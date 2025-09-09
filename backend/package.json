@@ -8,7 +8,8 @@
     "dev": "nodemon src/server.js",
     "test": "jest",
     "migrate": "node src/database/migrate.js",
-    "seed": "node src/database/seed.js"
+    "seed": "node src/database/seed.js",
+    "setup-supabase": "node setup-supabase.js"
   },
   "keywords": ["academic", "writing", "ai", "analysis", "education"],
   "author": "Scholar AI Team",

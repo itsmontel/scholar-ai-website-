@@ -10,10 +10,13 @@ const connectDB = async () => {
       database: process.env.DB_NAME || 'scholar_ai',
       user: process.env.DB_USER || 'postgres',
       password: process.env.DB_PASSWORD,
-      ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+      ssl: {
+        rejectUnauthorized: false, // Required for Supabase
+        ca: process.env.NODE_ENV === 'production' ? undefined : undefined
+      },
       max: 20,
       idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: 2000,
+      connectionTimeoutMillis: 10000, // Increased for Supabase
     });
 
     // Test the connection
