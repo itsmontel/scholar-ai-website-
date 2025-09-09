@@ -99,10 +99,12 @@ npm run dev
 ### **Frontend (.env)**
 ```env
 VITE_API_URL=http://localhost:5000/api
-VITE_STRIPE_PUBLISHABLE_KEY=pk_test_...
+VITE_STRIPE_PUBLISHABLE_KEY=your_stripe_publishable_key
 ```
 
 ### **Backend (.env)**
+Copy `backend/env.example` to `backend/.env` and configure with your credentials:
+
 ```env
 # Server Configuration
 PORT=5000
@@ -112,27 +114,29 @@ NODE_ENV=development
 DB_HOST=localhost
 DB_PORT=5432
 DB_NAME=scholar_ai
-DB_USER=postgres
-DB_PASSWORD=your_password
+DB_USER=your_db_user
+DB_PASSWORD=your_secure_password
 
 # JWT Configuration
-JWT_SECRET=your_super_secret_jwt_key
+JWT_SECRET=your_secure_jwt_secret
 JWT_EXPIRES_IN=7d
 
 # AWS S3 Configuration
 AWS_ACCESS_KEY_ID=your_aws_access_key
 AWS_SECRET_ACCESS_KEY=your_aws_secret_key
-AWS_REGION=us-east-1
-AWS_S3_BUCKET=scholar-ai-documents
+AWS_REGION=your_aws_region
+AWS_S3_BUCKET=your_s3_bucket_name
 
 # OpenAI Configuration
 OPENAI_API_KEY=your_openai_api_key
 
 # Stripe Configuration
-STRIPE_SECRET_KEY=sk_test_your_stripe_secret_key
-STRIPE_PUBLISHABLE_KEY=pk_test_your_stripe_publishable_key
-STRIPE_WEBHOOK_SECRET=whsec_your_webhook_secret
+STRIPE_SECRET_KEY=your_stripe_secret_key
+STRIPE_PUBLISHABLE_KEY=your_stripe_publishable_key
+STRIPE_WEBHOOK_SECRET=your_stripe_webhook_secret
 ```
+
+**⚠️ Security Note**: Never commit your `.env` files to version control. Use strong, unique passwords and API keys.
 
 ## 🚀 **Running the Application**
 
@@ -228,6 +232,32 @@ npm start
 - Helmet security headers
 - File upload security
 - SQL injection protection
+
+## 🛡️ **Security Best Practices**
+
+### **Environment Variables**
+- Never commit `.env` files to version control
+- Use strong, unique passwords and API keys
+- Rotate secrets regularly
+- Use environment-specific configurations
+
+### **Database Security**
+- Use strong database passwords
+- Enable SSL connections in production
+- Regular database backups
+- Limit database user permissions
+
+### **API Security**
+- Implement rate limiting
+- Validate all input data
+- Use HTTPS in production
+- Monitor for suspicious activity
+
+### **Deployment Security**
+- Use secure hosting platforms
+- Enable firewall protection
+- Regular security updates
+- Monitor application logs
 
 ## 📈 **Subscription Plans**
 

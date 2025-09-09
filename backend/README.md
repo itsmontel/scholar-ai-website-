@@ -53,37 +53,9 @@ A comprehensive backend API for the Scholar AI academic writing assistant platfo
    cp env.example .env
    ```
    
-   Edit `.env` with your configuration:
-   ```env
-   # Server Configuration
-   PORT=5000
-   NODE_ENV=development
-
-   # Database Configuration
-   DB_HOST=localhost
-   DB_PORT=5432
-   DB_NAME=scholar_ai
-   DB_USER=postgres
-   DB_PASSWORD=your_password_here
-
-   # JWT Configuration
-   JWT_SECRET=your_super_secret_jwt_key_here
-   JWT_EXPIRES_IN=7d
-
-   # AWS S3 Configuration
-   AWS_ACCESS_KEY_ID=your_aws_access_key
-   AWS_SECRET_ACCESS_KEY=your_aws_secret_key
-   AWS_REGION=us-east-1
-   AWS_S3_BUCKET=scholar-ai-documents
-
-   # OpenAI Configuration
-   OPENAI_API_KEY=your_openai_api_key_here
-
-   # Stripe Configuration
-   STRIPE_SECRET_KEY=sk_test_your_stripe_secret_key
-   STRIPE_PUBLISHABLE_KEY=pk_test_your_stripe_publishable_key
-   STRIPE_WEBHOOK_SECRET=whsec_your_webhook_secret
-   ```
+   Edit `.env` with your secure configuration. See `env.example` for required variables.
+   
+   **⚠️ Security Note**: Use strong, unique passwords and API keys. Never commit `.env` files to version control.
 
 4. **Set up the database**
    ```bash
