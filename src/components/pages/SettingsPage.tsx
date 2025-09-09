@@ -189,126 +189,149 @@ const SettingsPage = ({ onNavigate, user, onLogout }: SettingsPageProps) => {
         <div className="max-w-4xl mx-auto space-y-8">
           {/* Profile Information */}
           <div className="bg-white/90 backdrop-blur-xl border border-gray-200/60 rounded-2xl p-8 shadow-lg">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">Profile Information</h2>
-            <div className="space-y-4 text-center">
-              <div className="py-3 border-b border-gray-200">
-                <div className="font-semibold text-gray-900">Email</div>
-                <div className="text-gray-600">{user?.email || 'user@example.com'}</div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">Profile Information</h2>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between py-3 border-b border-gray-200">
+                <div>
+                  <div className="font-semibold text-gray-900">Email</div>
+                  <div className="text-gray-600">{user?.email || 'user@example.com'}</div>
       </div>
-              <div className="py-3 border-b border-gray-200">
-                <div className="font-semibold text-gray-900">Name</div>
-                <div className="text-gray-600">{user?.name || 'User Name'}</div>
+    </div>
+              <div className="flex items-center justify-between py-3 border-b border-gray-200">
+      <div>
+                  <div className="font-semibold text-gray-900">Name</div>
+                  <div className="text-gray-600">{user?.name || 'User Name'}</div>
+                </div>
               </div>
-              <div className="py-3">
-                <div className="font-semibold text-gray-900">Member Since</div>
-                <div className="text-gray-600">January 2024</div>
+              <div className="flex items-center justify-between py-3">
+              <div>
+                  <div className="font-semibold text-gray-900">Member Since</div>
+                  <div className="text-gray-600">January 2024</div>
+                </div>
               </div>
             </div>
           </div>
 
           {/* Usage Statistics */}
           <div className="bg-white/90 backdrop-blur-xl border border-gray-200/60 rounded-2xl p-8 shadow-lg">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">Usage Statistics</h2>
-            <div className="space-y-4 text-center">
-              <div className="py-3 border-b border-gray-200">
-                <div className="font-semibold text-gray-900">Documents Analyzed</div>
-                <div className="text-gray-600">This month: 3 / 3</div>
-                <span className="inline-block mt-2 px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-sm">3 used</span>
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">Usage Statistics</h2>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between py-3 border-b border-gray-200">
+                <div>
+                  <div className="font-semibold text-gray-900">Documents Analyzed</div>
+                  <div className="text-gray-600">This month: 3 / 3</div>
               </div>
-              <div className="py-3 border-b border-gray-200">
-                <div className="font-semibold text-gray-900">Total Documents</div>
-                <div className="text-gray-600">All time: 47 documents</div>
-                <span className="inline-block mt-2 px-3 py-1 bg-green-100 text-green-600 rounded-full text-sm">47 total</span>
+                <span className="px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-sm">3 used</span>
               </div>
-              <div className="py-3">
-                <div className="font-semibold text-gray-900">Last Activity</div>
-                <div className="text-gray-600">2 days ago</div>
-                <span className="inline-block mt-2 px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm">Recent</span>
+              <div className="flex items-center justify-between py-3 border-b border-gray-200">
+                <div>
+                  <div className="font-semibold text-gray-900">Total Documents</div>
+                  <div className="text-gray-600">All time: 47 documents</div>
+            </div>
+                <span className="px-3 py-1 bg-green-100 text-green-600 rounded-full text-sm">47 total</span>
+              </div>
+              <div className="flex items-center justify-between py-3">
+              <div>
+                  <div className="font-semibold text-gray-900">Last Activity</div>
+                  <div className="text-gray-600">2 days ago</div>
+                </div>
+                <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm">Recent</span>
               </div>
             </div>
           </div>
 
           {/* Support */}
           <div className="bg-white/90 backdrop-blur-xl border border-gray-200/60 rounded-2xl p-8 shadow-lg">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">Support</h2>
-            <p className="text-gray-600 mb-6 text-center">Need help? Check our FAQ for common questions or contact us directly.</p>
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">Support</h2>
+            <p className="text-gray-600 mb-6">Need help? Check our FAQ for common questions or contact us directly.</p>
             
-            <div className="space-y-4 text-center">
+            <div className="space-y-4">
               <button
                 onClick={() => onNavigate('help')}
-                className="w-full p-4 hover:bg-gray-50 rounded-xl transition-colors duration-200"
+                className="w-full flex items-center justify-between p-4 hover:bg-gray-50 rounded-xl transition-colors duration-200"
               >
-                <div className="flex flex-col items-center space-y-3">
+                <div className="flex items-center space-x-4">
                   <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
                     <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <div>
+                    </svg>
+                  </div>
+                  <div className="text-left">
                     <div className="font-semibold text-gray-900">FAQ</div>
                     <div className="text-sm text-gray-600">Find answers to common questions</div>
-              </div>
-            </div>
-            </button>
+        </div>
+      </div>
+                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+          </button>
 
               <button 
                 onClick={() => onNavigate('contact')}
-                className="w-full p-4 hover:bg-gray-50 rounded-xl transition-colors duration-200"
+                className="w-full flex items-center justify-between p-4 hover:bg-gray-50 rounded-xl transition-colors duration-200"
               >
-                <div className="flex flex-col items-center space-y-3">
+                <div className="flex items-center space-x-4">
                   <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
                     <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                     </svg>
-          </div>
-                  <div>
+        </div>
+                  <div className="text-left">
                     <div className="font-semibold text-gray-900">Contact Us</div>
                     <div className="text-sm text-gray-600">Get in touch with our support team</div>
-        </div>
       </div>
-              </button>
+    </div>
+                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
 
-              <button 
+            <button 
                 onClick={() => onNavigate('writing-guide')}
-                className="w-full p-4 hover:bg-gray-50 rounded-xl transition-colors duration-200"
+                className="w-full flex items-center justify-between p-4 hover:bg-gray-50 rounded-xl transition-colors duration-200"
               >
-                <div className="flex flex-col items-center space-y-3">
+                <div className="flex items-center space-x-4">
                   <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
                     <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                    </svg>
+              </svg>
                   </div>
-      <div>
+                  <div className="text-left">
                     <div className="font-semibold text-gray-900">Writing Guide</div>
                     <div className="text-sm text-gray-600">Learn best practices for academic writing</div>
-        </div>
-      </div>
-              </button>
-    </div>
-          </div>
-
-          {/* Subscription */}
-          <div className="bg-white/90 backdrop-blur-xl border border-gray-200/60 rounded-2xl p-8 shadow-lg">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">Subscription</h2>
-            <div className="space-y-4 text-center">
-              <div className="py-3 border-b border-gray-200">
-                <div className="font-semibold text-gray-900">Current Plan</div>
-                <div className="text-gray-600">No active plan</div>
-                <span className="inline-block mt-2 px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm">Free</span>
-        </div>
-
-            <button 
-                onClick={() => onNavigate('pricing')}
-                className="w-full bg-gray-800 hover:bg-gray-900 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center space-x-2"
-              >
-                <span>Manage Billing</span>
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </div>
+                </div>
+                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
             </button>
           </div>
+      </div>
+
+          {/* Subscription */}
+          <div className="bg-white/90 backdrop-blur-xl border border-gray-200/60 rounded-2xl p-8 shadow-lg">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">Subscription</h2>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between py-3 border-b border-gray-200">
+          <div>
+                  <div className="font-semibold text-gray-900">Current Plan</div>
+                  <div className="text-gray-600">No active plan</div>
           </div>
+                <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm">Free</span>
           </div>
+
+                    <button 
+                onClick={() => onNavigate('pricing')}
+                className="w-full bg-gray-800 hover:bg-gray-900 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center space-x-2"
+                    >
+                <span>Manage Billing</span>
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                </svg>
+                    </button>
+                  </div>
+                </div>
+        </div>
       </main>
 
       {/* Footer */}
@@ -318,7 +341,7 @@ const SettingsPage = ({ onNavigate, user, onLogout }: SettingsPageProps) => {
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
                 <span className="text-white font-bold text-lg">S</span>
-                  </div>
+              </div>
               <span className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">Scholar</span>
             </div>
             <div className="text-gray-500 text-sm">

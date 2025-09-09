@@ -1,0 +1,170 @@
+const { createClient } = require('@supabase/supabase-js');
+
+class UserService {
+  constructor() {
+    this.supabase = null;
+  }
+
+  getSupabaseClient() {
+    if (!this.supabase) {
+      this.supabase = createClient(
+        process.env.SUPABASE_URL,
+        process.env.SUPABASE_ANON_KEY
+      );
+    }
+    return this.supabase;
+  }
+
+  async findUserByEmail(email) {
+    try {
+      const { data, error } = await this.getSupabaseClient()
+        .from('users')
+        .select('*')
+        .eq('email', email.toLowerCase())
+        .single();
+
+      if (error && error.code !== 'PGRST116') { // PGRST116 is "not found"
+        throw error;
+      }
+
+      return data || null;
+    } catch (error) {
+      console.error('Error finding user by email:', error);
+      throw error;
+    }
+  }
+
+  async findUserById(id) {
+    try {
+      const { data, error } = await this.getSupabaseClient()
+        .from('users')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (error && error.code !== 'PGRST116') {
+        throw error;
+      }
+
+      return data || null;
+    } catch (error) {
+      console.error('Error finding user by ID:', error);
+      throw error;
+    }
+  }
+
+  async createUser(userData) {
+    try {
+      const { data, error } = await this.getSupabaseClient()
+        .from('users')
+        .insert([userData])
+        .select()
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Error creating user:', error);
+      throw error;
+    }
+  }
+
+  async updateUser(id, updates) {
+    try {
+      const { data, error } = await this.getSupabaseClient()
+        .from('users')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Error updating user:', error);
+      throw error;
+    }
+  }
+
+  async deleteUser(id) {
+    try {
+      const { error } = await this.getSupabaseClient()
+        .from('users')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        throw error;
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      throw error;
+    }
+  }
+
+  async findUserByVerificationToken(token) {
+    try {
+      const { data, error } = await this.getSupabaseClient()
+        .from('users')
+        .select('*')
+        .eq('email_verification_token', token)
+        .single();
+
+      if (error && error.code !== 'PGRST116') {
+        throw error;
+      }
+
+      return data || null;
+    } catch (error) {
+      console.error('Error finding user by verification token:', error);
+      throw error;
+    }
+  }
+
+  async findUserByResetToken(token) {
+    try {
+      const { data, error } = await this.getSupabaseClient()
+        .from('users')
+        .select('*')
+        .eq('password_reset_token', token)
+        .gt('password_reset_expires', new Date().toISOString())
+        .single();
+
+      if (error && error.code !== 'PGRST116') {
+        throw error;
+      }
+
+      return data || null;
+    } catch (error) {
+      console.error('Error finding user by reset token:', error);
+      throw error;
+    }
+  }
+
+  async getUserCount() {
+    try {
+      const { count, error } = await this.getSupabaseClient()
+        .from('users')
+        .select('*', { count: 'exact', head: true });
+
+      if (error) {
+        throw error;
+      }
+
+      return count || 0;
+    } catch (error) {
+      console.error('Error getting user count:', error);
+      throw error;
+    }
+  }
+}
+
+module.exports = new UserService();

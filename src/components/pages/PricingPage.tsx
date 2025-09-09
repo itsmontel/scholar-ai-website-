@@ -1,89 +1,75 @@
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
 
-const PricingPage = ({ onNavigate }) => {
+interface PricingPageProps {
+  onNavigate: (page: string) => void;
+  user: any;
+  onLogout: () => void;
+}
+
+const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [billingCycle, setBillingCycle] = useState('monthly');
-  const [selectedPlan, setSelectedPlan] = useState('premium');
+  const [, setSelectedPlan] = useState('premium');
 
-  const plans = {
-    free: {
-      name: 'Free',
-      price: { monthly: 0, annual: 0 },
-      description: 'Perfect for getting started',
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (isDropdownOpen && !(event.target as Element).closest('.dropdown-container')) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isDropdownOpen]);
+
+  const plans: Record<string, any> = {
+    basic: {
+      name: 'Basic',
+      price: { monthly: 19.99, annual: 199.99 },
+      description: 'Perfect for students and individual researchers',
       features: [
-        '3 document analyses per month',
-        'Basic grammar and style feedback',
-        'Standard citation checking',
-        'Email support',
-        'Basic document history'
+        'Unlimited document analyses',
+        'AI writing feedback & suggestions',
+        'Citation style checking (APA, MLA, Chicago)',
+        'Grammar and style improvements',
+        'Export to PDF and Word',
+        'Email support'
       ],
-      limitations: [
-        'Limited to 5,000 words per document',
-        'No priority processing',
-        'Standard analysis depth only'
-      ],
-      color: 'gray'
+      color: 'blue'
     },
     premium: {
       name: 'Premium',
-      price: { monthly: 29, annual: 278 },
-      description: 'Most popular for active researchers',
+      price: { monthly: 39.99, annual: 399.99 },
+      description: 'Most popular for serious academic writers',
       features: [
-        'Unlimited document analyses',
-        'Advanced AI feedback & suggestions',
-        'All citation styles (APA, MLA, Chicago, etc.)',
-        'Priority processing (2x faster)',
-        'Detailed writing analytics',
-        'Export to multiple formats',
-        'Cloud storage integration',
-        'Email & chat support',
-        'Advanced plagiarism detection',
-        'Collaboration features'
+        'Everything in Basic',
+        'Advanced writing analysis',
+        'Plagiarism detection',
+        'Document history & version control',
+        'Priority processing',
+        'Phone support'
       ],
-      limitations: [],
-      color: 'blue',
+      color: 'purple',
       popular: true
-    },
-    institution: {
-      name: 'Institution',
-      price: { monthly: 199, annual: 1990 },
-      description: 'For universities and research institutions',
-      features: [
-        'Everything in Premium',
-        'Up to 100 user accounts',
-        'Institution-wide analytics',
-        'Custom branding options',
-        'API access for integration',
-        'Dedicated account manager',
-        'Custom citation styles',
-        'SAML/SSO integration',
-        'Advanced security features',
-        'Training sessions included',
-        'Priority phone support',
-        'Custom contract terms'
-      ],
-      limitations: [],
-      color: 'purple'
     }
   };
 
-  const handleSelectPlan = (planType) => {
+  const handleSelectPlan = (planType: string) => {
     setSelectedPlan(planType);
-    if (planType === 'free') {
-      onNavigate('signup');
-    } else {
       // Would normally go to checkout
       onNavigate('signup');
-    }
   };
 
-  const formatPrice = (plan) => {
-    if (plan.price[billingCycle] === 0) return 'Free';
+  const formatPrice = (plan: any) => {
     const price = plan.price[billingCycle];
-    const period = billingCycle === 'monthly' ? '/month' : '/year';
+    const period = billingCycle === 'monthly' ? '/mo' : '/yr';
     return `$${price}${period}`;
   };
 
-  const getSavings = (plan) => {
+  const getSavings = (plan: any) => {
     if (billingCycle === 'annual' && plan.price.monthly > 0) {
       const monthlyCost = plan.price.monthly * 12;
       const savings = monthlyCost - plan.price.annual;
@@ -94,78 +80,222 @@ const PricingPage = ({ onNavigate }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
-      {/* Navigation */}
-      <nav className="flex items-center justify-between px-8 py-6 bg-white/80 backdrop-blur-sm border-b border-gray-200">
-        <div className="flex items-center space-x-2">
-          <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-sm">A</span>
-          </div>
-          <span className="text-xl font-bold text-gray-900">AcademicAI</span>
-        </div>
-        <div className="hidden md:flex items-center space-x-8">
-          <button onClick={() => onNavigate('landing')} className="text-gray-600 hover:text-gray-900 transition-colors">Home</button>
-          <button className="text-blue-600 font-medium">Pricing</button>
-          <button className="text-gray-600 hover:text-gray-900 transition-colors">Features</button>
-          <button className="text-gray-600 hover:text-gray-900 transition-colors">About</button>
-        </div>
-        <div className="flex items-center space-x-4">
-          <button onClick={() => onNavigate('login')} className="text-gray-600 hover:text-gray-900 transition-colors">
-            Login
-          </button>
-          <button onClick={() => onNavigate('signup')} className="bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors">
-            Sign up
-          </button>
-        </div>
-      </nav>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+      {/* Header */}
+      <header className="bg-white/90 backdrop-blur-xl border-b border-gray-200/60 sticky top-0 z-50 shadow-sm">
+        <div className="max-w-7xl mx-auto px-6 py-5">
+          <div className="flex items-center justify-between">
+            <button 
+              onClick={() => onNavigate('dashboard')}
+              className="flex items-center space-x-3 hover:opacity-80 transition-opacity duration-200"
+            >
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
+                <span className="text-white font-bold text-lg">S</span>
+              </div>
+              <span className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">Scholar</span>
+            </button>
 
-      <div className="max-w-7xl mx-auto px-8 py-20">
+            <nav className="hidden md:flex items-center space-x-8">
+              <button 
+                onClick={() => onNavigate('dashboard')}
+                className="px-4 py-2 text-gray-600 hover:text-gray-900 font-medium rounded-lg hover:bg-gray-100/50 transition-all duration-200"
+              >
+                Dashboard
+              </button>
+              <button 
+                onClick={() => onNavigate('library')}
+                className="px-4 py-2 text-gray-600 hover:text-gray-900 font-medium rounded-lg hover:bg-gray-100/50 transition-all duration-200"
+              >
+                Library
+              </button>
+              <button 
+                onClick={() => onNavigate('settings')}
+                className="px-4 py-2 text-gray-600 hover:text-gray-900 font-medium rounded-lg hover:bg-gray-100/50 transition-all duration-200"
+              >
+                Account
+              </button>
+            </nav>
+
+            <div className="flex items-center space-x-4">
+              {/* User Profile Dropdown */}
+              <div className="relative dropdown-container">
+                <button 
+                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  className="flex items-center space-x-3 px-4 py-2 rounded-xl hover:bg-gray-100/60 transition-all duration-200 border border-gray-200/50 bg-white/50 backdrop-blur-sm"
+                >
+                  <div className="w-9 h-9 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-full flex items-center justify-center shadow-md">
+                    <span className="text-white font-bold text-sm">
+                      {(user?.name || 'U').charAt(0).toUpperCase()}
+                    </span>
+                  </div>
+                  <div className="text-left">
+                    <div className="text-sm font-semibold text-gray-900">{user?.name || 'User Name'}</div>
+                    <div className="text-xs text-gray-500">{user?.email || 'user@example.com'}</div>
+          </div>
+                  <svg 
+                    className={`w-4 h-4 text-gray-500 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`} 
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+
+                {/* Dropdown Menu */}
+                {isDropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-2xl border border-gray-200/50 backdrop-blur-sm z-50">
+                    {/* User Info Section */}
+                    <div className="px-4 py-3 border-b border-gray-100">
+                      <div className="text-sm font-medium text-gray-900">{user?.name || 'User Name'}</div>
+                      <div className="text-xs text-gray-500">{user?.email || 'user@example.com'}</div>
+                      <div className="flex items-center mt-2">
+                        <svg className="w-4 h-4 text-yellow-500 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                        <span className="text-xs text-gray-600">0 credits</span>
+        </div>
+        </div>
+
+                    {/* Navigation Links */}
+                    <div className="py-2">
+                      <button 
+                        onClick={() => { onNavigate('dashboard'); setIsDropdownOpen(false); }}
+                        className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <span>Dashboard</span>
+                      </button>
+                      
+                      <button 
+                        onClick={() => { onNavigate('settings'); setIsDropdownOpen(false); }}
+                        className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        <span>Account</span>
+                      </button>
+                      
+                      <button 
+                        onClick={() => { onNavigate('library'); setIsDropdownOpen(false); }}
+                        className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                        </svg>
+                        <span>Documents</span>
+                      </button>
+                      
+                      <button 
+                        onClick={() => { onNavigate('pricing'); setIsDropdownOpen(false); }}
+                        className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                        <span>Upgrade Plan</span>
+          </button>
+                    </div>
+
+                    {/* Logout Section */}
+                    <div className="border-t border-gray-100 py-2">
+                      <button 
+                        onClick={() => { onLogout(); setIsDropdownOpen(false); }}
+                        className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors duration-200"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                        </svg>
+                        <span>Logout</span>
+          </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div className="max-w-6xl mx-auto px-8 py-16">
         {/* Header */}
-        <div className="text-center mb-16">
-          <h1 className="text-5xl font-bold text-gray-900 mb-6">
-            Choose the perfect plan for your<br />
-            <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">academic success</span>
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-bold text-gray-900 mb-6">
+            Simple and transparent pricing
           </h1>
-          <p className="text-xl text-gray-600 mb-12 max-w-3xl mx-auto">
-            From individual researchers to entire institutions, we have a plan that scales with your needs and helps you achieve writing excellence.
-          </p>
+          
+          {/* Key Benefits */}
+          <div className="flex justify-center items-center space-x-12 mb-10">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
+                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                </svg>
+              </div>
+              <span className="text-gray-700 text-sm font-medium">A fraction of traditional editing costs</span>
+            </div>
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+              </div>
+              <span className="text-gray-700 text-sm font-medium">Used by thousands of researchers</span>
+            </div>
+          </div>
+
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Choose Your Plan</h2>
+            <p className="text-gray-600">Select the plan that fits your needs.</p>
+          </div>
 
           {/* Billing Toggle */}
-          <div className="flex items-center justify-center space-x-4 mb-12">
-            <span className={`text-sm font-medium ${billingCycle === 'monthly' ? 'text-gray-900' : 'text-gray-500'}`}>Monthly</span>
+          <div className="flex items-center justify-center mb-12">
+            <div className="bg-white/80 backdrop-blur-sm rounded-xl p-1 flex shadow-lg border border-gray-200/50">
             <button
-              onClick={() => setBillingCycle(billingCycle === 'monthly' ? 'annual' : 'monthly')}
-              className="relative inline-flex h-6 w-11 items-center rounded-full bg-gray-200 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-            >
-              <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${
-                  billingCycle === 'annual' ? 'translate-x-6' : 'translate-x-1'
+                onClick={() => setBillingCycle('monthly')}
+                className={`px-6 py-2 rounded-lg text-sm font-semibold transition-all duration-300 ${
+                  billingCycle === 'monthly'
+                    ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-md'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                 }`}
-              />
+              >
+                Bill Monthly
+              </button>
+              <button
+                onClick={() => setBillingCycle('annual')}
+                className={`px-6 py-2 rounded-lg text-sm font-semibold transition-all duration-300 ${
+                  billingCycle === 'annual'
+                    ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-md'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                }`}
+              >
+                Bill Yearly (2 Months Free)
             </button>
-            <span className={`text-sm font-medium ${billingCycle === 'annual' ? 'text-gray-900' : 'text-gray-500'}`}>
-              Annual
-              <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                Save 20%
-              </span>
-            </span>
+            </div>
           </div>
         </div>
 
         {/* Pricing Cards */}
-        <div className="grid lg:grid-cols-3 gap-8 mb-16">
+        <div className="grid lg:grid-cols-2 gap-8 mb-16 max-w-5xl mx-auto">
           {Object.entries(plans).map(([key, plan]) => (
             <div
               key={key}
-              className={`relative bg-white rounded-2xl shadow-xl border-2 transition-all duration-300 hover:shadow-2xl ${
-                plan.popular ? 'border-blue-500 transform scale-105' : 'border-gray-200 hover:border-gray-300'
+              className={`relative bg-white/90 backdrop-blur-xl rounded-2xl border transition-all duration-300 hover:shadow-xl ${
+                plan.popular 
+                  ? 'border-blue-500/60 shadow-lg' 
+                  : 'border-gray-200/60 shadow-md hover:border-gray-300/60'
               }`}
             >
               {plan.popular && (
                 <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                  <span className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2 rounded-full text-sm font-semibold">
+                  <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-xl text-center font-bold text-sm shadow-lg">
                     Most Popular
-                  </span>
+                  </div>
                 </div>
               )}
 
@@ -174,11 +304,11 @@ const PricingPage = ({ onNavigate }) => {
                 <div className="text-center mb-8">
                   <h3 className="text-2xl font-bold text-gray-900 mb-2">{plan.name}</h3>
                   <p className="text-gray-600 mb-6">{plan.description}</p>
-                  <div className="mb-4">
-                    <span className="text-5xl font-bold text-gray-900">{formatPrice(plan)}</span>
+                  <div className="mb-6">
+                    <span className="text-4xl font-bold text-gray-900">{formatPrice(plan)}</span>
                     {getSavings(plan) > 0 && (
-                      <div className="mt-2">
-                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                      <div className="mt-3">
+                        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-green-100 text-green-800 border border-green-200">
                           Save {getSavings(plan)}%
                         </span>
                       </div>
@@ -188,9 +318,8 @@ const PricingPage = ({ onNavigate }) => {
 
                 {/* Features */}
                 <div className="mb-8">
-                  <h4 className="font-semibold text-gray-900 mb-4">What's included:</h4>
                   <ul className="space-y-3">
-                    {plan.features.map((feature, index) => (
+                    {plan.features.map((feature: string, index: number) => (
                       <li key={index} className="flex items-start space-x-3">
                         <svg className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -199,107 +328,103 @@ const PricingPage = ({ onNavigate }) => {
                       </li>
                     ))}
                   </ul>
-
-                  {plan.limitations.length > 0 && (
-                    <div className="mt-6">
-                      <h5 className="font-medium text-gray-500 mb-2 text-sm">Limitations:</h5>
-                      <ul className="space-y-2">
-                        {plan.limitations.map((limitation, index) => (
-                          <li key={index} className="flex items-start space-x-3">
-                            <svg className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                            <span className="text-gray-500 text-xs">{limitation}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
                 </div>
 
                 {/* CTA Button */}
                 <button
                   onClick={() => handleSelectPlan(key)}
-                  className={`w-full py-3 px-6 rounded-lg font-semibold transition-all duration-300 ${
+                  className={`w-full py-3 px-6 rounded-xl font-semibold text-base transition-all duration-300 ${
                     plan.popular
-                      ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:shadow-lg transform hover:scale-105'
-                      : key === 'free'
-                      ? 'bg-gray-100 text-gray-900 hover:bg-gray-200'
+                      ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:shadow-lg'
                       : 'bg-gray-900 text-white hover:bg-gray-800'
                   }`}
                 >
-                  {key === 'free' ? 'Get Started Free' : 
-                   key === 'institution' ? 'Contact Sales' : 
-                   'Start Free Trial'}
+                  {key === 'basic' ? 'Upgrade to Basic' : 'Upgrade to Premium'}
                 </button>
-
-                {key !== 'free' && (
-                  <p className="text-center text-xs text-gray-500 mt-3">
-                    {key === 'institution' ? 'Custom pricing available' : '14-day free trial • No credit card required'}
-                  </p>
-                )}
               </div>
             </div>
           ))}
         </div>
 
-        {/* Enterprise Section */}
-        <div className="bg-gradient-to-r from-gray-900 to-gray-800 rounded-2xl p-12 text-center mb-16">
-          <h2 className="text-3xl font-bold text-white mb-4">Need something custom?</h2>
-          <p className="text-gray-300 mb-8 max-w-2xl mx-auto">
-            We work with large institutions, research organizations, and enterprises to create custom solutions that fit your specific needs.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button className="bg-white text-gray-900 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
-              Schedule a Demo
-            </button>
-            <button className="border border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-gray-900 transition-colors">
-              Contact Sales
-            </button>
+        {/* Alternatives Section */}
+        <div className="bg-gradient-to-br from-gray-900 via-blue-900 to-indigo-900 text-white py-16 relative overflow-hidden">
+          <div className="max-w-6xl mx-auto px-8 relative z-10">
+            <h2 className="text-3xl font-bold text-center mb-12">Alternatives are expensive</h2>
+            
+            <div className="grid md:grid-cols-3 gap-8">
+              {/* Hire Editors */}
+              <div className="text-center">
+                <div className="w-16 h-16 bg-red-500/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                  <svg className="w-8 h-8 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-bold mb-4">Hire Editors</h3>
+                <p className="text-gray-300 text-sm">
+                  Expensive: Pay hundreds for basic editing, plus extra costs for revisions and multiple rounds of feedback.
+                </p>
+              </div>
+
+              {/* Do It Yourself */}
+              <div className="text-center">
+                <div className="w-16 h-16 bg-red-500/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                  <svg className="w-8 h-8 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-bold mb-4">Do It Yourself Manually</h3>
+                <p className="text-gray-300 text-sm">
+                  Time-consuming: Requires learning academic writing principles, citation styles, and countless hours of self-editing.
+                </p>
+              </div>
+
+              {/* Scholar AI */}
+              <div className="text-center">
+                <div className="w-16 h-16 bg-green-500/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                  <svg className="w-8 h-8 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-bold mb-4">Scholar AI</h3>
+                <p className="text-gray-300 text-sm">
+                  Generate professional academic feedback instantly with AI. Fast, affordable, and high-quality writing enhancement.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
 
         {/* FAQ Section */}
-        <div className="text-center mb-16">
-          <h2 className="text-3xl font-bold text-gray-900 mb-12">Frequently Asked Questions</h2>
-          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            <div className="text-left">
-              <h3 className="font-semibold text-gray-900 mb-2">Can I change plans at any time?</h3>
+        <div className="bg-gradient-to-br from-gray-50 to-white py-16">
+          <div className="max-w-6xl mx-auto px-8">
+            <h2 className="text-3xl font-bold text-gray-900 text-center mb-12">Frequently Asked Questions</h2>
+            <div className="grid md:grid-cols-2 gap-8">
+              <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-gray-200/50 shadow-lg">
+                <h3 className="font-bold text-gray-900 mb-3">Can I change plans at any time?</h3>
               <p className="text-gray-600 text-sm">Yes, you can upgrade or downgrade your plan at any time. Changes take effect immediately, and we'll prorate any billing differences.</p>
             </div>
-            <div className="text-left">
-              <h3 className="font-semibold text-gray-900 mb-2">Is there a free trial?</h3>
-              <p className="text-gray-600 text-sm">Premium and Institution plans come with a 14-day free trial. No credit card required to start.</p>
+              <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-gray-200/50 shadow-lg">
+                <h3 className="font-bold text-gray-900 mb-3">Is there a free trial?</h3>
+                <p className="text-gray-600 text-sm">Both Basic and Premium plans come with a 14-day free trial. No credit card required to start.</p>
             </div>
-            <div className="text-left">
-              <h3 className="font-semibold text-gray-900 mb-2">What payment methods do you accept?</h3>
+              <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-gray-200/50 shadow-lg">
+                <h3 className="font-bold text-gray-900 mb-3">What payment methods do you accept?</h3>
               <p className="text-gray-600 text-sm">We accept all major credit cards, PayPal, and can arrange invoicing for institutional customers.</p>
             </div>
-            <div className="text-left">
-              <h3 className="font-semibold text-gray-900 mb-2">Do you offer student discounts?</h3>
+              <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-gray-200/50 shadow-lg">
+                <h3 className="font-bold text-gray-900 mb-3">Do you offer student discounts?</h3>
               <p className="text-gray-600 text-sm">Yes! Students get 50% off Premium plans with a valid .edu email address. Verify your student status during signup.</p>
             </div>
-            <div className="text-left">
-              <h3 className="font-semibold text-gray-900 mb-2">What happens to my data if I cancel?</h3>
+              <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-gray-200/50 shadow-lg">
+                <h3 className="font-bold text-gray-900 mb-3">What happens to my data if I cancel?</h3>
               <p className="text-gray-600 text-sm">You can export all your documents and analyses before canceling. We retain data for 30 days after cancellation for account recovery.</p>
             </div>
-            <div className="text-left">
-              <h3 className="font-semibold text-gray-900 mb-2">Is my academic work secure?</h3>
+              <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-gray-200/50 shadow-lg">
+                <h3 className="font-bold text-gray-900 mb-3">Is my academic work secure?</h3>
               <p className="text-gray-600 text-sm">Absolutely. We use enterprise-grade encryption, and your documents are never used to train our AI models or shared with third parties.</p>
+              </div>
             </div>
           </div>
-        </div>
-
-        {/* Final CTA */}
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Ready to improve your academic writing?</h2>
-          <p className="text-gray-600 mb-8">Join thousands of researchers, students, and institutions worldwide.</p>
-          <button 
-            onClick={() => onNavigate('signup')}
-            className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-lg text-lg font-semibold hover:shadow-lg transform hover:scale-105 transition-all duration-300"
-          >
-            Start Your Free Trial
-          </button>
         </div>
       </div>
     </div>

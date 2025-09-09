@@ -1,70 +1,62 @@
-const { Pool } = require('pg');
+const { createClient } = require('@supabase/supabase-js');
 
-let pool;
+let supabase;
 
 const connectDB = async () => {
   try {
-    pool = new Pool({
-      host: process.env.DB_HOST || 'localhost',
-      port: process.env.DB_PORT || 5432,
-      database: process.env.DB_NAME || 'scholar_ai',
-      user: process.env.DB_USER || 'postgres',
-      password: process.env.DB_PASSWORD,
-      ssl: {
-        rejectUnauthorized: false, // Required for Supabase
-        ca: process.env.NODE_ENV === 'production' ? undefined : undefined
-      },
-      max: 20,
-      idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: 10000, // Increased for Supabase
-    });
+    console.log('🔗 Connecting to Supabase...');
+    console.log('SUPABASE_URL:', process.env.SUPABASE_URL);
+    console.log('SUPABASE_ANON_KEY:', process.env.SUPABASE_ANON_KEY ? 'SET' : 'NOT SET');
+    
+    supabase = createClient(
+      process.env.SUPABASE_URL,
+      process.env.SUPABASE_ANON_KEY
+    );
 
     // Test the connection
-    const client = await pool.connect();
-    console.log('✅ Database connected successfully');
-    client.release();
-
-    return pool;
+    const { data, error } = await supabase.from('users').select('count').limit(1);
+    
+    if (error) {
+      throw error;
+    }
+    
+    console.log('✅ Supabase connected successfully');
+    return supabase;
   } catch (error) {
-    console.error('❌ Database connection failed:', error.message);
+    console.error('❌ Supabase connection failed:', error.message);
     throw error;
   }
 };
 
-const getPool = () => {
-  if (!pool) {
-    throw new Error('Database not initialized. Call connectDB() first.');
+const getSupabase = () => {
+  if (!supabase) {
+    throw new Error('Supabase not initialized. Call connectDB() first.');
   }
-  return pool;
+  return supabase;
 };
+
+const databaseService = require('../services/databaseService');
 
 const query = async (text, params) => {
-  const start = Date.now();
-  try {
-    const res = await pool.query(text, params);
-    const duration = Date.now() - start;
-    console.log('Executed query', { text, duration, rows: res.rowCount });
-    return res;
-  } catch (error) {
-    console.error('Database query error:', error);
-    throw error;
+  if (!supabase) {
+    throw new Error('Supabase not initialized. Call connectDB() first.');
   }
+
+  return await databaseService.query(text, params);
 };
 
 const getClient = async () => {
-  return await pool.connect();
+  return supabase;
 };
 
 const closePool = async () => {
-  if (pool) {
-    await pool.end();
-    console.log('Database pool closed');
-  }
+  // Supabase client doesn't need explicit closing
+  console.log('Supabase connection closed');
 };
 
 module.exports = {
   connectDB,
-  getPool,
+  getSupabase,
   query,
   getClient,
   closePool

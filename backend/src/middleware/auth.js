@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const { query } = require('../database/connection');
+const userService = require('../services/userService');
 
 const authenticateToken = async (req, res, next) => {
   try {
@@ -17,19 +17,14 @@ const authenticateToken = async (req, res, next) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     
     // Get user from database
-    const result = await query(
-      'SELECT id, email, first_name, last_name, subscription_plan, subscription_status, is_active FROM users WHERE id = $1',
-      [decoded.userId]
-    );
+    const user = await userService.findUserById(decoded.userId);
 
-    if (result.rows.length === 0) {
+    if (!user) {
       return res.status(401).json({
         success: false,
         message: 'Invalid token - user not found'
       });
     }
-
-    const user = result.rows[0];
 
     if (!user.is_active) {
       return res.status(401).json({
@@ -109,13 +104,10 @@ const optionalAuth = async (req, res, next) => {
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     
-    const result = await query(
-      'SELECT id, email, first_name, last_name, subscription_plan, subscription_status, is_active FROM users WHERE id = $1',
-      [decoded.userId]
-    );
+    const user = await userService.findUserById(decoded.userId);
 
-    if (result.rows.length > 0 && result.rows[0].is_active) {
-      req.user = result.rows[0];
+    if (user && user.is_active) {
+      req.user = user;
     } else {
       req.user = null;
     }

@@ -1,4 +1,7 @@
 import React, { useState } from 'react';
+import SignUpPage from './components/pages/SignupPage';
+import LoginPage from './components/pages/LoginPage';
+import EmailVerificationPage from './components/pages/EmailVerificationPage';
 
 // Landing Page Component
 const LandingPage = ({ onNavigate }) => {
@@ -238,177 +241,38 @@ const LandingPage = ({ onNavigate }) => {
   );
 };
 
-// Sign Up Page Component  
-const SignUpPage = ({ onNavigate, onSignUp }) => {
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    confirmPassword: ''
-  });
-  const [animationStep, setAnimationStep] = useState(0);
-
-  React.useEffect(() => {
-    const interval = setInterval(() => {
-      setAnimationStep((prev) => (prev + 1) % 3);
-    }, 3000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const handleSubmit = () => {
-    onSignUp(true);
-    onNavigate('dashboard');
-  };
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex">
-      {/* Left Side - Sign Up Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
-        <div className="max-w-md w-full">
-          <div className="flex items-center space-x-2 mb-8">
-            <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">A</span>
-            </div>
-            <span className="text-xl font-bold text-gray-900">AcademicAI</span>
-          </div>
-
-          <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Create your account</h1>
-            <p className="text-gray-600 mb-8">Join thousands of researchers and students</p>
-
-            <div className="space-y-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
-                <input
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  placeholder="you@university.edu"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
-                <input
-                  type="password"
-                  value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  placeholder="••••••••"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Confirm Password</label>
-                <input
-                  type="password"
-                  value={formData.confirmPassword}
-                  onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                  placeholder="••••••••"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                />
-              </div>
-              <button
-                onClick={handleSubmit}
-                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 rounded-lg font-semibold hover:shadow-lg transform hover:scale-[1.02] transition-all duration-300"
-              >
-                Sign up
-              </button>
-            </div>
-
-            <div className="mt-6">
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-gray-300"></div>
-                </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-white text-gray-500">Or</span>
-                </div>
-              </div>
-              <button
-                onClick={handleSubmit}
-                className="w-full mt-4 bg-gray-900 text-white py-3 rounded-lg font-semibold hover:bg-gray-800 transition-colors"
-              >
-                Continue with Google
-              </button>
-            </div>
-
-            <p className="text-center text-sm text-gray-600 mt-6">
-              Already have an account?{' '}
-              <button
-                onClick={() => onNavigate('login')}
-                className="text-blue-600 hover:text-blue-500 font-medium"
-              >
-                Sign in
-              </button>
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Right Side - Animation */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-100 to-purple-100 items-center justify-center p-8">
-        <div className="max-w-lg w-full">
-          <div className="bg-white rounded-2xl shadow-2xl p-8">
-            <div className="mb-6">
-              <h3 className="font-bold text-gray-900 text-lg">Research Paper Analysis</h3>
-              <p className="text-sm text-gray-500">AI-powered feedback generation</p>
-            </div>
-
-            {animationStep === 0 && (
-              <div className="space-y-4">
-                <div className="border-2 border-dashed border-blue-300 rounded-lg p-6 text-center">
-                  <p className="text-sm text-gray-600">Drop your research paper here</p>
-                </div>
-              </div>
-            )}
-
-            {animationStep === 1 && (
-              <div className="space-y-4">
-                <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-4">
-                  <div className="flex items-center space-x-3 mb-3">
-                    <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center">
-                      <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
-                    </div>
-                    <span className="font-medium text-gray-900">AI Analysis in Progress...</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div className="bg-gradient-to-r from-blue-600 to-purple-600 h-2 rounded-full animate-pulse" style={{width: '75%'}}></div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {animationStep === 2 && (
-              <div className="space-y-3">
-                <div className="flex items-start space-x-3 p-3 bg-green-50 rounded-lg">
-                  <div className="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
-                  <div>
-                    <p className="text-sm font-medium text-green-700">Strong Introduction</p>
-                    <p className="text-xs text-gray-600">Clear thesis statement and compelling hook</p>
-                  </div>
-                </div>
-                <div className="flex items-start space-x-3 p-3 bg-yellow-50 rounded-lg">
-                  <div className="w-2 h-2 bg-yellow-500 rounded-full mt-2"></div>
-                  <div>
-                    <p className="text-sm font-medium text-yellow-700">Methodology Enhancement</p>
-                    <p className="text-xs text-gray-600">Add more detail to research methods</p>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
 
 // Main App Component
 const App = () => {
   const [currentPage, setCurrentPage] = useState('landing');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
+  // Handle URL-based routing
+  React.useEffect(() => {
+    const path = window.location.pathname;
+    const search = window.location.search;
+    
+    if (path === '/email-verification') {
+      setCurrentPage('email-verification');
+    } else if (path === '/signup') {
+      setCurrentPage('signup');
+    } else if (path === '/login') {
+      setCurrentPage('login');
+    } else if (path === '/dashboard') {
+      setCurrentPage('dashboard');
+    } else {
+      setCurrentPage('landing');
+    }
+  }, []);
+
   const navigateTo = (page) => {
     setCurrentPage(page);
+    // Update URL to match the page
+    if (page === 'landing') {
+      window.history.pushState({}, '', '/');
+    } else {
+      window.history.pushState({}, '', `/${page}`);
+    }
   };
 
   const handleSignUp = (status) => {
@@ -426,6 +290,8 @@ const App = () => {
         return <SignUpPage onNavigate={navigateTo} onSignUp={handleSignUp} />;
       case 'login':
         return <LoginPage onNavigate={navigateTo} onLogin={handleLogin} />;
+      case 'email-verification':
+        return <EmailVerificationPage onNavigate={navigateTo} />;
       case 'dashboard':
         return isLoggedIn ? <Dashboard onNavigate={navigateTo} /> : <LandingPage onNavigate={navigateTo} />;
       case 'upload':
@@ -447,33 +313,6 @@ const App = () => {
 };
 
 // Placeholder components (these would be imported from separate files in a real app)
-const LoginPage = ({ onNavigate, onLogin }) => (
-  <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex items-center justify-center p-8">
-    <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8">
-      <div className="flex items-center justify-center space-x-2 mb-8">
-        <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-          <span className="text-white font-bold text-sm">A</span>
-        </div>
-        <span className="text-xl font-bold text-gray-900">AcademicAI</span>
-      </div>
-      <h1 className="text-3xl font-bold text-gray-900 mb-8 text-center">Welcome back</h1>
-      <div className="space-y-4">
-        <input type="email" placeholder="Email" className="w-full px-4 py-3 border border-gray-300 rounded-lg" />
-        <input type="password" placeholder="Password" className="w-full px-4 py-3 border border-gray-300 rounded-lg" />
-        <button 
-          onClick={() => { onLogin(true); onNavigate('dashboard'); }}
-          className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 rounded-lg font-semibold"
-        >
-          Sign in
-        </button>
-      </div>
-      <p className="text-center text-sm text-gray-600 mt-6">
-        Don't have an account?{' '}
-        <button onClick={() => onNavigate('signup')} className="text-blue-600 font-medium">Sign up</button>
-      </p>
-    </div>
-  </div>
-);
 
 const Dashboard = ({ onNavigate }) => (
   <div className="min-h-screen bg-gray-50 p-8">

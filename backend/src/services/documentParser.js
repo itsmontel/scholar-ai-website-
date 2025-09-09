@@ -2,43 +2,47 @@ const pdfParse = require('pdf-parse');
 const mammoth = require('mammoth');
 
 class DocumentParser {
-  static async parseDocument(fileBuffer, mimeType, originalName) {
+  /**
+   * Parse document content based on file type
+   * @param {Buffer} fileBuffer - File buffer
+   * @param {string} mimeType - File MIME type
+   * @param {string} fileName - Original file name
+   * @returns {Promise<Object>} Parsed content with metadata
+   */
+  async parseDocument(fileBuffer, mimeType, fileName) {
     try {
       let content = '';
       let wordCount = 0;
       let pageCount = 0;
 
-      switch (mimeType) {
-        case 'application/pdf':
-          const pdfData = await this.parsePDF(fileBuffer);
-          content = pdfData.text;
-          pageCount = pdfData.numpages;
-          break;
-
-        case 'application/msword':
-        case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
-          const docData = await this.parseWordDocument(fileBuffer);
-          content = docData.value;
-          break;
-
-        case 'text/plain':
-          content = fileBuffer.toString('utf-8');
-          break;
-
-        default:
-          throw new Error(`Unsupported file type: ${mimeType}`);
+      // Determine file type and parse accordingly
+      if (mimeType === 'application/pdf') {
+        const result = await this.parsePDF(fileBuffer);
+        content = result.text;
+        pageCount = result.numpages;
+        wordCount = this.countWords(content);
+      } else if (
+        mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+        mimeType === 'application/msword'
+      ) {
+        const result = await this.parseWordDocument(fileBuffer);
+        content = result.value;
+        wordCount = this.countWords(content);
+        pageCount = this.estimatePages(wordCount);
+      } else if (mimeType === 'text/plain') {
+        content = fileBuffer.toString('utf-8');
+        wordCount = this.countWords(content);
+        pageCount = this.estimatePages(wordCount);
+      } else {
+        throw new Error(`Unsupported file type: ${mimeType}`);
       }
 
-      // Clean and process content
-      content = this.cleanContent(content);
-      wordCount = this.countWords(content);
-
       return {
-        content,
+        content: content.trim(),
         wordCount,
         pageCount,
-        originalName,
-        mimeType
+        fileType: this.getFileType(mimeType),
+        parsedAt: new Date().toISOString(),
       };
     } catch (error) {
       console.error('Document parsing error:', error);
@@ -46,33 +50,36 @@ class DocumentParser {
     }
   }
 
-  static async parsePDF(buffer) {
+  /**
+   * Parse PDF document
+   * @param {Buffer} fileBuffer - PDF file buffer
+   * @returns {Promise<Object>} PDF parsing result
+   */
+  async parsePDF(fileBuffer) {
     try {
-      const data = await pdfParse(buffer, {
-        // PDF parsing options
-        max: 0, // No page limit
-        version: 'v1.10.100' // PDF.js version
-      });
-
+      const data = await pdfParse(fileBuffer);
       return {
         text: data.text,
         numpages: data.numpages,
         info: data.info,
-        metadata: data.metadata
       };
     } catch (error) {
       console.error('PDF parsing error:', error);
-      throw new Error('Failed to parse PDF file');
+      throw new Error('Failed to parse PDF document');
     }
   }
 
-  static async parseWordDocument(buffer) {
+  /**
+   * Parse Word document (DOCX/DOC)
+   * @param {Buffer} fileBuffer - Word document buffer
+   * @returns {Promise<Object>} Word document parsing result
+   */
+  async parseWordDocument(fileBuffer) {
     try {
-      const result = await mammoth.extractRawText({ buffer });
-      
+      const result = await mammoth.extractRawText({ buffer: fileBuffer });
       return {
         value: result.value,
-        messages: result.messages
+        messages: result.messages,
       };
     } catch (error) {
       console.error('Word document parsing error:', error);
@@ -80,151 +87,73 @@ class DocumentParser {
     }
   }
 
-  static cleanContent(content) {
-    if (!content) return '';
-
-    return content
-      // Remove excessive whitespace
-      .replace(/\s+/g, ' ')
-      // Remove special characters that might interfere with analysis
-      .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
-      // Normalize line breaks
-      .replace(/\r\n/g, '\n')
-      .replace(/\r/g, '\n')
-      // Remove multiple consecutive line breaks
-      .replace(/\n\s*\n\s*\n/g, '\n\n')
-      // Trim whitespace
-      .trim();
-  }
-
-  static countWords(text) {
-    if (!text) return 0;
+  /**
+   * Count words in text
+   * @param {string} text - Text content
+   * @returns {number} Word count
+   */
+  countWords(text) {
+    if (!text || typeof text !== 'string') return 0;
     
     // Remove extra whitespace and split by spaces
-    const words = text
-      .replace(/\s+/g, ' ')
-      .trim()
-      .split(' ')
-      .filter(word => word.length > 0);
-    
+    const words = text.trim().split(/\s+/).filter(word => word.length > 0);
     return words.length;
   }
 
-  static extractCitations(text) {
-    if (!text) return [];
-
-    const citations = [];
-    
-    // Common citation patterns
-    const patterns = [
-      // APA style: (Author, Year)
-      /\([A-Za-z\s]+,\s*\d{4}\)/g,
-      // MLA style: (Author page)
-      /\([A-Za-z\s]+\s+\d+\)/g,
-      // Chicago style: (Author Year, page)
-      /\([A-Za-z\s]+\s+\d{4},\s*\d+\)/g,
-      // Harvard style: (Author Year)
-      /\([A-Za-z\s]+\s+\d{4}\)/g,
-      // Numbered citations: [1], [2], etc.
-      /\[\d+\]/g,
-      // Author-Date: Author (Year)
-      /[A-Za-z\s]+\(\d{4}\)/g
-    ];
-
-    patterns.forEach(pattern => {
-      const matches = text.match(pattern);
-      if (matches) {
-        citations.push(...matches);
-      }
-    });
-
-    // Remove duplicates
-    return [...new Set(citations)];
+  /**
+   * Estimate page count based on word count
+   * @param {number} wordCount - Number of words
+   * @returns {number} Estimated page count
+   */
+  estimatePages(wordCount) {
+    // Average academic paper: ~250 words per page
+    return Math.ceil(wordCount / 250);
   }
 
-  static extractReferences(text) {
-    if (!text) return [];
-
-    const references = [];
-    const lines = text.split('\n');
-    
-    // Look for reference sections
-    let inReferencesSection = false;
-    
-    for (const line of lines) {
-      const trimmedLine = line.trim();
-      
-      // Check if we're entering a references section
-      if (/^(references?|bibliography|works?\s+cited?)$/i.test(trimmedLine)) {
-        inReferencesSection = true;
-        continue;
-      }
-      
-      // Check if we're leaving the references section
-      if (inReferencesSection && /^(appendix|notes?|acknowledgments?)$/i.test(trimmedLine)) {
-        inReferencesSection = false;
-        continue;
-      }
-      
-      // If we're in the references section and the line looks like a reference
-      if (inReferencesSection && trimmedLine.length > 10) {
-        // Basic reference pattern matching
-        if (this.looksLikeReference(trimmedLine)) {
-          references.push(trimmedLine);
-        }
-      }
-    }
-    
-    return references;
-  }
-
-  static looksLikeReference(text) {
-    // Simple heuristics to identify reference entries
-    const patterns = [
-      // Contains year in parentheses or brackets
-      /\(\d{4}\)|\[\d{4}\]/,
-      // Contains "et al." or "and"
-      /et\s+al\.|and/,
-      // Contains common publication words
-      /journal|conference|proceedings|book|chapter|article|paper/i,
-      // Contains DOI or URL
-      /doi:|http|www\./i,
-      // Contains volume/issue/page numbers
-      /\d+\(\d+\)|\d+:\d+|\d+-\d+/
-    ];
-    
-    return patterns.some(pattern => pattern.test(text));
-  }
-
-  static getDocumentStats(content) {
-    if (!content) {
-      return {
-        wordCount: 0,
-        characterCount: 0,
-        sentenceCount: 0,
-        paragraphCount: 0,
-        averageWordsPerSentence: 0,
-        averageSentencesPerParagraph: 0
-      };
-    }
-
-    const wordCount = this.countWords(content);
-    const characterCount = content.length;
-    const sentenceCount = content.split(/[.!?]+/).filter(s => s.trim().length > 0).length;
-    const paragraphCount = content.split(/\n\s*\n/).filter(p => p.trim().length > 0).length;
-    
-    const averageWordsPerSentence = sentenceCount > 0 ? Math.round(wordCount / sentenceCount) : 0;
-    const averageSentencesPerParagraph = paragraphCount > 0 ? Math.round(sentenceCount / paragraphCount) : 0;
-
-    return {
-      wordCount,
-      characterCount,
-      sentenceCount,
-      paragraphCount,
-      averageWordsPerSentence,
-      averageSentencesPerParagraph
+  /**
+   * Get file type from MIME type
+   * @param {string} mimeType - MIME type
+   * @returns {string} File type
+   */
+  getFileType(mimeType) {
+    const typeMap = {
+      'application/pdf': 'PDF',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'DOCX',
+      'application/msword': 'DOC',
+      'text/plain': 'TXT',
     };
+    return typeMap[mimeType] || 'UNKNOWN';
+  }
+
+  /**
+   * Validate file type
+   * @param {string} mimeType - MIME type
+   * @returns {boolean} Whether file type is supported
+   */
+  isSupportedFileType(mimeType) {
+    const supportedTypes = [
+      'application/pdf',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'application/msword',
+      'text/plain',
+    ];
+    return supportedTypes.includes(mimeType);
+  }
+
+  /**
+   * Get file size limits based on type
+   * @param {string} mimeType - MIME type
+   * @returns {number} Maximum file size in bytes
+   */
+  getMaxFileSize(mimeType) {
+    const sizeLimits = {
+      'application/pdf': 50 * 1024 * 1024, // 50MB
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 25 * 1024 * 1024, // 25MB
+      'application/msword': 25 * 1024 * 1024, // 25MB
+      'text/plain': 10 * 1024 * 1024, // 10MB
+    };
+    return sizeLimits[mimeType] || 10 * 1024 * 1024; // Default 10MB
   }
 }
 
-module.exports = DocumentParser;
+module.exports = new DocumentParser();

@@ -1,61 +1,102 @@
 const express = require('express');
-const { v4: uuidv4 } = require('uuid');
-
-const { query } = require('../database/connection');
-const { authenticateToken, requireSubscription } = require('../middleware/auth');
-const { validate, validateFileUpload, schemas } = require('../middleware/validation');
-const { upload, uploadToS3, getSignedUrl, deleteFromS3 } = require('../services/fileUpload');
-const DocumentParser = require('../services/documentParser');
+const multer = require('multer');
+const { authenticateToken } = require('../middleware/auth');
+const { validate, schemas } = require('../middleware/validation');
+const s3Service = process.env.NODE_ENV === 'production' 
+  ? require('../services/s3Service')
+  : require('../services/mockS3Service');
+const documentParser = require('../services/documentParser');
+const documentService = require('../services/documentService');
 
 const router = express.Router();
+
+// Configure multer for file uploads
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 50 * 1024 * 1024, // 50MB limit
+  },
+  fileFilter: (req, file, cb) => {
+    // Check if file type is supported
+    if (documentParser.isSupportedFileType(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Unsupported file type. Please upload PDF, DOCX, DOC, or TXT files.'), false);
+    }
+  },
+});
 
 // @route   POST /api/documents/upload
 // @desc    Upload a new document
 // @access  Private
-router.post('/upload', authenticateToken, upload.single('document'), validateFileUpload, async (req, res) => {
+router.post('/upload', authenticateToken, upload.single('document'), async (req, res) => {
   try {
     const { title, citationStyle, focusAreas } = req.body;
     const file = req.file;
     const userId = req.user.id;
 
-    // Upload file to S3
-    const uploadResult = await uploadToS3(file, userId, file.originalname);
+    if (!file) {
+      return res.status(400).json({
+        success: false,
+        message: 'No file uploaded'
+      });
+    }
+
+    // Validate file size
+    const maxSize = documentParser.getMaxFileSize(file.mimetype);
+    if (file.size > maxSize) {
+      return res.status(400).json({
+        success: false,
+        message: `File size exceeds limit. Maximum size for ${file.mimetype} is ${Math.round(maxSize / 1024 / 1024)}MB`
+      });
+    }
+
+    console.log(`📄 Processing document upload: ${file.originalname} (${file.size} bytes)`);
 
     // Parse document content
-    const parsedContent = await DocumentParser.parseDocument(
+    const parsedContent = await documentParser.parseDocument(
       file.buffer,
       file.mimetype,
       file.originalname
     );
 
+    console.log(`✅ Document parsed: ${parsedContent.wordCount} words, ${parsedContent.pageCount} pages`);
+
+    // Upload file to S3
+    const uploadResult = await s3Service.uploadFile(
+      file.buffer,
+      file.originalname,
+      userId,
+      file.mimetype
+    );
+
+    if (!uploadResult.success) {
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to upload file to storage',
+        error: uploadResult.error
+      });
+    }
+
+    console.log(`☁️ File uploaded to S3: ${uploadResult.s3Key}`);
+
     // Save document to database
-    const result = await query(
-      `INSERT INTO documents (id, user_id, title, original_filename, file_type, file_size, s3_key, s3_url, content_text, word_count, page_count, upload_status)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
-       RETURNING id, title, original_filename, file_type, file_size, word_count, page_count, upload_status, created_at`,
-      [
-        uuidv4(),
-        userId,
-        title || file.originalname,
-        file.originalname,
-        file.mimetype,
-        file.size,
-        uploadResult.s3Key,
-        uploadResult.s3Url,
-        parsedContent.content,
-        parsedContent.wordCount,
-        parsedContent.pageCount,
-        'processed'
-      ]
-    );
+    const documentData = {
+      userId,
+      title: title || file.originalname,
+      originalFilename: file.originalname,
+      fileType: parsedContent.fileType,
+      fileSize: file.size,
+      s3Key: uploadResult.s3Key,
+      s3Url: uploadResult.s3Url,
+      contentText: parsedContent.content,
+      wordCount: parsedContent.wordCount,
+      pageCount: parsedContent.pageCount
+    };
 
-    const document = result.rows[0];
+    const document = await documentService.createDocument(documentData);
 
-    // Track usage
-    await query(
-      'INSERT INTO usage_tracking (user_id, document_id, action_type, credits_used) VALUES ($1, $2, $3, $4)',
-      [userId, document.id, 'upload', 1]
-    );
+    console.log(`💾 Document saved to database: ${document.id}`);
 
     res.status(201).json({
       success: true,
@@ -74,11 +115,13 @@ router.post('/upload', authenticateToken, upload.single('document'), validateFil
         }
       }
     });
+
   } catch (error) {
     console.error('Document upload error:', error);
     res.status(500).json({
       success: false,
-      message: 'Document upload failed'
+      message: 'Failed to upload document',
+      error: error.message
     });
   }
 });
@@ -89,51 +132,44 @@ router.post('/upload', authenticateToken, upload.single('document'), validateFil
 router.get('/', authenticateToken, async (req, res) => {
   try {
     const userId = req.user.id;
-    const { page = 1, limit = 10, sortBy = 'created_at', sortOrder = 'desc' } = req.query;
+    const { limit = 20, offset = 0, sortBy = 'created_at', sortOrder = 'desc' } = req.query;
 
-    const offset = (page - 1) * limit;
-    const validSortColumns = ['created_at', 'title', 'word_count', 'file_size'];
-    const validSortOrders = ['asc', 'desc'];
-
-    const sortColumn = validSortColumns.includes(sortBy) ? sortBy : 'created_at';
-    const order = validSortOrders.includes(sortOrder.toLowerCase()) ? sortOrder.toUpperCase() : 'DESC';
-
-    const result = await query(
-      `SELECT id, title, original_filename, file_type, file_size, word_count, page_count, upload_status, created_at, updated_at
-       FROM documents 
-       WHERE user_id = $1 
-       ORDER BY ${sortColumn} ${order}
-       LIMIT $2 OFFSET $3`,
-      [userId, parseInt(limit), offset]
-    );
-
-    // Get total count
-    const countResult = await query(
-      'SELECT COUNT(*) as total FROM documents WHERE user_id = $1',
-      [userId]
-    );
-
-    const total = parseInt(countResult.rows[0].total);
-    const totalPages = Math.ceil(total / limit);
+    const documents = await documentService.getUserDocuments(userId, {
+      limit: parseInt(limit),
+      offset: parseInt(offset),
+      sortBy,
+      sortOrder
+    });
 
     res.json({
       success: true,
       data: {
-        documents: result.rows,
+        documents: documents.map(doc => ({
+          id: doc.id,
+          title: doc.title,
+          originalFilename: doc.original_filename,
+          fileType: doc.file_type,
+          fileSize: doc.file_size,
+          wordCount: doc.word_count,
+          pageCount: doc.page_count,
+          uploadStatus: doc.upload_status,
+          createdAt: doc.created_at,
+          updatedAt: doc.updated_at
+        })),
         pagination: {
-          currentPage: parseInt(page),
-          totalPages,
-          totalDocuments: total,
-          hasNextPage: page < totalPages,
-          hasPrevPage: page > 1
+          limit: parseInt(limit),
+          offset: parseInt(offset),
+          total: documents.length
         }
       }
     });
+
   } catch (error) {
     console.error('Get documents error:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to retrieve documents'
+      message: 'Failed to retrieve documents',
+      error: error.message
     });
   }
 });
@@ -146,22 +182,14 @@ router.get('/:id', authenticateToken, async (req, res) => {
     const { id } = req.params;
     const userId = req.user.id;
 
-    const result = await query(
-      `SELECT id, title, original_filename, file_type, file_size, word_count, page_count, 
-              upload_status, s3_key, created_at, updated_at
-       FROM documents 
-       WHERE id = $1 AND user_id = $2`,
-      [id, userId]
-    );
+    const document = await documentService.getDocumentById(id, userId);
 
-    if (result.rows.length === 0) {
+    if (!document) {
       return res.status(404).json({
         success: false,
         message: 'Document not found'
       });
     }
-
-    const document = result.rows[0];
 
     res.json({
       success: true,
@@ -180,11 +208,13 @@ router.get('/:id', authenticateToken, async (req, res) => {
         }
       }
     });
+
   } catch (error) {
     console.error('Get document error:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to retrieve document'
+      message: 'Failed to retrieve document',
+      error: error.message
     });
   }
 });
@@ -197,40 +227,32 @@ router.get('/:id/download', authenticateToken, async (req, res) => {
     const { id } = req.params;
     const userId = req.user.id;
 
-    const result = await query(
-      'SELECT s3_key, original_filename FROM documents WHERE id = $1 AND user_id = $2',
-      [id, userId]
-    );
+    const document = await documentService.getDocumentById(id, userId);
 
-    if (result.rows.length === 0) {
+    if (!document) {
       return res.status(404).json({
         success: false,
         message: 'Document not found'
       });
     }
 
-    const { s3_key, original_filename } = result.rows[0];
-    const downloadUrl = await getSignedUrl(s3_key, 3600); // 1 hour expiry
-
-    // Track download usage
-    await query(
-      'INSERT INTO usage_tracking (user_id, document_id, action_type, credits_used) VALUES ($1, $2, $3, $4)',
-      [userId, id, 'download', 0]
-    );
+    const downloadUrl = await s3Service.getSignedDownloadUrl(document.s3_key, 3600); // 1 hour expiry
 
     res.json({
       success: true,
       data: {
         downloadUrl,
-        filename: original_filename,
-        expiresIn: 3600
+        expiresIn: 3600,
+        fileName: document.original_filename
       }
     });
+
   } catch (error) {
     console.error('Get download URL error:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to generate download URL'
+      message: 'Failed to generate download URL',
+      error: error.message
     });
   }
 });
@@ -238,47 +260,39 @@ router.get('/:id/download', authenticateToken, async (req, res) => {
 // @route   PUT /api/documents/:id
 // @desc    Update document metadata
 // @access  Private
-router.put('/:id', authenticateToken, async (req, res) => {
+router.put('/:id', authenticateToken, validate(schemas.documentUpdate), async (req, res) => {
   try {
     const { id } = req.params;
-    const { title } = req.body;
     const userId = req.user.id;
+    const { title } = req.body;
 
-    if (!title || title.trim().length === 0) {
-      return res.status(400).json({
-        success: false,
-        message: 'Title is required'
-      });
-    }
-
-    const result = await query(
-      'UPDATE documents SET title = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2 AND user_id = $3 RETURNING id, title, updated_at',
-      [title.trim(), id, userId]
-    );
-
-    if (result.rows.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: 'Document not found'
-      });
-    }
+    const document = await documentService.updateDocument(id, userId, { title });
 
     res.json({
       success: true,
       message: 'Document updated successfully',
       data: {
         document: {
-          id: result.rows[0].id,
-          title: result.rows[0].title,
-          updatedAt: result.rows[0].updated_at
+          id: document.id,
+          title: document.title,
+          originalFilename: document.original_filename,
+          fileType: document.file_type,
+          fileSize: document.file_size,
+          wordCount: document.word_count,
+          pageCount: document.page_count,
+          uploadStatus: document.upload_status,
+          createdAt: document.created_at,
+          updatedAt: document.updated_at
         }
       }
     });
+
   } catch (error) {
     console.error('Update document error:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to update document'
+      message: 'Failed to update document',
+      error: error.message
     });
   }
 });
@@ -291,79 +305,108 @@ router.delete('/:id', authenticateToken, async (req, res) => {
     const { id } = req.params;
     const userId = req.user.id;
 
-    // Get document info before deletion
-    const result = await query(
-      'SELECT s3_key FROM documents WHERE id = $1 AND user_id = $2',
-      [id, userId]
-    );
+    // Get document to get S3 key
+    const document = await documentService.getDocumentById(id, userId);
 
-    if (result.rows.length === 0) {
+    if (!document) {
       return res.status(404).json({
         success: false,
         message: 'Document not found'
       });
     }
 
-    const { s3_key } = result.rows[0];
-
-    // Delete from database (cascade will handle related records)
-    await query('DELETE FROM documents WHERE id = $1 AND user_id = $2', [id, userId]);
-
     // Delete from S3
-    try {
-      await deleteFromS3(s3_key);
-    } catch (s3Error) {
-      console.error('S3 deletion error:', s3Error);
-      // Don't fail the request if S3 deletion fails
-    }
+    const s3Deleted = await s3Service.deleteFile(document.s3_key);
+
+    // Delete from database
+    await documentService.deleteDocument(id, userId);
 
     res.json({
       success: true,
-      message: 'Document deleted successfully'
+      message: 'Document deleted successfully',
+      data: {
+        s3Deleted
+      }
     });
+
   } catch (error) {
     console.error('Delete document error:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to delete document'
+      message: 'Failed to delete document',
+      error: error.message
     });
   }
 });
 
-// @route   GET /api/documents/:id/content
-// @desc    Get document content for analysis
+// @route   GET /api/documents/stats/overview
+// @desc    Get document statistics
 // @access  Private
-router.get('/:id/content', authenticateToken, async (req, res) => {
+router.get('/stats/overview', authenticateToken, async (req, res) => {
   try {
-    const { id } = req.params;
     const userId = req.user.id;
 
-    const result = await query(
-      'SELECT content_text, word_count FROM documents WHERE id = $1 AND user_id = $2',
-      [id, userId]
-    );
-
-    if (result.rows.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: 'Document not found'
-      });
-    }
-
-    const { content_text, word_count } = result.rows[0];
+    const stats = await documentService.getDocumentStats(userId);
 
     res.json({
       success: true,
       data: {
-        content: content_text,
-        wordCount: word_count
+        stats
       }
     });
+
   } catch (error) {
-    console.error('Get document content error:', error);
+    console.error('Get document stats error:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to retrieve document content'
+      message: 'Failed to retrieve document statistics',
+      error: error.message
+    });
+  }
+});
+
+// @route   GET /api/documents/search
+// @desc    Search documents
+// @access  Private
+router.get('/search', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { q: searchTerm } = req.query;
+
+    if (!searchTerm || searchTerm.trim().length < 2) {
+      return res.status(400).json({
+        success: false,
+        message: 'Search term must be at least 2 characters long'
+      });
+    }
+
+    const documents = await documentService.searchDocuments(userId, searchTerm.trim());
+
+    res.json({
+      success: true,
+      data: {
+        documents: documents.map(doc => ({
+          id: doc.id,
+          title: doc.title,
+          originalFilename: doc.original_filename,
+          fileType: doc.file_type,
+          fileSize: doc.file_size,
+          wordCount: doc.word_count,
+          pageCount: doc.page_count,
+          uploadStatus: doc.upload_status,
+          createdAt: doc.created_at
+        })),
+        searchTerm: searchTerm.trim(),
+        totalResults: documents.length
+      }
+    });
+
+  } catch (error) {
+    console.error('Search documents error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to search documents',
+      error: error.message
     });
   }
 });

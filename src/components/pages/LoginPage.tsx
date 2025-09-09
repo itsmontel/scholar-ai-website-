@@ -12,6 +12,8 @@ const LoginPage = ({ onNavigate, onLogin }: LoginPageProps) => {
   });
   const [, setAnimationStep] = useState(0);
   const [textIndex, setTextIndex] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const animatedTexts = [
     "Turn good writing into great",
@@ -34,20 +36,50 @@ const LoginPage = ({ onNavigate, onLogin }: LoginPageProps) => {
     return () => clearInterval(textInterval);
   }, []);
 
-  const handleSubmit = () => {
-    onLogin(true);
-    onNavigate('dashboard');
+  const handleSubmit = async () => {
+    if (!formData.email || !formData.password) {
+      setError('Please fill in all fields');
+      return;
+    }
+
+    setIsLoading(true);
+    setError('');
+
+    try {
+      const response = await fetch('http://localhost:3001/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Login failed');
+      }
+
+      // Store token and user data
+      localStorage.setItem('authToken', data.data.token);
+      localStorage.setItem('user', JSON.stringify(data.data.user));
+
+      // Call the parent component's onLogin with the actual user data
+      onLogin(data.data.user);
+      onNavigate('dashboard');
+    } catch (error) {
+      console.error('Login error:', error);
+      setError(error instanceof Error ? error.message : 'Login failed. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex relative">
-      {/* Back Button */}
-      <button
-        onClick={() => onNavigate('landing')}
-        className="absolute top-6 right-6 z-50 w-10 h-10 bg-white/80 hover:bg-white backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110"
-      >
-        <span className="text-lg">←</span>
-      </button>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex">
       {/* Left Side - Login Form */}
       <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
         <div className="max-w-md w-full">
@@ -61,6 +93,12 @@ const LoginPage = ({ onNavigate, onLogin }: LoginPageProps) => {
           <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
             <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome back</h1>
             <p className="text-gray-600 mb-8">Sign in to continue your research journey</p>
+
+            {error && (
+              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                <p className="text-red-600 text-sm">{error}</p>
+              </div>
+            )}
 
             <div className="space-y-6">
               <div>
@@ -85,9 +123,17 @@ const LoginPage = ({ onNavigate, onLogin }: LoginPageProps) => {
               </div>
               <button
                 onClick={handleSubmit}
-                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 rounded-lg font-semibold hover:shadow-lg transform hover:scale-[1.02] transition-all duration-300"
+                disabled={isLoading}
+                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 rounded-lg font-semibold hover:shadow-lg transform hover:scale-[1.02] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
               >
-                Log in
+                {isLoading ? (
+                  <div className="flex items-center justify-center">
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                    Signing in...
+                  </div>
+                ) : (
+                  'Log in'
+                )}
               </button>
             </div>
 
@@ -101,7 +147,7 @@ const LoginPage = ({ onNavigate, onLogin }: LoginPageProps) => {
                 </div>
               </div>
               <button
-                onClick={handleSubmit}
+                onClick={() => setError('Google authentication not implemented yet')}
                 className="w-full mt-4 bg-gray-900 text-white py-3 rounded-lg font-semibold hover:bg-gray-800 transition-colors"
               >
                 Continue with Google

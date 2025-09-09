@@ -1,35 +1,100 @@
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
 
-// Import all page components (these would normally be in separate files)
-import LandingPage from './components/LandingPage';
-import SignUpPage from './components/SignUpPage';
-import LoginPage from './components/LoginPage';
-import Dashboard from './components/Dashboard';
-import AnalysisPage from './components/AnalysisPage';
-import UploadPage from './components/UploadPage';
-import SettingsPage from './components/SettingsPage';
-import PricingPage from './components/PricingPage';
-import FeaturesPage from './components/FeaturesPage';
-import ProfilePage from './components/ProfilePage';
-import LibraryPage from './components/LibraryPage';
-import HelpCenterPage from './components/HelpCenterPage';
-import WritingGuidePage from './components/WritingGuidePage';
-import AboutPage from './components/AboutPage';
-import ContactPage from './components/ContactPage';
+// Import all page components
+import LandingPage from './pages/LandingPage';
+import SignUpPage from './pages/SignUpPage';
+import LoginPage from './pages/LoginPage';
+import EmailVerificationPage from './pages/EmailVerificationPage';
+import DashboardPage from './pages/DashboardPage';
+import AnalysisPage from './pages/AnalysisPage';
+import UploadPage from './pages/UploadPage';
+import SettingsPage from './pages/SettingsPage';
+import PricingPage from './pages/PricingPage';
+import FeaturesPage from './pages/FeaturesPage';
+import ProfilePage from './pages/ProfilePage';
+import LibraryPage from './pages/LibraryPage';
+import HelpCenterPage from './pages/HelpCenterPage';
+import WritingGuidePage from './pages/WritingGuidePage';
+import AboutPage from './pages/AboutPage';
+import ContactPage from './pages/ContactPage';
+
+// Type definitions
+interface User {
+  name: string;
+  email: string;
+  plan: string;
+}
+
+interface NavigationProps {
+  onNavigate: (page: string) => void;
+}
+
+
+interface UserProps extends NavigationProps {
+  user: User | null;
+  onLogout?: () => void;
+}
 
 // Main Application Component
 const AcademicAIApp = () => {
   const [currentPage, setCurrentPage] = useState('landing');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<User | null>(null);
+
+  // Handle URL-based routing and authentication persistence
+  useEffect(() => {
+    const path = window.location.pathname;
+    
+    // Check for existing authentication
+    const token = localStorage.getItem('authToken');
+    const userData = localStorage.getItem('user');
+    
+    if (token && userData) {
+      try {
+        const user = JSON.parse(userData);
+        setIsLoggedIn(true);
+        setUser(user);
+      } catch (error) {
+        console.error('Error parsing user data:', error);
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('user');
+      }
+    }
+    
+    if (path === '/email-verification') {
+      setCurrentPage('email-verification');
+    } else if (path === '/signup') {
+      setCurrentPage('signup');
+    } else if (path === '/login') {
+      setCurrentPage('login');
+    } else if (path === '/dashboard') {
+      setCurrentPage('dashboard');
+    } else if (path === '/pricing') {
+      setCurrentPage('pricing');
+    } else if (path === '/features') {
+      setCurrentPage('features');
+    } else if (path === '/about') {
+      setCurrentPage('about');
+    } else if (path === '/contact') {
+      setCurrentPage('contact');
+    } else {
+      setCurrentPage('landing');
+    }
+  }, []);
 
   // Navigation function
-  const navigateTo = (page) => {
+  const navigateTo = (page: string) => {
     setCurrentPage(page);
+    // Update URL to match the page
+    if (page === 'landing') {
+      window.history.pushState({}, '', '/');
+    } else {
+      window.history.pushState({}, '', `/${page}`);
+    }
   };
 
   // Authentication handlers
-  const handleSignUp = (userData) => {
+  const handleSignUp = (userData: User) => {
     setIsLoggedIn(true);
     setUser(userData || { 
       name: 'Dr. Sarah Chen', 
@@ -38,19 +103,17 @@ const AcademicAIApp = () => {
     });
   };
 
-  const handleLogin = (userData) => {
+  const handleLogin = (userData: User) => {
     setIsLoggedIn(true);
-    setUser(userData || { 
-      name: 'Dr. Sarah Chen', 
-      email: 'sarah.chen@stanford.edu',
-      plan: 'premium'
-    });
+    setUser(userData);
   };
 
   const handleLogout = () => {
     setIsLoggedIn(false);
     setUser(null);
     setCurrentPage('landing');
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('user');
   };
 
   // Route protection for authenticated pages
@@ -69,6 +132,8 @@ const AcademicAIApp = () => {
         return <SignUpPage onNavigate={navigateTo} onSignUp={handleSignUp} />;
       case 'login':
         return <LoginPage onNavigate={navigateTo} onLogin={handleLogin} />;
+      case 'email-verification':
+        return <EmailVerificationPage onNavigate={navigateTo} />;
       case 'pricing':
         return <PricingPage onNavigate={navigateTo} />;
       case 'features':
@@ -82,17 +147,17 @@ const AcademicAIApp = () => {
       case 'writing-guide':
         return <WritingGuidePage onNavigate={navigateTo} />;
       case 'dashboard':
-        return <Dashboard onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
+        return <DashboardPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'analysis':
-        return <AnalysisPage onNavigate={navigateTo} user={user} />;
+        return <AnalysisPage onNavigate={navigateTo} />;
       case 'upload':
-        return <UploadPage onNavigate={navigateTo} user={user} />;
+        return <UploadPage onNavigate={navigateTo} />;
       case 'settings':
-        return <SettingsPage onNavigate={navigateTo} user={user} />;
+        return <SettingsPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'profile':
-        return <ProfilePage onNavigate={navigateTo} user={user} />;
+        return <ProfilePage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'library':
-        return <LibraryPage onNavigate={navigateTo} user={user} />;
+        return <LibraryPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'privacy':
         return <PrivacyPolicyPage onNavigate={navigateTo} />;
       case 'terms':
@@ -114,7 +179,7 @@ const AcademicAIApp = () => {
 };
 
 // Privacy Policy Page Component
-const PrivacyPolicyPage = ({ onNavigate }) => (
+const PrivacyPolicyPage = ({ onNavigate }: NavigationProps) => (
   <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
     {/* Navigation */}
     <nav className="flex items-center justify-between px-8 py-6 bg-white/80 backdrop-blur-sm border-b border-gray-200">
@@ -209,7 +274,7 @@ const PrivacyPolicyPage = ({ onNavigate }) => (
 );
 
 // Terms of Service Page Component
-const TermsOfServicePage = ({ onNavigate }) => (
+const TermsOfServicePage = ({ onNavigate }: NavigationProps) => (
   <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
     {/* Navigation */}
     <nav className="flex items-center justify-between px-8 py-6 bg-white/80 backdrop-blur-sm border-b border-gray-200">
@@ -309,7 +374,7 @@ const TermsOfServicePage = ({ onNavigate }) => (
 );
 
 // Admin Dashboard Component
-const AdminDashboard = ({ onNavigate, user }) => (
+const AdminDashboard = ({ onNavigate, user: _user }: UserProps) => (
   <div className="min-h-screen bg-gray-50">
     {/* Navigation */}
     <nav className="bg-white border-b border-gray-200 px-8 py-4">
@@ -398,7 +463,7 @@ const AdminDashboard = ({ onNavigate, user }) => (
 );
 
 // Collaboration Page Component
-const CollaborationPage = ({ onNavigate, user }) => (
+const CollaborationPage = ({ onNavigate, user: _user }: UserProps) => (
   <div className="min-h-screen bg-gray-50">
     {/* Navigation */}
     <nav className="bg-white border-b border-gray-200 px-8 py-4">

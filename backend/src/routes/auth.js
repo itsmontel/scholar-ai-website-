@@ -7,6 +7,8 @@ const { v4: uuidv4 } = require('uuid');
 const { query } = require('../database/connection');
 const { authenticateToken } = require('../middleware/auth');
 const { validate, schemas } = require('../middleware/validation');
+const emailService = require('../services/emailService');
+const userService = require('../services/userService');
 
 const router = express.Router();
 
@@ -24,15 +26,12 @@ const generateToken = (userId) => {
 // @access  Public
 router.post('/register', validate(schemas.register), async (req, res) => {
   try {
-    const { email, password, firstName, lastName, institution, researchField } = req.body;
+    const { email, password, institution, researchField } = req.body;
 
     // Check if user already exists
-    const existingUser = await query(
-      'SELECT id FROM users WHERE email = $1',
-      [email.toLowerCase()]
-    );
+    const existingUser = await userService.findUserByEmail(email);
 
-    if (existingUser.rows.length > 0) {
+    if (existingUser) {
       return res.status(400).json({
         success: false,
         message: 'User with this email already exists'
@@ -47,20 +46,27 @@ router.post('/register', validate(schemas.register), async (req, res) => {
     const emailVerificationToken = crypto.randomBytes(32).toString('hex');
 
     // Create user
-    const result = await query(
-      `INSERT INTO users (email, password_hash, first_name, last_name, institution, research_field, email_verification_token)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)
-       RETURNING id, email, first_name, last_name, subscription_plan, created_at`,
-      [email.toLowerCase(), passwordHash, firstName, lastName, institution, researchField, emailVerificationToken]
-    );
+    const userData = {
+      email: email.toLowerCase(),
+      password_hash: passwordHash,
+      institution: institution || null,
+      research_field: researchField || null,
+      email_verification_token: emailVerificationToken,
+      subscription_plan: 'free',
+      subscription_status: 'active',
+      is_active: true,
+      email_verified: false
+    };
 
-    const user = result.rows[0];
+    const user = await userService.createUser(userData);
 
-    // Generate JWT token
-    const token = generateToken(user.id);
-
-    // TODO: Send verification email
-    // await sendVerificationEmail(email, emailVerificationToken);
+    // Send verification email
+    const emailResult = await emailService.sendVerificationEmail(email, emailVerificationToken);
+    
+    if (!emailResult.success) {
+      console.error('Failed to send verification email:', emailResult.error);
+      // Don't fail registration if email fails, but log it
+    }
 
     res.status(201).json({
       success: true,
@@ -69,11 +75,11 @@ router.post('/register', validate(schemas.register), async (req, res) => {
         user: {
           id: user.id,
           email: user.email,
-          firstName: user.first_name,
-          lastName: user.last_name,
-          subscriptionPlan: user.subscription_plan
+          subscriptionPlan: user.subscription_plan,
+          emailVerified: false
         },
-        token
+        emailSent: emailResult.success,
+        verificationToken: process.env.NODE_ENV === 'development' ? emailVerificationToken : undefined
       }
     });
   } catch (error) {
@@ -93,19 +99,14 @@ router.post('/login', validate(schemas.login), async (req, res) => {
     const { email, password } = req.body;
 
     // Find user
-    const result = await query(
-      'SELECT id, email, password_hash, first_name, last_name, subscription_plan, subscription_status, is_active, email_verified FROM users WHERE email = $1',
-      [email.toLowerCase()]
-    );
+    const user = await userService.findUserByEmail(email);
 
-    if (result.rows.length === 0) {
+    if (!user) {
       return res.status(401).json({
         success: false,
         message: 'Invalid email or password'
       });
     }
-
-    const user = result.rows[0];
 
     // Check if account is active
     if (!user.is_active) {
@@ -124,11 +125,17 @@ router.post('/login', validate(schemas.login), async (req, res) => {
       });
     }
 
+    // Check if email is verified
+    if (!user.email_verified) {
+      return res.status(403).json({
+        success: false,
+        message: 'Please verify your email address before logging in. Check your inbox for a verification link.',
+        requiresEmailVerification: true
+      });
+    }
+
     // Update last login
-    await query(
-      'UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = $1',
-      [user.id]
-    );
+    await userService.updateUser(user.id, { last_login: new Date().toISOString() });
 
     // Generate JWT token
     const token = generateToken(user.id);
@@ -221,7 +228,7 @@ router.post('/verify-email', async (req, res) => {
     }
 
     const result = await query(
-      'UPDATE users SET email_verified = true, email_verification_token = NULL WHERE email_verification_token = $1 RETURNING id',
+      'UPDATE users SET email_verified = true, email_verification_token = NULL WHERE email_verification_token = $1 RETURNING id, email',
       [token]
     );
 
@@ -232,9 +239,21 @@ router.post('/verify-email', async (req, res) => {
       });
     }
 
+    const user = result.rows[0];
+
+    // Send welcome email
+    const welcomeResult = await emailService.sendWelcomeEmail(user.email);
+    if (!welcomeResult.success) {
+      console.error('Failed to send welcome email:', welcomeResult.error);
+    }
+
     res.json({
       success: true,
-      message: 'Email verified successfully'
+      message: 'Email verified successfully. Welcome to Scholar AI!',
+      data: {
+        emailVerified: true,
+        welcomeEmailSent: welcomeResult.success
+      }
     });
   } catch (error) {
     console.error('Email verification error:', error);
@@ -242,6 +261,51 @@ router.post('/verify-email', async (req, res) => {
       success: false,
       message: 'Email verification failed'
     });
+  }
+});
+
+// @route   GET /api/auth/verify-email
+// @desc    Verify email address via GET (for email links)
+// @access  Public
+router.get('/verify-email', async (req, res) => {
+  try {
+    const { token } = req.query;
+
+    if (!token) {
+      return res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:5173'}?error=missing-token`);
+    }
+
+    console.log('Verification attempt with token:', token);
+
+    // Use userService to find and update the user
+    const user = await userService.findUserByVerificationToken(token);
+    
+    if (!user) {
+      console.log('No user found with token:', token);
+      return res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:5173'}?error=invalid-token`);
+    }
+
+    console.log('User found:', user.email);
+
+    // Update the user to mark email as verified
+    const updatedUser = await userService.updateUser(user.id, {
+      email_verified: true,
+      email_verification_token: null
+    });
+
+    console.log('User updated:', updatedUser);
+
+    // Send welcome email
+    const welcomeResult = await emailService.sendWelcomeEmail(user.email);
+    if (!welcomeResult.success) {
+      console.error('Failed to send welcome email:', welcomeResult.error);
+    }
+
+    // Redirect to email verification success page
+    res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:5173'}/email-verification?verified=true`);
+  } catch (error) {
+    console.error('Email verification error:', error);
+    res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:5173'}?error=verification-failed`);
   }
 });
 
@@ -281,12 +345,20 @@ router.post('/forgot-password', async (req, res) => {
       [resetToken, resetExpires, email.toLowerCase()]
     );
 
-    // TODO: Send password reset email
-    // await sendPasswordResetEmail(email, resetToken);
+    // Send password reset email
+    const emailResult = await emailService.sendPasswordResetEmail(email, resetToken);
+    
+    if (!emailResult.success) {
+      console.error('Failed to send password reset email:', emailResult.error);
+    }
 
     res.json({
       success: true,
-      message: 'If the email exists, a password reset link has been sent'
+      message: 'If the email exists, a password reset link has been sent',
+      data: {
+        emailSent: emailResult.success,
+        resetToken: process.env.NODE_ENV === 'development' ? resetToken : undefined
+      }
     });
   } catch (error) {
     console.error('Forgot password error:', error);
@@ -311,10 +383,12 @@ router.post('/reset-password', async (req, res) => {
       });
     }
 
-    if (newPassword.length < 8) {
+    // Validate password strength
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/;
+    if (newPassword.length < 8 || !passwordRegex.test(newPassword)) {
       return res.status(400).json({
         success: false,
-        message: 'Password must be at least 8 characters long'
+        message: 'Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character'
       });
     }
 
@@ -349,6 +423,76 @@ router.post('/reset-password', async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Password reset failed'
+    });
+  }
+});
+
+// @route   POST /api/auth/resend-verification
+// @desc    Resend email verification
+// @access  Public
+router.post('/resend-verification', async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email is required'
+      });
+    }
+
+    // Check if user exists and is not verified
+    const result = await query(
+      'SELECT id, email_verified, email_verification_token FROM users WHERE email = $1',
+      [email.toLowerCase()]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    const user = result.rows[0];
+
+    if (user.email_verified) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email is already verified'
+      });
+    }
+
+    // Generate new verification token if needed
+    let verificationToken = user.email_verification_token;
+    if (!verificationToken) {
+      verificationToken = crypto.randomBytes(32).toString('hex');
+      await query(
+        'UPDATE users SET email_verification_token = $1 WHERE id = $2',
+        [verificationToken, user.id]
+      );
+    }
+
+    // Send verification email
+    const emailResult = await emailService.sendVerificationEmail(email, verificationToken);
+    
+    if (!emailResult.success) {
+      console.error('Failed to resend verification email:', emailResult.error);
+    }
+
+    res.json({
+      success: true,
+      message: 'Verification email sent successfully',
+      data: {
+        emailSent: emailResult.success,
+        verificationToken: process.env.NODE_ENV === 'development' ? verificationToken : undefined
+      }
+    });
+  } catch (error) {
+    console.error('Resend verification error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to resend verification email'
     });
   }
 });

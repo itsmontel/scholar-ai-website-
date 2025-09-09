@@ -6,20 +6,15 @@ const registerSchema = Joi.object({
     'string.email': 'Please provide a valid email address',
     'any.required': 'Email is required'
   }),
-  password: Joi.string().min(8).required().messages({
-    'string.min': 'Password must be at least 8 characters long',
-    'any.required': 'Password is required'
-  }),
-  firstName: Joi.string().min(2).max(50).required().messages({
-    'string.min': 'First name must be at least 2 characters long',
-    'string.max': 'First name cannot exceed 50 characters',
-    'any.required': 'First name is required'
-  }),
-  lastName: Joi.string().min(2).max(50).required().messages({
-    'string.min': 'Last name must be at least 2 characters long',
-    'string.max': 'Last name cannot exceed 50 characters',
-    'any.required': 'Last name is required'
-  }),
+  password: Joi.string()
+    .min(8)
+    .pattern(new RegExp('^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]'))
+    .required()
+    .messages({
+      'string.min': 'Password must be at least 8 characters long',
+      'string.pattern.base': 'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character',
+      'any.required': 'Password is required'
+    }),
   institution: Joi.string().max(255).optional(),
   researchField: Joi.string().max(255).optional()
 });
@@ -45,10 +40,15 @@ const changePasswordSchema = Joi.object({
   currentPassword: Joi.string().required().messages({
     'any.required': 'Current password is required'
   }),
-  newPassword: Joi.string().min(8).required().messages({
-    'string.min': 'New password must be at least 8 characters long',
-    'any.required': 'New password is required'
-  })
+  newPassword: Joi.string()
+    .min(8)
+    .pattern(new RegExp('^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]'))
+    .required()
+    .messages({
+      'string.min': 'New password must be at least 8 characters long',
+      'string.pattern.base': 'New password must contain at least one uppercase letter, one lowercase letter, one number, and one special character',
+      'any.required': 'New password is required'
+    })
 });
 
 // Document validation schemas
@@ -108,6 +108,15 @@ const analysisRequestSchema = Joi.object({
   }),
   researchField: Joi.string().max(255).optional().messages({
     'string.max': 'Research field cannot exceed 255 characters'
+  })
+});
+
+// Document validation schemas
+const documentUpdateSchema = Joi.object({
+  title: Joi.string().min(1).max(500).required().messages({
+    'string.min': 'Document title is required',
+    'string.max': 'Document title cannot exceed 500 characters',
+    'any.required': 'Document title is required'
   })
 });
 
@@ -179,6 +188,7 @@ module.exports = {
     updateProfile: updateProfileSchema,
     changePassword: changePasswordSchema,
     documentUpload: documentUploadSchema,
+    documentUpdate: documentUpdateSchema,
     analysisRequest: analysisRequestSchema,
     createSubscription: createSubscriptionSchema
   }

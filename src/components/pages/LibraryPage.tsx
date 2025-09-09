@@ -2,404 +2,499 @@ import { useState, useEffect } from 'react';
 
 interface LibraryPageProps {
   onNavigate: (page: string) => void;
-  user: any;
-  onLogout: () => void;
 }
 
-const LibraryPage = ({ onNavigate, user, onLogout }: LibraryPageProps) => {
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
+interface Document {
+  id: string;
+  title: string;
+  originalFilename: string;
+  fileType: string;
+  fileSize: number;
+  wordCount: number;
+  pageCount: number;
+  uploadStatus: string;
+  createdAt: string;
+  updatedAt: string;
+}
 
-  // Close dropdown when clicking outside
+interface DocumentStats {
+  totalDocuments: number;
+  totalWords: number;
+  totalSize: number;
+  fileTypes: Record<string, number>;
+  recentUploads: Array<{
+    id: string;
+    title: string;
+    fileType: string;
+    wordCount: number;
+    createdAt: string;
+  }>;
+}
+
+const LibraryPage = ({ onNavigate }: LibraryPageProps) => {
+  const [documents, setDocuments] = useState<Document[]>([]);
+  const [stats, setStats] = useState<DocumentStats | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortBy, setSortBy] = useState<'created_at' | 'title' | 'word_count'>('created_at');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
+
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (isDropdownOpen && !(event.target as Element).closest('.dropdown-container')) {
-        setIsDropdownOpen(false);
+    fetchDocuments();
+    fetchStats();
+  }, [sortBy, sortOrder]);
+
+  const fetchDocuments = async () => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem('authToken');
+      
+      if (!token) {
+        setError('Please log in to view documents.');
+        return;
       }
-    };
+      
+      const response = await fetch(
+        `http://localhost:3001/api/documents?sortBy=${sortBy}&sortOrder=${sortOrder}&limit=50`,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        }
+      );
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [isDropdownOpen]);
+      if (!response.ok) {
+        throw new Error('Failed to fetch documents');
+      }
 
-  const documents = [
-    {
-      id: 1,
-      title: 'Climate Change Research Paper',
-      type: 'Research Paper',
-      status: 'analyzed',
-      score: 89,
-      wordCount: 8542,
-      lastModified: '2024-09-07',
-      tags: ['Climate', 'Environment', 'Research']
-    },
-    {
-      id: 2,
-      title: 'Literature Review Draft',
-      type: 'Literature Review',
-      status: 'analyzed',
-      score: 92,
-      wordCount: 6234,
-      lastModified: '2024-09-04',
-      tags: ['Literature', 'Review', 'Academic']
-    },
-    {
-      id: 3,
-      title: 'Research Methodology Chapter',
-      type: 'Thesis Chapter',
-      status: 'analyzing',
-      score: null,
-      wordCount: 4567,
-      lastModified: '2024-09-08',
-      tags: ['Methodology', 'Thesis', 'Chapter']
-    },
-    {
-      id: 4,
-      title: 'Conference Abstract',
-      type: 'Abstract',
-      status: 'analyzed',
-      score: 85,
-      wordCount: 350,
-      lastModified: '2024-08-30',
-      tags: ['Conference', 'Abstract', 'Presentation']
-    },
-    {
-      id: 5,
-      title: 'Grant Proposal Draft',
-      type: 'Grant Proposal',
-      status: 'analyzed',
-      score: 91,
-      wordCount: 12340,
-      lastModified: '2024-08-25',
-      tags: ['Grant', 'Funding', 'NSF']
-    },
-    {
-      id: 6,
-      title: 'Introduction Chapter',
-      type: 'Thesis Chapter',
-      status: 'draft',
-      score: null,
-      wordCount: 3890,
-      lastModified: '2024-08-18',
-      tags: ['Introduction', 'Thesis', 'Chapter']
-    }
-  ];
-
-  const filteredDocuments = documents.filter(doc => 
-    doc.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    doc.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'analyzed': return 'text-green-600 bg-green-100';
-      case 'analyzing': return 'text-yellow-600 bg-yellow-100';
-      case 'draft': return 'text-gray-600 bg-gray-100';
-      default: return 'text-gray-600 bg-gray-100';
+      const result = await response.json();
+      setDocuments(result.data.documents);
+    } catch (error) {
+      console.error('Error fetching documents:', error);
+      setError(error instanceof Error ? error.message : 'Failed to load documents');
+    } finally {
+      setLoading(false);
     }
   };
 
-  const getFileIcon = (type: string) => {
-    switch (type) {
-      case 'Research Paper': return '📄';
-      case 'Thesis Chapter': return '📚';
-      case 'Literature Review': return '📖';
-      case 'Abstract': return '📝';
-      case 'Grant Proposal': return '💰';
-      default: return '📄';
+  const fetchStats = async () => {
+    try {
+      const token = localStorage.getItem('authToken');
+      
+      const response = await fetch('http://localhost:3001/api/documents/stats/overview', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch stats');
+      }
+
+      const result = await response.json();
+      setStats(result.data.stats);
+    } catch (error) {
+      console.error('Error fetching stats:', error);
     }
   };
 
+  const handleSearch = async () => {
+    if (!searchTerm.trim()) {
+      fetchDocuments();
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const token = localStorage.getItem('authToken');
+      
+      const response = await fetch(
+        `http://localhost:3001/api/documents/search?q=${encodeURIComponent(searchTerm)}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('Search failed');
+      }
+
+      const result = await response.json();
+      setDocuments(result.data.documents);
+    } catch (error) {
+      console.error('Search error:', error);
+      setError(error instanceof Error ? error.message : 'Search failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteDocument = async (documentId: string) => {
+    if (!confirm('Are you sure you want to delete this document? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('authToken');
+      
+      const response = await fetch(`http://localhost:3001/api/documents/${documentId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete document');
+      }
+
+      // Remove from local state
+      setDocuments(docs => docs.filter(doc => doc.id !== documentId));
+      setSelectedDocument(null);
+      
+      // Refresh stats
+      fetchStats();
+    } catch (error) {
+      console.error('Delete error:', error);
+      setError(error instanceof Error ? error.message : 'Failed to delete document');
+    }
+  };
+
+  const handleDownloadDocument = async (document: Document) => {
+    try {
+      const token = localStorage.getItem('authToken');
+      
+      const response = await fetch(`http://localhost:3001/api/documents/${document.id}/download`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to get download URL');
+      }
+
+      const result = await response.json();
+      
+      // Open download URL in new tab
+      window.open(result.data.downloadUrl, '_blank');
+    } catch (error) {
+      console.error('Download error:', error);
+      setError(error instanceof Error ? error.message : 'Failed to download document');
+    }
+  };
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  const getFileTypeIcon = (fileType: string) => {
+    switch (fileType.toLowerCase()) {
+      case 'pdf':
+        return (
+          <div className="w-8 h-8 bg-red-100 rounded flex items-center justify-center">
+            <span className="text-red-600 font-bold text-xs">PDF</span>
+          </div>
+        );
+      case 'docx':
+        return (
+          <div className="w-8 h-8 bg-blue-100 rounded flex items-center justify-center">
+            <span className="text-blue-600 font-bold text-xs">DOCX</span>
+          </div>
+        );
+      case 'doc':
+        return (
+          <div className="w-8 h-8 bg-green-100 rounded flex items-center justify-center">
+            <span className="text-green-600 font-bold text-xs">DOC</span>
+          </div>
+        );
+      case 'txt':
+        return (
+          <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center">
+            <span className="text-gray-600 font-bold text-xs">TXT</span>
+          </div>
+        );
+      default:
+        return (
+          <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center">
+            <span className="text-gray-600 font-bold text-xs">FILE</span>
+          </div>
+        );
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
-      {/* Header */}
-      <header className="bg-white/90 backdrop-blur-xl border-b border-gray-200/60 sticky top-0 z-50 shadow-sm">
-        <div className="max-w-7xl mx-auto px-6 py-5">
-        <div className="flex items-center justify-between">
-            <button 
-              onClick={() => onNavigate('dashboard')}
-              className="flex items-center space-x-3 hover:opacity-80 transition-opacity duration-200"
-            >
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
-                <span className="text-white font-bold text-lg">S</span>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+      {/* Navigation */}
+      <nav className="flex items-center justify-between px-8 py-6">
+        <div className="flex items-center space-x-2">
+          <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+            <span className="text-white font-bold text-sm">A</span>
+          </div>
+          <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            Scholar AI
+          </span>
               </div>
-              <span className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">Scholar</span>
-            </button>
-
-            <nav className="hidden md:flex items-center space-x-8">
+        <div className="flex items-center space-x-4">
               <button 
                 onClick={() => onNavigate('dashboard')}
-                className="px-4 py-2 text-gray-600 hover:text-gray-900 font-medium rounded-lg hover:bg-gray-100/50 transition-all duration-200"
+            className="text-gray-600 hover:text-gray-900 transition-colors"
               >
               Dashboard
             </button>
               <button 
-                onClick={() => onNavigate('library')}
-                className="relative px-4 py-2 text-blue-600 font-semibold rounded-lg bg-blue-50/80 hover:bg-blue-100/80 transition-all duration-200"
+            onClick={() => onNavigate('upload')}
+            className="text-gray-600 hover:text-gray-900 transition-colors"
               >
-                Library
-                <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-blue-600 rounded-full"></div>
+            Upload
               </button>
               <button 
                 onClick={() => onNavigate('settings')}
-                className="px-4 py-2 text-gray-600 hover:text-gray-900 font-medium rounded-lg hover:bg-gray-100/50 transition-all duration-200"
+            className="text-gray-600 hover:text-gray-900 transition-colors"
               >
-                Account
+            Settings
               </button>
+        </div>
             </nav>
 
-            <div className="flex items-center space-x-4">
-              {/* User Profile Dropdown */}
-              <div className="relative dropdown-container">
+      <div className="max-w-7xl mx-auto px-8 py-12">
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-4xl font-bold text-gray-900 mb-2">Document Library</h1>
+            <p className="text-xl text-gray-600">Manage and organize your academic documents</p>
+          </div>
                 <button 
-                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                  className="flex items-center space-x-3 px-4 py-2 rounded-xl hover:bg-gray-100/60 transition-all duration-200 border border-gray-200/50 bg-white/50 backdrop-blur-sm"
-                >
-                  <div className="w-9 h-9 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-full flex items-center justify-center shadow-md">
-                    <span className="text-white font-bold text-sm">
-                      {(user?.name || 'U').charAt(0).toUpperCase()}
-                    </span>
+            onClick={() => onNavigate('upload')}
+            className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-lg font-semibold hover:shadow-lg transform hover:scale-[1.02] transition-all duration-300"
+          >
+            Upload New Document
+          </button>
                   </div>
-                  <div className="text-left">
-                    <div className="text-sm font-semibold text-gray-900">{user?.name || 'User Name'}</div>
-                    <div className="text-xs text-gray-500">{user?.email || 'user@example.com'}</div>
-                  </div>
-                  <svg 
-                    className={`w-4 h-4 text-gray-500 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`} 
-                    fill="none" 
-                    stroke="currentColor" 
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
 
-                {/* Dropdown Menu */}
-                {isDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-2xl border border-gray-200/50 backdrop-blur-sm z-50">
-                    {/* User Info Section */}
-                    <div className="px-4 py-3 border-b border-gray-100">
-                      <div className="text-sm font-medium text-gray-900">{user?.name || 'User Name'}</div>
-                      <div className="text-xs text-gray-500">{user?.email || 'user@example.com'}</div>
-                      <div className="flex items-center mt-2">
-                        <svg className="w-4 h-4 text-yellow-500 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+        {/* Stats Overview */}
+        {stats && (
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <div className="flex items-center">
+                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                </div>
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-600">Total Documents</p>
+                  <p className="text-2xl font-bold text-gray-900">{stats.totalDocuments}</p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <div className="flex items-center">
+                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                  <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                         </svg>
-                        <span className="text-xs text-gray-600">0 credits</span>
+                </div>
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-600">Total Words</p>
+                  <p className="text-2xl font-bold text-gray-900">{stats.totalWords.toLocaleString()}</p>
+                </div>
                       </div>
                     </div>
 
-                    {/* Navigation Links */}
-                    <div className="py-2">
-                      <button 
-                        onClick={() => { onNavigate('dashboard'); setIsDropdownOpen(false); }}
-                        className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <div className="flex items-center">
+                <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                  <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
                         </svg>
-                        <span>Dashboard</span>
-                      </button>
-                      
-                      <button 
-                        onClick={() => { onNavigate('settings'); setIsDropdownOpen(false); }}
-                        className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                        <span>Account</span>
-                      </button>
-                      
-                      <button 
-                        onClick={() => { onNavigate('library'); setIsDropdownOpen(false); }}
-                        className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                        </svg>
-                        <span>Documents</span>
-                      </button>
-                      
-                      <button 
-                        onClick={() => { onNavigate('pricing'); setIsDropdownOpen(false); }}
-                        className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                        </svg>
-                        <span>Upgrade Plan</span>
-            </button>
+                </div>
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-600">Storage Used</p>
+                  <p className="text-2xl font-bold text-gray-900">{formatFileSize(stats.totalSize)}</p>
+                </div>
+              </div>
                     </div>
 
-                    {/* Logout Section */}
-                    <div className="border-t border-gray-100 py-2">
-                      <button 
-                        onClick={() => { onLogout(); setIsDropdownOpen(false); }}
-                        className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors duration-200"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <div className="flex items-center">
+                <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+                  <svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
                         </svg>
-                        <span>Logout</span>
-            </button>
                     </div>
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-600">File Types</p>
+                  <p className="text-2xl font-bold text-gray-900">{Object.keys(stats.fileTypes).length}</p>
                 </div>
-                )}
               </div>
             </div>
           </div>
-        </div>
-      </header>
+        )}
 
-      <div className="max-w-7xl mx-auto px-8 py-12">
-        {/* Header */}
-        <div className="mb-10">
-          <h1 className="text-3xl font-bold text-gray-900 mb-3">
-            Document Library
-          </h1>
-          <p className="text-gray-600">
-            Manage and organize your academic documents
-          </p>
-        </div>
-
-        {/* Search and Stats Row */}
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 mb-8">
-          {/* Search Bar */}
-          <div className="flex-1 max-w-md">
+        {/* Search and Filters */}
+        <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex-1">
             <div className="relative">
-              <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
               <input
                 type="text"
-                placeholder="Search documents..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-              />
-            </div>
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                  placeholder="Search documents by title or content..."
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
                 </div>
-
-          {/* Stats */}
-          <div className="flex items-center space-x-6 text-sm text-gray-600">
-            <div className="flex items-center space-x-2">
-              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-              <span>{documents.length} Total</span>
             </div>
-            <div className="flex items-center space-x-2">
-              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              <span>{documents.filter(d => d.status === 'analyzed').length} Analyzed</span>
             </div>
-            <div className="flex items-center space-x-2">
-              <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-              <span>{documents.filter(d => d.status === 'analyzing').length} Processing</span>
+            
+            <div className="flex gap-4">
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as any)}
+                className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="created_at">Date</option>
+                <option value="title">Title</option>
+                <option value="word_count">Word Count</option>
+              </select>
+              
+              <select
+                value={sortOrder}
+                onChange={(e) => setSortOrder(e.target.value as any)}
+                className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="desc">Descending</option>
+                <option value="asc">Ascending</option>
+              </select>
+              
+              <button
+                onClick={handleSearch}
+                className="px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+              >
+                Search
+              </button>
             </div>
           </div>
         </div>
 
-        {/* Documents Table */}
-        {filteredDocuments.length === 0 ? (
-          <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
+        {/* Error Message */}
+        {error && (
+          <div className="mb-8 p-6 bg-red-50 border border-red-200 rounded-xl">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
+                  <svg className="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </div>
+              </div>
+              <div className="ml-4">
+                <p className="text-red-700">{error}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Documents List */}
+        <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+          {loading ? (
+            <div className="p-12 text-center">
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+              <p className="mt-4 text-gray-600">Loading documents...</p>
+            </div>
+          ) : documents.length === 0 ? (
+            <div className="p-12 text-center">
             <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
             </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">No documents found</h3>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No documents found</h3>
             <p className="text-gray-600 mb-6">
-              {searchQuery ? 'Try adjusting your search terms' : 'Upload your first document to get started'}
+                {searchTerm ? 'Try adjusting your search terms.' : 'Upload your first document to get started.'}
             </p>
+              {!searchTerm && (
             <button 
               onClick={() => onNavigate('upload')}
-              className="bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors"
+                  className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-lg font-semibold hover:shadow-lg transform hover:scale-[1.02] transition-all duration-300"
             >
               Upload Document
             </button>
+              )}
     </div>
         ) : (
-          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead className="bg-gray-50 border-b border-gray-200">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Document</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Words</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Modified</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-            </tr>
-          </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-            {filteredDocuments.map((doc) => (
-              <tr 
-                key={doc.id}
-                      className="hover:bg-gray-50 cursor-pointer transition-colors"
-                onClick={() => doc.status === 'analyzed' ? onNavigate('analysis') : null}
-              >
-                <td className="px-6 py-4">
-                  <div className="flex items-center space-x-3">
-                          <div className="text-lg">{getFileIcon(doc.type)}</div>
+            <div className="divide-y divide-gray-200">
+              {documents.map((document) => (
+                <div key={document.id} className="p-6 hover:bg-gray-50 transition-colors">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-4">
+                      {getFileTypeIcon(document.fileType)}
                     <div>
-                            <div className="font-medium text-gray-900">{doc.title}</div>
-                            <div className="flex flex-wrap gap-1 mt-1">
-                              {doc.tags.slice(0, 2).map((tag, index) => (
-                                <span key={index} className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-xs">
-                                  {tag}
-                                </span>
-                              ))}
-                              {doc.tags.length > 2 && (
-                                <span className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-xs">
-                                  +{doc.tags.length - 2}
-                                </span>
-                              )}
+                        <h3 className="text-lg font-medium text-gray-900">{document.title}</h3>
+                        <p className="text-sm text-gray-500">
+                          {document.originalFilename} • {formatFileSize(document.fileSize)} • {document.wordCount.toLocaleString()} words • {document.pageCount} pages
+                        </p>
+                        <p className="text-xs text-gray-400">Uploaded {formatDate(document.createdAt)}</p>
                             </div>
                     </div>
+                    
+                    <div className="flex items-center space-x-2">
+                      <button
+                        onClick={() => handleDownloadDocument(document)}
+                        className="px-4 py-2 text-blue-600 hover:text-blue-800 transition-colors"
+                        title="Download"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                      </button>
+                      
+                      <button
+                        onClick={() => onNavigate('analysis')}
+                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                      >
+                        Analyze
+                      </button>
+                      
+                      <button
+                        onClick={() => handleDeleteDocument(document.id)}
+                        className="px-4 py-2 text-red-600 hover:text-red-800 transition-colors"
+                        title="Delete"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                      </button>
+                    </div>
                   </div>
-                </td>
-                <td className="px-6 py-4 text-sm text-gray-600">{doc.type}</td>
-                <td className="px-6 py-4">
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(doc.status)}`}>
-                    {doc.status.charAt(0).toUpperCase() + doc.status.slice(1)}
-                  </span>
-                </td>
-                <td className="px-6 py-4 text-sm text-gray-600">{doc.wordCount.toLocaleString()}</td>
-                <td className="px-6 py-4 text-sm text-gray-600">{doc.lastModified}</td>
-                <td className="px-6 py-4">
-                        <button 
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            doc.status === 'analyzed' ? onNavigate('analysis') : null;
-                          }}
-                          className="text-blue-600 hover:text-blue-800 text-sm font-medium"
-                        >
-                          {doc.status === 'analyzed' ? 'View Analysis' : 'View'}
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+                </div>
+              ))}
     </div>
         )}
-
-        {/* Upload CTA */}
-        <div className="mt-8 flex justify-end">
-              <button 
-                onClick={() => onNavigate('upload')}
-            className="bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors inline-flex items-center space-x-2"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                  </svg>
-            <span>Upload Document</span>
-                </button>
         </div>
       </div>
     </div>
