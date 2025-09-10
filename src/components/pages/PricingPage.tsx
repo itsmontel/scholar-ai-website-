@@ -400,28 +400,28 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
             <h2 className="text-3xl font-bold text-gray-900 text-center mb-12">Frequently Asked Questions</h2>
             <div className="grid md:grid-cols-2 gap-8">
               <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-gray-200/50 shadow-lg">
-                <h3 className="font-bold text-gray-900 mb-3">Can I change plans at any time?</h3>
-              <p className="text-gray-600 text-sm">Yes, you can upgrade or downgrade your plan at any time. Changes take effect immediately, and we'll prorate any billing differences.</p>
-            </div>
+                <h3 className="font-bold text-gray-900 mb-3">What types of documents can Scholar AI analyze?</h3>
+                <p className="text-gray-600 text-sm">Scholar AI supports PDF, DOCX, and TXT files. Our AI provides comprehensive analysis including writing quality, structure, citations, and academic standards compliance.</p>
+              </div>
               <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-gray-200/50 shadow-lg">
-                <h3 className="font-bold text-gray-900 mb-3">Is there a free trial?</h3>
-                <p className="text-gray-600 text-sm">Both Basic and Premium plans come with a 14-day free trial. No credit card required to start.</p>
-            </div>
+                <h3 className="font-bold text-gray-900 mb-3">How does the AI analysis work?</h3>
+                <p className="text-gray-600 text-sm">Our advanced AI analyzes your document for academic writing quality, provides interactive annotations with specific feedback, and offers suggestions for improvement based on academic standards.</p>
+              </div>
               <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-gray-200/50 shadow-lg">
-                <h3 className="font-bold text-gray-900 mb-3">What payment methods do you accept?</h3>
-              <p className="text-gray-600 text-sm">We accept all major credit cards, PayPal, and can arrange invoicing for institutional customers.</p>
-            </div>
+                <h3 className="font-bold text-gray-900 mb-3">What citation styles are supported?</h3>
+                <p className="text-gray-600 text-sm">Scholar AI supports all major academic citation styles including APA, Harvard, MLA, Chicago, and more. The AI can check and suggest corrections for your citations.</p>
+              </div>
               <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-gray-200/50 shadow-lg">
-                <h3 className="font-bold text-gray-900 mb-3">Do you offer student discounts?</h3>
-              <p className="text-gray-600 text-sm">Yes! Students get 50% off Premium plans with a valid .edu email address. Verify your student status during signup.</p>
-            </div>
+                <h3 className="font-bold text-gray-900 mb-3">Can I save and access my analysis history?</h3>
+                <p className="text-gray-600 text-sm">Yes! All your analyses are saved to your account and can be accessed anytime. You can view your analysis history and track your writing improvements over time.</p>
+              </div>
               <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-gray-200/50 shadow-lg">
-                <h3 className="font-bold text-gray-900 mb-3">What happens to my data if I cancel?</h3>
-              <p className="text-gray-600 text-sm">You can export all your documents and analyses before canceling. We retain data for 30 days after cancellation for account recovery.</p>
-            </div>
+                <h3 className="font-bold text-gray-900 mb-3">Is there a word limit for document analysis?</h3>
+                <p className="text-gray-600 text-sm">There's a minimum of 200 words required for analysis to ensure meaningful feedback. There's no maximum limit - we can analyze documents of any length.</p>
+              </div>
               <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-gray-200/50 shadow-lg">
-                <h3 className="font-bold text-gray-900 mb-3">Is my academic work secure?</h3>
-              <p className="text-gray-600 text-sm">Absolutely. We use enterprise-grade encryption, and your documents are never used to train our AI models or shared with third parties.</p>
+                <h3 className="font-bold text-gray-900 mb-3">How secure is my academic work?</h3>
+                <p className="text-gray-600 text-sm">Your documents are encrypted and secure. We never use your content to train our AI models or share it with third parties. Your academic work remains completely private.</p>
               </div>
             </div>
           </div>

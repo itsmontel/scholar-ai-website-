@@ -8,6 +8,71 @@ interface SettingsPageProps {
 
 const SettingsPage = ({ onNavigate, user, onLogout }: SettingsPageProps) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [userStats, setUserStats] = useState({
+    memberSince: '',
+    totalDocuments: 0,
+    documentsAnalyzed: 0,
+    lastActivity: ''
+  });
+  const [loading, setLoading] = useState(true);
+
+  // Fetch user stats
+  const fetchUserStats = async () => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem('authToken');
+      if (!token) return;
+
+      // Fetch user data
+      const userResponse = await fetch('http://localhost:3001/api/auth/me', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (userResponse.ok) {
+        const userData = await userResponse.json();
+        const memberSince = new Date(userData.data.user.createdAt).toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long'
+        });
+
+        // Fetch documents count
+        const docsResponse = await fetch('http://localhost:3001/api/documents', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
+        let totalDocuments = 0;
+        let lastActivity = '';
+
+        if (docsResponse.ok) {
+          const docsData = await docsResponse.json();
+          totalDocuments = docsData.data.documents?.length || 0;
+          
+          if (totalDocuments > 0) {
+            const lastDoc = docsData.data.documents[0]; // Assuming they're sorted by date
+            lastActivity = new Date(lastDoc.createdAt).toLocaleDateString('en-US', {
+              month: 'short',
+              day: 'numeric'
+            });
+          }
+        }
+
+        setUserStats({
+          memberSince,
+          totalDocuments,
+          documentsAnalyzed: totalDocuments, // For now, assume all documents are analyzed
+          lastActivity: lastActivity || 'No activity yet'
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching user stats:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -22,6 +87,11 @@ const SettingsPage = ({ onNavigate, user, onLogout }: SettingsPageProps) => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [isDropdownOpen]);
+
+  // Fetch user stats on component mount
+  useEffect(() => {
+    fetchUserStats();
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
@@ -206,7 +276,7 @@ const SettingsPage = ({ onNavigate, user, onLogout }: SettingsPageProps) => {
               <div className="flex items-center justify-between py-3">
               <div>
                   <div className="font-semibold text-gray-900">Member Since</div>
-                  <div className="text-gray-600">January 2024</div>
+                  <div className="text-gray-600">{loading ? 'Loading...' : userStats.memberSince}</div>
                 </div>
               </div>
             </div>
@@ -219,23 +289,23 @@ const SettingsPage = ({ onNavigate, user, onLogout }: SettingsPageProps) => {
               <div className="flex items-center justify-between py-3 border-b border-gray-200">
                 <div>
                   <div className="font-semibold text-gray-900">Documents Analyzed</div>
-                  <div className="text-gray-600">This month: 3 / 3</div>
+                  <div className="text-gray-600">{loading ? 'Loading...' : `${userStats.documentsAnalyzed} documents analyzed`}</div>
               </div>
-                <span className="px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-sm">3 used</span>
+                <span className="px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-sm">{loading ? '...' : userStats.documentsAnalyzed}</span>
               </div>
               <div className="flex items-center justify-between py-3 border-b border-gray-200">
                 <div>
                   <div className="font-semibold text-gray-900">Total Documents</div>
-                  <div className="text-gray-600">All time: 47 documents</div>
+                  <div className="text-gray-600">{loading ? 'Loading...' : `All time: ${userStats.totalDocuments} documents`}</div>
             </div>
-                <span className="px-3 py-1 bg-green-100 text-green-600 rounded-full text-sm">47 total</span>
+                <span className="px-3 py-1 bg-green-100 text-green-600 rounded-full text-sm">{loading ? '...' : userStats.totalDocuments}</span>
               </div>
               <div className="flex items-center justify-between py-3">
               <div>
                   <div className="font-semibold text-gray-900">Last Activity</div>
-                  <div className="text-gray-600">2 days ago</div>
+                  <div className="text-gray-600">{loading ? 'Loading...' : userStats.lastActivity}</div>
                 </div>
-                <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm">Recent</span>
+                <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm">{loading ? '...' : 'Recent'}</span>
               </div>
             </div>
           </div>

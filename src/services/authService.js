@@ -4,6 +4,7 @@ class AuthService {
   constructor() {
     this.token = localStorage.getItem('authToken');
     this.user = JSON.parse(localStorage.getItem('user') || 'null');
+    this.refreshPromise = null; // Prevent multiple simultaneous refresh calls
   }
 
   async register(userData) {
@@ -55,6 +56,55 @@ class AuthService {
       return data;
     } catch (error) {
       console.error('Login error:', error);
+      throw error;
+    }
+  }
+
+  async refreshToken() {
+    // Prevent multiple simultaneous refresh calls
+    if (this.refreshPromise) {
+      return this.refreshPromise;
+    }
+
+    this.refreshPromise = this._performTokenRefresh();
+    
+    try {
+      const result = await this.refreshPromise;
+      return result;
+    } finally {
+      this.refreshPromise = null;
+    }
+  }
+
+  async _performTokenRefresh() {
+    try {
+      if (!this.token) {
+        throw new Error('No token to refresh');
+      }
+
+      const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${this.token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Token refresh failed');
+      }
+
+      // Update token
+      this.token = data.data.token;
+      localStorage.setItem('authToken', this.token);
+
+      return this.token;
+    } catch (error) {
+      console.error('Token refresh error:', error);
+      // If refresh fails, clear auth data
+      this.logout();
       throw error;
     }
   }
@@ -217,6 +267,36 @@ class AuthService {
 
   getUser() {
     return this.user;
+  }
+
+  // Make authenticated API calls with automatic token refresh
+  async authenticatedFetch(url, options = {}) {
+    const makeRequest = async (token) => {
+      return fetch(url, {
+        ...options,
+        headers: {
+          ...options.headers,
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+    };
+
+    try {
+      // First attempt with current token
+      let response = await makeRequest(this.token);
+
+      // If token expired, try to refresh and retry
+      if (response.status === 401) {
+        console.log('Token expired, attempting refresh...');
+        const newToken = await this.refreshToken();
+        response = await makeRequest(newToken);
+      }
+
+      return response;
+    } catch (error) {
+      console.error('Authenticated fetch error:', error);
+      throw error;
+    }
   }
 }
 

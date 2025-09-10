@@ -58,6 +58,8 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate }) => {
   const [analysisResult, setAnalysisResult] = useState<string>('');
   const [annotations, setAnnotations] = useState<Annotation[]>([]);
   const [documentContent, setDocumentContent] = useState<string>('');
+  const [previewContent, setPreviewContent] = useState<string>('');
+  const [isLoadingPreview, setIsLoadingPreview] = useState<boolean>(false);
   const [hoveredAnnotation, setHoveredAnnotation] = useState<string | null>(null);
   const [selectedAnnotation, setSelectedAnnotation] = useState<string | null>(null);
   const [error, setError] = useState<string>('');
@@ -65,8 +67,18 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate }) => {
   const documentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    console.log('AnalysisPage: fetchDocuments and fetchAnalysisTypes called');
     fetchDocuments();
     fetchAnalysisTypes();
+    
+    // Check if there's text content from dashboard
+    const textContent = localStorage.getItem('textAnalysisContent');
+    if (textContent) {
+      setPreviewContent(textContent);
+      setDocumentContent(textContent);
+      // Clear the stored content after using it
+      localStorage.removeItem('textAnalysisContent');
+    }
   }, []);
 
   const fetchDocuments = async () => {
@@ -394,16 +406,58 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate }) => {
       }
 
       const data = await response.json();
-      return data.data?.document?.content_text || '';
+      console.log('Document response:', data);
+      return data.data?.document?.content_text || data.data?.content_text || '';
     } catch (error) {
       console.error('Error fetching document content:', error);
       throw new Error('Failed to fetch document content');
     }
   };
 
+  const handleDocumentSelection = async (documentId: string) => {
+    setSelectedDocument(documentId);
+    setPreviewContent('');
+    
+    if (documentId) {
+      setIsLoadingPreview(true);
+      try {
+        const content = await fetchDocumentContent(documentId);
+        setPreviewContent(content);
+      } catch (error) {
+        console.error('Error loading document preview:', error);
+        setPreviewContent('Failed to load document preview');
+      } finally {
+        setIsLoadingPreview(false);
+      }
+    }
+  };
+
   const handleAnalyze = async () => {
-    if (!selectedDocument || !selectedAnalysisType) {
-      setError('Please select both a document and analysis type');
+    if (!selectedAnalysisType) {
+      setError('Please select an analysis type');
+      return;
+    }
+
+    // Check if we have text content from dashboard or a selected document
+    let content = '';
+    if (documentContent && documentContent.trim().length > 0) {
+      // Use text content from dashboard
+      content = documentContent;
+    } else if (selectedDocument) {
+      // Use selected document content
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        setError('Please log in to analyze documents');
+        return;
+      }
+      content = await fetchDocumentContent(selectedDocument);
+      if (!content || content.trim().length === 0) {
+        setError('Document content is empty or unavailable');
+        return;
+      }
+      setDocumentContent(content);
+    } else {
+      setError('Please select a document or provide text content');
       return;
     }
 
@@ -418,13 +472,6 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate }) => {
         throw new Error('Please log in to analyze documents');
       }
 
-      // Get document content
-      const content = await fetchDocumentContent(selectedDocument);
-      if (!content || content.trim().length === 0) {
-        throw new Error('Document content is empty or unavailable');
-      }
-      setDocumentContent(content);
-
       const response = await fetch('http://localhost:3001/api/analysis/analyze', {
         method: 'POST',
         headers: {
@@ -432,7 +479,8 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate }) => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          documentId: selectedDocument,
+          documentId: selectedDocument || null,
+          content: content,
           analysisType: selectedAnalysisType,
           citationStyle: selectedCitationStyle,
         }),
@@ -449,7 +497,34 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate }) => {
       // Use annotations from backend if available, otherwise generate fallback
       if (result.data.annotations && result.data.annotations.length > 0) {
         console.log('Using backend annotations:', result.data.annotations);
-        setAnnotations(result.data.annotations);
+        
+        // Validate and clean annotations
+        const validatedAnnotations = result.data.annotations
+          .filter(annotation => {
+            // Validate that the annotation has proper indices and text
+            const isValid = annotation.startIndex >= 0 && 
+                           annotation.endIndex > annotation.startIndex && 
+                           annotation.endIndex <= content.length &&
+                           annotation.text && 
+                           annotation.comment;
+            
+            if (!isValid) {
+              console.warn('Invalid annotation filtered out:', annotation);
+            }
+            
+            return isValid;
+          })
+          .map(annotation => {
+            // Ensure the text matches what's actually in the document
+            const actualText = content.slice(annotation.startIndex, annotation.endIndex);
+            return {
+              ...annotation,
+              text: actualText // Use the actual text from the document
+            };
+          });
+        
+        console.log('Validated annotations:', validatedAnnotations);
+        setAnnotations(validatedAnnotations);
       } else {
         // Fallback to frontend generation if backend doesn't provide annotations
         const aiAnnotations = generateAIAnnotations(content, result.data.result);
@@ -491,16 +566,64 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate }) => {
     }
   };
 
+  const handleSaveAnalysis = async () => {
+    if (!analysisResult || !documentContent) {
+      setError('No analysis to save');
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        setError('Please log in to save analysis');
+        return;
+      }
+
+      const response = await fetch('http://localhost:3001/api/analysis/save', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          documentId: selectedDocument,
+          content: documentContent,
+          analysisResult: analysisResult,
+          annotations: annotations,
+          analysisType: selectedAnalysisType,
+          citationStyle: selectedCitationStyle,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to save analysis');
+      }
+
+      // Show success message
+      alert('Analysis saved successfully!');
+      
+      // Optionally redirect to analysis history
+      // onNavigate('analysis-history');
+
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Failed to save analysis');
+    }
+  };
+
   const renderHighlightedText = () => {
     if (!documentContent) {
       return <div className="text-gray-700 leading-relaxed">No document content available.</div>;
     }
 
     console.log('Rendering text with annotations:', annotations.length);
+    console.log('Document content length:', documentContent.length);
 
+    // Always split content into paragraphs first to preserve formatting
+    const paragraphs = documentContent.split(/\n\s*\n/).filter(p => p.trim().length > 0);
+    
     if (annotations.length === 0) {
       // Render content with proper paragraph spacing
-      const paragraphs = documentContent.split(/\n\s*\n/).filter(p => p.trim().length > 0);
       return (
         <div className="text-gray-700 leading-relaxed">
           {paragraphs.map((paragraph, index) => (
@@ -512,55 +635,112 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate }) => {
       );
     }
 
-    const sortedAnnotations = [...annotations].sort((a, b) => a.startIndex - b.startIndex);
-    const parts = [];
-    let lastIndex = 0;
+    // Sort annotations by start index and validate them
+    const sortedAnnotations = [...annotations]
+      .filter(annotation => {
+        const isValid = annotation.startIndex >= 0 && 
+                       annotation.endIndex > annotation.startIndex && 
+                       annotation.endIndex <= documentContent.length;
+        
+        if (!isValid) {
+          console.warn('Invalid annotation filtered out during rendering:', annotation);
+        }
+        
+        return isValid;
+      })
+      .sort((a, b) => a.startIndex - b.startIndex);
 
-    sortedAnnotations.forEach((annotation) => {
-      if (annotation.startIndex > lastIndex) {
-        const textBefore = documentContent.slice(lastIndex, annotation.startIndex);
-        parts.push(
-          <span key={`text-${lastIndex}`} className="text-gray-700">
-            {textBefore}
-          </span>
-        );
-      }
+    console.log('Valid annotations for rendering:', sortedAnnotations.length);
 
-      const highlightClasses = {
-        strong: 'bg-green-100 text-green-900 border-b-2 border-green-400 hover:bg-green-200',
-        improve: 'bg-amber-100 text-amber-900 border-b-2 border-amber-400 hover:bg-amber-200',
-        concern: 'bg-red-100 text-red-900 border-b-2 border-red-400 hover:bg-red-200'
-      };
-
-      parts.push(
-        <span
-          key={annotation.id}
-          id={`annotation-${annotation.id}`}
-          className={`${highlightClasses[annotation.type]} px-1 cursor-pointer transition-all duration-200 ${
-            selectedAnnotation === annotation.id ? 'ring-2 ring-offset-2 ring-blue-500' : ''
-          }`}
-          onMouseEnter={(e) => handleAnnotationHover(e, annotation.id)}
-          onMouseLeave={() => setHoveredAnnotation(null)}
-          onClick={() => scrollToAnnotation(annotation.id)}
-        >
-          {documentContent.slice(annotation.startIndex, annotation.endIndex)}
-        </span>
-      );
-
-      lastIndex = annotation.endIndex;
-    });
-
-    if (lastIndex < documentContent.length) {
-      parts.push(
-        <span key={`text-${lastIndex}`} className="text-gray-700">
-          {documentContent.slice(lastIndex)}
-        </span>
-      );
-    }
-
+    // Render each paragraph separately to preserve spacing
     return (
-      <div className="leading-relaxed text-justify">
-        {parts}
+      <div className="text-gray-700 leading-relaxed">
+        {paragraphs.map((paragraph, paragraphIndex) => {
+          const paragraphStart = documentContent.indexOf(paragraph);
+          const paragraphEnd = paragraphStart + paragraph.length;
+          
+          // Find annotations that fall within this paragraph
+          const paragraphAnnotations = sortedAnnotations.filter(annotation => 
+            annotation.startIndex >= paragraphStart && annotation.endIndex <= paragraphEnd
+          );
+          
+          if (paragraphAnnotations.length === 0) {
+            // No annotations in this paragraph, render normally
+            return (
+              <p key={paragraphIndex} className="mb-4 text-justify">
+                {paragraph.trim()}
+              </p>
+            );
+          }
+          
+          // Render paragraph with annotations
+          const parts = [];
+          let lastIndex = 0;
+          
+          paragraphAnnotations.forEach((annotation) => {
+            // Adjust annotation indices relative to paragraph start
+            const relativeStart = annotation.startIndex - paragraphStart;
+            const relativeEnd = annotation.endIndex - paragraphStart;
+            
+            // Add text before this annotation
+            if (relativeStart > lastIndex) {
+              const textBefore = paragraph.slice(lastIndex, relativeStart);
+              if (textBefore.trim()) {
+                parts.push(
+                  <span key={`text-${paragraphIndex}-${lastIndex}`} className="text-gray-700">
+                    {textBefore}
+                  </span>
+                );
+              }
+            }
+
+            // Validate annotation indices
+            const actualText = paragraph.slice(relativeStart, relativeEnd);
+            console.log(`Annotation ${annotation.id}: "${actualText}" (${relativeStart}-${relativeEnd})`);
+
+            const highlightClasses = {
+              strong: 'bg-green-100 text-green-900 border-b-2 border-green-400 hover:bg-green-200',
+              improve: 'bg-amber-100 text-amber-900 border-b-2 border-amber-400 hover:bg-amber-200',
+              concern: 'bg-red-100 text-red-900 border-b-2 border-red-400 hover:bg-red-200'
+            };
+
+            parts.push(
+              <span
+                key={annotation.id}
+                id={`annotation-${annotation.id}`}
+                className={`${highlightClasses[annotation.type]} px-1 cursor-pointer transition-all duration-200 ${
+                  selectedAnnotation === annotation.id ? 'ring-2 ring-offset-2 ring-blue-500' : ''
+                }`}
+                onMouseEnter={(e) => handleAnnotationHover(e, annotation.id)}
+                onMouseLeave={() => setHoveredAnnotation(null)}
+                onClick={() => scrollToAnnotation(annotation.id)}
+                title={`${annotation.type.toUpperCase()}: ${annotation.comment}`}
+              >
+                {actualText}
+              </span>
+            );
+
+            lastIndex = relativeEnd;
+          });
+
+          // Add remaining text after the last annotation in this paragraph
+          if (lastIndex < paragraph.length) {
+            const remainingText = paragraph.slice(lastIndex);
+            if (remainingText.trim()) {
+              parts.push(
+                <span key={`text-${paragraphIndex}-${lastIndex}`} className="text-gray-700">
+                  {remainingText}
+                </span>
+              );
+            }
+          }
+
+          return (
+            <p key={paragraphIndex} className="mb-4 text-justify">
+              {parts}
+            </p>
+          );
+        })}
       </div>
     );
   };
@@ -662,25 +842,42 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate }) => {
             <div className="bg-white rounded-xl shadow-lg p-6">
               <h2 className="text-xl font-semibold text-gray-900 mb-6">Configure Analysis</h2>
               
-              {/* Document Selection */}
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Select Document
-                </label>
-                <select
-                  value={selectedDocument}
-                  onChange={(e) => setSelectedDocument(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                  disabled={isAnalyzing}
-                >
-                  <option value="">Choose a document...</option>
-                  {documents.map((doc) => (
-                    <option key={doc.id} value={doc.id}>
-                      {doc.title} ({doc.originalFilename || doc.file_name})
-                    </option>
-                  ))}
-                </select>
-              </div>
+              {/* Document Selection - Only show if no text content from dashboard */}
+              {!documentContent && (
+                <div className="mb-6">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Select Document
+                  </label>
+                  <select
+                    value={selectedDocument}
+                    onChange={(e) => handleDocumentSelection(e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    disabled={isAnalyzing}
+                  >
+                    <option value="">Choose a document...</option>
+                    {documents.map((doc) => (
+                      <option key={doc.id} value={doc.id}>
+                        {doc.title} ({doc.originalFilename || doc.file_name})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+              
+              {/* Text Content Notice */}
+              {documentContent && !selectedDocument && (
+                <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <div className="flex items-center space-x-2">
+                    <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span className="text-sm font-medium text-blue-800">Text Analysis Mode</span>
+                  </div>
+                  <p className="text-sm text-blue-700 mt-1">
+                    Analyzing text content from dashboard. Select citation style and run analysis.
+                  </p>
+                </div>
+              )}
 
               {/* Analysis Type Selection */}
               <div className="mb-6">
@@ -748,7 +945,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate }) => {
               {/* Analyze Button */}
               <button
                 onClick={handleAnalyze}
-                disabled={!selectedDocument || !selectedAnalysisType || isAnalyzing}
+                disabled={(!selectedDocument && !documentContent) || !selectedAnalysisType || isAnalyzing}
                 className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-4 rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all transform hover:scale-[1.02] active:scale-[0.98]"
               >
                 {isAnalyzing ? (
@@ -762,20 +959,68 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate }) => {
               </button>
             </div>
 
-            {/* Placeholder for Results */}
+            {/* Document Preview */}
             <div className="bg-white rounded-xl shadow-lg p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-6">Analysis Preview</h2>
-              <div className="text-center py-16">
-                <div className="mx-auto h-24 w-24 text-gray-300">
-                  <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
+              <h2 className="text-xl font-semibold text-gray-900 mb-6">Document Preview</h2>
+              
+              {!selectedDocument && !documentContent ? (
+                <div className="text-center py-16">
+                  <div className="mx-auto h-24 w-24 text-gray-300">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                  </div>
+                  <h3 className="mt-4 text-sm font-medium text-gray-900">No document selected</h3>
+                  <p className="mt-2 text-sm text-gray-500">
+                    Select a document to preview its content
+                  </p>
                 </div>
-                <h3 className="mt-4 text-sm font-medium text-gray-900">No analysis yet</h3>
-                <p className="mt-2 text-sm text-gray-500">
-                  Select a document and analysis type to get started
-                </p>
+              ) : selectedDocument && isLoadingPreview ? (
+                <div className="text-center py-16">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                  <p className="mt-4 text-sm text-gray-600">Loading document preview...</p>
+                </div>
+              ) : previewContent || documentContent ? (
+                <div className="max-h-96 overflow-y-auto">
+                  <div className="bg-gray-50 rounded-lg p-4 border">
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="text-sm font-medium text-gray-700">
+                        {selectedDocument 
+                          ? documents.find(doc => doc.id === selectedDocument)?.title || 'Document Content'
+                          : 'Text Content from Dashboard'
+                        }
+                      </h3>
+                      <span className="text-xs text-gray-500">
+                        {(previewContent || documentContent).split(' ').length} words
+                      </span>
+                    </div>
+                    <div className="text-sm text-gray-700 leading-relaxed max-h-80 overflow-y-auto">
+                      {(previewContent || documentContent).split(/\n\s*\n/).filter(p => p.trim().length > 0).map((paragraph, index) => (
+                        <p key={index} className="mb-3 text-justify">
+                          {paragraph.trim()}
+                        </p>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="mt-4 text-center">
+                    <p className="text-xs text-gray-500">
+                      This is the content that will be analyzed. Click "Analyze Document" to begin.
+                    </p>
+                  </div>
+                </div>
+              ) : selectedDocument ? (
+                <div className="text-center py-16">
+                  <div className="mx-auto h-24 w-24 text-gray-300">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 19.5c-.77.833.192 2.5 1.732 2.5z" />
+                </svg>
+                  </div>
+                  <h3 className="mt-4 text-sm font-medium text-gray-900">Failed to load preview</h3>
+                  <p className="mt-2 text-sm text-gray-500">
+                    Unable to load document content for preview
+                  </p>
               </div>
+              ) : null}
             </div>
           </div>
         ) : (
@@ -792,6 +1037,16 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate }) => {
                     {analysisTypes.find(type => type.id === selectedAnalysisType)?.name} • Analyzed {formatDate(new Date().toISOString())}
                   </p>
               </div>
+              <div className="flex items-center space-x-3">
+                <button 
+                  onClick={handleSaveAnalysis}
+                  className="px-4 py-2 bg-green-500 hover:bg-green-600 rounded-lg transition-colors flex items-center space-x-2"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                  </svg>
+                  <span>Save Analysis</span>
+                </button>
                 <button 
                   onClick={() => {
                     setAnalysisResult('');
@@ -805,6 +1060,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate }) => {
                   </svg>
                   <span>Close</span>
                 </button>
+              </div>
               </div>
             </div>
 
@@ -972,17 +1228,38 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate }) => {
               transform: 'translate(-50%, -100%)'
             }}
           >
-            <div className="bg-gray-900 text-white text-xs rounded-lg px-3 py-2 shadow-xl max-w-xs mb-2">
-              <div className="font-semibold mb-1">
-                {annotations.find(a => a.id === hoveredAnnotation)?.type === 'strong' ? '✓ Strong Point' : 
-                 annotations.find(a => a.id === hoveredAnnotation)?.type === 'improve' ? '⚠ Needs Improvement' : 
-                 '⚠ Serious Concern'}
-              </div>
-              <div>{annotations.find(a => a.id === hoveredAnnotation)?.comment}</div>
-              <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-full">
-                <div className="border-8 border-transparent border-t-gray-900"></div>
-              </div>
+            {(() => {
+              const annotation = annotations.find(a => a.id === hoveredAnnotation);
+              if (!annotation) return null;
+              
+              const typeLabels = {
+                strong: '✓ Strong Point',
+                improve: '⚠ Needs Improvement', 
+                concern: '⚠ Serious Concern'
+              };
+              
+              return (
+                <div className="bg-gray-900 text-white text-xs rounded-lg px-3 py-2 shadow-xl max-w-xs mb-2">
+                  <div className="font-semibold mb-1">
+                    {typeLabels[annotation.type]}
+                  </div>
+                  <div className="mb-2 text-gray-200">
+                    "{annotation.text}"
+                  </div>
+                  <div className="text-gray-100">
+                    {annotation.comment}
+                  </div>
+                  {annotation.suggestion && (
+                    <div className="mt-2 text-gray-300 italic">
+                      💡 {annotation.suggestion}
+                    </div>
+                  )}
+                  <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-full">
+                    <div className="border-8 border-transparent border-t-gray-900"></div>
+                  </div>
             </div>
+              );
+            })()}
           </div>
         )}
       </div>

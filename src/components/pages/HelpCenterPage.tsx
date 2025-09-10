@@ -6,125 +6,129 @@ const HelpCenterPage = ({ onNavigate }) => {
   const [openFAQ, setOpenFAQ] = useState(null);
 
   const categories = [
-    { id: 'all', name: 'All Topics', icon: '📚', count: 47 },
-    { id: 'getting-started', name: 'Getting Started', icon: '🚀', count: 8 },
-    { id: 'analysis', name: 'Document Analysis', icon: '📊', count: 12 },
-    { id: 'collaboration', name: 'Collaboration', icon: '🤝', count: 6 },
-    { id: 'citations', name: 'Citations & References', icon: '📖', count: 9 },
-    { id: 'account', name: 'Account & Billing', icon: '⚙️', count: 7 },
-    { id: 'integrations', name: 'Integrations', icon: '🔗', count: 5 }
+    { id: 'all', name: 'All Topics', icon: '📚', count: 12 },
+    { id: 'getting-started', name: 'Getting Started', icon: '🚀', count: 2 },
+    { id: 'analysis', name: 'AI Analysis', icon: '🤖', count: 4 },
+    { id: 'documents', name: 'Document Management', icon: '📄', count: 2 },
+    { id: 'citations', name: 'Citation Styles', icon: '📖', count: 1 },
+    { id: 'account', name: 'Account & Settings', icon: '⚙️', count: 1 },
+    { id: 'troubleshooting', name: 'Troubleshooting', icon: '🔧', count: 2 }
   ];
 
   const faqs = [
     {
       id: 1,
       category: 'getting-started',
-      question: 'How do I upload my first document?',
-      answer: 'To upload your first document, click the "Upload Document" button on your dashboard or navigate to the Upload page. You can drag and drop files directly, or click to browse from your computer. We support PDF, DOC, DOCX, and TXT formats up to 50MB.',
-      helpful: 156,
-      tags: ['upload', 'first-time', 'documents']
+      question: 'How do I get started with Scholar AI?',
+      answer: 'Getting started is easy! Simply sign up for an account, then you can either upload a document from your computer or paste text directly into the dashboard. Make sure your text is at least 200 words for analysis. Click "Send to Analysis" to begin.',
+      tags: ['getting-started', 'signup', 'first-time']
     },
     {
       id: 2,
       category: 'analysis',
-      question: 'How accurate is the AI analysis?',
-      answer: 'Our AI analysis has a 99.7% accuracy rate for grammar and style detection, and 95% accuracy for academic content analysis. The system is trained on millions of academic papers and continuously improved based on user feedback and new research.',
-      helpful: 243,
-      tags: ['accuracy', 'ai', 'analysis']
+      question: 'What types of analysis does Scholar AI provide?',
+      answer: 'Scholar AI provides comprehensive academic analysis including: academic writing quality assessment, citation and referencing review, argument structure analysis, grammar and style feedback, and content depth evaluation. All feedback is categorized as strengths (green), improvements (amber), or concerns (red).',
+      tags: ['analysis', 'types', 'comprehensive']
     },
     {
       id: 3,
       category: 'analysis',
-      question: 'What does the writing score mean?',
-      answer: 'The writing score is a comprehensive metric (0-100) that evaluates your document across multiple dimensions: structure (25%), clarity (25%), grammar (20%), academic style (15%), and citations (15%). A score above 85 indicates publication-ready quality.',
-      helpful: 189,
-      tags: ['score', 'metrics', 'evaluation']
+      question: 'How does the highlighting and annotation system work?',
+      answer: 'Scholar AI highlights specific text passages in your document and provides contextual feedback. Hover over any highlighted text to see detailed comments and suggestions. The annotations are color-coded: green for strengths, amber for improvements, and red for concerns. Click on annotations in the sidebar to jump to specific sections.',
+      tags: ['highlights', 'annotations', 'feedback']
     },
     {
       id: 4,
       category: 'citations',
       question: 'Which citation styles are supported?',
-      answer: 'We support all major academic citation styles including APA, MLA, Chicago, Harvard, IEEE, Vancouver, and many more. You can also create custom citation styles for your institution. The system automatically detects and formats citations according to your chosen style.',
-      helpful: 167,
-      tags: ['citations', 'apa', 'mla', 'chicago']
+      answer: 'Scholar AI supports all major academic citation styles including APA, Harvard, Chicago, MLA, IEEE, and Vancouver. You can select your preferred citation style from the dropdown menu before running the analysis. The AI will provide feedback specific to your chosen citation format.',
+      tags: ['citations', 'apa', 'harvard', 'chicago', 'mla']
     },
     {
       id: 5,
-      category: 'collaboration',
-      question: 'How do I share documents with my supervisor?',
-      answer: 'To share a document, open it in the analysis view and click the "Share" button. Enter your supervisor\'s email address and set their permission level (view, comment, or edit). They\'ll receive an email invitation to access the document.',
-      helpful: 134,
-      tags: ['sharing', 'collaboration', 'supervisor']
+      category: 'documents',
+      question: 'How do I upload and manage documents?',
+      answer: 'You can upload documents by clicking the "Upload Document" button on your dashboard. Supported formats include PDF, DOC, DOCX, and TXT files. Once uploaded, documents appear in your dashboard with their analysis status. Documents with completed analysis show "Show Analysis" while new documents show "Analyze".',
+      tags: ['upload', 'documents', 'management']
     },
     {
       id: 6,
-      category: 'account',
-      question: 'How do I upgrade my plan?',
-      answer: 'You can upgrade your plan anytime from the Settings page under "Billing" or from the Pricing page. Changes take effect immediately, and you\'ll only pay the prorated difference for the current billing period.',
-      helpful: 98,
-      tags: ['upgrade', 'billing', 'plans']
+      category: 'analysis',
+      question: 'How do I save my analysis results?',
+      answer: 'After running an analysis, click the green "Save Analysis" button in the results header. This saves your analysis to your analysis history where you can access it later. Saved analyses include all annotations, feedback, and the original document content.',
+      tags: ['save', 'analysis', 'history']
     },
     {
       id: 7,
-      category: 'integrations',
-      question: 'Can I use AcademicAI with Microsoft Word?',
-      answer: 'Yes! We offer a native Microsoft Word add-in that provides real-time feedback as you write. Download it from the Microsoft Office Store or through the Integrations page in your account settings.',
-      helpful: 201,
-      tags: ['word', 'microsoft', 'integration']
+      category: 'analysis',
+      question: 'What AI model does Scholar AI use?',
+      answer: 'Scholar AI uses OpenAI\'s advanced language models to provide intelligent analysis of your academic writing. The system is specifically trained to understand academic writing conventions and provide relevant, actionable feedback for improving your work.',
+      tags: ['ai', 'openai', 'model']
     },
     {
       id: 8,
       category: 'analysis',
-      question: 'Why is my document taking so long to analyze?',
-      answer: 'Analysis time depends on document length and complexity. Most documents are processed in 30-60 seconds. Longer documents (>10,000 words) or those with many citations may take 2-3 minutes. Premium users get priority processing.',
-      helpful: 87,
+      question: 'How long does analysis take?',
+      answer: 'Analysis time depends on document length and complexity. Most documents are processed within 30-60 seconds. Longer documents or those with complex formatting may take 2-3 minutes. The system will show a loading indicator during processing.',
       tags: ['speed', 'processing', 'time']
     },
     {
       id: 9,
       category: 'getting-started',
-      question: 'Is there a limit to document uploads?',
-      answer: 'Free accounts can upload up to 3 documents per month. Premium accounts have unlimited uploads. All accounts have a 50MB file size limit per document. Institutional accounts can request higher limits.',
-      helpful: 156,
-      tags: ['limits', 'uploads', 'free', 'premium']
+      question: 'What is the minimum word count for analysis?',
+      answer: 'Scholar AI requires a minimum of 200 words for analysis. This ensures the AI has enough content to provide meaningful feedback. If your text is shorter than 200 words, you\'ll see a warning message and the analysis button will be disabled.',
+      tags: ['word-count', 'minimum', 'requirements']
     },
     {
       id: 10,
+      category: 'troubleshooting',
+      question: 'Why can\'t I see highlights in my analysis?',
+      answer: 'If you\'re not seeing highlights, make sure you\'ve run a complete analysis first. Highlights appear after the AI processes your document and generates annotations. Try refreshing the page or running the analysis again if highlights don\'t appear.',
+      tags: ['highlights', 'troubleshooting', 'display']
+    },
+    {
+      id: 11,
+      category: 'documents',
+      question: 'How do I view my analysis history?',
+      answer: 'You can view your analysis history by navigating to the "Analysis History" page from the main menu. This shows all your saved analyses with timestamps, document names, and analysis types. Click on any analysis to view the full results.',
+      tags: ['history', 'saved', 'analyses']
+    },
+    {
+      id: 12,
       category: 'account',
-      question: 'How do I cancel my subscription?',
-      answer: 'You can cancel your subscription anytime from Settings > Billing. Your account will remain active until the end of your current billing period, and you can reactivate anytime before it expires.',
-      helpful: 76,
-      tags: ['cancel', 'subscription', 'billing']
+      question: 'How do I change my account settings?',
+      answer: 'Account settings can be accessed from the user menu in the top-right corner of the dashboard. From there you can update your profile information, change your password, and manage your account preferences.',
+      tags: ['settings', 'account', 'profile']
     }
   ];
 
   const quickActions = [
     {
       title: 'Start Your First Analysis',
-      description: 'Upload a document and get AI-powered feedback',
+      description: 'Upload a document or paste text to get AI-powered feedback',
       icon: '🚀',
-      action: () => onNavigate('upload'),
+      action: () => onNavigate('dashboard'),
       color: 'blue'
     },
     {
-      title: 'Watch Tutorial Videos',
-      description: 'Learn how to use all features effectively',
-      icon: '🎥',
-      action: () => {},
+      title: 'View Analysis History',
+      description: 'Access all your saved analyses and results',
+      icon: '📊',
+      action: () => onNavigate('analysis-history'),
       color: 'purple'
+    },
+    {
+      title: 'Upload Documents',
+      description: 'Upload PDF, DOC, DOCX, or TXT files for analysis',
+      icon: '📄',
+      action: () => onNavigate('dashboard'),
+      color: 'green'
     },
     {
       title: 'Contact Support',
       description: 'Get help from our expert team',
       icon: '💬',
       action: () => onNavigate('contact'),
-      color: 'green'
-    },
-    {
-      title: 'Join Community Forum',
-      description: 'Connect with other researchers',
-      icon: '👥',
-      action: () => {},
       color: 'orange'
     }
   ];
@@ -148,9 +152,9 @@ const HelpCenterPage = ({ onNavigate }) => {
       <nav className="flex items-center justify-between px-8 py-6 bg-white/80 backdrop-blur-sm border-b border-gray-200">
         <div className="flex items-center space-x-2">
           <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-sm">A</span>
+            <span className="text-white font-bold text-sm">S</span>
           </div>
-          <span className="text-xl font-bold text-gray-900">AcademicAI</span>
+          <span className="text-xl font-bold text-gray-900">Scholar AI</span>
         </div>
         <div className="hidden md:flex items-center space-x-8">
           <button onClick={() => onNavigate('landing')} className="text-gray-600 hover:text-gray-900 transition-colors">Home</button>
@@ -175,7 +179,7 @@ const HelpCenterPage = ({ onNavigate }) => {
             How can we <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">help you?</span>
           </h1>
           <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-            Find answers, get support, and learn how to make the most of AcademicAI
+            Find answers, get support, and learn how to make the most of Scholar AI
           </p>
           
           {/* Search Bar */}
@@ -318,31 +322,7 @@ const HelpCenterPage = ({ onNavigate }) => {
                     {openFAQ === faq.id && (
                       <div className="px-6 pb-6">
                         <div className="border-t border-gray-200 pt-4">
-                          <p className="text-gray-700 leading-relaxed mb-4">{faq.answer}</p>
-                          
-                          {/* Helpful Actions */}
-                          <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                            <div className="flex items-center space-x-4">
-                              <span className="text-sm text-gray-500">Was this helpful?</span>
-                              <div className="flex space-x-2">
-                                <button className="flex items-center space-x-1 text-green-600 hover:text-green-700 transition-colors">
-                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
-                                  </svg>
-                                  <span className="text-sm">Yes</span>
-                                </button>
-                                <button className="flex items-center space-x-1 text-red-600 hover:text-red-700 transition-colors">
-                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14H5.236a2 2 0 01-1.789-2.894l3.5-7A2 2 0 018.736 3h4.018c.163 0 .326.02.485.06L17 4m-7 10v2a2 2 0 002 2h.095c.5 0 .905-.405.905-.905 0-.714.211-1.412.608-2.006L17 13V4m-7 10h2m5-10h2a2 2 0 012 2v6a2 2 0 01-2 2h-2.5" />
-                                  </svg>
-                                  <span className="text-sm">No</span>
-                                </button>
-                              </div>
-                            </div>
-                            <div className="text-sm text-gray-500">
-                              {faq.helpful} people found this helpful
-                            </div>
-                          </div>
+                          <p className="text-gray-700 leading-relaxed">{faq.answer}</p>
                         </div>
                       </div>
                     )}
@@ -357,16 +337,16 @@ const HelpCenterPage = ({ onNavigate }) => {
                 <h3 className="font-semibold text-gray-900 mb-4">📚 Learning Resources</h3>
                 <ul className="space-y-3">
                   <li>
-                    <a href="#" className="text-blue-600 hover:text-blue-500 font-medium">Academic Writing Guide</a>
-                    <p className="text-sm text-gray-600">Comprehensive guide to academic writing best practices</p>
+                    <a href="#" className="text-blue-600 hover:text-blue-500 font-medium">Academic Writing Best Practices</a>
+                    <p className="text-sm text-gray-600">Learn how to improve your academic writing with Scholar AI</p>
                   </li>
                   <li>
-                    <a href="#" className="text-blue-600 hover:text-blue-500 font-medium">Video Tutorials</a>
-                    <p className="text-sm text-gray-600">Step-by-step video guides for all features</p>
+                    <a href="#" className="text-blue-600 hover:text-blue-500 font-medium">Understanding AI Analysis</a>
+                    <p className="text-sm text-gray-600">Guide to interpreting and using AI feedback effectively</p>
                   </li>
                   <li>
-                    <a href="#" className="text-blue-600 hover:text-blue-500 font-medium">Citation Style Guide</a>
-                    <p className="text-sm text-gray-600">Examples and rules for all citation formats</p>
+                    <a href="#" className="text-blue-600 hover:text-blue-500 font-medium">Citation Style Examples</a>
+                    <p className="text-sm text-gray-600">Examples and rules for APA, MLA, Chicago, and other styles</p>
                   </li>
                 </ul>
               </div>
@@ -375,16 +355,16 @@ const HelpCenterPage = ({ onNavigate }) => {
                 <h3 className="font-semibold text-gray-900 mb-4">🔧 Technical Support</h3>
                 <ul className="space-y-3">
                   <li>
-                    <a href="#" className="text-blue-600 hover:text-blue-500 font-medium">API Documentation</a>
-                    <p className="text-sm text-gray-600">Technical docs for developers and integrations</p>
-                  </li>
-                  <li>
                     <a href="#" className="text-blue-600 hover:text-blue-500 font-medium">System Status</a>
-                    <p className="text-sm text-gray-600">Real-time status of all AcademicAI services</p>
+                    <p className="text-sm text-gray-600">Real-time status of all Scholar AI services</p>
                   </li>
                   <li>
                     <a href="#" className="text-blue-600 hover:text-blue-500 font-medium">Security & Privacy</a>
                     <p className="text-sm text-gray-600">Information about data protection and security</p>
+                  </li>
+                  <li>
+                    <a href="#" className="text-blue-600 hover:text-blue-500 font-medium">Feature Requests</a>
+                    <p className="text-sm text-gray-600">Suggest new features or improvements</p>
                   </li>
                 </ul>
               </div>

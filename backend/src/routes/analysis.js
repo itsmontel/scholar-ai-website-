@@ -8,13 +8,23 @@ const documentService = require('../services/documentService');
 
 // Validation schemas
 const analyzeDocumentSchema = Joi.object({
-  documentId: Joi.string().uuid().required(),
+  documentId: Joi.string().uuid().allow(null).optional(),
+  content: Joi.string().min(200).optional(),
   analysisType: Joi.string().valid('comprehensive').required(),
   citationStyle: Joi.string().valid('APA', 'Harvard', 'Chicago', 'MLA', 'IEEE', 'Vancouver').optional()
-});
+}).or('documentId', 'content'); // Either documentId or content must be provided
 
 const getAnalysisSchema = Joi.object({
   analysisId: Joi.string().uuid().required()
+});
+
+const saveAnalysisSchema = Joi.object({
+  documentId: Joi.string().uuid().allow(null).optional(),
+  content: Joi.string().min(200).required(),
+  analysisResult: Joi.string().required(),
+  annotations: Joi.array().required(),
+  analysisType: Joi.string().valid('comprehensive').required(),
+  citationStyle: Joi.string().valid('APA', 'Harvard', 'Chicago', 'MLA', 'IEEE', 'Vancouver').optional()
 });
 
 /**
@@ -24,31 +34,44 @@ const getAnalysisSchema = Joi.object({
  */
 router.post('/analyze', authenticateToken, validate(analyzeDocumentSchema), async (req, res) => {
   try {
-    const { documentId, analysisType, citationStyle } = req.body;
+    const { documentId, content, analysisType, citationStyle } = req.body;
     const userId = req.user.id;
 
-    // Get the document and verify ownership
-    const document = await documentService.getDocumentById(documentId, userId);
-    if (!document) {
-      return res.status(404).json({
-        success: false,
-        message: 'Document not found or access denied'
-      });
-    }
+    let analysisContent = '';
+    let analysisDocumentId = documentId;
 
-    // Get document content
-    const content = document.content_text;
-    if (!content) {
+    if (content) {
+      // Text analysis from dashboard
+      analysisContent = content;
+      analysisDocumentId = null; // No document ID for text analysis
+    } else if (documentId) {
+      // Document analysis
+      const document = await documentService.getDocumentById(documentId, userId);
+      if (!document) {
+        return res.status(404).json({
+          success: false,
+          message: 'Document not found or access denied'
+        });
+      }
+
+      analysisContent = document.content_text;
+      if (!analysisContent) {
+        return res.status(400).json({
+          success: false,
+          message: 'Document content not available for analysis'
+        });
+      }
+    } else {
       return res.status(400).json({
         success: false,
-        message: 'Document content not available for analysis'
+        message: 'Either documentId or content must be provided'
       });
     }
 
     // Perform AI analysis
     const analysisResult = await aiAnalysisService.analyzeDocument(
-      documentId,
-      content,
+      analysisDocumentId,
+      analysisContent,
       analysisType,
       userId,
       citationStyle
@@ -56,7 +79,7 @@ router.post('/analyze', authenticateToken, validate(analyzeDocumentSchema), asyn
 
     res.json({
       success: true,
-      message: 'Document analyzed successfully',
+      message: 'Analysis completed successfully',
       data: analysisResult
     });
 
@@ -65,6 +88,43 @@ router.post('/analyze', authenticateToken, validate(analyzeDocumentSchema), asyn
     res.status(500).json({
       success: false,
       message: 'Analysis failed',
+      error: error.message
+    });
+  }
+});
+
+/**
+ * @route POST /api/analysis/save
+ * @desc Save analysis results to history
+ * @access Private
+ */
+router.post('/save', authenticateToken, validate(saveAnalysisSchema), async (req, res) => {
+  try {
+    const { documentId, content, analysisResult, annotations, analysisType, citationStyle } = req.body;
+    const userId = req.user.id;
+
+    // Save the analysis
+    const savedAnalysis = await aiAnalysisService.saveAnalysis(
+      documentId,
+      userId,
+      analysisType,
+      analysisResult,
+      content,
+      annotations,
+      citationStyle
+    );
+
+    res.json({
+      success: true,
+      message: 'Analysis saved successfully',
+      data: savedAnalysis
+    });
+
+  } catch (error) {
+    console.error('Save analysis error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to save analysis',
       error: error.message
     });
   }

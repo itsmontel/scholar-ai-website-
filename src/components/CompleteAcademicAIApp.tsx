@@ -42,6 +42,40 @@ const AcademicAIApp = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState<User | null>(null);
 
+  // Validate and refresh token if needed
+  const validateAndRefreshToken = async () => {
+    try {
+      const response = await fetch('http://localhost:3001/api/auth/me', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+        },
+      });
+
+      if (response.status === 401) {
+        // Token expired, try to refresh
+        const refreshResponse = await fetch('http://localhost:3001/api/auth/refresh', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+          },
+        });
+
+        if (refreshResponse.ok) {
+          const refreshData = await refreshResponse.json();
+          localStorage.setItem('authToken', refreshData.data.token);
+          console.log('Token refreshed successfully');
+        } else {
+          // Refresh failed, logout user
+          handleLogout();
+        }
+      }
+    } catch (error) {
+      console.error('Token validation error:', error);
+      // If validation fails, logout user
+      handleLogout();
+    }
+  };
+
   // Handle URL-based routing and authentication persistence
   useEffect(() => {
     const path = window.location.pathname;
@@ -55,6 +89,9 @@ const AcademicAIApp = () => {
         const user = JSON.parse(userData);
         setIsLoggedIn(true);
         setUser(user);
+        
+        // Validate token and refresh if needed
+        validateAndRefreshToken();
       } catch (error) {
         console.error('Error parsing user data:', error);
         localStorage.removeItem('authToken');
@@ -82,6 +119,61 @@ const AcademicAIApp = () => {
       setCurrentPage('landing');
     }
   }, []);
+
+  // Set up periodic token refresh for logged-in users
+  useEffect(() => {
+    if (isLoggedIn) {
+      // Refresh token every 6 hours (6 * 60 * 60 * 1000 ms)
+      const refreshInterval = setInterval(() => {
+        validateAndRefreshToken();
+      }, 6 * 60 * 60 * 1000);
+
+      return () => clearInterval(refreshInterval);
+    }
+  }, [isLoggedIn]);
+
+  // Global error handler for 401 responses
+  useEffect(() => {
+    const originalFetch = window.fetch;
+    window.fetch = async (...args) => {
+      const response = await originalFetch(...args);
+      
+      // If we get a 401 and we're logged in, try to refresh token
+      if (response.status === 401 && isLoggedIn) {
+        try {
+          const refreshResponse = await fetch('http://localhost:3001/api/auth/refresh', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+            },
+          });
+
+          if (refreshResponse.ok) {
+            const refreshData = await refreshResponse.json();
+            localStorage.setItem('authToken', refreshData.data.token);
+            console.log('Token refreshed automatically');
+            
+            // Retry the original request with new token
+            const retryResponse = await originalFetch(...args);
+            return retryResponse;
+          } else {
+            // Refresh failed, logout user
+            handleLogout();
+          }
+        } catch (error) {
+          console.error('Auto-refresh failed:', error);
+          handleLogout();
+        }
+      }
+      
+      return response;
+    };
+
+    // Cleanup
+    return () => {
+      window.fetch = originalFetch;
+    };
+  }, [isLoggedIn]);
 
   // Navigation function
   const navigateTo = (page: string) => {
@@ -136,13 +228,13 @@ const AcademicAIApp = () => {
       case 'email-verification':
         return <EmailVerificationPage onNavigate={navigateTo} />;
       case 'pricing':
-        return <PricingPage onNavigate={navigateTo} />;
+        return <PricingPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'features':
-        return <FeaturesPage onNavigate={navigateTo} />;
+        return <FeaturesPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'about':
-        return <AboutPage onNavigate={navigateTo} />;
+        return <AboutPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'contact':
-        return <ContactPage onNavigate={navigateTo} />;
+        return <ContactPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'help':
         return <HelpCenterPage onNavigate={navigateTo} />;
       case 'writing-guide':

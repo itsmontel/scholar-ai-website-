@@ -60,6 +60,9 @@ class DatabaseService {
         const whereClause = whereMatch[1];
         
         // Handle common WHERE patterns
+        console.log('WHERE clause:', whereClause);
+        console.log('Params:', params);
+        
         if (whereClause.includes('email = $1')) {
           query = query.eq('email', params[0]);
         } else if (whereClause.includes('id = $1')) {
@@ -76,6 +79,16 @@ class DatabaseService {
           query = query.eq('stripe_subscription_id', params[0]);
         } else if (whereClause.includes('stripe_customer_id = $1')) {
           query = query.eq('stripe_customer_id', params[0]);
+        } else {
+          // Fallback: try to parse any column = $N pattern
+          const paramMatch = whereClause.match(/(\w+)\s*=\s*\$(\d+)/);
+          if (paramMatch) {
+            const column = paramMatch[1];
+            const paramIndex = parseInt(paramMatch[2]) - 1;
+            if (paramIndex < params.length) {
+              query = query.eq(column, params[paramIndex]);
+            }
+          }
         }
         
         // Handle multiple conditions

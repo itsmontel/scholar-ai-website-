@@ -10,6 +10,9 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
   const [inputText, setInputText] = useState('');
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [showWordWarning, setShowWordWarning] = useState(false);
+  const [documents, setDocuments] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const placeholders = [
     "Paste your academic text here to see how AI can help improve it.",
@@ -25,6 +28,96 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
     return () => clearInterval(interval);
   }, []);
 
+  useEffect(() => {
+    console.log('Dashboard: fetchDocuments called');
+    fetchDocuments();
+  }, []);
+
+  const processDocuments = async (documents: any[]) => {
+    console.log('Processing documents:', documents);
+    const docsWithAnalysis = await Promise.all(
+      documents.map(async (doc: any) => {
+        // Check if document has analysis
+        const analysisResponse = await fetch(`http://localhost:3001/api/analysis/document/${doc.id}`, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+          },
+        });
+        
+        let hasAnalysis = false;
+        if (analysisResponse.ok) {
+          const analysisResult = await analysisResponse.json();
+          hasAnalysis = analysisResult.data && analysisResult.data.length > 0;
+        }
+        
+        return {
+          ...doc,
+          hasAnalysis
+        };
+      })
+    );
+    setDocuments(docsWithAnalysis);
+  };
+
+  const fetchDocuments = async () => {
+    try {
+      setIsLoading(true);
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        setIsLoading(false);
+        return;
+      }
+
+      const response = await fetch('http://localhost:3001/api/documents', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      // If token expired, try to refresh
+      if (response.status === 401) {
+        const refreshResponse = await fetch('http://localhost:3001/api/auth/refresh', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
+        if (refreshResponse.ok) {
+          const refreshData = await refreshResponse.json();
+          localStorage.setItem('authToken', refreshData.data.token);
+          
+          // Retry the original request with new token
+          const retryResponse = await fetch('http://localhost:3001/api/documents', {
+            headers: {
+              'Authorization': `Bearer ${refreshData.data.token}`,
+            },
+          });
+          
+          if (retryResponse.ok) {
+            const result = await retryResponse.json();
+            await processDocuments(result.data.documents || []);
+          }
+        } else {
+          // Refresh failed, redirect to login
+          onLogout();
+        }
+        setIsLoading(false);
+        return;
+      }
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log('Dashboard documents response:', result);
+        await processDocuments(result.data.documents || []);
+      }
+    } catch (error) {
+      console.error('Error fetching documents:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -39,10 +132,27 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
     };
   }, [isDropdownOpen]);
 
+  const getWordCount = (text: string) => {
+    return text.trim().split(/\s+/).filter(word => word.length > 0).length;
+  };
+
+  const isTextValid = () => {
+    return getWordCount(inputText) >= 200;
+  };
+
   const handleAnalyze = () => {
-    if (inputText.trim()) {
-      onNavigate('analysis');
+    const wordCount = getWordCount(inputText);
+    
+    if (wordCount < 200) {
+      setShowWordWarning(true);
+      // Hide warning after 3 seconds
+      setTimeout(() => setShowWordWarning(false), 3000);
+      return;
     }
+    
+    // Store the text in localStorage to pass to analysis page
+    localStorage.setItem('textAnalysisContent', inputText);
+    onNavigate('analysis');
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -154,9 +264,9 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
                         className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200"
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
                         <span>Account</span>
                       </button>
                       
@@ -178,8 +288,8 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                         </svg>
                         <span>Upgrade Plan</span>
-            </button>
-          </div>
+                      </button>
+                    </div>
 
                     {/* Logout Section */}
                     <div className="border-t border-gray-100 py-2">
@@ -226,7 +336,10 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
               <div className="relative bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/30 p-8 hover:shadow-3xl transition-all duration-500">
                 <textarea
                   value={inputText}
-                  onChange={(e) => setInputText(e.target.value)}
+                  onChange={(e) => {
+                    setInputText(e.target.value);
+                    setShowWordWarning(false); // Hide warning when user types
+                  }}
                   onKeyPress={handleKeyPress}
                   placeholder={placeholders[placeholderIndex]}
                   className="w-full min-h-24 max-h-48 pb-6 pl-6 pr-20 text-gray-700 border-none outline-none resize-none placeholder-gray-400 bg-transparent text-lg font-light transition-all duration-300 overflow-y-auto leading-relaxed"
@@ -243,15 +356,38 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
                   }}
                 />
                 
+                {/* Word Count */}
+                <div className="absolute bottom-4 left-4 text-xs text-gray-500">
+                  {getWordCount(inputText)} words
+                </div>
+                
                 {/* Send Button */}
                 <button
                   onClick={handleAnalyze}
-                  className="absolute bottom-4 right-4 w-12 h-12 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-xl flex items-center justify-center transition-all duration-200 hover:scale-105 shadow-lg z-10"
+                  disabled={!isTextValid()}
+                  className={`absolute bottom-4 right-4 w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-200 shadow-lg z-10 ${
+                    isTextValid() 
+                      ? 'bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white hover:scale-105 cursor-pointer' 
+                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  }`}
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                   </svg>
                 </button>
+                
+                {/* Warning Message */}
+                {showWordWarning && (
+                  <div className="absolute bottom-16 right-4 bg-red-500 text-white text-xs px-3 py-2 rounded-lg shadow-lg z-20 animate-pulse">
+                    <div className="flex items-center space-x-2">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 19.5c-.77.833.192 2.5 1.732 2.5z" />
+                      </svg>
+                      <span>Minimum 200 words required</span>
+                    </div>
+                    <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-red-500"></div>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -295,117 +431,92 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {/* Document Cards */}
-            {[
-              {
-                id: 1,
-                name: "Research Paper Draft",
-                type: "PDF",
-                pages: 12,
-                date: "Sep 8, 2025",
-                status: "analyzed",
-                icon: "📄",
-                color: "from-blue-500 to-blue-600"
-              },
-              {
-                id: 2,
-                name: "Thesis Chapter 3",
-                type: "DOCX",
-                pages: 8,
-                date: "Sep 7, 2025",
-                status: "analyzing",
-                icon: "📝",
-                color: "from-purple-500 to-purple-600"
-              },
-              {
-                id: 3,
-                name: "Literature Review",
-                type: "PDF",
-                pages: 15,
-                date: "Sep 6, 2025",
-                status: "analyzed",
-                icon: "📚",
-                color: "from-green-500 to-green-600"
-              },
-              {
-                id: 4,
-                name: "Essay Analysis",
-                type: "DOCX",
-                pages: 5,
-                date: "Sep 5, 2025",
-                status: "analyzed",
-                icon: "✍️",
-                color: "from-orange-500 to-orange-600"
-              },
-              {
-                id: 5,
-                name: "Research Proposal",
-                type: "PDF",
-                pages: 10,
-                date: "Sep 4, 2025",
-                status: "analyzed",
-                icon: "📋",
-                color: "from-indigo-500 to-indigo-600"
-              },
-              {
-                id: 6,
-                name: "Methodology Section",
-                type: "DOCX",
-                pages: 6,
-                date: "Sep 3, 2025",
-                status: "analyzed",
-                icon: "🔬",
-                color: "from-teal-500 to-teal-600"
-              }
-            ].map((doc) => (
-                <div 
-                  key={doc.id}
-                onClick={() => doc.status === 'analyzed' && onNavigate('analysis')}
-                className={`bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow duration-200 cursor-pointer hover:border-gray-300`}
-              >
-                <div className="flex items-start justify-between mb-4">
-                  <div className={`w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center`}>
-                    <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                      </div>
-                      <button className="text-gray-400 hover:text-gray-600">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-                        </svg>
-                      </button>
-                    </div>
-                
-                <div className="mb-4">
-                  <h3 className="font-semibold text-gray-900 text-base mb-1">{doc.name}</h3>
-                  <p className="text-sm text-gray-500">{doc.type} • {doc.pages} pages</p>
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-500">{doc.date}</span>
-                  {doc.status === 'analyzed' && (
-                    <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-green-50 text-green-700 border border-green-200">
-                      Complete
-                    </span>
-                  )}
-                  {doc.status === 'analyzing' && (
-                    <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-yellow-50 text-yellow-700 border border-yellow-200">
-                      Analyzing
-                    </span>
-                  )}
+            {isLoading ? (
+              // Loading state
+              Array.from({ length: 6 }).map((_, index) => (
+                <div key={index} className="bg-white border border-gray-200 rounded-lg p-6 animate-pulse">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="w-10 h-10 bg-gray-200 rounded-lg"></div>
+                    <div className="w-4 h-4 bg-gray-200 rounded"></div>
+                  </div>
+                  <div className="mb-4">
+                    <div className="h-4 bg-gray-200 rounded mb-2"></div>
+                    <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="h-3 bg-gray-200 rounded w-1/3"></div>
+                    <div className="h-6 bg-gray-200 rounded w-16"></div>
                   </div>
                 </div>
-              ))}
-            </div>
-          
-          {/* Empty State */}
-          <div className="text-center mt-12">
-            <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-              <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-              </svg>
-            </div>
-            <p className="text-gray-500">Upload your first document to get started</p>
+              ))
+            ) : documents.length > 0 ? (
+              documents.slice(0, 3).map((doc) => (
+                <div 
+                  key={doc.id}
+                  onClick={() => onNavigate('library')}
+                  className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow duration-200 cursor-pointer hover:border-gray-300"
+                >
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+                      <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                    </div>
+                    <button className="text-gray-400 hover:text-gray-600">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+                      </svg>
+                    </button>
+                  </div>
+                  
+                  <div className="mb-4">
+                    <h3 className="font-semibold text-gray-900 text-base mb-1">{doc.title}</h3>
+                    <p className="text-sm text-gray-500">{doc.fileType?.toUpperCase() || 'DOC'} • {doc.wordCount || 0} words</p>
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-500">
+                      {new Date(doc.createdAt).toLocaleDateString()}
+                    </span>
+                    {doc.hasAnalysis ? (
+                      <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-green-50 text-green-700 border border-green-200">
+                        Show Analysis
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
+                        Analyze
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ))
+            ) : (
+              // Empty state
+              <div className="col-span-full text-center py-12">
+                <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  </svg>
+                </div>
+                <p className="text-gray-500">No documents uploaded yet</p>
+              </div>
+            )}
           </div>
+          
+          {/* See More Link */}
+          {documents.length > 3 && (
+            <div className="text-center mt-8">
+              <button 
+                onClick={() => onNavigate('library')}
+                className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-medium rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+              >
+                <span>See More</span>
+                <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
+          )}
         </div>
       </main>
     </div>

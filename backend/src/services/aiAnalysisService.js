@@ -450,7 +450,12 @@ CRITICAL REQUIREMENTS:
     // Remove quotes and clean the text
     const cleanText = quotedText.replace(/^["']|["']$/g, '').trim();
     
-    // Try exact match first
+    // Skip if text is too short or too long
+    if (cleanText.length < 5 || cleanText.length > 500) {
+      return null;
+    }
+    
+    // Try exact match first (most reliable)
     const exactIndex = content.indexOf(cleanText);
     if (exactIndex !== -1) {
       return {
@@ -460,34 +465,54 @@ CRITICAL REQUIREMENTS:
       };
     }
 
-    // Try case-insensitive match
+    // Try case-insensitive match (but preserve original case)
     const lowerContent = content.toLowerCase();
     const lowerText = cleanText.toLowerCase();
     const caseInsensitiveIndex = lowerContent.indexOf(lowerText);
     if (caseInsensitiveIndex !== -1) {
+      const originalText = content.slice(caseInsensitiveIndex, caseInsensitiveIndex + cleanText.length);
       return {
-        text: content.slice(caseInsensitiveIndex, caseInsensitiveIndex + cleanText.length),
+        text: originalText,
         startIndex: caseInsensitiveIndex,
         endIndex: caseInsensitiveIndex + cleanText.length
       };
     }
 
-    // Try to find partial matches (for cases where AI might have truncated text)
-    const words = cleanText.split(' ').filter(word => word.length > 3);
-    if (words.length > 0) {
-      for (const word of words) {
-        const wordIndex = lowerContent.indexOf(word.toLowerCase());
-        if (wordIndex !== -1) {
-          // Find sentence boundaries around this word
-          const sentenceStart = Math.max(0, content.lastIndexOf('.', wordIndex) + 1);
-          const sentenceEnd = Math.min(content.length, content.indexOf('.', wordIndex) + 1);
-          const sentence = content.slice(sentenceStart, sentenceEnd).trim();
-          
-          if (sentence.length > 10 && sentence.length < 200) {
+    // Try to find the text within sentence boundaries (more conservative approach)
+    const sentences = content.split(/[.!?]+/).filter(s => s.trim().length > 0);
+    for (const sentence of sentences) {
+      const sentenceTrimmed = sentence.trim();
+      const sentenceLower = sentenceTrimmed.toLowerCase();
+      
+      // Check if the quoted text appears in this sentence
+      if (sentenceLower.includes(lowerText)) {
+        const startIndex = content.indexOf(sentenceTrimmed);
+        if (startIndex !== -1) {
+          return {
+            text: sentenceTrimmed,
+            startIndex: startIndex,
+            endIndex: startIndex + sentenceTrimmed.length
+          };
+        }
+      }
+    }
+
+    // Last resort: try to find key words from the quoted text
+    const words = cleanText.split(' ').filter(word => word.length > 4);
+    if (words.length >= 2) {
+      // Look for sentences that contain at least 2 key words
+      for (const sentence of sentences) {
+        const sentenceLower = sentence.toLowerCase();
+        const matchingWords = words.filter(word => sentenceLower.includes(word.toLowerCase()));
+        
+        if (matchingWords.length >= 2) {
+          const sentenceTrimmed = sentence.trim();
+          const startIndex = content.indexOf(sentenceTrimmed);
+          if (startIndex !== -1 && sentenceTrimmed.length > 10 && sentenceTrimmed.length < 300) {
             return {
-              text: sentence,
-              startIndex: sentenceStart,
-              endIndex: sentenceEnd
+              text: sentenceTrimmed,
+              startIndex: startIndex,
+              endIndex: startIndex + sentenceTrimmed.length
             };
           }
         }
@@ -555,7 +580,7 @@ CRITICAL REQUIREMENTS:
   /**
    * Save analysis results to database
    */
-  async saveAnalysis(documentId, userId, analysisType, result, originalContent) {
+  async saveAnalysis(documentId, userId, analysisType, result, originalContent, annotations = null, citationStyle = null) {
     try {
       // Use service role key ONLY for AI analysis saves (bypasses RLS)
       // This is safe because we validate userId and documentId before calling this method
@@ -565,24 +590,26 @@ CRITICAL REQUIREMENTS:
         process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
       );
 
+      const analysisData = {
+        document_id: documentId,
+        user_id: userId,
+        analysis_type: analysisType,
+        status: 'completed',
+        analysis_results: {
+          result: result,
+          original_content: originalContent,
+          ai_model_used: process.env.OPENAI_MODEL || "gpt-5-nano",
+          annotations: annotations,
+          citation_style: citationStyle
+        },
+        processing_time_ms: Math.floor(Date.now() / 1000), // Convert to seconds
+        created_at: new Date().toISOString(),
+        completed_at: new Date().toISOString()
+      };
+
       const { data, error } = await supabase
         .from('document_analyses')
-        .insert([
-          {
-            document_id: documentId,
-            user_id: userId,
-            analysis_type: analysisType,
-            status: 'completed',
-            analysis_results: {
-              result: result,
-              original_content: originalContent,
-              ai_model_used: process.env.OPENAI_MODEL || "gpt-5-nano"
-            },
-            processing_time_ms: Math.floor(Date.now() / 1000), // Convert to seconds
-            created_at: new Date().toISOString(),
-            completed_at: new Date().toISOString()
-          }
-        ])
+        .insert([analysisData])
         .select();
 
       if (error) {

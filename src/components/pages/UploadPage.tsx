@@ -145,11 +145,16 @@ const UploadPage = ({ onNavigate }: UploadPageProps) => {
       setSelectedFile(null);
       setDocumentTitle('');
 
-      // Reset after 3 seconds
+      // Redirect to analysis page with document pre-selected
       setTimeout(() => {
-        setUploadedDocument(null);
-        setUploadProgress(0);
-      }, 3000);
+        // Store the uploaded document ID in localStorage for the analysis page
+        localStorage.setItem('selectedDocumentId', result.data.document.id);
+        localStorage.setItem('selectedDocumentTitle', result.data.document.title);
+        localStorage.setItem('selectedDocumentContent', result.data.document.content_text || '');
+        
+        // Navigate to analysis page
+        onNavigate('analysis');
+      }, 1500);
 
     } catch (error) {
       console.error('Upload error:', error);

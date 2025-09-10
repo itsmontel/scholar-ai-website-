@@ -17,7 +17,7 @@ const generateToken = (userId) => {
   return jwt.sign(
     { userId },
     process.env.JWT_SECRET,
-    { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
+    { expiresIn: process.env.JWT_EXPIRES_IN || '30d' }
   );
 };
 
@@ -170,21 +170,24 @@ router.post('/login', validate(schemas.login), async (req, res) => {
 // @access  Private
 router.get('/me', authenticateToken, async (req, res) => {
   try {
-    const result = await query(
-      `SELECT id, email, first_name, last_name, institution, research_field, 
-              subscription_plan, subscription_status, created_at, last_login, email_verified
-       FROM users WHERE id = $1`,
-      [req.user.id]
+    const { createClient } = require('@supabase/supabase-js');
+    const supabase = createClient(
+      process.env.SUPABASE_URL,
+      process.env.SUPABASE_ANON_KEY
     );
 
-    if (result.rows.length === 0) {
+    const { data: user, error } = await supabase
+      .from('users')
+      .select('id, email, first_name, last_name, institution, research_field, subscription_plan, subscription_status, created_at, last_login, email_verified')
+      .eq('id', req.user.id)
+      .single();
+
+    if (error || !user) {
       return res.status(404).json({
         success: false,
         message: 'User not found'
       });
     }
-
-    const user = result.rows[0];
 
     res.json({
       success: true,

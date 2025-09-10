@@ -37,8 +37,11 @@ class DocumentParser {
         throw new Error(`Unsupported file type: ${mimeType}`);
       }
 
+      // Clean up content while preserving paragraph structure
+      const cleanedContent = this.cleanContent(content);
+
       return {
-        content: content.trim(),
+        content: cleanedContent,
         wordCount,
         pageCount,
         fileType: this.getFileType(mimeType),
@@ -85,6 +88,27 @@ class DocumentParser {
       console.error('Word document parsing error:', error);
       throw new Error('Failed to parse Word document');
     }
+  }
+
+  /**
+   * Clean content while preserving paragraph structure
+   * @param {string} content - Raw content
+   * @returns {string} Cleaned content with preserved paragraphs
+   */
+  cleanContent(content) {
+    if (!content || typeof content !== 'string') return '';
+    
+    return content
+      // Normalize line breaks - convert various line break types to \n
+      .replace(/\r\n/g, '\n')
+      .replace(/\r/g, '\n')
+      // Remove excessive whitespace but preserve paragraph breaks
+      .replace(/[ \t]+/g, ' ') // Replace multiple spaces/tabs with single space
+      .replace(/\n[ \t]+/g, '\n') // Remove leading spaces from lines
+      .replace(/[ \t]+\n/g, '\n') // Remove trailing spaces from lines
+      // Preserve paragraph breaks (double newlines)
+      .replace(/\n{3,}/g, '\n\n') // Replace 3+ newlines with 2
+      .trim(); // Remove leading/trailing whitespace
   }
 
   /**

@@ -40,6 +40,8 @@ const LibraryPage = ({ onNavigate }: LibraryPageProps) => {
   const [sortBy, setSortBy] = useState<'created_at' | 'title' | 'word_count'>('created_at');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
+  const [editingDocument, setEditingDocument] = useState<string | null>(null);
+  const [editTitle, setEditTitle] = useState('');
 
   useEffect(() => {
     fetchDocuments();
@@ -164,6 +166,54 @@ const LibraryPage = ({ onNavigate }: LibraryPageProps) => {
     }
   };
 
+  const handleStartRename = (document: Document) => {
+    setEditingDocument(document.id);
+    setEditTitle(document.title);
+  };
+
+  const handleCancelRename = () => {
+    setEditingDocument(null);
+    setEditTitle('');
+  };
+
+  const handleSaveRename = async (documentId: string) => {
+    if (!editTitle.trim()) {
+      alert('Document title cannot be empty');
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        throw new Error('Please log in to rename documents');
+      }
+
+      const response = await fetch(`http://localhost:3001/api/documents/${documentId}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ title: editTitle.trim() }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to rename document');
+      }
+
+      // Update document in local state
+      setDocuments(prev => prev.map(doc => 
+        doc.id === documentId ? { ...doc, title: editTitle.trim() } : doc
+      ));
+
+      setEditingDocument(null);
+      setEditTitle('');
+    } catch (error) {
+      console.error('Error renaming document:', error);
+      setError(error instanceof Error ? error.message : 'Failed to rename document');
+    }
+  };
+
   const handleDownloadDocument = async (document: Document) => {
     try {
       const token = localStorage.getItem('authToken');
@@ -270,7 +320,7 @@ const LibraryPage = ({ onNavigate }: LibraryPageProps) => {
                 onClick={() => onNavigate('settings')}
             className="text-gray-600 hover:text-gray-900 transition-colors"
               >
-            Settings
+                Account
               </button>
         </div>
             </nav>
@@ -454,7 +504,44 @@ const LibraryPage = ({ onNavigate }: LibraryPageProps) => {
                     <div className="flex items-center space-x-4">
                       {getFileTypeIcon(document.fileType)}
                     <div>
-                        <h3 className="text-lg font-medium text-gray-900">{document.title}</h3>
+                        {editingDocument === document.id ? (
+                          <div className="flex items-center space-x-2">
+                            <input
+                              type="text"
+                              value={editTitle}
+                              onChange={(e) => setEditTitle(e.target.value)}
+                              className="text-lg font-medium text-gray-900 border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              autoFocus
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                  handleSaveRename(document.id);
+                                } else if (e.key === 'Escape') {
+                                  handleCancelRename();
+                                }
+                              }}
+                            />
+                            <button
+                              onClick={() => handleSaveRename(document.id)}
+                              className="text-green-600 hover:text-green-800 p-1"
+                              title="Save"
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                              </svg>
+                            </button>
+                            <button
+                              onClick={handleCancelRename}
+                              className="text-red-600 hover:text-red-800 p-1"
+                              title="Cancel"
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                              </svg>
+                            </button>
+                          </div>
+                        ) : (
+                          <h3 className="text-lg font-medium text-gray-900">{document.title}</h3>
+                        )}
                         <p className="text-sm text-gray-500">
                           {document.originalFilename} • {formatFileSize(document.fileSize)} • {document.wordCount.toLocaleString()} words • {document.pageCount} pages
                         </p>
@@ -470,6 +557,16 @@ const LibraryPage = ({ onNavigate }: LibraryPageProps) => {
                       >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                      </button>
+                      
+                      <button
+                        onClick={() => handleStartRename(document)}
+                        className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+                        title="Rename"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                         </svg>
                       </button>
                       
