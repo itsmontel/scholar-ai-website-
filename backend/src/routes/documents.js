@@ -204,7 +204,8 @@ router.get('/:id', authenticateToken, async (req, res) => {
           pageCount: document.page_count,
           uploadStatus: document.upload_status,
           createdAt: document.created_at,
-          updatedAt: document.updated_at
+          updatedAt: document.updated_at,
+          content_text: document.content_text
         }
       }
     });

@@ -7,6 +7,7 @@ import LoginPage from './pages/LoginPage';
 import EmailVerificationPage from './pages/EmailVerificationPage';
 import DashboardPage from './pages/DashboardPage';
 import AnalysisPage from './pages/AnalysisPage';
+import AnalysisHistoryPage from './pages/AnalysisHistoryPage';
 import UploadPage from './pages/UploadPage';
 import SettingsPage from './pages/SettingsPage';
 import PricingPage from './pages/PricingPage';
@@ -117,7 +118,7 @@ const AcademicAIApp = () => {
   };
 
   // Route protection for authenticated pages
-  const protectedRoutes = ['dashboard', 'analysis', 'upload', 'settings', 'profile', 'library'];
+  const protectedRoutes = ['dashboard', 'analysis', 'analysis-history', 'upload', 'settings', 'profile', 'library'];
   
   const renderCurrentPage = () => {
     // Redirect to login if trying to access protected route while not logged in
@@ -150,6 +151,8 @@ const AcademicAIApp = () => {
         return <DashboardPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'analysis':
         return <AnalysisPage onNavigate={navigateTo} />;
+      case 'analysis-history':
+        return <AnalysisHistoryPage onNavigate={navigateTo} />;
       case 'upload':
         return <UploadPage onNavigate={navigateTo} />;
       case 'settings':

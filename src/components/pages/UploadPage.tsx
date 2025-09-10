@@ -50,11 +50,11 @@ const UploadPage = ({ onNavigate }: UploadPageProps) => {
   const handleFileSelect = (file: File) => {
     // Validate file type
     const allowedTypes = [
-      'application/pdf',
+        'application/pdf',
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      'application/msword',
-      'text/plain'
-    ];
+        'application/msword',
+        'text/plain'
+      ];
 
     if (!allowedTypes.includes(file.type)) {
       setError('Please upload a PDF, DOCX, DOC, or TXT file.');
@@ -181,28 +181,28 @@ const UploadPage = ({ onNavigate }: UploadPageProps) => {
           <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
             Scholar AI
           </span>
-        </div>
+              </div>
         <div className="flex items-center space-x-4">
-          <button
-            onClick={() => onNavigate('dashboard')}
+              <button 
+                onClick={() => onNavigate('dashboard')}
             className="text-gray-600 hover:text-gray-900 transition-colors"
-          >
-            Dashboard
-          </button>
-          <button
-            onClick={() => onNavigate('library')}
+              >
+                Dashboard
+              </button>
+              <button 
+                onClick={() => onNavigate('library')}
             className="text-gray-600 hover:text-gray-900 transition-colors"
-          >
-            Library
-          </button>
-          <button
-            onClick={() => onNavigate('settings')}
+              >
+                Library
+              </button>
+              <button 
+                onClick={() => onNavigate('settings')}
             className="text-gray-600 hover:text-gray-900 transition-colors"
-          >
+              >
             Settings
-          </button>
+              </button>
         </div>
-      </nav>
+            </nav>
 
       <div className="max-w-4xl mx-auto px-8 py-12">
         <div className="text-center mb-12">
@@ -212,7 +212,7 @@ const UploadPage = ({ onNavigate }: UploadPageProps) => {
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
             Upload your academic papers, essays, or research documents for AI-powered analysis and feedback.
           </p>
-        </div>
+                  </div>
 
         {/* Upload Success Message */}
         {uploadedDocument && (
@@ -223,8 +223,8 @@ const UploadPage = ({ onNavigate }: UploadPageProps) => {
                   <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                </div>
-              </div>
+                      </div>
+                    </div>
               <div className="ml-4">
                 <h3 className="text-lg font-medium text-green-800">
                   Document Uploaded Successfully!
@@ -232,10 +232,10 @@ const UploadPage = ({ onNavigate }: UploadPageProps) => {
                 <p className="text-green-700">
                   {uploadedDocument.title} ({uploadedDocument.wordCount} words, {uploadedDocument.pageCount} pages)
                 </p>
-              </div>
-            </div>
-          </div>
-        )}
+                    </div>
+                    </div>
+                  </div>
+                )}
 
         {/* Error Message */}
         {error && (
@@ -259,23 +259,23 @@ const UploadPage = ({ onNavigate }: UploadPageProps) => {
           {/* File Upload Area */}
           <div
             className={`relative border-2 border-dashed rounded-xl p-12 text-center transition-colors ${
-              dragActive
+                  dragActive 
                 ? 'border-blue-400 bg-blue-50'
                 : selectedFile
                 ? 'border-green-400 bg-green-50'
                 : 'border-gray-300 hover:border-gray-400'
-            }`}
-            onDragEnter={handleDrag}
-            onDragLeave={handleDrag}
-            onDragOver={handleDrag}
-            onDrop={handleDrop}
-          >
-            <input
-              ref={fileInputRef}
-              type="file"
+                }`}
+                onDragEnter={handleDrag}
+                onDragLeave={handleDrag}
+                onDragOver={handleDrag}
+                onDrop={handleDrop}
+              >
+                <input
+                  ref={fileInputRef}
+                  type="file"
               className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
               onChange={handleFileInputChange}
-              accept=".pdf,.doc,.docx,.txt"
+                  accept=".pdf,.doc,.docx,.txt"
             />
             
             {selectedFile ? (
@@ -283,9 +283,9 @@ const UploadPage = ({ onNavigate }: UploadPageProps) => {
                 <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto">
                   <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                </div>
-                <div>
+                    </svg>
+                  </div>
+                  <div>
                   <h3 className="text-lg font-medium text-gray-900">{selectedFile.name}</h3>
                   <p className="text-sm text-gray-500">{formatFileSize(selectedFile.size)}</p>
                 </div>
@@ -295,7 +295,7 @@ const UploadPage = ({ onNavigate }: UploadPageProps) => {
                 <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto">
                   <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                  </svg>
+                    </svg>
                 </div>
                 <div>
                   <h3 className="text-lg font-medium text-gray-900">
@@ -307,7 +307,7 @@ const UploadPage = ({ onNavigate }: UploadPageProps) => {
                 </div>
               </div>
             )}
-          </div>
+                </div>
 
           {/* Document Title Input */}
           {selectedFile && (
@@ -315,7 +315,7 @@ const UploadPage = ({ onNavigate }: UploadPageProps) => {
               <label htmlFor="documentTitle" className="block text-sm font-medium text-gray-700 mb-2">
                 Document Title
               </label>
-              <input
+                        <input
                 type="text"
                 id="documentTitle"
                 value={documentTitle}
@@ -338,8 +338,8 @@ const UploadPage = ({ onNavigate }: UploadPageProps) => {
                   className="bg-blue-600 h-2 rounded-full transition-all duration-300"
                   style={{ width: `${uploadProgress}%` }}
                 ></div>
-              </div>
-            </div>
+                  </div>
+                </div>
           )}
 
           {/* Action Buttons */}
@@ -383,17 +383,17 @@ const UploadPage = ({ onNavigate }: UploadPageProps) => {
               <div>
                 <p className="font-medium text-gray-900">PDF Documents</p>
                 <p className="text-sm text-gray-500">Up to 50MB</p>
-              </div>
-            </div>
+                        </div>
+                      </div>
             <div className="flex items-center space-x-3">
               <div className="w-8 h-8 bg-blue-100 rounded flex items-center justify-center">
                 <span className="text-blue-600 font-bold text-xs">DOCX</span>
               </div>
-              <div>
+                  <div>
                 <p className="font-medium text-gray-900">Word Documents</p>
                 <p className="text-sm text-gray-500">Up to 25MB</p>
-              </div>
-            </div>
+                    </div>
+                  </div>
             <div className="flex items-center space-x-3">
               <div className="w-8 h-8 bg-green-100 rounded flex items-center justify-center">
                 <span className="text-green-600 font-bold text-xs">DOC</span>
@@ -401,9 +401,9 @@ const UploadPage = ({ onNavigate }: UploadPageProps) => {
               <div>
                 <p className="font-medium text-gray-900">Legacy Word</p>
                 <p className="text-sm text-gray-500">Up to 25MB</p>
-              </div>
-            </div>
-            <div className="flex items-center space-x-3">
+          </div>
+        </div>
+              <div className="flex items-center space-x-3">
               <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center">
                 <span className="text-gray-600 font-bold text-xs">TXT</span>
               </div>

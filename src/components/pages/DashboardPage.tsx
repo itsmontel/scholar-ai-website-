@@ -77,6 +77,12 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
                 <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-blue-600 rounded-full"></div>
             </button>
             <button 
+                onClick={() => onNavigate('analysis')}
+                className="px-4 py-2 text-gray-600 hover:text-gray-900 font-medium rounded-lg hover:bg-gray-100/50 transition-all duration-200"
+            >
+                AI Analysis
+            </button>
+            <button 
                 onClick={() => onNavigate('library')}
                 className="px-4 py-2 text-gray-600 hover:text-gray-900 font-medium rounded-lg hover:bg-gray-100/50 transition-all duration-200"
             >
