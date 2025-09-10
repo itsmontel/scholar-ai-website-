@@ -190,57 +190,85 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate }) => {
   const extractSpecificFeedback = (analysis: string): Array<{text: string, type: 'strong' | 'improve' | 'concern', comment: string, suggestion: string}> => {
     const feedback: Array<{text: string, type: 'strong' | 'improve' | 'concern', comment: string, suggestion: string}> = [];
     
-    // Extract specific feedback from the analysis
-    const lines = analysis.split('\n').filter(line => line.trim().length > 0);
+    // Look for quoted text in the analysis (from structured backend response)
+    const quotedTextRegex = /\*\*"([^"]+)"\*\*/g;
+    let match;
     
-    lines.forEach(line => {
-      const cleanLine = line.trim().replace(/^\*\*|\*\*$|^- |^• |^\d+\./g, '');
+    while ((match = quotedTextRegex.exec(analysis)) !== null) {
+      const quotedText = match[1];
+      const context = analysis.slice(Math.max(0, match.index - 100), match.index + 200);
       
-      // Look for specific patterns in the analysis
-      if (cleanLine.length > 20 && cleanLine.length < 300) {
-        // Determine type based on content - be more specific
-        let type: 'strong' | 'improve' | 'concern' = 'improve';
-        let comment = cleanLine;
-        let suggestion = '';
-        
-        // More specific patterns for strong points
-        if (/excellent|outstanding|well-written|clear|coherent|logical|thorough|comprehensive|insightful|rigorous|methodical|precise|articulate|compelling|persuasive|well-structured|well-organized|strong argument|solid evidence|good use of|effective|successful|impressive|notable|commendable/i.test(cleanLine)) {
-          type = 'strong';
-          suggestion = 'This demonstrates strong academic writing. Continue using this approach throughout your paper.';
-        } 
-        // More specific patterns for concerns
-        else if (/weak|poor|unclear|confusing|vague|inconsistent|incomplete|insufficient|lacking|missing|problem|issue|limitation|concern|critical|fail|detract|undermine|contradict|inaccurate|incorrect|flawed|deficient|inadequate|unconvincing|unsubstantiated/i.test(cleanLine)) {
-          type = 'concern';
-          suggestion = 'This area needs immediate attention and revision to strengthen your argument.';
-        } 
-        // Everything else is improvement
-        else {
-          type = 'improve';
-          suggestion = 'Consider enhancing this section with more specific details and supporting evidence.';
-        }
-        
-        // Extract key terms for text matching - focus on content-specific terms
-        const keyTerms = extractKeyTerms(cleanLine);
-        
-        // If no key terms found, try to extract from the comment itself
-        if (keyTerms.length === 0) {
-          const words = cleanLine.toLowerCase().split(/\s+/).filter(word => 
-            word.length > 3 && 
-            !['this', 'that', 'with', 'from', 'they', 'have', 'been', 'were', 'said', 'each', 'which', 'their', 'will', 'more', 'also', 'into', 'time', 'only', 'could', 'other', 'after', 'first', 'well', 'work', 'such', 'make', 'over', 'think', 'help', 'just', 'like', 'long', 'make', 'much', 'some', 'very', 'when', 'here', 'much', 'take', 'than', 'them', 'these', 'so', 'may', 'say', 'she', 'use', 'her', 'many', 'would', 'there', 'can', 'all', 'but', 'not', 'what', 'all', 'were', 'when', 'your', 'can', 'said', 'each', 'which', 'she', 'do', 'how', 'their', 'if', 'will', 'up', 'other', 'about', 'out', 'many', 'then', 'them', 'these', 'so', 'some', 'her', 'would', 'make', 'like', 'into', 'him', 'time', 'has', 'two', 'more', 'go', 'no', 'way', 'could', 'my', 'than', 'first', 'been', 'call', 'who', 'its', 'now', 'find', 'long', 'down', 'day', 'did', 'get', 'come', 'made', 'may', 'part'].includes(word)
-          );
-          keyTerms.push(...words.slice(0, 3));
-        }
-        
-        feedback.push({
-          text: keyTerms.join(' '),
-          type: type,
-          comment: comment,
-          suggestion: suggestion
-        });
+      // Determine type based on context around the quoted text
+      let type: 'strong' | 'improve' | 'concern' = 'improve';
+      let comment = '';
+      let suggestion = '';
+      
+      // Look for context clues
+      if (/strength|excellent|outstanding|well-written|clear|coherent|logical|thorough|comprehensive|insightful|rigorous|methodical|precise|articulate|compelling|persuasive|well-structured|well-organized|strong argument|solid evidence|good use of|effective|successful|impressive|notable|commendable/i.test(context)) {
+        type = 'strong';
+        comment = `Strong point: ${context.slice(0, 100)}...`;
+        suggestion = 'This demonstrates strong academic writing. Continue using this approach throughout your paper.';
+      } else if (/concern|weak|poor|unclear|confusing|vague|inconsistent|incomplete|insufficient|lacking|missing|problem|issue|limitation|critical|fail|detract|undermine|contradict|inaccurate|incorrect|flawed|deficient|inadequate|unconvincing|unsubstantiated/i.test(context)) {
+        type = 'concern';
+        comment = `Serious concern: ${context.slice(0, 100)}...`;
+        suggestion = 'This area needs immediate attention and revision to strengthen your argument.';
+      } else {
+        type = 'improve';
+        comment = `Area for improvement: ${context.slice(0, 100)}...`;
+        suggestion = 'Consider enhancing this section with more specific details and supporting evidence.';
       }
-    });
+      
+      feedback.push({
+        text: quotedText,
+        type: type,
+        comment: comment,
+        suggestion: suggestion
+      });
+    }
     
-    return feedback.slice(0, 15); // Increase limit to 15 specific feedback points
+    // If no quoted text found, fall back to line-based extraction
+    if (feedback.length === 0) {
+      const lines = analysis.split('\n').filter(line => line.trim().length > 0);
+      
+      lines.forEach(line => {
+        const cleanLine = line.trim().replace(/^\*\*|\*\*$|^- |^• |^\d+\./g, '');
+        
+        if (cleanLine.length > 20 && cleanLine.length < 300) {
+          let type: 'strong' | 'improve' | 'concern' = 'improve';
+          let suggestion = '';
+          
+          if (/excellent|outstanding|well-written|clear|coherent|logical|thorough|comprehensive|insightful|rigorous|methodical|precise|articulate|compelling|persuasive|well-structured|well-organized|strong argument|solid evidence|good use of|effective|successful|impressive|notable|commendable/i.test(cleanLine)) {
+            type = 'strong';
+            suggestion = 'This demonstrates strong academic writing. Continue using this approach throughout your paper.';
+          } else if (/weak|poor|unclear|confusing|vague|inconsistent|incomplete|insufficient|lacking|missing|problem|issue|limitation|concern|critical|fail|detract|undermine|contradict|inaccurate|incorrect|flawed|deficient|inadequate|unconvincing|unsubstantiated/i.test(cleanLine)) {
+            type = 'concern';
+            suggestion = 'This area needs immediate attention and revision to strengthen your argument.';
+          } else {
+            type = 'improve';
+            suggestion = 'Consider enhancing this section with more specific details and supporting evidence.';
+          }
+          
+          const keyTerms = extractKeyTerms(cleanLine);
+          
+          if (keyTerms.length === 0) {
+            const words = cleanLine.toLowerCase().split(/\s+/).filter(word => 
+              word.length > 3 && 
+              !['this', 'that', 'with', 'from', 'they', 'have', 'been', 'were', 'said', 'each', 'which', 'their', 'will', 'more', 'also', 'into', 'time', 'only', 'could', 'other', 'after', 'first', 'well', 'work', 'such', 'make', 'over', 'think', 'help', 'just', 'like', 'long', 'make', 'much', 'some', 'very', 'when', 'here', 'much', 'take', 'than', 'them', 'these', 'so', 'may', 'say', 'she', 'use', 'her', 'many', 'would', 'there', 'can', 'all', 'but', 'not', 'what', 'all', 'were', 'when', 'your', 'can', 'said', 'each', 'which', 'she', 'do', 'how', 'their', 'if', 'will', 'up', 'other', 'about', 'out', 'many', 'then', 'them', 'these', 'so', 'some', 'her', 'would', 'make', 'like', 'into', 'him', 'time', 'has', 'two', 'more', 'go', 'no', 'way', 'could', 'my', 'than', 'first', 'been', 'call', 'who', 'its', 'now', 'find', 'long', 'down', 'day', 'did', 'get', 'come', 'made', 'may', 'part'].includes(word)
+            );
+            keyTerms.push(...words.slice(0, 3));
+          }
+          
+          feedback.push({
+            text: keyTerms.join(' '),
+            type: type,
+            comment: cleanLine,
+            suggestion: suggestion
+          });
+        }
+      });
+    }
+    
+    return feedback.slice(0, 15);
   };
 
   const extractKeyTerms = (text: string): string[] => {
@@ -418,10 +446,16 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate }) => {
       const result: AnalysisResult = await response.json();
       setAnalysisResult(result.data.result);
       
-      // Generate AI-powered annotations based on the analysis result
-      const aiAnnotations = generateAIAnnotations(content, result.data.result);
-      console.log('Generated annotations:', aiAnnotations);
-      setAnnotations(aiAnnotations);
+      // Use annotations from backend if available, otherwise generate fallback
+      if (result.data.annotations && result.data.annotations.length > 0) {
+        console.log('Using backend annotations:', result.data.annotations);
+        setAnnotations(result.data.annotations);
+      } else {
+        // Fallback to frontend generation if backend doesn't provide annotations
+        const aiAnnotations = generateAIAnnotations(content, result.data.result);
+        console.log('Generated fallback annotations:', aiAnnotations);
+        setAnnotations(aiAnnotations);
+      }
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Analysis failed');
     } finally {

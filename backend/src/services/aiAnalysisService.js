@@ -45,13 +45,17 @@ class AIAnalysisService {
 
       const analysisResult = completion.choices[0].message.content;
       
+      // Parse structured analysis and extract annotations
+      const structuredAnalysis = this.parseStructuredAnalysis(analysisResult, content);
+      
       // Save analysis to database (temporarily disabled for demo)
       // await this.saveAnalysis(documentId, userId, analysisType, analysisResult, content);
       
       return {
         success: true,
         analysisType,
-        result: analysisResult,
+        result: structuredAnalysis.formattedResult,
+        annotations: structuredAnalysis.annotations,
         documentId,
         timestamp: new Date().toISOString(),
         model: process.env.OPENAI_MODEL || "gpt-4o-mini"
@@ -264,20 +268,288 @@ class AIAnalysisService {
    * Get analysis prompt with document content
    */
   getAnalysisPrompt(analysisType, content, citationStyle = 'APA') {
-    return `Please perform a comprehensive academic analysis of the following document using ${citationStyle} citation style standards:
+    return `Please perform a comprehensive academic analysis of the following document using ${citationStyle} citation style standards.
+
+IMPORTANT: For each feedback point, you must include the EXACT text from the document that you're referring to, enclosed in double quotes.
 
 Document Content:
 ${content}
 
-Please provide a detailed analysis focusing on:
-1. **Academic Writing Quality**: Clarity, coherence, and academic tone
-2. **Citation and Referencing**: Accuracy and consistency with ${citationStyle} style
-3. **Research Methodology**: If applicable, evaluate the research approach
-4. **Argument Structure**: Logical flow and evidence presentation
-5. **Grammar and Style**: Technical writing quality
-6. **Content Depth**: Thoroughness and academic rigor
+Please provide a detailed analysis in the following JSON format:
 
-For each point, provide specific examples from the text and actionable recommendations. Focus on identifying actual strengths and areas for improvement with precise text references.`;
+{
+  "overall_assessment": "Brief overall assessment of the document",
+  "detailed_analysis": {
+    "academic_writing_quality": {
+      "assessment": "Analysis of clarity, coherence, and academic tone",
+      "strengths": [
+        {
+          "text": "EXACT quoted text from document",
+          "comment": "Why this is a strength",
+          "suggestion": "How to maintain this quality"
+        }
+      ],
+      "improvements": [
+        {
+          "text": "EXACT quoted text from document",
+          "comment": "What needs improvement",
+          "suggestion": "Specific recommendation for improvement"
+        }
+      ],
+      "concerns": [
+        {
+          "text": "EXACT quoted text from document",
+          "comment": "What is problematic",
+          "suggestion": "How to fix this issue"
+        }
+      ]
+    },
+    "citation_referencing": {
+      "assessment": "Analysis of citations and references",
+      "strengths": [],
+      "improvements": [],
+      "concerns": []
+    },
+    "argument_structure": {
+      "assessment": "Analysis of logical flow and evidence",
+      "strengths": [],
+      "improvements": [],
+      "concerns": []
+    },
+    "grammar_style": {
+      "assessment": "Analysis of technical writing quality",
+      "strengths": [],
+      "improvements": [],
+      "concerns": []
+    },
+    "content_depth": {
+      "assessment": "Analysis of thoroughness and rigor",
+      "strengths": [],
+      "improvements": [],
+      "concerns": []
+    }
+  },
+  "recommendations": [
+    "Priority recommendation 1",
+    "Priority recommendation 2",
+    "Priority recommendation 3"
+  ]
+}
+
+CRITICAL REQUIREMENTS:
+1. Every feedback item MUST include the exact quoted text from the document
+2. Categorize feedback as: strengths (green), improvements (amber), concerns (red)
+3. Provide specific, actionable suggestions for each point
+4. Focus on the most important issues first
+5. Ensure all quoted text is exactly as it appears in the document`;
+  }
+
+  /**
+   * Parse structured analysis response and extract annotations
+   */
+  parseStructuredAnalysis(analysisResult, content) {
+    try {
+      // Try to extract JSON from the response
+      const jsonMatch = analysisResult.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) {
+        throw new Error('No JSON found in analysis result');
+      }
+
+      const structuredData = JSON.parse(jsonMatch[0]);
+      const annotations = [];
+      let annotationId = 1;
+
+      // Extract annotations from each category
+      Object.values(structuredData.detailed_analysis).forEach(category => {
+        // Process strengths (green)
+        if (category.strengths) {
+          category.strengths.forEach(item => {
+            if (item.text && item.comment) {
+              const textMatch = this.findTextInContent(content, item.text);
+              if (textMatch) {
+                annotations.push({
+                  id: annotationId.toString(),
+                  type: 'strong',
+                  text: textMatch.text,
+                  startIndex: textMatch.startIndex,
+                  endIndex: textMatch.endIndex,
+                  comment: item.comment,
+                  suggestion: item.suggestion || 'This demonstrates strong academic writing. Continue using this approach.'
+                });
+                annotationId++;
+              }
+            }
+          });
+        }
+
+        // Process improvements (amber)
+        if (category.improvements) {
+          category.improvements.forEach(item => {
+            if (item.text && item.comment) {
+              const textMatch = this.findTextInContent(content, item.text);
+              if (textMatch) {
+                annotations.push({
+                  id: annotationId.toString(),
+                  type: 'improve',
+                  text: textMatch.text,
+                  startIndex: textMatch.startIndex,
+                  endIndex: textMatch.endIndex,
+                  comment: item.comment,
+                  suggestion: item.suggestion || 'Consider enhancing this section with more specific details and supporting evidence.'
+                });
+                annotationId++;
+              }
+            }
+          });
+        }
+
+        // Process concerns (red)
+        if (category.concerns) {
+          category.concerns.forEach(item => {
+            if (item.text && item.comment) {
+              const textMatch = this.findTextInContent(content, item.text);
+              if (textMatch) {
+                annotations.push({
+                  id: annotationId.toString(),
+                  type: 'concern',
+                  text: textMatch.text,
+                  startIndex: textMatch.startIndex,
+                  endIndex: textMatch.endIndex,
+                  comment: item.comment,
+                  suggestion: item.suggestion || 'This area needs immediate attention and revision to strengthen your argument.'
+                });
+                annotationId++;
+              }
+            }
+          });
+        }
+      });
+
+      // Create formatted result for display
+      const formattedResult = this.formatAnalysisForDisplay(structuredData);
+
+      return {
+        formattedResult,
+        annotations: annotations.sort((a, b) => a.startIndex - b.startIndex)
+      };
+
+    } catch (error) {
+      console.error('Error parsing structured analysis:', error);
+      // Fallback to original result if parsing fails
+      return {
+        formattedResult: analysisResult,
+        annotations: []
+      };
+    }
+  }
+
+  /**
+   * Find exact text match in content
+   */
+  findTextInContent(content, quotedText) {
+    // Remove quotes and clean the text
+    const cleanText = quotedText.replace(/^["']|["']$/g, '').trim();
+    
+    // Try exact match first
+    const exactIndex = content.indexOf(cleanText);
+    if (exactIndex !== -1) {
+      return {
+        text: cleanText,
+        startIndex: exactIndex,
+        endIndex: exactIndex + cleanText.length
+      };
+    }
+
+    // Try case-insensitive match
+    const lowerContent = content.toLowerCase();
+    const lowerText = cleanText.toLowerCase();
+    const caseInsensitiveIndex = lowerContent.indexOf(lowerText);
+    if (caseInsensitiveIndex !== -1) {
+      return {
+        text: content.slice(caseInsensitiveIndex, caseInsensitiveIndex + cleanText.length),
+        startIndex: caseInsensitiveIndex,
+        endIndex: caseInsensitiveIndex + cleanText.length
+      };
+    }
+
+    // Try to find partial matches (for cases where AI might have truncated text)
+    const words = cleanText.split(' ').filter(word => word.length > 3);
+    if (words.length > 0) {
+      for (const word of words) {
+        const wordIndex = lowerContent.indexOf(word.toLowerCase());
+        if (wordIndex !== -1) {
+          // Find sentence boundaries around this word
+          const sentenceStart = Math.max(0, content.lastIndexOf('.', wordIndex) + 1);
+          const sentenceEnd = Math.min(content.length, content.indexOf('.', wordIndex) + 1);
+          const sentence = content.slice(sentenceStart, sentenceEnd).trim();
+          
+          if (sentence.length > 10 && sentence.length < 200) {
+            return {
+              text: sentence,
+              startIndex: sentenceStart,
+              endIndex: sentenceEnd
+            };
+          }
+        }
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Format structured analysis for display
+   */
+  formatAnalysisForDisplay(structuredData) {
+    let formatted = `# Comprehensive Academic Analysis\n\n`;
+    formatted += `## Overall Assessment\n${structuredData.overall_assessment}\n\n`;
+
+    Object.entries(structuredData.detailed_analysis).forEach(([category, data]) => {
+      const categoryTitle = category.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+      formatted += `## ${categoryTitle}\n${data.assessment}\n\n`;
+
+      if (data.strengths && data.strengths.length > 0) {
+        formatted += `### Strengths\n`;
+        data.strengths.forEach((item, index) => {
+          formatted += `${index + 1}. **"${item.text}"** - ${item.comment}\n`;
+          if (item.suggestion) {
+            formatted += `   *Suggestion: ${item.suggestion}*\n`;
+          }
+        });
+        formatted += `\n`;
+      }
+
+      if (data.improvements && data.improvements.length > 0) {
+        formatted += `### Areas for Improvement\n`;
+        data.improvements.forEach((item, index) => {
+          formatted += `${index + 1}. **"${item.text}"** - ${item.comment}\n`;
+          if (item.suggestion) {
+            formatted += `   *Suggestion: ${item.suggestion}*\n`;
+          }
+        });
+        formatted += `\n`;
+      }
+
+      if (data.concerns && data.concerns.length > 0) {
+        formatted += `### Serious Concerns\n`;
+        data.concerns.forEach((item, index) => {
+          formatted += `${index + 1}. **"${item.text}"** - ${item.comment}\n`;
+          if (item.suggestion) {
+            formatted += `   *Suggestion: ${item.suggestion}*\n`;
+          }
+        });
+        formatted += `\n`;
+      }
+    });
+
+    if (structuredData.recommendations && structuredData.recommendations.length > 0) {
+      formatted += `## Priority Recommendations\n`;
+      structuredData.recommendations.forEach((rec, index) => {
+        formatted += `${index + 1}. ${rec}\n`;
+      });
+    }
+
+    return formatted;
   }
 
   /**
