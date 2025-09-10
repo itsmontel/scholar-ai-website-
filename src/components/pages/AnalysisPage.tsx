@@ -51,7 +51,8 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate }) => {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [analysisTypes, setAnalysisTypes] = useState<AnalysisType[]>([]);
   const [selectedDocument, setSelectedDocument] = useState<string>('');
-  const [selectedAnalysisType, setSelectedAnalysisType] = useState<string>('');
+  const [selectedAnalysisType, setSelectedAnalysisType] = useState<string>('comprehensive');
+  const [selectedCitationStyle, setSelectedCitationStyle] = useState<string>('APA');
   const [isLoading, setIsLoading] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<string>('');
@@ -197,28 +198,37 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate }) => {
       
       // Look for specific patterns in the analysis
       if (cleanLine.length > 20 && cleanLine.length < 300) {
-        // Determine type based on content
+        // Determine type based on content - be more specific
         let type: 'strong' | 'improve' | 'concern' = 'improve';
         let comment = cleanLine;
         let suggestion = '';
         
-        if (/strength|strong|excellent|good|positive|commendable|effective|clear|well|timely|relevant/i.test(cleanLine)) {
+        // More specific patterns for strong points
+        if (/excellent|outstanding|well-written|clear|coherent|logical|thorough|comprehensive|insightful|rigorous|methodical|precise|articulate|compelling|persuasive|well-structured|well-organized|strong argument|solid evidence|good use of|effective|successful|impressive|notable|commendable/i.test(cleanLine)) {
           type = 'strong';
-          suggestion = 'This demonstrates strong academic writing and should be maintained throughout the paper.';
-        } else if (/concern|weak|lack|missing|insufficient|problem|issue|limitation|critical|fail|detract/i.test(cleanLine)) {
+          suggestion = 'This demonstrates strong academic writing. Continue using this approach throughout your paper.';
+        } 
+        // More specific patterns for concerns
+        else if (/weak|poor|unclear|confusing|vague|inconsistent|incomplete|insufficient|lacking|missing|problem|issue|limitation|concern|critical|fail|detract|undermine|contradict|inaccurate|incorrect|flawed|deficient|inadequate|unconvincing|unsubstantiated/i.test(cleanLine)) {
           type = 'concern';
-          suggestion = 'This area requires immediate attention and revision to improve the overall quality of the paper.';
-        } else {
+          suggestion = 'This area needs immediate attention and revision to strengthen your argument.';
+        } 
+        // Everything else is improvement
+        else {
           type = 'improve';
           suggestion = 'Consider enhancing this section with more specific details and supporting evidence.';
         }
         
-        // Extract key terms for text matching - be more aggressive
+        // Extract key terms for text matching - focus on content-specific terms
         const keyTerms = extractKeyTerms(cleanLine);
         
-        // If no key terms found, use common academic terms
+        // If no key terms found, try to extract from the comment itself
         if (keyTerms.length === 0) {
-          keyTerms.push('artificial intelligence', 'education', 'learning', 'research', 'analysis');
+          const words = cleanLine.toLowerCase().split(/\s+/).filter(word => 
+            word.length > 3 && 
+            !['this', 'that', 'with', 'from', 'they', 'have', 'been', 'were', 'said', 'each', 'which', 'their', 'will', 'more', 'also', 'into', 'time', 'only', 'could', 'other', 'after', 'first', 'well', 'work', 'such', 'make', 'over', 'think', 'help', 'just', 'like', 'long', 'make', 'much', 'some', 'very', 'when', 'here', 'much', 'take', 'than', 'them', 'these', 'so', 'may', 'say', 'she', 'use', 'her', 'many', 'would', 'there', 'can', 'all', 'but', 'not', 'what', 'all', 'were', 'when', 'your', 'can', 'said', 'each', 'which', 'she', 'do', 'how', 'their', 'if', 'will', 'up', 'other', 'about', 'out', 'many', 'then', 'them', 'these', 'so', 'some', 'her', 'would', 'make', 'like', 'into', 'him', 'time', 'has', 'two', 'more', 'go', 'no', 'way', 'could', 'my', 'than', 'first', 'been', 'call', 'who', 'its', 'now', 'find', 'long', 'down', 'day', 'did', 'get', 'come', 'made', 'may', 'part'].includes(word)
+          );
+          keyTerms.push(...words.slice(0, 3));
         }
         
         feedback.push({
@@ -396,6 +406,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate }) => {
         body: JSON.stringify({
           documentId: selectedDocument,
           analysisType: selectedAnalysisType,
+          citationStyle: selectedCitationStyle,
         }),
       });
 
@@ -677,6 +688,29 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate }) => {
                 </div>
               </div>
 
+              {/* Citation Style Selection */}
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Citation Style
+                </label>
+                <select
+                  value={selectedCitationStyle}
+                  onChange={(e) => setSelectedCitationStyle(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  disabled={isAnalyzing}
+                >
+                  <option value="APA">APA (American Psychological Association)</option>
+                  <option value="Harvard">Harvard</option>
+                  <option value="Chicago">Chicago</option>
+                  <option value="MLA">MLA (Modern Language Association)</option>
+                  <option value="IEEE">IEEE</option>
+                  <option value="Vancouver">Vancouver</option>
+                </select>
+                <p className="text-xs text-gray-500 mt-1">
+                  Select the citation style used in your document for more accurate analysis
+                </p>
+              </div>
+
               {/* Analyze Button */}
               <button
                 onClick={handleAnalyze}
@@ -873,12 +907,12 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate }) => {
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-6">
                   <div className="text-sm">
-                    <span className="text-gray-500">Overall Score:</span>
-                    <span className="ml-2 font-semibold text-gray-900">Good (7.5/10)</span>
-                      </div>
-                  <div className="text-sm">
                     <span className="text-gray-500">Word Count:</span>
                     <span className="ml-2 font-semibold text-gray-900">{documentContent.split(' ').length}</span>
+                      </div>
+                  <div className="text-sm">
+                    <span className="text-gray-500">Citation Style:</span>
+                    <span className="ml-2 font-semibold text-gray-900">{selectedCitationStyle}</span>
                   </div>
                 </div>
                 <div className="flex space-x-3">

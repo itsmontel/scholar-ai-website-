@@ -14,9 +14,10 @@ class AIAnalysisService {
    * @param {string} content - The document content
    * @param {string} analysisType - Type of analysis to perform
    * @param {string} userId - The user ID
+   * @param {string} citationStyle - Citation style (APA, Harvard, etc.)
    * @returns {Object} Analysis results
    */
-  async analyzeDocument(documentId, content, analysisType, userId) {
+  async analyzeDocument(documentId, content, analysisType, userId, citationStyle = 'APA') {
     try {
       // Check if OpenAI API key is configured
       if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY === 'your_openai_api_key_here') {
@@ -24,7 +25,7 @@ class AIAnalysisService {
         return await this.mockAnalysis(documentId, content, analysisType, userId);
       }
 
-      const analysisPrompt = this.getAnalysisPrompt(analysisType, content);
+      const analysisPrompt = this.getAnalysisPrompt(analysisType, content, citationStyle);
       
       const completion = await this.openai.chat.completions.create({
         model: process.env.OPENAI_MODEL || "gpt-4o-mini", // Using GPT-4o-mini (gpt-5-nano doesn't exist)
@@ -262,13 +263,21 @@ class AIAnalysisService {
   /**
    * Get analysis prompt with document content
    */
-  getAnalysisPrompt(analysisType, content) {
-    return `Please analyze the following document for ${analysisType} analysis:
+  getAnalysisPrompt(analysisType, content, citationStyle = 'APA') {
+    return `Please perform a comprehensive academic analysis of the following document using ${citationStyle} citation style standards:
 
 Document Content:
 ${content}
 
-Please provide your analysis in a structured format with clear sections and actionable recommendations.`;
+Please provide a detailed analysis focusing on:
+1. **Academic Writing Quality**: Clarity, coherence, and academic tone
+2. **Citation and Referencing**: Accuracy and consistency with ${citationStyle} style
+3. **Research Methodology**: If applicable, evaluate the research approach
+4. **Argument Structure**: Logical flow and evidence presentation
+5. **Grammar and Style**: Technical writing quality
+6. **Content Depth**: Thoroughness and academic rigor
+
+For each point, provide specific examples from the text and actionable recommendations. Focus on identifying actual strengths and areas for improvement with precise text references.`;
   }
 
   /**
@@ -376,37 +385,9 @@ Please provide your analysis in a structured format with clear sections and acti
   getAnalysisTypes() {
     return [
       {
-        id: 'general',
-        name: 'General Analysis',
-        description: 'Comprehensive feedback on structure, clarity, and academic style',
-        icon: '📝',
-        estimatedTime: '2-3 minutes'
-      },
-      {
-        id: 'citation',
-        name: 'Citation Check',
-        description: 'Review citations, references, and academic integrity',
-        icon: '📚',
-        estimatedTime: '1-2 minutes'
-      },
-      {
-        id: 'grammar',
-        name: 'Grammar & Language',
-        description: 'Grammar, punctuation, and language improvement',
-        icon: '✏️',
-        estimatedTime: '1-2 minutes'
-      },
-      {
-        id: 'plagiarism',
-        name: 'Plagiarism Check',
-        description: 'Academic integrity and originality assessment',
-        icon: '🔍',
-        estimatedTime: '2-3 minutes'
-      },
-      {
         id: 'comprehensive',
         name: 'Comprehensive Review',
-        description: 'Complete analysis across all aspects of academic writing',
+        description: 'Complete analysis across all aspects of academic writing including citations, grammar, structure, and content quality',
         icon: '🎯',
         estimatedTime: '4-5 minutes'
       }

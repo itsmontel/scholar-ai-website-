@@ -9,7 +9,8 @@ const documentService = require('../services/documentService');
 // Validation schemas
 const analyzeDocumentSchema = Joi.object({
   documentId: Joi.string().uuid().required(),
-  analysisType: Joi.string().valid('general', 'citation', 'grammar', 'plagiarism', 'comprehensive').required()
+  analysisType: Joi.string().valid('comprehensive').required(),
+  citationStyle: Joi.string().valid('APA', 'Harvard', 'Chicago', 'MLA', 'IEEE', 'Vancouver').optional()
 });
 
 const getAnalysisSchema = Joi.object({
@@ -23,7 +24,7 @@ const getAnalysisSchema = Joi.object({
  */
 router.post('/analyze', authenticateToken, validate(analyzeDocumentSchema), async (req, res) => {
   try {
-    const { documentId, analysisType } = req.body;
+    const { documentId, analysisType, citationStyle } = req.body;
     const userId = req.user.id;
 
     // Get the document and verify ownership
@@ -49,7 +50,8 @@ router.post('/analyze', authenticateToken, validate(analyzeDocumentSchema), asyn
       documentId,
       content,
       analysisType,
-      userId
+      userId,
+      citationStyle
     );
 
     res.json({
