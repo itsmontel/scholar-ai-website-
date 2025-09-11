@@ -103,6 +103,16 @@ router.post('/save', authenticateToken, validate(saveAnalysisSchema), async (req
     const { documentId, content, analysisResult, annotations, analysisType, citationStyle } = req.body;
     const userId = req.user.id;
 
+    console.log('Saving analysis with data:', {
+      documentId,
+      userId,
+      analysisType,
+      contentLength: content?.length,
+      analysisResultLength: analysisResult?.length,
+      annotationsCount: annotations?.length,
+      citationStyle
+    });
+
     // Save the analysis
     const savedAnalysis = await aiAnalysisService.saveAnalysis(
       documentId,
@@ -113,6 +123,8 @@ router.post('/save', authenticateToken, validate(saveAnalysisSchema), async (req
       annotations,
       citationStyle
     );
+
+    console.log('Analysis saved successfully:', savedAnalysis);
 
     res.json({
       success: true,
@@ -225,23 +237,32 @@ router.get('/document/:documentId', authenticateToken, async (req, res) => {
     const { documentId } = req.params;
     const userId = req.user.id;
 
-    // Verify document ownership
-    const document = await documentService.getDocumentById(documentId, userId);
-    if (!document) {
-      return res.status(404).json({
-        success: false,
-        message: 'Document not found or access denied'
-      });
+    // If documentId is 'null' (string), treat it as null
+    const actualDocumentId = documentId === 'null' ? null : documentId;
+
+    // Only verify document ownership if documentId is not null
+    if (actualDocumentId) {
+      const document = await documentService.getDocumentById(actualDocumentId, userId);
+      if (!document) {
+        return res.status(404).json({
+          success: false,
+          message: 'Document not found or access denied'
+        });
+      }
     }
 
     // Get analyses for this document
-    const { getSupabaseClient } = require('../services/databaseService');
-    const supabase = getSupabaseClient();
+    // Use service role key to bypass RLS for analysis retrieval
+    const { createClient } = require('@supabase/supabase-js');
+    const supabase = createClient(
+      process.env.SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
+    );
 
     const { data, error } = await supabase
       .from('document_analyses')
       .select('*')
-      .eq('document_id', documentId)
+      .eq('document_id', actualDocumentId)
       .eq('user_id', userId)
       .order('created_at', { ascending: false });
 

@@ -222,7 +222,6 @@ const LandingPage = ({ onNavigate }) => {
               <h4 className="font-semibold text-gray-900 mb-4">Resources</h4>
               <ul className="space-y-2">
                 <li><a href="#" className="text-gray-600 hover:text-gray-900 text-sm">Help Center</a></li>
-                <li><a href="#" className="text-gray-600 hover:text-gray-900 text-sm">Writing Guide</a></li>
                 <li><a href="#" className="text-gray-600 hover:text-gray-900 text-sm">API Docs</a></li>
               </ul>
             </div>

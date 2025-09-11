@@ -38,6 +38,7 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
     const docsWithAnalysis = await Promise.all(
       documents.map(async (doc: any) => {
         // Check if document has analysis
+        console.log('Dashboard: Checking analysis for document:', doc.id);
         const analysisResponse = await fetch(`http://localhost:3001/api/analysis/document/${doc.id}`, {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
@@ -47,7 +48,10 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
         let hasAnalysis = false;
         if (analysisResponse.ok) {
           const analysisResult = await analysisResponse.json();
+          console.log('Dashboard: Analysis check result for document', doc.id, ':', analysisResult);
           hasAnalysis = analysisResult.data && analysisResult.data.length > 0;
+        } else {
+          console.warn('Dashboard: Failed to check analysis for document', doc.id, ':', analysisResponse.status, analysisResponse.statusText);
         }
         
         return {

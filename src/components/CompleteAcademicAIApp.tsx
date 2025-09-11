@@ -15,7 +15,6 @@ import FeaturesPage from './pages/FeaturesPage';
 import ProfilePage from './pages/ProfilePage';
 import LibraryPage from './pages/LibraryPage';
 import HelpCenterPage from './pages/HelpCenterPage';
-import WritingGuidePage from './pages/WritingGuidePage';
 import AboutPage from './pages/AboutPage';
 import ContactPage from './pages/ContactPage';
 
@@ -237,8 +236,6 @@ const AcademicAIApp = () => {
         return <ContactPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'help':
         return <HelpCenterPage onNavigate={navigateTo} />;
-      case 'writing-guide':
-        return <WritingGuidePage onNavigate={navigateTo} />;
       case 'dashboard':
         return <DashboardPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'analysis':

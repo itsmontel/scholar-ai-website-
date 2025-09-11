@@ -1,9 +1,13 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 
-const HelpCenterPage = ({ onNavigate }) => {
+interface HelpCenterPageProps {
+  onNavigate?: (page: string) => void;
+}
+
+const HelpCenterPage: React.FC<HelpCenterPageProps> = ({ onNavigate }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [openFAQ, setOpenFAQ] = useState(null);
+  const [openFAQ, setOpenFAQ] = useState<number | null>(null);
 
   const categories = [
     { id: 'all', name: 'All Topics', icon: '📚', count: 12 },
@@ -107,28 +111,28 @@ const HelpCenterPage = ({ onNavigate }) => {
       title: 'Start Your First Analysis',
       description: 'Upload a document or paste text to get AI-powered feedback',
       icon: '🚀',
-      action: () => onNavigate('dashboard'),
+      action: () => onNavigate?.('dashboard'),
       color: 'blue'
     },
     {
       title: 'View Analysis History',
       description: 'Access all your saved analyses and results',
       icon: '📊',
-      action: () => onNavigate('analysis-history'),
+      action: () => onNavigate?.('analysis-history'),
       color: 'purple'
     },
     {
       title: 'Upload Documents',
       description: 'Upload PDF, DOC, DOCX, or TXT files for analysis',
       icon: '📄',
-      action: () => onNavigate('dashboard'),
+      action: () => onNavigate?.('dashboard'),
       color: 'green'
     },
     {
       title: 'Contact Support',
       description: 'Get help from our expert team',
       icon: '💬',
-      action: () => onNavigate('contact'),
+      action: () => onNavigate?.('contact'),
       color: 'orange'
     }
   ];
@@ -142,7 +146,7 @@ const HelpCenterPage = ({ onNavigate }) => {
     return matchesCategory && matchesSearch;
   });
 
-  const toggleFAQ = (id) => {
+  const toggleFAQ = (id: number) => {
     setOpenFAQ(openFAQ === id ? null : id);
   };
 
@@ -157,16 +161,16 @@ const HelpCenterPage = ({ onNavigate }) => {
           <span className="text-xl font-bold text-gray-900">Scholar AI</span>
         </div>
         <div className="hidden md:flex items-center space-x-8">
-          <button onClick={() => onNavigate('landing')} className="text-gray-600 hover:text-gray-900 transition-colors">Home</button>
-          <button onClick={() => onNavigate('features')} className="text-gray-600 hover:text-gray-900 transition-colors">Features</button>
-          <button onClick={() => onNavigate('pricing')} className="text-gray-600 hover:text-gray-900 transition-colors">Pricing</button>
+          <button onClick={() => onNavigate?.('landing')} className="text-gray-600 hover:text-gray-900 transition-colors">Home</button>
+          <button onClick={() => onNavigate?.('features')} className="text-gray-600 hover:text-gray-900 transition-colors">Features</button>
+          <button onClick={() => onNavigate?.('pricing')} className="text-gray-600 hover:text-gray-900 transition-colors">Pricing</button>
           <button className="text-blue-600 font-medium">Help</button>
         </div>
         <div className="flex items-center space-x-4">
-          <button onClick={() => onNavigate('login')} className="text-gray-600 hover:text-gray-900 transition-colors">
+          <button onClick={() => onNavigate?.('login')} className="text-gray-600 hover:text-gray-900 transition-colors">
             Login
           </button>
-          <button onClick={() => onNavigate('signup')} className="bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors">
+          <button onClick={() => onNavigate?.('signup')} className="bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors">
             Sign up
           </button>
         </div>
@@ -197,23 +201,6 @@ const HelpCenterPage = ({ onNavigate }) => {
               />
             </div>
           </div>
-        </div>
-
-        {/* Quick Actions */}
-        <div className="grid md:grid-cols-4 gap-6 mb-16">
-          {quickActions.map((action, index) => (
-            <button
-              key={index}
-              onClick={action.action}
-              className={`p-6 bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 text-left group border-2 border-transparent hover:border-${action.color}-200`}
-            >
-              <div className="text-3xl mb-4 group-hover:scale-110 transition-transform duration-300">
-                {action.icon}
-              </div>
-              <h3 className="font-semibold text-gray-900 mb-2">{action.title}</h3>
-              <p className="text-gray-600 text-sm">{action.description}</p>
-            </button>
-          ))}
         </div>
 
         <div className="grid lg:grid-cols-4 gap-8">
@@ -248,7 +235,7 @@ const HelpCenterPage = ({ onNavigate }) => {
                 <h4 className="font-semibold text-gray-900 mb-2">Still need help?</h4>
                 <p className="text-sm text-gray-600 mb-4">Our support team is here to help you succeed.</p>
                 <button 
-                  onClick={() => onNavigate('contact')}
+                  onClick={() => onNavigate?.('contact')}
                   className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-2 rounded-lg text-sm font-medium hover:shadow-lg transition-all duration-300"
                 >
                   Contact Support
@@ -281,7 +268,7 @@ const HelpCenterPage = ({ onNavigate }) => {
                 <h3 className="text-lg font-medium text-gray-900 mb-2">No articles found</h3>
                 <p className="text-gray-500 mb-6">Try adjusting your search terms or browse a different category</p>
                 <button 
-                  onClick={() => onNavigate('contact')}
+                  onClick={() => onNavigate?.('contact')}
                   className="bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors"
                 >
                   Contact Support
@@ -331,42 +318,23 @@ const HelpCenterPage = ({ onNavigate }) => {
               </div>
             )}
 
-            {/* Additional Resources */}
-            <div className="mt-12 grid md:grid-cols-2 gap-6">
-              <div className="bg-white rounded-xl shadow-lg p-6">
-                <h3 className="font-semibold text-gray-900 mb-4">📚 Learning Resources</h3>
-                <ul className="space-y-3">
-                  <li>
-                    <a href="#" className="text-blue-600 hover:text-blue-500 font-medium">Academic Writing Best Practices</a>
-                    <p className="text-sm text-gray-600">Learn how to improve your academic writing with Scholar AI</p>
-                  </li>
-                  <li>
-                    <a href="#" className="text-blue-600 hover:text-blue-500 font-medium">Understanding AI Analysis</a>
-                    <p className="text-sm text-gray-600">Guide to interpreting and using AI feedback effectively</p>
-                  </li>
-                  <li>
-                    <a href="#" className="text-blue-600 hover:text-blue-500 font-medium">Citation Style Examples</a>
-                    <p className="text-sm text-gray-600">Examples and rules for APA, MLA, Chicago, and other styles</p>
-                  </li>
-                </ul>
-              </div>
-
-              <div className="bg-white rounded-xl shadow-lg p-6">
-                <h3 className="font-semibold text-gray-900 mb-4">🔧 Technical Support</h3>
-                <ul className="space-y-3">
-                  <li>
-                    <a href="#" className="text-blue-600 hover:text-blue-500 font-medium">System Status</a>
-                    <p className="text-sm text-gray-600">Real-time status of all Scholar AI services</p>
-                  </li>
-                  <li>
-                    <a href="#" className="text-blue-600 hover:text-blue-500 font-medium">Security & Privacy</a>
-                    <p className="text-sm text-gray-600">Information about data protection and security</p>
-                  </li>
-                  <li>
-                    <a href="#" className="text-blue-600 hover:text-blue-500 font-medium">Feature Requests</a>
-                    <p className="text-sm text-gray-600">Suggest new features or improvements</p>
-                  </li>
-                </ul>
+            {/* Quick Actions */}
+            <div className="mt-12">
+              <h3 className="text-2xl font-bold text-gray-900 mb-6">Quick Actions</h3>
+              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {quickActions.map((action, index) => (
+                  <button
+                    key={index}
+                    onClick={action.action}
+                    className={`p-6 bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 text-left group border-2 border-transparent hover:border-${action.color}-200`}
+                  >
+                    <div className="text-3xl mb-4 group-hover:scale-110 transition-transform duration-300">
+                      {action.icon}
+                    </div>
+                    <h4 className="font-semibold text-gray-900 mb-2">{action.title}</h4>
+                    <p className="text-gray-600 text-sm">{action.description}</p>
+                  </button>
+                ))}
               </div>
             </div>
           </div>

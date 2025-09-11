@@ -63,6 +63,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate }) => {
   const [hoveredAnnotation, setHoveredAnnotation] = useState<string | null>(null);
   const [selectedAnnotation, setSelectedAnnotation] = useState<string | null>(null);
   const [error, setError] = useState<string>('');
+  const [successMessage, setSuccessMessage] = useState<string>('');
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
   const documentRef = useRef<HTMLDivElement>(null);
 
@@ -78,6 +79,24 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate }) => {
       setDocumentContent(textContent);
       // Clear the stored content after using it
       localStorage.removeItem('textAnalysisContent');
+    }
+
+    // Check if there's a selected document from Library page
+    const selectedDocumentId = localStorage.getItem('selectedDocumentId');
+    const hasExistingAnalysis = localStorage.getItem('hasExistingAnalysis') === 'true';
+    
+    if (selectedDocumentId) {
+      console.log('Loading selected document:', selectedDocumentId, 'with existing analysis:', hasExistingAnalysis);
+      setSelectedDocument(selectedDocumentId);
+      
+      // If there's an existing analysis, load it
+      if (hasExistingAnalysis) {
+        loadExistingAnalysis(selectedDocumentId);
+      }
+      
+      // Clear the stored data after using it
+      localStorage.removeItem('selectedDocumentId');
+      localStorage.removeItem('hasExistingAnalysis');
     }
   }, []);
 
@@ -414,6 +433,60 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate }) => {
     }
   };
 
+  const loadExistingAnalysis = async (documentId: string) => {
+    try {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        setError('Please log in to access analyses');
+        return;
+      }
+
+      console.log('Loading existing analysis for document:', documentId);
+
+      // Get the document content first
+      const content = await fetchDocumentContent(documentId);
+      setDocumentContent(content);
+      setPreviewContent(content);
+
+      // Get the existing analysis
+      const response = await fetch(`http://localhost:3001/api/analysis/document/${documentId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch existing analysis');
+      }
+
+      const data = await response.json();
+      console.log('Existing analysis response:', data);
+
+      if (data.data && data.data.length > 0) {
+        const latestAnalysis = data.data[0]; // Get the most recent analysis
+        const analysisResults = latestAnalysis.analysis_results;
+        
+        if (analysisResults) {
+          setAnalysisResult(analysisResults.result || '');
+          setAnnotations(analysisResults.annotations || []);
+          setSelectedAnalysisType(latestAnalysis.analysis_type || 'comprehensive');
+          setSelectedCitationStyle(analysisResults.citation_style || 'APA');
+          
+          console.log('Loaded existing analysis:', {
+            result: analysisResults.result?.substring(0, 100) + '...',
+            annotationsCount: analysisResults.annotations?.length || 0,
+            analysisType: latestAnalysis.analysis_type,
+            citationStyle: analysisResults.citation_style
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error loading existing analysis:', error);
+      setError('Failed to load existing analysis');
+    }
+  };
+
   const handleDocumentSelection = async (documentId: string) => {
     setSelectedDocument(documentId);
     setPreviewContent('');
@@ -463,6 +536,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate }) => {
 
     setIsAnalyzing(true);
     setError('');
+    setSuccessMessage('');
     setAnalysisResult('');
     setAnnotations([]);
 
@@ -495,6 +569,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate }) => {
       setAnalysisResult(result.data.result);
       
       // Use annotations from backend if available, otherwise generate fallback
+      let finalAnnotations: Annotation[] = [];
       if (result.data.annotations && result.data.annotations.length > 0) {
         console.log('Using backend annotations:', result.data.annotations);
         
@@ -524,12 +599,65 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate }) => {
           });
         
         console.log('Validated annotations:', validatedAnnotations);
+        finalAnnotations = validatedAnnotations;
         setAnnotations(validatedAnnotations);
       } else {
         // Fallback to frontend generation if backend doesn't provide annotations
         const aiAnnotations = generateAIAnnotations(content, result.data.result);
         console.log('Generated fallback annotations:', aiAnnotations);
+        finalAnnotations = aiAnnotations;
         setAnnotations(aiAnnotations);
+      }
+
+      // Automatically save the analysis
+      try {
+        console.log('Auto-saving analysis with data:', {
+          documentId: selectedDocument,
+          contentLength: content.length,
+          analysisResultLength: result.data.result.length,
+          annotationsCount: finalAnnotations.length,
+          analysisType: selectedAnalysisType,
+          citationStyle: selectedCitationStyle,
+        });
+
+        const saveResponse = await fetch('http://localhost:3001/api/analysis/save', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            documentId: selectedDocument,
+            content: content,
+            analysisResult: result.data.result,
+            annotations: finalAnnotations,
+            analysisType: selectedAnalysisType,
+            citationStyle: selectedCitationStyle,
+          }),
+        });
+
+        if (saveResponse.ok) {
+          const saveResult = await saveResponse.json();
+          console.log('Analysis automatically saved successfully:', saveResult);
+          
+          // Show success message
+          setError(''); // Clear any previous errors
+          setSuccessMessage('Analysis saved successfully! You can now view it in your Library.');
+          
+          // Optional: Navigate to Library page to show updated status
+          // Uncomment the line below if you want automatic navigation
+          // onNavigate?.('library');
+        } else {
+          const errorText = await saveResponse.text();
+          console.error('Failed to automatically save analysis:', {
+            status: saveResponse.status,
+            statusText: saveResponse.statusText,
+            error: errorText
+          });
+        }
+      } catch (saveError) {
+        console.error('Error automatically saving analysis:', saveError);
+        // Don't show error to user since analysis was successful
       }
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Analysis failed');
@@ -566,50 +694,6 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate }) => {
     }
   };
 
-  const handleSaveAnalysis = async () => {
-    if (!analysisResult || !documentContent) {
-      setError('No analysis to save');
-      return;
-    }
-
-    try {
-      const token = localStorage.getItem('authToken');
-      if (!token) {
-        setError('Please log in to save analysis');
-        return;
-      }
-
-      const response = await fetch('http://localhost:3001/api/analysis/save', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          documentId: selectedDocument,
-          content: documentContent,
-          analysisResult: analysisResult,
-          annotations: annotations,
-          analysisType: selectedAnalysisType,
-          citationStyle: selectedCitationStyle,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to save analysis');
-      }
-
-      // Show success message
-      alert('Analysis saved successfully!');
-      
-      // Optionally redirect to analysis history
-      // onNavigate('analysis-history');
-
-    } catch (error) {
-      setError(error instanceof Error ? error.message : 'Failed to save analysis');
-    }
-  };
 
   const renderHighlightedText = () => {
     if (!documentContent) {
@@ -836,6 +920,29 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate }) => {
           </div>
         )}
 
+        {successMessage && (
+          <div className="mb-6 bg-green-50 border-l-4 border-green-500 p-4 rounded-lg">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <svg className="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <p className="text-sm text-green-700">{successMessage}</p>
+                <div className="mt-2">
+                  <button
+                    onClick={() => onNavigate?.('library')}
+                    className="text-sm bg-green-600 text-white px-3 py-1 rounded-md hover:bg-green-700 transition-colors"
+                  >
+                    View in Library
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {!analysisResult ? (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Analysis Configuration */}
@@ -1039,15 +1146,6 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate }) => {
               </div>
               <div className="flex items-center space-x-3">
                 <button 
-                  onClick={handleSaveAnalysis}
-                  className="px-4 py-2 bg-green-500 hover:bg-green-600 rounded-lg transition-colors flex items-center space-x-2"
-                >
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
-                  </svg>
-                  <span>Save Analysis</span>
-                </button>
-                <button 
                   onClick={() => {
                     setAnalysisResult('');
                     setAnnotations([]);
@@ -1208,9 +1306,6 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate }) => {
                 <div className="flex space-x-3">
                   <button className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
                     Export Report
-                  </button>
-                  <button className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-colors">
-                    Save Analysis
                   </button>
                 </div>
               </div>

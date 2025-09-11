@@ -15,6 +15,7 @@ interface Document {
   uploadStatus: string;
   createdAt: string;
   updatedAt: string;
+  hasAnalysis?: boolean;
 }
 
 interface DocumentStats {
@@ -48,6 +49,29 @@ const LibraryPage = ({ onNavigate }: LibraryPageProps) => {
     fetchStats();
   }, [sortBy, sortOrder]);
 
+  const checkDocumentAnalysis = async (documentId: string, token: string): Promise<boolean> => {
+    try {
+      console.log('Checking analysis for document:', documentId);
+      const response = await fetch(`http://localhost:3001/api/analysis/document/${documentId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log('Analysis check result for document', documentId, ':', result);
+        return result.data && result.data.length > 0;
+      } else {
+        console.warn('Failed to check analysis for document', documentId, ':', response.status, response.statusText);
+        return false;
+      }
+    } catch (error) {
+      console.warn('Error checking document analysis:', error);
+      return false;
+    }
+  };
+
   const fetchDocuments = async () => {
     try {
       setLoading(true);
@@ -72,7 +96,14 @@ const LibraryPage = ({ onNavigate }: LibraryPageProps) => {
       }
 
       const result = await response.json();
-      setDocuments(result.data.documents);
+      const documentsWithAnalysis = await Promise.all(
+        result.data.documents.map(async (doc: Document) => {
+          const hasAnalysis = await checkDocumentAnalysis(doc.id, token);
+          return { ...doc, hasAnalysis };
+        })
+      );
+      
+      setDocuments(documentsWithAnalysis);
     } catch (error) {
       console.error('Error fetching documents:', error);
       setError(error instanceof Error ? error.message : 'Failed to load documents');
@@ -571,10 +602,20 @@ const LibraryPage = ({ onNavigate }: LibraryPageProps) => {
                       </button>
                       
                       <button
-                        onClick={() => onNavigate('analysis')}
-                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                        onClick={() => {
+                          // Store document info for analysis page
+                          localStorage.setItem('selectedDocumentId', document.id);
+                          localStorage.setItem('selectedDocumentTitle', document.title);
+                          localStorage.setItem('hasExistingAnalysis', document.hasAnalysis ? 'true' : 'false');
+                          onNavigate('analysis');
+                        }}
+                        className={`px-4 py-2 rounded-lg transition-colors ${
+                          document.hasAnalysis 
+                            ? 'bg-green-600 text-white hover:bg-green-700' 
+                            : 'bg-blue-600 text-white hover:bg-blue-700'
+                        }`}
                       >
-                        Analyze
+                        {document.hasAnalysis ? 'View Analysis' : 'Analyze'}
                       </button>
                       
                       <button
