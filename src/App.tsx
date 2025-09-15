@@ -3,8 +3,13 @@ import SignUpPage from './components/pages/SignupPage';
 import LoginPage from './components/pages/LoginPage';
 import EmailVerificationPage from './components/pages/EmailVerificationPage';
 
+// Type definitions
+interface NavigationProps {
+  onNavigate: (page: string) => void;
+}
+
 // Landing Page Component
-const LandingPage = ({ onNavigate }) => {
+const LandingPage: React.FC<NavigationProps> = ({ onNavigate }) => {
   const [inputText, setInputText] = useState('');
 
   const handleSubmit = () => {
@@ -77,54 +82,6 @@ const LandingPage = ({ onNavigate }) => {
           </div>
         </div>
 
-        {/* Mock Analysis Examples */}
-        <div className="grid md:grid-cols-2 gap-8 mb-20">
-          <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg p-6 border border-white/20 hover:shadow-xl transition-all duration-300">
-            <div className="mb-4">
-              <h3 className="font-semibold text-gray-900 mb-2">Climate Change Research Paper</h3>
-              <p className="text-sm text-gray-500">Analyzed 2 hours ago</p>
-            </div>
-            <div className="space-y-3">
-              <div className="flex items-start space-x-3 p-3 bg-green-50 rounded-lg">
-                <div className="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
-                <div>
-                  <p className="text-sm font-medium text-green-700">Strong Opening</p>
-                  <p className="text-xs text-gray-600">Excellent introduction that clearly establishes the scope and focus of your research.</p>
-                </div>
-              </div>
-              <div className="flex items-start space-x-3 p-3 bg-yellow-50 rounded-lg">
-                <div className="w-2 h-2 bg-yellow-500 rounded-full mt-2"></div>
-                <div>
-                  <p className="text-sm font-medium text-yellow-700">Consider Clarification</p>
-                  <p className="text-xs text-gray-600">The methodology section could benefit from more detailed explanation.</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg p-6 border border-white/20 hover:shadow-xl transition-all duration-300">
-            <div className="mb-4">
-              <h3 className="font-semibold text-gray-900 mb-2">Economics Thesis Draft</h3>
-              <p className="text-sm text-gray-500">Analyzed 1 day ago</p>
-            </div>
-            <div className="space-y-3">
-              <div className="flex items-start space-x-3 p-3 bg-green-50 rounded-lg">
-                <div className="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
-                <div>
-                  <p className="text-sm font-medium text-green-700">Well-Structured Arguments</p>
-                  <p className="text-xs text-gray-600">Your economic analysis shows clear logical progression.</p>
-                </div>
-              </div>
-              <div className="flex items-start space-x-3 p-3 bg-blue-50 rounded-lg">
-                <div className="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
-                <div>
-                  <p className="text-sm font-medium text-blue-700">Citation Enhancement</p>
-                  <p className="text-xs text-gray-600">Consider adding more recent studies to strengthen your review.</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
 
         {/* Reviews Section */}
         <div className="text-center mb-20">
@@ -249,7 +206,7 @@ const App = () => {
   // Handle URL-based routing
   React.useEffect(() => {
     const path = window.location.pathname;
-    const search = window.location.search;
+    // const search = window.location.search; // Unused variable
     
     if (path === '/email-verification') {
       setCurrentPage('email-verification');
@@ -264,7 +221,7 @@ const App = () => {
     }
   }, []);
 
-  const navigateTo = (page) => {
+  const navigateTo = (page: string) => {
     setCurrentPage(page);
     // Update URL to match the page
     if (page === 'landing') {
@@ -274,11 +231,11 @@ const App = () => {
     }
   };
 
-  const handleSignUp = (status) => {
+  const handleSignUp = (status: boolean) => {
     setIsLoggedIn(status);
   };
 
-  const handleLogin = (status) => {
+  const handleLogin = (status: boolean) => {
     setIsLoggedIn(status);
   };
 
@@ -313,7 +270,7 @@ const App = () => {
 
 // Placeholder components (these would be imported from separate files in a real app)
 
-const Dashboard = ({ onNavigate }) => (
+const Dashboard: React.FC<NavigationProps> = ({ onNavigate }) => (
   <div className="min-h-screen bg-gray-50 p-8">
     <div className="max-w-6xl mx-auto">
       <div className="flex justify-between items-center mb-8">
@@ -347,7 +304,7 @@ const Dashboard = ({ onNavigate }) => (
   </div>
 );
 
-const UploadPage = ({ onNavigate }) => (
+const UploadPage: React.FC<NavigationProps> = ({ onNavigate }) => (
   <div className="min-h-screen bg-gray-50 p-8">
     <div className="max-w-4xl mx-auto">
       <h1 className="text-3xl font-bold text-gray-900 mb-8">Upload Document</h1>
@@ -371,7 +328,7 @@ const UploadPage = ({ onNavigate }) => (
   </div>
 );
 
-const AnalysisPage = ({ onNavigate }) => (
+const AnalysisPage: React.FC<NavigationProps> = ({ onNavigate }) => (
   <div className="min-h-screen bg-gray-50 p-8">
     <div className="max-w-6xl mx-auto">
       <div className="flex justify-between items-center mb-8">
@@ -405,7 +362,7 @@ const AnalysisPage = ({ onNavigate }) => (
   </div>
 );
 
-const SettingsPage = ({ onNavigate }) => (
+const SettingsPage: React.FC<NavigationProps> = ({ onNavigate }) => (
   <div className="min-h-screen bg-gray-50 p-8">
     <div className="max-w-4xl mx-auto">
       <div className="flex justify-between items-center mb-8">

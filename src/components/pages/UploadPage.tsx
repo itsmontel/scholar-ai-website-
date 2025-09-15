@@ -1,7 +1,11 @@
 import { useState, useRef } from 'react';
+import Header from '../common/Header';
+import LoadingSpinner from '../common/LoadingSpinner';
 
 interface UploadPageProps {
   onNavigate: (page: string) => void;
+  user?: { name: string; email: string } | null;
+  onLogout?: () => void;
 }
 
 interface UploadedDocument {
@@ -16,7 +20,7 @@ interface UploadedDocument {
   createdAt: string;
 }
 
-const UploadPage = ({ onNavigate }: UploadPageProps) => {
+const UploadPage = ({ onNavigate, user, onLogout }: UploadPageProps) => {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadedDocument, setUploadedDocument] = useState<UploadedDocument | null>(null);
@@ -177,37 +181,7 @@ const UploadPage = ({ onNavigate }: UploadPageProps) => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
-      {/* Navigation */}
-      <nav className="flex items-center justify-between px-8 py-6">
-        <div className="flex items-center space-x-2">
-          <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-sm">A</span>
-          </div>
-          <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-            Scholar AI
-          </span>
-              </div>
-        <div className="flex items-center space-x-4">
-              <button 
-                onClick={() => onNavigate('dashboard')}
-            className="text-gray-600 hover:text-gray-900 transition-colors"
-              >
-                Dashboard
-              </button>
-              <button 
-                onClick={() => onNavigate('library')}
-            className="text-gray-600 hover:text-gray-900 transition-colors"
-              >
-                Library
-              </button>
-              <button 
-                onClick={() => onNavigate('settings')}
-            className="text-gray-600 hover:text-gray-900 transition-colors"
-              >
-            Settings
-              </button>
-        </div>
-            </nav>
+      <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="upload" />
 
       <div className="max-w-4xl mx-auto px-8 py-12">
         <div className="text-center mb-12">
@@ -334,13 +308,14 @@ const UploadPage = ({ onNavigate }: UploadPageProps) => {
           {/* Upload Progress */}
           {isUploading && (
             <div className="mt-8">
-              <div className="flex items-center justify-between text-sm text-gray-600 mb-2">
-                <span>Uploading...</span>
-                <span>{uploadProgress}%</span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
+              <LoadingSpinner 
+                size="lg" 
+                text={`Uploading... ${uploadProgress}%`}
+                color="blue"
+              />
+              <div className="w-full bg-gray-200 rounded-full h-2 mt-4">
                 <div
-                  className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                  className="bg-gradient-to-r from-blue-600 to-purple-600 h-2 rounded-full transition-all duration-300"
                   style={{ width: `${uploadProgress}%` }}
                 ></div>
                   </div>

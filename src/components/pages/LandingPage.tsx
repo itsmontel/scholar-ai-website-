@@ -1036,9 +1036,9 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
             <div className="-mt-20 text-right">
               <h4 className="font-semibold text-gray-900 mb-6 text-lg">Legal</h4>
               <ul className="space-y-3">
-                <li><a href="#" className="text-gray-600 hover:text-gray-900 text-sm transition-colors font-medium">Terms of Service</a></li>
-                <li><a href="#" className="text-gray-600 hover:text-gray-900 text-sm transition-colors font-medium">Privacy Policy</a></li>
-                <li><a href="#" className="text-gray-600 hover:text-gray-900 text-sm transition-colors font-medium">Delete Account</a></li>
+                <li><button onClick={() => onNavigate('terms')} className="text-gray-600 hover:text-gray-900 text-sm transition-colors font-medium">Terms of Service</button></li>
+                <li><button onClick={() => onNavigate('privacy')} className="text-gray-600 hover:text-gray-900 text-sm transition-colors font-medium">Privacy Policy</button></li>
+                <li><button onClick={() => onNavigate('contact')} className="text-gray-600 hover:text-gray-900 text-sm transition-colors font-medium">Contact Support</button></li>
               </ul>
             </div>
           </div>

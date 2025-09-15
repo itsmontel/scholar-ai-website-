@@ -1,10 +1,13 @@
 import { useState } from 'react';
+import Header from '../common/Header';
 
-interface HelpCenterPageProps {
+interface FAQPageProps {
   onNavigate?: (page: string) => void;
+  user?: { name: string; email: string } | null;
+  onLogout?: () => void;
 }
 
-const HelpCenterPage: React.FC<HelpCenterPageProps> = ({ onNavigate }) => {
+const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [openFAQ, setOpenFAQ] = useState<number | null>(null);
@@ -152,38 +155,16 @@ const HelpCenterPage: React.FC<HelpCenterPageProps> = ({ onNavigate }) => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
-      {/* Navigation */}
-      <nav className="flex items-center justify-between px-8 py-6 bg-white/80 backdrop-blur-sm border-b border-gray-200">
-        <div className="flex items-center space-x-2">
-          <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-sm">S</span>
-          </div>
-          <span className="text-xl font-bold text-gray-900">Scholar AI</span>
-        </div>
-        <div className="hidden md:flex items-center space-x-8">
-          <button onClick={() => onNavigate?.('landing')} className="text-gray-600 hover:text-gray-900 transition-colors">Home</button>
-          <button onClick={() => onNavigate?.('features')} className="text-gray-600 hover:text-gray-900 transition-colors">Features</button>
-          <button onClick={() => onNavigate?.('pricing')} className="text-gray-600 hover:text-gray-900 transition-colors">Pricing</button>
-          <button className="text-blue-600 font-medium">Help</button>
-        </div>
-        <div className="flex items-center space-x-4">
-          <button onClick={() => onNavigate?.('login')} className="text-gray-600 hover:text-gray-900 transition-colors">
-            Login
-          </button>
-          <button onClick={() => onNavigate?.('signup')} className="bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors">
-            Sign up
-          </button>
-        </div>
-      </nav>
+      <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="help" />
 
       <div className="max-w-7xl mx-auto px-8 py-12">
         {/* Header */}
         <div className="text-center mb-16">
           <h1 className="text-5xl font-bold text-gray-900 mb-6">
-            How can we <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">help you?</span>
+            Frequently Asked <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Questions</span>
           </h1>
           <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-            Find answers, get support, and learn how to make the most of Scholar AI
+            Find answers to common questions and learn how to make the most of Scholar AI
           </p>
           
           {/* Search Bar */}
@@ -344,4 +325,4 @@ const HelpCenterPage: React.FC<HelpCenterPageProps> = ({ onNavigate }) => {
   );
 };
 
-export default HelpCenterPage;
+export default FAQPage;

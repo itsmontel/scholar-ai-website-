@@ -6,7 +6,10 @@ const { v4: uuidv4 } = require('uuid');
 
 const { query } = require('../database/connection');
 const { authenticateToken } = require('../middleware/auth');
-const { validate, schemas } = require('../middleware/validation');
+const { 
+  validateRegister, 
+  validateLogin 
+} = require('../middleware/validation');
 const emailService = require('../services/emailService');
 const userService = require('../services/userService');
 
@@ -24,7 +27,7 @@ const generateToken = (userId) => {
 // @route   POST /api/auth/register
 // @desc    Register a new user
 // @access  Public
-router.post('/register', validate(schemas.register), async (req, res) => {
+router.post('/register', validateRegister, async (req, res) => {
   try {
     const { email, password, institution, researchField } = req.body;
 
@@ -94,7 +97,7 @@ router.post('/register', validate(schemas.register), async (req, res) => {
 // @route   POST /api/auth/login
 // @desc    Login user
 // @access  Public
-router.post('/login', validate(schemas.login), async (req, res) => {
+router.post('/login', validateLogin, async (req, res) => {
   try {
     const { email, password } = req.body;
 

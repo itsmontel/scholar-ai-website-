@@ -2,7 +2,7 @@ const errorHandler = (err, req, res, next) => {
   let error = { ...err };
   error.message = err.message;
 
-  // Log error
+  // Log error for debugging
   console.error('Error:', err);
 
   // Mongoose bad ObjectId
@@ -45,43 +45,16 @@ const errorHandler = (err, req, res, next) => {
     error = { message, statusCode: 400 };
   }
 
-  // AWS S3 errors
-  if (err.code === 'NoSuchBucket') {
-    const message = 'Storage bucket not found';
-    error = { message, statusCode: 500 };
-  }
-
-  if (err.code === 'AccessDenied') {
-    const message = 'Access denied to storage';
-    error = { message, statusCode: 403 };
-  }
-
-  // OpenAI API errors
+  // Rate limiting errors
   if (err.status === 429) {
-    const message = 'AI service rate limit exceeded. Please try again later.';
+    const message = 'Too many requests, please try again later';
     error = { message, statusCode: 429 };
-  }
-
-  if (err.status === 401) {
-    const message = 'AI service authentication failed';
-    error = { message, statusCode: 500 };
-  }
-
-  // Stripe errors
-  if (err.type === 'StripeCardError') {
-    const message = err.message;
-    error = { message, statusCode: 400 };
-  }
-
-  if (err.type === 'StripeInvalidRequestError') {
-    const message = 'Invalid payment request';
-    error = { message, statusCode: 400 };
   }
 
   // Database connection errors
   if (err.code === 'ECONNREFUSED') {
     const message = 'Database connection failed';
-    error = { message, statusCode: 500 };
+    error = { message, statusCode: 503 };
   }
 
   // Default to 500 server error
@@ -95,4 +68,20 @@ const errorHandler = (err, req, res, next) => {
   });
 };
 
-module.exports = { errorHandler };
+// Async error handler wrapper
+const asyncHandler = (fn) => (req, res, next) => {
+  Promise.resolve(fn(req, res, next)).catch(next);
+};
+
+// 404 handler
+const notFound = (req, res, next) => {
+  const error = new Error(`Not Found - ${req.originalUrl}`);
+  res.status(404);
+  next(error);
+};
+
+module.exports = {
+  errorHandler,
+  asyncHandler,
+  notFound
+};

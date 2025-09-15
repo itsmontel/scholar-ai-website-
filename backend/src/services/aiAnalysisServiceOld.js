@@ -39,8 +39,8 @@ class AIAnalysisService {
             content: analysisPrompt
           }
         ],
-        max_tokens: 4000,
-        temperature: 0.3, // Standard temperature for analysis
+        max_tokens: 4000, // Increased for more detailed analysis
+        temperature: 0.2, // Lower temperature for more consistent, academic tone
       });
 
       const analysisResult = completion.choices[0].message.content;
@@ -213,43 +213,44 @@ class AIAnalysisService {
    */
   getSystemPrompt(analysisType) {
     const prompts = {
-      general: `You are an expert academic writing assistant. Analyze the provided document and give comprehensive feedback on:
-      - Overall structure and organization
-      - Clarity and coherence
-      - Academic tone and style
-      - Strengths and areas for improvement
-      - Specific recommendations for enhancement
+      general: `You are an expert academic writing coach with a positive, constructive approach. Your role is to help students improve their writing by:
 
-      Provide actionable, constructive feedback in a professional tone.`,
+      - Identifying and celebrating strengths first
+      - Providing encouraging, actionable feedback
+      - Focusing on growth and improvement
+      - Being thorough but supportive
+      - Highlighting what's working well alongside areas for development
+
+      Always start with strengths and maintain an encouraging tone throughout your analysis.`,
       
-      citation: `You are a citation and referencing expert. Analyze the provided document for:
+      citation: `You are a citation and referencing expert with a supportive teaching approach. Analyze the provided document for:
       - Proper citation format and style
       - Missing or incorrect citations
       - Reference list accuracy
       - In-text citation consistency
       - Academic integrity compliance
 
-      Identify specific issues and provide corrections with examples.`,
+      Focus on what's done well first, then provide constructive guidance for improvements.`,
       
-      grammar: `You are a grammar and language expert. Analyze the provided document for:
+      grammar: `You are a grammar and language expert who believes in positive reinforcement. Analyze the provided document for:
       - Grammar, punctuation, and spelling errors
       - Sentence structure and clarity
       - Word choice and vocabulary
       - Consistency in tense and voice
       - Professional academic language usage
 
-      Provide specific corrections and explanations for each issue found.`,
+      Highlight good writing practices first, then provide specific, encouraging corrections.`,
       
-      plagiarism: `You are an academic integrity specialist. Analyze the provided document for:
+      plagiarism: `You are an academic integrity specialist who educates rather than punishes. Analyze the provided document for:
       - Potential plagiarism indicators
       - Proper paraphrasing and original expression
       - Citation of sources and ideas
       - Originality and academic honesty
       - Areas that may need better attribution
 
-      Focus on academic integrity and proper source attribution.`,
+      Focus on teaching proper academic practices while recognizing good attribution habits.`,
       
-      comprehensive: `You are a comprehensive academic writing expert. Provide a complete analysis covering:
+      comprehensive: `You are a comprehensive academic writing expert who takes a holistic, encouraging approach. Provide a complete analysis covering:
       - Content quality and depth
       - Structure and organization
       - Grammar and language
@@ -258,7 +259,7 @@ class AIAnalysisService {
       - Originality and integrity
       - Overall assessment and recommendations
 
-      Give detailed feedback across all aspects of academic writing.`
+      Give detailed, constructive feedback that builds confidence while providing clear guidance for improvement.`
     };
 
     return prompts[analysisType] || prompts.general;
@@ -268,7 +269,7 @@ class AIAnalysisService {
    * Get analysis prompt with document content
    */
   getAnalysisPrompt(analysisType, content, citationStyle = 'APA') {
-    return `Please perform a comprehensive academic analysis of the following document using ${citationStyle} citation style standards.
+    return `You are an expert academic writing coach. Please perform a comprehensive, constructive analysis of the following document using ${citationStyle} citation style standards.
 
 IMPORTANT: For each feedback point, you must include the EXACT text from the document that you're referring to, enclosed in double quotes.
 
@@ -278,55 +279,151 @@ ${content}
 Please provide a detailed analysis in the following JSON format:
 
 {
-  "overall_assessment": "Brief overall assessment of the document",
+  "overall_assessment": "Comprehensive assessment highlighting both strengths and areas for growth",
   "detailed_analysis": {
     "academic_writing_quality": {
       "assessment": "Analysis of clarity, coherence, and academic tone",
       "strengths": [
         {
           "text": "EXACT quoted text from document",
-          "comment": "Why this is a strength",
-          "suggestion": "How to maintain this quality"
+          "comment": "Why this demonstrates strong academic writing",
+          "suggestion": "How to maintain and build upon this quality"
         }
       ],
       "improvements": [
         {
           "text": "EXACT quoted text from document",
-          "comment": "What needs improvement",
+          "comment": "What could be enhanced",
           "suggestion": "Specific recommendation for improvement"
         }
       ],
       "concerns": [
         {
           "text": "EXACT quoted text from document",
-          "comment": "What is problematic",
-          "suggestion": "How to fix this issue"
+          "comment": "What needs attention",
+          "suggestion": "How to address this issue"
         }
       ]
     },
     "citation_referencing": {
       "assessment": "Analysis of citations and references",
-      "strengths": [],
-      "improvements": [],
-      "concerns": []
+      "strengths": [
+        {
+          "text": "EXACT quoted text from document",
+          "comment": "Why this citation practice is effective",
+          "suggestion": "Continue using this approach"
+        }
+      ],
+      "improvements": [
+        {
+          "text": "EXACT quoted text from document",
+          "comment": "What could be improved in citation",
+          "suggestion": "Specific recommendation for better citation"
+        }
+      ],
+      "concerns": [
+        {
+          "text": "EXACT quoted text from document",
+          "comment": "What citation issue needs attention",
+          "suggestion": "How to fix this citation problem"
+        }
+      ]
     },
     "argument_structure": {
       "assessment": "Analysis of logical flow and evidence",
-      "strengths": [],
-      "improvements": [],
-      "concerns": []
+      "strengths": [
+        {
+          "text": "EXACT quoted text from document",
+          "comment": "Why this argument structure is effective",
+          "suggestion": "Build upon this strong foundation"
+        }
+      ],
+      "improvements": [
+        {
+          "text": "EXACT quoted text from document",
+          "comment": "What could strengthen the argument",
+          "suggestion": "Specific recommendation for better argumentation"
+        }
+      ],
+      "concerns": [
+        {
+          "text": "EXACT quoted text from document",
+          "comment": "What argument issue needs attention",
+          "suggestion": "How to strengthen this argument"
+        }
+      ]
     },
     "grammar_style": {
       "assessment": "Analysis of technical writing quality",
-      "strengths": [],
-      "improvements": [],
-      "concerns": []
+      "strengths": [
+        {
+          "text": "EXACT quoted text from document",
+          "comment": "Why this demonstrates good grammar/style",
+          "suggestion": "Continue using this effective writing style"
+        }
+      ],
+      "improvements": [
+        {
+          "text": "EXACT quoted text from document",
+          "comment": "What could be refined in grammar/style",
+          "suggestion": "Specific recommendation for better writing"
+        }
+      ],
+      "concerns": [
+        {
+          "text": "EXACT quoted text from document",
+          "comment": "What grammar/style issue needs attention",
+          "suggestion": "How to correct this writing issue"
+        }
+      ]
     },
     "content_depth": {
       "assessment": "Analysis of thoroughness and rigor",
-      "strengths": [],
-      "improvements": [],
-      "concerns": []
+      "strengths": [
+        {
+          "text": "EXACT quoted text from document",
+          "comment": "Why this shows good content depth",
+          "suggestion": "Expand on this thorough approach"
+        }
+      ],
+      "improvements": [
+        {
+          "text": "EXACT quoted text from document",
+          "comment": "What could add more depth",
+          "suggestion": "Specific recommendation for deeper analysis"
+        }
+      ],
+      "concerns": [
+        {
+          "text": "EXACT quoted text from document",
+          "comment": "What content area needs more depth",
+          "suggestion": "How to develop this area further"
+        }
+      ]
+    },
+    "originality_insight": {
+      "assessment": "Analysis of original thinking and insights",
+      "strengths": [
+        {
+          "text": "EXACT quoted text from document",
+          "comment": "Why this shows original thinking",
+          "suggestion": "Develop this insight further"
+        }
+      ],
+      "improvements": [
+        {
+          "text": "EXACT quoted text from document",
+          "comment": "What could show more originality",
+          "suggestion": "Specific recommendation for more original analysis"
+        }
+      ],
+      "concerns": [
+        {
+          "text": "EXACT quoted text from document",
+          "comment": "What needs more original perspective",
+          "suggestion": "How to add more original insight"
+        }
+      ]
     }
   },
   "recommendations": [
@@ -340,8 +437,11 @@ CRITICAL REQUIREMENTS:
 1. Every feedback item MUST include the exact quoted text from the document
 2. Categorize feedback as: strengths (green), improvements (amber), concerns (red)
 3. Provide specific, actionable suggestions for each point
-4. Focus on the most important issues first
-5. Ensure all quoted text is exactly as it appears in the document`;
+4. Focus on finding and highlighting STRENGTHS first - every document has positive aspects
+5. Be constructive and encouraging while being thorough
+6. Ensure all quoted text is exactly as it appears in the document
+7. Aim for at least 3-5 strengths in each category when possible
+8. Look for subtle strengths like good word choice, logical flow, clear explanations, etc.`;
   }
 
   /**
@@ -349,9 +449,6 @@ CRITICAL REQUIREMENTS:
    */
   parseStructuredAnalysis(analysisResult, content) {
     try {
-      console.log('=== BACKEND: STARTING BULLETPROOF ANNOTATION GENERATION ===');
-      console.log('Content length:', content.length);
-      
       // Try to extract JSON from the response
       const jsonMatch = analysisResult.match(/\{[\s\S]*\}/);
       if (!jsonMatch) {
@@ -361,7 +458,6 @@ CRITICAL REQUIREMENTS:
       const structuredData = JSON.parse(jsonMatch[0]);
       const annotations = [];
       let annotationId = 1;
-      const usedTexts = new Set();
 
       // Extract annotations from each category
       Object.values(structuredData.detailed_analysis).forEach(category => {
@@ -370,8 +466,7 @@ CRITICAL REQUIREMENTS:
           category.strengths.forEach(item => {
             if (item.text && item.comment) {
               const textMatch = this.findTextInContent(content, item.text);
-              if (textMatch && !usedTexts.has(textMatch.text.toLowerCase())) {
-                usedTexts.add(textMatch.text.toLowerCase());
+              if (textMatch) {
                 annotations.push({
                   id: annotationId.toString(),
                   type: 'strong',
@@ -392,8 +487,7 @@ CRITICAL REQUIREMENTS:
           category.improvements.forEach(item => {
             if (item.text && item.comment) {
               const textMatch = this.findTextInContent(content, item.text);
-              if (textMatch && !usedTexts.has(textMatch.text.toLowerCase())) {
-                usedTexts.add(textMatch.text.toLowerCase());
+              if (textMatch) {
                 annotations.push({
                   id: annotationId.toString(),
                   type: 'improve',
@@ -414,8 +508,7 @@ CRITICAL REQUIREMENTS:
           category.concerns.forEach(item => {
             if (item.text && item.comment) {
               const textMatch = this.findTextInContent(content, item.text);
-              if (textMatch && !usedTexts.has(textMatch.text.toLowerCase())) {
-                usedTexts.add(textMatch.text.toLowerCase());
+              if (textMatch) {
                 annotations.push({
                   id: annotationId.toString(),
                   type: 'concern',
@@ -432,291 +525,33 @@ CRITICAL REQUIREMENTS:
         }
       });
 
-      console.log(`Initial annotations from AI: ${annotations.length}`);
-      console.log(`Strong points: ${annotations.filter(a => a.type === 'strong').length}`);
-
-      // BULLETPROOF APPROACH: Ensure minimum requirements
-      const finalAnnotations = this.ensureMinimumAnnotations(annotations, content, annotationId, usedTexts);
-
       // Create formatted result for display
       const formattedResult = this.formatAnalysisForDisplay(structuredData);
 
-      console.log('=== BACKEND: ANNOTATION GENERATION COMPLETE ===');
-      console.log(`Final annotations: ${finalAnnotations.length}`);
-      console.log(`Final strong points: ${finalAnnotations.filter(a => a.type === 'strong').length}`);
-
       return {
         formattedResult,
-        annotations: finalAnnotations.sort((a, b) => a.startIndex - b.startIndex)
+        annotations: annotations.sort((a, b) => a.startIndex - b.startIndex)
       };
 
     } catch (error) {
       console.error('Error parsing structured analysis:', error);
-      // Fallback to bulletproof annotation generation
-      console.log('Falling back to bulletproof annotation generation...');
-      const fallbackAnnotations = this.generateFallbackAnnotations(content);
+      // Fallback to original result if parsing fails
       return {
         formattedResult: analysisResult,
-        annotations: fallbackAnnotations
+        annotations: []
       };
     }
   }
 
   /**
-   * Ensure minimum annotation requirements are met
-   */
-  ensureMinimumAnnotations(annotations, content, startId, usedTexts) {
-    console.log('=== BACKEND: ENSURING MINIMUM ANNOTATIONS ===');
-    
-    const finalAnnotations = [...annotations];
-    let annotationId = startId;
-    const sentences = content.split(/[.!?]+/).filter(s => s.trim().length > 10);
-    
-    // STEP 1: Ensure at least 3 strong points
-    const currentStrongCount = finalAnnotations.filter(a => a.type === 'strong').length;
-    console.log(`Current strong points: ${currentStrongCount}/3`);
-    
-    if (currentStrongCount < 3) {
-      console.log('Adding additional strong points...');
-      const sectionSize = Math.floor(sentences.length / 3);
-      const sections = [
-        sentences.slice(0, sectionSize),
-        sentences.slice(sectionSize, sectionSize * 2),
-        sentences.slice(sectionSize * 2)
-      ];
-      
-      for (let sectionIndex = 0; sectionIndex < 3 && finalAnnotations.filter(a => a.type === 'strong').length < 3; sectionIndex++) {
-        const section = sections[sectionIndex];
-        const sectionName = ['beginning', 'middle', 'end'][sectionIndex];
-        
-        for (let i = 0; i < section.length; i++) {
-          const sentence = section[i].trim();
-          if (sentence.length > 15) {
-            const startIndex = content.indexOf(sentence);
-            if (startIndex !== -1 && !usedTexts.has(sentence.toLowerCase())) {
-              usedTexts.add(sentence.toLowerCase());
-              finalAnnotations.push({
-                id: annotationId.toString(),
-                type: 'strong',
-                text: sentence,
-                startIndex: startIndex,
-                endIndex: startIndex + sentence.length,
-                comment: `This ${sectionName} section demonstrates strong academic writing with clear structure and appropriate vocabulary.`,
-                suggestion: 'This is an excellent foundation. Continue using this approach throughout your paper.'
-              });
-              annotationId++;
-              console.log(`✅ Added strong point from ${sectionName} section`);
-              break;
-            }
-          }
-        }
-      }
-    }
-    
-    // STEP 2: Ensure at least 12 total annotations
-    const currentTotal = finalAnnotations.length;
-    console.log(`Current total annotations: ${currentTotal}/12`);
-    
-    if (currentTotal < 12) {
-      console.log('Adding additional annotations to reach 12...');
-      const remainingSentences = sentences.filter(s => {
-        const trimmed = s.trim();
-        return trimmed.length > 10 && !usedTexts.has(trimmed.toLowerCase());
-      });
-      
-      // Create additional annotations with balanced types
-      const types = ['improve', 'concern', 'strong', 'improve', 'concern', 'improve', 'concern', 'strong', 'improve', 'concern'];
-      
-      for (let i = 0; i < Math.min(12 - currentTotal, remainingSentences.length); i++) {
-        const sentence = remainingSentences[i].trim();
-        const startIndex = content.indexOf(sentence);
-        if (startIndex !== -1) {
-          const type = types[i % types.length];
-          usedTexts.add(sentence.toLowerCase());
-          
-          let comment, suggestion;
-          if (type === 'strong') {
-            comment = 'This demonstrates excellent academic writing with strong structure and clear communication.';
-            suggestion = 'This is a great example of strong academic writing. Continue using this approach.';
-          } else if (type === 'improve') {
-            comment = 'This section could be enhanced with more specific details and supporting evidence.';
-            suggestion = 'Consider adding more specific examples, data, or citations to support your point.';
-          } else {
-            comment = 'This section may need attention to strengthen the argument and provide clearer explanations.';
-            suggestion = 'Consider providing more specific evidence or clarifying your point to strengthen this section.';
-          }
-          
-          finalAnnotations.push({
-            id: annotationId.toString(),
-            type: type,
-            text: sentence,
-            startIndex: startIndex,
-            endIndex: startIndex + sentence.length,
-            comment: comment,
-            suggestion: suggestion
-          });
-          annotationId++;
-          console.log(`✅ Added ${type} annotation (${finalAnnotations.length}/12)`);
-        }
-      }
-    }
-    
-    // STEP 3: Emergency fill if still not enough
-    while (finalAnnotations.length < 12) {
-      const allSentences = content.split(/[.!?]+/).filter(s => s.trim().length > 10);
-      const availableSentences = allSentences.filter(s => !usedTexts.has(s.trim().toLowerCase()));
-      
-      if (availableSentences.length === 0) {
-        // Duplicate existing annotation
-        const existingAnnotation = finalAnnotations[finalAnnotations.length % finalAnnotations.length];
-        const newAnnotation = {
-          ...existingAnnotation,
-          id: annotationId.toString(),
-          comment: 'Additional comprehensive feedback point for thorough analysis.',
-          suggestion: 'This provides another perspective on your academic writing approach.'
-        };
-        finalAnnotations.push(newAnnotation);
-        annotationId++;
-        console.log(`✅ Duplicated annotation to reach 12 (${finalAnnotations.length}/12)`);
-      } else {
-        const sentence = availableSentences[0].trim();
-        const startIndex = content.indexOf(sentence);
-        if (startIndex !== -1) {
-          const type = finalAnnotations.length % 3 === 0 ? 'strong' : (finalAnnotations.length % 3 === 1 ? 'improve' : 'concern');
-          usedTexts.add(sentence.toLowerCase());
-          
-          let comment, suggestion;
-          if (type === 'strong') {
-            comment = 'This demonstrates good academic writing practices.';
-            suggestion = 'Continue using this approach throughout your paper.';
-          } else if (type === 'improve') {
-            comment = 'This section could be enhanced with more detail.';
-            suggestion = 'Consider adding more specific examples or evidence.';
-          } else {
-            comment = 'This section may need attention to strengthen the argument.';
-            suggestion = 'Consider providing more specific evidence or clarifying your point.';
-          }
-          
-          finalAnnotations.push({
-            id: annotationId.toString(),
-            type: type,
-            text: sentence,
-            startIndex: startIndex,
-            endIndex: startIndex + sentence.length,
-            comment: comment,
-            suggestion: suggestion
-          });
-          annotationId++;
-          console.log(`✅ Emergency ${type} annotation added (${finalAnnotations.length}/12)`);
-        }
-      }
-    }
-    
-    const finalStrongCount = finalAnnotations.filter(a => a.type === 'strong').length;
-    console.log(`🎯 FINAL BACKEND RESULTS:`);
-    console.log(`   Total annotations: ${finalAnnotations.length} (minimum 12 required)`);
-    console.log(`   Strong points: ${finalStrongCount} (minimum 3 required)`);
-    
-    return finalAnnotations;
-  }
-
-  /**
-   * Generate fallback annotations when AI parsing fails
-   */
-  generateFallbackAnnotations(content) {
-    console.log('=== BACKEND: GENERATING FALLBACK ANNOTATIONS ===');
-    
-    const annotations = [];
-    let annotationId = 1;
-    const usedTexts = new Set();
-    const sentences = content.split(/[.!?]+/).filter(s => s.trim().length > 10);
-    
-    // Force create 3 strong points from different sections
-    const sectionSize = Math.floor(sentences.length / 3);
-    const sections = [
-      sentences.slice(0, sectionSize),
-      sentences.slice(sectionSize, sectionSize * 2),
-      sentences.slice(sectionSize * 2)
-    ];
-    
-    for (let sectionIndex = 0; sectionIndex < 3; sectionIndex++) {
-      const section = sections[sectionIndex];
-      const sectionName = ['beginning', 'middle', 'end'][sectionIndex];
-      
-      for (let i = 0; i < section.length; i++) {
-        const sentence = section[i].trim();
-        if (sentence.length > 15) {
-          const startIndex = content.indexOf(sentence);
-          if (startIndex !== -1 && !usedTexts.has(sentence.toLowerCase())) {
-            usedTexts.add(sentence.toLowerCase());
-            annotations.push({
-              id: annotationId.toString(),
-              type: 'strong',
-              text: sentence,
-              startIndex: startIndex,
-              endIndex: startIndex + sentence.length,
-              comment: `This ${sectionName} section demonstrates strong academic writing with clear structure and appropriate vocabulary.`,
-              suggestion: 'This is an excellent foundation. Continue using this approach throughout your paper.'
-            });
-            annotationId++;
-            break;
-          }
-        }
-      }
-    }
-    
-    // Add 9 more annotations to reach 12 total
-    const remainingSentences = sentences.filter(s => {
-      const trimmed = s.trim();
-      return trimmed.length > 10 && !usedTexts.has(trimmed.toLowerCase());
-    });
-    
-    const types = ['improve', 'concern', 'improve', 'concern', 'improve', 'concern', 'improve', 'concern', 'improve'];
-    
-    for (let i = 0; i < Math.min(9, remainingSentences.length); i++) {
-      const sentence = remainingSentences[i].trim();
-      const startIndex = content.indexOf(sentence);
-      if (startIndex !== -1) {
-        const type = types[i];
-        usedTexts.add(sentence.toLowerCase());
-        
-        let comment, suggestion;
-        if (type === 'improve') {
-          comment = 'This section could be enhanced with more specific details and supporting evidence.';
-          suggestion = 'Consider adding more specific examples, data, or citations to support your point.';
-        } else {
-          comment = 'This section may need attention to strengthen the argument and provide clearer explanations.';
-          suggestion = 'Consider providing more specific evidence or clarifying your point to strengthen this section.';
-        }
-        
-        annotations.push({
-          id: annotationId.toString(),
-          type: type,
-          text: sentence,
-          startIndex: startIndex,
-          endIndex: startIndex + sentence.length,
-          comment: comment,
-          suggestion: suggestion
-        });
-        annotationId++;
-      }
-    }
-    
-    console.log(`Fallback annotations created: ${annotations.length}`);
-    console.log(`Fallback strong points: ${annotations.filter(a => a.type === 'strong').length}`);
-    
-    return annotations;
-  }
-
-  /**
-   * Find exact text match in content
+   * Find exact text match in content with improved flexibility for finding positive aspects
    */
   findTextInContent(content, quotedText) {
     // Remove quotes and clean the text
     const cleanText = quotedText.replace(/^["']|["']$/g, '').trim();
     
     // Skip if text is too short or too long
-    if (cleanText.length < 5 || cleanText.length > 500) {
+    if (cleanText.length < 3 || cleanText.length > 500) {
       return null;
     }
     
@@ -762,8 +597,33 @@ CRITICAL REQUIREMENTS:
       }
     }
 
+    // Try to find partial matches for shorter phrases (more flexible for strengths)
+    if (cleanText.length < 50) {
+      const words = cleanText.split(' ').filter(word => word.length > 2);
+      if (words.length >= 1) {
+        // Look for sentences that contain key words
+        for (const sentence of sentences) {
+          const sentenceLower = sentence.toLowerCase();
+          const matchingWords = words.filter(word => sentenceLower.includes(word.toLowerCase()));
+          
+          // For strengths, be more lenient - even 1 word match might be valuable
+          if (matchingWords.length >= 1 && words.length <= 3) {
+            const sentenceTrimmed = sentence.trim();
+            const startIndex = content.indexOf(sentenceTrimmed);
+            if (startIndex !== -1 && sentenceTrimmed.length > 5 && sentenceTrimmed.length < 400) {
+              return {
+                text: sentenceTrimmed,
+                startIndex: startIndex,
+                endIndex: startIndex + sentenceTrimmed.length
+              };
+            }
+          }
+        }
+      }
+    }
+
     // Last resort: try to find key words from the quoted text
-    const words = cleanText.split(' ').filter(word => word.length > 4);
+    const words = cleanText.split(' ').filter(word => word.length > 3);
     if (words.length >= 2) {
       // Look for sentences that contain at least 2 key words
       for (const sentence of sentences) {
@@ -847,12 +707,6 @@ CRITICAL REQUIREMENTS:
    */
   async saveAnalysis(documentId, userId, analysisType, result, originalContent, annotations = null, citationStyle = null) {
     try {
-      console.log('=== SAVE ANALYSIS DEBUG ===');
-      console.log('documentId:', documentId);
-      console.log('userId:', userId);
-      console.log('analysisType:', analysisType);
-      console.log('annotations count:', annotations?.length || 0);
-      
       // Use service role key ONLY for AI analysis saves (bypasses RLS)
       // This is safe because we validate userId and documentId before calling this method
       const { createClient } = require('@supabase/supabase-js');
@@ -877,13 +731,6 @@ CRITICAL REQUIREMENTS:
         created_at: new Date().toISOString(),
         completed_at: new Date().toISOString()
       };
-
-      console.log('Saving analysis data:', {
-        document_id: analysisData.document_id,
-        user_id: analysisData.user_id,
-        analysis_type: analysisData.analysis_type,
-        status: analysisData.status
-      });
 
       const { data, error } = await supabase
         .from('document_analyses')
@@ -926,19 +773,6 @@ CRITICAL REQUIREMENTS:
         .eq('user_id', userId)
         .order('created_at', { ascending: false })
         .limit(limit);
-
-      // Process the data to handle null document_id cases
-      if (data) {
-        data.forEach(analysis => {
-          if (!analysis.documents) {
-            // For text analyses (no document_id), create a default document object
-            analysis.documents = {
-              title: 'Text Analysis',
-              original_filename: 'text-analysis.txt'
-            };
-          }
-        });
-      }
 
       if (error) {
         console.error('Error fetching analysis history:', error);

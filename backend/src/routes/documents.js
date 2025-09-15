@@ -1,7 +1,12 @@
 const express = require('express');
 const multer = require('multer');
 const { authenticateToken } = require('../middleware/auth');
-const { validate, schemas } = require('../middleware/validation');
+const { 
+  validateUploadDocument,
+  validateUpdateDocument,
+  validateGetDocuments,
+  validateDocumentId
+} = require('../middleware/validation');
 const s3Service = process.env.NODE_ENV === 'production' 
   ? require('../services/s3Service')
   : require('../services/mockS3Service');
@@ -129,7 +134,7 @@ router.post('/upload', authenticateToken, upload.single('document'), async (req,
 // @route   GET /api/documents
 // @desc    Get user's documents
 // @access  Private
-router.get('/', authenticateToken, async (req, res) => {
+router.get('/', authenticateToken, validateGetDocuments, async (req, res) => {
   try {
     const userId = req.user.id;
     const { limit = 20, offset = 0, sortBy = 'created_at', sortOrder = 'desc' } = req.query;
@@ -140,6 +145,40 @@ router.get('/', authenticateToken, async (req, res) => {
       sortBy,
       sortOrder
     });
+
+    // Get analysis status for each document
+    const { createClient } = require('@supabase/supabase-js');
+    const supabase = createClient(
+      process.env.SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
+    );
+
+    // Get analysis counts for all documents
+    const documentIds = documents.map(doc => doc.id);
+    const { data: analyses, error: analysisError } = await supabase
+      .from('document_analyses')
+      .select('document_id, status, created_at')
+      .in('document_id', documentIds)
+      .eq('user_id', userId)
+      .eq('status', 'completed');
+
+    if (analysisError) {
+      console.error('Error fetching analysis status:', analysisError);
+    }
+
+    // Create a map of document_id to analysis status
+    const analysisStatusMap = {};
+    if (analyses) {
+      analyses.forEach(analysis => {
+        if (!analysisStatusMap[analysis.document_id] || 
+            new Date(analysis.created_at) > new Date(analysisStatusMap[analysis.document_id].created_at)) {
+          analysisStatusMap[analysis.document_id] = {
+            hasAnalysis: true,
+            lastAnalyzed: analysis.created_at
+          };
+        }
+      });
+    }
 
     res.json({
       success: true,
@@ -154,7 +193,8 @@ router.get('/', authenticateToken, async (req, res) => {
           pageCount: doc.page_count,
           uploadStatus: doc.upload_status,
           createdAt: doc.created_at,
-          updatedAt: doc.updated_at
+          updatedAt: doc.updated_at,
+          analysisStatus: analysisStatusMap[doc.id] || { hasAnalysis: false, lastAnalyzed: null }
         })),
         pagination: {
           limit: parseInt(limit),
@@ -177,7 +217,7 @@ router.get('/', authenticateToken, async (req, res) => {
 // @route   GET /api/documents/:id
 // @desc    Get specific document
 // @access  Private
-router.get('/:id', authenticateToken, async (req, res) => {
+router.get('/:id', authenticateToken, validateDocumentId, async (req, res) => {
   try {
     const { id } = req.params;
     const userId = req.user.id;
@@ -261,7 +301,7 @@ router.get('/:id/download', authenticateToken, async (req, res) => {
 // @route   PUT /api/documents/:id
 // @desc    Update document metadata
 // @access  Private
-router.put('/:id', authenticateToken, validate(schemas.documentUpdate), async (req, res) => {
+router.put('/:id', authenticateToken, validateDocumentId, validateUpdateDocument, async (req, res) => {
   try {
     const { id } = req.params;
     const userId = req.user.id;
@@ -301,7 +341,7 @@ router.put('/:id', authenticateToken, validate(schemas.documentUpdate), async (r
 // @route   DELETE /api/documents/:id
 // @desc    Delete document
 // @access  Private
-router.delete('/:id', authenticateToken, async (req, res) => {
+router.delete('/:id', authenticateToken, validateDocumentId, async (req, res) => {
   try {
     const { id } = req.params;
     const userId = req.user.id;

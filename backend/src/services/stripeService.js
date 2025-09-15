@@ -29,6 +29,59 @@ class StripeService {
     }
   }
 
+  // Create a Stripe Checkout session
+  async createCheckoutSession(customerId, planType, billingCycle, userId) {
+    try {
+      const priceId = this.getPriceId(planType, billingCycle);
+      
+      const session = await this.stripe.checkout.sessions.create({
+        customer: customerId,
+        payment_method_types: ['card'],
+        line_items: [
+          {
+            price: priceId,
+            quantity: 1,
+          },
+        ],
+        mode: 'subscription',
+        success_url: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/dashboard?payment=success`,
+        cancel_url: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/pricing?payment=cancelled`,
+        metadata: {
+          userId,
+          planType,
+          billingCycle
+        },
+        subscription_data: {
+          metadata: {
+            userId,
+            planType,
+            billingCycle
+          }
+        }
+      });
+
+      return {
+        success: true,
+        sessionId: session.id,
+        url: session.url
+      };
+    } catch (error) {
+      console.error('Stripe checkout session creation error:', error);
+      throw new Error(`Failed to create checkout session: ${error.message}`);
+    }
+  }
+
+  // Get a subscription
+  async getSubscription(subscriptionId) {
+    try {
+      const subscription = await this.stripe.subscriptions.retrieve(subscriptionId);
+      return subscription;
+    } catch (error) {
+      console.error('Stripe get subscription error:', error);
+      throw new Error(`Failed to get subscription: ${error.message}`);
+    }
+  }
+
   // Create a subscription
   async createSubscription(customerId, planType, billingCycle) {
     try {
@@ -182,9 +235,9 @@ class StripeService {
   // Get price ID based on plan and billing cycle
   getPriceId(planType, billingCycle) {
     const prices = {
-      'basic': {
-        'monthly': process.env.STRIPE_BASIC_MONTHLY_PRICE_ID || 'price_basic_monthly',
-        'yearly': process.env.STRIPE_BASIC_YEARLY_PRICE_ID || 'price_basic_yearly'
+      'starter': {
+        'monthly': process.env.STRIPE_STARTER_MONTHLY_PRICE_ID || 'price_starter_monthly',
+        'yearly': process.env.STRIPE_STARTER_YEARLY_PRICE_ID || 'price_starter_yearly'
       },
       'premium': {
         'monthly': process.env.STRIPE_PREMIUM_MONTHLY_PRICE_ID || 'price_premium_monthly',

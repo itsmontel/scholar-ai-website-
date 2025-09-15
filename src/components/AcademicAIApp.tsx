@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 
 // Import all page components
 import LandingPage from './components/LandingPage';
-import SignUpPage from './components/SignUpPage';
+import SignUpPage from './pages/SignupPage';
 import LoginPage from './components/LoginPage';
 import Dashboard from './components/Dashboard';
 import AnalysisPage from './components/AnalysisPage';
@@ -116,68 +116,6 @@ const LandingPage = ({ onNavigate }) => {
           </div>
         </div>
 
-        {/* Mock Analysis Examples */}
-        <div className="grid md:grid-cols-2 gap-8 mb-20">
-          <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
-            <div className="mb-4">
-              <h3 className="font-semibold text-gray-900 mb-2">Climate Change Research Paper</h3>
-              <p className="text-sm text-gray-500">Analyzed 2 hours ago</p>
-            </div>
-            <div className="space-y-3">
-              <div className="flex items-start space-x-3">
-                <div className="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
-                <div>
-                  <p className="text-sm font-medium text-green-700">Strong Opening</p>
-                  <p className="text-xs text-gray-600">Excellent introduction that clearly establishes the scope and focus of your research.</p>
-                </div>
-              </div>
-              <div className="flex items-start space-x-3">
-                <div className="w-2 h-2 bg-yellow-500 rounded-full mt-2"></div>
-                <div>
-                  <p className="text-sm font-medium text-yellow-700">Consider Clarification</p>
-                  <p className="text-xs text-gray-600">The methodology section could benefit from more detailed explanation of your data sources.</p>
-                </div>
-              </div>
-              <div className="flex items-start space-x-3">
-                <div className="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
-                <div>
-                  <p className="text-sm font-medium text-blue-700">Citation Enhancement</p>
-                  <p className="text-xs text-gray-600">Consider adding more recent studies to strengthen your literature review section.</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
-            <div className="mb-4">
-              <h3 className="font-semibold text-gray-900 mb-2">Economics Thesis Draft</h3>
-              <p className="text-sm text-gray-500">Analyzed 1 day ago</p>
-            </div>
-            <div className="space-y-3">
-              <div className="flex items-start space-x-3">
-                <div className="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
-                <div>
-                  <p className="text-sm font-medium text-green-700">Well-Structured Arguments</p>
-                  <p className="text-xs text-gray-600">Your economic analysis shows clear logical progression and solid theoretical foundation.</p>
-                </div>
-              </div>
-              <div className="flex items-start space-x-3">
-                <div className="w-2 h-2 bg-yellow-500 rounded-full mt-2"></div>
-                <div>
-                  <p className="text-sm font-medium text-yellow-700">Data Visualization</p>
-                  <p className="text-xs text-gray-600">Consider adding charts or graphs to better illustrate your statistical findings.</p>
-                </div>
-              </div>
-              <div className="flex items-start space-x-3">
-                <div className="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
-                <div>
-                  <p className="text-sm font-medium text-blue-700">Conclusion Strength</p>
-                  <p className="text-xs text-gray-600">Your conclusion effectively synthesizes findings but could better address limitations.</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
 
         {/* Reviews Section */}
         <div className="text-center mb-20">

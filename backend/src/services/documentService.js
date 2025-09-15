@@ -162,36 +162,53 @@ class DocumentService {
    */
   async getDocumentStats(userId) {
     try {
-      const { data, error } = await this.getSupabaseClient()
+      // Get documents data
+      const { data: documentsData, error: documentsError } = await this.getSupabaseClient()
         .from('documents')
-        .select('word_count, file_size, file_type, created_at')
+        .select('id, created_at, word_count, file_size, file_type')
         .eq('user_id', userId);
 
-      if (error) throw error;
+      if (documentsError) throw documentsError;
 
-      const stats = {
-        totalDocuments: data.length,
-        totalWords: data.reduce((sum, doc) => sum + (doc.word_count || 0), 0),
-        totalSize: data.reduce((sum, doc) => sum + (doc.file_size || 0), 0),
-        fileTypes: {},
-        recentUploads: data
-          .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-          .slice(0, 5)
-          .map(doc => ({
-            id: doc.id,
-            title: doc.title,
-            fileType: doc.file_type,
-            wordCount: doc.word_count,
-            createdAt: doc.created_at
-          }))
+      // Get analyses data
+      const { data: analysesData, error: analysesError } = await this.getSupabaseClient()
+        .from('document_analyses')
+        .select('id, created_at')
+        .eq('user_id', userId);
+
+      if (analysesError) throw analysesError;
+
+      // Calculate last activity
+      let lastActivity = null;
+      const allActivities = [
+        ...(documentsData || []).map(doc => ({ date: doc.created_at, type: 'document' })),
+        ...(analysesData || []).map(analysis => ({ date: analysis.created_at, type: 'analysis' }))
+      ];
+
+      if (allActivities.length > 0) {
+        const mostRecent = allActivities.sort((a, b) => new Date(b.date) - new Date(a.date))[0];
+        lastActivity = mostRecent.date;
+      }
+
+      // Return stats in the format expected by the frontend
+      return {
+        totalDocuments: documentsData?.length || 0,
+        documentsAnalyzed: analysesData?.length || 0,
+        lastActivity: lastActivity,
+        totalWords: documentsData?.reduce((sum, doc) => sum + (doc.word_count || 0), 0) || 0,
+        totalSize: documentsData?.reduce((sum, doc) => sum + (doc.file_size || 0), 0) || 0,
+        fileTypes: documentsData?.reduce((acc, doc) => {
+          acc[doc.file_type] = (acc[doc.file_type] || 0) + 1;
+          return acc;
+        }, {}) || {},
+        recentUploads: (documentsData || []).slice(0, 5).map(doc => ({
+          id: doc.id,
+          title: doc.title || 'Untitled Document',
+          fileType: doc.file_type,
+          wordCount: doc.word_count || 0,
+          createdAt: doc.created_at
+        }))
       };
-
-      // Count file types
-      data.forEach(doc => {
-        stats.fileTypes[doc.file_type] = (stats.fileTypes[doc.file_type] || 0) + 1;
-      });
-
-      return stats;
     } catch (error) {
       console.error('Error getting document stats:', error);
       throw error;

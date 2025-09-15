@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Header from '../common/Header';
-import LoadingSpinner from '../common/LoadingSpinner';
 import AnalysisAnimation from '../common/AnalysisAnimation';
 
 interface AnalysisPageProps {
@@ -70,8 +69,6 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
   const [error, setError] = useState<string>('');
   const [successMessage, setSuccessMessage] = useState<string>('');
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
-  const [showAnalysisPopup, setShowAnalysisPopup] = useState(false);
-  const [analysisComplete, setAnalysisComplete] = useState(false);
   const documentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -162,174 +159,263 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
     }
   };
 
-  const generateAIAnnotations = (content: string): Annotation[] => {
-    console.log('=== STARTING BULLETPROOF ANNOTATION GENERATION ===');
-    console.log('Content length:', content.length);
-    
-    const sentences = content.split(/[.!?]+/).filter(s => s.trim().length > 10);
-    console.log('Total sentences found:', sentences.length);
-    
-    // BULLETPROOF APPROACH: Create exactly what we need, no compromises
-    const finalAnnotations: Annotation[] = [];
+  const generateAIAnnotations = (content: string, analysisResult: string): Annotation[] => {
+    const annotations: Annotation[] = [];
     let annotationId = 1;
-    const usedTexts = new Set<string>();
+    const usedTexts = new Set<string>(); // Track used text content to prevent duplicates
+
+    console.log('Generating annotations for content length:', content.length);
+    console.log('Analysis result length:', analysisResult.length);
+
+    // Extract specific feedback points with better categorization
+    const specificFeedback = extractSpecificFeedback(analysisResult);
+    console.log('Extracted specific feedback:', specificFeedback);
     
-    // STEP 1: FORCE CREATE 6 STRONG POINTS FIRST (2 from each section)
-    console.log('=== STEP 1: FORCING 6 STRONG POINTS ===');
-    const sectionSize = Math.floor(sentences.length / 3);
-    const sections = [
-      sentences.slice(0, sectionSize),
-      sentences.slice(sectionSize, sectionSize * 2),
-      sentences.slice(sectionSize * 2)
-    ];
-    
-    for (let sectionIndex = 0; sectionIndex < 3; sectionIndex++) {
-      const section = sections[sectionIndex];
-      const sectionName = ['beginning', 'middle', 'end'][sectionIndex];
+    // Create annotations based on specific feedback
+    specificFeedback.forEach((feedback) => {
+      const matchingText = findBestMatchingText(content, feedback.text);
+      console.log('Looking for text:', feedback.text, 'Found:', matchingText);
+      if (matchingText) {
+        const textKey = matchingText.text.toLowerCase().trim();
+        // Only add if we haven't used this exact text before
+        if (!usedTexts.has(textKey)) {
+          usedTexts.add(textKey);
+          annotations.push({
+            id: annotationId.toString(),
+            type: feedback.type,
+            text: matchingText.text,
+            startIndex: matchingText.startIndex,
+            endIndex: matchingText.endIndex,
+            comment: feedback.comment,
+            suggestion: feedback.suggestion
+          });
+          annotationId++;
+        }
+      }
+    });
+
+    // If we still need more annotations, create sentence-based ones
+    if (annotations.length < 5) {
+      const sentences = content.split(/[.!?]+/).filter(s => s.trim().length > 10);
+      const aiInsights = extractDetailedInsights(analysisResult);
       
-      // Create 2 strong points from each section
-      let strongPointsFromSection = 0;
-      for (let i = 0; i < section.length && strongPointsFromSection < 2; i++) {
-        const sentence = section[i].trim();
-        if (sentence.length > 15) {
-          const startIndex = content.indexOf(sentence);
-          if (startIndex !== -1) {
-            const endIndex = startIndex + sentence.length;
-            const textKey = sentence.toLowerCase().trim();
+      sentences.forEach((sentence, index) => {
+        if (annotations.length >= 15) return;
+        
+        const sentenceTrimmed = sentence.trim();
+        if (sentenceTrimmed.length > 10) {
+          const startIndex = content.indexOf(sentenceTrimmed);
+          const textKey = sentenceTrimmed.toLowerCase().trim();
+          
+          // Check both position overlap and text content duplication
+          if (startIndex !== -1 && !isAlreadyAnnotated(annotations, startIndex, startIndex + sentenceTrimmed.length) && !usedTexts.has(textKey)) {
+            usedTexts.add(textKey);
+            const insight = aiInsights[index % aiInsights.length];
             
-            if (!usedTexts.has(textKey)) {
-              usedTexts.add(textKey);
-              finalAnnotations.push({
+            annotations.push({
               id: annotationId.toString(),
-                type: 'strong',
-                text: sentence,
+              type: insight.type,
+              text: sentenceTrimmed,
               startIndex: startIndex,
-                endIndex: endIndex,
-                comment: `This ${sectionName} section demonstrates strong academic writing with clear structure and appropriate vocabulary.`,
-                suggestion: 'This is an excellent foundation. Continue using this approach throughout your paper.'
+              endIndex: startIndex + sentenceTrimmed.length,
+              comment: insight.comment,
+              suggestion: insight.suggestion
             });
             annotationId++;
-              strongPointsFromSection++;
-              console.log(`✅ FORCED strong point ${strongPointsFromSection}/2 from ${sectionName} section (${i + 1}/${section.length})`);
-            }
+          }
+        }
+      });
+    }
+
+    console.log('Final annotations:', annotations);
+    return annotations;
+  };
+
+  const extractSpecificFeedback = (analysis: string): Array<{text: string, type: 'strong' | 'improve' | 'concern', comment: string, suggestion: string}> => {
+    const feedback: Array<{text: string, type: 'strong' | 'improve' | 'concern', comment: string, suggestion: string}> = [];
+    
+    // Look for quoted text in the analysis (from structured backend response)
+    const quotedTextRegex = /\*\*"([^"]+)"\*\*/g;
+    let match;
+    
+    while ((match = quotedTextRegex.exec(analysis)) !== null) {
+      const quotedText = match[1];
+      const context = analysis.slice(Math.max(0, match.index - 100), match.index + 200);
+      
+      // Determine type based on context around the quoted text
+      let type: 'strong' | 'improve' | 'concern' = 'improve';
+      let comment = '';
+      let suggestion = '';
+      
+      // Look for context clues
+      if (/strength|excellent|outstanding|well-written|clear|coherent|logical|thorough|comprehensive|insightful|rigorous|methodical|precise|articulate|compelling|persuasive|well-structured|well-organized|strong argument|solid evidence|good use of|effective|successful|impressive|notable|commendable/i.test(context)) {
+        type = 'strong';
+        comment = `Strong point: ${context.slice(0, 100)}...`;
+        suggestion = 'This demonstrates strong academic writing. Continue using this approach throughout your paper.';
+      } else if (/concern|weak|poor|unclear|confusing|vague|inconsistent|incomplete|insufficient|lacking|missing|problem|issue|limitation|critical|fail|detract|undermine|contradict|inaccurate|incorrect|flawed|deficient|inadequate|unconvincing|unsubstantiated/i.test(context)) {
+        type = 'concern';
+        comment = `Serious concern: ${context.slice(0, 100)}...`;
+        suggestion = 'This area needs immediate attention and revision to strengthen your argument.';
+      } else {
+        type = 'improve';
+        comment = `Area for improvement: ${context.slice(0, 100)}...`;
+        suggestion = 'Consider enhancing this section with more specific details and supporting evidence.';
+      }
+      
+      feedback.push({
+        text: quotedText,
+        type: type,
+        comment: comment,
+        suggestion: suggestion
+      });
+    }
+    
+    // If no quoted text found, fall back to line-based extraction
+    if (feedback.length === 0) {
+      const lines = analysis.split('\n').filter(line => line.trim().length > 0);
+      
+      lines.forEach(line => {
+        const cleanLine = line.trim().replace(/^\*\*|\*\*$|^- |^• |^\d+\./g, '');
+        
+        if (cleanLine.length > 20 && cleanLine.length < 300) {
+          let type: 'strong' | 'improve' | 'concern' = 'improve';
+          let suggestion = '';
+          
+          if (/excellent|outstanding|well-written|clear|coherent|logical|thorough|comprehensive|insightful|rigorous|methodical|precise|articulate|compelling|persuasive|well-structured|well-organized|strong argument|solid evidence|good use of|effective|successful|impressive|notable|commendable/i.test(cleanLine)) {
+            type = 'strong';
+            suggestion = 'This demonstrates strong academic writing. Continue using this approach throughout your paper.';
+          } else if (/weak|poor|unclear|confusing|vague|inconsistent|incomplete|insufficient|lacking|missing|problem|issue|limitation|concern|critical|fail|detract|undermine|contradict|inaccurate|incorrect|flawed|deficient|inadequate|unconvincing|unsubstantiated/i.test(cleanLine)) {
+            type = 'concern';
+            suggestion = 'This area needs immediate attention and revision to strengthen your argument.';
+          } else {
+            type = 'improve';
+            suggestion = 'Consider enhancing this section with more specific details and supporting evidence.';
+          }
+          
+          const keyTerms = extractKeyTerms(cleanLine);
+          
+          if (keyTerms.length === 0) {
+            const words = cleanLine.toLowerCase().split(/\s+/).filter(word => 
+              word.length > 3 && 
+              !['this', 'that', 'with', 'from', 'they', 'have', 'been', 'were', 'said', 'each', 'which', 'their', 'will', 'more', 'also', 'into', 'time', 'only', 'could', 'other', 'after', 'first', 'well', 'work', 'such', 'make', 'over', 'think', 'help', 'just', 'like', 'long', 'make', 'much', 'some', 'very', 'when', 'here', 'much', 'take', 'than', 'them', 'these', 'so', 'may', 'say', 'she', 'use', 'her', 'many', 'would', 'there', 'can', 'all', 'but', 'not', 'what', 'all', 'were', 'when', 'your', 'can', 'said', 'each', 'which', 'she', 'do', 'how', 'their', 'if', 'will', 'up', 'other', 'about', 'out', 'many', 'then', 'them', 'these', 'so', 'some', 'her', 'would', 'make', 'like', 'into', 'him', 'time', 'has', 'two', 'more', 'go', 'no', 'way', 'could', 'my', 'than', 'first', 'been', 'call', 'who', 'its', 'now', 'find', 'long', 'down', 'day', 'did', 'get', 'come', 'made', 'may', 'part'].includes(word)
+            );
+            keyTerms.push(...words.slice(0, 3));
+          }
+          
+          feedback.push({
+            text: keyTerms.join(' '),
+            type: type,
+            comment: cleanLine,
+            suggestion: suggestion
+          });
+        }
+      });
+    }
+    
+    return feedback.slice(0, 15);
+  };
+
+  const extractKeyTerms = (text: string): string[] => {
+    // Extract meaningful terms for text matching
+    const terms = text.toLowerCase()
+      .split(/\s+/)
+      .filter(word => 
+        word.length > 3 && 
+        !/the|and|or|but|for|with|this|that|these|those|from|they|have|been|were|said|each|which|their|time|will|about|there|could|other|after|first|well|also|new|want|because|any|these|give|day|most|us/i.test(word)
+      )
+      .slice(0, 3);
+    
+    return terms;
+  };
+
+  const findBestMatchingText = (content: string, keyTerms: string): { text: string; startIndex: number; endIndex: number } | null => {
+    const terms = keyTerms.split(' ').filter(term => term.length > 2);
+    
+    // Try to find exact phrase matches first
+    for (const term of terms) {
+      const regex = new RegExp(`\\b${term}\\b[^.!?]*[.!?]?`, 'gi');
+      const matches = content.match(regex);
+      if (matches) {
+        for (const match of matches) {
+          if (match.length > 10 && match.length < 200) {
+            const startIndex = content.indexOf(match);
+            return {
+              text: match.trim(),
+              startIndex: startIndex,
+              endIndex: startIndex + match.length
+            };
           }
         }
       }
     }
     
-    console.log(`Strong points created: ${finalAnnotations.filter(a => a.type === 'strong').length}/6`);
-    
-    // STEP 2: FORCE CREATE 12 MORE ANNOTATIONS (mix of all types with more strong points)
-    console.log('=== STEP 2: FORCING 12 MORE ANNOTATIONS ===');
-    const remainingSentences = sentences.filter(s => {
-      const trimmed = s.trim();
-      return trimmed.length > 10 && !usedTexts.has(trimmed.toLowerCase());
-    });
-    
-    console.log('Remaining sentences available:', remainingSentences.length);
-    
-    // Create 12 more annotations with more strong points: 4 strong, 4 improve, 4 concern
-    const types: ('strong' | 'improve' | 'concern')[] = [
-      'strong', 'improve', 'concern', 'strong', 
-      'improve', 'concern', 'strong', 'improve', 
-      'concern', 'strong', 'improve', 'concern'
-    ];
-    
-    for (let i = 0; i < Math.min(12, remainingSentences.length); i++) {
-      const sentence = remainingSentences[i].trim();
-      const startIndex = content.indexOf(sentence);
-      if (startIndex !== -1) {
-        const endIndex = startIndex + sentence.length;
-        const textKey = sentence.toLowerCase().trim();
-        const type = types[i];
-        
-        usedTexts.add(textKey);
-        finalAnnotations.push({
-          id: annotationId.toString(),
-            type: type,
-          text: sentence,
-          startIndex: startIndex,
-          endIndex: endIndex,
-          comment: type === 'strong' ? 'This demonstrates excellent academic writing with strong structure and clear communication.' : 
-                   (type === 'improve' ? 'This section could be enhanced with more specific details and supporting evidence.' : 
-                   'This section may need attention to strengthen the argument and provide clearer explanations.'),
-          suggestion: type === 'strong' ? 'This is a great example of strong academic writing. Continue using this approach.' : 
-                     (type === 'improve' ? 'Consider adding more specific examples, data, or citations to support your point.' : 
-                     'Consider providing more specific evidence or clarifying your point to strengthen this section.')
-        });
-        annotationId++;
-        console.log(`✅ Added ${type} annotation (${i + 1}/12)`);
-      }
-    }
-    
-    // STEP 3: EMERGENCY FILL - If we still don't have 18, create more
-    console.log('=== STEP 3: EMERGENCY FILL TO 18 ===');
-    while (finalAnnotations.length < 18) {
-      const allSentences = content.split(/[.!?]+/).filter(s => s.trim().length > 10);
-      const availableSentences = allSentences.filter(s => !usedTexts.has(s.trim().toLowerCase()));
-      
-      if (availableSentences.length === 0) {
-        // No more unique sentences, duplicate existing ones
-        const existingAnnotation = finalAnnotations[finalAnnotations.length % finalAnnotations.length];
-        const newAnnotation = {
-          ...existingAnnotation,
-          id: annotationId.toString(),
-          comment: 'Additional comprehensive feedback point for thorough analysis.',
-          suggestion: 'This provides another perspective on your academic writing approach.'
-        };
-        finalAnnotations.push(newAnnotation);
-        annotationId++;
-        console.log(`✅ Duplicated annotation to reach 18 (${finalAnnotations.length}/18)`);
-      } else {
-        const sentence = availableSentences[0].trim();
+    // If no exact matches, try to find sentences containing the terms
+    const sentences = content.split(/[.!?]+/).filter(s => s.trim().length > 10);
+    for (const sentence of sentences) {
+      const sentenceLower = sentence.toLowerCase();
+      if (terms.some(term => sentenceLower.includes(term.toLowerCase()))) {
         const startIndex = content.indexOf(sentence);
-        if (startIndex !== -1) {
-          const endIndex = startIndex + sentence.length;
-          const type: 'strong' | 'improve' | 'concern' = finalAnnotations.length % 3 === 0 ? 'strong' : (finalAnnotations.length % 3 === 1 ? 'improve' : 'concern');
-          
-          usedTexts.add(sentence.toLowerCase());
-          finalAnnotations.push({
-            id: annotationId.toString(),
-            type: type,
-            text: sentence,
-              startIndex: startIndex,
-            endIndex: endIndex,
-            comment: type === 'strong' ? 'This demonstrates good academic writing practices.' : (type === 'improve' ? 'This section could be enhanced with more detail.' : 'This section may need attention to strengthen the argument.'),
-            suggestion: type === 'strong' ? 'Continue using this approach throughout your paper.' : (type === 'improve' ? 'Consider adding more specific examples or evidence.' : 'Consider providing more specific evidence or clarifying your point.')
-          });
-          annotationId++;
-          console.log(`✅ Emergency ${type} annotation added (${finalAnnotations.length}/18)`);
-        }
+        return {
+          text: sentence.trim(),
+          startIndex: startIndex,
+          endIndex: startIndex + sentence.length
+        };
       }
     }
     
-    // STEP 4: FINAL VERIFICATION AND SORTING
-    console.log('=== STEP 4: FINAL VERIFICATION ===');
-    finalAnnotations.sort((a, b) => a.startIndex - b.startIndex);
-    
-    const strongCount = finalAnnotations.filter(a => a.type === 'strong').length;
-    const improveCount = finalAnnotations.filter(a => a.type === 'improve').length;
-    const concernCount = finalAnnotations.filter(a => a.type === 'concern').length;
-    
-    console.log(`🎯 FINAL RESULTS:`);
-    console.log(`   Total annotations: ${finalAnnotations.length} (minimum 18 required)`);
-    console.log(`   Strong points: ${strongCount} (minimum 6 required)`);
-    console.log(`   Improve points: ${improveCount}`);
-    console.log(`   Concern points: ${concernCount}`);
-    
-    // FINAL SAFETY CHECK - This should NEVER happen with our bulletproof approach
-    if (finalAnnotations.length < 18) {
-      console.error('🚨 CRITICAL ERROR: Less than 18 annotations created!');
-    }
-    if (strongCount < 6) {
-      console.error('🚨 CRITICAL ERROR: Less than 6 strong points created!');
+    // If still no matches, try to find any sentence that might be relevant
+    if (sentences.length > 0) {
+      const firstSentence = sentences[0].trim();
+      const startIndex = content.indexOf(firstSentence);
+      return {
+        text: firstSentence,
+        startIndex: startIndex,
+        endIndex: startIndex + firstSentence.length
+      };
     }
     
-    console.log('=== ANNOTATION GENERATION COMPLETE ===');
-    return finalAnnotations;
+    return null;
   };
 
+  const isAlreadyAnnotated = (annotations: Annotation[], startIndex: number, endIndex: number): boolean => {
+    return annotations.some(ann => 
+      (startIndex >= ann.startIndex && startIndex < ann.endIndex) ||
+      (endIndex > ann.startIndex && endIndex <= ann.endIndex) ||
+      (startIndex <= ann.startIndex && endIndex >= ann.endIndex)
+    );
+  };
 
+  const extractDetailedInsights = (analysis: string): Array<{type: 'strong' | 'improve' | 'concern', comment: string, suggestion: string}> => {
+    const insights: Array<{type: 'strong' | 'improve' | 'concern', comment: string, suggestion: string}> = [];
+    const lines = analysis.split('\n').filter(line => line.trim().length > 20);
+    
+    lines.forEach(line => {
+      const cleanLine = line.trim().replace(/^\*\*|\*\*$|^- |^• |^\d+\./g, '');
+      if (cleanLine.length > 20 && cleanLine.length < 200) {
+        let type: 'strong' | 'improve' | 'concern' = 'improve';
+        let suggestion = '';
+        
+        if (/strength|strong|excellent|good|positive|commendable|effective|clear|well|timely|relevant/i.test(cleanLine)) {
+          type = 'strong';
+          suggestion = 'This demonstrates strong academic writing practices that enhance the paper\'s credibility.';
+        } else if (/concern|weak|lack|missing|insufficient|problem|issue|limitation|critical|fail|detract/i.test(cleanLine)) {
+          type = 'concern';
+          suggestion = 'This area requires immediate attention and revision to improve the overall quality.';
+        } else {
+          type = 'improve';
+          suggestion = 'Consider enhancing this section with more specific details and supporting evidence.';
+        }
+        
+        insights.push({
+          type: type,
+          comment: cleanLine,
+          suggestion: suggestion
+        });
+      }
+    });
+    
+    return insights.slice(0, 15); // Limit to 15 insights
+  };
 
 
 
@@ -438,17 +524,11 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
       return;
     }
 
-    console.log('=== FRONTEND ANALYSIS DEBUG ===');
-    console.log('selectedDocument:', selectedDocument);
-    console.log('documentContent length:', documentContent?.length);
-    console.log('selectedAnalysisType:', selectedAnalysisType);
-
     // Check if we have text content from dashboard or a selected document
     let content = '';
     if (documentContent && documentContent.trim().length > 0) {
       // Use text content from dashboard
       content = documentContent;
-      console.log('Using text content from dashboard');
     } else if (selectedDocument) {
       // Use selected document content
       const token = localStorage.getItem('authToken');
@@ -462,15 +542,12 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
         return;
       }
       setDocumentContent(content);
-      console.log('Using selected document content, documentId:', selectedDocument);
     } else {
       setError('Please select a document or provide text content');
       return;
     }
 
     setIsAnalyzing(true);
-    setShowAnalysisPopup(true);
-    setAnalysisComplete(false);
     setError('');
     setSuccessMessage('');
     setAnalysisResult('');
@@ -481,13 +558,6 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
       if (!token) {
         throw new Error('Please log in to analyze documents');
       }
-
-      console.log('Making API call with:', {
-        documentId: selectedDocument || null,
-        contentLength: content.length,
-        analysisType: selectedAnalysisType,
-        citationStyle: selectedCitationStyle
-      });
 
       const response = await fetch('http://localhost:3001/api/analysis/analyze', {
         method: 'POST',
@@ -546,7 +616,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
         setAnnotations(validatedAnnotations);
       } else {
         // Fallback to frontend generation if backend doesn't provide annotations
-        const aiAnnotations = generateAIAnnotations(content);
+        const aiAnnotations = generateAIAnnotations(content, result.data.result);
         console.log('Generated fallback annotations:', aiAnnotations);
         finalAnnotations = aiAnnotations;
         setAnnotations(aiAnnotations);
@@ -604,20 +674,8 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
       }
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Analysis failed');
-      setShowAnalysisPopup(false);
     } finally {
       setIsAnalyzing(false);
-      // Mark analysis as complete and let the popup handle the transition
-      setAnalysisComplete(true);
-      // Refresh documents to update analysis status
-      fetchDocuments();
-      // Dispatch custom event to notify other components
-      window.dispatchEvent(new CustomEvent('analysisCompleted', { 
-        detail: { 
-          documentId: selectedDocument,
-          analysisType: selectedAnalysisType 
-        } 
-      }));
     }
   };
 
@@ -823,6 +881,14 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="analysis" />
+      
+      {/* Analysis Popup */}
+      {isAnalyzing && (
+        <AnalysisAnimation 
+          isPopup={true}
+          text="AI is analyzing your document"
+        />
+      )}
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
@@ -836,7 +902,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                 Get comprehensive AI-powered feedback on your academic documents
               </p>
             </div>
-            <button
+          <button 
               onClick={() => onNavigate?.('analysis-history')}
               className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:from-indigo-700 hover:to-purple-700 transition-all duration-200 transform hover:scale-[1.02] shadow-lg"
             >
@@ -996,13 +1062,17 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
               <button
                 onClick={handleAnalyze}
                 disabled={(!selectedDocument && !documentContent) || !selectedAnalysisType || isAnalyzing}
-                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-4 rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all transform hover:scale-[1.02] active:scale-[0.98]"
+                className={`w-full text-white py-3 px-4 rounded-lg font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all transform ${
+                  isAnalyzing 
+                    ? 'bg-gradient-to-r from-blue-500 to-purple-500 cursor-not-allowed animate-pulse' 
+                    : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 hover:scale-[1.02] active:scale-[0.98]'
+                } disabled:opacity-50 disabled:cursor-not-allowed`}
               >
                 {isAnalyzing ? (
-                  <LoadingSpinner 
+                  <AnalysisAnimation 
                     size="sm" 
-                    text="Analyzing..."
-                    color="white"
+                    text="AI is working its magic"
+                    isPopup={true}
                   />
                 ) : (
                   'Analyze Document'
@@ -1158,7 +1228,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                         {annotations.filter(a => a.type === 'strong').map((annotation) => (
                           <div
                             key={annotation.id}
-                            className={`bg-white rounded-lg p-4 border-l-4 border-green-400 shadow-sm hover:shadow-md transition-all cursor-pointer ${
+                            className={`bg-green-50 rounded-lg p-4 border-l-4 border-green-500 shadow-sm hover:shadow-md transition-all cursor-pointer ${
                               selectedAnnotation === annotation.id ? 'ring-2 ring-blue-500' : ''
                             }`}
                             onClick={() => scrollToAnnotation(annotation.id)}
@@ -1186,7 +1256,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                         {annotations.filter(a => a.type === 'improve').map((annotation) => (
                           <div
                             key={annotation.id}
-                            className={`bg-white rounded-lg p-4 border-l-4 border-amber-400 shadow-sm hover:shadow-md transition-all cursor-pointer ${
+                            className={`bg-amber-50 rounded-lg p-4 border-l-4 border-amber-500 shadow-sm hover:shadow-md transition-all cursor-pointer ${
                               selectedAnnotation === annotation.id ? 'ring-2 ring-blue-500' : ''
                             }`}
                             onClick={() => scrollToAnnotation(annotation.id)}
@@ -1214,7 +1284,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                         {annotations.filter(a => a.type === 'concern').map((annotation) => (
                           <div
                             key={annotation.id}
-                            className={`bg-white rounded-lg p-4 border-l-4 border-red-400 shadow-sm hover:shadow-md transition-all cursor-pointer ${
+                            className={`bg-red-50 rounded-lg p-4 border-l-4 border-red-500 shadow-sm hover:shadow-md transition-all cursor-pointer ${
                               selectedAnnotation === annotation.id ? 'ring-2 ring-blue-500' : ''
                             }`}
                             onClick={() => scrollToAnnotation(annotation.id)}
@@ -1302,19 +1372,6 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
           </div>
         )}
       </div>
-
-      {/* Analysis Popup Animation */}
-      {showAnalysisPopup && (
-        <AnalysisAnimation
-          isPopup={true}
-          text="AI is analyzing your document"
-          isComplete={analysisComplete}
-          onComplete={() => {
-            setShowAnalysisPopup(false);
-            setAnalysisComplete(false);
-          }}
-        />
-      )}
     </div>
   );
 };

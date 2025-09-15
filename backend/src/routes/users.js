@@ -1,9 +1,9 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
+const { createClient } = require('@supabase/supabase-js');
 
-const { query } = require('../database/connection');
 const { authenticateToken } = require('../middleware/auth');
-const { validate, schemas } = require('../middleware/validation');
+const { validateUpdateProfile, validateChangePassword } = require('../middleware/validation');
 
 const router = express.Router();
 
@@ -14,37 +14,39 @@ router.get('/profile', authenticateToken, async (req, res) => {
   try {
     const userId = req.user.id;
 
-    const result = await query(
-      `SELECT id, email, first_name, last_name, institution, research_field, 
-              subscription_plan, subscription_status, created_at, last_login, email_verified
-       FROM users WHERE id = $1`,
-      [userId]
+    const supabase = createClient(
+      process.env.SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY
     );
 
-    if (result.rows.length === 0) {
+    const { data, error } = await supabase
+      .from('users')
+      .select('id, email, first_name, last_name, institution, research_field, subscription_plan, subscription_status, created_at, last_login, email_verified')
+      .eq('id', userId)
+      .single();
+
+    if (error || !data) {
       return res.status(404).json({
         success: false,
         message: 'User not found'
       });
     }
 
-    const user = result.rows[0];
-
     res.json({
       success: true,
       data: {
         user: {
-          id: user.id,
-          email: user.email,
-          firstName: user.first_name,
-          lastName: user.last_name,
-          institution: user.institution,
-          researchField: user.research_field,
-          subscriptionPlan: user.subscription_plan,
-          subscriptionStatus: user.subscription_status,
-          createdAt: user.created_at,
-          lastLogin: user.last_login,
-          emailVerified: user.email_verified
+          id: data.id,
+          email: data.email,
+          firstName: data.first_name,
+          lastName: data.last_name,
+          institution: data.institution,
+          researchField: data.research_field,
+          subscriptionPlan: data.subscription_plan,
+          subscriptionStatus: data.subscription_status,
+          createdAt: data.created_at,
+          lastLogin: data.last_login,
+          emailVerified: data.email_verified
         }
       }
     });
@@ -60,43 +62,48 @@ router.get('/profile', authenticateToken, async (req, res) => {
 // @route   PUT /api/users/profile
 // @desc    Update user profile
 // @access  Private
-router.put('/profile', authenticateToken, validate(schemas.updateProfile), async (req, res) => {
+router.put('/profile', authenticateToken, validateUpdateProfile, async (req, res) => {
   try {
     const { firstName, lastName, institution, researchField } = req.body;
     const userId = req.user.id;
 
-    const result = await query(
-      `UPDATE users 
-       SET first_name = COALESCE($1, first_name),
-           last_name = COALESCE($2, last_name),
-           institution = COALESCE($3, institution),
-           research_field = COALESCE($4, research_field),
-           updated_at = CURRENT_TIMESTAMP
-       WHERE id = $5
-       RETURNING id, first_name, last_name, institution, research_field, updated_at`,
-      [firstName, lastName, institution, researchField, userId]
+    const supabase = createClient(
+      process.env.SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY
     );
 
-    if (result.rows.length === 0) {
+    const updateData = {};
+    if (firstName !== undefined) updateData.first_name = firstName;
+    if (lastName !== undefined) updateData.last_name = lastName;
+    if (institution !== undefined) updateData.institution = institution;
+    if (researchField !== undefined) updateData.research_field = researchField;
+    updateData.updated_at = new Date().toISOString();
+
+    const { data, error } = await supabase
+      .from('users')
+      .update(updateData)
+      .eq('id', userId)
+      .select('id, first_name, last_name, institution, research_field, updated_at')
+      .single();
+
+    if (error || !data) {
       return res.status(404).json({
         success: false,
         message: 'User not found'
       });
     }
 
-    const user = result.rows[0];
-
     res.json({
       success: true,
       message: 'Profile updated successfully',
       data: {
         user: {
-          id: user.id,
-          firstName: user.first_name,
-          lastName: user.last_name,
-          institution: user.institution,
-          researchField: user.research_field,
-          updatedAt: user.updated_at
+          id: data.id,
+          firstName: data.first_name,
+          lastName: data.last_name,
+          institution: data.institution,
+          researchField: data.research_field,
+          updatedAt: data.updated_at
         }
       }
     });
@@ -112,18 +119,24 @@ router.put('/profile', authenticateToken, validate(schemas.updateProfile), async
 // @route   POST /api/users/change-password
 // @desc    Change user password
 // @access  Private
-router.post('/change-password', authenticateToken, validate(schemas.changePassword), async (req, res) => {
+router.post('/change-password', authenticateToken, validateChangePassword, async (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body;
     const userId = req.user.id;
 
-    // Get current password hash
-    const result = await query(
-      'SELECT password_hash FROM users WHERE id = $1',
-      [userId]
+    const supabase = createClient(
+      process.env.SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY
     );
 
-    if (result.rows.length === 0) {
+    // Get current password hash
+    const { data: userData, error: fetchError } = await supabase
+      .from('users')
+      .select('password_hash')
+      .eq('id', userId)
+      .single();
+
+    if (fetchError || !userData) {
       return res.status(404).json({
         success: false,
         message: 'User not found'
@@ -131,7 +144,7 @@ router.post('/change-password', authenticateToken, validate(schemas.changePasswo
     }
 
     // Verify current password
-    const isCurrentPasswordValid = await bcrypt.compare(currentPassword, result.rows[0].password_hash);
+    const isCurrentPasswordValid = await bcrypt.compare(currentPassword, userData.password_hash);
     if (!isCurrentPasswordValid) {
       return res.status(400).json({
         success: false,
@@ -144,10 +157,17 @@ router.post('/change-password', authenticateToken, validate(schemas.changePasswo
     const newPasswordHash = await bcrypt.hash(newPassword, saltRounds);
 
     // Update password
-    await query(
-      'UPDATE users SET password_hash = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2',
-      [newPasswordHash, userId]
-    );
+    const { error: updateError } = await supabase
+      .from('users')
+      .update({ 
+        password_hash: newPasswordHash, 
+        updated_at: new Date().toISOString() 
+      })
+      .eq('id', userId);
+
+    if (updateError) {
+      throw updateError;
+    }
 
     res.json({
       success: true,
@@ -170,36 +190,34 @@ router.get('/notifications', authenticateToken, async (req, res) => {
     const userId = req.user.id;
     const { page = 1, limit = 10, unreadOnly = false } = req.query;
 
-    const offset = (page - 1) * limit;
-    let whereClause = 'WHERE user_id = $1';
-    let queryParams = [userId];
+    const supabase = createClient(
+      process.env.SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY
+    );
+
+    let query = supabase
+      .from('notifications')
+      .select('*', { count: 'exact' })
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false });
 
     if (unreadOnly === 'true') {
-      whereClause += ' AND is_read = false';
+      query = query.eq('is_read', false);
     }
 
-    const result = await query(
-      `SELECT id, type, title, message, is_read, metadata, created_at
-       FROM notifications 
-       ${whereClause}
-       ORDER BY created_at DESC
-       LIMIT $${queryParams.length + 1} OFFSET $${queryParams.length + 2}`,
-      [...queryParams, parseInt(limit), offset]
-    );
+    const offset = (page - 1) * limit;
+    const { data, error, count } = await query
+      .range(offset, offset + parseInt(limit) - 1);
 
-    // Get total count
-    const countResult = await query(
-      `SELECT COUNT(*) as total FROM notifications ${whereClause}`,
-      queryParams
-    );
+    if (error) throw error;
 
-    const total = parseInt(countResult.rows[0].total);
+    const total = count || 0;
     const totalPages = Math.ceil(total / limit);
 
     res.json({
       success: true,
       data: {
-        notifications: result.rows,
+        notifications: data || [],
         pagination: {
           currentPage: parseInt(page),
           totalPages,
@@ -226,12 +244,20 @@ router.put('/notifications/:id/read', authenticateToken, async (req, res) => {
     const { id } = req.params;
     const userId = req.user.id;
 
-    const result = await query(
-      'UPDATE notifications SET is_read = true WHERE id = $1 AND user_id = $2 RETURNING id',
-      [id, userId]
+    const supabase = createClient(
+      process.env.SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY
     );
 
-    if (result.rows.length === 0) {
+    const { data, error } = await supabase
+      .from('notifications')
+      .update({ is_read: true })
+      .eq('id', id)
+      .eq('user_id', userId)
+      .select('id')
+      .single();
+
+    if (error || !data) {
       return res.status(404).json({
         success: false,
         message: 'Notification not found'
@@ -258,10 +284,18 @@ router.put('/notifications/read-all', authenticateToken, async (req, res) => {
   try {
     const userId = req.user.id;
 
-    await query(
-      'UPDATE notifications SET is_read = true WHERE user_id = $1 AND is_read = false',
-      [userId]
+    const supabase = createClient(
+      process.env.SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY
     );
+
+    const { error } = await supabase
+      .from('notifications')
+      .update({ is_read: true })
+      .eq('user_id', userId)
+      .eq('is_read', false);
+
+    if (error) throw error;
 
     res.json({
       success: true,
@@ -284,46 +318,56 @@ router.get('/usage-stats', authenticateToken, async (req, res) => {
     const userId = req.user.id;
     const { period = '30' } = req.query; // days
 
+    const supabase = createClient(
+      process.env.SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY
+    );
+
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - parseInt(period));
 
     // Get document count
-    const docResult = await query(
-      'SELECT COUNT(*) as total_documents FROM documents WHERE user_id = $1',
-      [userId]
-    );
+    const { count: docCount, error: docError } = await supabase
+      .from('documents')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', userId);
+
+    if (docError) throw docError;
 
     // Get analysis count
-    const analysisResult = await query(
-      'SELECT COUNT(*) as total_analyses FROM document_analyses WHERE user_id = $1',
-      [userId]
-    );
+    const { count: analysisCount, error: analysisError } = await supabase
+      .from('document_analyses')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', userId);
 
-    // Get recent usage (last period days)
-    const recentUsageResult = await query(
-      `SELECT 
-         action_type,
-         COUNT(*) as count,
-         SUM(credits_used) as total_credits
-       FROM usage_tracking 
-       WHERE user_id = $1 AND created_at >= $2
-       GROUP BY action_type`,
-      [userId, startDate]
-    );
+    if (analysisError) throw analysisError;
+
+    // Get recent usage (last period days) - simplified for now
+    const { data: recentUsage, error: usageError } = await supabase
+      .from('usage_tracking')
+      .select('action_type, credits_used')
+      .eq('user_id', userId)
+      .gte('created_at', startDate.toISOString());
+
+    if (usageError) throw usageError;
 
     // Get total credits used
-    const totalCreditsResult = await query(
-      'SELECT SUM(credits_used) as total_credits FROM usage_tracking WHERE user_id = $1',
-      [userId]
-    );
+    const { data: totalCredits, error: creditsError } = await supabase
+      .from('usage_tracking')
+      .select('credits_used')
+      .eq('user_id', userId);
+
+    if (creditsError) throw creditsError;
+
+    const totalCreditsUsed = totalCredits?.reduce((sum, record) => sum + (record.credits_used || 0), 0) || 0;
 
     res.json({
       success: true,
       data: {
-        totalDocuments: parseInt(docResult.rows[0].total_documents),
-        totalAnalyses: parseInt(analysisResult.rows[0].total_analyses),
-        totalCreditsUsed: parseInt(totalCreditsResult.rows[0].total_credits) || 0,
-        recentUsage: recentUsageResult.rows,
+        totalDocuments: docCount || 0,
+        totalAnalyses: analysisCount || 0,
+        totalCreditsUsed,
+        recentUsage: recentUsage || [],
         period: `${period} days`
       }
     });
@@ -343,8 +387,20 @@ router.delete('/account', authenticateToken, async (req, res) => {
   try {
     const userId = req.user.id;
 
+    const supabase = createClient(
+      process.env.SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY
+    );
+
     // Note: This will cascade delete all related records due to foreign key constraints
-    await query('DELETE FROM users WHERE id = $1', [userId]);
+    const { error } = await supabase
+      .from('users')
+      .delete()
+      .eq('id', userId);
+
+    if (error) {
+      throw error;
+    }
 
     res.json({
       success: true,

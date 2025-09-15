@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 
 // Import all page components
 import LandingPage from './pages/LandingPage';
-import SignUpPage from './pages/SignUpPage';
+import SignUpPage from './pages/SignupPage';
 import LoginPage from './pages/LoginPage';
 import EmailVerificationPage from './pages/EmailVerificationPage';
 import DashboardPage from './pages/DashboardPage';
@@ -10,13 +10,19 @@ import AnalysisPage from './pages/AnalysisPage';
 import AnalysisHistoryPage from './pages/AnalysisHistoryPage';
 import UploadPage from './pages/UploadPage';
 import SettingsPage from './pages/SettingsPage';
+import AccountPage from './pages/AccountPage';
 import PricingPage from './pages/PricingPage';
 import FeaturesPage from './pages/FeaturesPage';
 import ProfilePage from './pages/ProfilePage';
 import LibraryPage from './pages/LibraryPage';
-import HelpCenterPage from './pages/HelpCenterPage';
+import FAQPage from './pages/HelpCenterPage';
 import AboutPage from './pages/AboutPage';
 import ContactPage from './pages/ContactPage';
+import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
+import TermsOfServicePage from './pages/TermsOfServicePage';
+
+// Import common components
+import ErrorBoundary from './common/ErrorBoundary';
 
 // Type definitions
 interface User {
@@ -44,12 +50,14 @@ const AcademicAIApp = () => {
   // Validate and refresh token if needed
   const validateAndRefreshToken = async () => {
     try {
+      console.log('Validating token...');
       const response = await fetch('http://localhost:3001/api/auth/me', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
         },
       });
 
+      console.log('Token validation response status:', response.status);
       if (response.status === 401) {
         // Token expired, try to refresh
         const refreshResponse = await fetch('http://localhost:3001/api/auth/refresh', {
@@ -65,12 +73,14 @@ const AcademicAIApp = () => {
           console.log('Token refreshed successfully');
         } else {
           // Refresh failed, logout user
+          console.log('Token refresh failed, logging out user');
           handleLogout();
         }
       }
     } catch (error) {
       console.error('Token validation error:', error);
       // If validation fails, logout user
+      console.log('Token validation failed, logging out user');
       handleLogout();
     }
   };
@@ -209,7 +219,7 @@ const AcademicAIApp = () => {
   };
 
   // Route protection for authenticated pages
-  const protectedRoutes = ['dashboard', 'analysis', 'analysis-history', 'upload', 'settings', 'profile', 'library'];
+  const protectedRoutes = ['dashboard', 'analysis', 'analysis-history', 'upload', 'settings', 'profile', 'library', 'account'];
   
   const renderCurrentPage = () => {
     // Redirect to login if trying to access protected route while not logged in
@@ -234,26 +244,28 @@ const AcademicAIApp = () => {
         return <AboutPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'contact':
         return <ContactPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
+      case 'privacy':
+        return <PrivacyPolicyPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
+      case 'terms':
+        return <TermsOfServicePage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'help':
-        return <HelpCenterPage onNavigate={navigateTo} />;
+        return <FAQPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'dashboard':
         return <DashboardPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'analysis':
-        return <AnalysisPage onNavigate={navigateTo} />;
+        return <AnalysisPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'analysis-history':
-        return <AnalysisHistoryPage onNavigate={navigateTo} />;
+        return <AnalysisHistoryPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'upload':
-        return <UploadPage onNavigate={navigateTo} />;
+        return <UploadPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'settings':
         return <SettingsPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'profile':
         return <ProfilePage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'library':
         return <LibraryPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
-      case 'privacy':
-        return <PrivacyPolicyPage onNavigate={navigateTo} />;
-      case 'terms':
-        return <TermsOfServicePage onNavigate={navigateTo} />;
+      case 'account':
+        return <AccountPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'admin':
         return <AdminDashboard onNavigate={navigateTo} user={user} />;
       case 'collaboration':
@@ -264,206 +276,14 @@ const AcademicAIApp = () => {
   };
 
   return (
+    <ErrorBoundary>
     <div className="min-h-screen bg-gray-50">
       {renderCurrentPage()}
     </div>
+    </ErrorBoundary>
   );
 };
 
-// Privacy Policy Page Component
-const PrivacyPolicyPage = ({ onNavigate }: NavigationProps) => (
-  <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
-    {/* Navigation */}
-    <nav className="flex items-center justify-between px-8 py-6 bg-white/80 backdrop-blur-sm border-b border-gray-200">
-      <div className="flex items-center space-x-2">
-        <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-          <span className="text-white font-bold text-sm">A</span>
-        </div>
-        <span className="text-xl font-bold text-gray-900">AcademicAI</span>
-      </div>
-      <div className="flex items-center space-x-4">
-        <button onClick={() => onNavigate('landing')} className="text-gray-600 hover:text-gray-900 transition-colors">
-          Home
-        </button>
-        <button onClick={() => onNavigate('contact')} className="text-gray-600 hover:text-gray-900 transition-colors">
-          Contact
-        </button>
-      </div>
-    </nav>
-
-    <div className="max-w-4xl mx-auto px-8 py-12">
-      <div className="bg-white rounded-xl shadow-lg p-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-6">Privacy Policy</h1>
-        <p className="text-gray-600 mb-8">Last updated: September 8, 2025</p>
-        
-        <div className="space-y-8">
-          <section>
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">Information We Collect</h2>
-            <div className="space-y-4 text-gray-700">
-              <p>We collect information you provide directly to us, such as when you create an account, upload documents, or contact us for support.</p>
-              <ul className="list-disc list-inside space-y-2">
-                <li>Account information (name, email, institutional affiliation)</li>
-                <li>Document content for analysis purposes</li>
-                <li>Usage data and analytics</li>
-                <li>Communication records with our support team</li>
-              </ul>
-            </div>
-          </section>
-
-          <section>
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">How We Use Your Information</h2>
-            <div className="space-y-4 text-gray-700">
-              <p>We use the information we collect to:</p>
-              <ul className="list-disc list-inside space-y-2">
-                <li>Provide and improve our AI writing analysis services</li>
-                <li>Communicate with you about your account and our services</li>
-                <li>Ensure the security and integrity of our platform</li>
-                <li>Comply with legal obligations</li>
-              </ul>
-            </div>
-          </section>
-
-          <section>
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">Data Security</h2>
-            <div className="space-y-4 text-gray-700">
-              <p>We implement industry-standard security measures to protect your data:</p>
-              <ul className="list-disc list-inside space-y-2">
-                <li>End-to-end encryption for all document transfers</li>
-                <li>SOC 2 Type II compliance</li>
-                <li>Regular security audits and penetration testing</li>
-                <li>Restricted access controls and employee training</li>
-              </ul>
-            </div>
-          </section>
-
-          <section>
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">Your Rights</h2>
-            <div className="space-y-4 text-gray-700">
-              <p>You have the right to:</p>
-              <ul className="list-disc list-inside space-y-2">
-                <li>Access, update, or delete your personal information</li>
-                <li>Export your data in a machine-readable format</li>
-                <li>Opt out of non-essential communications</li>
-                <li>Request deletion of your account and associated data</li>
-              </ul>
-            </div>
-          </section>
-
-          <section>
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">Contact Us</h2>
-            <div className="text-gray-700">
-              <p>If you have questions about this Privacy Policy, please contact us at:</p>
-              <p className="mt-2">
-                Email: privacy@academicai.com<br />
-                Address: 123 Innovation Drive, Suite 400, San Francisco, CA 94107
-              </p>
-            </div>
-          </section>
-        </div>
-      </div>
-    </div>
-  </div>
-);
-
-// Terms of Service Page Component
-const TermsOfServicePage = ({ onNavigate }: NavigationProps) => (
-  <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
-    {/* Navigation */}
-    <nav className="flex items-center justify-between px-8 py-6 bg-white/80 backdrop-blur-sm border-b border-gray-200">
-      <div className="flex items-center space-x-2">
-        <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-          <span className="text-white font-bold text-sm">A</span>
-        </div>
-        <span className="text-xl font-bold text-gray-900">AcademicAI</span>
-      </div>
-      <div className="flex items-center space-x-4">
-        <button onClick={() => onNavigate('landing')} className="text-gray-600 hover:text-gray-900 transition-colors">
-          Home
-        </button>
-        <button onClick={() => onNavigate('contact')} className="text-gray-600 hover:text-gray-900 transition-colors">
-          Contact
-        </button>
-      </div>
-    </nav>
-
-    <div className="max-w-4xl mx-auto px-8 py-12">
-      <div className="bg-white rounded-xl shadow-lg p-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-6">Terms of Service</h1>
-        <p className="text-gray-600 mb-8">Last updated: September 8, 2025</p>
-        
-        <div className="space-y-8">
-          <section>
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">Acceptance of Terms</h2>
-            <p className="text-gray-700">
-              By accessing and using AcademicAI, you accept and agree to be bound by the terms and provision of this agreement.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">Description of Service</h2>
-            <div className="space-y-4 text-gray-700">
-              <p>AcademicAI provides AI-powered writing analysis and feedback services for academic documents, including:</p>
-              <ul className="list-disc list-inside space-y-2">
-                <li>Grammar and style analysis</li>
-                <li>Citation format checking</li>
-                <li>Structure and organization feedback</li>
-                <li>Plagiarism detection</li>
-                <li>Collaboration tools</li>
-              </ul>
-            </div>
-          </section>
-
-          <section>
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">User Responsibilities</h2>
-            <div className="space-y-4 text-gray-700">
-              <p>You agree to:</p>
-              <ul className="list-disc list-inside space-y-2">
-                <li>Provide accurate account information</li>
-                <li>Use the service for legitimate academic purposes only</li>
-                <li>Respect intellectual property rights</li>
-                <li>Not attempt to reverse engineer or compromise our systems</li>
-                <li>Comply with your institution's academic integrity policies</li>
-              </ul>
-            </div>
-          </section>
-
-          <section>
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">Payment Terms</h2>
-            <div className="space-y-4 text-gray-700">
-              <p>For paid subscriptions:</p>
-              <ul className="list-disc list-inside space-y-2">
-                <li>Billing occurs monthly or annually as selected</li>
-                <li>You may cancel at any time with no penalty</li>
-                <li>Refunds are provided on a case-by-case basis</li>
-                <li>Price changes will be communicated 30 days in advance</li>
-              </ul>
-            </div>
-          </section>
-
-          <section>
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">Limitation of Liability</h2>
-            <p className="text-gray-700">
-              AcademicAI provides writing assistance tools and should not be considered a substitute for proper academic training, 
-              citation knowledge, or institutional writing support. Users are responsible for ensuring their work meets all 
-              academic and institutional requirements.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">Contact Information</h2>
-            <div className="text-gray-700">
-              <p>For questions about these Terms of Service:</p>
-              <p className="mt-2">
-                Email: legal@academicai.com<br />
-                Address: 123 Innovation Drive, Suite 400, San Francisco, CA 94107
-              </p>
-            </div>
-          </section>
-        </div>
-      </div>
-    </div>
-  </div>
-);
 
 // Admin Dashboard Component
 const AdminDashboard = ({ onNavigate, user: _user }: UserProps) => (

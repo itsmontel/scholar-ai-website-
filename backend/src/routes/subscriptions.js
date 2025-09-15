@@ -1,48 +1,40 @@
 const express = require('express');
 const { v4: uuidv4 } = require('uuid');
+const { createClient } = require('@supabase/supabase-js');
 
-const { query } = require('../database/connection');
 const { authenticateToken } = require('../middleware/auth');
-const { validate, schemas } = require('../middleware/validation');
+// const { validate, schemas } = require('../middleware/validation');
 const stripeService = require('../services/stripeService');
 
 const router = express.Router();
 
-// @route   POST /api/subscriptions/create
-// @desc    Create a new subscription
+// @route   POST /api/subscriptions/create-checkout-session
+// @desc    Create a Stripe Checkout session
 // @access  Private
-router.post('/create', authenticateToken, validate(schemas.createSubscription), async (req, res) => {
+router.post('/create-checkout-session', authenticateToken, async (req, res) => {
   try {
     const { planType, billingCycle } = req.body;
     const userId = req.user.id;
 
-    // Check if user already has an active subscription
-    const existingSubscription = await query(
-      'SELECT id, stripe_subscription_id, status FROM subscriptions WHERE user_id = $1 AND status = $2',
-      [userId, 'active']
+    const supabase = createClient(
+      process.env.SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY
     );
 
-    if (existingSubscription.rows.length > 0) {
-      return res.status(400).json({
-        success: false,
-        message: 'User already has an active subscription'
-      });
-    }
+    // Get user data
+    const { data: user, error: userError } = await supabase
+      .from('users')
+      .select('id, email, first_name, last_name, institution, research_field, stripe_customer_id')
+      .eq('id', userId)
+      .single();
 
-    // Get user data for Stripe customer creation
-    const userResult = await query(
-      'SELECT id, email, first_name, last_name, institution, research_field, stripe_customer_id FROM users WHERE id = $1',
-      [userId]
-    );
-
-    if (userResult.rows.length === 0) {
+    if (userError || !user) {
       return res.status(404).json({
         success: false,
         message: 'User not found'
       });
     }
 
-    const user = userResult.rows[0];
     let customerId = user.stripe_customer_id;
 
     // Create Stripe customer if doesn't exist
@@ -59,10 +51,98 @@ router.post('/create', authenticateToken, validate(schemas.createSubscription), 
       customerId = customerResult.customerId;
 
       // Update user with Stripe customer ID
-      await query(
-        'UPDATE users SET stripe_customer_id = $1 WHERE id = $2',
-        [customerId, userId]
-      );
+      await supabase
+        .from('users')
+        .update({ stripe_customer_id: customerId })
+        .eq('id', userId);
+    }
+
+    // Create Stripe Checkout session
+    const checkoutSession = await stripeService.createCheckoutSession(
+      customerId,
+      planType,
+      billingCycle,
+      userId
+    );
+
+    res.json({
+      success: true,
+      message: 'Checkout session created successfully',
+      data: {
+        checkoutUrl: checkoutSession.url
+      }
+    });
+  } catch (error) {
+    console.error('Create checkout session error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to create checkout session'
+    });
+  }
+});
+
+// @route   POST /api/subscriptions/create
+// @desc    Create a new subscription
+// @access  Private
+router.post('/create', authenticateToken, async (req, res) => {
+  try {
+    const { planType, billingCycle } = req.body;
+    const userId = req.user.id;
+
+    const supabase = createClient(
+      process.env.SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY
+    );
+
+    // Check if user already has an active subscription
+    const { data: existingSubscription, error: existingError } = await supabase
+      .from('subscriptions')
+      .select('id, stripe_subscription_id, status')
+      .eq('user_id', userId)
+      .eq('status', 'active')
+      .single();
+
+    if (existingSubscription && !existingError) {
+      return res.status(400).json({
+        success: false,
+        message: 'User already has an active subscription'
+      });
+    }
+
+    // Get user data for Stripe customer creation
+    const { data: user, error: userError } = await supabase
+      .from('users')
+      .select('id, email, first_name, last_name, institution, research_field, stripe_customer_id')
+      .eq('id', userId)
+      .single();
+
+    if (userError || !user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    let customerId = user.stripe_customer_id;
+
+    // Create Stripe customer if doesn't exist
+    if (!customerId) {
+      const customerResult = await stripeService.createCustomer({
+        id: user.id,
+        email: user.email,
+        firstName: user.first_name,
+        lastName: user.last_name,
+        institution: user.institution,
+        researchField: user.research_field
+      });
+
+      customerId = customerResult.customerId;
+
+      // Update user with Stripe customer ID
+      await supabase
+        .from('users')
+        .update({ stripe_customer_id: customerId })
+        .eq('id', userId);
     }
 
     // Create Stripe subscription
@@ -70,17 +150,22 @@ router.post('/create', authenticateToken, validate(schemas.createSubscription), 
 
     // Save subscription to database
     const subscriptionId = uuidv4();
-    await query(
-      `INSERT INTO subscriptions (id, user_id, stripe_subscription_id, plan_type, status, created_at)
-       VALUES ($1, $2, $3, $4, $5, CURRENT_TIMESTAMP)`,
-      [subscriptionId, userId, subscriptionResult.subscriptionId, planType, 'pending']
-    );
+    await supabase
+      .from('subscriptions')
+      .insert({
+        id: subscriptionId,
+        user_id: userId,
+        stripe_subscription_id: subscriptionResult.subscriptionId,
+        plan_type: planType,
+        status: 'pending',
+        created_at: new Date().toISOString()
+      });
 
     // Update user subscription plan
-    await query(
-      'UPDATE users SET subscription_plan = $1 WHERE id = $2',
-      [planType, userId]
-    );
+    await supabase
+      .from('users')
+      .update({ subscription_plan: planType })
+      .eq('id', userId);
 
     res.json({
       success: true,
@@ -178,7 +263,7 @@ router.get('/current', authenticateToken, async (req, res) => {
 // @route   PUT /api/subscriptions/update
 // @desc    Update subscription plan
 // @access  Private
-router.put('/update', authenticateToken, validate(schemas.createSubscription), async (req, res) => {
+router.put('/update', authenticateToken, async (req, res) => {
   try {
     const { planType, billingCycle } = req.body;
     const userId = req.user.id;

@@ -1,32 +1,44 @@
 import React, { useState, useEffect } from 'react';
 import jsPDF from 'jspdf';
+import Header from '../common/Header';
+import { AnalysisCardSkeleton } from '../common/LoadingSpinner';
 
 interface AnalysisHistoryPageProps {
   onNavigate?: (page: string) => void;
+  user?: { name: string; email: string } | null;
+  onLogout?: () => void;
+  showHeader?: boolean;
 }
 
 interface AnalysisHistory {
   id: string;
   analysis_type: string;
-  analysis_results: {
+  analysis_results?: {
     result: string;
-  };
+  } | null;
   created_at: string;
-  documents: {
+  documents?: {
     title: string;
     original_filename: string;
-  };
+  } | null;
 }
 
-const AnalysisHistoryPage: React.FC<AnalysisHistoryPageProps> = ({ onNavigate }) => {
+const AnalysisHistoryPage: React.FC<AnalysisHistoryPageProps> = ({ onNavigate, user, onLogout, showHeader = true }) => {
   const [analyses, setAnalyses] = useState<AnalysisHistory[]>([]);
+  const [filteredAnalyses, setFilteredAnalyses] = useState<AnalysisHistory[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string>('');
   const [selectedAnalysis, setSelectedAnalysis] = useState<AnalysisHistory | null>(null);
+  const [timeFilter, setTimeFilter] = useState<string>('all');
+  const [isDeleting, setIsDeleting] = useState<string | null>(null);
 
   useEffect(() => {
     fetchAnalysisHistory();
   }, []);
+
+  useEffect(() => {
+    filterAnalyses();
+  }, [analyses, timeFilter]);
 
   const fetchAnalysisHistory = async () => {
     try {
@@ -36,7 +48,7 @@ const AnalysisHistoryPage: React.FC<AnalysisHistoryPageProps> = ({ onNavigate })
         return;
       }
 
-      const response = await fetch('http://localhost:3001/api/analysis/history?limit=50', {
+      const response = await fetch('http://localhost:3001/api/analysis/history?limit=100', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -54,6 +66,72 @@ const AnalysisHistoryPage: React.FC<AnalysisHistoryPageProps> = ({ onNavigate })
       setError(error instanceof Error ? error.message : 'Failed to fetch analysis history');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const filterAnalyses = () => {
+    const now = new Date();
+    let filtered = [...analyses];
+
+    switch (timeFilter) {
+      case 'last3':
+        filtered = analyses.slice(0, 3);
+        break;
+      case 'lastWeek':
+        const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        filtered = analyses.filter(analysis => new Date(analysis.created_at) >= weekAgo);
+        break;
+      case 'lastMonth':
+        const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+        filtered = analyses.filter(analysis => new Date(analysis.created_at) >= monthAgo);
+        break;
+      case 'lastYear':
+        const yearAgo = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
+        filtered = analyses.filter(analysis => new Date(analysis.created_at) >= yearAgo);
+        break;
+      case 'all':
+      default:
+        filtered = analyses;
+        break;
+    }
+
+    setFilteredAnalyses(filtered);
+  };
+
+  const deleteAnalysis = async (analysisId: string) => {
+    if (!confirm('Are you sure you want to delete this analysis? This action cannot be undone.')) {
+      return;
+    }
+
+    setIsDeleting(analysisId);
+    try {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        setError('Please log in to delete analysis');
+        return;
+      }
+
+      const response = await fetch(`http://localhost:3001/api/analysis/${analysisId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete analysis');
+      }
+
+      // Remove from local state
+      setAnalyses(prev => prev.filter(analysis => analysis.id !== analysisId));
+      if (selectedAnalysis?.id === analysisId) {
+        setSelectedAnalysis(null);
+      }
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Failed to delete analysis');
+    } finally {
+      setIsDeleting(null);
     }
   };
 
@@ -175,35 +253,10 @@ const AnalysisHistoryPage: React.FC<AnalysisHistoryPageProps> = ({ onNavigate })
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Navigation Header */}
-      <header className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between py-4">
-            <div className="flex items-center space-x-4">
-              <button 
-                onClick={() => onNavigate?.('dashboard')}
-                className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors"
-              >
-                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                </svg>
-                <span>Back to Dashboard</span>
-              </button>
-            </div>
-            <div className="flex items-center space-x-4">
-              <button 
-                onClick={() => onNavigate?.('analysis')}
-                className="px-4 py-2 text-blue-600 hover:text-blue-700 font-medium rounded-lg hover:bg-blue-50 transition-colors"
-              >
-                New Analysis
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
+    <div className={showHeader ? "min-h-screen bg-gray-50" : ""}>
+      {showHeader && <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="analysis-history" />}
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className={showHeader ? "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" : "p-6"}>
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Analysis History</h1>
@@ -244,44 +297,138 @@ const AnalysisHistoryPage: React.FC<AnalysisHistoryPageProps> = ({ onNavigate })
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Analysis List */}
             <div className="lg:col-span-1">
-              <div className="bg-white rounded-lg shadow-md p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">
-                  Recent Analyses ({analyses.length})
-                </h2>
-                <div className="space-y-3">
-                  {analyses.map((analysis) => (
-                    <div
-                      key={analysis.id}
-                      className={`p-4 border rounded-lg cursor-pointer transition-colors ${
-                        selectedAnalysis?.id === analysis.id
-                          ? 'border-blue-500 bg-blue-50'
-                          : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
-                      }`}
-                      onClick={() => setSelectedAnalysis(analysis)}
+              <div className="bg-gradient-to-br from-white via-gray-50 to-white rounded-2xl shadow-xl border border-gray-100 p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
+                      <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h2 className="text-xl font-bold text-gray-900">Analysis History</h2>
+                      <p className="text-sm text-gray-500">Your analysis history</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <select
+                      value={timeFilter}
+                      onChange={(e) => setTimeFilter(e.target.value)}
+                      className="bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
                     >
-                      <div className="flex items-start">
-                        <span className="text-2xl mr-3">
-                          {getAnalysisTypeIcon(analysis.analysis_type)}
-                        </span>
-                        <div className="flex-1 min-w-0">
-                          <h3 className="text-sm font-medium text-gray-900 truncate">
-                            {analysis.documents.title}
-                          </h3>
-                          <p className="text-xs text-gray-500 mt-1">
-                            {analysis.documents?.original_filename || 'Unknown file'}
-                          </p>
-                          <div className="mt-2 flex items-center justify-between">
-                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getAnalysisTypeColor(analysis.analysis_type)}`}>
-                              {getAnalysisTypeName(analysis.analysis_type)}
-                            </span>
-                            <span className="text-xs text-gray-500">
-                              {formatDate(analysis.created_at)}
-                            </span>
+                      <option value="last3">Last 3</option>
+                      <option value="lastWeek">Last Week</option>
+                      <option value="lastMonth">Last Month</option>
+                      <option value="lastYear">Last Year</option>
+                      <option value="all">All Time</option>
+                    </select>
+                    <div className="bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-800 text-sm font-bold px-3 py-1.5 rounded-full shadow-sm">
+                      {filteredAnalyses.length}
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="space-y-4">
+                  {isLoading ? (
+                    Array.from({ length: 3 }).map((_, index) => (
+                      <AnalysisCardSkeleton key={index} />
+                    ))
+                  ) : filteredAnalyses.length === 0 ? (
+                    <div className="text-center py-8">
+                      <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                        <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                        </svg>
+                      </div>
+                      <h3 className="text-sm font-medium text-gray-900 mb-1">
+                        {timeFilter === 'all' ? 'No analyses yet' : `No analyses in ${timeFilter === 'last3' ? 'recent' : timeFilter.replace('last', 'the last ')}`}
+                      </h3>
+                      <p className="text-xs text-gray-500">
+                        {timeFilter === 'all' ? 'Start by analyzing a document' : 'Try selecting a different time period'}
+                      </p>
+                    </div>
+                  ) : (
+                    filteredAnalyses.map((analysis) => (
+                      <div
+                        key={analysis.id}
+                        className={`group relative p-5 border-2 rounded-2xl cursor-pointer transition-all duration-300 transform hover:scale-[1.02] hover:shadow-lg ${
+                          selectedAnalysis?.id === analysis.id
+                            ? 'border-blue-500 bg-gradient-to-br from-blue-50 to-indigo-50 shadow-lg scale-[1.02]'
+                            : 'border-gray-200 hover:border-blue-300 hover:bg-white shadow-sm'
+                        }`}
+                        onClick={() => setSelectedAnalysis(analysis)}
+                      >
+                        {/* Selection indicator */}
+                        {selectedAnalysis?.id === analysis.id && (
+                          <div className="absolute -top-2 -right-2 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center shadow-lg">
+                            <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                            </svg>
+                          </div>
+                        )}
+                        
+                        <div className="flex items-start space-x-4">
+                          <div className={`flex-shrink-0 w-12 h-12 rounded-2xl flex items-center justify-center text-2xl transition-all duration-300 shadow-md ${
+                            selectedAnalysis?.id === analysis.id
+                              ? 'bg-gradient-to-br from-blue-100 to-indigo-100 scale-110'
+                              : 'bg-gradient-to-br from-gray-100 to-gray-200 group-hover:from-blue-100 group-hover:to-indigo-100'
+                          }`}>
+                            {getAnalysisTypeIcon(analysis.analysis_type)}
+                          </div>
+                          
+                          <div className="flex-1 min-w-0">
+                            <h3 className="text-base font-bold text-gray-900 truncate mb-1 group-hover:text-blue-900 transition-colors">
+                              {analysis.documents?.title || 'Unknown Document'}
+                            </h3>
+                            <p className="text-sm text-gray-600 mb-3 line-clamp-1">
+                              {analysis.documents?.original_filename || 'Unknown file'}
+                            </p>
+                            
+                            <div className="flex items-center justify-between">
+                              <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-300 shadow-sm ${getAnalysisTypeColor(analysis.analysis_type)}`}>
+                                {getAnalysisTypeName(analysis.analysis_type)}
+                              </span>
+                              <div className="text-right">
+                                <div className="text-xs text-gray-500 font-medium">
+                                  {formatDate(analysis.created_at)}
+                                </div>
+                                {selectedAnalysis?.id === analysis.id && (
+                                  <div className="text-xs text-blue-600 font-bold mt-1 flex items-center">
+                                    <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                    </svg>
+                                    Selected
+                                  </div>
+                                )}
+                              </div>
+                            </div>
                           </div>
                         </div>
+                        
+                        {/* Delete Button */}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            deleteAnalysis(analysis.id);
+                          }}
+                          disabled={isDeleting === analysis.id}
+                          className="absolute top-3 right-3 w-8 h-8 bg-red-100 hover:bg-red-200 text-red-600 hover:text-red-700 rounded-full flex items-center justify-center transition-all duration-200 opacity-0 group-hover:opacity-100 focus:opacity-100 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                          title="Delete analysis"
+                        >
+                          {isDeleting === analysis.id ? (
+                            <svg className="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
+                          ) : (
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                          )}
+                        </button>
                       </div>
-                    </div>
-                  ))}
+                    ))
+                  )}
                 </div>
               </div>
             </div>
@@ -304,7 +451,7 @@ const AnalysisHistoryPage: React.FC<AnalysisHistoryPageProps> = ({ onNavigate })
                         <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                         <div>
                           <span className="font-medium text-gray-700">Document:</span>
-                          <p className="text-gray-900 font-medium">{selectedAnalysis.documents.title}</p>
+                          <p className="text-gray-900 font-medium">{selectedAnalysis.documents?.title || 'Unknown Document'}</p>
                         </div>
                       </div>
                       <div className="flex items-center space-x-2">

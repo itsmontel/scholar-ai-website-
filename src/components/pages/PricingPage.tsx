@@ -1,4 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import Header from '../common/Header';
+import PaymentModal from '../payment/PaymentModal';
 
 interface PricingPageProps {
   onNavigate: (page: string) => void;
@@ -7,219 +9,155 @@ interface PricingPageProps {
 }
 
 const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [billingCycle, setBillingCycle] = useState('monthly');
-  const [, setSelectedPlan] = useState('premium');
+  const [paymentModal, setPaymentModal] = useState<{
+    isOpen: boolean;
+    planType: 'starter' | 'premium';
+    billingCycle: 'monthly' | 'yearly';
+  }>({
+    isOpen: false,
+    planType: 'starter',
+    billingCycle: 'monthly'
+  });
 
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (isDropdownOpen && !(event.target as Element).closest('.dropdown-container')) {
-        setIsDropdownOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [isDropdownOpen]);
-
-  const plans: Record<string, any> = {
-    basic: {
-      name: 'Basic',
-      price: { monthly: 19.99, annual: 199.99 },
-      description: 'Perfect for students and individual researchers',
+  const plans = [
+    {
+      id: 'free',
+      name: 'Free',
+      description: 'Perfect for getting started',
+      monthlyPrice: 0,
+      yearlyPrice: 0,
       features: [
-        'Unlimited document analyses',
-        'AI writing feedback & suggestions',
-        'Citation style checking (APA, MLA, Chicago)',
-        'Grammar and style improvements',
-        'Export to PDF and Word',
-        'Email support'
+        '5 documents per month',
+        'Basic AI analysis',
+        'Standard citation styles',
+        'Email support',
+        'Basic grammar check'
       ],
-      color: 'blue'
+      limitations: [
+        'Limited to 5 documents',
+        'Basic analysis only',
+        'No priority support'
+      ],
+      popular: false,
+      buttonText: 'Get Started Free',
+      buttonAction: () => onNavigate('signup')
     },
-    premium: {
-      name: 'Premium',
-      price: { monthly: 39.99, annual: 399.99 },
-      description: 'Most popular for serious academic writers',
+    {
+      id: 'starter',
+      name: 'Starter',
+      description: 'Most popular for students',
+      monthlyPrice: 19.99,
+      yearlyPrice: 199.99,
       features: [
-        'Everything in Basic',
-        'Advanced writing analysis',
+        'Unlimited document uploads',
+        'AI-powered analysis',
+        'All citation styles',
+        'Grammar and style checks',
         'Plagiarism detection',
-        'Document history & version control',
-        'Priority processing',
-        'Phone support'
+        'Export in multiple file formats'
       ],
-      color: 'purple',
-      popular: true
+      limitations: [],
+      popular: true,
+      buttonText: 'Upgrade to Starter',
+      buttonAction: () => {
+        if (user) {
+          setPaymentModal({
+            isOpen: true,
+            planType: 'starter',
+            billingCycle: billingCycle as 'monthly' | 'yearly'
+          });
+        } else {
+          onNavigate('signup');
+        }
+      }
+    },
+    {
+      id: 'premium',
+      name: 'Premium',
+      description: 'For researchers and institutions',
+      monthlyPrice: 39.99,
+      yearlyPrice: 399.99,
+      features: [
+        'Everything in Starter',
+        'Advanced AI analysis',
+        'Advanced grammar and style checking',
+        'Additional premium features'
+      ],
+      limitations: [],
+      popular: false,
+      buttonText: 'Upgrade to Pro',
+      buttonAction: () => {
+        if (user) {
+          setPaymentModal({
+            isOpen: true,
+            planType: 'premium',
+            billingCycle: billingCycle as 'monthly' | 'yearly'
+          });
+        } else {
+          onNavigate('signup');
+        }
+      }
     }
-  };
+  ];
 
-  const handleSelectPlan = (planType: string) => {
-    setSelectedPlan(planType);
-      // Would normally go to checkout
-      onNavigate('signup');
-  };
+  const faqs = [
+    {
+      question: "What's included in the free plan?",
+      answer: "The free plan includes 5 document analyses per month, basic AI feedback, standard citation styles, and email support. It's perfect for students just getting started with academic writing."
+    },
+    {
+      question: "What's the difference between Starter and Premium?",
+      answer: "Starter includes unlimited documents, AI analysis, all citation styles, grammar checks, plagiarism detection, and multiple export formats. Premium adds advanced AI analysis, advanced grammar checking, and additional premium features."
+    },
+    {
+      question: "Can I change my plan after subscribing?",
+      answer: "No, plan changes are not available after subscription. Please choose your plan carefully as subscriptions are final and cannot be modified once activated."
+    },
+    {
+      question: "What payment methods do you accept?",
+      answer: "We accept PayPal, Visa, and Mastercard payments processed securely through Stripe. All transactions are encrypted and secure."
+    },
+    {
+      question: "Do you offer student discounts?",
+      answer: "No, we do not offer any discounts or special pricing. All plans are priced as shown with no exceptions."
+    },
+    {
+      question: "Is there a money-back guarantee?",
+      answer: "No, we do not offer a money-back guarantee. All sales are final. Please review the plan features carefully before subscribing."
+    },
+    {
+      question: "Do you offer team collaboration features?",
+      answer: "No, our service is designed for individual use only. We do not offer team accounts, collaboration features, or multi-user access."
+    },
+    {
+      question: "How does billing work?",
+      answer: "Subscriptions are billed monthly or annually based on your chosen plan. Payment is processed automatically on your billing date through your selected payment method."
+    }
+  ];
 
-  const formatPrice = (plan: any) => {
-    const price = plan.price[billingCycle];
-    const period = billingCycle === 'monthly' ? '/mo' : '/yr';
-    return `$${price}${period}`;
+  const getPrice = (plan: any) => {
+    return billingCycle === 'yearly' ? plan.yearlyPrice : plan.monthlyPrice;
   };
 
   const getSavings = (plan: any) => {
-    if (billingCycle === 'annual' && plan.price.monthly > 0) {
-      const monthlyCost = plan.price.monthly * 12;
-      const savings = monthlyCost - plan.price.annual;
-      const percentage = Math.round((savings / monthlyCost) * 100);
-      return percentage;
+    if (billingCycle === 'yearly' && plan.monthlyPrice > 0) {
+      const monthlyTotal = plan.monthlyPrice * 12;
+      const savings = monthlyTotal - plan.yearlyPrice;
+      return Math.round((savings / monthlyTotal) * 100);
     }
     return 0;
   };
 
+  const handlePaymentSuccess = (subscriptionId: string) => {
+    console.log('Payment successful:', subscriptionId);
+    // You could show a success message or redirect to dashboard
+    onNavigate('dashboard');
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
-      {/* Header */}
-      <header className="bg-white/90 backdrop-blur-xl border-b border-gray-200/60 sticky top-0 z-50 shadow-sm">
-        <div className="max-w-7xl mx-auto px-6 py-5">
-          <div className="flex items-center justify-between">
-            <button 
-              onClick={() => onNavigate('dashboard')}
-              className="flex items-center space-x-3 hover:opacity-80 transition-opacity duration-200"
-            >
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
-                <span className="text-white font-bold text-lg">S</span>
-              </div>
-              <span className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">Scholar</span>
-            </button>
-
-            <nav className="hidden md:flex items-center space-x-8">
-              <button 
-                onClick={() => onNavigate('dashboard')}
-                className="px-4 py-2 text-gray-600 hover:text-gray-900 font-medium rounded-lg hover:bg-gray-100/50 transition-all duration-200"
-              >
-                Dashboard
-              </button>
-              <button 
-                onClick={() => onNavigate('library')}
-                className="px-4 py-2 text-gray-600 hover:text-gray-900 font-medium rounded-lg hover:bg-gray-100/50 transition-all duration-200"
-              >
-                Library
-              </button>
-              <button 
-                onClick={() => onNavigate('settings')}
-                className="px-4 py-2 text-gray-600 hover:text-gray-900 font-medium rounded-lg hover:bg-gray-100/50 transition-all duration-200"
-              >
-                Account
-              </button>
-            </nav>
-
-            <div className="flex items-center space-x-4">
-              {/* User Profile Dropdown */}
-              <div className="relative dropdown-container">
-                <button 
-                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                  className="flex items-center space-x-3 px-4 py-2 rounded-xl hover:bg-gray-100/60 transition-all duration-200 border border-gray-200/50 bg-white/50 backdrop-blur-sm"
-                >
-                  <div className="w-9 h-9 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-full flex items-center justify-center shadow-md">
-                    <span className="text-white font-bold text-sm">
-                      {(user?.name || 'U').charAt(0).toUpperCase()}
-                    </span>
-                  </div>
-                  <div className="text-left">
-                    <div className="text-sm font-semibold text-gray-900">{user?.name || 'User Name'}</div>
-                    <div className="text-xs text-gray-500">{user?.email || 'user@example.com'}</div>
-          </div>
-                  <svg 
-                    className={`w-4 h-4 text-gray-500 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`} 
-                    fill="none" 
-                    stroke="currentColor" 
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
-
-                {/* Dropdown Menu */}
-                {isDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-2xl border border-gray-200/50 backdrop-blur-sm z-50">
-                    {/* User Info Section */}
-                    <div className="px-4 py-3 border-b border-gray-100">
-                      <div className="text-sm font-medium text-gray-900">{user?.name || 'User Name'}</div>
-                      <div className="text-xs text-gray-500">{user?.email || 'user@example.com'}</div>
-                      <div className="flex items-center mt-2">
-                        <svg className="w-4 h-4 text-yellow-500 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                        </svg>
-                        <span className="text-xs text-gray-600">0 credits</span>
-        </div>
-        </div>
-
-                    {/* Navigation Links */}
-                    <div className="py-2">
-                      <button 
-                        onClick={() => { onNavigate('dashboard'); setIsDropdownOpen(false); }}
-                        className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                        <span>Dashboard</span>
-                      </button>
-                      
-                      <button 
-                        onClick={() => { onNavigate('settings'); setIsDropdownOpen(false); }}
-                        className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                        <span>Account</span>
-                      </button>
-                      
-                      <button 
-                        onClick={() => { onNavigate('library'); setIsDropdownOpen(false); }}
-                        className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                        </svg>
-                        <span>Documents</span>
-                      </button>
-                      
-                      <button 
-                        onClick={() => { onNavigate('pricing'); setIsDropdownOpen(false); }}
-                        className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                        </svg>
-                        <span>Upgrade Plan</span>
-          </button>
-                    </div>
-
-                    {/* Logout Section */}
-                    <div className="border-t border-gray-100 py-2">
-                      <button 
-                        onClick={() => { onLogout(); setIsDropdownOpen(false); }}
-                        className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors duration-200"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                        </svg>
-                        <span>Logout</span>
-          </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="pricing" />
 
       <div className="max-w-6xl mx-auto px-8 py-16">
         {/* Header */}
@@ -267,166 +205,140 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
                 Bill Monthly
               </button>
               <button
-                onClick={() => setBillingCycle('annual')}
+                onClick={() => setBillingCycle('yearly')}
                 className={`px-6 py-2 rounded-lg text-sm font-semibold transition-all duration-300 ${
-                  billingCycle === 'annual'
+                  billingCycle === 'yearly'
                     ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-md'
                     : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                 }`}
               >
-                Bill Yearly (2 Months Free)
+                Bill Yearly
+                <span className="ml-2 px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
+                  Save 17%
+                </span>
             </button>
             </div>
           </div>
         </div>
 
         {/* Pricing Cards */}
-        <div className="grid lg:grid-cols-2 gap-8 mb-16 max-w-5xl mx-auto">
-          {Object.entries(plans).map(([key, plan]) => (
+        <div className="grid md:grid-cols-3 gap-8 mb-16">
+          {plans.map((plan) => (
             <div
-              key={key}
-              className={`relative bg-white/90 backdrop-blur-xl rounded-2xl border transition-all duration-300 hover:shadow-xl ${
+              key={plan.id}
+              className={`relative bg-white/90 backdrop-blur-xl border rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 ${
                 plan.popular 
-                  ? 'border-blue-500/60 shadow-lg' 
-                  : 'border-gray-200/60 shadow-md hover:border-gray-300/60'
+                  ? 'border-blue-500 ring-2 ring-blue-200'
+                  : 'border-gray-200/60'
               }`}
             >
               {plan.popular && (
                 <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                  <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-xl text-center font-bold text-sm shadow-lg">
+                  <span className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-1 rounded-full text-sm font-semibold">
                     Most Popular
-                  </div>
+                  </span>
                 </div>
               )}
 
-              <div className="p-8">
-                {/* Plan Header */}
                 <div className="text-center mb-8">
                   <h3 className="text-2xl font-bold text-gray-900 mb-2">{plan.name}</h3>
                   <p className="text-gray-600 mb-6">{plan.description}</p>
-                  <div className="mb-6">
-                    <span className="text-4xl font-bold text-gray-900">{formatPrice(plan)}</span>
-                    {getSavings(plan) > 0 && (
-                      <div className="mt-3">
-                        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-green-100 text-green-800 border border-green-200">
-                          Save {getSavings(plan)}%
+                
+                <div className="mb-4">
+                  <span className="text-4xl font-bold text-gray-900">
+                    ${getPrice(plan)}
+                  </span>
+                  <span className="text-gray-600 ml-2">
+                    /{billingCycle === 'yearly' ? 'year' : 'month'}
                         </span>
                       </div>
-                    )}
+
+                {getSavings(plan) > 0 && (
+                  <div className="text-green-600 text-sm font-medium mb-4">
+                    Save {getSavings(plan)}% with yearly billing
                   </div>
+                )}
                 </div>
 
-                {/* Features */}
                 <div className="mb-8">
                   <ul className="space-y-3">
-                    {plan.features.map((feature: string, index: number) => (
-                      <li key={index} className="flex items-start space-x-3">
-                        <svg className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  {plan.features.map((feature, index) => (
+                    <li key={index} className="flex items-start">
+                      <svg className="w-5 h-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                         </svg>
-                        <span className="text-gray-700 text-sm">{feature}</span>
+                      <span className="text-gray-700">{feature}</span>
                       </li>
                     ))}
                   </ul>
                 </div>
 
-                {/* CTA Button */}
                 <button
-                  onClick={() => handleSelectPlan(key)}
-                  className={`w-full py-3 px-6 rounded-xl font-semibold text-base transition-all duration-300 ${
+                onClick={plan.buttonAction}
+                className={`w-full py-3 px-6 rounded-xl font-semibold transition-all duration-200 ${
                     plan.popular
-                      ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:shadow-lg'
-                      : 'bg-gray-900 text-white hover:bg-gray-800'
+                    ? 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transform hover:scale-105'
+                    : 'bg-gray-100 hover:bg-gray-200 text-gray-900'
                   }`}
                 >
-                  {key === 'basic' ? 'Upgrade to Basic' : 'Upgrade to Premium'}
+                {plan.buttonText}
                 </button>
-              </div>
             </div>
           ))}
         </div>
 
-        {/* Alternatives Section */}
-        <div className="bg-gradient-to-br from-gray-900 via-blue-900 to-indigo-900 text-white py-16 relative overflow-hidden">
-          <div className="max-w-6xl mx-auto px-8 relative z-10">
-            <h2 className="text-3xl font-bold text-center mb-12">Alternatives are expensive</h2>
-            
-            <div className="grid md:grid-cols-3 gap-8">
-              {/* Hire Editors */}
-              <div className="text-center">
-                <div className="w-16 h-16 bg-red-500/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                  <svg className="w-8 h-8 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-bold mb-4">Hire Editors</h3>
-                <p className="text-gray-300 text-sm">
-                  Expensive: Pay hundreds for basic editing, plus extra costs for revisions and multiple rounds of feedback.
+        {/* FAQ Section */}
+        <div className="bg-white/90 backdrop-blur-xl border border-gray-200/60 rounded-2xl p-12 shadow-lg">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-6">Frequently Asked Questions</h2>
+            <p className="text-lg text-gray-600">
+              Everything you need to know about our pricing and plans.
                 </p>
               </div>
 
-              {/* Do It Yourself */}
-              <div className="text-center">
-                <div className="w-16 h-16 bg-red-500/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                  <svg className="w-8 h-8 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-bold mb-4">Do It Yourself Manually</h3>
-                <p className="text-gray-300 text-sm">
-                  Time-consuming: Requires learning academic writing principles, citation styles, and countless hours of self-editing.
-                </p>
+          <div className="grid md:grid-cols-2 gap-8">
+            {faqs.map((faq, index) => (
+              <div key={index} className="space-y-4">
+                <h3 className="text-lg font-semibold text-gray-900">{faq.question}</h3>
+                <p className="text-gray-600 leading-relaxed">{faq.answer}</p>
               </div>
-
-              {/* Scholar AI */}
-              <div className="text-center">
-                <div className="w-16 h-16 bg-green-500/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                  <svg className="w-8 h-8 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-bold mb-4">Scholar AI</h3>
-                <p className="text-gray-300 text-sm">
-                  Generate professional academic feedback instantly with AI. Fast, affordable, and high-quality writing enhancement.
-                </p>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
 
-        {/* FAQ Section */}
-        <div className="bg-gradient-to-br from-gray-50 to-white py-16">
-          <div className="max-w-6xl mx-auto px-8">
-            <h2 className="text-3xl font-bold text-gray-900 text-center mb-12">Frequently Asked Questions</h2>
-            <div className="grid md:grid-cols-2 gap-8">
-              <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-gray-200/50 shadow-lg">
-                <h3 className="font-bold text-gray-900 mb-3">What types of documents can Scholar AI analyze?</h3>
-                <p className="text-gray-600 text-sm">Scholar AI supports PDF, DOCX, and TXT files. Our AI provides comprehensive analysis including writing quality, structure, citations, and academic standards compliance.</p>
-              </div>
-              <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-gray-200/50 shadow-lg">
-                <h3 className="font-bold text-gray-900 mb-3">How does the AI analysis work?</h3>
-                <p className="text-gray-600 text-sm">Our advanced AI analyzes your document for academic writing quality, provides interactive annotations with specific feedback, and offers suggestions for improvement based on academic standards.</p>
-              </div>
-              <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-gray-200/50 shadow-lg">
-                <h3 className="font-bold text-gray-900 mb-3">What citation styles are supported?</h3>
-                <p className="text-gray-600 text-sm">Scholar AI supports all major academic citation styles including APA, Harvard, MLA, Chicago, and more. The AI can check and suggest corrections for your citations.</p>
-              </div>
-              <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-gray-200/50 shadow-lg">
-                <h3 className="font-bold text-gray-900 mb-3">Can I save and access my analysis history?</h3>
-                <p className="text-gray-600 text-sm">Yes! All your analyses are saved to your account and can be accessed anytime. You can view your analysis history and track your writing improvements over time.</p>
-              </div>
-              <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-gray-200/50 shadow-lg">
-                <h3 className="font-bold text-gray-900 mb-3">Is there a word limit for document analysis?</h3>
-                <p className="text-gray-600 text-sm">There's a minimum of 200 words required for analysis to ensure meaningful feedback. There's no maximum limit - we can analyze documents of any length.</p>
-              </div>
-              <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-gray-200/50 shadow-lg">
-                <h3 className="font-bold text-gray-900 mb-3">How secure is my academic work?</h3>
-                <p className="text-gray-600 text-sm">Your documents are encrypted and secure. We never use your content to train our AI models or share it with third parties. Your academic work remains completely private.</p>
-              </div>
-            </div>
+        {/* CTA Section */}
+        <div className="text-center mt-16">
+          <h2 className="text-3xl font-bold text-gray-900 mb-6">
+            Ready to improve your academic writing?
+          </h2>
+          <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
+            Join thousands of students and researchers who trust Scholar to help them achieve academic excellence.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <button 
+              onClick={() => onNavigate('signup')}
+              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-3 rounded-xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+            >
+              Get Started Free
+            </button>
+            <button 
+              onClick={() => onNavigate('contact')}
+              className="border-2 border-gray-300 hover:border-gray-400 text-gray-700 hover:text-gray-900 px-8 py-3 rounded-xl font-semibold transition-all duration-200"
+            >
+              Contact Sales
+            </button>
           </div>
         </div>
       </div>
+
+      {/* Payment Modal */}
+      <PaymentModal
+        isOpen={paymentModal.isOpen}
+        onClose={() => setPaymentModal(prev => ({ ...prev, isOpen: false }))}
+        planType={paymentModal.planType}
+        billingCycle={paymentModal.billingCycle}
+        onSuccess={handlePaymentSuccess}
+      />
     </div>
   );
 };

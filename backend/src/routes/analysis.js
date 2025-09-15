@@ -1,49 +1,41 @@
 const express = require('express');
 const router = express.Router();
 const { authenticateToken } = require('../middleware/auth');
-const { validate } = require('../middleware/validation');
-const Joi = require('joi');
+const { 
+  validateCreateAnalysis,
+  validateSaveAnalysis,
+  validateGetAnalysisHistory,
+  validateAnalysisId
+} = require('../middleware/validation');
 const aiAnalysisService = require('../services/aiAnalysisService');
 const documentService = require('../services/documentService');
 
-// Validation schemas
-const analyzeDocumentSchema = Joi.object({
-  documentId: Joi.string().uuid().allow(null).optional(),
-  content: Joi.string().min(200).optional(),
-  analysisType: Joi.string().valid('comprehensive').required(),
-  citationStyle: Joi.string().valid('APA', 'Harvard', 'Chicago', 'MLA', 'IEEE', 'Vancouver').optional()
-}).or('documentId', 'content'); // Either documentId or content must be provided
-
-const getAnalysisSchema = Joi.object({
-  analysisId: Joi.string().uuid().required()
-});
-
-const saveAnalysisSchema = Joi.object({
-  documentId: Joi.string().uuid().allow(null).optional(),
-  content: Joi.string().min(200).required(),
-  analysisResult: Joi.string().required(),
-  annotations: Joi.array().required(),
-  analysisType: Joi.string().valid('comprehensive').required(),
-  citationStyle: Joi.string().valid('APA', 'Harvard', 'Chicago', 'MLA', 'IEEE', 'Vancouver').optional()
-});
+// Note: Validation schemas are now imported from middleware/validation.js
 
 /**
  * @route POST /api/analysis/analyze
  * @desc Analyze a document with AI
  * @access Private
  */
-router.post('/analyze', authenticateToken, validate(analyzeDocumentSchema), async (req, res) => {
+router.post('/analyze', authenticateToken, validateCreateAnalysis, async (req, res) => {
   try {
     const { documentId, content, analysisType, citationStyle } = req.body;
     const userId = req.user.id;
 
+    console.log('=== ANALYSIS REQUEST DEBUG ===');
+    console.log('Received documentId:', documentId);
+    console.log('Received content length:', content?.length);
+    console.log('Received analysisType:', analysisType);
+    console.log('User ID:', userId);
+
     let analysisContent = '';
     let analysisDocumentId = documentId;
 
-    if (content) {
-      // Text analysis from dashboard
+    if (content && !documentId) {
+      // Text analysis from dashboard (no document ID)
       analysisContent = content;
       analysisDocumentId = null; // No document ID for text analysis
+      console.log('Text analysis from dashboard - no document ID');
     } else if (documentId) {
       // Document analysis
       const document = await documentService.getDocumentById(documentId, userId);
@@ -61,6 +53,7 @@ router.post('/analyze', authenticateToken, validate(analyzeDocumentSchema), asyn
           message: 'Document content not available for analysis'
         });
       }
+      console.log('Document analysis - document ID:', documentId, 'title:', document.title);
     } else {
       return res.status(400).json({
         success: false,
@@ -76,6 +69,32 @@ router.post('/analyze', authenticateToken, validate(analyzeDocumentSchema), asyn
       userId,
       citationStyle
     );
+
+    // Automatically save the analysis to database
+    try {
+      console.log('=== SAVING ANALYSIS DEBUG ===');
+      console.log('analysisDocumentId:', analysisDocumentId);
+      console.log('userId:', userId);
+      console.log('analysisType:', analysisType);
+      
+      const savedAnalysis = await aiAnalysisService.saveAnalysis(
+        analysisDocumentId,
+        userId,
+        analysisType,
+        analysisResult.result,
+        analysisContent,
+        analysisResult.annotations,
+        citationStyle
+      );
+      
+      console.log('Analysis automatically saved to database:', savedAnalysis.id);
+      
+      // Add the saved analysis ID to the response
+      analysisResult.savedAnalysisId = savedAnalysis.id;
+    } catch (saveError) {
+      console.error('Failed to auto-save analysis:', saveError);
+      // Don't fail the request if save fails, just log it
+    }
 
     res.json({
       success: true,
@@ -98,7 +117,7 @@ router.post('/analyze', authenticateToken, validate(analyzeDocumentSchema), asyn
  * @desc Save analysis results to history
  * @access Private
  */
-router.post('/save', authenticateToken, validate(saveAnalysisSchema), async (req, res) => {
+router.post('/save', authenticateToken, validateSaveAnalysis, async (req, res) => {
   try {
     const { documentId, content, analysisResult, annotations, analysisType, citationStyle } = req.body;
     const userId = req.user.id;
@@ -147,7 +166,7 @@ router.post('/save', authenticateToken, validate(saveAnalysisSchema), async (req
  * @desc Get user's analysis history
  * @access Private
  */
-router.get('/history', authenticateToken, async (req, res) => {
+router.get('/history', authenticateToken, validateGetAnalysisHistory, async (req, res) => {
   try {
     const userId = req.user.id;
     const limit = parseInt(req.query.limit) || 10;
@@ -198,7 +217,7 @@ router.get('/types', authenticateToken, async (req, res) => {
  * @desc Get specific analysis by ID
  * @access Private
  */
-router.get('/:analysisId', authenticateToken, validate(getAnalysisSchema, 'params'), async (req, res) => {
+router.get('/:analysisId', authenticateToken, validateAnalysisId, async (req, res) => {
   try {
     const { analysisId } = req.params;
     const userId = req.user.id;
@@ -280,6 +299,63 @@ router.get('/document/:documentId', authenticateToken, async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to fetch document analyses',
+      error: error.message
+    });
+  }
+});
+
+/**
+ * @route DELETE /api/analysis/:id
+ * @desc Delete a specific analysis
+ * @access Private
+ */
+router.delete('/:id', authenticateToken, validateAnalysisId, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+
+    const { createClient } = require('@supabase/supabase-js');
+    const supabase = createClient(
+      process.env.SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY
+    );
+
+    // First, check if the analysis exists and belongs to the user
+    const { data: analysis, error: fetchError } = await supabase
+      .from('document_analyses')
+      .select('id, user_id')
+      .eq('id', id)
+      .eq('user_id', userId)
+      .single();
+
+    if (fetchError || !analysis) {
+      return res.status(404).json({
+        success: false,
+        message: 'Analysis not found or access denied'
+      });
+    }
+
+    // Delete the analysis
+    const { error: deleteError } = await supabase
+      .from('document_analyses')
+      .delete()
+      .eq('id', id)
+      .eq('user_id', userId);
+
+    if (deleteError) {
+      throw deleteError;
+    }
+
+    res.json({
+      success: true,
+      message: 'Analysis deleted successfully'
+    });
+
+  } catch (error) {
+    console.error('Delete analysis error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to delete analysis',
       error: error.message
     });
   }

@@ -1,5 +1,5 @@
 const express = require('express');
-const { query } = require('../database/connection');
+const { createClient } = require('@supabase/supabase-js');
 const stripeService = require('../services/stripeService');
 
 const router = express.Router();
@@ -21,6 +21,10 @@ router.post('/stripe', express.raw({ type: 'application/json' }), async (req, re
 
     // Handle the event
     switch (event.type) {
+      case 'checkout.session.completed':
+        await handleCheckoutSessionCompleted(event.data.object);
+        break;
+
       case 'customer.subscription.created':
         await handleSubscriptionCreated(event.data.object);
         break;
@@ -56,48 +60,129 @@ router.post('/stripe', express.raw({ type: 'application/json' }), async (req, re
   }
 });
 
+// Handle checkout session completed
+async function handleCheckoutSessionCompleted(session) {
+  try {
+    console.log('Checkout session completed:', session.id);
+    
+    const { userId, planType, billingCycle } = session.metadata;
+    
+    if (!userId) {
+      console.error('No userId in checkout session metadata');
+      return;
+    }
+
+    const supabase = createClient(
+      process.env.SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY
+    );
+
+    // Get the subscription from the session
+    const subscription = await stripeService.getSubscription(session.subscription);
+    
+    if (!subscription) {
+      console.error('No subscription found for session:', session.id);
+      return;
+    }
+
+    // Save subscription to database
+    const { error: subError } = await supabase
+      .from('subscriptions')
+      .upsert({
+        id: require('uuid').v4(),
+        user_id: userId,
+        stripe_subscription_id: subscription.id,
+        plan_type: planType,
+        billing_cycle: billingCycle,
+        status: subscription.status,
+        current_period_start: new Date(subscription.current_period_start * 1000).toISOString(),
+        current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      }, {
+        onConflict: 'stripe_subscription_id'
+      });
+
+    if (subError) {
+      console.error('Error saving subscription:', subError);
+      return;
+    }
+
+    // Update user subscription plan and status
+    const { error: userError } = await supabase
+      .from('users')
+      .update({
+        subscription_plan: planType,
+        subscription_status: subscription.status,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', userId);
+
+    if (userError) {
+      console.error('Error updating user subscription:', userError);
+      return;
+    }
+
+    console.log('Checkout session completed successfully for user:', userId);
+  } catch (error) {
+    console.error('Error handling checkout session completed:', error);
+  }
+}
+
 // Handle subscription created
 async function handleSubscriptionCreated(subscription) {
   try {
     console.log('Subscription created:', subscription.id);
 
+    const supabase = createClient(
+      process.env.SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY
+    );
+
     // Get customer ID from subscription
     const customerId = subscription.customer;
     
     // Find user by Stripe customer ID
-    const userResult = await query(
-      'SELECT id FROM users WHERE stripe_customer_id = $1',
-      [customerId]
-    );
+    const { data: user, error: userError } = await supabase
+      .from('users')
+      .select('id')
+      .eq('stripe_customer_id', customerId)
+      .single();
 
-    if (userResult.rows.length === 0) {
+    if (userError || !user) {
       console.error('User not found for customer:', customerId);
       return;
     }
 
-    const userId = userResult.rows[0].id;
+    const userId = user.id;
 
     // Update subscription status
-    await query(
-      `UPDATE subscriptions 
-       SET status = $1, 
-           current_period_start = $2, 
-           current_period_end = $3,
-           updated_at = CURRENT_TIMESTAMP
-       WHERE stripe_subscription_id = $4`,
-      [
-        subscription.status,
-        new Date(subscription.current_period_start * 1000),
-        new Date(subscription.current_period_end * 1000),
-        subscription.id
-      ]
-    );
+    const { error: subError } = await supabase
+      .from('subscriptions')
+      .update({
+        status: subscription.status,
+        current_period_start: new Date(subscription.current_period_start * 1000).toISOString(),
+        current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
+        updated_at: new Date().toISOString()
+      })
+      .eq('stripe_subscription_id', subscription.id);
+
+    if (subError) {
+      console.error('Error updating subscription:', subError);
+    }
 
     // Update user subscription status
-    await query(
-      'UPDATE users SET subscription_status = $1 WHERE id = $2',
-      [subscription.status, userId]
-    );
+    const { error: userUpdateError } = await supabase
+      .from('users')
+      .update({
+        subscription_status: subscription.status,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', userId);
+
+    if (userUpdateError) {
+      console.error('Error updating user subscription status:', userUpdateError);
+    }
 
     console.log('Subscription created successfully for user:', userId);
   } catch (error) {
@@ -110,45 +195,66 @@ async function handleSubscriptionUpdated(subscription) {
   try {
     console.log('Subscription updated:', subscription.id);
 
-    // Update subscription in database
-    await query(
-      `UPDATE subscriptions 
-       SET status = $1, 
-           current_period_start = $2, 
-           current_period_end = $3,
-           cancel_at_period_end = $4,
-           updated_at = CURRENT_TIMESTAMP
-       WHERE stripe_subscription_id = $5`,
-      [
-        subscription.status,
-        new Date(subscription.current_period_start * 1000),
-        new Date(subscription.current_period_end * 1000),
-        subscription.cancel_at_period_end,
-        subscription.id
-      ]
+    const supabase = createClient(
+      process.env.SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY
     );
+
+    // Update subscription in database
+    const { error: subError } = await supabase
+      .from('subscriptions')
+      .update({
+        status: subscription.status,
+        current_period_start: new Date(subscription.current_period_start * 1000).toISOString(),
+        current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
+        cancel_at_period_end: subscription.cancel_at_period_end,
+        updated_at: new Date().toISOString()
+      })
+      .eq('stripe_subscription_id', subscription.id);
+
+    if (subError) {
+      console.error('Error updating subscription:', subError);
+    }
 
     // Get user ID for status update
-    const userResult = await query(
-      'SELECT user_id FROM subscriptions WHERE stripe_subscription_id = $1',
-      [subscription.id]
-    );
+    const { data: subData, error: subDataError } = await supabase
+      .from('subscriptions')
+      .select('user_id')
+      .eq('stripe_subscription_id', subscription.id)
+      .single();
 
-    if (userResult.rows.length > 0) {
-      const userId = userResult.rows[0].user_id;
-      
-      // Update user subscription status
-      await query(
-        'UPDATE users SET subscription_status = $1 WHERE id = $2',
-        [subscription.status, userId]
-      );
+    if (subDataError || !subData) {
+      console.error('Error finding subscription:', subDataError);
+      return;
+    }
 
-      // If subscription is cancelled, downgrade to free plan
-      if (subscription.status === 'canceled') {
-        await query(
-          'UPDATE users SET subscription_plan = $1 WHERE id = $2',
-          ['free', userId]
-        );
+    const userId = subData.user_id;
+    
+    // Update user subscription status
+    const { error: userError } = await supabase
+      .from('users')
+      .update({
+        subscription_status: subscription.status,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', userId);
+
+    if (userError) {
+      console.error('Error updating user subscription status:', userError);
+    }
+
+    // If subscription is cancelled, downgrade to free plan
+    if (subscription.status === 'canceled') {
+      const { error: downgradeError } = await supabase
+        .from('users')
+        .update({
+          subscription_plan: 'free',
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', userId);
+
+      if (downgradeError) {
+        console.error('Error downgrading user to free plan:', downgradeError);
       }
     }
 

@@ -1,195 +1,234 @@
 const Joi = require('joi');
 
-// User validation schemas
-const registerSchema = Joi.object({
-  email: Joi.string().email().required().messages({
-    'string.email': 'Please provide a valid email address',
-    'any.required': 'Email is required'
-  }),
-  password: Joi.string()
-    .min(8)
-    .pattern(new RegExp('^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]'))
-    .required()
-    .messages({
-      'string.min': 'Password must be at least 8 characters long',
-      'string.pattern.base': 'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character',
-      'any.required': 'Password is required'
-    }),
-  institution: Joi.string().max(255).optional(),
-  researchField: Joi.string().max(255).optional()
-});
-
-const loginSchema = Joi.object({
-  email: Joi.string().email().required().messages({
-    'string.email': 'Please provide a valid email address',
-    'any.required': 'Email is required'
-  }),
-  password: Joi.string().required().messages({
-    'any.required': 'Password is required'
-  })
-});
-
-const updateProfileSchema = Joi.object({
-  firstName: Joi.string().min(2).max(50).optional(),
-  lastName: Joi.string().min(2).max(50).optional(),
-  institution: Joi.string().max(255).optional(),
-  researchField: Joi.string().max(255).optional()
-});
-
-const changePasswordSchema = Joi.object({
-  currentPassword: Joi.string().required().messages({
-    'any.required': 'Current password is required'
-  }),
-  newPassword: Joi.string()
-    .min(8)
-    .pattern(new RegExp('^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]'))
-    .required()
-    .messages({
-      'string.min': 'New password must be at least 8 characters long',
-      'string.pattern.base': 'New password must contain at least one uppercase letter, one lowercase letter, one number, and one special character',
-      'any.required': 'New password is required'
-    })
-});
-
-// Document validation schemas
-const documentUploadSchema = Joi.object({
-  title: Joi.string().min(1).max(500).required().messages({
-    'string.min': 'Document title is required',
-    'string.max': 'Document title cannot exceed 500 characters',
-    'any.required': 'Document title is required'
-  }),
-  citationStyle: Joi.string().valid('APA', 'MLA', 'Chicago', 'Harvard', 'IEEE').optional(),
-  focusAreas: Joi.array().items(
-    Joi.string().valid(
-      'grammar',
-      'clarity',
-      'structure',
-      'citations',
-      'plagiarism',
-      'academic_tone',
-      'research_quality',
-      'argument_strength'
-    )
-  ).optional()
-});
-
-const analysisRequestSchema = Joi.object({
-  documentId: Joi.string().uuid().required().messages({
-    'string.guid': 'Invalid document ID format',
-    'any.required': 'Document ID is required'
-  }),
-  analysisType: Joi.string().valid('general', 'citation', 'grammar', 'plagiarism', 'comprehensive').required().messages({
-    'any.only': 'Analysis type must be one of: general, citation, grammar, plagiarism, comprehensive',
-    'any.required': 'Analysis type is required'
-  }),
-  citationStyle: Joi.string().valid('APA', 'MLA', 'Chicago', 'Harvard', 'IEEE', 'Vancouver', 'ACS', 'AMA').optional(),
-  focusAreas: Joi.array().items(
-    Joi.string().valid(
-      'grammar',
-      'clarity',
-      'structure',
-      'citations',
-      'plagiarism',
-      'academic_tone',
-      'research_quality',
-      'argument_strength',
-      'methodology',
-      'statistical_analysis',
-      'data_quality',
-      'reproducibility',
-      'ethical_considerations',
-      'novelty',
-      'significance',
-      'impact'
-    )
-  ).optional(),
-  targetJournal: Joi.string().max(255).optional().messages({
-    'string.max': 'Target journal name cannot exceed 255 characters'
-  }),
-  researchField: Joi.string().max(255).optional().messages({
-    'string.max': 'Research field cannot exceed 255 characters'
-  })
-});
-
-// Document validation schemas
-const documentUpdateSchema = Joi.object({
-  title: Joi.string().min(1).max(500).required().messages({
-    'string.min': 'Document title is required',
-    'string.max': 'Document title cannot exceed 500 characters',
-    'any.required': 'Document title is required'
-  })
-});
-
-// Subscription validation schemas
-const createSubscriptionSchema = Joi.object({
-  planType: Joi.string().valid('basic', 'premium').required().messages({
-    'any.only': 'Plan type must be either basic or premium',
-    'any.required': 'Plan type is required'
-  }),
-  billingCycle: Joi.string().valid('monthly', 'yearly').required().messages({
-    'any.only': 'Billing cycle must be either monthly or yearly',
-    'any.required': 'Billing cycle is required'
-  })
-});
-
-// Validation middleware
-const validate = (schema) => {
+// Validation middleware factory
+const validate = (schema, property = 'body') => {
   return (req, res, next) => {
-    const { error } = schema.validate(req.body, { abortEarly: false });
-    
+    const { error, value } = schema.validate(req[property], {
+      abortEarly: false,
+      stripUnknown: true,
+      allowUnknown: false
+    });
+
     if (error) {
-      const errorMessages = error.details.map(detail => detail.message);
+      const errorDetails = error.details.map(detail => ({
+        field: detail.path.join('.'),
+        message: detail.message,
+        value: detail.context?.value
+      }));
+
       return res.status(400).json({
         success: false,
-        message: 'Validation error',
-        errors: errorMessages
+        message: 'Validation failed',
+        errors: errorDetails
       });
     }
-    
+
+    // Replace the request property with the validated and sanitized value
+    req[property] = value;
     next();
   };
 };
 
-// File upload validation
-const validateFileUpload = (req, res, next) => {
-  if (!req.file) {
-    return res.status(400).json({
-      success: false,
-      message: 'No file uploaded'
-    });
+// Common validation schemas
+const commonSchemas = {
+  // Email validation
+  email: Joi.string()
+    .email({ tlds: { allow: false } })
+    .max(255)
+    .required()
+    .messages({
+      'string.email': 'Please provide a valid email address',
+      'string.max': 'Email address is too long',
+      'any.required': 'Email is required'
+    }),
+
+  // Password validation
+  password: Joi.string()
+    .min(8)
+    .max(128)
+    .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/)
+    .required()
+    .messages({
+      'string.min': 'Password must be at least 8 characters long',
+      'string.max': 'Password is too long',
+      'string.pattern.base': 'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character',
+      'any.required': 'Password is required'
+    }),
+
+  // Name validation
+  name: Joi.string()
+    .min(2)
+    .max(100)
+    .pattern(/^[a-zA-Z\s'-]+$/)
+    .required()
+    .messages({
+      'string.min': 'Name must be at least 2 characters long',
+      'string.max': 'Name is too long',
+      'string.pattern.base': 'Name can only contain letters, spaces, hyphens, and apostrophes',
+      'any.required': 'Name is required'
+    }),
+
+  // UUID validation
+  uuid: Joi.string()
+    .uuid({ version: 'uuidv4' })
+    .required()
+    .messages({
+      'string.guid': 'Invalid ID format',
+      'any.required': 'ID is required'
+    }),
+
+  // Document title validation
+  title: Joi.string()
+    .min(1)
+    .max(255)
+    .trim()
+    .required()
+    .messages({
+      'string.min': 'Title cannot be empty',
+      'string.max': 'Title is too long',
+      'any.required': 'Title is required'
+    }),
+
+  // Text content validation
+  content: Joi.string()
+    .min(10)
+    .max(100000)
+    .trim()
+    .required()
+    .messages({
+      'string.min': 'Content must be at least 10 characters long',
+      'string.max': 'Content is too long',
+      'any.required': 'Content is required'
+    }),
+
+  // Analysis type validation
+  analysisType: Joi.string()
+    .valid('comprehensive', 'grammar', 'style', 'structure', 'citation', 'plagiarism')
+    .required()
+    .messages({
+      'any.only': 'Invalid analysis type',
+      'any.required': 'Analysis type is required'
+    }),
+
+  // Citation style validation
+  citationStyle: Joi.string()
+    .valid('APA', 'MLA', 'Chicago', 'Harvard', 'IEEE', 'Vancouver')
+    .required()
+    .messages({
+      'any.only': 'Invalid citation style',
+      'any.required': 'Citation style is required'
+    }),
+
+  // Pagination validation
+  pagination: {
+    page: Joi.number().integer().min(1).default(1),
+    limit: Joi.number().integer().min(1).max(100).default(10)
   }
-
-  const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain'];
-  const maxSize = parseInt(process.env.MAX_FILE_SIZE) || 10 * 1024 * 1024; // 10MB default
-
-  if (!allowedTypes.includes(req.file.mimetype)) {
-    return res.status(400).json({
-      success: false,
-      message: 'Invalid file type. Only PDF, DOC, DOCX, and TXT files are allowed'
-    });
-  }
-
-  if (req.file.size > maxSize) {
-    return res.status(400).json({
-      success: false,
-      message: `File too large. Maximum size is ${maxSize / (1024 * 1024)}MB`
-    });
-  }
-
-  next();
 };
 
+// Specific validation schemas for different endpoints
+const validationSchemas = {
+  // Auth endpoints
+  register: Joi.object({
+    name: commonSchemas.name,
+    email: commonSchemas.email,
+    password: commonSchemas.password
+  }),
+
+  login: Joi.object({
+    email: commonSchemas.email,
+    password: Joi.string().required().messages({
+      'any.required': 'Password is required'
+    })
+  }),
+
+  // Document endpoints
+  uploadDocument: Joi.object({
+    title: commonSchemas.title,
+    content: commonSchemas.content
+  }),
+
+  updateDocument: Joi.object({
+    title: commonSchemas.title
+  }),
+
+  // Analysis endpoints
+  createAnalysis: Joi.object({
+    documentId: commonSchemas.uuid,
+    analysisType: commonSchemas.analysisType,
+    citationStyle: commonSchemas.citationStyle,
+    content: commonSchemas.content
+  }),
+
+  saveAnalysis: Joi.object({
+    documentId: commonSchemas.uuid,
+    analysisType: commonSchemas.analysisType,
+    citationStyle: commonSchemas.citationStyle,
+    result: commonSchemas.content
+  }),
+
+  // Query parameters
+  getDocuments: Joi.object({
+    page: commonSchemas.pagination.page,
+    limit: commonSchemas.pagination.limit,
+    search: Joi.string().max(100).optional()
+  }),
+
+  getAnalysisHistory: Joi.object({
+    page: commonSchemas.pagination.page,
+    limit: commonSchemas.pagination.limit,
+    documentId: commonSchemas.uuid.optional()
+  }),
+
+  // User profile validation
+  updateProfile: Joi.object({
+    firstName: Joi.string().min(2).max(50).optional(),
+    lastName: Joi.string().min(2).max(50).optional(),
+    institution: Joi.string().max(255).optional(),
+    researchField: Joi.string().max(255).optional()
+  }).min(1), // At least one field must be provided
+
+  // Change password validation
+  changePassword: Joi.object({
+    currentPassword: Joi.string().required().messages({
+      'any.required': 'Current password is required'
+    }),
+    newPassword: commonSchemas.password
+  })
+};
+
+// Export validation functions for different endpoints
 module.exports = {
   validate,
-  validateFileUpload,
-  schemas: {
-    register: registerSchema,
-    login: loginSchema,
-    updateProfile: updateProfileSchema,
-    changePassword: changePasswordSchema,
-    documentUpload: documentUploadSchema,
-    documentUpdate: documentUpdateSchema,
-    analysisRequest: analysisRequestSchema,
-    createSubscription: createSubscriptionSchema
-  }
+  commonSchemas,
+  validationSchemas,
+  
+  // Auth validations
+  validateRegister: validate(validationSchemas.register),
+  validateLogin: validate(validationSchemas.login),
+  
+  // Document validations
+  validateUploadDocument: validate(validationSchemas.uploadDocument),
+  validateUpdateDocument: validate(validationSchemas.updateDocument),
+  
+  // Analysis validations
+  validateCreateAnalysis: validate(validationSchemas.createAnalysis),
+  validateSaveAnalysis: validate(validationSchemas.saveAnalysis),
+  
+  // Query parameter validations
+  validateGetDocuments: validate(validationSchemas.getDocuments, 'query'),
+  validateGetAnalysisHistory: validate(validationSchemas.getAnalysisHistory, 'query'),
+  
+  // Parameter validations
+  validateDocumentId: validate(Joi.object({
+    id: commonSchemas.uuid
+  }), 'params'),
+  
+  validateAnalysisId: validate(Joi.object({
+    id: commonSchemas.uuid
+  }), 'params'),
+
+  // User validations
+  validateUpdateProfile: validate(validationSchemas.updateProfile),
+  validateChangePassword: validate(validationSchemas.changePassword)
 };

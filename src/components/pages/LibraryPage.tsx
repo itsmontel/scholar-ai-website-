@@ -1,7 +1,12 @@
 import { useState, useEffect } from 'react';
+import Header from '../common/Header';
+import LoadingSpinner, { DocumentCardSkeleton } from '../common/LoadingSpinner';
+import AnalysisHistoryPage from './AnalysisHistoryPage';
 
 interface LibraryPageProps {
   onNavigate: (page: string) => void;
+  user?: { name: string; email: string } | null;
+  onLogout?: () => void;
 }
 
 interface Document {
@@ -16,6 +21,10 @@ interface Document {
   createdAt: string;
   updatedAt: string;
   hasAnalysis?: boolean;
+  analysisStatus?: {
+    hasAnalysis: boolean;
+    lastAnalyzed: string | null;
+  };
 }
 
 interface DocumentStats {
@@ -32,7 +41,8 @@ interface DocumentStats {
   }>;
 }
 
-const LibraryPage = ({ onNavigate }: LibraryPageProps) => {
+const LibraryPage = ({ onNavigate, user, onLogout }: LibraryPageProps) => {
+  const [activeTab, setActiveTab] = useState<'documents' | 'analysis'>('documents');
   const [documents, setDocuments] = useState<Document[]>([]);
   const [stats, setStats] = useState<DocumentStats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -49,28 +59,38 @@ const LibraryPage = ({ onNavigate }: LibraryPageProps) => {
     fetchStats();
   }, [sortBy, sortOrder]);
 
-  const checkDocumentAnalysis = async (documentId: string, token: string): Promise<boolean> => {
-    try {
-      console.log('Checking analysis for document:', documentId);
-      const response = await fetch(`http://localhost:3001/api/analysis/document/${documentId}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      if (response.ok) {
-        const result = await response.json();
-        console.log('Analysis check result for document', documentId, ':', result);
-        return result.data && result.data.length > 0;
-      } else {
-        console.warn('Failed to check analysis for document', documentId, ':', response.status, response.statusText);
-        return false;
+  // Refresh documents when page becomes visible (e.g., when navigating back from analysis)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        fetchDocuments();
+        fetchStats();
       }
-    } catch (error) {
-      console.warn('Error checking document analysis:', error);
-      return false;
-    }
-  };
+    };
+
+    const handleFocus = () => {
+      fetchDocuments();
+      fetchStats();
+    };
+
+    const handleAnalysisCompleted = () => {
+      console.log('Analysis completed, refreshing documents...');
+      fetchDocuments();
+      fetchStats();
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleFocus);
+    window.addEventListener('analysisCompleted', handleAnalysisCompleted);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleFocus);
+      window.removeEventListener('analysisCompleted', handleAnalysisCompleted);
+    };
+  }, []);
+
+  // Removed checkDocumentAnalysis function - now handled by backend
 
   const fetchDocuments = async () => {
     try {
@@ -96,14 +116,10 @@ const LibraryPage = ({ onNavigate }: LibraryPageProps) => {
       }
 
       const result = await response.json();
-      const documentsWithAnalysis = await Promise.all(
-        result.data.documents.map(async (doc: Document) => {
-          const hasAnalysis = await checkDocumentAnalysis(doc.id, token);
-          return { ...doc, hasAnalysis };
-        })
-      );
+      console.log('Documents fetched with analysis status:', result.data.documents);
       
-      setDocuments(documentsWithAnalysis);
+      // Backend now provides analysis status directly
+      setDocuments(result.data.documents);
     } catch (error) {
       console.error('Error fetching documents:', error);
       setError(error instanceof Error ? error.message : 'Failed to load documents');
@@ -278,13 +294,18 @@ const LibraryPage = ({ onNavigate }: LibraryPageProps) => {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+    if (!dateString) return 'Unknown date';
+    try {
+      return new Date(dateString).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch (error) {
+      return 'Invalid date';
+    }
   };
 
   const getFileTypeIcon = (fileType: string) => {
@@ -324,54 +345,65 @@ const LibraryPage = ({ onNavigate }: LibraryPageProps) => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
-      {/* Navigation */}
-      <nav className="flex items-center justify-between px-8 py-6">
-        <div className="flex items-center space-x-2">
-          <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-sm">A</span>
-          </div>
-          <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-            Scholar AI
-          </span>
-              </div>
-        <div className="flex items-center space-x-4">
-              <button 
-                onClick={() => onNavigate('dashboard')}
-            className="text-gray-600 hover:text-gray-900 transition-colors"
-              >
-              Dashboard
-            </button>
-              <button 
-            onClick={() => onNavigate('upload')}
-            className="text-gray-600 hover:text-gray-900 transition-colors"
-              >
-            Upload
-              </button>
-              <button 
-                onClick={() => onNavigate('settings')}
-            className="text-gray-600 hover:text-gray-900 transition-colors"
-              >
-                Account
-              </button>
-        </div>
-            </nav>
+      <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="library" />
 
       <div className="max-w-7xl mx-auto px-8 py-12">
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-4xl font-bold text-gray-900 mb-2">Document Library</h1>
             <p className="text-xl text-gray-600">Manage and organize your academic documents</p>
-          </div>
-                <button 
+              </div>
+              <button 
             onClick={() => onNavigate('upload')}
             className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-lg font-semibold hover:shadow-lg transform hover:scale-[1.02] transition-all duration-300"
-          >
+              >
             Upload New Document
-          </button>
+            </button>
+        </div>
+
+        {/* Tab Navigation */}
+        <div className="mb-8">
+          <div className="border-b border-gray-200">
+            <nav className="-mb-px flex space-x-8">
+              <button 
+                onClick={() => setActiveTab('documents')}
+                className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors duration-200 ${
+                  activeTab === 'documents'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                <div className="flex items-center space-x-2">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  <span>Documents</span>
+                </div>
+              </button>
+              <button 
+                onClick={() => setActiveTab('analysis')}
+                className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors duration-200 ${
+                  activeTab === 'analysis'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                <div className="flex items-center space-x-2">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                  </svg>
+                  <span>Analysis History</span>
+                </div>
+              </button>
+            </nav>
+                  </div>
                   </div>
 
-        {/* Stats Overview */}
-        {stats && (
+        {/* Tab Content */}
+        {activeTab === 'documents' && (
+          <>
+            {/* Stats Overview */}
+            {stats && (
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
             <div className="bg-white rounded-xl shadow-lg p-6">
               <div className="flex items-center">
@@ -396,7 +428,7 @@ const LibraryPage = ({ onNavigate }: LibraryPageProps) => {
                 </div>
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-600">Total Words</p>
-                  <p className="text-2xl font-bold text-gray-900">{stats.totalWords.toLocaleString()}</p>
+                  <p className="text-2xl font-bold text-gray-900">{(stats.totalWords || 0).toLocaleString()}</p>
                 </div>
                       </div>
                     </div>
@@ -410,7 +442,7 @@ const LibraryPage = ({ onNavigate }: LibraryPageProps) => {
                 </div>
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-600">Storage Used</p>
-                  <p className="text-2xl font-bold text-gray-900">{formatFileSize(stats.totalSize)}</p>
+                  <p className="text-2xl font-bold text-gray-900">{formatFileSize(stats.totalSize || 0)}</p>
                 </div>
               </div>
                     </div>
@@ -424,7 +456,7 @@ const LibraryPage = ({ onNavigate }: LibraryPageProps) => {
                     </div>
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-600">File Types</p>
-                  <p className="text-2xl font-bold text-gray-900">{Object.keys(stats.fileTypes).length}</p>
+                  <p className="text-2xl font-bold text-gray-900">{Object.keys(stats.fileTypes || {}).length}</p>
                 </div>
               </div>
             </div>
@@ -503,9 +535,12 @@ const LibraryPage = ({ onNavigate }: LibraryPageProps) => {
         {/* Documents List */}
         <div className="bg-white rounded-xl shadow-lg overflow-hidden">
           {loading ? (
-            <div className="p-12 text-center">
-              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-              <p className="mt-4 text-gray-600">Loading documents...</p>
+            <div className="p-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {Array.from({ length: 6 }).map((_, index) => (
+                  <DocumentCardSkeleton key={index} />
+                ))}
+              </div>
             </div>
           ) : documents.length === 0 ? (
             <div className="p-12 text-center">
@@ -574,7 +609,7 @@ const LibraryPage = ({ onNavigate }: LibraryPageProps) => {
                           <h3 className="text-lg font-medium text-gray-900">{document.title}</h3>
                         )}
                         <p className="text-sm text-gray-500">
-                          {document.originalFilename} • {formatFileSize(document.fileSize)} • {document.wordCount.toLocaleString()} words • {document.pageCount} pages
+                          {document.originalFilename} • {formatFileSize(document.fileSize || 0)} • {(document.wordCount || 0).toLocaleString()} words • {document.pageCount || 0} pages
                         </p>
                         <p className="text-xs text-gray-400">Uploaded {formatDate(document.createdAt)}</p>
                             </div>
@@ -606,16 +641,17 @@ const LibraryPage = ({ onNavigate }: LibraryPageProps) => {
                           // Store document info for analysis page
                           localStorage.setItem('selectedDocumentId', document.id);
                           localStorage.setItem('selectedDocumentTitle', document.title);
-                          localStorage.setItem('hasExistingAnalysis', document.hasAnalysis ? 'true' : 'false');
+                          const hasAnalysis = document.analysisStatus?.hasAnalysis || document.hasAnalysis;
+                          localStorage.setItem('hasExistingAnalysis', hasAnalysis ? 'true' : 'false');
                           onNavigate('analysis');
                         }}
                         className={`px-4 py-2 rounded-lg transition-colors ${
-                          document.hasAnalysis 
+                          (document.analysisStatus?.hasAnalysis || document.hasAnalysis)
                             ? 'bg-green-600 text-white hover:bg-green-700' 
                             : 'bg-blue-600 text-white hover:bg-blue-700'
                         }`}
                       >
-                        {document.hasAnalysis ? 'View Analysis' : 'Analyze'}
+                        {(document.analysisStatus?.hasAnalysis || document.hasAnalysis) ? 'View Analysis' : 'Analyze'}
                       </button>
                       
                       <button
@@ -634,6 +670,15 @@ const LibraryPage = ({ onNavigate }: LibraryPageProps) => {
     </div>
         )}
         </div>
+          </>
+        )}
+
+        {/* Analysis History Tab */}
+        {activeTab === 'analysis' && (
+          <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+            <AnalysisHistoryPage onNavigate={onNavigate} user={user} onLogout={onLogout} showHeader={false} />
+          </div>
+        )}
       </div>
     </div>
   );
