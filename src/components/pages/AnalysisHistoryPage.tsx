@@ -31,6 +31,7 @@ const AnalysisHistoryPage: React.FC<AnalysisHistoryPageProps> = ({ onNavigate, u
   const [selectedAnalysis, setSelectedAnalysis] = useState<AnalysisHistory | null>(null);
   const [timeFilter, setTimeFilter] = useState<string>('all');
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
+  const [copySuccess, setCopySuccess] = useState<boolean>(false);
 
   useEffect(() => {
     fetchAnalysisHistory();
@@ -241,6 +242,30 @@ const AnalysisHistoryPage: React.FC<AnalysisHistoryPageProps> = ({ onNavigate, u
     return colors[type] || 'bg-gray-100 text-gray-800';
   };
 
+  const handleCopyText = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopySuccess(true);
+      // Reset the success state after 2 seconds
+      setTimeout(() => {
+        setCopySuccess(false);
+      }, 2000);
+    } catch (error) {
+      console.error('Failed to copy text:', error);
+      // Fallback for older browsers
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+      setCopySuccess(true);
+      setTimeout(() => {
+        setCopySuccess(false);
+      }, 2000);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -406,16 +431,38 @@ const AnalysisHistoryPage: React.FC<AnalysisHistoryPageProps> = ({ onNavigate, u
                           </div>
                         </div>
                         
-                        {/* Delete Button */}
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            deleteAnalysis(analysis.id);
-                          }}
-                          disabled={isDeleting === analysis.id}
-                          className="absolute top-3 right-3 w-8 h-8 bg-red-100 hover:bg-red-200 text-red-600 hover:text-red-700 rounded-full flex items-center justify-center transition-all duration-200 opacity-0 group-hover:opacity-100 focus:opacity-100 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                          title="Delete analysis"
-                        >
+                        {/* Action Buttons */}
+                        <div className="absolute top-3 right-3 flex space-x-2 opacity-0 group-hover:opacity-100 transition-all duration-200">
+                          {/* View Analysis Button */}
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (analysis.documents) {
+                                localStorage.setItem('selectedDocumentId', analysis.id);
+                                localStorage.setItem('selectedDocumentTitle', analysis.documents.title);
+                                localStorage.setItem('hasExistingAnalysis', 'true');
+                                onNavigate?.('analysis');
+                              }
+                            }}
+                            className="w-8 h-8 bg-green-100 hover:bg-green-200 text-green-600 hover:text-green-700 rounded-full flex items-center justify-center transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+                            title="View analysis with annotations"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                          </button>
+                          
+                          {/* Delete Button */}
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              deleteAnalysis(analysis.id);
+                            }}
+                            disabled={isDeleting === analysis.id}
+                            className="w-8 h-8 bg-red-100 hover:bg-red-200 text-red-600 hover:text-red-700 rounded-full flex items-center justify-center transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                            title="Delete analysis"
+                          >
                           {isDeleting === analysis.id ? (
                             <svg className="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -427,6 +474,7 @@ const AnalysisHistoryPage: React.FC<AnalysisHistoryPageProps> = ({ onNavigate, u
                           )}
                         </button>
                       </div>
+                    </div>
                     ))
                   )}
                 </div>
@@ -492,16 +540,28 @@ const AnalysisHistoryPage: React.FC<AnalysisHistoryPageProps> = ({ onNavigate, u
                     <h4 className="text-sm font-medium text-gray-900 mb-4">Export Options</h4>
                     <div className="flex flex-wrap gap-3">
                       <button
-                        onClick={() => {
-                          navigator.clipboard.writeText(cleanAnalysisText(selectedAnalysis.analysis_results?.result || ''));
-                          // You could add a toast notification here
-                        }}
-                        className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                        onClick={() => handleCopyText(cleanAnalysisText(selectedAnalysis.analysis_results?.result || ''))}
+                        className={`inline-flex items-center px-4 py-2 border rounded-lg shadow-sm text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 ${
+                          copySuccess 
+                            ? 'border-green-300 bg-green-50 text-green-700 hover:bg-green-100' 
+                            : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+                        }`}
                       >
-                        <svg className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                        </svg>
-                        Copy Text
+                        {copySuccess ? (
+                          <>
+                            <svg className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            </svg>
+                            Text Copied!
+                          </>
+                        ) : (
+                          <>
+                            <svg className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                            </svg>
+                            Copy Text
+                          </>
+                        )}
                       </button>
                       <button
                         onClick={() => {

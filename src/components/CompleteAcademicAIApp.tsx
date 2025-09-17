@@ -20,6 +20,7 @@ import AboutPage from './pages/AboutPage';
 import ContactPage from './pages/ContactPage';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import TermsOfServicePage from './pages/TermsOfServicePage';
+import BillingPage from './pages/BillingPage';
 
 // Import common components
 import ErrorBoundary from './common/ErrorBoundary';
@@ -47,6 +48,9 @@ const AcademicAIApp = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState<User | null>(null);
 
+  // Route protection for authenticated pages
+  const protectedRoutes = ['dashboard', 'analysis', 'analysis-history', 'upload', 'settings', 'profile', 'library', 'account', 'billing'];
+
   // Validate and refresh token if needed
   const validateAndRefreshToken = async () => {
     try {
@@ -72,16 +76,23 @@ const AcademicAIApp = () => {
           localStorage.setItem('authToken', refreshData.data.token);
           console.log('Token refreshed successfully');
         } else {
-          // Refresh failed, logout user
-          console.log('Token refresh failed, logging out user');
-          handleLogout();
+          // Refresh failed, only logout if we're on a protected route
+          console.log('Token refresh failed');
+          if (protectedRoutes.includes(currentPage)) {
+            console.log('On protected route, logging out user');
+            handleLogout();
+          }
         }
+      } else if (response.ok) {
+        console.log('Token is valid');
       }
     } catch (error) {
       console.error('Token validation error:', error);
-      // If validation fails, logout user
-      console.log('Token validation failed, logging out user');
-      handleLogout();
+      // Only logout if we're on a protected route and there's a network error
+      if (protectedRoutes.includes(currentPage)) {
+        console.log('Network error on protected route, logging out user');
+        handleLogout();
+      }
     }
   };
 
@@ -99,7 +110,7 @@ const AcademicAIApp = () => {
         setIsLoggedIn(true);
         setUser(user);
         
-        // Validate token and refresh if needed
+        // Always validate token when user is logged in (on any page)
         validateAndRefreshToken();
       } catch (error) {
         console.error('Error parsing user data:', error);
@@ -132,11 +143,11 @@ const AcademicAIApp = () => {
   // Set up periodic token refresh for logged-in users
   useEffect(() => {
     if (isLoggedIn) {
-      // Refresh token every 6 hours (6 * 60 * 60 * 1000 ms)
+      // Refresh token every 6 hours (6 * 60 * 60 * 1000 ms) when user is logged in on any page
       const refreshInterval = setInterval(() => {
         validateAndRefreshToken();
       }, 6 * 60 * 60 * 1000);
-
+      
       return () => clearInterval(refreshInterval);
     }
   }, [isLoggedIn]);
@@ -147,7 +158,7 @@ const AcademicAIApp = () => {
     window.fetch = async (...args) => {
       const response = await originalFetch(...args);
       
-      // If we get a 401 and we're logged in, try to refresh token
+      // If we get a 401 and we're logged in, try to refresh token (on any page)
       if (response.status === 401 && isLoggedIn) {
         try {
           const refreshResponse = await fetch('http://localhost:3001/api/auth/refresh', {
@@ -167,10 +178,12 @@ const AcademicAIApp = () => {
             return retryResponse;
           } else {
             // Refresh failed, logout user
+            console.log('Auto-refresh failed, logging out user');
             handleLogout();
           }
         } catch (error) {
           console.error('Auto-refresh failed:', error);
+          // Logout user on network error
           handleLogout();
         }
       }
@@ -218,9 +231,6 @@ const AcademicAIApp = () => {
     localStorage.removeItem('user');
   };
 
-  // Route protection for authenticated pages
-  const protectedRoutes = ['dashboard', 'analysis', 'analysis-history', 'upload', 'settings', 'profile', 'library', 'account'];
-  
   const renderCurrentPage = () => {
     // Redirect to login if trying to access protected route while not logged in
     if (protectedRoutes.includes(currentPage) && !isLoggedIn) {
@@ -266,6 +276,8 @@ const AcademicAIApp = () => {
         return <LibraryPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'account':
         return <AccountPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
+      case 'billing':
+        return <BillingPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'admin':
         return <AdminDashboard onNavigate={navigateTo} user={user} />;
       case 'collaboration':

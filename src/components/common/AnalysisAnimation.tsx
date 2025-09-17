@@ -19,6 +19,8 @@ const AnalysisAnimation: React.FC<AnalysisAnimationProps> = ({
 }) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [dots, setDots] = useState('');
+  const [progress, setProgress] = useState(0);
+  const [isCycling, setIsCycling] = useState(false);
 
   const sizeClasses = {
     sm: 'w-6 h-6',
@@ -43,22 +45,52 @@ const AnalysisAnimation: React.FC<AnalysisAnimationProps> = ({
     return () => clearInterval(interval);
   }, []);
 
-  // Cycle through analysis steps
+  // Cycle through analysis steps and handle progress
   useEffect(() => {
     if (isComplete) {
       // When complete, show final step and call onComplete
       setCurrentStep(analysisSteps.length - 1);
+      setProgress(100);
+      setIsCycling(false);
       if (onComplete) {
         setTimeout(onComplete, 1000);
       }
       return;
     }
 
+    // Start cycling animation when we reach 95%
+    if (progress >= 95 && !isCycling) {
+      setIsCycling(true);
+    }
+
     const interval = setInterval(() => {
       setCurrentStep(prev => (prev + 1) % analysisSteps.length);
     }, 2000);
     return () => clearInterval(interval);
-  }, [isComplete, onComplete]);
+  }, [isComplete, onComplete, progress, isCycling]);
+
+  // Handle progress animation
+  useEffect(() => {
+    if (isComplete) return;
+
+    const progressInterval = setInterval(() => {
+      setProgress(prev => {
+        if (prev >= 95 && !isCycling) {
+          // Stay at 95% until cycling starts
+          return 95;
+        } else if (isCycling) {
+          // Cycle animation: go from 95% to 120% and back
+          const cycleProgress = ((Date.now() / 2000) % 1) * 25; // 0 to 25
+          return 95 + cycleProgress; // 95% to 120%
+        } else {
+          // Normal progress: slowly increase to 95%
+          return Math.min(prev + 0.5, 95);
+        }
+      });
+    }, 50);
+
+    return () => clearInterval(progressInterval);
+  }, [isComplete, isCycling]);
 
   if (isPopup) {
     return (
@@ -101,11 +133,22 @@ const AnalysisAnimation: React.FC<AnalysisAnimationProps> = ({
             {/* Progress bar */}
             <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
               <div 
-                className="h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-full transition-all duration-500 ease-out"
+                className={`h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-full transition-all duration-300 ease-out ${
+                  isCycling ? 'animate-pulse' : ''
+                }`}
                 style={{
-                  width: `${((currentStep + 1) / analysisSteps.length) * 100}%`
+                  width: `${Math.min(progress, 100)}%`,
+                  transform: progress > 100 ? 'translateX(-5%)' : 'translateX(0)',
+                  boxShadow: isCycling ? '0 0 10px rgba(59, 130, 246, 0.5)' : 'none'
                 }}
               ></div>
+            </div>
+            
+            {/* Progress percentage */}
+            <div className="text-center">
+              <span className="text-xs text-gray-500 font-medium">
+                {isComplete ? '100%' : `${Math.round(Math.min(progress, 100))}%`}
+              </span>
             </div>
 
             {/* Floating particles around the modal */}
@@ -164,10 +207,13 @@ const AnalysisAnimation: React.FC<AnalysisAnimationProps> = ({
       {/* Progress bar */}
       <div className="w-32 h-1 bg-white/20 rounded-full overflow-hidden">
         <div 
-          className="h-full bg-gradient-to-r from-blue-400 to-purple-400 rounded-full animate-pulse"
+          className={`h-full bg-gradient-to-r from-blue-400 to-purple-400 rounded-full transition-all duration-300 ease-out ${
+            isCycling ? 'animate-pulse' : ''
+          }`}
           style={{
-            width: `${((currentStep + 1) / analysisSteps.length) * 100}%`,
-            transition: 'width 0.5s ease-in-out'
+            width: `${Math.min(progress, 100)}%`,
+            transform: progress > 100 ? 'translateX(-5%)' : 'translateX(0)',
+            boxShadow: isCycling ? '0 0 8px rgba(59, 130, 246, 0.6)' : 'none'
           }}
         ></div>
       </div>

@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Header from '../common/Header';
+import Footer from '../common/Footer';
 import LoadingSpinner from '../common/LoadingSpinner';
 import AnalysisAnimation from '../common/AnalysisAnimation';
+import { ExportService, AnalysisData } from '../../services/exportService';
 
 interface AnalysisPageProps {
   onNavigate?: (page: string) => void;
@@ -49,6 +51,8 @@ interface AnalysisResult {
     documentId: string;
     timestamp: string;
     annotations?: Annotation[];
+    isContentLimited?: boolean;
+    maxAnalysisPercentage?: number;
   };
 }
 
@@ -57,7 +61,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
   const [analysisTypes, setAnalysisTypes] = useState<AnalysisType[]>([]);
   const [selectedDocument, setSelectedDocument] = useState<string>('');
   const [selectedAnalysisType, setSelectedAnalysisType] = useState<string>('comprehensive');
-  const [selectedCitationStyle, setSelectedCitationStyle] = useState<string>('APA');
+  const [selectedCitationStyle, setSelectedCitationStyle] = useState<string>('None');
   const [isLoading, setIsLoading] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<string>('');
@@ -72,12 +76,16 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
   const [showAnalysisPopup, setShowAnalysisPopup] = useState(false);
   const [analysisComplete, setAnalysisComplete] = useState(false);
+  const [currentPlan, setCurrentPlan] = useState<string>('free');
+  const [isExporting, setIsExporting] = useState(false);
+  const [cameFromLibrary, setCameFromLibrary] = useState(false);
   const documentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     console.log('AnalysisPage: fetchDocuments and fetchAnalysisTypes called');
     fetchDocuments();
     fetchAnalysisTypes();
+    fetchUserPlan();
     
     // Check if there's text content from dashboard
     const textContent = localStorage.getItem('textAnalysisContent');
@@ -88,23 +96,22 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
       localStorage.removeItem('textAnalysisContent');
     }
 
-    // Check if there's a selected document from Library page
-    const selectedDocumentId = localStorage.getItem('selectedDocumentId');
-    const hasExistingAnalysis = localStorage.getItem('hasExistingAnalysis') === 'true';
+    // Check if we need to load an existing analysis
+    const viewAnalysisDocumentId = localStorage.getItem('viewAnalysisDocumentId');
+    const cameFromLibraryFlag = localStorage.getItem('cameFromLibrary');
     
-    if (selectedDocumentId) {
-      console.log('Loading selected document:', selectedDocumentId, 'with existing analysis:', hasExistingAnalysis);
-      setSelectedDocument(selectedDocumentId);
-      
-      // If there's an existing analysis, load it
-      if (hasExistingAnalysis) {
-        loadExistingAnalysis(selectedDocumentId);
-      }
-      
-      // Clear the stored data after using it
-      localStorage.removeItem('selectedDocumentId');
-      localStorage.removeItem('hasExistingAnalysis');
+    if (viewAnalysisDocumentId) {
+      console.log('Loading existing analysis for document:', viewAnalysisDocumentId);
+      loadExistingAnalysisSimple(viewAnalysisDocumentId);
+      localStorage.removeItem('viewAnalysisDocumentId');
     }
+    
+    // Check if user came from Library page
+    if (cameFromLibraryFlag === 'true') {
+      setCameFromLibrary(true);
+      localStorage.removeItem('cameFromLibrary');
+    }
+
   }, []);
 
   const fetchDocuments = async () => {
@@ -133,6 +140,27 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
       setError(error instanceof Error ? error.message : 'Failed to fetch documents');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const fetchUserPlan = async () => {
+    try {
+      const token = localStorage.getItem('authToken');
+      if (!token) return;
+
+      const response = await fetch('http://localhost:3001/api/subscriptions/current', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setCurrentPlan(data.plan || 'free');
+      }
+    } catch (error) {
+      console.error('Error fetching user plan:', error);
     }
   };
 
@@ -340,7 +368,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
         throw new Error('Please log in to access documents');
       }
 
-      const response = await fetch(`http://localhost:3001/api/documents/${documentId}`, {
+      const response = await fetch(`http://localhost:3001/api/documents/${documentId}/content`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -352,30 +380,33 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
       }
 
       const data = await response.json();
-      console.log('Document response:', data);
-      return data.data?.document?.content_text || data.data?.content_text || '';
+      console.log('Document content response:', data);
+      return data.data?.content || '';
     } catch (error) {
       console.error('Error fetching document content:', error);
       throw new Error('Failed to fetch document content');
     }
   };
 
-  const loadExistingAnalysis = async (documentId: string) => {
+  // Simple function to load existing analysis
+  const loadExistingAnalysisSimple = async (documentId: string) => {
     try {
+      console.log('=== LOADING EXISTING ANALYSIS ===');
+      console.log('Document ID:', documentId);
+      
       const token = localStorage.getItem('authToken');
       if (!token) {
         setError('Please log in to access analyses');
         return;
       }
 
-      console.log('Loading existing analysis for document:', documentId);
-
-      // Get the document content first
+      // Get document content
       const content = await fetchDocumentContent(documentId);
+      console.log('Document content loaded, length:', content.length);
       setDocumentContent(content);
       setPreviewContent(content);
 
-      // Get the existing analysis
+      // Get analysis data
       const response = await fetch(`http://localhost:3001/api/analysis/document/${documentId}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -384,33 +415,212 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch existing analysis');
+        throw new Error('Failed to fetch analysis');
       }
 
       const data = await response.json();
-      console.log('Existing analysis response:', data);
+      console.log('Analysis response:', data);
 
       if (data.data && data.data.length > 0) {
-        const latestAnalysis = data.data[0]; // Get the most recent analysis
-        const analysisResults = latestAnalysis.analysis_results;
+        const analysis = data.data[0];
+        const analysisResults = analysis.analysis_results;
+        
+        console.log('Found analysis:', analysis);
+        console.log('Analysis results:', analysisResults);
+        console.log('Analysis results keys:', Object.keys(analysisResults || {}));
         
         if (analysisResults) {
+          // Set the analysis result
           setAnalysisResult(analysisResults.result || '');
-          setAnnotations(analysisResults.annotations || []);
-          setSelectedAnalysisType(latestAnalysis.analysis_type || 'comprehensive');
-          setSelectedCitationStyle(analysisResults.citation_style || 'APA');
           
-          console.log('Loaded existing analysis:', {
-            result: analysisResults.result?.substring(0, 100) + '...',
-            annotationsCount: analysisResults.annotations?.length || 0,
-            analysisType: latestAnalysis.analysis_type,
-            citationStyle: analysisResults.citation_style
-          });
+          // Create simple annotations from the analysis data
+          const annotations: Annotation[] = [];
+          
+          console.log('Strong points:', analysisResults.strong_points);
+          console.log('Areas to improve:', analysisResults.areas_to_improve);
+          console.log('Serious concerns:', analysisResults.serious_concerns);
+          console.log('Original annotations:', analysisResults.annotations);
+          
+          // Try to use the original annotations first (if they exist)
+          if (analysisResults.annotations && Array.isArray(analysisResults.annotations)) {
+            console.log('Using original annotations:', analysisResults.annotations.length);
+            setAnnotations(analysisResults.annotations);
+          } else {
+            // Fallback to creating annotations from the structured data
+            console.log('Creating annotations from structured data');
+            
+            // Add strong points
+            if (analysisResults.strong_points && Array.isArray(analysisResults.strong_points)) {
+              analysisResults.strong_points.forEach((point: any, index: number) => {
+                if (point.text) {
+                  const textIndex = content.toLowerCase().indexOf(point.text.toLowerCase());
+                  if (textIndex !== -1) {
+                    annotations.push({
+                      id: `strong-${index}`,
+                      type: 'strong',
+                      text: point.text,
+                      startIndex: textIndex,
+                      endIndex: textIndex + point.text.length,
+                      comment: point.explanation || point.comment,
+                      suggestion: point.explanation || point.comment
+                    });
+                    console.log(`Added strong point: "${point.text}"`);
+                  } else {
+                    console.log(`Could not find strong point text: "${point.text}"`);
+                  }
+                }
+              });
+            }
+            
+            // Add areas to improve
+            if (analysisResults.areas_to_improve && Array.isArray(analysisResults.areas_to_improve)) {
+              analysisResults.areas_to_improve.forEach((point: any, index: number) => {
+                if (point.text) {
+                  const textIndex = content.toLowerCase().indexOf(point.text.toLowerCase());
+                  if (textIndex !== -1) {
+                    annotations.push({
+                      id: `improve-${index}`,
+                      type: 'improve',
+                      text: point.text,
+                      startIndex: textIndex,
+                      endIndex: textIndex + point.text.length,
+                      comment: point.explanation || point.comment,
+                      suggestion: point.explanation || point.comment
+                    });
+                    console.log(`Added improvement point: "${point.text}"`);
+                  } else {
+                    console.log(`Could not find improvement text: "${point.text}"`);
+                  }
+                }
+              });
+            }
+            
+            // Add serious concerns
+            if (analysisResults.serious_concerns && Array.isArray(analysisResults.serious_concerns)) {
+              analysisResults.serious_concerns.forEach((point: any, index: number) => {
+                if (point.text) {
+                  const textIndex = content.toLowerCase().indexOf(point.text.toLowerCase());
+                  if (textIndex !== -1) {
+                    annotations.push({
+                      id: `concern-${index}`,
+                      type: 'concern',
+                      text: point.text,
+                      startIndex: textIndex,
+                      endIndex: textIndex + point.text.length,
+                      comment: point.explanation || point.comment,
+                      suggestion: point.explanation || point.comment
+                    });
+                    console.log(`Added concern point: "${point.text}"`);
+                  } else {
+                    console.log(`Could not find concern text: "${point.text}"`);
+                  }
+                }
+              });
+            }
+            
+            console.log('Created annotations:', annotations.length);
+            setAnnotations(annotations);
+          }
+          
+          setSelectedAnalysisType(analysis.analysis_type || 'comprehensive');
+          setSelectedCitationStyle(analysisResults.citation_style || 'None');
+          
+          console.log('=== ANALYSIS LOADED SUCCESSFULLY ===');
+          console.log('Final annotations count:', annotations.length);
+        } else {
+          console.log('No analysis results found in the data');
+          setError('Analysis results not found');
         }
+      } else {
+        console.log('No analysis found for document');
+        setError('No analysis found for this document');
       }
     } catch (error) {
-      console.error('Error loading existing analysis:', error);
-      setError('Failed to load existing analysis');
+      console.error('Error loading analysis:', error);
+      setError('Failed to load analysis: ' + (error instanceof Error ? error.message : String(error)));
+    }
+  };
+
+  // Export functions
+  const exportToPDF = async () => {
+    if (!analysisResult || !documentContent) {
+      setError('No analysis data available to export');
+      return;
+    }
+
+    try {
+      setIsExporting(true);
+      
+      const analysisData: AnalysisData = {
+        documentTitle: documents.find(doc => doc.id === selectedDocument)?.title || 'Unknown Document',
+        documentContent: documentContent,
+        analysisResult: analysisResult,
+        annotations: annotations.map(annotation => ({
+          id: annotation.id,
+          type: annotation.type,
+          text: annotation.text,
+          comment: annotation.comment,
+          suggestion: annotation.suggestion || annotation.comment
+        })),
+        analysisType: selectedAnalysisType,
+        citationStyle: selectedCitationStyle,
+        createdAt: new Date().toISOString()
+      };
+
+      await ExportService.exportToPDF(analysisData);
+      setSuccessMessage('PDF report exported successfully!');
+    } catch (error) {
+      console.error('Export to PDF failed:', error);
+      setError('Failed to export PDF report');
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const exportToWord = async () => {
+    if (!analysisResult || !documentContent) {
+      setError('No analysis data available to export');
+      return;
+    }
+
+    try {
+      setIsExporting(true);
+      
+      const analysisData: AnalysisData = {
+        documentTitle: documents.find(doc => doc.id === selectedDocument)?.title || 'Unknown Document',
+        documentContent: documentContent,
+        analysisResult: analysisResult,
+        annotations: annotations.map(annotation => ({
+          id: annotation.id,
+          type: annotation.type,
+          text: annotation.text,
+          comment: annotation.comment,
+          suggestion: annotation.suggestion || annotation.comment
+        })),
+        analysisType: selectedAnalysisType,
+        citationStyle: selectedCitationStyle,
+        createdAt: new Date().toISOString()
+      };
+
+      await ExportService.exportToWord(analysisData);
+      setSuccessMessage('Word document exported successfully!');
+    } catch (error) {
+      console.error('Export to Word failed:', error);
+      setError('Failed to export Word document');
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  // Handle close button click
+  const handleCloseAnalysis = () => {
+    setAnalysisResult('');
+    setAnnotations([]);
+    setDocumentContent('');
+    
+    // If user came from Library, navigate back to Library
+    if (cameFromLibrary && onNavigate) {
+      onNavigate('library');
     }
   };
 
@@ -510,6 +720,11 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
 
       const result: AnalysisResult = await response.json();
       setAnalysisResult(result.data.result);
+      
+      // Check if content was limited by the backend
+      if (result.data.isContentLimited) {
+        console.log(`Content analysis was limited to ${result.data.maxAnalysisPercentage}% for display`);
+      }
       
       // Use annotations from backend if available, otherwise generate fallback
       let finalAnnotations: Annotation[] = [];
@@ -650,16 +865,32 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
   };
 
 
+  const getDisplayContent = () => {
+    if (!documentContent) return '';
+    
+    // For free users, only show 50% of the content
+    if (currentPlan === 'free') {
+      const words = documentContent.split(' ');
+      const halfWords = Math.floor(words.length / 2);
+      return words.slice(0, halfWords).join(' ');
+    }
+    
+    return documentContent;
+  };
+
   const renderHighlightedText = () => {
     if (!documentContent) {
       return <div className="text-gray-700 leading-relaxed">No document content available.</div>;
     }
 
+    const displayContent = getDisplayContent();
+
     console.log('Rendering text with annotations:', annotations.length);
     console.log('Document content length:', documentContent.length);
+    console.log('Display content length:', displayContent.length);
 
     // Always split content into paragraphs first to preserve formatting
-    const paragraphs = documentContent.split(/\n\s*\n/).filter(p => p.trim().length > 0);
+    const paragraphs = displayContent.split(/\n\s*\n/).filter(p => p.trim().length > 0);
     
     if (annotations.length === 0) {
       // Render content with proper paragraph spacing
@@ -695,7 +926,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
     return (
       <div className="text-gray-700 leading-relaxed">
         {paragraphs.map((paragraph, paragraphIndex) => {
-          const paragraphStart = documentContent.indexOf(paragraph);
+          const paragraphStart = displayContent.indexOf(paragraph);
           const paragraphEnd = paragraphStart + paragraph.length;
           
           // Find annotations that fall within this paragraph
@@ -980,6 +1211,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                   disabled={isAnalyzing}
                 >
+                  <option value="None">None (No citations required)</option>
                   <option value="APA">APA (American Psychological Association)</option>
                   <option value="Harvard">Harvard</option>
                   <option value="Chicago">Chicago</option>
@@ -988,7 +1220,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                   <option value="Vancouver">Vancouver</option>
                 </select>
                 <p className="text-xs text-gray-500 mt-1">
-                  Select the citation style used in your document for more accurate analysis
+                  Select the citation style used in your document, or "None" for papers that don't require citations
                 </p>
               </div>
 
@@ -1089,12 +1321,33 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                   </p>
               </div>
               <div className="flex items-center space-x-3">
+                {/* Export Buttons */}
                 <button 
-                  onClick={() => {
-                    setAnalysisResult('');
-                    setAnnotations([]);
-                    setDocumentContent('');
-                  }}
+                  onClick={exportToPDF}
+                  disabled={isExporting}
+                  className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors flex items-center space-x-2 disabled:opacity-50"
+                  title="Export as PDF"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  <span>PDF</span>
+                </button>
+                
+                <button 
+                  onClick={exportToWord}
+                  disabled={isExporting}
+                  className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors flex items-center space-x-2 disabled:opacity-50"
+                  title="Export as Word Document"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  <span>Word</span>
+                </button>
+                
+                <button 
+                  onClick={handleCloseAnalysis}
                   className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors flex items-center space-x-2"
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1124,6 +1377,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
               </div>
             </div>
 
+
             {/* Main Content Area */}
             <div className="flex h-[600px]">
               {/* Document Panel */}
@@ -1131,6 +1385,50 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                 <div className="prose max-w-none">
                   <div className="text-sm leading-7">
                     {renderHighlightedText()}
+                    
+                    {/* Permanent Unlock Overlay for Free Users */}
+                    {currentPlan === 'free' && (
+                      <div className="relative mt-8">
+                        {/* Blurred content preview */}
+                        <div className="relative">
+                          <div className="p-6 bg-gradient-to-r from-gray-50 to-gray-100 border-2 border-dashed border-gray-300 rounded-xl">
+                            <div className="text-center">
+                              <div className="w-16 h-16 bg-gradient-to-br from-amber-100 to-orange-100 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+                                <span className="text-3xl">🔒</span>
+            </div>
+                              <h3 className="text-xl font-bold text-gray-800 mb-2">
+                                Unlock Full Document
+                              </h3>
+                              <p className="text-gray-600 mb-6 max-w-md mx-auto">
+                                You're viewing 50% of your document. Upgrade to Starter or Premium to unlock the remaining content and get full AI analysis.
+                              </p>
+                              
+                              {/* Blurred text preview */}
+                              <div className="bg-white/50 backdrop-blur-sm rounded-lg p-4 mb-6 border border-gray-200">
+                                <div className="text-sm text-gray-500 leading-relaxed">
+                                  {documentContent.split(' ').slice(Math.floor(documentContent.split(' ').length / 2), Math.floor(documentContent.split(' ').length / 2) + 20).join(' ')}...
+                                </div>
+                                <div className="absolute inset-0 bg-gradient-to-t from-white via-white/50 to-transparent rounded-lg"></div>
+                              </div>
+                              
+                              <div className="flex flex-col sm:flex-row justify-center items-center space-y-3 sm:space-y-0 sm:space-x-4">
+                                <button
+                                  onClick={() => onNavigate?.('billing')}
+                                  className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-xl hover:shadow-2xl transform hover:scale-105 flex items-center justify-center space-x-2"
+                                >
+                                  <span>🚀</span>
+                                  <span>Upgrade Now</span>
+                                </button>
+                                <div className="text-center sm:text-left">
+                                  <div className="text-sm text-gray-500">Starting at $19.99/month</div>
+                                  <div className="text-xs text-gray-400">Cancel anytime</div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
             </div>
           </div>
         </div>
@@ -1158,7 +1456,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                         {annotations.filter(a => a.type === 'strong').map((annotation) => (
                           <div
                             key={annotation.id}
-                            className={`bg-white rounded-lg p-4 border-l-4 border-green-400 shadow-sm hover:shadow-md transition-all cursor-pointer ${
+                            className={`bg-green-50 rounded-lg p-4 border-l-4 border-green-400 shadow-sm hover:shadow-md transition-all cursor-pointer ${
                               selectedAnnotation === annotation.id ? 'ring-2 ring-blue-500' : ''
                             }`}
                             onClick={() => scrollToAnnotation(annotation.id)}
@@ -1186,7 +1484,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                         {annotations.filter(a => a.type === 'improve').map((annotation) => (
                           <div
                             key={annotation.id}
-                            className={`bg-white rounded-lg p-4 border-l-4 border-amber-400 shadow-sm hover:shadow-md transition-all cursor-pointer ${
+                            className={`bg-amber-50 rounded-lg p-4 border-l-4 border-amber-400 shadow-sm hover:shadow-md transition-all cursor-pointer ${
                               selectedAnnotation === annotation.id ? 'ring-2 ring-blue-500' : ''
                             }`}
                             onClick={() => scrollToAnnotation(annotation.id)}
@@ -1214,7 +1512,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                         {annotations.filter(a => a.type === 'concern').map((annotation) => (
                           <div
                             key={annotation.id}
-                            className={`bg-white rounded-lg p-4 border-l-4 border-red-400 shadow-sm hover:shadow-md transition-all cursor-pointer ${
+                            className={`bg-red-50 rounded-lg p-4 border-l-4 border-red-400 shadow-sm hover:shadow-md transition-all cursor-pointer ${
                               selectedAnnotation === annotation.id ? 'ring-2 ring-blue-500' : ''
                             }`}
                             onClick={() => scrollToAnnotation(annotation.id)}
@@ -1315,6 +1613,9 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
           }}
         />
       )}
+
+      {/* Footer */}
+      <Footer onNavigate={onNavigate} />
     </div>
   );
 };

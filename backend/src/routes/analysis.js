@@ -9,6 +9,88 @@ const {
 } = require('../middleware/validation');
 const aiAnalysisService = require('../services/aiAnalysisService');
 const documentService = require('../services/documentService');
+const subscriptionService = require('../services/subscriptionService');
+
+// @route   POST /api/analysis/simple-analyze
+// @desc    Simple analysis endpoint (bypasses external dependencies)
+// @access  Private
+router.post('/simple-analyze', authenticateToken, async (req, res) => {
+  try {
+    const { documentId, content, analysisType, citationStyle } = req.body;
+    const userId = req.user.id;
+
+    console.log('=== SIMPLE ANALYSIS REQUEST ===');
+    console.log('Received documentId:', documentId);
+    console.log('Received content length:', content?.length);
+    console.log('User ID:', userId);
+
+    let analysisContent = '';
+    let analysisDocumentId = documentId;
+
+    if (content && !documentId) {
+      analysisContent = content;
+      analysisDocumentId = null;
+    } else if (documentId) {
+      // Get document content from database
+      try {
+        const document = await documentService.getDocumentById(documentId, userId);
+        if (!document) {
+          return res.status(404).json({
+            success: false,
+            message: 'Document not found'
+          });
+        }
+        analysisContent = document.content_text || '';
+      } catch (error) {
+        console.error('Error fetching document:', error);
+        return res.status(500).json({
+          success: false,
+          message: 'Failed to fetch document content'
+        });
+      }
+    } else {
+      return res.status(400).json({
+        success: false,
+        message: 'Either documentId or content must be provided'
+      });
+    }
+
+    // Perform actual AI analysis
+    try {
+      const analysisResult = await aiAnalysisService.analyzeDocument(
+        analysisDocumentId,
+        analysisContent,
+        analysisType,
+        userId,
+        citationStyle,
+        focusAreas
+      );
+
+      console.log('✅ AI analysis completed');
+
+      res.status(200).json({
+        success: true,
+        message: 'Document analyzed successfully',
+        data: analysisResult
+      });
+    } catch (error) {
+      console.error('AI analysis failed:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Analysis failed',
+        error: error.message
+      });
+    }
+
+  } catch (error) {
+    console.error('SIMPLE Analysis Error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to perform analysis',
+      error: error.message
+    });
+  }
+});
 
 // Note: Validation schemas are now imported from middleware/validation.js
 
@@ -61,6 +143,55 @@ router.post('/analyze', authenticateToken, validateCreateAnalysis, async (req, r
       });
     }
 
+    // Get user's plan limits and check analysis limits with timeout
+    let planLimits;
+    try {
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Plan limits check timeout')), 5000);
+      });
+      
+      const planLimitsPromise = subscriptionService.getPlanLimits(userId);
+      planLimits = await Promise.race([planLimitsPromise, timeoutPromise]);
+    } catch (error) {
+      console.error('Error getting plan limits, using free plan defaults:', error);
+      planLimits = subscriptionService.PLAN_LIMITS.free;
+    }
+    
+    // Check monthly analysis limit for free users
+    if (planLimits.analysesPerMonth !== -1) {
+      try {
+        const timeoutPromise = new Promise((_, reject) => {
+          setTimeout(() => reject(new Error('Analysis check timeout')), 3000);
+        });
+        
+        const analysisCheckPromise = subscriptionService.checkLimit(userId, 'analysesPerMonth');
+        const analysisCheck = await Promise.race([analysisCheckPromise, timeoutPromise]);
+        
+        if (!analysisCheck.allowed) {
+          return res.status(403).json({
+            success: false,
+            message: `Monthly analysis limit exceeded. You have used ${analysisCheck.usage}/${analysisCheck.limit} analyses this month.`,
+            usage: {
+              limit: analysisCheck.limit,
+              used: analysisCheck.usage,
+              remaining: analysisCheck.remaining
+            }
+          });
+        }
+      } catch (error) {
+        console.error('Error checking analysis limits, allowing analysis:', error);
+        // Allow analysis to proceed if limit check fails
+      }
+    }
+
+    // Store original content for full analysis, but note the limitation for display
+    const originalContent = analysisContent;
+    const isContentLimited = planLimits.maxAnalysisPercentage < 100;
+    
+    if (isContentLimited) {
+      console.log(`Content will be analyzed in full but display limited to ${planLimits.maxAnalysisPercentage}% for ${planLimits.name} user`);
+    }
+
     // Perform AI analysis
     const analysisResult = await aiAnalysisService.analyzeDocument(
       analysisDocumentId,
@@ -82,7 +213,7 @@ router.post('/analyze', authenticateToken, validateCreateAnalysis, async (req, r
         userId,
         analysisType,
         analysisResult.result,
-        analysisContent,
+        originalContent, // Save the full content, not the limited one
         analysisResult.annotations,
         citationStyle
       );
@@ -99,7 +230,11 @@ router.post('/analyze', authenticateToken, validateCreateAnalysis, async (req, r
     res.json({
       success: true,
       message: 'Analysis completed successfully',
-      data: analysisResult
+      data: {
+        ...analysisResult,
+        isContentLimited: isContentLimited,
+        maxAnalysisPercentage: planLimits.maxAnalysisPercentage
+      }
     });
 
   } catch (error) {

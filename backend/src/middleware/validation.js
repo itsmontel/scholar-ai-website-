@@ -112,7 +112,7 @@ const commonSchemas = {
 
   // Citation style validation
   citationStyle: Joi.string()
-    .valid('APA', 'MLA', 'Chicago', 'Harvard', 'IEEE', 'Vancouver')
+    .valid('None', 'APA', 'MLA', 'Chicago', 'Harvard', 'IEEE', 'Vancouver')
     .required()
     .messages({
       'any.only': 'Invalid citation style',
@@ -130,7 +130,6 @@ const commonSchemas = {
 const validationSchemas = {
   // Auth endpoints
   register: Joi.object({
-    name: commonSchemas.name,
     email: commonSchemas.email,
     password: commonSchemas.password
   }),

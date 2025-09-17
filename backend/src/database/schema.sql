@@ -65,7 +65,7 @@ CREATE TABLE IF NOT EXISTS document_analyses (
     user_id UUID REFERENCES users(id) ON DELETE CASCADE,
     analysis_type VARCHAR(100) NOT NULL, -- 'general', 'citation', 'grammar', 'plagiarism'
     status VARCHAR(50) DEFAULT 'pending', -- 'pending', 'processing', 'completed', 'failed'
-    citation_style VARCHAR(50), -- 'APA', 'MLA', 'Chicago', 'Harvard'
+    citation_style VARCHAR(50), -- 'None', 'APA', 'MLA', 'Chicago', 'Harvard'
     focus_areas TEXT[], -- Array of focus areas
     analysis_results JSONB,
     ai_model_used VARCHAR(100),
@@ -131,14 +131,19 @@ BEGIN
 END;
 $$ language 'plpgsql';
 
+-- Drop triggers if they exist, then recreate them
+DROP TRIGGER IF EXISTS update_users_updated_at ON users;
 CREATE TRIGGER update_users_updated_at BEFORE UPDATE ON users
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_subscriptions_updated_at ON subscriptions;
 CREATE TRIGGER update_subscriptions_updated_at BEFORE UPDATE ON subscriptions
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_documents_updated_at ON documents;
 CREATE TRIGGER update_documents_updated_at BEFORE UPDATE ON documents
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_document_analyses_updated_at ON document_analyses;
 CREATE TRIGGER update_document_analyses_updated_at BEFORE UPDATE ON document_analyses
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();

@@ -12,6 +12,7 @@ const s3Service = process.env.NODE_ENV === 'production'
   : require('../services/mockS3Service');
 const documentParser = require('../services/documentParser');
 const documentService = require('../services/documentService');
+const subscriptionService = require('../services/subscriptionService');
 
 const router = express.Router();
 
@@ -47,61 +48,156 @@ router.post('/upload', authenticateToken, upload.single('document'), async (req,
       });
     }
 
-    // Validate file size
-    const maxSize = documentParser.getMaxFileSize(file.mimetype);
-    if (file.size > maxSize) {
-      return res.status(400).json({
+    console.log(`📄 Upload: ${file.originalname} (${file.size} bytes) for user ${userId}`);
+
+    // Get user's plan limits
+    let planLimits;
+    try {
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Plan limits check timeout')), 5000);
+      });
+      const planLimitsPromise = subscriptionService.getPlanLimits(userId);
+      planLimits = await Promise.race([planLimitsPromise, timeoutPromise]);
+    } catch (error) {
+      console.error('Error getting plan limits, using free plan defaults:', error);
+      planLimits = subscriptionService.PLAN_LIMITS.free;
+    }
+
+    // Check monthly upload limit
+    try {
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Upload limit check timeout')), 5000);
+      });
+      const uploadLimitPromise = subscriptionService.checkLimit(userId, 'documentsPerMonth');
+      const uploadLimitCheck = await Promise.race([uploadLimitPromise, timeoutPromise]);
+      
+      if (!uploadLimitCheck.allowed) {
+        return res.status(429).json({
+          success: false,
+          message: uploadLimitCheck.message || 'Monthly upload limit exceeded',
+          limit: planLimits.documentsPerMonth,
+          used: uploadLimitCheck.used || 0
+        });
+      }
+    } catch (error) {
+      console.error('Error checking upload limits, allowing upload:', error);
+    }
+
+    // Check file size against plan limits
+    if (file.size > planLimits.maxDocumentSize) {
+      return res.status(413).json({
         success: false,
-        message: `File size exceeds limit. Maximum size for ${file.mimetype} is ${Math.round(maxSize / 1024 / 1024)}MB`
+        message: `File size exceeds ${planLimits.name} plan limit of ${(planLimits.maxDocumentSize / 1024 / 1024).toFixed(1)}MB. Your file is ${(file.size / 1024 / 1024).toFixed(2)}MB.`,
+        maxFileSize: planLimits.maxDocumentSize,
+        currentFileSize: file.size,
+        plan: planLimits.name
       });
     }
 
-    console.log(`📄 Processing document upload: ${file.originalname} (${file.size} bytes)`);
-
     // Parse document content
-    const parsedContent = await documentParser.parseDocument(
-      file.buffer,
-      file.mimetype,
-      file.originalname
-    );
-
-    console.log(`✅ Document parsed: ${parsedContent.wordCount} words, ${parsedContent.pageCount} pages`);
+    let parsedContent;
+    try {
+      console.log(`🔍 Parsing document: ${file.originalname} (${file.mimetype})`);
+      const parseTimeout = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Document parsing timeout')), 15000);
+      });
+      const parsePromise = documentParser.parseDocument(file.buffer, file.mimetype, file.originalname);
+      parsedContent = await Promise.race([parsePromise, parseTimeout]);
+      
+      console.log(`📝 Parsed content length: ${parsedContent.content ? parsedContent.content.length : 0} characters`);
+      console.log(`📊 Word count: ${parsedContent.wordCount}, Page count: ${parsedContent.pageCount}`);
+      
+      if (!parsedContent.content || parsedContent.content.trim().length === 0) {
+        console.warn('⚠️ Warning: Parsed content is empty or null');
+      }
+    } catch (error) {
+      console.error('Document parsing failed:', error);
+      return res.status(400).json({
+        success: false,
+        message: 'Failed to parse document content',
+        error: error.message
+      });
+    }
 
     // Upload file to S3
-    const uploadResult = await s3Service.uploadFile(
-      file.buffer,
-      file.originalname,
-      userId,
-      file.mimetype
-    );
+    let uploadResult;
+    try {
+      const s3Timeout = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('S3 upload timeout')), 10000);
+      });
+      const s3Promise = s3Service.uploadFile(file.buffer, file.originalname, userId, file.mimetype);
+      uploadResult = await Promise.race([s3Promise, s3Timeout]);
+    } catch (error) {
+      console.error('S3 upload failed:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to upload file to storage',
+        error: error.message
+      });
+    }
 
     if (!uploadResult.success) {
       return res.status(500).json({
         success: false,
-        message: 'Failed to upload file to storage',
+        message: 'File upload failed',
         error: uploadResult.error
       });
     }
 
-    console.log(`☁️ File uploaded to S3: ${uploadResult.s3Key}`);
-
     // Save document to database
-    const documentData = {
-      userId,
-      title: title || file.originalname,
-      originalFilename: file.originalname,
-      fileType: parsedContent.fileType,
-      fileSize: file.size,
-      s3Key: uploadResult.s3Key,
-      s3Url: uploadResult.s3Url,
-      contentText: parsedContent.content,
-      wordCount: parsedContent.wordCount,
-      pageCount: parsedContent.pageCount
-    };
+    let document;
+    try {
+      const dbTimeout = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Database save timeout')), 5000);
+      });
+      
+      // Map long MIME types to shorter ones to fit database column limit (50 characters)
+      const getShortFileType = (mimetype) => {
+        if (mimetype.includes('pdf')) return 'application/pdf';
+        if (mimetype.includes('word') || mimetype.includes('document')) return 'application/msword';
+        if (mimetype.includes('text')) return 'text/plain';
+        if (mimetype.includes('rtf')) return 'application/rtf';
+        // Fallback: truncate if still too long
+        return mimetype.length > 50 ? mimetype.substring(0, 47) + '...' : mimetype;
+      };
+      
+      const shortFileType = getShortFileType(file.mimetype);
 
-    const document = await documentService.createDocument(documentData);
+      const documentData = {
+        userId: userId,
+        title: title || file.originalname,
+        originalFilename: file.originalname,
+        fileType: shortFileType,
+        fileSize: file.size,
+        s3Key: uploadResult.s3Key,
+        s3Url: uploadResult.s3Url,
+        contentText: parsedContent.content,
+        wordCount: parsedContent.wordCount || 0,
+        pageCount: parsedContent.pageCount || 1
+      };
+      
+      console.log(`💾 Saving to database - Content length: ${documentData.contentText ? documentData.contentText.length : 0} characters`);
+      console.log(`💾 Document data:`, {
+        title: documentData.title,
+        fileType: documentData.fileType,
+        fileSize: documentData.fileSize,
+        wordCount: documentData.wordCount,
+        pageCount: documentData.pageCount,
+        hasContent: !!documentData.contentText
+      });
+      
+      const dbPromise = documentService.createDocument(documentData);
+      document = await Promise.race([dbPromise, dbTimeout]);
+    } catch (error) {
+      console.error('Database save failed:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to save document to database',
+        error: error.message
+      });
+    }
 
-    console.log(`💾 Document saved to database: ${document.id}`);
+    console.log(`✅ Upload completed: ${document.id}`);
 
     res.status(201).json({
       success: true,
@@ -116,7 +212,8 @@ router.post('/upload', authenticateToken, upload.single('document'), async (req,
           wordCount: document.word_count,
           pageCount: document.page_count,
           uploadStatus: document.upload_status,
-          createdAt: document.created_at
+          createdAt: document.created_at,
+          hasAnalysis: false
         }
       }
     });
@@ -130,6 +227,42 @@ router.post('/upload', authenticateToken, upload.single('document'), async (req,
     });
   }
 });
+
+// @route   GET /api/documents/:id/content
+// @desc    Get document content
+// @access  Private
+router.get('/:id/content', authenticateToken, validateDocumentId, async (req, res) => {
+  try {
+    const documentId = req.params.id;
+    const userId = req.user.id;
+
+    const document = await documentService.getDocumentById(documentId, userId);
+    if (!document) {
+      return res.status(404).json({
+        success: false,
+        message: 'Document not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      data: {
+        content: document.content_text || '',
+        title: document.title,
+        wordCount: document.word_count
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching document content:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch document content',
+      error: error.message
+    });
+  }
+});
+
+
 
 // @route   GET /api/documents
 // @desc    Get user's documents

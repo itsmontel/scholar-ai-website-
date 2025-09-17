@@ -17,7 +17,7 @@ class AIAnalysisService {
    * @param {string} citationStyle - Citation style (APA, Harvard, etc.)
    * @returns {Object} Analysis results
    */
-  async analyzeDocument(documentId, content, analysisType, userId, citationStyle = 'APA') {
+  async analyzeDocument(documentId, content, analysisType, userId, citationStyle = 'None') {
     try {
       // Check if OpenAI API key is configured
       if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY === 'your_openai_api_key_here') {
@@ -102,10 +102,15 @@ class AIAnalysisService {
 - **Incomplete References:** Some sources are mentioned but not properly cited
 
 ### Specific Recommendations:
-1. Add citations for all factual claims and statistics
+${citationStyle === 'None' 
+  ? `1. Focus on content quality and clarity since no citations are required
+2. Ensure arguments are well-structured and logical
+3. Check for proper paragraph organization and flow
+4. Verify that claims are supported by reasoning rather than external sources`
+  : `1. Add citations for all factual claims and statistics
 2. Choose one citation style (APA, MLA, Chicago) and use it consistently
 3. Include a complete reference list at the end
-4. Use in-text citations for all paraphrased material
+4. Use in-text citations for all paraphrased material`}
 
 **Citation Score: 4/10** - Needs substantial improvement for academic integrity.`,
 
@@ -267,8 +272,12 @@ class AIAnalysisService {
   /**
    * Get analysis prompt with document content
    */
-  getAnalysisPrompt(analysisType, content, citationStyle = 'APA') {
-    return `Please perform a comprehensive academic analysis of the following document using ${citationStyle} citation style standards.
+  getAnalysisPrompt(analysisType, content, citationStyle = 'None') {
+    const citationInstruction = citationStyle === 'None' 
+      ? 'This document does not require citations, so focus on content quality, structure, and clarity.'
+      : `using ${citationStyle} citation style standards.`;
+    
+    return `Please perform a comprehensive academic analysis of the following document ${citationInstruction}
 
 IMPORTANT: For each feedback point, you must include the EXACT text from the document that you're referring to, enclosed in double quotes.
 
@@ -861,6 +870,22 @@ CRITICAL REQUIREMENTS:
         process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
       );
 
+      // Convert annotations to the format expected by frontend
+      const strongPoints = annotations?.filter(a => a.type === 'strong').map(a => ({
+        text: a.text,
+        explanation: a.comment
+      })) || [];
+      
+      const areasToImprove = annotations?.filter(a => a.type === 'improve').map(a => ({
+        text: a.text,
+        explanation: a.comment
+      })) || [];
+      
+      const seriousConcerns = annotations?.filter(a => a.type === 'concern').map(a => ({
+        text: a.text,
+        explanation: a.comment
+      })) || [];
+
       const analysisData = {
         document_id: documentId,
         user_id: userId,
@@ -869,8 +894,11 @@ CRITICAL REQUIREMENTS:
         analysis_results: {
           result: result,
           original_content: originalContent,
-          ai_model_used: process.env.OPENAI_MODEL || "gpt-5-nano",
-          annotations: annotations,
+          ai_model_used: process.env.OPENAI_MODEL || "gpt-4o-mini",
+          annotations: annotations, // Keep the original annotations for future use
+          strong_points: strongPoints, // Add the format expected by frontend
+          areas_to_improve: areasToImprove, // Add the format expected by frontend
+          serious_concerns: seriousConcerns, // Add the format expected by frontend
           citation_style: citationStyle
         },
         processing_time_ms: Math.floor(Date.now() / 1000), // Convert to seconds

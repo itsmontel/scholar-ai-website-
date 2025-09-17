@@ -7,9 +7,27 @@ interface HeaderProps {
   currentPage?: string;
 }
 
+interface UsageStats {
+  documentsUploaded: number;
+  documentsAnalyzed: number;
+  storageUsed: number;
+  storageLimit: number;
+  uploadsRemaining: number;
+  analysesRemaining: number;
+  plan: string;
+  planLimits: {
+    documentsPerMonth: number;
+    analysesPerMonth: number;
+    maxDocumentSize: number;
+    name: string;
+  };
+}
+
 const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [usageStats, setUsageStats] = useState<UsageStats | null>(null);
+  const [loadingUsage, setLoadingUsage] = useState(false);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -26,11 +44,60 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Fetch usage stats when user is available
+  useEffect(() => {
+    const fetchUsageStats = async () => {
+      if (!user) return;
+      
+      setLoadingUsage(true);
+      try {
+        const token = localStorage.getItem('authToken');
+        const response = await fetch('http://localhost:3001/api/subscriptions/usage', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          setUsageStats(data);
+        }
+      } catch (error) {
+        console.error('Error fetching usage stats:', error);
+      } finally {
+        setLoadingUsage(false);
+      }
+    };
+
+    fetchUsageStats();
+  }, [user]);
+
   const handleLogout = () => {
     if (onLogout) {
       onLogout();
     }
     setIsDropdownOpen(false);
+  };
+
+  // Helper functions for formatting usage data
+  const formatBytes = (bytes: number): string => {
+    if (bytes === 0) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+  };
+
+  const getUsagePercentage = (used: number, limit: number): number => {
+    if (limit === -1) return 0; // Unlimited
+    return Math.min((used / limit) * 100, 100);
+  };
+
+  const getUsageColor = (percentage: number): string => {
+    if (percentage >= 90) return 'text-red-600';
+    if (percentage >= 70) return 'text-yellow-600';
+    return 'text-green-600';
   };
 
   return (
@@ -81,14 +148,14 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
               Library
             </button>
             <button 
-              onClick={() => onNavigate?.('account')}
+              onClick={() => onNavigate?.('upload')}
               className={`px-4 py-2 font-medium rounded-lg transition-all duration-200 ${
-                currentPage === 'account' 
+                currentPage === 'upload' 
                   ? 'text-blue-600 bg-blue-50' 
                   : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100/50'
               }`}
             >
-              Account
+              Upload
             </button>
           </nav>
 
@@ -111,12 +178,12 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
               >
                 <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
                   <span className="text-white text-sm font-medium">
-                    {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
+                    {user.email ? user.email.charAt(0).toUpperCase() : 'U'}
                   </span>
                 </div>
                 <div className="hidden md:block text-left">
-                  <div className="text-sm font-semibold text-gray-900">{user.name || 'User Name'}</div>
-                  <div className="text-xs text-gray-500">{user.email || 'user@example.com'}</div>
+                  <div className="text-sm font-semibold text-gray-900">{user.email || 'user@example.com'}</div>
+                  <div className="text-xs text-gray-500">Scholar AI User</div>
                 </div>
                 <svg 
                   className={`w-4 h-4 text-gray-500 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`} 
@@ -133,14 +200,57 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
                 <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-2xl border border-gray-200/50 backdrop-blur-sm z-50">
                   {/* User Info Section */}
                   <div className="px-4 py-3 border-b border-gray-100">
-                    <div className="text-sm font-medium text-gray-900">{user.name || 'User Name'}</div>
-                    <div className="text-xs text-gray-500">{user.email || 'user@example.com'}</div>
-                    <div className="flex items-center mt-2">
-                      <svg className="w-4 h-4 text-yellow-500 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                      </svg>
-                      <span className="text-xs text-gray-600">0 credits</span>
-                    </div>
+                    <div className="text-sm font-medium text-gray-900">{user.email || 'user@example.com'}</div>
+                    <div className="text-xs text-gray-500 capitalize">{usageStats?.plan || 'Free'} Plan</div>
+                    
+                    {/* Usage Statistics */}
+                    {loadingUsage ? (
+                      <div className="mt-3 flex items-center justify-center">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                        <span className="ml-2 text-xs text-gray-500">Loading usage...</span>
+                      </div>
+                    ) : usageStats ? (
+                      <div className="mt-3 space-y-2">
+                        {/* Storage Usage */}
+                        <div className="space-y-1">
+                          <div className="flex justify-between items-center">
+                            <span className="text-xs text-gray-600">Storage</span>
+                            <span className={`text-xs font-medium ${getUsageColor(getUsagePercentage(usageStats.storageUsed, usageStats.storageLimit))}`}>
+                              {formatBytes(usageStats.storageUsed)} / {usageStats.storageLimit === -1 ? '∞' : formatBytes(usageStats.storageLimit)}
+                            </span>
+                          </div>
+                          {usageStats.storageLimit !== -1 && (
+                            <div className="w-full bg-gray-200 rounded-full h-1.5">
+                              <div 
+                                className={`h-1.5 rounded-full transition-all duration-300 ${
+                                  getUsagePercentage(usageStats.storageUsed, usageStats.storageLimit) >= 90 ? 'bg-red-500' :
+                                  getUsagePercentage(usageStats.storageUsed, usageStats.storageLimit) >= 70 ? 'bg-yellow-500' : 'bg-green-500'
+                                }`}
+                                style={{ width: `${getUsagePercentage(usageStats.storageUsed, usageStats.storageLimit)}%` }}
+                              ></div>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Uploads Remaining */}
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs text-gray-600">Uploads</span>
+                          <span className={`text-xs font-medium ${getUsageColor(getUsagePercentage(usageStats.documentsUploaded, usageStats.planLimits.documentsPerMonth))}`}>
+                            {usageStats.uploadsRemaining === -1 ? '∞' : usageStats.uploadsRemaining} left
+                          </span>
+                        </div>
+
+                        {/* Analyses Remaining */}
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs text-gray-600">Analyses</span>
+                          <span className={`text-xs font-medium ${getUsageColor(getUsagePercentage(usageStats.documentsAnalyzed, usageStats.planLimits.analysesPerMonth))}`}>
+                            {usageStats.analysesRemaining === -1 ? '∞' : usageStats.analysesRemaining} left
+                          </span>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="mt-2 text-xs text-gray-500">Unable to load usage data</div>
+                    )}
                   </div>
 
                   {/* Navigation Links */}
@@ -190,6 +300,15 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                       </svg>
                       <span>Account</span>
+                    </button>
+                    <button 
+                      onClick={() => { onNavigate?.('billing'); setIsDropdownOpen(false); }}
+                      className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                      </svg>
+                      <span>Billing</span>
                     </button>
                   </div>
 
@@ -275,14 +394,14 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
               Library
             </button>
             <button 
-              onClick={() => { onNavigate?.('account'); setIsMobileMenuOpen(false); }}
+              onClick={() => { onNavigate?.('upload'); setIsMobileMenuOpen(false); }}
               className={`w-full text-left px-4 py-3 rounded-lg font-medium transition-all duration-200 ${
-                currentPage === 'account' 
+                currentPage === 'upload' 
                   ? 'text-blue-600 bg-blue-50' 
                   : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100/50'
               }`}
             >
-              Account
+              Upload
             </button>
           </div>
         </div>

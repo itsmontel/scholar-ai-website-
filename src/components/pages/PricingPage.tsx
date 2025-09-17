@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import Header from '../common/Header';
+import Footer from '../common/Footer';
 import PaymentModal from '../payment/PaymentModal';
 
 interface PricingPageProps {
@@ -339,6 +340,9 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
         billingCycle={paymentModal.billingCycle}
         onSuccess={handlePaymentSuccess}
       />
+
+      {/* Footer */}
+      <Footer onNavigate={onNavigate} />
     </div>
   );
 };

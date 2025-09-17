@@ -9,7 +9,7 @@ class AIAnalysisService {
     // Academic standards and criteria for top-tier analysis
     this.academicStandards = {
       journals: ['Nature', 'Science', 'Cell', 'NEJM', 'Lancet', 'JAMA', 'PNAS', 'IEEE', 'ACM'],
-      citationStyles: ['APA', 'MLA', 'Chicago', 'Harvard', 'Vancouver', 'IEEE', 'ACS', 'AMA'],
+      citationStyles: ['None', 'APA', 'MLA', 'Chicago', 'Harvard', 'Vancouver', 'IEEE', 'ACS', 'AMA'],
       researchTypes: ['empirical', 'theoretical', 'systematic_review', 'meta_analysis', 'case_study', 'experimental', 'observational'],
       qualityIndicators: ['novelty', 'rigor', 'significance', 'clarity', 'reproducibility', 'ethical_considerations']
     };
@@ -17,7 +17,7 @@ class AIAnalysisService {
 
   async analyzeDocument(content, analysisType, options = {}) {
     try {
-      const { citationStyle = 'APA', focusAreas = [], targetJournal, researchField } = options;
+      const { citationStyle = 'None', focusAreas = [], targetJournal, researchField } = options;
 
       // Use GPT-4 Turbo for highest quality analysis
       const response = await this.openai.chat.completions.create({

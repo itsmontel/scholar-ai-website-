@@ -29,7 +29,7 @@ const generateToken = (userId) => {
 // @access  Public
 router.post('/register', validateRegister, async (req, res) => {
   try {
-    const { email, password, institution, researchField } = req.body;
+    const { email, password } = req.body;
 
     // Check if user already exists
     const existingUser = await userService.findUserByEmail(email);
@@ -52,8 +52,8 @@ router.post('/register', validateRegister, async (req, res) => {
     const userData = {
       email: email.toLowerCase(),
       password_hash: passwordHash,
-      institution: institution || null,
-      research_field: researchField || null,
+      institution: null,
+      research_field: null,
       email_verification_token: emailVerificationToken,
       subscription_plan: 'free',
       subscription_status: 'active',

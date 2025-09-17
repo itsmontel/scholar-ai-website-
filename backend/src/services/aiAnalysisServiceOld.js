@@ -17,7 +17,7 @@ class AIAnalysisService {
    * @param {string} citationStyle - Citation style (APA, Harvard, etc.)
    * @returns {Object} Analysis results
    */
-  async analyzeDocument(documentId, content, analysisType, userId, citationStyle = 'APA') {
+  async analyzeDocument(documentId, content, analysisType, userId, citationStyle = 'None') {
     try {
       // Check if OpenAI API key is configured
       if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY === 'your_openai_api_key_here') {
@@ -268,8 +268,12 @@ class AIAnalysisService {
   /**
    * Get analysis prompt with document content
    */
-  getAnalysisPrompt(analysisType, content, citationStyle = 'APA') {
-    return `You are an expert academic writing coach. Please perform a comprehensive, constructive analysis of the following document using ${citationStyle} citation style standards.
+  getAnalysisPrompt(analysisType, content, citationStyle = 'None') {
+    const citationInstruction = citationStyle === 'None' 
+      ? 'This document does not require citations, so focus on content quality, structure, and clarity.'
+      : `using ${citationStyle} citation style standards.`;
+    
+    return `You are an expert academic writing coach. Please perform a comprehensive, constructive analysis of the following document ${citationInstruction}
 
 IMPORTANT: For each feedback point, you must include the EXACT text from the document that you're referring to, enclosed in double quotes.
 

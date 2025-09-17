@@ -1,118 +1,27 @@
 const express = require('express');
-const { v4: uuidv4 } = require('uuid');
-const { createClient } = require('@supabase/supabase-js');
-
-const { authenticateToken } = require('../middleware/auth');
-// const { validate, schemas } = require('../middleware/validation');
-const stripeService = require('../services/stripeService');
-
 const router = express.Router();
+const subscriptionService = require('../services/subscriptionService');
+const { authenticateToken } = require('../middleware/auth');
 
 // @route   POST /api/subscriptions/create-checkout-session
-// @desc    Create a Stripe Checkout session
+// @desc    Create a Stripe checkout session for subscription
 // @access  Private
 router.post('/create-checkout-session', authenticateToken, async (req, res) => {
   try {
-    const { planType, billingCycle } = req.body;
+    const { priceId, successUrl, cancelUrl } = req.body;
     const userId = req.user.id;
 
-    const supabase = createClient(
-      process.env.SUPABASE_URL,
-      process.env.SUPABASE_SERVICE_ROLE_KEY
-    );
-
-    // Get user data
-    const { data: user, error: userError } = await supabase
-      .from('users')
-      .select('id, email, first_name, last_name, institution, research_field, stripe_customer_id')
-      .eq('id', userId)
-      .single();
-
-    if (userError || !user) {
-      return res.status(404).json({
-        success: false,
-        message: 'User not found'
-      });
-    }
-
-    let customerId = user.stripe_customer_id;
-
-    // Create Stripe customer if doesn't exist
-    if (!customerId) {
-      const customerResult = await stripeService.createCustomer({
-        id: user.id,
-        email: user.email,
-        firstName: user.first_name,
-        lastName: user.last_name,
-        institution: user.institution,
-        researchField: user.research_field
-      });
-
-      customerId = customerResult.customerId;
-
-      // Update user with Stripe customer ID
-      await supabase
-        .from('users')
-        .update({ stripe_customer_id: customerId })
-        .eq('id', userId);
-    }
-
-    // Create Stripe Checkout session
-    const checkoutSession = await stripeService.createCheckoutSession(
-      customerId,
-      planType,
-      billingCycle,
-      userId
-    );
-
-    res.json({
-      success: true,
-      message: 'Checkout session created successfully',
-      data: {
-        checkoutUrl: checkoutSession.url
-      }
-    });
-  } catch (error) {
-    console.error('Create checkout session error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to create checkout session'
-    });
-  }
-});
-
-// @route   POST /api/subscriptions/create
-// @desc    Create a new subscription
-// @access  Private
-router.post('/create', authenticateToken, async (req, res) => {
-  try {
-    const { planType, billingCycle } = req.body;
-    const userId = req.user.id;
-
-    const supabase = createClient(
-      process.env.SUPABASE_URL,
-      process.env.SUPABASE_SERVICE_ROLE_KEY
-    );
-
-    // Check if user already has an active subscription
-    const { data: existingSubscription, error: existingError } = await supabase
-      .from('subscriptions')
-      .select('id, stripe_subscription_id, status')
-      .eq('user_id', userId)
-      .eq('status', 'active')
-      .single();
-
-    if (existingSubscription && !existingError) {
+    if (!priceId || !successUrl || !cancelUrl) {
       return res.status(400).json({
         success: false,
-        message: 'User already has an active subscription'
+        message: 'Missing required fields: priceId, successUrl, cancelUrl'
       });
     }
 
-    // Get user data for Stripe customer creation
-    const { data: user, error: userError } = await supabase
+    // Get user details
+    const { data: user, error: userError } = await subscriptionService.supabase
       .from('users')
-      .select('id, email, first_name, last_name, institution, research_field, stripe_customer_id')
+      .select('email, name, stripe_customer_id')
       .eq('id', userId)
       .single();
 
@@ -127,247 +36,282 @@ router.post('/create', authenticateToken, async (req, res) => {
 
     // Create Stripe customer if doesn't exist
     if (!customerId) {
-      const customerResult = await stripeService.createCustomer({
-        id: user.id,
-        email: user.email,
-        firstName: user.first_name,
-        lastName: user.last_name,
-        institution: user.institution,
-        researchField: user.research_field
-      });
+      const customerResult = await subscriptionService.createStripeCustomer(
+        user.email,
+        user.name || user.email
+      );
+
+      if (!customerResult.success) {
+        return res.status(500).json({
+          success: false,
+          message: 'Failed to create customer',
+          error: customerResult.error
+        });
+      }
 
       customerId = customerResult.customerId;
 
       // Update user with Stripe customer ID
-      await supabase
+      const { error: updateError } = await subscriptionService.supabase
         .from('users')
         .update({ stripe_customer_id: customerId })
         .eq('id', userId);
+
+      if (updateError) {
+        console.error('Error updating user with Stripe customer ID:', updateError);
+      }
     }
 
-    // Create Stripe subscription
-    const subscriptionResult = await stripeService.createSubscription(customerId, planType, billingCycle);
+    // Create checkout session
+    const sessionResult = await subscriptionService.createCheckoutSession(
+      customerId,
+      priceId,
+      successUrl,
+      cancelUrl
+    );
 
-    // Save subscription to database
-    const subscriptionId = uuidv4();
-    await supabase
-      .from('subscriptions')
-      .insert({
-        id: subscriptionId,
-        user_id: userId,
-        stripe_subscription_id: subscriptionResult.subscriptionId,
-        plan_type: planType,
-        status: 'pending',
-        created_at: new Date().toISOString()
+    if (!sessionResult.success) {
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to create checkout session',
+        error: sessionResult.error
       });
-
-    // Update user subscription plan
-    await supabase
-      .from('users')
-      .update({ subscription_plan: planType })
-      .eq('id', userId);
+    }
 
     res.json({
       success: true,
-      message: 'Subscription created successfully',
-      data: {
-        subscriptionId,
-        clientSecret: subscriptionResult.clientSecret,
-        planType,
-        billingCycle
-      }
+      sessionId: sessionResult.sessionId,
+      url: sessionResult.url
     });
+
   } catch (error) {
-    console.error('Create subscription error:', error);
+    console.error('Error creating checkout session:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to create subscription'
+      message: 'Failed to create checkout session',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
 });
 
 // @route   GET /api/subscriptions/current
-// @desc    Get current user subscription
+// @desc    Get user's current subscription
 // @access  Private
 router.get('/current', authenticateToken, async (req, res) => {
   try {
     const userId = req.user.id;
+    const subscriptionDetails = await subscriptionService.getUserSubscriptionDetails(userId);
 
-    const result = await query(
-      `SELECT s.*, u.subscription_plan, u.subscription_status
-       FROM subscriptions s
-       JOIN users u ON s.user_id = u.id
-       WHERE s.user_id = $1 AND s.status = $2
-       ORDER BY s.created_at DESC
-       LIMIT 1`,
-      [userId, 'active']
-    );
+    // If user has a paid plan, get details from Stripe
+    let stripeSubscription = null;
+    if (subscriptionDetails.plan !== 'free' && subscriptionDetails.stripeCustomerId) {
+      // Get the most recent active subscription
+      const { data: subscription, error } = await subscriptionService.supabase
+        .from('subscriptions')
+        .select('stripe_subscription_id, status, current_period_start, current_period_end')
+        .eq('user_id', userId)
+        .eq('status', 'active')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
 
-    if (result.rows.length === 0) {
-      return res.json({
-        success: true,
-        data: {
-          subscription: null,
-          message: 'No active subscription found'
+      if (!error && subscription) {
+        const stripeResult = await subscriptionService.getStripeSubscription(subscription.stripe_subscription_id);
+        if (stripeResult.success) {
+          stripeSubscription = stripeResult.subscription;
         }
-      });
+      }
     }
 
-    const subscription = result.rows[0];
+    res.json({
+      success: true,
+      plan: subscriptionDetails.plan,
+      stripeSubscription,
+      planLimits: subscriptionService.PLAN_LIMITS[subscriptionDetails.plan]
+    });
 
-    // Get detailed subscription info from Stripe
-    try {
-      const stripeSubscription = await stripeService.getSubscription(subscription.stripe_subscription_id);
-      
-      res.json({
-        success: true,
-        data: {
-          subscription: {
-            id: subscription.id,
-            planType: subscription.plan_type,
-            status: subscription.status,
-            currentPeriodStart: subscription.current_period_start,
-            currentPeriodEnd: subscription.current_period_end,
-            cancelAtPeriodEnd: subscription.cancel_at_period_end,
-            createdAt: subscription.created_at,
-            stripeSubscription: stripeSubscription.subscription
-          }
-        }
-      });
-    } catch (stripeError) {
-      // If Stripe call fails, return basic subscription info
-      res.json({
-        success: true,
-        data: {
-          subscription: {
-            id: subscription.id,
-            planType: subscription.plan_type,
-            status: subscription.status,
-            currentPeriodStart: subscription.current_period_start,
-            currentPeriodEnd: subscription.current_period_end,
-            cancelAtPeriodEnd: subscription.cancel_at_period_end,
-            createdAt: subscription.created_at
-          }
-        }
-      });
-    }
   } catch (error) {
-    console.error('Get current subscription error:', error);
+    console.error('Error fetching current subscription:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to get current subscription'
+      message: 'Failed to fetch subscription details',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
 });
 
 // @route   PUT /api/subscriptions/update
-// @desc    Update subscription plan
+// @desc    Update user's subscription plan
 // @access  Private
 router.put('/update', authenticateToken, async (req, res) => {
   try {
-    const { planType, billingCycle } = req.body;
+    const { newPlan } = req.body;
     const userId = req.user.id;
 
-    // Get current subscription
-    const result = await query(
-      'SELECT id, stripe_subscription_id, plan_type FROM subscriptions WHERE user_id = $1 AND status = $2',
-      [userId, 'active']
-    );
+    if (!newPlan || !['starter', 'premium'].includes(newPlan)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid plan. Must be starter or premium.'
+      });
+    }
 
-    if (result.rows.length === 0) {
+    const subscriptionDetails = await subscriptionService.getUserSubscriptionDetails(userId);
+
+    if (subscriptionDetails.plan === 'free') {
+      return res.status(400).json({
+        success: false,
+        message: 'Cannot update free plan. Please use checkout to upgrade.'
+      });
+    }
+
+    // Get current subscription
+    const { data: subscription, error: subError } = await subscriptionService.supabase
+      .from('subscriptions')
+      .select('stripe_subscription_id')
+      .eq('user_id', userId)
+      .eq('status', 'active')
+      .single();
+
+    if (subError || !subscription) {
       return res.status(404).json({
         success: false,
         message: 'No active subscription found'
       });
     }
 
-    const currentSubscription = result.rows[0];
+    const newPriceId = subscriptionService.getPriceId(newPlan);
+    if (!newPriceId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid plan configuration'
+      });
+    }
 
-    // Update Stripe subscription
-    const updateResult = await stripeService.updateSubscription(
-      currentSubscription.stripe_subscription_id,
-      planType,
-      billingCycle
+    // Update subscription in Stripe
+    const updateResult = await subscriptionService.updateStripeSubscription(
+      subscription.stripe_subscription_id,
+      newPriceId
     );
 
-    // Update database
-    await query(
-      'UPDATE subscriptions SET plan_type = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2',
-      [planType, currentSubscription.id]
-    );
+    if (!updateResult.success) {
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to update subscription',
+        error: updateResult.error
+      });
+    }
 
-    // Update user subscription plan
-    await query(
-      'UPDATE users SET subscription_plan = $1 WHERE id = $2',
-      [planType, userId]
-    );
+    // Update user's plan in database
+    const { error: updateError } = await subscriptionService.supabase
+      .from('users')
+      .update({ subscription_plan: newPlan })
+      .eq('id', userId);
+
+    if (updateError) {
+      console.error('Error updating user plan:', updateError);
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to update user plan'
+      });
+    }
 
     res.json({
       success: true,
       message: 'Subscription updated successfully',
-      data: {
-        subscriptionId: currentSubscription.id,
-        newPlanType: planType,
-        newBillingCycle: billingCycle
-      }
+      newPlan,
+      planLimits: subscriptionService.PLAN_LIMITS[newPlan]
     });
+
   } catch (error) {
-    console.error('Update subscription error:', error);
+    console.error('Error updating subscription:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to update subscription'
+      message: 'Failed to update subscription',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
 });
 
 // @route   POST /api/subscriptions/cancel
-// @desc    Cancel subscription
+// @desc    Cancel user's subscription
 // @access  Private
 router.post('/cancel', authenticateToken, async (req, res) => {
   try {
-    const { cancelAtPeriodEnd = true } = req.body;
     const userId = req.user.id;
+    const subscriptionDetails = await subscriptionService.getUserSubscriptionDetails(userId);
+
+    if (subscriptionDetails.plan === 'free') {
+      return res.status(400).json({
+        success: false,
+        message: 'No active subscription to cancel'
+      });
+    }
 
     // Get current subscription
-    const result = await query(
-      'SELECT id, stripe_subscription_id FROM subscriptions WHERE user_id = $1 AND status = $2',
-      [userId, 'active']
-    );
+    const { data: subscription, error: subError } = await subscriptionService.supabase
+      .from('subscriptions')
+      .select('stripe_subscription_id')
+      .eq('user_id', userId)
+      .eq('status', 'active')
+      .single();
 
-    if (result.rows.length === 0) {
+    if (subError || !subscription) {
       return res.status(404).json({
         success: false,
         message: 'No active subscription found'
       });
     }
 
-    const subscription = result.rows[0];
-
-    // Cancel Stripe subscription
-    const cancelResult = await stripeService.cancelSubscription(
-      subscription.stripe_subscription_id,
-      cancelAtPeriodEnd
+    // Cancel subscription in Stripe
+    const cancelResult = await subscriptionService.cancelStripeSubscription(
+      subscription.stripe_subscription_id
     );
 
-    // Update database
-    await query(
-      'UPDATE subscriptions SET cancel_at_period_end = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2',
-      [cancelAtPeriodEnd, subscription.id]
-    );
+    if (!cancelResult.success) {
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to cancel subscription',
+        error: cancelResult.error
+      });
+    }
+
+    // Update subscription status in database
+    const { error: updateError } = await subscriptionService.supabase
+      .from('subscriptions')
+      .update({ 
+        status: 'canceled',
+        canceled_at: new Date().toISOString()
+      })
+      .eq('user_id', userId)
+      .eq('stripe_subscription_id', subscription.stripe_subscription_id);
+
+    if (updateError) {
+      console.error('Error updating subscription status:', updateError);
+    }
+
+    // Downgrade user to free plan
+    const { error: userUpdateError } = await subscriptionService.supabase
+      .from('users')
+      .update({ subscription_plan: 'free' })
+      .eq('id', userId);
+
+    if (userUpdateError) {
+      console.error('Error downgrading user:', userUpdateError);
+    }
 
     res.json({
       success: true,
-      message: cancelResult.message,
-      data: {
-        subscriptionId: subscription.id,
-        cancelAtPeriodEnd
-      }
+      message: 'Subscription canceled successfully',
+      newPlan: 'free',
+      planLimits: subscriptionService.PLAN_LIMITS.free
     });
+
   } catch (error) {
-    console.error('Cancel subscription error:', error);
+    console.error('Error canceling subscription:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to cancel subscription'
+      message: 'Failed to cancel subscription',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
 });
@@ -378,36 +322,38 @@ router.post('/cancel', authenticateToken, async (req, res) => {
 router.get('/payment-methods', authenticateToken, async (req, res) => {
   try {
     const userId = req.user.id;
+    const subscriptionDetails = await subscriptionService.getUserSubscriptionDetails(userId);
 
-    // Get user's Stripe customer ID
-    const userResult = await query(
-      'SELECT stripe_customer_id FROM users WHERE id = $1',
-      [userId]
-    );
-
-    if (userResult.rows.length === 0 || !userResult.rows[0].stripe_customer_id) {
+    if (!subscriptionDetails.stripeCustomerId) {
       return res.json({
         success: true,
-        data: {
-          paymentMethods: []
-        }
+        paymentMethods: []
       });
     }
 
-    const customerId = userResult.rows[0].stripe_customer_id;
-    const paymentMethodsResult = await stripeService.getPaymentMethods(customerId);
+    const paymentMethodsResult = await subscriptionService.getPaymentMethods(
+      subscriptionDetails.stripeCustomerId
+    );
+
+    if (!paymentMethodsResult.success) {
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to fetch payment methods',
+        error: paymentMethodsResult.error
+      });
+    }
 
     res.json({
       success: true,
-      data: {
-        paymentMethods: paymentMethodsResult.paymentMethods
-      }
+      paymentMethods: paymentMethodsResult.paymentMethods
     });
+
   } catch (error) {
-    console.error('Get payment methods error:', error);
+    console.error('Error fetching payment methods:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to get payment methods'
+      message: 'Failed to fetch payment methods',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
 });
@@ -418,59 +364,38 @@ router.get('/payment-methods', authenticateToken, async (req, res) => {
 router.post('/setup-payment-method', authenticateToken, async (req, res) => {
   try {
     const userId = req.user.id;
+    const subscriptionDetails = await subscriptionService.getUserSubscriptionDetails(userId);
 
-    // Get user's Stripe customer ID
-    const userResult = await query(
-      'SELECT stripe_customer_id FROM users WHERE id = $1',
-      [userId]
+    if (!subscriptionDetails.stripeCustomerId) {
+      return res.status(400).json({
+        success: false,
+        message: 'No Stripe customer found'
+      });
+    }
+
+    const setupIntentResult = await subscriptionService.createSetupIntent(
+      subscriptionDetails.stripeCustomerId
     );
 
-    if (userResult.rows.length === 0) {
-      return res.status(404).json({
+    if (!setupIntentResult.success) {
+      return res.status(500).json({
         success: false,
-        message: 'User not found'
+        message: 'Failed to create setup intent',
+        error: setupIntentResult.error
       });
     }
-
-    let customerId = userResult.rows[0].stripe_customer_id;
-
-    // Create customer if doesn't exist
-    if (!customerId) {
-      const user = await query(
-        'SELECT id, email, first_name, last_name FROM users WHERE id = $1',
-        [userId]
-      );
-
-      const customerResult = await stripeService.createCustomer({
-        id: user.rows[0].id,
-        email: user.rows[0].email,
-        firstName: user.rows[0].first_name,
-        lastName: user.rows[0].last_name
-      });
-
-      customerId = customerResult.customerId;
-
-      // Update user with Stripe customer ID
-      await query(
-        'UPDATE users SET stripe_customer_id = $1 WHERE id = $2',
-        [customerId, userId]
-      );
-    }
-
-    // Create setup intent
-    const setupResult = await stripeService.createSetupIntent(customerId);
 
     res.json({
       success: true,
-      data: {
-        clientSecret: setupResult.clientSecret
-      }
+      clientSecret: setupIntentResult.clientSecret
     });
+
   } catch (error) {
-    console.error('Setup payment method error:', error);
+    console.error('Error creating setup intent:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to setup payment method'
+      message: 'Failed to create setup intent',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
 });
@@ -480,92 +405,105 @@ router.post('/setup-payment-method', authenticateToken, async (req, res) => {
 // @access  Private
 router.post('/billing-portal', authenticateToken, async (req, res) => {
   try {
-    const { returnUrl } = req.body;
     const userId = req.user.id;
+    const subscriptionDetails = await subscriptionService.getUserSubscriptionDetails(userId);
 
-    // Get user's Stripe customer ID
-    const userResult = await query(
-      'SELECT stripe_customer_id FROM users WHERE id = $1',
-      [userId]
-    );
-
-    if (userResult.rows.length === 0 || !userResult.rows[0].stripe_customer_id) {
-      return res.status(404).json({
+    if (!subscriptionDetails.stripeCustomerId) {
+      return res.status(400).json({
         success: false,
         message: 'No Stripe customer found'
       });
     }
 
-    const customerId = userResult.rows[0].stripe_customer_id;
-    const portalResult = await stripeService.createBillingPortalSession(
-      customerId,
-      returnUrl || `${process.env.FRONTEND_URL}/account`
+    const returnUrl = req.body.returnUrl || `${req.protocol}://${req.get('host')}/billing`;
+
+    const portalResult = await subscriptionService.createBillingPortalSession(
+      subscriptionDetails.stripeCustomerId,
+      returnUrl
     );
+
+    if (!portalResult.success) {
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to create billing portal session',
+        error: portalResult.error
+      });
+    }
 
     res.json({
       success: true,
-      data: {
-        url: portalResult.url
-      }
+      url: portalResult.url
     });
+
   } catch (error) {
-    console.error('Create billing portal session error:', error);
+    console.error('Error creating billing portal session:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to create billing portal session'
+      message: 'Failed to create billing portal session',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
 });
 
 // @route   GET /api/subscriptions/usage
-// @desc    Get subscription usage statistics
+// @desc    Get user's usage statistics
 // @access  Private
 router.get('/usage', authenticateToken, async (req, res) => {
   try {
     const userId = req.user.id;
-    const { period = '30' } = req.query; // days
+    const subscriptionDetails = await subscriptionService.getUserSubscriptionDetails(userId);
+    const planLimits = subscriptionService.PLAN_LIMITS[subscriptionDetails.plan];
 
-    const startDate = new Date();
-    startDate.setDate(startDate.getDate() - parseInt(period));
+    // Get current month usage
+    const currentDate = new Date();
+    const startOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
 
-    // Get usage statistics
-    const usageResult = await query(
-      `SELECT 
-         action_type,
-         COUNT(*) as count,
-         SUM(credits_used) as total_credits
-       FROM usage_tracking 
-       WHERE user_id = $1 AND created_at >= $2
-       GROUP BY action_type`,
-      [userId, startDate]
-    );
+    // Get documents uploaded this month
+    const { data: documents, error: docsError } = await subscriptionService.supabase
+      .from('documents')
+      .select('id, file_size')
+      .eq('user_id', userId)
+      .gte('created_at', startOfMonth.toISOString());
 
-    // Get document count
-    const docResult = await query(
-      'SELECT COUNT(*) as document_count FROM documents WHERE user_id = $1 AND created_at >= $2',
-      [userId, startDate]
-    );
+    // Get analyses performed this month
+    const { data: analyses, error: analysesError } = await subscriptionService.supabase
+      .from('document_analyses')
+      .select('id')
+      .eq('user_id', userId)
+      .gte('created_at', startOfMonth.toISOString());
 
-    // Get analysis count
-    const analysisResult = await query(
-      'SELECT COUNT(*) as analysis_count FROM document_analyses WHERE user_id = $1 AND created_at >= $2',
-      [userId, startDate]
-    );
+    // Calculate total storage used (persistent - doesn't decrease when files are deleted)
+    const { data: allDocuments, error: allDocsError } = await subscriptionService.supabase
+      .from('documents')
+      .select('file_size')
+      .eq('user_id', userId);
+
+    const documentsUploaded = documents ? documents.length : 0;
+    const documentsAnalyzed = analyses ? analyses.length : 0;
+    const storageUsed = allDocuments ? allDocuments.reduce((total, doc) => total + (doc.file_size || 0), 0) : 0;
+
+    // Calculate remaining usage
+    const uploadsRemaining = planLimits.documentsPerMonth === -1 ? -1 : Math.max(0, planLimits.documentsPerMonth - documentsUploaded);
+    const analysesRemaining = planLimits.analysesPerMonth === -1 ? -1 : Math.max(0, planLimits.analysesPerMonth - documentsAnalyzed);
 
     res.json({
       success: true,
-      data: {
-        period: `${period} days`,
-        usage: usageResult.rows,
-        documentCount: parseInt(docResult.rows[0].document_count),
-        analysisCount: parseInt(analysisResult.rows[0].analysis_count)
-      }
+      documentsUploaded,
+      documentsAnalyzed,
+      storageUsed,
+      storageLimit: planLimits.maxDocumentSize,
+      uploadsRemaining,
+      analysesRemaining,
+      plan: subscriptionDetails.plan,
+      planLimits
     });
+
   } catch (error) {
-    console.error('Get usage statistics error:', error);
+    console.error('Error fetching usage statistics:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to get usage statistics'
+      message: 'Failed to fetch usage statistics',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
 });

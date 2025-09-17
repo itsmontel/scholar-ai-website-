@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import Header from '../common/Header';
+import Footer from '../common/Footer';
 import { DocumentCardSkeleton } from '../common/LoadingSpinner';
 import AnalysisAnimation from '../common/AnalysisAnimation';
 
@@ -331,14 +332,29 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
                       {new Date(doc.createdAt).toLocaleDateString()}
                     </span>
                     {doc.hasAnalysis ? (
-                      <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-green-50 text-green-700 border border-green-200">
+                      <button
+                        onClick={() => {
+                          localStorage.setItem('selectedDocumentId', doc.id);
+                          localStorage.setItem('selectedDocumentTitle', doc.title);
+                          localStorage.setItem('hasExistingAnalysis', 'true');
+                          onNavigate('analysis');
+                        }}
+                        className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-green-50 text-green-700 border border-green-200 hover:bg-green-100 hover:border-green-300 transition-colors cursor-pointer"
+                      >
                         Show Analysis
-                      </span>
+                      </button>
                     ) : (
-                      <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
+                      <button
+                        onClick={() => {
+                          localStorage.setItem('selectedDocumentId', doc.id);
+                          localStorage.setItem('selectedDocumentTitle', doc.title);
+                          onNavigate('analysis');
+                        }}
+                        className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 hover:border-blue-300 transition-colors cursor-pointer"
+                      >
                         Analyze
-                    </span>
-                  )}
+                      </button>
+                    )}
                   </div>
                 </div>
               ))
@@ -384,6 +400,9 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
           }}
         />
       )}
+
+      {/* Footer */}
+      <Footer onNavigate={onNavigate} />
     </div>
   );
 };

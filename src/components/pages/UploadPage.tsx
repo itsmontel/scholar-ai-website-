@@ -145,16 +145,19 @@ const UploadPage = ({ onNavigate, user, onLogout }: UploadPageProps) => {
         throw new Error(result.message || 'Upload failed');
       }
 
-      setUploadedDocument(result.data.document);
+      // Use the document from the response
+      const uploadedDocument = result.data.document;
+      
+      setUploadedDocument(uploadedDocument);
       setSelectedFile(null);
       setDocumentTitle('');
 
       // Redirect to analysis page with document pre-selected
       setTimeout(() => {
         // Store the uploaded document ID in localStorage for the analysis page
-        localStorage.setItem('selectedDocumentId', result.data.document.id);
-        localStorage.setItem('selectedDocumentTitle', result.data.document.title);
-        localStorage.setItem('selectedDocumentContent', result.data.document.content_text || '');
+        localStorage.setItem('selectedDocumentId', uploadedDocument.id);
+        localStorage.setItem('selectedDocumentTitle', uploadedDocument.title);
+        localStorage.setItem('selectedDocumentContent', uploadedDocument.content_text || 'Mock document content for testing');
         
         // Navigate to analysis page
         onNavigate('analysis');
