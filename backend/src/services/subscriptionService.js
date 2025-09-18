@@ -34,14 +34,6 @@ const PLAN_LIMITS = {
   }
 };
 
-// Get price ID for Stripe
-const getPriceId = (plan) => {
-  const priceIds = {
-    starter: process.env.STRIPE_STARTER_PRICE_ID,
-    premium: process.env.STRIPE_PREMIUM_PRICE_ID
-  };
-  return priceIds[plan];
-};
 
 // Get user's subscription details
 const getUserSubscriptionDetails = async (userId) => {
@@ -162,8 +154,11 @@ const createStripeCustomer = async (email, name) => {
 };
 
 // Create checkout session
-const createCheckoutSession = async (customerId, priceId, successUrl, cancelUrl) => {
+const createCheckoutSession = async (customerId, planType, billingCycle, userId) => {
   try {
+    // Get price ID based on plan and billing cycle
+    const priceId = getPriceId(planType, billingCycle);
+    
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       payment_method_types: ['card'],
@@ -174,9 +169,12 @@ const createCheckoutSession = async (customerId, priceId, successUrl, cancelUrl)
         },
       ],
       mode: 'subscription',
-      success_url: successUrl,
-      cancel_url: cancelUrl,
+      success_url: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/dashboard?payment=success`,
+      cancel_url: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/pricing?payment=cancelled`,
       metadata: {
+        userId,
+        planType,
+        billingCycle,
         source: 'scholar-ai'
       }
     });
@@ -186,6 +184,27 @@ const createCheckoutSession = async (customerId, priceId, successUrl, cancelUrl)
     console.error('Error creating checkout session:', error);
     return { success: false, error: error.message };
   }
+};
+
+// Get price ID based on plan and billing cycle
+const getPriceId = (planType, billingCycle) => {
+  const prices = {
+    'starter': {
+      'monthly': process.env.STRIPE_STARTER_MONTHLY_PRICE_ID || 'price_starter_monthly',
+      'yearly': process.env.STRIPE_STARTER_YEARLY_PRICE_ID || 'price_starter_yearly'
+    },
+    'premium': {
+      'monthly': process.env.STRIPE_PREMIUM_MONTHLY_PRICE_ID || 'price_premium_monthly',
+      'yearly': process.env.STRIPE_PREMIUM_YEARLY_PRICE_ID || 'price_premium_yearly'
+    }
+  };
+
+  const priceId = prices[planType]?.[billingCycle];
+  if (!priceId) {
+    throw new Error(`Invalid plan type or billing cycle: ${planType}/${billingCycle}`);
+  }
+  
+  return priceId;
 };
 
 // Get subscription details from Stripe

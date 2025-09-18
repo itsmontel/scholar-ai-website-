@@ -8,29 +8,19 @@ const { authenticateToken } = require('../middleware/auth');
 // @access  Private
 router.post('/create-checkout-session', authenticateToken, async (req, res) => {
   try {
-    const { priceId, successUrl, cancelUrl } = req.body;
+    const { planType, billingCycle, successUrl, cancelUrl } = req.body;
     const userId = req.user.id;
 
-    if (!priceId || !successUrl || !cancelUrl) {
+    if (!planType || !billingCycle || !successUrl || !cancelUrl) {
       return res.status(400).json({
         success: false,
-        message: 'Missing required fields: priceId, successUrl, cancelUrl'
+        message: 'Missing required fields: planType, billingCycle, successUrl, cancelUrl'
       });
     }
 
-    // Get user details
-    const { data: user, error: userError } = await subscriptionService.supabase
-      .from('users')
-      .select('email, name, stripe_customer_id')
-      .eq('id', userId)
-      .single();
-
-    if (userError || !user) {
-      return res.status(404).json({
-        success: false,
-        message: 'User not found'
-      });
-    }
+    // Get user details from the authenticated user (already available from auth middleware)
+    const user = req.user;
+    console.log('Using authenticated user:', { id: user.id, email: user.email });
 
     let customerId = user.stripe_customer_id;
 
@@ -55,7 +45,7 @@ router.post('/create-checkout-session', authenticateToken, async (req, res) => {
       const { error: updateError } = await subscriptionService.supabase
         .from('users')
         .update({ stripe_customer_id: customerId })
-        .eq('id', userId);
+        .eq('id', user.id);
 
       if (updateError) {
         console.error('Error updating user with Stripe customer ID:', updateError);
@@ -65,9 +55,9 @@ router.post('/create-checkout-session', authenticateToken, async (req, res) => {
     // Create checkout session
     const sessionResult = await subscriptionService.createCheckoutSession(
       customerId,
-      priceId,
-      successUrl,
-      cancelUrl
+      planType,
+      billingCycle,
+      userId
     );
 
     if (!sessionResult.success) {
@@ -80,8 +70,10 @@ router.post('/create-checkout-session', authenticateToken, async (req, res) => {
 
     res.json({
       success: true,
-      sessionId: sessionResult.sessionId,
-      url: sessionResult.url
+      data: {
+        sessionId: sessionResult.sessionId,
+        checkoutUrl: sessionResult.url
+      }
     });
 
   } catch (error) {

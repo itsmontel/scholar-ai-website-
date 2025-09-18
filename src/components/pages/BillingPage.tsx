@@ -31,6 +31,7 @@ interface UsageStats {
 
 const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout }) => {
   const [currentPlan, setCurrentPlan] = useState<string>('free');
+  const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
   const [usageStats, setUsageStats] = useState<UsageStats>({
     documentsUploaded: 0,
     documentsAnalyzed: 0,
@@ -63,8 +64,8 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
     {
       id: 'starter',
       name: 'Starter',
-      price: 19.99,
-      interval: 'month',
+      price: billingCycle === 'monthly' ? 19.99 : 199.99,
+      interval: billingCycle === 'monthly' ? 'month' : 'year',
       description: 'Perfect for students',
       icon: '🚀',
       features: [
@@ -76,13 +77,13 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
         'Advanced analytics'
       ],
       popular: true,
-      stripePriceId: 'price_starter_monthly'
+      stripePriceId: billingCycle === 'monthly' ? 'price_starter_monthly' : 'price_starter_yearly'
     },
     {
       id: 'premium',
       name: 'Premium',
-      price: 39.99,
-      interval: 'month',
+      price: billingCycle === 'monthly' ? 39.99 : 399.99,
+      interval: billingCycle === 'monthly' ? 'month' : 'year',
       description: 'Perfect for Researchers',
       icon: '⭐',
       features: [
@@ -95,7 +96,7 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
         'API access',
         'Custom integrations'
       ],
-      stripePriceId: 'price_premium_monthly'
+      stripePriceId: billingCycle === 'monthly' ? 'price_premium_monthly' : 'price_premium_yearly'
     }
   ];
 
@@ -149,7 +150,6 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
       setError(null);
       
       const token = localStorage.getItem('authToken');
-      const plan = plans.find(p => p.id === planId);
       
       const response = await fetch('http://localhost:3001/api/subscriptions/create-checkout-session', {
         method: 'POST',
@@ -158,7 +158,8 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          priceId: plan?.stripePriceId,
+          planType: planId,
+          billingCycle: billingCycle,
           successUrl: `${window.location.origin}/billing?success=true`,
           cancelUrl: `${window.location.origin}/billing?canceled=true`
         })
@@ -166,8 +167,8 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
 
       const data = await response.json();
       
-      if (data.success && data.url) {
-        window.location.href = data.url;
+      if (data.success && data.data?.checkoutUrl) {
+        window.location.href = data.data.checkoutUrl;
       } else {
         throw new Error(data.message || 'Failed to create checkout session');
       }
@@ -273,6 +274,35 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
           </div>
         </div>
 
+        {/* Billing Cycle Toggle */}
+        <div className="flex items-center justify-center mb-12">
+          <div className="bg-white/80 backdrop-blur-sm rounded-xl p-1 flex shadow-lg border border-gray-200/50">
+            <button
+              onClick={() => setBillingCycle('monthly')}
+              className={`px-8 py-3 rounded-lg text-sm font-semibold transition-all duration-300 ${
+                billingCycle === 'monthly'
+                  ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-md'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+              }`}
+            >
+              Bill Monthly
+            </button>
+            <button
+              onClick={() => setBillingCycle('yearly')}
+              className={`px-8 py-3 rounded-lg text-sm font-semibold transition-all duration-300 ${
+                billingCycle === 'yearly'
+                  ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-md'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+              }`}
+            >
+              Bill Yearly
+              <span className="ml-2 px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
+                Save 17%
+              </span>
+            </button>
+          </div>
+        </div>
+
         {error && (
           <div className="mb-8 bg-red-50 border border-red-200 rounded-xl p-6">
             <div className="flex">
@@ -322,7 +352,12 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
                 </div>
                 
                 {plan.price > 0 && (
-                  <p className="text-sm text-gray-500">Billed monthly</p>
+                  <p className="text-sm text-gray-500">
+                    Billed {plan.interval === 'year' ? 'annually' : 'monthly'}
+                    {plan.interval === 'year' && (
+                      <span className="text-green-600 font-semibold ml-1">(Save 17%)</span>
+                    )}
+                  </p>
                 )}
               </div>
 

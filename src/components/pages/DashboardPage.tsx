@@ -18,6 +18,22 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [showAnalysisPopup, setShowAnalysisPopup] = useState(false);
   const [analysisComplete, setAnalysisComplete] = useState(false);
+  const [usageStats, setUsageStats] = useState({
+    documentsUploaded: 0,
+    documentsAnalyzed: 0,
+    storageUsed: 0,
+    storageLimit: 0,
+    uploadsRemaining: 0,
+    analysesRemaining: 0,
+    plan: 'free',
+    planLimits: {
+      documentsPerMonth: 3,
+      analysesPerMonth: 3,
+      maxDocumentSize: 1024 * 1024, // 1MB
+      name: 'Free'
+    }
+  });
+  const [loadingStats, setLoadingStats] = useState(true);
 
   const placeholders = [
     "Paste your academic text here to see how AI can help improve it.",
@@ -36,7 +52,32 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
   useEffect(() => {
     console.log('Dashboard: fetchDocuments called');
     fetchDocuments();
+    fetchUsageStats();
   }, []);
+
+  const fetchUsageStats = async () => {
+    try {
+      setLoadingStats(true);
+      const token = localStorage.getItem('authToken');
+      if (!token) return;
+
+      const response = await fetch('http://localhost:3001/api/subscriptions/usage', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setUsageStats(data);
+      }
+    } catch (error) {
+      console.error('Error fetching usage stats:', error);
+    } finally {
+      setLoadingStats(false);
+    }
+  };
 
   const processDocuments = async (documents: any[]) => {
     console.log('Processing documents:', documents);
@@ -132,6 +173,26 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
     return text.trim().split(/\s+/).filter(word => word.length > 0).length;
   };
 
+  // Helper functions for formatting stats
+  const formatBytes = (bytes: number): string => {
+    if (bytes === 0) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+  };
+
+  const getUsagePercentage = (used: number, limit: number): number => {
+    if (limit === -1) return 0; // Unlimited
+    return Math.min((used / limit) * 100, 100);
+  };
+
+  const getUsageColor = (percentage: number): string => {
+    if (percentage >= 90) return 'text-red-600';
+    if (percentage >= 70) return 'text-yellow-600';
+    return 'text-green-600';
+  };
+
   const isTextValid = () => {
     return getWordCount(inputText) >= 200;
   };
@@ -176,6 +237,90 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="dashboard" />
+
+      {/* Compact Usage Overview */}
+      <div className="max-w-7xl mx-auto px-6 pt-6">
+        <div className="bg-white/60 backdrop-blur-sm rounded-xl shadow-sm border border-white/20 p-4 mb-6">
+          <div className="flex items-center justify-center">
+            <div className="flex items-center space-x-6">
+              {/* Documents */}
+              <div className="flex items-center space-x-2">
+                <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500">Documents</p>
+                  <p className="text-sm font-semibold text-gray-900">
+                    {loadingStats ? '...' : `${usageStats.documentsUploaded}/${usageStats.planLimits.documentsPerMonth === -1 ? '∞' : usageStats.planLimits.documentsPerMonth}`}
+                  </p>
+                </div>
+              </div>
+
+              {/* Analyses */}
+              <div className="flex items-center space-x-2">
+                <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                  <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500">Analyses</p>
+                  <p className="text-sm font-semibold text-gray-900">
+                    {loadingStats ? '...' : `${usageStats.documentsAnalyzed}/${usageStats.planLimits.analysesPerMonth === -1 ? '∞' : usageStats.planLimits.analysesPerMonth}`}
+                  </p>
+                </div>
+              </div>
+
+              {/* Storage */}
+              <div className="flex items-center space-x-2">
+                <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                  <svg className="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500">Storage</p>
+                  <p className="text-sm font-semibold text-gray-900">
+                    {loadingStats ? '...' : `${formatBytes(usageStats.storageUsed)}/${usageStats.storageLimit === -1 ? '∞' : formatBytes(usageStats.storageLimit)}`}
+                  </p>
+                </div>
+              </div>
+
+              {/* Plan */}
+              <div className="flex items-center space-x-2">
+                <div className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center">
+                  <svg className="w-4 h-4 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500">Plan</p>
+                  <p className="text-sm font-semibold text-gray-900 capitalize">
+                    {loadingStats ? '...' : usageStats.plan}
+                  </p>
+                </div>
+              </div>
+
+              {/* Upgrade Button */}
+              {usageStats.plan === 'free' && !loadingStats && (
+                <div className="flex items-center space-x-2 ml-4 pl-4 border-l border-gray-200">
+                  <button
+                    onClick={() => onNavigate('pricing')}
+                    className="px-3 py-1.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 text-xs font-medium flex items-center space-x-1"
+                  >
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                    </svg>
+                    <span>Upgrade</span>
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-6 py-16">
