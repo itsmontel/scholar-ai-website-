@@ -61,7 +61,7 @@ CREATE TABLE IF NOT EXISTS documents (
 -- Document analyses table
 CREATE TABLE IF NOT EXISTS document_analyses (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    document_id UUID REFERENCES documents(id) ON DELETE CASCADE,
+    document_id UUID REFERENCES documents(id) ON DELETE SET NULL,
     user_id UUID REFERENCES users(id) ON DELETE CASCADE,
     analysis_type VARCHAR(100) NOT NULL, -- 'general', 'citation', 'grammar', 'plagiarism'
     status VARCHAR(50) DEFAULT 'pending', -- 'pending', 'processing', 'completed', 'failed'

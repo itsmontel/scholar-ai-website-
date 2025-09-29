@@ -450,40 +450,59 @@ router.get('/usage', authenticateToken, async (req, res) => {
     const currentDate = new Date();
     const startOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
 
+    // Use service role key to bypass RLS for usage statistics
+    // This is safe because user is already authenticated via JWT
+    const { createClient } = require('@supabase/supabase-js');
+    const supabaseServiceRole = createClient(
+      process.env.SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
+    );
+
     // Get documents uploaded this month
-    const { data: documents, error: docsError } = await subscriptionService.supabase
+    const { data: documents, error: docsError } = await supabaseServiceRole
       .from('documents')
       .select('id, file_size')
       .eq('user_id', userId)
       .gte('created_at', startOfMonth.toISOString());
 
     // Get analyses performed this month
-    const { data: analyses, error: analysesError } = await subscriptionService.supabase
+    const { data: analyses, error: analysesError } = await supabaseServiceRole
       .from('document_analyses')
       .select('id')
       .eq('user_id', userId)
       .gte('created_at', startOfMonth.toISOString());
 
-    // Calculate total storage used (persistent - doesn't decrease when files are deleted)
-    const { data: allDocuments, error: allDocsError } = await subscriptionService.supabase
+    // Debug logging
+    console.log('=== USAGE ENDPOINT DEBUG ===');
+    console.log('User ID:', userId);
+    console.log('Start of month:', startOfMonth.toISOString());
+    console.log('Documents query result:', { data: documents, error: docsError });
+    console.log('Analyses query result:', { data: analyses, error: analysesError });
+
+    // Calculate current storage used (only existing documents - decreases when files are deleted)
+    const { data: currentDocuments, error: currentDocsError } = await supabaseServiceRole
       .from('documents')
       .select('file_size')
       .eq('user_id', userId);
 
     const documentsUploaded = documents ? documents.length : 0;
     const documentsAnalyzed = analyses ? analyses.length : 0;
-    const storageUsed = allDocuments ? allDocuments.reduce((total, doc) => total + (doc.file_size || 0), 0) : 0;
+    console.log('Calculated counts - Documents:', documentsUploaded, 'Analyses:', documentsAnalyzed);
+    const storageUsed = currentDocuments ? currentDocuments.reduce((total, doc) => total + (doc.file_size || 0), 0) : 0;
+    console.log('Current storage used:', storageUsed, 'bytes from', currentDocuments?.length || 0, 'documents');
 
     // Calculate remaining usage
     const uploadsRemaining = planLimits.documentsPerMonth === -1 ? -1 : Math.max(0, planLimits.documentsPerMonth - documentsUploaded);
     const analysesRemaining = planLimits.analysesPerMonth === -1 ? -1 : Math.max(0, planLimits.analysesPerMonth - documentsAnalyzed);
+    const storageRemaining = planLimits.maxTotalStorage ? Math.max(0, planLimits.maxTotalStorage - storageUsed) : -1;
 
     res.json({
       success: true,
       documentsUploaded,
       documentsAnalyzed,
       storageUsed,
-      storageLimit: planLimits.maxDocumentSize,
+      storageLimit: planLimits.maxTotalStorage,
+      storageRemaining,
       uploadsRemaining,
       analysesRemaining,
       plan: subscriptionDetails.plan,

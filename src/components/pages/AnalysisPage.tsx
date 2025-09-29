@@ -114,6 +114,26 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
 
   }, []);
 
+  // Check for plan changes periodically (for automatic unlocking after upgrade)
+  useEffect(() => {
+    const checkPlanChanges = setInterval(async () => {
+      try {
+        const newPlan = await fetchUserPlan();
+        if (newPlan && newPlan !== currentPlan && (newPlan === 'starter' || newPlan === 'premium')) {
+          console.log('Plan upgrade detected:', currentPlan, '->', newPlan);
+          setCurrentPlan(newPlan);
+          // Show success message
+          setSuccessMessage('🎉 Plan upgraded! You now have access to full document annotations.');
+          setTimeout(() => setSuccessMessage(''), 5000);
+        }
+      } catch (error) {
+        console.error('Error checking plan changes:', error);
+      }
+    }, 5000); // Check every 5 seconds
+
+    return () => clearInterval(checkPlanChanges);
+  }, [currentPlan]);
+
   const fetchDocuments = async () => {
     try {
       setIsLoading(true);
@@ -146,7 +166,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
   const fetchUserPlan = async () => {
     try {
       const token = localStorage.getItem('authToken');
-      if (!token) return;
+      if (!token) return 'free';
 
       const response = await fetch('http://localhost:3001/api/subscriptions/current', {
         headers: {
@@ -157,10 +177,14 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
 
       if (response.ok) {
         const data = await response.json();
-        setCurrentPlan(data.plan || 'free');
+        const plan = data.plan || 'free';
+        setCurrentPlan(plan);
+        return plan;
       }
+      return 'free';
     } catch (error) {
       console.error('Error fetching user plan:', error);
+      return 'free';
     }
   };
 
@@ -878,16 +902,36 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
     return documentContent;
   };
 
+  // Helper function to filter annotations based on user plan
+  const getFilteredAnnotations = (type?: string) => {
+    let filtered = annotations;
+    
+    // Filter by type if specified
+    if (type) {
+      filtered = filtered.filter(a => a.type === type);
+    }
+    
+    // For free users, only show annotations within the first 50% of the document
+    if (currentPlan === 'free' && documentContent) {
+      const contentLimitIndex = Math.floor(documentContent.length / 2);
+      filtered = filtered.filter(annotation => annotation.startIndex < contentLimitIndex);
+    }
+    
+    return filtered;
+  };
+
   const renderHighlightedText = () => {
     if (!documentContent) {
       return <div className="text-gray-700 leading-relaxed">No document content available.</div>;
     }
 
     const displayContent = getDisplayContent();
+    const contentLimitIndex = currentPlan === 'free' ? Math.floor(documentContent.length / 2) : documentContent.length;
 
     console.log('Rendering text with annotations:', annotations.length);
     console.log('Document content length:', documentContent.length);
     console.log('Display content length:', displayContent.length);
+    console.log('Content limit index for annotations:', contentLimitIndex);
 
     // Always split content into paragraphs first to preserve formatting
     const paragraphs = displayContent.split(/\n\s*\n/).filter(p => p.trim().length > 0);
@@ -901,26 +945,62 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
               {paragraph.trim()}
             </p>
           ))}
+          {currentPlan === 'free' && (
+            <div className="mt-8 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg">
+              <div className="flex items-center space-x-3 mb-3">
+                <div className="p-2 bg-blue-500 rounded-full">
+                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m0 0v2m0-2h2m-2 0H9m12-9V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-9z" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">Want to see the full document?</h3>
+                  <p className="text-sm text-gray-600">Upgrade to view the complete analysis with all annotations.</p>
+                </div>
+              </div>
+              <button
+                onClick={() => onNavigate?.('billing')}
+                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Upgrade Now
+              </button>
+            </div>
+          )}
         </div>
       );
     }
 
-    // Sort annotations by start index and validate them
+    // Sort annotations by start index and filter based on user plan
     const sortedAnnotations = [...annotations]
       .filter(annotation => {
+        // Basic validation
         const isValid = annotation.startIndex >= 0 && 
                        annotation.endIndex > annotation.startIndex && 
                        annotation.endIndex <= documentContent.length;
         
         if (!isValid) {
           console.warn('Invalid annotation filtered out during rendering:', annotation);
+          return false;
+        }
+
+        // For free users, only show annotations within the first 50% of the document
+        if (currentPlan === 'free') {
+          const isWithinLimit = annotation.startIndex < contentLimitIndex;
+          if (!isWithinLimit) {
+            console.log('Annotation filtered out for free user (beyond 50%):', annotation);
+          }
+          return isWithinLimit;
         }
         
-        return isValid;
+        return true;
       })
       .sort((a, b) => a.startIndex - b.startIndex);
 
     console.log('Valid annotations for rendering:', sortedAnnotations.length);
+    
+    // Check if there are hidden annotations for free users
+    const hiddenAnnotationsCount = currentPlan === 'free' ? 
+      annotations.filter(annotation => annotation.startIndex >= contentLimitIndex).length : 0;
 
     // Render each paragraph separately to preserve spacing
     return (
@@ -1011,6 +1091,33 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
             </p>
           );
         })}
+        
+        {/* Upgrade prompt for hidden annotations */}
+        {hiddenAnnotationsCount > 0 && (
+          <div className="mt-8 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg">
+            <div className="flex items-center space-x-3 mb-3">
+              <div className="p-2 bg-blue-500 rounded-full">
+                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m0 0v2m0-2h2m-2 0H9m12-9V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002-2v-9z" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">
+                  {hiddenAnnotationsCount} more annotation{hiddenAnnotationsCount > 1 ? 's' : ''} available
+                </h3>
+                <p className="text-sm text-gray-600">
+                  Upgrade to view all annotations across the full document and unlock complete analysis insights.
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => onNavigate?.('billing')}
+              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Upgrade Now
+            </button>
+          </div>
+        )}
       </div>
     );
   };
@@ -1450,10 +1557,10 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                         <div className="flex items-center justify-center w-8 h-8 bg-green-100 rounded-lg">
                           {getAnnotationIcon('strong')}
                         </div>
-                        <h4 className="font-medium text-green-800">Strong Points ({annotations.filter(a => a.type === 'strong').length})</h4>
+                        <h4 className="font-medium text-green-800">Strong Points ({getFilteredAnnotations('strong').length})</h4>
                       </div>
                       <div className="space-y-2">
-                        {annotations.filter(a => a.type === 'strong').map((annotation) => (
+                        {getFilteredAnnotations('strong').map((annotation) => (
                           <div
                             key={annotation.id}
                             className={`bg-green-50 rounded-lg p-4 border-l-4 border-green-400 shadow-sm hover:shadow-md transition-all cursor-pointer ${
@@ -1478,10 +1585,10 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                         <div className="flex items-center justify-center w-8 h-8 bg-amber-100 rounded-lg">
                           {getAnnotationIcon('improve')}
                         </div>
-                        <h4 className="font-medium text-amber-800">Areas to Improve ({annotations.filter(a => a.type === 'improve').length})</h4>
+                        <h4 className="font-medium text-amber-800">Areas to Improve ({getFilteredAnnotations('improve').length})</h4>
                       </div>
                       <div className="space-y-2">
-                        {annotations.filter(a => a.type === 'improve').map((annotation) => (
+                        {getFilteredAnnotations('improve').map((annotation) => (
                           <div
                             key={annotation.id}
                             className={`bg-amber-50 rounded-lg p-4 border-l-4 border-amber-400 shadow-sm hover:shadow-md transition-all cursor-pointer ${
@@ -1506,10 +1613,10 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                         <div className="flex items-center justify-center w-8 h-8 bg-red-100 rounded-lg">
                           {getAnnotationIcon('concern')}
                         </div>
-                        <h4 className="font-medium text-red-800">Serious Concerns ({annotations.filter(a => a.type === 'concern').length})</h4>
+                        <h4 className="font-medium text-red-800">Serious Concerns ({getFilteredAnnotations('concern').length})</h4>
                       </div>
                       <div className="space-y-2">
-                        {annotations.filter(a => a.type === 'concern').map((annotation) => (
+                        {getFilteredAnnotations('concern').map((annotation) => (
                           <div
                             key={annotation.id}
                             className={`bg-red-50 rounded-lg p-4 border-l-4 border-red-400 shadow-sm hover:shadow-md transition-all cursor-pointer ${
@@ -1527,6 +1634,31 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                         ))}
                   </div>
                 </div>
+                
+                {/* Upgrade prompt for hidden annotations in sidebar */}
+                {currentPlan === 'free' && annotations.length > getFilteredAnnotations().length && (
+                  <div className="mt-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg">
+                    <div className="text-center">
+                      <div className="p-2 bg-blue-500 rounded-full mx-auto w-fit mb-3">
+                        <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m0 0v2m0-2h2m-2 0H9m12-9V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002-2v-9z" />
+                        </svg>
+                  </div>
+                      <h4 className="text-sm font-semibold text-gray-900 mb-1">
+                        {annotations.length - getFilteredAnnotations().length} more annotation{annotations.length - getFilteredAnnotations().length !== 1 ? 's' : ''}
+                      </h4>
+                      <p className="text-xs text-gray-600 mb-3">
+                        Upgrade to view all insights
+                      </p>
+                      <button
+                        onClick={() => onNavigate?.('billing')}
+                        className="px-3 py-1 text-xs bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                      >
+                        Upgrade
+                      </button>
+                    </div>
+                  </div>
+                )}
                   </div>
                 </div>
               </div>

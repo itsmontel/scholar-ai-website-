@@ -102,9 +102,9 @@ async function handleCheckoutSessionCompleted(session) {
     const priceId = subscription.items.data[0].price.id;
     let plan = 'free';
     
-    if (priceId === process.env.STRIPE_STARTER_PRICE_ID) {
+    if (priceId === process.env.STRIPE_STARTER_MONTHLY_PRICE_ID || priceId === process.env.STRIPE_STARTER_YEARLY_PRICE_ID) {
       plan = 'starter';
-    } else if (priceId === process.env.STRIPE_PREMIUM_PRICE_ID) {
+    } else if (priceId === process.env.STRIPE_PREMIUM_MONTHLY_PRICE_ID || priceId === process.env.STRIPE_PREMIUM_YEARLY_PRICE_ID) {
       plan = 'premium';
     }
 
@@ -164,9 +164,9 @@ async function handleSubscriptionCreated(subscription) {
     const priceId = subscription.items.data[0].price.id;
     let plan = 'free';
     
-    if (priceId === process.env.STRIPE_STARTER_PRICE_ID) {
+    if (priceId === process.env.STRIPE_STARTER_MONTHLY_PRICE_ID || priceId === process.env.STRIPE_STARTER_YEARLY_PRICE_ID) {
       plan = 'starter';
-    } else if (priceId === process.env.STRIPE_PREMIUM_PRICE_ID) {
+    } else if (priceId === process.env.STRIPE_PREMIUM_MONTHLY_PRICE_ID || priceId === process.env.STRIPE_PREMIUM_YEARLY_PRICE_ID) {
       plan = 'premium';
     }
 
@@ -208,9 +208,9 @@ async function handleSubscriptionUpdated(subscription) {
     const priceId = subscription.items.data[0].price.id;
     let plan = 'free';
     
-    if (priceId === process.env.STRIPE_STARTER_PRICE_ID) {
+    if (priceId === process.env.STRIPE_STARTER_MONTHLY_PRICE_ID || priceId === process.env.STRIPE_STARTER_YEARLY_PRICE_ID) {
       plan = 'starter';
-    } else if (priceId === process.env.STRIPE_PREMIUM_PRICE_ID) {
+    } else if (priceId === process.env.STRIPE_PREMIUM_MONTHLY_PRICE_ID || priceId === process.env.STRIPE_PREMIUM_YEARLY_PRICE_ID) {
       plan = 'premium';
     }
 

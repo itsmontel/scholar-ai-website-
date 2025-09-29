@@ -4,6 +4,9 @@ const { v4: uuidv4 } = require('uuid');
 
 class S3Service {
   constructor() {
+    // Validate required environment variables
+    this.validateConfiguration();
+    
     this.s3Client = new S3Client({
       region: process.env.AWS_REGION || 'us-east-1',
       credentials: {
@@ -12,6 +15,22 @@ class S3Service {
       },
     });
     this.bucketName = process.env.AWS_S3_BUCKET || 'scholar-ai-documents';
+    
+    console.log(`🔗 S3 Service initialized - Bucket: ${this.bucketName}, Region: ${process.env.AWS_REGION || 'us-east-1'}`);
+  }
+
+  /**
+   * Validate S3 configuration
+   */
+  validateConfiguration() {
+    const requiredVars = ['AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'AWS_S3_BUCKET'];
+    const missing = requiredVars.filter(varName => !process.env[varName]);
+    
+    if (missing.length > 0) {
+      console.error('❌ Missing required S3 environment variables:', missing.join(', '));
+      console.error('Please check your .env file and ensure all AWS S3 variables are set.');
+      throw new Error(`Missing S3 configuration: ${missing.join(', ')}`);
+    }
   }
 
   /**
@@ -24,6 +43,8 @@ class S3Service {
    */
   async uploadFile(fileBuffer, fileName, userId, mimeType) {
     try {
+      console.log(`📤 Uploading file to S3: ${fileName} (${fileBuffer.length} bytes)`);
+      
       const fileExtension = fileName.split('.').pop();
       const uniqueFileName = `${uuidv4()}.${fileExtension}`;
       const s3Key = `documents/${userId}/${uniqueFileName}`;
@@ -40,9 +61,13 @@ class S3Service {
         },
       });
 
+      const startTime = Date.now();
       await this.s3Client.send(command);
+      const uploadTime = Date.now() - startTime;
 
       const s3Url = `https://${this.bucketName}.s3.${process.env.AWS_REGION || 'us-east-1'}.amazonaws.com/${s3Key}`;
+
+      console.log(`✅ S3 upload successful: ${s3Key} (${uploadTime}ms)`);
 
       return {
         success: true,
@@ -50,12 +75,33 @@ class S3Service {
         s3Url,
         fileName: uniqueFileName,
         originalName: fileName,
+        uploadTime,
       };
     } catch (error) {
-      console.error('S3 upload error:', error);
+      console.error('❌ S3 upload error:', {
+        fileName,
+        userId,
+        error: error.message,
+        code: error.code,
+        statusCode: error.$metadata?.httpStatusCode
+      });
+      
+      // Provide more specific error messages
+      let errorMessage = error.message;
+      if (error.code === 'NoSuchBucket') {
+        errorMessage = `S3 bucket '${this.bucketName}' does not exist`;
+      } else if (error.code === 'AccessDenied') {
+        errorMessage = 'Access denied. Check IAM permissions for S3';
+      } else if (error.code === 'InvalidAccessKeyId') {
+        errorMessage = 'Invalid AWS access key ID';
+      } else if (error.code === 'SignatureDoesNotMatch') {
+        errorMessage = 'Invalid AWS secret access key';
+      }
+      
       return {
         success: false,
-        error: error.message,
+        error: errorMessage,
+        code: error.code,
       };
     }
   }

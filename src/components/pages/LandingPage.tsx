@@ -17,24 +17,24 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
   const placeholders = [
     "Enhance your academic writing with a simple paste and click.",
     "Get instant feedback on your essay or thesis.",
-    "Turn good writing into great writing with Scholar."
+    "Turn good writing into great writing with WriteScholar."
   ];
 
   const reviews = [
     {
-      text: "This platform has revolutionized my research writing process. The AI feedback is incredibly detailed and helped me improve my argumentation and academic style significantly.",
+      text: "WriteScholar has revolutionized my research writing process. The AI feedback is incredibly detailed and helped me improve my argumentation and academic style significantly.",
       author: "Sarah Chen",
       title: "PhD Candidate, Stanford University",
       initial: "S"
     },
     {
-      text: "Scholar's annotation system is exactly what I needed for my thesis. The color-coded feedback makes it easy to prioritize improvements and track my progress over time.",
+      text: "WriteScholar's annotation system is exactly what I needed for my thesis. The color-coded feedback makes it easy to prioritize improvements and track my progress over time.",
       author: "Dr. Michael Rodriguez",
       title: "Postdoctoral Researcher, MIT",
       initial: "M"
     },
     {
-      text: "As a professor, I recommend Scholar to all my students. It provides the kind of detailed feedback that would normally take hours of manual review. A game-changer for academic writing.",
+      text: "As a professor, I recommend WriteScholar to all my students. It provides the kind of detailed feedback that would normally take hours of manual review. A game-changer for academic writing.",
       author: "Prof. Emily Watson",
       title: "Department Head, Harvard University",
       initial: "E"
@@ -277,20 +277,20 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
 
   const faqs = [
     {
-      question: "How does Scholar's AI analysis work?",
-      answer: "Scholar uses advanced natural language processing to analyze your academic writing for structure, clarity, grammar, citations, and academic rigor. Our AI provides detailed feedback similar to what you'd receive from a professor or writing tutor."
+      question: "How does WriteScholar's AI analysis work?",
+      answer: "WriteScholar uses advanced natural language processing to analyze your academic writing for structure, clarity, grammar, citations, and academic rigor. Our AI provides detailed feedback similar to what you'd receive from a professor or writing tutor."
     },
     {
       question: "Is my document content secure and private?",
       answer: "Yes, absolutely. We use enterprise-grade encryption to protect your documents. Your content is never shared with third parties, and you can delete your documents at any time. We're SOC 2 Type II compliant."
     },
     {
-      question: "What file formats does Scholar support?",
-      answer: "Scholar supports PDF, Word documents (.docx), and plain text. You can also paste text directly into our editor. We're working on adding support for LaTeX and other academic formats."
+      question: "What file formats does WriteScholar support?",
+      answer: "WriteScholar supports PDF, Word documents (.docx), and plain text. You can also paste text directly into our editor. We're working on adding support for LaTeX and other academic formats."
     },
     {
-      question: "Can I use Scholar for different citation styles?",
-      answer: "Yes! Scholar supports APA, MLA, Chicago, Harvard, and many other citation styles. You can specify your preferred style, and our AI will check your citations accordingly."
+      question: "Can I use WriteScholar for different citation styles?",
+      answer: "Yes! WriteScholar supports APA, MLA, Chicago, Harvard, and many other citation styles. You can specify your preferred style, and our AI will check your citations accordingly."
     },
     {
       question: "How accurate is the AI feedback?",
@@ -333,9 +333,9 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
       <nav className="relative z-10 flex items-center justify-between px-16 py-6 backdrop-blur-sm bg-white/80 border-b border-white/20">
         <div className="flex items-center space-x-3">
           <div className="w-10 h-10 bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 rounded-xl flex items-center justify-center shadow-lg">
-            <span className="text-white font-bold text-lg">A</span>
+            <span className="text-white font-bold text-lg">W</span>
           </div>
-          <span className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">Scholar</span>
+          <span className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">WriteScholar</span>
         </div>
         <div className="hidden md:flex items-center space-x-8">
           <button 
@@ -382,7 +382,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
       <div className="relative z-10 max-w-8xl mx-auto px-16 py-24">
         <div className="text-center mb-20">
           <h1 className="text-7xl font-bold text-gray-900 mb-8 leading-tight tracking-tight">
-            Enhance your academic<br />writing with <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">AI</span>
+            Enhance your academic<br />writing with <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">WriteScholar</span>
           </h1>
           <p className="text-2xl text-gray-600 mb-16 max-w-3xl mx-auto leading-relaxed font-light">
             Get detailed feedback on your research papers, essays, and academic work with AI-powered analysis that helps you write like a scholar.
@@ -475,7 +475,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
          {/* Interactive Annotation Examples */}
          <div className="max-w-full mx-auto mb-32 px-20">
            <div className="text-center mb-20">
-             <h2 className="text-6xl font-bold text-gray-900 mb-8 tracking-tight">See Scholar in Action</h2>
+             <h2 className="text-6xl font-bold text-gray-900 mb-8 tracking-tight">See WriteScholar in Action</h2>
              <p className="text-2xl text-gray-600 font-light max-w-4xl mx-auto leading-relaxed">Real examples of how our AI analyzes and improves academic writing</p>
              </div>
            
@@ -676,7 +676,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
         <div className="max-w-5xl mx-auto mb-32">
         <div className="text-center mb-20">
             <h2 className="text-6xl font-bold text-gray-900 mb-8 tracking-tight">FAQs</h2>
-            <p className="text-2xl text-gray-600 font-light">Common questions about Scholar</p>
+            <p className="text-2xl text-gray-600 font-light">Common questions about WriteScholar</p>
           </div>
           
           <div className="space-y-6">
@@ -995,7 +995,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
               <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 via-purple-600/10 to-indigo-600/10"></div>
           <div className="relative z-10">
             <h2 className="text-5xl font-bold text-white mb-8 tracking-tight">Ready to enhance your academic writing?</h2>
-            <p className="text-2xl text-gray-300 mb-16 max-w-3xl mx-auto font-light leading-relaxed">Join thousands of students and researchers who trust Scholar for their writing success.</p>
+            <p className="text-2xl text-gray-300 mb-16 max-w-3xl mx-auto font-light leading-relaxed">Join thousands of students and researchers who trust WriteScholar for their writing success.</p>
             <button 
               onClick={() => onNavigate('signup')}
               className="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-16 py-5 rounded-2xl text-xl font-semibold hover:shadow-lg transform hover:scale-105 transition-all duration-300 inline-flex items-center space-x-3"

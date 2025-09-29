@@ -16,6 +16,12 @@ const { connectDB } = require('./database/connection');
 const securityMiddleware = require('./middleware/security');
 const { generalLimiter, authLimiter, analysisLimiter, uploadLimiter } = require('./middleware/rateLimiting');
 
+// Initialize storage service if using Supabase Storage
+let storageService = null;
+if (process.env.USE_SUPABASE_STORAGE === 'true') {
+  storageService = require('./services/supabaseStorage');
+}
+
 const app = express();
 const PORT = process.env.PORT || 3001;
 
@@ -102,10 +108,28 @@ const startServer = async () => {
     // Connect to database
     await connectDB();
     
+    // Initialize Supabase Storage if enabled
+    if (storageService && typeof storageService.initializeBucket === 'function') {
+      console.log('🔗 Initializing Supabase Storage...');
+      const storageInitialized = await storageService.initializeBucket();
+      if (storageInitialized) {
+        console.log('✅ Supabase Storage initialized successfully');
+      } else {
+        console.log('⚠️  Supabase Storage initialization failed, but continuing...');
+      }
+    }
+    
     app.listen(PORT, () => {
       console.log(`🚀 Scholar AI Backend running on port ${PORT}`);
       console.log(`📊 Environment: ${process.env.NODE_ENV}`);
       console.log(`🔗 Health check: http://localhost:${PORT}/health`);
+      if (process.env.USE_SUPABASE_STORAGE === 'true') {
+        console.log('📦 Storage: Supabase Storage');
+      } else if (process.env.NODE_ENV === 'production') {
+        console.log('📦 Storage: AWS S3');
+      } else {
+        console.log('📦 Storage: Local filesystem (development)');
+      }
     });
   } catch (error) {
     console.error('❌ Failed to start server:', error);

@@ -1,7 +1,7 @@
 {
-  "name": "scholar-ai-backend",
+  "name": "writescholar-backend",
   "version": "1.0.0",
-  "description": "Backend API for Scholar AI - Academic Writing Assistant",
+  "description": "Backend API for WriteScholar - Academic Writing Assistant",
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
@@ -18,7 +18,7 @@
     "analysis",
     "education"
   ],
-  "author": "Scholar AI Team",
+  "author": "WriteScholar Team",
   "license": "MIT",
   "dependencies": {
     "@aws-sdk/client-s3": "^3.884.0",

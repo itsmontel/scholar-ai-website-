@@ -1,10 +1,10 @@
-# Scholar AI - Academic Writing Assistant
+# WriteScholar - Academic Writing Assistant
 
 A comprehensive web application that provides AI-powered academic writing analysis and feedback for students and researchers at all levels.
 
 ## 🎯 **Overview**
 
-Scholar AI is designed to help students and researchers improve their academic writing through advanced AI analysis. The platform serves users from undergraduate students to senior researchers, providing tailored feedback and learning resources.
+WriteScholar is designed to help students and researchers improve their academic writing through advanced AI analysis. The platform serves users from undergraduate students to senior researchers, providing tailored feedback and learning resources.
 
 ## 🚀 **Features**
 
@@ -62,7 +62,7 @@ Scholar AI is designed to help students and researchers improve their academic w
 ### **1. Clone the Repository**
 ```bash
 git clone <repository-url>
-cd scholar-ai-website
+cd writescholar-website
 ```
 
 ### **2. Frontend Setup**
@@ -86,7 +86,7 @@ cp env.example .env
 # Edit .env with your configuration
 
 # Set up database
-createdb scholar_ai
+createdb writescholar
 npm run migrate
 npm run seed
 
@@ -113,7 +113,7 @@ NODE_ENV=development
 # Database Configuration
 DB_HOST=localhost
 DB_PORT=5432
-DB_NAME=scholar_ai
+DB_NAME=writescholar
 DB_USER=your_db_user
 DB_PASSWORD=your_secure_password
 
@@ -333,4 +333,4 @@ For support and questions:
 
 ---
 
-*Scholar AI: Supporting academic excellence at every level of learning.*
+*WriteScholar: Supporting academic excellence at every level of learning.*

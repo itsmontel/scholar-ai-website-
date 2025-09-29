@@ -7,9 +7,18 @@ const {
   validateGetDocuments,
   validateDocumentId
 } = require('../middleware/validation');
-const s3Service = process.env.NODE_ENV === 'production' 
-  ? require('../services/s3Service')
-  : require('../services/mockS3Service');
+// Storage service selection based on environment
+const getStorageService = () => {
+  if (process.env.USE_SUPABASE_STORAGE === 'true') {
+    return require('../services/supabaseStorage');
+  } else if (process.env.NODE_ENV === 'production') {
+    return require('../services/s3Service');
+  } else {
+    return require('../services/mockS3Service');
+  }
+};
+
+const storageService = getStorageService();
 const documentParser = require('../services/documentParser');
 const documentService = require('../services/documentService');
 const subscriptionService = require('../services/subscriptionService');
@@ -122,13 +131,13 @@ router.post('/upload', authenticateToken, upload.single('document'), async (req,
     // Upload file to S3
     let uploadResult;
     try {
-      const s3Timeout = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('S3 upload timeout')), 10000);
+      const uploadTimeout = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Storage upload timeout')), 10000);
       });
-      const s3Promise = s3Service.uploadFile(file.buffer, file.originalname, userId, file.mimetype);
-      uploadResult = await Promise.race([s3Promise, s3Timeout]);
+      const uploadPromise = storageService.uploadFile(file.buffer, file.originalname, userId, file.mimetype);
+      uploadResult = await Promise.race([uploadPromise, uploadTimeout]);
     } catch (error) {
-      console.error('S3 upload failed:', error);
+      console.error('Storage upload failed:', error);
       return res.status(500).json({
         success: false,
         message: 'Failed to upload file to storage',
@@ -410,7 +419,7 @@ router.get('/:id/download', authenticateToken, async (req, res) => {
       });
     }
 
-    const downloadUrl = await s3Service.getSignedDownloadUrl(document.s3_key, 3600); // 1 hour expiry
+    const downloadUrl = await storageService.getSignedDownloadUrl(document.s3_key, 3600); // 1 hour expiry
 
     res.json({
       success: true,
@@ -489,8 +498,8 @@ router.delete('/:id', authenticateToken, validateDocumentId, async (req, res) =>
       });
     }
 
-    // Delete from S3
-    const s3Deleted = await s3Service.deleteFile(document.s3_key);
+    // Delete from storage
+    const storageDeleted = await storageService.deleteFile(document.s3_key);
 
     // Delete from database
     await documentService.deleteDocument(id, userId);
@@ -499,7 +508,7 @@ router.delete('/:id', authenticateToken, validateDocumentId, async (req, res) =>
       success: true,
       message: 'Document deleted successfully',
       data: {
-        s3Deleted
+        storageDeleted
       }
     });
 

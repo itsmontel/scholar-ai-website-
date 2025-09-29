@@ -141,13 +141,20 @@ class DocumentService {
    */
   async deleteDocument(documentId, userId) {
     try {
-      const { error } = await this.getSupabaseClient()
+      // Use service role key for deletion to bypass RLS and trigger issues
+      const supabaseServiceRole = createClient(
+        process.env.SUPABASE_URL,
+        process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
+      );
+
+      const { error } = await supabaseServiceRole
         .from('documents')
         .delete()
         .eq('id', documentId)
         .eq('user_id', userId);
 
       if (error) throw error;
+      console.log(`✅ Document deleted from database: ${documentId}`);
       return true;
     } catch (error) {
       console.error('Error deleting document:', error);

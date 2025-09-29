@@ -128,16 +128,6 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
               Dashboard
             </button>
             <button 
-              onClick={() => onNavigate?.('analysis')}
-              className={`px-4 py-2 font-medium rounded-lg transition-all duration-200 ${
-                currentPage === 'analysis' 
-                  ? 'text-blue-600 bg-blue-50' 
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100/50'
-              }`}
-            >
-              AI Analysis
-            </button>
-            <button 
               onClick={() => onNavigate?.('library')}
               className={`px-4 py-2 font-medium rounded-lg transition-all duration-200 ${
                 currentPage === 'library' 
@@ -156,6 +146,16 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
               }`}
             >
               Upload
+            </button>
+            <button 
+              onClick={() => onNavigate?.('analysis')}
+              className={`px-4 py-2 font-medium rounded-lg transition-all duration-200 ${
+                currentPage === 'analysis' 
+                  ? 'text-blue-600 bg-blue-50' 
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100/50'
+              }`}
+            >
+              AI Analysis
             </button>
           </nav>
 
@@ -266,15 +266,6 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
                       <span>Dashboard</span>
                     </button>
                     <button 
-                      onClick={() => { onNavigate?.('upload'); setIsDropdownOpen(false); }}
-                      className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                      </svg>
-                      <span>Upload</span>
-                    </button>
-                    <button 
                       onClick={() => { onNavigate?.('library'); setIsDropdownOpen(false); }}
                       className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200"
                     >
@@ -284,13 +275,31 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
                       <span>Library</span>
                     </button>
                     <button 
+                      onClick={() => { onNavigate?.('upload'); setIsDropdownOpen(false); }}
+                      className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                      </svg>
+                      <span>Upload</span>
+                    </button>
+                    <button 
+                      onClick={() => { onNavigate?.('analysis'); setIsDropdownOpen(false); }}
+                      className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                      </svg>
+                      <span>AI Analysis</span>
+                    </button>
+                    <button 
                       onClick={() => { onNavigate?.('analysis-history'); setIsDropdownOpen(false); }}
                       className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                       </svg>
-                      <span>Analysis History</span>
+                      <span>AI History</span>
                     </button>
                     <button 
                       onClick={() => { onNavigate?.('account'); setIsDropdownOpen(false); }}
@@ -374,16 +383,6 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
               Dashboard
             </button>
             <button 
-              onClick={() => { onNavigate?.('analysis'); setIsMobileMenuOpen(false); }}
-              className={`w-full text-left px-4 py-3 rounded-lg font-medium transition-all duration-200 ${
-                currentPage === 'analysis' 
-                  ? 'text-blue-600 bg-blue-50' 
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100/50'
-              }`}
-            >
-              AI Analysis
-            </button>
-            <button 
               onClick={() => { onNavigate?.('library'); setIsMobileMenuOpen(false); }}
               className={`w-full text-left px-4 py-3 rounded-lg font-medium transition-all duration-200 ${
                 currentPage === 'library' 
@@ -402,6 +401,16 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
               }`}
             >
               Upload
+            </button>
+            <button 
+              onClick={() => { onNavigate?.('analysis'); setIsMobileMenuOpen(false); }}
+              className={`w-full text-left px-4 py-3 rounded-lg font-medium transition-all duration-200 ${
+                currentPage === 'analysis' 
+                  ? 'text-blue-600 bg-blue-50' 
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100/50'
+              }`}
+            >
+              AI Analysis
             </button>
           </div>
         </div>

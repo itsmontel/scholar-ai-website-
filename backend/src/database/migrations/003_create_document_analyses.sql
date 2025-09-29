@@ -1,7 +1,7 @@
 -- Create document_analyses table
 CREATE TABLE IF NOT EXISTS document_analyses (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    document_id UUID NOT NULL REFERENCES documents(id) ON DELETE CASCADE,
+    document_id UUID REFERENCES documents(id) ON DELETE SET NULL,
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     analysis_type VARCHAR(50) NOT NULL CHECK (analysis_type IN ('general', 'citation', 'grammar', 'plagiarism', 'comprehensive')),
     result TEXT NOT NULL,

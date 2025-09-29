@@ -66,6 +66,9 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
   const [timeFilter, setTimeFilter] = useState<'all' | 'last7days' | 'lastmonth'>('all');
   const [filteredDocuments, setFilteredDocuments] = useState<Document[]>([]);
   
+  // State for view mode
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  
   // State for error handling
   const [, setError] = useState<string | null>(null);
 
@@ -311,8 +314,8 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
         setSelectedDocument(prev => prev ? { ...prev, title: newTitle } : null);
       }
 
-      setEditingDocument(null);
-      setEditTitle('');
+    setEditingDocument(null);
+    setEditTitle('');
     } catch (error) {
       console.error('Error renaming document:', error);
       setError('Failed to rename document');
@@ -326,7 +329,7 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
 
     try {
       const token = localStorage.getItem('authToken');
-      
+
       const response = await fetch(`http://localhost:3001/api/documents/${documentId}`, {
         method: 'DELETE',
         headers: {
@@ -347,7 +350,7 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
         setDocumentContent('');
         setAnalysis(null);
       }
-      
+
       setEditingDocument(null);
       setEditTitle('');
     } catch (error) {
@@ -426,11 +429,11 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
 
   const renderDocumentContent = () => {
     if (!documentContent) {
-      return (
+  return (
         <div className="prose max-w-none">
           <div className="whitespace-pre-wrap text-gray-800 leading-relaxed">
             {documentContent}
-          </div>
+              </div>
         </div>
       );
     }
@@ -440,8 +443,8 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
       <div className="prose max-w-none">
         <div className="whitespace-pre-wrap text-gray-800 leading-relaxed">
           {documentContent}
-        </div>
-      </div>
+                </div>
+                </div>
     );
   };
 
@@ -506,15 +509,48 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
               >
                 Last month
               </button>
-          </div>
         </div>
+
+            {/* View Toggle */}
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-sm text-gray-600">View:</span>
+              <div className="flex bg-gray-100 rounded-lg p-1">
+                <button
+                  onClick={() => setViewMode('grid')}
+                  className={`p-2 rounded-md transition-colors ${
+                    viewMode === 'grid'
+                      ? 'bg-white text-blue-600 shadow-sm'
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                  title="Grid View"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                  </svg>
+                </button>
+                <button
+                  onClick={() => setViewMode('list')}
+                  className={`p-2 rounded-md transition-colors ${
+                    viewMode === 'list'
+                      ? 'bg-white text-blue-600 shadow-sm'
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                  title="List View"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                  </svg>
+                </button>
+                </div>
+              </div>
+              </div>
 
           {/* Document List */}
           <div className="flex-1 overflow-y-auto">
             {loadingDocuments ? (
               <div className="p-4">
                 <LoadingSpinner />
-              </div>
+            </div>
             ) : filteredDocuments.length === 0 ? (
               <div className="p-4 text-center text-gray-500">
                 <p>No documents found</p>
@@ -526,76 +562,57 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
                     Clear search
             </button>
               )}
-    </div>
+          </div>
         ) : (
-              <div className="p-2">
+              <div className={`p-2 ${viewMode === 'grid' ? 'grid grid-cols-1 gap-3' : ''}`}>
                 {filteredDocuments.map((document) => (
                   <div
                     key={document.id}
-                    className={`p-3 mb-2 rounded-lg transition-colors ${
-                      selectedDocument?.id === document.id
-                        ? 'bg-blue-100 border-l-4 border-blue-500'
-                        : 'bg-white hover:bg-gray-100 border border-gray-200'
+                    className={`${viewMode === 'grid' 
+                      ? `p-4 rounded-lg transition-colors border border-gray-200 hover:shadow-md ${
+                          selectedDocument?.id === document.id
+                            ? 'bg-blue-100 border-blue-500 ring-2 ring-blue-200'
+                            : 'bg-white hover:bg-gray-50'
+                        }`
+                      : `p-2 mb-1 rounded-lg transition-colors ${
+                          selectedDocument?.id === document.id
+                            ? 'bg-blue-100 border-l-4 border-blue-500'
+                            : 'bg-white hover:bg-gray-100 border border-gray-200'
+                        }`
                     }`}
                   >
-                    <div className="flex items-start space-x-3">
-                      {getFileTypeIcon(document.fileType)}
-                      <div className="flex-1 min-w-0">
-                        {editingDocument === document.id ? (
-                          <div className="space-y-2">
-                            <input
-                              type="text"
-                              value={editTitle}
-                              onChange={(e) => setEditTitle(e.target.value)}
-                              className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                              onKeyDown={(e) => {
-                                if (e.key === 'Enter') {
-                                  handleRenameDocument(document.id, editTitle);
-                                } else if (e.key === 'Escape') {
-                                  cancelEditing();
-                                }
-                              }}
-                              autoFocus
-                            />
-                            <div className="flex space-x-2">
-                            <button
-                                onClick={() => handleRenameDocument(document.id, editTitle)}
-                                className="px-2 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700"
-                            >
-                                Save
-                            </button>
-                            <button
-                                onClick={cancelEditing}
-                                className="px-2 py-1 text-xs bg-gray-600 text-white rounded hover:bg-gray-700"
-                            >
-                                Cancel
-                            </button>
-                            </div>
-                          </div>
-                        ) : (
-                          <>
-                            <div 
-                              className="cursor-pointer"
-                              onClick={() => handleDocumentSelect(document)}
-                            >
-                              <h3 className="text-sm font-medium text-gray-900 truncate">
-                                {document.title}
-                              </h3>
-                              <p className="text-xs text-gray-500 mt-1">
-                                {formatFileSize(document.fileSize)} • {document.wordCount} words
-                              </p>
-                              <p className="text-xs text-gray-400">
-                                {formatDate(document.createdAt)}
-                              </p>
-                              {(document.analysisStatus?.hasAnalysis || document.hasAnalysis) && (
-                                <div className="flex items-center mt-1">
-                                  <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-                                  <span className="text-xs text-green-600">Analyzed</span>
-                                </div>
-                              )}
-                            </div>
-                            <div className="flex space-x-1 mt-2 justify-end">
-                      <button
+                    <div className={`${viewMode === 'grid' ? 'flex flex-col h-full' : 'flex items-start space-x-2'}`}>
+                      {viewMode === 'grid' ? (
+                        // Grid view layout
+                        <>
+                          <div className="flex items-center justify-between mb-3">
+                            <div className="flex items-center space-x-2">
+                              {getFileTypeIcon(document.fileType)}
+                              <div className="flex-1 min-w-0">
+                                {editingDocument === document.id ? (
+                                  <input
+                                    type="text"
+                                    value={editTitle}
+                                    onChange={(e) => setEditTitle(e.target.value)}
+                                    className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    onKeyDown={(e) => {
+                                      if (e.key === 'Enter') {
+                                        handleRenameDocument(document.id, editTitle);
+                                      } else if (e.key === 'Escape') {
+                                        cancelEditing();
+                                      }
+                                    }}
+                                    autoFocus
+                                  />
+                                ) : (
+                                  <h3 className="text-sm font-medium text-gray-900 truncate">
+                                    {document.title}
+                                  </h3>
+                                )}
+              </div>
+            </div>
+                            <div className="flex space-x-1">
+                              <button
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   startEditing(document);
@@ -604,10 +621,10 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
                                 title="Rename document"
                               >
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                        </svg>
-                      </button>
-                      <button
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
+                              </button>
+                              <button
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   handleDeleteDocument(document.id);
@@ -616,20 +633,146 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
                                 title="Delete document"
                               >
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                      </button>
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                              </button>
+            </div>
+                          </div>
+                          {editingDocument === document.id ? (
+                            <div className="flex space-x-2">
+            <button 
+                                onClick={() => handleRenameDocument(document.id, editTitle)}
+                                className="px-2 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700"
+            >
+                                Save
+            </button>
+                              <button
+                                onClick={cancelEditing}
+                                className="px-2 py-1 text-xs bg-gray-600 text-white rounded hover:bg-gray-700"
+                              >
+                                Cancel
+                              </button>
                             </div>
-                          </>
+                          ) : (
+                            <>
+                              <div 
+                                className="cursor-pointer flex-1"
+                                onClick={() => handleDocumentSelect(document)}
+                              >
+                                <div className="space-y-2">
+                                  <p className="text-xs text-gray-500">
+                                    {formatFileSize(document.fileSize)} • {document.wordCount} words
+                                  </p>
+                                  <p className="text-xs text-gray-400">
+                                    {formatDate(document.createdAt)}
+                                  </p>
+                                  {(document.analysisStatus?.hasAnalysis || document.hasAnalysis) && (
+                                    <div className="flex items-center">
+                                      <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+                                      <span className="text-xs text-green-600">Analyzed</span>
+                                    </div>
+              )}
+    </div>
+                              </div>
+                            </>
+                          )}
+                        </>
+                      ) : (
+                        // List view layout (original)
+                        <>
+                      {getFileTypeIcon(document.fileType)}
+                          <div className="flex-1 min-w-0">
+                        {editingDocument === document.id ? (
+                              <div className="space-y-2">
+                            <input
+                              type="text"
+                              value={editTitle}
+                              onChange={(e) => setEditTitle(e.target.value)}
+                                  className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                      handleRenameDocument(document.id, editTitle);
+                                } else if (e.key === 'Escape') {
+                                      cancelEditing();
+                                }
+                              }}
+                                  autoFocus
+                            />
+                                <div className="flex space-x-2">
+                            <button
+                                    onClick={() => handleRenameDocument(document.id, editTitle)}
+                                    className="px-2 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700"
+                                >
+                                    Save
+                                </button>
+                                <button
+                                    onClick={cancelEditing}
+                                    className="px-2 py-1 text-xs bg-gray-600 text-white rounded hover:bg-gray-700"
+                                >
+                                    Cancel
+                                </button>
+                                </div>
+                              </div>
+                            ) : (
+                              <>
+                                <div 
+                                  className="cursor-pointer"
+                                  onClick={() => handleDocumentSelect(document)}
+                                >
+                                  <h3 className="text-sm font-medium text-gray-900 truncate">
+                                    {document.title}
+                                  </h3>
+                                  <p className="text-xs text-gray-500 mt-1">
+                                    {formatFileSize(document.fileSize)} • {document.wordCount} words
+                                  </p>
+                                  <p className="text-xs text-gray-400">
+                                    {formatDate(document.createdAt)}
+                                  </p>
+                                  {(document.analysisStatus?.hasAnalysis || document.hasAnalysis) && (
+                                    <div className="flex items-center mt-1">
+                                      <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+                                      <span className="text-xs text-green-600">Analyzed</span>
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="flex space-x-1 mt-1 justify-end">
+                          <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      startEditing(document);
+                                    }}
+                                    className="p-1 text-gray-400 hover:text-blue-600 transition-colors"
+                                    title="Rename document"
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                              </svg>
+                            </button>
+                            <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleDeleteDocument(document.id);
+                                    }}
+                                    className="p-1 text-gray-400 hover:text-red-600 transition-colors"
+                                    title="Delete document"
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              </svg>
+                            </button>
+                          </div>
+                              </>
                         )}
-                      </div>
+                            </div>
+                        </>
+                      )}
                     </div>
                   </div>
                 ))}
               </div>
             )}
-          </div>
-
+                    </div>
+                    
           {/* Recent Activity */}
           <div className="p-4 border-t border-gray-200 bg-white">
             <h3 className="text-sm font-medium text-gray-900 mb-3">RECENT ACTIVITY</h3>
@@ -680,7 +823,7 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
                 {/* View Analysis Button */}
                 {analysis && (
                   <div className="mt-4">
-                    <button
+                      <button
                       onClick={() => {
                         // Simple navigation to analysis page with document ID
                         onNavigate('analysis');
@@ -690,13 +833,13 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
                         localStorage.setItem('cameFromLibrary', 'true');
                       }}
                       className="w-full bg-green-600 text-white px-4 py-3 rounded-lg hover:bg-green-700 transition-colors font-medium flex items-center justify-center space-x-2"
-                    >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                      </svg>
+                        </svg>
                       <span>View Analysis</span>
-                    </button>
+                      </button>
                   </div>
                 )}
               </div>
@@ -761,16 +904,16 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                 </svg>
                 <p className="mb-4">No analysis available</p>
-                <button
-                  onClick={() => {
+                      <button
+                        onClick={() => {
                     localStorage.setItem('selectedDocumentId', selectedDocument.id);
                     localStorage.setItem('selectedDocumentTitle', selectedDocument.title);
-                    onNavigate('analysis');
-                  }}
+                          onNavigate('analysis');
+                        }}
                   className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
                 >
                   Analyze Document
-                </button>
+                      </button>
               </div>
             ) : (
               <div className="space-y-4">
@@ -804,18 +947,18 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
                             <div className="flex-shrink-0">
                               <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
                                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                              </svg>
+                        </svg>
                             </div>
                             <div className="ml-3">
                               <h4 className="text-sm font-medium text-green-800">Strong Point</h4>
                               <p className="text-sm text-green-700 mt-1">{point.explanation}</p>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
                     </div>
                   </div>
-                )}
+                </div>
+              ))}
+                    </div>
+    </div>
+        )}
 
                 {/* Areas to Improve */}
                 {analysis.analysis_results?.areas_to_improve && analysis.analysis_results.areas_to_improve.length > 0 && (
@@ -829,7 +972,7 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
                               <svg className="w-5 h-5 text-amber-500" fill="currentColor" viewBox="0 0 20 20">
                                 <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                               </svg>
-                            </div>
+        </div>
                             <div className="ml-3">
                               <h4 className="text-sm font-medium text-amber-800">Consider Clarification</h4>
                               <p className="text-sm text-amber-700 mt-1">{point.explanation}</p>
@@ -862,8 +1005,8 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
                         </div>
                       ))}
                     </div>
-                  </div>
-                )}
+          </div>
+        )}
 
                 {(!analysis.analysis_results?.result && 
                   !analysis.analysis_results?.strong_points?.length && 
@@ -881,7 +1024,7 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
                     >
                       Analyze Document
                     </button>
-                  </div>
+      </div>
                 )}
               </div>
             )}

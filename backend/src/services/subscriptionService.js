@@ -12,14 +12,16 @@ const PLAN_LIMITS = {
   free: {
     documentsPerMonth: 3,
     analysesPerMonth: 3,
-    maxDocumentSize: 1024 * 1024, // 1MB
+    maxDocumentSize: 1024 * 1024, // 1MB per document
+    maxTotalStorage: 1024 * 1024, // 1MB total storage
     maxAnalysisPercentage: 50, // 50% of document
     name: 'Free'
   },
   starter: {
     documentsPerMonth: -1, // unlimited
     analysesPerMonth: -1, // unlimited
-    maxDocumentSize: 25 * 1024 * 1024, // 25MB
+    maxDocumentSize: 25 * 1024 * 1024, // 25MB per document
+    maxTotalStorage: 25 * 1024 * 1024, // 25MB total storage
     maxAnalysisPercentage: 100, // 100% of document
     name: 'Starter',
     price: 19.99
@@ -27,7 +29,8 @@ const PLAN_LIMITS = {
   premium: {
     documentsPerMonth: -1, // unlimited
     analysesPerMonth: -1, // unlimited
-    maxDocumentSize: 1024 * 1024 * 1024, // 1GB
+    maxDocumentSize: 1024 * 1024 * 1024, // 1GB per document
+    maxTotalStorage: 1024 * 1024 * 1024, // 1GB total storage
     maxAnalysisPercentage: 100, // 100% of document
     name: 'Premium',
     price: 39.99
@@ -73,10 +76,18 @@ const checkLimit = async (userId, limitType) => {
     const currentDate = new Date();
     const startOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
     
+    // Use service role key to bypass RLS for limit checking
+    // This is safe because we've already authenticated the user
+    const { createClient } = require('@supabase/supabase-js');
+    const supabaseServiceRole = createClient(
+      process.env.SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
+    );
+    
     let usage = 0;
     
     if (limitType === 'documentsPerMonth') {
-      const { data: documents, error } = await supabase
+      const { data: documents, error } = await supabaseServiceRole
         .from('documents')
         .select('id')
         .eq('user_id', userId)
@@ -85,8 +96,9 @@ const checkLimit = async (userId, limitType) => {
       if (!error) {
         usage = documents.length;
       }
+      console.log(`checkLimit: Found ${usage} documents for user ${userId} this month`);
     } else if (limitType === 'analysesPerMonth') {
-      const { data: analyses, error } = await supabase
+      const { data: analyses, error } = await supabaseServiceRole
         .from('document_analyses')
         .select('id')
         .eq('user_id', userId)
@@ -95,6 +107,7 @@ const checkLimit = async (userId, limitType) => {
       if (!error) {
         usage = analyses.length;
       }
+      console.log(`checkLimit: Found ${usage} analyses for user ${userId} this month (limit: ${planLimits[limitType]})`);
     }
 
     const limit = planLimits[limitType];
