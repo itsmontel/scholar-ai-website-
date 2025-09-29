@@ -295,10 +295,6 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
     {
       question: "How accurate is the AI feedback?",
       answer: "Our AI has been trained on thousands of academic papers and provides feedback comparable to human reviewers. While it's highly accurate, we recommend using it as a supplement to, not a replacement for, human review."
-    },
-    {
-      question: "Do you offer institutional licenses?",
-      answer: "Yes, we offer special pricing and features for universities, research institutions, and organizations. Contact us for custom pricing and features like bulk user management and institutional branding."
     }
   ];
 
