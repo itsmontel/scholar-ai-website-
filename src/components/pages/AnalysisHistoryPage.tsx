@@ -49,7 +49,7 @@ const AnalysisHistoryPage: React.FC<AnalysisHistoryPageProps> = ({ onNavigate, u
         return;
       }
 
-      const response = await fetch('http://localhost:3001/api/analysis/history?limit=100', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/analysis/history?limit=100`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -112,7 +112,7 @@ const AnalysisHistoryPage: React.FC<AnalysisHistoryPageProps> = ({ onNavigate, u
         return;
       }
 
-      const response = await fetch(`http://localhost:3001/api/analysis/${analysisId}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/analysis/${analysisId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,

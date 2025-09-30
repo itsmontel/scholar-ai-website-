@@ -188,7 +188,7 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
         return;
       }
       
-      const response = await fetch('http://localhost:3001/api/documents?limit=100', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/documents?limit=100`, {
           headers: {
             'Authorization': `Bearer ${token}`,
           },
@@ -224,7 +224,7 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
       setLoadingContent(true);
       const token = localStorage.getItem('authToken');
       
-      const response = await fetch(`http://localhost:3001/api/documents/${documentId}/content`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/documents/${documentId}/content`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -249,7 +249,7 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
       setLoadingAnalysis(true);
       const token = localStorage.getItem('authToken');
       
-      const response = await fetch(`http://localhost:3001/api/analysis/document/${documentId}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/analysis/document/${documentId}`, {
           headers: {
             'Authorization': `Bearer ${token}`,
           },
@@ -289,7 +289,7 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
     try {
       const token = localStorage.getItem('authToken');
       
-      const response = await fetch(`http://localhost:3001/api/documents/${documentId}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/documents/${documentId}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -330,7 +330,7 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
     try {
       const token = localStorage.getItem('authToken');
 
-      const response = await fetch(`http://localhost:3001/api/documents/${documentId}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/documents/${documentId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,

@@ -113,7 +113,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
         return;
       }
 
-      const response = await fetch('http://localhost:3001/api/documents', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/documents`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -141,7 +141,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
         return;
       }
 
-      const response = await fetch('http://localhost:3001/api/analysis/types', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/analysis/types`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -426,7 +426,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
         throw new Error('Please log in to access documents');
       }
 
-      const response = await fetch(`http://localhost:3001/api/documents/${documentId}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/documents/${documentId}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -462,7 +462,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
       setPreviewContent(content);
 
       // Get the existing analysis
-      const response = await fetch(`http://localhost:3001/api/analysis/document/${documentId}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/analysis/document/${documentId}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -559,7 +559,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
         throw new Error('Please log in to analyze documents');
       }
 
-      const response = await fetch('http://localhost:3001/api/analysis/analyze', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/analysis/analyze`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -633,7 +633,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
           citationStyle: selectedCitationStyle,
         });
 
-        const saveResponse = await fetch('http://localhost:3001/api/analysis/save', {
+        const saveResponse = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/analysis/save`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,

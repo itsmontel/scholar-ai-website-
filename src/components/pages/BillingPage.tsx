@@ -110,7 +110,7 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
       const token = localStorage.getItem('authToken');
       
       // Fetch current subscription
-      const subscriptionResponse = await fetch('http://localhost:3001/api/subscriptions/current', {
+      const subscriptionResponse = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/subscriptions/current`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -123,7 +123,7 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
       }
 
       // Fetch usage stats
-      const usageResponse = await fetch('http://localhost:3001/api/subscriptions/usage', {
+      const usageResponse = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/subscriptions/usage`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -151,7 +151,7 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
       
       const token = localStorage.getItem('authToken');
       
-      const response = await fetch('http://localhost:3001/api/subscriptions/create-checkout-session', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/subscriptions/create-checkout-session`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -187,7 +187,7 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
       
       const token = localStorage.getItem('authToken');
       
-      const response = await fetch('http://localhost:3001/api/subscriptions/billing-portal', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/subscriptions/billing-portal`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

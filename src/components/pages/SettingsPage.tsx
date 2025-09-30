@@ -26,7 +26,7 @@ const SettingsPage = ({ onNavigate, user, onLogout }: SettingsPageProps) => {
       }
 
       // Fetch user details
-      const userResponse = await fetch('http://localhost:3001/api/auth/me', {
+      const userResponse = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/auth/me`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -46,7 +46,7 @@ const SettingsPage = ({ onNavigate, user, onLogout }: SettingsPageProps) => {
       }
 
       // Fetch document stats
-      const statsResponse = await fetch('http://localhost:3001/api/documents/stats/overview', {
+      const statsResponse = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/documents/stats/overview`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },

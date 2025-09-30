@@ -57,7 +57,7 @@ const AccountPage = ({ onNavigate, user, onLogout }: AccountPageProps) => {
       }
 
       // Fetch user profile
-      const profileResponse = await fetch('http://localhost:3001/api/users/profile', {
+      const profileResponse = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/users/profile`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -82,7 +82,7 @@ const AccountPage = ({ onNavigate, user, onLogout }: AccountPageProps) => {
       }
 
       // Fetch document stats
-      const statsResponse = await fetch('http://localhost:3001/api/documents/stats/overview', {
+      const statsResponse = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/documents/stats/overview`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -131,7 +131,7 @@ const AccountPage = ({ onNavigate, user, onLogout }: AccountPageProps) => {
 
     try {
       const token = localStorage.getItem('authToken');
-      const response = await fetch('http://localhost:3001/api/users/change-password', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/users/change-password`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -172,7 +172,7 @@ const AccountPage = ({ onNavigate, user, onLogout }: AccountPageProps) => {
 
     try {
       const token = localStorage.getItem('authToken');
-      const response = await fetch('http://localhost:3001/api/users/account', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/users/account`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,

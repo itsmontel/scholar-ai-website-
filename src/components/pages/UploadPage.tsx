@@ -128,7 +128,7 @@ const UploadPage = ({ onNavigate, user, onLogout }: UploadPageProps) => {
         });
       }, 200);
 
-      const response = await fetch('http://localhost:3001/api/documents/upload', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/documents/upload`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

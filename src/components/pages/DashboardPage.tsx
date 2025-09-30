@@ -61,7 +61,7 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
       const token = localStorage.getItem('authToken');
       if (!token) return;
 
-      const response = await fetch('http://localhost:3001/api/subscriptions/usage', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/subscriptions/usage`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -85,7 +85,7 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
       documents.map(async (doc: any) => {
         // Check if document has analysis
         console.log('Dashboard: Checking analysis for document:', doc.id);
-        const analysisResponse = await fetch(`http://localhost:3001/api/analysis/document/${doc.id}`, {
+        const analysisResponse = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/analysis/document/${doc.id}`, {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
           },
@@ -118,7 +118,7 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
         return;
       }
 
-      const response = await fetch('http://localhost:3001/api/documents', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/documents`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -126,7 +126,7 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
 
       // If token expired, try to refresh
       if (response.status === 401) {
-        const refreshResponse = await fetch('http://localhost:3001/api/auth/refresh', {
+        const refreshResponse = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/auth/refresh`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -138,7 +138,7 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
           localStorage.setItem('authToken', refreshData.data.token);
           
           // Retry the original request with new token
-          const retryResponse = await fetch('http://localhost:3001/api/documents', {
+          const retryResponse = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/documents`, {
             headers: {
               'Authorization': `Bearer ${refreshData.data.token}`,
             },

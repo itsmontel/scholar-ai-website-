@@ -23,7 +23,7 @@ const StripeCheckout: React.FC<StripeCheckoutProps> = ({
       const cancelUrl = `${window.location.origin}/pricing?payment=cancelled`;
 
       // Create checkout session on backend - let backend handle price ID mapping
-      const response = await fetch('http://localhost:3001/api/subscriptions/create-checkout-session', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/subscriptions/create-checkout-session`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

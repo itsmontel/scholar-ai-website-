@@ -52,7 +52,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
       setLoadingUsage(true);
       try {
         const token = localStorage.getItem('authToken');
-        const response = await fetch('http://localhost:3001/api/subscriptions/usage', {
+        const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/subscriptions/usage`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
