@@ -81,18 +81,18 @@ const LoginPage = ({ onNavigate, onLogin }: LoginPageProps) => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex">
       {/* Left Side - Login Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-4 sm:p-6 md:p-8">
         <div className="max-w-md w-full">
-          <div className="flex items-center space-x-2 mb-8">
+          <div className="flex items-center space-x-2 mb-6 sm:mb-8">
             <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">A</span>
+              <span className="text-white font-bold text-sm">W</span>
             </div>
-            <span className="text-xl font-bold text-gray-900">AcademicAI</span>
+            <span className="text-xl font-bold text-gray-900">WriteScholar</span>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome back</h1>
-            <p className="text-gray-600 mb-8">Sign in to continue your research journey</p>
+          <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 border border-gray-100">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Welcome back</h1>
+            <p className="text-gray-600 mb-6 sm:mb-8">Sign in to continue your research journey</p>
 
             {error && (
               <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
@@ -100,7 +100,7 @@ const LoginPage = ({ onNavigate, onLogin }: LoginPageProps) => {
               </div>
             )}
 
-            <div className="space-y-6">
+            <div className="space-y-5 sm:space-y-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
                 <input
@@ -108,7 +108,7 @@ const LoginPage = ({ onNavigate, onLogin }: LoginPageProps) => {
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   placeholder="you@university.edu"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-base"
                 />
               </div>
               <div>
@@ -118,7 +118,7 @@ const LoginPage = ({ onNavigate, onLogin }: LoginPageProps) => {
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                   placeholder="••••••••"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-base"
                 />
               </div>
               <button

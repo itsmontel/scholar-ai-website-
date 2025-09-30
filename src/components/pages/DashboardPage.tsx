@@ -239,10 +239,10 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="dashboard" />
 
       {/* Compact Usage Overview */}
-      <div className="max-w-7xl mx-auto px-6 pt-6">
-        <div className="bg-white/60 backdrop-blur-sm rounded-xl shadow-sm border border-white/20 p-4 mb-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-4 sm:pt-6">
+        <div className="bg-white/60 backdrop-blur-sm rounded-xl shadow-sm border border-white/20 p-3 sm:p-4 mb-4 sm:mb-6">
           <div className="flex items-center justify-center">
-            <div className="flex items-center space-x-6">
+            <div className="flex items-center space-x-3 sm:space-x-4 md:space-x-6 flex-wrap justify-center gap-y-2">
               {/* Documents */}
               <div className="flex items-center space-x-2">
                 <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -323,19 +323,19 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
       </div>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-6 py-16">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12 md:py-16">
         {/* Hero Section */}
-        <div className="text-center mb-20">
-          <div className="inline-flex items-center px-4 py-2 bg-blue-50/80 text-blue-700 rounded-full text-sm font-medium mb-8 border border-blue-200/50">
-            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="text-center mb-12 sm:mb-16 md:mb-20">
+          <div className="inline-flex items-center px-3 sm:px-4 py-1.5 sm:py-2 bg-blue-50/80 text-blue-700 rounded-full text-xs sm:text-sm font-medium mb-6 sm:mb-8 border border-blue-200/50">
+            <svg className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
             </svg>
             Your Academic Writing Assistant
             </div>
-          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-6 md:mb-8 leading-tight tracking-tight">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-gray-900 mb-4 sm:mb-6 md:mb-8 leading-tight tracking-tight">
             Enhance your academic<br className="hidden sm:block" />writing with <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">AI</span>
           </h1>
-          <p className="text-lg sm:text-xl text-gray-600 max-w-4xl mx-auto mb-12 md:mb-16 leading-relaxed px-4">
+          <p className="text-base sm:text-lg md:text-xl text-gray-600 max-w-4xl mx-auto mb-8 sm:mb-12 md:mb-16 leading-relaxed px-4">
             Get instant, intelligent feedback on your research papers, essays, and academic documents with our advanced AI analysis that understands academic writing standards
           </p>
 
