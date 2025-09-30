@@ -76,16 +76,16 @@ const FeaturesPage = ({ onNavigate, user, onLogout }: FeaturesPageProps) => {
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="features" />
 
       {/* Main Content */}
-      <main className="max-w-6xl mx-auto px-6 py-16">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12 md:py-16">
         {/* Page Header */}
-        <div className="text-center mb-16">
-          <div className="inline-flex items-center px-4 py-2 bg-blue-100 text-blue-800 rounded-full text-sm font-semibold mb-6">
+        <div className="text-center mb-12 sm:mb-16">
+          <div className="inline-flex items-center px-3 sm:px-4 py-1.5 sm:py-2 bg-blue-100 text-blue-800 rounded-full text-xs sm:text-sm font-semibold mb-4 sm:mb-6">
             Features
           </div>
-          <h1 className="text-5xl font-bold bg-gradient-to-r from-gray-900 via-blue-900 to-purple-900 bg-clip-text text-transparent mb-6">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold bg-gradient-to-r from-gray-900 via-blue-900 to-purple-900 bg-clip-text text-transparent mb-4 sm:mb-6">
             Powerful Features for Academic Excellence
           </h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed px-4">
             Discover the comprehensive suite of AI-powered tools designed to elevate your academic writing and research capabilities.
           </p>
         </div>

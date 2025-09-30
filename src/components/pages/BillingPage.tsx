@@ -250,14 +250,14 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
         currentPage="billing"
       />
       
-      <div className="max-w-7xl mx-auto px-6 py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         {/* Hero Section */}
-        <div className="text-center mb-16">
-          <h1 className="text-5xl font-bold text-gray-900 mb-6">
+        <div className="text-center mb-12 sm:mb-16">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-4 sm:mb-6">
             Choose Your Perfect Plan
           </h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
-            Unlock the full potential of Scholar AI with our flexible pricing plans. 
+          <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto mb-6 sm:mb-8 px-4">
+            Unlock the full potential of WriteScholar with our flexible pricing plans. 
             Start free and upgrade anytime as your needs grow.
           </p>
           
