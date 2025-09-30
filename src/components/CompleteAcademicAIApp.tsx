@@ -55,7 +55,7 @@ const AcademicAIApp = () => {
   const validateAndRefreshToken = async () => {
     try {
       console.log('Validating token...');
-      const response = await fetch('http://localhost:3001/api/auth/me', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/auth/me`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
         },
@@ -64,7 +64,7 @@ const AcademicAIApp = () => {
       console.log('Token validation response status:', response.status);
       if (response.status === 401) {
         // Token expired, try to refresh
-        const refreshResponse = await fetch('http://localhost:3001/api/auth/refresh', {
+        const refreshResponse = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/auth/refresh`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
@@ -161,7 +161,7 @@ const AcademicAIApp = () => {
       // If we get a 401 and we're logged in, try to refresh token (on any page)
       if (response.status === 401 && isLoggedIn) {
         try {
-          const refreshResponse = await fetch('http://localhost:3001/api/auth/refresh', {
+          const refreshResponse = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/auth/refresh`, {
             method: 'POST',
             headers: {
               'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
