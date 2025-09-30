@@ -35,7 +35,7 @@ app.use(generalLimiter);
 // CORS configuration
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
-    ? ['https://yourdomain.com'] 
+    ? [process.env.FRONTEND_URL || 'https://writescholar.netlify.app'] 
     : ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:5173'],
   credentials: true
 }));
@@ -68,10 +68,20 @@ app.get('/', (req, res) => {
   });
 });
 
-// Health check endpoint
+// Health check endpoints
 app.get('/health', (req, res) => {
   res.status(200).json({
     status: 'OK',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    environment: process.env.NODE_ENV
+  });
+});
+
+app.get('/api/health', (req, res) => {
+  res.status(200).json({
+    status: 'OK',
+    service: 'WriteScholar Backend API',
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
     environment: process.env.NODE_ENV
