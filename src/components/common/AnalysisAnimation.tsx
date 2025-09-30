@@ -61,8 +61,8 @@ const AnalysisAnimation: React.FC<AnalysisAnimationProps> = ({
       return;
     }
 
-    // Start cycling animation when we reach 85%
-    if (progress >= 85 && !isCycling) {
+    // Start cycling animation when we reach 90%
+    if (progress >= 90 && !isCycling) {
       setIsCycling(true);
     }
 
@@ -78,24 +78,25 @@ const AnalysisAnimation: React.FC<AnalysisAnimationProps> = ({
 
     const progressInterval = setInterval(() => {
       setProgress(prev => {
-        if (prev >= 85 && !isCycling) {
-          // Stay between 85-90% and fluctuate slightly
-          const fluctuation = Math.sin(Date.now() / 3000) * 2; // ±2%
-          return Math.min(87 + fluctuation, 90);
-        } else if (isCycling) {
-          // Cycle animation: fluctuate between 85-92%
-          const cycleProgress = Math.sin(Date.now() / 2000) * 3.5; // ±3.5%
-          return 88.5 + cycleProgress; // 85% to 92%
+        if (prev >= 99) {
+          // Stay at 99% until complete - never go backwards
+          return 99;
+        } else if (prev >= 90) {
+          // Very slow progress from 90% to 99%
+          return Math.min(prev + 0.05, 99);
+        } else if (prev >= 80) {
+          // Slow progress from 80% to 90%
+          return Math.min(prev + 0.1, 90);
         } else {
-          // Slower progress: increase more gradually
-          const increment = prev < 20 ? 0.8 : prev < 50 ? 0.4 : prev < 70 ? 0.2 : 0.1;
-          return Math.min(prev + increment, 85);
+          // Normal progressive slowdown
+          const increment = prev < 20 ? 0.8 : prev < 50 ? 0.4 : prev < 70 ? 0.2 : 0.15;
+          return Math.min(prev + increment, 80);
         }
       });
-    }, 100); // Slower update interval
+    }, 150); // Slower update interval for smoother progression
 
     return () => clearInterval(progressInterval);
-  }, [isComplete, isCycling]);
+  }, [isComplete]);
 
   if (isPopup) {
     return (
