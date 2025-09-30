@@ -30,11 +30,14 @@ const AnalysisAnimation: React.FC<AnalysisAnimationProps> = ({
 
   const analysisSteps = [
     'Reading document...',
-    'Processing content...',
-    'Analyzing structure...',
-    'Generating insights...',
+    'Extracting text content...',
+    'Processing language patterns...',
+    'Analyzing document structure...',
+    'Evaluating writing quality...',
+    'Identifying key insights...',
+    'Generating recommendations...',
     'Creating annotations...',
-    'Finalizing results...'
+    'Finalizing analysis...'
   ];
 
   // Animate dots
@@ -58,14 +61,14 @@ const AnalysisAnimation: React.FC<AnalysisAnimationProps> = ({
       return;
     }
 
-    // Start cycling animation when we reach 95%
-    if (progress >= 95 && !isCycling) {
+    // Start cycling animation when we reach 85%
+    if (progress >= 85 && !isCycling) {
       setIsCycling(true);
     }
 
     const interval = setInterval(() => {
       setCurrentStep(prev => (prev + 1) % analysisSteps.length);
-    }, 2000);
+    }, 3000); // Slower step transitions
     return () => clearInterval(interval);
   }, [isComplete, onComplete, progress, isCycling]);
 
@@ -75,19 +78,21 @@ const AnalysisAnimation: React.FC<AnalysisAnimationProps> = ({
 
     const progressInterval = setInterval(() => {
       setProgress(prev => {
-        if (prev >= 95 && !isCycling) {
-          // Stay at 95% until cycling starts
-          return 95;
+        if (prev >= 85 && !isCycling) {
+          // Stay between 85-90% and fluctuate slightly
+          const fluctuation = Math.sin(Date.now() / 3000) * 2; // ±2%
+          return Math.min(87 + fluctuation, 90);
         } else if (isCycling) {
-          // Cycle animation: go from 95% to 120% and back
-          const cycleProgress = ((Date.now() / 2000) % 1) * 25; // 0 to 25
-          return 95 + cycleProgress; // 95% to 120%
+          // Cycle animation: fluctuate between 85-92%
+          const cycleProgress = Math.sin(Date.now() / 2000) * 3.5; // ±3.5%
+          return 88.5 + cycleProgress; // 85% to 92%
         } else {
-          // Normal progress: slowly increase to 95%
-          return Math.min(prev + 0.5, 95);
+          // Slower progress: increase more gradually
+          const increment = prev < 20 ? 0.8 : prev < 50 ? 0.4 : prev < 70 ? 0.2 : 0.1;
+          return Math.min(prev + increment, 85);
         }
       });
-    }, 50);
+    }, 100); // Slower update interval
 
     return () => clearInterval(progressInterval);
   }, [isComplete, isCycling]);
