@@ -186,12 +186,12 @@ const UploadPage = ({ onNavigate, user, onLogout }: UploadPageProps) => {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="upload" />
 
-      <div className="max-w-4xl mx-auto px-8 py-12">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 md:px-8 py-8 sm:py-12">
+        <div className="text-center mb-8 sm:mb-12">
+          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
             Upload Your Document
           </h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+          <p className="text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto px-4">
             Upload your academic papers, essays, or research documents for AI-powered analysis and feedback.
           </p>
                   </div>
