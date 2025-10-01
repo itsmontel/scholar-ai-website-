@@ -452,36 +452,36 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
     <div className="min-h-screen bg-white">
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="library" />
 
-      <div ref={containerRef} className="flex h-[calc(100vh-80px)]">
+      <div ref={containerRef} className="flex min-h-[calc(100vh-80px)] md:h-[calc(100vh-80px)]">
         {/* Left Panel - Document Library */}
         <div 
-          className="border-r border-gray-200 bg-gray-50 flex flex-col"
-          style={{ width: `${leftPanelWidth}%` }}
+          className="w-full md:border-r border-gray-200 bg-gray-50 flex flex-col md:w-auto"
+          style={{ width: window.innerWidth < 768 ? '100%' : `${leftPanelWidth}%` }}
         >
-          <div className="p-4 border-b border-gray-200 bg-white">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">MY DOCUMENTS</h2>
+          <div className="p-3 md:p-4 border-b border-gray-200 bg-white">
+            <h2 className="text-base md:text-lg font-semibold text-gray-900 mb-3 md:mb-4">MY DOCUMENTS</h2>
             
             {/* Search Bar */}
-            <div className="relative mb-4">
+            <div className="relative mb-3 md:mb-4">
               <input
                 type="text"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Search documents..."
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full pl-9 md:pl-10 pr-3 md:pr-4 py-1.5 md:py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="absolute inset-y-0 left-0 pl-2 md:pl-3 flex items-center pointer-events-none">
+                  <svg className="h-4 w-4 md:h-5 md:w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                   </svg>
             </div>
             </div>
             
             {/* Filters */}
-            <div className="flex gap-2 mb-4">
+            <div className="flex gap-1.5 md:gap-2 mb-3 md:mb-4 flex-wrap">
               <button
                 onClick={() => setTimeFilter('all')}
-                className={`px-3 py-1 text-sm rounded-full transition-colors ${
+                className={`px-2 md:px-3 py-1 text-xs md:text-sm rounded-full transition-colors ${
                   timeFilter === 'all' 
                     ? 'bg-blue-100 text-blue-700' 
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -491,7 +491,7 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
               </button>
               <button
                 onClick={() => setTimeFilter('last7days')}
-                className={`px-3 py-1 text-sm rounded-full transition-colors ${
+                className={`px-2 md:px-3 py-1 text-xs md:text-sm rounded-full transition-colors ${
                   timeFilter === 'last7days' 
                     ? 'bg-blue-100 text-blue-700' 
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -501,7 +501,7 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
               </button>
               <button
                 onClick={() => setTimeFilter('lastmonth')}
-                className={`px-3 py-1 text-sm rounded-full transition-colors ${
+                className={`px-2 md:px-3 py-1 text-xs md:text-sm rounded-full transition-colors ${
                   timeFilter === 'lastmonth' 
                     ? 'bg-blue-100 text-blue-700' 
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -512,32 +512,32 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
         </div>
 
             {/* View Toggle */}
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-sm text-gray-600">View:</span>
-              <div className="flex bg-gray-100 rounded-lg p-1">
+            <div className="flex items-center justify-between">
+              <span className="text-xs md:text-sm text-gray-600">View:</span>
+              <div className="flex bg-gray-100 rounded-lg p-0.5 md:p-1">
                 <button
                   onClick={() => setViewMode('grid')}
-                  className={`p-2 rounded-md transition-colors ${
+                  className={`p-1.5 md:p-2 rounded-md transition-colors ${
                     viewMode === 'grid'
                       ? 'bg-white text-blue-600 shadow-sm'
                       : 'text-gray-600 hover:text-gray-900'
                   }`}
                   title="Grid View"
                 >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-3.5 h-3.5 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
                   </svg>
                 </button>
                 <button
                   onClick={() => setViewMode('list')}
-                  className={`p-2 rounded-md transition-colors ${
+                  className={`p-1.5 md:p-2 rounded-md transition-colors ${
                     viewMode === 'list'
                       ? 'bg-white text-blue-600 shadow-sm'
                       : 'text-gray-600 hover:text-gray-900'
                   }`}
                   title="List View"
                 >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-3.5 h-3.5 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
                   </svg>
                 </button>
@@ -564,206 +564,183 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
               )}
           </div>
         ) : (
-              <div className={`p-2 ${viewMode === 'grid' ? 'grid grid-cols-1 gap-3' : ''}`}>
+              <div className={`p-2 ${viewMode === 'grid' ? 'grid grid-cols-1 gap-6' : 'space-y-1'}`}>
                 {filteredDocuments.map((document) => (
                   <div
                     key={document.id}
                     className={`${viewMode === 'grid' 
-                      ? `p-4 rounded-lg transition-colors border border-gray-200 hover:shadow-md ${
+                      ? `p-3 rounded-lg transition-all duration-200 border border-gray-200 hover:shadow-lg hover:border-blue-300 ${
                           selectedDocument?.id === document.id
-                            ? 'bg-blue-100 border-blue-500 ring-2 ring-blue-200'
+                            ? 'bg-white border-l-4 border-l-blue-500'
                             : 'bg-white hover:bg-gray-50'
                         }`
-                      : `p-2 mb-1 rounded-lg transition-colors ${
+                      : `py-1.5 px-2 rounded transition-all duration-150 cursor-pointer ${
                           selectedDocument?.id === document.id
-                            ? 'bg-blue-100 border-l-4 border-blue-500'
-                            : 'bg-white hover:bg-gray-100 border border-gray-200'
+                            ? 'bg-blue-50 border-l-2 border-blue-500'
+                            : 'hover:bg-gray-100'
                         }`
                     }`}
                   >
-                    <div className={`${viewMode === 'grid' ? 'flex flex-col h-full' : 'flex items-start space-x-2'}`}>
+                    <div className={`${viewMode === 'grid' ? 'w-full' : 'flex items-start space-x-2'}`}>
                       {viewMode === 'grid' ? (
-                        // Grid view layout
-                        <>
-                          <div className="flex items-center justify-between mb-3">
-                            <div className="flex items-center space-x-2">
-                              {getFileTypeIcon(document.fileType)}
-                              <div className="flex-1 min-w-0">
-                                {editingDocument === document.id ? (
-                                  <input
-                                    type="text"
-                                    value={editTitle}
-                                    onChange={(e) => setEditTitle(e.target.value)}
-                                    className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    onKeyDown={(e) => {
-                                      if (e.key === 'Enter') {
-                                        handleRenameDocument(document.id, editTitle);
-                                      } else if (e.key === 'Escape') {
-                                        cancelEditing();
-                                      }
-                                    }}
-                                    autoFocus
-                                  />
-                                ) : (
-                                  <h3 className="text-sm font-medium text-gray-900 truncate">
-                                    {document.title}
-                                  </h3>
-                                )}
-              </div>
-            </div>
-                            <div className="flex space-x-1">
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  startEditing(document);
-                                }}
-                                className="p-1 text-gray-400 hover:text-blue-600 transition-colors"
-                                title="Rename document"
-                              >
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-              </svg>
-                              </button>
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleDeleteDocument(document.id);
-                                }}
-                                className="p-1 text-gray-400 hover:text-red-600 transition-colors"
-                                title="Delete document"
-                              >
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                </svg>
-                              </button>
-            </div>
-                          </div>
-                          {editingDocument === document.id ? (
-                            <div className="flex space-x-2">
-            <button 
-                                onClick={() => handleRenameDocument(document.id, editTitle)}
-                                className="px-2 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700"
-            >
-                                Save
-            </button>
-                              <button
-                                onClick={cancelEditing}
-                                className="px-2 py-1 text-xs bg-gray-600 text-white rounded hover:bg-gray-700"
-                              >
-                                Cancel
-                              </button>
-                            </div>
-                          ) : (
-                            <>
-                              <div 
-                                className="cursor-pointer flex-1"
-                                onClick={() => handleDocumentSelect(document)}
-                              >
-                                <div className="space-y-2">
-                                  <p className="text-xs text-gray-500">
-                                    {formatFileSize(document.fileSize)} • {document.wordCount} words
-                                  </p>
-                                  <p className="text-xs text-gray-400">
-                                    {formatDate(document.createdAt)}
-                                  </p>
-                                  {(document.analysisStatus?.hasAnalysis || document.hasAnalysis) && (
-                                    <div className="flex items-center">
-                                      <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-                                      <span className="text-xs text-green-600">Analyzed</span>
-                                    </div>
-              )}
-    </div>
-                              </div>
-                            </>
-                          )}
-                        </>
-                      ) : (
-                        // List view layout (original)
-                        <>
-                      {getFileTypeIcon(document.fileType)}
-                          <div className="flex-1 min-w-0">
-                        {editingDocument === document.id ? (
-                              <div className="space-y-2">
-                            <input
-                              type="text"
-                              value={editTitle}
-                              onChange={(e) => setEditTitle(e.target.value)}
-                                  className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                              onKeyDown={(e) => {
-                                if (e.key === 'Enter') {
-                                      handleRenameDocument(document.id, editTitle);
-                                } else if (e.key === 'Escape') {
-                                      cancelEditing();
-                                }
-                              }}
-                                  autoFocus
-                            />
-                                <div className="flex space-x-2">
+                        // GRID VIEW - Fixed to match image exactly
+                        <div className="relative">
+                          {/* Action buttons positioned outside card, top right */}
+                          <div className="absolute top-0 right-0 z-10 flex space-x-1">
                             <button
-                                    onClick={() => handleRenameDocument(document.id, editTitle)}
-                                    className="px-2 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                startEditing(document);
+                              }}
+                              className="p-1 text-gray-400 hover:text-blue-600"
+                              title="Rename"
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                              </svg>
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteDocument(document.id);
+                              }}
+                              className="p-1 text-gray-400 hover:text-red-600"
+                              title="Delete"
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              </svg>
+                            </button>
+                          </div>
+                          
+                  {/* Card content */}
+                  <div 
+                    className="cursor-pointer"
+                    onClick={() => handleDocumentSelect(document)}
+                  >
+                    {/* FILE badge */}
+                    <div className="mb-2">
+                      {getFileTypeIcon(document.fileType)}
+                    </div>
+                    
+                    {/* Document title */}
+                    <div className="mb-2">
+                      <h3 className="text-sm font-medium text-gray-900 truncate">
+                        {document.title}
+                      </h3>
+                    </div>
+                    
+                    {/* File info stacked vertically */}
+                    <div className="space-y-1 text-xs text-gray-600">
+                      <div>{formatFileSize(document.fileSize)}</div>
+                      <div>{document.wordCount} words</div>
+                      <div>{formatDate(document.createdAt)}</div>
+                      {(document.analysisStatus?.hasAnalysis || document.hasAnalysis) && (
+                        <div className="flex items-center text-green-600">
+                          <div className="w-1.5 h-1.5 bg-green-500 rounded-full mr-1"></div>
+                          Analyzed
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                        </div>
+                      ) : (
+                        // List view layout - Compact and thin
+                        <>
+                          <div className="flex items-center space-x-2 flex-1 min-w-0">
+                            {/* Smaller file icon for list view */}
+                            <div className={`w-6 h-6 rounded flex items-center justify-center flex-shrink-0 ${
+                              document.fileType.toLowerCase() === 'pdf' ? 'bg-red-100' :
+                              document.fileType.toLowerCase() === 'docx' ? 'bg-blue-100' :
+                              document.fileType.toLowerCase() === 'doc' ? 'bg-green-100' : 'bg-gray-100'
+                            }`}>
+                              <span className={`font-bold text-[10px] ${
+                                document.fileType.toLowerCase() === 'pdf' ? 'text-red-600' :
+                                document.fileType.toLowerCase() === 'docx' ? 'text-blue-600' :
+                                document.fileType.toLowerCase() === 'doc' ? 'text-green-600' : 'text-gray-600'
+                              }`}>
+                                {document.fileType.toUpperCase().slice(0, 3)}
+                              </span>
+                            </div>
+
+                            {editingDocument === document.id ? (
+                              <div className="flex-1 flex items-center space-x-2">
+                                <input
+                                  type="text"
+                                  value={editTitle}
+                                  onChange={(e) => setEditTitle(e.target.value)}
+                                  className="flex-1 px-2 py-0.5 text-xs border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-transparent"
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                      handleRenameDocument(document.id, editTitle);
+                                    } else if (e.key === 'Escape') {
+                                      cancelEditing();
+                                    }
+                                  }}
+                                  autoFocus
+                                />
+                                <button
+                                  onClick={() => handleRenameDocument(document.id, editTitle)}
+                                  className="px-1.5 py-0.5 text-[10px] bg-green-600 text-white rounded hover:bg-green-700"
                                 >
-                                    Save
+                                  ✓
                                 </button>
                                 <button
-                                    onClick={cancelEditing}
-                                    className="px-2 py-1 text-xs bg-gray-600 text-white rounded hover:bg-gray-700"
+                                  onClick={cancelEditing}
+                                  className="px-1.5 py-0.5 text-[10px] bg-gray-600 text-white rounded hover:bg-gray-700"
                                 >
-                                    Cancel
+                                  ✕
                                 </button>
-                                </div>
                               </div>
                             ) : (
                               <>
                                 <div 
-                                  className="cursor-pointer"
+                                  className="flex-1 min-w-0 flex items-center justify-between"
                                   onClick={() => handleDocumentSelect(document)}
                                 >
-                                  <h3 className="text-sm font-medium text-gray-900 truncate">
-                                    {document.title}
-                                  </h3>
-                                  <p className="text-xs text-gray-500 mt-1">
-                                    {formatFileSize(document.fileSize)} • {document.wordCount} words
-                                  </p>
-                                  <p className="text-xs text-gray-400">
-                                    {formatDate(document.createdAt)}
-                                  </p>
-                                  {(document.analysisStatus?.hasAnalysis || document.hasAnalysis) && (
-                                    <div className="flex items-center mt-1">
-                                      <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-                                      <span className="text-xs text-green-600">Analyzed</span>
-                                    </div>
-                                  )}
+                                  <div className="flex-1 min-w-0">
+                                    <h3 className="text-xs font-medium text-gray-900 truncate leading-tight">
+                                      {document.title}
+                                    </h3>
+                                  </div>
+                                  <div className="flex items-center space-x-2 ml-2 flex-shrink-0">
+                                    <span className="text-[10px] text-gray-500">
+                                      {formatFileSize(document.fileSize)}
+                                    </span>
+                                    {(document.analysisStatus?.hasAnalysis || document.hasAnalysis) && (
+                                      <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
+                                    )}
+                                  </div>
                                 </div>
-                                <div className="flex space-x-1 mt-1 justify-end">
-                          <button
+                                <div className="flex space-x-0.5 flex-shrink-0">
+                                  <button
                                     onClick={(e) => {
                                       e.stopPropagation();
                                       startEditing(document);
                                     }}
-                                    className="p-1 text-gray-400 hover:text-blue-600 transition-colors"
-                                    title="Rename document"
-                            >
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                              </svg>
-                            </button>
-                            <button
+                                    className="p-0.5 text-gray-400 hover:text-blue-600 transition-colors"
+                                    title="Rename"
+                                  >
+                                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                    </svg>
+                                  </button>
+                                  <button
                                     onClick={(e) => {
                                       e.stopPropagation();
                                       handleDeleteDocument(document.id);
                                     }}
-                                    className="p-1 text-gray-400 hover:text-red-600 transition-colors"
-                                    title="Delete document"
-                            >
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                              </svg>
-                            </button>
-                          </div>
+                                    className="p-0.5 text-gray-400 hover:text-red-600 transition-colors"
+                                    title="Delete"
+                                  >
+                                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                  </button>
+                                </div>
                               </>
-                        )}
-                            </div>
+                            )}
+                          </div>
                         </>
                       )}
                     </div>
@@ -774,15 +751,15 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
                     </div>
                     
           {/* Recent Activity */}
-          <div className="p-4 border-t border-gray-200 bg-white">
-            <h3 className="text-sm font-medium text-gray-900 mb-3">RECENT ACTIVITY</h3>
-            <div className="space-y-2">
+          <div className="hidden md:block p-3 md:p-4 border-t border-gray-200 bg-white">
+            <h3 className="text-xs md:text-sm font-medium text-gray-900 mb-2 md:mb-3">RECENT ACTIVITY</h3>
+            <div className="space-y-1.5 md:space-y-2">
               {filteredDocuments.slice(0, 3).map((doc) => (
-                <div key={doc.id} className="flex items-center text-xs text-gray-600">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
-                  <span className="truncate">{doc.title}</span>
-                  <span className="ml-auto text-gray-400">
-                    {new Date(doc.createdAt).toLocaleDateString()}
+                <div key={doc.id} className="flex items-center text-[10px] md:text-xs text-gray-600">
+                  <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-blue-500 rounded-full mr-1.5 md:mr-2 flex-shrink-0"></div>
+                  <span className="truncate flex-1 min-w-0">{doc.title}</span>
+                  <span className="ml-2 text-gray-400 text-[9px] md:text-[10px] flex-shrink-0">
+                    {new Date(doc.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                   </span>
                 </div>
               ))}
@@ -793,7 +770,7 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
         {/* Left Resize Handle */}
         <div
           ref={leftResizeRef}
-          className="w-1 bg-gray-200 hover:bg-blue-400 cursor-col-resize transition-colors relative group"
+          className="hidden md:block w-1 bg-gray-200 hover:bg-blue-400 cursor-col-resize transition-colors relative group"
           onMouseDown={() => handleMouseDown('left')}
         >
           <div className="absolute inset-y-0 -left-1 -right-1 bg-transparent"></div>
@@ -804,7 +781,7 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
 
         {/* Center Panel - Document Viewer */}
         <div 
-          className="flex flex-col"
+          className="hidden md:flex flex-col"
           style={{ width: `${centerPanelWidth}%` }}
         >
           {selectedDocument ? (
@@ -870,7 +847,7 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
         {/* Right Resize Handle */}
         <div
           ref={rightResizeRef}
-          className="w-1 bg-gray-200 hover:bg-blue-400 cursor-col-resize transition-colors relative group"
+          className="hidden md:block w-1 bg-gray-200 hover:bg-blue-400 cursor-col-resize transition-colors relative group"
           onMouseDown={() => handleMouseDown('right')}
         >
           <div className="absolute inset-y-0 -left-1 -right-1 bg-transparent"></div>
@@ -881,7 +858,7 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
 
         {/* Right Panel - Annotations */}
         <div 
-          className="border-l border-gray-200 bg-gray-50 flex flex-col"
+          className="hidden md:flex border-l border-gray-200 bg-gray-50 flex-col"
           style={{ width: `${rightPanelWidth}%` }}
         >
           <div className="p-4 border-b border-gray-200 bg-white">

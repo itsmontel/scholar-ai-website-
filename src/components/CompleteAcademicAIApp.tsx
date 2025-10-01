@@ -125,6 +125,7 @@ const AcademicAIApp = () => {
     if (token && userData) {
       try {
         const user = JSON.parse(userData);
+        console.log('Setting user from localStorage:', user);
         setIsLoggedIn(true);
         setUser(user);
         
@@ -135,6 +136,8 @@ const AcademicAIApp = () => {
         localStorage.removeItem('authToken');
         localStorage.removeItem('user');
       }
+    } else {
+      console.log('No token or user data found in localStorage');
     }
     
     // Set initial page based on URL
@@ -169,6 +172,20 @@ const AcademicAIApp = () => {
       const newPage = getPageFromPath(newPath);
       console.log('Browser navigation detected, changing page to:', newPage);
       setCurrentPage(newPage);
+      
+      // Restore user data from localStorage when navigating back/forward
+      const storedToken = localStorage.getItem('authToken');
+      const storedUserData = localStorage.getItem('user');
+      if (storedToken && storedUserData) {
+        try {
+          const userData = JSON.parse(storedUserData);
+          setIsLoggedIn(true);
+          setUser(userData);
+          console.log('User data restored on navigation:', userData);
+        } catch (error) {
+          console.error('Error restoring user data:', error);
+        }
+      }
     };
     
     window.addEventListener('popstate', handlePopState);
@@ -177,6 +194,23 @@ const AcademicAIApp = () => {
       window.removeEventListener('popstate', handlePopState);
     };
   }, []);
+
+  // Ensure user data is always restored from localStorage
+  useEffect(() => {
+    const token = localStorage.getItem('authToken');
+    const userData = localStorage.getItem('user');
+    
+    if (token && userData && !user) {
+      try {
+        const parsedUser = JSON.parse(userData);
+        console.log('Restoring user data from useEffect:', parsedUser);
+        setIsLoggedIn(true);
+        setUser(parsedUser);
+      } catch (error) {
+        console.error('Error restoring user data:', error);
+      }
+    }
+  }, [user, currentPage]); // Run when user or page changes
 
   // Set up periodic token refresh for logged-in users
   useEffect(() => {
@@ -245,6 +279,20 @@ const AcademicAIApp = () => {
       window.history.pushState({}, '', '/');
     } else {
       window.history.pushState({}, '', `/${page}`);
+    }
+    
+    // Ensure user data is restored on navigation
+    const token = localStorage.getItem('authToken');
+    const userData = localStorage.getItem('user');
+    if (token && userData && !user) {
+      try {
+        const parsedUser = JSON.parse(userData);
+        console.log('Restoring user data on navigation:', parsedUser);
+        setIsLoggedIn(true);
+        setUser(parsedUser);
+      } catch (error) {
+        console.error('Error restoring user on navigation:', error);
+      }
     }
   };
 
