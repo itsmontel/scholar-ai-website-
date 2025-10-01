@@ -76,23 +76,29 @@ const AcademicAIApp = () => {
           localStorage.setItem('authToken', refreshData.data.token);
           console.log('Token refreshed successfully');
         } else {
-          // Refresh failed, only logout if we're on a protected route
-          console.log('Token refresh failed');
-          if (protectedRoutes.includes(currentPage)) {
-            console.log('On protected route, logging out user');
-            handleLogout();
-          }
+          // Refresh failed - clear auth state silently
+          // Don't force logout, let user continue browsing public pages
+          console.log('Token refresh failed, clearing auth state');
+          setIsLoggedIn(false);
+          setUser(null);
+          localStorage.removeItem('authToken');
+          localStorage.removeItem('user');
         }
       } else if (response.ok) {
+        const userData = await response.json();
+        // Update user data from server
+        if (userData.data) {
+          setUser(userData.data);
+          localStorage.setItem('user', JSON.stringify(userData.data));
+        }
         console.log('Token is valid');
       }
     } catch (error) {
       console.error('Token validation error:', error);
-      // Only logout if we're on a protected route and there's a network error
-      if (protectedRoutes.includes(currentPage)) {
-        console.log('Network error on protected route, logging out user');
-        handleLogout();
-      }
+      // On network error, keep the user logged in locally
+      // They can still browse, but API calls might fail
+      // Don't force logout - better UX for temporary network issues
+      console.log('Network error during validation, keeping user logged in locally');
     }
   };
 
@@ -119,25 +125,45 @@ const AcademicAIApp = () => {
       }
     }
     
-    if (path === '/email-verification') {
-      setCurrentPage('email-verification');
-    } else if (path === '/signup') {
-      setCurrentPage('signup');
-    } else if (path === '/login') {
-      setCurrentPage('login');
-    } else if (path === '/dashboard') {
-      setCurrentPage('dashboard');
-    } else if (path === '/pricing') {
-      setCurrentPage('pricing');
-    } else if (path === '/features') {
-      setCurrentPage('features');
-    } else if (path === '/about') {
-      setCurrentPage('about');
-    } else if (path === '/contact') {
-      setCurrentPage('contact');
-    } else {
-      setCurrentPage('landing');
-    }
+    // Set initial page based on URL
+    const getPageFromPath = (pathname: string) => {
+      if (pathname === '/email-verification') return 'email-verification';
+      if (pathname === '/signup') return 'signup';
+      if (pathname === '/login') return 'login';
+      if (pathname === '/dashboard') return 'dashboard';
+      if (pathname === '/pricing') return 'pricing';
+      if (pathname === '/features') return 'features';
+      if (pathname === '/about') return 'about';
+      if (pathname === '/contact') return 'contact';
+      if (pathname === '/analysis') return 'analysis';
+      if (pathname === '/analysis-history') return 'analysis-history';
+      if (pathname === '/upload') return 'upload';
+      if (pathname === '/settings') return 'settings';
+      if (pathname === '/profile') return 'profile';
+      if (pathname === '/library') return 'library';
+      if (pathname === '/account') return 'account';
+      if (pathname === '/billing') return 'billing';
+      if (pathname === '/help-center') return 'help-center';
+      if (pathname === '/privacy-policy') return 'privacy-policy';
+      if (pathname === '/terms-of-service') return 'terms-of-service';
+      return 'landing';
+    };
+    
+    setCurrentPage(getPageFromPath(path));
+    
+    // Listen for browser back/forward button
+    const handlePopState = () => {
+      const newPath = window.location.pathname;
+      const newPage = getPageFromPath(newPath);
+      console.log('Browser navigation detected, changing page to:', newPage);
+      setCurrentPage(newPage);
+    };
+    
+    window.addEventListener('popstate', handlePopState);
+    
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
   }, []);
 
   // Set up periodic token refresh for logged-in users
@@ -161,7 +187,7 @@ const AcademicAIApp = () => {
       // If we get a 401 and we're logged in, try to refresh token (on any page)
       if (response.status === 401 && isLoggedIn) {
         try {
-          const refreshResponse = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/auth/refresh`, {
+          const refreshResponse = await originalFetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/auth/refresh`, {
             method: 'POST',
             headers: {
               'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
@@ -177,14 +203,16 @@ const AcademicAIApp = () => {
             const retryResponse = await originalFetch(...args);
             return retryResponse;
           } else {
-            // Refresh failed, logout user
-            console.log('Auto-refresh failed, logging out user');
-            handleLogout();
+            // Refresh failed - clear auth state but don't redirect
+            console.log('Auto-refresh failed, clearing auth state');
+            setIsLoggedIn(false);
+            setUser(null);
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('user');
           }
         } catch (error) {
           console.error('Auto-refresh failed:', error);
-          // Logout user on network error
-          handleLogout();
+          // Don't logout on network errors - better UX
         }
       }
       
