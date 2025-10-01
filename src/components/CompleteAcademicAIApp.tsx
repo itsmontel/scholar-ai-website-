@@ -88,10 +88,22 @@ const AcademicAIApp = () => {
         const userData = await response.json();
         // Update user data from server
         if (userData.data) {
-          setUser(userData.data);
-          localStorage.setItem('user', JSON.stringify(userData.data));
+          const updatedUser = {
+            id: userData.data.id,
+            email: userData.data.email,
+            name: userData.data.first_name && userData.data.last_name 
+              ? `${userData.data.first_name} ${userData.data.last_name}` 
+              : userData.data.name || userData.data.email,
+            first_name: userData.data.first_name,
+            last_name: userData.data.last_name,
+            plan: userData.data.subscription_plan || 'free',
+            subscription_status: userData.data.subscription_status,
+            email_verified: userData.data.email_verified
+          };
+          setUser(updatedUser);
+          localStorage.setItem('user', JSON.stringify(updatedUser));
         }
-        console.log('Token is valid');
+        console.log('Token is valid, user data updated');
       }
     } catch (error) {
       console.error('Token validation error:', error);
@@ -239,11 +251,7 @@ const AcademicAIApp = () => {
   // Authentication handlers
   const handleSignUp = (userData: User) => {
     setIsLoggedIn(true);
-    setUser(userData || { 
-      name: 'Dr. Sarah Chen', 
-      email: 'sarah.chen@stanford.edu',
-      plan: 'premium'
-    });
+    setUser(userData);
   };
 
   const handleLogin = (userData: User) => {

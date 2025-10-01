@@ -228,7 +228,7 @@ const AccountPage = ({ onNavigate, user, onLogout }: AccountPageProps) => {
                 <div>
                   <div className="font-semibold text-gray-900">Email</div>
                   <div className="text-gray-600 flex items-center">
-                    {user?.email || 'user@example.com'}
+                    {user?.email || 'Loading...'}
                     {userStats.emailVerified && (
                       <span className="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
                         <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
@@ -243,7 +243,7 @@ const AccountPage = ({ onNavigate, user, onLogout }: AccountPageProps) => {
               <div className="flex items-center justify-between py-3 border-b border-gray-200">
                 <div>
                   <div className="font-semibold text-gray-900">Name</div>
-                  <div className="text-gray-600">{user?.name || 'User Name'}</div>
+                  <div className="text-gray-600">{user?.name || 'Loading...'}</div>
                 </div>
               </div>
               <div className="flex items-center justify-between py-3">
