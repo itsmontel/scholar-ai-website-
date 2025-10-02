@@ -264,7 +264,7 @@ const AccountPage = ({ onNavigate, user, onLogout }: AccountPageProps) => {
                 <div>
                   <div className="font-semibold text-gray-900">Current Plan</div>
                   <div className="text-gray-600 flex items-center">
-                    {userStats.subscriptionPlan}
+                    <span className="capitalize">{userStats.subscriptionPlan}</span>
                     <span className={`ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
                       userStats.subscriptionStatus === 'active' 
                         ? 'bg-green-100 text-green-800' 
@@ -274,7 +274,7 @@ const AccountPage = ({ onNavigate, user, onLogout }: AccountPageProps) => {
                     </span>
                   </div>
                 </div>
-                {userStats.subscriptionPlan === 'Free' && (
+                {userStats.subscriptionPlan === 'free' && (
                   <button 
                     onClick={() => onNavigate('pricing')}
                     className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg font-medium hover:shadow-lg transform hover:scale-105 transition-all duration-200"
@@ -287,13 +287,49 @@ const AccountPage = ({ onNavigate, user, onLogout }: AccountPageProps) => {
                 <div>
                   <div className="font-semibold text-gray-900">Plan Features</div>
                   <div className="text-gray-600">
-                    {userStats.subscriptionPlan === 'Free' 
+                    {userStats.subscriptionPlan === 'free' 
                       ? '5 documents per month, Basic analysis, Standard support'
-                      : userStats.subscriptionPlan === 'Starter'
+                      : userStats.subscriptionPlan === 'starter'
                       ? '50 documents per month, Advanced analysis, Priority support'
-                      : 'Unlimited documents, Premium analysis, 24/7 support'
+                      : userStats.subscriptionPlan === 'premium'
+                      ? 'Unlimited documents, Premium analysis, 24/7 support'
+                      : 'Basic features included'
                     }
                   </div>
+                </div>
+              </div>
+              
+              {/* Plan Details */}
+              <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+                <div className="text-sm font-medium text-gray-900 mb-2">What's included:</div>
+                <div className="space-y-1 text-sm text-gray-600">
+                  {userStats.subscriptionPlan === 'free' && (
+                    <>
+                      <div>• 5 document analyses per month</div>
+                      <div>• Basic writing feedback</div>
+                      <div>• Standard email support</div>
+                      <div>• Basic citation checking</div>
+                    </>
+                  )}
+                  {userStats.subscriptionPlan === 'starter' && (
+                    <>
+                      <div>• 50 document analyses per month</div>
+                      <div>• Advanced writing feedback</div>
+                      <div>• Priority email support</div>
+                      <div>• Advanced citation checking</div>
+                      <div>• Plagiarism detection</div>
+                    </>
+                  )}
+                  {userStats.subscriptionPlan === 'premium' && (
+                    <>
+                      <div>• Unlimited document analyses</div>
+                      <div>• Premium AI writing feedback</div>
+                      <div>• 24/7 priority support</div>
+                      <div>• Advanced plagiarism detection</div>
+                      <div>• Custom citation styles</div>
+                      <div>• Bulk document processing</div>
+                    </>
+                  )}
                 </div>
               </div>
             </div>

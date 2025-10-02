@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const subscriptionService = require('../services/subscriptionService');
+const { query } = require('../database/connection');
 
 // @route   GET /api/webhooks/test
 // @desc    Test webhook endpoint
@@ -82,17 +83,18 @@ async function handleCheckoutSessionCompleted(session) {
     // Get customer ID from session
     const customerId = session.customer;
     
-    // Find user by Stripe customer ID
-    const { data: user, error: userError } = await subscriptionService.supabase
-      .from('users')
-      .select('id, email')
-      .eq('stripe_customer_id', customerId)
-      .single();
+    // Find user by Stripe customer ID using PostgreSQL
+    const userResult = await query(
+      'SELECT id, email FROM users WHERE stripe_customer_id = $1',
+      [customerId]
+    );
 
-    if (userError || !user) {
+    if (userResult.rows.length === 0) {
       console.error('User not found for customer:', customerId);
       return;
     }
+
+    const user = userResult.rows[0];
 
     // Get subscription details from Stripe
     const subscriptionId = session.subscription;
@@ -119,31 +121,36 @@ async function handleCheckoutSessionCompleted(session) {
       plan = 'premium';
     }
 
-    // Update user's subscription plan
-    const { error: updateError } = await subscriptionService.supabase
-      .from('users')
-      .update({ subscription_plan: plan })
-      .eq('id', user.id);
+    // Update user's subscription plan using PostgreSQL
+    console.log('Updating user plan to:', plan, 'for user:', user.id);
+    await query(
+      'UPDATE users SET subscription_plan = $1, subscription_status = $2 WHERE id = $3',
+      [plan, subscription.status, user.id]
+    );
+    console.log('Successfully updated user subscription plan');
 
-    if (updateError) {
-      console.error('Error updating user plan:', updateError);
-    }
-
-    // Record subscription in database
-    const { error: subError } = await subscriptionService.supabase
-      .from('subscriptions')
-      .insert({
-        user_id: user.id,
-        stripe_subscription_id: subscriptionId,
-        stripe_customer_id: customerId,
-        plan: plan,
-        status: subscription.status,
-        current_period_start: new Date(subscription.current_period_start * 1000).toISOString(),
-        current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
-        created_at: new Date().toISOString()
-      });
-
-    if (subError) {
+    // Record subscription in database using PostgreSQL
+    try {
+      await query(
+        `INSERT INTO subscriptions (user_id, stripe_subscription_id, stripe_customer_id, plan, status, current_period_start, current_period_end, created_at)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())
+         ON CONFLICT (stripe_subscription_id) DO UPDATE SET
+         plan = EXCLUDED.plan,
+         status = EXCLUDED.status,
+         current_period_start = EXCLUDED.current_period_start,
+         current_period_end = EXCLUDED.current_period_end`,
+        [
+          user.id,
+          subscriptionId,
+          customerId,
+          plan,
+          subscription.status,
+          new Date(subscription.current_period_start * 1000),
+          new Date(subscription.current_period_end * 1000)
+        ]
+      );
+      console.log('Successfully recorded subscription in database');
+    } catch (subError) {
       console.error('Error recording subscription:', subError);
     }
 
