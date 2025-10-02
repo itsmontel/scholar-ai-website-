@@ -29,11 +29,12 @@ const AccountPage = ({ onNavigate, user, onLogout }: AccountPageProps) => {
     totalDocuments: 0,
     documentsAnalyzed: 0,
     lastActivity: '',
-    subscriptionPlan: 'Free',
+    subscriptionPlan: 'free',
     subscriptionStatus: 'active',
     emailVerified: false
   });
   const [loading, setLoading] = useState(true);
+  const [displayUser, setDisplayUser] = useState<User | null>(null);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [passwordData, setPasswordData] = useState<PasswordChangeData>({
     currentPassword: '',
@@ -75,9 +76,9 @@ const AccountPage = ({ onNavigate, user, onLogout }: AccountPageProps) => {
             month: 'long',
             day: 'numeric'
           }),
-          subscriptionPlan: userData.subscriptionPlan || 'Free',
-          subscriptionStatus: userData.subscriptionStatus || 'active',
-          emailVerified: userData.emailVerified || false
+          subscriptionPlan: userData.subscription_plan || 'free',
+          subscriptionStatus: userData.subscription_status || 'active',
+          emailVerified: userData.email_verified || false
         }));
       }
 
@@ -109,9 +110,30 @@ const AccountPage = ({ onNavigate, user, onLogout }: AccountPageProps) => {
     }
   };
 
+  // Sync display user with prop user
   useEffect(() => {
-    fetchUserData();
-  }, []);
+    if (user) {
+      setDisplayUser(user);
+    } else if (typeof window !== 'undefined') {
+      // Fallback to localStorage if no user prop
+      try {
+        const userData = localStorage.getItem('user');
+        if (userData) {
+          setDisplayUser(JSON.parse(userData));
+        }
+      } catch (error) {
+        console.error('Error getting user from localStorage:', error);
+      }
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (displayUser) {
+      fetchUserData();
+    } else {
+      setLoading(false);
+    }
+  }, [displayUser]);
 
   // Handle password change
   const handlePasswordChange = async () => {
@@ -228,7 +250,7 @@ const AccountPage = ({ onNavigate, user, onLogout }: AccountPageProps) => {
                 <div>
                   <div className="font-semibold text-gray-900">Email</div>
                   <div className="text-gray-600 flex items-center">
-                    {user?.email || 'Not available'}
+                    {displayUser?.email || (displayUser ? 'Not available' : 'Loading...')}
                     {userStats.emailVerified && (
                       <span className="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
                         <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
@@ -243,7 +265,7 @@ const AccountPage = ({ onNavigate, user, onLogout }: AccountPageProps) => {
               <div className="flex items-center justify-between py-3 border-b border-gray-200">
                 <div>
                   <div className="font-semibold text-gray-900">Name</div>
-                  <div className="text-gray-600">{user?.name || 'Not available'}</div>
+                  <div className="text-gray-600">{displayUser?.name || (displayUser ? 'Not available' : 'Loading...')}</div>
                 </div>
               </div>
               <div className="flex items-center justify-between py-3">
@@ -266,8 +288,8 @@ const AccountPage = ({ onNavigate, user, onLogout }: AccountPageProps) => {
                   <div className="text-gray-600 flex items-center">
                     <span className="capitalize">{userStats.subscriptionPlan}</span>
                     <span className={`ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                      userStats.subscriptionStatus === 'active' 
-                        ? 'bg-green-100 text-green-800' 
+                      userStats.subscriptionStatus === 'active'
+                        ? 'bg-green-100 text-green-800'
                         : 'bg-yellow-100 text-yellow-800'
                     }`}>
                       {userStats.subscriptionStatus}
@@ -287,7 +309,7 @@ const AccountPage = ({ onNavigate, user, onLogout }: AccountPageProps) => {
                 <div>
                   <div className="font-semibold text-gray-900">Plan Features</div>
                   <div className="text-gray-600">
-                    {userStats.subscriptionPlan === 'free' 
+                    {userStats.subscriptionPlan === 'free'
                       ? '5 documents per month, Basic analysis, Standard support'
                       : userStats.subscriptionPlan === 'starter'
                       ? '50 documents per month, Advanced analysis, Priority support'

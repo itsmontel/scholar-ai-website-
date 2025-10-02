@@ -43,34 +43,31 @@ interface UserProps extends NavigationProps {
   onLogout?: () => void;
 }
 
-// Helper function to get initial user state from localStorage
-const getInitialUserState = (): User | null => {
-  try {
-    const token = localStorage.getItem('authToken');
-    const userData = localStorage.getItem('user');
-    if (token && userData) {
-      const parsedUser = JSON.parse(userData);
-      console.log('Initial user state from localStorage:', parsedUser);
-      return parsedUser;
-    }
-  } catch (error) {
-    console.error('Error parsing initial user data:', error);
-  }
-  return null;
-};
-
-// Helper function to get initial login state
-const getInitialLoginState = (): boolean => {
-  const token = localStorage.getItem('authToken');
-  const userData = localStorage.getItem('user');
-  return !!(token && userData);
-};
-
 // Main Application Component
 const AcademicAIApp = () => {
   const [currentPage, setCurrentPage] = useState('landing');
-  const [isLoggedIn, setIsLoggedIn] = useState(getInitialLoginState());
-  const [user, setUser] = useState<User | null>(getInitialUserState());
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+
+  // Initialize user state from localStorage on mount
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const token = localStorage.getItem('authToken');
+        const userData = localStorage.getItem('user');
+        if (token && userData) {
+          const parsedUser = JSON.parse(userData);
+          console.log('Initializing user state from localStorage:', parsedUser);
+          setIsLoggedIn(true);
+          setUser(parsedUser);
+        }
+      } catch (error) {
+        console.error('Error parsing initial user data:', error);
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('user');
+      }
+    }
+  }, []);
 
   // Route protection for authenticated pages
   const protectedRoutes = ['dashboard', 'analysis', 'analysis-history', 'upload', 'settings', 'profile', 'library', 'account', 'billing'];
