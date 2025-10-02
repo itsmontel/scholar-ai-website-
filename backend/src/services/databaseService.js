@@ -195,6 +195,18 @@ class DatabaseService {
       
       if (error) throw error;
       return { rows: [result], rowCount: 1 };
+    } else if (tableName === 'subscriptions') {
+      // For subscriptions table, handle ON CONFLICT with upsert
+      const { data: result, error } = await supabase
+        .from(tableName)
+        .upsert([data], { 
+          onConflict: 'stripe_subscription_id',
+          ignoreDuplicates: false 
+        })
+        .select();
+      
+      if (error) throw error;
+      return { rows: result || [], rowCount: result?.length || 0 };
     } else {
       // For other tables
       const { data: result, error } = await supabase
@@ -229,13 +241,15 @@ class DatabaseService {
     const setPairs = setClause.split(',');
     setPairs.forEach(pair => {
       const [column, value] = pair.split('=').map(s => s.trim());
-      if (value === '$1') {
-        updates[column] = params[0];
-      } else if (value === '$2') {
-        updates[column] = params[1];
-      } else if (value === '$3') {
-        updates[column] = params[2];
-      } else if (value === 'CURRENT_TIMESTAMP') {
+      
+      // Handle parameterized values ($1, $2, $3, etc.)
+      const paramMatch = value.match(/\$(\d+)/);
+      if (paramMatch) {
+        const paramIndex = parseInt(paramMatch[1]) - 1;
+        if (paramIndex < params.length) {
+          updates[column] = params[paramIndex];
+        }
+      } else if (value === 'CURRENT_TIMESTAMP' || value === 'NOW()') {
         updates[column] = new Date().toISOString();
       } else if (value === 'NULL') {
         updates[column] = null;
@@ -254,32 +268,18 @@ class DatabaseService {
       if (whereMatch) {
         const whereClause = whereMatch[1];
         
-        if (whereClause.includes('id = $1')) {
-          query = query.eq('id', params[0]);
-        } else if (whereClause.includes('email = $1')) {
-          query = query.eq('email', params[0]);
-        } else if (whereClause.includes('user_id = $1')) {
-          query = query.eq('user_id', params[0]);
-        } else if (whereClause.includes('email_verification_token = $1')) {
-          query = query.eq('email_verification_token', params[0]);
-        } else if (whereClause.includes('password_reset_token = $1')) {
-          query = query.eq('password_reset_token', params[0]);
-        }
-        
-        // Handle multiple conditions
-        if (whereClause.includes('AND')) {
-          const conditions = whereClause.split('AND');
-          conditions.forEach(condition => {
-            const trimmed = condition.trim();
-            if (trimmed.includes('id = $2')) {
-              query = query.eq('id', params[1]);
-            } else if (trimmed.includes('user_id = $2')) {
-              query = query.eq('user_id', params[1]);
-            } else if (trimmed.includes('status = $2')) {
-              query = query.eq('status', params[1]);
+        // Parse WHERE conditions more dynamically
+        const conditions = whereClause.split('AND').map(c => c.trim());
+        conditions.forEach(condition => {
+          const condMatch = condition.match(/(\w+)\s*=\s*\$(\d+)/);
+          if (condMatch) {
+            const column = condMatch[1];
+            const paramIndex = parseInt(condMatch[2]) - 1;
+            if (paramIndex < params.length) {
+              query = query.eq(column, params[paramIndex]);
             }
-          });
-        }
+          }
+        });
       }
     }
 
