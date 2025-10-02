@@ -17,3 +17,4 @@ ON DELETE SET NULL;
 ALTER TABLE document_analyses 
 ALTER COLUMN document_id DROP NOT NULL;
 
+

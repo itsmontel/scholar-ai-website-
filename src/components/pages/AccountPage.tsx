@@ -1,9 +1,15 @@
  import { useState, useEffect } from 'react';
 import Header from '../common/Header';
 
+interface User {
+  name: string;
+  email: string;
+  plan: string;
+}
+
 interface AccountPageProps {
   onNavigate: (page: string) => void;
-  user: any;
+  user: User | null;
   onLogout: () => void;
 }
 
