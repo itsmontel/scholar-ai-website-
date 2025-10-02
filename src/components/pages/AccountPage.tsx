@@ -53,6 +53,7 @@ const AccountPage = ({ onNavigate, user, onLogout }: AccountPageProps) => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteConfirmation, setDeleteConfirmation] = useState('');
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [showDeletionAnimation, setShowDeletionAnimation] = useState(false);
 
   // Fetch user stats and profile data
   const fetchUserData = async () => {
@@ -208,18 +209,24 @@ const AccountPage = ({ onNavigate, user, onLogout }: AccountPageProps) => {
       });
 
       if (response.ok) {
-        // Clear local storage and redirect to login
-        localStorage.removeItem('authToken');
-        localStorage.removeItem('user');
-        onLogout();
-        onNavigate('login');
+        // Show deletion animation
+        setShowDeletionAnimation(true);
+        setShowDeleteModal(false);
+        
+        // Wait for animation to complete, then clear data and redirect
+        setTimeout(() => {
+          localStorage.removeItem('authToken');
+          localStorage.removeItem('user');
+          onLogout();
+          onNavigate('login');
+        }, 3000); // 3 second animation
       } else {
         const data = await response.json();
         alert(data.message || 'Failed to delete account');
+        setDeleteLoading(false);
       }
     } catch (error) {
       alert('An error occurred while deleting account');
-    } finally {
       setDeleteLoading(false);
     }
   };
@@ -555,6 +562,40 @@ const AccountPage = ({ onNavigate, user, onLogout }: AccountPageProps) => {
               >
                 {deleteLoading ? 'Deleting...' : 'Delete Account'}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Account Deletion Animation */}
+      {showDeletionAnimation && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl p-8 max-w-md mx-4 text-center animate-pulse">
+            <div className="w-20 h-20 mx-auto mb-6 bg-red-100 rounded-full flex items-center justify-center">
+              <svg className="w-10 h-10 text-red-600 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </div>
+            <h3 className="text-2xl font-bold text-gray-900 mb-4">Account Deletion in Progress</h3>
+            <div className="space-y-3">
+              <div className="flex items-center justify-center space-x-2 text-gray-600">
+                <div className="w-2 h-2 bg-red-500 rounded-full animate-bounce"></div>
+                <span>Removing your data...</span>
+              </div>
+              <div className="flex items-center justify-center space-x-2 text-gray-600">
+                <div className="w-2 h-2 bg-red-500 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+                <span>Clearing documents...</span>
+              </div>
+              <div className="flex items-center justify-center space-x-2 text-gray-600">
+                <div className="w-2 h-2 bg-red-500 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                <span>Finalizing deletion...</span>
+              </div>
+            </div>
+            <div className="mt-6">
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div className="bg-red-600 h-2 rounded-full animate-pulse" style={{width: '100%'}}></div>
+              </div>
+              <p className="text-sm text-gray-500 mt-2">Your account will be permanently deleted</p>
             </div>
           </div>
         </div>
