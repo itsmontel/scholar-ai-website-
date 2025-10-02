@@ -166,17 +166,18 @@ async function handleSubscriptionCreated(subscription) {
   try {
     console.log('Processing subscription created:', subscription.id);
     
-    // Find user by customer ID
-    const { data: user, error: userError } = await subscriptionService.supabase
-      .from('users')
-      .select('id')
-      .eq('stripe_customer_id', subscription.customer)
-      .single();
+    // Find user by customer ID using PostgreSQL
+    const userResult = await query(
+      'SELECT id, email FROM users WHERE stripe_customer_id = $1',
+      [subscription.customer]
+    );
 
-    if (userError || !user) {
+    if (userResult.rows.length === 0) {
       console.error('User not found for customer:', subscription.customer);
       return;
     }
+
+    const user = userResult.rows[0];
 
     // Determine plan based on price ID
     const priceId = subscription.items.data[0].price.id;
@@ -188,15 +189,11 @@ async function handleSubscriptionCreated(subscription) {
       plan = 'premium';
     }
 
-    // Update user's subscription plan
-    const { error: updateError } = await subscriptionService.supabase
-      .from('users')
-      .update({ subscription_plan: plan })
-      .eq('id', user.id);
-
-    if (updateError) {
-      console.error('Error updating user plan:', updateError);
-    }
+    // Update user's subscription plan using PostgreSQL
+    await query(
+      'UPDATE users SET subscription_plan = $1, subscription_status = $2 WHERE id = $3',
+      [plan, subscription.status, user.id]
+    );
 
     console.log(`Subscription created for user ${user.id}: ${plan} plan`);
 
@@ -210,17 +207,18 @@ async function handleSubscriptionUpdated(subscription) {
   try {
     console.log('Processing subscription updated:', subscription.id);
     
-    // Find user by customer ID
-    const { data: user, error: userError } = await subscriptionService.supabase
-      .from('users')
-      .select('id')
-      .eq('stripe_customer_id', subscription.customer)
-      .single();
+    // Find user by customer ID using PostgreSQL
+    const userResult = await query(
+      'SELECT id, email FROM users WHERE stripe_customer_id = $1',
+      [subscription.customer]
+    );
 
-    if (userError || !user) {
+    if (userResult.rows.length === 0) {
       console.error('User not found for customer:', subscription.customer);
       return;
     }
+
+    const user = userResult.rows[0];
 
     // Determine plan based on price ID
     const priceId = subscription.items.data[0].price.id;
@@ -232,31 +230,29 @@ async function handleSubscriptionUpdated(subscription) {
       plan = 'premium';
     }
 
-    // Update subscription in database
-    const { error: updateError } = await subscriptionService.supabase
-      .from('subscriptions')
-      .update({
-        plan: plan,
-        status: subscription.status,
-        current_period_start: new Date(subscription.current_period_start * 1000).toISOString(),
-        current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
-        updated_at: new Date().toISOString()
-      })
-      .eq('stripe_subscription_id', subscription.id);
+    // Update subscription in database using PostgreSQL
+    await query(
+      `UPDATE subscriptions SET
+        plan = $1,
+        status = $2,
+        current_period_start = $3,
+        current_period_end = $4,
+        updated_at = NOW()
+      WHERE stripe_subscription_id = $5`,
+      [
+        plan,
+        subscription.status,
+        new Date(subscription.current_period_start * 1000),
+        new Date(subscription.current_period_end * 1000),
+        subscription.id
+      ]
+    );
 
-    if (updateError) {
-      console.error('Error updating subscription:', updateError);
-    }
-
-    // Update user's subscription plan
-    const { error: userUpdateError } = await subscriptionService.supabase
-      .from('users')
-      .update({ subscription_plan: plan })
-      .eq('id', user.id);
-
-    if (userUpdateError) {
-      console.error('Error updating user plan:', userUpdateError);
-    }
+    // Update user's subscription plan using PostgreSQL
+    await query(
+      'UPDATE users SET subscription_plan = $1, subscription_status = $2 WHERE id = $3',
+      [plan, subscription.status, user.id]
+    );
 
     console.log(`Subscription updated for user ${user.id}: ${plan} plan`);
 
@@ -270,40 +266,33 @@ async function handleSubscriptionDeleted(subscription) {
   try {
     console.log('Processing subscription deleted:', subscription.id);
     
-    // Find user by customer ID
-    const { data: user, error: userError } = await subscriptionService.supabase
-      .from('users')
-      .select('id')
-      .eq('stripe_customer_id', subscription.customer)
-      .single();
+    // Find user by customer ID using PostgreSQL
+    const userResult = await query(
+      'SELECT id FROM users WHERE stripe_customer_id = $1',
+      [subscription.customer]
+    );
 
-    if (userError || !user) {
+    if (userResult.rows.length === 0) {
       console.error('User not found for customer:', subscription.customer);
       return;
     }
 
-    // Update subscription status in database
-    const { error: updateError } = await subscriptionService.supabase
-      .from('subscriptions')
-      .update({
-        status: 'canceled',
-        canceled_at: new Date().toISOString()
-      })
-      .eq('stripe_subscription_id', subscription.id);
+    const user = userResult.rows[0];
 
-    if (updateError) {
-      console.error('Error updating subscription status:', updateError);
-    }
+    // Update subscription status in database using PostgreSQL
+    await query(
+      `UPDATE subscriptions SET
+        status = 'canceled',
+        canceled_at = NOW()
+      WHERE stripe_subscription_id = $1`,
+      [subscription.id]
+    );
 
-    // Downgrade user to free plan
-    const { error: userUpdateError } = await subscriptionService.supabase
-      .from('users')
-      .update({ subscription_plan: 'free' })
-      .eq('id', user.id);
-
-    if (userUpdateError) {
-      console.error('Error downgrading user:', userUpdateError);
-    }
+    // Downgrade user to free plan using PostgreSQL
+    await query(
+      'UPDATE users SET subscription_plan = $1, subscription_status = $2 WHERE id = $3',
+      ['free', 'canceled', user.id]
+    );
 
     console.log(`Subscription canceled for user ${user.id}, downgraded to free plan`);
 
@@ -317,28 +306,31 @@ async function handleInvoicePaymentSucceeded(invoice) {
   try {
     console.log('Processing invoice payment succeeded:', invoice.id);
     
-    // Find user by customer ID
-    const { data: user, error: userError } = await subscriptionService.supabase
-      .from('users')
-      .select('id')
-      .eq('stripe_customer_id', invoice.customer)
-      .single();
+    // Find user by customer ID using PostgreSQL
+    const userResult = await query(
+      'SELECT id FROM users WHERE stripe_customer_id = $1',
+      [invoice.customer]
+    );
 
-    if (userError || !user) {
+    if (userResult.rows.length === 0) {
       console.error('User not found for customer:', invoice.customer);
       return;
     }
 
-    // Update subscription status to active
-    const { error: updateError } = await subscriptionService.supabase
-      .from('subscriptions')
-      .update({ status: 'active' })
-      .eq('stripe_customer_id', invoice.customer)
-      .eq('status', 'past_due');
+    const user = userResult.rows[0];
 
-    if (updateError) {
-      console.error('Error updating subscription status:', updateError);
-    }
+    // Update subscription status to active using PostgreSQL
+    await query(
+      `UPDATE subscriptions SET status = 'active'
+       WHERE stripe_customer_id = $1 AND status = 'past_due'`,
+      [invoice.customer]
+    );
+
+    // Update user status to active
+    await query(
+      'UPDATE users SET subscription_status = $1 WHERE id = $2',
+      ['active', user.id]
+    );
 
     console.log(`Invoice payment succeeded for user ${user.id}`);
 
@@ -352,27 +344,31 @@ async function handleInvoicePaymentFailed(invoice) {
   try {
     console.log('Processing invoice payment failed:', invoice.id);
     
-    // Find user by customer ID
-    const { data: user, error: userError } = await subscriptionService.supabase
-      .from('users')
-      .select('id')
-      .eq('stripe_customer_id', invoice.customer)
-      .single();
+    // Find user by customer ID using PostgreSQL
+    const userResult = await query(
+      'SELECT id FROM users WHERE stripe_customer_id = $1',
+      [invoice.customer]
+    );
 
-    if (userError || !user) {
+    if (userResult.rows.length === 0) {
       console.error('User not found for customer:', invoice.customer);
       return;
     }
 
-    // Update subscription status to past_due
-    const { error: updateError } = await subscriptionService.supabase
-      .from('subscriptions')
-      .update({ status: 'past_due' })
-      .eq('stripe_customer_id', invoice.customer);
+    const user = userResult.rows[0];
 
-    if (updateError) {
-      console.error('Error updating subscription status:', updateError);
-    }
+    // Update subscription status to past_due using PostgreSQL
+    await query(
+      `UPDATE subscriptions SET status = 'past_due'
+       WHERE stripe_customer_id = $1`,
+      [invoice.customer]
+    );
+
+    // Update user status to past_due
+    await query(
+      'UPDATE users SET subscription_status = $1 WHERE id = $2',
+      ['past_due', user.id]
+    );
 
     console.log(`Invoice payment failed for user ${user.id}`);
 
@@ -386,17 +382,18 @@ async function handleTrialWillEnd(subscription) {
   try {
     console.log('Processing trial will end:', subscription.id);
     
-    // Find user by customer ID
-    const { data: user, error: userError } = await subscriptionService.supabase
-      .from('users')
-      .select('id, email')
-      .eq('stripe_customer_id', subscription.customer)
-      .single();
+    // Find user by customer ID using PostgreSQL
+    const userResult = await query(
+      'SELECT id, email FROM users WHERE stripe_customer_id = $1',
+      [subscription.customer]
+    );
 
-    if (userError || !user) {
+    if (userResult.rows.length === 0) {
       console.error('User not found for customer:', subscription.customer);
       return;
     }
+
+    const user = userResult.rows[0];
 
     // TODO: Send notification email about trial ending
     console.log(`Trial ending soon for user ${user.id} (${user.email})`);
