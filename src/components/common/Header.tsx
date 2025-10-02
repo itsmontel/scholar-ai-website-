@@ -182,7 +182,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
                   </span>
                 </div>
                 <div className="hidden md:block text-left">
-                  <div className="text-sm font-semibold text-gray-900">{user.email || 'user@example.com'}</div>
+                  <div className="text-sm font-semibold text-gray-900">{user.email || 'Loading...'}</div>
                   <div className="text-xs text-gray-500">WriteScholar User</div>
                 </div>
                 <svg 
@@ -200,7 +200,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
                 <div className="absolute right-0 mt-2 w-56 sm:w-64 bg-white rounded-xl shadow-2xl border border-gray-200/50 backdrop-blur-sm z-50">
                   {/* User Info Section */}
                   <div className="px-4 py-3 border-b border-gray-100">
-                    <div className="text-sm font-medium text-gray-900">{user.email || 'user@example.com'}</div>
+                    <div className="text-sm font-medium text-gray-900">{user.email || 'Loading...'}</div>
                     <div className="text-xs text-gray-500 capitalize">{usageStats?.plan || 'Free'} Plan</div>
                     
                     {/* Usage Statistics */}

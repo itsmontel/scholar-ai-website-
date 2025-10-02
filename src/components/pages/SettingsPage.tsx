@@ -109,13 +109,13 @@ const SettingsPage = ({ onNavigate, user, onLogout }: SettingsPageProps) => {
               <div className="flex items-center justify-between py-3 border-b border-gray-200">
                 <div>
                   <div className="font-semibold text-gray-900">Email</div>
-                  <div className="text-gray-600">{user?.email || 'user@example.com'}</div>
+                  <div className="text-gray-600">{user?.email || 'Loading...'}</div>
       </div>
     </div>
               <div className="flex items-center justify-between py-3 border-b border-gray-200">
       <div>
                   <div className="font-semibold text-gray-900">Name</div>
-                  <div className="text-gray-600">{user?.name || 'User Name'}</div>
+                  <div className="text-gray-600">{user?.name || 'Loading...'}</div>
                 </div>
               </div>
               <div className="flex items-center justify-between py-3">

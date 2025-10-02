@@ -321,6 +321,7 @@ router.get('/verify-email', async (req, res) => {
 router.post('/forgot-password', async (req, res) => {
   try {
     const { email } = req.body;
+    console.log('Forgot password request for email:', email);
 
     if (!email) {
       return res.status(400).json({

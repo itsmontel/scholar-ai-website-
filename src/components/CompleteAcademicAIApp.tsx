@@ -21,6 +21,7 @@ import ContactPage from './pages/ContactPage';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import TermsOfServicePage from './pages/TermsOfServicePage';
 import BillingPage from './pages/BillingPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
 
 // Import common components
 import ErrorBoundary from './common/ErrorBoundary';
@@ -42,11 +43,34 @@ interface UserProps extends NavigationProps {
   onLogout?: () => void;
 }
 
+// Helper function to get initial user state from localStorage
+const getInitialUserState = (): User | null => {
+  try {
+    const token = localStorage.getItem('authToken');
+    const userData = localStorage.getItem('user');
+    if (token && userData) {
+      const parsedUser = JSON.parse(userData);
+      console.log('Initial user state from localStorage:', parsedUser);
+      return parsedUser;
+    }
+  } catch (error) {
+    console.error('Error parsing initial user data:', error);
+  }
+  return null;
+};
+
+// Helper function to get initial login state
+const getInitialLoginState = (): boolean => {
+  const token = localStorage.getItem('authToken');
+  const userData = localStorage.getItem('user');
+  return !!(token && userData);
+};
+
 // Main Application Component
 const AcademicAIApp = () => {
   const [currentPage, setCurrentPage] = useState('landing');
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(getInitialLoginState());
+  const [user, setUser] = useState<User | null>(getInitialUserState());
 
   // Route protection for authenticated pages
   const protectedRoutes = ['dashboard', 'analysis', 'analysis-history', 'upload', 'settings', 'profile', 'library', 'account', 'billing'];
@@ -55,19 +79,26 @@ const AcademicAIApp = () => {
   const validateAndRefreshToken = async () => {
     try {
       console.log('Validating token...');
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        console.log('No token found, skipping validation');
+        return;
+      }
+
       const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/auth/me`, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+          'Authorization': `Bearer ${token}`,
         },
       });
 
       console.log('Token validation response status:', response.status);
       if (response.status === 401) {
         // Token expired, try to refresh
+        console.log('Token expired, attempting refresh...');
         const refreshResponse = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/auth/refresh`, {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+            'Authorization': `Bearer ${token}`,
           },
         });
 
@@ -75,14 +106,49 @@ const AcademicAIApp = () => {
           const refreshData = await refreshResponse.json();
           localStorage.setItem('authToken', refreshData.data.token);
           console.log('Token refreshed successfully');
+          
+          // After successful refresh, get updated user data
+          const userResponse = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/auth/me`, {
+            headers: {
+              'Authorization': `Bearer ${refreshData.data.token}`,
+            },
+          });
+          
+          if (userResponse.ok) {
+            const userData = await userResponse.json();
+            if (userData.data) {
+              const updatedUser = {
+                id: userData.data.id,
+                email: userData.data.email,
+                name: userData.data.first_name && userData.data.last_name 
+                  ? `${userData.data.first_name} ${userData.data.last_name}` 
+                  : userData.data.name || userData.data.email,
+                first_name: userData.data.first_name,
+                last_name: userData.data.last_name,
+                plan: userData.data.subscription_plan || 'free',
+                subscription_status: userData.data.subscription_status,
+                email_verified: userData.data.email_verified
+              };
+              setUser(updatedUser);
+              localStorage.setItem('user', JSON.stringify(updatedUser));
+              console.log('User data updated after token refresh');
+            }
+          }
         } else {
-          // Refresh failed - clear auth state silently
-          // Don't force logout, let user continue browsing public pages
-          console.log('Token refresh failed, clearing auth state');
-          setIsLoggedIn(false);
-          setUser(null);
-          localStorage.removeItem('authToken');
-          localStorage.removeItem('user');
+          // Refresh failed - but DON'T clear auth state immediately
+          // Keep user logged in with cached data for better UX
+          console.log('Token refresh failed, but keeping user logged in with cached data');
+          
+          // Only clear if we're on a protected route and have no cached user data
+          const cachedUser = localStorage.getItem('user');
+          if (!cachedUser && protectedRoutes.includes(currentPage)) {
+            console.log('No cached user data and on protected route, clearing auth state');
+            setIsLoggedIn(false);
+            setUser(null);
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('user');
+            setCurrentPage('login');
+          }
         }
       } else if (response.ok) {
         const userData = await response.json();
@@ -104,13 +170,15 @@ const AcademicAIApp = () => {
           localStorage.setItem('user', JSON.stringify(updatedUser));
         }
         console.log('Token is valid, user data updated');
+      } else {
+        // Other error status - keep user logged in with cached data
+        console.log('Server error during validation, keeping user logged in with cached data');
       }
     } catch (error) {
       console.error('Token validation error:', error);
-      // On network error, keep the user logged in locally
-      // They can still browse, but API calls might fail
-      // Don't force logout - better UX for temporary network issues
-      console.log('Network error during validation, keeping user logged in locally');
+      // On network error, always keep the user logged in locally
+      // They can still browse with cached data
+      console.log('Network error during validation, keeping user logged in with cached data');
     }
   };
 
@@ -118,26 +186,16 @@ const AcademicAIApp = () => {
   useEffect(() => {
     const path = window.location.pathname;
     
-    // Check for existing authentication
-    const token = localStorage.getItem('authToken');
-    const userData = localStorage.getItem('user');
-    
-    if (token && userData) {
-      try {
-        const user = JSON.parse(userData);
-        console.log('Setting user from localStorage:', user);
-        setIsLoggedIn(true);
-        setUser(user);
-        
-        // Always validate token when user is logged in (on any page)
+    // Validate token in background if user is logged in
+    // User state is already initialized from localStorage, so no need to set it again
+    if (isLoggedIn && user) {
+      console.log('User already logged in from initial state:', user);
+      // Validate token in background, but don't let failures clear the user immediately
+      setTimeout(() => {
         validateAndRefreshToken();
-      } catch (error) {
-        console.error('Error parsing user data:', error);
-        localStorage.removeItem('authToken');
-        localStorage.removeItem('user');
-      }
+      }, 100); // Small delay to ensure UI renders first
     } else {
-      console.log('No token or user data found in localStorage');
+      console.log('No user logged in on initial load');
     }
     
     // Set initial page based on URL
@@ -145,6 +203,7 @@ const AcademicAIApp = () => {
       if (pathname === '/email-verification') return 'email-verification';
       if (pathname === '/signup') return 'signup';
       if (pathname === '/login') return 'login';
+      if (pathname === '/reset-password') return 'reset-password';
       if (pathname === '/dashboard') return 'dashboard';
       if (pathname === '/pricing') return 'pricing';
       if (pathname === '/features') return 'features';
@@ -195,22 +254,35 @@ const AcademicAIApp = () => {
     };
   }, []);
 
-  // Ensure user data is always restored from localStorage
+  // Sync user data from localStorage when it changes (e.g., from another tab or after login)
   useEffect(() => {
-    const token = localStorage.getItem('authToken');
-    const userData = localStorage.getItem('user');
-    
-    if (token && userData && !user) {
-      try {
-        const parsedUser = JSON.parse(userData);
-        console.log('Restoring user data from useEffect:', parsedUser);
-        setIsLoggedIn(true);
-        setUser(parsedUser);
-      } catch (error) {
-        console.error('Error restoring user data:', error);
+    const handleStorageChange = () => {
+      const token = localStorage.getItem('authToken');
+      const userData = localStorage.getItem('user');
+      
+      if (token && userData) {
+        try {
+          const parsedUser = JSON.parse(userData);
+          console.log('Syncing user data from storage change:', parsedUser);
+          setIsLoggedIn(true);
+          setUser(parsedUser);
+        } catch (error) {
+          console.error('Error syncing user data:', error);
+        }
+      } else if (!token) {
+        // If token is removed, log out
+        setIsLoggedIn(false);
+        setUser(null);
       }
-    }
-  }, [user, currentPage]); // Run when user or page changes
+    };
+    
+    // Listen for storage changes from other tabs
+    window.addEventListener('storage', handleStorageChange);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, []); // Run once on mount
 
   // Set up periodic token refresh for logged-in users
   useEffect(() => {
@@ -249,16 +321,25 @@ const AcademicAIApp = () => {
             const retryResponse = await originalFetch(...args);
             return retryResponse;
           } else {
-            // Refresh failed - clear auth state but don't redirect
-            console.log('Auto-refresh failed, clearing auth state');
-            setIsLoggedIn(false);
-            setUser(null);
-            localStorage.removeItem('authToken');
-            localStorage.removeItem('user');
+            // Refresh failed - but DON'T clear auth state automatically
+            // Let the user continue with cached data
+            console.log('Auto-refresh failed, but keeping user logged in with cached data');
+            
+            // Only clear auth if we're on a protected route and have no cached user
+            const cachedUser = localStorage.getItem('user');
+            if (!cachedUser && protectedRoutes.includes(currentPage)) {
+              console.log('No cached user data on protected route, clearing auth state');
+              setIsLoggedIn(false);
+              setUser(null);
+              localStorage.removeItem('authToken');
+              localStorage.removeItem('user');
+              setCurrentPage('login');
+            }
           }
         } catch (error) {
           console.error('Auto-refresh failed:', error);
-          // Don't logout on network errors - better UX
+          // Don't logout on network errors - keep user logged in with cached data
+          console.log('Network error during auto-refresh, keeping user logged in');
         }
       }
       
@@ -269,7 +350,7 @@ const AcademicAIApp = () => {
     return () => {
       window.fetch = originalFetch;
     };
-  }, [isLoggedIn]);
+  }, [isLoggedIn, currentPage]);
 
   // Navigation function
   const navigateTo = (page: string) => {
@@ -328,6 +409,8 @@ const AcademicAIApp = () => {
         return <SignUpPage onNavigate={navigateTo} onSignUp={handleSignUp} />;
       case 'login':
         return <LoginPage onNavigate={navigateTo} onLogin={handleLogin} />;
+      case 'reset-password':
+        return <ResetPasswordPage onNavigate={navigateTo} />;
       case 'email-verification':
         return <EmailVerificationPage onNavigate={navigateTo} />;
       case 'pricing':

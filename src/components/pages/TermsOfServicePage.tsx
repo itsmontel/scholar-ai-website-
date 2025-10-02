@@ -191,8 +191,8 @@ const TermsOfServicePage: React.FC<TermsOfServicePageProps> = ({ onNavigate, use
                   If you have any questions about these terms, please contact us at:
                 </p>
                 <div className="bg-gray-50 p-4 rounded-lg">
-                  <p><strong>Email:</strong> legal@scholarai.com</p>
-                  <p><strong>Support:</strong> support@scholarai.com</p>
+                  <p><strong>Email:</strong> legal@writescholar.com</p>
+                  <p><strong>Support:</strong> support@writescholar.com</p>
                 </div>
               </div>
             </section>

@@ -26,29 +26,29 @@ const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
     {
       id: 1,
       category: 'getting-started',
-      question: 'How do I get started with Scholar AI?',
+      question: 'How do I get started with WriteScholar?',
       answer: 'Getting started is easy! Simply sign up for an account, then you can either upload a document from your computer or paste text directly into the dashboard. Make sure your text is at least 200 words for analysis. Click "Send to Analysis" to begin.',
       tags: ['getting-started', 'signup', 'first-time']
     },
     {
       id: 2,
       category: 'analysis',
-      question: 'What types of analysis does Scholar AI provide?',
-      answer: 'Scholar AI provides comprehensive academic analysis including: academic writing quality assessment, citation and referencing review, argument structure analysis, grammar and style feedback, and content depth evaluation. All feedback is categorized as strengths (green), improvements (amber), or concerns (red).',
+      question: 'What types of analysis does WriteScholar provide?',
+      answer: 'WriteScholar provides comprehensive academic analysis including: academic writing quality assessment, citation and referencing review, argument structure analysis, grammar and style feedback, and content depth evaluation. All feedback is categorized as strengths (green), improvements (amber), or concerns (red).',
       tags: ['analysis', 'types', 'comprehensive']
     },
     {
       id: 3,
       category: 'analysis',
       question: 'How does the highlighting and annotation system work?',
-      answer: 'Scholar AI highlights specific text passages in your document and provides contextual feedback. Hover over any highlighted text to see detailed comments and suggestions. The annotations are color-coded: green for strengths, amber for improvements, and red for concerns. Click on annotations in the sidebar to jump to specific sections.',
+      answer: 'WriteScholar highlights specific text passages in your document and provides contextual feedback. Hover over any highlighted text to see detailed comments and suggestions. The annotations are color-coded: green for strengths, amber for improvements, and red for concerns. Click on annotations in the sidebar to jump to specific sections.',
       tags: ['highlights', 'annotations', 'feedback']
     },
     {
       id: 4,
       category: 'citations',
       question: 'Which citation styles are supported?',
-      answer: 'Scholar AI supports all major academic citation styles including APA, Harvard, Chicago, MLA, IEEE, and Vancouver. You can select your preferred citation style from the dropdown menu before running the analysis. The AI will provide feedback specific to your chosen citation format.',
+      answer: 'WriteScholar supports all major academic citation styles including APA, Harvard, Chicago, MLA, IEEE, and Vancouver. You can select your preferred citation style from the dropdown menu before running the analysis. The AI will provide feedback specific to your chosen citation format.',
       tags: ['citations', 'apa', 'harvard', 'chicago', 'mla']
     },
     {
@@ -68,8 +68,8 @@ const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
     {
       id: 7,
       category: 'analysis',
-      question: 'What AI model does Scholar AI use?',
-      answer: 'Scholar AI uses OpenAI\'s advanced language models to provide intelligent analysis of your academic writing. The system is specifically trained to understand academic writing conventions and provide relevant, actionable feedback for improving your work.',
+      question: 'What AI model does WriteScholar use?',
+      answer: 'WriteScholar uses OpenAI\'s advanced language models to provide intelligent analysis of your academic writing. The system is specifically trained to understand academic writing conventions and provide relevant, actionable feedback for improving your work.',
       tags: ['ai', 'openai', 'model']
     },
     {
@@ -83,7 +83,7 @@ const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
       id: 9,
       category: 'getting-started',
       question: 'What is the minimum word count for analysis?',
-      answer: 'Scholar AI requires a minimum of 200 words for analysis. This ensures the AI has enough content to provide meaningful feedback. If your text is shorter than 200 words, you\'ll see a warning message and the analysis button will be disabled.',
+      answer: 'WriteScholar requires a minimum of 200 words for analysis. This ensures the AI has enough content to provide meaningful feedback. If your text is shorter than 200 words, you\'ll see a warning message and the analysis button will be disabled.',
       tags: ['word-count', 'minimum', 'requirements']
     },
     {
@@ -164,7 +164,7 @@ const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
             Frequently Asked <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Questions</span>
           </h1>
           <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-            Find answers to common questions and learn how to make the most of Scholar AI
+            Find answers to common questions and learn how to make the most of WriteScholar
           </p>
           
           {/* Search Bar */}

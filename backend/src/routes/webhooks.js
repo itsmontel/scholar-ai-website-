@@ -2,6 +2,17 @@ const express = require('express');
 const router = express.Router();
 const subscriptionService = require('../services/subscriptionService');
 
+// @route   GET /api/webhooks/test
+// @desc    Test webhook endpoint
+// @access  Public
+router.get('/test', (req, res) => {
+  res.json({ 
+    success: true, 
+    message: 'Webhook endpoint is working!',
+    timestamp: new Date().toISOString()
+  });
+});
+
 // @route   POST /api/webhooks/stripe
 // @desc    Handle Stripe webhook events
 // @access  Public (but verified with signature)

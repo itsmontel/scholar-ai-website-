@@ -152,8 +152,8 @@ const PrivacyPolicyPage: React.FC<PrivacyPolicyPageProps> = ({ onNavigate, user,
                   please contact us at:
                 </p>
                 <div className="bg-gray-50 p-4 rounded-lg">
-                  <p><strong>Email:</strong> privacy@scholarai.com</p>
-                  <p><strong>Address:</strong> Scholar AI Privacy Team</p>
+                  <p><strong>Email:</strong> privacy@writescholar.com</p>
+                  <p><strong>Address:</strong> WriteScholar Privacy Team</p>
                 </div>
               </div>
             </section>

@@ -25,8 +25,8 @@ const ProfilePage = ({ onNavigate, user, onLogout }: ProfilePageProps) => {
   useEffect(() => {
     // Simulate fetching profile data
     setProfileData({
-      name: user?.name || 'User Name',
-      email: user?.email || 'user@example.com',
+      name: user?.name || 'Loading...',
+      email: user?.email || 'Loading...',
       institution: 'University of Example',
       researchField: 'Computer Science',
       bio: 'Passionate researcher focused on AI and machine learning applications in academic writing.',

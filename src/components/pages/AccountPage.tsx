@@ -228,7 +228,7 @@ const AccountPage = ({ onNavigate, user, onLogout }: AccountPageProps) => {
                 <div>
                   <div className="font-semibold text-gray-900">Email</div>
                   <div className="text-gray-600 flex items-center">
-                    {user?.email || 'Loading...'}
+                    {user?.email || 'Not available'}
                     {userStats.emailVerified && (
                       <span className="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
                         <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
@@ -243,7 +243,7 @@ const AccountPage = ({ onNavigate, user, onLogout }: AccountPageProps) => {
               <div className="flex items-center justify-between py-3 border-b border-gray-200">
                 <div>
                   <div className="font-semibold text-gray-900">Name</div>
-                  <div className="text-gray-600">{user?.name || 'Loading...'}</div>
+                  <div className="text-gray-600">{user?.name || 'Not available'}</div>
                 </div>
               </div>
               <div className="flex items-center justify-between py-3">
@@ -255,30 +255,6 @@ const AccountPage = ({ onNavigate, user, onLogout }: AccountPageProps) => {
             </div>
           </div>
 
-          {/* Usage Statistics */}
-          <div className="bg-white/90 backdrop-blur-xl border border-gray-200/60 rounded-2xl p-8 shadow-lg">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Usage Statistics</h2>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between py-3 border-b border-gray-200">
-                <div>
-                  <div className="font-semibold text-gray-900">Total Documents</div>
-                  <div className="text-gray-600">{loading ? 'Loading...' : userStats.totalDocuments}</div>
-                </div>
-              </div>
-              <div className="flex items-center justify-between py-3 border-b border-gray-200">
-                <div>
-                  <div className="font-semibold text-gray-900">Documents Analyzed</div>
-                  <div className="text-gray-600">{loading ? 'Loading...' : userStats.documentsAnalyzed}</div>
-                </div>
-              </div>
-              <div className="flex items-center justify-between py-3">
-                <div>
-                  <div className="font-semibold text-gray-900">Last Activity</div>
-                  <div className="text-gray-600">{loading ? 'Loading...' : userStats.lastActivity}</div>
-                </div>
-              </div>
-            </div>
-          </div>
 
           {/* Subscription */}
           <div className="bg-white/90 backdrop-blur-xl border border-gray-200/60 rounded-2xl p-8 shadow-lg">
@@ -312,8 +288,10 @@ const AccountPage = ({ onNavigate, user, onLogout }: AccountPageProps) => {
                   <div className="font-semibold text-gray-900">Plan Features</div>
                   <div className="text-gray-600">
                     {userStats.subscriptionPlan === 'Free' 
-                      ? 'Basic document analysis, Limited uploads'
-                      : 'Unlimited document analysis, All features'
+                      ? '5 documents per month, Basic analysis, Standard support'
+                      : userStats.subscriptionPlan === 'Starter'
+                      ? '50 documents per month, Advanced analysis, Priority support'
+                      : 'Unlimited documents, Premium analysis, 24/7 support'
                     }
                   </div>
                 </div>
