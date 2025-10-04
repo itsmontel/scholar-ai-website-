@@ -40,6 +40,10 @@ app.use(cors({
   credentials: true
 }));
 
+// Webhook route MUST come BEFORE body parsing middleware
+// This is because Stripe signature verification needs raw body
+app.use('/api/webhooks', webhookRoutes);
+
 // Body parsing middleware
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
@@ -99,7 +103,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/documents', uploadLimiter, documentRoutes);
 app.use('/api/analysis', analysisLimiter, analysisRoutes);
 app.use('/api/subscriptions', subscriptionRoutes);
-app.use('/api/webhooks', webhookRoutes);
+// Webhooks already registered before body parser (line 45)
 
 // 404 handler
 app.use('*', (req, res) => {
