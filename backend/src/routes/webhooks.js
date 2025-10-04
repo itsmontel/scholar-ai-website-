@@ -70,7 +70,8 @@ router.post('/stripe', express.raw({ type: 'application/json' }), async (req, re
     res.json({ received: true });
 
   } catch (error) {
-    console.error('Error processing webhook:', error);
+    console.error('🔥 WEBHOOK ERROR: Error processing webhook:', error);
+    console.error('🔥 WEBHOOK ERROR: Stack trace:', error.stack);
     res.status(500).json({ error: 'Webhook processing failed' });
   }
 });
@@ -78,10 +79,12 @@ router.post('/stripe', express.raw({ type: 'application/json' }), async (req, re
 // Handle successful checkout session
 async function handleCheckoutSessionCompleted(session) {
   try {
-    console.log('Processing checkout session completed:', session.id);
+    console.log('🔥 WEBHOOK: Processing checkout session completed:', session.id);
+    console.log('🔥 WEBHOOK: Session data:', JSON.stringify(session, null, 2));
     
     // Get customer ID from session
     const customerId = session.customer;
+    console.log('🔥 WEBHOOK: Customer ID:', customerId);
     
     // Find user by Stripe customer ID using PostgreSQL
     const userResult = await query(
@@ -90,24 +93,28 @@ async function handleCheckoutSessionCompleted(session) {
     );
 
     if (userResult.rows.length === 0) {
-      console.error('User not found for customer:', customerId);
+      console.error('🔥 WEBHOOK ERROR: User not found for customer:', customerId);
       return;
     }
 
     const user = userResult.rows[0];
+    console.log('🔥 WEBHOOK: Found user:', user.email);
 
     // Get subscription details from Stripe
     const subscriptionId = session.subscription;
     if (!subscriptionId) {
-      console.error('No subscription ID in checkout session');
+      console.error('🔥 WEBHOOK ERROR: No subscription ID in checkout session');
       return;
     }
 
+    console.log('🔥 WEBHOOK: Fetching subscription from Stripe:', subscriptionId);
     const stripeResult = await subscriptionService.getStripeSubscription(subscriptionId);
     if (!stripeResult.success) {
-      console.error('Failed to fetch subscription from Stripe:', stripeResult.error);
+      console.error('🔥 WEBHOOK ERROR: Failed to fetch subscription from Stripe:', stripeResult.error);
       return;
     }
+
+    console.log('🔥 WEBHOOK: Got subscription from Stripe:', stripeResult.subscription.id);
 
     const subscription = stripeResult.subscription;
     
@@ -122,11 +129,12 @@ async function handleCheckoutSessionCompleted(session) {
     }
 
     // Update user's subscription plan using PostgreSQL
-    console.log('Updating user plan to:', plan, 'for user:', user.id);
+    console.log('🔥 WEBHOOK: Updating user plan to:', plan, 'for user:', user.id);
     await query(
       'UPDATE users SET subscription_plan = $1, subscription_status = $2 WHERE id = $3',
       [plan, subscription.status, user.id]
     );
+    console.log('🔥 WEBHOOK: User plan updated successfully!');
     console.log('Successfully updated user subscription plan');
 
     // Record subscription in database using PostgreSQL
