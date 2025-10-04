@@ -132,13 +132,14 @@ async function handleCheckoutSessionCompleted(session) {
     // Record subscription in database using PostgreSQL
     try {
       await query(
-        `INSERT INTO subscriptions (user_id, stripe_subscription_id, stripe_customer_id, plan, status, current_period_start, current_period_end, created_at)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())
+        `INSERT INTO subscriptions (user_id, stripe_subscription_id, stripe_customer_id, plan, status, current_period_start, current_period_end, created_at, updated_at)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), NOW())
          ON CONFLICT (stripe_subscription_id) DO UPDATE SET
          plan = EXCLUDED.plan,
          status = EXCLUDED.status,
          current_period_start = EXCLUDED.current_period_start,
-         current_period_end = EXCLUDED.current_period_end`,
+         current_period_end = EXCLUDED.current_period_end,
+         updated_at = NOW()`,
         [
           user.id,
           subscriptionId,

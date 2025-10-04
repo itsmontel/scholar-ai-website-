@@ -51,7 +51,15 @@ class DatabaseService {
     }
     
     const tableName = tableMatch[1];
-    let query = supabase.from(tableName);
+    
+    // Extract column names from SELECT clause
+    const selectMatch = sql.match(/SELECT\s+(.+?)\s+FROM/i);
+    let selectColumns = '*';
+    if (selectMatch && selectMatch[1].trim() !== '*') {
+      selectColumns = selectMatch[1].trim();
+    }
+    
+    let query = supabase.from(tableName).select(selectColumns);
 
     // Handle WHERE clauses
     if (sql.includes('WHERE')) {
@@ -140,13 +148,15 @@ class DatabaseService {
 
     // Handle COUNT queries
     if (sql.includes('COUNT(*)')) {
-      const { count, error } = await query.select('*', { count: 'exact', head: true });
+      // Re-build query for count
+      const countQuery = supabase.from(tableName).select('*', { count: 'exact', head: true });
+      const { count, error } = await countQuery;
       if (error) throw error;
       return { rows: [{ count }], rowCount: 1 };
     }
 
-    // Execute the query
-    const { data, error } = await query.select('*');
+    // Execute the query (select was already called at the beginning)
+    const { data, error } = await query;
     if (error) throw error;
     
     return { rows: data || [], rowCount: data?.length || 0 };
@@ -197,6 +207,8 @@ class DatabaseService {
       return { rows: [result], rowCount: 1 };
     } else if (tableName === 'subscriptions') {
       // For subscriptions table, handle ON CONFLICT with upsert
+      console.log('Upserting subscription data:', data);
+      
       const { data: result, error } = await supabase
         .from(tableName)
         .upsert([data], { 
@@ -205,7 +217,11 @@ class DatabaseService {
         })
         .select();
       
-      if (error) throw error;
+      if (error) {
+        console.error('Subscription upsert error:', error);
+        throw error;
+      }
+      console.log('Subscription upsert result:', result);
       return { rows: result || [], rowCount: result?.length || 0 };
     } else {
       // For other tables
@@ -237,17 +253,19 @@ class DatabaseService {
     const setClause = setMatch[1];
     const updates = {};
     
-    // Parse SET clause
+    // Parse SET clause - handle complex updates
     const setPairs = setClause.split(',');
+    let paramIndex = 0;
+    
     setPairs.forEach(pair => {
       const [column, value] = pair.split('=').map(s => s.trim());
       
       // Handle parameterized values ($1, $2, $3, etc.)
       const paramMatch = value.match(/\$(\d+)/);
       if (paramMatch) {
-        const paramIndex = parseInt(paramMatch[1]) - 1;
-        if (paramIndex < params.length) {
-          updates[column] = params[paramIndex];
+        const pIndex = parseInt(paramMatch[1]) - 1;
+        if (pIndex < params.length) {
+          updates[column] = params[pIndex];
         }
       } else if (value === 'CURRENT_TIMESTAMP' || value === 'NOW()') {
         updates[column] = new Date().toISOString();
@@ -257,6 +275,9 @@ class DatabaseService {
         updates[column] = true;
       } else if (value === 'false') {
         updates[column] = false;
+      } else if (value.startsWith("'") && value.endsWith("'")) {
+        // Handle quoted strings
+        updates[column] = value.slice(1, -1);
       }
     });
 
