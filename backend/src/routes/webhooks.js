@@ -86,11 +86,21 @@ async function handleCheckoutSessionCompleted(session) {
     const customerId = session.customer;
     console.log('🔥 WEBHOOK: Customer ID:', customerId);
     
-    // Find user by Stripe customer ID using PostgreSQL
-    const userResult = await query(
-      'SELECT id, email FROM users WHERE stripe_customer_id = $1',
-      [customerId]
-    );
+    // Find user by Stripe customer ID using Supabase client directly
+    const { getSupabase } = require('../database/connection');
+    const supabase = getSupabase();
+    
+    const { data: users, error: userError } = await supabase
+      .from('users')
+      .select('id, email')
+      .eq('stripe_customer_id', customerId);
+    
+    if (userError) {
+      console.error('🔥 WEBHOOK ERROR: Failed to find user:', userError);
+      return;
+    }
+    
+    const userResult = { rows: users };
 
     if (userResult.rows.length === 0) {
       console.error('🔥 WEBHOOK ERROR: User not found for customer:', customerId);
