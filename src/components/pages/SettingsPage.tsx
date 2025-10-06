@@ -12,7 +12,9 @@ const SettingsPage = ({ onNavigate, user, onLogout }: SettingsPageProps) => {
     memberSince: '',
     totalDocuments: 0,
     documentsAnalyzed: 0,
-    lastActivity: ''
+    lastActivity: '',
+    subscriptionPlan: 'free',
+    subscriptionStatus: 'active'
   });
   const [loading, setLoading] = useState(true);
 
@@ -25,23 +27,27 @@ const SettingsPage = ({ onNavigate, user, onLogout }: SettingsPageProps) => {
         return;
       }
 
-      // Fetch user details
-      const userResponse = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/auth/me`, {
+      // Fetch user profile with subscription data (cache-busting)
+      const profileResponse = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/users/profile?t=${Date.now()}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
       });
 
-      if (userResponse.ok) {
-        const userData = await userResponse.json();
-        const createdDate = new Date(userData.data.created_at);
+      if (profileResponse.ok) {
+        const profileData = await profileResponse.json();
+        const userData = profileData.data.user;
+        const createdDate = new Date(userData.createdAt);
+        
         setUserStats(prev => ({
           ...prev,
           memberSince: createdDate.toLocaleDateString('en-US', {
             year: 'numeric',
             month: 'long',
             day: 'numeric'
-          })
+          }),
+          subscriptionPlan: userData.subscriptionPlan || 'free',
+          subscriptionStatus: userData.subscriptionStatus || 'active'
         }));
       }
 
@@ -157,16 +163,27 @@ const SettingsPage = ({ onNavigate, user, onLogout }: SettingsPageProps) => {
             <h2 className="text-2xl font-bold text-gray-900 mb-6">Subscription</h2>
             <div className="space-y-4">
               <div className="flex items-center justify-between py-3 border-b border-gray-200">
-          <div>
+                <div>
                   <div className="font-semibold text-gray-900">Current Plan</div>
-                  <div className="text-gray-600">Free Plan</div>
+                  <div className="text-gray-600 flex items-center">
+                    <span className="capitalize">{userStats.subscriptionPlan}</span>
+                    <span className={`ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                      userStats.subscriptionStatus === 'active'
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-yellow-100 text-yellow-800'
+                    }`}>
+                      {userStats.subscriptionStatus}
+                    </span>
+                  </div>
                 </div>
-                <button 
-                  onClick={() => onNavigate('pricing')}
-                  className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg font-medium hover:shadow-lg transform hover:scale-105 transition-all duration-200"
-                >
-                  Upgrade
-                </button>
+                {userStats.subscriptionPlan === 'free' && (
+                  <button 
+                    onClick={() => onNavigate('pricing')}
+                    className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg font-medium hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+                  >
+                    Upgrade
+                  </button>
+                )}
               </div>
               <div className="flex items-center justify-between py-3">
                 <div>

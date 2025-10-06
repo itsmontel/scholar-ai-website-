@@ -64,8 +64,8 @@ const AccountPage = ({ onNavigate, user, onLogout }: AccountPageProps) => {
         return;
       }
 
-      // Fetch user profile
-      const profileResponse = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/users/profile`, {
+      // Fetch user profile with cache-busting timestamp
+      const profileResponse = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/users/profile?t=${Date.now()}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -83,9 +83,9 @@ const AccountPage = ({ onNavigate, user, onLogout }: AccountPageProps) => {
             month: 'long',
             day: 'numeric'
           }),
-          subscriptionPlan: userData.subscription_plan || 'free',
-          subscriptionStatus: userData.subscription_status || 'active',
-          emailVerified: userData.email_verified || false
+          subscriptionPlan: userData.subscriptionPlan || 'free',
+          subscriptionStatus: userData.subscriptionStatus || 'active',
+          emailVerified: userData.emailVerified || false
         }));
       }
 
