@@ -1,10 +1,11 @@
+require('dotenv').config();
+
 const express = require('express');
 const cors = require('cors');
 const compression = require('compression');
 const morgan = require('morgan');
 const session = require('express-session');
 const passport = require('./config/passport');
-require('dotenv').config();
 
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
