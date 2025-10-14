@@ -407,7 +407,7 @@ router.post('/billing-portal', authenticateToken, async (req, res) => {
       });
     }
 
-    const returnUrl = req.body.returnUrl || `${req.protocol}://${req.get('host')}/billing`;
+    const returnUrl = req.body.returnUrl || `${process.env.FRONTEND_URL}/billing`;
 
     const portalResult = await subscriptionService.createBillingPortalSession(
       subscriptionDetails.stripeCustomerId,
