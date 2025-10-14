@@ -10,13 +10,13 @@ const supabase = createClient(
 
 async function fixUserSubscription() {
   try {
-    console.log('🔍 Checking user: tabsmosaic@gmail.com');
+    console.log('🔍 Checking user: researcher@university.edu');
     
     // Get user data
     const { data: user, error: userError } = await supabase
       .from('users')
       .select('*')
-      .eq('email', 'tabsmosaic@gmail.com')
+      .eq('email', 'researcher@university.edu')
       .single();
     
     if (userError) {

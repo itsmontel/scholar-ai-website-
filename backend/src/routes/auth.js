@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const { v4: uuidv4 } = require('uuid');
+const passport = require('../config/passport');
 
 const { query } = require('../database/connection');
 const { authenticateToken } = require('../middleware/auth');
@@ -535,5 +536,38 @@ router.post('/logout', authenticateToken, (req, res) => {
     message: 'Logged out successfully'
   });
 });
+
+// @route   GET /api/auth/google
+// @desc    Initiate Google OAuth
+// @access  Public
+router.get('/google', passport.authenticate('google', {
+  scope: ['profile', 'email']
+}));
+
+// @route   GET /api/auth/google/callback
+// @desc    Google OAuth callback
+// @access  Public
+router.get('/google/callback', 
+  passport.authenticate('google', { session: false }),
+  async (req, res) => {
+    try {
+      // Generate JWT token for the user
+      const token = generateToken(req.user.id);
+      
+      // Redirect to frontend with token
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+      res.redirect(`${frontendUrl}/auth/callback?token=${token}&user=${encodeURIComponent(JSON.stringify({
+        id: req.user.id,
+        email: req.user.email,
+        name: req.user.name,
+        profilePicture: req.user.profile_picture
+      }))}`);
+    } catch (error) {
+      console.error('Google OAuth callback error:', error);
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+      res.redirect(`${frontendUrl}/login?error=oauth_failed`);
+    }
+  }
+);
 
 module.exports = router;

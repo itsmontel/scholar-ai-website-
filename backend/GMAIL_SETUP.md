@@ -50,7 +50,7 @@ npm run dev
 curl -X POST http://localhost:3001/api/auth/register \
   -H "Content-Type: application/json" \
   -d '{
-    "email": "test@example.com",
+    "email": "demo@writescholar.com",
     "password": "TestPass123!",
     "firstName": "Test",
     "lastName": "User"

@@ -19,7 +19,7 @@ const PLAN_LIMITS = {
   },
   starter: {
     documentsPerMonth: -1, // unlimited
-    analysesPerMonth: -1, // unlimited
+    analysesPerMonth: 999, // 999 analyses per month
     maxDocumentSize: 25 * 1024 * 1024, // 25MB per document
     maxTotalStorage: 25 * 1024 * 1024, // 25MB total storage
     maxAnalysisPercentage: 100, // 100% of document
@@ -28,7 +28,7 @@ const PLAN_LIMITS = {
   },
   premium: {
     documentsPerMonth: -1, // unlimited
-    analysesPerMonth: -1, // unlimited
+    analysesPerMonth: 999, // 999 analyses per month
     maxDocumentSize: 1024 * 1024 * 1024, // 1GB per document
     maxTotalStorage: 1024 * 1024 * 1024, // 1GB total storage
     maxAnalysisPercentage: 100, // 100% of document

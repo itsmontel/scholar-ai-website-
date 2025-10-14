@@ -2,9 +2,10 @@ import { useState, useEffect } from 'react';
 
 // Import all page components
 import LandingPage from './pages/LandingPage';
-import SignUpPage from './pages/SignUpPage';
+import SignUpPage from './pages/SignupPage';
 import LoginPage from './pages/LoginPage';
 import EmailVerificationPage from './pages/EmailVerificationPage';
+import AuthCallbackPage from './pages/AuthCallbackPage';
 import DashboardPage from './pages/DashboardPage';
 import AnalysisPage from './pages/AnalysisPage';
 import AnalysisHistoryPage from './pages/AnalysisHistoryPage';
@@ -198,6 +199,7 @@ const AcademicAIApp = () => {
     // Set initial page based on URL
     const getPageFromPath = (pathname: string) => {
       if (pathname === '/email-verification') return 'email-verification';
+      if (pathname === '/auth/callback') return 'auth-callback';
       if (pathname === '/signup') return 'signup';
       if (pathname === '/login') return 'login';
       if (pathname === '/reset-password') return 'reset-password';
@@ -410,6 +412,8 @@ const AcademicAIApp = () => {
         return <ResetPasswordPage onNavigate={navigateTo} />;
       case 'email-verification':
         return <EmailVerificationPage onNavigate={navigateTo} />;
+      case 'auth-callback':
+        return <AuthCallbackPage onNavigate={navigateTo} onLogin={handleLogin} />;
       case 'pricing':
         return <PricingPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'features':

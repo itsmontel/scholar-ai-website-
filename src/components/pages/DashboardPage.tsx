@@ -182,16 +182,6 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
   };
 
-  const getUsagePercentage = (used: number, limit: number): number => {
-    if (limit === -1) return 0; // Unlimited
-    return Math.min((used / limit) * 100, 100);
-  };
-
-  const getUsageColor = (percentage: number): string => {
-    if (percentage >= 90) return 'text-red-600';
-    if (percentage >= 70) return 'text-yellow-600';
-    return 'text-green-600';
-  };
 
   const isTextValid = () => {
     return getWordCount(inputText) >= 200;
@@ -417,19 +407,54 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
         </div>
       </div>
 
-        {/* Upload Button */}
+        {/* Upload Document Section */}
         <div className="max-w-4xl mx-auto mb-12 sm:mb-16 px-4">
-          <div className="text-center">
+          <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-3xl p-8 sm:p-12 text-center border border-gray-200 shadow-lg">
+            {/* Upload Icon */}
+            <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+              <svg className="w-10 h-10 sm:w-12 sm:h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                {/* Cloud shape */}
+                <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z" />
+                {/* Arrow shaft */}
+                <path d="M12 16V8" />
+                {/* Arrow head - left chevron */}
+                <path d="M12 8l-3 3" />
+                {/* Arrow head - right chevron */}
+                <path d="M12 8l3 3" />
+              </svg>
+            </div>
+            
+            {/* Title */}
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">
+              Upload Your Document
+            </h2>
+            
+            {/* Description */}
+            <p className="text-base sm:text-lg text-gray-600 mb-8 max-w-2xl mx-auto leading-relaxed">
+              Get instant AI-powered analysis and feedback on your academic papers, essays, and research documents.
+            </p>
+            
+            {/* Upload Button */}
             <button 
               onClick={() => onNavigate('upload')}
-              className="inline-flex items-center px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-2xl font-semibold text-base sm:text-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 shadow-lg"
+              className="inline-flex items-center px-8 sm:px-12 py-4 sm:py-5 bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-700 hover:from-blue-700 hover:via-purple-700 hover:to-indigo-800 text-white rounded-2xl font-bold text-lg sm:text-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 shadow-xl"
             >
-              <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+              <svg className="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
               </svg>
-              Upload Document
+              Upload Document Now
             </button>
-            <p className="text-sm text-gray-500 mt-3">Supports PDF, DOCX, and TXT files</p>
+            
+            {/* File Types */}
+            <div className="flex flex-wrap justify-center items-center gap-4 mt-6">
+              <span className="text-sm font-medium text-gray-500">Supported formats:</span>
+              <div className="flex gap-3">
+                <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">PDF</span>
+                <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">DOCX</span>
+                <span className="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-xs font-medium">TXT</span>
+              </div>
+              <span className="text-sm text-gray-500">Up to 50MB</span>
+            </div>
           </div>
         </div>
 

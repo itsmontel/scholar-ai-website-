@@ -19,17 +19,6 @@ async function seedDatabase() {
     // Create sample users
     const sampleUsers = [
       {
-        email: 'demo@scholarai.com',
-        password_hash: '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj4J/8KzKz2a', // password: demo123
-        first_name: 'Demo',
-        last_name: 'User',
-        institution: 'University of Technology',
-        research_field: 'Computer Science',
-        subscription_plan: 'premium',
-        subscription_status: 'active',
-        email_verified: true
-      },
-      {
         email: 'researcher@university.edu',
         password_hash: '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj4J/8KzKz2a', // password: demo123
         first_name: 'Dr. Sarah',
@@ -58,14 +47,6 @@ async function seedDatabase() {
     const sampleSubscriptions = [
       {
         user_id: userIds[0],
-        stripe_subscription_id: 'sub_demo_premium',
-        plan_type: 'premium',
-        status: 'active',
-        current_period_start: new Date(),
-        current_period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days from now
-      },
-      {
-        user_id: userIds[1],
         stripe_subscription_id: 'sub_demo_basic',
         plan_type: 'basic',
         status: 'active',
@@ -87,19 +68,6 @@ async function seedDatabase() {
     const sampleDocuments = [
       {
         user_id: userIds[0],
-        title: 'Machine Learning in Healthcare: A Comprehensive Review',
-        original_filename: 'ml_healthcare_review.pdf',
-        file_type: 'application/pdf',
-        file_size: 2048576,
-        s3_key: 'demo/documents/ml_healthcare_review.pdf',
-        s3_url: 'https://s3.amazonaws.com/scholar-ai-documents/demo/documents/ml_healthcare_review.pdf',
-        content_text: 'This paper provides a comprehensive review of machine learning applications in healthcare...',
-        word_count: 2500,
-        page_count: 8,
-        upload_status: 'processed'
-      },
-      {
-        user_id: userIds[1],
         title: 'The Impact of Social Media on Academic Performance',
         original_filename: 'social_media_academic_performance.docx',
         file_type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
@@ -130,23 +98,6 @@ async function seedDatabase() {
       {
         document_id: documentIds[0],
         user_id: userIds[0],
-        analysis_type: 'comprehensive',
-        status: 'completed',
-        citation_style: 'APA',
-        focus_areas: ['clarity', 'structure', 'citations'],
-        analysis_results: {
-          overall_score: 85,
-          summary: 'This is a well-structured academic paper with strong research methodology.',
-          strengths: ['Clear research question', 'Comprehensive literature review', 'Good data analysis'],
-          areas_for_improvement: ['Some sections could be more concise', 'Additional citations needed in methodology section'],
-          recommendations: ['Consider adding more recent studies', 'Strengthen the conclusion section']
-        },
-        ai_model_used: 'gpt-4-turbo-preview',
-        processing_time_ms: 4500
-      },
-      {
-        document_id: documentIds[1],
-        user_id: userIds[1],
         analysis_type: 'general',
         status: 'completed',
         citation_style: 'MLA',
@@ -175,9 +126,7 @@ async function seedDatabase() {
     // Create sample usage tracking
     const sampleUsage = [
       { user_id: userIds[0], document_id: documentIds[0], action_type: 'upload', credits_used: 1 },
-      { user_id: userIds[0], document_id: documentIds[0], action_type: 'analysis', credits_used: 3 },
-      { user_id: userIds[1], document_id: documentIds[1], action_type: 'upload', credits_used: 1 },
-      { user_id: userIds[1], document_id: documentIds[1], action_type: 'analysis', credits_used: 1 }
+      { user_id: userIds[0], document_id: documentIds[0], action_type: 'analysis', credits_used: 1 }
     ];
     
     for (const usage of sampleUsage) {
@@ -193,14 +142,6 @@ async function seedDatabase() {
     const sampleNotifications = [
       {
         user_id: userIds[0],
-        type: 'analysis_complete',
-        title: 'Document Analysis Complete',
-        message: 'Your analysis of "Machine Learning in Healthcare" has been completed.',
-        is_read: false,
-        metadata: { document_id: documentIds[0], analysis_type: 'comprehensive' }
-      },
-      {
-        user_id: userIds[1],
         type: 'system',
         title: 'Welcome to Scholar AI',
         message: 'Welcome to Scholar AI! Start by uploading your first document for analysis.',
@@ -228,10 +169,7 @@ async function seedDatabase() {
     console.log(`   - ${sampleNotifications.length} notifications`);
     
     console.log('\n🔑 Demo Login Credentials:');
-    console.log('   Email: demo@scholarai.com');
-    console.log('   Password: demo123');
-    console.log('   Plan: Premium');
-    console.log('\n   Email: researcher@university.edu');
+    console.log('   Email: researcher@university.edu');
     console.log('   Password: demo123');
     console.log('   Plan: Basic');
     

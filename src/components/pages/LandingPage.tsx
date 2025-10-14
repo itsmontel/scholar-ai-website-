@@ -22,22 +22,13 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
 
   const reviews = [
     {
-      text: "WriteScholar has revolutionized my research writing process. The AI feedback is incredibly detailed and helped me improve my argumentation and academic style significantly.",
-      author: "Sarah Chen",
-      title: "PhD Candidate, Stanford University",
-      initial: "S"
+      text: "WriteScholar has revolutionized my research writing process. The AI feedback is incredibly detailed and helped me improve my argumentation and academic style significantly."
     },
     {
-      text: "WriteScholar's annotation system is exactly what I needed for my thesis. The color-coded feedback makes it easy to prioritize improvements and track my progress over time.",
-      author: "Dr. Michael Rodriguez",
-      title: "Postdoctoral Researcher, MIT",
-      initial: "M"
+      text: "WriteScholar's annotation system is exactly what I needed for my thesis. The color-coded feedback makes it easy to prioritize improvements and track my progress over time."
     },
     {
-      text: "As a professor, I recommend WriteScholar to all my students. It provides the kind of detailed feedback that would normally take hours of manual review. A game-changer for academic writing.",
-      author: "Prof. Emily Watson",
-      title: "Department Head, Harvard University",
-      initial: "E"
+      text: "As a professor, I recommend WriteScholar to all my students. It provides the kind of detailed feedback that would normally take hours of manual review. A game-changer for academic writing."
     }
   ];
 
@@ -643,15 +634,14 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
             <div className="bg-white/90 backdrop-blur-xl rounded-2xl shadow-xl p-6 sm:p-8 md:p-12">
                 <div className="flex justify-center mb-4 sm:mb-6">
                   <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 rounded-2xl flex items-center justify-center shadow-lg">
-                    <span className="text-white font-bold text-xl sm:text-2xl">{reviews[reviewIndex].initial}</span>
-              </div>
+                    <svg className="w-6 h-6 sm:w-8 sm:h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h4v10h-10z"/>
+                    </svg>
+                  </div>
                 </div>
-                <blockquote className="text-base sm:text-lg md:text-xl text-gray-900 mb-4 sm:mb-6 leading-relaxed font-light transition-all duration-500 px-4">
+                <blockquote className="text-base sm:text-lg md:text-xl text-gray-900 mb-6 sm:mb-8 leading-relaxed font-light transition-all duration-500 px-4">
                   "{reviews[reviewIndex].text}"
                 </blockquote>
-                <cite className="text-gray-600 text-sm sm:text-base md:text-lg">
-                  <span className="font-semibold">{reviews[reviewIndex].author}</span> / {reviews[reviewIndex].title}
-                </cite>
                 <div className="flex justify-center mt-6 space-x-3">
                   {reviews.map((_, index) => (
                     <div 
@@ -848,7 +838,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                       <svg className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
-                      <span className="text-gray-700 text-sm">Unlimited document analysis</span>
+                      <span className="text-gray-700 text-sm">999 AI analyses per month</span>
                     </li>
                     <li className="flex items-start space-x-3">
                       <svg className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -930,6 +920,12 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
                       <span className="text-gray-700 text-sm">Everything in Basic</span>
+                    </li>
+                    <li className="flex items-start space-x-3">
+                      <svg className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                      <span className="text-gray-700 text-sm">999 AI analyses per month</span>
                     </li>
                     <li className="flex items-start space-x-3">
                       <svg className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">

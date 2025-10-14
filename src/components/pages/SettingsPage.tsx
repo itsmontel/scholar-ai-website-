@@ -187,8 +187,15 @@ const SettingsPage = ({ onNavigate, user, onLogout }: SettingsPageProps) => {
               </div>
               <div className="flex items-center justify-between py-3">
                 <div>
-                  <div className="font-semibold text-gray-900">Credits Remaining</div>
-                  <div className="text-gray-600">0 credits</div>
+                  <div className="font-semibold text-gray-900">Plan Features</div>
+                  <div className="text-gray-600">
+                    {userStats.subscriptionPlan === 'free' 
+                      ? '3 analyses per month' 
+                      : userStats.subscriptionPlan === 'starter' || userStats.subscriptionPlan === 'premium'
+                      ? '999 analyses per month'
+                      : 'View billing for details'
+                    }
+                  </div>
                 </div>
               </div>
             </div>

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Header from '../common/Header';
 import Footer from '../common/Footer';
 import PaymentModal from '../payment/PaymentModal';
@@ -11,6 +11,7 @@ interface PricingPageProps {
 
 const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
   const [billingCycle, setBillingCycle] = useState('monthly');
+  const [currentPlan, setCurrentPlan] = useState<string>('free');
   const [paymentModal, setPaymentModal] = useState<{
     isOpen: boolean;
     planType: 'starter' | 'premium';
@@ -20,6 +21,76 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
     planType: 'starter',
     billingCycle: 'monthly'
   });
+
+  // Fetch current plan when component mounts
+  useEffect(() => {
+    const fetchCurrentPlan = async () => {
+      if (!user) return;
+      
+      try {
+        const token = localStorage.getItem('authToken');
+        const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/subscriptions/current`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setCurrentPlan(data.plan || 'free');
+        }
+      } catch (error) {
+        console.error('Error fetching current plan:', error);
+      }
+    };
+
+    fetchCurrentPlan();
+  }, [user]);
+
+  // Handle plan upgrade/switch
+  const handlePlanAction = async (planId: string) => {
+    if (!user) {
+      onNavigate('signup');
+      return;
+    }
+
+    if (planId === 'free') return;
+
+    // Check if user already has a subscription (not free plan)
+    if (currentPlan !== 'free') {
+      // User has existing subscription - redirect to billing portal
+      try {
+        const token = localStorage.getItem('authToken');
+        const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/subscriptions/billing-portal`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            returnUrl: `${window.location.origin}/pricing`
+          })
+        });
+
+        const data = await response.json();
+        
+        if (data.success && data.url) {
+          window.location.href = data.url;
+        } else {
+          throw new Error(data.message || 'Failed to create billing portal session');
+        }
+      } catch (error) {
+        console.error('Error opening billing portal:', error);
+      }
+    } else {
+      // User is on free plan - show payment modal for new subscription
+      setPaymentModal({
+        isOpen: true,
+        planType: planId as 'starter' | 'premium',
+        billingCycle: billingCycle as 'monthly' | 'yearly'
+      });
+    }
+  };
 
   const plans = [
     {
@@ -52,7 +123,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
       yearlyPrice: 199.99,
       features: [
         'Unlimited document uploads',
-        'AI-powered analysis',
+        '999 AI analyses per month',
         'All citation styles',
         'Grammar and style checks',
         'Plagiarism detection',
@@ -60,18 +131,8 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
       ],
       limitations: [],
       popular: true,
-      buttonText: 'Upgrade to Starter',
-      buttonAction: () => {
-        if (user) {
-          setPaymentModal({
-            isOpen: true,
-            planType: 'starter',
-            billingCycle: billingCycle as 'monthly' | 'yearly'
-          });
-        } else {
-          onNavigate('signup');
-        }
-      }
+      buttonText: currentPlan === 'free' ? 'Upgrade to Starter' : 'Switch to Starter',
+      buttonAction: () => handlePlanAction('starter')
     },
     {
       id: 'premium',
@@ -81,24 +142,15 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
       yearlyPrice: 399.99,
       features: [
         'Everything in Starter',
+        '999 AI analyses per month',
         'Advanced AI analysis',
         'Advanced grammar and style checking',
         'Additional premium features'
       ],
       limitations: [],
       popular: false,
-      buttonText: 'Upgrade to Pro',
-      buttonAction: () => {
-        if (user) {
-          setPaymentModal({
-            isOpen: true,
-            planType: 'premium',
-            billingCycle: billingCycle as 'monthly' | 'yearly'
-          });
-        } else {
-          onNavigate('signup');
-        }
-      }
+      buttonText: currentPlan === 'free' ? 'Upgrade to Premium' : 'Switch to Premium',
+      buttonAction: () => handlePlanAction('premium')
     }
   ];
 
@@ -275,14 +327,17 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
                 </div>
 
                 <button
-                onClick={plan.buttonAction}
-                className={`w-full py-3 px-6 rounded-xl font-semibold transition-all duration-200 ${
-                    plan.popular
+                onClick={plan.id === currentPlan ? undefined : plan.buttonAction}
+                disabled={plan.id === currentPlan}
+                className={`w-full py-3 px-6 rounded-xl font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
+                    plan.id === currentPlan
+                    ? 'bg-gray-100 text-gray-500 cursor-not-allowed'
+                    : plan.popular
                     ? 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transform hover:scale-105'
                     : 'bg-gray-100 hover:bg-gray-200 text-gray-900'
                   }`}
                 >
-                {plan.buttonText}
+                {plan.id === currentPlan ? 'Current Plan' : plan.buttonText}
                 </button>
             </div>
           ))}

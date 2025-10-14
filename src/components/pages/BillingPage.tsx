@@ -71,7 +71,7 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
       features: [
         '25MB total upload limit',
         'Unlimited document uploads',
-        'Unlimited AI analyses',
+        '999 AI analyses per month',
         '100% document annotation',
         'Priority support',
         'Advanced analytics'
@@ -89,7 +89,7 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
       features: [
         '1GB total upload limit',
         'Unlimited document uploads',
-        'Unlimited AI analyses',
+        '999 AI analyses per month',
         '100% document annotation',
         'Priority support',
         'Advanced analytics',
@@ -151,26 +151,50 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
       
       const token = localStorage.getItem('authToken');
       
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/subscriptions/create-checkout-session`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          planType: planId,
-          billingCycle: billingCycle,
-          successUrl: `${window.location.origin}/billing?success=true`,
-          cancelUrl: `${window.location.origin}/billing?canceled=true`
-        })
-      });
+      // Check if user already has a subscription (not free plan)
+      if (currentPlan !== 'free') {
+        // User has existing subscription - redirect to billing portal to manage/change plan
+        const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/subscriptions/billing-portal`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            returnUrl: `${window.location.origin}/billing`
+          })
+        });
 
-      const data = await response.json();
-      
-      if (data.success && data.data?.checkoutUrl) {
-        window.location.href = data.data.checkoutUrl;
+        const data = await response.json();
+        
+        if (data.success && data.url) {
+          window.location.href = data.url;
+        } else {
+          throw new Error(data.message || 'Failed to create billing portal session');
+        }
       } else {
-        throw new Error(data.message || 'Failed to create checkout session');
+        // User is on free plan - create new checkout session
+        const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/subscriptions/create-checkout-session`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            planType: planId,
+            billingCycle: billingCycle,
+            successUrl: `${window.location.origin}/billing?success=true`,
+            cancelUrl: `${window.location.origin}/billing?canceled=true`
+          })
+        });
+
+        const data = await response.json();
+        
+        if (data.success && data.data?.checkoutUrl) {
+          window.location.href = data.data.checkoutUrl;
+        } else {
+          throw new Error(data.message || 'Failed to create checkout session');
+        }
       }
     } catch (error) {
       console.error('Error upgrading plan:', error);
@@ -273,6 +297,34 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
             </span>
           </div>
         </div>
+
+        {/* Billing Management */}
+        {currentPlan !== 'free' && (
+          <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-8 mb-12">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">Billing Management</h2>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <button
+                onClick={handleManageBilling}
+                disabled={processing === 'billing'}
+                className="bg-gray-900 text-white py-3 px-8 rounded-xl font-medium hover:bg-gray-800 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {processing === 'billing' ? (
+                  <div className="flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                    Opening...
+                  </div>
+                ) : (
+                  'Manage Billing & Invoices'
+                )}
+              </button>
+            </div>
+            {error && (
+              <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                <p className="text-red-800 text-sm">{error}</p>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Billing Cycle Toggle */}
         <div className="flex items-center justify-center mb-12">
@@ -396,8 +448,10 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
                   </div>
                 ) : plan.id === 'free' ? (
                   'Stay Free'
-                ) : (
+                ) : currentPlan === 'free' ? (
                   `Upgrade to ${plan.name}`
+                ) : (
+                  `Switch to ${plan.name}`
                 )}
               </button>
             </div>
@@ -443,7 +497,7 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
                 </svg>
               </div>
               <div className="text-2xl font-bold text-green-600 mb-2">
-                {usageStats.uploadsRemaining}
+                {usageStats.uploadsRemaining === -1 ? '∞' : usageStats.uploadsRemaining}
               </div>
               <div className="text-sm text-gray-600">
                 {currentPlan === 'free' ? 'uploads remaining' : 'unlimited uploads'}
@@ -459,10 +513,10 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
                 </svg>
               </div>
               <div className="text-2xl font-bold text-purple-600 mb-2">
-                {usageStats.analysesRemaining}
+                {usageStats.analysesRemaining === -1 ? '∞' : usageStats.analysesRemaining}
               </div>
               <div className="text-sm text-gray-600">
-                {currentPlan === 'free' ? 'analyses remaining' : 'unlimited analyses'}
+                {currentPlan === 'free' ? 'analyses remaining' : '999 analyses per month'}
               </div>
             </div>
 
@@ -482,28 +536,6 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
           </div>
         </div>
 
-        {/* Billing Management */}
-        {currentPlan !== 'free' && (
-          <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">Billing Management</h2>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button
-                onClick={handleManageBilling}
-                disabled={processing === 'billing'}
-                className="bg-gray-900 text-white py-3 px-8 rounded-xl font-medium hover:bg-gray-800 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {processing === 'billing' ? (
-                  <div className="flex items-center justify-center">
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                    Opening...
-                  </div>
-                ) : (
-                  'Manage Billing & Invoices'
-                )}
-              </button>
-            </div>
-          </div>
-        )}
 
         {/* Trust Indicators */}
         <div className="mt-16 text-center">

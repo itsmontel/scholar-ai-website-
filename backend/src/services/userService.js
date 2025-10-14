@@ -53,6 +53,74 @@ class UserService {
     }
   }
 
+  async findUserByGoogleId(googleId) {
+    try {
+      const { data, error } = await this.getSupabaseClient()
+        .from('users')
+        .select('*')
+        .eq('google_id', googleId)
+        .single();
+
+      if (error && error.code !== 'PGRST116') {
+        throw error;
+      }
+
+      return data || null;
+    } catch (error) {
+      console.error('Error finding user by Google ID:', error);
+      throw error;
+    }
+  }
+
+  async linkGoogleAccount(userId, googleId) {
+    try {
+      const { data, error } = await this.getSupabaseClient()
+        .from('users')
+        .update({ google_id: googleId })
+        .eq('id', userId)
+        .select()
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Error linking Google account:', error);
+      throw error;
+    }
+  }
+
+  async createGoogleUser({ googleId, email, name, picture, emailVerified = true }) {
+    try {
+      const { data, error } = await this.getSupabaseClient()
+        .from('users')
+        .insert({
+          google_id: googleId,
+          email: email?.toLowerCase(),
+          name: name,
+          profile_picture: picture,
+          email_verified: emailVerified,
+          subscription_plan: 'free',
+          subscription_status: 'active',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        .select()
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Error creating Google user:', error);
+      throw error;
+    }
+  }
+
   async createUser(userData) {
     try {
       const { data, error } = await this.getSupabaseClient()
