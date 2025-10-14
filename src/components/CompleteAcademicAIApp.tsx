@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 
 // Import all page components
 import LandingPage from './pages/LandingPage';
-import SignUpPage from './pages/SignupPage';
+import SignUpPage from './pages/SignUpPage';
 import LoginPage from './pages/LoginPage';
 import EmailVerificationPage from './pages/EmailVerificationPage';
 import AuthCallbackPage from './pages/AuthCallbackPage';
