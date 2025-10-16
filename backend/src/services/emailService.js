@@ -63,7 +63,7 @@ class EmailService {
       const verificationUrl = `${process.env.BACKEND_URL || 'http://localhost:3001'}/api/auth/verify-email?token=${verificationToken}`;
       
       const mailOptions = {
-        from: `"Scholar AI" <${process.env.EMAIL_USER}>`,
+        from: `"WriteScholar" <${process.env.EMAIL_FROM || process.env.EMAIL_USER}>`,
         to: email,
         subject: 'Verify Your Scholar AI Account',
         html: `
@@ -144,7 +144,7 @@ class EmailService {
       const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/reset-password?token=${resetToken}`;
       
       const mailOptions = {
-        from: `"Scholar AI" <${process.env.EMAIL_USER}>`,
+        from: `"WriteScholar" <${process.env.EMAIL_FROM || process.env.EMAIL_USER}>`,
         to: email,
         subject: 'Reset Your Scholar AI Password',
         html: `
@@ -212,7 +212,7 @@ class EmailService {
 
     try {
       const mailOptions = {
-        from: `"Scholar AI" <${process.env.EMAIL_USER}>`,
+        from: `"WriteScholar" <${process.env.EMAIL_FROM || process.env.EMAIL_USER}>`,
         to: email,
         subject: 'Welcome to Scholar AI - Your Account is Verified!',
         html: `
