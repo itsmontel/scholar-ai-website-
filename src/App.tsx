@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import SignUpPage from './components/pages/SignupPage';
+import SignUpPage from './components/pages/SignUpPage';
 import LoginPage from './components/pages/LoginPage';
 import EmailVerificationPage from './components/pages/EmailVerificationPage';
 

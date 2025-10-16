@@ -1,6 +1,6 @@
 # 🚀 Supabase Storage Migration Guide
 
-This guide will help you migrate from AWS S3 to Supabase Storage for your Scholar AI application, which will save costs and simplify your infrastructure.
+This guide will help you migrate from AWS S3 to Supabase Storage for your WriteScholar application, which will save costs and simplify your infrastructure.
 
 ## 📊 **Cost Comparison**
 
@@ -44,7 +44,7 @@ This will:
 ```sql
 CREATE POLICY "Users can upload their own documents" ON storage.objects
 FOR INSERT WITH CHECK (
-  bucket_id = 'scholar-ai-documents' AND
+  bucket_id = 'writescholar-documents' AND
   (storage.foldername(name))[1] = 'documents' AND
   (storage.foldername(name))[2] = auth.uid()::text
 );
@@ -54,7 +54,7 @@ FOR INSERT WITH CHECK (
 ```sql
 CREATE POLICY "Users can view their own documents" ON storage.objects
 FOR SELECT USING (
-  bucket_id = 'scholar-ai-documents' AND
+  bucket_id = 'writescholar-documents' AND
   (storage.foldername(name))[1] = 'documents' AND
   (storage.foldername(name))[2] = auth.uid()::text
 );
@@ -64,7 +64,7 @@ FOR SELECT USING (
 ```sql
 CREATE POLICY "Users can delete their own documents" ON storage.objects
 FOR DELETE USING (
-  bucket_id = 'scholar-ai-documents' AND
+  bucket_id = 'writescholar-documents' AND
   (storage.foldername(name))[1] = 'documents' AND
   (storage.foldername(name))[2] = auth.uid()::text
 );
@@ -105,7 +105,7 @@ npm run dev
 
 ### **File Organization**
 ```
-scholar-ai-documents/
+writescholar-documents/
 ├── documents/
 │   ├── user-id-1/
 │   │   ├── uuid1.pdf
@@ -190,7 +190,7 @@ NODE_ENV=production
 AWS_ACCESS_KEY_ID=your_aws_access_key
 AWS_SECRET_ACCESS_KEY=your_aws_secret_key
 AWS_REGION=us-east-1
-AWS_S3_BUCKET=scholar-ai-documents
+AWS_S3_BUCKET=writescholar-documents
 ```
 
 ## ⚡ **Performance Comparison**

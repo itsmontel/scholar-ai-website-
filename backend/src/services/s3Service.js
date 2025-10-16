@@ -14,7 +14,7 @@ class S3Service {
         secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
       },
     });
-    this.bucketName = process.env.AWS_S3_BUCKET || 'scholar-ai-documents';
+    this.bucketName = process.env.AWS_S3_BUCKET || 'writescholar-documents';
     
     console.log(`🔗 S3 Service initialized - Bucket: ${this.bucketName}, Region: ${process.env.AWS_REGION || 'us-east-1'}`);
   }

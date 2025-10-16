@@ -65,19 +65,19 @@ class EmailService {
       const mailOptions = {
         from: `"WriteScholar" <${process.env.EMAIL_FROM || process.env.EMAIL_USER}>`,
         to: email,
-        subject: 'Verify Your Scholar AI Account',
+        subject: 'Verify Your WriteScholar Account',
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center;">
-              <h1 style="color: white; margin: 0; font-size: 28px;">Scholar AI</h1>
+              <h1 style="color: white; margin: 0; font-size: 28px;">WriteScholar</h1>
               <p style="color: white; margin: 10px 0 0 0; font-size: 16px;">Academic Writing Assistant</p>
             </div>
             
             <div style="padding: 30px; background: #f8f9fa;">
-              <h2 style="color: #333; margin-bottom: 20px;">Welcome to Scholar AI!</h2>
+              <h2 style="color: #333; margin-bottom: 20px;">Welcome to WriteScholar!</h2>
               
               <p style="color: #666; line-height: 1.6; margin-bottom: 25px;">
-                Thank you for signing up for Scholar AI. To complete your registration and start using our AI-powered academic writing assistant, please verify your email address by clicking the button below.
+                Thank you for signing up for WriteScholar. To complete your registration and start using our AI-powered academic writing assistant, please verify your email address by clicking the button below.
               </p>
               
               <div style="text-align: center; margin: 30px 0;">
@@ -102,12 +102,12 @@ class EmailService {
               </p>
               
               <p style="color: #999; font-size: 14px; margin-top: 30px;">
-                This verification link will expire in 24 hours. If you didn't create an account with Scholar AI, you can safely ignore this email.
+                This verification link will expire in 24 hours. If you didn't create an account with WriteScholar, you can safely ignore this email.
               </p>
             </div>
             
             <div style="background: #333; color: white; padding: 20px; text-align: center; font-size: 14px;">
-              <p style="margin: 0;">© 2025 Scholar AI. All rights reserved.</p>
+              <p style="margin: 0;">© 2025 WriteScholar. All rights reserved.</p>
               <p style="margin: 5px 0 0 0;">Enhancing academic writing with AI</p>
             </div>
           </div>
@@ -146,11 +146,11 @@ class EmailService {
       const mailOptions = {
         from: `"WriteScholar" <${process.env.EMAIL_FROM || process.env.EMAIL_USER}>`,
         to: email,
-        subject: 'Reset Your Scholar AI Password',
+        subject: 'Reset Your WriteScholar Password',
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center;">
-              <h1 style="color: white; margin: 0; font-size: 28px;">Scholar AI</h1>
+              <h1 style="color: white; margin: 0; font-size: 28px;">WriteScholar</h1>
               <p style="color: white; margin: 10px 0 0 0; font-size: 16px;">Password Reset Request</p>
             </div>
             
@@ -158,7 +158,7 @@ class EmailService {
               <h2 style="color: #333; margin-bottom: 20px;">Password Reset Request</h2>
               
               <p style="color: #666; line-height: 1.6; margin-bottom: 25px;">
-                We received a request to reset your password for your Scholar AI account. If you made this request, click the button below to reset your password.
+                We received a request to reset your password for your WriteScholar account. If you made this request, click the button below to reset your password.
               </p>
               
               <div style="text-align: center; margin: 30px 0;">
@@ -188,7 +188,7 @@ class EmailService {
             </div>
             
             <div style="background: #333; color: white; padding: 20px; text-align: center; font-size: 14px;">
-              <p style="margin: 0;">© 2025 Scholar AI. All rights reserved.</p>
+              <p style="margin: 0;">© 2025 WriteScholar. All rights reserved.</p>
               <p style="margin: 5px 0 0 0;">Enhancing academic writing with AI</p>
             </div>
           </div>
@@ -214,19 +214,19 @@ class EmailService {
       const mailOptions = {
         from: `"WriteScholar" <${process.env.EMAIL_FROM || process.env.EMAIL_USER}>`,
         to: email,
-        subject: 'Welcome to Scholar AI - Your Account is Verified!',
+        subject: 'Welcome to WriteScholar - Your Account is Verified!',
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center;">
-              <h1 style="color: white; margin: 0; font-size: 28px;">Scholar AI</h1>
+              <h1 style="color: white; margin: 0; font-size: 28px;">WriteScholar</h1>
               <p style="color: white; margin: 10px 0 0 0; font-size: 16px;">Welcome to the Future of Academic Writing</p>
             </div>
             
             <div style="padding: 30px; background: #f8f9fa;">
-              <h2 style="color: #333; margin-bottom: 20px;">Welcome to Scholar AI!</h2>
+              <h2 style="color: #333; margin-bottom: 20px;">Welcome to WriteScholar!</h2>
               
               <p style="color: #666; line-height: 1.6; margin-bottom: 25px;">
-                Congratulations! Your Scholar AI account has been successfully verified. You're now ready to enhance your academic writing with our AI-powered analysis tools.
+                Congratulations! Your WriteScholar account has been successfully verified. You're now ready to enhance your academic writing with our AI-powered analysis tools.
               </p>
               
               <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #667eea;">
@@ -259,7 +259,7 @@ class EmailService {
             </div>
             
             <div style="background: #333; color: white; padding: 20px; text-align: center; font-size: 14px;">
-              <p style="margin: 0;">© 2025 Scholar AI. All rights reserved.</p>
+              <p style="margin: 0;">© 2025 WriteScholar. All rights reserved.</p>
               <p style="margin: 5px 0 0 0;">Enhancing academic writing with AI</p>
             </div>
           </div>

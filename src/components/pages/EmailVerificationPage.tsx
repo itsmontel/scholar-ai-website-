@@ -127,7 +127,7 @@ const EmailVerificationPage = ({ onNavigate }: EmailVerificationPageProps) => {
           </h1>
           
           <p className="text-gray-600 mb-6">
-            Your email has been successfully verified. Welcome to Scholar AI!
+            Your email has been successfully verified. Welcome to WriteScholar!
           </p>
 
           {/* Countdown */}

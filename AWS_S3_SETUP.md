@@ -1,6 +1,6 @@
-# AWS S3 Configuration Guide for Scholar AI
+# AWS S3 Configuration Guide for WriteScholar
 
-This guide will help you set up proper AWS S3 configuration for your Scholar AI application.
+This guide will help you set up proper AWS S3 configuration for your WriteScholar application.
 
 ## 🚀 Quick Setup (Recommended)
 
@@ -10,10 +10,10 @@ This guide will help you set up proper AWS S3 configuration for your Scholar AI 
    - Go to [aws.amazon.com](https://aws.amazon.com)
    - Create a free account (12 months free tier available)
 
-2. **Create IAM User for Scholar AI**
+2. **Create IAM User for WriteScholar**
    ```bash
    # Navigate to IAM in AWS Console
-   # Create User: scholar-ai-s3-user
+   # Create User: writescholar-s3-user
    # Attach Policy: AmazonS3FullAccess (for development)
    # Or create custom policy (recommended for production)
    ```
@@ -22,7 +22,7 @@ This guide will help you set up proper AWS S3 configuration for your Scholar AI 
 
 1. **Create Bucket**
    ```bash
-   # Bucket name: scholar-ai-documents-[your-unique-suffix]
+   # Bucket name: writescholar-documents-[your-unique-suffix]
    # Region: us-east-1 (or your preferred region)
    # Block all public access: YES (recommended)
    ```
@@ -48,7 +48,7 @@ Create/update your `.env` file in the `backend` directory:
 AWS_ACCESS_KEY_ID=AKIA...your_access_key_here
 AWS_SECRET_ACCESS_KEY=your_secret_access_key_here
 AWS_REGION=us-east-1
-AWS_S3_BUCKET=scholar-ai-documents-your-unique-suffix
+AWS_S3_BUCKET=writescholar-documents-your-unique-suffix
 
 # Set to production to use real S3
 NODE_ENV=production
@@ -72,14 +72,14 @@ Instead of `AmazonS3FullAccess`, create a custom policy:
         "s3:DeleteObject",
         "s3:GetObjectMetadata"
       ],
-      "Resource": "arn:aws:s3:::scholar-ai-documents-your-unique-suffix/*"
+      "Resource": "arn:aws:s3:::writescholar-documents-your-unique-suffix/*"
     },
     {
       "Effect": "Allow",
       "Action": [
         "s3:ListBucket"
       ],
-      "Resource": "arn:aws:s3:::scholar-ai-documents-your-unique-suffix"
+      "Resource": "arn:aws:s3:::writescholar-documents-your-unique-suffix"
     }
   ]
 }
@@ -99,8 +99,8 @@ Add bucket policy for additional security:
       "Principal": "*",
       "Action": "s3:*",
       "Resource": [
-        "arn:aws:s3:::scholar-ai-documents-your-unique-suffix",
-        "arn:aws:s3:::scholar-ai-documents-your-unique-suffix/*"
+        "arn:aws:s3:::writescholar-documents-your-unique-suffix",
+        "arn:aws:s3:::writescholar-documents-your-unique-suffix/*"
       ],
       "Condition": {
         "Bool": {
@@ -117,7 +117,7 @@ Add bucket policy for additional security:
 Your S3 bucket will be organized as:
 
 ```
-scholar-ai-documents/
+writescholar-documents/
 ├── documents/
 │   ├── user-id-1/
 │   │   ├── uuid1.pdf

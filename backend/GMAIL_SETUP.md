@@ -19,7 +19,7 @@
 1. Still in Security settings, click "App passwords"
 2. You might need to sign in again
 3. Select "Mail" as the app
-4. Select "Other" as the device and type "Scholar AI"
+4. Select "Other" as the device and type "WriteScholar"
 5. Click "Generate"
 6. **Copy the 16-character password** (like: `abcd efgh ijkl mnop`)
 

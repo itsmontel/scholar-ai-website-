@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 
 /**
- * Supabase Setup Script for Scholar AI
+ * Supabase Setup Script for WriteScholar
  * 
  * This script helps you set up your Supabase database with the required tables
- * and initial data for the Scholar AI application.
+ * and initial data for the WriteScholar application.
  */
 
 const { Pool } = require('pg');
@@ -29,7 +29,7 @@ const log = (message, color = 'reset') => {
 };
 
 const setupSupabase = async () => {
-  log('\n🚀 Setting up Supabase for Scholar AI...\n', 'cyan');
+  log('\n🚀 Setting up Supabase for WriteScholar...\n', 'cyan');
   
   // Check if .env file exists
   if (!fs.existsSync('.env')) {

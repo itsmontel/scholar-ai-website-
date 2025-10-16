@@ -156,7 +156,7 @@ const createStripeCustomer = async (email, name) => {
       email,
       name,
       metadata: {
-        source: 'scholar-ai'
+        source: 'writescholar'
       }
     });
     return { success: true, customerId: customer.id };
@@ -188,7 +188,7 @@ const createCheckoutSession = async (customerId, planType, billingCycle, userId)
         userId,
         planType,
         billingCycle,
-        source: 'scholar-ai'
+        source: 'writescholar'
       }
     });
     

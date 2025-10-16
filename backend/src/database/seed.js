@@ -73,7 +73,7 @@ async function seedDatabase() {
         file_type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
         file_size: 1536000,
         s3_key: 'demo/documents/social_media_academic_performance.docx',
-        s3_url: 'https://s3.amazonaws.com/scholar-ai-documents/demo/documents/social_media_academic_performance.docx',
+        s3_url: 'https://s3.amazonaws.com/writescholar-documents/demo/documents/social_media_academic_performance.docx',
         content_text: 'This study examines the relationship between social media usage and academic performance among university students...',
         word_count: 1800,
         page_count: 6,
@@ -143,8 +143,8 @@ async function seedDatabase() {
       {
         user_id: userIds[0],
         type: 'system',
-        title: 'Welcome to Scholar AI',
-        message: 'Welcome to Scholar AI! Start by uploading your first document for analysis.',
+        title: 'Welcome to WriteScholar',
+        message: 'Welcome to WriteScholar! Start by uploading your first document for analysis.',
         is_read: true,
         metadata: {}
       }

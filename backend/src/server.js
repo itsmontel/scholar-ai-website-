@@ -75,7 +75,7 @@ if (process.env.NODE_ENV !== 'test') {
 app.get('/', (req, res) => {
   res.status(200).json({
     success: true,
-    message: 'Scholar AI Backend API',
+    message: 'WriteScholar Backend API',
     version: '1.0.0',
     endpoints: {
       auth: '/api/auth',
@@ -152,7 +152,7 @@ const startServer = async () => {
     }
     
     app.listen(PORT, () => {
-      console.log(`🚀 Scholar AI Backend running on port ${PORT}`);
+      console.log(`🚀 WriteScholar Backend running on port ${PORT}`);
       console.log(`📊 Environment: ${process.env.NODE_ENV}`);
       console.log(`🔗 Health check: http://localhost:${PORT}/health`);
       if (process.env.USE_SUPABASE_STORAGE === 'true') {

@@ -1,8 +1,8 @@
-# Scholar AI - Comprehensive Academic Analysis Features
+# WriteScholar - Comprehensive Academic Analysis Features
 
 ## 🎯 **Academic Analysis for All Levels**
 
-Scholar AI provides comprehensive academic analysis designed to help students and researchers at all levels improve their writing and research skills, from undergraduate students to graduate researchers and professionals.
+WriteScholar provides comprehensive academic analysis designed to help students and researchers at all levels improve their writing and research skills, from undergraduate students to graduate researchers and professionals.
 
 ## 🏆 **Analysis Types**
 
@@ -250,4 +250,4 @@ Simulates comprehensive peer review for academic documents.
 
 ---
 
-*Scholar AI: Supporting academic excellence at every level of learning.*
+*WriteScholar: Supporting academic excellence at every level of learning.*

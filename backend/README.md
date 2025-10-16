@@ -1,6 +1,6 @@
-# Scholar AI Backend
+# WriteScholar Backend
 
-A comprehensive backend API for the Scholar AI academic writing assistant platform.
+A comprehensive backend API for the WriteScholar academic writing assistant platform.
 
 ## 🚀 Features
 
@@ -40,7 +40,7 @@ A comprehensive backend API for the Scholar AI academic writing assistant platfo
 1. **Clone the repository**
    ```bash
    git clone <repository-url>
-   cd scholar-ai-backend
+   cd writescholar-backend
    ```
 
 2. **Install dependencies**
@@ -60,10 +60,10 @@ A comprehensive backend API for the Scholar AI academic writing assistant platfo
 4. **Set up the database**
    ```bash
    # Create PostgreSQL database
-   createdb scholar_ai
+   createdb writescholar
    
    # Run the schema
-   psql -d scholar_ai -f src/database/schema.sql
+   psql -d writescholar -f src/database/schema.sql
    ```
 
 5. **Start the server**

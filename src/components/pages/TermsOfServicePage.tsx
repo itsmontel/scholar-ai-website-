@@ -28,7 +28,7 @@ const TermsOfServicePage: React.FC<TermsOfServicePageProps> = ({ onNavigate, use
               <h2 className="text-2xl font-bold text-gray-900 mb-4">1. Acceptance of Terms</h2>
               <div className="space-y-4 text-gray-700">
                 <p>
-                  By accessing and using Scholar AI ("the Service"), you accept and agree to be bound by 
+                  By accessing and using WriteScholar ("the Service"), you accept and agree to be bound by 
                   the terms and provision of this agreement. If you do not agree to abide by the above, 
                   please do not use this service.
                 </p>
@@ -39,7 +39,7 @@ const TermsOfServicePage: React.FC<TermsOfServicePageProps> = ({ onNavigate, use
               <h2 className="text-2xl font-bold text-gray-900 mb-4">2. Description of Service</h2>
               <div className="space-y-4 text-gray-700">
                 <p>
-                  Scholar AI provides AI-powered academic writing analysis and feedback services. 
+                  WriteScholar provides AI-powered academic writing analysis and feedback services. 
                   Our service includes:
                 </p>
                 <ul className="list-disc list-inside space-y-2 ml-4">

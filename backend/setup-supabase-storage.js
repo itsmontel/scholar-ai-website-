@@ -3,7 +3,7 @@
 /**
  * Supabase Storage Setup Script
  * 
- * This script sets up Supabase Storage for Scholar AI, including:
+ * This script sets up Supabase Storage for WriteScholar, including:
  * - Creating the storage bucket
  * - Setting up RLS policies
  * - Testing the configuration
@@ -13,7 +13,7 @@ require('dotenv').config();
 const { createClient } = require('@supabase/supabase-js');
 
 async function setupSupabaseStorage() {
-  console.log('🚀 Setting up Supabase Storage for Scholar AI\n');
+  console.log('🚀 Setting up Supabase Storage for WriteScholar\n');
 
   // Check environment variables
   if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
@@ -28,7 +28,7 @@ async function setupSupabaseStorage() {
     process.env.SUPABASE_SERVICE_ROLE_KEY
   );
 
-  const bucketName = 'scholar-ai-documents';
+  const bucketName = 'writescholar-documents';
 
   try {
     // Step 1: Create storage bucket
@@ -121,7 +121,7 @@ async function setupSupabaseStorage() {
     console.log('🧪 Step 3: Testing storage configuration...');
     
     // Test upload
-    const testContent = `Scholar AI Storage Test
+    const testContent = `WriteScholar Storage Test
 Created: ${new Date().toISOString()}
 This is a test file to verify Supabase Storage configuration.`;
     

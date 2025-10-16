@@ -1,4 +1,4 @@
--- Scholar AI Database Schema
+-- WriteScholar Database Schema
 -- PostgreSQL Database Setup
 
 -- Enable UUID extension

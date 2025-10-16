@@ -256,7 +256,7 @@ router.post('/verify-email', async (req, res) => {
 
     res.json({
       success: true,
-      message: 'Email verified successfully. Welcome to Scholar AI!',
+      message: 'Email verified successfully. Welcome to WriteScholar!',
       data: {
         emailVerified: true,
         welcomeEmailSent: welcomeResult.success

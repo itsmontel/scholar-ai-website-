@@ -1,19 +1,19 @@
-# 🚀 Supabase Setup Guide for Scholar AI
+# 🚀 Supabase Setup Guide for WriteScholar
 
-This guide will help you set up Supabase as your database for the Scholar AI application.
+This guide will help you set up Supabase as your database for the WriteScholar application.
 
 ## 📋 **Prerequisites**
 
 - Node.js installed on your system
 - A Supabase account (free at [supabase.com](https://supabase.com))
-- Your Scholar AI backend code
+- Your WriteScholar backend code
 
 ## 🎯 **Step 1: Create Supabase Project**
 
 1. **Go to [supabase.com](https://supabase.com)** and sign up/login
 2. **Click "New Project"**
 3. **Fill in project details:**
-   - **Name**: `scholar-ai-database`
+   - **Name**: `writescholar-database`
    - **Database Password**: Generate a strong password (save this!)
    - **Region**: Choose closest to your users
    - **Pricing Plan**: Free tier is perfect to start
@@ -78,7 +78,7 @@ Once your project is ready:
    AWS_ACCESS_KEY_ID=your_aws_access_key
    AWS_SECRET_ACCESS_KEY=your_aws_secret_key
    AWS_REGION=us-east-1
-   AWS_S3_BUCKET=scholar-ai-documents
+   AWS_S3_BUCKET=writescholar-documents
 
    # OpenAI Configuration
    OPENAI_API_KEY=your_openai_api_key_here
@@ -179,4 +179,4 @@ If you encounter any issues:
 
 ---
 
-**🎉 Congratulations!** Your Supabase database is now ready for Scholar AI!
+**🎉 Congratulations!** Your Supabase database is now ready for WriteScholar!

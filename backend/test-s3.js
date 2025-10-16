@@ -34,7 +34,7 @@ async function testS3Configuration() {
   try {
     // Test 1: Upload a test file
     console.log('📤 Test 1: Uploading test file...');
-    const testContent = `Scholar AI S3 Test File
+    const testContent = `WriteScholar S3 Test File
 Created: ${new Date().toISOString()}
 This is a test file to verify S3 configuration.`;
     

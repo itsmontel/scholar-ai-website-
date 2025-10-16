@@ -11,7 +11,7 @@ class SupabaseStorageService {
       process.env.SUPABASE_SERVICE_ROLE_KEY
     );
     
-    this.bucketName = 'scholar-ai-documents';
+    this.bucketName = 'writescholar-documents';
     
     console.log(`🔗 Supabase Storage Service initialized - Bucket: ${this.bucketName}`);
   }

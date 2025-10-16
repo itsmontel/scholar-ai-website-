@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 
 // Import all page components
 import LandingPage from './components/LandingPage';
-import SignUpPage from './pages/SignupPage';
+import SignUpPage from './pages/SignUpPage';
 import LoginPage from './components/LoginPage';
 import Dashboard from './components/Dashboard';
 import AnalysisPage from './components/AnalysisPage';

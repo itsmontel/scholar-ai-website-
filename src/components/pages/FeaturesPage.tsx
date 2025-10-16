@@ -108,7 +108,7 @@ const FeaturesPage = ({ onNavigate, user, onLogout }: FeaturesPageProps) => {
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-900 mb-6">How It Works</h2>
             <p className="text-lg text-gray-600 leading-relaxed max-w-3xl mx-auto">
-              Get started with Scholar in just a few simple steps and experience the power of AI-driven academic writing assistance.
+              Get started with WriteScholar in just a few simple steps and experience the power of AI-driven academic writing assistance.
             </p>
           </div>
           

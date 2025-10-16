@@ -3,7 +3,7 @@
 /**
  * S3 Setup Helper Script
  * 
- * This script helps you set up AWS S3 configuration for Scholar AI.
+ * This script helps you set up AWS S3 configuration for WriteScholar.
  * It will guide you through the process and create the necessary .env entries.
  */
 
@@ -23,8 +23,8 @@ function question(prompt) {
 }
 
 async function setupS3() {
-  console.log('🚀 Scholar AI S3 Setup Helper\n');
-  console.log('This script will help you configure AWS S3 for your Scholar AI application.\n');
+  console.log('🚀 WriteScholar S3 Setup Helper\n');
+  console.log('This script will help you configure AWS S3 for your WriteScholar application.\n');
 
   // Check if .env file exists
   const envPath = path.join(__dirname, '.env');
@@ -37,7 +37,7 @@ async function setupS3() {
       console.log('✅ .env file created!\n');
     } else {
       console.log('⚠️  env.example not found. Creating basic .env file...');
-      fs.writeFileSync(envPath, '# Scholar AI Environment Variables\n\n');
+      fs.writeFileSync(envPath, '# WriteScholar Environment Variables\n\n');
     }
   }
 

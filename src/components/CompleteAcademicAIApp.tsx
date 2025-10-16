@@ -222,7 +222,15 @@ const AcademicAIApp = () => {
       return 'landing';
     };
     
-    setCurrentPage(getPageFromPath(path));
+    const initialPage = getPageFromPath(path);
+    
+    // If user is logged in and trying to access landing page, redirect to dashboard
+    if (isLoggedIn && initialPage === 'landing') {
+      setCurrentPage('dashboard');
+      window.history.replaceState(null, '', '/dashboard');
+    } else {
+      setCurrentPage(initialPage);
+    }
     
     // Listen for browser back/forward button
     const handlePopState = () => {
@@ -251,7 +259,16 @@ const AcademicAIApp = () => {
     return () => {
       window.removeEventListener('popstate', handlePopState);
     };
-  }, []);
+  }, [isLoggedIn]);
+
+  // Handle authentication state changes - redirect to dashboard if logged in and on landing page
+  useEffect(() => {
+    if (isLoggedIn && currentPage === 'landing') {
+      console.log('User logged in, redirecting from landing to dashboard');
+      setCurrentPage('dashboard');
+      window.history.replaceState(null, '', '/dashboard');
+    }
+  }, [isLoggedIn, currentPage]);
 
   // Sync user data from localStorage when it changes (e.g., from another tab or after login)
   useEffect(() => {

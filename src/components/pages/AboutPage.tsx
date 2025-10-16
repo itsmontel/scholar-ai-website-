@@ -74,7 +74,7 @@ const AboutPage = ({ onNavigate, user, onLogout }: AboutPageProps) => {
           <div>
             <h2 className="text-3xl font-bold text-gray-900 mb-6">Our Story</h2>
             <p className="text-lg text-gray-600 leading-relaxed mb-6">
-              Scholar was born from a simple observation: academic writing is one of the most challenging aspects of scholarly work, yet access to quality feedback is often limited by time, cost, and availability of expert reviewers.
+              WriteScholar was born from a simple observation: academic writing is one of the most challenging aspects of scholarly work, yet access to quality feedback is often limited by time, cost, and availability of expert reviewers.
             </p>
             <p className="text-lg text-gray-600 leading-relaxed mb-6">
               Our team of researchers, educators, and AI specialists came together with a shared vision: to create a platform that could provide instant, comprehensive feedback on academic writing, helping students and researchers improve their work and achieve their academic goals.
