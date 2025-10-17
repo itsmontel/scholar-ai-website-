@@ -833,31 +833,31 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                       <svg className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
-                      <span className="text-gray-700 text-sm">5 documents per month</span>
+                      <span className="text-gray-700 text-sm">1MB total upload limit</span>
                     </li>
                     <li className="flex items-start space-x-3">
                       <svg className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
-                      <span className="text-gray-700 text-sm">Basic AI analysis</span>
+                      <span className="text-gray-700 text-sm">3 document uploads per month</span>
                     </li>
                     <li className="flex items-start space-x-3">
                       <svg className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
-                      <span className="text-gray-700 text-sm">Standard citation styles</span>
+                      <span className="text-gray-700 text-sm">3 AI analyses per month</span>
                     </li>
                     <li className="flex items-start space-x-3">
                       <svg className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
-                      <span className="text-gray-700 text-sm">Basic grammar check</span>
+                      <span className="text-gray-700 text-sm">50% document annotation only</span>
                     </li>
                     <li className="flex items-start space-x-3">
                       <svg className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
-                      <span className="text-gray-700 text-sm">Email support</span>
+                      <span className="text-gray-700 text-sm">Basic support</span>
                     </li>
                   </ul>
                 </div>
