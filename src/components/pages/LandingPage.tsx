@@ -808,14 +808,83 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
           </div>
 
           {/* Pricing Cards */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 mb-12 sm:mb-16 max-w-5xl mx-auto">
-            {/* Basic Plan */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 mb-12 sm:mb-16 max-w-6xl mx-auto">
+            {/* Free Plan */}
             <div className="relative bg-white/90 backdrop-blur-xl rounded-2xl border border-gray-200/60 shadow-md hover:shadow-xl hover:border-gray-300/60 transition-all duration-300">
               <div className="p-8">
                 {/* Plan Header */}
                 <div className="text-center mb-8">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-2">Basic</h3>
-                  <p className="text-gray-600 mb-6">Perfect for students and researchers</p>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-2">Free</h3>
+                  <p className="text-gray-600 mb-6">Perfect for getting started</p>
+                  <div className="mb-6">
+                    <span className="text-4xl font-bold text-gray-900">
+                      $0
+                    </span>
+                    <span className="text-gray-600 ml-2">
+                      /month
+                    </span>
+                  </div>
+                </div>
+
+                {/* Features */}
+                <div className="mb-8">
+                  <ul className="space-y-3">
+                    <li className="flex items-start space-x-3">
+                      <svg className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                      <span className="text-gray-700 text-sm">5 documents per month</span>
+                    </li>
+                    <li className="flex items-start space-x-3">
+                      <svg className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                      <span className="text-gray-700 text-sm">Basic AI analysis</span>
+                    </li>
+                    <li className="flex items-start space-x-3">
+                      <svg className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                      <span className="text-gray-700 text-sm">Standard citation styles</span>
+                    </li>
+                    <li className="flex items-start space-x-3">
+                      <svg className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                      <span className="text-gray-700 text-sm">Basic grammar check</span>
+                    </li>
+                    <li className="flex items-start space-x-3">
+                      <svg className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                      <span className="text-gray-700 text-sm">Email support</span>
+                    </li>
+                  </ul>
+                </div>
+
+                {/* CTA Button */}
+                <button
+                  onClick={() => onNavigate('signup')}
+                  className="w-full py-3 px-6 rounded-xl font-semibold text-base transition-all duration-300 bg-gray-900 text-white hover:bg-gray-800"
+                >
+                  Get Started Free
+                </button>
+              </div>
+            </div>
+
+            {/* Starter Plan */}
+            <div className="relative bg-white/90 backdrop-blur-xl rounded-2xl border border-blue-500/60 shadow-lg transition-all duration-300">
+              <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-xl text-center font-bold text-sm shadow-lg">
+                  Most Popular
+                </div>
+              </div>
+
+              <div className="p-8">
+                {/* Plan Header */}
+                <div className="text-center mb-8">
+                  <h3 className="text-2xl font-bold text-gray-900 mb-2">Starter</h3>
+                  <p className="text-gray-600 mb-6">Most popular for students</p>
                   <div className="mb-6">
                     <span className="text-4xl font-bold text-gray-900">
                       {billingCycle === 'monthly' ? '$19.99' : '$199.99'}
@@ -838,31 +907,31 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                       <svg className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
+                      <span className="text-gray-700 text-sm">Unlimited document uploads</span>
+                    </li>
+                    <li className="flex items-start space-x-3">
+                      <svg className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
                       <span className="text-gray-700 text-sm">999 AI analyses per month</span>
                     </li>
                     <li className="flex items-start space-x-3">
                       <svg className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
-                      <span className="text-gray-700 text-sm">AI-powered writing feedback</span>
+                      <span className="text-gray-700 text-sm">All citation styles</span>
                     </li>
                     <li className="flex items-start space-x-3">
                       <svg className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
-                      <span className="text-gray-700 text-sm">Citation and reference checking</span>
+                      <span className="text-gray-700 text-sm">Grammar and style checks</span>
                     </li>
                     <li className="flex items-start space-x-3">
                       <svg className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
-                      <span className="text-gray-700 text-sm">Grammar and style improvements</span>
-                    </li>
-                    <li className="flex items-start space-x-3">
-                      <svg className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span className="text-gray-700 text-sm">Email support</span>
+                      <span className="text-gray-700 text-sm">Plagiarism detection</span>
                     </li>
                   </ul>
                 </div>
@@ -870,7 +939,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                 {/* CTA Button */}
                 <button
                   onClick={() => onNavigate('signup')}
-                  className="w-full py-3 px-6 rounded-xl font-semibold text-base transition-all duration-300 bg-gray-900 text-white hover:bg-gray-800"
+                  className="w-full py-3 px-6 rounded-xl font-semibold text-base transition-all duration-300 bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:shadow-lg"
                 >
                   Get Started
                 </button>
@@ -878,18 +947,12 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
             </div>
 
             {/* Premium Plan */}
-            <div className="relative bg-white/90 backdrop-blur-xl rounded-2xl border border-blue-500/60 shadow-lg transition-all duration-300">
-              <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-xl text-center font-bold text-sm shadow-lg">
-                  Most Popular
-                </div>
-              </div>
-
+            <div className="relative bg-white/90 backdrop-blur-xl rounded-2xl border border-gray-200/60 shadow-md hover:shadow-xl hover:border-gray-300/60 transition-all duration-300">
               <div className="p-8">
                 {/* Plan Header */}
                 <div className="text-center mb-8">
                   <h3 className="text-2xl font-bold text-gray-900 mb-2">Premium</h3>
-                  <p className="text-gray-600 mb-6">For serious academic writers</p>
+                  <p className="text-gray-600 mb-6">For researchers and institutions</p>
                   <div className="mb-6">
                     <span className="text-4xl font-bold text-gray-900">
                       {billingCycle === 'monthly' ? '$39.99' : '$399.99'}
@@ -919,7 +982,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                       <svg className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
-                      <span className="text-gray-700 text-sm">Everything in Basic</span>
+                      <span className="text-gray-700 text-sm">Everything in Starter</span>
                     </li>
                     <li className="flex items-start space-x-3">
                       <svg className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -931,19 +994,13 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                       <svg className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
-                      <span className="text-gray-700 text-sm">Advanced plagiarism detection</span>
+                      <span className="text-gray-700 text-sm">Advanced AI analysis</span>
                     </li>
                     <li className="flex items-start space-x-3">
                       <svg className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
-                      <span className="text-gray-700 text-sm">Priority processing</span>
-                    </li>
-                    <li className="flex items-start space-x-3">
-                      <svg className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span className="text-gray-700 text-sm">Advanced analytics</span>
+                      <span className="text-gray-700 text-sm">Advanced grammar and style checking</span>
                     </li>
                     <li className="flex items-start space-x-3">
                       <svg className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -957,9 +1014,9 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                 {/* CTA Button */}
                 <button
                   onClick={() => onNavigate('signup')}
-                  className="w-full py-3 px-6 rounded-xl font-semibold text-base transition-all duration-300 bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:shadow-lg"
+                  className="w-full py-3 px-6 rounded-xl font-semibold text-base transition-all duration-300 bg-gray-900 text-white hover:bg-gray-800"
                 >
-                  Start Premium Trial
+                  Get Started
                 </button>
               </div>
             </div>
