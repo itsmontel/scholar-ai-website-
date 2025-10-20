@@ -68,12 +68,28 @@ const LoginPage = ({ onNavigate, onLogin }: LoginPageProps) => {
         throw new Error(data.message || 'Login failed');
       }
 
-      // Store token and user data
-      localStorage.setItem('authToken', data.data.token);
-      localStorage.setItem('user', JSON.stringify(data.data.user));
+      // Transform user data to match expected interface
+      const transformedUser = {
+        id: data.data.user.id,
+        email: data.data.user.email,
+        name: data.data.user.firstName && data.data.user.lastName 
+          ? `${data.data.user.firstName} ${data.data.user.lastName}` 
+          : data.data.user.name || data.data.user.email,
+        firstName: data.data.user.firstName,
+        lastName: data.data.user.lastName,
+        plan: data.data.user.subscriptionPlan || 'free',
+        subscription_status: data.data.user.subscriptionStatus,
+        email_verified: data.data.user.emailVerified
+      };
 
-      // Call the parent component's onLogin with the actual user data
-      onLogin(data.data.user);
+      // Store token and transformed user data
+      localStorage.setItem('authToken', data.data.token);
+      localStorage.setItem('user', JSON.stringify(transformedUser));
+      
+      console.log('Login successful - transformed user data:', transformedUser);
+
+      // Call the parent component's onLogin with the transformed user data
+      onLogin(transformedUser);
       onNavigate('dashboard');
     } catch (error) {
       console.error('Login error:', error);
@@ -156,7 +172,7 @@ const LoginPage = ({ onNavigate, onLogin }: LoginPageProps) => {
         <div className="max-w-md w-full">
           <div className="flex items-center space-x-2 mb-6 sm:mb-8">
             <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">W</span>
+              <span className="text-white font-bold text-lg">W</span>
             </div>
             <span className="text-xl font-bold text-gray-900">WriteScholar</span>
           </div>

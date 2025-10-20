@@ -29,9 +29,14 @@ import ErrorBoundary from './common/ErrorBoundary';
 
 // Type definitions
 interface User {
+  id: string;
   name: string;
   email: string;
+  firstName?: string;
+  lastName?: string;
   plan: string;
+  subscription_status?: string;
+  email_verified?: boolean;
 }
 
 interface NavigationProps {

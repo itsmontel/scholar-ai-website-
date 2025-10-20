@@ -320,7 +320,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
       <nav className="relative z-10 flex items-center justify-between px-4 sm:px-8 md:px-16 py-4 sm:py-6 backdrop-blur-sm bg-white/80 border-b border-white/20">
         <div className="flex items-center space-x-2 sm:space-x-3">
           <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 rounded-xl flex items-center justify-center shadow-lg">
-            <span className="text-white font-bold text-base sm:text-lg">W</span>
+            <span className="text-white font-bold text-xl sm:text-2xl">W</span>
           </div>
           <span className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">WriteScholar</span>
         </div>

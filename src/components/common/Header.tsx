@@ -2,7 +2,16 @@ import React, { useState, useEffect } from 'react';
 
 interface HeaderProps {
   onNavigate?: (page: string) => void;
-  user?: { name: string; email: string } | null;
+  user?: { 
+    id: string;
+    name: string; 
+    email: string;
+    firstName?: string;
+    lastName?: string;
+    plan: string;
+    subscription_status?: string;
+    email_verified?: boolean;
+  } | null;
   onLogout?: () => void;
   currentPage?: string;
 }
@@ -28,6 +37,11 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [usageStats, setUsageStats] = useState<UsageStats | null>(null);
   const [loadingUsage, setLoadingUsage] = useState(false);
+
+  // Debug user data
+  useEffect(() => {
+    console.log('Header received user data:', user);
+  }, [user]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -110,7 +124,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
             className="flex items-center space-x-2 sm:space-x-3 hover:opacity-80 transition-opacity duration-200"
           >
             <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
-              <span className="text-white font-bold text-base sm:text-lg">W</span>
+              <span className="text-white font-bold text-xl sm:text-2xl">W</span>
             </div>
             <span className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">WriteScholar</span>
           </button>

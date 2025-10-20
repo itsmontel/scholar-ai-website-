@@ -142,7 +142,7 @@ const ResetPasswordPage = ({ onNavigate }: ResetPasswordPageProps) => {
       <div className="max-w-md w-full">
         <div className="flex items-center space-x-2 mb-8 justify-center">
           <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-sm">W</span>
+            <span className="text-white font-bold text-lg">W</span>
           </div>
           <span className="text-xl font-bold text-gray-900">WriteScholar</span>
         </div>
