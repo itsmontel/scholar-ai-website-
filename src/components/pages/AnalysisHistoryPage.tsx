@@ -5,7 +5,16 @@ import { AnalysisCardSkeleton } from '../common/LoadingSpinner';
 
 interface AnalysisHistoryPageProps {
   onNavigate?: (page: string) => void;
-  user?: { name: string; email: string } | null;
+  user?: { 
+    id: string; 
+    name: string; 
+    email: string; 
+    firstName?: string; 
+    lastName?: string; 
+    plan: string; 
+    subscription_status?: string; 
+    email_verified?: boolean; 
+  } | null;
   onLogout?: () => void;
   showHeader?: boolean;
 }
@@ -214,7 +223,6 @@ const AnalysisHistoryPage: React.FC<AnalysisHistoryPageProps> = ({ onNavigate, u
       general: '📝',
       citation: '📚',
       grammar: '✏️',
-      plagiarism: '🔍',
       comprehensive: '🎯',
     };
     return icons[type] || '📄';
@@ -225,7 +233,6 @@ const AnalysisHistoryPage: React.FC<AnalysisHistoryPageProps> = ({ onNavigate, u
       general: 'General Analysis',
       citation: 'Citation Check',
       grammar: 'Grammar & Language',
-      plagiarism: 'Plagiarism Check',
       comprehensive: 'Comprehensive Review',
     };
     return names[type] || type;
@@ -236,7 +243,6 @@ const AnalysisHistoryPage: React.FC<AnalysisHistoryPageProps> = ({ onNavigate, u
       general: 'bg-blue-100 text-blue-800',
       citation: 'bg-green-100 text-green-800',
       grammar: 'bg-yellow-100 text-yellow-800',
-      plagiarism: 'bg-red-100 text-red-800',
       comprehensive: 'bg-purple-100 text-purple-800',
     };
     return colors[type] || 'bg-gray-100 text-gray-800';

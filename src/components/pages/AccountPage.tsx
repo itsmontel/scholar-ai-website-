@@ -362,7 +362,6 @@ const AccountPage = ({ onNavigate, user, onLogout }: AccountPageProps) => {
                       <div>• Advanced writing feedback</div>
                       <div>• Priority email support</div>
                       <div>• Advanced citation checking</div>
-                      <div>• Plagiarism detection</div>
                     </>
                   )}
                   {userStats.subscriptionPlan === 'premium' && (
@@ -370,7 +369,6 @@ const AccountPage = ({ onNavigate, user, onLogout }: AccountPageProps) => {
                       <div>• Unlimited document analyses</div>
                       <div>• Premium AI writing feedback</div>
                       <div>• 24/7 priority support</div>
-                      <div>• Advanced plagiarism detection</div>
                       <div>• Custom citation styles</div>
                       <div>• Bulk document processing</div>
                     </>
