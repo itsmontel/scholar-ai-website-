@@ -169,10 +169,13 @@ const createStripeCustomer = async (email, name) => {
 // Create checkout session
 const createCheckoutSession = async (customerId, planType, billingCycle, userId) => {
   try {
+    console.log('🔥 STRIPE: Creating checkout session for:', { customerId, planType, billingCycle, userId });
+    
     // Get price ID based on plan and billing cycle
     const priceId = getPriceId(planType, billingCycle);
+    console.log('🔥 STRIPE: Using price ID:', priceId);
     
-    const session = await stripe.checkout.sessions.create({
+    const sessionConfig = {
       customer: customerId,
       payment_method_types: ['card'],
       line_items: [
@@ -190,17 +193,30 @@ const createCheckoutSession = async (customerId, planType, billingCycle, userId)
         billingCycle,
         source: 'writescholar'
       }
-    });
+    };
     
+    console.log('🔥 STRIPE: Session config:', JSON.stringify(sessionConfig, null, 2));
+    
+    const session = await stripe.checkout.sessions.create(sessionConfig);
+    
+    console.log('🔥 STRIPE: Session created successfully:', { id: session.id, url: session.url });
     return { success: true, sessionId: session.id, url: session.url };
   } catch (error) {
-    console.error('Error creating checkout session:', error);
+    console.error('🔥 STRIPE ERROR: Failed to create checkout session:', error);
+    console.error('🔥 STRIPE ERROR: Error details:', {
+      message: error.message,
+      type: error.type,
+      code: error.code,
+      param: error.param
+    });
     return { success: false, error: error.message };
   }
 };
 
 // Get price ID based on plan and billing cycle
 const getPriceId = (planType, billingCycle) => {
+  console.log('🔥 STRIPE: Getting price ID for:', { planType, billingCycle });
+  
   const prices = {
     'starter': {
       'monthly': process.env.STRIPE_STARTER_MONTHLY_PRICE_ID || 'price_starter_monthly',
@@ -212,11 +228,21 @@ const getPriceId = (planType, billingCycle) => {
     }
   };
 
+  console.log('🔥 STRIPE: Available prices:', prices);
+  console.log('🔥 STRIPE: Environment variables:', {
+    STRIPE_STARTER_MONTHLY_PRICE_ID: process.env.STRIPE_STARTER_MONTHLY_PRICE_ID,
+    STRIPE_STARTER_YEARLY_PRICE_ID: process.env.STRIPE_STARTER_YEARLY_PRICE_ID,
+    STRIPE_PREMIUM_MONTHLY_PRICE_ID: process.env.STRIPE_PREMIUM_MONTHLY_PRICE_ID,
+    STRIPE_PREMIUM_YEARLY_PRICE_ID: process.env.STRIPE_PREMIUM_YEARLY_PRICE_ID
+  });
+
   const priceId = prices[planType]?.[billingCycle];
   if (!priceId) {
+    console.error('🔥 STRIPE ERROR: Invalid plan/billing combination:', { planType, billingCycle });
     throw new Error(`Invalid plan type or billing cycle: ${planType}/${billingCycle}`);
   }
-  
+
+  console.log('🔥 STRIPE: Selected price ID:', priceId);
   return priceId;
 };
 
