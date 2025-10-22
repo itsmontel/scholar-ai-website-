@@ -10,17 +10,38 @@ const securityMiddleware = [
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        styleSrc: ["'self'", "'unsafe-inline'"],
-        scriptSrc: ["'self'"],
-        imgSrc: ["'self'", "data:", "https:"],
-        connectSrc: ["'self'"],
-        fontSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+        scriptSrc: ["'self'", "https://js.stripe.com"],
+        imgSrc: ["'self'", "data:", "https:", "blob:"],
+        connectSrc: ["'self'", "https://api.openai.com", "https://api.stripe.com"],
+        fontSrc: ["'self'", "https://fonts.gstatic.com"],
         objectSrc: ["'none'"],
         mediaSrc: ["'self'"],
         frameSrc: ["'none'"],
+        baseUri: ["'self'"],
+        formAction: ["'self'"],
+        upgradeInsecureRequests: process.env.NODE_ENV === 'production' ? [] : null,
       },
     },
     crossOriginEmbedderPolicy: false,
+    hsts: {
+      maxAge: 31536000, // 1 year
+      includeSubDomains: true,
+      preload: true
+    },
+    referrerPolicy: { policy: "strict-origin-when-cross-origin" },
+    permissionsPolicy: {
+      features: {
+        camera: ["'none'"],
+        microphone: ["'none'"],
+        geolocation: ["'none'"],
+        payment: ["'self'"],
+        usb: ["'none'"],
+        magnetometer: ["'none'"],
+        gyroscope: ["'none'"],
+        accelerometer: ["'none'"]
+      }
+    }
   }),
 
   // Prevent NoSQL injection attacks
@@ -62,6 +83,11 @@ const securityMiddleware = [
         return next();
       }
       
+      // Allow webhooks with specific content types
+      if (req.path.includes('/webhooks')) {
+        return next();
+      }
+      
       // For other endpoints, require JSON content type
       if (!contentType || !contentType.includes('application/json')) {
         return res.status(400).json({
@@ -71,6 +97,53 @@ const securityMiddleware = [
       }
     }
 
+    next();
+  },
+
+  // Additional security headers
+  (req, res, next) => {
+    // Prevent MIME type sniffing
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    
+    // Prevent clickjacking
+    res.setHeader('X-Frame-Options', 'DENY');
+    
+    // XSS Protection (legacy browsers)
+    res.setHeader('X-XSS-Protection', '1; mode=block');
+    
+    // Remove server information
+    res.removeHeader('X-Powered-By');
+    
+    next();
+  },
+
+  // Input sanitization for common attack vectors
+  (req, res, next) => {
+    // Skip sanitization for file uploads to avoid corrupting form data
+    if (req.path.includes('/upload')) {
+      return next();
+    }
+    
+    if (req.body) {
+      // Recursively sanitize all string values in request body
+      const sanitizeObject = (obj) => {
+        for (const key in obj) {
+          if (typeof obj[key] === 'string') {
+            // Remove potentially dangerous characters
+            obj[key] = obj[key]
+              .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '') // Remove script tags
+              .replace(/javascript:/gi, '') // Remove javascript: protocol
+              .replace(/on\w+\s*=/gi, '') // Remove event handlers
+              .trim();
+          } else if (typeof obj[key] === 'object' && obj[key] !== null) {
+            sanitizeObject(obj[key]);
+          }
+        }
+      };
+      
+      sanitizeObject(req.body);
+    }
+    
     next();
   }
 ];

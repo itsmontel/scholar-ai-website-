@@ -5,11 +5,84 @@ const {
   validateCreateAnalysis,
   validateSaveAnalysis,
   validateGetAnalysisHistory,
-  validateAnalysisId
+  validateAnalysisId,
+  validateCitationReview
 } = require('../middleware/validation');
 const aiAnalysisService = require('../services/aiAnalysisService');
 const documentService = require('../services/documentService');
 const subscriptionService = require('../services/subscriptionService');
+
+// @route   POST /api/analysis/citation-review
+// @desc    Citation review analysis (temporary, not saved to database)
+// @access  Private
+router.post('/citation-review', authenticateToken, validateCitationReview, async (req, res) => {
+  try {
+    const { content, citationStyle } = req.body;
+    const userId = req.user.id;
+
+    console.log('=== CITATION REVIEW REQUEST ===');
+    console.log('Content length:', content?.length);
+    console.log('Citation style:', citationStyle);
+    console.log('User ID:', userId);
+
+    // Validate input
+    if (!content || content.trim().length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Document content is required for citation review'
+      });
+    }
+
+    if (!citationStyle || citationStyle === 'None') {
+      return res.status(400).json({
+        success: false,
+        message: 'Citation style must be specified for citation review'
+      });
+    }
+
+    // Check user's analysis limits (citation review counts toward monthly limit)
+    const limitCheck = await subscriptionService.checkLimit(userId, 'analysesPerMonth');
+    if (!limitCheck.allowed) {
+      return res.status(429).json({
+        success: false,
+        message: 'Monthly analysis limit reached. Please upgrade your plan or wait until next month.',
+        limit: limitCheck.limit,
+        usage: limitCheck.usage
+      });
+    }
+
+    // Perform citation review analysis
+    const analysisResult = await aiAnalysisService.analyzeCitationReview(
+      content,
+      citationStyle
+    );
+
+    console.log('Citation review completed successfully');
+
+    // Return analysis result (not saved to database)
+    res.json({
+      success: true,
+      message: 'Citation review completed successfully',
+      data: {
+        analysisType: 'citation_review',
+        result: analysisResult.result,
+        annotations: analysisResult.annotations,
+        citationStyle: analysisResult.citationStyle,
+        model: analysisResult.model,
+        timestamp: analysisResult.timestamp,
+        temporary: true // Indicates this is not saved
+      }
+    });
+
+  } catch (error) {
+    console.error('Citation review error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Citation review failed',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
 
 // @route   POST /api/analysis/simple-analyze
 // @desc    Simple analysis endpoint (bypasses external dependencies)
@@ -103,6 +176,16 @@ router.post('/analyze', authenticateToken, validateCreateAnalysis, async (req, r
   try {
     const { documentId, content, analysisType, citationStyle } = req.body;
     const userId = req.user.id;
+
+    // Additional validation for citation review
+    if (analysisType === 'citation_review') {
+      if (!citationStyle || citationStyle === 'None') {
+        return res.status(400).json({
+          success: false,
+          message: 'Citation style is required for citation review. Please select APA, MLA, Chicago, Harvard, IEEE, or Vancouver.'
+        });
+      }
+    }
 
     console.log('=== ANALYSIS REQUEST DEBUG ===');
     console.log('Received documentId:', documentId);
@@ -424,9 +507,28 @@ router.get('/document/:documentId', authenticateToken, async (req, res) => {
       throw error;
     }
 
+    // Separate analyses by type and get the most recent of each
+    const comprehensiveAnalyses = data?.filter(analysis => 
+      analysis.analysis_type === 'comprehensive' || analysis.analysis_type === 'general'
+    ) || [];
+    
+    const citationAnalyses = data?.filter(analysis => 
+      analysis.analysis_type === 'citation_review'
+    ) || [];
+
+    // Get the most recent of each type
+    const latestComprehensive = comprehensiveAnalyses.length > 0 ? comprehensiveAnalyses[0] : null;
+    const latestCitation = citationAnalyses.length > 0 ? citationAnalyses[0] : null;
+
     res.json({
       success: true,
-      data: data || []
+      data: {
+        all: data || [],
+        comprehensive: latestComprehensive,
+        citation: latestCitation,
+        hasComprehensive: !!latestComprehensive,
+        hasCitation: !!latestCitation
+      }
     });
 
   } catch (error) {

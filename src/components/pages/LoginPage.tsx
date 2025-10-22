@@ -171,7 +171,7 @@ const LoginPage = ({ onNavigate, onLogin }: LoginPageProps) => {
       <div className="w-full lg:w-1/2 flex items-center justify-center p-4 sm:p-6 md:p-8">
         <div className="max-w-md w-full">
           <div className="flex items-center space-x-2 mb-6 sm:mb-8">
-            <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-500 rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-lg">W</span>
             </div>
             <span className="text-xl font-bold text-gray-900">WriteScholar</span>

@@ -103,7 +103,7 @@ const commonSchemas = {
 
   // Analysis type validation
   analysisType: Joi.string()
-    .valid('comprehensive', 'grammar', 'style', 'structure', 'citation', 'plagiarism')
+    .valid('comprehensive', 'grammar', 'style', 'structure', 'citation', 'plagiarism', 'citation_review')
     .required()
     .messages({
       'any.only': 'Invalid analysis type',
@@ -157,6 +157,18 @@ const validationSchemas = {
     analysisType: commonSchemas.analysisType,
     citationStyle: commonSchemas.citationStyle,
     content: commonSchemas.content
+  }),
+
+  // Citation review endpoint (temporary analysis, no documentId needed)
+  citationReview: Joi.object({
+    content: commonSchemas.content,
+    citationStyle: Joi.string()
+      .valid('APA', 'MLA', 'Chicago', 'Harvard', 'IEEE', 'Vancouver')
+      .required()
+      .messages({
+        'any.only': 'Invalid citation style. Citation review requires a specific citation style (not "None")',
+        'any.required': 'Citation style is required for citation review'
+      })
   }),
 
   saveAnalysis: Joi.object({
@@ -213,6 +225,7 @@ module.exports = {
   // Analysis validations
   validateCreateAnalysis: validate(validationSchemas.createAnalysis),
   validateSaveAnalysis: validate(validationSchemas.saveAnalysis),
+  validateCitationReview: validate(validationSchemas.citationReview),
   
   // Query parameter validations
   validateGetDocuments: validate(validationSchemas.getDocuments, 'query'),

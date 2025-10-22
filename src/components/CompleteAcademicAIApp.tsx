@@ -119,22 +119,24 @@ const AcademicAIApp = () => {
           
           if (userResponse.ok) {
             const userData = await userResponse.json();
-            if (userData.data) {
+            if (userData.data && userData.data.user && userData.data.user.email) {
               const updatedUser = {
-                id: userData.data.id,
-                email: userData.data.email,
-                name: userData.data.first_name && userData.data.last_name 
-                  ? `${userData.data.first_name} ${userData.data.last_name}` 
-                  : userData.data.name || userData.data.email,
-                first_name: userData.data.first_name,
-                last_name: userData.data.last_name,
-                plan: userData.data.subscription_plan || 'free',
-                subscription_status: userData.data.subscription_status,
-                email_verified: userData.data.email_verified
+                id: userData.data.user.id,
+                email: userData.data.user.email,
+                name: userData.data.user.firstName && userData.data.user.lastName 
+                  ? `${userData.data.user.firstName} ${userData.data.user.lastName}` 
+                  : userData.data.user.name || userData.data.user.email,
+                firstName: userData.data.user.firstName,
+                lastName: userData.data.user.lastName,
+                plan: userData.data.user.subscriptionPlan || 'free',
+                subscription_status: userData.data.user.subscriptionStatus,
+                email_verified: userData.data.user.emailVerified
               };
               setUser(updatedUser);
               localStorage.setItem('user', JSON.stringify(updatedUser));
-              console.log('User data updated after token refresh');
+              console.log('User data updated after token refresh:', updatedUser);
+            } else {
+              console.log('Invalid user data after token refresh, keeping existing user data');
             }
           }
         } else {
@@ -156,21 +158,24 @@ const AcademicAIApp = () => {
       } else if (response.ok) {
         const userData = await response.json();
         // Update user data from server
-        if (userData.data) {
+        if (userData.data && userData.data.user && userData.data.user.email) {
           const updatedUser = {
-            id: userData.data.id,
-            email: userData.data.email,
-            name: userData.data.first_name && userData.data.last_name 
-              ? `${userData.data.first_name} ${userData.data.last_name}` 
-              : userData.data.name || userData.data.email,
-            first_name: userData.data.first_name,
-            last_name: userData.data.last_name,
-            plan: userData.data.subscription_plan || 'free',
-            subscription_status: userData.data.subscription_status,
-            email_verified: userData.data.email_verified
+            id: userData.data.user.id,
+            email: userData.data.user.email,
+            name: userData.data.user.firstName && userData.data.user.lastName 
+              ? `${userData.data.user.firstName} ${userData.data.user.lastName}` 
+              : userData.data.user.name || userData.data.user.email,
+            firstName: userData.data.user.firstName,
+            lastName: userData.data.user.lastName,
+            plan: userData.data.user.subscriptionPlan || 'free',
+            subscription_status: userData.data.user.subscriptionStatus,
+            email_verified: userData.data.user.emailVerified
           };
           setUser(updatedUser);
           localStorage.setItem('user', JSON.stringify(updatedUser));
+          console.log('User data updated from /auth/me:', updatedUser);
+        } else {
+          console.log('Invalid user data from /auth/me, keeping existing user data');
         }
         console.log('Token is valid, user data updated');
       } else {

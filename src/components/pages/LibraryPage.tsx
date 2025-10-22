@@ -5,7 +5,16 @@ import LoadingSpinner from '../common/LoadingSpinner';
 
 interface LibraryPageProps {
   onNavigate: (page: string) => void;
-  user?: { name: string; email: string } | null;
+  user?: { 
+    id: string;
+    name: string; 
+    email: string;
+    firstName?: string;
+    lastName?: string;
+    plan: string;
+    subscription_status?: string;
+    email_verified?: boolean;
+  } | null;
   onLogout?: () => void;
 }
 
@@ -28,7 +37,7 @@ interface Document {
 }
 
 interface Analysis {
-    id: string;
+  id: string;
   analysis_type: string;
   analysis_results?: {
     result: string;
@@ -49,6 +58,14 @@ interface Analysis {
   document_id: string;
 }
 
+interface AnalysisData {
+  all: Analysis[];
+  comprehensive: Analysis | null;
+  citation: Analysis | null;
+  hasComprehensive: boolean;
+  hasCitation: boolean;
+}
+
 const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout }) => {
   // State for documents
   const [documents, setDocuments] = useState<Document[]>([]);
@@ -58,7 +75,7 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
   const [loadingContent, setLoadingContent] = useState(false);
   
   // State for analysis
-  const [analysis, setAnalysis] = useState<Analysis | null>(null);
+  const [analysisData, setAnalysisData] = useState<AnalysisData | null>(null);
   const [loadingAnalysis, setLoadingAnalysis] = useState(false);
   
   // State for search and filters
@@ -67,7 +84,7 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
   const [filteredDocuments, setFilteredDocuments] = useState<Document[]>([]);
   
   // State for view mode
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
   
   // State for error handling
   const [, setError] = useState<string | null>(null);
@@ -258,18 +275,18 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
       if (!response.ok) {
         if (response.status === 404) {
           // No analysis found
-          setAnalysis(null);
+          setAnalysisData(null);
           return;
         }
         throw new Error('Failed to fetch analysis');
       }
 
       const result = await response.json();
-      // API returns an array of analyses, get the most recent one
-      setAnalysis(result.data && result.data.length > 0 ? result.data[0] : null);
+      // API now returns structured data with separate comprehensive and citation analyses
+      setAnalysisData(result.data || null);
     } catch (error) {
       console.error('Error fetching analysis:', error);
-      setAnalysis(null);
+      setAnalysisData(null);
     } finally {
       setLoadingAnalysis(false);
     }
@@ -278,7 +295,7 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
   const handleDocumentSelect = (document: Document) => {
     setSelectedDocument(document);
     setDocumentContent('');
-    setAnalysis(null);
+    setAnalysisData(null);
     
     // Fetch content and analysis for selected document
     fetchDocumentContent(document.id);
@@ -348,7 +365,7 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
       if (selectedDocument?.id === documentId) {
       setSelectedDocument(null);
         setDocumentContent('');
-        setAnalysis(null);
+        setAnalysisData(null);
       }
 
       setEditingDocument(null);
@@ -797,26 +814,46 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
                   </div>
                 </div>
                 
-                {/* View Analysis Button */}
-                {analysis && (
-                  <div className="mt-4">
+                {/* Analysis Buttons */}
+                {analysisData && (analysisData.hasComprehensive || analysisData.hasCitation) && (
+                  <div className="mt-4 space-y-3">
+                    {/* Comprehensive Analysis Button */}
+                    {analysisData.hasComprehensive && (
                       <button
-                      onClick={() => {
-                        // Simple navigation to analysis page with document ID
-                        onNavigate('analysis');
-                        // Store the document ID for the analysis page to pick up
-                        localStorage.setItem('viewAnalysisDocumentId', selectedDocument.id);
-                        // Store flag indicating user came from Library
-                        localStorage.setItem('cameFromLibrary', 'true');
-                      }}
-                      className="w-full bg-green-600 text-white px-4 py-3 rounded-lg hover:bg-green-700 transition-colors font-medium flex items-center justify-center space-x-2"
+                        onClick={() => {
+                          // Navigate to analysis page with comprehensive analysis
+                          onNavigate('analysis');
+                          localStorage.setItem('viewAnalysisDocumentId', selectedDocument.id);
+                          localStorage.setItem('viewAnalysisType', 'comprehensive');
+                          localStorage.setItem('cameFromLibrary', 'true');
+                        }}
+                        className="w-full bg-green-600 text-white px-4 py-3 rounded-lg hover:bg-green-700 transition-colors font-medium flex items-center justify-center space-x-2"
                       >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
-                      <span>View Analysis</span>
+                        <span>View Comprehensive Analysis</span>
                       </button>
+                    )}
+
+                    {/* Citation Analysis Button */}
+                    {analysisData.hasCitation && (
+                      <button
+                        onClick={() => {
+                          // Navigate to analysis page with citation analysis
+                          onNavigate('analysis');
+                          localStorage.setItem('viewAnalysisDocumentId', selectedDocument.id);
+                          localStorage.setItem('viewAnalysisType', 'citation');
+                          localStorage.setItem('cameFromLibrary', 'true');
+                        }}
+                        className="w-full bg-purple-600 text-white px-4 py-3 rounded-lg hover:bg-purple-700 transition-colors font-medium flex items-center justify-center space-x-2"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 4V2a1 1 0 011-1h8a1 1 0 011 1v2h4a1 1 0 110 2h-1v12a2 2 0 01-2 2H6a2 2 0 01-2-2V6H3a1 1 0 110-2h4zM6 6v12h12V6H6zm3-2V2h6v2H9z" />
+                        </svg>
+                        <span>View Citation Analysis</span>
+                      </button>
+                    )}
                   </div>
                 )}
               </div>
@@ -875,7 +912,7 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
               <div className="flex items-center justify-center h-full">
                 <LoadingSpinner />
               </div>
-            ) : !analysis ? (
+            ) : !analysisData || (!analysisData.hasComprehensive && !analysisData.hasCitation) ? (
               <div className="text-center text-gray-500 mt-8">
                 <svg className="w-12 h-12 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
@@ -894,115 +931,97 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
               </div>
             ) : (
               <div className="space-y-4">
-                {/* Comprehensive Academic Analysis */}
-                {analysis.analysis_results?.result && (
-                  <div className="mb-6">
-                    <h3 className="text-sm font-medium text-gray-900 mb-3">Comprehensive Academic Analysis</h3>
-                    <div className="bg-blue-50 rounded-lg p-4 border-l-4 border-blue-400">
-                      <div className="prose prose-sm max-w-none">
-                        <div className="whitespace-pre-wrap text-gray-800 leading-relaxed">
-                          {analysis.analysis_results.result
-                            .replace(/#{1,6}\s*/g, '') // Remove markdown headers
-                            .replace(/\*{1,2}([^*]+)\*{1,2}/g, '$1') // Remove bold/italic markdown
-                            .replace(/`([^`]+)`/g, '$1') // Remove code markdown
-                            .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Remove markdown links
-                            .trim()}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
+                 {/* Document Analysis - Full Analysis Display */}
+                 <div className="bg-white rounded-lg border border-gray-200">
+                   <div className="p-4 border-b border-gray-100">
+                     <h3 className="text-lg font-medium text-gray-900">Document Analysis</h3>
+                     <p className="text-sm text-gray-600 mt-1">AI-generated feedback and suggestions</p>
+                   </div>
+                   
+                   <div className="p-4 space-y-4">
+                     {(() => {
+                       // Get the most recent analysis (comprehensive or citation)
+                       const mostRecentAnalysis = analysisData.comprehensive && analysisData.citation 
+                         ? (new Date(analysisData.comprehensive.created_at) > new Date(analysisData.citation.created_at) 
+                            ? analysisData.comprehensive 
+                            : analysisData.citation)
+                         : (analysisData.comprehensive || analysisData.citation);
+                       
+                       if (!mostRecentAnalysis?.analysis_results) {
+                         return (
+                           <div className="text-center text-gray-500 py-4">
+                             <p>No analysis content available</p>
+                           </div>
+                         );
+                       }
 
-                {/* Strong Points */}
-                {analysis.analysis_results?.strong_points && analysis.analysis_results.strong_points.length > 0 && (
-                  <div>
-                    <h3 className="text-sm font-medium text-gray-900 mb-3">Strong Points</h3>
-                    <div className="space-y-3">
-                      {analysis.analysis_results.strong_points.map((point, index) => (
-                        <div key={index} className="bg-green-50 rounded-lg p-4 border-l-4 border-green-400">
-                          <div className="flex items-start">
-                            <div className="flex-shrink-0">
-                              <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                        </svg>
-                            </div>
-                            <div className="ml-3">
-                              <h4 className="text-sm font-medium text-green-800">Strong Point</h4>
-                              <p className="text-sm text-green-700 mt-1">{point.explanation}</p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-                    </div>
-    </div>
-        )}
+                       const results = mostRecentAnalysis.analysis_results;
+                       const analysisType = mostRecentAnalysis.analysis_type === 'citation_review' ? 'Citation' : 'Comprehensive';
+                       
+                       return (
+                         <>
+                           {/* Header Section - Analysis Type and Date */}
+                           <div className="flex items-center justify-between mb-4">
+                             <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
+                               mostRecentAnalysis.analysis_type === 'citation_review' 
+                                 ? 'bg-purple-100 text-purple-800' 
+                                 : 'bg-green-100 text-green-800'
+                             }`}>
+                               {analysisType} Analysis
+                             </span>
+                             <span className="text-sm text-gray-500">
+                               {new Date(mostRecentAnalysis.created_at).toLocaleDateString()}
+                             </span>
+                           </div>
 
-                {/* Areas to Improve */}
-                {analysis.analysis_results?.areas_to_improve && analysis.analysis_results.areas_to_improve.length > 0 && (
-                  <div>
-                    <h3 className="text-sm font-medium text-gray-900 mb-3">Areas to Improve</h3>
-                    <div className="space-y-3">
-                      {analysis.analysis_results.areas_to_improve.map((point, index) => (
-                        <div key={index} className="bg-amber-50 rounded-lg p-4 border-l-4 border-amber-400">
-                          <div className="flex items-start">
-                            <div className="flex-shrink-0">
-                              <svg className="w-5 h-5 text-amber-500" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                              </svg>
-        </div>
-                            <div className="ml-3">
-                              <h4 className="text-sm font-medium text-amber-800">Consider Clarification</h4>
-                              <p className="text-sm text-amber-700 mt-1">{point.explanation}</p>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                           {/* Summary Section - Quick Stats */}
+                           <div className="grid grid-cols-3 gap-3 mb-6">
+                             {results.strong_points && results.strong_points.length > 0 && (
+                               <div className="text-center p-3 bg-green-50 rounded-lg border border-green-200">
+                                 <div className="text-xl font-bold text-green-600">{results.strong_points.length}</div>
+                                 <div className="text-sm text-green-700">Strong Points</div>
+                               </div>
+                             )}
+                             {results.areas_to_improve && results.areas_to_improve.length > 0 && (
+                               <div className="text-center p-3 bg-amber-50 rounded-lg border border-amber-200">
+                                 <div className="text-xl font-bold text-amber-600">{results.areas_to_improve.length}</div>
+                                 <div className="text-sm text-amber-700">Areas to Improve</div>
+                               </div>
+                             )}
+                             {results.serious_concerns && results.serious_concerns.length > 0 && (
+                               <div className="text-center p-3 bg-red-50 rounded-lg border border-red-200">
+                                 <div className="text-xl font-bold text-red-600">{results.serious_concerns.length}</div>
+                                 <div className="text-sm text-red-700">Serious Concerns</div>
+                               </div>
+                             )}
+                           </div>
 
-                {/* Serious Concerns */}
-                {analysis.analysis_results?.serious_concerns && analysis.analysis_results.serious_concerns.length > 0 && (
-                  <div>
-                    <h3 className="text-sm font-medium text-gray-900 mb-3">Serious Concerns</h3>
-                    <div className="space-y-3">
-                      {analysis.analysis_results.serious_concerns.map((point, index) => (
-                        <div key={index} className="bg-red-50 rounded-lg p-4 border-l-4 border-red-400">
-                          <div className="flex items-start">
-                            <div className="flex-shrink-0">
-                              <svg className="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                              </svg>
-                            </div>
-                            <div className="ml-3">
-                              <h4 className="text-sm font-medium text-red-800">Serious Concern</h4>
-                              <p className="text-sm text-red-700 mt-1">{point.explanation}</p>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-          </div>
-        )}
+                           {/* Full Analysis Section - Complete Assessment */}
+                           {results.result && (
+                             <div className="mb-6">
+                               <h4 className="text-base font-semibold text-gray-900 mb-3">
+                                 {analysisType} Academic Analysis – Overall Assessment
+                               </h4>
+                               <div className="bg-blue-50 rounded-lg p-4 border-l-4 border-blue-400">
+                                 <div className="prose prose-sm max-w-none">
+                                   <div className="whitespace-pre-wrap text-gray-800 leading-relaxed">
+                                     {results.result
+                                       .replace(/#{1,6}\s*/g, '') // Remove markdown headers
+                                       .replace(/\*{1,2}([^*]+)\*{1,2}/g, '$1') // Remove bold/italic markdown
+                                       .replace(/`([^`]+)`/g, '$1') // Remove code markdown
+                                       .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Remove markdown links
+                                       .trim()}
+                                   </div>
+                                 </div>
+                               </div>
+                             </div>
+                           )}
 
-                {(!analysis.analysis_results?.result && 
-                  !analysis.analysis_results?.strong_points?.length && 
-                  !analysis.analysis_results?.areas_to_improve?.length && 
-                  !analysis.analysis_results?.serious_concerns?.length) && (
-                  <div className="text-center text-gray-500 mt-8">
-                    <p className="mb-4">No analysis available</p>
-                    <button
-                      onClick={() => {
-                        localStorage.setItem('selectedDocumentId', selectedDocument.id);
-                        localStorage.setItem('selectedDocumentTitle', selectedDocument.title);
-                        onNavigate('analysis');
-                      }}
-                      className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-                    >
-                      Analyze Document
-                    </button>
-      </div>
-                )}
+                         </>
+                       );
+                     })()}
+                   </div>
+                 </div>
               </div>
             )}
           </div>

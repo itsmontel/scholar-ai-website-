@@ -57,7 +57,7 @@ const ContactPage = ({ onNavigate, user, onLogout }: ContactPageProps) => {
           {/* Email Address */}
           <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-xl p-6 mb-8">
             <div className="flex items-center justify-between">
-              <div>
+          <div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-2">Email Address</h3>
                 <p className="text-2xl font-bold text-blue-600">support@writescholar.com</p>
                 <p className="text-sm text-gray-600 mt-1">We respond within 24 hours</p>
@@ -112,8 +112,8 @@ const ContactPage = ({ onNavigate, user, onLogout }: ContactPageProps) => {
                       [BILLING] - Question about [subscription/payment]
                     </div>
                   </div>
-                </div>
-              </div>
+          </div>
+        </div>
 
               {/* Feature Request */}
               <div className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
@@ -131,7 +131,7 @@ const ContactPage = ({ onNavigate, user, onLogout }: ContactPageProps) => {
                     </div>
                   </div>
                 </div>
-              </div>
+        </div>
 
               {/* General Inquiry */}
               <div className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
@@ -151,7 +151,7 @@ const ContactPage = ({ onNavigate, user, onLogout }: ContactPageProps) => {
                 </div>
               </div>
             </div>
-          </div>
+        </div>
 
           {/* Email Template */}
           <div className="mt-8 bg-gray-50 border border-gray-200 rounded-xl p-6">

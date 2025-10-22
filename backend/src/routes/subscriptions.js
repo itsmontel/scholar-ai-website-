@@ -171,7 +171,21 @@ router.put('/update', authenticateToken, async (req, res) => {
       });
     }
 
-    const newPriceId = subscriptionService.getPriceId(newPlan);
+    // Get current subscription details from Stripe to determine billing cycle
+    const stripeSubscription = await subscriptionService.getStripeSubscription(subscription.stripe_subscription_id);
+    if (!stripeSubscription.success) {
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to retrieve current subscription details'
+      });
+    }
+
+    // Determine current billing cycle based on Stripe subscription
+    const currentPriceId = stripeSubscription.subscription.items.data[0].price.id;
+    const isMonthly = currentPriceId.includes('monthly') || currentPriceId === process.env.STRIPE_STARTER_MONTHLY_PRICE_ID || currentPriceId === process.env.STRIPE_PREMIUM_MONTHLY_PRICE_ID;
+    const billingCycle = isMonthly ? 'monthly' : 'yearly';
+
+    const newPriceId = subscriptionService.getPriceId(newPlan, billingCycle);
     if (!newPriceId) {
       return res.status(400).json({
         success: false,

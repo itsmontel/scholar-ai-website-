@@ -98,12 +98,14 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
 
     // Check if we need to load an existing analysis
     const viewAnalysisDocumentId = localStorage.getItem('viewAnalysisDocumentId');
+    const viewAnalysisType = localStorage.getItem('viewAnalysisType');
     const cameFromLibraryFlag = localStorage.getItem('cameFromLibrary');
     
     if (viewAnalysisDocumentId) {
-      console.log('Loading existing analysis for document:', viewAnalysisDocumentId);
-      loadExistingAnalysisSimple(viewAnalysisDocumentId);
+      console.log('Loading existing analysis for document:', viewAnalysisDocumentId, 'type:', viewAnalysisType);
+      loadExistingAnalysisSimple(viewAnalysisDocumentId, viewAnalysisType);
       localStorage.removeItem('viewAnalysisDocumentId');
+      localStorage.removeItem('viewAnalysisType');
     }
     
     // Check if user came from Library page
@@ -413,7 +415,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
   };
 
   // Simple function to load existing analysis
-  const loadExistingAnalysisSimple = async (documentId: string) => {
+  const loadExistingAnalysisSimple = async (documentId: string, analysisType?: string | null) => {
     try {
       console.log('=== LOADING EXISTING ANALYSIS ===');
       console.log('Document ID:', documentId);
@@ -445,8 +447,30 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
       const data = await response.json();
       console.log('Analysis response:', data);
 
-      if (data.data && data.data.length > 0) {
-        const analysis = data.data[0];
+      // Handle the new structured response from backend
+      let analysis = null;
+      if (data.data) {
+        if (data.data.all && data.data.all.length > 0) {
+          // New structured format - select the appropriate analysis type
+          if (analysisType === 'citation' && data.data.citation) {
+            analysis = data.data.citation;
+            console.log('Loading citation analysis:', analysis);
+          } else if (analysisType === 'comprehensive' && data.data.comprehensive) {
+            analysis = data.data.comprehensive;
+            console.log('Loading comprehensive analysis:', analysis);
+          } else {
+            // Default to the most recent analysis if no specific type requested
+            analysis = data.data.comprehensive || data.data.citation || data.data.all[0];
+            console.log('Loading default analysis:', analysis);
+          }
+        } else if (Array.isArray(data.data) && data.data.length > 0) {
+          // Legacy format - array of analyses
+          analysis = data.data[0];
+          console.log('Loading legacy format analysis:', analysis);
+        }
+      }
+
+      if (analysis) {
         const analysisResults = analysis.analysis_results;
         
         console.log('Found analysis:', analysis);
@@ -888,6 +912,68 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
     }
   };
 
+  // Helper function to render text with italics for common patterns
+  const renderTextWithItalics = (text: string, key: string) => {
+    // Common patterns for italics in academic writing:
+    // 1. Book/movie/film titles
+    // 2. Journal/magazine names  
+    // 3. Latin phrases (et al., ibid., etc.)
+    // 4. Titles with "Dir.", "Perf.", "Eds."
+    
+    const italicPatterns = [
+      // Known work titles from the document
+      /\b(Get Out|The Dark Knight|White Privilege|Black Panther|Hegemony|McIntosh)\b/g,
+      
+      // Titles followed by periods, colons, or citations markers (Dir., Perf., Eds.)
+      /(?:^|[.!?]\s+)([A-Z][a-z]+(?:\s+[A-Z][a-z]+){1,5})(?=\.|:|\s+Dir\.|\s+Perf\.|\s+Eds\.)/g,
+      
+      // Latin phrases and abbreviations
+      /\b(et al\.|ibid\.|op\. cit\.|sic|circa|ca\.|vs\.|viz\.)\b/gi,
+      
+      // Italicized citations style (e.g., "Media, Communication, Culture")
+      /(?:^|[.]\s+)([A-Z][a-z]+(?:,\s+[A-Z][a-z]+){2,})(?=\.)/g,
+    ];
+
+    // Split text and apply italics where needed
+    let parts: React.ReactNode[] = [];
+    let lastIndex = 0;
+    let foundMatch = false;
+
+    italicPatterns.forEach(pattern => {
+      pattern.lastIndex = 0; // Reset regex
+      let match;
+      const tempText = text.slice(lastIndex);
+      
+      while ((match = pattern.exec(text)) !== null) {
+        if (match.index >= lastIndex) {
+          foundMatch = true;
+          // Add text before match
+          if (match.index > lastIndex) {
+            parts.push(text.slice(lastIndex, match.index));
+          }
+          // Add italicized match
+          parts.push(
+            <em key={`${key}-italic-${match.index}`}>
+              {match[0]}
+            </em>
+          );
+          lastIndex = match.index + match[0].length;
+        }
+      }
+    });
+
+    // If no patterns found, return plain text
+    if (!foundMatch || lastIndex === 0) {
+      return text;
+    }
+
+    // Add remaining text
+    if (lastIndex < text.length) {
+      parts.push(text.slice(lastIndex));
+    }
+
+    return parts.length > 0 ? <>{parts}</> : text;
+  };
 
   const getDisplayContent = () => {
     if (!documentContent) return '';
@@ -942,7 +1028,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
         <div className="text-gray-700 leading-relaxed">
           {paragraphs.map((paragraph, index) => (
             <p key={index} className="mb-4 text-justify">
-              {paragraph.trim()}
+              {renderTextWithItalics(paragraph.trim(), `no-anno-p-${index}`)}
             </p>
           ))}
           {currentPlan === 'free' && (
@@ -1009,16 +1095,17 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
           const paragraphStart = displayContent.indexOf(paragraph);
           const paragraphEnd = paragraphStart + paragraph.length;
           
-          // Find annotations that fall within this paragraph
-          const paragraphAnnotations = sortedAnnotations.filter(annotation => 
-            annotation.startIndex >= paragraphStart && annotation.endIndex <= paragraphEnd
-          );
+          // Find annotations that overlap with this paragraph (including multi-paragraph annotations)
+          const paragraphAnnotations = sortedAnnotations.filter(annotation => {
+            // Annotation overlaps if it starts before paragraph ends AND ends after paragraph starts
+            return annotation.startIndex < paragraphEnd && annotation.endIndex > paragraphStart;
+          });
           
           if (paragraphAnnotations.length === 0) {
-            // No annotations in this paragraph, render normally
+            // No annotations in this paragraph, render normally with italics
             return (
               <p key={paragraphIndex} className="mb-4 text-justify">
-                {paragraph.trim()}
+                {renderTextWithItalics(paragraph.trim(), `p-${paragraphIndex}`)}
               </p>
             );
           }
@@ -1028,9 +1115,13 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
           let lastIndex = 0;
           
           paragraphAnnotations.forEach((annotation) => {
+            // Calculate the portion of the annotation that overlaps with this paragraph
+            const annotationStart = Math.max(annotation.startIndex, paragraphStart);
+            const annotationEnd = Math.min(annotation.endIndex, paragraphEnd);
+            
             // Adjust annotation indices relative to paragraph start
-            const relativeStart = annotation.startIndex - paragraphStart;
-            const relativeEnd = annotation.endIndex - paragraphStart;
+            const relativeStart = Math.max(0, annotationStart - paragraphStart);
+            const relativeEnd = Math.min(paragraph.length, annotationEnd - paragraphStart);
             
             // Add text before this annotation
             if (relativeStart > lastIndex) {
@@ -1038,15 +1129,15 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
               if (textBefore.trim()) {
                 parts.push(
                   <span key={`text-${paragraphIndex}-${lastIndex}`} className="text-gray-700">
-                    {textBefore}
+                    {renderTextWithItalics(textBefore, `text-${paragraphIndex}-${lastIndex}`)}
                   </span>
                 );
               }
             }
 
-            // Validate annotation indices
+            // Extract the portion of text that falls within this paragraph
             const actualText = paragraph.slice(relativeStart, relativeEnd);
-            console.log(`Annotation ${annotation.id}: "${actualText}" (${relativeStart}-${relativeEnd})`);
+            console.log(`Annotation ${annotation.id} (${annotation.type}): "${actualText.substring(0, 50)}..." (${relativeStart}-${relativeEnd} in paragraph ${paragraphIndex})`);
 
             const highlightClasses = {
               strong: 'bg-green-100 text-green-900 border-b-2 border-green-400 hover:bg-green-200',
@@ -1066,7 +1157,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                 onClick={() => scrollToAnnotation(annotation.id)}
                 title={`${annotation.type.toUpperCase()}: ${annotation.comment}`}
               >
-                {actualText}
+                {renderTextWithItalics(actualText, `anno-${annotation.id}`)}
               </span>
             );
 
@@ -1079,7 +1170,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
             if (remainingText.trim()) {
               parts.push(
                 <span key={`text-${paragraphIndex}-${lastIndex}`} className="text-gray-700">
-                  {remainingText}
+                  {renderTextWithItalics(remainingText, `text-${paragraphIndex}-${lastIndex}`)}
                 </span>
               );
             }

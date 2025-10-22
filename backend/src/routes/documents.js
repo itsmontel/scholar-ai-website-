@@ -1,5 +1,6 @@
 const express = require('express');
 const multer = require('multer');
+const path = require('path');
 const { authenticateToken } = require('../middleware/auth');
 const { 
   validateUploadDocument,
@@ -25,20 +26,58 @@ const subscriptionService = require('../services/subscriptionService');
 
 const router = express.Router();
 
+// Enhanced file validation function
+const validateFile = (req, file, cb) => {
+  // Check MIME type
+  if (!documentParser.isSupportedFileType(file.mimetype)) {
+    return cb(new Error('Unsupported file type. Please upload PDF, DOCX, DOC, or TXT files.'), false);
+  }
+  
+  // Validate file extension matches MIME type
+  const allowedExtensions = {
+    'application/pdf': ['.pdf'],
+    'application/msword': ['.doc'],
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],
+    'text/plain': ['.txt']
+  };
+  
+  const fileExtension = path.extname(file.originalname).toLowerCase();
+  const expectedExtensions = allowedExtensions[file.mimetype];
+  
+  if (!expectedExtensions || !expectedExtensions.includes(fileExtension)) {
+    return cb(new Error('File extension does not match content type'), false);
+  }
+  
+  // Validate filename (prevent path traversal)
+  const sanitizedName = path.basename(file.originalname);
+  if (sanitizedName !== file.originalname || sanitizedName.includes('..')) {
+    return cb(new Error('Invalid filename'), false);
+  }
+  
+  // Check for suspicious file patterns
+  const suspiciousPatterns = [
+    /\.exe$/i, /\.bat$/i, /\.cmd$/i, /\.scr$/i, /\.pif$/i,
+    /\.com$/i, /\.jar$/i, /\.js$/i, /\.vbs$/i, /\.php$/i
+  ];
+  
+  if (suspiciousPatterns.some(pattern => pattern.test(file.originalname))) {
+    return cb(new Error('Potentially dangerous file type'), false);
+  }
+  
+  cb(null, true);
+};
+
 // Configure multer for file uploads
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: {
     fileSize: 50 * 1024 * 1024, // 50MB limit
+    files: 1, // Only allow one file at a time
+    fields: 10, // Limit number of fields
+    fieldNameSize: 100, // Limit field name size
+    fieldSize: 1024 * 1024 // 1MB limit for field values
   },
-  fileFilter: (req, file, cb) => {
-    // Check if file type is supported
-    if (documentParser.isSupportedFileType(file.mimetype)) {
-      cb(null, true);
-    } else {
-      cb(new Error('Unsupported file type. Please upload PDF, DOCX, DOC, or TXT files.'), false);
-    }
-  },
+  fileFilter: validateFile,
 });
 
 // @route   POST /api/documents/upload

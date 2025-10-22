@@ -2,9 +2,14 @@
 import Header from '../common/Header';
 
 interface User {
+  id: string;
   name: string;
   email: string;
+  firstName?: string;
+  lastName?: string;
   plan: string;
+  subscription_status?: string;
+  email_verified?: boolean;
 }
 
 interface AccountPageProps {
@@ -119,14 +124,18 @@ const AccountPage = ({ onNavigate, user, onLogout }: AccountPageProps) => {
 
   // Sync display user with prop user
   useEffect(() => {
+    console.log('AccountPage - user prop changed:', user);
     if (user) {
       setDisplayUser(user);
+      console.log('AccountPage - setDisplayUser with:', user);
     } else if (typeof window !== 'undefined') {
       // Fallback to localStorage if no user prop
       try {
         const userData = localStorage.getItem('user');
         if (userData) {
-          setDisplayUser(JSON.parse(userData));
+          const parsedUser = JSON.parse(userData);
+          console.log('AccountPage - using localStorage user:', parsedUser);
+          setDisplayUser(parsedUser);
         }
       } catch (error) {
         console.error('Error getting user from localStorage:', error);
@@ -135,6 +144,7 @@ const AccountPage = ({ onNavigate, user, onLogout }: AccountPageProps) => {
   }, [user]);
 
   useEffect(() => {
+    console.log('AccountPage - displayUser changed:', displayUser);
     if (displayUser) {
       fetchUserData();
     } else {
@@ -263,7 +273,7 @@ const AccountPage = ({ onNavigate, user, onLogout }: AccountPageProps) => {
                 <div>
                   <div className="font-semibold text-gray-900">Email</div>
                   <div className="text-gray-600 flex items-center">
-                    {displayUser?.email || (displayUser ? 'Not available' : 'Loading...')}
+                    {displayUser?.email ? displayUser.email : (displayUser ? 'Email not available' : 'Loading...')}
                     {userStats.emailVerified && (
                       <span className="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
                         <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">

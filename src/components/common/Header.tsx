@@ -38,10 +38,6 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
   const [usageStats, setUsageStats] = useState<UsageStats | null>(null);
   const [loadingUsage, setLoadingUsage] = useState(false);
 
-  // Debug user data
-  useEffect(() => {
-    console.log('Header received user data:', user);
-  }, [user]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -123,10 +119,10 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
             onClick={() => onNavigate?.('dashboard')}
             className="flex items-center space-x-2 sm:space-x-3 hover:opacity-80 transition-opacity duration-200"
           >
-            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-xl flex items-center justify-center shadow-lg">
               <span className="text-white font-bold text-xl sm:text-2xl">W</span>
             </div>
-            <span className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">WriteScholar</span>
+            <span className="text-lg sm:text-2xl font-bold text-gray-900">WriteScholar</span>
           </button>
 
           {/* Navigation */}
@@ -214,7 +210,9 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
                 <div className="absolute right-0 mt-2 w-56 sm:w-64 bg-white rounded-xl shadow-2xl border border-gray-200/50 backdrop-blur-sm z-50">
                   {/* User Info Section */}
                   <div className="px-4 py-3 border-b border-gray-100">
-                    <div className="text-sm font-medium text-gray-900">{user.email || 'Loading...'}</div>
+                    <div className="text-sm font-medium text-gray-900">
+                      {user?.email ? user.email : (user ? 'Email not available' : 'Loading...')}
+                    </div>
                     <div className="text-xs text-gray-500 capitalize">{usageStats?.plan || 'Free'} Plan</div>
                     
                     {/* Usage Statistics */}

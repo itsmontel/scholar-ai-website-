@@ -92,9 +92,7 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
         '999 AI analyses per month',
         '100% document annotation',
         'Priority support',
-        'Advanced analytics',
-        'API access',
-        'Custom integrations'
+        'Advanced analytics'
       ],
       stripePriceId: billingCycle === 'monthly' ? 'price_premium_monthly' : 'price_premium_yearly'
     }
