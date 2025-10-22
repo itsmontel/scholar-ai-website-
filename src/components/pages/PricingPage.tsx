@@ -100,14 +100,14 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
       monthlyPrice: 0,
       yearlyPrice: 0,
       features: [
-        '5 documents per month',
+        '3 documents per month',
         'Basic AI analysis',
         'Standard citation styles',
         'Email support',
         'Basic grammar check'
       ],
       limitations: [
-        'Limited to 5 documents',
+        'Limited to 3 documents',
         'Basic analysis only',
         'No priority support'
       ],
@@ -156,7 +156,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
   const faqs = [
     {
       question: "What's included in the free plan?",
-      answer: "The free plan includes 5 document analyses per month, basic AI feedback, standard citation styles, and email support. It's perfect for students just getting started with academic writing."
+      answer: "The free plan includes 3 document analyses per month, basic AI feedback, standard citation styles, and email support. It's perfect for students just getting started with academic writing."
     },
     {
       question: "What's the difference between Starter and Premium?",

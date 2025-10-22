@@ -28,11 +28,6 @@ interface UserStats {
   emailVerified: boolean;
 }
 
-interface PasswordChangeData {
-  currentPassword: string;
-  newPassword: string;
-  confirmPassword: string;
-}
 
 const AccountPage = ({ onNavigate, user, onLogout }: AccountPageProps) => {
   const [userStats, setUserStats] = useState<UserStats>({
@@ -46,15 +41,6 @@ const AccountPage = ({ onNavigate, user, onLogout }: AccountPageProps) => {
   });
   const [loading, setLoading] = useState(true);
   const [displayUser, setDisplayUser] = useState<User | null>(null);
-  const [showPasswordModal, setShowPasswordModal] = useState(false);
-  const [passwordData, setPasswordData] = useState<PasswordChangeData>({
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: ''
-  });
-  const [passwordLoading, setPasswordLoading] = useState(false);
-  const [passwordError, setPasswordError] = useState('');
-  const [passwordSuccess, setPasswordSuccess] = useState('');
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteConfirmation, setDeleteConfirmation] = useState('');
   const [deleteLoading, setDeleteLoading] = useState(false);
@@ -152,54 +138,6 @@ const AccountPage = ({ onNavigate, user, onLogout }: AccountPageProps) => {
     }
   }, [displayUser]);
 
-  // Handle password change
-  const handlePasswordChange = async () => {
-    if (passwordData.newPassword !== passwordData.confirmPassword) {
-      setPasswordError('New passwords do not match');
-      return;
-    }
-
-    if (passwordData.newPassword.length < 8) {
-      setPasswordError('New password must be at least 8 characters long');
-      return;
-    }
-
-    setPasswordLoading(true);
-    setPasswordError('');
-    setPasswordSuccess('');
-
-    try {
-      const token = localStorage.getItem('authToken');
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/users/change-password`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          currentPassword: passwordData.currentPassword,
-          newPassword: passwordData.newPassword
-        })
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        setPasswordSuccess('Password changed successfully!');
-        setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
-        setTimeout(() => {
-          setShowPasswordModal(false);
-          setPasswordSuccess('');
-        }, 2000);
-      } else {
-        setPasswordError(data.message || 'Failed to change password');
-      }
-    } catch (error) {
-      setPasswordError('An error occurred while changing password');
-    } finally {
-      setPasswordLoading(false);
-    }
-  };
 
   // Handle account deletion
   const handleDeleteAccount = async () => {
@@ -333,7 +271,7 @@ const AccountPage = ({ onNavigate, user, onLogout }: AccountPageProps) => {
                   <div className="font-semibold text-gray-900">Plan Features</div>
                   <div className="text-gray-600">
                     {userStats.subscriptionPlan === 'free'
-                      ? '5 documents per month, Basic analysis, Standard support'
+                      ? '3 documents per month, Basic analysis, Standard support'
                       : userStats.subscriptionPlan === 'starter'
                       ? '50 documents per month, Advanced analysis, Priority support'
                       : userStats.subscriptionPlan === 'premium'
@@ -350,7 +288,7 @@ const AccountPage = ({ onNavigate, user, onLogout }: AccountPageProps) => {
                 <div className="space-y-1 text-sm text-gray-600">
                   {userStats.subscriptionPlan === 'free' && (
                     <>
-                      <div>• 5 document analyses per month</div>
+                      <div>• 3 document analyses per month</div>
                       <div>• Basic writing feedback</div>
                       <div>• Standard email support</div>
                       <div>• Basic citation checking</div>
@@ -378,24 +316,6 @@ const AccountPage = ({ onNavigate, user, onLogout }: AccountPageProps) => {
             </div>
           </div>
 
-          {/* Security */}
-          <div className="bg-white/90 backdrop-blur-xl border border-gray-200/60 rounded-2xl p-8 shadow-lg">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Security</h2>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between py-3">
-                <div>
-                  <div className="font-semibold text-gray-900">Password</div>
-                  <div className="text-gray-600">Last changed: Recently</div>
-                </div>
-                <button 
-                  onClick={() => setShowPasswordModal(true)}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200"
-                >
-                  Change Password
-                </button>
-              </div>
-            </div>
-          </div>
 
           {/* Danger Zone */}
           <div className="bg-red-50/90 backdrop-blur-xl border border-red-200/60 rounded-2xl p-8 shadow-lg">
@@ -418,88 +338,6 @@ const AccountPage = ({ onNavigate, user, onLogout }: AccountPageProps) => {
         </div>
       </main>
 
-      {/* Password Change Modal */}
-      {showPasswordModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl">
-            <h3 className="text-2xl font-bold text-gray-900 mb-6">Change Password</h3>
-            
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Current Password
-                </label>
-                <input
-                  type="password"
-                  value={passwordData.currentPassword}
-                  onChange={(e) => setPasswordData(prev => ({ ...prev, currentPassword: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter current password"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  New Password
-                </label>
-                <input
-                  type="password"
-                  value={passwordData.newPassword}
-                  onChange={(e) => setPasswordData(prev => ({ ...prev, newPassword: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter new password"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Confirm New Password
-                </label>
-                <input
-                  type="password"
-                  value={passwordData.confirmPassword}
-                  onChange={(e) => setPasswordData(prev => ({ ...prev, confirmPassword: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Confirm new password"
-                />
-              </div>
-            </div>
-
-            {passwordError && (
-              <div className="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg">
-                {passwordError}
-              </div>
-            )}
-
-            {passwordSuccess && (
-              <div className="mt-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded-lg">
-                {passwordSuccess}
-              </div>
-            )}
-
-            <div className="flex justify-end space-x-3 mt-6">
-              <button
-                onClick={() => {
-                  setShowPasswordModal(false);
-                  setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
-                  setPasswordError('');
-                  setPasswordSuccess('');
-                }}
-                className="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handlePasswordChange}
-                disabled={passwordLoading || !passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword}
-                className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200"
-              >
-                {passwordLoading ? 'Changing...' : 'Change Password'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Delete Account Modal */}
       {showDeleteModal && (
