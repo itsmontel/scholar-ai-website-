@@ -542,7 +542,8 @@ router.post('/logout', authenticateToken, (req, res) => {
 // @desc    Initiate Google OAuth
 // @access  Public
 router.get('/google', passport.authenticate('google', {
-  scope: ['profile', 'email']
+  scope: ['profile', 'email'],
+  prompt: 'select_account'
 }));
 
 // @route   GET /api/auth/google/callback
