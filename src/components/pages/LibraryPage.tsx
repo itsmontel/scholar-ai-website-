@@ -66,9 +66,6 @@ interface AnalysisData {
   hasCitation: boolean;
 }
 
-// Simple client-side cache for document content
-const documentContentCache = new Map<string, string>();
-
 const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout }) => {
   // State for documents
   const [documents, setDocuments] = useState<Document[]>([]);
@@ -244,56 +241,40 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
       setLoadingContent(true);
       const token = localStorage.getItem('authToken');
       
+      console.log('🔍 Fetching document content for:', documentId);
+      
       const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/documents/${documentId}/content`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
       });
 
-      if (!response.ok && response.status !== 304) {
-        throw new Error('Failed to fetch document content');
-      }
+      console.log('📡 Response status:', response.status, response.statusText);
 
-      // Handle 304 Not Modified - content hasn't changed, use cached data if available
-      if (response.status === 304) {
-        console.log('Document content not modified, using cached version');
-        const cachedContent = documentContentCache.get(documentId);
-        if (cachedContent) {
-          console.log('Using cached document content');
-          setDocumentContent(cachedContent);
-          return;
-        } else {
-          console.warn('No cached content available for 304 response, forcing fresh request');
-          // Force a fresh request by adding cache-busting parameter
-          const freshResponse = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/documents/${documentId}/content?t=${Date.now()}`, {
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Cache-Control': 'no-cache'
-            },
-          });
-          
-          if (!freshResponse.ok) {
-            throw new Error('Failed to fetch document content');
-          }
-          
-          const freshResult = await freshResponse.json();
-          const content = freshResult.data.content || '';
-          documentContentCache.set(documentId, content);
-          setDocumentContent(content);
-          return;
-        }
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('❌ Response error:', errorText);
+        throw new Error(`Failed to fetch document content: ${response.status}`);
       }
 
       const result = await response.json();
-      const content = result.data.content || '';
+      console.log('📄 Document content response:', {
+        hasData: !!result.data,
+        hasContent: !!result.data?.content,
+        contentLength: result.data?.content?.length || 0
+      });
       
-      // Cache the content for future 304 responses
-      documentContentCache.set(documentId, content);
-      
-      setDocumentContent(content);
+      if (!result.data || !result.data.content) {
+        console.warn('⚠️ No content in response:', result);
+        setError('Document content is empty or missing');
+        setDocumentContent('No content available for this document');
+      } else {
+        setDocumentContent(result.data.content);
+      }
     } catch (error) {
-      console.error('Error fetching document content:', error);
-      setDocumentContent('Error loading document content');
+      console.error('❌ Error fetching document content:', error);
+      setError(`Failed to load document: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      setDocumentContent('Error loading document content. Please try refreshing the page.');
     } finally {
       setLoadingContent(false);
     }

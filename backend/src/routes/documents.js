@@ -284,24 +284,39 @@ router.get('/:id/content', authenticateToken, validateDocumentId, async (req, re
     const documentId = req.params.id;
     const userId = req.user.id;
 
+    console.log(`🔍 Fetching content for document: ${documentId}, user: ${userId}`);
+
     const document = await documentService.getDocumentById(documentId, userId);
     if (!document) {
+      console.log(`❌ Document not found: ${documentId}`);
       return res.status(404).json({
         success: false,
         message: 'Document not found'
       });
     }
 
-    res.json({
+    console.log(`📄 Document found:`, {
+      id: document.id,
+      title: document.title,
+      hasContent: !!document.content_text,
+      contentLength: document.content_text?.length || 0,
+      wordCount: document.word_count
+    });
+
+    const responseData = {
       success: true,
       data: {
         content: document.content_text || '',
         title: document.title,
         wordCount: document.word_count
       }
-    });
+    };
+
+    console.log(`✅ Sending response with content length: ${responseData.data.content.length}`);
+    
+    res.json(responseData);
   } catch (error) {
-    console.error('Error fetching document content:', error);
+    console.error('❌ Error fetching document content:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to fetch document content',

@@ -56,9 +56,6 @@ interface AnalysisResult {
   };
 }
 
-// Simple client-side cache for document content
-const documentContentCache = new Map<string, string>();
-
 const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout }) => {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [analysisTypes, setAnalysisTypes] = useState<AnalysisType[]>([]);
@@ -404,47 +401,13 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
         },
       });
 
-      if (!response.ok && response.status !== 304) {
+      if (!response.ok) {
         throw new Error('Failed to fetch document content');
-      }
-
-      // Handle 304 Not Modified - content hasn't changed, use cached data if available
-      if (response.status === 304) {
-        console.log('Document content not modified, using cached version');
-        const cachedContent = documentContentCache.get(documentId);
-        if (cachedContent) {
-          console.log('Using cached document content');
-          return cachedContent;
-        } else {
-          console.warn('No cached content available for 304 response, forcing fresh request');
-          // Force a fresh request by adding cache-busting parameter
-          const freshResponse = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/documents/${documentId}/content?t=${Date.now()}`, {
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json',
-              'Cache-Control': 'no-cache'
-            },
-          });
-          
-          if (!freshResponse.ok) {
-            throw new Error('Failed to fetch document content');
-          }
-          
-          const freshData = await freshResponse.json();
-          const content = freshData.data?.content || '';
-          documentContentCache.set(documentId, content);
-          return content;
-        }
       }
 
       const data = await response.json();
       console.log('Document content response:', data);
-      const content = data.data?.content || '';
-      
-      // Cache the content for future 304 responses
-      documentContentCache.set(documentId, content);
-      
-      return content;
+      return data.data?.content || '';
     } catch (error) {
       console.error('Error fetching document content:', error);
       throw new Error('Failed to fetch document content');

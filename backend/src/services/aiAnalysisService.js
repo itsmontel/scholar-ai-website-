@@ -810,7 +810,7 @@ CRITICAL REQUIREMENTS:
                 if (!hasSignificantOverlap(newAnnotation, annotations)) {
                   usedTexts.add(textMatch.text.toLowerCase());
                   annotations.push(newAnnotation);
-                  annotationId++;
+                annotationId++;
                 } else {
                   console.log(`Skipping overlapping strong annotation: "${textMatch.text.substring(0, 50)}..."`);
                 }
@@ -839,7 +839,7 @@ CRITICAL REQUIREMENTS:
                 if (!hasSignificantOverlap(newAnnotation, annotations)) {
                   usedTexts.add(textMatch.text.toLowerCase());
                   annotations.push(newAnnotation);
-                  annotationId++;
+                annotationId++;
                 } else {
                   console.log(`Skipping overlapping improve annotation: "${textMatch.text.substring(0, 50)}..."`);
                 }
@@ -868,7 +868,7 @@ CRITICAL REQUIREMENTS:
                 if (!hasSignificantOverlap(newAnnotation, annotations)) {
                   usedTexts.add(textMatch.text.toLowerCase());
                   annotations.push(newAnnotation);
-                  annotationId++;
+                annotationId++;
                 } else {
                   console.log(`Skipping overlapping concern annotation: "${textMatch.text.substring(0, 50)}..."`);
                 }
