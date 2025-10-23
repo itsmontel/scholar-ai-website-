@@ -3,7 +3,16 @@ import Header from '../common/Header';
 
 interface TermsOfServicePageProps {
   onNavigate: (page: string) => void;
-  user?: { name: string; email: string } | null;
+  user?: { 
+    id: string;
+    name: string; 
+    email: string;
+    firstName?: string;
+    lastName?: string;
+    plan: string;
+    subscription_status?: string;
+    email_verified?: boolean;
+  } | null;
   onLogout?: () => void;
 }
 
@@ -46,7 +55,6 @@ const TermsOfServicePage: React.FC<TermsOfServicePageProps> = ({ onNavigate, use
                   <li>Document analysis and feedback</li>
                   <li>Grammar and style checking</li>
                   <li>Citation style formatting</li>
-                  <li>Plagiarism detection</li>
                   <li>Academic writing guidance</li>
                 </ul>
               </div>

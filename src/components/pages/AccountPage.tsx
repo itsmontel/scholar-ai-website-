@@ -369,7 +369,6 @@ const AccountPage = ({ onNavigate, user, onLogout }: AccountPageProps) => {
                       <div>• Unlimited document analyses</div>
                       <div>• Premium AI writing feedback</div>
                       <div>• 24/7 priority support</div>
-                      <div>• Advanced plagiarism detection</div>
                       <div>• Custom citation styles</div>
                       <div>• Bulk document processing</div>
                     </>

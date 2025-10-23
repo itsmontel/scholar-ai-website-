@@ -160,7 +160,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
     },
     {
       question: "What's the difference between Starter and Premium?",
-      answer: "Starter includes unlimited documents, AI analysis, all citation styles, grammar checks, plagiarism detection, and multiple export formats. Premium adds advanced AI analysis, advanced grammar checking, and additional premium features."
+      answer: "Starter includes unlimited documents, AI analysis, all citation styles, grammar checks, and multiple export formats. Premium adds advanced AI analysis, advanced grammar checking, and additional premium features."
     },
     {
       question: "Can I change my plan after subscribing?",
