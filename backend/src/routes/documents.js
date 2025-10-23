@@ -1,6 +1,5 @@
 const express = require('express');
 const multer = require('multer');
-const path = require('path');
 const { authenticateToken } = require('../middleware/auth');
 const { 
   validateUploadDocument,
@@ -26,58 +25,20 @@ const subscriptionService = require('../services/subscriptionService');
 
 const router = express.Router();
 
-// Enhanced file validation function
-const validateFile = (req, file, cb) => {
-  // Check MIME type
-  if (!documentParser.isSupportedFileType(file.mimetype)) {
-    return cb(new Error('Unsupported file type. Please upload PDF, DOCX, DOC, or TXT files.'), false);
-  }
-  
-  // Validate file extension matches MIME type
-  const allowedExtensions = {
-    'application/pdf': ['.pdf'],
-    'application/msword': ['.doc'],
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],
-    'text/plain': ['.txt']
-  };
-  
-  const fileExtension = path.extname(file.originalname).toLowerCase();
-  const expectedExtensions = allowedExtensions[file.mimetype];
-  
-  if (!expectedExtensions || !expectedExtensions.includes(fileExtension)) {
-    return cb(new Error('File extension does not match content type'), false);
-  }
-  
-  // Validate filename (prevent path traversal)
-  const sanitizedName = path.basename(file.originalname);
-  if (sanitizedName !== file.originalname || sanitizedName.includes('..')) {
-    return cb(new Error('Invalid filename'), false);
-  }
-  
-  // Check for suspicious file patterns
-  const suspiciousPatterns = [
-    /\.exe$/i, /\.bat$/i, /\.cmd$/i, /\.scr$/i, /\.pif$/i,
-    /\.com$/i, /\.jar$/i, /\.js$/i, /\.vbs$/i, /\.php$/i
-  ];
-  
-  if (suspiciousPatterns.some(pattern => pattern.test(file.originalname))) {
-    return cb(new Error('Potentially dangerous file type'), false);
-  }
-  
-  cb(null, true);
-};
-
 // Configure multer for file uploads
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: {
     fileSize: 50 * 1024 * 1024, // 50MB limit
-    files: 1, // Only allow one file at a time
-    fields: 10, // Limit number of fields
-    fieldNameSize: 100, // Limit field name size
-    fieldSize: 1024 * 1024 // 1MB limit for field values
   },
-  fileFilter: validateFile,
+  fileFilter: (req, file, cb) => {
+    // Check if file type is supported
+    if (documentParser.isSupportedFileType(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Unsupported file type. Please upload PDF, DOCX, DOC, or TXT files.'), false);
+    }
+  },
 });
 
 // @route   POST /api/documents/upload
@@ -284,39 +245,24 @@ router.get('/:id/content', authenticateToken, validateDocumentId, async (req, re
     const documentId = req.params.id;
     const userId = req.user.id;
 
-    console.log(`🔍 Fetching content for document: ${documentId}, user: ${userId}`);
-
     const document = await documentService.getDocumentById(documentId, userId);
     if (!document) {
-      console.log(`❌ Document not found: ${documentId}`);
       return res.status(404).json({
         success: false,
         message: 'Document not found'
       });
     }
 
-    console.log(`📄 Document found:`, {
-      id: document.id,
-      title: document.title,
-      hasContent: !!document.content_text,
-      contentLength: document.content_text?.length || 0,
-      wordCount: document.word_count
-    });
-
-    const responseData = {
+    res.json({
       success: true,
       data: {
         content: document.content_text || '',
         title: document.title,
         wordCount: document.word_count
       }
-    };
-
-    console.log(`✅ Sending response with content length: ${responseData.data.content.length}`);
-    
-    res.json(responseData);
+    });
   } catch (error) {
-    console.error('❌ Error fetching document content:', error);
+    console.error('Error fetching document content:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to fetch document content',

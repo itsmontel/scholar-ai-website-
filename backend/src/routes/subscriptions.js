@@ -20,36 +20,18 @@ router.post('/create-checkout-session', authenticateToken, async (req, res) => {
 
     // Get user details from the authenticated user (already available from auth middleware)
     const user = req.user;
-    console.log('🔥 CHECKOUT: Using authenticated user:', { 
-      id: user.id, 
-      email: user.email, 
-      name: user.name,
-      google_id: user.google_id,
-      stripe_customer_id: user.stripe_customer_id,
-      subscription_plan: user.subscription_plan 
-    });
+    console.log('Using authenticated user:', { id: user.id, email: user.email });
 
     let customerId = user.stripe_customer_id;
 
     // Create Stripe customer if doesn't exist
     if (!customerId) {
-      console.log('🔥 CHECKOUT: Creating new Stripe customer...');
-      
-      // Ensure we have a proper name for Stripe
-      const customerName = user.name || user.email?.split('@')[0] || 'User';
-      const customerEmail = user.email;
-      
-      console.log('🔥 CHECKOUT: Customer details:', { email: customerEmail, name: customerName });
-      
       const customerResult = await subscriptionService.createStripeCustomer(
-        customerEmail,
-        customerName
+        user.email,
+        user.name || user.email
       );
 
-      console.log('🔥 CHECKOUT: Customer creation result:', customerResult);
-
       if (!customerResult.success) {
-        console.error('🔥 CHECKOUT ERROR: Failed to create customer:', customerResult.error);
         return res.status(500).json({
           success: false,
           message: 'Failed to create customer',
@@ -71,13 +53,6 @@ router.post('/create-checkout-session', authenticateToken, async (req, res) => {
     }
 
     // Create checkout session
-    console.log('🔥 CHECKOUT: Creating checkout session with:', {
-      customerId,
-      planType,
-      billingCycle,
-      userId
-    });
-    
     const sessionResult = await subscriptionService.createCheckoutSession(
       customerId,
       planType,
@@ -85,10 +60,7 @@ router.post('/create-checkout-session', authenticateToken, async (req, res) => {
       userId
     );
 
-    console.log('🔥 CHECKOUT: Session creation result:', sessionResult);
-
     if (!sessionResult.success) {
-      console.error('🔥 CHECKOUT ERROR: Failed to create checkout session:', sessionResult.error);
       return res.status(500).json({
         success: false,
         message: 'Failed to create checkout session',

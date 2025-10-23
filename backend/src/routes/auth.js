@@ -7,7 +7,6 @@ const passport = require('../config/passport');
 
 const { query } = require('../database/connection');
 const { authenticateToken } = require('../middleware/auth');
-const { getCSRFToken } = require('../middleware/csrf');
 const { 
   validateRegister, 
   validateLogin 
@@ -571,10 +570,5 @@ router.get('/google/callback',
     }
   }
 );
-
-// @route   GET /api/auth/csrf-token
-// @desc    Get CSRF token for authenticated user
-// @access  Private
-router.get('/csrf-token', authenticateToken, getCSRFToken);
 
 module.exports = router;

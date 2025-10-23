@@ -156,11 +156,11 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
   const faqs = [
     {
       question: "What's included in the free plan?",
-      answer: "The free plan includes 3 document analyses per month, basic AI feedback, standard citation styles, and email support. It's perfect for students just getting started with academic writing."
+      answer: "The free plan includes 5 document analyses per month, basic AI feedback, standard citation styles, and email support. It's perfect for students just getting started with academic writing."
     },
     {
       question: "What's the difference between Starter and Premium?",
-      answer: "Starter includes unlimited documents, AI analysis, all citation styles, grammar checks, and multiple export formats. Premium adds advanced AI analysis, advanced grammar checking, and additional premium features."
+      answer: "Starter includes unlimited documents, AI analysis, all citation styles, grammar checks, plagiarism detection, and multiple export formats. Premium adds advanced AI analysis, advanced grammar checking, and additional premium features."
     },
     {
       question: "Can I change my plan after subscribing?",

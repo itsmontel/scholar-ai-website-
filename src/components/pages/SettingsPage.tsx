@@ -201,6 +201,30 @@ const SettingsPage = ({ onNavigate, user, onLogout }: SettingsPageProps) => {
             </div>
           </div>
 
+          {/* Security */}
+          <div className="bg-white/90 backdrop-blur-xl border border-gray-200/60 rounded-2xl p-8 shadow-lg">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">Security</h2>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between py-3 border-b border-gray-200">
+                <div>
+                  <div className="font-semibold text-gray-900">Password</div>
+                  <div className="text-gray-600">Last changed: Never</div>
+                </div>
+                <button className="text-blue-600 hover:text-blue-700 font-medium">
+                  Change Password
+                </button>
+              </div>
+              <div className="flex items-center justify-between py-3">
+                <div>
+                  <div className="font-semibold text-gray-900">Two-Factor Authentication</div>
+                  <div className="text-gray-600">Not enabled</div>
+                </div>
+                <button className="text-blue-600 hover:text-blue-700 font-medium">
+                  Enable 2FA
+                </button>
+              </div>
+            </div>
+          </div>
 
           {/* Preferences */}
           <div className="bg-white/90 backdrop-blur-xl border border-gray-200/60 rounded-2xl p-8 shadow-lg">

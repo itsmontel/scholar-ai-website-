@@ -241,40 +241,21 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
       setLoadingContent(true);
       const token = localStorage.getItem('authToken');
       
-      console.log('🔍 Fetching document content for:', documentId);
-      
       const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/documents/${documentId}/content`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
       });
 
-      console.log('📡 Response status:', response.status, response.statusText);
-
       if (!response.ok) {
-        const errorText = await response.text();
-        console.error('❌ Response error:', errorText);
-        throw new Error(`Failed to fetch document content: ${response.status}`);
+        throw new Error('Failed to fetch document content');
       }
 
       const result = await response.json();
-      console.log('📄 Document content response:', {
-        hasData: !!result.data,
-        hasContent: !!result.data?.content,
-        contentLength: result.data?.content?.length || 0
-      });
-      
-      if (!result.data || !result.data.content) {
-        console.warn('⚠️ No content in response:', result);
-        setError('Document content is empty or missing');
-        setDocumentContent('No content available for this document');
-      } else {
-        setDocumentContent(result.data.content);
-      }
+      setDocumentContent(result.data.content || '');
     } catch (error) {
-      console.error('❌ Error fetching document content:', error);
-      setError(`Failed to load document: ${error instanceof Error ? error.message : 'Unknown error'}`);
-      setDocumentContent('Error loading document content. Please try refreshing the page.');
+      console.error('Error fetching document content:', error);
+      setDocumentContent('Error loading document content');
     } finally {
       setLoadingContent(false);
     }
