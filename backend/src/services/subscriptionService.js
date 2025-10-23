@@ -192,6 +192,11 @@ const createCheckoutSession = async (customerId, planType, billingCycle, userId)
         planType,
         billingCycle,
         source: 'writescholar'
+      },
+      custom_text: {
+        submit: {
+          message: 'Subscribe to WriteScholar'
+        }
       }
     };
     
