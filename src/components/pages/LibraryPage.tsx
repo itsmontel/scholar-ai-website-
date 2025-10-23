@@ -66,6 +66,9 @@ interface AnalysisData {
   hasCitation: boolean;
 }
 
+// Simple client-side cache for document content
+const documentContentCache = new Map<string, string>();
+
 const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout }) => {
   // State for documents
   const [documents, setDocuments] = useState<Document[]>([]);
@@ -247,12 +250,47 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
         },
       });
 
-      if (!response.ok) {
+      if (!response.ok && response.status !== 304) {
         throw new Error('Failed to fetch document content');
       }
 
+      // Handle 304 Not Modified - content hasn't changed, use cached data if available
+      if (response.status === 304) {
+        console.log('Document content not modified, using cached version');
+        const cachedContent = documentContentCache.get(documentId);
+        if (cachedContent) {
+          console.log('Using cached document content');
+          setDocumentContent(cachedContent);
+          return;
+        } else {
+          console.warn('No cached content available for 304 response, forcing fresh request');
+          // Force a fresh request by adding cache-busting parameter
+          const freshResponse = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/documents/${documentId}/content?t=${Date.now()}`, {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Cache-Control': 'no-cache'
+            },
+          });
+          
+          if (!freshResponse.ok) {
+            throw new Error('Failed to fetch document content');
+          }
+          
+          const freshResult = await freshResponse.json();
+          const content = freshResult.data.content || '';
+          documentContentCache.set(documentId, content);
+          setDocumentContent(content);
+          return;
+        }
+      }
+
       const result = await response.json();
-      setDocumentContent(result.data.content || '');
+      const content = result.data.content || '';
+      
+      // Cache the content for future 304 responses
+      documentContentCache.set(documentId, content);
+      
+      setDocumentContent(content);
     } catch (error) {
       console.error('Error fetching document content:', error);
       setDocumentContent('Error loading document content');
