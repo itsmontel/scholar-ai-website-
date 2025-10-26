@@ -88,22 +88,15 @@ const AcademicAIApp = () => {
         return;
       }
 
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/auth/me`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
+      // Use bulletproof API for token validation
+      const { BulletproofAPI } = await import('../config/api');
+      const response = await BulletproofAPI.get('/auth/me', token);
 
       console.log('Token validation response status:', response.status);
       if (response.status === 401) {
         // Token expired, try to refresh
         console.log('Token expired, attempting refresh...');
-        const refreshResponse = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/auth/refresh`, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
-        });
+        const refreshResponse = await BulletproofAPI.post('/auth/refresh', {}, token);
 
         if (refreshResponse.ok) {
           const refreshData = await refreshResponse.json();
@@ -111,11 +104,7 @@ const AcademicAIApp = () => {
           console.log('Token refreshed successfully');
           
           // After successful refresh, get updated user data
-          const userResponse = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/auth/me`, {
-            headers: {
-              'Authorization': `Bearer ${refreshData.data.token}`,
-            },
-          });
+          const userResponse = await BulletproofAPI.get('/auth/me', refreshData.data.token);
           
           if (userResponse.ok) {
             const userData = await userResponse.json();

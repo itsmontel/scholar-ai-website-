@@ -7,7 +7,16 @@ import { ExportService, AnalysisData } from '../../services/exportService';
 
 interface AnalysisPageProps {
   onNavigate?: (page: string) => void;
-  user?: { name: string; email: string } | null;
+  user?: { 
+    id: string; 
+    name: string; 
+    email: string; 
+    firstName?: string; 
+    lastName?: string; 
+    plan: string;
+    subscription_status?: string;
+    email_verified?: boolean;
+  } | null;
   onLogout?: () => void;
 }
 
@@ -145,21 +154,26 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
         return;
       }
 
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/documents`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
+      // Use bulletproof API with maximum reliability
+      const { BulletproofAPI } = await import('../../config/api');
+      const result = await BulletproofAPI.safeRequest(
+        () => BulletproofAPI.get('/documents', token),
+        { documents: [] }
+      );
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch documents');
+      if (result.success) {
+        console.log('✅ Analysis documents loaded successfully');
+        setDocuments(result.data.documents || []);
+        setError(''); // Clear any previous errors
+      } else {
+        console.error('📄 Document fetch failed:', result.error);
+        setError('Failed to load documents. Retrying automatically...');
+        setDocuments([]); // Show empty state
       }
-
-      const data = await response.json();
-      setDocuments(data.data.documents || []);
     } catch (error) {
-      setError(error instanceof Error ? error.message : 'Failed to fetch documents');
+      console.error('💥 Critical error in fetchDocuments:', error);
+      setError('Unable to load documents. Please check your connection.');
+      setDocuments([]);
     } finally {
       setIsLoading(false);
     }
@@ -170,22 +184,26 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
       const token = localStorage.getItem('authToken');
       if (!token) return 'free';
 
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/subscriptions/current`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
+      // Use bulletproof API for plan fetching
+      const { BulletproofAPI } = await import('../../config/api');
+      const result = await BulletproofAPI.safeRequest(
+        () => BulletproofAPI.get('/subscriptions/current', token),
+        { plan: 'free' }
+      );
 
-      if (response.ok) {
-        const data = await response.json();
-        const plan = data.plan || 'free';
+      if (result.success) {
+        console.log('✅ User plan loaded successfully:', result.data.plan);
+        const plan = result.data.plan || 'free';
         setCurrentPlan(plan);
         return plan;
+      } else {
+        console.error('🎯 Plan fetch failed:', result.error);
+        setCurrentPlan('free');
+        return 'free';
       }
-      return 'free';
     } catch (error) {
-      console.error('Error fetching user plan:', error);
+      console.error('💥 Critical error fetching user plan:', error);
+      setCurrentPlan('free');
       return 'free';
     }
   };
@@ -942,7 +960,6 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
     italicPatterns.forEach(pattern => {
       pattern.lastIndex = 0; // Reset regex
       let match;
-      const tempText = text.slice(lastIndex);
       
       while ((match = pattern.exec(text)) !== null) {
         if (match.index >= lastIndex) {

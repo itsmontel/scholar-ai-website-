@@ -118,51 +118,56 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
         return;
       }
 
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/documents`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
+      // Use bulletproof API with maximum retries
+      const { BulletproofAPI } = await import('../../config/api');
+      const result = await BulletproofAPI.safeRequest(
+        () => BulletproofAPI.get('/documents', token),
+        { documents: [] }
+      );
 
-      // If token expired, try to refresh
-      if (response.status === 401) {
-        const refreshResponse = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/auth/refresh`, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
-        });
-
-        if (refreshResponse.ok) {
-          const refreshData = await refreshResponse.json();
-          localStorage.setItem('authToken', refreshData.data.token);
-          
-          // Retry the original request with new token
-          const retryResponse = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/documents`, {
-            headers: {
-              'Authorization': `Bearer ${refreshData.data.token}`,
-            },
-          });
-          
-          if (retryResponse.ok) {
-            const result = await retryResponse.json();
-            await processDocuments(result.data.documents || []);
+      if (result.success) {
+        console.log('✅ Dashboard documents loaded successfully:', result.data);
+        await processDocuments(result.data.documents || []);
+      } else {
+        // Handle auth errors by trying to refresh token
+        if (result.error?.includes('401')) {
+          try {
+            const refreshResult = await BulletproofAPI.safeRequest(
+              () => BulletproofAPI.post('/auth/refresh', {}, token),
+              { token: null }
+            );
+            
+            if (refreshResult.success && refreshResult.data?.token) {
+              const newToken = refreshResult.data.token;
+              localStorage.setItem('authToken', newToken);
+              
+              // Retry with new token
+              const retryResult = await BulletproofAPI.safeRequest(
+                () => BulletproofAPI.get('/documents', newToken),
+                { documents: [] }
+              );
+              
+              if (retryResult.success) {
+                await processDocuments(retryResult.data.documents || []);
+              }
+            } else {
+              console.warn('Token refresh failed, logging out');
+              onLogout();
+            }
+          } catch (refreshError) {
+            console.error('Token refresh error:', refreshError);
+            onLogout();
           }
         } else {
-          // Refresh failed, redirect to login
-          onLogout();
+          console.error('📄 Documents fetch failed:', result.error);
+          // Still show empty state rather than crash
+          await processDocuments([]);
         }
-        setIsLoading(false);
-        return;
-      }
-
-      if (response.ok) {
-        const result = await response.json();
-        console.log('Dashboard documents response:', result);
-        await processDocuments(result.data.documents || []);
       }
     } catch (error) {
-      console.error('Error fetching documents:', error);
+      console.error('💥 Critical error in fetchDocuments:', error);
+      // Even in worst case, show empty state
+      await processDocuments([]);
     } finally {
       setIsLoading(false);
     }

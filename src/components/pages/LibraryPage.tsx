@@ -208,32 +208,38 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
         return;
       }
       
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/documents?limit=100`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
-      });
+      // Use bulletproof API for ultra-reliable document fetching
+      const { BulletproofAPI } = await import('../../config/api');
+      const result = await BulletproofAPI.safeRequest(
+        () => BulletproofAPI.get('/documents?limit=100', token),
+        { documents: [] as any[] }
+      );
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch documents');
-      }
-
-      const result = await response.json();
-      setDocuments(result.data.documents);
-      
-      // Auto-select the most recent document (first in the list since they're sorted by date)
-      if (result.data.documents.length > 0) {
-        const mostRecentDocument = result.data.documents[0];
-        console.log('Auto-selecting most recent document:', mostRecentDocument.title);
-        setSelectedDocument(mostRecentDocument);
+      if (result.success) {
+        console.log('✅ Library documents loaded successfully');
+        const docs = result.data.documents || [];
+        setDocuments(docs);
+        setError(''); // Clear any previous errors
         
-        // Automatically load content and analysis for the most recent document
-        fetchDocumentContent(mostRecentDocument.id);
-        fetchDocumentAnalysis(mostRecentDocument.id);
+        // Auto-select the most recent document (first in the list since they're sorted by date)
+        if (docs.length > 0) {
+          const mostRecentDocument = docs[0];
+          console.log('Auto-selecting most recent document:', mostRecentDocument.title);
+          setSelectedDocument(mostRecentDocument);
+          
+          // Automatically load content and analysis for the most recent document
+          fetchDocumentContent(mostRecentDocument.id);
+          fetchDocumentAnalysis(mostRecentDocument.id);
+        }
+      } else {
+        console.error('📚 Library documents fetch failed:', result.error);
+        setError('Failed to load documents. Retrying automatically...');
+        setDocuments([]);
       }
     } catch (error) {
-      console.error('Error fetching documents:', error);
-      setError(error instanceof Error ? error.message : 'Failed to load documents');
+      console.error('💥 Critical error in Library fetchDocuments:', error);
+      setError('Unable to load documents. Please check your connection.');
+      setDocuments([]);
     } finally {
       setLoadingDocuments(false);
     }
