@@ -1577,9 +1577,9 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
 
 
             {/* Main Content Area */}
-            <div className="flex h-[600px]">
+            <div className="flex flex-col md:flex-row md:h-[600px]">
               {/* Document Panel */}
-              <div className="flex-1 p-6 overflow-y-auto bg-white" ref={documentRef}>
+              <div className="flex-1 p-4 md:p-6 overflow-y-auto bg-white" ref={documentRef}>
                 <div className="prose max-w-none">
                   <div className="text-sm leading-7">
                     {renderHighlightedText()}
@@ -1632,36 +1632,36 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
         </div>
 
               {/* Annotations Panel */}
-              <div className="w-96 bg-gray-50 border-l border-gray-200 overflow-y-auto">
-                <div className="p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-6 flex items-center">
-                    <svg className="w-5 h-5 mr-2 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <div className="w-full md:w-96 bg-gray-50 border-t md:border-t-0 md:border-l border-gray-200 overflow-y-auto max-h-[400px] md:max-h-none">
+                <div className="p-4 md:p-6">
+                  <h3 className="text-base md:text-lg font-semibold text-gray-900 mb-4 md:mb-6 flex items-center">
+                    <svg className="w-4 h-4 md:w-5 md:h-5 mr-2 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
                     </svg>
                     Annotations
                   </h3>
 
-                  <div className="space-y-6">
+                  <div className="space-y-4 md:space-y-6">
                     {/* Strong Points */}
                 <div>
-                      <div className="flex items-center space-x-2 mb-3">
-                        <div className="flex items-center justify-center w-8 h-8 bg-green-100 rounded-lg">
+                      <div className="flex items-center space-x-2 mb-2 md:mb-3">
+                        <div className="flex items-center justify-center w-6 h-6 md:w-8 md:h-8 bg-green-100 rounded-lg">
                           {getAnnotationIcon('strong')}
                         </div>
-                        <h4 className="font-medium text-green-800">Strong Points ({getFilteredAnnotations('strong').length})</h4>
+                        <h4 className="text-sm md:text-base font-medium text-green-800">Strong Points ({getFilteredAnnotations('strong').length})</h4>
                       </div>
                       <div className="space-y-2">
                         {getFilteredAnnotations('strong').map((annotation) => (
                           <div
                             key={annotation.id}
-                            className={`bg-green-50 rounded-lg p-4 border-l-4 border-green-400 shadow-sm hover:shadow-md transition-all cursor-pointer ${
+                            className={`bg-green-50 rounded-lg p-3 md:p-4 border-l-4 border-green-400 shadow-sm hover:shadow-md transition-all cursor-pointer ${
                               selectedAnnotation === annotation.id ? 'ring-2 ring-blue-500' : ''
                             }`}
                             onClick={() => scrollToAnnotation(annotation.id)}
                             onMouseEnter={() => setHoveredAnnotation(annotation.id)}
                             onMouseLeave={() => setHoveredAnnotation(null)}
                           >
-                            <p className="text-sm text-gray-700 font-medium mb-1">{annotation.comment}</p>
+                            <p className="text-xs md:text-sm text-gray-700 font-medium mb-1">{annotation.comment}</p>
                             {annotation.suggestion && (
                               <p className="text-xs text-gray-500 italic">{annotation.suggestion}</p>
                             )}
@@ -1672,24 +1672,24 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
 
                     {/* Areas to Improve */}
                 <div>
-                      <div className="flex items-center space-x-2 mb-3">
-                        <div className="flex items-center justify-center w-8 h-8 bg-amber-100 rounded-lg">
+                      <div className="flex items-center space-x-2 mb-2 md:mb-3">
+                        <div className="flex items-center justify-center w-6 h-6 md:w-8 md:h-8 bg-amber-100 rounded-lg">
                           {getAnnotationIcon('improve')}
                         </div>
-                        <h4 className="font-medium text-amber-800">Areas to Improve ({getFilteredAnnotations('improve').length})</h4>
+                        <h4 className="text-sm md:text-base font-medium text-amber-800">Areas to Improve ({getFilteredAnnotations('improve').length})</h4>
                       </div>
                       <div className="space-y-2">
                         {getFilteredAnnotations('improve').map((annotation) => (
                           <div
                             key={annotation.id}
-                            className={`bg-amber-50 rounded-lg p-4 border-l-4 border-amber-400 shadow-sm hover:shadow-md transition-all cursor-pointer ${
+                            className={`bg-amber-50 rounded-lg p-3 md:p-4 border-l-4 border-amber-400 shadow-sm hover:shadow-md transition-all cursor-pointer ${
                               selectedAnnotation === annotation.id ? 'ring-2 ring-blue-500' : ''
                             }`}
                             onClick={() => scrollToAnnotation(annotation.id)}
                             onMouseEnter={() => setHoveredAnnotation(annotation.id)}
                             onMouseLeave={() => setHoveredAnnotation(null)}
                           >
-                            <p className="text-sm text-gray-700 font-medium mb-1">{annotation.comment}</p>
+                            <p className="text-xs md:text-sm text-gray-700 font-medium mb-1">{annotation.comment}</p>
                             {annotation.suggestion && (
                               <p className="text-xs text-gray-500 italic">{annotation.suggestion}</p>
                             )}
@@ -1700,24 +1700,24 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
 
                     {/* Serious Concerns */}
                 <div>
-                      <div className="flex items-center space-x-2 mb-3">
-                        <div className="flex items-center justify-center w-8 h-8 bg-red-100 rounded-lg">
+                      <div className="flex items-center space-x-2 mb-2 md:mb-3">
+                        <div className="flex items-center justify-center w-6 h-6 md:w-8 md:h-8 bg-red-100 rounded-lg">
                           {getAnnotationIcon('concern')}
                         </div>
-                        <h4 className="font-medium text-red-800">Serious Concerns ({getFilteredAnnotations('concern').length})</h4>
+                        <h4 className="text-sm md:text-base font-medium text-red-800">Serious Concerns ({getFilteredAnnotations('concern').length})</h4>
                       </div>
                       <div className="space-y-2">
                         {getFilteredAnnotations('concern').map((annotation) => (
                           <div
                             key={annotation.id}
-                            className={`bg-red-50 rounded-lg p-4 border-l-4 border-red-400 shadow-sm hover:shadow-md transition-all cursor-pointer ${
+                            className={`bg-red-50 rounded-lg p-3 md:p-4 border-l-4 border-red-400 shadow-sm hover:shadow-md transition-all cursor-pointer ${
                               selectedAnnotation === annotation.id ? 'ring-2 ring-blue-500' : ''
                             }`}
                             onClick={() => scrollToAnnotation(annotation.id)}
                             onMouseEnter={() => setHoveredAnnotation(annotation.id)}
                             onMouseLeave={() => setHoveredAnnotation(null)}
                           >
-                            <p className="text-sm text-gray-700 font-medium mb-1">{annotation.comment}</p>
+                            <p className="text-xs md:text-sm text-gray-700 font-medium mb-1">{annotation.comment}</p>
                             {annotation.suggestion && (
                               <p className="text-xs text-gray-500 italic">{annotation.suggestion}</p>
                             )}
