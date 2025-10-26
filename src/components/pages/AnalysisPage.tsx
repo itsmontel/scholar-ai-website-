@@ -90,6 +90,11 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
   const [cameFromLibrary, setCameFromLibrary] = useState(false);
   const documentRef = useRef<HTMLDivElement>(null);
 
+  // Mobile detection utility
+  const isMobileDevice = () => {
+    return window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  };
+
   useEffect(() => {
     console.log('AnalysisPage: fetchDocuments and fetchAnalysisTypes called');
     fetchDocuments();
@@ -916,10 +921,35 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
   const handleAnnotationHover = (e: React.MouseEvent, annotationId: string) => {
     setHoveredAnnotation(annotationId);
     const rect = e.currentTarget.getBoundingClientRect();
-    setTooltipPosition({
-      x: rect.left + rect.width / 2,
-      y: rect.top - 10
-    });
+    
+    if (isMobileDevice()) {
+      // Mobile-optimized tooltip positioning
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+      const tooltipWidth = 280; // Estimated tooltip width
+      const tooltipHeight = 120; // Estimated tooltip height
+      
+      let x = Math.max(20, Math.min(viewportWidth - tooltipWidth - 20, rect.left));
+      let y = rect.top - tooltipHeight - 10;
+      
+      // If tooltip would go above viewport, position it below the element
+      if (y < 20) {
+        y = rect.bottom + 10;
+      }
+      
+      // Ensure tooltip doesn't go beyond viewport height
+      if (y + tooltipHeight > viewportHeight - 20) {
+        y = viewportHeight - tooltipHeight - 20;
+      }
+      
+      setTooltipPosition({ x, y });
+    } else {
+      // Desktop positioning (original)
+      setTooltipPosition({
+        x: rect.left + rect.width / 2,
+        y: rect.top - 10
+      });
+    }
   };
 
   const scrollToAnnotation = (annotationId: string) => {
@@ -1536,30 +1566,34 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                   </p>
               </div>
               <div className="flex items-center space-x-3">
-                {/* Export Buttons */}
-                <button 
-                  onClick={exportToPDF}
-                  disabled={isExporting}
-                  className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors flex items-center space-x-2 disabled:opacity-50"
-                  title="Export as PDF"
-                >
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                  <span>PDF</span>
-                </button>
-                
-                <button 
-                  onClick={exportToWord}
-                  disabled={isExporting}
-                  className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors flex items-center space-x-2 disabled:opacity-50"
-                  title="Export as Word Document"
-                >
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                  <span>Word</span>
-                </button>
+                {/* Export Buttons - Hidden on Mobile */}
+                {!isMobileDevice() && (
+                  <>
+                    <button 
+                      onClick={exportToPDF}
+                      disabled={isExporting}
+                      className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors flex items-center space-x-2 disabled:opacity-50"
+                      title="Export as PDF"
+                    >
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                      <span>PDF</span>
+                    </button>
+                    
+                    <button 
+                      onClick={exportToWord}
+                      disabled={isExporting}
+                      className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors flex items-center space-x-2 disabled:opacity-50"
+                      title="Export as Word Document"
+                    >
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                      <span>Word</span>
+                    </button>
+                  </>
+                )}
                 
                 <button 
                   onClick={handleCloseAnalysis}
@@ -1795,14 +1829,14 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
           </div>
         )}
 
-        {/* Hover Tooltip */}
+        {/* Hover Tooltip - Mobile Responsive */}
         {hoveredAnnotation && analysisResult && (
           <div 
             className="fixed z-50 pointer-events-none transition-all duration-200"
             style={{
               left: tooltipPosition.x,
               top: tooltipPosition.y,
-              transform: 'translate(-50%, -100%)'
+              transform: isMobileDevice() ? 'translate(0, 0)' : 'translate(-50%, -100%)'
             }}
           >
             {(() => {
@@ -1816,25 +1850,32 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
               };
               
               return (
-                <div className="bg-gray-900 text-white text-xs rounded-lg px-3 py-2 shadow-xl max-w-xs mb-2">
+                <div className={`bg-gray-900 text-white rounded-lg px-3 py-2 shadow-xl mb-2 ${
+                  isMobileDevice() 
+                    ? 'text-sm max-w-xs w-72' // Mobile: larger text, fixed width
+                    : 'text-xs max-w-xs'     // Desktop: smaller text, flexible width
+                }`}>
                   <div className="font-semibold mb-1">
                     {typeLabels[annotation.type]}
                   </div>
-                  <div className="mb-2 text-gray-200">
+                  <div className={`mb-2 text-gray-200 ${isMobileDevice() ? 'text-sm' : 'text-xs'}`}>
                     "{annotation.text}"
                   </div>
-                  <div className="text-gray-100">
+                  <div className={`text-gray-100 ${isMobileDevice() ? 'text-sm' : 'text-xs'}`}>
                     {annotation.comment}
                   </div>
                   {annotation.suggestion && (
-                    <div className="mt-2 text-gray-300 italic">
+                    <div className={`mt-2 text-gray-300 italic ${isMobileDevice() ? 'text-sm' : 'text-xs'}`}>
                       💡 {annotation.suggestion}
                     </div>
                   )}
-                  <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-full">
-                    <div className="border-8 border-transparent border-t-gray-900"></div>
-                  </div>
-            </div>
+                  {/* Arrow pointer - positioned differently for mobile */}
+                  {!isMobileDevice() && (
+                    <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-full">
+                      <div className="border-8 border-transparent border-t-gray-900"></div>
+                    </div>
+                  )}
+                </div>
               );
             })()}
           </div>
