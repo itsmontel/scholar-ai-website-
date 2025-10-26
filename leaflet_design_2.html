@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WriteScholar - Student Success Guaranteed</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        .leaflet {
+            width: 8.5in;
+            height: 11in;
+            background: #ffffff;
+            color: #333;
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        
+        .header-section {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 10px,
+                rgba(255,255,255,0.05) 10px,
+                rgba(255,255,255,0.05) 20px
+            );
+        }
+        
+        .main-title {
+            font-size: 36px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            z-index: 2;
+            position: relative;
+        }
+        
+        .subtitle {
+            font-size: 20px;
+            font-weight: 300;
+            z-index: 2;
+            position: relative;
+        }
+        
+        .problem-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-left: 5px solid #ff6b6b;
+        }
+        
+        .problem-title {
+            font-size: 22px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .problem-icon {
+            font-size: 24px;
+            margin-right: 10px;
+        }
+        
+        .problem-list {
+            list-style: none;
+            font-size: 16px;
+            line-height: 1.8;
+        }
+        
+        .problem-list li {
+            margin-bottom: 8px;
+            padding-left: 25px;
+            position: relative;
+        }
+        
+        .problem-list li::before {
+            content: '❌';
+            position: absolute;
+            left: 0;
+        }
+        
+        .solution-section {
+            padding: 30px;
+            flex: 1;
+        }
+        
+        .solution-title {
+            font-size: 28px;
+            font-weight: bold;
+            color: #27ae60;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+        
+        .feature-item {
+            background: #ffffff;
+            border: 2px solid #27ae60;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .feature-number {
+            background: #27ae60;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 18px;
+            margin: 0 auto 15px;
+        }
+        
+        .feature-name {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .feature-benefit {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.4;
+        }
+        
+        .testimonial-section {
+            background: #e8f5e8;
+            padding: 20px;
+            margin: 20px 30px;
+            border-radius: 15px;
+            border-left: 5px solid #27ae60;
+        }
+        
+        .testimonial-text {
+            font-style: italic;
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        .testimonial-author {
+            font-weight: bold;
+            color: #27ae60;
+            text-align: center;
+            font-size: 14px;
+        }
+        
+        .cta-section {
+            background: linear-gradient(45deg, #2c3e50, #34495e);
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+        
+        .cta-headline {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        
+        .website-url {
+            font-size: 32px;
+            font-weight: bold;
+            color: #f39c12;
+            margin-bottom: 10px;
+            text-decoration: underline;
+        }
+        
+        .cta-details {
+            font-size: 16px;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+        
+        .guarantee-badge {
+            background: #f39c12;
+            color: #2c3e50;
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-weight: bold;
+            display: inline-block;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="leaflet">
+        <div class="header-section">
+            <div class="main-title">📚 WriteScholar</div>
+            <div class="subtitle">Stop Struggling with Academic Writing!</div>
+        </div>
+        
+        <div class="problem-section">
+            <div class="problem-title">
+                <span class="problem-icon">😰</span>
+                Sound Familiar?
+            </div>
+            <ul class="problem-list">
+                <li>Spending hours on citations that are still wrong</li>
+                <li>Getting marked down for grammar and structure</li>
+                <li>Worried about accidental plagiarism</li>
+                <li>Struggling to improve your writing style</li>
+                <li>Need feedback but professors are too busy</li>
+            </ul>
+        </div>
+        
+        <div class="solution-section">
+            <div class="solution-title">✨ WriteScholar Has Your Back! ✨</div>
+            
+            <div class="features-grid">
+                <div class="feature-item">
+                    <div class="feature-number">1</div>
+                    <div class="feature-name">Upload Your Paper</div>
+                    <div class="feature-benefit">Any format, any subject - we handle it all</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-number">2</div>
+                    <div class="feature-name">AI Analysis</div>
+                    <div class="feature-benefit">Comprehensive feedback in under 30 seconds</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-number">3</div>
+                    <div class="feature-name">Get Results</div>
+                    <div class="feature-benefit">Detailed suggestions for improvement</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-number">4</div>
+                    <div class="feature-name">Perfect Paper</div>
+                    <div class="feature-benefit">Submit with confidence!</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="testimonial-section">
+            <div class="testimonial-text">
+                "WriteScholar helped me go from C+ to A- average! The citation checker alone saved me so much time."
+            </div>
+            <div class="testimonial-author">- Sarah M., Psychology Major</div>
+        </div>
+        
+        <div class="cta-section">
+            <div class="cta-headline">Ready to Ace Your Next Paper?</div>
+            <div class="website-url">writescholar.com</div>
+            <div class="cta-details">
+                🆓 <strong>FREE</strong> analysis for your first paper<br>
+                🚀 Results in seconds, not hours<br>
+                🎓 Join thousands of successful students
+            </div>
+            <div class="guarantee-badge">100% Student Success Guarantee</div>
+        </div>
+    </div>
+</body>
+</html>

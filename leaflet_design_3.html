@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WriteScholar - Academic Excellence Made Easy</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        .leaflet {
+            width: 8.5in;
+            height: 11in;
+            background: #ffffff;
+            color: #2d3748;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #4299e1, #3182ce);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .logo-section {
+            margin-bottom: 20px;
+        }
+        
+        .logo-text {
+            font-size: 40px;
+            font-weight: 700;
+            letter-spacing: -1px;
+        }
+        
+        .tagline {
+            font-size: 18px;
+            font-weight: 300;
+            opacity: 0.95;
+        }
+        
+        .content-area {
+            flex: 1;
+            padding: 35px 30px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .main-headline {
+            font-size: 28px;
+            font-weight: 600;
+            color: #2d3748;
+            text-align: center;
+            margin-bottom: 30px;
+            line-height: 1.3;
+        }
+        
+        .services-section {
+            margin-bottom: 30px;
+        }
+        
+        .services-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .services-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+        
+        .service-card {
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            transition: transform 0.2s;
+        }
+        
+        .service-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .service-icon {
+            font-size: 28px;
+            margin-bottom: 12px;
+            display: block;
+        }
+        
+        .service-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 8px;
+        }
+        
+        .service-desc {
+            font-size: 14px;
+            color: #718096;
+            line-height: 1.4;
+        }
+        
+        .comparison-section {
+            background: #edf2f7;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+        
+        .comparison-title {
+            font-size: 18px;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 20px;
+            color: #2d3748;
+        }
+        
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .comparison-column {
+            text-align: center;
+        }
+        
+        .column-header {
+            font-size: 16px;
+            font-weight: 600;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .without-ws {
+            background: #fed7d7;
+            color: #c53030;
+        }
+        
+        .with-ws {
+            background: #c6f6d5;
+            color: #38a169;
+        }
+        
+        .comparison-list {
+            list-style: none;
+            font-size: 14px;
+        }
+        
+        .comparison-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+        }
+        
+        .comparison-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .pricing-highlight {
+            background: linear-gradient(45deg, #38a169, #48bb78);
+            color: white;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        
+        .price-text {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .price-details {
+            font-size: 16px;
+            opacity: 0.95;
+        }
+        
+        .footer-cta {
+            background: #2d3748;
+            color: white;
+            padding: 30px;
+            text-align: center;
+            margin-top: auto;
+        }
+        
+        .website-large {
+            font-size: 36px;
+            font-weight: bold;
+            color: #ffd700;
+            margin-bottom: 15px;
+        }
+        
+        .cta-message {
+            font-size: 18px;
+            margin-bottom: 15px;
+        }
+        
+        .quick-benefits {
+            display: flex;
+            justify-content: space-around;
+            font-size: 14px;
+            margin-top: 15px;
+        }
+        
+        .benefit-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .benefit-icon {
+            font-size: 20px;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="leaflet">
+        <div class="header">
+            <div class="logo-section">
+                <div class="logo-text">WriteScholar</div>
+                <div class="tagline">Your AI Writing Assistant</div>
+            </div>
+        </div>
+        
+        <div class="content-area">
+            <div class="main-headline">
+                Transform Your Academic Writing with AI-Powered Analysis
+            </div>
+            
+            <div class="services-section">
+                <div class="services-title">🎯 What We Analyze</div>
+                <div class="services-grid">
+                    <div class="service-card">
+                        <span class="service-icon">📊</span>
+                        <div class="service-name">General Analysis</div>
+                        <div class="service-desc">Structure, clarity, academic tone & style</div>
+                    </div>
+                    <div class="service-card">
+                        <span class="service-icon">📚</span>
+                        <div class="service-name">Citation Review</div>
+                        <div class="service-desc">APA, MLA, Chicago, Harvard formats</div>
+                    </div>
+                    <div class="service-card">
+                        <span class="service-icon">🔍</span>
+                        <div class="service-name">Plagiarism Check</div>
+                        <div class="service-desc">Originality & academic integrity</div>
+                    </div>
+                    <div class="service-card">
+                        <span class="service-icon">✏️</span>
+                        <div class="service-name">Grammar Review</div>
+                        <div class="service-desc">Grammar, punctuation & language</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="comparison-section">
+                <div class="comparison-title">⚡ Before vs After WriteScholar</div>
+                <div class="comparison-grid">
+                    <div class="comparison-column">
+                        <div class="column-header without-ws">Without WriteScholar</div>
+                        <ul class="comparison-list">
+                            <li>⏰ Hours of manual checking</li>
+                            <li>❓ Uncertain citation formats</li>
+                            <li>😰 Plagiarism anxiety</li>
+                            <li>📉 Inconsistent grades</li>
+                            <li>🔄 Multiple revisions</li>
+                        </ul>
+                    </div>
+                    <div class="comparison-column">
+                        <div class="column-header with-ws">With WriteScholar</div>
+                        <ul class="comparison-list">
+                            <li>⚡ 30-second analysis</li>
+                            <li>✅ Perfect citations</li>
+                            <li>🛡️ Confidence in originality</li>
+                            <li>📈 Better grades</li>
+                            <li>🎯 Submit with confidence</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="pricing-highlight">
+                <div class="price-text">🆓 START FREE TODAY</div>
+                <div class="price-details">No credit card • Instant results • All citation styles</div>
+            </div>
+        </div>
+        
+        <div class="footer-cta">
+            <div class="website-large">writescholar.com</div>
+            <div class="cta-message">Join 10,000+ Students Getting Better Grades</div>
+            
+            <div class="quick-benefits">
+                <div class="benefit-item">
+                    <div class="benefit-icon">🚀</div>
+                    <div>Instant</div>
+                </div>
+                <div class="benefit-item">
+                    <div class="benefit-icon">🎓</div>
+                    <div>Academic</div>
+                </div>
+                <div class="benefit-item">
+                    <div class="benefit-icon">🔒</div>
+                    <div>Secure</div>
+                </div>
+                <div class="benefit-item">
+                    <div class="benefit-icon">💯</div>
+                    <div>Accurate</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

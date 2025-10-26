@@ -5,6 +5,13 @@
 [build.environment]
   NODE_VERSION = "18"
 
+# IMPORTANT: Set this in Netlify UI under Site Settings > Environment Variables
+# VITE_API_URL = "https://your-railway-backend.railway.app/api"
+
+[context.production.environment]
+  # Production environment variables
+  # Set VITE_API_URL in Netlify dashboard to your Railway backend URL
+
 [[redirects]]
   from = "/*"
   to = "/index.html"
