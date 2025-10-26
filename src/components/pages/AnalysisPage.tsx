@@ -79,6 +79,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
   const [currentPlan, setCurrentPlan] = useState<string>('free');
   const [isExporting, setIsExporting] = useState(false);
   const [cameFromLibrary, setCameFromLibrary] = useState(false);
+  const [mobileView, setMobileView] = useState<'document' | 'annotations'>('document');
   const documentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -1508,78 +1509,118 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
           /* Premium Analysis Results Display */
           <div className="bg-white rounded-xl shadow-2xl overflow-hidden">
             {/* Results Header */}
-            <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-4">
-            <div className="flex items-center justify-between">
-              <div>
-                  <h2 className="text-xl font-semibold">
+            <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 sm:px-6 py-4">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
+                <div className="flex-1 min-w-0">
+                  <h2 className="text-lg sm:text-xl font-semibold truncate">
                     {documents.find(doc => doc.id === selectedDocument)?.title || 'Document Analysis'}
                   </h2>
-                  <p className="text-blue-100 text-sm mt-1">
+                  <p className="text-blue-100 text-xs sm:text-sm mt-1">
                     {analysisTypes.find(type => type.id === selectedAnalysisType)?.name} • Analyzed {formatDate(new Date().toISOString())}
                   </p>
-              </div>
-              <div className="flex items-center space-x-3">
-                {/* Export Buttons */}
-                <button 
-                  onClick={exportToPDF}
-                  disabled={isExporting}
-                  className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors flex items-center space-x-2 disabled:opacity-50"
-                  title="Export as PDF"
-                >
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                  <span>PDF</span>
-                </button>
-                
-                <button 
-                  onClick={exportToWord}
-                  disabled={isExporting}
-                  className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors flex items-center space-x-2 disabled:opacity-50"
-                  title="Export as Word Document"
-                >
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                  <span>Word</span>
-                </button>
-                
-                <button 
-                  onClick={handleCloseAnalysis}
-                  className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors flex items-center space-x-2"
-                >
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                  <span>Close</span>
-                </button>
-              </div>
+                </div>
+                <div className="flex items-center space-x-2 sm:space-x-3 flex-wrap sm:flex-nowrap">
+                  {/* Export Buttons */}
+                  <button 
+                    onClick={exportToPDF}
+                    disabled={isExporting}
+                    className="px-3 sm:px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors flex items-center space-x-1 sm:space-x-2 disabled:opacity-50 text-sm"
+                    title="Export as PDF"
+                  >
+                    <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <span className="hidden sm:inline">PDF</span>
+                  </button>
+                  
+                  <button 
+                    onClick={exportToWord}
+                    disabled={isExporting}
+                    className="px-3 sm:px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors flex items-center space-x-1 sm:space-x-2 disabled:opacity-50 text-sm"
+                    title="Export as Word Document"
+                  >
+                    <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <span className="hidden sm:inline">Word</span>
+                  </button>
+                  
+                  <button 
+                    onClick={handleCloseAnalysis}
+                    className="px-3 sm:px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors flex items-center space-x-1 sm:space-x-2 text-sm"
+                  >
+                    <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                    <span className="hidden sm:inline">Close</span>
+                  </button>
+                </div>
               </div>
             </div>
 
             {/* Legend */}
-            <div className="bg-gray-50 px-6 py-3 border-b border-gray-200">
-              <div className="flex items-center space-x-6 text-sm">
+            <div className="bg-gray-50 px-4 sm:px-6 py-3 border-b border-gray-200">
+              <div className="flex items-center space-x-3 sm:space-x-6 text-xs sm:text-sm flex-wrap">
                 <div className="flex items-center space-x-2">
-                  <div className="w-4 h-1 bg-green-400 rounded"></div>
+                  <div className="w-3 h-1 sm:w-4 sm:h-1 bg-green-400 rounded"></div>
                   <span className="text-gray-600">Strong sections</span>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <div className="w-4 h-1 bg-amber-400 rounded"></div>
+                  <div className="w-3 h-1 sm:w-4 sm:h-1 bg-amber-400 rounded"></div>
                   <span className="text-gray-600">Needs improvement</span>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <div className="w-4 h-1 bg-red-400 rounded"></div>
+                  <div className="w-3 h-1 sm:w-4 sm:h-1 bg-red-400 rounded"></div>
                   <span className="text-gray-600">Needs revision</span>
                 </div>
               </div>
             </div>
 
+            {/* Mobile View Toggle */}
+            <div className="md:hidden bg-white border-b border-gray-200 px-4 py-2">
+              <div className="flex space-x-2">
+                <button
+                  onClick={() => setMobileView('document')}
+                  className={`flex-1 px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
+                    mobileView === 'document'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
+                >
+                  <div className="flex items-center justify-center space-x-2">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <span>Document</span>
+                  </div>
+                </button>
+                <button
+                  onClick={() => setMobileView('annotations')}
+                  className={`flex-1 px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
+                    mobileView === 'annotations'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
+                >
+                  <div className="flex items-center justify-center space-x-2">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+                    </svg>
+                    <span>Annotations ({annotations.length})</span>
+                  </div>
+                </button>
+              </div>
+            </div>
 
             {/* Main Content Area */}
-            <div className="flex h-[600px]">
+            <div className="flex flex-col md:flex-row h-auto md:h-[600px]">
               {/* Document Panel */}
-              <div className="flex-1 p-6 overflow-y-auto bg-white" ref={documentRef}>
+              <div 
+                className={`flex-1 p-4 sm:p-6 overflow-y-auto bg-white min-h-[400px] md:min-h-0 ${
+                  mobileView === 'document' ? 'block' : 'hidden md:block'
+                }`} 
+                ref={documentRef}
+              >
                 <div className="prose max-w-none">
                   <div className="text-sm leading-7">
                     {renderHighlightedText()}
@@ -1632,38 +1673,42 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
         </div>
 
               {/* Annotations Panel */}
-              <div className="w-96 bg-gray-50 border-l border-gray-200 overflow-y-auto">
-                <div className="p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-6 flex items-center">
-                    <svg className="w-5 h-5 mr-2 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <div 
+                className={`w-full md:w-96 bg-gray-50 border-t md:border-t-0 md:border-l border-gray-200 overflow-y-auto min-h-[400px] md:min-h-0 ${
+                  mobileView === 'annotations' ? 'block' : 'hidden md:block'
+                }`}
+              >
+                <div className="p-4 sm:p-6">
+                  <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-4 sm:mb-6 flex items-center">
+                    <svg className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
                     </svg>
                     Annotations
                   </h3>
 
-                  <div className="space-y-6">
+                  <div className="space-y-4 sm:space-y-6">
                     {/* Strong Points */}
                 <div>
-                      <div className="flex items-center space-x-2 mb-3">
-                        <div className="flex items-center justify-center w-8 h-8 bg-green-100 rounded-lg">
+                      <div className="flex items-center space-x-2 mb-2 sm:mb-3">
+                        <div className="flex items-center justify-center w-6 h-6 sm:w-8 sm:h-8 bg-green-100 rounded-lg">
                           {getAnnotationIcon('strong')}
                         </div>
-                        <h4 className="font-medium text-green-800">Strong Points ({getFilteredAnnotations('strong').length})</h4>
+                        <h4 className="text-sm sm:text-base font-medium text-green-800">Strong Points ({getFilteredAnnotations('strong').length})</h4>
                       </div>
                       <div className="space-y-2">
                         {getFilteredAnnotations('strong').map((annotation) => (
                           <div
                             key={annotation.id}
-                            className={`bg-green-50 rounded-lg p-4 border-l-4 border-green-400 shadow-sm hover:shadow-md transition-all cursor-pointer ${
+                            className={`bg-green-50 rounded-lg p-3 sm:p-4 border-l-4 border-green-400 shadow-sm hover:shadow-md transition-all cursor-pointer ${
                               selectedAnnotation === annotation.id ? 'ring-2 ring-blue-500' : ''
                             }`}
                             onClick={() => scrollToAnnotation(annotation.id)}
                             onMouseEnter={() => setHoveredAnnotation(annotation.id)}
                             onMouseLeave={() => setHoveredAnnotation(null)}
                           >
-                            <p className="text-sm text-gray-700 font-medium mb-1">{annotation.comment}</p>
+                            <p className="text-xs sm:text-sm text-gray-700 font-medium mb-1">{annotation.comment}</p>
                             {annotation.suggestion && (
-                              <p className="text-xs text-gray-500 italic">{annotation.suggestion}</p>
+                              <p className="text-[10px] sm:text-xs text-gray-500 italic">{annotation.suggestion}</p>
                             )}
                   </div>
                         ))}
@@ -1672,26 +1717,26 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
 
                     {/* Areas to Improve */}
                 <div>
-                      <div className="flex items-center space-x-2 mb-3">
-                        <div className="flex items-center justify-center w-8 h-8 bg-amber-100 rounded-lg">
+                      <div className="flex items-center space-x-2 mb-2 sm:mb-3">
+                        <div className="flex items-center justify-center w-6 h-6 sm:w-8 sm:h-8 bg-amber-100 rounded-lg">
                           {getAnnotationIcon('improve')}
                         </div>
-                        <h4 className="font-medium text-amber-800">Areas to Improve ({getFilteredAnnotations('improve').length})</h4>
+                        <h4 className="text-sm sm:text-base font-medium text-amber-800">Areas to Improve ({getFilteredAnnotations('improve').length})</h4>
                       </div>
                       <div className="space-y-2">
                         {getFilteredAnnotations('improve').map((annotation) => (
                           <div
                             key={annotation.id}
-                            className={`bg-amber-50 rounded-lg p-4 border-l-4 border-amber-400 shadow-sm hover:shadow-md transition-all cursor-pointer ${
+                            className={`bg-amber-50 rounded-lg p-3 sm:p-4 border-l-4 border-amber-400 shadow-sm hover:shadow-md transition-all cursor-pointer ${
                               selectedAnnotation === annotation.id ? 'ring-2 ring-blue-500' : ''
                             }`}
                             onClick={() => scrollToAnnotation(annotation.id)}
                             onMouseEnter={() => setHoveredAnnotation(annotation.id)}
                             onMouseLeave={() => setHoveredAnnotation(null)}
                           >
-                            <p className="text-sm text-gray-700 font-medium mb-1">{annotation.comment}</p>
+                            <p className="text-xs sm:text-sm text-gray-700 font-medium mb-1">{annotation.comment}</p>
                             {annotation.suggestion && (
-                              <p className="text-xs text-gray-500 italic">{annotation.suggestion}</p>
+                              <p className="text-[10px] sm:text-xs text-gray-500 italic">{annotation.suggestion}</p>
                             )}
                   </div>
                         ))}
@@ -1700,26 +1745,26 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
 
                     {/* Serious Concerns */}
                 <div>
-                      <div className="flex items-center space-x-2 mb-3">
-                        <div className="flex items-center justify-center w-8 h-8 bg-red-100 rounded-lg">
+                      <div className="flex items-center space-x-2 mb-2 sm:mb-3">
+                        <div className="flex items-center justify-center w-6 h-6 sm:w-8 sm:h-8 bg-red-100 rounded-lg">
                           {getAnnotationIcon('concern')}
                         </div>
-                        <h4 className="font-medium text-red-800">Serious Concerns ({getFilteredAnnotations('concern').length})</h4>
+                        <h4 className="text-sm sm:text-base font-medium text-red-800">Serious Concerns ({getFilteredAnnotations('concern').length})</h4>
                       </div>
                       <div className="space-y-2">
                         {getFilteredAnnotations('concern').map((annotation) => (
                           <div
                             key={annotation.id}
-                            className={`bg-red-50 rounded-lg p-4 border-l-4 border-red-400 shadow-sm hover:shadow-md transition-all cursor-pointer ${
+                            className={`bg-red-50 rounded-lg p-3 sm:p-4 border-l-4 border-red-400 shadow-sm hover:shadow-md transition-all cursor-pointer ${
                               selectedAnnotation === annotation.id ? 'ring-2 ring-blue-500' : ''
                             }`}
                             onClick={() => scrollToAnnotation(annotation.id)}
                             onMouseEnter={() => setHoveredAnnotation(annotation.id)}
                             onMouseLeave={() => setHoveredAnnotation(null)}
                           >
-                            <p className="text-sm text-gray-700 font-medium mb-1">{annotation.comment}</p>
+                            <p className="text-xs sm:text-sm text-gray-700 font-medium mb-1">{annotation.comment}</p>
                             {annotation.suggestion && (
-                              <p className="text-xs text-gray-500 italic">{annotation.suggestion}</p>
+                              <p className="text-[10px] sm:text-xs text-gray-500 italic">{annotation.suggestion}</p>
                             )}
                   </div>
                         ))}
@@ -1728,22 +1773,22 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                 
                 {/* Upgrade prompt for hidden annotations in sidebar */}
                 {currentPlan === 'free' && annotations.length > getFilteredAnnotations().length && (
-                  <div className="mt-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg">
+                  <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg">
                     <div className="text-center">
-                      <div className="p-2 bg-blue-500 rounded-full mx-auto w-fit mb-3">
-                        <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <div className="p-2 bg-blue-500 rounded-full mx-auto w-fit mb-2 sm:mb-3">
+                        <svg className="w-3 h-3 sm:w-4 sm:h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m0 0v2m0-2h2m-2 0H9m12-9V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002-2v-9z" />
                         </svg>
                   </div>
-                      <h4 className="text-sm font-semibold text-gray-900 mb-1">
+                      <h4 className="text-xs sm:text-sm font-semibold text-gray-900 mb-1">
                         {annotations.length - getFilteredAnnotations().length} more annotation{annotations.length - getFilteredAnnotations().length !== 1 ? 's' : ''}
                       </h4>
-                      <p className="text-xs text-gray-600 mb-3">
+                      <p className="text-[10px] sm:text-xs text-gray-600 mb-2 sm:mb-3">
                         Upgrade to view all insights
                       </p>
                       <button
                         onClick={() => onNavigate?.('billing')}
-                        className="px-3 py-1 text-xs bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                        className="px-3 py-1 text-[10px] sm:text-xs bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
                       >
                         Upgrade
                       </button>
@@ -1756,32 +1801,31 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
             </div>
 
             {/* Summary Footer */}
-            <div className="bg-gray-50 border-t border-gray-200 px-6 py-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-6">
-                  <div className="text-sm">
+            <div className="bg-gray-50 border-t border-gray-200 px-4 sm:px-6 py-4">
+              <div className="flex flex-col sm:flex-row items-center justify-between space-y-3 sm:space-y-0">
+                <div className="flex items-center space-x-4 sm:space-x-6 text-xs sm:text-sm">
+                  <div>
                     <span className="text-gray-500">Word Count:</span>
                     <span className="ml-2 font-semibold text-gray-900">{documentContent.split(' ').length}</span>
-                      </div>
-                  <div className="text-sm">
+                  </div>
+                  <div>
                     <span className="text-gray-500">Citation Style:</span>
                     <span className="ml-2 font-semibold text-gray-900">{selectedCitationStyle}</span>
                   </div>
-                </div>
-                <div className="flex space-x-3">
-                  <button className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-                    Export Report
-                  </button>
+                  <div>
+                    <span className="text-gray-500">Annotations:</span>
+                    <span className="ml-2 font-semibold text-gray-900">{annotations.length}</span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         )}
 
-        {/* Hover Tooltip */}
+        {/* Hover Tooltip (Hidden on mobile) */}
         {hoveredAnnotation && analysisResult && (
           <div 
-            className="fixed z-50 pointer-events-none transition-all duration-200"
+            className="hidden md:block fixed z-50 pointer-events-none transition-all duration-200"
             style={{
               left: tooltipPosition.x,
               top: tooltipPosition.y,
