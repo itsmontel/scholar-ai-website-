@@ -65,6 +65,12 @@ const LoginPage = ({ onNavigate, onLogin }: LoginPageProps) => {
       const data = await response.json();
 
       if (!response.ok) {
+        // Check if there are detailed validation errors
+        if (data.errors && Array.isArray(data.errors) && data.errors.length > 0) {
+          // Display all validation error messages
+          const errorMessages = data.errors.map((err: any) => err.message).join('. ');
+          throw new Error(errorMessages);
+        }
         throw new Error(data.message || 'Login failed');
       }
 

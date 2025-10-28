@@ -67,6 +67,12 @@ const SignUpPage = ({ onNavigate, onSignUp }: SignUpPageProps) => {
       const data = await response.json();
 
       if (!response.ok) {
+        // Check if there are detailed validation errors
+        if (data.errors && Array.isArray(data.errors) && data.errors.length > 0) {
+          // Display all validation error messages
+          const errorMessages = data.errors.map((err: any) => err.message).join('. ');
+          throw new Error(errorMessages);
+        }
         throw new Error(data.message || 'Registration failed');
       }
 
@@ -136,6 +142,9 @@ const SignUpPage = ({ onNavigate, onSignUp }: SignUpPageProps) => {
                   placeholder="••••••••"
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                 />
+                <p className="mt-2 text-xs text-gray-500">
+                  Must be at least 8 characters with one uppercase, one lowercase, one number, and one special character (@$!%*?&)
+                </p>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Confirm Password</label>
