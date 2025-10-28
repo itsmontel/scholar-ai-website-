@@ -8,7 +8,7 @@ const { authenticateToken } = require('../middleware/auth');
 // @access  Private
 router.post('/create-checkout-session', authenticateToken, async (req, res) => {
   try {
-    const { planType, billingCycle, successUrl, cancelUrl } = req.body;
+    const { planType, billingCycle, successUrl, cancelUrl, promoCode } = req.body;
     const userId = req.user.id;
 
     if (!planType || !billingCycle || !successUrl || !cancelUrl) {
@@ -52,12 +52,13 @@ router.post('/create-checkout-session', authenticateToken, async (req, res) => {
       }
     }
 
-    // Create checkout session
+    // Create checkout session with optional promo code
     const sessionResult = await subscriptionService.createCheckoutSession(
       customerId,
       planType,
       billingCycle,
-      userId
+      userId,
+      promoCode || null
     );
 
     if (!sessionResult.success) {
@@ -446,6 +447,48 @@ router.post('/billing-portal', authenticateToken, async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to create billing portal session',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
+// @route   POST /api/subscriptions/validate-promo-code
+// @desc    Validate a promo code
+// @access  Private
+router.post('/validate-promo-code', authenticateToken, async (req, res) => {
+  try {
+    const { promoCode } = req.body;
+
+    if (!promoCode) {
+      return res.status(400).json({
+        success: false,
+        message: 'Promo code is required'
+      });
+    }
+
+    const validationResult = await subscriptionService.validatePromoCode(promoCode);
+
+    if (!validationResult.success) {
+      return res.status(400).json({
+        success: false,
+        message: validationResult.error || 'Invalid promo code'
+      });
+    }
+
+    res.json({
+      success: true,
+      data: {
+        valid: validationResult.valid,
+        discount: validationResult.discount,
+        message: validationResult.message
+      }
+    });
+
+  } catch (error) {
+    console.error('Error validating promo code:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to validate promo code',
       error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }

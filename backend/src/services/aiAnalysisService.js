@@ -9,6 +9,65 @@ class AIAnalysisService {
   }
 
   /**
+   * Search for relevant citations based on a research topic or question
+   * @param {string} researchTopic - The research topic or essay question
+   * @param {string} citationStyle - Citation style (APA, Harvard, etc.)
+   * @param {number} numberOfCitations - Number of citations to generate
+   * @returns {Object} Citation search results
+   */
+  async searchCitations(researchTopic, citationStyle = 'APA', numberOfCitations = 10) {
+    try {
+      // Check if OpenAI API key is configured
+      if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY === 'your_openai_api_key_here') {
+        console.log('🤖 Using mock citation search (OpenAI API key not configured)');
+        return await this.mockCitationSearch(researchTopic, citationStyle, numberOfCitations);
+      }
+
+      const searchPrompt = this.getCitationSearchPrompt(researchTopic, citationStyle, numberOfCitations);
+      
+      // Use standard model for citation search
+      const selectedModel = process.env.OPENAI_STANDARD_MODEL || 'gpt-4o-mini';
+      const maxTokens = 4000;
+
+      const completion = await this.openai.chat.completions.create({
+        model: selectedModel,
+        messages: [
+          {
+            role: 'system',
+            content: this.getCitationSearchSystemPrompt()
+          },
+          {
+            role: 'user',
+            content: searchPrompt
+          }
+        ],
+        max_tokens: maxTokens,
+        temperature: 0.7, // Slightly higher for more diverse results
+      });
+
+      const searchResult = completion.choices[0].message.content;
+      
+      // Parse citation search results
+      const parsedCitations = this.parseCitationSearchResults(searchResult, citationStyle);
+      
+      return {
+        success: true,
+        searchType: 'citation_search',
+        researchTopic: researchTopic,
+        citations: parsedCitations.citations,
+        searchStrategies: parsedCitations.searchStrategies,
+        keywords: parsedCitations.keywords,
+        citationStyle: citationStyle,
+        timestamp: new Date().toISOString(),
+        model: selectedModel
+      };
+    } catch (error) {
+      console.error('Citation Search Error:', error);
+      throw new Error(`Citation search failed: ${error.message}`);
+    }
+  }
+
+  /**
    * Analyze a document with the specified analysis type
    * @param {string} documentId - The document ID
    * @param {string} content - The document content
@@ -2143,6 +2202,246 @@ The reference list requires formatting adjustments to meet ${citationStyle} stan
       model: 'mock',
       temporary: true
     };
+  }
+
+  /**
+   * Get system prompt for citation search
+   */
+  getCitationSearchSystemPrompt() {
+    return `You are an expert academic research librarian and citation specialist. Your role is to help students and researchers find relevant academic sources for their research topics.
+
+When given a research topic or essay question, you should:
+1. Identify key concepts and research areas
+2. Suggest relevant academic sources (journal articles, books, reports)
+3. Provide properly formatted citations in the requested citation style
+4. Include brief descriptions of why each source is relevant
+5. Suggest search keywords and strategies
+6. Recommend a mix of foundational and recent sources
+
+Focus on providing HIGH-QUALITY, CREDIBLE academic sources from reputable publishers, journals, and institutions. Prioritize peer-reviewed journal articles and authoritative books.`;
+  }
+
+  /**
+   * Get citation search prompt
+   */
+  getCitationSearchPrompt(researchTopic, citationStyle = 'APA', numberOfCitations = 10) {
+    return `I need help finding relevant academic citations for the following research topic or essay question:
+
+RESEARCH TOPIC/QUESTION: "${researchTopic}"
+
+Please provide ${numberOfCitations} relevant academic sources formatted in ${citationStyle} citation style.
+
+For each citation, provide the following in JSON format:
+{
+  "citations": [
+    {
+      "citation": "Full citation in ${citationStyle} format with proper formatting (use <i></i> for italics)",
+      "type": "journal_article | book | book_chapter | report | thesis | conference_paper",
+      "relevance": "Brief explanation (2-3 sentences) of why this source is relevant to the research topic",
+      "key_points": ["Key point 1", "Key point 2", "Key point 3"],
+      "example_sentence": "A comprehensive academic passage (2-4 sentences) that incorporates this citation while directly addressing the research topic. The passage should connect the source's findings to the specific research question, showing clear relevance and creating a bridge between the citation and the user's argument.",
+      "in_text_citation": "The proper in-text citation format for ${citationStyle} style (e.g., (Smith, 2023) for APA)",
+      "year": "YYYY",
+      "accessibility": "Open Access | Subscription Required | Library Access"
+    }
+  ],
+  "keywords": ["keyword1", "keyword2", "keyword3", ...],
+  "search_strategies": [
+    "Specific database or search strategy recommendation 1",
+    "Specific database or search strategy recommendation 2",
+    "Specific database or search strategy recommendation 3"
+  ],
+  "topic_overview": "Brief overview of the research area and why these sources were selected"
+}
+
+IMPORTANT REQUIREMENTS:
+1. Provide REAL, PLAUSIBLE academic sources - they should sound like actual published works
+2. Use proper ${citationStyle} citation formatting with HTML tags for italics (journal names, book titles should be in <i></i> tags)
+3. Include a mix of recent (last 5 years) and foundational sources
+4. Focus on peer-reviewed journal articles and authoritative books
+5. Ensure citations are complete with all required elements (authors, year, title, publication, DOI/URL when applicable)
+6. Make sure all sources are directly relevant to the research topic
+7. For example_sentence: Write comprehensive academic passages (2-4 sentences) that not only incorporate the citation but also explicitly connect the source's findings back to the specific research topic "${researchTopic}". Show how this source directly supports or relates to the user's research question.
+8. For in_text_citation: Provide the exact format needed for in-text citations in ${citationStyle} style`;
+  }
+
+  /**
+   * Parse citation search results
+   */
+  parseCitationSearchResults(searchResult, citationStyle) {
+    try {
+      // Try to extract JSON from the response
+      const jsonMatch = searchResult.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) {
+        throw new Error('No JSON found in citation search result');
+      }
+
+      const parsedData = JSON.parse(jsonMatch[0]);
+      
+      return {
+        citations: parsedData.citations || [],
+        keywords: parsedData.keywords || [],
+        searchStrategies: parsedData.search_strategies || [],
+        topicOverview: parsedData.topic_overview || ''
+      };
+    } catch (error) {
+      console.error('Error parsing citation search results:', error);
+      // Return empty results on parse failure
+      return {
+        citations: [],
+        keywords: [],
+        searchStrategies: [],
+        topicOverview: ''
+      };
+    }
+  }
+
+  /**
+   * Mock citation search for development/testing
+   */
+  async mockCitationSearch(researchTopic, citationStyle, numberOfCitations) {
+    console.log('🤖 Using mock citation search');
+    
+    const mockCitations = [
+      {
+        citation: "Smith, J. A., & Johnson, M. B. (2023). Understanding modern research methodologies in social sciences. <i>Journal of Academic Research</i>, 45(3), 234-256. https://doi.org/10.1234/jar.2023.45.3.234",
+        type: "journal_article",
+        relevance: "This article provides a comprehensive overview of current research methodologies relevant to your topic. It offers practical frameworks and theoretical foundations that can strengthen your arguments.",
+        key_points: ["Discusses mixed-methods approaches", "Reviews recent developments in the field", "Provides methodological frameworks"],
+        example_sentence: "The complexity of modern research challenges requires sophisticated methodological approaches that can address multifaceted questions effectively. Recent research has emphasized the importance of adopting mixed-methods approaches to capture the complexity of social phenomena, as these methodologies provide both quantitative rigor and qualitative depth necessary for comprehensive understanding (Smith & Johnson, 2023). This integrated approach is particularly valuable when investigating topics that involve both measurable outcomes and subjective experiences, allowing researchers to develop more robust and nuanced conclusions.",
+        in_text_citation: "(Smith & Johnson, 2023)",
+        year: "2023",
+        accessibility: "Subscription Required"
+      },
+      {
+        citation: "Brown, L. (2022). <i>Academic writing in the digital age</i>. Academic Press.",
+        type: "book",
+        relevance: "This book offers essential insights into contemporary academic writing practices. It's particularly useful for understanding how digital tools are changing scholarly communication and research practices.",
+        key_points: ["Covers digital literacy in academia", "Discusses citation management tools", "Explores open access publishing"],
+        example_sentence: "The evolution of academic discourse in contemporary scholarship reflects broader technological and social changes that have reshaped how knowledge is created and shared. The transformation of academic writing in the digital era has fundamentally altered how scholars approach research communication, with new technologies offering unprecedented opportunities for collaboration and knowledge dissemination (Brown, 2022). These developments have not only expanded access to academic resources but have also created new expectations for scholarly engagement and interdisciplinary dialogue. Understanding these changes is crucial for researchers seeking to effectively communicate their findings and contribute to ongoing academic conversations.",
+        in_text_citation: "(Brown, 2022)",
+        year: "2022",
+        accessibility: "Library Access"
+      },
+      {
+        citation: "Williams, R., Davis, K., & Martinez, A. (2021). Critical perspectives on contemporary research. <i>International Journal of Studies</i>, 38(2), 112-134. https://doi.org/10.5678/ijs.2021.38.2.112",
+        type: "journal_article",
+        relevance: "This peer-reviewed article presents critical analysis of current trends in your research area. It provides valuable theoretical perspectives that can help contextualize your arguments.",
+        key_points: ["Offers critical analysis frameworks", "Reviews recent literature comprehensively", "Suggests future research directions"],
+        example_sentence: "The rigor and credibility of academic research depend heavily on the theoretical frameworks and methodological approaches employed by scholars in their investigations. Contemporary research practices require careful examination through multiple theoretical lenses to ensure robust findings that can contribute meaningfully to the broader academic discourse (Williams et al., 2021). This multi-perspective approach helps researchers avoid potential biases and limitations that might arise from relying on a single theoretical framework. By integrating diverse analytical approaches, scholars can develop more comprehensive understanding of complex phenomena and strengthen the validity of their conclusions.",
+        in_text_citation: "(Williams et al., 2021)",
+        year: "2021",
+        accessibility: "Open Access"
+      },
+      {
+        citation: "Thompson, E. M. (2020). Foundations of academic research. In P. Anderson & S. Green (Eds.), <i>Handbook of research methods</i> (pp. 45-78). Scholarly Publications.",
+        type: "book_chapter",
+        relevance: "This handbook chapter provides foundational knowledge essential for understanding your research topic. It's widely cited and offers authoritative perspectives on core concepts.",
+        key_points: ["Establishes fundamental concepts", "Reviews historical development", "Connects theory to practice"],
+        example_sentence: "The quality and impact of academic research are fundamentally determined by the researcher's grasp of established methodological principles and their ability to apply these concepts effectively. Understanding the foundational principles of academic research is crucial for developing robust methodological approaches that can withstand scholarly scrutiny and contribute to knowledge advancement (Thompson, 2020). These principles provide the essential framework for designing studies that generate reliable, valid, and meaningful results. Without this foundational knowledge, researchers risk producing work that lacks the rigor and credibility necessary for meaningful contribution to their field.",
+        in_text_citation: "(Thompson, 2020)",
+        year: "2020",
+        accessibility: "Library Access"
+      },
+      {
+        citation: "Garcia, M., & Lee, S. H. (2023). Recent advances in academic research practices. <i>Research Quarterly</i>, 52(1), 78-95. https://doi.org/10.9012/rq.2023.52.1.78",
+        type: "journal_article",
+        relevance: "This recent article discusses cutting-edge developments directly relevant to your topic. It provides up-to-date evidence and contemporary perspectives that can strengthen your literature review.",
+        key_points: ["Presents latest research findings", "Discusses emerging trends", "Offers practical implications"],
+        example_sentence: "The dynamic nature of contemporary academic research reflects the ongoing influence of technological advancement and shifting scholarly priorities across disciplines. The evolving landscape of academic research continues to be shaped by technological innovations and changing institutional priorities, requiring scholars to adapt their methodological approaches accordingly (Garcia & Lee, 2023). These changes present both opportunities and challenges for researchers, who must balance traditional scholarly rigor with innovative approaches that leverage new tools and perspectives. Success in this environment requires continuous learning and flexibility in methodological application while maintaining commitment to academic excellence.",
+        in_text_citation: "(Garcia & Lee, 2023)",
+        year: "2023",
+        accessibility: "Subscription Required"
+      }
+    ];
+
+    return {
+      success: true,
+      searchType: 'citation_search',
+      researchTopic: researchTopic,
+      citations: mockCitations.slice(0, numberOfCitations),
+      keywords: ["academic research", "methodology", "scholarly writing", "literature review", "research design"],
+      searchStrategies: [
+        "Search Google Scholar using keywords: " + researchTopic.split(' ').slice(0, 3).join(' '),
+        "Check your university's library databases (JSTOR, EBSCOhost, ProQuest)",
+        "Look for recent review articles to find additional relevant sources",
+        "Use citation tracking tools to find papers that cite key sources"
+      ],
+      citationStyle: citationStyle,
+      timestamp: new Date().toISOString(),
+      model: 'mock'
+    };
+  }
+
+  /**
+   * Save citation search to history
+   */
+  async saveCitationSearch(userId, researchTopic, citationStyle, searchResults) {
+    try {
+      console.log('Saving citation search to history:', { userId, researchTopic, citationStyle });
+      
+      const { createClient } = require('@supabase/supabase-js');
+      const supabase = createClient(
+        process.env.SUPABASE_URL,
+        process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
+      );
+
+      const searchData = {
+        user_id: userId,
+        research_topic: researchTopic,
+        citation_style: citationStyle,
+        search_results: searchResults,
+        created_at: new Date().toISOString()
+      };
+
+      const { data, error } = await supabase
+        .from('citation_searches')
+        .insert([searchData])
+        .select();
+
+      if (error) {
+        console.error('Error saving citation search:', error);
+        // Don't throw error - citation search should work even if saving fails
+        return null;
+      }
+
+      console.log('Citation search saved successfully:', data[0]?.id);
+      return data[0];
+    } catch (error) {
+      console.error('Database error in saveCitationSearch:', error);
+      // Don't throw error - citation search should work even if saving fails
+      return null;
+    }
+  }
+
+  /**
+   * Get citation search history for a user
+   */
+  async getCitationHistory(userId, limit = 20) {
+    try {
+      const { createClient } = require('@supabase/supabase-js');
+      const supabase = createClient(
+        process.env.SUPABASE_URL,
+        process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
+      );
+
+      const { data, error } = await supabase
+        .from('citation_searches')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(limit);
+
+      if (error) {
+        console.error('Error fetching citation history:', error);
+        throw error;
+      }
+
+      return data || [];
+    } catch (error) {
+      console.error('Database error in getCitationHistory:', error);
+      throw error;
+    }
   }
 
   /**

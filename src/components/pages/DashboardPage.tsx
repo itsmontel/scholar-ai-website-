@@ -18,6 +18,10 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [showAnalysisPopup, setShowAnalysisPopup] = useState(false);
   const [analysisComplete, setAnalysisComplete] = useState(false);
+  const [mode, setMode] = useState<'analyze' | 'citations'>('analyze');
+  const [citationStyle, setCitationStyle] = useState('APA');
+  const [isSearchingCitations, setIsSearchingCitations] = useState(false);
+  const [showSearchAnimation, setShowSearchAnimation] = useState(false);
   const [usageStats, setUsageStats] = useState({
     documentsUploaded: 0,
     documentsAnalyzed: 0,
@@ -35,12 +39,21 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
   });
   const [loadingStats, setLoadingStats] = useState(true);
 
-  const placeholders = [
+  const analyzePlaceholders = [
     "Paste your academic text here to see how AI can help improve it.",
     "Enhance your academic writing with a simple paste and click.",
     "Get instant feedback on your essay or thesis.",
     "Turn good writing into great writing with Scholar."
   ];
+
+  const citationPlaceholders = [
+    "Enter your essay question or research topic to find relevant citations...",
+    "What's your research topic? Get academic sources instantly.",
+    "Type your assignment question and discover relevant literature.",
+    "Find citations for your research paper in seconds."
+  ];
+
+  const placeholders = mode === 'analyze' ? analyzePlaceholders : citationPlaceholders;
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -189,7 +202,67 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
 
 
   const isTextValid = () => {
+    if (mode === 'citations') {
+      return inputText.trim().length > 0;
+    }
     return getWordCount(inputText) >= 200;
+  };
+
+  const handleCitationSearch = async () => {
+    if (inputText.trim().length === 0) {
+      setShowWordWarning(true);
+      setTimeout(() => setShowWordWarning(false), 3000);
+      return;
+    }
+
+    try {
+      setIsSearchingCitations(true);
+      setShowSearchAnimation(true);
+      
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        alert('Please log in to search for citations');
+        onNavigate('login');
+        return;
+      }
+
+      // Add a small delay to show the animation
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/analysis/citation-search`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          researchTopic: inputText,
+          citationStyle: citationStyle,
+          numberOfCitations: 10
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Citation search failed');
+      }
+
+      if (data.success && data.data) {
+        // Store results and navigate to results page
+        localStorage.setItem('citationSearchResults', JSON.stringify(data.data));
+        onNavigate('citation-results');
+      } else {
+        throw new Error('No citation results received');
+      }
+
+    } catch (error) {
+      console.error('Citation search error:', error);
+      alert(error instanceof Error ? error.message : 'Failed to search for citations. Please try again.');
+    } finally {
+      setIsSearchingCitations(false);
+      setShowSearchAnimation(false);
+    }
   };
 
   const handleAnalyze = () => {
@@ -222,10 +295,18 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
     }, 4000);
   };
 
+  const handleSubmit = () => {
+    if (mode === 'citations') {
+      handleCitationSearch();
+    } else {
+      handleAnalyze();
+    }
+  };
+
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      handleAnalyze();
+      handleSubmit();
     }
   };
 
@@ -328,14 +409,84 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
             Your Academic Writing Assistant
             </div>
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-gray-900 mb-4 sm:mb-6 md:mb-8 leading-tight tracking-tight">
-            Enhance your academic<br className="hidden sm:block" />writing with <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">AI</span>
+            {mode === 'analyze' ? (
+              <>Enhance your academic<br className="hidden sm:block" />writing with <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">AI</span></>
+            ) : (
+              <>Find relevant citations<br className="hidden sm:block" />for your <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">research</span></>
+            )}
           </h1>
           <p className="text-base sm:text-lg md:text-xl text-gray-600 max-w-4xl mx-auto mb-8 sm:mb-12 md:mb-16 leading-relaxed px-4">
-            Get instant, intelligent feedback on your research papers, essays, and academic documents with our advanced AI analysis that understands academic writing standards
+            {mode === 'analyze' 
+              ? 'Get instant, intelligent feedback on your research papers, essays, and academic documents with our advanced AI analysis that understands academic writing standards'
+              : 'Enter your essay question or research topic and get relevant academic citations instantly from journals, books, and scholarly sources'
+            }
           </p>
+
+          {/* Mode Toggle */}
+          <div className="flex justify-center mb-8">
+            <div className="bg-white rounded-full p-1 shadow-lg border border-gray-200 inline-flex">
+              <button
+                onClick={() => {
+                  setMode('analyze');
+                  setInputText('');
+                }}
+                className={`px-6 py-3 rounded-full font-semibold text-sm transition-all duration-200 ${
+                  mode === 'analyze'
+                    ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-md'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                <span className="flex items-center">
+                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  Analyze Text
+                </span>
+              </button>
+              <button
+                onClick={() => {
+                  setMode('citations');
+                  setInputText('');
+                }}
+                className={`px-6 py-3 rounded-full font-semibold text-sm transition-all duration-200 ${
+                  mode === 'citations'
+                    ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-md'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                <span className="flex items-center">
+                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                  Find Citations
+                </span>
+              </button>
+            </div>
+          </div>
 
           {/* Search Box */}
           <div className="max-w-4xl mx-auto mb-12 px-4">
+            {/* Citation Style Selector (only show in citations mode) */}
+            {mode === 'citations' && (
+              <div className="flex justify-center mb-4">
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-2 inline-flex items-center">
+                  <span className="text-sm text-gray-600 mr-2 px-2">Citation Style:</span>
+                  <select
+                    value={citationStyle}
+                    onChange={(e) => setCitationStyle(e.target.value)}
+                    className="px-3 py-1 rounded border-none outline-none text-sm font-medium text-gray-700 bg-transparent cursor-pointer"
+                  >
+                    <option value="APA">APA</option>
+                    <option value="MLA">MLA</option>
+                    <option value="Chicago">Chicago</option>
+                    <option value="Harvard">Harvard</option>
+                    <option value="IEEE">IEEE</option>
+                    <option value="Vancouver">Vancouver</option>
+                  </select>
+                </div>
+              </div>
+            )}
+
             <div className="relative">
               {/* Shadow gradient behind the input */}
               <div className="absolute -inset-1 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-indigo-500/20 rounded-3xl blur-sm"></div>
@@ -362,24 +513,35 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
                   }}
                 />
                 
-                {/* Word Count */}
+                {/* Word/Character Count */}
                 <div className="absolute bottom-4 left-4 text-xs text-gray-500">
-                  {getWordCount(inputText)} words
+                  {mode === 'citations' ? `${inputText.length} characters` : `${getWordCount(inputText)} words`}
                 </div>
                 
                 {/* Send Button */}
                 <button
-                  onClick={handleAnalyze}
-                  disabled={!isTextValid()}
+                  onClick={handleSubmit}
+                  disabled={!isTextValid() || isSearchingCitations}
                   className={`absolute bottom-3 sm:bottom-4 right-3 sm:right-4 w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center transition-all duration-200 shadow-lg z-10 ${
-                    isTextValid() 
+                    isTextValid() && !isSearchingCitations
                       ? 'bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white hover:scale-105 cursor-pointer' 
                       : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                   }`}
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                  </svg>
+                  {isSearchingCitations ? (
+                    <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                  ) : mode === 'citations' ? (
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                  ) : (
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                    </svg>
+                  )}
                 </button>
                 
                 {/* Warning Message */}
@@ -389,7 +551,7 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 19.5c-.77.833.192 2.5 1.732 2.5z" />
                       </svg>
-                      <span>Minimum 200 words required</span>
+                      <span>{mode === 'citations' ? 'Please enter a research topic or question' : 'Minimum 200 words required'}</span>
                     </div>
                     <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-red-500"></div>
                   </div>
@@ -574,6 +736,51 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
             setAnalysisComplete(false);
           }}
         />
+      )}
+
+      {/* Citation Search Animation */}
+      {showSearchAnimation && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl p-8 max-w-md mx-4 shadow-2xl">
+            <div className="text-center">
+              <div className="relative mb-6">
+                <div className="w-16 h-16 mx-auto">
+                  <svg className="animate-spin w-16 h-16 text-blue-600" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                </div>
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Finding Citations</h3>
+              <p className="text-gray-600 mb-4">Searching academic databases for relevant sources...</p>
+              
+              {/* Animated citation icons */}
+              <div className="flex justify-center space-x-2 mb-4">
+                {['📄', '📚', '📖'].map((icon, index) => (
+                  <div
+                    key={index}
+                    className="text-2xl animate-bounce"
+                    style={{ animationDelay: `${index * 0.2}s` }}
+                  >
+                    {icon}
+                  </div>
+                ))}
+              </div>
+              
+              <div className="flex justify-center">
+                <div className="flex space-x-1">
+                  {[0, 1, 2].map((i) => (
+                    <div
+                      key={i}
+                      className="w-2 h-2 bg-blue-600 rounded-full animate-pulse"
+                      style={{ animationDelay: `${i * 0.3}s` }}
+                    ></div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Footer */}

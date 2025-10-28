@@ -14,6 +14,55 @@ const StripeCheckout: React.FC<StripeCheckoutProps> = ({
   onCancel 
 }) => {
   const [isLoading, setIsLoading] = useState(false);
+  const [promoCode, setPromoCode] = useState('');
+  const [isValidating, setIsValidating] = useState(false);
+  const [promoValidation, setPromoValidation] = useState<{
+    valid: boolean;
+    message: string;
+  } | null>(null);
+
+  const validatePromoCode = async () => {
+    if (!promoCode.trim()) {
+      setPromoValidation(null);
+      return;
+    }
+
+    setIsValidating(true);
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/subscriptions/validate-promo-code`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+          },
+          body: JSON.stringify({ promoCode: promoCode.trim() })
+        }
+      );
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        setPromoValidation({
+          valid: true,
+          message: data.data.message
+        });
+      } else {
+        setPromoValidation({
+          valid: false,
+          message: data.message || 'Invalid promo code'
+        });
+      }
+    } catch (err) {
+      setPromoValidation({
+        valid: false,
+        message: 'Failed to validate promo code'
+      });
+    } finally {
+      setIsValidating(false);
+    }
+  };
 
   const handleCheckout = async () => {
     setIsLoading(true);
@@ -33,7 +82,8 @@ const StripeCheckout: React.FC<StripeCheckoutProps> = ({
           planType,
           billingCycle,
           successUrl,
-          cancelUrl
+          cancelUrl,
+          promoCode: promoCode.trim() || undefined
         })
       });
 
@@ -64,7 +114,7 @@ const StripeCheckout: React.FC<StripeCheckoutProps> = ({
             You'll be redirected to Stripe's secure checkout page to complete your payment.
           </p>
           
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
             <div className="flex items-center">
               <svg className="w-5 h-5 text-blue-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
@@ -73,6 +123,52 @@ const StripeCheckout: React.FC<StripeCheckoutProps> = ({
                 Your payment information is secure and encrypted
               </span>
             </div>
+          </div>
+
+          {/* Promo Code Section */}
+          <div className="space-y-2">
+            <label htmlFor="promoCode" className="block text-sm font-medium text-gray-700">
+              Promo Code (Optional)
+            </label>
+            <div className="flex gap-2">
+              <input
+                id="promoCode"
+                type="text"
+                value={promoCode}
+                onChange={(e) => {
+                  setPromoCode(e.target.value.toUpperCase());
+                  setPromoValidation(null);
+                }}
+                onBlur={validatePromoCode}
+                placeholder="Enter code"
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                disabled={isLoading || isValidating}
+              />
+              <button
+                type="button"
+                onClick={validatePromoCode}
+                disabled={!promoCode.trim() || isValidating || isLoading}
+                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 disabled:bg-gray-50 disabled:cursor-not-allowed text-gray-700 rounded-lg font-medium transition-colors duration-200"
+              >
+                {isValidating ? 'Checking...' : 'Apply'}
+              </button>
+            </div>
+            
+            {/* Promo Code Validation Message */}
+            {promoValidation && (
+              <div className={`text-sm ${promoValidation.valid ? 'text-green-600' : 'text-red-600'} flex items-center gap-1`}>
+                {promoValidation.valid ? (
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                ) : (
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                  </svg>
+                )}
+                <span>{promoValidation.message}</span>
+              </div>
+            )}
           </div>
         </div>
 

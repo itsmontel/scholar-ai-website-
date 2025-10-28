@@ -167,12 +167,12 @@ const createStripeCustomer = async (email, name) => {
 };
 
 // Create checkout session
-const createCheckoutSession = async (customerId, planType, billingCycle, userId) => {
+const createCheckoutSession = async (customerId, planType, billingCycle, userId, promoCode = null) => {
   try {
     // Get price ID based on plan and billing cycle
     const priceId = getPriceId(planType, billingCycle);
     
-    const session = await stripe.checkout.sessions.create({
+    const sessionConfig = {
       customer: customerId,
       payment_method_types: ['card'],
       line_items: [
@@ -189,8 +189,36 @@ const createCheckoutSession = async (customerId, planType, billingCycle, userId)
         planType,
         billingCycle,
         source: 'writescholar'
+      },
+      // Allow customers to enter promo codes at checkout
+      allow_promotion_codes: true
+    };
+
+    // If a specific promo code is provided, apply it directly
+    if (promoCode) {
+      try {
+        // Find the promotion code in Stripe
+        const promoCodes = await stripe.promotionCodes.list({
+          code: promoCode,
+          active: true,
+          limit: 1
+        });
+
+        if (promoCodes.data.length > 0) {
+          // Apply the promo code automatically
+          sessionConfig.discounts = [{
+            promotion_code: promoCodes.data[0].id
+          }];
+        } else {
+          console.warn(`Promo code "${promoCode}" not found or inactive`);
+        }
+      } catch (promoError) {
+        console.error('Error applying promo code:', promoError);
+        // Continue without promo code if there's an error
       }
-    });
+    }
+    
+    const session = await stripe.checkout.sessions.create(sessionConfig);
     
     return { success: true, sessionId: session.id, url: session.url };
   } catch (error) {
@@ -319,6 +347,93 @@ const verifyWebhookSignature = (payload, signature) => {
   }
 };
 
+// Validate promo code
+const validatePromoCode = async (promoCode) => {
+  try {
+    // Search for active promo codes matching the provided code
+    const promoCodes = await stripe.promotionCodes.list({
+      code: promoCode,
+      active: true,
+      limit: 1
+    });
+
+    if (promoCodes.data.length === 0) {
+      return {
+        success: false,
+        valid: false,
+        error: 'Invalid or expired promo code'
+      };
+    }
+
+    const promoCodeData = promoCodes.data[0];
+    const coupon = promoCodeData.coupon;
+
+    // Check if the coupon is valid
+    if (!coupon.valid) {
+      return {
+        success: false,
+        valid: false,
+        error: 'This promo code is no longer valid'
+      };
+    }
+
+    // Check if coupon has usage limits
+    if (promoCodeData.max_redemptions && promoCodeData.times_redeemed >= promoCodeData.max_redemptions) {
+      return {
+        success: false,
+        valid: false,
+        error: 'This promo code has reached its usage limit'
+      };
+    }
+
+    // Check if coupon has expired
+    if (coupon.redeem_by && coupon.redeem_by * 1000 < Date.now()) {
+      return {
+        success: false,
+        valid: false,
+        error: 'This promo code has expired'
+      };
+    }
+
+    // Format discount information
+    let discountText = '';
+    if (coupon.percent_off) {
+      discountText = `${coupon.percent_off}% off`;
+    } else if (coupon.amount_off) {
+      const amount = (coupon.amount_off / 100).toFixed(2);
+      discountText = `$${amount} off`;
+    }
+
+    if (coupon.duration === 'forever') {
+      discountText += ' forever';
+    } else if (coupon.duration === 'repeating') {
+      discountText += ` for ${coupon.duration_in_months} months`;
+    } else if (coupon.duration === 'once') {
+      discountText += ' on first payment';
+    }
+
+    return {
+      success: true,
+      valid: true,
+      discount: {
+        percentOff: coupon.percent_off,
+        amountOff: coupon.amount_off,
+        currency: coupon.currency,
+        duration: coupon.duration,
+        durationInMonths: coupon.duration_in_months
+      },
+      message: discountText
+    };
+  } catch (error) {
+    console.error('Error validating promo code:', error);
+    return {
+      success: false,
+      valid: false,
+      error: 'Failed to validate promo code'
+    };
+  }
+};
+
 module.exports = {
   supabase,
   PLAN_LIMITS,
@@ -336,6 +451,7 @@ module.exports = {
   getPaymentMethods,
   createSetupIntent,
   createBillingPortalSession,
-  verifyWebhookSignature
+  verifyWebhookSignature,
+  validatePromoCode
 };
 

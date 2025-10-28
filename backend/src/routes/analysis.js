@@ -12,6 +12,102 @@ const aiAnalysisService = require('../services/aiAnalysisService');
 const documentService = require('../services/documentService');
 const subscriptionService = require('../services/subscriptionService');
 
+// @route   POST /api/analysis/citation-search
+// @desc    Search for relevant citations based on research topic
+// @access  Private
+router.post('/citation-search', authenticateToken, async (req, res) => {
+  try {
+    const { researchTopic, citationStyle, numberOfCitations } = req.body;
+    const userId = req.user.id;
+
+    console.log('=== CITATION SEARCH REQUEST ===');
+    console.log('Research topic:', researchTopic);
+    console.log('Citation style:', citationStyle);
+    console.log('Number of citations:', numberOfCitations);
+    console.log('User ID:', userId);
+
+    // Validate input
+    if (!researchTopic || researchTopic.trim().length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Research topic or essay question is required'
+      });
+    }
+
+    const style = citationStyle || 'APA';
+    const numCitations = numberOfCitations || 10;
+
+    // Check user's analysis limits (citation search counts as a light operation)
+    const limitCheck = await subscriptionService.checkLimit(userId, 'analysesPerMonth');
+    if (!limitCheck.allowed) {
+      return res.status(429).json({
+        success: false,
+        message: 'Monthly analysis limit reached. Please upgrade your plan or wait until next month.',
+        limit: limitCheck.limit,
+        usage: limitCheck.usage
+      });
+    }
+
+    // Perform citation search
+    const searchResults = await aiAnalysisService.searchCitations(
+      researchTopic,
+      style,
+      numCitations
+    );
+
+    console.log('Citation search completed successfully');
+
+    // Save search to history (don't block response if this fails)
+    aiAnalysisService.saveCitationSearch(userId, researchTopic, style, searchResults)
+      .catch(error => console.error('Failed to save citation search to history:', error));
+
+    res.json({
+      success: true,
+      message: 'Citation search completed successfully',
+      data: searchResults
+    });
+
+  } catch (error) {
+    console.error('Citation search error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Citation search failed',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
+// @route   GET /api/analysis/citation-history
+// @desc    Get user's citation search history
+// @access  Private
+router.get('/citation-history', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const limit = parseInt(req.query.limit) || 20;
+
+    console.log('=== CITATION HISTORY REQUEST ===');
+    console.log('User ID:', userId);
+    console.log('Limit:', limit);
+
+    const citationHistory = await aiAnalysisService.getCitationHistory(userId, limit);
+
+    console.log(`Found ${citationHistory.length} citation searches`);
+
+    res.json({
+      success: true,
+      data: citationHistory
+    });
+
+  } catch (error) {
+    console.error('Citation history error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch citation history',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
 // @route   POST /api/analysis/citation-review
 // @desc    Citation review analysis (temporary, not saved to database)
 // @access  Private

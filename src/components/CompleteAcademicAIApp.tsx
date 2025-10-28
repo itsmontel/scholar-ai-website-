@@ -9,6 +9,8 @@ import AuthCallbackPage from './pages/AuthCallbackPage';
 import DashboardPage from './pages/DashboardPage';
 import AnalysisPage from './pages/AnalysisPage';
 import AnalysisHistoryPage from './pages/AnalysisHistoryPage';
+import CitationResultsPage from './pages/CitationResultsPage';
+import CitationHistoryPage from './pages/CitationHistoryPage';
 import UploadPage from './pages/UploadPage';
 import SettingsPage from './pages/SettingsPage';
 import AccountPage from './pages/AccountPage';
@@ -76,7 +78,7 @@ const AcademicAIApp = () => {
   }, []);
 
   // Route protection for authenticated pages
-  const protectedRoutes = ['dashboard', 'analysis', 'analysis-history', 'upload', 'settings', 'profile', 'library', 'account', 'billing'];
+  const protectedRoutes = ['dashboard', 'analysis', 'analysis-history', 'citation-results', 'citation-history', 'upload', 'settings', 'profile', 'library', 'account', 'billing'];
 
   // Validate and refresh token if needed
   const validateAndRefreshToken = async () => {
@@ -209,6 +211,8 @@ const AcademicAIApp = () => {
       if (pathname === '/contact') return 'contact';
       if (pathname === '/analysis') return 'analysis';
       if (pathname === '/analysis-history') return 'analysis-history';
+      if (pathname === '/citation-results') return 'citation-results';
+      if (pathname === '/citation-history') return 'citation-history';
       if (pathname === '/upload') return 'upload';
       if (pathname === '/settings') return 'settings';
       if (pathname === '/profile') return 'profile';
@@ -450,6 +454,24 @@ const AcademicAIApp = () => {
         return <AnalysisPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'analysis-history':
         return <AnalysisHistoryPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
+      case 'citation-results':
+        const citationResults = localStorage.getItem('citationSearchResults');
+        if (citationResults) {
+          return (
+            <CitationResultsPage 
+              onNavigate={navigateTo} 
+              user={user} 
+              onLogout={handleLogout}
+              searchResults={JSON.parse(citationResults)}
+              onNewSearch={() => navigateTo('dashboard')}
+            />
+          );
+        } else {
+          navigateTo('dashboard');
+          return <DashboardPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
+        }
+      case 'citation-history':
+        return <CitationHistoryPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'upload':
         return <UploadPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'settings':
