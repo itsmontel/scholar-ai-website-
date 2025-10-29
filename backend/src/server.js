@@ -162,6 +162,18 @@ const startServer = async () => {
       } else {
         console.log('📦 Storage: Local filesystem (development)');
       }
+      
+      // Run citation cleanup immediately on startup
+      const subscriptionService = require('./services/subscriptionService');
+      subscriptionService.cleanupOldCitations()
+        .then(() => console.log('✅ Initial citation cleanup completed'))
+        .catch(error => console.error('❌ Initial citation cleanup failed:', error));
+      
+      // Schedule citation cleanup to run daily (every 24 hours)
+      setInterval(async () => {
+        console.log('🧹 Running scheduled citation cleanup...');
+        await subscriptionService.cleanupOldCitations();
+      }, 24 * 60 * 60 * 1000); // 24 hours in milliseconds
     });
   } catch (error) {
     console.error('❌ Failed to start server:', error);

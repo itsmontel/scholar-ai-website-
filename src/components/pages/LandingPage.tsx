@@ -13,12 +13,22 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
   const [hoveredAnnotation, setHoveredAnnotation] = useState<any>(null);
   const [openFAQ, setOpenFAQ] = useState<number | null>(null);
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('monthly');
+  const [mode, setMode] = useState<'analyze' | 'citations'>('analyze');
+  const [citationStyle, setCitationStyle] = useState('APA');
 
-  const placeholders = [
+  const analyzePlaceholders = [
     "Enhance your academic writing with a simple paste and click.",
     "Get instant feedback on your essay or thesis.",
     "Turn good writing into great writing with WriteScholar."
   ];
+
+  const citationPlaceholders = [
+    "Enter your essay question or research topic to find relevant citations...",
+    "What's your research topic? Get academic sources instantly.",
+    "Type your assignment question and discover relevant literature."
+  ];
+
+  const placeholders = mode === 'analyze' ? analyzePlaceholders : citationPlaceholders;
 
   const reviews = [
     {
@@ -307,6 +317,13 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
 
 
   const handleSubmit = () => {
+    if (mode === 'citations') {
+      // Store the citation search parameters
+      localStorage.setItem('pendingCitationSearch', JSON.stringify({
+        topic: inputText,
+        style: citationStyle
+      }));
+    }
     onNavigate('signup');
   };
 
@@ -369,14 +386,84 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
       <div className="relative z-10 max-w-8xl mx-auto px-4 sm:px-8 md:px-16 py-12 sm:py-16 md:py-24">
         <div className="text-center mb-12 sm:mb-16 md:mb-20">
           <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-6 sm:mb-8 leading-tight tracking-tight">
-            Enhance your academic<br className="hidden sm:block" /><span className="sm:hidden"> </span>writing with <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">WriteScholar</span>
+            {mode === 'analyze' ? (
+              <>Enhance your academic<br className="hidden sm:block" /><span className="sm:hidden"> </span>writing with <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">WriteScholar</span></>
+            ) : (
+              <>Find relevant citations<br className="hidden sm:block" /><span className="sm:hidden"> </span>for your <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">research</span></>
+            )}
           </h1>
-          <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-600 mb-12 sm:mb-16 max-w-3xl mx-auto leading-relaxed font-light px-4">
-            Get detailed feedback on your research papers, essays, and academic work with AI-powered analysis that helps you write like a scholar.
+          <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-600 mb-8 sm:mb-12 max-w-3xl mx-auto leading-relaxed font-light px-4">
+            {mode === 'analyze' 
+              ? 'Get detailed feedback on your research papers, essays, and academic work with AI-powered analysis that helps you write like a scholar.'
+              : 'Enter your essay question or research topic and get relevant academic citations instantly from journals, books, and scholarly sources.'
+            }
           </p>
+
+          {/* Mode Toggle */}
+          <div className="flex justify-center mb-8">
+            <div className="bg-white/90 backdrop-blur-xl rounded-full p-1 shadow-lg border border-gray-200/50 inline-flex">
+              <button
+                onClick={() => {
+                  setMode('analyze');
+                  setInputText('');
+                }}
+                className={`px-4 sm:px-6 py-2 sm:py-3 rounded-full font-semibold text-sm transition-all duration-200 ${
+                  mode === 'analyze'
+                    ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-md'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                <span className="flex items-center">
+                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  Analyze Text
+                </span>
+              </button>
+              <button
+                onClick={() => {
+                  setMode('citations');
+                  setInputText('');
+                }}
+                className={`px-4 sm:px-6 py-2 sm:py-3 rounded-full font-semibold text-sm transition-all duration-200 ${
+                  mode === 'citations'
+                    ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-md'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                <span className="flex items-center">
+                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                  Find Citations
+                </span>
+              </button>
+            </div>
+          </div>
           
           {/* Interactive Text Input */}
           <div className="max-w-4xl mx-auto mb-8 sm:mb-12 px-4">
+            {/* Citation Style Selector (only show in citations mode) */}
+            {mode === 'citations' && (
+              <div className="flex justify-center mb-4">
+                <div className="bg-white/90 backdrop-blur-xl rounded-lg shadow-md border border-gray-200/50 p-2 inline-flex items-center">
+                  <span className="text-sm text-gray-600 mr-2 px-2">Citation Style:</span>
+                  <select
+                    value={citationStyle}
+                    onChange={(e) => setCitationStyle(e.target.value)}
+                    className="px-3 py-1 rounded border-none outline-none text-sm font-medium text-gray-700 bg-transparent cursor-pointer"
+                  >
+                    <option value="APA">APA</option>
+                    <option value="MLA">MLA</option>
+                    <option value="Chicago">Chicago</option>
+                    <option value="Harvard">Harvard</option>
+                    <option value="IEEE">IEEE</option>
+                    <option value="Vancouver">Vancouver</option>
+                  </select>
+                </div>
+              </div>
+            )}
+
             <div className="relative">
               {/* Shadow gradient behind the input */}
               <div className="absolute -inset-1 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-indigo-500/20 rounded-2xl sm:rounded-3xl blur-sm"></div>
@@ -414,18 +501,37 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
             {/* Suggested Categories */}
             <div className="mt-8 text-center">
               <div className="flex flex-wrap justify-center gap-3">
-                <button className="px-4 py-2 bg-white/80 backdrop-blur-sm border border-gray-200 rounded-full text-sm font-medium text-gray-700 hover:bg-white hover:shadow-md transition-all duration-200">
-                  Research Paper
-                </button>
-                <button className="px-4 py-2 bg-white/80 backdrop-blur-sm border border-gray-200 rounded-full text-sm font-medium text-gray-700 hover:bg-white hover:shadow-md transition-all duration-200">
-                  Thesis Draft
-                </button>
-                <button className="px-4 py-2 bg-white/80 backdrop-blur-sm border border-gray-200 rounded-full text-sm font-medium text-gray-700 hover:bg-white hover:shadow-md transition-all duration-200">
-                  Essay Analysis
-                </button>
-                <button className="px-4 py-2 bg-white/80 backdrop-blur-sm border border-gray-200 rounded-full text-sm font-medium text-gray-700 hover:bg-white hover:shadow-md transition-all duration-200">
-                  Literature Review
-                </button>
+                {mode === 'analyze' ? (
+                  <>
+                    <button className="px-4 py-2 bg-white/80 backdrop-blur-sm border border-gray-200 rounded-full text-sm font-medium text-gray-700 hover:bg-white hover:shadow-md transition-all duration-200">
+                      Research Paper
+                    </button>
+                    <button className="px-4 py-2 bg-white/80 backdrop-blur-sm border border-gray-200 rounded-full text-sm font-medium text-gray-700 hover:bg-white hover:shadow-md transition-all duration-200">
+                      Thesis Draft
+                    </button>
+                    <button className="px-4 py-2 bg-white/80 backdrop-blur-sm border border-gray-200 rounded-full text-sm font-medium text-gray-700 hover:bg-white hover:shadow-md transition-all duration-200">
+                      Essay Analysis
+                    </button>
+                    <button className="px-4 py-2 bg-white/80 backdrop-blur-sm border border-gray-200 rounded-full text-sm font-medium text-gray-700 hover:bg-white hover:shadow-md transition-all duration-200">
+                      Literature Review
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button className="px-4 py-2 bg-white/80 backdrop-blur-sm border border-gray-200 rounded-full text-sm font-medium text-gray-700 hover:bg-white hover:shadow-md transition-all duration-200">
+                      Psychology
+                    </button>
+                    <button className="px-4 py-2 bg-white/80 backdrop-blur-sm border border-gray-200 rounded-full text-sm font-medium text-gray-700 hover:bg-white hover:shadow-md transition-all duration-200">
+                      Sociology
+                    </button>
+                    <button className="px-4 py-2 bg-white/80 backdrop-blur-sm border border-gray-200 rounded-full text-sm font-medium text-gray-700 hover:bg-white hover:shadow-md transition-all duration-200">
+                      History
+                    </button>
+                    <button className="px-4 py-2 bg-white/80 backdrop-blur-sm border border-gray-200 rounded-full text-sm font-medium text-gray-700 hover:bg-white hover:shadow-md transition-all duration-200">
+                      Literature
+                    </button>
+                  </>
+                )}
               </div>
             </div>
           </div>
@@ -851,6 +957,12 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                       <svg className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
+                      <span className="text-gray-700 text-sm">2 citation searches per month</span>
+                    </li>
+                    <li className="flex items-start space-x-3">
+                      <svg className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
                       <span className="text-gray-700 text-sm">50% document annotation only</span>
                     </li>
                     <li className="flex items-start space-x-3">
@@ -914,6 +1026,12 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
                       <span className="text-gray-700 text-sm">999 AI analyses per month</span>
+                    </li>
+                    <li className="flex items-start space-x-3">
+                      <svg className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                      <span className="text-gray-700 text-sm">Unlimited citation searches</span>
                     </li>
                     <li className="flex items-start space-x-3">
                       <svg className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -983,6 +1101,12 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
                       <span className="text-gray-700 text-sm">999 AI analyses per month</span>
+                    </li>
+                    <li className="flex items-start space-x-3">
+                      <svg className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                      <span className="text-gray-700 text-sm">Unlimited citation searches</span>
                     </li>
                     <li className="flex items-start space-x-3">
                       <svg className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">

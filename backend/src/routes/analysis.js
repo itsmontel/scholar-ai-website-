@@ -37,14 +37,16 @@ router.post('/citation-search', authenticateToken, async (req, res) => {
     const style = citationStyle || 'APA';
     const numCitations = numberOfCitations || 10;
 
-    // Check user's analysis limits (citation search counts as a light operation)
-    const limitCheck = await subscriptionService.checkLimit(userId, 'analysesPerMonth');
+    // Check user's citation search limits
+    const limitCheck = await subscriptionService.checkLimit(userId, 'citationSearchesPerMonth');
     if (!limitCheck.allowed) {
       return res.status(429).json({
         success: false,
-        message: 'Monthly analysis limit reached. Please upgrade your plan or wait until next month.',
+        message: `Citation search limit reached. You have used ${limitCheck.usage} of ${limitCheck.limit} searches this month. Upgrade to get ${limitCheck.limit === 2 ? 'unlimited' : 'more'} citation searches.`,
         limit: limitCheck.limit,
-        usage: limitCheck.usage
+        usage: limitCheck.usage,
+        remaining: limitCheck.remaining,
+        upgrade: true
       });
     }
 
@@ -690,6 +692,67 @@ router.delete('/:id', authenticateToken, validateAnalysisId, async (req, res) =>
       success: false,
       message: 'Failed to delete analysis',
       error: error.message
+    });
+  }
+});
+
+// @route   DELETE /api/analysis/citation/:id
+// @desc    Delete a specific citation search from history
+// @access  Private
+router.delete('/citation/:id', authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+
+    console.log('=== DELETE CITATION REQUEST ===');
+    console.log('Citation ID:', id);
+    console.log('User ID:', userId);
+
+    const { createClient } = require('@supabase/supabase-js');
+    const supabase = createClient(
+      process.env.SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
+    );
+
+    // First, check if the citation search exists and belongs to the user
+    const { data: citationSearch, error: fetchError } = await supabase
+      .from('citation_searches')
+      .select('id, user_id')
+      .eq('id', id)
+      .eq('user_id', userId)
+      .single();
+
+    if (fetchError || !citationSearch) {
+      return res.status(404).json({
+        success: false,
+        message: 'Citation search not found or access denied'
+      });
+    }
+
+    // Delete the citation search
+    const { error: deleteError } = await supabase
+      .from('citation_searches')
+      .delete()
+      .eq('id', id)
+      .eq('user_id', userId);
+
+    if (deleteError) {
+      throw deleteError;
+    }
+
+    console.log('Citation search deleted successfully');
+
+    res.json({
+      success: true,
+      message: 'Citation search deleted successfully'
+    });
+
+  } catch (error) {
+    console.error('Delete citation search error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to delete citation search',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
 });

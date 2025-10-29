@@ -12,6 +12,7 @@ const PLAN_LIMITS = {
   free: {
     documentsPerMonth: 3,
     analysesPerMonth: 3,
+    citationSearchesPerMonth: 2, // 2 citation searches per month for free users
     maxDocumentSize: 1024 * 1024, // 1MB per document
     maxTotalStorage: 1024 * 1024, // 1MB total storage
     maxAnalysisPercentage: 50, // 50% of document
@@ -20,6 +21,7 @@ const PLAN_LIMITS = {
   starter: {
     documentsPerMonth: -1, // unlimited
     analysesPerMonth: 999, // 999 analyses per month
+    citationSearchesPerMonth: 999, // 999 citation searches per month
     maxDocumentSize: 25 * 1024 * 1024, // 25MB per document
     maxTotalStorage: 25 * 1024 * 1024, // 25MB total storage
     maxAnalysisPercentage: 100, // 100% of document
@@ -29,6 +31,7 @@ const PLAN_LIMITS = {
   premium: {
     documentsPerMonth: -1, // unlimited
     analysesPerMonth: 999, // 999 analyses per month
+    citationSearchesPerMonth: 999, // 999 citation searches per month
     maxDocumentSize: 1024 * 1024 * 1024, // 1GB per document
     maxTotalStorage: 1024 * 1024 * 1024, // 1GB total storage
     maxAnalysisPercentage: 100, // 100% of document
@@ -98,7 +101,7 @@ const checkLimit = async (userId, limitType) => {
       }
       console.log(`checkLimit: Found ${usage} documents for user ${userId} this month`);
     } else if (limitType === 'analysesPerMonth') {
-      const { data: analyses, error } = await supabaseServiceRole
+      const { data: analyses, error} = await supabaseServiceRole
         .from('document_analyses')
         .select('id')
         .eq('user_id', userId)
@@ -108,6 +111,17 @@ const checkLimit = async (userId, limitType) => {
         usage = analyses.length;
       }
       console.log(`checkLimit: Found ${usage} analyses for user ${userId} this month (limit: ${planLimits[limitType]})`);
+    } else if (limitType === 'citationSearchesPerMonth') {
+      const { data: citationSearches, error } = await supabaseServiceRole
+        .from('citation_searches')
+        .select('id')
+        .eq('user_id', userId)
+        .gte('created_at', startOfMonth.toISOString());
+      
+      if (!error) {
+        usage = citationSearches ? citationSearches.length : 0;
+      }
+      console.log(`checkLimit: Found ${usage} citation searches for user ${userId} this month (limit: ${planLimits[limitType]})`);
     }
 
     const limit = planLimits[limitType];
@@ -434,6 +448,37 @@ const validatePromoCode = async (promoCode) => {
   }
 };
 
+// Auto-delete citations older than 30 days to save space
+const cleanupOldCitations = async () => {
+  try {
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    
+    // Use service role key to delete across all users
+    const { createClient } = require('@supabase/supabase-js');
+    const supabaseServiceRole = createClient(
+      process.env.SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
+    );
+    
+    const { data, error } = await supabaseServiceRole
+      .from('citation_searches')
+      .delete()
+      .lt('created_at', thirtyDaysAgo.toISOString());
+    
+    if (error) {
+      console.error('Error cleaning up old citations:', error);
+      return { success: false, error: error.message };
+    }
+    
+    console.log(`✅ Successfully cleaned up citations older than 30 days`);
+    return { success: true, deletedCount: data ? data.length : 0 };
+  } catch (error) {
+    console.error('Error in cleanupOldCitations:', error);
+    return { success: false, error: error.message };
+  }
+};
+
 module.exports = {
   supabase,
   PLAN_LIMITS,
@@ -452,6 +497,7 @@ module.exports = {
   createSetupIntent,
   createBillingPortalSession,
   verifyWebhookSignature,
-  validatePromoCode
+  validatePromoCode,
+  cleanupOldCitations
 };
 

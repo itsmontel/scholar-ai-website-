@@ -25,8 +25,8 @@ class AIAnalysisService {
 
       const searchPrompt = this.getCitationSearchPrompt(researchTopic, citationStyle, numberOfCitations);
       
-      // Use standard model for citation search
-      const selectedModel = process.env.OPENAI_STANDARD_MODEL || 'gpt-4o-mini';
+      // Use specified model for citation search
+      const selectedModel = process.env.OPENAI_STANDARD_MODEL || 'gpt-4.1-mini';
       const maxTokens = 4000;
 
       const completion = await this.openai.chat.completions.create({
@@ -2239,7 +2239,7 @@ For each citation, provide the following in JSON format:
       "type": "journal_article | book | book_chapter | report | thesis | conference_paper",
       "relevance": "Brief explanation (2-3 sentences) of why this source is relevant to the research topic",
       "key_points": ["Key point 1", "Key point 2", "Key point 3"],
-      "example_sentence": "A comprehensive academic passage (2-4 sentences) that incorporates this citation while directly addressing the research topic. The passage should connect the source's findings to the specific research question, showing clear relevance and creating a bridge between the citation and the user's argument.",
+      "ready_to_use_sentence": "A well-developed academic passage (2-3 sentences) that the user can copy and paste directly into their paper. This passage should incorporate the in-text citation naturally, present key findings or arguments from the source, establish context, and directly relate to the research topic. The text should be substantive and scholarly, demonstrating how the source contributes to the research topic. Example: 'Recent studies have demonstrated the critical link between climate change and biodiversity loss. Smith (2021) argues that rising global temperatures significantly impact species diversity, with particular effects on vulnerable ecosystems. This research underscores the urgent need for comprehensive conservation strategies to mitigate further ecological damage.'",
       "in_text_citation": "The proper in-text citation format for ${citationStyle} style (e.g., (Smith, 2023) for APA)",
       "year": "YYYY",
       "accessibility": "Open Access | Subscription Required | Library Access"
@@ -2259,9 +2259,9 @@ IMPORTANT REQUIREMENTS:
 2. Use proper ${citationStyle} citation formatting with HTML tags for italics (journal names, book titles should be in <i></i> tags)
 3. Include a mix of recent (last 5 years) and foundational sources
 4. Focus on peer-reviewed journal articles and authoritative books
-5. Ensure citations are complete with all required elements (authors, year, title, publication, DOI/URL when applicable)
+5. Ensure citations are complete with all required elements (authors, year, title, publication) - DO NOT include fake DOI links or URLs unless you are certain they are real
 6. Make sure all sources are directly relevant to the research topic
-7. For example_sentence: Write comprehensive academic passages (2-4 sentences) that not only incorporate the citation but also explicitly connect the source's findings back to the specific research topic "${researchTopic}". Show how this source directly supports or relates to the user's research question.
+7. For ready_to_use_sentence: Write a well-developed academic passage (2-3 sentences) that the user can copy and paste directly into their paper. The passage should: (a) establish context for the citation, (b) naturally incorporate the in-text citation, (c) present key findings or arguments from the source, and (d) directly relate to "${researchTopic}". Make it substantive, scholarly, and immediately usable in an academic paper.
 8. For in_text_citation: Provide the exact format needed for in-text citations in ${citationStyle} style`;
   }
 
@@ -2304,11 +2304,11 @@ IMPORTANT REQUIREMENTS:
     
     const mockCitations = [
       {
-        citation: "Smith, J. A., & Johnson, M. B. (2023). Understanding modern research methodologies in social sciences. <i>Journal of Academic Research</i>, 45(3), 234-256. https://doi.org/10.1234/jar.2023.45.3.234",
+        citation: "Smith, J. A., & Johnson, M. B. (2023). Understanding modern research methodologies in social sciences. <i>Journal of Academic Research</i>, 45(3), 234-256.",
         type: "journal_article",
         relevance: "This article provides a comprehensive overview of current research methodologies relevant to your topic. It offers practical frameworks and theoretical foundations that can strengthen your arguments.",
         key_points: ["Discusses mixed-methods approaches", "Reviews recent developments in the field", "Provides methodological frameworks"],
-        example_sentence: "The complexity of modern research challenges requires sophisticated methodological approaches that can address multifaceted questions effectively. Recent research has emphasized the importance of adopting mixed-methods approaches to capture the complexity of social phenomena, as these methodologies provide both quantitative rigor and qualitative depth necessary for comprehensive understanding (Smith & Johnson, 2023). This integrated approach is particularly valuable when investigating topics that involve both measurable outcomes and subjective experiences, allowing researchers to develop more robust and nuanced conclusions.",
+        ready_to_use_sentence: "Contemporary research methodology has evolved significantly in response to complex social phenomena. Smith and Johnson (2023) argue that modern research challenges require sophisticated mixed-methods approaches to capture both quantitative rigor and qualitative depth. Their framework demonstrates how integrating diverse methodological perspectives enables more comprehensive understanding of multifaceted research questions.",
         in_text_citation: "(Smith & Johnson, 2023)",
         year: "2023",
         accessibility: "Subscription Required"
@@ -2318,17 +2318,17 @@ IMPORTANT REQUIREMENTS:
         type: "book",
         relevance: "This book offers essential insights into contemporary academic writing practices. It's particularly useful for understanding how digital tools are changing scholarly communication and research practices.",
         key_points: ["Covers digital literacy in academia", "Discusses citation management tools", "Explores open access publishing"],
-        example_sentence: "The evolution of academic discourse in contemporary scholarship reflects broader technological and social changes that have reshaped how knowledge is created and shared. The transformation of academic writing in the digital era has fundamentally altered how scholars approach research communication, with new technologies offering unprecedented opportunities for collaboration and knowledge dissemination (Brown, 2022). These developments have not only expanded access to academic resources but have also created new expectations for scholarly engagement and interdisciplinary dialogue. Understanding these changes is crucial for researchers seeking to effectively communicate their findings and contribute to ongoing academic conversations.",
+        ready_to_use_sentence: "The digital revolution has profoundly impacted academic communication practices across all disciplines. Brown (2022) demonstrates that the transformation of academic writing in the digital era has fundamentally altered how scholars approach research communication, offering unprecedented opportunities for collaboration and knowledge dissemination. This shift has created new expectations for accessibility, transparency, and engagement in scholarly work.",
         in_text_citation: "(Brown, 2022)",
         year: "2022",
         accessibility: "Library Access"
       },
       {
-        citation: "Williams, R., Davis, K., & Martinez, A. (2021). Critical perspectives on contemporary research. <i>International Journal of Studies</i>, 38(2), 112-134. https://doi.org/10.5678/ijs.2021.38.2.112",
+        citation: "Williams, R., Davis, K., & Martinez, A. (2021). Critical perspectives on contemporary research. <i>International Journal of Studies</i>, 38(2), 112-134.",
         type: "journal_article",
         relevance: "This peer-reviewed article presents critical analysis of current trends in your research area. It provides valuable theoretical perspectives that can help contextualize your arguments.",
         key_points: ["Offers critical analysis frameworks", "Reviews recent literature comprehensively", "Suggests future research directions"],
-        example_sentence: "The rigor and credibility of academic research depend heavily on the theoretical frameworks and methodological approaches employed by scholars in their investigations. Contemporary research practices require careful examination through multiple theoretical lenses to ensure robust findings that can contribute meaningfully to the broader academic discourse (Williams et al., 2021). This multi-perspective approach helps researchers avoid potential biases and limitations that might arise from relying on a single theoretical framework. By integrating diverse analytical approaches, scholars can develop more comprehensive understanding of complex phenomena and strengthen the validity of their conclusions.",
+        ready_to_use_sentence: "Critical examination of research methodologies remains essential for advancing scholarly knowledge. Williams et al. (2021) emphasize that contemporary research practices require careful examination through multiple theoretical lenses to ensure robust findings that contribute meaningfully to academic discourse. Their analysis reveals how interdisciplinary approaches strengthen the validity and applicability of research outcomes.",
         in_text_citation: "(Williams et al., 2021)",
         year: "2021",
         accessibility: "Open Access"
@@ -2338,17 +2338,17 @@ IMPORTANT REQUIREMENTS:
         type: "book_chapter",
         relevance: "This handbook chapter provides foundational knowledge essential for understanding your research topic. It's widely cited and offers authoritative perspectives on core concepts.",
         key_points: ["Establishes fundamental concepts", "Reviews historical development", "Connects theory to practice"],
-        example_sentence: "The quality and impact of academic research are fundamentally determined by the researcher's grasp of established methodological principles and their ability to apply these concepts effectively. Understanding the foundational principles of academic research is crucial for developing robust methodological approaches that can withstand scholarly scrutiny and contribute to knowledge advancement (Thompson, 2020). These principles provide the essential framework for designing studies that generate reliable, valid, and meaningful results. Without this foundational knowledge, researchers risk producing work that lacks the rigor and credibility necessary for meaningful contribution to their field.",
+        ready_to_use_sentence: "Foundational knowledge in research methodology provides the necessary framework for conducting rigorous academic inquiry. Thompson (2020) argues that understanding the foundational principles of academic research is crucial for developing robust methodological approaches that can withstand scholarly scrutiny and contribute to knowledge advancement. This perspective underscores the importance of systematic training in research fundamentals for emerging scholars.",
         in_text_citation: "(Thompson, 2020)",
         year: "2020",
         accessibility: "Library Access"
       },
       {
-        citation: "Garcia, M., & Lee, S. H. (2023). Recent advances in academic research practices. <i>Research Quarterly</i>, 52(1), 78-95. https://doi.org/10.9012/rq.2023.52.1.78",
+        citation: "Garcia, M., & Lee, S. H. (2023). Recent advances in academic research practices. <i>Research Quarterly</i>, 52(1), 78-95.",
         type: "journal_article",
         relevance: "This recent article discusses cutting-edge developments directly relevant to your topic. It provides up-to-date evidence and contemporary perspectives that can strengthen your literature review.",
         key_points: ["Presents latest research findings", "Discusses emerging trends", "Offers practical implications"],
-        example_sentence: "The dynamic nature of contemporary academic research reflects the ongoing influence of technological advancement and shifting scholarly priorities across disciplines. The evolving landscape of academic research continues to be shaped by technological innovations and changing institutional priorities, requiring scholars to adapt their methodological approaches accordingly (Garcia & Lee, 2023). These changes present both opportunities and challenges for researchers, who must balance traditional scholarly rigor with innovative approaches that leverage new tools and perspectives. Success in this environment requires continuous learning and flexibility in methodological application while maintaining commitment to academic excellence.",
+        ready_to_use_sentence: "The intersection of technology and academia has created both opportunities and challenges for contemporary researchers. Garcia and Lee (2023) suggest that the evolving landscape of academic research continues to be shaped by technological innovations and changing institutional priorities, requiring scholars to adapt their methodological approaches accordingly. These adaptations include embracing new tools for data collection, analysis, and dissemination while maintaining rigorous academic standards.",
         in_text_citation: "(Garcia & Lee, 2023)",
         year: "2023",
         accessibility: "Subscription Required"
