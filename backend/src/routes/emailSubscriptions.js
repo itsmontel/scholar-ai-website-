@@ -181,7 +181,6 @@ router.get('/list', authenticateToken, emailSubscriptionLimiter, async (req, res
     // TODO: Add admin role check here
     // Example: if (req.user.role !== 'admin') return res.status(403).json({...});
     
-  try {
     const { subscribed_only = 'true', subscription_type = 'marketing', include_all_free_users = 'false' } = req.query;
 
     // If include_all_free_users is true, get all free users even if not in email_subscriptions
