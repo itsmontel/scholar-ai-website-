@@ -231,86 +231,69 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
           <h1 className="text-5xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-4 sm:mb-8 leading-tight tracking-tight">
             {mode === 'analyze' ? (
               <>
-                <span className="block">Your AI<br />writing assistant</span>
+                <span className="block">Your AI<br />writing <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">assistant</span></span>
               </>
             ) : (
               <>
-                <span className="block">Find citations<br />instantly</span>
+                <span className="block">Find <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">citations</span><br />instantly</span>
               </>
             )}
           </h1>
-          <p className="text-lg sm:text-lg md:text-xl lg:text-2xl text-gray-600 mb-6 sm:mb-12 max-w-3xl mx-auto leading-relaxed font-light px-2 sm:px-6">
-            {mode === 'analyze' 
-              ? (
-                <>
-                  <span className="sm:hidden block text-base">Get instant AI feedback on your academic writing</span>
-                  <span className="hidden sm:inline">Get detailed feedback on your research papers, essays, and academic work with AI-powered analysis that helps you write like a scholar.</span>
-                </>
-              )
-              : (
-                <>
-                  <span className="sm:hidden block text-base">Get relevant academic citations instantly</span>
-                  <span className="hidden sm:inline">Enter your essay question or research topic and get relevant academic citations instantly from journals, books, and scholarly sources.</span>
-                </>
-              )
-            }
-          </p>
-  
-          {/* Mobile: Feature list with checkmarks */}
-          <div className="sm:hidden mb-8">
-            <div className="flex flex-col items-start max-w-sm mx-auto space-y-3 text-left">
+          {/* Feature list with checkmarks */}
+          <div className="mb-8">
+            <div className="flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-center justify-center max-w-4xl mx-auto gap-3 sm:gap-4 sm:gap-x-6 text-left sm:text-center">
               {mode === 'analyze' ? (
                 <>
-                  <div className="flex items-center space-x-3">
+                  <div className="flex items-center space-x-2 sm:space-x-2">
                     <svg className="w-5 h-5 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
-                    <span className="text-gray-700 text-sm font-medium">Quick structure analysis</span>
+                    <span className="text-gray-700 text-sm sm:text-base font-medium">Quick structure analysis</span>
                   </div>
-                  <div className="flex items-center space-x-3">
+                  <div className="flex items-center space-x-2 sm:space-x-2">
                     <svg className="w-5 h-5 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
-                    <span className="text-gray-700 text-sm font-medium">Detailed annotations</span>
+                    <span className="text-gray-700 text-sm sm:text-base font-medium">Detailed annotations</span>
                   </div>
-                  <div className="flex items-center space-x-3">
+                  <div className="flex items-center space-x-2 sm:space-x-2">
                     <svg className="w-5 h-5 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
-                    <span className="text-gray-700 text-sm font-medium">Academic writing feedback</span>
+                    <span className="text-gray-700 text-sm sm:text-base font-medium">Academic writing feedback</span>
                   </div>
-                  <div className="flex items-center space-x-3">
+                  <div className="flex items-center space-x-2 sm:space-x-2">
                     <svg className="w-5 h-5 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
-                    <span className="text-gray-700 text-sm font-medium">Improvement suggestions</span>
+                    <span className="text-gray-700 text-sm sm:text-base font-medium">Improvement suggestions</span>
                   </div>
                 </>
               ) : (
                 <>
-                  <div className="flex items-center space-x-3">
+                  <div className="flex items-center space-x-2 sm:space-x-2">
                     <svg className="w-5 h-5 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
-                    <span className="text-gray-700 text-sm font-medium">10M+ academic sources</span>
+                    <span className="text-gray-700 text-sm sm:text-base font-medium">10M+ academic sources</span>
                   </div>
-                  <div className="flex items-center space-x-3">
+                  <div className="flex items-center space-x-2 sm:space-x-2">
                     <svg className="w-5 h-5 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
-                    <span className="text-gray-700 text-sm font-medium">Multiple citation styles</span>
+                    <span className="text-gray-700 text-sm sm:text-base font-medium">Multiple citation styles</span>
                   </div>
-                  <div className="flex items-center space-x-3">
+                  <div className="flex items-center space-x-2 sm:space-x-2">
                     <svg className="w-5 h-5 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
-                    <span className="text-gray-700 text-sm font-medium">Instant results</span>
+                    <span className="text-gray-700 text-sm sm:text-base font-medium">Instant results</span>
                   </div>
-                  <div className="flex items-center space-x-3">
+                  <div className="flex items-center space-x-2 sm:space-x-2">
                     <svg className="w-5 h-5 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
-                    <span className="text-gray-700 text-sm font-medium">Ready-to-use citations</span>
+                    <span className="text-gray-700 text-sm sm:text-base font-medium">Ready-to-use citations</span>
                   </div>
                 </>
               )}
