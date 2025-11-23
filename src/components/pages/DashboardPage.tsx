@@ -402,35 +402,210 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12 md:py-16">
         {/* Hero Section */}
         <div className="text-center mb-12 sm:mb-16 md:mb-20">
-          <div className="inline-flex items-center px-3 sm:px-4 py-1.5 sm:py-2 bg-blue-50/80 text-blue-700 rounded-full text-xs sm:text-sm font-medium mb-6 sm:mb-8 border border-blue-200/50">
-            <svg className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
-            Your Academic Writing Assistant
-            </div>
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-gray-900 mb-4 sm:mb-6 md:mb-8 leading-tight tracking-tight">
+          {/* Mobile: Clean, bold headline */}
+          <h1 className="text-5xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-4 sm:mb-8 leading-tight tracking-tight -mt-4 sm:-mt-6">
             {mode === 'analyze' ? (
-              <>Enhance your academic<br className="hidden sm:block" />writing with <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">AI</span></>
+              <>
+                <span className="block">Your AI<br />writing <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">assistant</span></span>
+              </>
             ) : (
-              <>Find relevant citations<br className="hidden sm:block" />for your <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">research</span></>
+              <>
+                <span className="block">Find <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">citations</span><br />instantly</span>
+              </>
             )}
           </h1>
-          <p className="text-base sm:text-lg md:text-xl text-gray-600 max-w-4xl mx-auto mb-8 sm:mb-12 md:mb-16 leading-relaxed px-4">
-            {mode === 'analyze' 
-              ? 'Get instant, intelligent feedback on your research papers, essays, and academic documents with our advanced AI analysis that understands academic writing standards'
-              : 'Enter your essay question or research topic and get relevant academic citations instantly from journals, books, and scholarly sources'
-            }
-          </p>
+          {/* Feature list with checkmarks */}
+          <div className="mb-8">
+            {/* Mobile: Vertical list */}
+            <div className="sm:hidden flex flex-col items-start max-w-sm mx-auto space-y-3 text-left">
+              {mode === 'analyze' ? (
+                <>
+                  <div className="flex items-center space-x-3">
+                    <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
+                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    <span className="text-gray-700 text-sm font-medium">Quick structure analysis</span>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
+                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    <span className="text-gray-700 text-sm font-medium">Detailed annotations</span>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
+                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    <span className="text-gray-700 text-sm font-medium">Academic writing feedback</span>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
+                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    <span className="text-gray-700 text-sm font-medium">Improvement suggestions</span>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="flex items-center space-x-3">
+                    <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
+                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    <span className="text-gray-700 text-sm font-medium">10M+ academic sources</span>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
+                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    <span className="text-gray-700 text-sm font-medium">Multiple citation styles</span>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
+                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    <span className="text-gray-700 text-sm font-medium">Instant results</span>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
+                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    <span className="text-gray-700 text-sm font-medium">Ready-to-use citations</span>
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Desktop: Single line layout */}
+            <div className="hidden sm:flex sm:flex-row sm:items-center sm:justify-center sm:gap-6 max-w-6xl mx-auto flex-wrap">
+              {mode === 'analyze' ? (
+                <>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
+                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    <span className="text-gray-800 text-base font-semibold">Quick structure analysis</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
+                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    <span className="text-gray-800 text-base font-semibold">Detailed annotations</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
+                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    <span className="text-gray-800 text-base font-semibold">Academic writing feedback</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
+                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    <span className="text-gray-800 text-base font-semibold">Improvement suggestions</span>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
+                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    <span className="text-gray-800 text-base font-semibold">10M+ academic sources</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
+                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    <span className="text-gray-800 text-base font-semibold">Multiple citation styles</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
+                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    <span className="text-gray-800 text-base font-semibold">Instant results</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
+                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    <span className="text-gray-800 text-base font-semibold">Ready-to-use citations</span>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
 
           {/* Mode Toggle */}
-          <div className="flex justify-center mb-8">
-            <div className="bg-white rounded-full p-1 shadow-lg border border-gray-200 inline-flex">
+          <div className="flex justify-center mb-6 sm:mb-8">
+            {/* Mobile: Simple pill buttons */}
+            <div className="sm:hidden flex gap-2 bg-gray-100 rounded-lg p-1">
               <button
                 onClick={() => {
                   setMode('analyze');
                   setInputText('');
                 }}
-                className={`px-6 py-3 rounded-full font-semibold text-sm transition-all duration-200 ${
+                className={`px-5 py-2.5 rounded-md font-semibold text-sm transition-all duration-200 ${
+                  mode === 'analyze'
+                    ? 'bg-gray-900 text-white shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900 bg-transparent'
+                }`}
+              >
+                Analyze Text
+              </button>
+              <button
+                onClick={() => {
+                  setMode('citations');
+                  setInputText('');
+                }}
+                className={`px-5 py-2.5 rounded-md font-semibold text-sm transition-all duration-200 ${
+                  mode === 'citations'
+                    ? 'bg-gray-900 text-white shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900 bg-transparent'
+                }`}
+              >
+                Citations
+              </button>
+            </div>
+            {/* Desktop: Original design */}
+            <div className="hidden sm:block bg-white/90 backdrop-blur-xl rounded-lg p-1 shadow-lg border border-gray-200/50 inline-flex">
+              <button
+                onClick={() => {
+                  setMode('analyze');
+                  setInputText('');
+                }}
+                className={`px-6 py-3 rounded-md font-semibold text-sm transition-all duration-200 ${
                   mode === 'analyze'
                     ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-md'
                     : 'text-gray-600 hover:text-gray-900'
@@ -448,7 +623,7 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
                   setMode('citations');
                   setInputText('');
                 }}
-                className={`px-6 py-3 rounded-full font-semibold text-sm transition-all duration-200 ${
+                className={`px-6 py-3 rounded-md font-semibold text-sm transition-all duration-200 ${
                   mode === 'citations'
                     ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-md'
                     : 'text-gray-600 hover:text-gray-900'
@@ -458,7 +633,7 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
                   <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                   </svg>
-                  Find Citations
+                  Citations
                 </span>
               </button>
             </div>

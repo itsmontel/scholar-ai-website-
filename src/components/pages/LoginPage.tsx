@@ -164,7 +164,7 @@ const LoginPage = ({ onNavigate, onLogin }: LoginPageProps) => {
       {/* Back Button - Fixed Position */}
       <button
         onClick={() => onNavigate('landing')}
-        className="absolute top-4 left-4 z-50 text-gray-600 hover:text-gray-900 transition-colors group"
+        className="fixed sm:absolute top-16 sm:top-4 left-4 z-50 text-gray-600 hover:text-gray-900 transition-colors group"
       >
         <div className="w-10 h-10 bg-white rounded-full shadow-md flex items-center justify-center group-hover:shadow-lg transition-all">
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -170,7 +170,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 relative overflow-hidden px-2 sm:px-8 pt-14 sm:pt-16">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 relative overflow-hidden px-2 sm:px-8">
       {/* Background decorative elements */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-100/20 via-transparent to-transparent"></div>
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-purple-100/20 via-transparent to-transparent"></div>
@@ -227,27 +227,26 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
       {/* Hero Section */}
       <div className="relative z-10 max-w-8xl mx-auto px-2 sm:px-8 md:px-16 py-12 sm:py-16 md:py-24">
         <div className="text-center mb-12 sm:mb-16 md:mb-20">
-          {/* Hero headline */}
-          <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold text-gray-900 mb-6 sm:mb-10 leading-tight tracking-tight text-center">
+          {/* Mobile: Clean, bold headline */}
+          <h1 className="text-5xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-4 sm:mb-8 leading-tight tracking-tight -mt-4 sm:-mt-6">
             {mode === 'analyze' ? (
               <>
-                <span className="block">Your AI<br className="hidden sm:block" /><span className="sm:inline">writing </span><span className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">assistant</span></span>
+                <span className="block">Your AI<br />writing <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">assistant</span></span>
               </>
             ) : (
               <>
-                <span className="block">Find <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">citations</span><br className="hidden sm:block" /><span className="sm:inline">instantly</span></span>
+                <span className="block">Find <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">citations</span><br />instantly</span>
               </>
             )}
           </h1>
-          
           {/* Feature list with checkmarks */}
-          <div className="mb-8 sm:mb-12">
+          <div className="mb-8">
             {/* Mobile: Vertical list */}
             <div className="sm:hidden flex flex-col items-start max-w-sm mx-auto space-y-3 text-left">
               {mode === 'analyze' ? (
                 <>
                   <div className="flex items-center space-x-3">
-                    <div className="w-6 h-6 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center flex-shrink-0">
+                    <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
                       <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                       </svg>
@@ -255,7 +254,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                     <span className="text-gray-700 text-sm font-medium">Quick structure analysis</span>
                   </div>
                   <div className="flex items-center space-x-3">
-                    <div className="w-6 h-6 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center flex-shrink-0">
+                    <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
                       <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                       </svg>
@@ -263,7 +262,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                     <span className="text-gray-700 text-sm font-medium">Detailed annotations</span>
                   </div>
                   <div className="flex items-center space-x-3">
-                    <div className="w-6 h-6 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center flex-shrink-0">
+                    <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
                       <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                       </svg>
@@ -271,7 +270,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                     <span className="text-gray-700 text-sm font-medium">Academic writing feedback</span>
                   </div>
                   <div className="flex items-center space-x-3">
-                    <div className="w-6 h-6 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center flex-shrink-0">
+                    <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
                       <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                       </svg>
@@ -282,7 +281,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
               ) : (
                 <>
                   <div className="flex items-center space-x-3">
-                    <div className="w-6 h-6 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center flex-shrink-0">
+                    <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
                       <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                       </svg>
@@ -290,7 +289,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                     <span className="text-gray-700 text-sm font-medium">10M+ academic sources</span>
                   </div>
                   <div className="flex items-center space-x-3">
-                    <div className="w-6 h-6 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center flex-shrink-0">
+                    <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
                       <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                       </svg>
@@ -298,7 +297,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                     <span className="text-gray-700 text-sm font-medium">Multiple citation styles</span>
                   </div>
                   <div className="flex items-center space-x-3">
-                    <div className="w-6 h-6 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center flex-shrink-0">
+                    <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
                       <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                       </svg>
@@ -306,7 +305,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                     <span className="text-gray-700 text-sm font-medium">Instant results</span>
                   </div>
                   <div className="flex items-center space-x-3">
-                    <div className="w-6 h-6 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center flex-shrink-0">
+                    <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
                       <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                       </svg>
@@ -316,93 +315,77 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                 </>
               )}
             </div>
-            
-            {/* Desktop: Horizontal grid with cards */}
-            <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-5xl mx-auto">
+
+            {/* Desktop: Single line layout */}
+            <div className="hidden sm:flex sm:flex-row sm:items-center sm:justify-center sm:gap-6 max-w-6xl mx-auto flex-wrap">
               {mode === 'analyze' ? (
                 <>
-                  <div className="bg-white/60 backdrop-blur-sm rounded-xl p-4 border border-gray-200/50 shadow-sm hover:shadow-md transition-all duration-200 hover:border-purple-200/50">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-8 h-8 rounded-lg bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center flex-shrink-0">
-                        <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                        </svg>
-                      </div>
-                      <span className="text-gray-800 text-base font-semibold">Quick structure analysis</span>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
+                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                      </svg>
                     </div>
+                    <span className="text-gray-800 text-base font-semibold">Quick structure analysis</span>
                   </div>
-                  <div className="bg-white/60 backdrop-blur-sm rounded-xl p-4 border border-gray-200/50 shadow-sm hover:shadow-md transition-all duration-200 hover:border-purple-200/50">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-8 h-8 rounded-lg bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center flex-shrink-0">
-                        <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                        </svg>
-                      </div>
-                      <span className="text-gray-800 text-base font-semibold">Detailed annotations</span>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
+                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                      </svg>
                     </div>
+                    <span className="text-gray-800 text-base font-semibold">Detailed annotations</span>
                   </div>
-                  <div className="bg-white/60 backdrop-blur-sm rounded-xl p-4 border border-gray-200/50 shadow-sm hover:shadow-md transition-all duration-200 hover:border-purple-200/50">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-8 h-8 rounded-lg bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center flex-shrink-0">
-                        <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                        </svg>
-                      </div>
-                      <span className="text-gray-800 text-base font-semibold">Academic writing feedback</span>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
+                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                      </svg>
                     </div>
+                    <span className="text-gray-800 text-base font-semibold">Academic writing feedback</span>
                   </div>
-                  <div className="bg-white/60 backdrop-blur-sm rounded-xl p-4 border border-gray-200/50 shadow-sm hover:shadow-md transition-all duration-200 hover:border-purple-200/50">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-8 h-8 rounded-lg bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center flex-shrink-0">
-                        <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                        </svg>
-                      </div>
-                      <span className="text-gray-800 text-base font-semibold">Improvement suggestions</span>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
+                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                      </svg>
                     </div>
+                    <span className="text-gray-800 text-base font-semibold">Improvement suggestions</span>
                   </div>
                 </>
               ) : (
                 <>
-                  <div className="bg-white/60 backdrop-blur-sm rounded-xl p-4 border border-gray-200/50 shadow-sm hover:shadow-md transition-all duration-200 hover:border-purple-200/50">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-8 h-8 rounded-lg bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center flex-shrink-0">
-                        <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                        </svg>
-                      </div>
-                      <span className="text-gray-800 text-base font-semibold">10M+ academic sources</span>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
+                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                      </svg>
                     </div>
+                    <span className="text-gray-800 text-base font-semibold">10M+ academic sources</span>
                   </div>
-                  <div className="bg-white/60 backdrop-blur-sm rounded-xl p-4 border border-gray-200/50 shadow-sm hover:shadow-md transition-all duration-200 hover:border-purple-200/50">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-8 h-8 rounded-lg bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center flex-shrink-0">
-                        <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                        </svg>
-                      </div>
-                      <span className="text-gray-800 text-base font-semibold">Multiple citation styles</span>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
+                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                      </svg>
                     </div>
+                    <span className="text-gray-800 text-base font-semibold">Multiple citation styles</span>
                   </div>
-                  <div className="bg-white/60 backdrop-blur-sm rounded-xl p-4 border border-gray-200/50 shadow-sm hover:shadow-md transition-all duration-200 hover:border-purple-200/50">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-8 h-8 rounded-lg bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center flex-shrink-0">
-                        <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                        </svg>
-                      </div>
-                      <span className="text-gray-800 text-base font-semibold">Instant results</span>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
+                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                      </svg>
                     </div>
+                    <span className="text-gray-800 text-base font-semibold">Instant results</span>
                   </div>
-                  <div className="bg-white/60 backdrop-blur-sm rounded-xl p-4 border border-gray-200/50 shadow-sm hover:shadow-md transition-all duration-200 hover:border-purple-200/50">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-8 h-8 rounded-lg bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center flex-shrink-0">
-                        <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                        </svg>
-                      </div>
-                      <span className="text-gray-800 text-base font-semibold">Ready-to-use citations</span>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
+                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                      </svg>
                     </div>
+                    <span className="text-gray-800 text-base font-semibold">Ready-to-use citations</span>
                   </div>
                 </>
               )}
@@ -418,7 +401,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                   setMode('analyze');
                   setInputText('');
                 }}
-                className={`px-5 py-2.5 rounded-lg font-semibold text-sm transition-all duration-200 ${
+                className={`px-5 py-2.5 rounded-md font-semibold text-sm transition-all duration-200 ${
                   mode === 'analyze'
                     ? 'bg-gray-900 text-white shadow-sm'
                     : 'text-gray-600 hover:text-gray-900 bg-transparent'
@@ -431,7 +414,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                   setMode('citations');
                   setInputText('');
                 }}
-                className={`px-5 py-2.5 rounded-lg font-semibold text-sm transition-all duration-200 ${
+                className={`px-5 py-2.5 rounded-md font-semibold text-sm transition-all duration-200 ${
                   mode === 'citations'
                     ? 'bg-gray-900 text-white shadow-sm'
                     : 'text-gray-600 hover:text-gray-900 bg-transparent'
@@ -441,13 +424,13 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
               </button>
             </div>
             {/* Desktop: Original design */}
-            <div className="hidden sm:block bg-white/90 backdrop-blur-xl rounded-full p-1 shadow-lg border border-gray-200/50 inline-flex">
+            <div className="hidden sm:block bg-white/90 backdrop-blur-xl rounded-lg p-1 shadow-lg border border-gray-200/50 inline-flex">
               <button
                 onClick={() => {
                   setMode('analyze');
                   setInputText('');
                 }}
-                className={`px-6 py-3 rounded-full font-semibold text-sm transition-all duration-200 ${
+                className={`px-6 py-3 rounded-md font-semibold text-sm transition-all duration-200 ${
                   mode === 'analyze'
                     ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-md'
                     : 'text-gray-600 hover:text-gray-900'
@@ -465,7 +448,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                   setMode('citations');
                   setInputText('');
                 }}
-                className={`px-6 py-3 rounded-full font-semibold text-sm transition-all duration-200 ${
+                className={`px-6 py-3 rounded-md font-semibold text-sm transition-all duration-200 ${
                   mode === 'citations'
                     ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-md'
                     : 'text-gray-600 hover:text-gray-900'
