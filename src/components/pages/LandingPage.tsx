@@ -2,6 +2,10 @@ import React, { useState } from 'react';
 import Footer from '../common/Footer';
 import AnalysisAnimation from '../common/AnalysisAnimation';
 
+// Import images from assets folder
+import philosophyImage from '../../assets/images/Philosophy.png';
+import multiculturalImage from '../../assets/images/Multiculturalfilmpaper.png';
+
 interface LandingPageProps {
   onNavigate: (page: string) => void;
 }
@@ -49,7 +53,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
       title: "Philosophy Essay Analysis",
       subtitle: "Justice & Ethics Paper • Analyzed Oct 29, 2025",
       isImage: true,
-      imagePath: "/Philosophy.png",
+      imagePath: philosophyImage,
       feature: "Real-time Analysis",
       description: "Instant feedback with detailed annotations highlighting strengths and improvement areas.",
       summary: {
@@ -76,7 +80,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
       title: "Multicultural Film Analysis",
       subtitle: "Film Studies Essay • Analyzed Oct 29, 2025",
       isImage: true,
-      imagePath: "/Multiculturalfilmpaper.png",
+      imagePath: multiculturalImage,
       feature: "Citation Enhancement",
       description: "AI-powered suggestions for better source integration and citation formatting.",
       summary: {
@@ -514,13 +518,20 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                             className="w-full h-auto rounded-lg shadow-lg"
                             onError={(e) => {
                               console.error('Failed to load image:', paper.imagePath);
-                              // Try absolute URL as fallback
+                              console.log('Image error event:', e);
+                              // Show a placeholder or hide the image
                               const img = e.currentTarget;
-                              if (!img.src.startsWith('http')) {
-                                img.src = `${window.location.origin}${paper.imagePath}`;
-                              }
+                              img.style.display = 'none';
+                              // Show a placeholder div instead
+                              const placeholder = document.createElement('div');
+                              placeholder.className = 'w-full h-64 bg-gray-200 rounded-lg flex items-center justify-center text-gray-500';
+                              placeholder.innerHTML = `<span>Image not available</span>`;
+                              img.parentNode?.appendChild(placeholder);
                             }}
-                            loading="lazy"
+                            onLoad={() => {
+                              console.log('Image loaded successfully:', paper.imagePath);
+                            }}
+                            loading="eager"
                           />
                         </div>
                       ) : (
