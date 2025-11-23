@@ -39,6 +39,7 @@ module.exports = {
         'fade-in': 'fadeIn 0.6s ease-out',
         'slide-up': 'slideUp 0.4s ease-out',
         'bounce-slow': 'bounce 2s infinite',
+        'scroll-slow': 'scroll-slow 30s linear infinite',
       },
       keyframes: {
         fadeIn: {
@@ -48,6 +49,10 @@ module.exports = {
         slideUp: {
           '0%': { opacity: '0', transform: 'translateY(30px)' },
           '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        'scroll-slow': {
+          '0%': { transform: 'translateX(0)' },
+          '100%': { transform: 'translateX(-50%)' },
         }
       }
     },

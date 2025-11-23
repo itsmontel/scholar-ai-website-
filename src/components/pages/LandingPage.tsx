@@ -151,13 +151,13 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 relative overflow-hidden px-6 sm:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 relative overflow-hidden px-3 sm:px-8">
       {/* Background decorative elements */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-100/20 via-transparent to-transparent"></div>
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-purple-100/20 via-transparent to-transparent"></div>
       
       {/* Navigation */}
-      <nav className="relative z-10 flex items-center justify-between px-6 sm:px-8 md:px-16 py-4 sm:py-6 backdrop-blur-sm bg-white/80 border-b border-white/20">
+      <nav className="relative z-10 flex items-center justify-between px-3 sm:px-8 md:px-16 py-4 sm:py-6 backdrop-blur-sm bg-white/80 border-b border-white/20">
         <div className="flex items-center space-x-2 sm:space-x-3">
           <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-xl flex items-center justify-center shadow-lg">
             <span className="text-white font-bold text-xl sm:text-2xl">W</span>
@@ -206,7 +206,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
       </nav>
 
       {/* Hero Section */}
-      <div className="relative z-10 max-w-8xl mx-auto px-6 sm:px-8 md:px-16 py-12 sm:py-16 md:py-24">
+      <div className="relative z-10 max-w-8xl mx-auto px-3 sm:px-8 md:px-16 py-12 sm:py-16 md:py-24">
         <div className="text-center mb-12 sm:mb-16 md:mb-20">
           <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-6 sm:mb-8 leading-tight tracking-tight">
             {mode === 'analyze' ? (
@@ -215,7 +215,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
               <>Find relevant citations<br className="hidden sm:block" /><span className="sm:hidden"> </span>for your <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">research</span></>
             )}
           </h1>
-          <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-600 mb-8 sm:mb-12 max-w-3xl mx-auto leading-relaxed font-light px-6">
+          <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-600 mb-8 sm:mb-12 max-w-3xl mx-auto leading-relaxed font-light px-3 sm:px-6">
             {mode === 'analyze' 
               ? 'Get detailed feedback on your research papers, essays, and academic work with AI-powered analysis that helps you write like a scholar.'
               : 'Enter your essay question or research topic and get relevant academic citations instantly from journals, books, and scholarly sources.'
@@ -265,7 +265,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
           </div>
           
           {/* Interactive Text Input */}
-          <div className="max-w-4xl mx-auto mb-8 sm:mb-12 px-6">
+          <div className="max-w-4xl mx-auto mb-8 sm:mb-12 px-3 sm:px-6">
             {/* Citation Style Selector (only show in citations mode) */}
             {mode === 'citations' && (
               <div className="flex justify-center mb-4">
@@ -361,7 +361,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
         </div>
 
         {/* Trusted By Universities Section */}
-        <div className="text-center mb-12 sm:mb-16 px-6 sm:px-8 md:px-16">
+        <div className="text-center mb-12 sm:mb-16 px-3 sm:px-8 md:px-16">
           <div className="max-w-6xl mx-auto">
             <div className="mb-8">
               <p className="text-gray-700 font-semibold text-xl sm:text-2xl mb-2">Trusted by students at leading universities</p>
@@ -373,9 +373,9 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
               <div className="absolute right-0 top-0 bottom-0 w-24 sm:w-40 bg-gradient-to-l from-white via-white to-transparent z-10 pointer-events-none"></div>
               
               {/* Animated carousel */}
-              <div className="flex animate-scroll-slow items-center">
+              <div className="flex animate-scroll-slow items-center" style={{ width: 'max-content' }}>
                 {/* First set of universities */}
-                <div className="flex space-x-12 sm:space-x-16 px-8">
+                <div className="flex space-x-12 sm:space-x-16 px-8 flex-shrink-0">
                   {/* Harvard */}
                   <div className="flex items-center justify-center min-w-[120px] sm:min-w-[140px]">
                     <span className="font-bold text-2xl sm:text-3xl tracking-tight" style={{color: '#A51C30'}}>HARVARD</span>
@@ -413,7 +413,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                 </div>
                 
                 {/* Duplicate set for seamless loop */}
-                <div className="flex space-x-12 sm:space-x-16 px-8">
+                <div className="flex space-x-12 sm:space-x-16 px-8 flex-shrink-0">
                   {/* Harvard */}
                   <div className="flex items-center justify-center min-w-[120px] sm:min-w-[140px]">
                     <span className="font-bold text-2xl sm:text-3xl tracking-tight" style={{color: '#A51C30'}}>HARVARD</span>
@@ -455,10 +455,10 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
         </div>
 
          {/* Interactive Annotation Examples */}
-         <div className="max-w-full mx-auto mb-16 sm:mb-24 md:mb-32 px-6 sm:px-8 md:px-12 lg:px-20">
+         <div className="max-w-full mx-auto mb-16 sm:mb-24 md:mb-32 px-3 sm:px-8 md:px-12 lg:px-20">
            <div className="text-center mb-12 sm:mb-16 md:mb-20">
              <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 sm:mb-8 tracking-tight">See WriteScholar in Action</h2>
-             <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-600 font-light max-w-4xl mx-auto leading-relaxed px-6">Real examples of how our AI analyzes and improves academic writing</p>
+             <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-600 font-light max-w-4xl mx-auto leading-relaxed px-3 sm:px-6">Real examples of how our AI analyzes and improves academic writing</p>
              </div>
            
            {/* Three Separate Papers */}
@@ -482,6 +482,11 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                             src={paper.imagePath} 
                             alt={paper.title}
                             className="w-full h-auto rounded-lg shadow-lg"
+                            onError={(e) => {
+                              console.error('Failed to load image:', paper.imagePath);
+                              e.currentTarget.style.display = 'none';
+                            }}
+                            loading="lazy"
                           />
                         </div>
                       ) : (
@@ -558,7 +563,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                 </div>
 
         {/* Reviews Section */}
-        <div className="text-center mb-16 sm:mb-20 md:mb-24 px-6 sm:px-8 md:px-16">
+        <div className="text-center mb-16 sm:mb-20 md:mb-24 px-3 sm:px-8 md:px-16">
           <div className="max-w-7xl mx-auto">
             <div className="bg-white/90 backdrop-blur-xl rounded-2xl shadow-xl p-6 sm:p-8 md:p-12">
                 <div className="flex justify-center mb-4 sm:mb-6">
@@ -588,7 +593,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
         </div>
 
         {/* FAQ Section */}
-        <div className="max-w-5xl mx-auto mb-16 sm:mb-24 md:mb-32 px-6 sm:px-6 md:px-8">
+        <div className="max-w-5xl mx-auto mb-16 sm:mb-24 md:mb-32 px-3 sm:px-6 md:px-8">
         <div className="text-center mb-12 sm:mb-16 md:mb-20">
             <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 sm:mb-8 tracking-tight">FAQs</h2>
             <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-600 font-light">Common questions about WriteScholar</p>
@@ -626,10 +631,10 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
         </div>
 
         {/* How It Works */}
-        <div className="text-center mb-16 sm:mb-24 md:mb-32 px-6 sm:px-6 md:px-8">
+        <div className="text-center mb-16 sm:mb-24 md:mb-32 px-3 sm:px-6 md:px-8">
           <div className="max-w-5xl mx-auto">
             <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 sm:mb-8 tracking-tight">How it works</h2>
-            <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-600 mb-12 sm:mb-16 md:mb-24 font-light max-w-4xl mx-auto leading-relaxed px-6">Transform your academic writing into polished, professional work in just a few simple steps.</p>
+            <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-600 mb-12 sm:mb-16 md:mb-24 font-light max-w-4xl mx-auto leading-relaxed px-3 sm:px-6">Transform your academic writing into polished, professional work in just a few simple steps.</p>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 sm:gap-10 md:gap-12">
             <div className="text-center group">
@@ -678,7 +683,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
         </div>
 
         {/* Pricing Section */}
-        <div id="pricing" className="max-w-6xl mx-auto mb-16 sm:mb-24 md:mb-32 px-6 sm:px-6 md:px-8">
+        <div id="pricing" className="max-w-6xl mx-auto mb-16 sm:mb-24 md:mb-32 px-3 sm:px-6 md:px-8">
           {/* Header */}
           <div className="text-center mb-8 sm:mb-12">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4 sm:mb-6">
@@ -978,14 +983,14 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
         </div>
 
         {/* CTA Section */}
-        <div className="relative mb-16 sm:mb-24 md:mb-32 px-6 sm:px-8 md:px-16">
+        <div className="relative mb-16 sm:mb-24 md:mb-32 px-3 sm:px-8 md:px-16">
           <div className="max-w-8xl mx-auto">
             <div className="absolute -inset-1 bg-gradient-to-r from-blue-600/30 via-purple-600/30 to-indigo-600/30 rounded-2xl sm:rounded-3xl blur-sm"></div>
             <div className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 rounded-2xl sm:rounded-3xl p-8 sm:p-12 md:p-16 lg:p-20 text-center overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 via-purple-600/10 to-indigo-600/10"></div>
           <div className="relative z-10">
             <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6 sm:mb-8 tracking-tight">Ready to enhance your academic writing?</h2>
-            <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-300 mb-10 sm:mb-12 md:mb-16 max-w-3xl mx-auto font-light leading-relaxed px-6">Join thousands of students and researchers who trust WriteScholar for their writing success.</p>
+            <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-300 mb-10 sm:mb-12 md:mb-16 max-w-3xl mx-auto font-light leading-relaxed px-3 sm:px-6">Join thousands of students and researchers who trust WriteScholar for their writing success.</p>
             <button 
               onClick={() => onNavigate('signup')}
               className="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-8 sm:px-12 md:px-16 py-3 sm:py-4 md:py-5 rounded-xl sm:rounded-2xl text-base sm:text-lg md:text-xl font-semibold hover:shadow-lg transform hover:scale-105 transition-all duration-300 inline-flex items-center space-x-2 sm:space-x-3"
