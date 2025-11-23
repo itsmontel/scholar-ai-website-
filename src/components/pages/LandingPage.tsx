@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import Footer from '../common/Footer';
+import AnalysisAnimation from '../common/AnalysisAnimation';
 
 interface LandingPageProps {
   onNavigate: (page: string) => void;
@@ -15,6 +16,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('monthly');
   const [mode, setMode] = useState<'analyze' | 'citations'>('analyze');
   const [citationStyle, setCitationStyle] = useState('APA');
+  const [showFakeAnimation, setShowFakeAnimation] = useState(false);
 
   const analyzePlaceholders = [
     "Enhance your academic writing with a simple paste and click.",
@@ -140,14 +142,26 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
 
 
   const handleSubmit = () => {
+    // Show fake animation for unauthenticated users
+    setShowFakeAnimation(true);
+    
+    // Store the search parameters for after signup
     if (mode === 'citations') {
-      // Store the citation search parameters
       localStorage.setItem('pendingCitationSearch', JSON.stringify({
         topic: inputText,
         style: citationStyle
       }));
+    } else {
+      localStorage.setItem('pendingAnalysis', JSON.stringify({
+        text: inputText
+      }));
     }
-    onNavigate('signup');
+    
+    // After 3-5 seconds, navigate to signup
+    setTimeout(() => {
+      setShowFakeAnimation(false);
+      onNavigate('signup');
+    }, 4000); // 4 seconds
   };
 
   return (
@@ -500,6 +514,11 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                             className="w-full h-auto rounded-lg shadow-lg"
                             onError={(e) => {
                               console.error('Failed to load image:', paper.imagePath);
+                              // Try absolute URL as fallback
+                              const img = e.currentTarget;
+                              if (!img.src.startsWith('http')) {
+                                img.src = `${window.location.origin}${paper.imagePath}`;
+                              }
                             }}
                             loading="lazy"
                           />
@@ -1020,6 +1039,60 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
 
       {/* Footer */}
       <Footer onNavigate={onNavigate} />
+
+      {/* Fake Citation Search Animation for unauthenticated users */}
+      {showFakeAnimation && mode === 'citations' && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl p-8 max-w-md mx-4 shadow-2xl">
+            <div className="text-center">
+              <div className="relative mb-6">
+                <div className="w-16 h-16 mx-auto">
+                  <svg className="animate-spin w-16 h-16 text-blue-600" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                </div>
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Finding Citations</h3>
+              <p className="text-gray-600 mb-4">Searching academic databases for relevant sources...</p>
+              
+              {/* Animated citation icons */}
+              <div className="flex justify-center space-x-2 mb-4">
+                {['📄', '📚', '📖'].map((icon, index) => (
+                  <div
+                    key={index}
+                    className="text-2xl animate-bounce"
+                    style={{ animationDelay: `${index * 0.2}s` }}
+                  >
+                    {icon}
+                  </div>
+                ))}
+              </div>
+              
+              <div className="flex justify-center">
+                <div className="flex space-x-1">
+                  {[0, 1, 2].map((i) => (
+                    <div
+                      key={i}
+                      className="w-2 h-2 bg-blue-600 rounded-full animate-pulse"
+                      style={{ animationDelay: `${i * 0.3}s` }}
+                    ></div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Fake Analysis Animation for unauthenticated users */}
+      {showFakeAnimation && mode === 'analyze' && (
+        <AnalysisAnimation
+          isPopup={true}
+          text="Preparing your text for analysis"
+          isComplete={false}
+        />
+      )}
     </div>
   );
 };
