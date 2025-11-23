@@ -225,8 +225,8 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
       </nav>
 
       {/* Hero Section */}
-      <div className="relative z-10 max-w-8xl mx-auto px-2 sm:px-8 md:px-16 py-8 sm:py-16 md:py-24">
-        <div className="text-center mb-8 sm:mb-16 md:mb-20">
+      <div className="relative z-10 max-w-8xl mx-auto px-2 sm:px-8 md:px-16 py-12 sm:py-16 md:py-24">
+        <div className="text-center mb-12 sm:mb-16 md:mb-20">
           {/* Mobile: Clean, bold headline */}
           <h1 className="text-5xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-4 sm:mb-8 leading-tight tracking-tight">
             {mode === 'analyze' ? (
@@ -257,30 +257,30 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
               )
             }
           </p>
- 
+  
           {/* Mobile: Feature list with checkmarks */}
           <div className="sm:hidden mb-8">
             <div className="flex flex-col items-start max-w-sm mx-auto space-y-3 text-left">
               <div className="flex items-center space-x-3">
-                <svg className="w-5 h-5 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
                 <span className="text-gray-700 text-sm font-medium">Quick structure analysis</span>
               </div>
               <div className="flex items-center space-x-3">
-                <svg className="w-5 h-5 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
                 <span className="text-gray-700 text-sm font-medium">Originality checker</span>
               </div>
               <div className="flex items-center space-x-3">
-                <svg className="w-5 h-5 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
                 <span className="text-gray-700 text-sm font-medium">Automatic citations</span>
               </div>
               <div className="flex items-center space-x-3">
-                <svg className="w-5 h-5 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
                 <span className="text-gray-700 text-sm font-medium">Grammar & spelling checker</span>
@@ -418,7 +418,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                   </button>
                 </div>
               </div>
-               
+                
               {/* Desktop: Original fancy design */}
               <div className="hidden sm:block relative">
                 <div className="absolute -inset-1 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-indigo-500/20 rounded-2xl sm:rounded-3xl blur-sm"></div>
@@ -638,41 +638,41 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                             loading="eager"
                           />
                         </div>
-                      ) : (
-                        // Display text content for text-based examples (not currently used)
-                        <>
-                          <div className="prose max-w-none">
-                            {('content' in paper && paper.content) ? (
-                              (paper.content as any[]).map((paragraph: any, pIndex: number) => (
-                                <p key={pIndex} className="text-gray-700 leading-relaxed mb-4">
-                                  {paragraph.annotations && paragraph.annotations.length > 0 ? (
-                                    paragraph.text.split(paragraph.annotations[0].text).map((part: string, partIndex: number) => (
-                                      <React.Fragment key={partIndex}>
-                                        {part}
-                                        {partIndex < paragraph.text.split(paragraph.annotations[0].text).length - 1 && (
-                                          <span 
-                                            className={`px-2 py-1 rounded border-l-4 cursor-pointer transition-all duration-200 ${
-                                              paragraph.annotations[0].type === 'green' 
-                                                ? 'bg-green-100 border-green-500 hover:bg-green-200' 
-                                                : paragraph.annotations[0].type === 'amber'
-                                                ? 'bg-amber-100 border-amber-500 hover:bg-amber-200'
-                                                : 'bg-red-100 border-red-500 hover:bg-red-200'
-                                            }`}
-                                            onMouseEnter={() => setHoveredAnnotation(paragraph.annotations[0])}
-                                            onMouseLeave={() => setHoveredAnnotation(null)}
-                                          >
-                                            {paragraph.annotations[0].text}
-                                          </span>
-                                        )}
-                                      </React.Fragment>
-                                    ))
-                                  ) : (
-                                    paragraph.text
-                                  )}
-                                </p>
-                              ))
-                            ) : null}
-                          </div>
+                        ) : (
+                         // Display text content for text-based examples (not currently used)
+                         <>
+                           <div className="prose max-w-none">
+                             {('content' in paper && paper.content) ? (
+                               (paper.content as any[]).map((paragraph: any, pIndex: number) => (
+                                 <p key={pIndex} className="text-gray-700 leading-relaxed mb-4">
+                                   {paragraph.annotations && paragraph.annotations.length > 0 ? (
+                                     paragraph.text.split(paragraph.annotations[0].text).map((part: string, partIndex: number) => (
+                                       <React.Fragment key={partIndex}>
+                                         {part}
+                                         {partIndex < paragraph.text.split(paragraph.annotations[0].text).length - 1 && (
+                                           <span 
+                                             className={`px-2 py-1 rounded border-l-4 cursor-pointer transition-all duration-200 ${
+                                               paragraph.annotations[0].type === 'green' 
+                                                 ? 'bg-green-100 border-green-500 hover:bg-green-200' 
+                                                 : paragraph.annotations[0].type === 'amber'
+                                                 ? 'bg-amber-100 border-amber-500 hover:bg-amber-200'
+                                                 : 'bg-red-100 border-red-500 hover:bg-red-200'
+                                             }`}
+                                             onMouseEnter={() => setHoveredAnnotation(paragraph.annotations[0])}
+                                             onMouseLeave={() => setHoveredAnnotation(null)}
+                                           >
+                                             {paragraph.annotations[0].text}
+                                           </span>
+                                         )}
+                                       </React.Fragment>
+                                     ))
+                                   ) : (
+                                     paragraph.text
+                                   )}
+                                 </p>
+                               ))
+                             ) : null}
+                           </div>
                           
                           {/* Annotation Legend */}
                           <div className="mt-6 pt-4 border-t border-gray-100">
