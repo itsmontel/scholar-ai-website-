@@ -5,6 +5,7 @@ import AnalysisAnimation from '../common/AnalysisAnimation';
 // Import images from assets folder
 import philosophyImage from '../../assets/images/Philosophy.png';
 import multiculturalImage from '../../assets/images/Multiculturalfilmpaper.png';
+import customersImage from '../../assets/images/CustomersWriteScholar.png';
 
 interface LandingPageProps {
   onNavigate: (page: string) => void;
@@ -397,10 +398,15 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
         {/* Trusted By Universities Section */}
         <div className="text-center mb-12 sm:mb-16 px-2 sm:px-8 md:px-16">
           <div className="max-w-6xl mx-auto">
-            <div className="mb-8">
-              <p className="text-gray-700 font-semibold text-xl sm:text-2xl mb-2">Trusted by students at leading universities</p>
-              <p className="text-gray-500 text-sm sm:text-base">Join thousands of students improving their academic writing</p>
+            <div className="mb-8 flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6">
+              <p className="text-gray-700 font-semibold text-xl sm:text-2xl mb-0">Trusted by students around the world</p>
+              <img 
+                src={customersImage} 
+                alt="WriteScholar Customers" 
+                className="h-12 sm:h-16 md:h-24 lg:h-32 w-auto object-contain"
+              />
             </div>
+            <p className="text-gray-500 text-sm sm:text-base mb-8">Join thousands of students improving their academic writing</p>
             <div className="relative overflow-hidden py-8 bg-white border border-gray-100 rounded-xl shadow-sm">
               {/* Gradient overlays for fade effect */}
               <div className="absolute left-0 top-0 bottom-0 w-24 sm:w-40 bg-gradient-to-r from-white via-white to-transparent z-10 pointer-events-none"></div>
@@ -412,37 +418,37 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                 <div className="flex space-x-12 sm:space-x-16 px-8 flex-shrink-0">
                   {/* Harvard */}
                   <div className="flex items-center justify-center min-w-[120px] sm:min-w-[140px]">
-                    <span className="font-bold text-2xl sm:text-3xl tracking-tight" style={{color: '#A51C30'}}>HARVARD</span>
+                    <span className="university-harvard text-2xl sm:text-3xl">HARVARD</span>
                   </div>
                   
                   {/* Yale */}
                   <div className="flex items-center justify-center min-w-[120px] sm:min-w-[140px]">
-                    <span className="font-bold text-2xl sm:text-3xl tracking-tight" style={{color: '#00356B'}}>YALE</span>
+                    <span className="university-yale text-2xl sm:text-3xl">YALE</span>
                   </div>
                   
                   {/* Oxford */}
                   <div className="flex items-center justify-center min-w-[120px] sm:min-w-[140px]">
-                    <span className="font-bold text-2xl sm:text-3xl tracking-tight" style={{color: '#002147'}}>OXFORD</span>
+                    <span className="university-oxford text-2xl sm:text-3xl">OXFORD</span>
                   </div>
                   
                   {/* MIT */}
                   <div className="flex items-center justify-center min-w-[120px] sm:min-w-[140px]">
-                    <span className="font-bold text-2xl sm:text-3xl tracking-tight" style={{color: '#A31F34'}}>MIT</span>
+                    <span className="university-mit text-2xl sm:text-3xl">MIT</span>
                   </div>
                   
                   {/* Cambridge */}
                   <div className="flex items-center justify-center min-w-[120px] sm:min-w-[140px]">
-                    <span className="font-bold text-2xl sm:text-3xl tracking-tight" style={{color: '#A3C1AD'}}>CAMBRIDGE</span>
+                    <span className="university-cambridge text-2xl sm:text-3xl">CAMBRIDGE</span>
                   </div>
                   
                   {/* Stanford */}
                   <div className="flex items-center justify-center min-w-[120px] sm:min-w-[140px]">
-                    <span className="font-bold text-2xl sm:text-3xl tracking-tight" style={{color: '#8C1515'}}>STANFORD</span>
+                    <span className="university-stanford text-2xl sm:text-3xl">STANFORD</span>
                   </div>
                   
                   {/* Princeton */}
                   <div className="flex items-center justify-center min-w-[120px] sm:min-w-[140px]">
-                    <span className="font-bold text-2xl sm:text-3xl tracking-tight" style={{color: '#FF8F00'}}>PRINCETON</span>
+                    <span className="university-princeton text-2xl sm:text-3xl">PRINCETON</span>
                   </div>
                 </div>
                 
@@ -450,37 +456,37 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                 <div className="flex space-x-12 sm:space-x-16 px-8 flex-shrink-0">
                   {/* Harvard */}
                   <div className="flex items-center justify-center min-w-[120px] sm:min-w-[140px]">
-                    <span className="font-bold text-2xl sm:text-3xl tracking-tight" style={{color: '#A51C30'}}>HARVARD</span>
+                    <span className="university-harvard text-2xl sm:text-3xl">HARVARD</span>
                   </div>
                   
                   {/* Yale */}
                   <div className="flex items-center justify-center min-w-[120px] sm:min-w-[140px]">
-                    <span className="font-bold text-2xl sm:text-3xl tracking-tight" style={{color: '#00356B'}}>YALE</span>
+                    <span className="university-yale text-2xl sm:text-3xl">YALE</span>
                   </div>
                   
                   {/* Oxford */}
                   <div className="flex items-center justify-center min-w-[120px] sm:min-w-[140px]">
-                    <span className="font-bold text-2xl sm:text-3xl tracking-tight" style={{color: '#002147'}}>OXFORD</span>
+                    <span className="university-oxford text-2xl sm:text-3xl">OXFORD</span>
                   </div>
                   
                   {/* MIT */}
                   <div className="flex items-center justify-center min-w-[120px] sm:min-w-[140px]">
-                    <span className="font-bold text-2xl sm:text-3xl tracking-tight" style={{color: '#A31F34'}}>MIT</span>
+                    <span className="university-mit text-2xl sm:text-3xl">MIT</span>
                   </div>
                   
                   {/* Cambridge */}
                   <div className="flex items-center justify-center min-w-[120px] sm:min-w-[140px]">
-                    <span className="font-bold text-2xl sm:text-3xl tracking-tight" style={{color: '#A3C1AD'}}>CAMBRIDGE</span>
+                    <span className="university-cambridge text-2xl sm:text-3xl">CAMBRIDGE</span>
                   </div>
                   
                   {/* Stanford */}
                   <div className="flex items-center justify-center min-w-[120px] sm:min-w-[140px]">
-                    <span className="font-bold text-2xl sm:text-3xl tracking-tight" style={{color: '#8C1515'}}>STANFORD</span>
+                    <span className="university-stanford text-2xl sm:text-3xl">STANFORD</span>
                   </div>
                   
                   {/* Princeton */}
                   <div className="flex items-center justify-center min-w-[120px] sm:min-w-[140px]">
-                    <span className="font-bold text-2xl sm:text-3xl tracking-tight" style={{color: '#FF8F00'}}>PRINCETON</span>
+                    <span className="university-princeton text-2xl sm:text-3xl">PRINCETON</span>
                   </div>
                 </div>
               </div>

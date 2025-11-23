@@ -20,3 +20,61 @@
 .animate-scroll-slow:hover {
   animation-play-state: paused;
 }
+
+/* University-specific font styles */
+.university-harvard {
+  font-family: 'Crimson Text', 'Times New Roman', serif;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: #6b7280;
+  text-transform: uppercase;
+}
+
+.university-yale {
+  font-family: 'Baskervville', 'Baskerville', 'Times New Roman', serif;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: #6b7280;
+  text-transform: uppercase;
+  font-style: normal;
+}
+
+.university-oxford {
+  font-family: 'EB Garamond', 'Garamond', 'Times New Roman', serif;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: #6b7280;
+  text-transform: uppercase;
+}
+
+.university-mit {
+  font-family: 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: #6b7280;
+  text-transform: uppercase;
+}
+
+.university-cambridge {
+  font-family: 'EB Garamond', 'Garamond', 'Times New Roman', serif;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  color: #6b7280;
+  text-transform: uppercase;
+}
+
+.university-stanford {
+  font-family: 'Source Sans Pro', 'Helvetica Neue', sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #6b7280;
+  text-transform: uppercase;
+}
+
+.university-princeton {
+  font-family: 'EB Garamond', 'Garamond', 'Times New Roman', serif;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: #6b7280;
+  text-transform: uppercase;
+}
