@@ -231,13 +231,11 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
           <h1 className="text-5xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-4 sm:mb-8 leading-tight tracking-tight">
             {mode === 'analyze' ? (
               <>
-                <span className="sm:hidden block">Your AI<br />writing<br />assistant</span>
-                <span className="hidden sm:inline">Enhance your academic<br className="hidden sm:block" />writing with <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">WriteScholar</span></span>
+                <span className="block">Your AI<br />writing assistant</span>
               </>
             ) : (
               <>
-                <span className="sm:hidden block">Find citations<br />instantly</span>
-                <span className="hidden sm:inline">Find relevant citations<br className="hidden sm:block" />for your <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">research</span></span>
+                <span className="block">Find citations<br />instantly</span>
               </>
             )}
           </h1>
