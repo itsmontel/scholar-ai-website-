@@ -296,6 +296,13 @@ router.post('/cancel', authenticateToken, async (req, res) => {
       console.error('Error updating subscription status:', updateError);
     }
 
+    // Get user email before downgrading
+    const { data: userData, error: userFetchError } = await subscriptionService.supabase
+      .from('users')
+      .select('email')
+      .eq('id', userId)
+      .single();
+
     // Downgrade user to free plan
     const { error: userUpdateError } = await subscriptionService.supabase
       .from('users')
@@ -304,6 +311,42 @@ router.post('/cancel', authenticateToken, async (req, res) => {
 
     if (userUpdateError) {
       console.error('Error downgrading user:', userUpdateError);
+    }
+
+    // Add user to email subscription list if they haven't unsubscribed
+    if (userData && userData.email) {
+      try {
+        const { query } = require('../database/connection');
+        const normalizedEmail = userData.email.toLowerCase().trim();
+        
+        // Check if email is already unsubscribed
+        const unsubscribeCheck = await query(
+          'SELECT id, is_subscribed FROM email_subscriptions WHERE email = $1',
+          [normalizedEmail]
+        );
+
+        if (unsubscribeCheck.rows.length === 0) {
+          // Email not in list, add it
+          await query(
+            `INSERT INTO email_subscriptions (email, user_id, is_subscribed, subscription_type, created_at, updated_at)
+             VALUES ($1, $2, true, 'marketing', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+             ON CONFLICT (email) DO UPDATE SET user_id = $2, is_subscribed = true, updated_at = CURRENT_TIMESTAMP`,
+            [normalizedEmail, userId]
+          );
+        } else if (unsubscribeCheck.rows[0].is_subscribed === false) {
+          // Email exists but is unsubscribed - don't add them back
+          console.log(`User ${normalizedEmail} has unsubscribed, not adding to email list`);
+        } else {
+          // Email exists and is subscribed, update user_id if needed
+          await query(
+            'UPDATE email_subscriptions SET user_id = $1, updated_at = CURRENT_TIMESTAMP WHERE email = $2',
+            [userId, normalizedEmail]
+          );
+        }
+      } catch (emailSubError) {
+        console.error('Error adding user to email subscription list after downgrade:', emailSubError);
+        // Don't fail the cancellation if email subscription fails
+      }
     }
 
     res.json({

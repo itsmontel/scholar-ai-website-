@@ -25,6 +25,7 @@ import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import TermsOfServicePage from './pages/TermsOfServicePage';
 import BillingPage from './pages/BillingPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
+import UnsubscribePage from './pages/UnsubscribePage';
 
 // Import common components
 import ErrorBoundary from './common/ErrorBoundary';
@@ -223,6 +224,7 @@ const AcademicAIApp = () => {
       if (pathname === '/help-center') return 'help-center';
       if (pathname === '/privacy-policy') return 'privacy-policy';
       if (pathname === '/terms-of-service') return 'terms-of-service';
+      if (pathname === '/unsubscribe') return 'unsubscribe';
       return 'landing';
     };
     
@@ -449,6 +451,8 @@ const AcademicAIApp = () => {
         return <TermsOfServicePage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'help':
         return <FAQPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
+      case 'unsubscribe':
+        return <UnsubscribePage onNavigate={navigateTo} />;
       case 'dashboard':
         return <DashboardPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'analysis':

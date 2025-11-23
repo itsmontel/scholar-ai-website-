@@ -60,9 +60,23 @@ const uploadLimiter = rateLimit({
   skip
 });
 
+// Rate limiting for email subscription endpoints
+const emailSubscriptionLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: process.env.NODE_ENV === 'development' ? 100 : 10, // 10 requests per 15 minutes in production
+  message: {
+    success: false,
+    message: 'Too many requests, please try again later.'
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip
+});
+
 module.exports = {
   generalLimiter,
   authLimiter,
   analysisLimiter,
-  uploadLimiter
+  uploadLimiter,
+  emailSubscriptionLimiter
 };

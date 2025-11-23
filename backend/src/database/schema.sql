@@ -108,6 +108,18 @@ CREATE TABLE IF NOT EXISTS notifications (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Email subscriptions table
+CREATE TABLE IF NOT EXISTS email_subscriptions (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    email VARCHAR(255) UNIQUE NOT NULL,
+    user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+    is_subscribed BOOLEAN DEFAULT true,
+    subscription_type VARCHAR(50) DEFAULT 'marketing', -- 'marketing', 'transactional', 'all'
+    unsubscribed_at TIMESTAMP WITH TIME ZONE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Indexes for better performance
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 CREATE INDEX IF NOT EXISTS idx_users_stripe_customer_id ON users(stripe_customer_id);
@@ -121,6 +133,9 @@ CREATE INDEX IF NOT EXISTS idx_usage_tracking_user_id ON usage_tracking(user_id)
 CREATE INDEX IF NOT EXISTS idx_usage_tracking_created_at ON usage_tracking(created_at);
 CREATE INDEX IF NOT EXISTS idx_notifications_user_id ON notifications(user_id);
 CREATE INDEX IF NOT EXISTS idx_notifications_is_read ON notifications(is_read);
+CREATE INDEX IF NOT EXISTS idx_email_subscriptions_email ON email_subscriptions(email);
+CREATE INDEX IF NOT EXISTS idx_email_subscriptions_user_id ON email_subscriptions(user_id);
+CREATE INDEX IF NOT EXISTS idx_email_subscriptions_is_subscribed ON email_subscriptions(is_subscribed);
 
 -- Triggers for updated_at timestamps
 CREATE OR REPLACE FUNCTION update_updated_at_column()
@@ -146,4 +161,8 @@ CREATE TRIGGER update_documents_updated_at BEFORE UPDATE ON documents
 
 DROP TRIGGER IF EXISTS update_document_analyses_updated_at ON document_analyses;
 CREATE TRIGGER update_document_analyses_updated_at BEFORE UPDATE ON document_analyses
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+DROP TRIGGER IF EXISTS update_email_subscriptions_updated_at ON email_subscriptions;
+CREATE TRIGGER update_email_subscriptions_updated_at BEFORE UPDATE ON email_subscriptions
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();

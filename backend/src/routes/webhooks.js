@@ -279,6 +279,41 @@ async function handleSubscriptionUpdated(subscription) {
       [plan, subscription.status, user.id]
     );
 
+    // If user downgraded to free plan, add them to email subscription list (if not unsubscribed)
+    if (plan === 'free' && user.email) {
+      try {
+        const normalizedEmail = user.email.toLowerCase().trim();
+        
+        // Check if email is already unsubscribed
+        const unsubscribeCheck = await query(
+          'SELECT id, is_subscribed FROM email_subscriptions WHERE email = $1',
+          [normalizedEmail]
+        );
+
+        if (unsubscribeCheck.rows.length === 0) {
+          // Email not in list, add it
+          await query(
+            `INSERT INTO email_subscriptions (email, user_id, is_subscribed, subscription_type, created_at, updated_at)
+             VALUES ($1, $2, true, 'marketing', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+             ON CONFLICT (email) DO UPDATE SET user_id = $2, is_subscribed = true, updated_at = CURRENT_TIMESTAMP`,
+            [normalizedEmail, user.id]
+          );
+        } else if (unsubscribeCheck.rows[0].is_subscribed === false) {
+          // Email exists but is unsubscribed - don't add them back
+          console.log(`User ${normalizedEmail} has unsubscribed, not adding to email list`);
+        } else {
+          // Email exists and is subscribed, update user_id if needed
+          await query(
+            'UPDATE email_subscriptions SET user_id = $1, updated_at = CURRENT_TIMESTAMP WHERE email = $2',
+            [user.id, normalizedEmail]
+          );
+        }
+      } catch (emailSubError) {
+        console.error('Error adding user to email subscription list after webhook update:', emailSubError);
+        // Don't fail the webhook if email subscription fails
+      }
+    }
+
     console.log(`Subscription updated for user ${user.id}: ${plan} plan`);
 
   } catch (error) {
@@ -313,11 +348,52 @@ async function handleSubscriptionDeleted(subscription) {
       [subscription.id]
     );
 
+    // Get user email before downgrading
+    const userEmailResult = await query(
+      'SELECT email FROM users WHERE id = $1',
+      [user.id]
+    );
+
     // Downgrade user to free plan using PostgreSQL
     await query(
       'UPDATE users SET subscription_plan = $1, subscription_status = $2 WHERE id = $3',
       ['free', 'canceled', user.id]
     );
+
+    // Add user to email subscription list if they haven't unsubscribed
+    if (userEmailResult.rows.length > 0 && userEmailResult.rows[0].email) {
+      try {
+        const normalizedEmail = userEmailResult.rows[0].email.toLowerCase().trim();
+        
+        // Check if email is already unsubscribed
+        const unsubscribeCheck = await query(
+          'SELECT id, is_subscribed FROM email_subscriptions WHERE email = $1',
+          [normalizedEmail]
+        );
+
+        if (unsubscribeCheck.rows.length === 0) {
+          // Email not in list, add it
+          await query(
+            `INSERT INTO email_subscriptions (email, user_id, is_subscribed, subscription_type, created_at, updated_at)
+             VALUES ($1, $2, true, 'marketing', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+             ON CONFLICT (email) DO UPDATE SET user_id = $2, is_subscribed = true, updated_at = CURRENT_TIMESTAMP`,
+            [normalizedEmail, user.id]
+          );
+        } else if (unsubscribeCheck.rows[0].is_subscribed === false) {
+          // Email exists but is unsubscribed - don't add them back
+          console.log(`User ${normalizedEmail} has unsubscribed, not adding to email list`);
+        } else {
+          // Email exists and is subscribed, update user_id if needed
+          await query(
+            'UPDATE email_subscriptions SET user_id = $1, updated_at = CURRENT_TIMESTAMP WHERE email = $2',
+            [user.id, normalizedEmail]
+          );
+        }
+      } catch (emailSubError) {
+        console.error('Error adding user to email subscription list after webhook downgrade:', emailSubError);
+        // Don't fail the webhook if email subscription fails
+      }
+    }
 
     console.log(`Subscription canceled for user ${user.id}, downgraded to free plan`);
 

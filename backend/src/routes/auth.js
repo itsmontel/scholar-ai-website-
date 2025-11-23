@@ -64,6 +64,37 @@ router.post('/register', validateRegister, async (req, res) => {
 
     const user = await userService.createUser(userData);
 
+    // Add user to email subscription list (only if they haven't unsubscribed)
+    try {
+      const normalizedEmail = email.toLowerCase().trim();
+      
+      // Check if email is already unsubscribed
+      const unsubscribeCheck = await query(
+        'SELECT id, is_subscribed FROM email_subscriptions WHERE email = $1',
+        [normalizedEmail]
+      );
+
+      if (unsubscribeCheck.rows.length === 0) {
+        // Email not in list, add it
+        await query(
+          `INSERT INTO email_subscriptions (email, user_id, is_subscribed, subscription_type, created_at, updated_at)
+           VALUES ($1, $2, true, 'marketing', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+           ON CONFLICT (email) DO UPDATE SET user_id = $2, updated_at = CURRENT_TIMESTAMP`,
+          [normalizedEmail, user.id]
+        );
+      } else if (unsubscribeCheck.rows[0].is_subscribed) {
+        // Email exists and is subscribed, update user_id if needed
+        await query(
+          'UPDATE email_subscriptions SET user_id = $1, updated_at = CURRENT_TIMESTAMP WHERE email = $2',
+          [user.id, normalizedEmail]
+        );
+      }
+      // If email is unsubscribed, don't add them back
+    } catch (emailSubError) {
+      console.error('Error adding user to email subscription list:', emailSubError);
+      // Don't fail registration if email subscription fails
+    }
+
     // Send verification email
     const emailResult = await emailService.sendVerificationEmail(email, emailVerificationToken);
     

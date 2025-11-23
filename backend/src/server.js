@@ -13,11 +13,12 @@ const documentRoutes = require('./routes/documents');
 const analysisRoutes = require('./routes/analysis');
 const subscriptionRoutes = require('./routes/subscriptions');
 const webhookRoutes = require('./routes/webhooks');
+const emailSubscriptionRoutes = require('./routes/emailSubscriptions');
 
 const { errorHandler } = require('./middleware/errorHandler');
 const { connectDB } = require('./database/connection');
 const securityMiddleware = require('./middleware/security');
-const { generalLimiter, authLimiter, analysisLimiter, uploadLimiter } = require('./middleware/rateLimiting');
+const { generalLimiter, authLimiter, analysisLimiter, uploadLimiter, emailSubscriptionLimiter } = require('./middleware/rateLimiting');
 
 // Initialize storage service if using Supabase Storage
 let storageService = null;
@@ -77,12 +78,13 @@ app.get('/', (req, res) => {
     success: true,
     message: 'WriteScholar Backend API',
     version: '1.0.0',
-    endpoints: {
+      endpoints: {
       auth: '/api/auth',
       users: '/api/users',
       documents: '/api/documents',
       analysis: '/api/analysis',
       subscriptions: '/api/subscriptions',
+      emailSubscriptions: '/api/email-subscriptions',
       webhooks: '/api/webhooks'
     },
     health: '/health',
@@ -121,6 +123,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/documents', uploadLimiter, documentRoutes);
 app.use('/api/analysis', analysisLimiter, analysisRoutes);
 app.use('/api/subscriptions', subscriptionRoutes);
+app.use('/api/email-subscriptions', emailSubscriptionRoutes);
 // Webhooks already registered before body parser (line 45)
 
 // 404 handler
