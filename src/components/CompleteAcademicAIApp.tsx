@@ -28,6 +28,7 @@ import ResetPasswordPage from './pages/ResetPasswordPage';
 
 // Import common components
 import ErrorBoundary from './common/ErrorBoundary';
+import PromoBanner from './common/PromoBanner';
 
 // Type definitions
 interface User {
@@ -496,6 +497,7 @@ const AcademicAIApp = () => {
   return (
     <ErrorBoundary>
     <div className="min-h-screen bg-gray-50">
+      <PromoBanner />
       {renderCurrentPage()}
     </div>
     </ErrorBoundary>
