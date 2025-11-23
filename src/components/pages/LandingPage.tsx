@@ -170,13 +170,13 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
   };
 
   return (
-    <div className="min-h-screen bg-white sm:bg-gradient-to-br sm:from-slate-50 sm:via-blue-50 sm:to-indigo-100 relative overflow-hidden px-2 sm:px-8">
-      {/* Background decorative elements - hidden on mobile for cleaner look */}
-      <div className="hidden sm:block absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-100/20 via-transparent to-transparent"></div>
-      <div className="hidden sm:block absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-purple-100/20 via-transparent to-transparent"></div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 relative overflow-hidden px-2 sm:px-8">
+      {/* Background decorative elements */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-100/20 via-transparent to-transparent"></div>
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-purple-100/20 via-transparent to-transparent"></div>
       
       {/* Navigation */}
-      <nav className="relative z-10 flex items-center justify-between px-2 sm:px-8 md:px-16 py-3 sm:py-6 backdrop-blur-sm bg-white/80 border-b border-white/20">
+      <nav className="relative z-10 flex items-center justify-between px-2 sm:px-8 md:px-16 py-4 sm:py-6 backdrop-blur-sm bg-white/80 border-b border-white/20">
         <div className="flex items-center space-x-2 sm:space-x-3">
           <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-xl flex items-center justify-center shadow-lg">
             <span className="text-white font-bold text-xl sm:text-2xl">W</span>
@@ -211,7 +211,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
         <div className="flex items-center space-x-2 sm:space-x-3">
           <button 
             onClick={() => onNavigate('login')}
-            className="hidden sm:block text-gray-600 hover:text-gray-900 transition-colors font-medium px-2 sm:px-4 py-2 rounded-lg hover:bg-gray-100/50 text-sm sm:text-base"
+            className="text-gray-600 hover:text-gray-900 transition-colors font-medium px-2 sm:px-4 py-2 rounded-lg hover:bg-gray-100/50 text-sm sm:text-base"
           >
             Login
           </button>
@@ -219,8 +219,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
             onClick={() => onNavigate('signup')}
             className="bg-gradient-to-r from-gray-900 to-gray-800 text-white px-3 sm:px-6 py-2 sm:py-2.5 rounded-xl hover:shadow-lg transform hover:scale-105 transition-all duration-200 font-medium text-sm sm:text-base"
           >
-            <span className="sm:hidden">Sign up</span>
-            <span className="hidden sm:inline">Sign up</span>
+            Sign up
           </button>
         </div>
       </nav>
@@ -258,7 +257,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
               )
             }
           </p>
-
+ 
           {/* Mobile: Feature list with checkmarks */}
           <div className="sm:hidden mb-8">
             <div className="flex flex-col items-start max-w-sm mx-auto space-y-3 text-left">
@@ -291,26 +290,53 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
 
           {/* Mode Toggle */}
           <div className="flex justify-center mb-6 sm:mb-8">
-            <div className="bg-white rounded-lg p-1 shadow-md border border-gray-200 inline-flex sm:bg-white/90 sm:backdrop-blur-xl sm:rounded-full">
+            {/* Mobile: Simple pill buttons */}
+            <div className="sm:hidden flex gap-2 bg-gray-100 rounded-lg p-1">
               <button
                 onClick={() => {
                   setMode('analyze');
                   setInputText('');
                 }}
-                className={`px-5 sm:px-6 py-2.5 sm:py-3 rounded-lg sm:rounded-full font-semibold text-sm transition-all duration-200 ${
+                className={`px-5 py-2.5 rounded-lg font-semibold text-sm transition-all duration-200 ${
                   mode === 'analyze'
-                    ? 'bg-gray-900 text-white shadow-sm sm:bg-gradient-to-r sm:from-blue-600 sm:to-purple-600 sm:shadow-md'
+                    ? 'bg-gray-900 text-white shadow-sm'
                     : 'text-gray-600 hover:text-gray-900 bg-transparent'
                 }`}
               >
-                <span className="flex items-center justify-center">
-                  <span className="sm:hidden">Essay</span>
-                  <span className="hidden sm:flex items-center">
-                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                    Analyze Text
-                  </span>
+                Essay
+              </button>
+              <button
+                onClick={() => {
+                  setMode('citations');
+                  setInputText('');
+                }}
+                className={`px-5 py-2.5 rounded-lg font-semibold text-sm transition-all duration-200 ${
+                  mode === 'citations'
+                    ? 'bg-gray-900 text-white shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900 bg-transparent'
+                }`}
+              >
+                Literature review
+              </button>
+            </div>
+            {/* Desktop: Original design */}
+            <div className="hidden sm:block bg-white/90 backdrop-blur-xl rounded-full p-1 shadow-lg border border-gray-200/50 inline-flex">
+              <button
+                onClick={() => {
+                  setMode('analyze');
+                  setInputText('');
+                }}
+                className={`px-6 py-3 rounded-full font-semibold text-sm transition-all duration-200 ${
+                  mode === 'analyze'
+                    ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-md'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                <span className="flex items-center">
+                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  Analyze Text
                 </span>
               </button>
               <button
@@ -318,20 +344,17 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                   setMode('citations');
                   setInputText('');
                 }}
-                className={`px-5 sm:px-6 py-2.5 sm:py-3 rounded-lg sm:rounded-full font-semibold text-sm transition-all duration-200 ${
+                className={`px-6 py-3 rounded-full font-semibold text-sm transition-all duration-200 ${
                   mode === 'citations'
-                    ? 'bg-gray-900 text-white shadow-sm sm:bg-gradient-to-r sm:from-blue-600 sm:to-purple-600 sm:shadow-md'
-                    : 'text-gray-600 hover:text-gray-900 bg-transparent'
+                    ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-md'
+                    : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
-                <span className="flex items-center justify-center">
-                  <span className="sm:hidden">Literature review</span>
-                  <span className="hidden sm:flex items-center">
-                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                    Find Citations
-                  </span>
+                <span className="flex items-center">
+                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                  Find Citations
                 </span>
               </button>
             </div>
@@ -395,7 +418,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                   </button>
                 </div>
               </div>
-              
+               
               {/* Desktop: Original fancy design */}
               <div className="hidden sm:block relative">
                 <div className="absolute -inset-1 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-indigo-500/20 rounded-2xl sm:rounded-3xl blur-sm"></div>
@@ -616,37 +639,39 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                           />
                         </div>
                       ) : (
-                        // Display text content for text-based examples
+                        // Display text content for text-based examples (not currently used)
                         <>
                           <div className="prose max-w-none">
-                            {paper.content.map((paragraph, pIndex) => (
-                              <p key={pIndex} className="text-gray-700 leading-relaxed mb-4">
-                                {paragraph.annotations.length > 0 ? (
-                                  paragraph.text.split(paragraph.annotations[0].text).map((part, partIndex) => (
-                                    <React.Fragment key={partIndex}>
-                                      {part}
-                                      {partIndex < paragraph.text.split(paragraph.annotations[0].text).length - 1 && (
-                                        <span 
-                                          className={`px-2 py-1 rounded border-l-4 cursor-pointer transition-all duration-200 ${
-                                            paragraph.annotations[0].type === 'green' 
-                                              ? 'bg-green-100 border-green-500 hover:bg-green-200' 
-                                              : paragraph.annotations[0].type === 'amber'
-                                              ? 'bg-amber-100 border-amber-500 hover:bg-amber-200'
-                                              : 'bg-red-100 border-red-500 hover:bg-red-200'
-                                          }`}
-                                          onMouseEnter={() => setHoveredAnnotation(paragraph.annotations[0])}
-                                          onMouseLeave={() => setHoveredAnnotation(null)}
-                                        >
-                                          {paragraph.annotations[0].text}
-                                        </span>
-                                      )}
-                                    </React.Fragment>
-                                  ))
-                                ) : (
-                                  paragraph.text
-                                )}
-                              </p>
-                            ))}
+                            {('content' in paper && paper.content) ? (
+                              (paper.content as any[]).map((paragraph: any, pIndex: number) => (
+                                <p key={pIndex} className="text-gray-700 leading-relaxed mb-4">
+                                  {paragraph.annotations && paragraph.annotations.length > 0 ? (
+                                    paragraph.text.split(paragraph.annotations[0].text).map((part: string, partIndex: number) => (
+                                      <React.Fragment key={partIndex}>
+                                        {part}
+                                        {partIndex < paragraph.text.split(paragraph.annotations[0].text).length - 1 && (
+                                          <span 
+                                            className={`px-2 py-1 rounded border-l-4 cursor-pointer transition-all duration-200 ${
+                                              paragraph.annotations[0].type === 'green' 
+                                                ? 'bg-green-100 border-green-500 hover:bg-green-200' 
+                                                : paragraph.annotations[0].type === 'amber'
+                                                ? 'bg-amber-100 border-amber-500 hover:bg-amber-200'
+                                                : 'bg-red-100 border-red-500 hover:bg-red-200'
+                                            }`}
+                                            onMouseEnter={() => setHoveredAnnotation(paragraph.annotations[0])}
+                                            onMouseLeave={() => setHoveredAnnotation(null)}
+                                          >
+                                            {paragraph.annotations[0].text}
+                                          </span>
+                                        )}
+                                      </React.Fragment>
+                                    ))
+                                  ) : (
+                                    paragraph.text
+                                  )}
+                                </p>
+                              ))
+                            ) : null}
                           </div>
                           
                           {/* Annotation Legend */}
