@@ -332,12 +332,13 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                   onFocus={() => setIsFocused(true)}
                   onBlur={() => setIsFocused(false)}
                   placeholder={isFocused ? "" : placeholders[placeholderIndex]}
-                  className="w-full min-h-20 sm:min-h-24 max-h-48 pb-6 pl-2 sm:pl-4 md:pl-6 pr-14 sm:pr-20 text-gray-700 border-none outline-none resize-none placeholder-gray-400 bg-transparent text-sm sm:text-base md:text-lg font-light transition-all duration-300 overflow-y-auto leading-relaxed"
+                  className="w-full min-h-20 sm:min-h-24 max-h-48 pb-6 pl-2 sm:pl-4 md:pl-6 pr-14 sm:pr-20 text-gray-700 border-none outline-none resize-none placeholder-gray-400 bg-transparent text-base sm:text-base md:text-lg font-light transition-all duration-300 overflow-y-auto leading-relaxed"
                   style={{ 
                     height: 'auto', 
                     lineHeight: '1.6',
                     paddingTop: '0px',
-                    marginTop: '0px'
+                    marginTop: '0px',
+                    fontSize: '16px' // Prevent iOS zoom on focus
                   }}
                   onInput={(e) => {
                     const target = e.target as HTMLTextAreaElement;

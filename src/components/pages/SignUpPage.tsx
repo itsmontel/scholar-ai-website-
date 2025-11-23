@@ -88,11 +88,12 @@ const SignUpPage = ({ onNavigate, onSignUp }: SignUpPageProps) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex relative">
       {/* Back Button - Fixed Position */}
       <button
         onClick={() => onNavigate('landing')}
-        className="absolute top-4 left-4 z-50 text-gray-600 hover:text-gray-900 transition-colors group"
+        className="fixed top-4 left-4 z-50 text-gray-600 hover:text-gray-900 transition-colors group sm:absolute"
+        aria-label="Go back"
       >
         <div className="w-10 h-10 bg-white rounded-full shadow-md flex items-center justify-center group-hover:shadow-lg transition-all">
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -102,7 +103,7 @@ const SignUpPage = ({ onNavigate, onSignUp }: SignUpPageProps) => {
       </button>
 
       {/* Left Side - Form */}
-      <div className="flex-1 flex items-center justify-center p-4 sm:p-6 md:p-8">
+      <div className="flex-1 flex items-center justify-center p-4 sm:p-6 md:p-8 pt-16 sm:pt-8">
         <div className="max-w-md w-full">
           <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 border border-gray-100">
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Create your account</h1>
