@@ -170,13 +170,13 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 relative overflow-hidden px-2 sm:px-8">
-      {/* Background decorative elements */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-100/20 via-transparent to-transparent"></div>
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-purple-100/20 via-transparent to-transparent"></div>
+    <div className="min-h-screen bg-white sm:bg-gradient-to-br sm:from-slate-50 sm:via-blue-50 sm:to-indigo-100 relative overflow-hidden px-2 sm:px-8">
+      {/* Background decorative elements - hidden on mobile for cleaner look */}
+      <div className="hidden sm:block absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-100/20 via-transparent to-transparent"></div>
+      <div className="hidden sm:block absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-purple-100/20 via-transparent to-transparent"></div>
       
       {/* Navigation */}
-      <nav className="relative z-10 flex items-center justify-between px-2 sm:px-8 md:px-16 py-4 sm:py-6 backdrop-blur-sm bg-white/80 border-b border-white/20">
+      <nav className="relative z-10 flex items-center justify-between px-2 sm:px-8 md:px-16 py-3 sm:py-6 backdrop-blur-sm bg-white/80 border-b border-white/20">
         <div className="flex items-center space-x-2 sm:space-x-3">
           <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-xl flex items-center justify-center shadow-lg">
             <span className="text-white font-bold text-xl sm:text-2xl">W</span>
@@ -211,7 +211,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
         <div className="flex items-center space-x-2 sm:space-x-3">
           <button 
             onClick={() => onNavigate('login')}
-            className="text-gray-600 hover:text-gray-900 transition-colors font-medium px-2 sm:px-4 py-2 rounded-lg hover:bg-gray-100/50 text-sm sm:text-base"
+            className="hidden sm:block text-gray-600 hover:text-gray-900 transition-colors font-medium px-2 sm:px-4 py-2 rounded-lg hover:bg-gray-100/50 text-sm sm:text-base"
           >
             Login
           </button>
@@ -219,63 +219,98 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
             onClick={() => onNavigate('signup')}
             className="bg-gradient-to-r from-gray-900 to-gray-800 text-white px-3 sm:px-6 py-2 sm:py-2.5 rounded-xl hover:shadow-lg transform hover:scale-105 transition-all duration-200 font-medium text-sm sm:text-base"
           >
-            Sign up
+            <span className="sm:hidden">Sign up</span>
+            <span className="hidden sm:inline">Sign up</span>
           </button>
         </div>
       </nav>
 
       {/* Hero Section */}
-      <div className="relative z-10 max-w-8xl mx-auto px-2 sm:px-8 md:px-16 py-12 sm:py-16 md:py-24">
-        <div className="text-center mb-12 sm:mb-16 md:mb-20">
-          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-6 sm:mb-8 leading-tight tracking-tight">
+      <div className="relative z-10 max-w-8xl mx-auto px-2 sm:px-8 md:px-16 py-8 sm:py-16 md:py-24">
+        <div className="text-center mb-8 sm:mb-16 md:mb-20">
+          {/* Mobile: Clean, bold headline */}
+          <h1 className="text-5xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-4 sm:mb-8 leading-tight tracking-tight">
             {mode === 'analyze' ? (
               <>
-                <span className="sm:hidden">Enhance your writing with <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">WriteScholar</span></span>
+                <span className="sm:hidden block">Your AI<br />writing<br />assistant</span>
                 <span className="hidden sm:inline">Enhance your academic<br className="hidden sm:block" />writing with <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">WriteScholar</span></span>
               </>
             ) : (
               <>
-                <span className="sm:hidden">Find citations for your <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">research</span></span>
+                <span className="sm:hidden block">Find citations<br />instantly</span>
                 <span className="hidden sm:inline">Find relevant citations<br className="hidden sm:block" />for your <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">research</span></span>
               </>
             )}
           </h1>
-          <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-600 mb-8 sm:mb-12 max-w-3xl mx-auto leading-relaxed font-light px-2 sm:px-6">
+          <p className="text-lg sm:text-lg md:text-xl lg:text-2xl text-gray-600 mb-6 sm:mb-12 max-w-3xl mx-auto leading-relaxed font-light px-2 sm:px-6">
             {mode === 'analyze' 
               ? (
                 <>
-                  <span className="sm:hidden">Get AI-powered feedback on your academic writing.</span>
+                  <span className="sm:hidden block text-base">Get instant AI feedback on your academic writing</span>
                   <span className="hidden sm:inline">Get detailed feedback on your research papers, essays, and academic work with AI-powered analysis that helps you write like a scholar.</span>
                 </>
               )
               : (
                 <>
-                  <span className="sm:hidden">Get relevant academic citations instantly.</span>
+                  <span className="sm:hidden block text-base">Get relevant academic citations instantly</span>
                   <span className="hidden sm:inline">Enter your essay question or research topic and get relevant academic citations instantly from journals, books, and scholarly sources.</span>
                 </>
               )
             }
           </p>
 
+          {/* Mobile: Feature list with checkmarks */}
+          <div className="sm:hidden mb-8">
+            <div className="flex flex-col items-start max-w-sm mx-auto space-y-3 text-left">
+              <div className="flex items-center space-x-3">
+                <svg className="w-5 h-5 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                <span className="text-gray-700 text-sm font-medium">Quick structure analysis</span>
+              </div>
+              <div className="flex items-center space-x-3">
+                <svg className="w-5 h-5 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                <span className="text-gray-700 text-sm font-medium">Originality checker</span>
+              </div>
+              <div className="flex items-center space-x-3">
+                <svg className="w-5 h-5 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                <span className="text-gray-700 text-sm font-medium">Automatic citations</span>
+              </div>
+              <div className="flex items-center space-x-3">
+                <svg className="w-5 h-5 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                <span className="text-gray-700 text-sm font-medium">Grammar & spelling checker</span>
+              </div>
+            </div>
+          </div>
+
           {/* Mode Toggle */}
-          <div className="flex justify-center mb-8">
-            <div className="bg-white/90 backdrop-blur-xl rounded-full p-1 shadow-lg border border-gray-200/50 inline-flex">
+          <div className="flex justify-center mb-6 sm:mb-8">
+            <div className="bg-white rounded-lg p-1 shadow-md border border-gray-200 inline-flex sm:bg-white/90 sm:backdrop-blur-xl sm:rounded-full">
               <button
                 onClick={() => {
                   setMode('analyze');
                   setInputText('');
                 }}
-                className={`px-4 sm:px-6 py-2 sm:py-3 rounded-full font-semibold text-sm transition-all duration-200 ${
+                className={`px-5 sm:px-6 py-2.5 sm:py-3 rounded-lg sm:rounded-full font-semibold text-sm transition-all duration-200 ${
                   mode === 'analyze'
-                    ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-md'
-                    : 'text-gray-600 hover:text-gray-900'
+                    ? 'bg-gray-900 text-white shadow-sm sm:bg-gradient-to-r sm:from-blue-600 sm:to-purple-600 sm:shadow-md'
+                    : 'text-gray-600 hover:text-gray-900 bg-transparent'
                 }`}
               >
-                <span className="flex items-center">
-                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                  Analyze Text
+                <span className="flex items-center justify-center">
+                  <span className="sm:hidden">Essay</span>
+                  <span className="hidden sm:flex items-center">
+                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    Analyze Text
+                  </span>
                 </span>
               </button>
               <button
@@ -283,17 +318,20 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                   setMode('citations');
                   setInputText('');
                 }}
-                className={`px-4 sm:px-6 py-2 sm:py-3 rounded-full font-semibold text-sm transition-all duration-200 ${
+                className={`px-5 sm:px-6 py-2.5 sm:py-3 rounded-lg sm:rounded-full font-semibold text-sm transition-all duration-200 ${
                   mode === 'citations'
-                    ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-md'
-                    : 'text-gray-600 hover:text-gray-900'
+                    ? 'bg-gray-900 text-white shadow-sm sm:bg-gradient-to-r sm:from-blue-600 sm:to-purple-600 sm:shadow-md'
+                    : 'text-gray-600 hover:text-gray-900 bg-transparent'
                 }`}
               >
-                <span className="flex items-center">
-                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
-                  Find Citations
+                <span className="flex items-center justify-center">
+                  <span className="sm:hidden">Literature review</span>
+                  <span className="hidden sm:flex items-center">
+                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                    Find Citations
+                  </span>
                 </span>
               </button>
             </div>
@@ -304,7 +342,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
             {/* Citation Style Selector (only show in citations mode) */}
             {mode === 'citations' && (
               <div className="flex justify-center mb-4">
-                <div className="bg-white/90 backdrop-blur-xl rounded-lg shadow-md border border-gray-200/50 p-2 inline-flex items-center">
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-2 inline-flex items-center sm:bg-white/90 sm:backdrop-blur-xl">
                   <span className="text-sm text-gray-600 mr-2 px-2">Citation Style:</span>
                   <select
                     value={citationStyle}
@@ -322,43 +360,79 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
               </div>
             )}
 
+            {/* Mobile: Cleaner input design */}
             <div className="relative">
-              {/* Shadow gradient behind the input */}
-              <div className="absolute -inset-1 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-indigo-500/20 rounded-2xl sm:rounded-3xl blur-sm"></div>
-              <div className="relative bg-white/90 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-2xl border border-white/30 p-4 sm:p-6 md:p-8 hover:shadow-3xl transition-all duration-500">
-              <textarea
-                value={inputText}
-                onChange={(e) => setInputText(e.target.value)}
-                  onFocus={() => setIsFocused(true)}
-                  onBlur={() => setIsFocused(false)}
-                  placeholder={isFocused ? "" : placeholders[placeholderIndex]}
-                  className="w-full min-h-20 sm:min-h-24 max-h-48 pb-6 pl-2 sm:pl-4 md:pl-6 pr-14 sm:pr-20 text-gray-700 border-none outline-none resize-none placeholder-gray-400 bg-transparent text-base sm:text-base md:text-lg font-light transition-all duration-300 overflow-y-auto leading-relaxed"
-                  style={{ 
-                    height: 'auto', 
-                    lineHeight: '1.6',
-                    paddingTop: '0px',
-                    marginTop: '0px',
-                    fontSize: '16px' // Prevent iOS zoom on focus
-                  }}
-                  onInput={(e) => {
-                    const target = e.target as HTMLTextAreaElement;
-                    target.style.height = 'auto';
-                    target.style.height = Math.min(target.scrollHeight, 192) + 'px'; // 192px = max-h-48
-                  }}
-                />
-                <button
-                  onClick={handleSubmit}
-                  className="absolute bottom-3 sm:bottom-4 right-3 sm:right-4 bg-gradient-to-r from-orange-500 to-orange-600 text-white w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl hover:shadow-lg transform hover:scale-110 transition-all duration-300 flex items-center justify-center group z-10"
-                >
-                  <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                  </svg>
-                </button>
+              <div className="sm:hidden">
+                {/* Mobile: Simple, clean input */}
+                <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-4">
+                  <textarea
+                    value={inputText}
+                    onChange={(e) => setInputText(e.target.value)}
+                    onFocus={() => setIsFocused(true)}
+                    onBlur={() => setIsFocused(false)}
+                    placeholder={isFocused ? "" : placeholders[placeholderIndex]}
+                    className="w-full min-h-24 max-h-48 pb-12 pl-3 pr-3 text-gray-700 border-none outline-none resize-none placeholder-gray-400 bg-transparent text-base font-normal transition-all duration-300 overflow-y-auto leading-relaxed"
+                    style={{ 
+                      height: 'auto', 
+                      lineHeight: '1.6',
+                      paddingTop: '0px',
+                      marginTop: '0px',
+                      fontSize: '16px'
+                    }}
+                    onInput={(e) => {
+                      const target = e.target as HTMLTextAreaElement;
+                      target.style.height = 'auto';
+                      target.style.height = Math.min(target.scrollHeight, 192) + 'px';
+                    }}
+                  />
+                  <button
+                    onClick={handleSubmit}
+                    className="absolute bottom-4 right-4 bg-gray-900 text-white w-10 h-10 rounded-lg hover:bg-gray-800 transition-all duration-300 flex items-center justify-center shadow-md"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+              
+              {/* Desktop: Original fancy design */}
+              <div className="hidden sm:block relative">
+                <div className="absolute -inset-1 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-indigo-500/20 rounded-2xl sm:rounded-3xl blur-sm"></div>
+                <div className="relative bg-white/90 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-2xl border border-white/30 p-4 sm:p-6 md:p-8 hover:shadow-3xl transition-all duration-500">
+                  <textarea
+                    value={inputText}
+                    onChange={(e) => setInputText(e.target.value)}
+                    onFocus={() => setIsFocused(true)}
+                    onBlur={() => setIsFocused(false)}
+                    placeholder={isFocused ? "" : placeholders[placeholderIndex]}
+                    className="w-full min-h-24 max-h-48 pb-6 pl-4 md:pl-6 pr-14 sm:pr-20 text-gray-700 border-none outline-none resize-none placeholder-gray-400 bg-transparent text-base md:text-lg font-light transition-all duration-300 overflow-y-auto leading-relaxed"
+                    style={{ 
+                      height: 'auto', 
+                      lineHeight: '1.6',
+                      paddingTop: '0px',
+                      marginTop: '0px'
+                    }}
+                    onInput={(e) => {
+                      const target = e.target as HTMLTextAreaElement;
+                      target.style.height = 'auto';
+                      target.style.height = Math.min(target.scrollHeight, 192) + 'px';
+                    }}
+                  />
+                  <button
+                    onClick={handleSubmit}
+                    className="absolute bottom-4 right-4 bg-gradient-to-r from-orange-500 to-orange-600 text-white w-12 h-12 rounded-2xl hover:shadow-lg transform hover:scale-110 transition-all duration-300 flex items-center justify-center group z-10"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                    </svg>
+                  </button>
+                </div>
               </div>
             </div>
             
-            {/* Suggested Categories */}
-            <div className="mt-8 text-center">
+            {/* Suggested Categories - Hidden on mobile for cleaner design */}
+            <div className="hidden sm:block mt-8 text-center">
               <div className="flex flex-wrap justify-center gap-3">
                 {mode === 'analyze' ? (
                   <>
