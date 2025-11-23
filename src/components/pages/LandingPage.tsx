@@ -403,7 +403,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
               <img 
                 src={customersImage} 
                 alt="WriteScholar Customers" 
-                className="h-12 sm:h-16 md:h-24 lg:h-32 w-auto object-contain"
+                className="h-20 sm:h-20 md:h-24 lg:h-32 w-auto object-contain"
               />
             </div>
             <p className="text-gray-500 text-sm sm:text-base mb-8">Join thousands of students improving their academic writing</p>
