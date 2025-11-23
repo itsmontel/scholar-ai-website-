@@ -111,7 +111,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
   };
 
   return (
-    <header className="bg-white/90 backdrop-blur-xl border-b border-gray-200/60 sticky top-0 z-40 shadow-sm">
+    <header className="bg-white/90 backdrop-blur-xl border-b border-gray-200/60 sticky top-0 z-50 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
@@ -217,7 +217,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
 
               {/* Dropdown Menu */}
               {isDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-56 sm:w-64 bg-white rounded-xl shadow-2xl border border-gray-200/50 backdrop-blur-sm z-50">
+                <div className="absolute right-0 mt-2 w-56 sm:w-64 bg-white rounded-xl shadow-2xl border border-gray-200/50 backdrop-blur-sm z-[60]">
                   {/* User Info Section */}
                   <div className="px-4 py-3 border-b border-gray-100">
                     <div className="text-sm font-medium text-gray-900">
@@ -401,7 +401,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
 
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
-        <div className="md:hidden bg-white border-t border-gray-200 mobile-menu-container">
+        <div className="md:hidden bg-white border-t border-gray-200 mobile-menu-container z-[60]">
           <div className="px-4 sm:px-6 py-4 space-y-2">
             <button 
               onClick={() => { onNavigate?.('dashboard'); setIsMobileMenuOpen(false); }}

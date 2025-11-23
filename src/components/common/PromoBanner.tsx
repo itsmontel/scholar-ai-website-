@@ -6,7 +6,7 @@ const PromoBanner: React.FC = () => {
   if (isDismissed) return null;
 
   return (
-    <div className="sticky sm:relative top-0 left-0 right-0 bg-gradient-to-r from-orange-500 via-orange-600 to-orange-500 text-white py-2.5 sm:py-4 px-2 sm:px-4 z-50 shadow-md">
+    <div className="sticky sm:relative top-0 left-0 right-0 bg-gradient-to-r from-orange-500 via-orange-600 to-orange-500 text-white py-2.5 sm:py-4 px-2 sm:px-4 z-30 shadow-md">
       <div className="max-w-7xl mx-auto flex items-center justify-center gap-1.5 sm:gap-4">
         {/* Mobile: Single line compact text */}
         <div className="flex-1 flex items-center justify-center gap-1.5 sm:gap-3 text-center">
