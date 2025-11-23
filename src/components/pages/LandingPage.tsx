@@ -44,233 +44,56 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
 
   const examplePapers = [
     {
-      title: "Climate Change Research Paper",
-      subtitle: "Environmental Science Study • Analyzed 2 hours ago",
-      content: [
-        {
-          text: "Climate change represents one of the most pressing challenges of our time, affecting ecosystems, economies, and societies worldwide. This study examines the multifaceted impacts of global warming on biodiversity and ecosystem services across multiple biomes and temporal scales, with particular focus on the period 2010-2023.",
-          annotations: [
-            {
-              type: "green",
-              text: "Climate change represents one of the most pressing challenges of our time",
-              tooltip: "Excellent opening statement that immediately establishes the significance and urgency of your research topic."
-            }
-          ]
-        },
-        {
-          text: "Our comprehensive analysis reveals significant temperature increases across all studied regions, with particular emphasis on polar and tropical ecosystems. The data shows a clear correlation between rising temperatures and species migration patterns, with documented shifts in habitat ranges exceeding 100 kilometers in some cases. These findings are consistent with previous studies by Smith et al. (2021) and Johnson (2022).",
-          annotations: [
-            {
-              type: "green",
-              text: "comprehensive analysis reveals significant temperature increases",
-              tooltip: "Strong methodology with clear presentation of quantitative findings and specific data points."
-            }
-          ]
-        },
-        {
-          text: "The research methodology employed a comprehensive analysis of temperature data from 2000-2023, though the sample size could be expanded to include more diverse geographical regions. Statistical models were applied to assess correlation patterns between climate variables and ecosystem responses, utilizing both linear regression and machine learning approaches.",
-          annotations: [
-            {
-              type: "amber",
-              text: "though the sample size could be expanded",
-              tooltip: "Good methodology description, but consider adding more detail about sample selection criteria and geographical coverage to strengthen generalizability."
-            }
-          ]
-        },
-        {
-          text: "Economic implications of these ecological changes are substantial, with estimated costs to agricultural productivity reaching $50 billion annually in affected regions. The cascading effects on food security and rural livelihoods require immediate attention from policymakers and international organizations, particularly in developing nations where adaptation resources are limited.",
-          annotations: [
-            {
-              type: "green",
-              text: "Economic implications of these ecological changes are substantial",
-              tooltip: "Excellent integration of environmental and economic analysis with specific quantitative estimates and policy relevance."
-            }
-          ]
-        },
-        {
-          text: "The conclusion section lacks sufficient discussion of policy implications and fails to address the limitations of the current research methodology. Future studies should consider longitudinal data collection and more comprehensive stakeholder engagement to ensure practical applicability of findings.",
-          annotations: [
-            {
-              type: "red",
-              text: "lacks sufficient discussion of policy implications",
-              tooltip: "Critical issue: Your conclusion needs to address practical applications and policy recommendations to strengthen the paper's impact and real-world relevance."
-            }
-          ]
-        }
-      ],
+      title: "Philosophy Essay Analysis",
+      subtitle: "Justice & Ethics Paper • Analyzed Oct 29, 2025",
+      isImage: true,
+      imagePath: "/Philosophy.png",
       feature: "Real-time Analysis",
       description: "Instant feedback with detailed annotations highlighting strengths and improvement areas.",
       summary: {
-        general: "This climate change research demonstrates strong scientific methodology with comprehensive data analysis, though it needs better policy integration and clearer practical applications.",
+        general: "This philosophy essay demonstrates strong engagement with Plato's Republic and creative use of modern examples, though transitions and academic support need strengthening.",
         goods: [
-          "Excellent opening that immediately establishes research significance and urgency",
-          "Strong quantitative analysis with specific data points and clear methodology",
-          "Good integration of economic and environmental perspectives with concrete estimates",
-          "Comprehensive temporal scope (2000-2023) with clear correlation patterns"
+          "Excellent integration of classical philosophy with contemporary examples (The Dark Knight)",
+          "Clear thesis comparing Glaucon's and Socrates' views on justice",
+          "Strong opening that establishes the philosophical debate",
+          "Creative approach to illustrating abstract concepts with concrete examples"
         ],
         improvements: [
-          "Expand sample size to include more diverse geographical regions for better generalizability",
-          "Add more specific examples and research citations to strengthen claims",
-          "Include discussion of practical applications and implementation strategies"
+          "Strengthen transitions between Glaucon's and Socrates' arguments for better flow",
+          "Add more academic citations and research evidence to support claims",
+          "Improve connection between The Dark Knight examples and Socrates' argument"
         ],
         concerns: [
-          "Critical gap: Conclusion lacks sufficient policy implications and practical recommendations",
-          "Missing discussion of research limitations and methodological constraints",
-          "Need for more comprehensive stakeholder engagement and real-world applicability"
+          "Some sections need more academic evidence and scholarly support",
+          "Transitions between ideas could be smoother and more explicit",
+          "Consider developing the connection between modern examples and classical philosophy"
         ]
       }
     },
     {
-      title: "Economics Thesis Draft",
-      subtitle: "Macroeconomic Analysis • Analyzed 1 day ago",
-      content: [
-        {
-          text: "The relationship between monetary policy and economic growth has been extensively studied, yet recent developments in digital currencies present new challenges for traditional economic models. This research examines the evolving landscape of central banking and its implications for macroeconomic stability across both developed and emerging markets.",
-          annotations: [
-            {
-              type: "green",
-              text: "extensively studied, yet recent developments in digital currencies present new challenges",
-              tooltip: "Strong literature review that acknowledges existing research while identifying a current gap in the field."
-            }
-          ]
-        },
-        {
-          text: "Our econometric analysis reveals significant correlations between interest rates and GDP growth across 45 countries over a 15-year period (2008-2023). The findings demonstrate that a 1% increase in policy rates typically corresponds to a 0.3% decrease in GDP growth within 12 months, with stronger effects observed in emerging markets.",
-          annotations: [
-            {
-              type: "green",
-              text: "significant correlations between interest rates and GDP growth across 45 countries",
-              tooltip: "Excellent use of specific data with clear timeframes and comprehensive country coverage that strengthens your argument."
-            }
-          ]
-        },
-        {
-          text: "The model's R-squared value of 0.67 indicates moderate explanatory power, though the R-squared value suggests room for additional explanatory variables such as inflation expectations, exchange rate volatility, and financial market conditions. Including these factors could improve model fit and provide more nuanced insights.",
-          annotations: [
-            {
-              type: "amber",
-              text: "though the R-squared value suggests room for additional explanatory variables",
-              tooltip: "Good statistical analysis, but consider adding more variables or discussing model limitations in greater detail to enhance robustness."
-            }
-          ]
-        },
-        {
-          text: "Cross-country analysis reveals substantial heterogeneity in policy transmission mechanisms, with emerging markets showing greater sensitivity to interest rate changes compared to advanced economies. This finding has important implications for global monetary policy coordination and suggests the need for differentiated policy approaches.",
-          annotations: [
-            {
-              type: "green",
-              text: "Cross-country analysis reveals substantial heterogeneity in policy transmission mechanisms",
-              tooltip: "Strong comparative analysis with clear policy implications and practical applications for central banking."
-            }
-          ]
-        },
-        {
-          text: "The data collection process was flawed due to inconsistent reporting standards across different countries, which may compromise the validity of our findings. Additionally, the exclusion of recent financial crises may limit the generalizability of our conclusions and requires careful consideration in future research.",
-          annotations: [
-            {
-              type: "red",
-              text: "The data collection process was flawed",
-              tooltip: "Major concern: Data quality issues need to be addressed before drawing conclusions. Consider alternative data sources or methodology to ensure reliability."
-            }
-          ]
-        }
-      ],
+      title: "Multicultural Film Analysis",
+      subtitle: "Film Studies Essay • Analyzed Oct 29, 2025",
+      isImage: true,
+      imagePath: "/Multiculturalfilmpaper.png",
       feature: "Citation Enhancement",
       description: "AI-powered suggestions for better source integration and citation formatting.",
       summary: {
-        general: "This economics thesis shows strong analytical foundations with comprehensive cross-country data, but requires better data quality controls and methodological robustness.",
+        general: "This film studies paper demonstrates strong analytical engagement with multicultural cinema, though citation formatting and theoretical framework integration need improvement.",
         goods: [
-          "Strong literature review that identifies current research gaps in digital currency impacts",
-          "Excellent quantitative analysis with specific correlations and clear timeframes (2008-2023)",
-          "Comprehensive cross-country analysis with 45 countries providing robust sample",
-          "Clear policy implications with practical applications for central banking"
+          "Excellent critical analysis of cultural representation in contemporary cinema",
+          "Strong use of film theory and scholarly sources to support arguments",
+          "Clear thesis statement addressing multiculturalism and identity in film",
+          "Good integration of specific film examples to illustrate theoretical concepts"
         ],
         improvements: [
-          "Include additional explanatory variables (inflation expectations, exchange rates) to improve model fit",
-          "Expand discussion of model limitations and statistical robustness",
-          "Add more specific data points and statistical measures in methodology section"
+          "Strengthen citation formatting to ensure consistency with MLA/Chicago style",
+          "Expand theoretical framework discussion for deeper academic grounding",
+          "Add more comparative analysis between different cultural perspectives in films"
         ],
         concerns: [
-          "Critical data quality issues: Inconsistent reporting standards across countries compromise validity",
-          "Missing consideration of recent financial crises limits generalizability of conclusions",
-          "Need for alternative data sources or methodology to ensure reliability and accuracy"
-        ]
-      }
-    },
-    {
-      title: "Psychology Research Study",
-      subtitle: "Behavioral Analysis • Analyzed 3 hours ago",
-      content: [
-        {
-          text: "Social media usage patterns among adolescents have shown remarkable consistency across demographic groups, with average daily usage exceeding 6 hours per day. This study examines the psychological and behavioral implications of digital engagement among 12-18 year olds across diverse socioeconomic backgrounds, utilizing both quantitative and qualitative methodologies.",
-          annotations: [
-            {
-              type: "green",
-              text: "remarkable consistency across demographic groups",
-              tooltip: "Excellent use of specific data and clear demographic analysis that strengthens your argument with concrete statistics."
-            }
-          ]
-        },
-        {
-          text: "Longitudinal data collected over 18 months reveals significant correlations between social media consumption and sleep quality, with participants reporting 23% more sleep disturbances compared to control groups. The findings suggest that digital engagement patterns directly impact circadian rhythms and overall well-being, with particular effects observed in evening usage patterns.",
-          annotations: [
-            {
-              type: "green",
-              text: "Longitudinal data collected over 18 months reveals significant correlations",
-              tooltip: "Strong research design with longitudinal methodology and specific quantitative findings that demonstrate causality."
-            }
-          ]
-        },
-        {
-          text: "The psychological impact of prolonged social media exposure appears to correlate with increased anxiety levels, although the causal relationship requires further investigation. Additional factors such as pre-existing mental health conditions and family dynamics may confound these associations and should be controlled for in future studies.",
-          annotations: [
-            {
-              type: "amber",
-              text: "although the causal relationship requires further investigation",
-              tooltip: "Good acknowledgment of limitations, but consider discussing potential confounding variables and study design improvements to strengthen causal claims."
-            }
-          ]
-        },
-        {
-          text: "Qualitative interviews with 25 participants revealed nuanced insights into social media's role in identity formation and peer relationships. Many adolescents described using platforms for creative expression and community building, challenging purely negative narratives about digital engagement and highlighting the complexity of social media effects.",
-          annotations: [
-            {
-              type: "green",
-              text: "Qualitative interviews with 25 participants revealed nuanced insights",
-              tooltip: "Excellent mixed-methods approach that provides depth and context to quantitative findings, offering balanced perspective."
-            }
-          ]
-        },
-        {
-          text: "Our sample size of 50 participants is insufficient for drawing meaningful conclusions about population-wide trends in social media behavior. The limited geographical scope and lack of diversity in participant selection further constrain the generalizability of our findings and require careful consideration in interpreting results.",
-          annotations: [
-            {
-              type: "red",
-              text: "sample size of 50 participants is insufficient",
-              tooltip: "Critical limitation: Small sample size significantly weakens your study's external validity. Consider power analysis and sample size justification for stronger conclusions."
-            }
-          ]
-        }
-      ],
-      feature: "Structure Optimization",
-      description: "AI suggestions for better paper organization, logical flow, and clarity.",
-      summary: {
-        general: "This psychology study demonstrates strong mixed-methods design with valuable insights, but is significantly limited by sample size and geographical scope affecting generalizability.",
-        goods: [
-          "Excellent mixed-methods approach combining quantitative and qualitative data collection",
-          "Strong longitudinal design (18 months) with specific quantitative findings (23% sleep disturbance increase)",
-          "Comprehensive demographic analysis with concrete statistics (6+ hours daily usage)",
-          "Balanced perspective challenging negative narratives about social media effects"
-        ],
-        improvements: [
-          "Expand discussion of potential confounding variables and study design improvements",
-          "Add more specific examples and research citations to strengthen causal claims",
-          "Include detailed discussion of practical applications and intervention strategies"
-        ],
-        concerns: [
-          "Critical limitation: Sample size of 50 participants insufficient for population-wide conclusions",
-          "Limited geographical scope and lack of diversity constrains generalizability",
-          "Need for power analysis and sample size justification to strengthen external validity"
+          "Some citations need proper formatting and complete bibliographic information",
+          "Theoretical framework could be more explicitly connected to film examples",
+          "Consider adding more recent scholarly sources to strengthen contemporary relevance"
         ]
       }
     }
@@ -328,13 +151,13 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 relative overflow-hidden px-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 relative overflow-hidden px-6 sm:px-8">
       {/* Background decorative elements */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-100/20 via-transparent to-transparent"></div>
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-purple-100/20 via-transparent to-transparent"></div>
       
       {/* Navigation */}
-      <nav className="relative z-10 flex items-center justify-between px-4 sm:px-8 md:px-16 py-4 sm:py-6 backdrop-blur-sm bg-white/80 border-b border-white/20">
+      <nav className="relative z-10 flex items-center justify-between px-6 sm:px-8 md:px-16 py-4 sm:py-6 backdrop-blur-sm bg-white/80 border-b border-white/20">
         <div className="flex items-center space-x-2 sm:space-x-3">
           <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-xl flex items-center justify-center shadow-lg">
             <span className="text-white font-bold text-xl sm:text-2xl">W</span>
@@ -383,7 +206,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
       </nav>
 
       {/* Hero Section */}
-      <div className="relative z-10 max-w-8xl mx-auto px-4 sm:px-8 md:px-16 py-12 sm:py-16 md:py-24">
+      <div className="relative z-10 max-w-8xl mx-auto px-6 sm:px-8 md:px-16 py-12 sm:py-16 md:py-24">
         <div className="text-center mb-12 sm:mb-16 md:mb-20">
           <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-6 sm:mb-8 leading-tight tracking-tight">
             {mode === 'analyze' ? (
@@ -392,7 +215,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
               <>Find relevant citations<br className="hidden sm:block" /><span className="sm:hidden"> </span>for your <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">research</span></>
             )}
           </h1>
-          <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-600 mb-8 sm:mb-12 max-w-3xl mx-auto leading-relaxed font-light px-4">
+          <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-600 mb-8 sm:mb-12 max-w-3xl mx-auto leading-relaxed font-light px-6">
             {mode === 'analyze' 
               ? 'Get detailed feedback on your research papers, essays, and academic work with AI-powered analysis that helps you write like a scholar.'
               : 'Enter your essay question or research topic and get relevant academic citations instantly from journals, books, and scholarly sources.'
@@ -442,7 +265,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
           </div>
           
           {/* Interactive Text Input */}
-          <div className="max-w-4xl mx-auto mb-8 sm:mb-12 px-4">
+          <div className="max-w-4xl mx-auto mb-8 sm:mb-12 px-6">
             {/* Citation Style Selector (only show in citations mode) */}
             {mode === 'citations' && (
               <div className="flex justify-center mb-4">
@@ -537,47 +360,113 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
           </div>
         </div>
 
-         {/* Trusted By Section */}
-         <div className="text-center mb-12 sm:mb-16 px-4 sm:px-8 md:px-16">
-           <div className="max-w-6xl mx-auto">
-             <div className="flex items-center justify-center space-x-4">
-               <div className="flex -space-x-2">
-                 <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg border-2 border-white">
-                   <span className="text-white font-semibold text-sm">A</span>
-                 </div>
-                 <div className="w-12 h-12 rounded-full bg-gradient-to-br from-green-500 to-teal-600 flex items-center justify-center shadow-lg border-2 border-white">
-                   <span className="text-white font-semibold text-sm">S</span>
-                 </div>
-                 <div className="w-12 h-12 rounded-full bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center shadow-lg border-2 border-white">
-                   <span className="text-white font-semibold text-sm">M</span>
-                 </div>
-                 <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center shadow-lg border-2 border-white">
-                   <span className="text-white font-semibold text-sm">J</span>
-                 </div>
-                 <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-blue-600 flex items-center justify-center shadow-lg border-2 border-white">
-                   <span className="text-white font-semibold text-sm">L</span>
-                 </div>
-               </div>
-               <div className="ml-4">
-                 <p className="text-gray-600 font-medium">Trusted by many users</p>
-               </div>
-             </div>
-           </div>
-         </div>
+        {/* Trusted By Universities Section */}
+        <div className="text-center mb-12 sm:mb-16 px-6 sm:px-8 md:px-16">
+          <div className="max-w-6xl mx-auto">
+            <div className="mb-8">
+              <p className="text-gray-700 font-semibold text-xl sm:text-2xl mb-2">Trusted by students at leading universities</p>
+              <p className="text-gray-500 text-sm sm:text-base">Join thousands of students improving their academic writing</p>
+            </div>
+            <div className="relative overflow-hidden py-8 bg-white border border-gray-100 rounded-xl shadow-sm">
+              {/* Gradient overlays for fade effect */}
+              <div className="absolute left-0 top-0 bottom-0 w-24 sm:w-40 bg-gradient-to-r from-white via-white to-transparent z-10 pointer-events-none"></div>
+              <div className="absolute right-0 top-0 bottom-0 w-24 sm:w-40 bg-gradient-to-l from-white via-white to-transparent z-10 pointer-events-none"></div>
+              
+              {/* Animated carousel */}
+              <div className="flex animate-scroll-slow items-center">
+                {/* First set of universities */}
+                <div className="flex space-x-12 sm:space-x-16 px-8">
+                  {/* Harvard */}
+                  <div className="flex items-center justify-center min-w-[120px] sm:min-w-[140px]">
+                    <span className="font-bold text-2xl sm:text-3xl tracking-tight" style={{color: '#A51C30'}}>HARVARD</span>
+                  </div>
+                  
+                  {/* Yale */}
+                  <div className="flex items-center justify-center min-w-[120px] sm:min-w-[140px]">
+                    <span className="font-bold text-2xl sm:text-3xl tracking-tight" style={{color: '#00356B'}}>YALE</span>
+                  </div>
+                  
+                  {/* Oxford */}
+                  <div className="flex items-center justify-center min-w-[120px] sm:min-w-[140px]">
+                    <span className="font-bold text-2xl sm:text-3xl tracking-tight" style={{color: '#002147'}}>OXFORD</span>
+                  </div>
+                  
+                  {/* MIT */}
+                  <div className="flex items-center justify-center min-w-[120px] sm:min-w-[140px]">
+                    <span className="font-bold text-2xl sm:text-3xl tracking-tight" style={{color: '#A31F34'}}>MIT</span>
+                  </div>
+                  
+                  {/* Cambridge */}
+                  <div className="flex items-center justify-center min-w-[120px] sm:min-w-[140px]">
+                    <span className="font-bold text-2xl sm:text-3xl tracking-tight" style={{color: '#A3C1AD'}}>CAMBRIDGE</span>
+                  </div>
+                  
+                  {/* Stanford */}
+                  <div className="flex items-center justify-center min-w-[120px] sm:min-w-[140px]">
+                    <span className="font-bold text-2xl sm:text-3xl tracking-tight" style={{color: '#8C1515'}}>STANFORD</span>
+                  </div>
+                  
+                  {/* Princeton */}
+                  <div className="flex items-center justify-center min-w-[120px] sm:min-w-[140px]">
+                    <span className="font-bold text-2xl sm:text-3xl tracking-tight" style={{color: '#FF8F00'}}>PRINCETON</span>
+                  </div>
+                </div>
+                
+                {/* Duplicate set for seamless loop */}
+                <div className="flex space-x-12 sm:space-x-16 px-8">
+                  {/* Harvard */}
+                  <div className="flex items-center justify-center min-w-[120px] sm:min-w-[140px]">
+                    <span className="font-bold text-2xl sm:text-3xl tracking-tight" style={{color: '#A51C30'}}>HARVARD</span>
+                  </div>
+                  
+                  {/* Yale */}
+                  <div className="flex items-center justify-center min-w-[120px] sm:min-w-[140px]">
+                    <span className="font-bold text-2xl sm:text-3xl tracking-tight" style={{color: '#00356B'}}>YALE</span>
+                  </div>
+                  
+                  {/* Oxford */}
+                  <div className="flex items-center justify-center min-w-[120px] sm:min-w-[140px]">
+                    <span className="font-bold text-2xl sm:text-3xl tracking-tight" style={{color: '#002147'}}>OXFORD</span>
+                  </div>
+                  
+                  {/* MIT */}
+                  <div className="flex items-center justify-center min-w-[120px] sm:min-w-[140px]">
+                    <span className="font-bold text-2xl sm:text-3xl tracking-tight" style={{color: '#A31F34'}}>MIT</span>
+                  </div>
+                  
+                  {/* Cambridge */}
+                  <div className="flex items-center justify-center min-w-[120px] sm:min-w-[140px]">
+                    <span className="font-bold text-2xl sm:text-3xl tracking-tight" style={{color: '#A3C1AD'}}>CAMBRIDGE</span>
+                  </div>
+                  
+                  {/* Stanford */}
+                  <div className="flex items-center justify-center min-w-[120px] sm:min-w-[140px]">
+                    <span className="font-bold text-2xl sm:text-3xl tracking-tight" style={{color: '#8C1515'}}>STANFORD</span>
+                  </div>
+                  
+                  {/* Princeton */}
+                  <div className="flex items-center justify-center min-w-[120px] sm:min-w-[140px]">
+                    <span className="font-bold text-2xl sm:text-3xl tracking-tight" style={{color: '#FF8F00'}}>PRINCETON</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
 
          {/* Interactive Annotation Examples */}
-         <div className="max-w-full mx-auto mb-16 sm:mb-24 md:mb-32 px-4 sm:px-8 md:px-12 lg:px-20">
+         <div className="max-w-full mx-auto mb-16 sm:mb-24 md:mb-32 px-6 sm:px-8 md:px-12 lg:px-20">
            <div className="text-center mb-12 sm:mb-16 md:mb-20">
              <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 sm:mb-8 tracking-tight">See WriteScholar in Action</h2>
-             <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-600 font-light max-w-4xl mx-auto leading-relaxed px-4">Real examples of how our AI analyzes and improves academic writing</p>
+             <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-600 font-light max-w-4xl mx-auto leading-relaxed px-6">Real examples of how our AI analyzes and improves academic writing</p>
              </div>
            
            {/* Three Separate Papers */}
-           <div className="space-y-12 sm:space-y-16 md:space-y-20">
-             {examplePapers.map((paper, paperIndex) => (
-               <div key={paperIndex} className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-10 md:gap-16 items-start">
-                 {/* Document Display */}
-                 <div className="relative group lg:col-span-2">
+          <div className="space-y-12 sm:space-y-16 md:space-y-20">
+            {examplePapers.map((paper, paperIndex) => (
+              <div key={paperIndex} className="max-w-5xl mx-auto">
+                {/* Document Display */}
+                <div className="relative group">
                    <div className="absolute -inset-1 bg-gradient-to-r from-green-400/30 to-amber-400/30 rounded-3xl blur-sm opacity-0 group-hover:opacity-100 transition duration-700"></div>
                    <div className="relative bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/40 hover:shadow-3xl transition-all duration-700 overflow-hidden">
                      <div className="p-6 border-b border-gray-100">
@@ -585,138 +474,72 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                        <p className="text-sm text-gray-500 font-medium">{paper.subtitle}</p>
                      </div>
                      
-                     <div className="p-6">
-                       <div className="prose max-w-none">
-                         {paper.content.map((paragraph, pIndex) => (
-                           <p key={pIndex} className="text-gray-700 leading-relaxed mb-4">
-                             {paragraph.annotations.length > 0 ? (
-                               paragraph.text.split(paragraph.annotations[0].text).map((part, partIndex) => (
-                                 <React.Fragment key={partIndex}>
-                                   {part}
-                                   {partIndex < paragraph.text.split(paragraph.annotations[0].text).length - 1 && (
-                                     <span 
-                                       className={`px-2 py-1 rounded border-l-4 cursor-pointer transition-all duration-200 ${
-                                         paragraph.annotations[0].type === 'green' 
-                                           ? 'bg-green-100 border-green-500 hover:bg-green-200' 
-                                           : paragraph.annotations[0].type === 'amber'
-                                           ? 'bg-amber-100 border-amber-500 hover:bg-amber-200'
-                                           : 'bg-red-100 border-red-500 hover:bg-red-200'
-                                       }`}
-                                       onMouseEnter={() => setHoveredAnnotation(paragraph.annotations[0])}
-                                       onMouseLeave={() => setHoveredAnnotation(null)}
-                                     >
-                                       {paragraph.annotations[0].text}
-                                     </span>
-                                   )}
-                                 </React.Fragment>
-                               ))
-                             ) : (
-                               paragraph.text
-                             )}
-                           </p>
-                         ))}
-            </div>
-                       
-                       {/* Annotation Legend */}
-                       <div className="mt-6 pt-4 border-t border-gray-100">
-                         <div className="flex flex-wrap gap-4">
-                           <div className="flex items-center space-x-2">
-                             <div className="w-3 h-3 bg-green-500 rounded border-l-2 border-green-600 shadow-sm"></div>
-                             <span className="text-xs font-medium text-gray-700">Strong sections</span>
+                    <div className="p-6">
+                      {paper.isImage ? (
+                        // Display image for image-based examples
+                        <div className="w-full">
+                          <img 
+                            src={paper.imagePath} 
+                            alt={paper.title}
+                            className="w-full h-auto rounded-lg shadow-lg"
+                          />
+                        </div>
+                      ) : (
+                        // Display text content for text-based examples
+                        <>
+                          <div className="prose max-w-none">
+                            {paper.content.map((paragraph, pIndex) => (
+                              <p key={pIndex} className="text-gray-700 leading-relaxed mb-4">
+                                {paragraph.annotations.length > 0 ? (
+                                  paragraph.text.split(paragraph.annotations[0].text).map((part, partIndex) => (
+                                    <React.Fragment key={partIndex}>
+                                      {part}
+                                      {partIndex < paragraph.text.split(paragraph.annotations[0].text).length - 1 && (
+                                        <span 
+                                          className={`px-2 py-1 rounded border-l-4 cursor-pointer transition-all duration-200 ${
+                                            paragraph.annotations[0].type === 'green' 
+                                              ? 'bg-green-100 border-green-500 hover:bg-green-200' 
+                                              : paragraph.annotations[0].type === 'amber'
+                                              ? 'bg-amber-100 border-amber-500 hover:bg-amber-200'
+                                              : 'bg-red-100 border-red-500 hover:bg-red-200'
+                                          }`}
+                                          onMouseEnter={() => setHoveredAnnotation(paragraph.annotations[0])}
+                                          onMouseLeave={() => setHoveredAnnotation(null)}
+                                        >
+                                          {paragraph.annotations[0].text}
+                                        </span>
+                                      )}
+                                    </React.Fragment>
+                                  ))
+                                ) : (
+                                  paragraph.text
+                                )}
+                              </p>
+                            ))}
+                          </div>
+                          
+                          {/* Annotation Legend */}
+                          <div className="mt-6 pt-4 border-t border-gray-100">
+                            <div className="flex flex-wrap gap-4">
+                              <div className="flex items-center space-x-2">
+                                <div className="w-3 h-3 bg-green-500 rounded border-l-2 border-green-600 shadow-sm"></div>
+                                <span className="text-xs font-medium text-gray-700">Strong sections</span>
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <div className="w-3 h-3 bg-amber-500 rounded border-l-2 border-amber-600 shadow-sm"></div>
+                                <span className="text-xs font-medium text-gray-700">Needs improvement</span>
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <div className="w-3 h-3 bg-red-500 rounded border-l-2 border-red-600 shadow-sm"></div>
+                                <span className="text-xs font-medium text-gray-700">Needs revision</span>
+                              </div>
+                            </div>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </div>
                 </div>
-                           <div className="flex items-center space-x-2">
-                             <div className="w-3 h-3 bg-amber-500 rounded border-l-2 border-amber-600 shadow-sm"></div>
-                             <span className="text-xs font-medium text-gray-700">Needs improvement</span>
-              </div>
-                           <div className="flex items-center space-x-2">
-                             <div className="w-3 h-3 bg-red-500 rounded border-l-2 border-red-600 shadow-sm"></div>
-                             <span className="text-xs font-medium text-gray-700">Needs revision</span>
-                </div>
-              </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-                 {/* Annotations Panel */}
-                 <div className="lg:col-span-1">
-                   <div className="relative">
-                     <div className="absolute -inset-1 bg-gradient-to-r from-blue-400/20 to-indigo-400/20 rounded-3xl blur-sm"></div>
-                     <div className="relative bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/40 p-6 max-h-fit">
-                       <h3 className="text-2xl font-bold text-gray-900 mb-6">
-                         Annotations
-                       </h3>
-                       
-                       
-                       {/* Goods */}
-                       <div className="mb-4">
-                         <h4 className="text-lg font-semibold text-green-700 mb-3 flex items-center">
-                           <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center mr-2">
-                             <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                               <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                             </svg>
-                           </div>
-                           Strong Points
-                         </h4>
-                         <div className="bg-green-50 border-l-4 border-green-500 rounded-r-lg p-4">
-                           <ul className="space-y-2">
-                             {paper.summary.goods.map((item, index) => (
-                               <li key={index} className="flex items-start space-x-2">
-                                 <div className="w-1.5 h-1.5 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
-                                 <span className="text-gray-700 text-sm">{item}</span>
-                               </li>
-                             ))}
-                           </ul>
-                         </div>
-                       </div>
-                       
-                       {/* Improvements */}
-                       <div className="mb-4">
-                         <h4 className="text-lg font-semibold text-amber-700 mb-3 flex items-center">
-                           <div className="w-5 h-5 bg-amber-500 rounded-full flex items-center justify-center mr-2">
-                             <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                               <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                             </svg>
-                           </div>
-                           Areas to Improve
-                         </h4>
-                         <div className="bg-amber-50 border-l-4 border-amber-500 rounded-r-lg p-4">
-                           <ul className="space-y-2">
-                             {paper.summary.improvements.map((item, index) => (
-                               <li key={index} className="flex items-start space-x-2">
-                                 <div className="w-1.5 h-1.5 bg-amber-500 rounded-full mt-2 flex-shrink-0"></div>
-                                 <span className="text-gray-700 text-sm">{item}</span>
-                               </li>
-                             ))}
-                           </ul>
-                         </div>
-                       </div>
-                       
-                       {/* Concerns */}
-            <div className="mb-4">
-                         <h4 className="text-lg font-semibold text-red-700 mb-3 flex items-center">
-                           <div className="w-5 h-5 bg-red-500 rounded-full flex items-center justify-center mr-2">
-                             <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                               <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                             </svg>
-                           </div>
-                           Serious Concerns
-                         </h4>
-                         <div className="bg-red-50 border-l-4 border-red-500 rounded-r-lg p-4">
-                           <ul className="space-y-2">
-                             {paper.summary.concerns.map((item, index) => (
-                               <li key={index} className="flex items-start space-x-2">
-                                 <div className="w-1.5 h-1.5 bg-red-500 rounded-full mt-2 flex-shrink-0"></div>
-                                 <span className="text-gray-700 text-sm">{item}</span>
-                               </li>
-                             ))}
-                           </ul>
-                         </div>
-                       </div>
-                     </div>
-            </div>
-                </div>
-   
               </div>
              ))}
            </div>
@@ -735,7 +558,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                 </div>
 
         {/* Reviews Section */}
-        <div className="text-center mb-16 sm:mb-20 md:mb-24 px-4 sm:px-8 md:px-16">
+        <div className="text-center mb-16 sm:mb-20 md:mb-24 px-6 sm:px-8 md:px-16">
           <div className="max-w-7xl mx-auto">
             <div className="bg-white/90 backdrop-blur-xl rounded-2xl shadow-xl p-6 sm:p-8 md:p-12">
                 <div className="flex justify-center mb-4 sm:mb-6">
@@ -765,7 +588,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
         </div>
 
         {/* FAQ Section */}
-        <div className="max-w-5xl mx-auto mb-16 sm:mb-24 md:mb-32 px-4 sm:px-6 md:px-8">
+        <div className="max-w-5xl mx-auto mb-16 sm:mb-24 md:mb-32 px-6 sm:px-6 md:px-8">
         <div className="text-center mb-12 sm:mb-16 md:mb-20">
             <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 sm:mb-8 tracking-tight">FAQs</h2>
             <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-600 font-light">Common questions about WriteScholar</p>
@@ -803,10 +626,10 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
         </div>
 
         {/* How It Works */}
-        <div className="text-center mb-16 sm:mb-24 md:mb-32 px-4 sm:px-6 md:px-8">
+        <div className="text-center mb-16 sm:mb-24 md:mb-32 px-6 sm:px-6 md:px-8">
           <div className="max-w-5xl mx-auto">
             <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 sm:mb-8 tracking-tight">How it works</h2>
-            <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-600 mb-12 sm:mb-16 md:mb-24 font-light max-w-4xl mx-auto leading-relaxed">Transform your academic writing into polished, professional work in just a few simple steps.</p>
+            <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-600 mb-12 sm:mb-16 md:mb-24 font-light max-w-4xl mx-auto leading-relaxed px-6">Transform your academic writing into polished, professional work in just a few simple steps.</p>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 sm:gap-10 md:gap-12">
             <div className="text-center group">
@@ -855,7 +678,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
         </div>
 
         {/* Pricing Section */}
-        <div id="pricing" className="max-w-6xl mx-auto mb-16 sm:mb-24 md:mb-32 px-4 sm:px-6 md:px-8">
+        <div id="pricing" className="max-w-6xl mx-auto mb-16 sm:mb-24 md:mb-32 px-6 sm:px-6 md:px-8">
           {/* Header */}
           <div className="text-center mb-8 sm:mb-12">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4 sm:mb-6">
@@ -1155,14 +978,14 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
         </div>
 
         {/* CTA Section */}
-        <div className="relative mb-16 sm:mb-24 md:mb-32 px-4 sm:px-8 md:px-16">
+        <div className="relative mb-16 sm:mb-24 md:mb-32 px-6 sm:px-8 md:px-16">
           <div className="max-w-8xl mx-auto">
             <div className="absolute -inset-1 bg-gradient-to-r from-blue-600/30 via-purple-600/30 to-indigo-600/30 rounded-2xl sm:rounded-3xl blur-sm"></div>
             <div className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 rounded-2xl sm:rounded-3xl p-8 sm:p-12 md:p-16 lg:p-20 text-center overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 via-purple-600/10 to-indigo-600/10"></div>
           <div className="relative z-10">
             <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6 sm:mb-8 tracking-tight">Ready to enhance your academic writing?</h2>
-            <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-300 mb-10 sm:mb-12 md:mb-16 max-w-3xl mx-auto font-light leading-relaxed px-4">Join thousands of students and researchers who trust WriteScholar for their writing success.</p>
+            <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-300 mb-10 sm:mb-12 md:mb-16 max-w-3xl mx-auto font-light leading-relaxed px-6">Join thousands of students and researchers who trust WriteScholar for their writing success.</p>
             <button 
               onClick={() => onNavigate('signup')}
               className="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-8 sm:px-12 md:px-16 py-3 sm:py-4 md:py-5 rounded-xl sm:rounded-2xl text-base sm:text-lg md:text-xl font-semibold hover:shadow-lg transform hover:scale-105 transition-all duration-300 inline-flex items-center space-x-2 sm:space-x-3"
