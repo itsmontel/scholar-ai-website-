@@ -1,24 +1,33 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="/favicon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>WriteScholar — AI Academic Writing Assistant</title>
-    <meta name="description" content="Get instant AI feedback on your academic papers. WriteScholar analyzes structure, grammar, citations (APA, MLA, Chicago), and academic rigor. Free to start." />
-    <meta name="keywords" content="academic writing tool, AI paper checker, citation checker, grammar checker for academic writing, academic paper feedback, research paper analyzer, essay structure checker, AI writing assistant for students" />
-    <link rel="canonical" href="https://writescholar.com/" />
-    <!-- Open Graph -->
+
+    <!-- PRIMARY SEO META TAGS -->
+    <title>WriteScholar — AI-Powered Academic Writing Feedback | Grammar, Citations &amp; Analysis</title>
+    <meta name="description" content="Get instant AI feedback on your academic papers. WriteScholar analyzes structure, grammar, citations (APA, MLA, Chicago, Harvard), and academic rigor. Free to start." />
+
+    <!-- OPEN GRAPH -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://writescholar.com/" />
     <meta property="og:title" content="WriteScholar — AI Academic Writing Assistant" />
     <meta property="og:description" content="Upload your paper and get professor-style feedback in seconds. Grammar, citations, structure analysis and more." />
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://writescholar.com" />
-    <meta property="og:locale" content="en_US" />
-    <!-- Twitter -->
+    <meta property="og:site_name" content="WriteScholar" />
+
+    <!-- TWITTER CARD -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="WriteScholar — AI Academic Writing Assistant" />
     <meta name="twitter:description" content="Upload your paper and get professor-style feedback in seconds. Grammar, citations, structure analysis and more." />
-    <!-- Schema.org JSON-LD: SoftwareApplication -->
+
+    <!-- CANONICAL & ROBOTS -->
+    <link rel="canonical" href="https://writescholar.com/" />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="WriteScholar" />
+    <meta name="keywords" content="academic writing tool, AI paper checker, citation checker, APA citation generator, grammar checker academic writing, research paper analyzer, essay structure checker" />
+
+    <!-- STRUCTURED DATA - SoftwareApplication -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -26,14 +35,51 @@
       "name": "WriteScholar",
       "applicationCategory": "EducationalApplication",
       "operatingSystem": "Web",
-      "description": "AI-powered academic writing assistant that analyzes grammar, citations, and structure",
+      "description": "AI-powered academic writing assistant that analyzes grammar, citations, and structure for essays, theses, and research papers",
       "url": "https://writescholar.com",
       "offers": [
         { "@type": "Offer", "price": "0", "priceCurrency": "USD", "name": "Free Plan" },
-        { "@type": "Offer", "price": "9.99", "priceCurrency": "USD", "name": "Pro Plan" }
+        { "@type": "Offer", "price": "19.99", "priceCurrency": "USD", "name": "Starter Plan" },
+        { "@type": "Offer", "price": "39.99", "priceCurrency": "USD", "name": "Premium Plan" }
       ]
     }
     </script>
+
+    <!-- STRUCTURED DATA - FAQPage -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "How does WriteScholar's AI analysis work?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Upload your academic paper in PDF, Word, or paste text directly. Our AI analyzes structure, grammar, citations, and academic rigor, providing professor-style feedback in under 60 seconds." }
+        },
+        {
+          "@type": "Question",
+          "name": "Which citation styles does WriteScholar support?",
+          "acceptedAnswer": { "@type": "Answer", "text": "WriteScholar supports APA, MLA, Chicago, Harvard, IEEE, and Vancouver citation styles." }
+        },
+        {
+          "@type": "Question",
+          "name": "Is my document content secure and private?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Yes, WriteScholar uses encryption for data in transit and at rest. Your documents are protected with enterprise-grade security measures." }
+        },
+        {
+          "@type": "Question",
+          "name": "What file formats does WriteScholar support?",
+          "acceptedAnswer": { "@type": "Answer", "text": "WriteScholar supports PDF, DOC, DOCX, and TXT file formats, or you can paste text directly." }
+        },
+        {
+          "@type": "Question",
+          "name": "How accurate is the AI feedback?",
+          "acceptedAnswer": { "@type": "Answer", "text": "WriteScholar uses advanced AI models to provide detailed, professor-style feedback on academic writing including grammar, citations, structure, and argumentation." }
+        }
+      ]
+    }
+    </script>
+
     <!-- University Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -41,6 +87,22 @@
   </head>
   <body>
     <div id="root"></div>
+    <noscript>
+      <h1>WriteScholar — AI-Powered Academic Writing Feedback</h1>
+      <p>Upload your essay, thesis, or research paper. Get detailed feedback on grammar, citations (APA, MLA, Chicago, Harvard), structure, and academic rigor in under 60 seconds.</p>
+      <h2>Features</h2>
+      <ul>
+        <li>AI-Powered Writing Analysis</li>
+        <li>Citation Style Support — APA, MLA, Chicago, Harvard, IEEE, Vancouver</li>
+        <li>Grammar and Style Check</li>
+        <li>Professor-Style Annotations</li>
+      </ul>
+      <h2>Pricing</h2>
+      <p>Free: $0/month | Starter: $19.99/month | Premium: $39.99/month</p>
+      <nav>
+        <a href="/features">Features</a> | <a href="/pricing">Pricing</a> | <a href="/about">About</a> | <a href="/blog">Blog</a> | <a href="/help">FAQ</a> | <a href="/contact">Contact</a> | <a href="/login">Login</a> | <a href="/signup">Sign Up</a>
+      </nav>
+    </noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

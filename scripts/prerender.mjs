@@ -1,0 +1,113 @@
+/**
+ * Build-time prerendering script for WriteScholar
+ * Runs after `vite build`, uses Puppeteer to visit each route
+ * and save the fully-rendered HTML to dist/
+ */
+import puppeteer from 'puppeteer';
+import { createServer } from 'http';
+import handler from 'serve-handler';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const DIST = path.resolve(__dirname, '../dist');
+const PORT = 34567;
+
+const staticRoutes = [
+  '/',
+  '/features',
+  '/pricing',
+  '/about',
+  '/blog',
+  '/help',
+  '/contact',
+  '/privacy',
+  '/terms',
+  '/login',
+  '/signup',
+];
+
+let blogSlugs = [];
+try {
+  const blogDataPath = path.resolve(__dirname, '../src/data/blogPosts.ts');
+  const content = fs.readFileSync(blogDataPath, 'utf-8');
+  const slugMatches = [...content.matchAll(/slug:\s*['"]([^'"]+)['"]/g)];
+  blogSlugs = slugMatches.map((m) => m[1]);
+  console.log(`Found ${blogSlugs.length} blog slugs`);
+} catch (e) {
+  console.warn('Could not auto-detect blog slugs:', e.message);
+}
+
+const blogRoutes = blogSlugs.map((s) => `/blog/${s}`);
+const allRoutes = [...staticRoutes, ...blogRoutes];
+
+async function prerender() {
+  const server = createServer((req, res) => {
+    return handler(req, res, {
+      public: DIST,
+      rewrites: [{ source: '**', destination: '/index.html' }],
+    });
+  });
+
+  await new Promise((resolve) => server.listen(PORT, resolve));
+  console.log(`Static server running on http://localhost:${PORT}`);
+
+  let browser;
+  try {
+    browser = await puppeteer.launch({
+      headless: 'new',
+      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
+    });
+  } catch (e) {
+    // Fallback: try system Chrome on macOS (e.g. when Puppeteer's Chromium is corrupted)
+    const isMac = process.platform === 'darwin';
+    const chromePath = isMac
+      ? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
+      : process.platform === 'win32'
+        ? 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
+        : null;
+    if (chromePath) {
+      if (fs.existsSync(chromePath)) {
+        browser = await puppeteer.launch({
+          headless: 'new',
+          executablePath: chromePath,
+          args: ['--no-sandbox', '--disable-setuid-sandbox'],
+        });
+      } else {
+        throw e;
+      }
+    } else {
+      throw e;
+    }
+  }
+
+  for (const route of allRoutes) {
+    const url = `http://localhost:${PORT}${route}`;
+    console.log(`Prerendering: ${route}`);
+
+    const page = await browser.newPage();
+    await page.goto(url, { waitUntil: 'networkidle0', timeout: 15000 });
+    await new Promise((r) => setTimeout(r, 2000));
+
+    let html = await page.content();
+    html = html.replace(/http:\/\/localhost:\d+/g, 'https://writescholar.com');
+
+    const outputDir = route === '/' ? DIST : path.join(DIST, route);
+    fs.mkdirSync(outputDir, { recursive: true });
+    fs.writeFileSync(path.join(outputDir, 'index.html'), html);
+
+    await page.close();
+    console.log(`  ✅ Saved: ${route}`);
+  }
+
+  await browser.close();
+  server.close();
+  console.log(`\nPrerendered ${allRoutes.length} pages!`);
+}
+
+prerender().catch((err) => {
+  console.error('Prerender failed:', err.message);
+  console.warn('Build will continue. Deploying SPA without prerendered HTML. Fix Puppeteer/Chrome to enable prerendering.');
+  process.exit(0);
+});

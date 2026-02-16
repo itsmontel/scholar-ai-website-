@@ -1,15 +1,25 @@
 User-agent: *
 Allow: /
+Allow: /features
+Allow: /pricing
+Allow: /about
+Allow: /blog
+Allow: /help
+Allow: /contact
+
 Disallow: /dashboard
 Disallow: /analysis
-Disallow: /settings
 Disallow: /analysis-history
+Disallow: /citation-results
 Disallow: /citation-history
-Disallow: /upload
+Disallow: /settings
+Disallow: /profile
 Disallow: /library
 Disallow: /account
 Disallow: /billing
-Disallow: /profile
-Disallow: /citation-results
+Disallow: /upload
+Disallow: /auth-callback
+Disallow: /email-verification
+Disallow: /reset-password
 
 Sitemap: https://writescholar.com/sitemap.xml

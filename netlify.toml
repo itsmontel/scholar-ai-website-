@@ -1,16 +1,6 @@
 [build]
-  publish = "dist"
   command = "npm run build"
-
-[build.environment]
-  NODE_VERSION = "18"
-
-# IMPORTANT: Set this in Netlify UI under Site Settings > Environment Variables
-# VITE_API_URL = "https://your-railway-backend.railway.app/api"
-
-[context.production.environment]
-  # Production environment variables
-  # Set VITE_API_URL in Netlify dashboard to your Railway backend URL
+  publish = "dist"
 
 [[redirects]]
   from = "/*"
@@ -21,11 +11,15 @@
   for = "/*"
   [headers.values]
     X-Frame-Options = "DENY"
-    X-XSS-Protection = "1; mode=block"
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
 
 [[headers]]
-  for = "/assets/*"
+  for = "/sitemap.xml"
   [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
+    Content-Type = "application/xml"
+
+[[headers]]
+  for = "/robots.txt"
+  [headers.values]
+    Content-Type = "text/plain"
