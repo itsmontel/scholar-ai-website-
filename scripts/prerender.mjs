@@ -40,7 +40,8 @@ try {
 }
 
 const blogRoutes = blogSlugs.map((s) => `/blog/${s}`);
-const allRoutes = [...staticRoutes, ...blogRoutes];
+// Process root last so we never serve prerendered homepage when capturing other routes
+const allRoutes = [...staticRoutes.filter((r) => r !== '/'), ...blogRoutes, '/'];
 
 async function prerender() {
   const server = createServer((req, res) => {
@@ -93,9 +94,10 @@ async function prerender() {
     let html = await page.content();
     html = html.replace(/http:\/\/localhost:\d+/g, 'https://writescholar.com');
 
-    const outputDir = route === '/' ? DIST : path.join(DIST, route);
-    fs.mkdirSync(outputDir, { recursive: true });
-    fs.writeFileSync(path.join(outputDir, 'index.html'), html);
+    // Homepage: replace Vite's dist/index.html with prerendered HTML. Other routes: write to dist/<route>/index.html
+    const outputPath = route === '/' ? path.join(DIST, 'index.html') : path.join(DIST, route, 'index.html');
+    if (route !== '/') fs.mkdirSync(path.join(DIST, route), { recursive: true });
+    fs.writeFileSync(outputPath, html);
 
     await page.close();
     console.log(`  ✅ Saved: ${route}`);
