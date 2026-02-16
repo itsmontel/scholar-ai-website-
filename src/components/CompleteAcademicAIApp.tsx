@@ -26,6 +26,8 @@ import TermsOfServicePage from './pages/TermsOfServicePage';
 import BillingPage from './pages/BillingPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import UnsubscribePage from './pages/UnsubscribePage';
+import BlogPage from './pages/BlogPage';
+import BlogPostPage from './pages/BlogPostPage';
 
 // Import common components
 import ErrorBoundary from './common/ErrorBoundary';
@@ -81,6 +83,35 @@ const AcademicAIApp = () => {
 
   // Route protection for authenticated pages
   const protectedRoutes = ['dashboard', 'analysis', 'analysis-history', 'citation-results', 'citation-history', 'upload', 'settings', 'profile', 'library', 'account', 'billing'];
+
+  // SEO: dynamic document title and meta description per page (SPA)
+  const pageMeta: Record<string, { title: string; description: string }> = {
+    landing: { title: 'WriteScholar — AI Academic Writing Assistant', description: 'Get instant AI feedback on your academic papers. WriteScholar analyzes structure, grammar, citations (APA, MLA, Chicago), and academic rigor. Free to start.' },
+    features: { title: 'Features | WriteScholar', description: 'Explore WriteScholar\'s AI-powered features: academic writing analysis, APA/MLA/Chicago citation validation, grammar & style checking, and document management.' },
+    pricing: { title: 'Pricing | WriteScholar', description: 'Start free with 5 AI analyses per month. Upgrade to Pro for 999 analyses, advanced grammar checking, and priority support. Annual plans save 2 months.' },
+    about: { title: 'About | WriteScholar', description: 'WriteScholar helps students and researchers improve academic writing with AI analysis. Serving 10,000+ documents across 50+ countries.' },
+    help: { title: 'Help & FAQ | WriteScholar', description: 'Get answers about WriteScholar: supported citation styles (APA, Harvard, MLA, Chicago), file formats, analysis features, and account management.' },
+    contact: { title: 'Contact | WriteScholar', description: 'Contact WriteScholar support for help with your academic writing tool.' },
+    privacy: { title: 'Privacy Policy | WriteScholar', description: 'WriteScholar privacy policy and data handling.' },
+    terms: { title: 'Terms of Service | WriteScholar', description: 'WriteScholar terms of service.' },
+    login: { title: 'Log in | WriteScholar', description: 'Log in to your WriteScholar account.' },
+    signup: { title: 'Sign up | WriteScholar', description: 'Create your free WriteScholar account.' },
+    blog: { title: 'Blog | WriteScholar', description: 'Guides on APA research papers, citation checker tools, grammar for academic writing, and how to use AI writing assistants for students.' }
+  };
+  useEffect(() => {
+    const meta = pageMeta[currentPage];
+    if (meta) {
+      document.title = meta.title;
+      let desc = document.querySelector('meta[name="description"]');
+      if (desc) desc.setAttribute('content', meta.description);
+      else {
+        desc = document.createElement('meta');
+        desc.setAttribute('name', 'description');
+        desc.setAttribute('content', meta.description);
+        document.head.appendChild(desc);
+      }
+    }
+  }, [currentPage]);
 
   // Validate and refresh token if needed
   const validateAndRefreshToken = async () => {
@@ -221,10 +252,12 @@ const AcademicAIApp = () => {
       if (pathname === '/library') return 'library';
       if (pathname === '/account') return 'account';
       if (pathname === '/billing') return 'billing';
-      if (pathname === '/help-center') return 'help-center';
-      if (pathname === '/privacy-policy') return 'privacy-policy';
-      if (pathname === '/terms-of-service') return 'terms-of-service';
+      if (pathname === '/help' || pathname === '/help-center') return 'help';
+      if (pathname === '/privacy' || pathname === '/privacy-policy') return 'privacy';
+      if (pathname === '/terms' || pathname === '/terms-of-service') return 'terms';
       if (pathname === '/unsubscribe') return 'unsubscribe';
+      if (pathname === '/blog') return 'blog';
+      if (pathname.startsWith('/blog/')) return 'blog-post';
       return 'landing';
     };
     
@@ -374,12 +407,14 @@ const AcademicAIApp = () => {
     };
   }, [isLoggedIn, currentPage]);
 
-  // Navigation function
-  const navigateTo = (page: string) => {
+  // Navigation function (slug optional for blog posts)
+  const navigateTo = (page: string, slug?: string) => {
     setCurrentPage(page);
     // Update URL to match the page
     if (page === 'landing') {
       window.history.pushState({}, '', '/');
+    } else if (page === 'blog-post' && slug) {
+      window.history.pushState({}, '', `/blog/${slug}`);
     } else {
       window.history.pushState({}, '', `/${page}`);
     }
@@ -451,6 +486,10 @@ const AcademicAIApp = () => {
         return <TermsOfServicePage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'help':
         return <FAQPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
+      case 'blog':
+        return <BlogPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
+      case 'blog-post':
+        return <BlogPostPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'unsubscribe':
         return <UnsubscribePage onNavigate={navigateTo} />;
       case 'dashboard':

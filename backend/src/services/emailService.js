@@ -107,7 +107,7 @@ class EmailService {
             </div>
             
             <div style="background: #333; color: white; padding: 20px; text-align: center; font-size: 14px;">
-              <p style="margin: 0;">© 2025 WriteScholar. All rights reserved.</p>
+              <p style="margin: 0;">© 2026 WriteScholar. All rights reserved.</p>
               <p style="margin: 5px 0 0 0;">Enhancing academic writing with AI</p>
             </div>
           </div>
@@ -188,7 +188,7 @@ class EmailService {
             </div>
             
             <div style="background: #333; color: white; padding: 20px; text-align: center; font-size: 14px;">
-              <p style="margin: 0;">© 2025 WriteScholar. All rights reserved.</p>
+              <p style="margin: 0;">© 2026 WriteScholar. All rights reserved.</p>
               <p style="margin: 5px 0 0 0;">Enhancing academic writing with AI</p>
             </div>
           </div>
@@ -259,7 +259,7 @@ class EmailService {
             </div>
             
             <div style="background: #333; color: white; padding: 20px; text-align: center; font-size: 14px;">
-              <p style="margin: 0;">© 2025 WriteScholar. All rights reserved.</p>
+              <p style="margin: 0;">© 2026 WriteScholar. All rights reserved.</p>
               <p style="margin: 5px 0 0 0;">Enhancing academic writing with AI</p>
             </div>
           </div>

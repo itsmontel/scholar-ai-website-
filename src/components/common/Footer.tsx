@@ -17,36 +17,32 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
               </div>
               <span className="text-xl sm:text-2xl font-bold text-gray-900">WriteScholar</span>
             </div>
-            <p className="text-gray-600 text-sm font-medium">© 2025 WriteScholar. All rights reserved.</p>
+            <p className="text-gray-600 text-sm font-medium">© 2026 WriteScholar. All rights reserved.</p>
           </div>
           
-          {/* Company Links */}
+          {/* Company Links - real hrefs for SEO, onClick for SPA nav */}
           <div className="sm:-mt-8 md:-mt-12 lg:-mt-20 sm:text-right">
             <h4 className="font-semibold text-gray-900 mb-4 sm:mb-6 text-base sm:text-lg">Company</h4>
             <ul className="space-y-2 sm:space-y-3">
               <li>
-                <button 
-                  onClick={() => onNavigate?.('pricing')} 
-                  className="text-gray-600 hover:text-gray-900 text-sm transition-colors font-medium block"
-                >
+                <a href="/blog" onClick={(e) => { e.preventDefault(); onNavigate?.('blog'); }} className="text-gray-600 hover:text-gray-900 text-sm transition-colors font-medium block">
+                  Blog
+                </a>
+              </li>
+              <li>
+                <a href="/pricing" onClick={(e) => { e.preventDefault(); onNavigate?.('pricing'); }} className="text-gray-600 hover:text-gray-900 text-sm transition-colors font-medium block">
                   Pricing
-                </button>
+                </a>
               </li>
               <li>
-                <button 
-                  onClick={() => onNavigate?.('help')} 
-                  className="text-gray-600 hover:text-gray-900 text-sm transition-colors font-medium block"
-                >
+                <a href="/help" onClick={(e) => { e.preventDefault(); onNavigate?.('help'); }} className="text-gray-600 hover:text-gray-900 text-sm transition-colors font-medium block">
                   FAQ
-                </button>
+                </a>
               </li>
               <li>
-                <button 
-                  onClick={() => onNavigate?.('contact')} 
-                  className="text-gray-600 hover:text-gray-900 text-sm transition-colors font-medium block"
-                >
+                <a href="/contact" onClick={(e) => { e.preventDefault(); onNavigate?.('contact'); }} className="text-gray-600 hover:text-gray-900 text-sm transition-colors font-medium block">
                   Contact Us
-                </button>
+                </a>
               </li>
             </ul>
           </div>
@@ -56,28 +52,19 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
             <h4 className="font-semibold text-gray-900 mb-4 sm:mb-6 text-base sm:text-lg">Legal</h4>
             <ul className="space-y-2 sm:space-y-3">
               <li>
-                <button 
-                  onClick={() => onNavigate?.('terms')} 
-                  className="text-gray-600 hover:text-gray-900 text-sm transition-colors font-medium block"
-                >
+                <a href="/terms" onClick={(e) => { e.preventDefault(); onNavigate?.('terms'); }} className="text-gray-600 hover:text-gray-900 text-sm transition-colors font-medium block">
                   Terms of Service
-                </button>
+                </a>
               </li>
               <li>
-                <button 
-                  onClick={() => onNavigate?.('privacy')} 
-                  className="text-gray-600 hover:text-gray-900 text-sm transition-colors font-medium block"
-                >
+                <a href="/privacy" onClick={(e) => { e.preventDefault(); onNavigate?.('privacy'); }} className="text-gray-600 hover:text-gray-900 text-sm transition-colors font-medium block">
                   Privacy Policy
-                </button>
+                </a>
               </li>
               <li>
-                <button 
-                  onClick={() => onNavigate?.('contact')} 
-                  className="text-gray-600 hover:text-gray-900 text-sm transition-colors font-medium block"
-                >
+                <a href="/contact" onClick={(e) => { e.preventDefault(); onNavigate?.('contact'); }} className="text-gray-600 hover:text-gray-900 text-sm transition-colors font-medium block">
                   Contact Support
-                </button>
+                </a>
               </li>
             </ul>
           </div>

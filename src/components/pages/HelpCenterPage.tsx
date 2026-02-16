@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Header from '../common/Header';
 
 interface FAQPageProps {
@@ -11,6 +11,45 @@ const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [openFAQ, setOpenFAQ] = useState<number | null>(null);
+
+  // FAQPage schema for SEO / rich results
+  useEffect(() => {
+    const faqSchema = {
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: [
+        {
+          '@type': 'Question',
+          name: 'Which citation styles does WriteScholar support?',
+          acceptedAnswer: { '@type': 'Answer', text: 'WriteScholar supports APA, Harvard, Chicago, MLA, IEEE, and Vancouver citation styles.' }
+        },
+        {
+          '@type': 'Question',
+          name: 'What is the minimum word count for analysis?',
+          acceptedAnswer: { '@type': 'Answer', text: 'WriteScholar requires a minimum of 200 words for analysis.' }
+        },
+        {
+          '@type': 'Question',
+          name: 'How do I get started with WriteScholar?',
+          acceptedAnswer: { '@type': 'Answer', text: 'Sign up for an account, then upload a document or paste text (at least 200 words) and click "Send to Analysis".' }
+        },
+        {
+          '@type': 'Question',
+          name: 'What file formats does WriteScholar support?',
+          acceptedAnswer: { '@type': 'Answer', text: 'WriteScholar supports PDF, DOC, DOCX, and TXT files.' }
+        }
+      ]
+    };
+    const script = document.createElement('script');
+    script.type = 'application/ld+json';
+    script.textContent = JSON.stringify(faqSchema);
+    script.id = 'faq-schema-writescholar';
+    document.head.appendChild(script);
+    return () => {
+      const el = document.getElementById('faq-schema-writescholar');
+      if (el) el.remove();
+    };
+  }, []);
 
   const categories = [
     { id: 'all', name: 'All Topics', icon: '📚', count: 12 },

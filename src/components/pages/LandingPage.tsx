@@ -170,13 +170,13 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 relative overflow-hidden px-2 sm:px-8">
+    <main className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 relative overflow-hidden px-2 sm:px-8" role="main">
       {/* Background decorative elements */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-100/20 via-transparent to-transparent"></div>
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-purple-100/20 via-transparent to-transparent"></div>
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-100/20 via-transparent to-transparent" aria-hidden="true" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-purple-100/20 via-transparent to-transparent" aria-hidden="true" />
       
       {/* Navigation */}
-      <nav className="relative z-10 flex items-center justify-between px-2 sm:px-8 md:px-16 py-4 sm:py-6 backdrop-blur-sm bg-white/80 border-b border-white/20">
+      <nav className="relative z-10 flex items-center justify-between px-2 sm:px-8 md:px-16 py-4 sm:py-6 backdrop-blur-sm bg-white/80 border-b border-white/20" aria-label="Main navigation">
         <div className="flex items-center space-x-2 sm:space-x-3">
           <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-xl flex items-center justify-center shadow-lg">
             <span className="text-white font-bold text-xl sm:text-2xl">W</span>
@@ -207,6 +207,12 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
           >
             About
           </button>
+          <button 
+            onClick={() => onNavigate('blog')}
+            className="text-gray-600 hover:text-gray-900 transition-colors font-medium"
+          >
+            Blog
+          </button>
         </div>
         <div className="flex items-center space-x-2 sm:space-x-3">
           <button 
@@ -224,21 +230,28 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
         </div>
       </nav>
 
-      {/* Hero Section */}
+      {/* Hero Section - keyword-rich for SEO */}
       <div className="relative z-10 max-w-8xl mx-auto px-2 sm:px-8 md:px-16 py-12 sm:py-16 md:py-24">
-        <div className="text-center mb-12 sm:mb-16 md:mb-20">
-          {/* Mobile: Clean, bold headline */}
+        <header className="text-center mb-12 sm:mb-16 md:mb-20">
           <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-4 sm:mb-8 leading-tight tracking-tighter -mt-4 sm:-mt-6">
             {mode === 'analyze' ? (
               <>
-                <span className="block">Your AI<br />writing <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">assistant</span></span>
+                <span className="block">AI-Powered <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">Academic Writing</span></span>
+                <span className="block">Feedback</span>
+                <span className="block text-2xl sm:text-3xl md:text-4xl font-normal text-gray-700 mt-3">Instant analysis for your papers</span>
               </>
             ) : (
               <>
-                <span className="block">Find <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">citations</span><br />instantly</span>
+                <span className="block">Find <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">citations</span> instantly</span>
+                <span className="block text-2xl sm:text-3xl md:text-4xl font-normal text-gray-700 mt-2">APA, MLA, Chicago &amp; more</span>
               </>
             )}
           </h1>
+          <p className="text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto mb-6 sm:mb-8">
+            {mode === 'analyze'
+              ? 'Upload your essay, thesis, or research paper. Get detailed feedback on grammar, citations (APA, MLA, Chicago, Harvard), structure, and academic rigor in under 60 seconds.'
+              : 'Search 10M+ academic sources. Get ready-to-use citations in multiple styles for your research.'}
+          </p>
           {/* Feature list with checkmarks */}
           <div className="mb-8">
             {/* Mobile: 3 lines layout (2-1-1) */}
@@ -599,7 +612,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
               </div>
             </div>
           </div>
-        </div>
+        </header>
 
         {/* Trusted By Universities Section */}
         <div className="text-center mb-12 sm:mb-16 px-2 sm:px-8 md:px-16">
@@ -1316,10 +1329,10 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
           isPopup={true}
           text="Preparing your text for analysis"
           isComplete={false}
-        />
-      )}
-    </div>
-  );
-};
+          />
+        )}
+      </main>
+    );
+  };
 
 export default LandingPage;

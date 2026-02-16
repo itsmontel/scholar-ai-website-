@@ -165,29 +165,29 @@ const LandingPage: React.FC<NavigationProps> = ({ onNavigate }) => {
                 </div>
                 <span className="text-xl font-bold text-gray-900">AcademicAI</span>
               </div>
-              <p className="text-gray-600 text-sm">© 2025 AcademicAI. All rights reserved.</p>
+              <p className="text-gray-600 text-sm">© 2026 AcademicAI. All rights reserved.</p>
             </div>
             <div>
               <h4 className="font-semibold text-gray-900 mb-4">Company</h4>
               <ul className="space-y-2">
-                <li><a href="#" className="text-gray-600 hover:text-gray-900 text-sm">About</a></li>
-                <li><a href="#" className="text-gray-600 hover:text-gray-900 text-sm">Pricing</a></li>
-                <li><a href="#" className="text-gray-600 hover:text-gray-900 text-sm">Contact</a></li>
+                <li><a href="/about" className="text-gray-600 hover:text-gray-900 text-sm">About</a></li>
+                <li><a href="/pricing" className="text-gray-600 hover:text-gray-900 text-sm">Pricing</a></li>
+                <li><a href="/contact" className="text-gray-600 hover:text-gray-900 text-sm">Contact</a></li>
               </ul>
             </div>
             <div>
               <h4 className="font-semibold text-gray-900 mb-4">Resources</h4>
               <ul className="space-y-2">
-                <li><a href="#" className="text-gray-600 hover:text-gray-900 text-sm">Help Center</a></li>
-                <li><a href="#" className="text-gray-600 hover:text-gray-900 text-sm">API Docs</a></li>
+                <li><a href="/help" className="text-gray-600 hover:text-gray-900 text-sm">Help Center</a></li>
+                <li><a href="/contact" className="text-gray-600 hover:text-gray-900 text-sm">API Docs</a></li>
               </ul>
             </div>
             <div>
               <h4 className="font-semibold text-gray-900 mb-4">Legal</h4>
               <ul className="space-y-2">
-                <li><a href="#" className="text-gray-600 hover:text-gray-900 text-sm">Terms</a></li>
-                <li><a href="#" className="text-gray-600 hover:text-gray-900 text-sm">Privacy</a></li>
-                <li><a href="#" className="text-gray-600 hover:text-gray-900 text-sm">Cookies</a></li>
+                <li><a href="/terms" className="text-gray-600 hover:text-gray-900 text-sm">Terms</a></li>
+                <li><a href="/privacy" className="text-gray-600 hover:text-gray-900 text-sm">Privacy</a></li>
+                <li><a href="/privacy" className="text-gray-600 hover:text-gray-900 text-sm">Cookies</a></li>
               </ul>
             </div>
           </div>

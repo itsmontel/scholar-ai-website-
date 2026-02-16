@@ -1,0 +1,15 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /analysis
+Disallow: /settings
+Disallow: /analysis-history
+Disallow: /citation-history
+Disallow: /upload
+Disallow: /library
+Disallow: /account
+Disallow: /billing
+Disallow: /profile
+Disallow: /citation-results
+
+Sitemap: https://writescholar.com/sitemap.xml
