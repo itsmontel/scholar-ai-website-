@@ -256,8 +256,12 @@ const AcademicAIApp = () => {
       if (pathname === '/privacy' || pathname === '/privacy-policy') return 'privacy';
       if (pathname === '/terms' || pathname === '/terms-of-service') return 'terms';
       if (pathname === '/unsubscribe') return 'unsubscribe';
-      if (pathname === '/blog') return 'blog';
-      if (pathname.startsWith('/blog/')) return 'blog-post';
+      if (pathname === '/blog' || pathname === '/blog/') return 'blog';
+      if (pathname.startsWith('/blog/')) {
+        const slug = pathname.replace(/^\/blog\/?/, '').split('/')[0]?.trim() ?? '';
+        if (slug) return 'blog-post';
+        return 'blog';
+      }
       return 'landing';
     };
     

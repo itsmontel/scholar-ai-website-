@@ -12,8 +12,16 @@ interface BlogPostPageProps {
 
 const BlogPostPage: React.FC<BlogPostPageProps> = ({ onNavigate, user, onLogout }) => {
   const pathname = typeof window !== 'undefined' ? window.location.pathname : '';
-  const slug = pathname.startsWith('/blog/') ? pathname.replace('/blog/', '').split('/')[0] : '';
+  const slug = pathname.startsWith('/blog/') ? pathname.replace(/^\/blog\/?/, '').split('/')[0]?.trim() ?? '' : '';
   const post = slug ? getPostBySlug(slug) : null;
+
+  // Empty slug (e.g. /blog/) → redirect to blog listing
+  useEffect(() => {
+    if (!slug && pathname.startsWith('/blog')) {
+      onNavigate('blog');
+      if (typeof window !== 'undefined') window.history.replaceState(null, '', '/blog');
+    }
+  }, [slug, pathname, onNavigate]);
 
   useEffect(() => {
     if (post) {
@@ -31,6 +39,10 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ onNavigate, user, onLogout 
   }, [post]);
 
   if (!post) {
+    // Redirect to blog listing if slug is empty (e.g. /blog/); otherwise show not found
+    if (!slug) {
+      return null; // useEffect will redirect to /blog
+    }
     return (
       <div className="min-h-screen bg-gray-50">
         <Header onNavigate={onNavigate} user={user} onLogout={onLogout} />
