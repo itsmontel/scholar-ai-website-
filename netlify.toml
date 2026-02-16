@@ -2,16 +2,10 @@
   command = "npm run build"
   publish = "dist"
 
-# Strip trailing slashes (SEO: canonical URL)
+# Strip trailing slash on /blog/ only (avoids loop; general /*/ can redirect root to itself)
 [[redirects]]
   from = "/blog/"
   to = "/blog"
-  status = 301
-  force = true
-
-[[redirects]]
-  from = "/*/"
-  to = "/:splat"
   status = 301
   force = true
 
