@@ -10,6 +10,7 @@ const LoginPage = ({ onNavigate, onLogin }: LoginPageProps) => {
     email: '',
     password: ''
   });
+  const [textIndex, setTextIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [showForgotPassword, setShowForgotPassword] = useState(false);
@@ -17,6 +18,20 @@ const LoginPage = ({ onNavigate, onLogin }: LoginPageProps) => {
   const [forgotPasswordLoading, setForgotPasswordLoading] = useState(false);
   const [forgotPasswordMessage, setForgotPasswordMessage] = useState('');
   const [forgotPasswordError, setForgotPasswordError] = useState('');
+
+  const animatedTexts = [
+    "Turn good writing into great",
+    "Enhance your academic papers",
+    "Get instant AI feedback",
+    "Improve your research quality"
+  ];
+
+  React.useEffect(() => {
+    const textInterval = setInterval(() => {
+      setTextIndex((prev) => (prev + 1) % animatedTexts.length);
+    }, 2000);
+    return () => clearInterval(textInterval);
+  }, []);
 
   const handleSubmit = async () => {
     if (!formData.email || !formData.password) {
@@ -132,19 +147,28 @@ const LoginPage = ({ onNavigate, onLogin }: LoginPageProps) => {
 
   return (
     <div className="min-h-screen bg-white flex">
+      {/* Back Button */}
+      <button
+        onClick={() => onNavigate('landing')}
+        className="fixed top-4 left-4 sm:top-6 sm:left-6 z-50 text-gray-600 hover:text-gray-900 transition-colors group"
+      >
+        <div className="w-10 h-10 bg-white rounded-full shadow-md flex items-center justify-center group-hover:shadow-lg transition-all border border-gray-100">
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+        </div>
+      </button>
+
       {/* Left Side - Login Form */}
       <div className="w-full lg:w-1/2 flex flex-col">
         {/* Header */}
-        <div className="p-6">
-          <button
-            onClick={() => onNavigate('landing')}
-            className="flex items-center space-x-2.5"
-          >
+        <div className="p-6 pt-20 sm:pt-6">
+          <div className="flex items-center space-x-2.5">
             <div className="w-9 h-9 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center">
               <span className="text-white font-bold text-lg">W</span>
             </div>
             <span className="text-xl font-bold text-gray-900">WriteScholar</span>
-          </button>
+          </div>
         </div>
 
         {/* Form Container */}
@@ -254,45 +278,114 @@ const LoginPage = ({ onNavigate, onLogin }: LoginPageProps) => {
         </div>
       </div>
 
-      {/* Right Side - Decorative */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gray-50 items-center justify-center p-12 relative overflow-hidden">
-        <div className="relative z-10 max-w-md text-center">
-          <div className="w-20 h-20 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-8">
-            <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-            </svg>
-          </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">
-            Write better academic papers
-          </h2>
-          <p className="text-gray-500 leading-relaxed mb-8">
-            Get AI-powered feedback on your essays, find reliable citations, and improve your academic writing in minutes.
-          </p>
-          <div className="flex items-center justify-center space-x-6 text-sm">
-            <div className="flex items-center text-gray-500">
-              <svg className="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-              AI Analysis
-            </div>
-            <div className="flex items-center text-gray-500">
-              <svg className="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-              Citations
-            </div>
-            <div className="flex items-center text-gray-500">
-              <svg className="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-              Grammar
+      {/* Right Side - Animated Design */}
+      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-slate-100 via-blue-100 to-indigo-100 flex-col items-center justify-center p-8 relative overflow-hidden rounded-l-3xl">
+        {/* Background blur effect */}
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-200/40 via-blue-200/30 to-indigo-200/40 backdrop-blur-sm rounded-l-3xl"></div>
+        
+        {/* Central input container */}
+        <div className="relative z-10 max-w-lg w-full">
+          <div className="bg-gradient-to-r from-white/50 to-white/30 backdrop-blur-xl rounded-3xl p-10 border border-white/60 shadow-2xl">
+            <div className="flex items-center space-x-5">
+              {/* Animated text */}
+              <span className="text-2xl font-light text-slate-600 flex-1 transition-all duration-700 ease-in-out">
+                {animatedTexts[textIndex]}
+              </span>
+              
+              {/* Cursor pipe */}
+              <div className="w-0.5 h-8 bg-slate-500 animate-pulse"></div>
+              
+              {/* Arrow button */}
+              <button className="w-10 h-10 bg-gradient-to-br from-slate-200/90 to-slate-300/70 hover:from-slate-300/90 hover:to-slate-400/70 rounded-xl flex items-center justify-center transition-all duration-300 hover:scale-110 shadow-xl hover:shadow-2xl">
+                <svg className="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M7 17L17 7M17 7H7M17 7V17" />
+                </svg>
+              </button>
             </div>
           </div>
         </div>
         
-        {/* Background decorations */}
-        <div className="absolute top-20 left-20 w-64 h-64 bg-blue-100 rounded-full opacity-50 blur-3xl"></div>
-        <div className="absolute bottom-20 right-20 w-48 h-48 bg-indigo-100 rounded-full opacity-50 blur-3xl"></div>
+        {/* Group of characters */}
+        <div className="relative z-10 mt-8">
+          <svg viewBox="0 0 320 160" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-72 h-36">
+            {/* Person 1 - Woman with red hair (left) */}
+            <g transform="translate(0, 0)">
+              <path d="M35 80 Q30 102 35 130 L65 130 Q70 102 65 80" fill="#8B5CF6" />
+              <rect x="43" y="62" width="14" height="20" fill="#FCD9B6" />
+              <ellipse cx="50" cy="40" rx="22" ry="25" fill="#FCD9B6" />
+              <path d="M28 34 Q24 16 38 10 Q50 3 66 10 Q78 16 74 34 Q71 25 60 20 Q50 15 40 20 Q30 25 28 34" fill="#B45309" />
+              <path d="M28 34 Q20 58 28 85" fill="#B45309" />
+              <path d="M72 34 Q80 58 72 85" fill="#B45309" />
+              <ellipse cx="40" cy="40" rx="4" ry="5" fill="#1F2937" />
+              <ellipse cx="60" cy="40" rx="4" ry="5" fill="#1F2937" />
+              <circle cx="41" cy="38" r="1.5" fill="white" />
+              <circle cx="61" cy="38" r="1.5" fill="white" />
+              <path d="M40 52 Q50 62 60 52" stroke="#1F2937" strokeWidth="2" fill="none" strokeLinecap="round" />
+              <ellipse cx="30" cy="47" rx="5" ry="3" fill="#FECACA" opacity="0.5" />
+              <ellipse cx="70" cy="47" rx="5" ry="3" fill="#FECACA" opacity="0.5" />
+              <path d="M70 85 Q82 72 86 55" stroke="#FCD9B6" strokeWidth="9" fill="none" strokeLinecap="round" />
+              <ellipse cx="88" cy="53" rx="6" ry="7" fill="#FCD9B6" />
+            </g>
+            
+            {/* Person 2 - Man with glasses (center) */}
+            <g transform="translate(110, -8)">
+              <path d="M35 95 Q30 120 35 150 L75 150 Q80 120 75 95" fill="#3B82F6" />
+              <rect x="47" y="74" width="16" height="24" fill="#E8B796" />
+              <ellipse cx="55" cy="48" rx="26" ry="30" fill="#E8B796" />
+              <path d="M29 40 Q26 20 40 14 Q55 6 70 14 Q84 20 81 40 Q78 28 66 21 Q55 15 44 21 Q32 28 29 40" fill="#5D4037" />
+              <path d="M29 40 Q22 50 29 60" fill="#5D4037" />
+              <path d="M81 40 Q88 50 81 60" fill="#5D4037" />
+              <ellipse cx="42" cy="46" rx="12" ry="10" fill="none" stroke="#374151" strokeWidth="2.5" />
+              <ellipse cx="68" cy="46" rx="12" ry="10" fill="none" stroke="#374151" strokeWidth="2.5" />
+              <path d="M54 46 L56 46" stroke="#374151" strokeWidth="2.5" />
+              <path d="M30 43 L24 40" stroke="#374151" strokeWidth="2.5" />
+              <path d="M80 43 L86 40" stroke="#374151" strokeWidth="2.5" />
+              <ellipse cx="42" cy="48" rx="4" ry="5" fill="#1F2937" />
+              <ellipse cx="68" cy="48" rx="4" ry="5" fill="#1F2937" />
+              <circle cx="43" cy="46" r="1.5" fill="white" />
+              <circle cx="69" cy="46" r="1.5" fill="white" />
+              <path d="M30 34 Q42 28 54 34" stroke="#5D4037" strokeWidth="2" fill="none" strokeLinecap="round" />
+              <path d="M56 34 Q68 28 80 34" stroke="#5D4037" strokeWidth="2" fill="none" strokeLinecap="round" />
+              <path d="M42 64 Q55 76 68 64" stroke="#1F2937" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+              <ellipse cx="28" cy="56" rx="5" ry="3" fill="#FECACA" opacity="0.4" />
+              <ellipse cx="82" cy="56" rx="5" ry="3" fill="#FECACA" opacity="0.4" />
+              <path d="M80 100 Q92 88 96 68" stroke="#E8B796" strokeWidth="11" fill="none" strokeLinecap="round" />
+              <ellipse cx="98" cy="66" rx="7" ry="8" fill="#E8B796" />
+              <path d="M45 90 L55 102 L65 90" stroke="#2563EB" strokeWidth="2" fill="none" />
+            </g>
+            
+            {/* Person 3 - Woman with bun (right) */}
+            <g transform="translate(220, 2)">
+              <path d="M30 78 Q25 100 30 128 L60 128 Q65 100 60 78" fill="#10B981" />
+              <rect x="38" y="60" width="14" height="20" fill="#D4A574" />
+              <ellipse cx="45" cy="38" rx="22" ry="24" fill="#D4A574" />
+              <path d="M23 32 Q20 15 33 10 Q45 4 60 10 Q72 15 69 32 Q65 23 54 18 Q45 14 36 18 Q26 23 23 32" fill="#1F2937" />
+              <ellipse cx="45" cy="6" rx="10" ry="8" fill="#1F2937" />
+              <path d="M23 32 Q16 42 23 52" fill="#1F2937" />
+              <path d="M67 32 Q74 42 67 52" fill="#1F2937" />
+              <ellipse cx="36" cy="38" rx="4" ry="5" fill="#1F2937" />
+              <ellipse cx="54" cy="38" rx="4" ry="5" fill="#1F2937" />
+              <circle cx="37" cy="36" r="1.5" fill="white" />
+              <circle cx="55" cy="36" r="1.5" fill="white" />
+              <path d="M28 30 Q36 26 44 30" stroke="#1F2937" strokeWidth="2" fill="none" strokeLinecap="round" />
+              <path d="M46 30 Q54 26 62 30" stroke="#1F2937" strokeWidth="2" fill="none" strokeLinecap="round" />
+              <path d="M35 50 Q45 60 55 50" stroke="#1F2937" strokeWidth="2" fill="none" strokeLinecap="round" />
+              <ellipse cx="25" cy="44" rx="5" ry="3" fill="#FECACA" opacity="0.5" />
+              <ellipse cx="65" cy="44" rx="5" ry="3" fill="#FECACA" opacity="0.5" />
+              <path d="M25 82 Q12 70 8 52" stroke="#D4A574" strokeWidth="9" fill="none" strokeLinecap="round" />
+              <ellipse cx="7" cy="50" rx="6" ry="7" fill="#D4A574" />
+            </g>
+          </svg>
+        </div>
+        
+        {/* Enhanced floating elements */}
+        <div className="absolute top-16 left-16 w-32 h-32 bg-gradient-to-br from-blue-300/20 to-indigo-300/15 rounded-full animate-bounce" style={{animationDuration: '6s'}}></div>
+        <div className="absolute bottom-20 right-20 w-24 h-24 bg-gradient-to-br from-slate-300/20 to-blue-300/15 rounded-full animate-bounce" style={{animationDuration: '8s', animationDelay: '2s'}}></div>
+        <div className="absolute top-1/3 right-12 w-20 h-20 bg-gradient-to-br from-indigo-300/20 to-slate-300/15 rounded-full animate-bounce" style={{animationDuration: '7s', animationDelay: '1s'}}></div>
+        
+        {/* Additional subtle elements */}
+        <div className="absolute top-1/4 left-1/4 w-16 h-16 bg-gradient-to-br from-blue-200/10 to-indigo-200/5 rounded-full animate-bounce" style={{animationDuration: '5s', animationDelay: '0.5s'}}></div>
+        <div className="absolute bottom-1/3 left-1/3 w-12 h-12 bg-gradient-to-br from-slate-200/10 to-blue-200/5 rounded-full animate-bounce" style={{animationDuration: '4s', animationDelay: '1.5s'}}></div>
       </div>
 
       {/* Forgot Password Modal */}

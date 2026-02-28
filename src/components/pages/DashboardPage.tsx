@@ -67,36 +67,63 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
   ];
 
   // Character illustration component - positioned outside the text area
+  // Mobile: head only, top-right corner | Desktop: full body with pointing arm
   const CharacterIllustration = () => (
-    <div className="absolute right-2 top-0 w-20 h-28 sm:right-4 sm:w-24 sm:h-32 xl:-right-28 xl:w-24 xl:h-32 pointer-events-none z-10">
-      <svg viewBox="0 0 100 130" fill="none" xmlns="http://www.w3.org/2000/svg">
-        {/* Body */}
-        <ellipse cx="50" cy="115" rx="18" ry="8" fill="#E0E7FF" />
-        <path d="M36 65 Q36 100 50 108 Q64 100 64 65" fill="#6366F1" />
-        {/* Head */}
-        <circle cx="50" cy="38" r="22" fill="#FCD9B6" />
-        {/* Hair */}
-        <path d="M28 32 Q30 12 50 16 Q70 12 72 32 Q76 22 64 18 Q50 8 36 18 Q24 22 28 32" fill="#4B5563" />
-        {/* Eyes */}
-        <circle cx="42" cy="36" r="3.5" fill="#1F2937" />
-        <circle cx="58" cy="36" r="3.5" fill="#1F2937" />
-        <circle cx="43" cy="34.5" r="1.2" fill="white" />
-        <circle cx="59" cy="34.5" r="1.2" fill="white" />
-        {/* Eyebrows */}
-        <path d="M37 28 Q42 25 47 28" stroke="#4B5563" strokeWidth="1.5" fill="none" strokeLinecap="round" />
-        <path d="M53 28 Q58 25 63 28" stroke="#4B5563" strokeWidth="1.5" fill="none" strokeLinecap="round" />
-        {/* Smile */}
-        <path d="M42 48 Q50 55 58 48" stroke="#1F2937" strokeWidth="2" fill="none" strokeLinecap="round" />
-        {/* Arm pointing left toward input */}
-        <path d="M36 75 Q15 82 5 95" stroke="#FCD9B6" strokeWidth="8" fill="none" strokeLinecap="round" />
-        <circle cx="3" cy="98" r="5" fill="#FCD9B6" />
-        {/* Shirt collar */}
-        <path d="M42 62 L50 68 L58 62" stroke="white" strokeWidth="2" fill="none" />
-        {/* Cheeks (blush) */}
-        <circle cx="35" cy="44" r="3" fill="#FECACA" opacity="0.5" />
-        <circle cx="65" cy="44" r="3" fill="#FECACA" opacity="0.5" />
-      </svg>
-    </div>
+    <>
+      {/* Mobile version - head only, positioned top-right */}
+      <div className="absolute -right-2 -top-10 w-14 h-14 sm:hidden pointer-events-none z-10">
+        <svg viewBox="0 0 70 70" fill="none" xmlns="http://www.w3.org/2000/svg">
+          {/* Head */}
+          <circle cx="35" cy="38" r="22" fill="#FCD9B6" />
+          {/* Hair */}
+          <path d="M13 32 Q15 12 35 16 Q55 12 57 32 Q61 22 49 18 Q35 8 21 18 Q9 22 13 32" fill="#4B5563" />
+          {/* Eyes */}
+          <circle cx="27" cy="36" r="3.5" fill="#1F2937" />
+          <circle cx="43" cy="36" r="3.5" fill="#1F2937" />
+          <circle cx="28" cy="34.5" r="1.2" fill="white" />
+          <circle cx="44" cy="34.5" r="1.2" fill="white" />
+          {/* Eyebrows */}
+          <path d="M22 28 Q27 25 32 28" stroke="#4B5563" strokeWidth="1.5" fill="none" strokeLinecap="round" />
+          <path d="M38 28 Q43 25 48 28" stroke="#4B5563" strokeWidth="1.5" fill="none" strokeLinecap="round" />
+          {/* Smile */}
+          <path d="M27 48 Q35 55 43 48" stroke="#1F2937" strokeWidth="2" fill="none" strokeLinecap="round" />
+          {/* Cheeks (blush) */}
+          <circle cx="20" cy="44" r="3" fill="#FECACA" opacity="0.5" />
+          <circle cx="50" cy="44" r="3" fill="#FECACA" opacity="0.5" />
+        </svg>
+      </div>
+      
+      {/* Tablet/Desktop version - full body with arm */}
+      <div className="absolute hidden sm:block sm:right-4 sm:top-0 sm:w-24 sm:h-32 xl:-right-28 xl:w-24 xl:h-32 pointer-events-none z-10">
+        <svg viewBox="0 0 100 130" fill="none" xmlns="http://www.w3.org/2000/svg">
+          {/* Body */}
+          <ellipse cx="50" cy="115" rx="18" ry="8" fill="#E0E7FF" />
+          <path d="M36 65 Q36 100 50 108 Q64 100 64 65" fill="#6366F1" />
+          {/* Head */}
+          <circle cx="50" cy="38" r="22" fill="#FCD9B6" />
+          {/* Hair */}
+          <path d="M28 32 Q30 12 50 16 Q70 12 72 32 Q76 22 64 18 Q50 8 36 18 Q24 22 28 32" fill="#4B5563" />
+          {/* Eyes */}
+          <circle cx="42" cy="36" r="3.5" fill="#1F2937" />
+          <circle cx="58" cy="36" r="3.5" fill="#1F2937" />
+          <circle cx="43" cy="34.5" r="1.2" fill="white" />
+          <circle cx="59" cy="34.5" r="1.2" fill="white" />
+          {/* Eyebrows */}
+          <path d="M37 28 Q42 25 47 28" stroke="#4B5563" strokeWidth="1.5" fill="none" strokeLinecap="round" />
+          <path d="M53 28 Q58 25 63 28" stroke="#4B5563" strokeWidth="1.5" fill="none" strokeLinecap="round" />
+          {/* Smile */}
+          <path d="M42 48 Q50 55 58 48" stroke="#1F2937" strokeWidth="2" fill="none" strokeLinecap="round" />
+          {/* Arm pointing left toward input */}
+          <path d="M36 75 Q15 82 5 95" stroke="#FCD9B6" strokeWidth="8" fill="none" strokeLinecap="round" />
+          <circle cx="3" cy="98" r="5" fill="#FCD9B6" />
+          {/* Shirt collar */}
+          <path d="M42 62 L50 68 L58 62" stroke="white" strokeWidth="2" fill="none" />
+          {/* Cheeks (blush) */}
+          <circle cx="35" cy="44" r="3" fill="#FECACA" opacity="0.5" />
+          <circle cx="65" cy="44" r="3" fill="#FECACA" opacity="0.5" />
+        </svg>
+      </div>
+    </>
   );
 
   useEffect(() => {
@@ -396,91 +423,176 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
             </div>
           </div>
 
-        {/* Citation Options (citations mode) */}
-            {mode === 'citations' && (
-          <div className="flex justify-center mb-5">
-            <div className="inline-flex items-center gap-3 flex-wrap justify-center">
-              {/* Citation Style */}
-              <div className="inline-flex items-center bg-gray-50 rounded-xl px-4 py-2.5 border border-gray-200">
-                <span className="text-gray-500 mr-2 text-sm">Style:</span>
+        {/* ANALYZE MODE - Upload First Design */}
+        {mode === 'analyze' && (
+          <>
+            {/* Primary: Upload Section */}
+            <div className="relative mb-8">
+              {/* Character illustration */}
+              <CharacterIllustration />
+              
+              <div 
+                onClick={() => onNavigate('upload')}
+                className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-3xl p-10 sm:p-14 text-center border-2 border-dashed border-blue-200 hover:border-blue-400 cursor-pointer transition-all hover:shadow-lg group"
+              >
+                <div className="w-20 h-20 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform shadow-lg">
+                  <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                  </svg>
+                </div>
+                <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">Upload Your Document</h2>
+                <p className="text-gray-600 text-lg mb-6 max-w-md mx-auto">
+                  Drop your essay, thesis, or research paper here for comprehensive AI analysis
+                </p>
+                <button 
+                  className="inline-flex items-center px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-colors text-lg shadow-lg group-hover:shadow-xl"
+                >
+                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  </svg>
+                  Choose File
+                </button>
+                <div className="flex justify-center gap-3 mt-6">
+                  <span className="px-4 py-1.5 bg-white text-gray-600 text-sm font-medium rounded-lg border border-gray-200">PDF</span>
+                  <span className="px-4 py-1.5 bg-white text-gray-600 text-sm font-medium rounded-lg border border-gray-200">DOCX</span>
+                  <span className="px-4 py-1.5 bg-white text-gray-600 text-sm font-medium rounded-lg border border-gray-200">TXT</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Divider */}
+            <div className="flex items-center justify-center mb-8">
+              <div className="flex-1 h-px bg-gray-200"></div>
+              <span className="px-4 text-gray-400 text-sm font-medium">or paste your text directly</span>
+              <div className="flex-1 h-px bg-gray-200"></div>
+            </div>
+
+            {/* Secondary: Text Input (smaller) */}
+            <div className="mb-12">
+              <div className="relative bg-white rounded-2xl border border-gray-200 hover:border-gray-300 focus-within:border-blue-500 transition-colors">
+                <textarea
+                  value={inputText}
+                  onChange={(e) => { setInputText(e.target.value); setShowWordWarning(false); }}
+                  onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey && isTextValid()) { e.preventDefault(); handleSubmit(); }}}
+                  placeholder={placeholders[placeholderIndex]}
+                  className="w-full min-h-[120px] p-5 text-gray-800 text-base border-none outline-none resize-none bg-transparent placeholder-gray-400 leading-relaxed"
+                  onInput={(e) => {
+                    const target = e.target as HTMLTextAreaElement;
+                    target.style.height = 'auto';
+                    target.style.height = Math.min(target.scrollHeight, 280) + 'px';
+                  }}
+                />
+                
+                {/* Word count */}
+                <div className="absolute bottom-3 left-5 text-sm text-gray-400">
+                  {getWordCount(inputText)} words{getWordCount(inputText) < 200 ? ' (min 200)' : ''}
+                </div>
+
+                {/* Warning */}
+                {showWordWarning && (
+                  <div className="absolute -bottom-7 left-0 right-0 text-center">
+                    <span className="text-sm text-red-500">Minimum 200 words required for analysis</span>
+                  </div>
+                )}
+              </div>
+              
+              {/* Submit button */}
+              <div className="flex justify-center mt-4">
+                <button
+                  onClick={handleSubmit}
+                  disabled={!isTextValid()}
+                  className={`px-6 py-3 rounded-xl flex items-center justify-center transition-all font-semibold text-base ${
+                    isTextValid()
+                      ? 'bg-gray-900 hover:bg-gray-800 text-white shadow-md cursor-pointer'
+                      : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  }`}
+                >
+                  <span className="mr-2">✨</span>
+                  Analyze Text
+                </button>
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* CITATIONS MODE - Text Input Primary */}
+        {mode === 'citations' && (
+          <>
+            {/* Citation Options */}
+            <div className="flex justify-center mb-5">
+              <div className="inline-flex items-center gap-3 flex-wrap justify-center">
+                <div className="inline-flex items-center bg-gray-50 rounded-xl px-4 py-2.5 border border-gray-200">
+                  <span className="text-gray-500 mr-2 text-sm">Style:</span>
                   <select
                     value={citationStyle}
                     onChange={(e) => setCitationStyle(e.target.value)}
-                  className="bg-transparent font-medium text-gray-900 outline-none cursor-pointer text-sm"
+                    className="bg-transparent font-medium text-gray-900 outline-none cursor-pointer text-sm"
                   >
-                  <option value="APA">APA 7th</option>
-                  <option value="MLA">MLA 9th</option>
+                    <option value="APA">APA 7th</option>
+                    <option value="MLA">MLA 9th</option>
                     <option value="Chicago">Chicago</option>
                     <option value="Harvard">Harvard</option>
                     <option value="IEEE">IEEE</option>
                     <option value="Vancouver">Vancouver</option>
                   </select>
-              </div>
-              
-              {/* Year Range */}
-              <div className="inline-flex items-center bg-gray-50 rounded-xl px-4 py-2.5 border border-gray-200">
-                <span className="text-gray-500 mr-2 text-sm">Year:</span>
-                <select
-                  value={citationYearRange}
-                  onChange={(e) => setCitationYearRange(e.target.value)}
-                  className="bg-transparent font-medium text-gray-900 outline-none cursor-pointer text-sm"
-                >
-                  <option value="all">All Time</option>
-                  <option value="3">Last 3 Years</option>
-                  <option value="5">Last 5 Years</option>
-                  <option value="10">Last 10 Years</option>
-                  <option value="15">Last 15 Years</option>
-                  <option value="20">Last 20 Years</option>
-                </select>
-              </div>
+                </div>
+                
+                <div className="inline-flex items-center bg-gray-50 rounded-xl px-4 py-2.5 border border-gray-200">
+                  <span className="text-gray-500 mr-2 text-sm">Year:</span>
+                  <select
+                    value={citationYearRange}
+                    onChange={(e) => setCitationYearRange(e.target.value)}
+                    className="bg-transparent font-medium text-gray-900 outline-none cursor-pointer text-sm"
+                  >
+                    <option value="all">All Time</option>
+                    <option value="3">Last 3 Years</option>
+                    <option value="5">Last 5 Years</option>
+                    <option value="10">Last 10 Years</option>
+                    <option value="15">Last 15 Years</option>
+                    <option value="20">Last 20 Years</option>
+                  </select>
                 </div>
               </div>
-            )}
+            </div>
 
-        {/* Input Area with Character outside */}
-        <div className="mb-8 relative">
-          {/* Character illustration - positioned outside to the right */}
-          <CharacterIllustration />
-          
-          <div className="relative bg-white rounded-2xl border-2 border-gray-200 hover:border-gray-300 focus-within:border-blue-500 transition-colors">
+            {/* Input Area */}
+            <div className="mb-8 relative">
+              <CharacterIllustration />
+              
+              <div className="relative bg-white rounded-2xl border-2 border-gray-200 hover:border-gray-300 focus-within:border-blue-500 transition-colors">
                 <textarea
                   value={inputText}
-              onChange={(e) => { setInputText(e.target.value); setShowWordWarning(false); }}
-              onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey && isTextValid()) { e.preventDefault(); handleSubmit(); }}}
+                  onChange={(e) => { setInputText(e.target.value); setShowWordWarning(false); }}
+                  onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey && isTextValid()) { e.preventDefault(); handleSubmit(); }}}
                   placeholder={placeholders[placeholderIndex]}
-              className="w-full min-h-[160px] sm:min-h-[180px] p-5 sm:p-6 text-gray-800 text-lg border-none outline-none resize-none bg-transparent placeholder-gray-400 leading-relaxed"
-              style={{ fontSize: '18px' }}
+                  className="w-full min-h-[160px] sm:min-h-[180px] p-5 sm:p-6 text-gray-800 text-lg border-none outline-none resize-none bg-transparent placeholder-gray-400 leading-relaxed"
+                  style={{ fontSize: '18px' }}
                   onInput={(e) => {
                     const target = e.target as HTMLTextAreaElement;
                     target.style.height = 'auto';
-                target.style.height = Math.min(target.scrollHeight, 320) + 'px';
-              }}
-            />
-            
-            {/* Word count / Character count */}
-            <div className="absolute bottom-4 left-5 text-sm text-gray-400">
-              {mode === 'citations' ? `${inputText.length} characters` : `${getWordCount(inputText)} words${getWordCount(inputText) < 200 ? ' (min 200)' : ''}`}
-            </div>
-
-            {/* Warning */}
-            {showWordWarning && (
-              <div className="absolute -bottom-8 left-0 right-0 text-center">
-                <span className="text-sm text-red-500">
-                  {mode === 'citations' ? 'Please enter a research topic' : 'Minimum 200 words required for analysis'}
-                </span>
-              </div>
-            )}
-                </div>
+                    target.style.height = Math.min(target.scrollHeight, 320) + 'px';
+                  }}
+                />
                 
-          {/* Submit button - below textarea */}
-          <div className="flex justify-center mt-4">
+                <div className="absolute bottom-4 left-5 text-sm text-gray-400">
+                  {inputText.length} characters
+                </div>
+
+                {showWordWarning && (
+                  <div className="absolute -bottom-8 left-0 right-0 text-center">
+                    <span className="text-sm text-red-500">Please enter a research topic</span>
+                  </div>
+                )}
+              </div>
+              
+              <div className="flex justify-center mt-4">
                 <button
                   onClick={handleSubmit}
                   disabled={!isTextValid() || isSearchingCitations}
-              className={`px-8 py-3.5 rounded-xl flex items-center justify-center transition-all font-semibold text-base ${
+                  className={`px-8 py-3.5 rounded-xl flex items-center justify-center transition-all font-semibold text-base ${
                     isTextValid() && !isSearchingCitations
-                  ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg cursor-pointer'
-                  : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                      ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg cursor-pointer'
+                      : 'bg-gray-200 text-gray-400 cursor-not-allowed'
                   }`}
                 >
                   {isSearchingCitations ? (
@@ -488,58 +600,33 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-              ) : (
-                <>
-                  <span className="mr-2">✨</span>
-                  {mode === 'analyze' ? 'Get Feedback' : 'Find Sources'}
-                </>
+                  ) : (
+                    <>
+                      <span className="mr-2">✨</span>
+                      Find Sources
+                    </>
                   )}
                 </button>
               </div>
             </div>
 
-        {/* Suggested Topics */}
-        <div className="mb-12">
-          <p className="text-sm text-gray-500 text-center mb-4">Suggestions</p>
-          <div className="flex flex-wrap justify-center gap-2.5">
-            {suggestedTopics.map((topic, idx) => (
-            <button 
-                key={idx}
-                onClick={() => setInputText(topic)}
-                className="px-4 py-2 bg-gray-50 hover:bg-gray-100 text-gray-700 text-sm sm:text-base rounded-lg border border-gray-200 hover:border-gray-300 transition-colors"
-              >
-                {topic}
-            </button>
-              ))}
-        </div>
-      </div>
-
-        {/* Upload Section */}
-        <div className="bg-gray-50 rounded-2xl p-8 sm:p-10 text-center mb-12 border border-gray-100">
-          <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-5">
-            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-              </svg>
+            {/* Suggested Topics */}
+            <div className="mb-12">
+              <p className="text-sm text-gray-500 text-center mb-4">Suggestions</p>
+              <div className="flex flex-wrap justify-center gap-2.5">
+                {suggestedTopics.map((topic, idx) => (
+                  <button 
+                    key={idx}
+                    onClick={() => setInputText(topic)}
+                    className="px-4 py-2 bg-gray-50 hover:bg-gray-100 text-gray-700 text-sm sm:text-base rounded-lg border border-gray-200 hover:border-gray-300 transition-colors"
+                  >
+                    {topic}
+                  </button>
+                ))}
+              </div>
             </div>
-          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3">Upload a Document</h2>
-          <p className="text-gray-600 text-base mb-5 max-w-md mx-auto">
-            Upload your essay, thesis, or research paper for comprehensive AI analysis
-          </p>
-            <button 
-              onClick={() => onNavigate('upload')}
-            className="inline-flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl transition-colors text-base"
-            >
-            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-              </svg>
-            Upload Document
-            </button>
-          <div className="flex justify-center gap-2 mt-5">
-            <span className="px-3 py-1 bg-white text-gray-600 text-sm rounded border">PDF</span>
-            <span className="px-3 py-1 bg-white text-gray-600 text-sm rounded border">DOCX</span>
-            <span className="px-3 py-1 bg-white text-gray-600 text-sm rounded border">TXT</span>
-          </div>
-        </div>
+          </>
+        )}
 
         {/* Recent Documents */}
         <div>
