@@ -67,7 +67,7 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
 
   // Character illustration component - positioned outside the text area
   const CharacterIllustration = () => (
-    <div className="absolute -right-28 top-0 w-24 h-32 hidden xl:block pointer-events-none z-10">
+    <div className="absolute right-2 top-0 w-20 h-28 sm:right-4 sm:w-24 sm:h-32 xl:-right-28 xl:w-24 xl:h-32 pointer-events-none z-10">
       <svg viewBox="0 0 100 130" fill="none" xmlns="http://www.w3.org/2000/svg">
         {/* Body */}
         <ellipse cx="50" cy="115" rx="18" ry="8" fill="#E0E7FF" />

@@ -118,7 +118,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
 
   // Character illustration component - positioned outside the text area
   const CharacterIllustration = () => (
-    <div className="absolute -right-32 top-0 w-28 h-36 hidden xl:block pointer-events-none z-10">
+    <div className="absolute right-2 top-0 w-20 h-28 sm:right-4 sm:w-24 sm:h-32 xl:-right-32 xl:w-28 xl:h-36 pointer-events-none z-10">
       <svg viewBox="0 0 100 130" fill="none" xmlns="http://www.w3.org/2000/svg">
         {/* Body */}
         <ellipse cx="50" cy="115" rx="18" ry="8" fill="#E0E7FF" />
