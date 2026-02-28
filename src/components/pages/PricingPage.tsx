@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import Header from '../common/Header';
 import Footer from '../common/Footer';
 import PaymentModal from '../payment/PaymentModal';
 
@@ -9,7 +8,7 @@ interface PricingPageProps {
   onLogout: () => void;
 }
 
-const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
+const PricingPage = ({ onNavigate, user }: PricingPageProps) => {
   const [billingCycle, setBillingCycle] = useState('monthly');
   const [currentPlan, setCurrentPlan] = useState<string>('free');
   const [paymentModal, setPaymentModal] = useState<{
@@ -22,7 +21,6 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
     billingCycle: 'monthly'
   });
 
-  // Fetch current plan when component mounts
   useEffect(() => {
     const fetchCurrentPlan = async () => {
       if (!user) return;
@@ -47,7 +45,6 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
     fetchCurrentPlan();
   }, [user]);
 
-  // Handle plan upgrade/switch
   const handlePlanAction = async (planId: string) => {
     if (!user) {
       onNavigate('signup');
@@ -56,9 +53,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
 
     if (planId === 'free') return;
 
-    // Check if user already has a subscription (not free plan)
     if (currentPlan !== 'free') {
-      // User has existing subscription - redirect to billing portal
       try {
         const token = localStorage.getItem('authToken');
         const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/subscriptions/billing-portal`, {
@@ -83,7 +78,6 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
         console.error('Error opening billing portal:', error);
       }
     } else {
-      // User is on free plan - show payment modal for new subscription
       setPaymentModal({
         isOpen: true,
         planType: planId as 'starter' | 'premium',
@@ -203,38 +197,63 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
 
   const handlePaymentSuccess = (subscriptionId: string) => {
     console.log('Payment successful:', subscriptionId);
-    // You could show a success message or redirect to dashboard
     onNavigate('dashboard');
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
-      <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="pricing" />
+    <div className="min-h-screen bg-white">
+      {/* Public Header */}
+      <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-100" aria-label="Main navigation">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-18 py-4">
+            <a href="/" onClick={(e) => { e.preventDefault(); onNavigate('landing'); }} className="flex items-center space-x-2.5">
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center">
+                <span className="text-white font-bold text-xl">W</span>
+              </div>
+              <span className="text-2xl font-bold text-gray-900">WriteScholar</span>
+            </a>
+            
+            <div className="hidden md:flex items-center space-x-2">
+              <a href="/features" onClick={(e) => { e.preventDefault(); onNavigate('features'); }} className="px-4 py-2.5 text-base text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-50 transition-colors font-medium">Features</a>
+              <a href="/pricing" onClick={(e) => { e.preventDefault(); onNavigate('pricing'); }} className="px-4 py-2.5 text-base text-blue-600 hover:text-blue-700 rounded-lg hover:bg-blue-50 transition-colors font-medium">Pricing</a>
+              <a href="/blog" onClick={(e) => { e.preventDefault(); onNavigate('blog'); }} className="px-4 py-2.5 text-base text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-50 transition-colors font-medium">Blog</a>
+              <a href="/about" onClick={(e) => { e.preventDefault(); onNavigate('about'); }} className="px-4 py-2.5 text-base text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-50 transition-colors font-medium">About</a>
+            </div>
+            
+            <div className="flex items-center space-x-3">
+              <a href="/login" onClick={(e) => { e.preventDefault(); onNavigate('login'); }} className="hidden sm:inline-flex px-4 py-2.5 text-base text-gray-700 hover:text-gray-900 font-medium rounded-lg hover:bg-gray-50 transition-colors">Log in</a>
+              <a href="/signup" onClick={(e) => { e.preventDefault(); onNavigate('signup'); }} className="inline-flex items-center px-5 py-2.5 bg-gray-900 text-white text-base font-semibold rounded-xl hover:bg-gray-800 transition-colors">
+                Get Started
+              </a>
+            </div>
+          </div>
+        </div>
+      </nav>
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 md:px-8 py-8 sm:py-12 md:py-16">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 md:px-8 py-12 sm:py-16 md:py-20">
         {/* Header */}
-        <div className="text-center mb-8 sm:mb-12">
-          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4 sm:mb-6">
+        <div className="text-center mb-12">
+          <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6">
             Simple and transparent pricing
           </h1>
           
           {/* Key Benefits */}
-          <div className="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-8 md:space-x-12 mb-8 sm:mb-10">
+          <div className="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-8 md:space-x-12 mb-10">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
+              <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center">
                 <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
                 </svg>
               </div>
-              <span className="text-gray-700 text-sm font-medium">A fraction of traditional editing costs</span>
+              <span className="text-gray-700 text-base font-medium">A fraction of traditional editing costs</span>
             </div>
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+              <div className="w-10 h-10 bg-purple-600 rounded-xl flex items-center justify-center">
                 <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
               </div>
-              <span className="text-gray-700 text-sm font-medium">Used by thousands of researchers</span>
+              <span className="text-gray-700 text-base font-medium">Used by thousands of researchers</span>
             </div>
           </div>
 
@@ -245,56 +264,56 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
 
           {/* Billing Toggle */}
           <div className="flex items-center justify-center mb-12">
-            <div className="bg-white/80 backdrop-blur-sm rounded-xl p-1 flex shadow-lg border border-gray-200/50">
-            <button
+            <div className="bg-gray-100 rounded-xl p-1.5 flex">
+              <button
                 onClick={() => setBillingCycle('monthly')}
-                className={`px-6 py-2 rounded-lg text-sm font-semibold transition-all duration-300 ${
+                className={`px-6 py-2.5 rounded-lg text-base font-semibold transition-all ${
                   billingCycle === 'monthly'
-                    ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-md'
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                    ? 'bg-white text-gray-900 shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
                 Bill Monthly
               </button>
               <button
                 onClick={() => setBillingCycle('yearly')}
-                className={`px-6 py-2 rounded-lg text-sm font-semibold transition-all duration-300 ${
+                className={`px-6 py-2.5 rounded-lg text-base font-semibold transition-all ${
                   billingCycle === 'yearly'
-                    ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-md'
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                    ? 'bg-white text-gray-900 shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
                 Bill Yearly
                 <span className="ml-2 px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
                   Save 17%
                 </span>
-            </button>
+              </button>
             </div>
           </div>
         </div>
 
         {/* Pricing Cards */}
-        <div className="grid md:grid-cols-3 gap-8 mb-16">
+        <div className="grid md:grid-cols-3 gap-8 mb-20">
           {plans.map((plan) => (
             <div
               key={plan.id}
-              className={`relative bg-white/90 backdrop-blur-xl border rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 ${
+              className={`relative bg-white border rounded-2xl p-8 hover:shadow-lg transition-all ${
                 plan.popular 
                   ? 'border-blue-500 ring-2 ring-blue-200'
-                  : 'border-gray-200/60'
+                  : 'border-gray-200'
               }`}
             >
               {plan.popular && (
                 <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                  <span className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-1 rounded-full text-sm font-semibold">
+                  <span className="bg-blue-600 text-white px-4 py-1 rounded-full text-sm font-semibold">
                     Most Popular
                   </span>
                 </div>
               )}
 
-                <div className="text-center mb-8">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-2">{plan.name}</h3>
-                  <p className="text-gray-600 mb-6">{plan.description}</p>
+              <div className="text-center mb-8">
+                <h3 className="text-2xl font-bold text-gray-900 mb-2">{plan.name}</h3>
+                <p className="text-gray-600 mb-6">{plan.description}</p>
                 
                 <div className="mb-4">
                   <span className="text-4xl font-bold text-gray-900">
@@ -302,54 +321,54 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
                   </span>
                   <span className="text-gray-600 ml-2">
                     /{billingCycle === 'yearly' ? 'year' : 'month'}
-                        </span>
-                      </div>
+                  </span>
+                </div>
 
                 {getSavings(plan) > 0 && (
                   <div className="text-green-600 text-sm font-medium mb-4">
                     Save {getSavings(plan)}% with yearly billing
                   </div>
                 )}
-                </div>
+              </div>
 
-                <div className="mb-8">
-                  <ul className="space-y-3">
+              <div className="mb-8">
+                <ul className="space-y-3">
                   {plan.features.map((feature, index) => (
                     <li key={index} className="flex items-start">
                       <svg className="w-5 h-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                        </svg>
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
                       <span className="text-gray-700">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
 
-                <button
+              <button
                 onClick={plan.id === currentPlan ? undefined : plan.buttonAction}
                 disabled={plan.id === currentPlan}
-                className={`w-full py-3 px-6 rounded-xl font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
-                    plan.id === currentPlan
+                className={`w-full py-3 px-6 rounded-xl font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
+                  plan.id === currentPlan
                     ? 'bg-gray-100 text-gray-500 cursor-not-allowed'
                     : plan.popular
-                    ? 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transform hover:scale-105'
+                    ? 'bg-blue-600 hover:bg-blue-700 text-white'
                     : 'bg-gray-100 hover:bg-gray-200 text-gray-900'
-                  }`}
-                >
+                }`}
+              >
                 {plan.id === currentPlan ? 'Current Plan' : plan.buttonText}
-                </button>
+              </button>
             </div>
           ))}
         </div>
 
         {/* FAQ Section */}
-        <div className="bg-white/90 backdrop-blur-xl border border-gray-200/60 rounded-2xl p-12 shadow-lg">
+        <div className="bg-gray-50 rounded-2xl p-12 mb-16">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-900 mb-6">Frequently Asked Questions</h2>
             <p className="text-lg text-gray-600">
               Everything you need to know about our pricing and plans.
-                </p>
-              </div>
+            </p>
+          </div>
 
           <div className="grid md:grid-cols-2 gap-8">
             {faqs.map((faq, index) => (
@@ -362,23 +381,23 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
         </div>
 
         {/* CTA Section */}
-        <div className="text-center mt-16">
+        <div className="text-center">
           <h2 className="text-3xl font-bold text-gray-900 mb-6">
             Ready to improve your academic writing?
           </h2>
           <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
-            Join thousands of students and researchers who trust Scholar to help them achieve academic excellence.
+            Join thousands of students and researchers who trust WriteScholar to help them achieve academic excellence.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button 
               onClick={() => onNavigate('signup')}
-              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-3 rounded-xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+              className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-xl font-semibold transition-colors shadow-lg"
             >
               Get Started Free
             </button>
             <button 
               onClick={() => onNavigate('contact')}
-              className="border-2 border-gray-300 hover:border-gray-400 text-gray-700 hover:text-gray-900 px-8 py-3 rounded-xl font-semibold transition-all duration-200"
+              className="border-2 border-gray-300 hover:border-gray-400 text-gray-700 hover:text-gray-900 px-8 py-3 rounded-xl font-semibold transition-colors"
             >
               Contact Sales
             </button>
@@ -395,7 +414,6 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
         onSuccess={handlePaymentSuccess}
       />
 
-      {/* Footer */}
       <Footer onNavigate={onNavigate} />
     </div>
   );

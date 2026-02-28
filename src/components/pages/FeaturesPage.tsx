@@ -1,4 +1,4 @@
-import Header from '../common/Header';
+import Footer from '../common/Footer';
 
 interface FeaturesPageProps {
   onNavigate: (page: string) => void;
@@ -15,7 +15,7 @@ interface FeaturesPageProps {
   onLogout: () => void;
 }
 
-const FeaturesPage = ({ onNavigate, user, onLogout }: FeaturesPageProps) => {
+const FeaturesPage = ({ onNavigate }: FeaturesPageProps) => {
   const features = [
     {
       title: "AI-Powered Analysis",
@@ -70,28 +70,54 @@ const FeaturesPage = ({ onNavigate, user, onLogout }: FeaturesPageProps) => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="features" />
+    <div className="min-h-screen bg-white">
+      {/* Public Header */}
+      <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-100" aria-label="Main navigation">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-18 py-4">
+            <a href="/" onClick={(e) => { e.preventDefault(); onNavigate('landing'); }} className="flex items-center space-x-2.5">
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center">
+                <span className="text-white font-bold text-xl">W</span>
+              </div>
+              <span className="text-2xl font-bold text-gray-900">WriteScholar</span>
+            </a>
+            
+            <div className="hidden md:flex items-center space-x-2">
+              <a href="/features" onClick={(e) => { e.preventDefault(); onNavigate('features'); }} className="px-4 py-2.5 text-base text-blue-600 hover:text-blue-700 rounded-lg hover:bg-blue-50 transition-colors font-medium">Features</a>
+              <a href="/pricing" onClick={(e) => { e.preventDefault(); onNavigate('pricing'); }} className="px-4 py-2.5 text-base text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-50 transition-colors font-medium">Pricing</a>
+              <a href="/blog" onClick={(e) => { e.preventDefault(); onNavigate('blog'); }} className="px-4 py-2.5 text-base text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-50 transition-colors font-medium">Blog</a>
+              <a href="/about" onClick={(e) => { e.preventDefault(); onNavigate('about'); }} className="px-4 py-2.5 text-base text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-50 transition-colors font-medium">About</a>
+            </div>
+            
+            <div className="flex items-center space-x-3">
+              <a href="/login" onClick={(e) => { e.preventDefault(); onNavigate('login'); }} className="hidden sm:inline-flex px-4 py-2.5 text-base text-gray-700 hover:text-gray-900 font-medium rounded-lg hover:bg-gray-50 transition-colors">Log in</a>
+              <a href="/signup" onClick={(e) => { e.preventDefault(); onNavigate('signup'); }} className="inline-flex items-center px-5 py-2.5 bg-gray-900 text-white text-base font-semibold rounded-xl hover:bg-gray-800 transition-colors">
+                Get Started
+              </a>
+            </div>
+          </div>
+        </div>
+      </nav>
 
       {/* Main Content */}
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12 md:py-16">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-12 sm:py-16 md:py-20">
         {/* Page Header */}
-        <div className="text-center mb-12 sm:mb-16">
-          <div className="inline-flex items-center px-3 sm:px-4 py-1.5 sm:py-2 bg-blue-100 text-blue-800 rounded-full text-xs sm:text-sm font-semibold mb-4 sm:mb-6">
+        <div className="text-center mb-16">
+          <div className="inline-flex items-center px-4 py-2 bg-blue-100 text-blue-800 rounded-full text-sm font-semibold mb-6">
             Features
           </div>
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold bg-gradient-to-r from-gray-900 via-blue-900 to-purple-900 bg-clip-text text-transparent mb-4 sm:mb-6">
+          <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6">
             Powerful Features for Academic Excellence
           </h1>
-          <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed px-4">
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
             Discover the comprehensive suite of AI-powered tools designed to elevate your academic writing and research capabilities.
           </p>
         </div>
 
         {/* Features Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-20">
           {features.map((feature, index) => (
-            <div key={index} className="bg-white/90 backdrop-blur-xl border border-gray-200/60 rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+            <div key={index} className="bg-white border border-gray-200 rounded-2xl p-8 hover:shadow-lg hover:border-gray-300 transition-all">
               <div className={`w-16 h-16 bg-gradient-to-br ${feature.color} rounded-2xl flex items-center justify-center mb-6 text-white`}>
                 {feature.icon}
               </div>
@@ -102,7 +128,7 @@ const FeaturesPage = ({ onNavigate, user, onLogout }: FeaturesPageProps) => {
         </div>
 
         {/* How It Works */}
-        <div className="bg-white/90 backdrop-blur-xl border border-gray-200/60 rounded-2xl p-12 shadow-lg mb-16">
+        <div className="bg-gray-50 rounded-2xl p-12 mb-20">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-900 mb-6">How It Works</h2>
             <p className="text-lg text-gray-600 leading-relaxed max-w-3xl mx-auto">
@@ -112,7 +138,7 @@ const FeaturesPage = ({ onNavigate, user, onLogout }: FeaturesPageProps) => {
           
           <div className="grid md:grid-cols-3 gap-8">
             <div className="text-center">
-              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-6 text-white text-2xl font-bold">
+              <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-6 text-white text-2xl font-bold">
                 1
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-4">Upload Your Document</h3>
@@ -120,7 +146,7 @@ const FeaturesPage = ({ onNavigate, user, onLogout }: FeaturesPageProps) => {
             </div>
             
             <div className="text-center">
-              <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl flex items-center justify-center mx-auto mb-6 text-white text-2xl font-bold">
+              <div className="w-16 h-16 bg-green-600 rounded-2xl flex items-center justify-center mx-auto mb-6 text-white text-2xl font-bold">
                 2
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-4">AI Analysis</h3>
@@ -128,7 +154,7 @@ const FeaturesPage = ({ onNavigate, user, onLogout }: FeaturesPageProps) => {
             </div>
             
             <div className="text-center">
-              <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-6 text-white text-2xl font-bold">
+              <div className="w-16 h-16 bg-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-6 text-white text-2xl font-bold">
                 3
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-4">Get Feedback</h3>
@@ -138,9 +164,9 @@ const FeaturesPage = ({ onNavigate, user, onLogout }: FeaturesPageProps) => {
         </div>
 
         {/* Benefits */}
-        <div className="grid lg:grid-cols-2 gap-12 items-center mb-16">
+        <div className="grid lg:grid-cols-2 gap-12 items-center mb-20">
           <div>
-            <h2 className="text-3xl font-bold text-gray-900 mb-6">Why Choose Scholar?</h2>
+            <h2 className="text-3xl font-bold text-gray-900 mb-6">Why Choose WriteScholar?</h2>
             <div className="space-y-6">
               <div className="flex items-start space-x-4">
                 <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -196,24 +222,26 @@ const FeaturesPage = ({ onNavigate, user, onLogout }: FeaturesPageProps) => {
         <div className="text-center">
           <h2 className="text-3xl font-bold text-gray-900 mb-6">Ready to Transform Your Academic Writing?</h2>
           <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
-            Join thousands of students and researchers who trust Scholar to help them achieve academic excellence.
+            Join thousands of students and researchers who trust WriteScholar to help them achieve academic excellence.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button 
               onClick={() => onNavigate('signup')}
-              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-3 rounded-xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+              className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-xl font-semibold transition-colors shadow-lg"
             >
               Start Free Trial
             </button>
             <button 
               onClick={() => onNavigate('pricing')}
-              className="border-2 border-gray-300 hover:border-gray-400 text-gray-700 hover:text-gray-900 px-8 py-3 rounded-xl font-semibold transition-all duration-200"
+              className="border-2 border-gray-300 hover:border-gray-400 text-gray-700 hover:text-gray-900 px-8 py-3 rounded-xl font-semibold transition-colors"
             >
               View Pricing
             </button>
           </div>
         </div>
       </main>
+
+      <Footer onNavigate={onNavigate} />
     </div>
   );
 };

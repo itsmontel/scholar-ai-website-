@@ -1,11 +1,6 @@
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Footer from '../common/Footer';
 import AnalysisAnimation from '../common/AnalysisAnimation';
-
-// Import images from assets folder
-import philosophyImage from '../../assets/images/Philosophy.png';
-import multiculturalImage from '../../assets/images/Multiculturalfilmpaper.png';
-import customersImage from '../../assets/images/CustomersWriteScholar.png';
 
 interface LandingPageProps {
   onNavigate: (page: string) => void;
@@ -15,1324 +10,653 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
   const [inputText, setInputText] = useState('');
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
   const [isFocused, setIsFocused] = useState(false);
-  const [reviewIndex, setReviewIndex] = useState(0);
-  const [hoveredAnnotation, setHoveredAnnotation] = useState<any>(null);
   const [openFAQ, setOpenFAQ] = useState<number | null>(null);
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('monthly');
   const [mode, setMode] = useState<'analyze' | 'citations'>('analyze');
   const [citationStyle, setCitationStyle] = useState('APA');
   const [showFakeAnimation, setShowFakeAnimation] = useState(false);
+  const [activeToolHover, setActiveToolHover] = useState<string | null>(null);
 
   const analyzePlaceholders = [
-    "Enhance your academic writing with a simple paste and click.",
-    "Get instant feedback on your essay or thesis.",
-    "Turn good writing into great writing with WriteScholar."
+    "Paste your essay or research paper here...",
+    "Get instant feedback on structure and clarity...",
+    "Improve your academic writing in seconds..."
   ];
 
   const citationPlaceholders = [
-    "Enter your essay question or research topic to find relevant citations...",
-    "What's your research topic? Get academic sources instantly.",
-    "Type your assignment question and discover relevant literature."
+    "Enter your research topic to find citations...",
+    "What are you researching? Find sources instantly...",
+    "Type your essay question and discover literature..."
   ];
 
   const placeholders = mode === 'analyze' ? analyzePlaceholders : citationPlaceholders;
 
-  const reviews = [
-    {
-      text: "WriteScholar has revolutionized my research writing process. The AI feedback is incredibly detailed and helped me improve my argumentation and academic style significantly."
-    },
-    {
-      text: "WriteScholar's annotation system is exactly what I needed for my thesis. The color-coded feedback makes it easy to prioritize improvements and track my progress over time."
-    },
-    {
-      text: "As a professor, I recommend WriteScholar to all my students. It provides the kind of detailed feedback that would normally take hours of manual review. A game-changer for academic writing."
-    }
+  const suggestedTopics = mode === 'analyze' ? [
+    "The impact of social media on student mental health",
+    "Climate change effects on global agriculture",
+    "Artificial intelligence in healthcare",
+    "Education's role in economic development",
+    "Renewable energy in developing countries",
+    "Cultural factors in consumer behavior"
+  ] : [
+    "Effects of sleep on cognitive function",
+    "Social media and political polarization",
+    "Machine learning in medical diagnosis",
+    "Sustainable urban development",
+    "Remote work and productivity",
+    "Blockchain in supply chain"
   ];
 
-  const examplePapers = [
-    {
-      title: "Philosophy Essay Analysis",
-      subtitle: "Justice & Ethics Paper • Analyzed Oct 29, 2025",
-      isImage: true,
-      imagePath: philosophyImage,
-      feature: "Real-time Analysis",
-      description: "Instant feedback with detailed annotations highlighting strengths and improvement areas.",
-      summary: {
-        general: "This philosophy essay demonstrates strong engagement with Plato's Republic and creative use of modern examples, though transitions and academic support need strengthening.",
-        goods: [
-          "Excellent integration of classical philosophy with contemporary examples (The Dark Knight)",
-          "Clear thesis comparing Glaucon's and Socrates' views on justice",
-          "Strong opening that establishes the philosophical debate",
-          "Creative approach to illustrating abstract concepts with concrete examples"
-        ],
-        improvements: [
-          "Strengthen transitions between Glaucon's and Socrates' arguments for better flow",
-          "Add more academic citations and research evidence to support claims",
-          "Improve connection between The Dark Knight examples and Socrates' argument"
-        ],
-        concerns: [
-          "Some sections need more academic evidence and scholarly support",
-          "Transitions between ideas could be smoother and more explicit",
-          "Consider developing the connection between modern examples and classical philosophy"
-        ]
-      }
-    },
-    {
-      title: "Multicultural Film Analysis",
-      subtitle: "Film Studies Essay • Analyzed Oct 29, 2025",
-      isImage: true,
-      imagePath: multiculturalImage,
-      feature: "Citation Enhancement",
-      description: "AI-powered suggestions for better source integration and citation formatting.",
-      summary: {
-        general: "This film studies paper demonstrates strong analytical engagement with multicultural cinema, though citation formatting and theoretical framework integration need improvement.",
-        goods: [
-          "Excellent critical analysis of cultural representation in contemporary cinema",
-          "Strong use of film theory and scholarly sources to support arguments",
-          "Clear thesis statement addressing multiculturalism and identity in film",
-          "Good integration of specific film examples to illustrate theoretical concepts"
-        ],
-        improvements: [
-          "Strengthen citation formatting to ensure consistency with MLA/Chicago style",
-          "Expand theoretical framework discussion for deeper academic grounding",
-          "Add more comparative analysis between different cultural perspectives in films"
-        ],
-        concerns: [
-          "Some citations need proper formatting and complete bibliographic information",
-          "Theoretical framework could be more explicitly connected to film examples",
-          "Consider adding more recent scholarly sources to strengthen contemporary relevance"
-        ]
-      }
-    }
+  const sidebarTools = [
+    { id: 'grammar', name: 'Grammar Checker', icon: 'A', color: 'text-red-500', bg: 'bg-red-50' },
+    { id: 'structure', name: 'Structure Analysis', icon: '◎', color: 'text-blue-500', bg: 'bg-blue-50' },
+    { id: 'citations', name: 'Citation Checker', icon: '99', color: 'text-purple-500', bg: 'bg-purple-50' },
+    { id: 'tone', name: 'Academic Tone', icon: '≡', color: 'text-green-500', bg: 'bg-green-50' },
+    { id: 'clarity', name: 'Clarity Feedback', icon: '◇', color: 'text-orange-500', bg: 'bg-orange-50' },
+    { id: 'sources', name: 'Source Finder', icon: '⌕', color: 'text-indigo-500', bg: 'bg-indigo-50' }
   ];
 
   const faqs = [
     {
-      question: "How does WriteScholar's AI analysis work?",
-      answer: "WriteScholar uses advanced natural language processing to analyze your academic writing for structure, clarity, grammar, citations, and academic rigor. Our AI provides detailed feedback similar to what you'd receive from a professor or writing tutor."
+      question: "How does the AI writing analysis work?",
+      answer: "WriteScholar uses advanced AI to analyze your writing for structure, clarity, grammar, citation formatting, and academic tone. You get specific, actionable feedback similar to what a professor would provide."
     },
     {
-      question: "Is my document content secure and private?",
-      answer: "Yes, absolutely. We use enterprise-grade encryption to protect your documents. Your content is never shared with third parties, and you can delete your documents at any time. We're SOC 2 Type II compliant."
+      question: "Is my document content private?",
+      answer: "Yes. We use enterprise-grade encryption. Your content is never shared with third parties or used to train AI models. You can delete your documents at any time."
     },
     {
-      question: "What file formats does WriteScholar support?",
-      answer: "WriteScholar supports PDF, Word documents (.docx), and plain text. You can also paste text directly into our editor. We're working on adding support for LaTeX and other academic formats."
+      question: "What citation styles are supported?",
+      answer: "We support APA 7th edition, MLA 9th edition, Chicago (notes-bibliography and author-date), Harvard, IEEE, and Vancouver. Our citation checker validates formatting and catches common errors."
     },
     {
-      question: "Can I use WriteScholar for different citation styles?",
-      answer: "Yes! WriteScholar supports APA, MLA, Chicago, Harvard, and many other citation styles. You can specify your preferred style, and our AI will check your citations accordingly."
+      question: "Can I use this for my thesis or dissertation?",
+      answer: "Yes. WriteScholar handles documents of any length and provides chapter-by-chapter analysis for longer works. Premium users get feedback on methodology and literature review structure."
     },
     {
-      question: "How accurate is the AI feedback?",
-      answer: "Our AI has been trained on thousands of academic papers and provides feedback comparable to human reviewers. While it's highly accurate, we recommend using it as a supplement to, not a replacement for, human review."
+      question: "How is this different from Grammarly?",
+      answer: "While Grammarly is general-purpose, WriteScholar is built for academic writing. We understand academic tone, citation requirements, discipline-specific conventions, and research paper structure."
     }
   ];
 
-  React.useEffect(() => {
+  const universities = [
+    { name: 'Cambridge', logo: 'Cambridge' },
+    { name: 'Stanford', logo: 'Stanford' },
+    { name: 'Princeton', logo: 'Princeton' },
+    { name: 'Harvard', logo: 'Harvard' },
+    { name: 'Oxford', logo: 'Oxford' },
+    { name: 'MIT', logo: 'MIT' }
+  ];
+
+  useEffect(() => {
     const interval = setInterval(() => {
       if (!isFocused) {
         setPlaceholderIndex((prev) => (prev + 1) % placeholders.length);
       }
-    }, 3000);
+    }, 3500);
     return () => clearInterval(interval);
   }, [isFocused, placeholders.length]);
 
-  React.useEffect(() => {
-    const interval = setInterval(() => {
-      setReviewIndex((prev) => (prev + 1) % reviews.length);
-    }, 10000);
-    return () => clearInterval(interval);
-  }, [reviews.length]);
-
-
   const handleSubmit = () => {
-    // Show fake animation for unauthenticated users
+    if (!inputText.trim()) return;
     setShowFakeAnimation(true);
-    
-    // Store the search parameters for after signup
     if (mode === 'citations') {
-      localStorage.setItem('pendingCitationSearch', JSON.stringify({
-        topic: inputText,
-        style: citationStyle
-      }));
+      localStorage.setItem('pendingCitationSearch', JSON.stringify({ topic: inputText, style: citationStyle }));
     } else {
-      localStorage.setItem('pendingAnalysis', JSON.stringify({
-        text: inputText
-      }));
+      localStorage.setItem('pendingAnalysis', JSON.stringify({ text: inputText }));
     }
-    
-    // After 3-5 seconds, navigate to signup
     setTimeout(() => {
       setShowFakeAnimation(false);
       onNavigate('signup');
-    }, 4000); // 4 seconds
+    }, 3500);
+  };
+
+  const handleTopicClick = (topic: string) => {
+    setInputText(topic);
+  };
+
+  // Character illustration component - positioned outside the text area
+  const CharacterIllustration = () => (
+    <div className="absolute -right-32 top-0 w-28 h-36 hidden xl:block pointer-events-none z-10">
+      <svg viewBox="0 0 100 130" fill="none" xmlns="http://www.w3.org/2000/svg">
+        {/* Body */}
+        <ellipse cx="50" cy="115" rx="18" ry="8" fill="#E0E7FF" />
+        <path d="M36 65 Q36 100 50 108 Q64 100 64 65" fill="#6366F1" />
+        {/* Head */}
+        <circle cx="50" cy="38" r="22" fill="#FCD9B6" />
+        {/* Hair */}
+        <path d="M28 32 Q30 12 50 16 Q70 12 72 32 Q76 22 64 18 Q50 8 36 18 Q24 22 28 32" fill="#4B5563" />
+        {/* Eyes */}
+        <circle cx="42" cy="36" r="3.5" fill="#1F2937" />
+        <circle cx="58" cy="36" r="3.5" fill="#1F2937" />
+        <circle cx="43" cy="34.5" r="1.2" fill="white" />
+        <circle cx="59" cy="34.5" r="1.2" fill="white" />
+        {/* Eyebrows */}
+        <path d="M37 28 Q42 25 47 28" stroke="#4B5563" strokeWidth="1.5" fill="none" strokeLinecap="round" />
+        <path d="M53 28 Q58 25 63 28" stroke="#4B5563" strokeWidth="1.5" fill="none" strokeLinecap="round" />
+        {/* Smile */}
+        <path d="M42 48 Q50 55 58 48" stroke="#1F2937" strokeWidth="2" fill="none" strokeLinecap="round" />
+        {/* Arm pointing left toward input */}
+        <path d="M36 75 Q15 82 5 95" stroke="#FCD9B6" strokeWidth="8" fill="none" strokeLinecap="round" />
+        <circle cx="3" cy="98" r="5" fill="#FCD9B6" />
+        {/* Shirt collar */}
+        <path d="M42 62 L50 68 L58 62" stroke="white" strokeWidth="2" fill="none" />
+        {/* Cheeks (blush) */}
+        <circle cx="35" cy="44" r="3" fill="#FECACA" opacity="0.5" />
+        <circle cx="65" cy="44" r="3" fill="#FECACA" opacity="0.5" />
+      </svg>
+    </div>
+  );
+
+  // Demo screenshots for "See WriteScholar in Action"
+  const DemoScreenshot = ({ step }: { step: number }) => {
+    if (step === 1) {
+      return (
+        <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden">
+          <div className="bg-gray-100 px-4 py-3 flex items-center space-x-2">
+            <div className="w-3 h-3 rounded-full bg-red-400"></div>
+            <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
+            <div className="w-3 h-3 rounded-full bg-green-400"></div>
+            <span className="ml-4 text-sm text-gray-500">WriteScholar</span>
+          </div>
+          <div className="p-6">
+            <div className="bg-gray-50 rounded-xl p-4 border border-gray-200 mb-4">
+              <div className="space-y-2">
+                <div className="h-3 bg-gray-300 rounded w-full"></div>
+                <div className="h-3 bg-gray-300 rounded w-11/12"></div>
+                <div className="h-3 bg-gray-300 rounded w-full"></div>
+                <div className="h-3 bg-blue-300 rounded w-9/12"></div>
+                <div className="h-3 bg-gray-300 rounded w-full"></div>
+                <div className="h-3 bg-gray-300 rounded w-10/12"></div>
+              </div>
+            </div>
+            <div className="flex justify-end">
+              <div className="bg-blue-600 text-white text-sm px-4 py-2 rounded-lg font-medium">Analyze Essay</div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    if (step === 2) {
+      return (
+        <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden">
+          <div className="bg-gray-100 px-4 py-3 flex items-center space-x-2">
+            <div className="w-3 h-3 rounded-full bg-red-400"></div>
+            <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
+            <div className="w-3 h-3 rounded-full bg-green-400"></div>
+            <span className="ml-4 text-sm text-gray-500">Analysis Results</span>
+          </div>
+          <div className="p-6">
+            <div className="grid grid-cols-2 gap-4 mb-4">
+              <div className="bg-green-50 rounded-xl p-4 border border-green-200">
+                <div className="flex items-center mb-2">
+                  <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center mr-2">
+                    <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>
+                  </div>
+                  <span className="font-semibold text-gray-900">Structure</span>
+                </div>
+                <p className="text-sm text-green-700">Strong thesis statement</p>
+              </div>
+              <div className="bg-yellow-50 rounded-xl p-4 border border-yellow-200">
+                <div className="flex items-center mb-2">
+                  <div className="w-8 h-8 bg-yellow-500 rounded-lg flex items-center justify-center mr-2">
+                    <span className="text-white font-bold text-sm">!</span>
+                  </div>
+                  <span className="font-semibold text-gray-900">Citations</span>
+                </div>
+                <p className="text-sm text-yellow-700">2 formatting issues</p>
+              </div>
+            </div>
+            <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
+              <div className="flex items-center mb-2">
+                <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center mr-2">
+                  <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/><path fillRule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clipRule="evenodd"/></svg>
+                </div>
+                <span className="font-semibold text-gray-900">Grammar & Clarity</span>
+              </div>
+              <p className="text-sm text-blue-700">5 suggestions to improve readability</p>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    return null;
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 relative overflow-hidden px-2 sm:px-8" role="main">
-      {/* Background decorative elements */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-100/20 via-transparent to-transparent" aria-hidden="true" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-purple-100/20 via-transparent to-transparent" aria-hidden="true" />
-      
+    <main className="min-h-screen bg-white" role="main">
       {/* Navigation */}
-      <nav className="relative z-10 flex items-center justify-between px-2 sm:px-8 md:px-16 py-4 sm:py-6 backdrop-blur-sm bg-white/80 border-b border-white/20" aria-label="Main navigation">
-        <div className="flex items-center space-x-2 sm:space-x-3">
-          <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-xl flex items-center justify-center shadow-lg">
-            <span className="text-white font-bold text-xl sm:text-2xl">W</span>
+      <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-100" aria-label="Main navigation">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-18 py-4">
+            <a href="/" onClick={(e) => { e.preventDefault(); onNavigate('landing'); }} className="flex items-center space-x-2.5">
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center">
+                <span className="text-white font-bold text-xl">W</span>
+              </div>
+              <span className="text-2xl font-bold text-gray-900">WriteScholar</span>
+            </a>
+            
+            <div className="hidden md:flex items-center space-x-2">
+              <a href="/features" onClick={(e) => { e.preventDefault(); onNavigate('features'); }} className="px-4 py-2.5 text-base text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-50 transition-colors font-medium">Features</a>
+              <a href="/pricing" onClick={(e) => { e.preventDefault(); onNavigate('pricing'); }} className="px-4 py-2.5 text-base text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-50 transition-colors font-medium">Pricing</a>
+              <a href="/blog" onClick={(e) => { e.preventDefault(); onNavigate('blog'); }} className="px-4 py-2.5 text-base text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-50 transition-colors font-medium">Blog</a>
+              <a href="/about" onClick={(e) => { e.preventDefault(); onNavigate('about'); }} className="px-4 py-2.5 text-base text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-50 transition-colors font-medium">About</a>
+            </div>
+            
+            <div className="flex items-center space-x-3">
+              <a href="/login" onClick={(e) => { e.preventDefault(); onNavigate('login'); }} className="hidden sm:inline-flex px-4 py-2.5 text-base text-gray-700 hover:text-gray-900 font-medium rounded-lg hover:bg-gray-50 transition-colors">Log in</a>
+              <a href="/signup" onClick={(e) => { e.preventDefault(); onNavigate('signup'); }} className="inline-flex items-center px-5 py-2.5 bg-gray-900 text-white text-base font-semibold rounded-xl hover:bg-gray-800 transition-colors">
+                Get Started
+              </a>
+            </div>
           </div>
-          <span className="text-lg sm:text-2xl font-bold text-gray-900">WriteScholar</span>
-        </div>
-        <div className="hidden md:flex items-center space-x-8">
-          <button 
-            onClick={() => onNavigate('features')}
-            className="text-gray-600 hover:text-gray-900 transition-colors font-medium"
-          >
-            Features
-          </button>
-          <button 
-            onClick={() => {
-              const pricingSection = document.getElementById('pricing');
-              if (pricingSection) {
-                pricingSection.scrollIntoView({ behavior: 'smooth' });
-              }
-            }}
-            className="text-gray-600 hover:text-gray-900 transition-colors font-medium"
-          >
-            Pricing
-          </button>
-          <button 
-            onClick={() => onNavigate('about')}
-            className="text-gray-600 hover:text-gray-900 transition-colors font-medium"
-          >
-            About
-          </button>
-          <button 
-            onClick={() => onNavigate('blog')}
-            className="text-gray-600 hover:text-gray-900 transition-colors font-medium"
-          >
-            Blog
-          </button>
-        </div>
-        <div className="flex items-center space-x-2 sm:space-x-3">
-          <button 
-            onClick={() => onNavigate('login')}
-            className="text-gray-600 hover:text-gray-900 transition-colors font-medium px-2 sm:px-4 py-2 rounded-lg hover:bg-gray-100/50 text-sm sm:text-base"
-          >
-            Login
-          </button>
-          <button 
-            onClick={() => onNavigate('signup')}
-            className="bg-gradient-to-r from-gray-900 to-gray-800 text-white px-3 sm:px-6 py-2 sm:py-2.5 rounded-xl hover:shadow-lg transform hover:scale-105 transition-all duration-200 font-medium text-sm sm:text-base"
-          >
-            Sign up
-          </button>
         </div>
       </nav>
 
-      {/* Hero Section - keyword-rich for SEO */}
-      <div className="relative z-10 max-w-8xl mx-auto px-2 sm:px-8 md:px-16 py-12 sm:py-16 md:py-24">
-        <header className="text-center mb-12 sm:mb-16 md:mb-20">
-          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-4 sm:mb-8 leading-tight tracking-tighter -mt-4 sm:-mt-6">
-            {mode === 'analyze' ? (
-              <>
-                <span className="block">AI-Powered <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">Academic Writing</span></span>
-                <span className="block">Feedback</span>
-                <span className="block text-2xl sm:text-3xl md:text-4xl font-normal text-gray-700 mt-3">Instant analysis for your papers</span>
-              </>
-            ) : (
-              <>
-                <span className="block">Find <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">citations</span> instantly</span>
-                <span className="block text-2xl sm:text-3xl md:text-4xl font-normal text-gray-700 mt-2">APA, MLA, Chicago &amp; more</span>
-              </>
-            )}
-          </h1>
-          <p className="text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto mb-6 sm:mb-8">
-            {mode === 'analyze'
-              ? 'Upload your essay, thesis, or research paper. Get detailed feedback on grammar, citations (APA, MLA, Chicago, Harvard), structure, and academic rigor in under 60 seconds.'
-              : 'Search 10M+ academic sources. Get ready-to-use citations in multiple styles for your research.'}
-          </p>
-          {/* Feature list with checkmarks */}
-          <div className="mb-8">
-            {/* Mobile: 3 lines layout (2-1-1) */}
-            <div className="sm:hidden flex flex-col items-center gap-2 max-w-sm mx-auto">
-              {mode === 'analyze' ? (
-                <>
-                  <div className="flex items-center justify-center gap-4">
-                    <div className="flex items-center space-x-2">
-                      <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
-                        <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                        </svg>
-                      </div>
-                      <span className="text-gray-700 text-xs font-medium tracking-tight">Quick structure analysis</span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
-                        <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                        </svg>
-                      </div>
-                      <span className="text-gray-700 text-xs font-medium tracking-tight">Detailed annotations</span>
-                    </div>
+      {/* Hero Section with Sidebar */}
+      <section className="pt-6 sm:pt-10 lg:pt-12 pb-8 sm:pb-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-start">
+            {/* Desktop Sidebar - aligned with H1 */}
+            <div className="hidden lg:flex flex-col space-y-1 pr-6 xl:pr-10">
+              {sidebarTools.map((tool) => (
+                <button
+                  key={tool.id}
+                  onMouseEnter={() => setActiveToolHover(tool.id)}
+                  onMouseLeave={() => setActiveToolHover(null)}
+                  onClick={() => onNavigate('signup')}
+                  className={`relative flex flex-col items-center p-3 rounded-xl transition-all ${
+                    activeToolHover === tool.id ? 'bg-gray-50 scale-105' : ''
+                  }`}
+                >
+                  <div className={`w-12 h-12 ${tool.bg} rounded-xl flex items-center justify-center mb-1.5`}>
+                    <span className={`${tool.color} font-bold text-base`}>{tool.icon}</span>
                   </div>
-                  <div className="flex items-center justify-center space-x-2">
-                    <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
-                      <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                      </svg>
+                  <span className="text-[11px] text-gray-600 text-center leading-tight max-w-[70px]">{tool.name}</span>
+                  
+                  {activeToolHover === tool.id && (
+                    <div className="absolute left-full ml-3 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg whitespace-nowrap z-10">
+                      {tool.name}
+                      <div className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-gray-900" />
                     </div>
-                    <span className="text-gray-700 text-xs font-medium tracking-tight">Academic writing feedback</span>
-                  </div>
-                  <div className="flex items-center justify-center space-x-2">
-                    <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
-                      <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                      </svg>
-                    </div>
-                    <span className="text-gray-700 text-xs font-medium tracking-tight">Improvement suggestions</span>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div className="flex items-center justify-center gap-4">
-                    <div className="flex items-center space-x-2">
-                      <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
-                        <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                        </svg>
-                      </div>
-                      <span className="text-gray-700 text-xs font-medium tracking-tight">10M+ academic sources</span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
-                        <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                        </svg>
-                      </div>
-                      <span className="text-gray-700 text-xs font-medium tracking-tight">Multiple citation styles</span>
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-center space-x-2">
-                    <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
-                      <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                      </svg>
-                    </div>
-                    <span className="text-gray-700 text-xs font-medium tracking-tight">Instant results</span>
-                  </div>
-                  <div className="flex items-center justify-center space-x-2">
-                    <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
-                      <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                      </svg>
-                    </div>
-                    <span className="text-gray-700 text-xs font-medium tracking-tight">Ready-to-use citations</span>
-                  </div>
-                </>
-              )}
+                  )}
+                </button>
+              ))}
             </div>
 
-            {/* Desktop: Single line layout */}
-            <div className="hidden sm:flex sm:flex-row sm:items-center sm:justify-center sm:gap-6 max-w-6xl mx-auto flex-wrap">
-              {mode === 'analyze' ? (
-                <>
-                  <div className="flex items-center space-x-2">
-                    <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
-                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                      </svg>
-                    </div>
-                    <span className="text-gray-800 text-base font-semibold">Quick structure analysis</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
-                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                      </svg>
-                    </div>
-                    <span className="text-gray-800 text-base font-semibold">Detailed annotations</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
-                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                      </svg>
-                    </div>
-                    <span className="text-gray-800 text-base font-semibold">Academic writing feedback</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
-                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                      </svg>
-                    </div>
-                    <span className="text-gray-800 text-base font-semibold">Improvement suggestions</span>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div className="flex items-center space-x-2">
-                    <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
-                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                      </svg>
-                    </div>
-                    <span className="text-gray-800 text-base font-semibold">10M+ academic sources</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
-                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                      </svg>
-                    </div>
-                    <span className="text-gray-800 text-base font-semibold">Multiple citation styles</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
-                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                      </svg>
-                    </div>
-                    <span className="text-gray-800 text-base font-semibold">Instant results</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
-                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                      </svg>
-                    </div>
-                    <span className="text-gray-800 text-base font-semibold">Ready-to-use citations</span>
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
-
-          {/* Mode Toggle */}
-          <div className="flex justify-center mb-6 sm:mb-8">
-            {/* Mobile: Purple gradient buttons */}
-            <div className="sm:hidden flex gap-2 bg-white/90 backdrop-blur-xl rounded-lg p-1 shadow-lg border border-gray-200/50">
-              <button
-                onClick={() => {
-                  setMode('analyze');
-                  setInputText('');
-                }}
-                className={`px-5 py-2.5 rounded-md font-semibold text-sm transition-all duration-200 ${
-                  mode === 'analyze'
-                    ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-md'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                Analyze Text
-              </button>
-              <button
-                onClick={() => {
-                  setMode('citations');
-                  setInputText('');
-                }}
-                className={`px-5 py-2.5 rounded-md font-semibold text-sm transition-all duration-200 ${
-                  mode === 'citations'
-                    ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-md'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                Citations
-              </button>
-            </div>
-            {/* Desktop: Original design */}
-            <div className="hidden sm:block bg-white/90 backdrop-blur-xl rounded-lg p-1 shadow-lg border border-gray-200/50 inline-flex">
-              <button
-                onClick={() => {
-                  setMode('analyze');
-                  setInputText('');
-                }}
-                className={`px-6 py-3 rounded-md font-semibold text-sm transition-all duration-200 ${
-                  mode === 'analyze'
-                    ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-md'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                <span className="flex items-center">
-                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                  Analyze Text
-                </span>
-              </button>
-              <button
-                onClick={() => {
-                  setMode('citations');
-                  setInputText('');
-                }}
-                className={`px-6 py-3 rounded-md font-semibold text-sm transition-all duration-200 ${
-                  mode === 'citations'
-                    ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-md'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                <span className="flex items-center">
-                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
-                  Citations
-                </span>
-              </button>
-            </div>
-          </div>
-          
-          {/* Interactive Text Input */}
-          <div className="max-w-4xl mx-auto mb-8 sm:mb-12 px-2 sm:px-6">
-            {/* Citation Style Selector (only show in citations mode) */}
-            {mode === 'citations' && (
-              <div className="flex justify-center mb-4">
-                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-2 inline-flex items-center sm:bg-white/90 sm:backdrop-blur-xl">
-                  <span className="text-sm text-gray-600 mr-2 px-2">Citation Style:</span>
-                  <select
-                    value={citationStyle}
-                    onChange={(e) => setCitationStyle(e.target.value)}
-                    className="px-3 py-1 rounded border-none outline-none text-sm font-medium text-gray-700 bg-transparent cursor-pointer"
-                  >
-                    <option value="APA">APA</option>
-                    <option value="MLA">MLA</option>
-                    <option value="Chicago">Chicago</option>
-                    <option value="Harvard">Harvard</option>
-                    <option value="IEEE">IEEE</option>
-                    <option value="Vancouver">Vancouver</option>
-                  </select>
-                </div>
-              </div>
-            )}
-
-            {/* Mobile: Cleaner input design */}
-            <div className="relative">
-              <div className="sm:hidden">
-                {/* Mobile: Simple, clean input */}
-                <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-4">
-                  <textarea
-                    value={inputText}
-                    onChange={(e) => setInputText(e.target.value)}
-                    onFocus={() => setIsFocused(true)}
-                    onBlur={() => setIsFocused(false)}
-                    placeholder={isFocused ? "" : placeholders[placeholderIndex]}
-                    className="w-full min-h-24 max-h-48 pb-12 pl-3 pr-3 text-gray-700 border-none outline-none resize-none placeholder-gray-400 bg-transparent text-base font-normal transition-all duration-300 overflow-y-auto leading-relaxed"
-                    style={{ 
-                      height: 'auto', 
-                      lineHeight: '1.6',
-                      paddingTop: '0px',
-                      marginTop: '0px',
-                      fontSize: '16px'
-                    }}
-                    onInput={(e) => {
-                      const target = e.target as HTMLTextAreaElement;
-                      target.style.height = 'auto';
-                      target.style.height = Math.min(target.scrollHeight, 192) + 'px';
-                    }}
-                  />
-                  <button
-                    onClick={handleSubmit}
-                    className="absolute bottom-4 right-4 bg-gradient-to-r from-orange-500 to-orange-600 text-white w-10 h-10 rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all duration-300 flex items-center justify-center shadow-md"
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                    </svg>
-                  </button>
-                </div>
-              </div>
-                
-              {/* Desktop: Original fancy design */}
-              <div className="hidden sm:block relative">
-                <div className="absolute -inset-1 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-indigo-500/20 rounded-2xl sm:rounded-3xl blur-sm"></div>
-                <div className="relative bg-white/90 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-2xl border border-white/30 p-4 sm:p-6 md:p-8 hover:shadow-3xl transition-all duration-500">
-                  <textarea
-                    value={inputText}
-                    onChange={(e) => setInputText(e.target.value)}
-                    onFocus={() => setIsFocused(true)}
-                    onBlur={() => setIsFocused(false)}
-                    placeholder={isFocused ? "" : placeholders[placeholderIndex]}
-                    className="w-full min-h-24 max-h-48 pb-6 pl-4 md:pl-6 pr-14 sm:pr-20 text-gray-700 border-none outline-none resize-none placeholder-gray-400 bg-transparent text-base md:text-lg font-light transition-all duration-300 overflow-y-auto leading-relaxed"
-                    style={{ 
-                      height: 'auto', 
-                      lineHeight: '1.6',
-                      paddingTop: '0px',
-                      marginTop: '0px'
-                    }}
-                    onInput={(e) => {
-                      const target = e.target as HTMLTextAreaElement;
-                      target.style.height = 'auto';
-                      target.style.height = Math.min(target.scrollHeight, 192) + 'px';
-                    }}
-                  />
-                  <button
-                    onClick={handleSubmit}
-                    className="absolute bottom-4 right-4 bg-gradient-to-r from-orange-500 to-orange-600 text-white w-12 h-12 rounded-2xl hover:shadow-lg transform hover:scale-110 transition-all duration-300 flex items-center justify-center group z-10"
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                    </svg>
-                  </button>
-                </div>
-              </div>
-            </div>
-            
-            {/* Suggested Categories - Hidden on mobile for cleaner design */}
-            <div className="hidden sm:block mt-8 text-center">
-              <div className="flex flex-wrap justify-center gap-3">
+            {/* Main Content */}
+            <div className="flex-1 text-center max-w-4xl mx-auto">
+              {/* H1 - bigger */}
+              <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-900 tracking-tight leading-tight mb-5 sm:mb-7">
+                {mode === 'analyze' ? (
+                  <>Your essay — improved with <span className="text-blue-600">AI feedback</span></>
+                ) : (
+                  <>Find <span className="text-blue-600">academic citations</span> instantly</>
+                )}
+              </h1>
+              
+              {/* Feature badges - bigger */}
+              <div className="flex flex-wrap justify-center gap-x-5 gap-y-2 mb-7 sm:mb-9 text-base text-gray-600">
                 {mode === 'analyze' ? (
                   <>
-                    <button className="px-4 py-2 bg-white/80 backdrop-blur-sm border border-gray-200 rounded-full text-sm font-medium text-gray-700 hover:bg-white hover:shadow-md transition-all duration-200">
-                      Research Paper
-                    </button>
-                    <button className="px-4 py-2 bg-white/80 backdrop-blur-sm border border-gray-200 rounded-full text-sm font-medium text-gray-700 hover:bg-white hover:shadow-md transition-all duration-200">
-                      Thesis Draft
-                    </button>
-                    <button className="px-4 py-2 bg-white/80 backdrop-blur-sm border border-gray-200 rounded-full text-sm font-medium text-gray-700 hover:bg-white hover:shadow-md transition-all duration-200">
-                      Essay Analysis
-                    </button>
-                    <button className="px-4 py-2 bg-white/80 backdrop-blur-sm border border-gray-200 rounded-full text-sm font-medium text-gray-700 hover:bg-white hover:shadow-md transition-all duration-200">
-                      Literature Review
-                    </button>
+                    <span className="flex items-center"><svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Structure analysis</span>
+                    <span className="flex items-center"><svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Grammar &amp; clarity</span>
+                    <span className="flex items-center"><svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Citation check</span>
                   </>
                 ) : (
                   <>
-                    <button className="px-4 py-2 bg-white/80 backdrop-blur-sm border border-gray-200 rounded-full text-sm font-medium text-gray-700 hover:bg-white hover:shadow-md transition-all duration-200">
-                      Psychology
-                    </button>
-                    <button className="px-4 py-2 bg-white/80 backdrop-blur-sm border border-gray-200 rounded-full text-sm font-medium text-gray-700 hover:bg-white hover:shadow-md transition-all duration-200">
-                      Sociology
-                    </button>
-                    <button className="px-4 py-2 bg-white/80 backdrop-blur-sm border border-gray-200 rounded-full text-sm font-medium text-gray-700 hover:bg-white hover:shadow-md transition-all duration-200">
-                      History
-                    </button>
-                    <button className="px-4 py-2 bg-white/80 backdrop-blur-sm border border-gray-200 rounded-full text-sm font-medium text-gray-700 hover:bg-white hover:shadow-md transition-all duration-200">
-                      Literature
-                    </button>
+                    <span className="flex items-center"><svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Millions of sources</span>
+                    <span className="flex items-center"><svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>APA, MLA, Chicago</span>
+                    <span className="flex items-center"><svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Auto-formatted</span>
                   </>
                 )}
               </div>
-            </div>
-          </div>
-        </header>
 
-        {/* Trusted By Universities Section */}
-        <div className="text-center mb-12 sm:mb-16 px-2 sm:px-8 md:px-16">
-          <div className="max-w-6xl mx-auto">
-            <div className="mb-8 flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6">
-              <p className="text-gray-700 font-semibold text-xl sm:text-2xl mb-0">Trusted by students around the world</p>
-              <img 
-                src={customersImage} 
-                alt="WriteScholar Customers" 
-                className="h-20 sm:h-20 md:h-24 lg:h-32 w-auto object-contain"
-              />
-            </div>
-            <p className="text-gray-500 text-sm sm:text-base mb-8">Join thousands of students improving their academic writing</p>
-            <div className="relative overflow-hidden py-8 bg-white border border-gray-100 rounded-xl shadow-sm">
-              {/* Gradient overlays for fade effect */}
-              <div className="absolute left-0 top-0 bottom-0 w-24 sm:w-40 bg-gradient-to-r from-white via-white to-transparent z-10 pointer-events-none"></div>
-              <div className="absolute right-0 top-0 bottom-0 w-24 sm:w-40 bg-gradient-to-l from-white via-white to-transparent z-10 pointer-events-none"></div>
-              
-              {/* Animated carousel */}
-              <div className="flex animate-scroll-slow items-center" style={{ width: 'max-content' }}>
-                {/* First set of universities */}
-                <div className="flex space-x-12 sm:space-x-16 px-8 flex-shrink-0">
-                  {/* Harvard */}
-                  <div className="flex items-center justify-center min-w-[120px] sm:min-w-[140px]">
-                    <span className="university-harvard text-2xl sm:text-3xl">HARVARD</span>
+              {/* Mode Toggle - bigger */}
+              <div className="flex justify-center mb-5">
+                <div className="inline-flex bg-gray-100 rounded-full p-1.5">
+                  <button
+                    onClick={() => { setMode('analyze'); setInputText(''); }}
+                    className={`px-5 sm:px-6 py-2.5 rounded-full text-base font-medium transition-all ${
+                      mode === 'analyze' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    Analyze Essay
+                  </button>
+                  <button
+                    onClick={() => { setMode('citations'); setInputText(''); }}
+                    className={`px-5 sm:px-6 py-2.5 rounded-full text-base font-medium transition-all ${
+                      mode === 'citations' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    Find Citations
+                  </button>
+                </div>
+              </div>
+
+              {/* Helper text */}
+              <p className="text-sm text-amber-600 mb-4 flex items-center justify-center">
+                <span className="mr-1.5">💡</span>
+                {mode === 'analyze' ? 'AI analyzes, you refine for submission' : 'Find sources, format citations automatically'}
+              </p>
+
+              {/* Citation Style (citations mode only) */}
+              {mode === 'citations' && (
+                <div className="flex justify-center mb-4">
+                  <div className="inline-flex items-center bg-gray-50 rounded-lg px-4 py-2 text-base">
+                    <span className="text-gray-500 mr-2">Style:</span>
+                    <select
+                      value={citationStyle}
+                      onChange={(e) => setCitationStyle(e.target.value)}
+                      className="bg-transparent font-medium text-gray-900 outline-none cursor-pointer"
+                    >
+                      <option value="APA">APA 7th</option>
+                      <option value="MLA">MLA 9th</option>
+                      <option value="Chicago">Chicago</option>
+                      <option value="Harvard">Harvard</option>
+                      <option value="IEEE">IEEE</option>
+                      <option value="Vancouver">Vancouver</option>
+                    </select>
                   </div>
-                  
-                  {/* Yale */}
-                  <div className="flex items-center justify-center min-w-[120px] sm:min-w-[140px]">
-                    <span className="university-yale text-2xl sm:text-3xl">YALE</span>
-                  </div>
-                  
-                  {/* Oxford */}
-                  <div className="flex items-center justify-center min-w-[120px] sm:min-w-[140px]">
-                    <span className="university-oxford text-2xl sm:text-3xl">OXFORD</span>
-                  </div>
-                  
-                  {/* MIT */}
-                  <div className="flex items-center justify-center min-w-[120px] sm:min-w-[140px]">
-                    <span className="university-mit text-2xl sm:text-3xl">MIT</span>
-                  </div>
-                  
-                  {/* Cambridge */}
-                  <div className="flex items-center justify-center min-w-[120px] sm:min-w-[140px]">
-                    <span className="university-cambridge text-2xl sm:text-3xl">CAMBRIDGE</span>
-                  </div>
-                  
-                  {/* Stanford */}
-                  <div className="flex items-center justify-center min-w-[120px] sm:min-w-[140px]">
-                    <span className="university-stanford text-2xl sm:text-3xl">STANFORD</span>
-                  </div>
-                  
-                  {/* Princeton */}
-                  <div className="flex items-center justify-center min-w-[120px] sm:min-w-[140px]">
-                    <span className="university-princeton text-2xl sm:text-3xl">PRINCETON</span>
-                  </div>
+                </div>
+              )}
+
+              {/* Input Area with Character outside */}
+              <div className="relative mb-5">
+                {/* Character illustration - positioned outside to the right */}
+                <CharacterIllustration />
+                
+                <div className="relative bg-white rounded-2xl border-2 border-gray-200 hover:border-gray-300 focus-within:border-blue-500 transition-colors shadow-sm">
+                  <textarea
+                    value={inputText}
+                    onChange={(e) => setInputText(e.target.value)}
+                    onFocus={() => setIsFocused(true)}
+                    onBlur={() => setIsFocused(false)}
+                    placeholder={placeholders[placeholderIndex]}
+                    className="w-full min-h-[120px] sm:min-h-[140px] p-5 sm:p-6 text-gray-800 text-lg border-none outline-none resize-none bg-transparent placeholder-gray-400 leading-relaxed"
+                    style={{ fontSize: '18px' }}
+                    onInput={(e) => {
+                      const target = e.target as HTMLTextAreaElement;
+                      target.style.height = 'auto';
+                      target.style.height = Math.min(target.scrollHeight, 220) + 'px';
+                    }}
+                  />
                 </div>
                 
-                {/* Duplicate set for seamless loop */}
-                <div className="flex space-x-12 sm:space-x-16 px-8 flex-shrink-0">
-                  {/* Harvard */}
-                  <div className="flex items-center justify-center min-w-[120px] sm:min-w-[140px]">
-                    <span className="university-harvard text-2xl sm:text-3xl">HARVARD</span>
-                  </div>
-                  
-                  {/* Yale */}
-                  <div className="flex items-center justify-center min-w-[120px] sm:min-w-[140px]">
-                    <span className="university-yale text-2xl sm:text-3xl">YALE</span>
-                  </div>
-                  
-                  {/* Oxford */}
-                  <div className="flex items-center justify-center min-w-[120px] sm:min-w-[140px]">
-                    <span className="university-oxford text-2xl sm:text-3xl">OXFORD</span>
-                  </div>
-                  
-                  {/* MIT */}
-                  <div className="flex items-center justify-center min-w-[120px] sm:min-w-[140px]">
-                    <span className="university-mit text-2xl sm:text-3xl">MIT</span>
-                  </div>
-                  
-                  {/* Cambridge */}
-                  <div className="flex items-center justify-center min-w-[120px] sm:min-w-[140px]">
-                    <span className="university-cambridge text-2xl sm:text-3xl">CAMBRIDGE</span>
-                  </div>
-                  
-                  {/* Stanford */}
-                  <div className="flex items-center justify-center min-w-[120px] sm:min-w-[140px]">
-                    <span className="university-stanford text-2xl sm:text-3xl">STANFORD</span>
-                  </div>
-                  
-                  {/* Princeton */}
-                  <div className="flex items-center justify-center min-w-[120px] sm:min-w-[140px]">
-                    <span className="university-princeton text-2xl sm:text-3xl">PRINCETON</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-         {/* Interactive Annotation Examples */}
-         <div className="max-w-full mx-auto mb-16 sm:mb-24 md:mb-32 px-2 sm:px-8 md:px-12 lg:px-20">
-           <div className="text-center mb-12 sm:mb-16 md:mb-20">
-             <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 sm:mb-8 tracking-tight">See WriteScholar in Action</h2>
-             <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-600 font-light max-w-4xl mx-auto leading-relaxed px-2 sm:px-6">Real examples of how our AI analyzes and improves academic writing</p>
-             </div>
-           
-           {/* Three Separate Papers */}
-          <div className="space-y-12 sm:space-y-16 md:space-y-20">
-            {examplePapers.map((paper, paperIndex) => (
-              <div key={paperIndex} className="max-w-5xl mx-auto">
-                {/* Document Display */}
-                <div className="relative group">
-                   <div className="absolute -inset-1 bg-gradient-to-r from-green-400/30 to-amber-400/30 rounded-3xl blur-sm opacity-0 group-hover:opacity-100 transition duration-700"></div>
-                   <div className="relative bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/40 hover:shadow-3xl transition-all duration-700 overflow-hidden">
-                     <div className="p-6 border-b border-gray-100">
-                       <h3 className="text-xl font-semibold text-gray-900 mb-1">{paper.title}</h3>
-                       <p className="text-sm text-gray-500 font-medium">{paper.subtitle}</p>
-                     </div>
-                     
-                    <div className="p-6">
-                      {paper.isImage ? (
-                        // Display image for image-based examples
-                        <div className="w-full">
-                          <img 
-                            src={paper.imagePath} 
-                            alt={paper.title}
-                            className="w-full h-auto rounded-lg shadow-lg"
-                            onError={(e) => {
-                              console.error('Failed to load image:', paper.imagePath);
-                              console.log('Image error event:', e);
-                              // Show a placeholder or hide the image
-                              const img = e.currentTarget;
-                              img.style.display = 'none';
-                              // Show a placeholder div instead
-                              const placeholder = document.createElement('div');
-                              placeholder.className = 'w-full h-64 bg-gray-200 rounded-lg flex items-center justify-center text-gray-500';
-                              placeholder.innerHTML = `<span>Image not available</span>`;
-                              img.parentNode?.appendChild(placeholder);
-                            }}
-                            onLoad={() => {
-                              console.log('Image loaded successfully:', paper.imagePath);
-                            }}
-                            loading="eager"
-                          />
-                        </div>
-                        ) : (
-                         // Display text content for text-based examples (not currently used)
-                         <>
-                           <div className="prose max-w-none">
-                             {('content' in paper && paper.content) ? (
-                               (paper.content as any[]).map((paragraph: any, pIndex: number) => (
-                                 <p key={pIndex} className="text-gray-700 leading-relaxed mb-4">
-                                   {paragraph.annotations && paragraph.annotations.length > 0 ? (
-                                     paragraph.text.split(paragraph.annotations[0].text).map((part: string, partIndex: number) => (
-                                       <React.Fragment key={partIndex}>
-                                         {part}
-                                         {partIndex < paragraph.text.split(paragraph.annotations[0].text).length - 1 && (
-                                           <span 
-                                             className={`px-2 py-1 rounded border-l-4 cursor-pointer transition-all duration-200 ${
-                                               paragraph.annotations[0].type === 'green' 
-                                                 ? 'bg-green-100 border-green-500 hover:bg-green-200' 
-                                                 : paragraph.annotations[0].type === 'amber'
-                                                 ? 'bg-amber-100 border-amber-500 hover:bg-amber-200'
-                                                 : 'bg-red-100 border-red-500 hover:bg-red-200'
-                                             }`}
-                                             onMouseEnter={() => setHoveredAnnotation(paragraph.annotations[0])}
-                                             onMouseLeave={() => setHoveredAnnotation(null)}
-                                           >
-                                             {paragraph.annotations[0].text}
-                                           </span>
-                                         )}
-                                       </React.Fragment>
-                                     ))
-                                   ) : (
-                                     paragraph.text
-                                   )}
-                                 </p>
-                               ))
-                             ) : null}
-                           </div>
-                          
-                          {/* Annotation Legend */}
-                          <div className="mt-6 pt-4 border-t border-gray-100">
-                            <div className="flex flex-wrap gap-4">
-                              <div className="flex items-center space-x-2">
-                                <div className="w-3 h-3 bg-green-500 rounded border-l-2 border-green-600 shadow-sm"></div>
-                                <span className="text-xs font-medium text-gray-700">Strong sections</span>
-                              </div>
-                              <div className="flex items-center space-x-2">
-                                <div className="w-3 h-3 bg-amber-500 rounded border-l-2 border-amber-600 shadow-sm"></div>
-                                <span className="text-xs font-medium text-gray-700">Needs improvement</span>
-                              </div>
-                              <div className="flex items-center space-x-2">
-                                <div className="w-3 h-3 bg-red-500 rounded border-l-2 border-red-600 shadow-sm"></div>
-                                <span className="text-xs font-medium text-gray-700">Needs revision</span>
-                              </div>
-                            </div>
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-             ))}
-           </div>
-
-          {/* Tooltip */}
-          {hoveredAnnotation && (
-            <div className="fixed z-50 bg-gray-900 text-white px-4 py-2 rounded-lg shadow-lg text-sm max-w-xs pointer-events-none"
-                 style={{
-                   left: '50%',
-                   top: '50%',
-                   transform: 'translate(-50%, -50%)'
-                 }}>
-              {hoveredAnnotation.tooltip}
-            </div>
-          )}
-                </div>
-
-        {/* Reviews Section */}
-        <div className="text-center mb-16 sm:mb-20 md:mb-24 px-2 sm:px-8 md:px-16">
-          <div className="max-w-7xl mx-auto">
-            <div className="bg-white/90 backdrop-blur-xl rounded-2xl shadow-xl p-6 sm:p-8 md:p-12">
-                <div className="flex justify-center mb-4 sm:mb-6">
-                  <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 rounded-2xl flex items-center justify-center shadow-lg">
-                    <svg className="w-6 h-6 sm:w-8 sm:h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h4v10h-10z"/>
-                    </svg>
-                  </div>
-                </div>
-                <blockquote className="text-base sm:text-lg md:text-xl text-gray-900 mb-6 sm:mb-8 leading-relaxed font-light transition-all duration-500 px-4">
-                  "{reviews[reviewIndex].text}"
-                </blockquote>
-                <div className="flex justify-center mt-6 space-x-3">
-                  {reviews.map((_, index) => (
-                    <div 
-                      key={index}
-                      className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                        index === reviewIndex 
-                          ? 'bg-gradient-to-r from-blue-600 to-purple-600' 
-                          : 'bg-gray-300 hover:bg-gray-400'
-                      }`}
-                    ></div>
-                  ))}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* FAQ Section */}
-        <div className="max-w-5xl mx-auto mb-16 sm:mb-24 md:mb-32 px-2 sm:px-6 md:px-8">
-        <div className="text-center mb-12 sm:mb-16 md:mb-20">
-            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 sm:mb-8 tracking-tight">FAQs</h2>
-            <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-600 font-light">Common questions about WriteScholar</p>
-          </div>
-          
-          <div className="space-y-6">
-            {faqs.map((faq, index) => (
-              <div key={index} className="relative group">
-                <div className="absolute -inset-0.5 bg-gradient-to-r from-gray-400/20 to-gray-500/20 rounded-3xl blur opacity-0 group-hover:opacity-100 transition duration-500"></div>
-                <div className="relative bg-white/95 backdrop-blur-xl rounded-3xl shadow-xl border border-white/40 overflow-hidden hover:shadow-2xl transition-all duration-500">
+                {/* Submit button - below textarea */}
+                <div className="flex justify-center mt-4">
                   <button
-                    onClick={() => setOpenFAQ(openFAQ === index ? null : index)}
-                    className="w-full px-10 py-8 text-left flex items-center justify-between hover:bg-gray-50/50 transition-colors"
+                    onClick={handleSubmit}
+                    disabled={!inputText.trim()}
+                    className={`px-8 py-3.5 rounded-xl flex items-center justify-center transition-all font-semibold text-base ${
+                      inputText.trim()
+                        ? 'bg-gray-900 hover:bg-gray-800 text-white shadow-lg hover:shadow-xl cursor-pointer'
+                        : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                    }`}
                   >
-                    <h3 className="text-xl font-semibold text-gray-900 pr-6">{faq.question}</h3>
-                    <div className={`w-8 h-8 flex items-center justify-center transition-transform duration-300 ${
-                      openFAQ === index ? 'rotate-45' : ''
-                    }`}>
-                      <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                      </svg>
-                    </div>
+                    <span className="mr-2">✨</span>
+                    {mode === 'analyze' ? 'Get Feedback' : 'Find Sources'}
                   </button>
-                  {openFAQ === index && (
-                    <div className="px-10 pb-8">
-                      <div className="border-t border-gray-100 pt-6">
-                        <p className="text-gray-600 leading-relaxed text-lg">{faq.answer}</p>
-                      </div>
-                    </div>
-                  )}
+                </div>
+              </div>
+
+              {/* Suggested Topics - bigger */}
+              <div className="mb-10">
+                <p className="text-sm text-gray-500 mb-4">Suggested topics</p>
+                <div className="flex flex-wrap justify-center gap-2.5">
+                  {suggestedTopics.map((topic, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => handleTopicClick(topic)}
+                      className="px-4 py-2 bg-gray-50 hover:bg-gray-100 text-gray-700 text-sm sm:text-base rounded-lg border border-gray-200 hover:border-gray-300 transition-colors text-left"
+                    >
+                      {topic}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Trusted by Universities */}
+      <section className="py-12 bg-gray-50 border-y border-gray-100">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <p className="text-center text-gray-500 text-sm font-medium mb-8">Trusted by students around the world</p>
+          <div className="flex flex-wrap justify-center items-center gap-8 sm:gap-12 lg:gap-16">
+            {universities.map((uni) => (
+              <div key={uni.name} className="text-gray-400 hover:text-gray-600 transition-colors">
+                <span className="text-lg sm:text-xl font-semibold tracking-wide">{uni.logo}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* See WriteScholar in Action */}
+      <section className="py-20 sm:py-24">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 text-center mb-5">
+            See WriteScholar in Action
+          </h2>
+          <p className="text-lg text-gray-600 text-center mb-16 max-w-2xl mx-auto">
+            Watch how our AI analyzes your writing and provides detailed, actionable feedback
+          </p>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+            {/* Step 1 */}
+            <div className="order-2 lg:order-1">
+              <div className="bg-blue-50 rounded-full w-12 h-12 flex items-center justify-center text-blue-600 font-bold text-lg mb-4">1</div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-3">Paste Your Text</h3>
+              <p className="text-gray-600 text-lg leading-relaxed mb-4">
+                Simply paste your essay, research paper, or thesis into our editor. We support documents of any length, from short essays to full dissertations.
+              </p>
+              <ul className="space-y-2 text-gray-600">
+                <li className="flex items-center"><svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Copy-paste from any source</li>
+                <li className="flex items-center"><svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Upload PDF or DOCX</li>
+                <li className="flex items-center"><svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Supports any length</li>
+              </ul>
+            </div>
+            <div className="order-1 lg:order-2">
+              <DemoScreenshot step={1} />
+            </div>
+
+            {/* Step 2 */}
+            <div className="order-3 lg:order-3 mt-12 lg:mt-0">
+              <DemoScreenshot step={2} />
+            </div>
+            <div className="order-4 lg:order-4">
+              <div className="bg-blue-50 rounded-full w-12 h-12 flex items-center justify-center text-blue-600 font-bold text-lg mb-4">2</div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-3">Get Detailed Feedback</h3>
+              <p className="text-gray-600 text-lg leading-relaxed mb-4">
+                Our AI analyzes your writing in seconds, providing comprehensive feedback on structure, grammar, citations, and academic tone.
+              </p>
+              <ul className="space-y-2 text-gray-600">
+                <li className="flex items-center"><svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Structure analysis</li>
+                <li className="flex items-center"><svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Citation validation</li>
+                <li className="flex items-center"><svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Grammar suggestions</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Features Grid - bigger */}
+      <section className="py-20 sm:py-24 bg-gray-50">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 text-center mb-5">
+            Everything You Need for Better Writing
+          </h2>
+          <p className="text-lg text-gray-600 text-center mb-14 max-w-2xl mx-auto">
+            WriteScholar combines multiple tools to help you write better academic papers
+          </p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+            {[
+              { title: 'Structure Analysis', desc: 'Get feedback on your essay organization, thesis clarity, and paragraph flow.', color: 'blue' },
+              { title: 'Grammar Check', desc: 'Catch grammar, spelling, and punctuation errors with AI-powered suggestions.', color: 'green' },
+              { title: 'Citation Checker', desc: 'Validate APA, MLA, Chicago, and Harvard citations. Fix formatting errors.', color: 'purple' },
+              { title: 'Academic Tone', desc: 'Ensure your writing maintains appropriate formality and discipline conventions.', color: 'orange' },
+              { title: 'Clarity Feedback', desc: 'Identify unclear sentences and get suggestions for clearer expression.', color: 'pink' },
+              { title: 'Source Finder', desc: 'Search millions of academic papers to find relevant citations for your topic.', color: 'indigo' }
+            ].map((feature, idx) => (
+              <div key={idx} className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-lg hover:border-gray-300 transition-all">
+                <div className={`w-12 h-12 bg-${feature.color}-100 rounded-xl flex items-center justify-center mb-4`}>
+                  <div className={`w-6 h-6 bg-${feature.color}-500 rounded`}></div>
+                </div>
+                <h3 className="font-semibold text-gray-900 text-lg mb-2">{feature.title}</h3>
+                <p className="text-base text-gray-600 leading-relaxed">{feature.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ Section - bigger */}
+      <section className="py-20 sm:py-24">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 text-center mb-5">
+            Frequently Asked Questions
+          </h2>
+          <p className="text-lg text-gray-600 text-center mb-12">
+            Everything you need to know about WriteScholar
+          </p>
+
+          <div className="space-y-4">
+            {faqs.map((faq, idx) => (
+              <div key={idx} className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                <button
+                  onClick={() => setOpenFAQ(openFAQ === idx ? null : idx)}
+                  className="w-full px-6 py-5 text-left flex items-center justify-between hover:bg-gray-50 transition-colors"
+                >
+                  <span className="font-medium text-gray-900 text-lg pr-4">{faq.question}</span>
+                  <svg className={`w-5 h-5 text-gray-400 flex-shrink-0 transition-transform ${openFAQ === idx ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                <div className={`overflow-hidden transition-all duration-300 ${openFAQ === idx ? 'max-h-56' : 'max-h-0'}`}>
+                  <div className="px-6 pb-5 text-gray-600 text-base leading-relaxed">{faq.answer}</div>
                 </div>
               </div>
             ))}
           </div>
         </div>
+      </section>
 
-        {/* How It Works */}
-        <div className="text-center mb-16 sm:mb-24 md:mb-32 px-2 sm:px-6 md:px-8">
-          <div className="max-w-5xl mx-auto">
-            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 sm:mb-8 tracking-tight">How it works</h2>
-            <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-600 mb-12 sm:mb-16 md:mb-24 font-light max-w-4xl mx-auto leading-relaxed px-2 sm:px-6">Transform your academic writing into polished, professional work in just a few simple steps.</p>
-            
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 sm:gap-10 md:gap-12">
-            <div className="text-center group">
-                <div className="relative mb-6 sm:mb-8">
-                  <div className="absolute -inset-1 bg-gradient-to-r from-blue-500/30 to-blue-600/30 rounded-3xl blur-sm opacity-0 group-hover:opacity-100 transition duration-700"></div>
-                  <div className="relative w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-blue-500 to-blue-600 rounded-3xl flex items-center justify-center mx-auto shadow-xl group-hover:scale-110 transition-all duration-500">
-                    <span className="text-white font-bold text-2xl sm:text-3xl">1</span>
-                  </div>
-              </div>
-                <h3 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-4 sm:mb-6">Upload Your Paper</h3>
-                <p className="text-gray-600 leading-relaxed text-sm sm:text-base md:text-lg">Upload your academic document in PDF, Word, or paste your text directly into our secure platform.</p>
-            </div>
-            <div className="text-center group">
-                <div className="relative mb-6 sm:mb-8">
-                  <div className="absolute -inset-1 bg-gradient-to-r from-purple-500/30 to-purple-600/30 rounded-3xl blur-sm opacity-0 group-hover:opacity-100 transition duration-700"></div>
-                  <div className="relative w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-purple-500 to-purple-600 rounded-3xl flex items-center justify-center mx-auto shadow-xl group-hover:scale-110 transition-all duration-500">
-                    <span className="text-white font-bold text-2xl sm:text-3xl">2</span>
-                  </div>
-                </div>
-                <h3 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-4 sm:mb-6">AI Analysis</h3>
-                <p className="text-gray-600 leading-relaxed text-sm sm:text-base md:text-lg">Our advanced AI analyzes your writing for structure, clarity, grammar, citation style, and academic rigor.</p>
-              </div>
-              <div className="text-center group">
-                <div className="relative mb-6 sm:mb-8">
-                  <div className="absolute -inset-1 bg-gradient-to-r from-green-500/30 to-green-600/30 rounded-3xl blur-sm opacity-0 group-hover:opacity-100 transition duration-700"></div>
-                  <div className="relative w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-green-500 to-green-600 rounded-3xl flex items-center justify-center mx-auto shadow-xl group-hover:scale-110 transition-all duration-500">
-                    <span className="text-white font-bold text-2xl sm:text-3xl">3</span>
-                  </div>
-                </div>
-                <h3 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-4 sm:mb-6">Review Feedback</h3>
-                <p className="text-gray-600 leading-relaxed text-sm sm:text-base md:text-lg">Get detailed, professor-style annotations and suggestions with explanations for every recommendation.</p>
-            </div>
-            <div className="text-center group">
-                <div className="relative mb-6 sm:mb-8">
-                  <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500/30 to-indigo-600/30 rounded-3xl blur-sm opacity-0 group-hover:opacity-100 transition duration-700"></div>
-                  <div className="relative w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-3xl flex items-center justify-center mx-auto shadow-xl group-hover:scale-110 transition-all duration-500">
-                    <span className="text-white font-bold text-2xl sm:text-3xl">4</span>
-                  </div>
-                </div>
-                <h3 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-4 sm:mb-6">Improve & Iterate</h3>
-                <p className="text-gray-600 leading-relaxed text-sm sm:text-base md:text-lg">Apply suggestions and re-analyze to continuously enhance your academic writing skills and quality.</p>
-              </div>
-            </div>
-          </div>
-          </div>
-        </div>
-
-        {/* Pricing Section */}
-        <div id="pricing" className="max-w-6xl mx-auto mb-16 sm:mb-24 md:mb-32 px-2 sm:px-6 md:px-8">
-          {/* Header */}
-          <div className="text-center mb-8 sm:mb-12">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4 sm:mb-6">
-              Simple and transparent pricing
-            </h2>
-            
-            {/* Key Benefits */}
-            <div className="flex flex-col sm:flex-row justify-center items-center gap-4 sm:gap-12 mb-10">
-              <div className="flex items-center space-x-2 sm:space-x-3">
-                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg flex-shrink-0">
-                  <svg className="w-4 h-4 sm:w-5 sm:h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-                  </svg>
-                </div>
-                <span className="text-gray-700 text-xs sm:text-sm font-medium whitespace-nowrap">A fraction of traditional editing costs</span>
-              </div>
-              <div className="flex items-center space-x-2 sm:space-x-3">
-                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg flex-shrink-0">
-                  <svg className="w-4 h-4 sm:w-5 sm:h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                  </svg>
-                </div>
-                <span className="text-gray-700 text-xs sm:text-sm font-medium whitespace-nowrap">Used by thousands of researchers</span>
-              </div>
-            </div>
-
-            <div className="mb-8">
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">Choose Your Plan</h3>
-              <p className="text-gray-600 mb-6">Select the plan that fits your needs.</p>
-              
-              {/* Billing Toggle */}
-              <div className="flex items-center justify-center space-x-4">
-                <span className={`text-sm font-medium ${billingCycle === 'monthly' ? 'text-gray-900' : 'text-gray-500'}`}>
-                  Monthly
-                </span>
-                <button
-                  onClick={() => setBillingCycle(billingCycle === 'monthly' ? 'annual' : 'monthly')}
-                  className="relative inline-flex h-6 w-11 items-center rounded-full bg-gray-200 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                >
-                  <span
-                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                      billingCycle === 'annual' ? 'translate-x-6' : 'translate-x-1'
-                    }`}
-                  />
-                </button>
-                <span className={`text-sm font-medium ${billingCycle === 'annual' ? 'text-gray-900' : 'text-gray-500'}`}>
-                  Annual
-                </span>
-                {billingCycle === 'annual' && (
-                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800 border border-green-200">
-                    Save 17%
-                  </span>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Pricing Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 mb-12 sm:mb-16 max-w-6xl mx-auto">
-            {/* Free Plan */}
-            <div className="relative bg-white/90 backdrop-blur-xl rounded-2xl border border-gray-200/60 shadow-md hover:shadow-xl hover:border-gray-300/60 transition-all duration-300">
-              <div className="p-8">
-                {/* Plan Header */}
-                <div className="text-center mb-8">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-2">Free</h3>
-                  <p className="text-gray-600 mb-6">Perfect for getting started</p>
-                  <div className="mb-6">
-                    <span className="text-4xl font-bold text-gray-900">
-                      $0
-                    </span>
-                    <span className="text-gray-600 ml-2">
-                      /month
-                    </span>
-                  </div>
-                </div>
-
-                {/* Features */}
-                <div className="mb-8">
-                  <ul className="space-y-3">
-                    <li className="flex items-start space-x-3">
-                      <svg className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span className="text-gray-700 text-sm">1MB total upload limit</span>
-                    </li>
-                    <li className="flex items-start space-x-3">
-                      <svg className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span className="text-gray-700 text-sm">3 document uploads per month</span>
-                    </li>
-                    <li className="flex items-start space-x-3">
-                      <svg className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span className="text-gray-700 text-sm">3 AI analyses per month</span>
-                    </li>
-                    <li className="flex items-start space-x-3">
-                      <svg className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span className="text-gray-700 text-sm">2 citation searches per month</span>
-                    </li>
-                    <li className="flex items-start space-x-3">
-                      <svg className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span className="text-gray-700 text-sm">50% document annotation only</span>
-                    </li>
-                    <li className="flex items-start space-x-3">
-                      <svg className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span className="text-gray-700 text-sm">Basic support</span>
-                    </li>
-                  </ul>
-                </div>
-
-                {/* CTA Button */}
-                <button
-                  onClick={() => onNavigate('signup')}
-                  className="w-full py-3 px-6 rounded-xl font-semibold text-base transition-all duration-300 bg-gray-900 text-white hover:bg-gray-800"
-                >
-                  Get Started Free
-                </button>
-              </div>
-            </div>
-
-            {/* Starter Plan */}
-            <div className="relative bg-white/90 backdrop-blur-xl rounded-2xl border border-blue-500/60 shadow-lg transition-all duration-300">
-              <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-xl text-center font-bold text-sm shadow-lg">
-                  Most Popular
-                </div>
-              </div>
-
-              <div className="p-8">
-                {/* Plan Header */}
-                <div className="text-center mb-8">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-2">Starter</h3>
-                  <p className="text-gray-600 mb-6">Most popular for students</p>
-                  <div className="mb-6">
-                    <span className="text-4xl font-bold text-gray-900">
-                      {billingCycle === 'monthly' ? '$19.99' : '$199.99'}
-                    </span>
-                    <span className="text-gray-600 ml-2">
-                      {billingCycle === 'monthly' ? '/month' : '/year'}
-                    </span>
-                    {billingCycle === 'annual' && (
-                      <div className="text-sm text-gray-500 mt-1">
-                        $16.67/month billed annually
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Features */}
-                <div className="mb-8">
-                  <ul className="space-y-3">
-                    <li className="flex items-start space-x-3">
-                      <svg className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span className="text-gray-700 text-sm">Unlimited document uploads</span>
-                    </li>
-                    <li className="flex items-start space-x-3">
-                      <svg className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span className="text-gray-700 text-sm">999 AI analyses per month</span>
-                    </li>
-                    <li className="flex items-start space-x-3">
-                      <svg className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span className="text-gray-700 text-sm">999 citation searches per month</span>
-                    </li>
-                    <li className="flex items-start space-x-3">
-                      <svg className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span className="text-gray-700 text-sm">All citation styles</span>
-                    </li>
-                    <li className="flex items-start space-x-3">
-                      <svg className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span className="text-gray-700 text-sm">Grammar and style checks</span>
-                    </li>
-                  </ul>
-                </div>
-
-                {/* CTA Button */}
-                <button
-                  onClick={() => onNavigate('signup')}
-                  className="w-full py-3 px-6 rounded-xl font-semibold text-base transition-all duration-300 bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:shadow-lg"
-                >
-                  Get Started
-                </button>
-              </div>
-            </div>
-
-            {/* Premium Plan */}
-            <div className="relative bg-white/90 backdrop-blur-xl rounded-2xl border border-gray-200/60 shadow-md hover:shadow-xl hover:border-gray-300/60 transition-all duration-300">
-              <div className="p-8">
-                {/* Plan Header */}
-                <div className="text-center mb-8">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-2">Premium</h3>
-                  <p className="text-gray-600 mb-6">For researchers and institutions</p>
-                  <div className="mb-6">
-                    <span className="text-4xl font-bold text-gray-900">
-                      {billingCycle === 'monthly' ? '$39.99' : '$399.99'}
-                    </span>
-                    <span className="text-gray-600 ml-2">
-                      {billingCycle === 'monthly' ? '/month' : '/year'}
-                    </span>
-                    {billingCycle === 'annual' && (
-                      <div className="text-sm text-gray-500 mt-1">
-                        $33.33/month billed annually
-                      </div>
-                    )}
-                    {billingCycle === 'annual' && (
-                      <div className="mt-3">
-                        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-green-100 text-green-800 border border-green-200">
-                          Save 17%
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Features */}
-                <div className="mb-8">
-                  <ul className="space-y-3">
-                    <li className="flex items-start space-x-3">
-                      <svg className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span className="text-gray-700 text-sm">Everything in Starter</span>
-                    </li>
-                    <li className="flex items-start space-x-3">
-                      <svg className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span className="text-gray-700 text-sm">999 AI analyses per month</span>
-                    </li>
-                    <li className="flex items-start space-x-3">
-                      <svg className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span className="text-gray-700 text-sm">999 citation searches per month</span>
-                    </li>
-                    <li className="flex items-start space-x-3">
-                      <svg className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span className="text-gray-700 text-sm">Advanced AI analysis</span>
-                    </li>
-                    <li className="flex items-start space-x-3">
-                      <svg className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span className="text-gray-700 text-sm">Advanced grammar and style checking</span>
-                    </li>
-                    <li className="flex items-start space-x-3">
-                      <svg className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span className="text-gray-700 text-sm">Priority support</span>
-                    </li>
-                  </ul>
-                </div>
-
-                {/* CTA Button */}
-                <button
-                  onClick={() => onNavigate('signup')}
-                  className="w-full py-3 px-6 rounded-xl font-semibold text-base transition-all duration-300 bg-gray-900 text-white hover:bg-gray-800"
-                >
-                  Get Started
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Annual Pricing Note */}
-          <div className="text-center mb-8">
-            <p className="text-gray-600 text-sm">
-              Annual plans available with 2 months free. 
-              <button 
-                onClick={() => onNavigate('pricing')}
-                className="text-blue-600 hover:text-blue-700 font-medium ml-1"
-              >
-                View all pricing options →
-              </button>
-            </p>
-          </div>
-        </div>
-
-        {/* CTA Section */}
-        <div className="relative mb-16 sm:mb-24 md:mb-32 px-2 sm:px-8 md:px-16">
-          <div className="max-w-8xl mx-auto">
-            <div className="absolute -inset-1 bg-gradient-to-r from-blue-600/30 via-purple-600/30 to-indigo-600/30 rounded-2xl sm:rounded-3xl blur-sm"></div>
-            <div className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 rounded-2xl sm:rounded-3xl p-8 sm:p-12 md:p-16 lg:p-20 text-center overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 via-purple-600/10 to-indigo-600/10"></div>
-          <div className="relative z-10">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6 sm:mb-8 tracking-tight">Ready to enhance your academic writing?</h2>
-            <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-300 mb-10 sm:mb-12 md:mb-16 max-w-3xl mx-auto font-light leading-relaxed px-2 sm:px-6">Join thousands of students and researchers who trust WriteScholar for their writing success.</p>
-            <button 
-              onClick={() => onNavigate('signup')}
-              className="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-8 sm:px-12 md:px-16 py-3 sm:py-4 md:py-5 rounded-xl sm:rounded-2xl text-base sm:text-lg md:text-xl font-semibold hover:shadow-lg transform hover:scale-105 transition-all duration-300 inline-flex items-center space-x-2 sm:space-x-3"
+      {/* Pricing Section - bigger */}
+      <section id="pricing" className="py-20 sm:py-24 bg-gray-50">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 text-center mb-5">
+            Simple Pricing
+          </h2>
+          <p className="text-lg text-gray-600 text-center mb-8">Start free. Upgrade when you need more.</p>
+          
+          <div className="flex items-center justify-center space-x-4 mb-12">
+            <span className={`text-base ${billingCycle === 'monthly' ? 'text-gray-900 font-medium' : 'text-gray-500'}`}>Monthly</span>
+            <button
+              onClick={() => setBillingCycle(billingCycle === 'monthly' ? 'annual' : 'monthly')}
+              className="relative w-12 h-7 bg-gray-200 rounded-full transition-colors"
             >
-              <span>Get Started Free</span>
-              <span className="text-xl sm:text-2xl">→</span>
+              <span className={`absolute top-1 w-5 h-5 bg-white rounded-full shadow transition-transform ${billingCycle === 'annual' ? 'translate-x-6' : 'translate-x-1'}`} />
             </button>
+            <span className={`text-base ${billingCycle === 'annual' ? 'text-gray-900 font-medium' : 'text-gray-500'}`}>Annual</span>
+            {billingCycle === 'annual' && <span className="text-sm bg-green-100 text-green-700 px-3 py-1 rounded-full font-medium">Save 17%</span>}
           </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+            {/* Free */}
+            <div className="bg-white border border-gray-200 rounded-2xl p-8">
+              <h3 className="text-xl font-bold text-gray-900 mb-1">Free</h3>
+              <p className="text-base text-gray-500 mb-5">Get started</p>
+              <div className="text-4xl font-bold text-gray-900 mb-8">$0<span className="text-lg font-normal text-gray-500">/mo</span></div>
+              <ul className="space-y-4 mb-8 text-base text-gray-600">
+                <li className="flex items-start"><svg className="w-5 h-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>3 analyses per month</li>
+                <li className="flex items-start"><svg className="w-5 h-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>2 citation searches</li>
+                <li className="flex items-start"><svg className="w-5 h-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Basic grammar check</li>
+              </ul>
+              <button onClick={() => onNavigate('signup')} className="w-full py-3 bg-gray-100 hover:bg-gray-200 text-gray-900 font-medium rounded-xl transition-colors text-base">Get Started</button>
+            </div>
+
+            {/* Starter */}
+            <div className="bg-white border-2 border-blue-500 rounded-2xl p-8 relative">
+              <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-blue-500 text-white text-sm font-semibold px-4 py-1 rounded-full">Popular</div>
+              <h3 className="text-xl font-bold text-gray-900 mb-1">Starter</h3>
+              <p className="text-base text-gray-500 mb-5">For students</p>
+              <div className="text-4xl font-bold text-gray-900 mb-8">
+                {billingCycle === 'monthly' ? '$19.99' : '$16.67'}<span className="text-lg font-normal text-gray-500">/mo</span>
+              </div>
+              <ul className="space-y-4 mb-8 text-base text-gray-600">
+                <li className="flex items-start"><svg className="w-5 h-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Unlimited analyses</li>
+                <li className="flex items-start"><svg className="w-5 h-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Unlimited citations</li>
+                <li className="flex items-start"><svg className="w-5 h-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>All citation styles</li>
+                <li className="flex items-start"><svg className="w-5 h-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Advanced grammar</li>
+              </ul>
+              <button onClick={() => onNavigate('signup')} className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl transition-colors text-base">Get Started</button>
+            </div>
+
+            {/* Premium */}
+            <div className="bg-white border border-gray-200 rounded-2xl p-8">
+              <h3 className="text-xl font-bold text-gray-900 mb-1">Premium</h3>
+              <p className="text-base text-gray-500 mb-5">For researchers</p>
+              <div className="text-4xl font-bold text-gray-900 mb-8">
+                {billingCycle === 'monthly' ? '$39.99' : '$33.33'}<span className="text-lg font-normal text-gray-500">/mo</span>
+              </div>
+              <ul className="space-y-4 mb-8 text-base text-gray-600">
+                <li className="flex items-start"><svg className="w-5 h-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Everything in Starter</li>
+                <li className="flex items-start"><svg className="w-5 h-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Thesis/dissertation</li>
+                <li className="flex items-start"><svg className="w-5 h-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Priority support</li>
+              </ul>
+              <button onClick={() => onNavigate('signup')} className="w-full py-3 bg-gray-900 hover:bg-gray-800 text-white font-medium rounded-xl transition-colors text-base">Get Started</button>
+            </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* Footer */}
+      {/* Final CTA - bigger */}
+      <section className="py-20 sm:py-24">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-5">
+            Ready to improve your writing?
+          </h2>
+          <p className="text-lg text-gray-600 mb-10">
+            Start analyzing your essays and finding citations for free. No credit card required.
+          </p>
+          <button
+            onClick={() => onNavigate('signup')}
+            className="inline-flex items-center px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-colors shadow-lg hover:shadow-xl text-lg"
+          >
+            Start Writing Better
+            <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+            </svg>
+          </button>
+        </div>
+      </section>
+
       <Footer onNavigate={onNavigate} />
 
-      {/* Fake Citation Search Animation for unauthenticated users */}
+      {/* Loading Animations */}
       {showFakeAnimation && mode === 'citations' && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-2xl p-8 max-w-md mx-4 shadow-2xl">
-            <div className="text-center">
-              <div className="relative mb-6">
-                <div className="w-16 h-16 mx-auto">
-                  <svg className="animate-spin w-16 h-16 text-blue-600" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                </div>
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Finding Citations</h3>
-              <p className="text-gray-600 mb-4">Searching academic databases for relevant sources...</p>
-              
-              {/* Animated citation icons */}
-              <div className="flex justify-center space-x-2 mb-4">
-                {['📄', '📚', '📖'].map((icon, index) => (
-                  <div
-                    key={index}
-                    className="text-2xl animate-bounce"
-                    style={{ animationDelay: `${index * 0.2}s` }}
-                  >
-                    {icon}
-                  </div>
-                ))}
-              </div>
-              
-              <div className="flex justify-center">
-                <div className="flex space-x-1">
-                  {[0, 1, 2].map((i) => (
-                    <div
-                      key={i}
-                      className="w-2 h-2 bg-blue-600 rounded-full animate-pulse"
-                      style={{ animationDelay: `${i * 0.3}s` }}
-                    ></div>
-                  ))}
-                </div>
-              </div>
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl p-8 max-w-sm mx-4 shadow-2xl text-center">
+            <div className="w-12 h-12 mx-auto mb-4">
+              <svg className="animate-spin w-12 h-12 text-blue-600" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+              </svg>
             </div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-1">Finding Citations</h3>
+            <p className="text-sm text-gray-500">Searching academic databases...</p>
           </div>
         </div>
       )}
 
-      {/* Fake Analysis Animation for unauthenticated users */}
       {showFakeAnimation && mode === 'analyze' && (
-        <AnalysisAnimation
-          isPopup={true}
-          text="Preparing your text for analysis"
-          isComplete={false}
-          />
-        )}
-      </main>
-    );
-  };
+        <AnalysisAnimation isPopup={true} text="Analyzing your writing" isComplete={false} />
+      )}
+    </main>
+  );
+};
 
 export default LandingPage;
