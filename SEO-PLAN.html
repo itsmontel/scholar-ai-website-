@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WriteScholar 2-Month SEO Plan</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 40px 20px;
+      color: #1a1a2e;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+      color: white;
+    }
+    .header h1 {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+    }
+    .header p {
+      font-size: 1.1rem;
+      opacity: 0.9;
+    }
+    .card {
+      background: white;
+      border-radius: 20px;
+      padding: 30px;
+      margin-bottom: 30px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+    }
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid #f0f0f0;
+    }
+    .card-icon {
+      width: 50px;
+      height: 50px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+    }
+    .card-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+    }
+    .card-subtitle {
+      font-size: 0.9rem;
+      color: #666;
+    }
+    .urgent { background: linear-gradient(135deg, #ff6b6b, #ee5a5a); }
+    .week1 { background: linear-gradient(135deg, #4ecdc4, #44a08d); }
+    .week2 { background: linear-gradient(135deg, #667eea, #764ba2); }
+    .week3 { background: linear-gradient(135deg, #f093fb, #f5576c); }
+    .week4 { background: linear-gradient(135deg, #4facfe, #00f2fe); }
+    .week5 { background: linear-gradient(135deg, #43e97b, #38f9d7); }
+    .week6 { background: linear-gradient(135deg, #fa709a, #fee140); }
+    .week7 { background: linear-gradient(135deg, #a8edea, #fed6e3); color: #333; }
+    .week8 { background: linear-gradient(135deg, #667eea, #764ba2); }
+    .metrics { background: linear-gradient(135deg, #11998e, #38ef7d); }
+
+    .task-list { list-style: none; }
+    .task-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid #f5f5f5;
+    }
+    .task-item:last-child { border-bottom: none; }
+    .checkbox {
+      width: 24px;
+      height: 24px;
+      border: 2px solid #ddd;
+      border-radius: 6px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .task-text {
+      flex: 1;
+      line-height: 1.5;
+    }
+    .task-text strong {
+      color: #333;
+    }
+    .priority-high {
+      background: #fff5f5;
+      border-left: 4px solid #ff6b6b;
+      padding: 12px;
+      border-radius: 0 8px 8px 0;
+      margin: 8px 0;
+    }
+    .priority-medium {
+      background: #fffbeb;
+      border-left: 4px solid #f59e0b;
+      padding: 12px;
+      border-radius: 0 8px 8px 0;
+      margin: 8px 0;
+    }
+    .note-box {
+      background: #f0f9ff;
+      border: 1px solid #bae6fd;
+      border-radius: 12px;
+      padding: 16px;
+      margin-top: 15px;
+    }
+    .note-box h4 {
+      color: #0369a1;
+      margin-bottom: 8px;
+      font-size: 0.9rem;
+    }
+    .note-box p, .note-box li {
+      color: #0c4a6e;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    .blog-audit {
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 15px 0;
+    }
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #eee;
+    }
+    th {
+      background: #f8fafc;
+      font-weight: 600;
+      color: #475569;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .status-bad { color: #dc2626; font-weight: 600; }
+    .status-good { color: #16a34a; font-weight: 600; }
+    .status-partial { color: #d97706; font-weight: 600; }
+
+    .month-header {
+      background: linear-gradient(135deg, #1e3a8a, #3730a3);
+      color: white;
+      text-align: center;
+      padding: 20px;
+      border-radius: 16px;
+      margin: 40px 0 20px 0;
+      font-size: 1.3rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+    .expectations {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-top: 15px;
+    }
+    .expectation-card {
+      background: #f8fafc;
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+    }
+    .expectation-card h4 {
+      color: #6366f1;
+      font-size: 1rem;
+      margin-bottom: 8px;
+    }
+    .expectation-card p {
+      color: #64748b;
+      font-size: 0.9rem;
+    }
+    .cta-section {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      text-align: center;
+      padding: 40px;
+      border-radius: 20px;
+      margin-top: 40px;
+    }
+    .cta-section h2 {
+      margin-bottom: 15px;
+    }
+    .cta-section p {
+      opacity: 0.9;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    @media print {
+      body { background: white; padding: 20px; }
+      .card { box-shadow: none; border: 1px solid #ddd; page-break-inside: avoid; }
+      .month-header { page-break-before: always; }
+    }
+    .divider {
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #e2e8f0, transparent);
+      margin: 20px 0;
+    }
+    .keyword-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .keyword-tag {
+      background: #e0e7ff;
+      color: #4338ca;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>📈 WriteScholar SEO Plan</h1>
+      <p>8-Week Action Plan • Customized for Your Site • February - April 2026</p>
+    </div>
+
+    <!-- URGENT FIXES -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon urgent">🚨</div>
+        <div>
+          <div class="card-title">Urgent: Fix Your Existing Blog Posts</div>
+          <div class="card-subtitle">Do this FIRST before writing new content</div>
+        </div>
+      </div>
+
+      <div class="priority-high">
+        <strong>Your blog posts need improvements before they can rank:</strong>
+      </div>
+
+      <div class="blog-audit">
+        <table>
+          <thead>
+            <tr>
+              <th>Blog Post</th>
+              <th>Words</th>
+              <th>Target</th>
+              <th>Links</th>
+              <th>CTA</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>How to Write a Thesis Statement</td>
+              <td class="status-bad">~950</td>
+              <td>1,500+</td>
+              <td class="status-bad">None</td>
+              <td class="status-partial">Text only</td>
+            </tr>
+            <tr>
+              <td>How to Write an APA Research Paper</td>
+              <td class="status-bad">~950</td>
+              <td>1,500+</td>
+              <td class="status-bad">None</td>
+              <td class="status-partial">Text only</td>
+            </tr>
+            <tr>
+              <td>Citation Checker Academic Writing</td>
+              <td class="status-bad">~750</td>
+              <td>1,500+</td>
+              <td class="status-bad">None</td>
+              <td class="status-partial">Text only</td>
+            </tr>
+            <tr>
+              <td>Best Academic Writing Tools</td>
+              <td class="status-bad">~750</td>
+              <td>1,500+</td>
+              <td class="status-bad">None</td>
+              <td class="status-partial">Text only</td>
+            </tr>
+            <tr>
+              <td>Grammar Checker Academic Writing</td>
+              <td class="status-bad">~700</td>
+              <td>1,500+</td>
+              <td class="status-bad">None</td>
+              <td class="status-partial">Text only</td>
+            </tr>
+            <tr>
+              <td>MLA vs APA vs Chicago</td>
+              <td class="status-bad">~750</td>
+              <td>1,500+</td>
+              <td class="status-bad">None</td>
+              <td class="status-partial">Text only</td>
+            </tr>
+            <tr>
+              <td>AI Writing Assistant for Students</td>
+              <td class="status-bad">~800</td>
+              <td>1,500+</td>
+              <td class="status-bad">None</td>
+              <td class="status-partial">Text only</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <ul class="task-list">
+        <li class="task-item">
+          <div class="checkbox"></div>
+          <div class="task-text"><strong>Expand each post to 1,500+ words</strong> — Add more examples, deeper explanations, FAQs, or step-by-step sections</div>
+        </li>
+        <li class="task-item">
+          <div class="checkbox"></div>
+          <div class="task-text"><strong>Add internal links</strong> — Link to <code>/features</code> and <code>/pricing</code> naturally within the content (2-3 per post)</div>
+        </li>
+        <li class="task-item">
+          <div class="checkbox"></div>
+          <div class="task-text"><strong>Add CTA buttons at the end</strong> — Replace text mentions with actual linked buttons: "Try WriteScholar Free →"</div>
+        </li>
+        <li class="task-item">
+          <div class="checkbox"></div>
+          <div class="task-text"><strong>Update read times</strong> — Change from "3-4 min" to accurate times after expanding</div>
+        </li>
+      </ul>
+
+      <div class="note-box">
+        <h4>💡 How to expand posts</h4>
+        <ul style="margin-left: 20px;">
+          <li>Add more real-world examples</li>
+          <li>Include a "Common mistakes" section</li>
+          <li>Add FAQ (3-5 questions) at the bottom</li>
+          <li>Include comparison tables where relevant</li>
+          <li>Add step-by-step instructions with numbered lists</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- MONTH 1 -->
+    <div class="month-header">📅 Month 1: Fix & Optimize</div>
+
+    <!-- Week 1 -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon week1">1</div>
+        <div>
+          <div class="card-title">Week 1: Analytics & First Fixes</div>
+          <div class="card-subtitle">Feb 17 - Feb 23</div>
+        </div>
+      </div>
+      <ul class="task-list">
+        <li class="task-item">
+          <div class="checkbox"></div>
+          <div class="task-text"><strong>Verify Google Search Console</strong> — Check for crawl errors, submit sitemap if not done</div>
+        </li>
+        <li class="task-item">
+          <div class="checkbox"></div>
+          <div class="task-text"><strong>Set up Google Analytics 4</strong> — Track organic traffic and user behavior</div>
+        </li>
+        <li class="task-item">
+          <div class="checkbox"></div>
+          <div class="task-text"><strong>Fix blog post #1:</strong> "How to Write a Thesis Statement" — Expand to 1,500+ words, add links, add CTA button</div>
+        </li>
+        <li class="task-item">
+          <div class="checkbox"></div>
+          <div class="task-text"><strong>Fix blog post #2:</strong> "How to Write an APA Research Paper" — Expand to 1,500+ words, add links, add CTA button</div>
+        </li>
+        <li class="task-item">
+          <div class="checkbox"></div>
+          <div class="task-text"><strong>Run PageSpeed Insights</strong> — Note any issues to fix</div>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Week 2 -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon week2">2</div>
+        <div>
+          <div class="card-title">Week 2: Continue Blog Fixes</div>
+          <div class="card-subtitle">Feb 24 - Mar 2</div>
+        </div>
+      </div>
+      <ul class="task-list">
+        <li class="task-item">
+          <div class="checkbox"></div>
+          <div class="task-text"><strong>Fix blog post #3:</strong> "Citation Checker Academic Writing" — Expand, add links, add CTA</div>
+        </li>
+        <li class="task-item">
+          <div class="checkbox"></div>
+          <div class="task-text"><strong>Fix blog post #4:</strong> "Best Academic Writing Tools" — Expand, add links, add CTA</div>
+        </li>
+        <li class="task-item">
+          <div class="checkbox"></div>
+          <div class="task-text"><strong>Fix blog post #5:</strong> "Grammar Checker Academic Writing" — Expand, add links, add CTA</div>
+        </li>
+        <li class="task-item">
+          <div class="checkbox"></div>
+          <div class="task-text"><strong>Add FAQ schema to blog posts</strong> — Structured data for rich snippets</div>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Week 3 -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon week3">3</div>
+        <div>
+          <div class="card-title">Week 3: Finish Fixes + New Content</div>
+          <div class="card-subtitle">Mar 3 - Mar 9</div>
+        </div>
+      </div>
+      <ul class="task-list">
+        <li class="task-item">
+          <div class="checkbox"></div>
+          <div class="task-text"><strong>Fix blog post #6:</strong> "MLA vs APA vs Chicago" — Expand, add links, add CTA</div>
+        </li>
+        <li class="task-item">
+          <div class="checkbox"></div>
+          <div class="task-text"><strong>Fix blog post #7:</strong> "AI Writing Assistant for Students" — Expand, add links, add CTA</div>
+        </li>
+        <li class="task-item">
+          <div class="checkbox"></div>
+          <div class="task-text"><strong>Write NEW blog post #8:</strong> "How to Avoid Plagiarism in Academic Writing" (1,500+ words)</div>
+        </li>
+        <li class="task-item">
+          <div class="checkbox"></div>
+          <div class="task-text"><strong>Check all images have alt text</strong> — Important for accessibility and SEO</div>
+        </li>
+      </ul>
+      <div class="note-box">
+        <h4>🎯 New blog post keywords to target</h4>
+        <div class="keyword-list">
+          <span class="keyword-tag">how to avoid plagiarism</span>
+          <span class="keyword-tag">plagiarism checker</span>
+          <span class="keyword-tag">academic integrity</span>
+          <span class="keyword-tag">paraphrasing tips</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Week 4 -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon week4">4</div>
+        <div>
+          <div class="card-title">Week 4: First Backlinks</div>
+          <div class="card-subtitle">Mar 10 - Mar 16</div>
+        </div>
+      </div>
+      <ul class="task-list">
+        <li class="task-item">
+          <div class="checkbox"></div>
+          <div class="task-text"><strong>Write NEW blog post #9:</strong> "Essay Structure Template: Introduction, Body, Conclusion" (1,500+ words)</div>
+        </li>
+        <li class="task-item">
+          <div class="checkbox"></div>
+          <div class="task-text"><strong>Submit to Product Hunt</strong> — Prepare launch page, screenshots, description</div>
+        </li>
+        <li class="task-item">
+          <div class="checkbox"></div>
+          <div class="task-text"><strong>List on AlternativeTo.net</strong> — As alternative to Grammarly, QuillBot</div>
+        </li>
+        <li class="task-item">
+          <div class="checkbox"></div>
+          <div class="task-text"><strong>List on SaaSHub.com</strong> — Free directory listing</div>
+        </li>
+        <li class="task-item">
+          <div class="checkbox"></div>
+          <div class="task-text"><strong>Create free resource:</strong> "APA Citation Cheat Sheet PDF" — Linkable asset</div>
+        </li>
+      </ul>
+    </div>
+
+    <!-- MONTH 2 -->
+    <div class="month-header">📅 Month 2: Backlinks & Growth</div>
+
+    <!-- Week 5 -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon week5">5</div>
+        <div>
+          <div class="card-title">Week 5: Directory Submissions</div>
+          <div class="card-subtitle">Mar 17 - Mar 23</div>
+        </div>
+      </div>
+      <ul class="task-list">
+        <li class="task-item">
+          <div class="checkbox"></div>
+          <div class="task-text"><strong>Write NEW blog post #10:</strong> "How to Write a Literature Review" (1,500+ words)</div>
+        </li>
+        <li class="task-item">
+          <div class="checkbox"></div>
+          <div class="task-text"><strong>Submit to G2.com</strong> — Create product profile, request reviews</div>
+        </li>
+        <li class="task-item">
+          <div class="checkbox"></div>
+          <div class="task-text"><strong>Submit to Capterra</strong> — Free listing for SaaS tools</div>
+        </li>
+        <li class="task-item">
+          <div class="checkbox"></div>
+          <div class="task-text"><strong>Submit to GetApp</strong> — Related to Capterra</div>
+        </li>
+        <li class="task-item">
+          <div class="checkbox"></div>
+          <div class="task-text"><strong>Find 5 "best writing tools" articles</strong> — Email authors requesting inclusion</div>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Week 6 -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon week6">6</div>
+        <div>
+          <div class="card-title">Week 6: Community Engagement</div>
+          <div class="card-subtitle">Mar 24 - Mar 30</div>
+        </div>
+      </div>
+      <ul class="task-list">
+        <li class="task-item">
+          <div class="checkbox"></div>
+          <div class="task-text"><strong>Write NEW blog post #11:</strong> "Harvard Referencing Guide" (1,500+ words)</div>
+        </li>
+        <li class="task-item">
+          <div class="checkbox"></div>
+          <div class="task-text"><strong>Reddit engagement</strong> — Post helpful answers on r/college, r/GradSchool, r/AskAcademia (no spam!)</div>
+        </li>
+        <li class="task-item">
+          <div class="checkbox"></div>
+          <div class="task-text"><strong>Quora answers</strong> — Answer 5 questions about academic writing, link to relevant blog posts</div>
+        </li>
+        <li class="task-item">
+          <div class="checkbox"></div>
+          <div class="task-text"><strong>Find 3 student/academic bloggers</strong> — Pitch guest post ideas</div>
+        </li>
+      </ul>
+      <div class="priority-medium">
+        <strong>Reddit tip:</strong> Be genuinely helpful first. Don't just drop links. Build karma by answering questions, then occasionally mention your tool when truly relevant.
+      </div>
+    </div>
+
+    <!-- Week 7 -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon week7">7</div>
+        <div>
+          <div class="card-title">Week 7: Guest Posting & PR</div>
+          <div class="card-subtitle">Mar 31 - Apr 6</div>
+        </div>
+      </div>
+      <ul class="task-list">
+        <li class="task-item">
+          <div class="checkbox"></div>
+          <div class="task-text"><strong>Write NEW blog post #12:</strong> "How to Format a Research Paper" (1,500+ words)</div>
+        </li>
+        <li class="task-item">
+          <div class="checkbox"></div>
+          <div class="task-text"><strong>Write 1 guest post</strong> — For another blog with backlink to WriteScholar</div>
+        </li>
+        <li class="task-item">
+          <div class="checkbox"></div>
+          <div class="task-text"><strong>Sign up for HARO / Connectively</strong> — Respond to 5+ relevant journalist queries</div>
+        </li>
+        <li class="task-item">
+          <div class="checkbox"></div>
+          <div class="task-text"><strong>Outreach to university writing centers</strong> — Offer partnership or free trials</div>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Week 8 -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon week8">8</div>
+        <div>
+          <div class="card-title">Week 8: Review & Optimize</div>
+          <div class="card-subtitle">Apr 7 - Apr 13</div>
+        </div>
+      </div>
+      <ul class="task-list">
+        <li class="task-item">
+          <div class="checkbox"></div>
+          <div class="task-text"><strong>Review Search Console data</strong> — Which queries show impressions? Which pages get clicks?</div>
+        </li>
+        <li class="task-item">
+          <div class="checkbox"></div>
+          <div class="task-text"><strong>Optimize underperforming posts</strong> — Update titles, add more content, improve keywords</div>
+        </li>
+        <li class="task-item">
+          <div class="checkbox"></div>
+          <div class="task-text"><strong>Check backlink progress</strong> — Use Ahrefs Webmaster Tools (free) or Ubersuggest</div>
+        </li>
+        <li class="task-item">
+          <div class="checkbox"></div>
+          <div class="task-text"><strong>Plan Month 3 content</strong> — Based on what's working, double down on successful topics</div>
+        </li>
+        <li class="task-item">
+          <div class="checkbox"></div>
+          <div class="task-text"><strong>Update sitemap lastmod dates</strong> — Reflect content updates</div>
+        </li>
+      </ul>
+    </div>
+
+    <!-- METRICS TRACKING -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon metrics">📊</div>
+        <div>
+          <div class="card-title">Weekly Metrics Tracker</div>
+          <div class="card-subtitle">Fill in each week to track progress</div>
+        </div>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Metric</th>
+            <th>Week 1</th>
+            <th>Week 2</th>
+            <th>Week 3</th>
+            <th>Week 4</th>
+            <th>Week 5</th>
+            <th>Week 6</th>
+            <th>Week 7</th>
+            <th>Week 8</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Search Console Impressions</strong></td>
+            <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+          </tr>
+          <tr>
+            <td><strong>Search Console Clicks</strong></td>
+            <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+          </tr>
+          <tr>
+            <td><strong>Keywords in Top 100</strong></td>
+            <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+          </tr>
+          <tr>
+            <td><strong>Backlinks (total)</strong></td>
+            <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+          </tr>
+          <tr>
+            <td><strong>Organic Traffic (GA4)</strong></td>
+            <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+          </tr>
+          <tr>
+            <td><strong>Blog Posts Published</strong></td>
+            <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- EXPECTATIONS -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon" style="background: linear-gradient(135deg, #8b5cf6, #6366f1);">⏰</div>
+        <div>
+          <div class="card-title">Realistic Expectations</div>
+          <div class="card-subtitle">SEO is a long game — here's what to expect</div>
+        </div>
+      </div>
+      <div class="expectations">
+        <div class="expectation-card">
+          <h4>Month 1-2</h4>
+          <p>Pages indexed, first impressions in Search Console, 0-100 organic visits</p>
+        </div>
+        <div class="expectation-card">
+          <h4>Month 3-4</h4>
+          <p>Some keywords on page 2-3, 100-500 organic visits</p>
+        </div>
+        <div class="expectation-card">
+          <h4>Month 5-6</h4>
+          <p>Keywords moving to page 1, 500-2,000+ organic visits</p>
+        </div>
+      </div>
+      <div class="note-box" style="margin-top: 20px;">
+        <h4>🔑 Key insight</h4>
+        <p>The work you do in months 1-2 pays off in months 3-6. SEO compounds over time. Stay consistent, and the traffic will come.</p>
+      </div>
+    </div>
+
+    <!-- CTA -->
+    <div class="cta-section">
+      <h2>🚀 Ready to Start?</h2>
+      <p>Print this page (Cmd/Ctrl + P → Save as PDF) and check off tasks as you complete them. Consistency beats intensity. Do a little every week.</p>
+    </div>
+
+  </div>
+</body>
+</html>

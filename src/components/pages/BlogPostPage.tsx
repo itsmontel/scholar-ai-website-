@@ -67,6 +67,36 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ onNavigate, user, onLogout 
     window.scrollTo(0, 0);
   };
 
+  // Conditional header component for logged-out users
+  const PublicNav = () => (
+    <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-100" aria-label="Main navigation">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-18 py-4">
+          <a href="/" onClick={(e) => { e.preventDefault(); onNavigate('landing'); }} className="flex items-center space-x-2.5">
+            <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center">
+              <span className="text-white font-bold text-xl">W</span>
+            </div>
+            <span className="text-2xl font-bold text-gray-900">WriteScholar</span>
+          </a>
+          
+          <div className="hidden md:flex items-center space-x-2">
+            <a href="/features" onClick={(e) => { e.preventDefault(); onNavigate('features'); }} className="px-4 py-2.5 text-base text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-50 transition-colors font-medium">Features</a>
+            <a href="/pricing" onClick={(e) => { e.preventDefault(); onNavigate('pricing'); }} className="px-4 py-2.5 text-base text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-50 transition-colors font-medium">Pricing</a>
+            <a href="/blog" onClick={(e) => { e.preventDefault(); onNavigate('blog'); }} className="px-4 py-2.5 text-base text-blue-600 font-medium rounded-lg bg-blue-50">Blog</a>
+            <a href="/about" onClick={(e) => { e.preventDefault(); onNavigate('about'); }} className="px-4 py-2.5 text-base text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-50 transition-colors font-medium">About</a>
+          </div>
+          
+          <div className="flex items-center space-x-3">
+            <a href="/login" onClick={(e) => { e.preventDefault(); onNavigate('login'); }} className="hidden sm:inline-flex px-4 py-2.5 text-base text-gray-600 hover:text-gray-900 font-medium rounded-lg hover:bg-gray-50 transition-colors">Log in</a>
+            <a href="/signup" onClick={(e) => { e.preventDefault(); onNavigate('signup'); }} className="px-5 py-2.5 bg-gray-900 text-white text-base font-medium rounded-xl hover:bg-gray-800 transition-colors">
+              Get Started
+            </a>
+          </div>
+        </div>
+      </div>
+    </nav>
+  );
+
   if (!post) {
     // Redirect to blog listing if slug is empty (e.g. /blog/); otherwise show not found
     if (!currentSlug) {
@@ -74,7 +104,11 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ onNavigate, user, onLogout 
     }
     return (
       <div className="min-h-screen bg-gray-50">
-        <Header onNavigate={onNavigate} user={user} onLogout={onLogout} />
+        {user ? (
+          <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="blog" />
+        ) : (
+          <PublicNav />
+        )}
         <main className="max-w-4xl mx-auto px-4 py-16 text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Post not found</h1>
           <a href="/blog" onClick={(e) => { e.preventDefault(); onNavigate('blog'); }} className="text-blue-600 hover:underline">
@@ -92,7 +126,11 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ onNavigate, user, onLogout 
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      <Header onNavigate={onNavigate} user={user} onLogout={onLogout} />
+      {user ? (
+        <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="blog" />
+      ) : (
+        <PublicNav />
+      )}
 
       <main className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12 md:py-16">
         <nav aria-label="Breadcrumb" className="mb-8">
@@ -119,7 +157,7 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ onNavigate, user, onLogout 
           </header>
 
           <div className="prose prose-lg max-w-none text-gray-700">
-            <BlogPostContent slug={post.slug} />
+            <BlogPostContent slug={post.slug} onNavigate={onNavigate} />
           </div>
         </article>
 

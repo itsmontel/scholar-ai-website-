@@ -1,9 +1,19 @@
 import { useState, useEffect } from 'react';
 import Header from '../common/Header';
+import Footer from '../common/Footer';
 
 interface FAQPageProps {
   onNavigate?: (page: string) => void;
-  user?: { name: string; email: string } | null;
+  user?: { 
+    id: string;
+    name: string; 
+    email: string;
+    firstName?: string;
+    lastName?: string;
+    plan: string;
+    subscription_status?: string;
+    email_verified?: boolean;
+  } | null;
   onLogout?: () => void;
 }
 
@@ -52,13 +62,13 @@ const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
   }, []);
 
   const categories = [
-    { id: 'all', name: 'All Topics', icon: '📚', count: 12 },
-    { id: 'getting-started', name: 'Getting Started', icon: '🚀', count: 2 },
-    { id: 'analysis', name: 'AI Analysis', icon: '🤖', count: 4 },
-    { id: 'documents', name: 'Document Management', icon: '📄', count: 2 },
-    { id: 'citations', name: 'Citation Styles', icon: '📖', count: 1 },
-    { id: 'account', name: 'Account & Settings', icon: '⚙️', count: 1 },
-    { id: 'troubleshooting', name: 'Troubleshooting', icon: '🔧', count: 2 }
+    { id: 'all', name: 'All Topics', count: 12 },
+    { id: 'getting-started', name: 'Getting Started', count: 2 },
+    { id: 'analysis', name: 'AI Analysis', count: 4 },
+    { id: 'documents', name: 'Document Management', count: 2 },
+    { id: 'citations', name: 'Citation Styles', count: 1 },
+    { id: 'account', name: 'Account & Settings', count: 1 },
+    { id: 'troubleshooting', name: 'Troubleshooting', count: 2 }
   ];
 
   const faqs = [
@@ -152,30 +162,79 @@ const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
     {
       title: 'Start Your First Analysis',
       description: 'Upload a document or paste text to get AI-powered feedback',
-      icon: '🚀',
       action: () => onNavigate?.('dashboard'),
-      color: 'blue'
+      color: 'blue',
+      icon: (
+        <svg viewBox="0 0 56 56" fill="none" className="w-14 h-14">
+          <circle cx="28" cy="28" r="28" fill="#DBEAFE"/>
+          <ellipse cx="28" cy="30" rx="14" ry="15" fill="#E8C4A0"/>
+          <path d="M14 26 Q12 16 20 12 Q28 8 36 12 Q44 16 42 26 Q40 20 34 16 Q28 12 22 16 Q16 20 14 26" fill="#1F2937"/>
+          <ellipse cx="22" cy="30" rx="3" ry="3.5" fill="#1F2937"/>
+          <ellipse cx="34" cy="30" rx="3" ry="3.5" fill="#1F2937"/>
+          <circle cx="23" cy="29" r="1" fill="white"/>
+          <circle cx="35" cy="29" r="1" fill="white"/>
+          <path d="M24 40 Q28 45 32 40" stroke="#1F2937" strokeWidth="2" fill="none" strokeLinecap="round"/>
+        </svg>
+      )
     },
     {
       title: 'View Analysis History',
       description: 'Access all your saved analyses and results',
-      icon: '📊',
       action: () => onNavigate?.('analysis-history'),
-      color: 'purple'
+      color: 'purple',
+      icon: (
+        <svg viewBox="0 0 56 56" fill="none" className="w-14 h-14">
+          <circle cx="28" cy="28" r="28" fill="#F3E8FF"/>
+          <ellipse cx="28" cy="30" rx="14" ry="15" fill="#FCD9B6"/>
+          <path d="M14 24 Q12 12 22 10 Q28 8 34 10 Q44 12 42 24 Q40 18 34 14 Q28 10 22 14 Q16 18 14 24" fill="#8B6914"/>
+          <ellipse cx="21" cy="30" rx="6" ry="5" fill="none" stroke="#374151" strokeWidth="2"/>
+          <ellipse cx="35" cy="30" rx="6" ry="5" fill="none" stroke="#374151" strokeWidth="2"/>
+          <path d="M27 30 L29 30" stroke="#374151" strokeWidth="2"/>
+          <ellipse cx="21" cy="31" rx="2.5" ry="3" fill="#1F2937"/>
+          <ellipse cx="35" cy="31" rx="2.5" ry="3" fill="#1F2937"/>
+          <path d="M24 42 Q28 47 32 42" stroke="#1F2937" strokeWidth="2" fill="none" strokeLinecap="round"/>
+        </svg>
+      )
     },
     {
       title: 'Upload Documents',
       description: 'Upload PDF, DOC, DOCX, or TXT files for analysis',
-      icon: '📄',
       action: () => onNavigate?.('dashboard'),
-      color: 'green'
+      color: 'green',
+      icon: (
+        <svg viewBox="0 0 56 56" fill="none" className="w-14 h-14">
+          <circle cx="28" cy="28" r="28" fill="#D1FAE5"/>
+          <ellipse cx="28" cy="30" rx="14" ry="15" fill="#8B5A2B"/>
+          <path d="M14 28 Q12 18 20 14 Q28 10 36 14 Q44 18 42 28 Q40 22 34 18 Q28 14 22 18 Q16 22 14 28" fill="#1F2937"/>
+          <ellipse cx="16" cy="30" rx="5" ry="7" fill="#1F2937"/>
+          <ellipse cx="40" cy="30" rx="5" ry="7" fill="#1F2937"/>
+          <ellipse cx="22" cy="30" rx="3" ry="3.5" fill="#1F2937"/>
+          <ellipse cx="34" cy="30" rx="3" ry="3.5" fill="#1F2937"/>
+          <circle cx="23" cy="29" r="1" fill="white"/>
+          <circle cx="35" cy="29" r="1" fill="white"/>
+          <path d="M24 40 Q28 46 32 40" stroke="#1F2937" strokeWidth="2" fill="none" strokeLinecap="round"/>
+        </svg>
+      )
     },
     {
       title: 'Contact Support',
       description: 'Get help from our expert team',
-      icon: '💬',
       action: () => onNavigate?.('contact'),
-      color: 'orange'
+      color: 'orange',
+      icon: (
+        <svg viewBox="0 0 56 56" fill="none" className="w-14 h-14">
+          <circle cx="28" cy="28" r="28" fill="#FFEDD5"/>
+          <ellipse cx="28" cy="30" rx="14" ry="15" fill="#D4A574"/>
+          <path d="M12 26 Q10 14 20 10 Q28 6 36 10 Q46 14 44 26 Q42 18 34 14 Q28 10 22 14 Q16 18 12 26" fill="#3D2314"/>
+          <path d="M12 26 Q6 40 16 48" fill="#3D2314"/>
+          <path d="M44 26 Q50 40 40 48" fill="#3D2314"/>
+          <ellipse cx="22" cy="30" rx="3" ry="3.5" fill="#1F2937"/>
+          <ellipse cx="34" cy="30" rx="3" ry="3.5" fill="#1F2937"/>
+          <circle cx="23" cy="29" r="1" fill="white"/>
+          <circle cx="35" cy="29" r="1" fill="white"/>
+          <path d="M24 41 Q28 46 32 41" stroke="#1F2937" strokeWidth="2" fill="none" strokeLinecap="round"/>
+        </svg>
+      )
     }
   ];
 
@@ -192,174 +251,330 @@ const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
     setOpenFAQ(openFAQ === id ? null : id);
   };
 
-  return (
-    <div className="min-h-screen bg-white">
-      <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="help" />
-
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
-        {/* Header */}
-        <div className="text-center mb-10">
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
-            Help Center
-          </h1>
-          <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
-            Find answers to common questions and learn how to make the most of WriteScholar
-          </p>
+  // Public navigation for logged-out users
+  const PublicNav = () => (
+    <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-100" aria-label="Main navigation">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-18 py-4">
+          <a href="/" onClick={(e) => { e.preventDefault(); onNavigate?.('landing'); }} className="flex items-center space-x-2.5">
+            <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center">
+              <span className="text-white font-bold text-xl">W</span>
+            </div>
+            <span className="text-2xl font-bold text-gray-900">WriteScholar</span>
+          </a>
           
-          {/* Search Bar */}
-          <div className="max-w-xl mx-auto">
-            <div className="relative">
-              <svg className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-              <input
-                type="text"
-                placeholder="Search help topics..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-6 py-3.5 text-base border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-gray-50 focus:bg-white transition-all"
-              />
-            </div>
+          <div className="hidden md:flex items-center space-x-2">
+            <a href="/features" onClick={(e) => { e.preventDefault(); onNavigate?.('features'); }} className="px-4 py-2.5 text-base text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-50 transition-colors font-medium">Features</a>
+            <a href="/pricing" onClick={(e) => { e.preventDefault(); onNavigate?.('pricing'); }} className="px-4 py-2.5 text-base text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-50 transition-colors font-medium">Pricing</a>
+            <a href="/blog" onClick={(e) => { e.preventDefault(); onNavigate?.('blog'); }} className="px-4 py-2.5 text-base text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-50 transition-colors font-medium">Blog</a>
+            <a href="/about" onClick={(e) => { e.preventDefault(); onNavigate?.('about'); }} className="px-4 py-2.5 text-base text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-50 transition-colors font-medium">About</a>
           </div>
-        </div>
-
-        <div className="grid lg:grid-cols-4 gap-6">
-          {/* Categories Sidebar */}
-          <div className="lg:col-span-1">
-            <div className="bg-white border border-gray-200 rounded-2xl p-5 sticky top-24">
-              <h3 className="font-semibold text-gray-900 mb-4 text-sm">Browse by Category</h3>
-              <div className="space-y-1">
-                {categories.map((category) => (
-                  <button
-                    key={category.id}
-                    onClick={() => setSelectedCategory(category.id)}
-                    className={`w-full flex items-center justify-between p-3 rounded-xl text-left transition-all ${
-                      selectedCategory === category.id
-                        ? 'bg-blue-50 text-blue-600'
-                        : 'hover:bg-gray-50 text-gray-600'
-                    }`}
-                  >
-                    <div className="flex items-center space-x-3">
-                      <span className="text-base">{category.icon}</span>
-                      <span className="font-medium text-sm">{category.name}</span>
-                    </div>
-                    <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
-                      {category.count}
-                    </span>
-                  </button>
-                ))}
-              </div>
-
-              {/* Contact Support */}
-              <div className="mt-6 p-4 bg-gray-50 rounded-xl border border-gray-200">
-                <h4 className="font-semibold text-gray-900 text-sm mb-1">Still need help?</h4>
-                <p className="text-xs text-gray-500 mb-4">Our support team is here to help.</p>
-                <button 
-                  onClick={() => onNavigate?.('contact')}
-                  className="w-full bg-gray-900 text-white py-2.5 rounded-xl text-sm font-medium hover:bg-gray-800 transition-colors"
-                >
-                  Contact Support
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* FAQ Content */}
-          <div className="lg:col-span-3">
-            {/* Results Header */}
-            <div className="mb-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-1">
-                {selectedCategory === 'all' ? 'Frequently Asked Questions' : categories.find(c => c.id === selectedCategory)?.name}
-              </h2>
-              <p className="text-gray-500 text-sm">
-                {filteredFAQs.length} article{filteredFAQs.length !== 1 ? 's' : ''} found
-                {searchQuery && ` for "${searchQuery}"`}
-              </p>
-            </div>
-
-            {/* FAQ List */}
-            {filteredFAQs.length === 0 ? (
-              <div className="bg-white border border-gray-200 rounded-2xl p-10 text-center">
-                <div className="w-14 h-14 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-7 h-7 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">No articles found</h3>
-                <p className="text-gray-500 text-sm mb-6">Try adjusting your search terms or browse a different category</p>
-                <button 
-                  onClick={() => onNavigate?.('contact')}
-                  className="bg-blue-600 text-white px-5 py-2.5 rounded-xl font-medium hover:bg-blue-700 transition-colors"
-                >
-                  Contact Support
-                </button>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {filteredFAQs.map((faq) => (
-                  <div key={faq.id} className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-                    <button
-                      onClick={() => toggleFAQ(faq.id)}
-                      className="w-full p-5 text-left hover:bg-gray-50 transition-colors"
-                    >
-                      <div className="flex items-center justify-between">
-                        <h3 className="font-semibold text-gray-900 pr-4 text-sm">{faq.question}</h3>
-                        <svg 
-                          className={`w-5 h-5 text-gray-400 flex-shrink-0 transform transition-transform ${
-                            openFAQ === faq.id ? 'rotate-180' : ''
-                          }`} 
-                          fill="none" 
-                          stroke="currentColor" 
-                          viewBox="0 0 24 24"
-                        >
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                        </svg>
-                      </div>
-                      
-                      {/* Tags */}
-                      <div className="flex flex-wrap gap-1.5 mt-2.5">
-                        {faq.tags.map((tag, index) => (
-                          <span key={index} className="px-2 py-0.5 bg-gray-100 text-gray-500 rounded-md text-xs">
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                    </button>
-                    
-                    {openFAQ === faq.id && (
-                      <div className="px-5 pb-5">
-                        <div className="border-t border-gray-100 pt-4">
-                          <p className="text-gray-600 text-sm leading-relaxed">{faq.answer}</p>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* Quick Actions */}
-            <div className="mt-10">
-              <h3 className="text-lg font-bold text-gray-900 mb-4">Quick Actions</h3>
-              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                {quickActions.map((action, index) => (
-                  <button
-                    key={index}
-                    onClick={action.action}
-                    className="p-5 bg-gray-50 border border-gray-200 rounded-xl hover:bg-gray-100 transition-colors text-left"
-                  >
-                    <div className="text-2xl mb-3">
-                      {action.icon}
-                    </div>
-                    <h4 className="font-semibold text-gray-900 text-sm mb-1">{action.title}</h4>
-                    <p className="text-gray-500 text-xs">{action.description}</p>
-                  </button>
-                ))}
-              </div>
-            </div>
+          
+          <div className="flex items-center space-x-3">
+            <a href="/login" onClick={(e) => { e.preventDefault(); onNavigate?.('login'); }} className="hidden sm:inline-flex px-4 py-2.5 text-base text-gray-600 hover:text-gray-900 font-medium rounded-lg hover:bg-gray-50 transition-colors">Log in</a>
+            <a href="/signup" onClick={(e) => { e.preventDefault(); onNavigate?.('signup'); }} className="px-5 py-2.5 bg-gray-900 text-white text-base font-medium rounded-xl hover:bg-gray-800 transition-colors">
+              Get Started
+            </a>
           </div>
         </div>
       </div>
+    </nav>
+  );
+
+  // Category icon component with cute characters
+  const getCategoryIcon = (categoryId: string) => {
+    switch (categoryId) {
+      case 'all':
+        return (
+          <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5 text-current">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        );
+      case 'getting-started':
+        return (
+          <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5 text-current">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <polyline points="22 4 12 14.01 9 11.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        );
+      case 'analysis':
+        return (
+          <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5 text-current">
+            <path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        );
+      case 'documents':
+        return (
+          <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5 text-current">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <polyline points="14 2 14 8 20 8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <line x1="16" y1="13" x2="8" y2="13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <line x1="16" y1="17" x2="8" y2="17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        );
+      case 'citations':
+        return (
+          <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5 text-current">
+            <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        );
+      case 'account':
+        return (
+          <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5 text-current">
+            <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        );
+      case 'troubleshooting':
+        return (
+          <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5 text-current">
+            <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        );
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-white">
+      {/* Conditional Header */}
+      {user ? (
+        <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="help" />
+      ) : (
+        <PublicNav />
+      )}
+
+      {/* Hero Section */}
+      <section className="py-16 sm:py-20 border-b border-gray-100 bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <div className="text-center max-w-3xl mx-auto">
+            <span className="inline-flex items-center px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-sm font-medium mb-6">
+              Help Center
+            </span>
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-6 leading-tight">
+              How can we help you?
+            </h1>
+            <p className="text-lg text-gray-500 leading-relaxed mb-8">
+              Find answers to common questions and learn how to make the most of WriteScholar
+            </p>
+            
+            {/* Search Bar */}
+            <div className="max-w-xl mx-auto">
+              <div className="relative">
+                <svg className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                <input
+                  type="text"
+                  placeholder="Search help topics..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-12 pr-6 py-4 text-base border border-gray-200 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white shadow-sm transition-all"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Quick Actions */}
+      <section className="py-12 sm:py-16 bg-gray-50">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <h2 className="text-xl font-bold text-gray-900 mb-6 text-center">Quick Actions</h2>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {quickActions.map((action, index) => (
+              <button
+                key={index}
+                onClick={action.action}
+                className="p-6 bg-white border border-gray-200 rounded-2xl hover:shadow-lg hover:border-gray-300 transition-all text-left group"
+              >
+                <div className="w-14 h-14 rounded-full mb-4 overflow-hidden">
+                  {action.icon}
+                </div>
+                <h4 className="font-semibold text-gray-900 mb-1 group-hover:text-blue-600 transition-colors">{action.title}</h4>
+                <p className="text-gray-500 text-sm">{action.description}</p>
+              </button>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section className="py-12 sm:py-16">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <div className="grid lg:grid-cols-4 gap-8">
+            {/* Categories Sidebar */}
+            <div className="lg:col-span-1">
+              <div className="bg-white border border-gray-200 rounded-2xl p-5 sticky top-24">
+                <h3 className="font-semibold text-gray-900 mb-4">Browse by Category</h3>
+                <div className="space-y-1">
+                  {categories.map((category) => (
+                    <button
+                      key={category.id}
+                      onClick={() => setSelectedCategory(category.id)}
+                      className={`w-full flex items-center justify-between p-3 rounded-xl text-left transition-all ${
+                        selectedCategory === category.id
+                          ? 'bg-blue-50 text-blue-600'
+                          : 'hover:bg-gray-50 text-gray-600'
+                      }`}
+                    >
+                      <div className="flex items-center space-x-3">
+                        {getCategoryIcon(category.id)}
+                        <span className="font-medium text-sm">{category.name}</span>
+                      </div>
+                      <span className={`text-xs px-2 py-0.5 rounded-full ${
+                        selectedCategory === category.id
+                          ? 'bg-blue-100 text-blue-600'
+                          : 'bg-gray-100 text-gray-400'
+                      }`}>
+                        {category.count}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+
+                {/* Contact Support Card */}
+                <div className="mt-6 p-5 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl text-white">
+                  <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mb-3">
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                    </svg>
+                  </div>
+                  <h4 className="font-semibold mb-1">Still need help?</h4>
+                  <p className="text-blue-100 text-sm mb-4">Our support team is here to assist you.</p>
+                  <button 
+                    onClick={() => onNavigate?.('contact')}
+                    className="w-full bg-white text-blue-600 py-2.5 rounded-xl text-sm font-medium hover:bg-blue-50 transition-colors"
+                  >
+                    Contact Support
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* FAQ Content */}
+            <div className="lg:col-span-3">
+              {/* Results Header */}
+              <div className="mb-6">
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                  {selectedCategory === 'all' ? 'Frequently Asked Questions' : categories.find(c => c.id === selectedCategory)?.name}
+                </h2>
+                <p className="text-gray-500">
+                  {filteredFAQs.length} article{filteredFAQs.length !== 1 ? 's' : ''} found
+                  {searchQuery && ` for "${searchQuery}"`}
+                </p>
+              </div>
+
+              {/* FAQ List */}
+              {filteredFAQs.length === 0 ? (
+                <div className="bg-white border border-gray-200 rounded-2xl p-12 text-center">
+                  <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                  </div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">No articles found</h3>
+                  <p className="text-gray-500 mb-6">Try adjusting your search terms or browse a different category</p>
+                  <button 
+                    onClick={() => { setSearchQuery(''); setSelectedCategory('all'); }}
+                    className="bg-gray-900 text-white px-6 py-3 rounded-xl font-medium hover:bg-gray-800 transition-colors"
+                  >
+                    Clear Filters
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {filteredFAQs.map((faq) => (
+                    <div key={faq.id} className="bg-white border border-gray-200 rounded-2xl overflow-hidden hover:border-gray-300 transition-all">
+                      <button
+                        onClick={() => toggleFAQ(faq.id)}
+                        className="w-full p-6 text-left hover:bg-gray-50 transition-colors"
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1 pr-4">
+                            <h3 className="font-semibold text-gray-900 text-base mb-2">{faq.question}</h3>
+                            {/* Tags */}
+                            <div className="flex flex-wrap gap-2">
+                              {faq.tags.map((tag, index) => (
+                                <span key={index} className="px-2.5 py-1 bg-gray-100 text-gray-500 rounded-lg text-xs">
+                                  {tag}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                          <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 transition-all ${
+                            openFAQ === faq.id ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-400'
+                          }`}>
+                            <svg 
+                              className={`w-4 h-4 transform transition-transform ${
+                                openFAQ === faq.id ? 'rotate-180' : ''
+                              }`} 
+                              fill="none" 
+                              stroke="currentColor" 
+                              viewBox="0 0 24 24"
+                            >
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                            </svg>
+                          </div>
+                        </div>
+                      </button>
+                      
+                      {openFAQ === faq.id && (
+                        <div className="px-6 pb-6">
+                          <div className="border-t border-gray-100 pt-4">
+                            <p className="text-gray-600 leading-relaxed">{faq.answer}</p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-16 sm:py-20 bg-gray-900">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
+          <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4">
+            Ready to improve your writing?
+          </h2>
+          <p className="text-gray-400 mb-8 max-w-xl mx-auto">
+            Join thousands of students and researchers who trust WriteScholar for academic excellence.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            {user ? (
+              <button 
+                onClick={() => onNavigate?.('dashboard')}
+                className="px-6 py-3 bg-white text-gray-900 font-semibold rounded-xl hover:bg-gray-100 transition-colors"
+              >
+                Go to Dashboard
+              </button>
+            ) : (
+              <>
+                <button 
+                  onClick={() => onNavigate?.('signup')}
+                  className="px-6 py-3 bg-white text-gray-900 font-semibold rounded-xl hover:bg-gray-100 transition-colors"
+                >
+                  Get Started Free
+                </button>
+                <button 
+                  onClick={() => onNavigate?.('pricing')}
+                  className="px-6 py-3 border border-gray-600 text-white font-medium rounded-xl hover:border-gray-500 transition-colors"
+                >
+                  View Pricing
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      </section>
+
+      <Footer onNavigate={onNavigate} />
     </div>
   );
 };

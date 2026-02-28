@@ -177,6 +177,16 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
             >
               Citations
             </button>
+            <button 
+              onClick={() => onNavigate?.('blog')}
+              className={`px-4 py-2.5 text-base font-medium rounded-xl transition-all duration-200 ${
+                currentPage === 'blog' 
+                  ? 'text-blue-600 bg-blue-50' 
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+              }`}
+            >
+              Blog
+            </button>
           </nav>
 
           {/* Mobile Menu Button */}
@@ -461,6 +471,16 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
               }`}
             >
               Citations
+            </button>
+            <button 
+              onClick={() => { onNavigate?.('blog'); setIsMobileMenuOpen(false); }}
+              className={`w-full text-left px-4 py-3 rounded-xl font-medium transition-all duration-200 ${
+                currentPage === 'blog' 
+                  ? 'text-blue-600 bg-blue-50' 
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+              }`}
+            >
+              Blog
             </button>
           </div>
         </div>

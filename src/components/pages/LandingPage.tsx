@@ -264,7 +264,14 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                     }`}
                   >
                     <div className={`w-12 h-12 ${tool.bg} rounded-xl flex items-center justify-center mb-1.5`}>
-                      <span className={`${tool.color} font-bold text-base`}>{tool.icon}</span>
+                      {tool.id === 'sources' ? (
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={`w-6 h-6 ${tool.color}`}>
+                          <circle cx="11" cy="11" r="8" />
+                          <path d="M21 21l-4.35-4.35" />
+                        </svg>
+                      ) : (
+                        <span className={`${tool.color} font-bold ${tool.id === 'tone' || tool.id === 'clarity' ? 'text-lg' : 'text-base'}`}>{tool.icon}</span>
+                      )}
                     </div>
                     <span className="text-[11px] text-gray-600 text-center leading-tight max-w-[70px]">{tool.name}</span>
                     
