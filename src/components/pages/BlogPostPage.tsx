@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import Header from '../common/Header';
 import Footer from '../common/Footer';
 import { getPostBySlug, blogPostList } from '../../data/blogPosts';
@@ -11,17 +11,39 @@ interface BlogPostPageProps {
 }
 
 const BlogPostPage: React.FC<BlogPostPageProps> = ({ onNavigate, user, onLogout }) => {
-  const pathname = typeof window !== 'undefined' ? window.location.pathname : '';
-  const slug = pathname.startsWith('/blog/') ? pathname.replace(/^\/blog\/?/, '').split('/')[0]?.trim() ?? '' : '';
-  const post = slug ? getPostBySlug(slug) : null;
+  const [currentSlug, setCurrentSlug] = useState(() => {
+    const pathname = typeof window !== 'undefined' ? window.location.pathname : '';
+    return pathname.startsWith('/blog/') ? pathname.replace(/^\/blog\/?/, '').split('/')[0]?.trim() ?? '' : '';
+  });
+  
+  const post = currentSlug ? getPostBySlug(currentSlug) : null;
+
+  // Update slug when URL changes (for prev/next navigation)
+  useEffect(() => {
+    const updateSlug = () => {
+      const pathname = window.location.pathname;
+      const newSlug = pathname.startsWith('/blog/') ? pathname.replace(/^\/blog\/?/, '').split('/')[0]?.trim() ?? '' : '';
+      if (newSlug !== currentSlug) {
+        setCurrentSlug(newSlug);
+      }
+    };
+
+    // Check immediately
+    updateSlug();
+    
+    // Also listen for popstate events (browser back/forward)
+    window.addEventListener('popstate', updateSlug);
+    return () => window.removeEventListener('popstate', updateSlug);
+  }, [currentSlug]);
 
   // Empty slug (e.g. /blog/) → redirect to blog listing
   useEffect(() => {
-    if (!slug && pathname.startsWith('/blog')) {
+    const pathname = window.location.pathname;
+    if (!currentSlug && pathname.startsWith('/blog')) {
       onNavigate('blog');
-      if (typeof window !== 'undefined') window.history.replaceState(null, '', '/blog');
+      window.history.replaceState(null, '', '/blog');
     }
-  }, [slug, pathname, onNavigate]);
+  }, [currentSlug, onNavigate]);
 
   useEffect(() => {
     if (post) {
@@ -38,9 +60,16 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ onNavigate, user, onLogout 
     }
   }, [post]);
 
+  // Handle navigation to a different blog post
+  const handleNavigateToPost = (newSlug: string) => {
+    setCurrentSlug(newSlug);
+    window.history.pushState({}, '', `/blog/${newSlug}`);
+    window.scrollTo(0, 0);
+  };
+
   if (!post) {
     // Redirect to blog listing if slug is empty (e.g. /blog/); otherwise show not found
-    if (!slug) {
+    if (!currentSlug) {
       return null; // useEffect will redirect to /blog
     }
     return (
@@ -57,7 +86,7 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ onNavigate, user, onLogout 
     );
   }
 
-  const currentIndex = blogPostList.findIndex(p => p.slug === slug);
+  const currentIndex = blogPostList.findIndex(p => p.slug === currentSlug);
   const prevPost = currentIndex > 0 ? blogPostList[currentIndex - 1] : null;
   const nextPost = currentIndex >= 0 && currentIndex < blogPostList.length - 1 ? blogPostList[currentIndex + 1] : null;
 
@@ -96,22 +125,20 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ onNavigate, user, onLogout 
 
         <nav className="mt-12 pt-8 border-t border-gray-200 flex flex-col sm:flex-row justify-between gap-4" aria-label="Previous and next posts">
           {prevPost ? (
-            <a
-              href={`/blog/${prevPost.slug}`}
-              onClick={(e) => { e.preventDefault(); onNavigate('blog-post', prevPost.slug); }}
-              className="text-blue-600 hover:underline font-medium"
+            <button
+              onClick={() => handleNavigateToPost(prevPost.slug)}
+              className="text-blue-600 hover:underline font-medium text-left"
             >
               ← {prevPost.title}
-            </a>
+            </button>
           ) : <span />}
           {nextPost ? (
-            <a
-              href={`/blog/${nextPost.slug}`}
-              onClick={(e) => { e.preventDefault(); onNavigate('blog-post', nextPost.slug); }}
+            <button
+              onClick={() => handleNavigateToPost(nextPost.slug)}
               className="text-blue-600 hover:underline font-medium sm:text-right"
             >
               {nextPost.title} →
-            </a>
+            </button>
           ) : null}
         </nav>
 

@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react';
 import Header from '../common/Header';
+import Footer from '../common/Footer';
 import LoadingSpinner from '../common/LoadingSpinner';
 
 interface UploadPageProps {
@@ -52,28 +53,26 @@ const UploadPage = ({ onNavigate, user, onLogout }: UploadPageProps) => {
   };
 
   const handleFileSelect = (file: File) => {
-    // Validate file type
     const allowedTypes = [
-        'application/pdf',
+      'application/pdf',
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        'application/msword',
-        'text/plain'
-      ];
+      'application/msword',
+      'text/plain'
+    ];
 
     if (!allowedTypes.includes(file.type)) {
       setError('Please upload a PDF, DOCX, DOC, or TXT file.');
       return;
     }
 
-    // Validate file size (50MB limit)
-    const maxSize = 50 * 1024 * 1024; // 50MB
+    const maxSize = 50 * 1024 * 1024;
     if (file.size > maxSize) {
       setError('File size must be less than 50MB.');
       return;
     }
 
     setSelectedFile(file);
-    setDocumentTitle(file.name.replace(/\.[^/.]+$/, '')); // Remove extension
+    setDocumentTitle(file.name.replace(/\.[^/.]+$/, ''));
     setError(null);
   };
 
@@ -117,7 +116,6 @@ const UploadPage = ({ onNavigate, user, onLogout }: UploadPageProps) => {
       formData.append('document', selectedFile);
       formData.append('title', documentTitle.trim());
 
-      // Simulate progress
       const progressInterval = setInterval(() => {
         setUploadProgress(prev => {
           if (prev >= 90) {
@@ -145,21 +143,16 @@ const UploadPage = ({ onNavigate, user, onLogout }: UploadPageProps) => {
         throw new Error(result.message || 'Upload failed');
       }
 
-      // Use the document from the response
       const uploadedDocument = result.data.document;
       
       setUploadedDocument(uploadedDocument);
       setSelectedFile(null);
       setDocumentTitle('');
 
-      // Redirect to analysis page with document pre-selected
       setTimeout(() => {
-        // Store the uploaded document ID in localStorage for the analysis page
         localStorage.setItem('selectedDocumentId', uploadedDocument.id);
         localStorage.setItem('selectedDocumentTitle', uploadedDocument.title);
         localStorage.setItem('selectedDocumentContent', uploadedDocument.content_text || 'Mock document content for testing');
-        
-        // Navigate to analysis page
         onNavigate('analysis');
       }, 1500);
 
@@ -183,126 +176,124 @@ const UploadPage = ({ onNavigate, user, onLogout }: UploadPageProps) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+    <div className="min-h-screen bg-white">
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="upload" />
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 md:px-8 py-8 sm:py-12">
-        <div className="text-center mb-8 sm:mb-12">
-          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
+        {/* Header */}
+        <div className="text-center mb-10">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
             Upload Your Document
           </h1>
-          <p className="text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto px-4">
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
             Upload your academic papers, essays, or research documents for AI-powered analysis and feedback.
           </p>
-                  </div>
+        </div>
 
-        {/* Upload Success Message */}
+        {/* Success Message */}
         {uploadedDocument && (
-          <div className="mb-8 p-6 bg-green-50 border border-green-200 rounded-xl">
+          <div className="mb-8 p-5 bg-green-50 border border-green-200 rounded-2xl">
             <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                  <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                      </div>
-                    </div>
+              <div className="w-10 h-10 bg-green-500 rounded-xl flex items-center justify-center flex-shrink-0">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
               <div className="ml-4">
-                <h3 className="text-lg font-medium text-green-800">
+                <h3 className="text-lg font-semibold text-green-800">
                   Document Uploaded Successfully!
                 </h3>
                 <p className="text-green-700">
                   {uploadedDocument.title} ({uploadedDocument.wordCount} words, {uploadedDocument.pageCount} pages)
                 </p>
-                    </div>
-                    </div>
-                  </div>
-                )}
-
-        {/* Error Message */}
-        {error && (
-          <div className="mb-8 p-6 bg-red-50 border border-red-200 rounded-xl">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
-                  <svg className="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </div>
-              </div>
-              <div className="ml-4">
-                <p className="text-red-700">{error}</p>
               </div>
             </div>
           </div>
         )}
 
-        <div className="bg-white rounded-2xl shadow-xl p-8">
-          {/* File Upload Area */}
+        {/* Error Message */}
+        {error && (
+          <div className="mb-8 p-5 bg-red-50 border border-red-200 rounded-2xl">
+            <div className="flex items-center">
+              <div className="w-10 h-10 bg-red-500 rounded-xl flex items-center justify-center flex-shrink-0">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </div>
+              <div className="ml-4">
+                <p className="text-red-700 font-medium">{error}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Upload Card */}
+        <div className="bg-white border border-gray-200 rounded-2xl p-8 shadow-sm">
+          {/* Drop Zone */}
           <div
-            className={`relative border-2 border-dashed rounded-xl p-12 text-center transition-colors ${
-                  dragActive 
-                ? 'border-blue-400 bg-blue-50'
+            className={`relative border-2 border-dashed rounded-2xl p-10 sm:p-16 text-center transition-all ${
+              dragActive 
+                ? 'border-blue-500 bg-blue-50'
                 : selectedFile
-                ? 'border-green-400 bg-green-50'
-                : 'border-gray-300 hover:border-gray-400'
-                }`}
-                onDragEnter={handleDrag}
-                onDragLeave={handleDrag}
-                onDragOver={handleDrag}
-                onDrop={handleDrop}
-              >
-                <input
-                  ref={fileInputRef}
-                  type="file"
+                  ? 'border-green-400 bg-green-50'
+                  : 'border-gray-300 hover:border-gray-400 hover:bg-gray-50'
+            }`}
+            onDragEnter={handleDrag}
+            onDragLeave={handleDrag}
+            onDragOver={handleDrag}
+            onDrop={handleDrop}
+          >
+            <input
+              ref={fileInputRef}
+              type="file"
               className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
               onChange={handleFileInputChange}
-                  accept=".pdf,.doc,.docx,.txt"
+              accept=".pdf,.doc,.docx,.txt"
             />
             
             {selectedFile ? (
               <div className="space-y-4">
-                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto">
+                <div className="w-16 h-16 bg-green-100 rounded-2xl flex items-center justify-center mx-auto">
                   <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                  </div>
-                  <div>
-                  <h3 className="text-lg font-medium text-gray-900">{selectedFile.name}</h3>
-                  <p className="text-sm text-gray-500">{formatFileSize(selectedFile.size)}</p>
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">{selectedFile.name}</h3>
+                  <p className="text-gray-500">{formatFileSize(selectedFile.size)}</p>
                 </div>
               </div>
             ) : (
               <div className="space-y-4">
-                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto">
+                <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto">
                   <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                    </svg>
+                  </svg>
                 </div>
                 <div>
-                  <h3 className="text-lg font-medium text-gray-900">
+                  <h3 className="text-lg font-semibold text-gray-900">
                     Drop your document here, or click to browse
                   </h3>
-                  <p className="text-sm text-gray-500">
+                  <p className="text-gray-500">
                     Supports PDF, DOCX, DOC, and TXT files up to 50MB
                   </p>
                 </div>
               </div>
             )}
-                </div>
+          </div>
 
           {/* Document Title Input */}
           {selectedFile && (
             <div className="mt-8">
-              <label htmlFor="documentTitle" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="documentTitle" className="block text-base font-medium text-gray-900 mb-2">
                 Document Title
               </label>
-                        <input
+              <input
                 type="text"
                 id="documentTitle"
                 value={documentTitle}
                 onChange={(e) => setDocumentTitle(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-3 text-lg border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                 placeholder="Enter a title for your document"
               />
             </div>
@@ -318,26 +309,26 @@ const UploadPage = ({ onNavigate, user, onLogout }: UploadPageProps) => {
               />
               <div className="w-full bg-gray-200 rounded-full h-2 mt-4">
                 <div
-                  className="bg-gradient-to-r from-blue-600 to-purple-600 h-2 rounded-full transition-all duration-300"
+                  className="bg-blue-600 h-2 rounded-full transition-all duration-300"
                   style={{ width: `${uploadProgress}%` }}
                 ></div>
-                  </div>
-                </div>
+              </div>
+            </div>
           )}
 
           {/* Action Buttons */}
-          <div className="mt-8 flex space-x-4">
+          <div className="mt-8 flex flex-col sm:flex-row gap-4">
             {selectedFile && !isUploading && !uploadedDocument && (
               <>
                 <button
                   onClick={handleUpload}
-                  className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-6 rounded-lg font-semibold hover:shadow-lg transform hover:scale-[1.02] transition-all duration-300"
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3.5 px-6 rounded-xl font-semibold text-lg transition-colors"
                 >
                   Upload Document
                 </button>
                 <button
                   onClick={handleReset}
-                  className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-colors"
+                  className="px-6 py-3.5 border border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-colors"
                 >
                   Reset
                 </button>
@@ -347,7 +338,7 @@ const UploadPage = ({ onNavigate, user, onLogout }: UploadPageProps) => {
             {uploadedDocument && (
               <button
                 onClick={() => onNavigate('library')}
-                className="flex-1 bg-gradient-to-r from-green-600 to-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:shadow-lg transform hover:scale-[1.02] transition-all duration-300"
+                className="flex-1 bg-green-600 hover:bg-green-700 text-white py-3.5 px-6 rounded-xl font-semibold text-lg transition-colors"
               >
                 View in Library
               </button>
@@ -356,48 +347,72 @@ const UploadPage = ({ onNavigate, user, onLogout }: UploadPageProps) => {
         </div>
 
         {/* Supported File Types */}
-        <div className="mt-12 bg-white rounded-xl shadow-lg p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Supported File Types</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-red-100 rounded flex items-center justify-center">
-                <span className="text-red-600 font-bold text-xs">PDF</span>
+        <div className="mt-10 bg-gray-50 border border-gray-200 rounded-2xl p-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-5">Supported File Types</h3>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div className="flex items-center space-x-3 bg-white rounded-xl p-4 border border-gray-200">
+              <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
+                <span className="text-red-600 font-bold text-sm">PDF</span>
               </div>
               <div>
-                <p className="font-medium text-gray-900">PDF Documents</p>
-                <p className="text-sm text-gray-500">Up to 50MB</p>
-                        </div>
-                      </div>
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-blue-100 rounded flex items-center justify-center">
-                <span className="text-blue-600 font-bold text-xs">DOCX</span>
+                <p className="font-medium text-gray-900 text-sm">PDF</p>
+                <p className="text-xs text-gray-500">Up to 50MB</p>
               </div>
-                  <div>
-                <p className="font-medium text-gray-900">Word Documents</p>
-                <p className="text-sm text-gray-500">Up to 25MB</p>
-                    </div>
-                  </div>
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-green-100 rounded flex items-center justify-center">
-                <span className="text-green-600 font-bold text-xs">DOC</span>
+            </div>
+            <div className="flex items-center space-x-3 bg-white rounded-xl p-4 border border-gray-200">
+              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                <span className="text-blue-600 font-bold text-sm">DOCX</span>
               </div>
               <div>
-                <p className="font-medium text-gray-900">Legacy Word</p>
-                <p className="text-sm text-gray-500">Up to 25MB</p>
-          </div>
-        </div>
-              <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center">
-                <span className="text-gray-600 font-bold text-xs">TXT</span>
+                <p className="font-medium text-gray-900 text-sm">Word</p>
+                <p className="text-xs text-gray-500">Up to 25MB</p>
+              </div>
+            </div>
+            <div className="flex items-center space-x-3 bg-white rounded-xl p-4 border border-gray-200">
+              <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                <span className="text-green-600 font-bold text-sm">DOC</span>
               </div>
               <div>
-                <p className="font-medium text-gray-900">Text Files</p>
-                <p className="text-sm text-gray-500">Up to 10MB</p>
+                <p className="font-medium text-gray-900 text-sm">Legacy</p>
+                <p className="text-xs text-gray-500">Up to 25MB</p>
+              </div>
+            </div>
+            <div className="flex items-center space-x-3 bg-white rounded-xl p-4 border border-gray-200">
+              <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+                <span className="text-gray-600 font-bold text-sm">TXT</span>
+              </div>
+              <div>
+                <p className="font-medium text-gray-900 text-sm">Text</p>
+                <p className="text-xs text-gray-500">Up to 10MB</p>
               </div>
             </div>
           </div>
         </div>
-      </div>
+
+        {/* Quick Actions */}
+        <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <button
+            onClick={() => onNavigate('dashboard')}
+            className="flex items-center justify-center p-5 bg-white border border-gray-200 rounded-2xl hover:border-gray-300 hover:shadow-sm transition-all"
+          >
+            <svg className="w-6 h-6 text-gray-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+            <span className="text-gray-700 font-medium">Paste text instead</span>
+          </button>
+          <button
+            onClick={() => onNavigate('library')}
+            className="flex items-center justify-center p-5 bg-white border border-gray-200 rounded-2xl hover:border-gray-300 hover:shadow-sm transition-all"
+          >
+            <svg className="w-6 h-6 text-gray-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+            </svg>
+            <span className="text-gray-700 font-medium">View document library</span>
+          </button>
+        </div>
+      </main>
+
+      <Footer onNavigate={onNavigate} />
     </div>
   );
 };

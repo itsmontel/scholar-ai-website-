@@ -1,16 +1,17 @@
 import { useState } from 'react';
+import Header from '../common/Header';
 import Footer from '../common/Footer';
 import { blogPostList, BlogPostMeta } from '../../data/blogPosts';
 
 interface BlogPageProps {
   onNavigate: (page: string, slug?: string) => void;
-  user?: { name: string; email: string } | null;
+  user?: any;
   onLogout?: () => void;
 }
 
 const POSTS_PER_PAGE = 6;
 
-const BlogPage = ({ onNavigate }: BlogPageProps) => {
+const BlogPage = ({ onNavigate, user, onLogout }: BlogPageProps) => {
   const [currentPage, setCurrentPage] = useState(1);
   
   const totalPages = Math.ceil(blogPostList.length / POSTS_PER_PAGE);
@@ -132,6 +133,11 @@ const BlogPage = ({ onNavigate }: BlogPageProps) => {
     return match ? match[1] : '3';
   };
 
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo(0, 0);
+  };
+
   const renderPagination = () => {
     if (totalPages <= 1) return null;
 
@@ -147,7 +153,7 @@ const BlogPage = ({ onNavigate }: BlogPageProps) => {
     return (
       <nav className="flex items-center justify-center space-x-1 mt-12" aria-label="Pagination">
         <button
-          onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+          onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
           disabled={currentPage === 1}
           className="w-10 h-10 flex items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           aria-label="Previous page"
@@ -163,7 +169,7 @@ const BlogPage = ({ onNavigate }: BlogPageProps) => {
           ) : (
             <button
               key={page}
-              onClick={() => setCurrentPage(page as number)}
+              onClick={() => handlePageChange(page as number)}
               className={`w-10 h-10 flex items-center justify-center rounded-lg text-sm font-medium transition-colors ${
                 currentPage === page
                   ? 'bg-indigo-500 text-white'
@@ -176,7 +182,7 @@ const BlogPage = ({ onNavigate }: BlogPageProps) => {
         ))}
         
         <button
-          onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+          onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
           disabled={currentPage === totalPages}
           className="w-10 h-10 flex items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           aria-label="Next page"
@@ -191,33 +197,37 @@ const BlogPage = ({ onNavigate }: BlogPageProps) => {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Public Header - same as landing page */}
-      <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-100" aria-label="Main navigation">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-18 py-4">
-            <a href="/" onClick={(e) => { e.preventDefault(); onNavigate('landing'); }} className="flex items-center space-x-2.5">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center">
-                <span className="text-white font-bold text-xl">W</span>
-              </div>
-              <span className="text-2xl font-bold text-gray-900">WriteScholar</span>
-            </a>
-            
-            <div className="hidden md:flex items-center space-x-2">
-              <a href="/features" onClick={(e) => { e.preventDefault(); onNavigate('features'); }} className="px-4 py-2.5 text-base text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-50 transition-colors font-medium">Features</a>
-              <a href="/pricing" onClick={(e) => { e.preventDefault(); onNavigate('pricing'); }} className="px-4 py-2.5 text-base text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-50 transition-colors font-medium">Pricing</a>
-              <a href="/blog" onClick={(e) => { e.preventDefault(); onNavigate('blog'); }} className="px-4 py-2.5 text-base text-blue-600 hover:text-blue-700 rounded-lg hover:bg-blue-50 transition-colors font-medium">Blog</a>
-              <a href="/about" onClick={(e) => { e.preventDefault(); onNavigate('about'); }} className="px-4 py-2.5 text-base text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-50 transition-colors font-medium">About</a>
-            </div>
-            
-            <div className="flex items-center space-x-3">
-              <a href="/login" onClick={(e) => { e.preventDefault(); onNavigate('login'); }} className="hidden sm:inline-flex px-4 py-2.5 text-base text-gray-700 hover:text-gray-900 font-medium rounded-lg hover:bg-gray-50 transition-colors">Log in</a>
-              <a href="/signup" onClick={(e) => { e.preventDefault(); onNavigate('signup'); }} className="inline-flex items-center px-5 py-2.5 bg-gray-900 text-white text-base font-semibold rounded-xl hover:bg-gray-800 transition-colors">
-                Get Started
+      {/* Conditional Header - Show logged-in header if user exists */}
+      {user ? (
+        <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="blog" />
+      ) : (
+        <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-100" aria-label="Main navigation">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between h-18 py-4">
+              <a href="/" onClick={(e) => { e.preventDefault(); onNavigate('landing'); }} className="flex items-center space-x-2.5">
+                <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center">
+                  <span className="text-white font-bold text-xl">W</span>
+                </div>
+                <span className="text-2xl font-bold text-gray-900">WriteScholar</span>
               </a>
+              
+              <div className="hidden md:flex items-center space-x-2">
+                <a href="/features" onClick={(e) => { e.preventDefault(); onNavigate('features'); }} className="px-4 py-2.5 text-base text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-50 transition-colors font-medium">Features</a>
+                <a href="/pricing" onClick={(e) => { e.preventDefault(); onNavigate('pricing'); }} className="px-4 py-2.5 text-base text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-50 transition-colors font-medium">Pricing</a>
+                <a href="/blog" onClick={(e) => { e.preventDefault(); onNavigate('blog'); }} className="px-4 py-2.5 text-base text-blue-600 hover:text-blue-700 rounded-lg hover:bg-blue-50 transition-colors font-medium">Blog</a>
+                <a href="/about" onClick={(e) => { e.preventDefault(); onNavigate('about'); }} className="px-4 py-2.5 text-base text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-50 transition-colors font-medium">About</a>
+              </div>
+              
+              <div className="flex items-center space-x-3">
+                <a href="/login" onClick={(e) => { e.preventDefault(); onNavigate('login'); }} className="hidden sm:inline-flex px-4 py-2.5 text-base text-gray-700 hover:text-gray-900 font-medium rounded-lg hover:bg-gray-50 transition-colors">Log in</a>
+                <a href="/signup" onClick={(e) => { e.preventDefault(); onNavigate('signup'); }} className="inline-flex items-center px-5 py-2.5 bg-gray-900 text-white text-base font-semibold rounded-xl hover:bg-gray-800 transition-colors">
+                  Get Started
+                </a>
+              </div>
             </div>
           </div>
-        </div>
-      </nav>
+        </nav>
+      )}
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
         {/* Breadcrumbs */}
@@ -279,26 +289,51 @@ const BlogPage = ({ onNavigate }: BlogPageProps) => {
         {/* Pagination */}
         {renderPagination()}
 
-        {/* Newsletter CTA */}
-        <section className="mt-20 sm:mt-24 bg-gray-50 rounded-2xl p-10 sm:p-14 text-center">
-          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
-            Get Writing Tips in Your Inbox
+        {/* CTA Section - Different for logged-in users */}
+        <section className="mt-16 sm:mt-20 bg-gray-900 rounded-2xl p-8 sm:p-12 text-center">
+          <h2 className="text-2xl sm:text-3xl font-bold text-white mb-3">
+            {user ? 'Put these tips into practice' : 'Ready to improve your academic writing?'}
           </h2>
-          <p className="text-lg text-gray-600 mb-8 max-w-lg mx-auto">
-            Join thousands of students improving their academic writing. Weekly tips on citations, structure, and more.
+          <p className="text-gray-300 mb-6 max-w-lg mx-auto">
+            {user 
+              ? 'Head to your dashboard to start writing with AI-powered feedback and citation tools.'
+              : 'Get AI-powered feedback on your essays, citations, and more. Start writing better today.'
+            }
           </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 max-w-md mx-auto">
-            <input
-              type="email"
-              placeholder="Enter your email"
-              className="w-full sm:flex-1 px-5 py-3.5 rounded-xl border border-gray-200 focus:border-indigo-500 focus:outline-none text-gray-900 text-base"
-            />
-            <button 
-              onClick={() => onNavigate('signup')}
-              className="w-full sm:w-auto px-7 py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-xl transition-colors text-base"
-            >
-              Subscribe
-            </button>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+            {user ? (
+              <>
+                <button 
+                  onClick={() => onNavigate('dashboard')}
+                  className="w-full sm:w-auto px-6 py-3 bg-white hover:bg-gray-100 text-gray-900 font-semibold rounded-xl transition-colors"
+                >
+                  Go to Dashboard
+                </button>
+                {user.plan === 'Free' && (
+                  <button 
+                    onClick={() => onNavigate('billing')}
+                    className="w-full sm:w-auto px-6 py-3 border border-gray-600 hover:border-gray-500 text-white font-medium rounded-xl transition-colors"
+                  >
+                    Upgrade Plan
+                  </button>
+                )}
+              </>
+            ) : (
+              <>
+                <button 
+                  onClick={() => onNavigate('signup')}
+                  className="w-full sm:w-auto px-6 py-3 bg-white hover:bg-gray-100 text-gray-900 font-semibold rounded-xl transition-colors"
+                >
+                  Get Started Free
+                </button>
+                <button 
+                  onClick={() => onNavigate('features')}
+                  className="w-full sm:w-auto px-6 py-3 border border-gray-600 hover:border-gray-500 text-white font-medium rounded-xl transition-colors"
+                >
+                  Learn More
+                </button>
+              </>
+            )}
           </div>
         </section>
       </main>

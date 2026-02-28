@@ -193,57 +193,57 @@ const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
+    <div className="min-h-screen bg-white">
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="help" />
 
-      <div className="max-w-7xl mx-auto px-8 py-12">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
         {/* Header */}
-        <div className="text-center mb-16">
-          <h1 className="text-5xl font-bold text-gray-900 mb-6">
-            Frequently Asked <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Questions</span>
+        <div className="text-center mb-10">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
+            Help Center
           </h1>
-          <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+          <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
             Find answers to common questions and learn how to make the most of WriteScholar
           </p>
           
           {/* Search Bar */}
-          <div className="max-w-2xl mx-auto">
+          <div className="max-w-xl mx-auto">
             <div className="relative">
-              <svg className="absolute left-4 top-1/2 transform -translate-y-1/2 w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
               <input
                 type="text"
-                placeholder="Search for help topics, features, or troubleshooting..."
+                placeholder="Search help topics..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-6 py-4 text-lg border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-lg"
+                className="w-full pl-12 pr-6 py-3.5 text-base border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-gray-50 focus:bg-white transition-all"
               />
             </div>
           </div>
         </div>
 
-        <div className="grid lg:grid-cols-4 gap-8">
+        <div className="grid lg:grid-cols-4 gap-6">
           {/* Categories Sidebar */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-xl shadow-lg p-6 sticky top-8">
-              <h3 className="font-semibold text-gray-900 mb-4">Browse by Category</h3>
-              <div className="space-y-2">
+            <div className="bg-white border border-gray-200 rounded-2xl p-5 sticky top-24">
+              <h3 className="font-semibold text-gray-900 mb-4 text-sm">Browse by Category</h3>
+              <div className="space-y-1">
                 {categories.map((category) => (
                   <button
                     key={category.id}
                     onClick={() => setSelectedCategory(category.id)}
-                    className={`w-full flex items-center justify-between p-3 rounded-lg text-left transition-colors ${
+                    className={`w-full flex items-center justify-between p-3 rounded-xl text-left transition-all ${
                       selectedCategory === category.id
-                        ? 'bg-blue-50 text-blue-600 border border-blue-200'
-                        : 'hover:bg-gray-50 text-gray-700 border border-transparent'
+                        ? 'bg-blue-50 text-blue-600'
+                        : 'hover:bg-gray-50 text-gray-600'
                     }`}
                   >
                     <div className="flex items-center space-x-3">
-                      <span className="text-lg">{category.icon}</span>
-                      <span className="font-medium">{category.name}</span>
+                      <span className="text-base">{category.icon}</span>
+                      <span className="font-medium text-sm">{category.name}</span>
                     </div>
-                    <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+                    <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
                       {category.count}
                     </span>
                   </button>
@@ -251,12 +251,12 @@ const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
               </div>
 
               {/* Contact Support */}
-              <div className="mt-8 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200">
-                <h4 className="font-semibold text-gray-900 mb-2">Still need help?</h4>
-                <p className="text-sm text-gray-600 mb-4">Our support team is here to help you succeed.</p>
+              <div className="mt-6 p-4 bg-gray-50 rounded-xl border border-gray-200">
+                <h4 className="font-semibold text-gray-900 text-sm mb-1">Still need help?</h4>
+                <p className="text-xs text-gray-500 mb-4">Our support team is here to help.</p>
                 <button 
                   onClick={() => onNavigate?.('contact')}
-                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-2 rounded-lg text-sm font-medium hover:shadow-lg transition-all duration-300"
+                  className="w-full bg-gray-900 text-white py-2.5 rounded-xl text-sm font-medium hover:bg-gray-800 transition-colors"
                 >
                   Contact Support
                 </button>
@@ -268,10 +268,10 @@ const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
           <div className="lg:col-span-3">
             {/* Results Header */}
             <div className="mb-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+              <h2 className="text-xl font-bold text-gray-900 mb-1">
                 {selectedCategory === 'all' ? 'Frequently Asked Questions' : categories.find(c => c.id === selectedCategory)?.name}
               </h2>
-              <p className="text-gray-600">
+              <p className="text-gray-500 text-sm">
                 {filteredFAQs.length} article{filteredFAQs.length !== 1 ? 's' : ''} found
                 {searchQuery && ` for "${searchQuery}"`}
               </p>
@@ -279,33 +279,33 @@ const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
 
             {/* FAQ List */}
             {filteredFAQs.length === 0 ? (
-              <div className="bg-white rounded-xl shadow-lg p-12 text-center">
-                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="bg-white border border-gray-200 rounded-2xl p-10 text-center">
+                <div className="w-14 h-14 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-7 h-7 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
                 </div>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No articles found</h3>
-                <p className="text-gray-500 mb-6">Try adjusting your search terms or browse a different category</p>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">No articles found</h3>
+                <p className="text-gray-500 text-sm mb-6">Try adjusting your search terms or browse a different category</p>
                 <button 
                   onClick={() => onNavigate?.('contact')}
-                  className="bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors"
+                  className="bg-blue-600 text-white px-5 py-2.5 rounded-xl font-medium hover:bg-blue-700 transition-colors"
                 >
                   Contact Support
                 </button>
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {filteredFAQs.map((faq) => (
-                  <div key={faq.id} className="bg-white rounded-xl shadow-lg overflow-hidden">
+                  <div key={faq.id} className="bg-white border border-gray-200 rounded-xl overflow-hidden">
                     <button
                       onClick={() => toggleFAQ(faq.id)}
-                      className="w-full p-6 text-left hover:bg-gray-50 transition-colors"
+                      className="w-full p-5 text-left hover:bg-gray-50 transition-colors"
                     >
                       <div className="flex items-center justify-between">
-                        <h3 className="font-semibold text-gray-900 pr-4">{faq.question}</h3>
+                        <h3 className="font-semibold text-gray-900 pr-4 text-sm">{faq.question}</h3>
                         <svg 
-                          className={`w-5 h-5 text-gray-500 transform transition-transform duration-200 ${
+                          className={`w-5 h-5 text-gray-400 flex-shrink-0 transform transition-transform ${
                             openFAQ === faq.id ? 'rotate-180' : ''
                           }`} 
                           fill="none" 
@@ -317,9 +317,9 @@ const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
                       </div>
                       
                       {/* Tags */}
-                      <div className="flex flex-wrap gap-2 mt-3">
+                      <div className="flex flex-wrap gap-1.5 mt-2.5">
                         {faq.tags.map((tag, index) => (
-                          <span key={index} className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs">
+                          <span key={index} className="px-2 py-0.5 bg-gray-100 text-gray-500 rounded-md text-xs">
                             {tag}
                           </span>
                         ))}
@@ -327,9 +327,9 @@ const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
                     </button>
                     
                     {openFAQ === faq.id && (
-                      <div className="px-6 pb-6">
-                        <div className="border-t border-gray-200 pt-4">
-                          <p className="text-gray-700 leading-relaxed">{faq.answer}</p>
+                      <div className="px-5 pb-5">
+                        <div className="border-t border-gray-100 pt-4">
+                          <p className="text-gray-600 text-sm leading-relaxed">{faq.answer}</p>
                         </div>
                       </div>
                     )}
@@ -339,20 +339,20 @@ const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
             )}
 
             {/* Quick Actions */}
-            <div className="mt-12">
-              <h3 className="text-2xl font-bold text-gray-900 mb-6">Quick Actions</h3>
-              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="mt-10">
+              <h3 className="text-lg font-bold text-gray-900 mb-4">Quick Actions</h3>
+              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {quickActions.map((action, index) => (
                   <button
                     key={index}
                     onClick={action.action}
-                    className={`p-6 bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 text-left group border-2 border-transparent hover:border-${action.color}-200`}
+                    className="p-5 bg-gray-50 border border-gray-200 rounded-xl hover:bg-gray-100 transition-colors text-left"
                   >
-                    <div className="text-3xl mb-4 group-hover:scale-110 transition-transform duration-300">
+                    <div className="text-2xl mb-3">
                       {action.icon}
                     </div>
-                    <h4 className="font-semibold text-gray-900 mb-2">{action.title}</h4>
-                    <p className="text-gray-600 text-sm">{action.description}</p>
+                    <h4 className="font-semibold text-gray-900 text-sm mb-1">{action.title}</h4>
+                    <p className="text-gray-500 text-xs">{action.description}</p>
                   </button>
                 ))}
               </div>

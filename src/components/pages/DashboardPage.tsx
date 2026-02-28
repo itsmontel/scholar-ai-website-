@@ -20,6 +20,7 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
   const [analysisComplete, setAnalysisComplete] = useState(false);
   const [mode, setMode] = useState<'analyze' | 'citations'>('analyze');
   const [citationStyle, setCitationStyle] = useState('APA');
+  const [citationYearRange, setCitationYearRange] = useState('all');
   const [isSearchingCitations, setIsSearchingCitations] = useState(false);
   const [showSearchAnimation, setShowSearchAnimation] = useState(false);
   const [usageStats, setUsageStats] = useState({
@@ -171,22 +172,22 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
       if (result.success) {
         await processDocuments(result.data.documents || []);
       } else if (result.error?.includes('401')) {
-        try {
-          const refreshResult = await BulletproofAPI.safeRequest(
-            () => BulletproofAPI.post('/auth/refresh', {}, token),
-            { token: null }
-          );
-          
-          if (refreshResult.success && refreshResult.data?.token) {
-            localStorage.setItem('authToken', refreshResult.data.token);
-            const retryResult = await BulletproofAPI.safeRequest(
-              () => BulletproofAPI.get('/documents', refreshResult.data.token),
-              { documents: [] }
+          try {
+            const refreshResult = await BulletproofAPI.safeRequest(
+              () => BulletproofAPI.post('/auth/refresh', {}, token),
+              { token: null }
             );
-            if (retryResult.success) {
-              await processDocuments(retryResult.data.documents || []);
-            }
-          } else {
+            
+            if (refreshResult.success && refreshResult.data?.token) {
+            localStorage.setItem('authToken', refreshResult.data.token);
+              const retryResult = await BulletproofAPI.safeRequest(
+              () => BulletproofAPI.get('/documents', refreshResult.data.token),
+                { documents: [] }
+              );
+              if (retryResult.success) {
+                await processDocuments(retryResult.data.documents || []);
+              }
+            } else {
             onLogout();
           }
         } catch {
@@ -240,6 +241,13 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
 
       await new Promise(resolve => setTimeout(resolve, 500));
 
+      // Calculate year filter
+      const currentYear = new Date().getFullYear();
+      let minYear = null;
+      if (citationYearRange !== 'all') {
+        minYear = currentYear - parseInt(citationYearRange);
+      }
+
       const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/analysis/citation-search`, {
         method: 'POST',
         headers: {
@@ -249,7 +257,9 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
         body: JSON.stringify({
           researchTopic: inputText,
           citationStyle: citationStyle,
-          numberOfCitations: 10
+          numberOfCitations: 10,
+          minYear: minYear,
+          yearRange: citationYearRange
         })
       });
 
@@ -312,35 +322,35 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
       <div className="border-b border-gray-100 bg-gray-50/50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3">
           <div className="flex items-center justify-center flex-wrap gap-4 sm:gap-8 text-sm">
-            <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2">
               <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
               <span className="text-gray-600">Documents:</span>
               <span className="font-medium text-gray-900">
-                {loadingStats ? '...' : `${usageStats.documentsUploaded}/${usageStats.planLimits.documentsPerMonth === -1 ? '∞' : usageStats.planLimits.documentsPerMonth}`}
+                    {loadingStats ? '...' : `${usageStats.documentsUploaded}/${usageStats.planLimits.documentsPerMonth === -1 ? '∞' : usageStats.planLimits.documentsPerMonth}`}
               </span>
-            </div>
-            <div className="flex items-center space-x-2">
+              </div>
+              <div className="flex items-center space-x-2">
               <div className="w-2 h-2 bg-green-500 rounded-full"></div>
               <span className="text-gray-600">Analyses:</span>
               <span className="font-medium text-gray-900">
-                {loadingStats ? '...' : `${usageStats.documentsAnalyzed}/${usageStats.planLimits.analysesPerMonth === -1 ? '∞' : usageStats.planLimits.analysesPerMonth}`}
+                    {loadingStats ? '...' : `${usageStats.documentsAnalyzed}/${usageStats.planLimits.analysesPerMonth === -1 ? '∞' : usageStats.planLimits.analysesPerMonth}`}
               </span>
-            </div>
-            <div className="flex items-center space-x-2">
+              </div>
+              <div className="flex items-center space-x-2">
               <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
               <span className="text-gray-600">Storage:</span>
               <span className="font-medium text-gray-900">
                 {loadingStats ? '...' : formatBytes(usageStats.storageUsed)}
               </span>
-            </div>
-            {usageStats.plan === 'free' && !loadingStats && (
-              <button
-                onClick={() => onNavigate('pricing')}
+              </div>
+              {usageStats.plan === 'free' && !loadingStats && (
+                  <button
+                    onClick={() => onNavigate('pricing')}
                 className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-full transition-colors"
-              >
+                  >
                 Upgrade
-              </button>
-            )}
+                  </button>
+              )}
           </div>
         </div>
       </div>
@@ -362,50 +372,70 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
               : 'Enter your topic to discover relevant academic sources'
             }
           </p>
-        </div>
+          </div>
 
-        {/* Mode Toggle */}
+          {/* Mode Toggle */}
         <div className="flex justify-center mb-7">
           <div className="inline-flex bg-gray-100 rounded-full p-1.5">
-            <button
+              <button
               onClick={() => { setMode('analyze'); setInputText(''); setShowWordWarning(false); }}
               className={`px-5 py-2.5 rounded-full text-base font-medium transition-all ${
                 mode === 'analyze' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'
               }`}
             >
               Analyze Essay
-            </button>
-            <button
+              </button>
+              <button
               onClick={() => { setMode('citations'); setInputText(''); setShowWordWarning(false); }}
               className={`px-5 py-2.5 rounded-full text-base font-medium transition-all ${
                 mode === 'citations' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'
               }`}
             >
               Find Citations
-            </button>
-          </div>
-        </div>
-
-        {/* Citation Style (citations mode) */}
-        {mode === 'citations' && (
-          <div className="flex justify-center mb-5">
-            <div className="inline-flex items-center bg-gray-50 rounded-lg px-4 py-2 text-base">
-              <span className="text-gray-500 mr-2">Style:</span>
-              <select
-                value={citationStyle}
-                onChange={(e) => setCitationStyle(e.target.value)}
-                className="bg-transparent font-medium text-gray-900 outline-none cursor-pointer"
-              >
-                <option value="APA">APA 7th</option>
-                <option value="MLA">MLA 9th</option>
-                <option value="Chicago">Chicago</option>
-                <option value="Harvard">Harvard</option>
-                <option value="IEEE">IEEE</option>
-                <option value="Vancouver">Vancouver</option>
-              </select>
+              </button>
             </div>
           </div>
-        )}
+
+        {/* Citation Options (citations mode) */}
+            {mode === 'citations' && (
+          <div className="flex justify-center mb-5">
+            <div className="inline-flex items-center gap-3 flex-wrap justify-center">
+              {/* Citation Style */}
+              <div className="inline-flex items-center bg-gray-50 rounded-xl px-4 py-2.5 border border-gray-200">
+                <span className="text-gray-500 mr-2 text-sm">Style:</span>
+                  <select
+                    value={citationStyle}
+                    onChange={(e) => setCitationStyle(e.target.value)}
+                  className="bg-transparent font-medium text-gray-900 outline-none cursor-pointer text-sm"
+                  >
+                  <option value="APA">APA 7th</option>
+                  <option value="MLA">MLA 9th</option>
+                    <option value="Chicago">Chicago</option>
+                    <option value="Harvard">Harvard</option>
+                    <option value="IEEE">IEEE</option>
+                    <option value="Vancouver">Vancouver</option>
+                  </select>
+              </div>
+              
+              {/* Year Range */}
+              <div className="inline-flex items-center bg-gray-50 rounded-xl px-4 py-2.5 border border-gray-200">
+                <span className="text-gray-500 mr-2 text-sm">Year:</span>
+                <select
+                  value={citationYearRange}
+                  onChange={(e) => setCitationYearRange(e.target.value)}
+                  className="bg-transparent font-medium text-gray-900 outline-none cursor-pointer text-sm"
+                >
+                  <option value="all">All Time</option>
+                  <option value="3">Last 3 Years</option>
+                  <option value="5">Last 5 Years</option>
+                  <option value="10">Last 10 Years</option>
+                  <option value="15">Last 15 Years</option>
+                  <option value="20">Last 20 Years</option>
+                </select>
+              </div>
+                </div>
+              </div>
+            )}
 
         {/* Input Area with Character outside */}
         <div className="mb-8 relative">
@@ -413,16 +443,16 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
           <CharacterIllustration />
           
           <div className="relative bg-white rounded-2xl border-2 border-gray-200 hover:border-gray-300 focus-within:border-blue-500 transition-colors">
-            <textarea
-              value={inputText}
+                <textarea
+                  value={inputText}
               onChange={(e) => { setInputText(e.target.value); setShowWordWarning(false); }}
               onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey && isTextValid()) { e.preventDefault(); handleSubmit(); }}}
-              placeholder={placeholders[placeholderIndex]}
+                  placeholder={placeholders[placeholderIndex]}
               className="w-full min-h-[160px] sm:min-h-[180px] p-5 sm:p-6 text-gray-800 text-lg border-none outline-none resize-none bg-transparent placeholder-gray-400 leading-relaxed"
               style={{ fontSize: '18px' }}
-              onInput={(e) => {
-                const target = e.target as HTMLTextAreaElement;
-                target.style.height = 'auto';
+                  onInput={(e) => {
+                    const target = e.target as HTMLTextAreaElement;
+                    target.style.height = 'auto';
                 target.style.height = Math.min(target.scrollHeight, 320) + 'px';
               }}
             />
@@ -440,70 +470,70 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
                 </span>
               </div>
             )}
-          </div>
-          
+                </div>
+                
           {/* Submit button - below textarea */}
           <div className="flex justify-center mt-4">
-            <button
-              onClick={handleSubmit}
-              disabled={!isTextValid() || isSearchingCitations}
+                <button
+                  onClick={handleSubmit}
+                  disabled={!isTextValid() || isSearchingCitations}
               className={`px-8 py-3.5 rounded-xl flex items-center justify-center transition-all font-semibold text-base ${
-                isTextValid() && !isSearchingCitations
+                    isTextValid() && !isSearchingCitations
                   ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg cursor-pointer'
                   : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-              }`}
-            >
-              {isSearchingCitations ? (
-                <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
+                  }`}
+                >
+                  {isSearchingCitations ? (
+                    <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
               ) : (
                 <>
                   <span className="mr-2">✨</span>
                   {mode === 'analyze' ? 'Get Feedback' : 'Find Sources'}
                 </>
-              )}
-            </button>
-          </div>
-        </div>
+                  )}
+                </button>
+              </div>
+            </div>
 
         {/* Suggested Topics */}
         <div className="mb-12">
           <p className="text-sm text-gray-500 text-center mb-4">Suggestions</p>
           <div className="flex flex-wrap justify-center gap-2.5">
             {suggestedTopics.map((topic, idx) => (
-              <button
+            <button 
                 key={idx}
                 onClick={() => setInputText(topic)}
                 className="px-4 py-2 bg-gray-50 hover:bg-gray-100 text-gray-700 text-sm sm:text-base rounded-lg border border-gray-200 hover:border-gray-300 transition-colors"
               >
                 {topic}
-              </button>
-            ))}
-          </div>
+            </button>
+              ))}
         </div>
+      </div>
 
         {/* Upload Section */}
         <div className="bg-gray-50 rounded-2xl p-8 sm:p-10 text-center mb-12 border border-gray-100">
           <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-5">
             <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-            </svg>
-          </div>
+              </svg>
+            </div>
           <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3">Upload a Document</h2>
           <p className="text-gray-600 text-base mb-5 max-w-md mx-auto">
             Upload your essay, thesis, or research paper for comprehensive AI analysis
           </p>
-          <button
-            onClick={() => onNavigate('upload')}
+            <button 
+              onClick={() => onNavigate('upload')}
             className="inline-flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl transition-colors text-base"
-          >
+            >
             <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-            </svg>
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+              </svg>
             Upload Document
-          </button>
+            </button>
           <div className="flex justify-center gap-2 mt-5">
             <span className="px-3 py-1 bg-white text-gray-600 text-sm rounded border">PDF</span>
             <span className="px-3 py-1 bg-white text-gray-600 text-sm rounded border">DOCX</span>
@@ -520,25 +550,25 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
                 View all →
               </button>
             )}
-          </div>
-
-          {isLoading ? (
+              </div>
+          
+            {isLoading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {Array.from({ length: 3 }).map((_, i) => <DocumentCardSkeleton key={i} />)}
             </div>
-          ) : documents.length > 0 ? (
+            ) : documents.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {documents.slice(0, 6).map((doc) => (
-                <div
+                <div 
                   key={doc.id}
                   className="bg-white border border-gray-200 rounded-xl p-5 hover:border-gray-300 hover:shadow-md transition-all cursor-pointer"
                   onClick={() => onNavigate('library')}
-                >
-                  <div className="flex items-start justify-between mb-4">
+              >
+                <div className="flex items-start justify-between mb-4">
                     <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
                       <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                      </svg>
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
                     </div>
                     {doc.hasAnalysis && (
                       <span className="px-2.5 py-1 bg-green-50 text-green-700 text-xs font-medium rounded">Analyzed</span>
@@ -551,12 +581,12 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
                 </div>
               ))}
             </div>
-          ) : (
+            ) : (
             <div className="text-center py-12 bg-gray-50 rounded-xl border border-gray-100">
-              <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+              <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
+              </svg>
               </div>
               <p className="text-gray-500 text-base">No documents yet</p>
               <button onClick={() => onNavigate('upload')} className="mt-4 text-base text-blue-600 hover:text-blue-700 font-medium">
@@ -586,10 +616,10 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
           <div className="bg-white rounded-2xl p-8 max-w-sm mx-4 shadow-2xl text-center">
             <div className="w-12 h-12 mx-auto mb-4">
               <svg className="animate-spin w-12 h-12 text-blue-600" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-            </div>
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                </div>
             <h3 className="text-lg font-semibold text-gray-900 mb-1">Finding Citations</h3>
             <p className="text-sm text-gray-500">Searching academic databases...</p>
           </div>

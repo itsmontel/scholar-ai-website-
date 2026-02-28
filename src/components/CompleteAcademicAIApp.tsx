@@ -423,6 +423,9 @@ const AcademicAIApp = () => {
       window.history.pushState({}, '', `/${page}`);
     }
     
+    // Scroll to top on navigation
+    window.scrollTo(0, 0);
+    
     // Ensure user data is restored on navigation
     const token = localStorage.getItem('authToken');
     const userData = localStorage.getItem('user');

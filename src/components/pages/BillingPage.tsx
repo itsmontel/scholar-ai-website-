@@ -246,7 +246,7 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      <div className="min-h-screen bg-white">
         <Header 
           onNavigate={onNavigate} 
           user={user} 
@@ -264,7 +264,7 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+    <div className="min-h-screen bg-white">
       <Header 
         onNavigate={onNavigate} 
         user={user} 
@@ -272,52 +272,50 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
         currentPage="billing"
       />
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
         {/* Hero Section */}
-        <div className="text-center mb-12 sm:mb-16">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-4 sm:mb-6">
-            Choose Your Perfect Plan
+        <div className="text-center mb-10">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
+            Billing & Subscription
           </h1>
-          <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto mb-6 sm:mb-8 px-4">
-            Unlock the full potential of WriteScholar with our flexible pricing plans. 
-            Start free and upgrade anytime as your needs grow.
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto mb-6">
+            Manage your subscription and view your usage
           </p>
           
           {/* Current Plan Badge */}
-          <div className="inline-flex items-center bg-white rounded-full px-6 py-3 shadow-lg border border-gray-200">
+          <div className="inline-flex items-center bg-gray-50 rounded-xl px-5 py-3 border border-gray-200">
             <span className="text-sm font-medium text-gray-600 mr-2">Current Plan:</span>
-            <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
+            <span className={`px-3 py-1 rounded-lg text-sm font-semibold ${
               currentPlan === 'free' 
-                ? 'bg-gray-100 text-gray-800' 
+                ? 'bg-gray-200 text-gray-800' 
                 : 'bg-blue-100 text-blue-800'
             }`}>
-              {plans.find(p => p.id === currentPlan)?.name} Plan
+              {plans.find(p => p.id === currentPlan)?.name}
             </span>
           </div>
         </div>
 
         {/* Billing Management */}
         {currentPlan !== 'free' && (
-          <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-8 mb-12">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">Billing Management</h2>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button
-                onClick={handleManageBilling}
-                disabled={processing === 'billing'}
-                className="bg-gray-900 text-white py-3 px-8 rounded-xl font-medium hover:bg-gray-800 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {processing === 'billing' ? (
-                  <div className="flex items-center justify-center">
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                    Opening...
-                  </div>
-                ) : (
-                  'Manage Billing & Invoices'
-                )}
-              </button>
-            </div>
+          <div className="bg-white border border-gray-200 rounded-2xl p-6 sm:p-8 mb-8">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">Billing Management</h2>
+            <p className="text-gray-600 text-sm mb-6">Manage your payment methods, view invoices, and update billing details.</p>
+            <button
+              onClick={handleManageBilling}
+              disabled={processing === 'billing'}
+              className="bg-gray-900 text-white py-3 px-6 rounded-xl font-medium hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {processing === 'billing' ? (
+                <div className="flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                  Opening...
+                </div>
+              ) : (
+                'Manage Billing & Invoices'
+              )}
+            </button>
             {error && (
-              <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+              <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-xl">
                 <p className="text-red-800 text-sm">{error}</p>
               </div>
             )}
@@ -325,28 +323,28 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
         )}
 
         {/* Billing Cycle Toggle */}
-        <div className="flex items-center justify-center mb-12">
-          <div className="bg-white/80 backdrop-blur-sm rounded-xl p-1 flex shadow-lg border border-gray-200/50">
+        <div className="flex items-center justify-center mb-10">
+          <div className="bg-gray-100 rounded-xl p-1.5 flex">
             <button
               onClick={() => setBillingCycle('monthly')}
-              className={`px-8 py-3 rounded-lg text-sm font-semibold transition-all duration-300 ${
+              className={`px-6 py-2.5 rounded-lg text-sm font-semibold transition-all ${
                 billingCycle === 'monthly'
-                  ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-md'
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                  ? 'bg-white text-gray-900 shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900'
               }`}
             >
               Bill Monthly
             </button>
             <button
               onClick={() => setBillingCycle('yearly')}
-              className={`px-8 py-3 rounded-lg text-sm font-semibold transition-all duration-300 ${
+              className={`px-6 py-2.5 rounded-lg text-sm font-semibold transition-all flex items-center ${
                 billingCycle === 'yearly'
-                  ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-md'
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                  ? 'bg-white text-gray-900 shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900'
               }`}
             >
               Bill Yearly
-              <span className="ml-2 px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
+              <span className="ml-2 px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded-full font-medium">
                 Save 17%
               </span>
             </button>
@@ -354,72 +352,60 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
         </div>
 
         {error && (
-          <div className="mb-8 bg-red-50 border border-red-200 rounded-xl p-6">
-            <div className="flex">
-              <svg className="w-6 h-6 text-red-400 mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+          <div className="mb-8 bg-red-50 border border-red-200 rounded-xl p-4">
+            <div className="flex items-center">
+              <svg className="w-5 h-5 text-red-500 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
               </svg>
-              <div>
-                <h3 className="text-lg font-medium text-red-800">Error</h3>
-                <p className="text-red-700 mt-1">{error}</p>
-              </div>
+              <p className="text-red-700 text-sm">{error}</p>
             </div>
           </div>
         )}
 
         {/* Pricing Cards */}
-        <div className="grid md:grid-cols-3 gap-8 mb-16">
+        <div className="grid md:grid-cols-3 gap-6 mb-12">
           {plans.map((plan) => (
             <div
               key={plan.id}
-              className={`relative bg-white/90 backdrop-blur-xl border rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 ${
+              className={`relative bg-white border rounded-2xl p-6 transition-all ${
                 plan.popular 
-                  ? 'border-blue-500 ring-2 ring-blue-200' 
-                  : 'border-gray-200/60'
+                  ? 'border-blue-500 ring-2 ring-blue-100' 
+                  : 'border-gray-200'
               }`}
             >
               {plan.popular && (
-                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                  <span className="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-6 py-2 rounded-full text-sm font-bold shadow-lg">
+                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                  <span className="bg-blue-600 text-white px-4 py-1 rounded-full text-xs font-semibold">
                     Most Popular
                   </span>
                 </div>
               )}
 
               {/* Plan Name & Description */}
-              <div className="text-center mb-8">
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">{plan.name}</h3>
-                <p className="text-gray-600 mb-6">{plan.description}</p>
-                
-                {/* Price */}
-                <div className="mb-4">
-                  <span className="text-4xl font-bold text-gray-900">
-                    ${plan.price}
-                  </span>
-                  <span className="text-gray-600 ml-2">
-                    /{plan.interval}
-                  </span>
-                </div>
-                
-                {plan.price > 0 && (
-                  <p className="text-sm text-gray-500">
-                    Billed {plan.interval === 'year' ? 'annually' : 'monthly'}
-                    {plan.interval === 'year' && (
-                      <span className="text-green-600 font-semibold ml-1">(Save 17%)</span>
-                    )}
-                  </p>
-                )}
+              <div className="text-center mb-6 pt-2">
+                <h3 className="text-xl font-bold text-gray-900 mb-1">{plan.name}</h3>
+                <p className="text-gray-500 text-sm">{plan.description}</p>
+              </div>
+              
+              {/* Price */}
+              <div className="text-center mb-6">
+                <span className="text-4xl font-bold text-gray-900">
+                  ${plan.price}
+                </span>
+                <span className="text-gray-500 text-sm">
+                  /{plan.interval}
+                </span>
               </div>
 
               {/* Features */}
-              <div className="mb-8">
+              <div className="mb-6">
                 <ul className="space-y-3">
                   {plan.features.map((feature, index) => (
-                    <li key={index} className="flex items-start">
-                      <svg className="w-5 h-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <li key={index} className="flex items-start text-sm">
+                      <svg className="w-5 h-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
-                      <span className="text-gray-700">{feature}</span>
+                      <span className="text-gray-600">{feature}</span>
                     </li>
                   ))}
                 </ul>
@@ -429,11 +415,11 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
               <button
                 onClick={() => handleUpgrade(plan.id)}
                 disabled={plan.id === currentPlan || processing === plan.id}
-                className={`w-full py-3 px-6 rounded-xl font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
+                className={`w-full py-3 px-6 rounded-xl font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
                   plan.id === currentPlan
                     ? 'bg-gray-100 text-gray-500 cursor-not-allowed'
                     : plan.popular
-                    ? 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transform hover:scale-105'
+                    ? 'bg-blue-600 hover:bg-blue-700 text-white'
                     : 'bg-gray-100 hover:bg-gray-200 text-gray-900'
                 }`}
               >
@@ -457,29 +443,31 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
         </div>
 
         {/* Usage Stats Section */}
-        <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-8 mb-8">
-          <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">Your Usage Overview</h2>
+        <div className="bg-white border border-gray-200 rounded-2xl p-6 sm:p-8 mb-8">
+          <h2 className="text-xl font-bold text-gray-900 mb-6">Your Usage Overview</h2>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Storage Usage */}
-            <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-semibold text-gray-900">Storage Used</h3>
-                <svg className="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
-                </svg>
+            <div className="bg-blue-50 border border-blue-100 rounded-xl p-5">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="font-medium text-gray-900 text-sm">Storage Used</h3>
+                <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
+                  </svg>
+                </div>
               </div>
-              <div className="text-2xl font-bold text-blue-600 mb-2">
+              <div className="text-2xl font-bold text-gray-900 mb-1">
                 {formatBytes(usageStats.storageUsed)}
               </div>
-              <div className="text-sm text-gray-600 mb-3">
+              <div className="text-xs text-gray-500 mb-3">
                 of {formatBytes(usageStats.storageLimit)} used
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
+              <div className="w-full bg-blue-200 rounded-full h-1.5">
                 <div 
-                  className={`h-2 rounded-full transition-all duration-300 ${
+                  className={`h-1.5 rounded-full transition-all ${
                     getStoragePercentage() > 90 ? 'bg-red-500' : 
-                    getStoragePercentage() > 70 ? 'bg-yellow-500' : 'bg-blue-500'
+                    getStoragePercentage() > 70 ? 'bg-yellow-500' : 'bg-blue-600'
                   }`}
                   style={{ width: `${getStoragePercentage()}%` }}
                 ></div>
@@ -487,83 +475,95 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
             </div>
 
             {/* Uploads Remaining */}
-            <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-semibold text-gray-900">Uploads This Month</h3>
-                <svg className="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                </svg>
+            <div className="bg-green-50 border border-green-100 rounded-xl p-5">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="font-medium text-gray-900 text-sm">Uploads</h3>
+                <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                  <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                  </svg>
+                </div>
               </div>
-              <div className="text-2xl font-bold text-green-600 mb-2">
+              <div className="text-2xl font-bold text-gray-900 mb-1">
                 {usageStats.uploadsRemaining === -1 ? '∞' : usageStats.uploadsRemaining}
               </div>
-              <div className="text-sm text-gray-600">
+              <div className="text-xs text-gray-500">
                 {currentPlan === 'free' ? 'uploads remaining' : 'unlimited uploads'}
               </div>
             </div>
 
             {/* Analyses Remaining */}
-            <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-semibold text-gray-900">Analyses This Month</h3>
-                <svg className="w-6 h-6 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                </svg>
+            <div className="bg-purple-50 border border-purple-100 rounded-xl p-5">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="font-medium text-gray-900 text-sm">Analyses</h3>
+                <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                  <svg className="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
+                </div>
               </div>
-              <div className="text-2xl font-bold text-purple-600 mb-2">
+              <div className="text-2xl font-bold text-gray-900 mb-1">
                 {usageStats.analysesRemaining === -1 ? '∞' : usageStats.analysesRemaining}
               </div>
-              <div className="text-sm text-gray-600">
-                {currentPlan === 'free' ? 'analyses remaining' : '999 analyses per month'}
+              <div className="text-xs text-gray-500">
+                {currentPlan === 'free' ? 'analyses remaining' : '999/month'}
               </div>
             </div>
 
             {/* Documents Analyzed */}
-            <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-semibold text-gray-900">Total Documents</h3>
-                <svg className="w-6 h-6 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
+            <div className="bg-amber-50 border border-amber-100 rounded-xl p-5">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="font-medium text-gray-900 text-sm">Documents</h3>
+                <div className="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center">
+                  <svg className="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                </div>
               </div>
-              <div className="text-2xl font-bold text-orange-600 mb-2">
+              <div className="text-2xl font-bold text-gray-900 mb-1">
                 {usageStats.documentsAnalyzed}
               </div>
-              <div className="text-sm text-gray-600">documents analyzed</div>
+              <div className="text-xs text-gray-500">total analyzed</div>
             </div>
           </div>
         </div>
 
 
         {/* Trust Indicators */}
-        <div className="mt-16 text-center">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="flex flex-col items-center">
-              <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mb-4">
-                <svg className="w-6 h-6 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+        <div className="bg-gray-50 border border-gray-200 rounded-2xl p-6 sm:p-8">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
                 </svg>
               </div>
-              <h3 className="font-semibold text-gray-900 mb-2">Secure Payments</h3>
-              <p className="text-sm text-gray-600">All payments processed securely through Stripe</p>
+              <div>
+                <h3 className="font-semibold text-gray-900 text-sm">Secure Payments</h3>
+                <p className="text-xs text-gray-500">Processed through Stripe</p>
+              </div>
             </div>
-            <div className="flex flex-col items-center">
-              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-4">
-                <svg className="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                <svg className="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                 </svg>
               </div>
-              <h3 className="font-semibold text-gray-900 mb-2">Cancel Anytime</h3>
-              <p className="text-sm text-gray-600">No long-term contracts or hidden fees</p>
+              <div>
+                <h3 className="font-semibold text-gray-900 text-sm">Cancel Anytime</h3>
+                <p className="text-xs text-gray-500">No hidden fees</p>
+              </div>
             </div>
-            <div className="flex flex-col items-center">
-              <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mb-4">
-                <svg className="w-6 h-6 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
                 </svg>
               </div>
-              <h3 className="font-semibold text-gray-900 mb-2">24/7 Support</h3>
-              <p className="text-sm text-gray-600">Get help whenever you need it</p>
+              <div>
+                <h3 className="font-semibold text-gray-900 text-sm">24/7 Support</h3>
+                <p className="text-xs text-gray-500">Help when you need it</p>
+              </div>
             </div>
           </div>
         </div>

@@ -111,68 +111,68 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
   };
 
   return (
-    <header className="bg-white/90 backdrop-blur-xl border-b border-gray-200/60 sticky top-0 z-50 shadow-sm">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
+    <header className="bg-white/95 backdrop-blur-md border-b border-gray-100 sticky top-0 z-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
           <button 
             onClick={() => onNavigate?.('dashboard')}
-            className="flex items-center space-x-2 sm:space-x-3 hover:opacity-80 transition-opacity duration-200"
+            className="flex items-center space-x-2.5 hover:opacity-80 transition-opacity duration-200"
           >
-            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-xl flex items-center justify-center shadow-lg">
-              <span className="text-white font-bold text-xl sm:text-2xl">W</span>
+            <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center">
+              <span className="text-white font-bold text-xl">W</span>
             </div>
-            <span className="text-lg sm:text-2xl font-bold text-gray-900">WriteScholar</span>
+            <span className="text-2xl font-bold text-gray-900">WriteScholar</span>
           </button>
 
           {/* Navigation */}
-          <nav className="hidden md:flex items-center space-x-8">
+          <nav className="hidden lg:flex items-center space-x-1">
             <button 
               onClick={() => onNavigate?.('dashboard')}
-              className={`px-4 py-2 font-medium rounded-lg transition-all duration-200 ${
+              className={`px-4 py-2.5 text-base font-medium rounded-xl transition-all duration-200 ${
                 currentPage === 'dashboard' 
                   ? 'text-blue-600 bg-blue-50' 
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100/50'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
               }`}
             >
               Dashboard
             </button>
             <button 
               onClick={() => onNavigate?.('library')}
-              className={`px-4 py-2 font-medium rounded-lg transition-all duration-200 ${
+              className={`px-4 py-2.5 text-base font-medium rounded-xl transition-all duration-200 ${
                 currentPage === 'library' 
                   ? 'text-blue-600 bg-blue-50' 
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100/50'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
               }`}
             >
               Library
             </button>
             <button 
               onClick={() => onNavigate?.('upload')}
-              className={`px-4 py-2 font-medium rounded-lg transition-all duration-200 ${
+              className={`px-4 py-2.5 text-base font-medium rounded-xl transition-all duration-200 ${
                 currentPage === 'upload' 
                   ? 'text-blue-600 bg-blue-50' 
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100/50'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
               }`}
             >
               Upload
             </button>
             <button 
               onClick={() => onNavigate?.('analysis')}
-              className={`px-4 py-2 font-medium rounded-lg transition-all duration-200 ${
+              className={`px-4 py-2.5 text-base font-medium rounded-xl transition-all duration-200 ${
                 currentPage === 'analysis' 
                   ? 'text-blue-600 bg-blue-50' 
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100/50'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
               }`}
             >
               AI Analysis
             </button>
             <button 
               onClick={() => onNavigate?.('citation-history')}
-              className={`px-4 py-2 font-medium rounded-lg transition-all duration-200 ${
+              className={`px-4 py-2.5 text-base font-medium rounded-xl transition-all duration-200 ${
                 currentPage === 'citations' 
                   ? 'text-blue-600 bg-blue-50' 
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100/50'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
               }`}
             >
               Citations
@@ -182,7 +182,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
           {/* Mobile Menu Button */}
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="md:hidden p-2 rounded-lg hover:bg-gray-100/50 transition-colors duration-200"
+            className="lg:hidden p-2 rounded-xl hover:bg-gray-50 transition-colors duration-200"
           >
             <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
@@ -194,19 +194,19 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
             <div className="relative dropdown-container">
               <button
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100/50 transition-colors duration-200"
+                className="flex items-center space-x-3 p-2 rounded-xl hover:bg-gray-50 transition-colors duration-200"
               >
-                <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
-                  <span className="text-white text-sm font-medium">
+                <div className="w-9 h-9 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center">
+                  <span className="text-white text-sm font-semibold">
                     {user.email ? user.email.charAt(0).toUpperCase() : 'U'}
                   </span>
                 </div>
                 <div className="hidden md:block text-left">
                   <div className="text-sm font-semibold text-gray-900">{user.email || 'Loading...'}</div>
-                  <div className="text-xs text-gray-500">WriteScholar User</div>
+                  <div className="text-xs text-gray-500 capitalize">{usageStats?.plan || 'Free'} Plan</div>
                 </div>
                 <svg 
-                  className={`w-4 h-4 text-gray-500 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`} 
+                  className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`} 
                   fill="none" 
                   stroke="currentColor" 
                   viewBox="0 0 24 24"
@@ -217,13 +217,13 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
 
               {/* Dropdown Menu */}
               {isDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-56 sm:w-64 bg-white rounded-xl shadow-2xl border border-gray-200/50 backdrop-blur-sm z-[60]">
+                <div className="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-xl border border-gray-200 z-[60]">
                   {/* User Info Section */}
-                  <div className="px-4 py-3 border-b border-gray-100">
-                    <div className="text-sm font-medium text-gray-900">
+                  <div className="px-4 py-4 border-b border-gray-100 bg-gray-50/50 rounded-t-2xl">
+                    <div className="text-sm font-semibold text-gray-900">
                       {user?.email ? user.email : (user ? 'Email not available' : 'Loading...')}
                     </div>
-                    <div className="text-xs text-gray-500 capitalize">{usageStats?.plan || 'Free'} Plan</div>
+                    <div className="text-xs text-gray-500 capitalize mt-0.5">{usageStats?.plan || 'Free'} Plan</div>
                     
                     {/* Usage Statistics */}
                     {loadingUsage ? (
@@ -333,6 +333,15 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
                       <span>Citation History</span>
                     </button>
                     <button 
+                      onClick={() => { onNavigate?.('blog'); setIsDropdownOpen(false); }}
+                      className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
+                      </svg>
+                      <span>Blog</span>
+                    </button>
+                    <button 
                       onClick={() => { onNavigate?.('account'); setIsDropdownOpen(false); }}
                       className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200"
                     >
@@ -401,54 +410,54 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
 
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
-        <div className="md:hidden bg-white border-t border-gray-200 mobile-menu-container z-[60]">
-          <div className="px-4 sm:px-6 py-4 space-y-2">
+        <div className="lg:hidden bg-white border-t border-gray-100 mobile-menu-container z-[60]">
+          <div className="px-4 sm:px-6 py-4 space-y-1">
             <button 
               onClick={() => { onNavigate?.('dashboard'); setIsMobileMenuOpen(false); }}
-              className={`w-full text-left px-4 py-3 rounded-lg font-medium transition-all duration-200 ${
+              className={`w-full text-left px-4 py-3 rounded-xl font-medium transition-all duration-200 ${
                 currentPage === 'dashboard' 
                   ? 'text-blue-600 bg-blue-50' 
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100/50'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
               }`}
             >
               Dashboard
             </button>
             <button 
               onClick={() => { onNavigate?.('library'); setIsMobileMenuOpen(false); }}
-              className={`w-full text-left px-4 py-3 rounded-lg font-medium transition-all duration-200 ${
+              className={`w-full text-left px-4 py-3 rounded-xl font-medium transition-all duration-200 ${
                 currentPage === 'library' 
                   ? 'text-blue-600 bg-blue-50' 
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100/50'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
               }`}
             >
               Library
             </button>
             <button 
               onClick={() => { onNavigate?.('upload'); setIsMobileMenuOpen(false); }}
-              className={`w-full text-left px-4 py-3 rounded-lg font-medium transition-all duration-200 ${
+              className={`w-full text-left px-4 py-3 rounded-xl font-medium transition-all duration-200 ${
                 currentPage === 'upload' 
                   ? 'text-blue-600 bg-blue-50' 
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100/50'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
               }`}
             >
               Upload
             </button>
             <button 
               onClick={() => { onNavigate?.('analysis'); setIsMobileMenuOpen(false); }}
-              className={`w-full text-left px-4 py-3 rounded-lg font-medium transition-all duration-200 ${
+              className={`w-full text-left px-4 py-3 rounded-xl font-medium transition-all duration-200 ${
                 currentPage === 'analysis' 
                   ? 'text-blue-600 bg-blue-50' 
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100/50'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
               }`}
             >
               AI Analysis
             </button>
             <button 
               onClick={() => { onNavigate?.('citation-history'); setIsMobileMenuOpen(false); }}
-              className={`w-full text-left px-4 py-3 rounded-lg font-medium transition-all duration-200 ${
+              className={`w-full text-left px-4 py-3 rounded-xl font-medium transition-all duration-200 ${
                 currentPage === 'citations' 
                   ? 'text-blue-600 bg-blue-50' 
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100/50'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
               }`}
             >
               Citations

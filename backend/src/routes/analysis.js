@@ -17,13 +17,15 @@ const subscriptionService = require('../services/subscriptionService');
 // @access  Private
 router.post('/citation-search', authenticateToken, async (req, res) => {
   try {
-    const { researchTopic, citationStyle, numberOfCitations } = req.body;
+    const { researchTopic, citationStyle, numberOfCitations, minYear, yearRange } = req.body;
     const userId = req.user.id;
 
     console.log('=== CITATION SEARCH REQUEST ===');
     console.log('Research topic:', researchTopic);
     console.log('Citation style:', citationStyle);
     console.log('Number of citations:', numberOfCitations);
+    console.log('Min year:', minYear);
+    console.log('Year range:', yearRange);
     console.log('User ID:', userId);
 
     // Validate input
@@ -54,13 +56,15 @@ router.post('/citation-search', authenticateToken, async (req, res) => {
     const searchResults = await aiAnalysisService.searchCitations(
       researchTopic,
       style,
-      numCitations
+      numCitations,
+      minYear,
+      yearRange
     );
 
     console.log('Citation search completed successfully');
 
     // Save search to history (don't block response if this fails)
-    aiAnalysisService.saveCitationSearch(userId, researchTopic, style, searchResults)
+    aiAnalysisService.saveCitationSearch(userId, researchTopic, style, searchResults, yearRange)
       .catch(error => console.error('Failed to save citation search to history:', error));
 
     res.json({

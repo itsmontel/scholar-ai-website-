@@ -242,32 +242,26 @@ const AccountPage = ({ onNavigate, user, onLogout }: AccountPageProps) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+    <div className="min-h-screen bg-white">
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="account" />
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
         {/* Page Header */}
-        <div className="text-center mb-12 sm:mb-16">
-          <div className="inline-flex items-center px-3 sm:px-4 py-1.5 sm:py-2 bg-blue-50/80 text-blue-700 rounded-full text-xs sm:text-sm font-medium mb-6 sm:mb-8 border border-blue-200/50">
-            <svg className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-            </svg>
-            Account Management
-          </div>
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-4 sm:mb-6 leading-tight tracking-tight">
-            Account <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">Settings</span>
+        <div className="text-center mb-10">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
+            Account Settings
           </h1>
-          <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed px-4">
-            Manage your profile, subscription, security settings, and account preferences.
+          <p className="text-lg text-gray-600">
+            Manage your profile, subscription, and security settings.
           </p>
         </div>
 
         {/* Settings List */}
-        <div className="max-w-4xl mx-auto space-y-6 sm:space-y-8">
+        <div className="space-y-6">
           {/* Profile Information */}
-          <div className="bg-white/90 backdrop-blur-xl border border-gray-200/60 rounded-2xl p-4 sm:p-6 md:p-8 shadow-lg">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Profile Information</h2>
+          <div className="bg-white border border-gray-200 rounded-2xl p-6 sm:p-8">
+            <h2 className="text-xl font-bold text-gray-900 mb-6">Profile Information</h2>
             <div className="space-y-4">
               <div className="flex items-center justify-between py-3 border-b border-gray-200">
                 <div>
@@ -302,8 +296,8 @@ const AccountPage = ({ onNavigate, user, onLogout }: AccountPageProps) => {
 
 
           {/* Subscription */}
-          <div className="bg-white/90 backdrop-blur-xl border border-gray-200/60 rounded-2xl p-8 shadow-lg">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Subscription</h2>
+          <div className="bg-white border border-gray-200 rounded-2xl p-6 sm:p-8">
+            <h2 className="text-xl font-bold text-gray-900 mb-6">Subscription</h2>
             <div className="space-y-4">
               <div className="flex items-center justify-between py-3 border-b border-gray-200">
                 <div>
@@ -322,7 +316,7 @@ const AccountPage = ({ onNavigate, user, onLogout }: AccountPageProps) => {
                 {userStats.subscriptionPlan === 'free' && (
                   <button 
                     onClick={() => onNavigate('pricing')}
-                    className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg font-medium hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-medium transition-colors"
                   >
                     Upgrade
                   </button>
@@ -345,9 +339,9 @@ const AccountPage = ({ onNavigate, user, onLogout }: AccountPageProps) => {
               </div>
               
               {/* Plan Details */}
-              <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-                <div className="text-sm font-medium text-gray-900 mb-2">What's included:</div>
-                <div className="space-y-1 text-sm text-gray-600">
+              <div className="mt-4 p-4 bg-gray-50 rounded-xl border border-gray-200">
+                <div className="text-sm font-semibold text-gray-900 mb-3">What's included:</div>
+                <div className="space-y-2 text-sm text-gray-600">
                   {userStats.subscriptionPlan === 'free' && (
                     <>
                       <div>• 5 document analyses per month</div>
@@ -379,40 +373,36 @@ const AccountPage = ({ onNavigate, user, onLogout }: AccountPageProps) => {
           </div>
 
           {/* Security */}
-          <div className="bg-white/90 backdrop-blur-xl border border-gray-200/60 rounded-2xl p-8 shadow-lg">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Security</h2>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between py-3">
-                <div>
-                  <div className="font-semibold text-gray-900">Password</div>
-                  <div className="text-gray-600">Last changed: Recently</div>
-                </div>
-                <button 
-                  onClick={() => setShowPasswordModal(true)}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200"
-                >
-                  Change Password
-                </button>
+          <div className="bg-white border border-gray-200 rounded-2xl p-6 sm:p-8">
+            <h2 className="text-xl font-bold text-gray-900 mb-6">Security</h2>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 py-3">
+              <div>
+                <div className="font-semibold text-gray-900">Password</div>
+                <div className="text-gray-500 text-sm">Last changed: Recently</div>
               </div>
+              <button 
+                onClick={() => setShowPasswordModal(true)}
+                className="bg-gray-900 hover:bg-gray-800 text-white px-5 py-2.5 rounded-xl font-medium transition-colors"
+              >
+                Change Password
+              </button>
             </div>
           </div>
 
           {/* Danger Zone */}
-          <div className="bg-red-50/90 backdrop-blur-xl border border-red-200/60 rounded-2xl p-8 shadow-lg">
-            <h2 className="text-2xl font-bold text-red-900 mb-6">Danger Zone</h2>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between py-3">
-                <div>
-                  <div className="font-semibold text-red-900">Delete Account</div>
-                  <div className="text-red-600">Permanently delete your account and all data</div>
-                </div>
-                <button 
-                  onClick={() => setShowDeleteModal(true)}
-                  className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200"
-                >
-                  Delete Account
-                </button>
+          <div className="bg-red-50 border border-red-200 rounded-2xl p-6 sm:p-8">
+            <h2 className="text-xl font-bold text-red-900 mb-6">Danger Zone</h2>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 py-3">
+              <div>
+                <div className="font-semibold text-red-900">Delete Account</div>
+                <div className="text-red-600 text-sm">Permanently delete your account and all data</div>
               </div>
+              <button 
+                onClick={() => setShowDeleteModal(true)}
+                className="bg-red-600 hover:bg-red-700 text-white px-5 py-2.5 rounded-xl font-medium transition-colors"
+              >
+                Delete Account
+              </button>
             </div>
           </div>
         </div>
@@ -420,9 +410,9 @@ const AccountPage = ({ onNavigate, user, onLogout }: AccountPageProps) => {
 
       {/* Password Change Modal */}
       {showPasswordModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl">
-            <h3 className="text-2xl font-bold text-gray-900 mb-6">Change Password</h3>
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
+          <div className="bg-white rounded-2xl p-6 sm:p-8 max-w-md w-full shadow-2xl">
+            <h3 className="text-xl font-bold text-gray-900 mb-6">Change Password</h3>
             
             <div className="space-y-4">
               <div>
@@ -433,7 +423,7 @@ const AccountPage = ({ onNavigate, user, onLogout }: AccountPageProps) => {
                   type="password"
                   value={passwordData.currentPassword}
                   onChange={(e) => setPasswordData(prev => ({ ...prev, currentPassword: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                   placeholder="Enter current password"
                 />
               </div>
@@ -446,7 +436,7 @@ const AccountPage = ({ onNavigate, user, onLogout }: AccountPageProps) => {
                   type="password"
                   value={passwordData.newPassword}
                   onChange={(e) => setPasswordData(prev => ({ ...prev, newPassword: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                   placeholder="Enter new password"
                 />
               </div>
@@ -459,25 +449,25 @@ const AccountPage = ({ onNavigate, user, onLogout }: AccountPageProps) => {
                   type="password"
                   value={passwordData.confirmPassword}
                   onChange={(e) => setPasswordData(prev => ({ ...prev, confirmPassword: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                   placeholder="Confirm new password"
                 />
               </div>
             </div>
 
             {passwordError && (
-              <div className="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+              <div className="mt-4 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl text-sm">
                 {passwordError}
               </div>
             )}
 
             {passwordSuccess && (
-              <div className="mt-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded-lg">
+              <div className="mt-4 p-4 bg-green-50 border border-green-200 text-green-700 rounded-xl text-sm">
                 {passwordSuccess}
               </div>
             )}
 
-            <div className="flex justify-end space-x-3 mt-6">
+            <div className="flex justify-end gap-3 mt-6">
               <button
                 onClick={() => {
                   setShowPasswordModal(false);
@@ -485,14 +475,14 @@ const AccountPage = ({ onNavigate, user, onLogout }: AccountPageProps) => {
                   setPasswordError('');
                   setPasswordSuccess('');
                 }}
-                className="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium"
+                className="px-5 py-2.5 text-gray-600 hover:text-gray-800 font-medium rounded-xl hover:bg-gray-100 transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={handlePasswordChange}
                 disabled={passwordLoading || !passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword}
-                className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200"
+                className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white px-5 py-2.5 rounded-xl font-medium transition-colors"
               >
                 {passwordLoading ? 'Changing...' : 'Change Password'}
               </button>
@@ -503,36 +493,36 @@ const AccountPage = ({ onNavigate, user, onLogout }: AccountPageProps) => {
 
       {/* Delete Account Modal */}
       {showDeleteModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-2xl p-8 max-w-lg w-full mx-4 shadow-2xl">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
+          <div className="bg-white rounded-2xl p-6 sm:p-8 max-w-lg w-full shadow-2xl">
             <div className="text-center mb-6">
-              <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
-                <svg className="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="mx-auto flex items-center justify-center h-14 w-14 rounded-2xl bg-red-100 mb-4">
+                <svg className="h-7 w-7 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
                 </svg>
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">Delete Account</h3>
-              <p className="text-gray-600 mb-4">
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Delete Account</h3>
+              <p className="text-gray-600 text-sm">
                 This action is <strong>permanent and irreversible</strong>. You will lose:
               </p>
             </div>
             
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+            <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
               <ul className="text-sm text-red-800 space-y-2">
                 <li className="flex items-center">
-                  <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="w-4 h-4 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
                   </svg>
                   All your documents and analysis history
                 </li>
                 <li className="flex items-center">
-                  <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="w-4 h-4 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
                   </svg>
                   Your subscription and billing information
                 </li>
                 <li className="flex items-center">
-                  <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="w-4 h-4 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
                   </svg>
                   All account data and preferences
@@ -548,25 +538,25 @@ const AccountPage = ({ onNavigate, user, onLogout }: AccountPageProps) => {
                 type="text"
                 value={deleteConfirmation}
                 onChange={(e) => setDeleteConfirmation(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all"
                 placeholder="Type DELETE to confirm"
               />
             </div>
 
-            <div className="flex justify-end space-x-3">
+            <div className="flex justify-end gap-3">
               <button
                 onClick={() => {
                   setShowDeleteModal(false);
                   setDeleteConfirmation('');
                 }}
-                className="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium"
+                className="px-5 py-2.5 text-gray-600 hover:text-gray-800 font-medium rounded-xl hover:bg-gray-100 transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={handleDeleteAccount}
                 disabled={deleteLoading || deleteConfirmation !== 'DELETE'}
-                className="bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200"
+                className="bg-red-600 hover:bg-red-700 disabled:bg-gray-300 text-white px-5 py-2.5 rounded-xl font-medium transition-colors"
               >
                 {deleteLoading ? 'Deleting...' : 'Delete Account'}
               </button>

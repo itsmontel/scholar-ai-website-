@@ -427,31 +427,31 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
     switch (fileType.toLowerCase()) {
       case 'pdf':
         return (
-          <div className="w-8 h-8 bg-red-100 rounded flex items-center justify-center">
+          <div className="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center">
             <span className="text-red-600 font-bold text-xs">PDF</span>
           </div>
         );
       case 'docx':
         return (
-          <div className="w-8 h-8 bg-blue-100 rounded flex items-center justify-center">
+          <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
             <span className="text-blue-600 font-bold text-xs">DOCX</span>
           </div>
         );
       case 'doc':
         return (
-          <div className="w-8 h-8 bg-green-100 rounded flex items-center justify-center">
+          <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
             <span className="text-green-600 font-bold text-xs">DOC</span>
           </div>
         );
       case 'txt':
         return (
-          <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center">
+          <div className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center">
             <span className="text-gray-600 font-bold text-xs">TXT</span>
           </div>
         );
       default:
         return (
-          <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center">
+          <div className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center">
             <span className="text-gray-600 font-bold text-xs">FILE</span>
           </div>
         );
@@ -484,24 +484,24 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="library" />
 
       {/* Mobile Navigation Tabs */}
-      <div className="md:hidden bg-white border-b border-gray-200 sticky top-0 z-10">
+      <div className="md:hidden bg-white border-b border-gray-100 sticky top-0 z-10">
         <div className="flex">
           <button
             onClick={() => setMobileView('list')}
-            className={`flex-1 py-3 text-sm font-medium transition-colors ${
+            className={`flex-1 py-3.5 text-sm font-medium transition-colors ${
               mobileView === 'list'
-                ? 'text-blue-600 border-b-2 border-blue-600'
-                : 'text-gray-500 hover:text-gray-700'
+                ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50/50'
+                : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
             }`}
           >
             Documents
           </button>
           <button
             onClick={() => setMobileView('document')}
-            className={`flex-1 py-3 text-sm font-medium transition-colors ${
+            className={`flex-1 py-3.5 text-sm font-medium transition-colors ${
               mobileView === 'document'
-                ? 'text-blue-600 border-b-2 border-blue-600'
-                : 'text-gray-500 hover:text-gray-700'
+                ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50/50'
+                : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
             }`}
             disabled={!selectedDocument}
           >
@@ -509,10 +509,10 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
           </button>
           <button
             onClick={() => setMobileView('analysis')}
-            className={`flex-1 py-3 text-sm font-medium transition-colors ${
+            className={`flex-1 py-3.5 text-sm font-medium transition-colors ${
               mobileView === 'analysis'
-                ? 'text-blue-600 border-b-2 border-blue-600'
-                : 'text-gray-500 hover:text-gray-700'
+                ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50/50'
+                : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
             }`}
             disabled={!selectedDocument}
           >
@@ -524,37 +524,37 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
       <div ref={containerRef} className="flex min-h-[calc(100vh-80px)] md:h-[calc(100vh-80px)]">
         {/* Left Panel - Document Library */}
         <div 
-          className={`w-full md:border-r border-gray-200 bg-gray-50 flex flex-col md:w-auto ${
+          className={`w-full md:border-r border-gray-100 bg-gray-50/50 flex flex-col md:w-auto ${
             mobileView !== 'list' ? 'hidden md:flex' : ''
           }`}
           style={{ width: window.innerWidth < 768 ? '100%' : `${leftPanelWidth}%` }}
         >
-          <div className="p-3 md:p-4 border-b border-gray-200 bg-white">
-            <h2 className="text-base md:text-lg font-semibold text-gray-900 mb-3 md:mb-4">MY DOCUMENTS</h2>
+          <div className="p-4 md:p-5 border-b border-gray-100 bg-white">
+            <h2 className="text-lg md:text-xl font-bold text-gray-900 mb-4 md:mb-5">My Documents</h2>
             
             {/* Search Bar */}
-            <div className="relative mb-3 md:mb-4">
+            <div className="relative mb-4">
               <input
                 type="text"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Search documents..."
-                className="w-full pl-9 md:pl-10 pr-3 md:pr-4 py-1.5 md:py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-                <div className="absolute inset-y-0 left-0 pl-2 md:pl-3 flex items-center pointer-events-none">
-                  <svg className="h-4 w-4 md:h-5 md:w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
-            </div>
+                className="w-full pl-10 pr-4 py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition-all"
+              />
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
             </div>
             
             {/* Filters */}
-            <div className="flex gap-1.5 md:gap-2 mb-3 md:mb-4 flex-wrap">
+            <div className="flex gap-2 mb-4 flex-wrap">
               <button
                 onClick={() => setTimeFilter('all')}
-                className={`px-2 md:px-3 py-1 text-xs md:text-sm rounded-full transition-colors ${
+                className={`px-3 py-1.5 text-xs md:text-sm rounded-lg font-medium transition-all ${
                   timeFilter === 'all' 
-                    ? 'bg-blue-100 text-blue-700' 
+                    ? 'bg-blue-600 text-white' 
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
@@ -562,9 +562,9 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
               </button>
               <button
                 onClick={() => setTimeFilter('last7days')}
-                className={`px-2 md:px-3 py-1 text-xs md:text-sm rounded-full transition-colors ${
+                className={`px-3 py-1.5 text-xs md:text-sm rounded-lg font-medium transition-all ${
                   timeFilter === 'last7days' 
-                    ? 'bg-blue-100 text-blue-700' 
+                    ? 'bg-blue-600 text-white' 
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
@@ -572,83 +572,88 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
               </button>
               <button
                 onClick={() => setTimeFilter('lastmonth')}
-                className={`px-2 md:px-3 py-1 text-xs md:text-sm rounded-full transition-colors ${
+                className={`px-3 py-1.5 text-xs md:text-sm rounded-lg font-medium transition-all ${
                   timeFilter === 'lastmonth' 
-                    ? 'bg-blue-100 text-blue-700' 
+                    ? 'bg-blue-600 text-white' 
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
                 Last month
               </button>
-        </div>
+            </div>
 
             {/* View Toggle */}
             <div className="flex items-center justify-between">
-              <span className="text-xs md:text-sm text-gray-600">View:</span>
-              <div className="flex bg-gray-100 rounded-lg p-0.5 md:p-1">
+              <span className="text-sm text-gray-500">View:</span>
+              <div className="flex bg-gray-100 rounded-xl p-1">
                 <button
                   onClick={() => setViewMode('grid')}
-                  className={`p-1.5 md:p-2 rounded-md transition-colors ${
+                  className={`p-2 rounded-lg transition-all ${
                     viewMode === 'grid'
                       ? 'bg-white text-blue-600 shadow-sm'
-                      : 'text-gray-600 hover:text-gray-900'
+                      : 'text-gray-500 hover:text-gray-700'
                   }`}
                   title="Grid View"
                 >
-                  <svg className="w-3.5 h-3.5 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
                   </svg>
                 </button>
                 <button
                   onClick={() => setViewMode('list')}
-                  className={`p-1.5 md:p-2 rounded-md transition-colors ${
+                  className={`p-2 rounded-lg transition-all ${
                     viewMode === 'list'
                       ? 'bg-white text-blue-600 shadow-sm'
-                      : 'text-gray-600 hover:text-gray-900'
+                      : 'text-gray-500 hover:text-gray-700'
                   }`}
                   title="List View"
                 >
-                  <svg className="w-3.5 h-3.5 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
                   </svg>
                 </button>
-                </div>
               </div>
-              </div>
+            </div>
+          </div>
 
           {/* Document List */}
           <div className="flex-1 overflow-y-auto">
             {loadingDocuments ? (
-              <div className="p-4">
+              <div className="p-6 flex items-center justify-center">
                 <LoadingSpinner />
-            </div>
+              </div>
             ) : filteredDocuments.length === 0 ? (
-              <div className="p-4 text-center text-gray-500">
-                <p>No documents found</p>
+              <div className="p-6 text-center">
+                <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                </div>
+                <p className="text-gray-500 mb-3">No documents found</p>
                 {searchTerm && (
-            <button 
+                  <button 
                     onClick={() => setSearchTerm('')}
-                    className="text-blue-600 hover:text-blue-800 mt-2"
-            >
+                    className="text-blue-600 hover:text-blue-700 font-medium text-sm"
+                  >
                     Clear search
-            </button>
-              )}
-          </div>
-        ) : (
-              <div className={`p-2 ${viewMode === 'grid' ? 'grid grid-cols-1 gap-6' : 'space-y-1'}`}>
+                  </button>
+                )}
+              </div>
+            ) : (
+              <div className={`p-3 ${viewMode === 'grid' ? 'grid grid-cols-1 gap-4' : 'space-y-1.5'}`}>
                 {filteredDocuments.map((document) => (
                   <div
                     key={document.id}
                     className={`${viewMode === 'grid' 
-                      ? `p-3 rounded-lg transition-all duration-200 border border-gray-200 hover:shadow-lg hover:border-blue-300 ${
+                      ? `p-4 rounded-xl transition-all duration-200 border-2 hover:shadow-md ${
                           selectedDocument?.id === document.id
-                            ? 'bg-white border-l-4 border-l-blue-500'
-                            : 'bg-white hover:bg-gray-50'
+                            ? 'bg-blue-50 border-blue-500'
+                            : 'bg-white border-gray-200 hover:border-gray-300'
                         }`
-                      : `py-1.5 px-2 rounded transition-all duration-150 cursor-pointer ${
+                      : `py-2 px-3 rounded-xl transition-all duration-150 cursor-pointer border ${
                           selectedDocument?.id === document.id
-                            ? 'bg-blue-50 border-l-2 border-blue-500'
-                            : 'hover:bg-gray-100'
+                            ? 'bg-blue-50 border-blue-500'
+                            : 'bg-white border-gray-200 hover:bg-gray-50 hover:border-gray-300'
                         }`
                     }`}
                   >
@@ -718,9 +723,9 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
                       ) : (
                         // List view layout - Compact and thin
                         <>
-                          <div className="flex items-center space-x-2 flex-1 min-w-0">
+                          <div className="flex items-center space-x-3 flex-1 min-w-0">
                             {/* Smaller file icon for list view */}
-                            <div className={`w-6 h-6 rounded flex items-center justify-center flex-shrink-0 ${
+                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
                               document.fileType.toLowerCase() === 'pdf' ? 'bg-red-100' :
                               document.fileType.toLowerCase() === 'docx' ? 'bg-blue-100' :
                               document.fileType.toLowerCase() === 'doc' ? 'bg-green-100' : 'bg-gray-100'
@@ -822,70 +827,81 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
                     </div>
                     
           {/* Recent Activity */}
-          <div className="hidden md:block p-3 md:p-4 border-t border-gray-200 bg-white">
-            <h3 className="text-xs md:text-sm font-medium text-gray-900 mb-2 md:mb-3">RECENT ACTIVITY</h3>
-            <div className="space-y-1.5 md:space-y-2">
+          <div className="hidden md:block p-4 border-t border-gray-100 bg-white">
+            <h3 className="text-sm font-semibold text-gray-900 mb-3">Recent Activity</h3>
+            <div className="space-y-2">
               {filteredDocuments.slice(0, 3).map((doc) => (
-                <div key={doc.id} className="flex items-center text-[10px] md:text-xs text-gray-600">
-                  <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-blue-500 rounded-full mr-1.5 md:mr-2 flex-shrink-0"></div>
-                  <span className="truncate flex-1 min-w-0">{doc.title}</span>
-                  <span className="ml-2 text-gray-400 text-[9px] md:text-[10px] flex-shrink-0">
+                <div key={doc.id} className="flex items-center text-xs text-gray-600 p-2 bg-gray-50 rounded-lg">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full mr-2 flex-shrink-0"></div>
+                  <span className="truncate flex-1 min-w-0 font-medium text-gray-700">{doc.title}</span>
+                  <span className="ml-2 text-gray-400 text-xs flex-shrink-0">
                     {new Date(doc.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                   </span>
                 </div>
               ))}
-    </div>
+            </div>
           </div>
         </div>
 
         {/* Left Resize Handle */}
         <div
           ref={leftResizeRef}
-          className="hidden md:block w-1 bg-gray-200 hover:bg-blue-400 cursor-col-resize transition-colors relative group"
+          className="hidden md:block w-1 bg-gray-100 hover:bg-blue-500 cursor-col-resize transition-colors relative group"
           onMouseDown={() => handleMouseDown('left')}
         >
           <div className="absolute inset-y-0 -left-1 -right-1 bg-transparent"></div>
           <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
-            <div className="w-1 h-8 bg-blue-400 rounded"></div>
+            <div className="w-1 h-10 bg-blue-500 rounded-full"></div>
           </div>
         </div>
 
         {/* Center Panel - Document Viewer */}
         <div 
-          className={`flex flex-col w-full ${
+          className={`flex flex-col w-full bg-white ${
             mobileView !== 'document' ? 'hidden md:flex' : ''
           }`}
           style={{ width: window.innerWidth < 768 ? '100%' : `${centerPanelWidth}%` }}
         >
           {selectedDocument ? (
             <>
-              <div className="p-4 md:p-6 border-b border-gray-200 bg-white">
+              <div className="p-5 md:p-6 border-b border-gray-100 bg-white">
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
                     <h1 className="text-xl md:text-2xl font-bold text-gray-900 mb-2">
                       {selectedDocument.title}
                     </h1>
-                  <div className="text-xs md:text-sm text-gray-600">
-                    By {user?.email || 'User'} • {formatDate(selectedDocument.createdAt)}
+                    <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500">
+                      <span className="flex items-center">
+                        <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                        {user?.email || 'User'}
+                      </span>
+                      <span className="flex items-center">
+                        <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        {formatDate(selectedDocument.createdAt)}
+                      </span>
+                    </div>
                   </div>
                 </div>
                 
                 {/* Analysis Buttons */}
                 {analysisData && (analysisData.hasComprehensive || analysisData.hasCitation) && (
-                  <div className="mt-4 space-y-2 md:space-y-3">
+                  <div className="mt-5 flex flex-wrap gap-3">
                     {/* Comprehensive Analysis Button */}
                     {analysisData.hasComprehensive && (
                       <button
                         onClick={() => {
-                          // Navigate to analysis page with comprehensive analysis
                           onNavigate('analysis');
                           localStorage.setItem('viewAnalysisDocumentId', selectedDocument.id);
                           localStorage.setItem('viewAnalysisType', 'comprehensive');
                           localStorage.setItem('cameFromLibrary', 'true');
                         }}
-                        className="w-full bg-green-600 text-white px-3 md:px-4 py-2 md:py-3 rounded-lg hover:bg-green-700 transition-colors font-medium flex items-center justify-center space-x-2 text-sm md:text-base"
+                        className="flex-1 min-w-[200px] bg-green-600 text-white px-4 py-3 rounded-xl hover:bg-green-700 transition-colors font-medium flex items-center justify-center space-x-2 text-sm"
                       >
-                        <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
                         <span>View Comprehensive Analysis</span>
@@ -896,16 +912,15 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
                     {analysisData.hasCitation && (
                       <button
                         onClick={() => {
-                          // Navigate to analysis page with citation analysis
                           onNavigate('analysis');
                           localStorage.setItem('viewAnalysisDocumentId', selectedDocument.id);
                           localStorage.setItem('viewAnalysisType', 'citation');
                           localStorage.setItem('cameFromLibrary', 'true');
                         }}
-                        className="w-full bg-purple-600 text-white px-3 md:px-4 py-2 md:py-3 rounded-lg hover:bg-purple-700 transition-colors font-medium flex items-center justify-center space-x-2 text-sm md:text-base"
+                        className="flex-1 min-w-[200px] bg-purple-600 text-white px-4 py-3 rounded-xl hover:bg-purple-700 transition-colors font-medium flex items-center justify-center space-x-2 text-sm"
                       >
-                        <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 4V2a1 1 0 011-1h8a1 1 0 011 1v2h4a1 1 0 110 2h-1v12a2 2 0 01-2 2H6a2 2 0 01-2-2V6H3a1 1 0 110-2h4zM6 6v12h12V6H6zm3-2V2h6v2H9z" />
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                         </svg>
                         <span>View Citation Analysis</span>
                       </button>
@@ -913,173 +928,184 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
                   </div>
                 )}
               </div>
-              </div>
               
-              <div className="flex-1 overflow-y-auto p-4 md:p-6">
+              <div className="flex-1 overflow-y-auto p-5 md:p-6 bg-gray-50/50">
                 {loadingContent ? (
                   <div className="flex items-center justify-center h-full">
                     <LoadingSpinner />
                   </div>
                 ) : (
-                  renderDocumentContent()
+                  <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
+                    {renderDocumentContent()}
+                  </div>
                 )}
               </div>
             </>
           ) : (
-            <div className="flex-1 flex items-center justify-center text-gray-500">
+            <div className="flex-1 flex items-center justify-center bg-gray-50/30">
               <div className="text-center">
-                <svg className="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                <p className="text-lg">Select a document to view</p>
+                <div className="w-20 h-20 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                </div>
+                <p className="text-lg text-gray-500 font-medium">Select a document to view</p>
+                <p className="text-sm text-gray-400 mt-1">Choose from your library on the left</p>
               </div>
-    </div>
-        )}
+            </div>
+          )}
         </div>
 
         {/* Right Resize Handle */}
         <div
           ref={rightResizeRef}
-          className="hidden md:block w-1 bg-gray-200 hover:bg-blue-400 cursor-col-resize transition-colors relative group"
+          className="hidden md:block w-1 bg-gray-100 hover:bg-blue-500 cursor-col-resize transition-colors relative group"
           onMouseDown={() => handleMouseDown('right')}
         >
           <div className="absolute inset-y-0 -left-1 -right-1 bg-transparent"></div>
           <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
-            <div className="w-1 h-8 bg-blue-400 rounded"></div>
+            <div className="w-1 h-10 bg-blue-500 rounded-full"></div>
           </div>
         </div>
 
         {/* Right Panel - Annotations */}
         <div 
-          className={`flex border-l border-gray-200 bg-gray-50 flex-col w-full ${
+          className={`flex border-l border-gray-100 bg-gray-50/50 flex-col w-full ${
             mobileView !== 'analysis' ? 'hidden md:flex' : ''
           }`}
           style={{ width: window.innerWidth < 768 ? '100%' : `${rightPanelWidth}%` }}
         >
-          <div className="p-3 md:p-4 border-b border-gray-200 bg-white">
-            <h2 className="text-base md:text-lg font-semibold text-gray-900">Document Analysis</h2>
-            <p className="text-xs md:text-sm text-gray-600">AI-generated feedback and suggestions</p>
+          <div className="p-4 md:p-5 border-b border-gray-100 bg-white">
+            <h2 className="text-lg md:text-xl font-bold text-gray-900">Document Analysis</h2>
+            <p className="text-sm text-gray-500 mt-1">AI-generated feedback and suggestions</p>
           </div>
           
-          <div className="flex-1 overflow-y-auto p-3 md:p-4">
+          <div className="flex-1 overflow-y-auto p-4">
             {!selectedDocument ? (
-              <div className="text-center text-gray-500 mt-8">
-                <p>Select a document to view analysis</p>
+              <div className="text-center mt-12">
+                <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                  </svg>
+                </div>
+                <p className="text-gray-500">Select a document to view analysis</p>
               </div>
             ) : loadingAnalysis ? (
               <div className="flex items-center justify-center h-full">
                 <LoadingSpinner />
               </div>
             ) : !analysisData || (!analysisData.hasComprehensive && !analysisData.hasCitation) ? (
-              <div className="text-center text-gray-500 mt-8">
-                <svg className="w-12 h-12 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                </svg>
-                <p className="mb-4">No analysis available</p>
-                      <button
-                        onClick={() => {
+              <div className="text-center mt-12">
+                <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                  </svg>
+                </div>
+                <p className="text-gray-500 mb-4">No analysis available</p>
+                <button
+                  onClick={() => {
                     localStorage.setItem('selectedDocumentId', selectedDocument.id);
                     localStorage.setItem('selectedDocumentTitle', selectedDocument.title);
-                          onNavigate('analysis');
-                        }}
-                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                    onNavigate('analysis');
+                  }}
+                  className="bg-blue-600 text-white px-5 py-2.5 rounded-xl hover:bg-blue-700 transition-colors font-medium text-sm"
                 >
                   Analyze Document
-                      </button>
+                </button>
               </div>
             ) : (
               <div className="space-y-4">
-                 {/* Document Analysis - Full Analysis Display */}
-                 <div className="bg-white rounded-lg border border-gray-200">
-                   <div className="p-4 border-b border-gray-100">
-                     <h3 className="text-lg font-medium text-gray-900">Document Analysis</h3>
-                     <p className="text-sm text-gray-600 mt-1">AI-generated feedback and suggestions</p>
-                   </div>
-                   
-                   <div className="p-4 space-y-4">
-                     {(() => {
-                       // Get the most recent analysis (comprehensive or citation)
-                       const mostRecentAnalysis = analysisData.comprehensive && analysisData.citation 
-                         ? (new Date(analysisData.comprehensive.created_at) > new Date(analysisData.citation.created_at) 
-                            ? analysisData.comprehensive 
-                            : analysisData.citation)
-                         : (analysisData.comprehensive || analysisData.citation);
-                       
-                       if (!mostRecentAnalysis?.analysis_results) {
-                         return (
-                           <div className="text-center text-gray-500 py-4">
-                             <p>No analysis content available</p>
-                           </div>
-                         );
-                       }
+                {/* Document Analysis - Full Analysis Display */}
+                <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
+                  <div className="p-4 bg-gray-900 text-white">
+                    <h3 className="text-base font-semibold">Analysis Summary</h3>
+                    <p className="text-sm text-gray-300 mt-0.5">AI-generated insights</p>
+                  </div>
+                  
+                  <div className="p-4 space-y-4">
+                    {(() => {
+                      const mostRecentAnalysis = analysisData.comprehensive && analysisData.citation 
+                        ? (new Date(analysisData.comprehensive.created_at) > new Date(analysisData.citation.created_at) 
+                           ? analysisData.comprehensive 
+                           : analysisData.citation)
+                        : (analysisData.comprehensive || analysisData.citation);
+                      
+                      if (!mostRecentAnalysis?.analysis_results) {
+                        return (
+                          <div className="text-center text-gray-500 py-4">
+                            <p>No analysis content available</p>
+                          </div>
+                        );
+                      }
 
-                       const results = mostRecentAnalysis.analysis_results;
-                       const analysisType = mostRecentAnalysis.analysis_type === 'citation_review' ? 'Citation' : 'Comprehensive';
-                       
-                       return (
-                         <>
-                           {/* Header Section - Analysis Type and Date */}
-                           <div className="flex items-center justify-between mb-4">
-                             <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
-                               mostRecentAnalysis.analysis_type === 'citation_review' 
-                                 ? 'bg-purple-100 text-purple-800' 
-                                 : 'bg-green-100 text-green-800'
-                             }`}>
-                               {analysisType} Analysis
-                             </span>
-                             <span className="text-sm text-gray-500">
-                               {new Date(mostRecentAnalysis.created_at).toLocaleDateString()}
-                             </span>
-                           </div>
+                      const results = mostRecentAnalysis.analysis_results;
+                      const analysisType = mostRecentAnalysis.analysis_type === 'citation_review' ? 'Citation' : 'Comprehensive';
+                      
+                      return (
+                        <>
+                          {/* Header Section - Analysis Type and Date */}
+                          <div className="flex items-center justify-between mb-4">
+                            <span className={`inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-semibold ${
+                              mostRecentAnalysis.analysis_type === 'citation_review' 
+                                ? 'bg-purple-100 text-purple-700' 
+                                : 'bg-green-100 text-green-700'
+                            }`}>
+                              {analysisType} Analysis
+                            </span>
+                            <span className="text-xs text-gray-500">
+                              {new Date(mostRecentAnalysis.created_at).toLocaleDateString()}
+                            </span>
+                          </div>
 
-                           {/* Summary Section - Quick Stats */}
-                           <div className="grid grid-cols-3 gap-3 mb-6">
-                             {results.strong_points && results.strong_points.length > 0 && (
-                               <div className="text-center p-3 bg-green-50 rounded-lg border border-green-200">
-                                 <div className="text-xl font-bold text-green-600">{results.strong_points.length}</div>
-                                 <div className="text-sm text-green-700">Strong Points</div>
-                               </div>
-                             )}
-                             {results.areas_to_improve && results.areas_to_improve.length > 0 && (
-                               <div className="text-center p-3 bg-amber-50 rounded-lg border border-amber-200">
-                                 <div className="text-xl font-bold text-amber-600">{results.areas_to_improve.length}</div>
-                                 <div className="text-sm text-amber-700">Areas to Improve</div>
-                               </div>
-                             )}
-                             {results.serious_concerns && results.serious_concerns.length > 0 && (
-                               <div className="text-center p-3 bg-red-50 rounded-lg border border-red-200">
-                                 <div className="text-xl font-bold text-red-600">{results.serious_concerns.length}</div>
-                                 <div className="text-sm text-red-700">Serious Concerns</div>
-                               </div>
-                             )}
-                           </div>
+                          {/* Summary Section - Quick Stats */}
+                          <div className="grid grid-cols-3 gap-2 mb-4">
+                            {results.strong_points && results.strong_points.length > 0 && (
+                              <div className="text-center p-3 bg-green-50 rounded-xl border border-green-200">
+                                <div className="text-2xl font-bold text-green-600">{results.strong_points.length}</div>
+                                <div className="text-xs text-green-700 font-medium">Strengths</div>
+                              </div>
+                            )}
+                            {results.areas_to_improve && results.areas_to_improve.length > 0 && (
+                              <div className="text-center p-3 bg-amber-50 rounded-xl border border-amber-200">
+                                <div className="text-2xl font-bold text-amber-600">{results.areas_to_improve.length}</div>
+                                <div className="text-xs text-amber-700 font-medium">Improve</div>
+                              </div>
+                            )}
+                            {results.serious_concerns && results.serious_concerns.length > 0 && (
+                              <div className="text-center p-3 bg-red-50 rounded-xl border border-red-200">
+                                <div className="text-2xl font-bold text-red-600">{results.serious_concerns.length}</div>
+                                <div className="text-xs text-red-700 font-medium">Concerns</div>
+                              </div>
+                            )}
+                          </div>
 
-                           {/* Full Analysis Section - Complete Assessment */}
-                           {results.result && (
-                             <div className="mb-6">
-                               <h4 className="text-base font-semibold text-gray-900 mb-3">
-                                 {analysisType} Academic Analysis – Overall Assessment
-                               </h4>
-                               <div className="bg-blue-50 rounded-lg p-4 border-l-4 border-blue-400">
-                                 <div className="prose prose-sm max-w-none">
-                                   <div className="whitespace-pre-wrap text-gray-800 leading-relaxed">
-                                     {results.result
-                                       .replace(/#{1,6}\s*/g, '') // Remove markdown headers
-                                       .replace(/\*{1,2}([^*]+)\*{1,2}/g, '$1') // Remove bold/italic markdown
-                                       .replace(/`([^`]+)`/g, '$1') // Remove code markdown
-                                       .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Remove markdown links
-                                       .trim()}
-                                   </div>
-                                 </div>
-                               </div>
-                             </div>
-                           )}
-
-                         </>
-                       );
-                     })()}
-                   </div>
-                 </div>
+                          {/* Full Analysis Section - Complete Assessment */}
+                          {results.result && (
+                            <div>
+                              <h4 className="text-sm font-semibold text-gray-900 mb-2">
+                                Overall Assessment
+                              </h4>
+                              <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                                <div className="prose prose-sm max-w-none">
+                                  <div className="whitespace-pre-wrap text-gray-700 leading-relaxed text-sm">
+                                    {results.result
+                                      .replace(/#{1,6}\s*/g, '')
+                                      .replace(/\*{1,2}([^*]+)\*{1,2}/g, '$1')
+                                      .replace(/`([^`]+)`/g, '$1')
+                                      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+                                      .trim()
+                                      .substring(0, 500)}
+                                    {results.result.length > 500 && '...'}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </>
+                      );
+                    })()}
+                  </div>
+                </div>
               </div>
             )}
           </div>

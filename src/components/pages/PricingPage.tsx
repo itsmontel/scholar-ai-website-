@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import Header from '../common/Header';
 import Footer from '../common/Footer';
 import PaymentModal from '../payment/PaymentModal';
 
@@ -8,7 +9,7 @@ interface PricingPageProps {
   onLogout: () => void;
 }
 
-const PricingPage = ({ onNavigate, user }: PricingPageProps) => {
+const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
   const [billingCycle, setBillingCycle] = useState('monthly');
   const [currentPlan, setCurrentPlan] = useState<string>('free');
   const [paymentModal, setPaymentModal] = useState<{
@@ -86,6 +87,45 @@ const PricingPage = ({ onNavigate, user }: PricingPageProps) => {
     }
   };
 
+  const getFreePlanButtonText = () => {
+    if (!user) return 'Get Started Free';
+    if (currentPlan === 'free') return 'Current Plan';
+    return 'Switch to Free';
+  };
+
+  const handleFreePlanAction = async () => {
+    if (!user) {
+      onNavigate('signup');
+      return;
+    }
+    
+    if (currentPlan === 'free') return;
+    
+    try {
+      const token = localStorage.getItem('authToken');
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/subscriptions/billing-portal`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          returnUrl: `${window.location.origin}/pricing`
+        })
+      });
+
+      const data = await response.json();
+      
+      if (data.success && data.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error(data.message || 'Failed to create billing portal session');
+      }
+    } catch (error) {
+      console.error('Error opening billing portal:', error);
+    }
+  };
+
   const plans = [
     {
       id: 'free',
@@ -106,8 +146,8 @@ const PricingPage = ({ onNavigate, user }: PricingPageProps) => {
         'No priority support'
       ],
       popular: false,
-      buttonText: 'Get Started Free',
-      buttonAction: () => onNavigate('signup')
+      buttonText: getFreePlanButtonText(),
+      buttonAction: handleFreePlanAction
     },
     {
       id: 'starter',
@@ -124,7 +164,7 @@ const PricingPage = ({ onNavigate, user }: PricingPageProps) => {
       ],
       limitations: [],
       popular: true,
-      buttonText: currentPlan === 'free' ? 'Upgrade to Starter' : 'Switch to Starter',
+      buttonText: !user ? 'Get Started' : (currentPlan === 'free' ? 'Upgrade to Starter' : 'Switch to Starter'),
       buttonAction: () => handlePlanAction('starter')
     },
     {
@@ -142,7 +182,7 @@ const PricingPage = ({ onNavigate, user }: PricingPageProps) => {
       ],
       limitations: [],
       popular: false,
-      buttonText: currentPlan === 'free' ? 'Upgrade to Premium' : 'Switch to Premium',
+      buttonText: !user ? 'Get Started' : (currentPlan === 'free' ? 'Upgrade to Premium' : 'Switch to Premium'),
       buttonAction: () => handlePlanAction('premium')
     }
   ];
@@ -202,65 +242,47 @@ const PricingPage = ({ onNavigate, user }: PricingPageProps) => {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Public Header */}
-      <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-100" aria-label="Main navigation">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-18 py-4">
-            <a href="/" onClick={(e) => { e.preventDefault(); onNavigate('landing'); }} className="flex items-center space-x-2.5">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center">
-                <span className="text-white font-bold text-xl">W</span>
-              </div>
-              <span className="text-2xl font-bold text-gray-900">WriteScholar</span>
-            </a>
-            
-            <div className="hidden md:flex items-center space-x-2">
-              <a href="/features" onClick={(e) => { e.preventDefault(); onNavigate('features'); }} className="px-4 py-2.5 text-base text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-50 transition-colors font-medium">Features</a>
-              <a href="/pricing" onClick={(e) => { e.preventDefault(); onNavigate('pricing'); }} className="px-4 py-2.5 text-base text-blue-600 hover:text-blue-700 rounded-lg hover:bg-blue-50 transition-colors font-medium">Pricing</a>
-              <a href="/blog" onClick={(e) => { e.preventDefault(); onNavigate('blog'); }} className="px-4 py-2.5 text-base text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-50 transition-colors font-medium">Blog</a>
-              <a href="/about" onClick={(e) => { e.preventDefault(); onNavigate('about'); }} className="px-4 py-2.5 text-base text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-50 transition-colors font-medium">About</a>
-            </div>
-            
-            <div className="flex items-center space-x-3">
-              <a href="/login" onClick={(e) => { e.preventDefault(); onNavigate('login'); }} className="hidden sm:inline-flex px-4 py-2.5 text-base text-gray-700 hover:text-gray-900 font-medium rounded-lg hover:bg-gray-50 transition-colors">Log in</a>
-              <a href="/signup" onClick={(e) => { e.preventDefault(); onNavigate('signup'); }} className="inline-flex items-center px-5 py-2.5 bg-gray-900 text-white text-base font-semibold rounded-xl hover:bg-gray-800 transition-colors">
-                Get Started
+      {/* Conditional Header - Show logged-in header if user exists */}
+      {user ? (
+        <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="pricing" />
+      ) : (
+        <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-100" aria-label="Main navigation">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between h-18 py-4">
+              <a href="/" onClick={(e) => { e.preventDefault(); onNavigate('landing'); }} className="flex items-center space-x-2.5">
+                <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center">
+                  <span className="text-white font-bold text-xl">W</span>
+                </div>
+                <span className="text-2xl font-bold text-gray-900">WriteScholar</span>
               </a>
+              
+              <div className="hidden md:flex items-center space-x-2">
+                <a href="/features" onClick={(e) => { e.preventDefault(); onNavigate('features'); }} className="px-4 py-2.5 text-base text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-50 transition-colors font-medium">Features</a>
+                <a href="/pricing" onClick={(e) => { e.preventDefault(); onNavigate('pricing'); }} className="px-4 py-2.5 text-base text-blue-600 hover:text-blue-700 rounded-lg hover:bg-blue-50 transition-colors font-medium">Pricing</a>
+                <a href="/blog" onClick={(e) => { e.preventDefault(); onNavigate('blog'); }} className="px-4 py-2.5 text-base text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-50 transition-colors font-medium">Blog</a>
+                <a href="/about" onClick={(e) => { e.preventDefault(); onNavigate('about'); }} className="px-4 py-2.5 text-base text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-50 transition-colors font-medium">About</a>
+              </div>
+              
+              <div className="flex items-center space-x-3">
+                <a href="/login" onClick={(e) => { e.preventDefault(); onNavigate('login'); }} className="hidden sm:inline-flex px-4 py-2.5 text-base text-gray-700 hover:text-gray-900 font-medium rounded-lg hover:bg-gray-50 transition-colors">Log in</a>
+                <a href="/signup" onClick={(e) => { e.preventDefault(); onNavigate('signup'); }} className="inline-flex items-center px-5 py-2.5 bg-gray-900 text-white text-base font-semibold rounded-xl hover:bg-gray-800 transition-colors">
+                  Get Started
+                </a>
+              </div>
             </div>
           </div>
-        </div>
-      </nav>
+        </nav>
+      )}
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 md:px-8 py-12 sm:py-16 md:py-20">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
         {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6">
-            Simple and transparent pricing
+        <div className="text-center mb-10">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
+            Simple, transparent pricing
           </h1>
-          
-          {/* Key Benefits */}
-          <div className="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-8 md:space-x-12 mb-10">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center">
-                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-                </svg>
-              </div>
-              <span className="text-gray-700 text-base font-medium">A fraction of traditional editing costs</span>
-            </div>
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-purple-600 rounded-xl flex items-center justify-center">
-                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
-              </div>
-              <span className="text-gray-700 text-base font-medium">Used by thousands of researchers</span>
-            </div>
-          </div>
-
-          <div className="mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Choose Your Plan</h2>
-            <p className="text-gray-600">Select the plan that fits your needs.</p>
-          </div>
+          <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
+            Choose the plan that fits your needs. Upgrade anytime.
+          </p>
 
           {/* Billing Toggle */}
           <div className="flex items-center justify-center mb-12">
@@ -362,45 +384,61 @@ const PricingPage = ({ onNavigate, user }: PricingPageProps) => {
         </div>
 
         {/* FAQ Section */}
-        <div className="bg-gray-50 rounded-2xl p-12 mb-16">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-6">Frequently Asked Questions</h2>
-            <p className="text-lg text-gray-600">
-              Everything you need to know about our pricing and plans.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-8">
+        <div className="bg-gray-50 border border-gray-200 rounded-2xl p-6 sm:p-8 mb-10">
+          <h2 className="text-xl font-bold text-gray-900 mb-6 text-center">Frequently Asked Questions</h2>
+          <div className="grid md:grid-cols-2 gap-6">
             {faqs.map((faq, index) => (
-              <div key={index} className="space-y-4">
-                <h3 className="text-lg font-semibold text-gray-900">{faq.question}</h3>
-                <p className="text-gray-600 leading-relaxed">{faq.answer}</p>
+              <div key={index} className="space-y-2">
+                <h3 className="font-semibold text-gray-900 text-sm">{faq.question}</h3>
+                <p className="text-gray-600 text-sm leading-relaxed">{faq.answer}</p>
               </div>
             ))}
           </div>
         </div>
 
-        {/* CTA Section */}
-        <div className="text-center">
-          <h2 className="text-3xl font-bold text-gray-900 mb-6">
-            Ready to improve your academic writing?
+        {/* CTA Section - Different for logged-in users */}
+        <div className="text-center bg-gray-900 rounded-2xl p-8 sm:p-10">
+          <h2 className="text-2xl font-bold text-white mb-3">
+            {user ? 'Start writing with AI today' : 'Ready to improve your academic writing?'}
           </h2>
-          <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
-            Join thousands of students and researchers who trust WriteScholar to help them achieve academic excellence.
+          <p className="text-gray-300 mb-6 max-w-xl mx-auto">
+            {user 
+              ? 'Head to your dashboard to start analyzing documents and finding citations.'
+              : 'Join thousands of students and researchers who trust WriteScholar.'
+            }
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button 
-              onClick={() => onNavigate('signup')}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-xl font-semibold transition-colors shadow-lg"
-            >
-              Get Started Free
-            </button>
-            <button 
-              onClick={() => onNavigate('contact')}
-              className="border-2 border-gray-300 hover:border-gray-400 text-gray-700 hover:text-gray-900 px-8 py-3 rounded-xl font-semibold transition-colors"
-            >
-              Contact Sales
-            </button>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            {user ? (
+              <>
+                <button 
+                  onClick={() => onNavigate('dashboard')}
+                  className="bg-white hover:bg-gray-100 text-gray-900 px-6 py-3 rounded-xl font-semibold transition-colors"
+                >
+                  Go to Dashboard
+                </button>
+                <button 
+                  onClick={() => onNavigate('contact')}
+                  className="border border-gray-600 hover:border-gray-500 text-white px-6 py-3 rounded-xl font-semibold transition-colors"
+                >
+                  Contact Support
+                </button>
+              </>
+            ) : (
+              <>
+                <button 
+                  onClick={() => onNavigate('signup')}
+                  className="bg-white hover:bg-gray-100 text-gray-900 px-6 py-3 rounded-xl font-semibold transition-colors"
+                >
+                  Get Started Free
+                </button>
+                <button 
+                  onClick={() => onNavigate('contact')}
+                  className="border border-gray-600 hover:border-gray-500 text-white px-6 py-3 rounded-xl font-semibold transition-colors"
+                >
+                  Contact Sales
+                </button>
+              </>
+            )}
           </div>
         </div>
       </div>

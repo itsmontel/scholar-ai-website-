@@ -14,6 +14,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('monthly');
   const [mode, setMode] = useState<'analyze' | 'citations'>('analyze');
   const [citationStyle, setCitationStyle] = useState('APA');
+  const [citationYearRange, setCitationYearRange] = useState('all');
   const [showFakeAnimation, setShowFakeAnimation] = useState(false);
   const [activeToolHover, setActiveToolHover] = useState<string | null>(null);
 
@@ -102,7 +103,11 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
     if (!inputText.trim()) return;
     setShowFakeAnimation(true);
     if (mode === 'citations') {
-      localStorage.setItem('pendingCitationSearch', JSON.stringify({ topic: inputText, style: citationStyle }));
+      localStorage.setItem('pendingCitationSearch', JSON.stringify({
+        topic: inputText,
+        style: citationStyle,
+        yearRange: citationYearRange
+      }));
     } else {
       localStorage.setItem('pendingAnalysis', JSON.stringify({ text: inputText }));
     }
@@ -159,7 +164,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
             <a href="/" onClick={(e) => { e.preventDefault(); onNavigate('landing'); }} className="flex items-center space-x-2.5">
               <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center">
                 <span className="text-white font-bold text-xl">W</span>
-              </div>
+          </div>
               <span className="text-2xl font-bold text-gray-900">WriteScholar</span>
             </a>
             
@@ -168,14 +173,14 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
               <a href="/pricing" onClick={(e) => { e.preventDefault(); onNavigate('pricing'); }} className="px-4 py-2.5 text-base text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-50 transition-colors font-medium">Pricing</a>
               <a href="/blog" onClick={(e) => { e.preventDefault(); onNavigate('blog'); }} className="px-4 py-2.5 text-base text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-50 transition-colors font-medium">Blog</a>
               <a href="/about" onClick={(e) => { e.preventDefault(); onNavigate('about'); }} className="px-4 py-2.5 text-base text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-50 transition-colors font-medium">About</a>
-            </div>
+        </div>
             
             <div className="flex items-center space-x-3">
               <a href="/login" onClick={(e) => { e.preventDefault(); onNavigate('login'); }} className="hidden sm:inline-flex px-4 py-2.5 text-base text-gray-700 hover:text-gray-900 font-medium rounded-lg hover:bg-gray-50 transition-colors">Log in</a>
               <a href="/signup" onClick={(e) => { e.preventDefault(); onNavigate('signup'); }} className="inline-flex items-center px-5 py-2.5 bg-gray-900 text-white text-base font-semibold rounded-xl hover:bg-gray-800 transition-colors">
                 Get Started
               </a>
-            </div>
+        </div>
           </div>
         </div>
       </nav>
@@ -187,11 +192,11 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
             {/* Desktop Sidebar - aligned with H1 */}
             <div className="hidden lg:flex flex-col space-y-1 pr-6 xl:pr-10">
               {sidebarTools.map((tool) => (
-                <button
+          <button 
                   key={tool.id}
                   onMouseEnter={() => setActiveToolHover(tool.id)}
                   onMouseLeave={() => setActiveToolHover(null)}
-                  onClick={() => onNavigate('signup')}
+            onClick={() => onNavigate('signup')}
                   className={`relative flex flex-col items-center p-3 rounded-xl transition-all ${
                     activeToolHover === tool.id ? 'bg-gray-50 scale-105' : ''
                   }`}
@@ -207,86 +212,106 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                       <div className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-gray-900" />
                     </div>
                   )}
-                </button>
+          </button>
               ))}
-            </div>
+        </div>
 
             {/* Main Content */}
             <div className="flex-1 text-center max-w-4xl mx-auto">
               {/* H1 - bigger */}
               <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-900 tracking-tight leading-tight mb-5 sm:mb-7">
-                {mode === 'analyze' ? (
+            {mode === 'analyze' ? (
                   <>Your essay — improved with <span className="text-blue-600">AI feedback</span></>
-                ) : (
+            ) : (
                   <>Find <span className="text-blue-600">academic citations</span> instantly</>
-                )}
-              </h1>
+            )}
+          </h1>
               
               {/* Feature badges - bigger */}
               <div className="flex flex-wrap justify-center gap-x-5 gap-y-2 mb-7 sm:mb-9 text-base text-gray-600">
-                {mode === 'analyze' ? (
-                  <>
+              {mode === 'analyze' ? (
+                <>
                     <span className="flex items-center"><svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Structure analysis</span>
                     <span className="flex items-center"><svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Grammar &amp; clarity</span>
                     <span className="flex items-center"><svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Citation check</span>
-                  </>
-                ) : (
-                  <>
+                </>
+              ) : (
+                <>
                     <span className="flex items-center"><svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Millions of sources</span>
                     <span className="flex items-center"><svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>APA, MLA, Chicago</span>
                     <span className="flex items-center"><svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Auto-formatted</span>
-                  </>
-                )}
-              </div>
+                </>
+              )}
+          </div>
 
               {/* Mode Toggle - bigger */}
               <div className="flex justify-center mb-5">
                 <div className="inline-flex bg-gray-100 rounded-full p-1.5">
-                  <button
+              <button
                     onClick={() => { setMode('analyze'); setInputText(''); }}
                     className={`px-5 sm:px-6 py-2.5 rounded-full text-base font-medium transition-all ${
                       mode === 'analyze' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'
                     }`}
                   >
                     Analyze Essay
-                  </button>
-                  <button
+              </button>
+              <button
                     onClick={() => { setMode('citations'); setInputText(''); }}
                     className={`px-5 sm:px-6 py-2.5 rounded-full text-base font-medium transition-all ${
                       mode === 'citations' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'
                     }`}
                   >
                     Find Citations
-                  </button>
-                </div>
-              </div>
-
+              </button>
+            </div>
+          </div>
+          
               {/* Helper text */}
               <p className="text-sm text-amber-600 mb-4 flex items-center justify-center">
                 <span className="mr-1.5">💡</span>
                 {mode === 'analyze' ? 'AI analyzes, you refine for submission' : 'Find sources, format citations automatically'}
               </p>
 
-              {/* Citation Style (citations mode only) */}
-              {mode === 'citations' && (
-                <div className="flex justify-center mb-4">
-                  <div className="inline-flex items-center bg-gray-50 rounded-lg px-4 py-2 text-base">
-                    <span className="text-gray-500 mr-2">Style:</span>
-                    <select
-                      value={citationStyle}
-                      onChange={(e) => setCitationStyle(e.target.value)}
-                      className="bg-transparent font-medium text-gray-900 outline-none cursor-pointer"
-                    >
-                      <option value="APA">APA 7th</option>
-                      <option value="MLA">MLA 9th</option>
-                      <option value="Chicago">Chicago</option>
-                      <option value="Harvard">Harvard</option>
-                      <option value="IEEE">IEEE</option>
-                      <option value="Vancouver">Vancouver</option>
-                    </select>
-                  </div>
+              {/* Citation Options (citations mode only) */}
+            {mode === 'citations' && (
+              <div className="flex justify-center mb-4">
+                  <div className="inline-flex items-center gap-3 flex-wrap justify-center">
+                    {/* Citation Style */}
+                    <div className="inline-flex items-center bg-gray-50 rounded-xl px-4 py-2.5 border border-gray-200">
+                      <span className="text-gray-500 mr-2 text-sm">Style:</span>
+                  <select
+                    value={citationStyle}
+                    onChange={(e) => setCitationStyle(e.target.value)}
+                        className="bg-transparent font-medium text-gray-900 outline-none cursor-pointer text-sm"
+                  >
+                        <option value="APA">APA 7th</option>
+                        <option value="MLA">MLA 9th</option>
+                    <option value="Chicago">Chicago</option>
+                    <option value="Harvard">Harvard</option>
+                    <option value="IEEE">IEEE</option>
+                    <option value="Vancouver">Vancouver</option>
+                  </select>
+                    </div>
+                    
+                    {/* Year Range */}
+                    <div className="inline-flex items-center bg-gray-50 rounded-xl px-4 py-2.5 border border-gray-200">
+                      <span className="text-gray-500 mr-2 text-sm">Year:</span>
+                      <select
+                        value={citationYearRange}
+                        onChange={(e) => setCitationYearRange(e.target.value)}
+                        className="bg-transparent font-medium text-gray-900 outline-none cursor-pointer text-sm"
+                      >
+                        <option value="all">All Time</option>
+                        <option value="3">Last 3 Years</option>
+                        <option value="5">Last 5 Years</option>
+                        <option value="10">Last 10 Years</option>
+                        <option value="15">Last 15 Years</option>
+                        <option value="20">Last 20 Years</option>
+                      </select>
+                    </div>
                 </div>
-              )}
+              </div>
+            )}
 
               {/* Input Area with Character outside */}
               <div className="relative mb-5">
@@ -326,25 +351,25 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                   </button>
                 </div>
               </div>
-
+                
               {/* Suggested Topics - bigger */}
               <div className="mb-10">
                 <p className="text-sm text-gray-500 mb-4">Suggested topics</p>
                 <div className="flex flex-wrap justify-center gap-2.5">
                   {suggestedTopics.map((topic, idx) => (
-                    <button
+                  <button
                       key={idx}
                       onClick={() => handleTopicClick(topic)}
                       className="px-4 py-2 bg-gray-50 hover:bg-gray-100 text-gray-700 text-sm sm:text-base rounded-lg border border-gray-200 hover:border-gray-300 transition-colors text-left"
-                    >
+                  >
                       {topic}
-                    </button>
+                  </button>
                   ))}
                 </div>
               </div>
             </div>
-          </div>
-        </div>
+              </div>
+            </div>
       </section>
 
       {/* Trusted by Universities - Animated Carousel */}
@@ -353,21 +378,21 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
           <p className="text-center text-gray-500 text-sm font-medium mb-8">Trusted by students around the world</p>
           <div className="relative">
             <div className="flex animate-scroll-slow">
-              {/* First set of universities */}
+                {/* First set of universities */}
               {universities.map((uni, idx) => (
                 <div key={`first-${idx}`} className="flex-shrink-0 mx-8 sm:mx-12">
                   <span className={`text-lg sm:text-xl ${uni.className}`}>{uni.name}</span>
-                </div>
+                  </div>
               ))}
-              {/* Duplicate set for seamless loop */}
+                {/* Duplicate set for seamless loop */}
               {universities.map((uni, idx) => (
                 <div key={`second-${idx}`} className="flex-shrink-0 mx-8 sm:mx-12">
                   <span className={`text-lg sm:text-xl ${uni.className}`}>{uni.name}</span>
-                </div>
+                  </div>
               ))}
-            </div>
-          </div>
-        </div>
+                  </div>
+                  </div>
+                  </div>
       </section>
 
       {/* See WriteScholar in Action */}
@@ -387,7 +412,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
               <div className="order-2 lg:order-1">
                 <div className="inline-flex items-center px-3 py-1.5 bg-purple-100 text-purple-700 rounded-full text-sm font-medium mb-4">
                   Philosophy Essay
-                </div>
+                  </div>
                 <h3 className="text-2xl font-bold text-gray-900 mb-3">Philosophy Essay Analysis</h3>
                 <p className="text-gray-600 text-lg leading-relaxed mb-4">
                   See how WriteScholar analyzes a philosophy paper on justice and ethics, providing detailed feedback on argument structure, citation formatting, and academic tone.
@@ -397,7 +422,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                   <li className="flex items-center"><svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>APA citation validation</li>
                   <li className="flex items-center"><svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Areas for improvement highlighted</li>
                 </ul>
-              </div>
+                  </div>
               <div className="order-1 lg:order-2">
                 <div className="rounded-2xl overflow-hidden shadow-2xl border border-gray-200">
                   <img 
@@ -405,9 +430,9 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                     alt="Philosophy essay analysis showing document feedback with structure analysis, citation checking, and improvement suggestions"
                     className="w-full h-auto"
                   />
-                </div>
-              </div>
             </div>
+          </div>
+        </div>
 
             {/* Multicultural Film Paper Example */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
@@ -417,13 +442,13 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                     src="/Multiculturalfilmpaper.png" 
                     alt="Multicultural film paper analysis showing comprehensive AI feedback on academic writing"
                     className="w-full h-auto"
-                  />
-                </div>
-              </div>
+                          />
+                        </div>
+                           </div>
               <div className="order-2 lg:order-2">
                 <div className="inline-flex items-center px-3 py-1.5 bg-blue-100 text-blue-700 rounded-full text-sm font-medium mb-4">
                   Film Studies
-                </div>
+                              </div>
                 <h3 className="text-2xl font-bold text-gray-900 mb-3">Film Studies Paper Analysis</h3>
                 <p className="text-gray-600 text-lg leading-relaxed mb-4">
                   Watch WriteScholar analyze a multicultural film studies paper, identifying areas for clarity improvement and ensuring proper academic formatting.
@@ -433,10 +458,10 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                   <li className="flex items-center"><svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Grammar improvements</li>
                   <li className="flex items-center"><svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Detailed suggestions</li>
                 </ul>
-              </div>
-            </div>
-          </div>
-        </div>
+                              </div>
+                              </div>
+                            </div>
+                          </div>
       </section>
 
       {/* Features Grid - bigger */}
@@ -461,13 +486,13 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
               <div key={idx} className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-lg hover:border-gray-300 transition-all">
                 <div className={`w-12 h-12 bg-${feature.color}-100 rounded-xl flex items-center justify-center mb-4`}>
                   <div className={`w-6 h-6 bg-${feature.color}-500 rounded`}></div>
-                </div>
+                  </div>
                 <h3 className="font-semibold text-gray-900 text-lg mb-2">{feature.title}</h3>
                 <p className="text-base text-gray-600 leading-relaxed">{feature.desc}</p>
+                </div>
+                  ))}
               </div>
-            ))}
-          </div>
-        </div>
+            </div>
       </section>
 
       {/* FAQ Section - bigger */}
@@ -483,15 +508,15 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
           <div className="space-y-4">
             {faqs.map((faq, idx) => (
               <div key={idx} className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-                <button
+                  <button
                   onClick={() => setOpenFAQ(openFAQ === idx ? null : idx)}
                   className="w-full px-6 py-5 text-left flex items-center justify-between hover:bg-gray-50 transition-colors"
                 >
                   <span className="font-medium text-gray-900 text-lg pr-4">{faq.question}</span>
                   <svg className={`w-5 h-5 text-gray-400 flex-shrink-0 transition-transform ${openFAQ === idx ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
+                      </svg>
+                  </button>
                 <div className={`overflow-hidden transition-all duration-300 ${openFAQ === idx ? 'max-h-56' : 'max-h-0'}`}>
                   <div className="px-6 pb-5 text-gray-600 text-base leading-relaxed">{faq.answer}</div>
                 </div>
@@ -506,17 +531,17 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 text-center mb-5">
             Simple Pricing
-          </h2>
+            </h2>
           <p className="text-lg text-gray-600 text-center mb-8">Start free. Upgrade when you need more.</p>
           
           <div className="flex items-center justify-center space-x-4 mb-12">
             <span className={`text-base ${billingCycle === 'monthly' ? 'text-gray-900 font-medium' : 'text-gray-500'}`}>Monthly</span>
-            <button
-              onClick={() => setBillingCycle(billingCycle === 'monthly' ? 'annual' : 'monthly')}
+                <button
+                  onClick={() => setBillingCycle(billingCycle === 'monthly' ? 'annual' : 'monthly')}
               className="relative w-12 h-7 bg-gray-200 rounded-full transition-colors"
             >
               <span className={`absolute top-1 w-5 h-5 bg-white rounded-full shadow transition-transform ${billingCycle === 'annual' ? 'translate-x-6' : 'translate-x-1'}`} />
-            </button>
+                </button>
             <span className={`text-base ${billingCycle === 'annual' ? 'text-gray-900 font-medium' : 'text-gray-500'}`}>Annual</span>
             {billingCycle === 'annual' && <span className="text-sm bg-green-100 text-green-700 px-3 py-1 rounded-full font-medium">Save 17%</span>}
           </div>
@@ -531,9 +556,9 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                 <li className="flex items-start"><svg className="w-5 h-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>3 analyses per month</li>
                 <li className="flex items-start"><svg className="w-5 h-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>2 citation searches</li>
                 <li className="flex items-start"><svg className="w-5 h-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Basic grammar check</li>
-              </ul>
+                  </ul>
               <button onClick={() => onNavigate('signup')} className="w-full py-3 bg-gray-100 hover:bg-gray-200 text-gray-900 font-medium rounded-xl transition-colors text-base">Get Started</button>
-            </div>
+                </div>
 
             {/* Starter */}
             <div className="bg-white border-2 border-blue-500 rounded-2xl p-8 relative">
@@ -548,9 +573,9 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                 <li className="flex items-start"><svg className="w-5 h-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Unlimited citations</li>
                 <li className="flex items-start"><svg className="w-5 h-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>All citation styles</li>
                 <li className="flex items-start"><svg className="w-5 h-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Advanced grammar</li>
-              </ul>
+                  </ul>
               <button onClick={() => onNavigate('signup')} className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl transition-colors text-base">Get Started</button>
-            </div>
+                </div>
 
             {/* Premium */}
             <div className="bg-white border border-gray-200 rounded-2xl p-8">
@@ -563,11 +588,11 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                 <li className="flex items-start"><svg className="w-5 h-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Everything in Starter</li>
                 <li className="flex items-start"><svg className="w-5 h-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Thesis/dissertation</li>
                 <li className="flex items-start"><svg className="w-5 h-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Priority support</li>
-              </ul>
+                  </ul>
               <button onClick={() => onNavigate('signup')} className="w-full py-3 bg-gray-900 hover:bg-gray-800 text-white font-medium rounded-xl transition-colors text-base">Get Started</button>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
       </section>
 
       {/* Final CTA - bigger */}
@@ -579,16 +604,16 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
           <p className="text-lg text-gray-600 mb-10">
             Start analyzing your essays and finding citations for free. No credit card required.
           </p>
-          <button
-            onClick={() => onNavigate('signup')}
+            <button 
+              onClick={() => onNavigate('signup')}
             className="inline-flex items-center px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-colors shadow-lg hover:shadow-xl text-lg"
           >
             Start Writing Better
             <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
             </svg>
-          </button>
-        </div>
+            </button>
+          </div>
       </section>
 
       <Footer onNavigate={onNavigate} />
@@ -601,8 +626,8 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
               <svg className="animate-spin w-12 h-12 text-blue-600" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-              </svg>
-            </div>
+                  </svg>
+                </div>
             <h3 className="text-lg font-semibold text-gray-900 mb-1">Finding Citations</h3>
             <p className="text-sm text-gray-500">Searching academic databases...</p>
           </div>

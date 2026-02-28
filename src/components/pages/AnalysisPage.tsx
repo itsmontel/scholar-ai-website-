@@ -1287,7 +1287,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading analysis tools...</p>
@@ -1297,24 +1297,24 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+    <div className="min-h-screen bg-white">
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="analysis" />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between">
+        <div className="mb-10">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900">
                 AI Scholar Analysis
               </h1>
-              <p className="mt-2 text-gray-600">
+              <p className="mt-3 text-lg text-gray-600">
                 Get comprehensive AI-powered feedback on your academic documents
               </p>
             </div>
             <button
               onClick={() => onNavigate?.('analysis-history')}
-              className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:from-indigo-700 hover:to-purple-700 transition-all duration-200 transform hover:scale-[1.02] shadow-lg"
+              className="flex items-center space-x-2 px-5 py-3 bg-gray-900 text-white rounded-xl hover:bg-gray-800 transition-colors"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
@@ -1325,38 +1325,36 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
         </div>
 
         {error && (
-          <div className="mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded-lg">
-            <div className="flex">
-              <div className="flex-shrink-0">
-                <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-            </svg>
+          <div className="mb-8 p-5 bg-red-50 border border-red-200 rounded-2xl">
+            <div className="flex items-center">
+              <div className="w-10 h-10 bg-red-500 rounded-xl flex items-center justify-center flex-shrink-0">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
               </div>
-              <div className="ml-3">
-                <p className="text-sm text-red-700">{error}</p>
+              <div className="ml-4">
+                <p className="text-red-700 font-medium">{error}</p>
               </div>
             </div>
-        </div>
+          </div>
         )}
 
         {successMessage && (
-          <div className="mb-6 bg-green-50 border-l-4 border-green-500 p-4 rounded-lg">
-            <div className="flex">
-              <div className="flex-shrink-0">
-                <svg className="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+          <div className="mb-8 p-5 bg-green-50 border border-green-200 rounded-2xl">
+            <div className="flex items-start">
+              <div className="w-10 h-10 bg-green-500 rounded-xl flex items-center justify-center flex-shrink-0">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
               </div>
-              <div className="ml-3">
-                <p className="text-sm text-green-700">{successMessage}</p>
-                <div className="mt-2">
-                  <button
-                    onClick={() => onNavigate?.('library')}
-                    className="text-sm bg-green-600 text-white px-3 py-1 rounded-md hover:bg-green-700 transition-colors"
-                  >
-                    View in Library
-                  </button>
-                </div>
+              <div className="ml-4">
+                <p className="text-green-700 font-medium">{successMessage}</p>
+                <button
+                  onClick={() => onNavigate?.('library')}
+                  className="mt-3 px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors"
+                >
+                  View in Library
+                </button>
               </div>
             </div>
           </div>
@@ -1365,19 +1363,19 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
         {!analysisResult ? (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Analysis Configuration */}
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-6">Configure Analysis</h2>
+            <div className="bg-white border border-gray-200 rounded-2xl p-6 sm:p-8">
+              <h2 className="text-xl font-bold text-gray-900 mb-6">Configure Analysis</h2>
               
-              {/* Document Selection - Only show if no text content from dashboard */}
+              {/* Document Selection */}
               {!documentContent && (
                 <div className="mb-6">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-base font-medium text-gray-900 mb-2">
                     Select Document
                   </label>
                   <select
                     value={selectedDocument}
                     onChange={(e) => handleDocumentSelection(e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    className="w-full px-4 py-3.5 text-base border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                     disabled={isAnalyzing}
                   >
                     <option value="">Choose a document...</option>
@@ -1392,14 +1390,14 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
               
               {/* Text Content Notice */}
               {documentContent && !selectedDocument && (
-                <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-              <div className="flex items-center space-x-2">
+                <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-xl">
+                  <div className="flex items-center space-x-2">
                     <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    <span className="text-sm font-medium text-blue-800">Text Analysis Mode</span>
+                    <span className="font-medium text-blue-800">Text Analysis Mode</span>
                   </div>
-                  <p className="text-sm text-blue-700 mt-1">
+                  <p className="text-sm text-blue-700 mt-2">
                     Analyzing text content from dashboard. Select citation style and run analysis.
                   </p>
                 </div>
@@ -1407,36 +1405,36 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
 
               {/* Analysis Type Selection */}
               <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-base font-medium text-gray-900 mb-3">
                   Analysis Type
                 </label>
                 <div className="space-y-3">
                   {analysisTypes.map((type) => (
                     <div
                       key={type.id}
-                      className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                      className={`p-4 border-2 rounded-xl cursor-pointer transition-all ${
                         selectedAnalysisType === type.id
-                          ? 'border-blue-500 bg-blue-50 shadow-md'
-                          : 'border-gray-200 hover:border-gray-300 hover:shadow-sm'
+                          ? 'border-blue-500 bg-blue-50'
+                          : 'border-gray-200 hover:border-gray-300'
                       }`}
                       onClick={() => setSelectedAnalysisType(type.id)}
                     >
-                      <div className="flex items-center space-x-3">
+                      <div className="flex items-center space-x-4">
                         <span className="text-2xl">{type.icon}</span>
                         <div className="flex-1">
-                          <h3 className="font-medium text-gray-900">{type.name}</h3>
-                          <p className="text-sm text-gray-600">{type.description}</p>
+                          <h3 className="font-semibold text-gray-900">{type.name}</h3>
+                          <p className="text-sm text-gray-600 mt-0.5">{type.description}</p>
                           <p className="text-xs text-gray-500 mt-1">⏱️ {type.estimatedTime}</p>
                         </div>
-                        <div className={`w-5 h-5 rounded-full border-2 ${
+                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
                           selectedAnalysisType === type.id
                             ? 'border-blue-500 bg-blue-500'
                             : 'border-gray-300'
                         }`}>
                           {selectedAnalysisType === type.id && (
-                            <svg className="w-full h-full text-white" fill="currentColor" viewBox="0 0 20 20">
+                            <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
                               <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                </svg>
+                            </svg>
                           )}
                         </div>
                       </div>
@@ -1447,13 +1445,13 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
 
               {/* Citation Style Selection */}
               <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-base font-medium text-gray-900 mb-2">
                   Citation Style
                 </label>
                 <select
                   value={selectedCitationStyle}
                   onChange={(e) => setSelectedCitationStyle(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  className="w-full px-4 py-3.5 text-base border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                   disabled={isAnalyzing}
                 >
                   <option value="None">None (No citations required)</option>
@@ -1464,8 +1462,8 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                   <option value="IEEE">IEEE</option>
                   <option value="Vancouver">Vancouver</option>
                 </select>
-                <p className="text-xs text-gray-500 mt-1">
-                  Select the citation style used in your document, or "None" for papers that don't require citations
+                <p className="text-sm text-gray-500 mt-2">
+                  Select the citation style used in your document
                 </p>
               </div>
 
@@ -1473,7 +1471,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
               <button
                 onClick={handleAnalyze}
                 disabled={(!selectedDocument && !documentContent) || !selectedAnalysisType || isAnalyzing}
-                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-4 rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all transform hover:scale-[1.02] active:scale-[0.98]"
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3.5 px-4 rounded-xl font-semibold text-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 {isAnalyzing ? (
                   <LoadingSpinner 
@@ -1488,139 +1486,136 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
             </div>
 
             {/* Document Preview */}
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-6">Document Preview</h2>
+            <div className="bg-white border border-gray-200 rounded-2xl p-6 sm:p-8">
+              <h2 className="text-xl font-bold text-gray-900 mb-6">Document Preview</h2>
               
               {!selectedDocument && !documentContent ? (
                 <div className="text-center py-16">
-                  <div className="mx-auto h-24 w-24 text-gray-300">
-                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  <div className="w-20 h-20 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <svg className="w-10 h-10 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
                   </div>
-                  <h3 className="mt-4 text-sm font-medium text-gray-900">No document selected</h3>
-                  <p className="mt-2 text-sm text-gray-500">
+                  <h3 className="text-lg font-medium text-gray-900">No document selected</h3>
+                  <p className="mt-2 text-gray-500">
                     Select a document to preview its content
                   </p>
                 </div>
               ) : selectedDocument && isLoadingPreview ? (
                 <div className="text-center py-16">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-                  <p className="mt-4 text-sm text-gray-600">Loading document preview...</p>
+                  <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mx-auto"></div>
+                  <p className="mt-4 text-gray-600">Loading document preview...</p>
                 </div>
               ) : previewContent || documentContent ? (
-                <div className="max-h-96 overflow-y-auto">
-                  <div className="bg-gray-50 rounded-lg p-4 border">
-                    <div className="flex items-center justify-between mb-3">
-                      <h3 className="text-sm font-medium text-gray-700">
+                <div className="max-h-[500px] overflow-y-auto">
+                  <div className="bg-gray-50 rounded-xl p-5 border border-gray-200">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="font-medium text-gray-900">
                         {selectedDocument 
                           ? documents.find(doc => doc.id === selectedDocument)?.title || 'Document Content'
                           : 'Text Content from Dashboard'
                         }
                       </h3>
-                      <span className="text-xs text-gray-500">
+                      <span className="px-3 py-1 bg-gray-200 text-gray-700 rounded-full text-sm font-medium">
                         {(previewContent || documentContent).split(' ').length} words
                       </span>
                     </div>
-                    <div className="text-sm text-gray-700 leading-relaxed max-h-80 overflow-y-auto">
+                    <div className="text-gray-700 leading-relaxed max-h-80 overflow-y-auto">
                       {(previewContent || documentContent).split(/\n\s*\n/).filter(p => p.trim().length > 0).map((paragraph, index) => (
-                        <p key={index} className="mb-3 text-justify">
+                        <p key={index} className="mb-4 text-justify">
                           {paragraph.trim()}
                         </p>
                       ))}
                     </div>
                   </div>
-                  <div className="mt-4 text-center">
-                    <p className="text-xs text-gray-500">
-                      This is the content that will be analyzed. Click "Analyze Document" to begin.
-                    </p>
-                  </div>
+                  <p className="mt-4 text-center text-sm text-gray-500">
+                    This is the content that will be analyzed. Click "Analyze Document" to begin.
+                  </p>
                 </div>
               ) : selectedDocument ? (
                 <div className="text-center py-16">
-                  <div className="mx-auto h-24 w-24 text-gray-300">
-                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 19.5c-.77.833.192 2.5 1.732 2.5z" />
-                </svg>
+                  <div className="w-20 h-20 bg-red-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <svg className="w-10 h-10 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 19.5c-.77.833.192 2.5 1.732 2.5z" />
+                    </svg>
                   </div>
-                  <h3 className="mt-4 text-sm font-medium text-gray-900">Failed to load preview</h3>
-                  <p className="mt-2 text-sm text-gray-500">
+                  <h3 className="text-lg font-medium text-gray-900">Failed to load preview</h3>
+                  <p className="mt-2 text-gray-500">
                     Unable to load document content for preview
                   </p>
-              </div>
+                </div>
               ) : null}
             </div>
           </div>
         ) : (
           /* Premium Analysis Results Display */
-          <div className="bg-white rounded-xl shadow-2xl overflow-hidden">
+          <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
             {/* Results Header */}
-            <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-4">
-            <div className="flex items-center justify-between">
-              <div>
-                  <h2 className="text-xl font-semibold">
+            <div className="bg-gray-900 text-white px-6 py-5">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div>
+                  <h2 className="text-xl font-bold">
                     {documents.find(doc => doc.id === selectedDocument)?.title || 'Document Analysis'}
                   </h2>
-                  <p className="text-blue-100 text-sm mt-1">
+                  <p className="text-gray-400 text-sm mt-1">
                     {analysisTypes.find(type => type.id === selectedAnalysisType)?.name} • Analyzed {formatDate(new Date().toISOString())}
                   </p>
-              </div>
-              <div className="flex items-center space-x-3">
-                {/* Export Buttons - Hidden on Mobile */}
-                {!isMobileDevice() && (
-                  <>
-                    <button 
-                      onClick={exportToPDF}
-                      disabled={isExporting}
-                      className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors flex items-center space-x-2 disabled:opacity-50"
-                      title="Export as PDF"
-                    >
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                      </svg>
-                      <span>PDF</span>
-                    </button>
-                    
-                    <button 
-                      onClick={exportToWord}
-                      disabled={isExporting}
-                      className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors flex items-center space-x-2 disabled:opacity-50"
-                      title="Export as Word Document"
-                    >
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                      </svg>
-                      <span>Word</span>
-                    </button>
-                  </>
-                )}
-                
-                <button 
-                  onClick={handleCloseAnalysis}
-                  className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors flex items-center space-x-2"
-                >
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                  <span>Close</span>
-                </button>
-              </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  {!isMobileDevice() && (
+                    <>
+                      <button 
+                        onClick={exportToPDF}
+                        disabled={isExporting}
+                        className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors flex items-center space-x-2 disabled:opacity-50 text-sm font-medium"
+                        title="Export as PDF"
+                      >
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <span>PDF</span>
+                      </button>
+                      
+                      <button 
+                        onClick={exportToWord}
+                        disabled={isExporting}
+                        className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors flex items-center space-x-2 disabled:opacity-50 text-sm font-medium"
+                        title="Export as Word Document"
+                      >
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <span>Word</span>
+                      </button>
+                    </>
+                  )}
+                  
+                  <button 
+                    onClick={handleCloseAnalysis}
+                    className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors flex items-center space-x-2 text-sm font-medium"
+                  >
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                    <span>Close</span>
+                  </button>
+                </div>
               </div>
             </div>
 
             {/* Legend */}
-            <div className="bg-gray-50 px-6 py-3 border-b border-gray-200">
-              <div className="flex items-center space-x-6 text-sm">
+            <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
+              <div className="flex flex-wrap items-center gap-6 text-sm">
                 <div className="flex items-center space-x-2">
-                  <div className="w-4 h-1 bg-green-400 rounded"></div>
+                  <div className="w-3 h-3 bg-green-400 rounded-full"></div>
                   <span className="text-gray-600">Strong sections</span>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <div className="w-4 h-1 bg-amber-400 rounded"></div>
+                  <div className="w-3 h-3 bg-amber-400 rounded-full"></div>
                   <span className="text-gray-600">Needs improvement</span>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <div className="w-4 h-1 bg-red-400 rounded"></div>
+                  <div className="w-3 h-3 bg-red-400 rounded-full"></div>
                   <span className="text-gray-600">Needs revision</span>
                 </div>
               </div>
@@ -1684,123 +1679,123 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
 
               {/* Annotations Panel */}
               <div className="w-full md:w-96 bg-gray-50 border-t md:border-t-0 md:border-l border-gray-200 overflow-y-auto max-h-[400px] md:max-h-none">
-                <div className="p-4 md:p-6">
-                  <h3 className="text-base md:text-lg font-semibold text-gray-900 mb-4 md:mb-6 flex items-center">
-                    <svg className="w-4 h-4 md:w-5 md:h-5 mr-2 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div className="p-5 md:p-6">
+                  <h3 className="text-lg font-bold text-gray-900 mb-5 flex items-center">
+                    <svg className="w-5 h-5 mr-2 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
                     </svg>
                     Annotations
                   </h3>
 
-                  <div className="space-y-4 md:space-y-6">
+                  <div className="space-y-6">
                     {/* Strong Points */}
-                <div>
-                      <div className="flex items-center space-x-2 mb-2 md:mb-3">
-                        <div className="flex items-center justify-center w-6 h-6 md:w-8 md:h-8 bg-green-100 rounded-lg">
+                    <div>
+                      <div className="flex items-center space-x-2 mb-3">
+                        <div className="flex items-center justify-center w-8 h-8 bg-green-100 rounded-xl">
                           {getAnnotationIcon('strong')}
                         </div>
-                        <h4 className="text-sm md:text-base font-medium text-green-800">Strong Points ({getFilteredAnnotations('strong').length})</h4>
+                        <h4 className="font-semibold text-green-800">Strong Points ({getFilteredAnnotations('strong').length})</h4>
                       </div>
                       <div className="space-y-2">
                         {getFilteredAnnotations('strong').map((annotation) => (
                           <div
                             key={annotation.id}
-                            className={`bg-green-50 rounded-lg p-3 md:p-4 border-l-4 border-green-400 shadow-sm hover:shadow-md transition-all cursor-pointer ${
+                            className={`bg-white rounded-xl p-4 border-l-4 border-green-400 shadow-sm hover:shadow-md transition-all cursor-pointer ${
                               selectedAnnotation === annotation.id ? 'ring-2 ring-blue-500' : ''
                             }`}
                             onClick={() => scrollToAnnotation(annotation.id)}
                             onMouseEnter={() => setHoveredAnnotation(annotation.id)}
                             onMouseLeave={() => setHoveredAnnotation(null)}
                           >
-                            <p className="text-xs md:text-sm text-gray-700 font-medium mb-1">{annotation.comment}</p>
+                            <p className="text-sm text-gray-700 font-medium mb-1">{annotation.comment}</p>
                             {annotation.suggestion && (
                               <p className="text-xs text-gray-500 italic">{annotation.suggestion}</p>
                             )}
-                  </div>
+                          </div>
                         ))}
-                  </div>
-                </div>
+                      </div>
+                    </div>
 
                     {/* Areas to Improve */}
-                <div>
-                      <div className="flex items-center space-x-2 mb-2 md:mb-3">
-                        <div className="flex items-center justify-center w-6 h-6 md:w-8 md:h-8 bg-amber-100 rounded-lg">
+                    <div>
+                      <div className="flex items-center space-x-2 mb-3">
+                        <div className="flex items-center justify-center w-8 h-8 bg-amber-100 rounded-xl">
                           {getAnnotationIcon('improve')}
                         </div>
-                        <h4 className="text-sm md:text-base font-medium text-amber-800">Areas to Improve ({getFilteredAnnotations('improve').length})</h4>
+                        <h4 className="font-semibold text-amber-800">Areas to Improve ({getFilteredAnnotations('improve').length})</h4>
                       </div>
                       <div className="space-y-2">
                         {getFilteredAnnotations('improve').map((annotation) => (
                           <div
                             key={annotation.id}
-                            className={`bg-amber-50 rounded-lg p-3 md:p-4 border-l-4 border-amber-400 shadow-sm hover:shadow-md transition-all cursor-pointer ${
+                            className={`bg-white rounded-xl p-4 border-l-4 border-amber-400 shadow-sm hover:shadow-md transition-all cursor-pointer ${
                               selectedAnnotation === annotation.id ? 'ring-2 ring-blue-500' : ''
                             }`}
                             onClick={() => scrollToAnnotation(annotation.id)}
                             onMouseEnter={() => setHoveredAnnotation(annotation.id)}
                             onMouseLeave={() => setHoveredAnnotation(null)}
                           >
-                            <p className="text-xs md:text-sm text-gray-700 font-medium mb-1">{annotation.comment}</p>
+                            <p className="text-sm text-gray-700 font-medium mb-1">{annotation.comment}</p>
                             {annotation.suggestion && (
                               <p className="text-xs text-gray-500 italic">{annotation.suggestion}</p>
                             )}
-                  </div>
+                          </div>
                         ))}
-                  </div>
-                </div>
+                      </div>
+                    </div>
 
                     {/* Serious Concerns */}
-                <div>
-                      <div className="flex items-center space-x-2 mb-2 md:mb-3">
-                        <div className="flex items-center justify-center w-6 h-6 md:w-8 md:h-8 bg-red-100 rounded-lg">
+                    <div>
+                      <div className="flex items-center space-x-2 mb-3">
+                        <div className="flex items-center justify-center w-8 h-8 bg-red-100 rounded-xl">
                           {getAnnotationIcon('concern')}
                         </div>
-                        <h4 className="text-sm md:text-base font-medium text-red-800">Serious Concerns ({getFilteredAnnotations('concern').length})</h4>
+                        <h4 className="font-semibold text-red-800">Serious Concerns ({getFilteredAnnotations('concern').length})</h4>
                       </div>
                       <div className="space-y-2">
                         {getFilteredAnnotations('concern').map((annotation) => (
                           <div
                             key={annotation.id}
-                            className={`bg-red-50 rounded-lg p-3 md:p-4 border-l-4 border-red-400 shadow-sm hover:shadow-md transition-all cursor-pointer ${
+                            className={`bg-white rounded-xl p-4 border-l-4 border-red-400 shadow-sm hover:shadow-md transition-all cursor-pointer ${
                               selectedAnnotation === annotation.id ? 'ring-2 ring-blue-500' : ''
                             }`}
                             onClick={() => scrollToAnnotation(annotation.id)}
                             onMouseEnter={() => setHoveredAnnotation(annotation.id)}
                             onMouseLeave={() => setHoveredAnnotation(null)}
                           >
-                            <p className="text-xs md:text-sm text-gray-700 font-medium mb-1">{annotation.comment}</p>
+                            <p className="text-sm text-gray-700 font-medium mb-1">{annotation.comment}</p>
                             {annotation.suggestion && (
                               <p className="text-xs text-gray-500 italic">{annotation.suggestion}</p>
                             )}
-                  </div>
+                          </div>
                         ))}
-                  </div>
-                </div>
-                
-                {/* Upgrade prompt for hidden annotations in sidebar */}
-                {currentPlan === 'free' && annotations.length > getFilteredAnnotations().length && (
-                  <div className="mt-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg">
-                    <div className="text-center">
-                      <div className="p-2 bg-blue-500 rounded-full mx-auto w-fit mb-3">
-                        <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m0 0v2m0-2h2m-2 0H9m12-9V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002-2v-9z" />
-                        </svg>
-                  </div>
-                      <h4 className="text-sm font-semibold text-gray-900 mb-1">
-                        {annotations.length - getFilteredAnnotations().length} more annotation{annotations.length - getFilteredAnnotations().length !== 1 ? 's' : ''}
-                      </h4>
-                      <p className="text-xs text-gray-600 mb-3">
-                        Upgrade to view all insights
-                      </p>
-                      <button
-                        onClick={() => onNavigate?.('billing')}
-                        className="px-3 py-1 text-xs bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-                      >
-                        Upgrade
-                      </button>
+                      </div>
                     </div>
-                  </div>
-                )}
+                
+                    {/* Upgrade prompt for hidden annotations */}
+                    {currentPlan === 'free' && annotations.length > getFilteredAnnotations().length && (
+                      <div className="p-5 bg-blue-50 border border-blue-200 rounded-xl">
+                        <div className="text-center">
+                          <div className="w-10 h-10 bg-blue-500 rounded-xl flex items-center justify-center mx-auto mb-3">
+                            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m0 0v2m0-2h2m-2 0H9m12-9V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002-2v-9z" />
+                            </svg>
+                          </div>
+                          <h4 className="font-semibold text-gray-900 mb-1">
+                            {annotations.length - getFilteredAnnotations().length} more annotation{annotations.length - getFilteredAnnotations().length !== 1 ? 's' : ''}
+                          </h4>
+                          <p className="text-sm text-gray-600 mb-4">
+                            Upgrade to view all insights
+                          </p>
+                          <button
+                            onClick={() => onNavigate?.('billing')}
+                            className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                          >
+                            Upgrade
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -1808,22 +1803,23 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
 
             {/* Summary Footer */}
             <div className="bg-gray-50 border-t border-gray-200 px-6 py-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-6">
-                  <div className="text-sm">
-                    <span className="text-gray-500">Word Count:</span>
-                    <span className="ml-2 font-semibold text-gray-900">{documentContent.split(' ').length}</span>
-                      </div>
-                  <div className="text-sm">
-                    <span className="text-gray-500">Citation Style:</span>
-                    <span className="ml-2 font-semibold text-gray-900">{selectedCitationStyle}</span>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div className="flex flex-wrap items-center gap-4 sm:gap-6">
+                  <div className="flex items-center gap-2">
+                    <span className="text-gray-500 text-sm">Word Count:</span>
+                    <span className="px-3 py-1 bg-white border border-gray-200 rounded-lg font-semibold text-gray-900 text-sm">{documentContent.split(' ').length}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-gray-500 text-sm">Citation Style:</span>
+                    <span className="px-3 py-1 bg-white border border-gray-200 rounded-lg font-semibold text-gray-900 text-sm">{selectedCitationStyle}</span>
                   </div>
                 </div>
-                <div className="flex space-x-3">
-                  <button className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-                    Export Report
-                  </button>
-                </div>
+                <button 
+                  onClick={exportToPDF}
+                  className="px-5 py-2.5 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 transition-colors"
+                >
+                  Export Report
+                </button>
               </div>
             </div>
           </div>

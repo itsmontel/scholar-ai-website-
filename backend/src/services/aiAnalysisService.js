@@ -13,9 +13,11 @@ class AIAnalysisService {
    * @param {string} researchTopic - The research topic or essay question
    * @param {string} citationStyle - Citation style (APA, Harvard, etc.)
    * @param {number} numberOfCitations - Number of citations to generate
+   * @param {number} minYear - Minimum publication year (optional)
+   * @param {string} yearRange - Year range selection (e.g., '5', '10', 'all')
    * @returns {Object} Citation search results
    */
-  async searchCitations(researchTopic, citationStyle = 'APA', numberOfCitations = 10) {
+  async searchCitations(researchTopic, citationStyle = 'APA', numberOfCitations = 10, minYear = null, yearRange = 'all') {
     try {
       // Check if OpenAI API key is configured
       if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY === 'your_openai_api_key_here') {
@@ -23,7 +25,7 @@ class AIAnalysisService {
         return await this.mockCitationSearch(researchTopic, citationStyle, numberOfCitations);
       }
 
-      const searchPrompt = this.getCitationSearchPrompt(researchTopic, citationStyle, numberOfCitations);
+      const searchPrompt = this.getCitationSearchPrompt(researchTopic, citationStyle, numberOfCitations, minYear, yearRange);
       
       // Use specified model for citation search
       const selectedModel = process.env.OPENAI_STANDARD_MODEL || 'gpt-4.1-mini';
@@ -58,6 +60,8 @@ class AIAnalysisService {
         searchStrategies: parsedCitations.searchStrategies,
         keywords: parsedCitations.keywords,
         citationStyle: citationStyle,
+        yearRange: yearRange,
+        minYear: minYear,
         timestamp: new Date().toISOString(),
         model: selectedModel
       };
@@ -2216,18 +2220,30 @@ When given a research topic or essay question, you should:
 3. Provide properly formatted citations in the requested citation style
 4. Include brief descriptions of why each source is relevant
 5. Suggest search keywords and strategies
-6. Recommend a mix of foundational and recent sources
+6. STRICTLY adhere to any year/date filters specified - if the user requests sources from a specific time period, ALL sources must fall within that range
 
-Focus on providing HIGH-QUALITY, CREDIBLE academic sources from reputable publishers, journals, and institutions. Prioritize peer-reviewed journal articles and authoritative books.`;
+Focus on providing HIGH-QUALITY, CREDIBLE academic sources from reputable publishers, journals, and institutions. Prioritize peer-reviewed journal articles and authoritative books.
+
+IMPORTANT: When a year filter is specified (e.g., "last 5 years"), you MUST ensure every single citation falls within that date range. Do not include any sources outside the specified time period, even if they are considered "foundational" or "classic" works.`;
   }
 
   /**
    * Get citation search prompt
    */
-  getCitationSearchPrompt(researchTopic, citationStyle = 'APA', numberOfCitations = 10) {
+  getCitationSearchPrompt(researchTopic, citationStyle = 'APA', numberOfCitations = 10, minYear = null, yearRange = 'all') {
+    // Build year constraint text based on filter
+    let yearConstraintText = '';
+    let yearRequirementText = 'Include a mix of recent (last 5 years) and foundational sources';
+    
+    if (minYear && yearRange !== 'all') {
+      const currentYear = new Date().getFullYear();
+      yearConstraintText = `\nYEAR FILTER: Only include sources published from ${minYear} to ${currentYear} (last ${yearRange} years). DO NOT include any sources older than ${minYear}.`;
+      yearRequirementText = `CRITICAL: ALL sources MUST be published between ${minYear} and ${currentYear}. Do NOT include ANY sources published before ${minYear}. This is a strict requirement - the user specifically requested sources from the last ${yearRange} years only.`;
+    }
+
     return `I need help finding relevant academic citations for the following research topic or essay question:
 
-RESEARCH TOPIC/QUESTION: "${researchTopic}"
+RESEARCH TOPIC/QUESTION: "${researchTopic}"${yearConstraintText}
 
 Please provide ${numberOfCitations} relevant academic sources formatted in ${citationStyle} citation style.
 
@@ -2257,12 +2273,13 @@ For each citation, provide the following in JSON format:
 IMPORTANT REQUIREMENTS:
 1. Provide REAL, PLAUSIBLE academic sources - they should sound like actual published works
 2. Use proper ${citationStyle} citation formatting with HTML tags for italics (journal names, book titles should be in <i></i> tags)
-3. Include a mix of recent (last 5 years) and foundational sources
+3. ${yearRequirementText}
 4. Focus on peer-reviewed journal articles and authoritative books
 5. Ensure citations are complete with all required elements (authors, year, title, publication) - DO NOT include fake DOI links or URLs unless you are certain they are real
 6. Make sure all sources are directly relevant to the research topic
 7. For ready_to_use_sentence: Write a well-developed academic passage (2-3 sentences) that the user can copy and paste directly into their paper. The passage should: (a) establish context for the citation, (b) naturally incorporate the in-text citation, (c) present key findings or arguments from the source, and (d) directly relate to "${researchTopic}". Make it substantive, scholarly, and immediately usable in an academic paper.
-8. For in_text_citation: Provide the exact format needed for in-text citations in ${citationStyle} style`;
+8. For in_text_citation: Provide the exact format needed for in-text citations in ${citationStyle} style
+9. The "year" field MUST contain the actual publication year as a 4-digit number (e.g., "2023")`;
   }
 
   /**
@@ -2376,9 +2393,9 @@ IMPORTANT REQUIREMENTS:
   /**
    * Save citation search to history
    */
-  async saveCitationSearch(userId, researchTopic, citationStyle, searchResults) {
+  async saveCitationSearch(userId, researchTopic, citationStyle, searchResults, yearRange = 'all') {
     try {
-      console.log('Saving citation search to history:', { userId, researchTopic, citationStyle });
+      console.log('Saving citation search to history:', { userId, researchTopic, citationStyle, yearRange });
       
       const { createClient } = require('@supabase/supabase-js');
       const supabase = createClient(
@@ -2386,6 +2403,8 @@ IMPORTANT REQUIREMENTS:
         process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
       );
 
+      // Note: yearRange is already included in searchResults.yearRange
+      // so we don't need a separate column - it's stored in the JSONB field
       const searchData = {
         user_id: userId,
         research_topic: researchTopic,
