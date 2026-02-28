@@ -16,6 +16,8 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
   const [citationStyle, setCitationStyle] = useState('APA');
   const [citationYearRange, setCitationYearRange] = useState('all');
   const [showFakeAnimation, setShowFakeAnimation] = useState(false);
+  const [showFakeResults, setShowFakeResults] = useState(false);
+  const [showFakeCitationResults, setShowFakeCitationResults] = useState(false);
   const [activeToolHover, setActiveToolHover] = useState<string | null>(null);
   const [activeHelpCategory, setActiveHelpCategory] = useState('essays');
 
@@ -142,13 +144,27 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
         style: citationStyle,
         yearRange: citationYearRange
       }));
+      setTimeout(() => {
+        setShowFakeAnimation(false);
+        setShowFakeCitationResults(true);
+      }, 15000);
     } else {
       localStorage.setItem('pendingAnalysis', JSON.stringify({ text: inputText }));
+      setTimeout(() => {
+        setShowFakeAnimation(false);
+        setShowFakeResults(true);
+      }, 15000);
     }
-    setTimeout(() => {
-      setShowFakeAnimation(false);
-      onNavigate('signup');
-    }, 3500);
+  };
+
+  const handleContinueToSignup = () => {
+    setShowFakeResults(false);
+    onNavigate('signup');
+  };
+
+  const handleContinueToSignupFromCitations = () => {
+    setShowFakeCitationResults(false);
+    onNavigate('signup');
   };
 
   const handleTopicClick = (topic: string) => {
@@ -1436,22 +1452,138 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
 
       {/* Loading Animations */}
       {showFakeAnimation && mode === 'citations' && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl p-8 max-w-sm mx-4 shadow-2xl text-center">
-            <div className="w-12 h-12 mx-auto mb-4">
-              <svg className="animate-spin w-12 h-12 text-blue-600" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                  </svg>
-                </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-1">Finding Citations</h3>
-            <p className="text-sm text-gray-500">Searching academic databases...</p>
-          </div>
-        </div>
+        <AnalysisAnimation isPopup={true} text="Finding citations for your topic" isComplete={false} variant="citations" />
       )}
 
       {showFakeAnimation && mode === 'analyze' && (
         <AnalysisAnimation isPopup={true} text="Analyzing your writing" isComplete={false} />
+      )}
+
+      {/* Fake Results Modal */}
+      {showFakeResults && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl p-6 sm:p-8 max-w-md w-full mx-4 shadow-2xl animate-fade-in">
+            {/* Character - concerned look */}
+            <div className="flex justify-center mb-4">
+              <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-24 h-24">
+                <ellipse cx="60" cy="60" rx="50" ry="52" fill="#FCD9B6" />
+                <path d="M20 48 Q16 20 38 12 Q60 2 82 12 Q104 20 100 48 Q96 32 80 22 Q60 12 40 22 Q24 32 20 48" fill="#D4A853" />
+                <path d="M20 48 Q12 70 20 90" fill="#D4A853" />
+                <path d="M100 48 Q108 70 100 90" fill="#D4A853" />
+                <ellipse cx="42" cy="55" rx="8" ry="9" fill="white" />
+                <ellipse cx="78" cy="55" rx="8" ry="9" fill="white" />
+                <ellipse cx="43" cy="57" rx="5" ry="6" fill="#1F2937" />
+                <ellipse cx="79" cy="57" rx="5" ry="6" fill="#1F2937" />
+                <circle cx="44" cy="55" r="2" fill="white" />
+                <circle cx="80" cy="55" r="2" fill="white" />
+                <path d="M32 42 Q42 36 52 42" stroke="#8B7355" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+                <path d="M68 42 Q78 36 88 42" stroke="#8B7355" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+                <path d="M45 82 Q60 74 75 82" stroke="#1F2937" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+                <ellipse cx="30" cy="70" rx="8" ry="5" fill="#FECACA" opacity="0.5" />
+                <ellipse cx="90" cy="70" rx="8" ry="5" fill="#FECACA" opacity="0.5" />
+              </svg>
+            </div>
+            
+            <h3 className="text-xl font-bold text-gray-900 text-center mb-2">Analysis Complete</h3>
+            <p className="text-gray-500 text-center text-sm mb-6">Your essay has been scanned — here's a quick preview</p>
+            
+            {/* Results Summary */}
+            <div className="space-y-3 mb-5">
+              <div className="flex items-start p-3.5 bg-red-50 rounded-xl border border-red-100">
+                <span className="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center mr-3 flex-shrink-0 mt-0.5">
+                  <svg className="w-4 h-4 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                </span>
+                <div>
+                  <p className="text-red-800 font-semibold text-sm">Critical issues detected</p>
+                  <p className="text-red-600 text-xs mt-0.5">Structural weaknesses and argument gaps that could significantly affect your grade</p>
+                </div>
+              </div>
+              
+              <div className="flex items-start p-3.5 bg-amber-50 rounded-xl border border-amber-100">
+                <span className="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center mr-3 flex-shrink-0 mt-0.5">
+                  <svg className="w-4 h-4 text-amber-600" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                </span>
+                <div>
+                  <p className="text-amber-800 font-semibold text-sm">Several areas need improvement</p>
+                  <p className="text-amber-600 text-xs mt-0.5">Grammar, clarity, and tone issues that should be addressed before submission</p>
+                </div>
+              </div>
+            </div>
+            
+            {/* Urgency text */}
+            <div className="bg-gray-50 rounded-xl p-3.5 mb-6">
+              <p className="text-gray-600 text-sm text-center leading-relaxed">
+                <span className="font-semibold text-gray-800">Don't submit yet.</span> View the full breakdown with specific line-by-line feedback to fix these issues.
+              </p>
+            </div>
+            
+            {/* CTA Button */}
+            <button
+              onClick={handleContinueToSignup}
+              className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all duration-200 hover:shadow-lg flex items-center justify-center"
+            >
+              View full analysis — it's free
+              <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Fake Citation Results Modal */}
+      {showFakeCitationResults && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl p-6 sm:p-8 max-w-md w-full mx-4 shadow-2xl animate-fade-in">
+            {/* Character - happy / excited with papers */}
+            <div className="flex justify-center mb-4">
+              <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-24 h-24">
+                <ellipse cx="60" cy="60" rx="50" ry="52" fill="#FCD9B6" />
+                <path d="M20 48 Q16 20 38 12 Q60 2 82 12 Q104 20 100 48 Q96 32 80 22 Q60 12 40 22 Q24 32 20 48" fill="#D4A853" />
+                <path d="M20 48 Q12 70 20 90" fill="#D4A853" />
+                <path d="M100 48 Q108 70 100 90" fill="#D4A853" />
+                <ellipse cx="42" cy="55" rx="8" ry="9" fill="white" />
+                <ellipse cx="78" cy="55" rx="8" ry="9" fill="white" />
+                <ellipse cx="43" cy="56" rx="5" ry="5" fill="#1F2937" />
+                <ellipse cx="79" cy="56" rx="5" ry="5" fill="#1F2937" />
+                <circle cx="44" cy="54" r="2" fill="white" />
+                <circle cx="80" cy="54" r="2" fill="white" />
+                <path d="M32 42 Q42 36 52 42" stroke="#8B7355" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+                <path d="M68 42 Q78 36 88 42" stroke="#8B7355" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+                <path d="M38 78 Q60 88 82 78" stroke="#1F2937" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+                <ellipse cx="30" cy="70" rx="8" ry="5" fill="#FECACA" opacity="0.5" />
+                <ellipse cx="90" cy="70" rx="8" ry="5" fill="#FECACA" opacity="0.5" />
+              </svg>
+            </div>
+            
+            <h3 className="text-xl font-bold text-gray-900 text-center mb-2">Citations Ready</h3>
+            <p className="text-gray-500 text-center text-sm mb-5">We found high-quality sources that match your topic</p>
+            
+            <div className="bg-green-50 rounded-xl border border-green-100 p-4 mb-5">
+              <p className="text-green-800 text-center text-sm leading-relaxed">
+                <span className="font-semibold">We've pulled together strong, relevant citations</span> for your paper — from peer-reviewed journals and academic sources that will strengthen your argument and reference list.
+              </p>
+            </div>
+            
+            <p className="text-gray-500 text-sm text-center mb-6">
+              Sign up free to view your full citation list, copy formatted references, and add them to your draft.
+            </p>
+            
+            <button
+              onClick={handleContinueToSignupFromCitations}
+              className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all duration-200 hover:shadow-lg flex items-center justify-center"
+            >
+              See my citations — it's free
+              <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              </svg>
+            </button>
+          </div>
+        </div>
       )}
     </main>
   );

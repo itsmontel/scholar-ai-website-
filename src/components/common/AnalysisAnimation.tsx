@@ -7,7 +7,32 @@ interface AnalysisAnimationProps {
   isPopup?: boolean;
   onComplete?: () => void;
   isComplete?: boolean;
+  variant?: 'analyze' | 'citations';
 }
+
+const analysisSteps = [
+  { text: 'Reading document...', icon: '📄' },
+  { text: 'Extracting text content...', icon: '📝' },
+  { text: 'Processing language patterns...', icon: '🔍' },
+  { text: 'Analyzing document structure...', icon: '📊' },
+  { text: 'Evaluating writing quality...', icon: '✨' },
+  { text: 'Identifying key insights...', icon: '💡' },
+  { text: 'Generating recommendations...', icon: '📋' },
+  { text: 'Creating annotations...', icon: '🏷️' },
+  { text: 'Finalizing analysis...', icon: '✅' }
+];
+
+const citationSteps = [
+  { text: 'Finding relevant sources...', icon: '🔍' },
+  { text: 'Searching academic databases...', icon: '📚' },
+  { text: 'Matching your topic...', icon: '📄' },
+  { text: 'Checking peer-reviewed journals...', icon: '📋' },
+  { text: 'Filtering by relevance...', icon: '✨' },
+  { text: 'Formatting citations...', icon: '🏷️' },
+  { text: 'Verifying sources...', icon: '✅' },
+  { text: 'Preparing your list...', icon: '📑' },
+  { text: 'Almost ready...', icon: '💡' }
+];
 
 const AnalysisAnimation: React.FC<AnalysisAnimationProps> = ({
   size = 'md',
@@ -15,7 +40,8 @@ const AnalysisAnimation: React.FC<AnalysisAnimationProps> = ({
   className = '',
   isPopup = false,
   onComplete,
-  isComplete = false
+  isComplete = false,
+  variant = 'analyze'
 }) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [dots, setDots] = useState('');
@@ -28,17 +54,7 @@ const AnalysisAnimation: React.FC<AnalysisAnimationProps> = ({
     lg: 'w-16 h-16'
   };
 
-  const analysisSteps = [
-    { text: 'Reading document...', icon: '📄' },
-    { text: 'Extracting text content...', icon: '📝' },
-    { text: 'Processing language patterns...', icon: '🔍' },
-    { text: 'Analyzing document structure...', icon: '📊' },
-    { text: 'Evaluating writing quality...', icon: '✨' },
-    { text: 'Identifying key insights...', icon: '💡' },
-    { text: 'Generating recommendations...', icon: '📋' },
-    { text: 'Creating annotations...', icon: '🏷️' },
-    { text: 'Finalizing analysis...', icon: '✅' }
-  ];
+  const steps = variant === 'citations' ? citationSteps : analysisSteps;
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -49,7 +65,7 @@ const AnalysisAnimation: React.FC<AnalysisAnimationProps> = ({
 
   useEffect(() => {
     if (isComplete) {
-      setCurrentStep(analysisSteps.length - 1);
+      setCurrentStep(steps.length - 1);
       setProgress(100);
       setIsCycling(false);
       if (onComplete) {
@@ -63,10 +79,10 @@ const AnalysisAnimation: React.FC<AnalysisAnimationProps> = ({
     }
 
     const interval = setInterval(() => {
-      setCurrentStep(prev => (prev + 1) % analysisSteps.length);
+      setCurrentStep(prev => (prev + 1) % steps.length);
     }, 3000);
     return () => clearInterval(interval);
-  }, [isComplete, onComplete, progress, isCycling]);
+  }, [isComplete, onComplete, progress, isCycling, steps.length]);
 
   useEffect(() => {
     if (isComplete) return;
@@ -149,14 +165,14 @@ const AnalysisAnimation: React.FC<AnalysisAnimationProps> = ({
 
             {/* Title */}
             <h3 className="text-xl font-bold text-gray-900 mb-2">
-              AI Analysis in Progress
+              {variant === 'citations' ? 'Finding Citations' : 'AI Analysis in Progress'}
             </h3>
             
             {/* Current step with icon */}
             <div className="flex items-center justify-center space-x-2 mb-4">
-              <span className="text-lg">{analysisSteps[currentStep].icon}</span>
+              <span className="text-lg">{steps[currentStep].icon}</span>
               <p className="text-gray-600">
-                {analysisSteps[currentStep].text}
+                {steps[currentStep].text}
               </p>
             </div>
 
@@ -181,7 +197,9 @@ const AnalysisAnimation: React.FC<AnalysisAnimationProps> = ({
             {/* Helpful tip */}
             <div className="mt-6 px-4 py-3 bg-blue-50 rounded-xl border border-blue-100 w-full">
               <p className="text-sm text-blue-700 text-center">
-                💡 Tip: Our AI analyzes structure, grammar, citations, and more!
+                {variant === 'citations'
+                  ? '💡 Tip: We search millions of peer-reviewed sources in your citation style.'
+                  : '💡 Tip: Our AI analyzes structure, grammar, citations, and more!'}
               </p>
             </div>
           </div>
@@ -204,7 +222,7 @@ const AnalysisAnimation: React.FC<AnalysisAnimationProps> = ({
 
       <div className="text-center">
         <p className="text-sm font-medium text-white mb-1">
-          {analysisSteps[currentStep].text}
+          {steps[currentStep].text}
         </p>
         <p className="text-xs text-white/80">
           {text}{dots}
