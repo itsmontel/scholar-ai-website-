@@ -291,7 +291,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
               {/* H1 - bigger */}
               <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-900 tracking-tight leading-tight mb-5 sm:mb-7">
             {mode === 'analyze' ? (
-                  <>Your essay — improved with <span className="text-blue-600">AI feedback</span></>
+                  <>Your essay — improved with <span className="text-blue-600">AI assistance</span></>
             ) : (
                   <>Find <span className="text-blue-600">academic citations</span> instantly</>
             )}
