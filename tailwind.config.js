@@ -39,7 +39,7 @@ module.exports = {
         'fade-in': 'fadeIn 0.6s ease-out',
         'slide-up': 'slideUp 0.4s ease-out',
         'bounce-slow': 'bounce 2s infinite',
-        'scroll-slow': 'scroll-slow 30s linear infinite',
+        'scroll-slow': 'scroll-slow 14s linear infinite',
       },
       keyframes: {
         fadeIn: {
@@ -52,7 +52,7 @@ module.exports = {
         },
         'scroll-slow': {
           '0%': { transform: 'translateX(0)' },
-          '100%': { transform: 'translateX(-50%)' },
+          '100%': { transform: 'translateX(-33.333%)' },
         }
       }
     },

@@ -2,18 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 
-/* University Carousel Animation - scrolls right to left, 30s loop, fast movement */
+/* University Carousel Animation - 3 sets; w-max makes track width = content so -33.33% = one set; 8s = fast scroll */
 @keyframes scroll-slow {
   0% {
     transform: translateX(0);
   }
   100% {
-    transform: translateX(-100%);
+    transform: translateX(-33.333%);
   }
 }
 
 .animate-scroll-slow {
-  animation: scroll-slow 30s linear infinite;
+  animation: scroll-slow 14s linear infinite;
 }
 
 /* Pause animation on hover */

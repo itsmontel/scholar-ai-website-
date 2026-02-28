@@ -238,7 +238,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
             
             <div className="flex items-center space-x-3">
               <a href="/login" onClick={(e) => { e.preventDefault(); onNavigate('login'); }} className="hidden sm:inline-flex px-4 py-2.5 text-base text-gray-700 hover:text-gray-900 font-medium rounded-lg hover:bg-gray-50 transition-colors">Log in</a>
-              <a href="/signup" onClick={(e) => { e.preventDefault(); onNavigate('signup'); }} className="inline-flex items-center px-5 py-2.5 bg-gray-900 text-white text-base font-semibold rounded-xl hover:bg-gray-800 transition-colors">
+              <a href="/signup" onClick={(e) => { e.preventDefault(); onNavigate('signup'); }} className="inline-flex items-center px-5 py-2.5 bg-gray-900 text-white text-base font-semibold rounded-xl hover:bg-gray-800 hover:shadow-md transition-all duration-200">
                 Get Started
               </a>
         </div>
@@ -289,7 +289,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
             {/* Main Content */}
             <div className="flex-1 text-center max-w-4xl mx-auto">
               {/* H1 - bigger */}
-              <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-900 tracking-tight leading-tight mb-5 sm:mb-7">
+              <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-900 tracking-tight leading-tight mb-5 sm:mb-7" style={{ letterSpacing: '-0.02em' }}>
             {mode === 'analyze' ? (
                   <>Your essay — improved with <span className="text-blue-600">AI assistance</span></>
             ) : (
@@ -316,7 +316,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
 
               {/* Mode Toggle - bigger */}
               <div className="flex justify-center mb-5">
-                <div className="inline-flex bg-gray-100 rounded-full p-1.5">
+                <div className="inline-flex bg-gray-100 rounded-full p-1.5 shadow-sm">
               <button
                     onClick={() => { setMode('analyze'); setInputText(''); }}
                     className={`px-5 sm:px-6 py-2.5 rounded-full text-base font-medium transition-all ${
@@ -336,8 +336,8 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
             </div>
           </div>
           
-              {/* Helper text */}
-              <p className="text-sm text-amber-600 mb-4 flex items-center justify-center">
+              {/* Helper text - left on mobile to avoid crowding character, center on larger screens */}
+              <p className="text-sm text-amber-600 mb-4 flex items-center justify-start md:justify-center">
                 <span className="mr-1.5">💡</span>
                 {mode === 'analyze' ? 'AI analyzes, you refine for submission' : 'Find sources, format citations automatically'}
               </p>
@@ -388,7 +388,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                 {/* Character illustration - positioned outside to the right */}
                 <CharacterIllustration />
                 
-                <div className="relative bg-white rounded-2xl border-2 border-gray-200 hover:border-gray-300 focus-within:border-blue-500 transition-colors shadow-sm">
+                <div className="relative bg-white rounded-2xl border-2 border-gray-200 hover:border-gray-300 focus-within:border-blue-500 focus-within:shadow-lg transition-all duration-200 shadow-sm">
                   <textarea
                     value={inputText}
                     onChange={(e) => setInputText(e.target.value)}
@@ -410,9 +410,9 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                   <button
                     onClick={handleSubmit}
                     disabled={!inputText.trim()}
-                    className={`px-8 py-3.5 rounded-xl flex items-center justify-center transition-all font-semibold text-base ${
+                    className={`px-8 py-3.5 rounded-xl flex items-center justify-center transition-all duration-200 font-semibold text-base ${
                       inputText.trim()
-                        ? 'bg-gray-900 hover:bg-gray-800 text-white shadow-lg hover:shadow-xl cursor-pointer'
+                        ? 'bg-gray-900 hover:bg-gray-800 text-white shadow-lg hover:shadow-xl hover:-translate-y-0.5 cursor-pointer'
                         : 'bg-gray-200 text-gray-400 cursor-not-allowed'
                     }`}
                   >
@@ -431,7 +431,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                       <button
                         key={idx}
                         onClick={() => handleTopicClick(topic)}
-                        className="px-4 py-2 bg-gray-50 hover:bg-gray-100 text-gray-700 text-sm sm:text-base rounded-lg border border-gray-200 hover:border-gray-300 transition-colors text-left"
+                        className="px-4 py-2 bg-gray-50 hover:bg-gray-100 text-gray-700 text-sm sm:text-base rounded-lg border border-gray-200 hover:border-gray-300 transition-all duration-200 hover:shadow-sm text-left"
                       >
                         {topic}
                       </button>
@@ -445,20 +445,24 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
       </section>
 
       {/* Trusted by Universities - Animated Carousel */}
-      <section className="py-10 bg-gray-50 border-y border-gray-100 overflow-hidden">
+      <section className="py-10 bg-gradient-to-r from-gray-50 via-white to-gray-50 border-y border-gray-100 overflow-hidden">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <p className="text-center text-gray-500 text-sm font-medium mb-8">Trusted by students around the world</p>
           <div className="relative">
-            <div className="flex animate-scroll-slow">
-                {/* First set of universities */}
+            <div className="flex w-max animate-scroll-slow">
+                {/* Three sets of universities for seamless loop and faster-feeling scroll */}
               {universities.map((uni, idx) => (
                 <div key={`first-${idx}`} className="flex-shrink-0 mx-8 sm:mx-12">
                   <span className={`text-lg sm:text-xl ${uni.className}`}>{uni.name}</span>
                   </div>
               ))}
-                {/* Duplicate set for seamless loop */}
               {universities.map((uni, idx) => (
                 <div key={`second-${idx}`} className="flex-shrink-0 mx-8 sm:mx-12">
+                  <span className={`text-lg sm:text-xl ${uni.className}`}>{uni.name}</span>
+                  </div>
+              ))}
+              {universities.map((uni, idx) => (
+                <div key={`third-${idx}`} className="flex-shrink-0 mx-8 sm:mx-12">
                   <span className={`text-lg sm:text-xl ${uni.className}`}>{uni.name}</span>
                   </div>
               ))}
@@ -504,7 +508,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                 </p>
                 <button
                   onClick={() => onNavigate('signup')}
-                  className="inline-flex items-center px-6 py-3 bg-gray-900 text-white font-semibold rounded-xl hover:bg-gray-800 transition-colors"
+                  className="inline-flex items-center px-6 py-3 bg-gray-900 text-white font-semibold rounded-xl hover:bg-gray-800 hover:-translate-y-0.5 hover:shadow-lg transition-all duration-200"
                 >
                   <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
@@ -967,7 +971,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
             {/* Structure Analysis - Asian man */}
-            <div className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-lg hover:border-gray-300 transition-all">
+            <div className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-lg hover:border-gray-300 hover:-translate-y-1 transition-all duration-200">
               <div className="w-14 h-14 rounded-full bg-blue-50 flex items-center justify-center mb-4 overflow-hidden">
                 <svg viewBox="0 0 56 56" fill="none" className="w-14 h-14">
                   <circle cx="28" cy="28" r="28" fill="#DBEAFE"/>
@@ -989,7 +993,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
             </div>
             
             {/* Grammar Check - Black woman */}
-            <div className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-lg hover:border-gray-300 transition-all">
+            <div className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-lg hover:border-gray-300 hover:-translate-y-1 transition-all duration-200">
               <div className="w-14 h-14 rounded-full bg-green-50 flex items-center justify-center mb-4 overflow-hidden">
                 <svg viewBox="0 0 56 56" fill="none" className="w-14 h-14">
                   <circle cx="28" cy="28" r="28" fill="#D1FAE5"/>
@@ -1015,7 +1019,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
             </div>
             
             {/* Citation Checker - White man with glasses */}
-            <div className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-lg hover:border-gray-300 transition-all">
+            <div className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-lg hover:border-gray-300 hover:-translate-y-1 transition-all duration-200">
               <div className="w-14 h-14 rounded-full bg-purple-50 flex items-center justify-center mb-4 overflow-hidden">
                 <svg viewBox="0 0 56 56" fill="none" className="w-14 h-14">
                   <circle cx="28" cy="28" r="28" fill="#F3E8FF"/>
@@ -1042,7 +1046,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
             </div>
             
             {/* Academic Tone - Hispanic woman */}
-            <div className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-lg hover:border-gray-300 transition-all">
+            <div className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-lg hover:border-gray-300 hover:-translate-y-1 transition-all duration-200">
               <div className="w-14 h-14 rounded-full bg-orange-50 flex items-center justify-center mb-4 overflow-hidden">
                 <svg viewBox="0 0 56 56" fill="none" className="w-14 h-14">
                   <circle cx="28" cy="28" r="28" fill="#FFEDD5"/>
@@ -1066,7 +1070,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
             </div>
             
             {/* Clarity Feedback - South Asian man */}
-            <div className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-lg hover:border-gray-300 transition-all">
+            <div className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-lg hover:border-gray-300 hover:-translate-y-1 transition-all duration-200">
               <div className="w-14 h-14 rounded-full bg-pink-50 flex items-center justify-center mb-4 overflow-hidden">
                 <svg viewBox="0 0 56 56" fill="none" className="w-14 h-14">
                   <circle cx="28" cy="28" r="28" fill="#FCE7F3"/>
@@ -1090,7 +1094,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
             </div>
             
             {/* Source Finder - East Asian woman */}
-            <div className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-lg hover:border-gray-300 transition-all">
+            <div className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-lg hover:border-gray-300 hover:-translate-y-1 transition-all duration-200">
               <div className="w-14 h-14 rounded-full bg-indigo-50 flex items-center justify-center mb-4 overflow-hidden">
                 <svg viewBox="0 0 56 56" fill="none" className="w-14 h-14">
                   <circle cx="28" cy="28" r="28" fill="#E0E7FF"/>
@@ -1162,10 +1166,10 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
 
           <div className="space-y-4">
             {faqs.map((faq, idx) => (
-              <div key={idx} className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+              <div key={idx} className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:border-gray-300 hover:shadow-sm transition-all duration-200">
                   <button
                   onClick={() => setOpenFAQ(openFAQ === idx ? null : idx)}
-                  className="w-full px-6 py-5 text-left flex items-center justify-between hover:bg-gray-50 transition-colors"
+                  className="w-full px-6 py-5 text-left flex items-center justify-between hover:bg-gray-50 transition-all duration-200"
                 >
                   <span className="font-medium text-gray-900 text-lg pr-4">{faq.question}</span>
                   <svg className={`w-5 h-5 text-gray-400 flex-shrink-0 transition-transform ${openFAQ === idx ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1225,21 +1229,29 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
             </div>
           </div>
           
-          <div className="flex items-center justify-center space-x-4 mb-12">
-            <span className={`text-base ${billingCycle === 'monthly' ? 'text-gray-900 font-medium' : 'text-gray-500'}`}>Monthly</span>
-                <button
-                  onClick={() => setBillingCycle(billingCycle === 'monthly' ? 'annual' : 'monthly')}
-              className="relative w-12 h-7 bg-gray-200 rounded-full transition-colors"
+          <div className="flex items-center justify-center gap-6 mb-12 flex-wrap">
+            <span className={`text-base flex-shrink-0 ${billingCycle === 'monthly' ? 'text-gray-900 font-medium' : 'text-gray-500'}`}>Monthly</span>
+            <button
+              onClick={() => setBillingCycle(billingCycle === 'monthly' ? 'annual' : 'monthly')}
+              className="relative w-14 h-7 flex-shrink-0 bg-gray-200 rounded-full transition-colors overflow-hidden"
+              aria-label={billingCycle === 'annual' ? 'Switch to monthly' : 'Switch to annual'}
             >
-              <span className={`absolute top-1 w-5 h-5 bg-white rounded-full shadow transition-transform ${billingCycle === 'annual' ? 'translate-x-6' : 'translate-x-1'}`} />
-                </button>
-            <span className={`text-base ${billingCycle === 'annual' ? 'text-gray-900 font-medium' : 'text-gray-500'}`}>Annual</span>
-            {billingCycle === 'annual' && <span className="text-sm bg-green-100 text-green-700 px-3 py-1 rounded-full font-medium">Save 17%</span>}
+              {/* Green fill shows selected side: left = Monthly, right = Annual */}
+              <span
+                className={`absolute inset-y-0 w-1/2 rounded-full bg-green-400 transition-all duration-200 ${billingCycle === 'annual' ? 'left-1/2' : 'left-0'}`}
+                aria-hidden
+              />
+              <span className={`absolute top-1 left-0 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 z-10 flex items-center justify-center ${billingCycle === 'annual' ? 'translate-x-8' : 'translate-x-1'}`}>
+                <span className="w-1.5 h-1.5 rounded-full bg-green-500" aria-hidden />
+              </span>
+            </button>
+            <span className={`text-base flex-shrink-0 min-w-[4rem] ${billingCycle === 'annual' ? 'text-gray-900 font-medium' : 'text-gray-500'}`}>Annual</span>
+            {billingCycle === 'annual' && <span className="text-sm bg-green-100 text-green-700 px-3 py-1 rounded-full font-medium flex-shrink-0">Save 17%</span>}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             {/* Free */}
-            <div className="bg-white border border-gray-200 rounded-2xl p-8">
+            <div className="bg-white border border-gray-200 rounded-2xl p-8 hover:shadow-lg hover:-translate-y-1 transition-all duration-200">
               <h3 className="text-xl font-bold text-gray-900 mb-1">Free</h3>
               <p className="text-base text-gray-500 mb-5">Perfect for getting started</p>
               <div className="text-4xl font-bold text-gray-900 mb-8">$0<span className="text-lg font-normal text-gray-500">/mo</span></div>
@@ -1250,11 +1262,11 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                 <li className="flex items-start"><svg className="w-5 h-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Email support</li>
                 <li className="flex items-start"><svg className="w-5 h-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Basic grammar check</li>
               </ul>
-              <button onClick={() => onNavigate('signup')} className="w-full py-3 bg-gray-100 hover:bg-gray-200 text-gray-900 font-medium rounded-xl transition-colors text-base">Get Started Free</button>
+              <button onClick={() => onNavigate('signup')} className="w-full py-3 bg-gray-100 hover:bg-gray-200 text-gray-900 font-medium rounded-xl transition-all duration-200 hover:shadow-sm text-base">Get Started Free</button>
             </div>
 
             {/* Starter */}
-            <div className="bg-white border-2 border-blue-500 rounded-2xl p-8 relative">
+            <div className="bg-white border-2 border-blue-500 rounded-2xl p-8 relative hover:shadow-xl hover:-translate-y-1 transition-all duration-200">
               <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-blue-500 text-white text-sm font-semibold px-4 py-1 rounded-full">Popular</div>
               <h3 className="text-xl font-bold text-gray-900 mb-1">Starter</h3>
               <p className="text-base text-gray-500 mb-5">Most popular for students</p>
@@ -1269,11 +1281,11 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                 <li className="flex items-start"><svg className="w-5 h-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Grammar and style checks</li>
                 <li className="flex items-start"><svg className="w-5 h-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Export in multiple file formats</li>
               </ul>
-              <button onClick={() => onNavigate('signup')} className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl transition-colors text-base">Get Started</button>
+              <button onClick={() => onNavigate('signup')} className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl transition-all duration-200 hover:shadow-md text-base">Get Started</button>
             </div>
 
             {/* Premium */}
-            <div className="bg-white border border-gray-200 rounded-2xl p-8">
+            <div className="bg-white border border-gray-200 rounded-2xl p-8 hover:shadow-lg hover:-translate-y-1 transition-all duration-200">
               <h3 className="text-xl font-bold text-gray-900 mb-1">Premium</h3>
               <p className="text-base text-gray-500 mb-5">For researchers and institutions</p>
               <div className="text-4xl font-bold text-gray-900 mb-8">
@@ -1287,7 +1299,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                 <li className="flex items-start"><svg className="w-5 h-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Advanced grammar and style checking</li>
                 <li className="flex items-start"><svg className="w-5 h-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Additional premium features</li>
               </ul>
-              <button onClick={() => onNavigate('signup')} className="w-full py-3 bg-gray-900 hover:bg-gray-800 text-white font-medium rounded-xl transition-colors text-base">Get Started</button>
+              <button onClick={() => onNavigate('signup')} className="w-full py-3 bg-gray-900 hover:bg-gray-800 text-white font-medium rounded-xl transition-all duration-200 hover:shadow-md text-base">Get Started</button>
             </div>
           </div>
             </div>
@@ -1307,7 +1319,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
               </p>
               <button 
                 onClick={() => onNavigate('signup')}
-                className="inline-flex items-center px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-colors shadow-lg hover:shadow-xl text-lg"
+                className="inline-flex items-center px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl hover:-translate-y-0.5 text-lg"
               >
                 Start Writing Better
                 <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
