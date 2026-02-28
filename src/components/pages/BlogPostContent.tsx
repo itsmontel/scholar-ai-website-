@@ -14,6 +14,99 @@ const h3 = 'text-lg font-semibold text-gray-900 mt-6 mb-2';
  */
 const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug }) => {
   switch (slug) {
+    case 'how-to-write-a-thesis-statement':
+      return (
+        <>
+          <p className={p}>
+            A thesis statement is the single sentence (or occasionally two) that tells your reader what your paper argues and why it matters. Every essay, research paper, or analytical piece needs one. A weak thesis leads to a weak paper; a clear, specific, arguable thesis gives your writing direction and makes it easier to stay focused from introduction to conclusion.
+          </p>
+          <p className={p}>
+            This guide explains what makes a thesis statement work, how to write one for different essay types, and common mistakes to avoid. We&apos;ll include concrete examples for argumentative, analytical, and expository essays so you can see the difference between a vague claim and a strong one.
+          </p>
+
+          <h2 className={h2}>What a thesis statement does</h2>
+          <p className={p}>
+            Your thesis tells the reader three things: what your topic is, what position you&apos;re taking on it, and (in most cases) the main reasons or structure of your argument. It usually appears at the end of your introduction, after you&apos;ve given enough context for the claim to make sense. The rest of your paper develops, supports, or explores that claim.
+          </p>
+          <p className={p}>
+            A good thesis is specific enough that a reader can tell immediately what the paper is about. It should be arguable — someone could reasonably disagree with it. And it should be supportable — you need to be able to back it up with evidence, analysis, or examples throughout the paper.
+          </p>
+
+          <h2 className={h2}>Argumentative thesis statements</h2>
+          <p className={p}>
+            Argumentative essays make a claim and defend it. Your thesis needs to take a clear position, not just describe a situation or ask a question. The reader should be able to identify your stance immediately.
+          </p>
+          <h3 className={h3}>Weak example</h3>
+          <p className={p}>
+            <em>Social media has become part of daily life for many people.</em>
+          </p>
+          <p className={p}>
+            This is a statement of fact, not an argument. No one would disagree with it, and it doesn&apos;t tell the reader what you intend to prove.
+          </p>
+          <h3 className={h3}>Strong example</h3>
+          <p className={p}>
+            <em>Excessive social media use among teenagers is linked to increased anxiety and decreased academic performance, and schools should limit device use during the school day to address these effects.</em>
+          </p>
+          <p className={p}>
+            This version makes a specific claim (the link to anxiety and academic performance), states a proposed action (limiting device use), and gives the reader a clear sense of what the paper will argue and why it matters.
+          </p>
+
+          <h2 className={h2}>Analytical thesis statements</h2>
+          <p className={p}>
+            Analytical essays break down a text, event, or concept to explain how or why it works the way it does. The thesis doesn&apos;t argue for a position so much as it makes a specific interpretive claim that your analysis will support.
+          </p>
+          <h3 className={h3}>Weak example</h3>
+          <p className={p}>
+            <em>In &quot;The Great Gatsby,&quot; Fitzgerald uses symbolism.</em>
+          </p>
+          <p className={p}>
+            Almost every novel uses symbolism. This tells the reader nothing about what the paper will actually say.
+          </p>
+          <h3 className={h3}>Strong example</h3>
+          <p className={p}>
+            <em>In &quot;The Great Gatsby,&quot; Fitzgerald uses the green light at the end of Daisy&apos;s dock to represent Gatsby&apos;s belief that the American Dream is always within reach yet permanently unattainable, ultimately showing that the dream itself is an illusion that destroys those who pursue it.</em>
+          </p>
+          <p className={p}>
+            This thesis identifies a specific symbol, states what it represents, and makes a claim about what that means for the novel&apos;s larger argument. Your analysis can now develop each part of that claim.
+          </p>
+
+          <h2 className={h2}>Expository thesis statements</h2>
+          <p className={p}>
+            Expository essays explain, describe, or inform rather than argue. The thesis still needs to be specific and focused. It tells the reader exactly what the essay will cover without trying to persuade.
+          </p>
+          <h3 className={h3}>Weak example</h3>
+          <p className={p}>
+            <em>This essay will discuss the causes of World War I.</em>
+          </p>
+          <p className={p}>
+            Telling the reader what the essay will do is not the same as making a focused claim. It&apos;s also unnecessary: the essay should speak for itself.
+          </p>
+          <h3 className={h3}>Strong example</h3>
+          <p className={p}>
+            <em>World War I was the result of three interconnected forces: militarism among European powers, a web of alliance commitments, and the destabilizing effects of nationalist movements in the Austro-Hungarian Empire.</em>
+          </p>
+          <p className={p}>
+            This gives the reader a clear roadmap: the essay will cover three causes and explain how they relate. Each body paragraph can address one cause in detail.
+          </p>
+
+          <h2 className={h2}>How to write your thesis: a process</h2>
+          <p className={p}>
+            Start with your topic and ask: what do I actually want to say about this? Write a draft claim. Then ask yourself: Is this specific? Could someone disagree with it? Can I support it with evidence? If the answers are yes, you&apos;re on the right track. If not, narrow your claim or add a &quot;because&quot; clause to force yourself to state your reasoning.
+          </p>
+          <p className={p}>
+            A useful formula for early drafts is: <em>[Subject] + [claim] + [because/by/through reason]</em>. You don&apos;t have to use this exact structure in the final version, but it helps you make sure all three elements are present. Revise your thesis after you&apos;ve written the rest of the paper, since your thinking often sharpens as you write.
+          </p>
+
+          <h2 className={h2}>Common mistakes</h2>
+          <p className={p}>
+            The most common errors are being too vague (a thesis that could describe hundreds of papers), too broad (a claim that would require a book to prove), too obvious (no one would disagree), or announcing instead of arguing (saying &quot;this essay will&quot; instead of making the claim directly). Another frequent problem is burying the thesis: it should appear at the end of the introduction, not the middle, and not in the conclusion.
+          </p>
+          <p className={p}>
+            Once you have a draft thesis, tools like WriteScholar can help you evaluate whether it&apos;s clear and well-positioned within your introduction, and flag if your body paragraphs actually support the claim you&apos;ve made. A strong thesis is the foundation of a strong paper — getting it right early saves significant revision time later.
+          </p>
+        </>
+      );
+
     case 'how-to-write-apa-research-paper':
       return (
         <>

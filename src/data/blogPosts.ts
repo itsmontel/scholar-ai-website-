@@ -14,6 +14,14 @@ export interface BlogPostMeta {
 
 export const blogPostList: BlogPostMeta[] = [
   {
+    slug: 'how-to-write-a-thesis-statement',
+    title: 'How to Write a Thesis Statement: Examples for Any Essay',
+    description: 'Learn how to write a clear, arguable thesis statement for any essay or research paper. Includes examples for argumentative, analytical, and expository writing.',
+    date: '2026-02-28',
+    author: 'WriteScholar Team',
+    readTime: '4 min read'
+  },
+  {
     slug: 'how-to-write-apa-research-paper',
     title: 'How to Write an APA Research Paper: Complete Guide (2026)',
     description: 'Step-by-step guide to formatting and writing an APA research paper, from title page to references. Get the structure right and avoid common mistakes.',
