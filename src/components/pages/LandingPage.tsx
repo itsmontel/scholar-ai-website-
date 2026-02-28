@@ -80,12 +80,13 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
   ];
 
   const universities = [
-    { name: 'Cambridge', logo: 'Cambridge' },
-    { name: 'Stanford', logo: 'Stanford' },
-    { name: 'Princeton', logo: 'Princeton' },
-    { name: 'Harvard', logo: 'Harvard' },
-    { name: 'Oxford', logo: 'Oxford' },
-    { name: 'MIT', logo: 'MIT' }
+    { name: 'Harvard', className: 'university-harvard' },
+    { name: 'Yale', className: 'university-yale' },
+    { name: 'Stanford', className: 'university-stanford' },
+    { name: 'MIT', className: 'university-mit' },
+    { name: 'Oxford', className: 'university-oxford' },
+    { name: 'Cambridge', className: 'university-cambridge' },
+    { name: 'Princeton', className: 'university-princeton' }
   ];
 
   useEffect(() => {
@@ -148,80 +149,6 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
     </div>
   );
 
-  // Demo screenshots for "See WriteScholar in Action"
-  const DemoScreenshot = ({ step }: { step: number }) => {
-    if (step === 1) {
-      return (
-        <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden">
-          <div className="bg-gray-100 px-4 py-3 flex items-center space-x-2">
-            <div className="w-3 h-3 rounded-full bg-red-400"></div>
-            <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
-            <div className="w-3 h-3 rounded-full bg-green-400"></div>
-            <span className="ml-4 text-sm text-gray-500">WriteScholar</span>
-          </div>
-          <div className="p-6">
-            <div className="bg-gray-50 rounded-xl p-4 border border-gray-200 mb-4">
-              <div className="space-y-2">
-                <div className="h-3 bg-gray-300 rounded w-full"></div>
-                <div className="h-3 bg-gray-300 rounded w-11/12"></div>
-                <div className="h-3 bg-gray-300 rounded w-full"></div>
-                <div className="h-3 bg-blue-300 rounded w-9/12"></div>
-                <div className="h-3 bg-gray-300 rounded w-full"></div>
-                <div className="h-3 bg-gray-300 rounded w-10/12"></div>
-              </div>
-            </div>
-            <div className="flex justify-end">
-              <div className="bg-blue-600 text-white text-sm px-4 py-2 rounded-lg font-medium">Analyze Essay</div>
-            </div>
-          </div>
-        </div>
-      );
-    }
-    if (step === 2) {
-      return (
-        <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden">
-          <div className="bg-gray-100 px-4 py-3 flex items-center space-x-2">
-            <div className="w-3 h-3 rounded-full bg-red-400"></div>
-            <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
-            <div className="w-3 h-3 rounded-full bg-green-400"></div>
-            <span className="ml-4 text-sm text-gray-500">Analysis Results</span>
-          </div>
-          <div className="p-6">
-            <div className="grid grid-cols-2 gap-4 mb-4">
-              <div className="bg-green-50 rounded-xl p-4 border border-green-200">
-                <div className="flex items-center mb-2">
-                  <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center mr-2">
-                    <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>
-                  </div>
-                  <span className="font-semibold text-gray-900">Structure</span>
-                </div>
-                <p className="text-sm text-green-700">Strong thesis statement</p>
-              </div>
-              <div className="bg-yellow-50 rounded-xl p-4 border border-yellow-200">
-                <div className="flex items-center mb-2">
-                  <div className="w-8 h-8 bg-yellow-500 rounded-lg flex items-center justify-center mr-2">
-                    <span className="text-white font-bold text-sm">!</span>
-                  </div>
-                  <span className="font-semibold text-gray-900">Citations</span>
-                </div>
-                <p className="text-sm text-yellow-700">2 formatting issues</p>
-              </div>
-            </div>
-            <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
-              <div className="flex items-center mb-2">
-                <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center mr-2">
-                  <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/><path fillRule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clipRule="evenodd"/></svg>
-                </div>
-                <span className="font-semibold text-gray-900">Grammar & Clarity</span>
-              </div>
-              <p className="text-sm text-blue-700">5 suggestions to improve readability</p>
-            </div>
-          </div>
-        </div>
-      );
-    }
-    return null;
-  };
 
   return (
     <main className="min-h-screen bg-white" role="main">
@@ -420,16 +347,25 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
         </div>
       </section>
 
-      {/* Trusted by Universities */}
-      <section className="py-12 bg-gray-50 border-y border-gray-100">
+      {/* Trusted by Universities - Animated Carousel */}
+      <section className="py-10 bg-gray-50 border-y border-gray-100 overflow-hidden">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <p className="text-center text-gray-500 text-sm font-medium mb-8">Trusted by students around the world</p>
-          <div className="flex flex-wrap justify-center items-center gap-8 sm:gap-12 lg:gap-16">
-            {universities.map((uni) => (
-              <div key={uni.name} className="text-gray-400 hover:text-gray-600 transition-colors">
-                <span className="text-lg sm:text-xl font-semibold tracking-wide">{uni.logo}</span>
-              </div>
-            ))}
+          <div className="relative">
+            <div className="flex animate-scroll-slow">
+              {/* First set of universities */}
+              {universities.map((uni, idx) => (
+                <div key={`first-${idx}`} className="flex-shrink-0 mx-8 sm:mx-12">
+                  <span className={`text-lg sm:text-xl ${uni.className}`}>{uni.name}</span>
+                </div>
+              ))}
+              {/* Duplicate set for seamless loop */}
+              {universities.map((uni, idx) => (
+                <div key={`second-${idx}`} className="flex-shrink-0 mx-8 sm:mx-12">
+                  <span className={`text-lg sm:text-xl ${uni.className}`}>{uni.name}</span>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -441,42 +377,63 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
             See WriteScholar in Action
           </h2>
           <p className="text-lg text-gray-600 text-center mb-16 max-w-2xl mx-auto">
-            Watch how our AI analyzes your writing and provides detailed, actionable feedback
+            Real examples of how our AI analyzes and improves academic writing
           </p>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-            {/* Step 1 */}
-            <div className="order-2 lg:order-1">
-              <div className="bg-blue-50 rounded-full w-12 h-12 flex items-center justify-center text-blue-600 font-bold text-lg mb-4">1</div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-3">Paste Your Text</h3>
-              <p className="text-gray-600 text-lg leading-relaxed mb-4">
-                Simply paste your essay, research paper, or thesis into our editor. We support documents of any length, from short essays to full dissertations.
-              </p>
-              <ul className="space-y-2 text-gray-600">
-                <li className="flex items-center"><svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Copy-paste from any source</li>
-                <li className="flex items-center"><svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Upload PDF or DOCX</li>
-                <li className="flex items-center"><svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Supports any length</li>
-              </ul>
-            </div>
-            <div className="order-1 lg:order-2">
-              <DemoScreenshot step={1} />
+          {/* Screenshot Showcase */}
+          <div className="space-y-16">
+            {/* Philosophy Essay Example */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+              <div className="order-2 lg:order-1">
+                <div className="inline-flex items-center px-3 py-1.5 bg-purple-100 text-purple-700 rounded-full text-sm font-medium mb-4">
+                  Philosophy Essay
+                </div>
+                <h3 className="text-2xl font-bold text-gray-900 mb-3">Philosophy Essay Analysis</h3>
+                <p className="text-gray-600 text-lg leading-relaxed mb-4">
+                  See how WriteScholar analyzes a philosophy paper on justice and ethics, providing detailed feedback on argument structure, citation formatting, and academic tone.
+                </p>
+                <ul className="space-y-2 text-gray-600">
+                  <li className="flex items-center"><svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Strong thesis identification</li>
+                  <li className="flex items-center"><svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>APA citation validation</li>
+                  <li className="flex items-center"><svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Areas for improvement highlighted</li>
+                </ul>
+              </div>
+              <div className="order-1 lg:order-2">
+                <div className="rounded-2xl overflow-hidden shadow-2xl border border-gray-200">
+                  <img 
+                    src="/Philosophy.png" 
+                    alt="Philosophy essay analysis showing document feedback with structure analysis, citation checking, and improvement suggestions"
+                    className="w-full h-auto"
+                  />
+                </div>
+              </div>
             </div>
 
-            {/* Step 2 */}
-            <div className="order-3 lg:order-3 mt-12 lg:mt-0">
-              <DemoScreenshot step={2} />
-            </div>
-            <div className="order-4 lg:order-4">
-              <div className="bg-blue-50 rounded-full w-12 h-12 flex items-center justify-center text-blue-600 font-bold text-lg mb-4">2</div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-3">Get Detailed Feedback</h3>
-              <p className="text-gray-600 text-lg leading-relaxed mb-4">
-                Our AI analyzes your writing in seconds, providing comprehensive feedback on structure, grammar, citations, and academic tone.
-              </p>
-              <ul className="space-y-2 text-gray-600">
-                <li className="flex items-center"><svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Structure analysis</li>
-                <li className="flex items-center"><svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Citation validation</li>
-                <li className="flex items-center"><svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Grammar suggestions</li>
-              </ul>
+            {/* Multicultural Film Paper Example */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+              <div className="order-1 lg:order-1">
+                <div className="rounded-2xl overflow-hidden shadow-2xl border border-gray-200">
+                  <img 
+                    src="/Multiculturalfilmpaper.png" 
+                    alt="Multicultural film paper analysis showing comprehensive AI feedback on academic writing"
+                    className="w-full h-auto"
+                  />
+                </div>
+              </div>
+              <div className="order-2 lg:order-2">
+                <div className="inline-flex items-center px-3 py-1.5 bg-blue-100 text-blue-700 rounded-full text-sm font-medium mb-4">
+                  Film Studies
+                </div>
+                <h3 className="text-2xl font-bold text-gray-900 mb-3">Film Studies Paper Analysis</h3>
+                <p className="text-gray-600 text-lg leading-relaxed mb-4">
+                  Watch WriteScholar analyze a multicultural film studies paper, identifying areas for clarity improvement and ensuring proper academic formatting.
+                </p>
+                <ul className="space-y-2 text-gray-600">
+                  <li className="flex items-center"><svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Paragraph flow analysis</li>
+                  <li className="flex items-center"><svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Grammar improvements</li>
+                  <li className="flex items-center"><svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Detailed suggestions</li>
+                </ul>
+              </div>
             </div>
           </div>
         </div>
