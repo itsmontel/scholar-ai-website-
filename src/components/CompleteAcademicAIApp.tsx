@@ -29,6 +29,16 @@ import UnsubscribePage from './pages/UnsubscribePage';
 import BlogPage from './pages/BlogPage';
 import BlogPostPage from './pages/BlogPostPage';
 
+// Import free tool pages
+import WordCounterPage from './pages/tools/WordCounterPage';
+import CitationGeneratorToolPage from './pages/tools/CitationGeneratorToolPage';
+import ReadabilityScorePage from './pages/tools/ReadabilityScorePage';
+import ParaphrasingTipsPage from './pages/tools/ParaphrasingTipsPage';
+import EssayOutlineGeneratorPage from './pages/tools/EssayOutlineGeneratorPage';
+import TextCaseConverterPage from './pages/tools/TextCaseConverterPage';
+import ThesisGeneratorPage from './pages/tools/ThesisGeneratorPage';
+import GrammarCheckerPage from './pages/tools/GrammarCheckerPage';
+
 // Import common components
 import ErrorBoundary from './common/ErrorBoundary';
 import PromoBanner from './common/PromoBanner';
@@ -96,7 +106,15 @@ const AcademicAIApp = () => {
     terms: { title: 'Terms of Service | WriteScholar', description: 'WriteScholar terms of service.' },
     login: { title: 'Log in | WriteScholar', description: 'Log in to your WriteScholar account.' },
     signup: { title: 'Sign up | WriteScholar', description: 'Create your free WriteScholar account.' },
-    blog: { title: 'Blog | WriteScholar', description: 'Guides on APA research papers, citation checker tools, grammar for academic writing, and how to use AI writing assistants for students.' }
+    blog: { title: 'Blog | WriteScholar', description: 'Guides on APA research papers, citation checker tools, grammar for academic writing, and how to use AI writing assistants for students.' },
+    'word-counter': { title: 'Free Word Counter Tool | WriteScholar', description: 'Count words, characters, sentences, and paragraphs instantly. Free online word counter for essays, academic papers, and assignments with word limits.' },
+    'citation-generator-tool': { title: 'Free Citation Generator - APA, MLA, Chicago, Harvard | WriteScholar', description: 'Generate properly formatted citations in APA, MLA, Chicago, and Harvard styles. Free citation generator for research papers, essays, and bibliographies.' },
+    'readability-score': { title: 'Free Readability Score Calculator | WriteScholar', description: 'Check your text readability with Flesch-Kincaid scores. Free readability checker shows grade level and reading ease for academic writing.' },
+    'paraphrasing-tips': { title: 'Free Paraphrasing Tips Tool | WriteScholar', description: 'Find overused words, passive voice, and wordy phrases in your writing. Free paraphrasing helper with synonym suggestions for better academic writing.' },
+    'essay-outline': { title: 'Free Essay Outline Generator | WriteScholar', description: 'Generate structured essay outlines for argumentative, expository, narrative, compare-contrast, persuasive, and research papers. Free outline templates.' },
+    'text-case-converter': { title: 'Free Text Case Converter | WriteScholar', description: 'Convert text to UPPERCASE, lowercase, Title Case, Sentence case, and more. Perfect for formatting titles, headings, and fixing caps lock mistakes.' },
+    'thesis-generator': { title: 'Free Thesis Statement Generator | WriteScholar', description: 'Create strong thesis statements for argumentative, expository, analytical, and compare-contrast essays. Template-based thesis builder.' },
+    'grammar-checker': { title: 'Free Grammar Checker | WriteScholar', description: 'Check your writing for common spelling mistakes, grammar errors, punctuation issues, and style suggestions. Quick client-side grammar check.' }
   };
   useEffect(() => {
     const meta = pageMeta[currentPage];
@@ -262,6 +280,15 @@ const AcademicAIApp = () => {
         if (slug) return 'blog-post';
         return 'blog';
       }
+      // Free Tools routes
+      if (pathname === '/tools/word-counter' || pathname === '/word-counter') return 'word-counter';
+      if (pathname === '/tools/citation-generator' || pathname === '/citation-generator-tool') return 'citation-generator-tool';
+      if (pathname === '/tools/readability-score' || pathname === '/readability-score') return 'readability-score';
+      if (pathname === '/tools/paraphrasing-tips' || pathname === '/paraphrasing-tips') return 'paraphrasing-tips';
+      if (pathname === '/tools/essay-outline' || pathname === '/essay-outline') return 'essay-outline';
+      if (pathname === '/tools/text-case-converter' || pathname === '/text-case-converter') return 'text-case-converter';
+      if (pathname === '/tools/thesis-generator' || pathname === '/thesis-generator') return 'thesis-generator';
+      if (pathname === '/tools/grammar-checker' || pathname === '/grammar-checker') return 'grammar-checker';
       return 'landing';
     };
     
@@ -535,6 +562,23 @@ const AcademicAIApp = () => {
         return <AccountPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'billing':
         return <BillingPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
+      // Free Tools
+      case 'word-counter':
+        return <WordCounterPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
+      case 'citation-generator-tool':
+        return <CitationGeneratorToolPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
+      case 'readability-score':
+        return <ReadabilityScorePage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
+      case 'paraphrasing-tips':
+        return <ParaphrasingTipsPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
+      case 'essay-outline':
+        return <EssayOutlineGeneratorPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
+      case 'text-case-converter':
+        return <TextCaseConverterPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
+      case 'thesis-generator':
+        return <ThesisGeneratorPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
+      case 'grammar-checker':
+        return <GrammarCheckerPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'admin':
         return <AdminDashboard onNavigate={navigateTo} user={user} />;
       case 'collaboration':
