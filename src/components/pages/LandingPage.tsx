@@ -193,64 +193,72 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
     e.target.value = '';
   };
 
-  // Character illustration component - positioned outside the text area
-  // Mobile: head only, top-right corner | Desktop: full body with pointing arm
+  // Character illustration - man peeking over the right edge of the text box
   const CharacterIllustration = () => (
     <>
-      {/* Mobile version - head only, positioned top-right */}
-      <div className="absolute -right-2 -top-10 w-14 h-14 sm:hidden pointer-events-none z-10">
+      {/* Mobile version - small head peeking over top-right corner */}
+      <div className="absolute -right-2 -top-9 w-14 h-14 sm:hidden pointer-events-none z-20">
         <svg viewBox="0 0 70 70" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="35" cy="28" r="20" fill="#E8B796" />
+          <path d="M15 24 Q14 8 28 4 Q35 1 42 4 Q56 8 55 24 Q52 16 42 12 Q35 8 28 12 Q18 16 15 24" fill="#4A3728" />
+          <path d="M15 24 Q10 30 15 36" fill="#4A3728" />
+          <path d="M55 24 Q60 30 55 36" fill="#4A3728" />
+          <ellipse cx="28" cy="28" rx="3" ry="3.5" fill="#1F2937" />
+          <ellipse cx="42" cy="28" rx="3" ry="3.5" fill="#1F2937" />
+          <circle cx="29" cy="26.5" r="1.2" fill="white" />
+          <circle cx="43" cy="26.5" r="1.2" fill="white" />
+          <path d="M28 40 Q35 46 42 40" stroke="#1F2937" strokeWidth="2" fill="none" strokeLinecap="round" />
+          <circle cx="20" cy="34" r="3" fill="#FECACA" opacity="0.5" />
+          <circle cx="50" cy="34" r="3" fill="#FECACA" opacity="0.5" />
+          <ellipse cx="26" cy="55" rx="6" ry="5" fill="#E8B796" />
+          <ellipse cx="44" cy="55" rx="6" ry="5" fill="#E8B796" />
+        </svg>
+      </div>
+
+      {/* Desktop - man peeking from behind right edge, hands gripping the top */}
+      <div className="absolute hidden sm:block -right-8 xl:-right-16 pointer-events-none z-20" style={{ top: '-110px', width: '120px', height: '160px' }}>
+        <svg viewBox="0 0 120 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+          {/* Body - light blue shirt, cut off at bottom (behind the box) */}
+          <path d="M35 105 Q35 130 60 138 Q85 130 85 105" fill="#60A5FA" />
+          <path d="M48 101 L60 112 L72 101" stroke="#3B82F6" strokeWidth="2" fill="none" />
+          {/* Neck */}
+          <rect x="52" y="88" width="16" height="18" rx="2" fill="#E8B796" />
           {/* Head */}
-          <circle cx="35" cy="38" r="22" fill="#FCD9B6" />
-          {/* Hair */}
-          <path d="M13 32 Q15 12 35 16 Q55 12 57 32 Q61 22 49 18 Q35 8 21 18 Q9 22 13 32" fill="#4B5563" />
-          {/* Eyes */}
-          <circle cx="27" cy="36" r="3.5" fill="#1F2937" />
-          <circle cx="43" cy="36" r="3.5" fill="#1F2937" />
-          <circle cx="28" cy="34.5" r="1.2" fill="white" />
-          <circle cx="44" cy="34.5" r="1.2" fill="white" />
-          {/* Eyebrows */}
-          <path d="M22 28 Q27 25 32 28" stroke="#4B5563" strokeWidth="1.5" fill="none" strokeLinecap="round" />
-          <path d="M38 28 Q43 25 48 28" stroke="#4B5563" strokeWidth="1.5" fill="none" strokeLinecap="round" />
-          {/* Smile */}
-          <path d="M27 48 Q35 55 43 48" stroke="#1F2937" strokeWidth="2" fill="none" strokeLinecap="round" />
-          {/* Cheeks (blush) */}
-          <circle cx="20" cy="44" r="3" fill="#FECACA" opacity="0.5" />
-          <circle cx="50" cy="44" r="3" fill="#FECACA" opacity="0.5" />
-                        </svg>
-                      </div>
-      
-      {/* Tablet/Desktop version - full body with arm */}
-      <div className="absolute hidden sm:block sm:right-4 sm:top-0 sm:w-24 sm:h-32 xl:-right-32 xl:w-28 xl:h-36 pointer-events-none z-10">
-        <svg viewBox="0 0 100 130" fill="none" xmlns="http://www.w3.org/2000/svg">
-          {/* Body */}
-          <ellipse cx="50" cy="115" rx="18" ry="8" fill="#E0E7FF" />
-          <path d="M36 65 Q36 100 50 108 Q64 100 64 65" fill="#6366F1" />
-          {/* Head */}
-          <circle cx="50" cy="38" r="22" fill="#FCD9B6" />
-          {/* Hair */}
-          <path d="M28 32 Q30 12 50 16 Q70 12 72 32 Q76 22 64 18 Q50 8 36 18 Q24 22 28 32" fill="#4B5563" />
-          {/* Eyes */}
-          <circle cx="42" cy="36" r="3.5" fill="#1F2937" />
-          <circle cx="58" cy="36" r="3.5" fill="#1F2937" />
-          <circle cx="43" cy="34.5" r="1.2" fill="white" />
-          <circle cx="59" cy="34.5" r="1.2" fill="white" />
-          {/* Eyebrows */}
-          <path d="M37 28 Q42 25 47 28" stroke="#4B5563" strokeWidth="1.5" fill="none" strokeLinecap="round" />
-          <path d="M53 28 Q58 25 63 28" stroke="#4B5563" strokeWidth="1.5" fill="none" strokeLinecap="round" />
-          {/* Smile */}
-          <path d="M42 48 Q50 55 58 48" stroke="#1F2937" strokeWidth="2" fill="none" strokeLinecap="round" />
-          {/* Arm pointing left toward input */}
-          <path d="M36 75 Q15 82 5 95" stroke="#FCD9B6" strokeWidth="8" fill="none" strokeLinecap="round" />
-          <circle cx="3" cy="98" r="5" fill="#FCD9B6" />
-          {/* Shirt collar */}
-          <path d="M42 62 L50 68 L58 62" stroke="white" strokeWidth="2" fill="none" />
-          {/* Cheeks (blush) */}
-          <circle cx="35" cy="44" r="3" fill="#FECACA" opacity="0.5" />
-          <circle cx="65" cy="44" r="3" fill="#FECACA" opacity="0.5" />
-                        </svg>
-                  </div>
-                </>
+          <ellipse cx="60" cy="52" rx="30" ry="34" fill="#E8B796" />
+          {/* Hair - short neat brown male hair */}
+          <path d="M30 44 Q28 18 44 10 Q60 2 76 10 Q92 18 90 44 Q88 30 76 22 Q60 12 44 22 Q32 30 30 44" fill="#4A3728" />
+          <path d="M30 44 Q24 52 30 62" fill="#4A3728" />
+          <path d="M90 44 Q96 52 90 62" fill="#4A3728" />
+          {/* Eyes - looking left toward the text box */}
+          <ellipse cx="48" cy="50" rx="4.5" ry="5.5" fill="#1F2937" />
+          <ellipse cx="72" cy="50" rx="4.5" ry="5.5" fill="#1F2937" />
+          <circle cx="46" cy="48" r="2" fill="white" />
+          <circle cx="70" cy="48" r="2" fill="white" />
+          {/* Eyebrows - friendly */}
+          <path d="M38 38 Q48 33 58 38" stroke="#4A3728" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+          <path d="M62 38 Q72 33 82 38" stroke="#4A3728" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+          {/* Warm smile */}
+          <path d="M47 70 Q60 82 73 70" stroke="#1F2937" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+          {/* Cheeks */}
+          <ellipse cx="34" cy="62" rx="5" ry="3.5" fill="#FECACA" opacity="0.5" />
+          <ellipse cx="86" cy="62" rx="5" ry="3.5" fill="#FECACA" opacity="0.5" />
+          {/* Left arm reaching down to grip the edge of the box */}
+          <path d="M34 110 Q18 125 12 145" stroke="#E8B796" strokeWidth="11" fill="none" strokeLinecap="round" />
+          {/* Left hand - fingers curled over edge */}
+          <ellipse cx="10" cy="148" rx="8" ry="6" fill="#E8B796" />
+          <path d="M4 144 Q3 148 5 152" stroke="#D4A574" strokeWidth="1.2" fill="none" />
+          <path d="M9 143 Q8 148 10 153" stroke="#D4A574" strokeWidth="1.2" fill="none" />
+          <path d="M14 144 Q13 148 15 152" stroke="#D4A574" strokeWidth="1.2" fill="none" />
+          {/* Right arm reaching down */}
+          <path d="M86 110 Q100 125 106 145" stroke="#E8B796" strokeWidth="11" fill="none" strokeLinecap="round" />
+          {/* Right hand */}
+          <ellipse cx="108" cy="148" rx="8" ry="6" fill="#E8B796" />
+          <path d="M102 144 Q101 148 103 152" stroke="#D4A574" strokeWidth="1.2" fill="none" />
+          <path d="M107 143 Q106 148 108 153" stroke="#D4A574" strokeWidth="1.2" fill="none" />
+          <path d="M112 144 Q111 148 113 152" stroke="#D4A574" strokeWidth="1.2" fill="none" />
+        </svg>
+      </div>
+    </>
   );
 
 
@@ -289,7 +297,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-start">
             {/* Desktop Sidebar - aligned with H1, positioned far left with border */}
-            <div className="hidden lg:flex flex-col space-y-1 mr-8 xl:mr-12 -ml-4 xl:-ml-8">
+            <div className="hidden lg:flex flex-col space-y-1 mr-8 xl:mr-12 -ml-8 xl:-ml-16">
               <div className="bg-white border border-gray-200 rounded-2xl p-3 shadow-sm">
                 {sidebarTools.map((tool) => (
                   <button 
@@ -426,7 +434,11 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                 {/* Character illustration - positioned outside to the right */}
                 <CharacterIllustration />
                 
-                <div className="relative bg-white rounded-2xl border-2 border-gray-200 hover:border-gray-300 focus-within:border-blue-500 focus-within:shadow-lg transition-all duration-200 shadow-sm">
+                <div className={`relative bg-white rounded-2xl border-2 shadow-sm transition-all duration-200 ${
+                  isFocused
+                    ? 'border-blue-500 shadow-lg ring-4 ring-blue-100'
+                    : 'border-blue-100 hover:border-blue-200'
+                }`}>
                   <textarea
                     value={inputText}
                     onChange={(e) => setInputText(e.target.value)}
