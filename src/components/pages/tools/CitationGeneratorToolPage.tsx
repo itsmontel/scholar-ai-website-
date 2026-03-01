@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Header from '../../common/Header';
 import Footer from '../../common/Footer';
 
@@ -82,6 +82,15 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
     day: ''
   });
   const [citation, setCitation] = useState('');
+
+  // SEO: Set page title and meta description
+  useEffect(() => {
+    document.title = 'Free Citation Generator - APA, MLA, Chicago, Harvard | WriteScholar';
+    const metaDescription = document.querySelector('meta[name="description"]');
+    if (metaDescription) {
+      metaDescription.setAttribute('content', 'Free citation generator for APA, MLA, Chicago, Harvard, IEEE, and Vancouver styles. Create accurate citations for books, journals, websites, and more. No signup required.');
+    }
+  }, []);
   const [copied, setCopied] = useState(false);
 
   const handleInputChange = (field: keyof FormData, value: string) => {

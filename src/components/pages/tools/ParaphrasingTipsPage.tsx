@@ -26,6 +26,15 @@ const ParaphrasingTipsPage = ({ onNavigate, user, onLogout }: ParaphrasingTipsPa
   const [text, setText] = useState('');
   const [analysis, setAnalysis] = useState<WordAnalysis | null>(null);
 
+  // SEO: Set page title and meta description
+  useEffect(() => {
+    document.title = 'Free Paraphrasing Tips Tool - Improve Your Writing Style | WriteScholar';
+    const metaDescription = document.querySelector('meta[name="description"]');
+    if (metaDescription) {
+      metaDescription.setAttribute('content', 'Free paraphrasing tips tool. Get synonym suggestions, identify wordy phrases, detect passive voice, and improve your writing style. No signup required.');
+    }
+  }, []);
+
   const commonWords = new Set(['the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'from', 'as', 'is', 'was', 'are', 'were', 'been', 'be', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should', 'may', 'might', 'must', 'shall', 'can', 'need', 'that', 'this', 'these', 'those', 'i', 'you', 'he', 'she', 'it', 'we', 'they', 'what', 'which', 'who', 'when', 'where', 'why', 'how', 'all', 'each', 'every', 'both', 'few', 'more', 'most', 'other', 'some', 'such', 'no', 'not', 'only', 'own', 'same', 'so', 'than', 'too', 'very', 'just', 'also', 'now', 'here', 'there', 'then', 'if', 'about', 'into', 'through', 'during', 'before', 'after', 'above', 'below', 'between', 'under', 'again', 'further', 'once', 'any', 'my', 'your', 'his', 'her', 'its', 'our', 'their', 'being', 'having', 'doing', 'because', 'while', 'although', 'though', 'however', 'therefore', 'thus', 'hence', 'since', 'until', 'unless', 'whether']);
 
   const synonymSuggestions: Record<string, string[]> = {

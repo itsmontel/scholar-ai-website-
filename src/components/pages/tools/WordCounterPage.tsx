@@ -20,6 +20,15 @@ const WordCounterPage = ({ onNavigate, user, onLogout }: WordCounterPageProps) =
     speakingTime: '0 min'
   });
 
+  // SEO: Set page title and meta description
+  useEffect(() => {
+    document.title = 'Free Word Counter Tool - Count Words & Characters | WriteScholar';
+    const metaDescription = document.querySelector('meta[name="description"]');
+    if (metaDescription) {
+      metaDescription.setAttribute('content', 'Free online word counter tool. Count words, characters, sentences, and paragraphs instantly. Check reading time and speaking time. No signup required.');
+    }
+  }, []);
+
   useEffect(() => {
     const words = text.trim() ? text.trim().split(/\s+/).length : 0;
     const characters = text.length;

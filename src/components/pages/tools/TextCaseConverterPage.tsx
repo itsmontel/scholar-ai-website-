@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Header from '../../common/Header';
 import Footer from '../../common/Footer';
 
@@ -13,6 +13,15 @@ type CaseType = 'uppercase' | 'lowercase' | 'titlecase' | 'sentencecase' | 'capi
 const TextCaseConverterPage = ({ onNavigate, user, onLogout }: TextCaseConverterPageProps) => {
   const [text, setText] = useState('');
   const [copied, setCopied] = useState(false);
+
+  // SEO: Set page title and meta description
+  useEffect(() => {
+    document.title = 'Free Text Case Converter - Uppercase, Lowercase, Title Case | WriteScholar';
+    const metaDescription = document.querySelector('meta[name="description"]');
+    if (metaDescription) {
+      metaDescription.setAttribute('content', 'Free text case converter. Convert text to uppercase, lowercase, title case, sentence case, and more. Transform your text instantly. No signup required.');
+    }
+  }, []);
 
   const convertCase = (type: CaseType): string => {
     if (!text) return '';

@@ -21,6 +21,15 @@ const GrammarCheckerPage = ({ onNavigate, user, onLogout }: GrammarCheckerPagePr
   const [text, setText] = useState('');
   const [issues, setIssues] = useState<GrammarIssue[]>([]);
 
+  // SEO: Set page title and meta description
+  useEffect(() => {
+    document.title = 'Free Grammar Checker - Fix Spelling & Punctuation | WriteScholar';
+    const metaDescription = document.querySelector('meta[name="description"]');
+    if (metaDescription) {
+      metaDescription.setAttribute('content', 'Free online grammar checker. Find and fix spelling, punctuation, and grammar errors instantly. Get suggestions to improve your writing. No signup required.');
+    }
+  }, []);
+
   const grammarRules: { pattern: RegExp; type: 'error' | 'warning' | 'suggestion'; category: string; message: string; suggestion?: string }[] = [
     // Capitalization errors
     { pattern: /\bi\b(?!['\u2019])/g, type: 'error', category: 'Capitalization', message: '"i" should be capitalized to "I"', suggestion: 'I' },

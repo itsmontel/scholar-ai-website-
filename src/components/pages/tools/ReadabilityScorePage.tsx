@@ -33,6 +33,15 @@ const ReadabilityScorePage = ({ onNavigate, user, onLogout }: ReadabilityScorePa
   const [text, setText] = useState('');
   const [scores, setScores] = useState<ReadabilityScores | null>(null);
 
+  // SEO: Set page title and meta description
+  useEffect(() => {
+    document.title = 'Free Readability Score Calculator - Flesch-Kincaid & More | WriteScholar';
+    const metaDescription = document.querySelector('meta[name="description"]');
+    if (metaDescription) {
+      metaDescription.setAttribute('content', 'Free readability score calculator. Get Flesch-Kincaid, Gunning Fog, SMOG Index, and more. Check your text\'s grade level and reading difficulty. No signup required.');
+    }
+  }, []);
+
   const countSyllables = (word: string): number => {
     word = word.toLowerCase().replace(/[^a-z]/g, '');
     if (word.length <= 3) return 1;

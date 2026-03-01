@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Header from '../../common/Header';
 import Footer from '../../common/Footer';
 
@@ -21,6 +21,15 @@ const ThesisGeneratorPage = ({ onNavigate, user, onLogout }: ThesisGeneratorPage
   const [subject2, setSubject2] = useState('');
   const [thesis, setThesis] = useState('');
   const [copied, setCopied] = useState(false);
+
+  // SEO: Set page title and meta description
+  useEffect(() => {
+    document.title = 'Free Thesis Statement Generator - Create Strong Arguments | WriteScholar';
+    const metaDescription = document.querySelector('meta[name="description"]');
+    if (metaDescription) {
+      metaDescription.setAttribute('content', 'Free thesis statement generator. Create strong thesis statements for argumentative, expository, and analytical essays. Get instant results with no signup required.');
+    }
+  }, []);
 
   const generateThesis = () => {
     if (!topic) return;
