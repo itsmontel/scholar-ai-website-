@@ -14,6 +14,14 @@ export interface BlogPostMeta {
 
 export const blogPostList: BlogPostMeta[] = [
   {
+    slug: 'free-writing-tools-every-student-needs',
+    title: '8 Free Writing Tools Every Student Needs in 2026',
+    description: 'Discover the best free writing tools for students including word counters, grammar checkers, citation generators, and paraphrasing tools to improve your academic writing.',
+    date: '2026-03-01',
+    author: 'WriteScholar Team',
+    readTime: '10 min read'
+  },
+  {
     slug: 'how-to-write-a-thesis-statement',
     title: 'How to Write a Thesis Statement: Examples for Any Essay',
     description: 'Learn how to write a clear, arguable thesis statement for any essay or research paper. Includes examples for argumentative, analytical, and expository writing.',

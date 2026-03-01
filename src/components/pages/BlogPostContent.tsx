@@ -171,10 +171,10 @@ const ToolsIllustration = () => (
       <circle cx="140" cy="15" r="8" fill="#3B82F6" />
       <rect x="165" y="35" width="8" height="30" rx="1" fill="#34D399" />
       <polygon points="169,35 165,25 173,25" fill="#10B981" />
-      {/* Labels */}
-      <text x="109" y="80" fontSize="6" fill="#9CA3AF">Grammar</text>
-      <text x="140" y="80" textAnchor="middle" fontSize="6" fill="#9CA3AF">Citation</text>
-      <text x="169" y="80" textAnchor="middle" fontSize="6" fill="#9CA3AF">Style</text>
+      {/* Labels below toolbox - widely spaced so text fits */}
+      <text x="95" y="138" textAnchor="middle" fontSize="7" fill="#4B5563" fontWeight="500">Grammar</text>
+      <text x="140" y="138" textAnchor="middle" fontSize="7" fill="#4B5563" fontWeight="500">Citation</text>
+      <text x="185" y="138" textAnchor="middle" fontSize="7" fill="#4B5563" fontWeight="500">Style</text>
     </svg>
   </IllustrationWrapper>
 );
@@ -190,6 +190,242 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
   };
 
   switch (slug) {
+    case 'free-writing-tools-every-student-needs':
+      return (
+        <>
+          <p className={p}>
+            Academic writing doesn&apos;t have to be a struggle. Whether you&apos;re drafting an essay, polishing a research paper, or formatting citations, the right tools can save hours of frustration and help you produce better work. The good news? Many of the most useful writing tools are completely free. You don&apos;t need expensive software subscriptions to write well-structured, error-free papers.
+          </p>
+          <p className={p}>
+            This comprehensive guide covers eight essential free writing tools that every student should have in their toolkit. From word counters that help you meet length requirements to readability analyzers that make your writing clearer, these tools address the most common challenges students face. We&apos;ll explain what each tool does, when to use it, and how it can improve your academic work—plus links to try them yourself.
+          </p>
+
+          <ToolsIllustration />
+
+          <h2 className={h2}>Why free writing tools matter for students</h2>
+          <p className={p}>
+            Let&apos;s be honest: students are on tight budgets. Textbooks, software, and subscription services add up quickly. Meanwhile, writing requirements only get more demanding as you progress through your academic career. You&apos;re expected to write longer papers, cite more sources, and maintain higher standards of clarity and correctness.
+          </p>
+          <p className={p}>
+            Free writing tools democratize access to quality feedback. You shouldn&apos;t need a premium subscription to check whether you&apos;ve hit the word count, generate a properly formatted citation, or identify weak areas in your writing. According to a <a href="https://nces.ed.gov/fastfacts/display.asp?id=372" target="_blank" rel="noopener noreferrer" className={internalLink}>study by the National Center for Education Statistics</a>, over 19 million students were enrolled in U.S. colleges in recent years—and most could benefit from better writing support.
+          </p>
+          <p className={p}>
+            The tools we cover below work directly in your browser. There&apos;s nothing to download, no accounts required for basic features, and no hidden costs. Bookmark them, use them whenever you need them, and watch your writing improve.
+          </p>
+
+          <h2 className={h2}>1. Word Counter: Know exactly where you stand</h2>
+          <p className={p}>
+            Every student knows the frustration of trying to hit a word count. Is your essay too short? Too long? Will removing that paragraph put you under the minimum? A dedicated <a href="/tools/word-counter" onClick={handleNavigate('word-counter')} className={internalLink}>word counter tool</a> gives you instant answers without the guesswork.
+          </p>
+          <p className={p}>
+            Modern word counters do more than just count words. They also tell you character counts (with and without spaces), sentence counts, paragraph counts, and estimated reading time. This information helps you understand the structure of your writing at a glance. For instance, if you have a high word count but few paragraphs, your paragraphs might be too long and need breaking up.
+          </p>
+          <h3 className={h3}>When to use a word counter</h3>
+          <p className={p}>
+            <strong>During drafting:</strong> Check your progress periodically to make sure you&apos;re on track. If you&apos;re at 600 words and need 1,500, you know you have significant work ahead.<br />
+            <strong>Before submission:</strong> Verify you meet minimum and maximum requirements. Some professors dock points for going over or under.<br />
+            <strong>For revision:</strong> See how your word count changes as you cut unnecessary content or expand underdeveloped sections.
+          </p>
+          <p className={p}>
+            The <a href="https://owl.purdue.edu/owl/general_writing/academic_writing/essay_writing/index.html" target="_blank" rel="noopener noreferrer" className={internalLink}>Purdue Online Writing Lab (OWL)</a> notes that word count requirements exist to ensure sufficient development of ideas. Meeting the count matters, but so does making every word count.
+          </p>
+
+          <WritingIllustration />
+
+          <h2 className={h2}>2. Citation Generator: Format references correctly</h2>
+          <p className={p}>
+            Citation formatting is one of the most tedious parts of academic writing. APA, MLA, Chicago, Harvard, IEEE, Vancouver—each style has different rules for punctuation, capitalization, and order of elements. One misplaced comma or missing period can cost you points, even when your argument is excellent.
+          </p>
+          <p className={p}>
+            A <a href="/tools/citation-generator" onClick={handleNavigate('citation-generator')} className={internalLink}>citation generator</a> creates properly formatted references from the information you provide. Enter the author, title, publication date, and other details, and the tool outputs a citation in your chosen style. This saves time and reduces errors, especially when you have dozens of sources.
+          </p>
+          <h3 className={h3}>Supported source types</h3>
+          <p className={p}>
+            Good citation generators handle various source types beyond just books and journal articles. Look for tools that support:<br />
+            • Books and e-books<br />
+            • Journal articles (with DOI support)<br />
+            • Websites and online articles<br />
+            • Newspapers and magazines<br />
+            • Conference papers and proceedings<br />
+            • Theses and dissertations<br />
+            • Videos and podcasts<br />
+            • Government reports and technical documents
+          </p>
+          <p className={p}>
+            Always double-check generated citations against your style guide. Generators are helpful but not infallible—they may handle unusual sources incorrectly or use outdated formatting rules.
+          </p>
+
+          <CitationIllustration />
+
+          <h2 className={h2}>3. Grammar Checker: Catch errors before your professor does</h2>
+          <p className={p}>
+            Even strong writers make mistakes. Subject-verb agreement errors, comma splices, incorrect word usage, and typos can slip through no matter how carefully you proofread. A <a href="/tools/grammar-checker" onClick={handleNavigate('grammar-checker')} className={internalLink}>grammar checker</a> serves as your first line of defense, catching common errors that are easy to miss when you&apos;ve been staring at your own writing for hours.
+          </p>
+          <p className={p}>
+            Academic grammar checkers go beyond basic spell-check. They identify issues like:<br />
+            • Commonly confused words (affect/effect, their/there/they&apos;re, its/it&apos;s)<br />
+            • Redundant phrases (&quot;absolutely essential,&quot; &quot;past history&quot;)<br />
+            • Wordiness that obscures your meaning<br />
+            • Punctuation errors including comma usage and apostrophes<br />
+            • Sentence fragments and run-on sentences
+          </p>
+          <h3 className={h3}>Grammar checking best practices</h3>
+          <p className={p}>
+            <strong>Run the checker after you&apos;ve finished drafting,</strong> not during. Constant interruptions break your flow and make writing harder.<br />
+            <strong>Don&apos;t accept every suggestion blindly.</strong> Grammar checkers can be wrong, especially with discipline-specific terminology or intentional stylistic choices.<br />
+            <strong>Learn from the feedback.</strong> If the tool flags the same error repeatedly, take time to understand the rule so you stop making that mistake.
+          </p>
+
+          <GrammarIllustration />
+
+          <h2 className={h2}>4. Readability Score Calculator: Write clearly for your audience</h2>
+          <p className={p}>
+            Clear writing communicates ideas effectively. Overly complex sentences, excessive jargon, and convoluted structure make your work harder to read—and may obscure your actual argument. A <a href="/tools/readability-checker" onClick={handleNavigate('readability-checker')} className={internalLink}>readability score calculator</a> analyzes your text using established formulas to tell you how accessible your writing is.
+          </p>
+          <p className={p}>
+            Common readability metrics include:<br />
+            • <strong>Flesch-Kincaid Grade Level:</strong> Estimates the U.S. grade level needed to understand your text<br />
+            • <strong>Flesch Reading Ease:</strong> Scores from 0-100, with higher scores indicating easier text<br />
+            • <strong>Gunning Fog Index:</strong> Measures complexity based on sentence length and multi-syllable words<br />
+            • <strong>SMOG Index:</strong> Popular in healthcare writing for assessing patient materials<br />
+            • <strong>Coleman-Liau Index:</strong> Uses character counts instead of syllable counts<br />
+            • <strong>Automated Readability Index:</strong> Based on characters per word and words per sentence
+          </p>
+          <p className={p}>
+            According to <a href="https://www.apa.org/gradpsych/2006/01/starting-tips" target="_blank" rel="noopener noreferrer" className={internalLink}>APA guidelines</a>, good academic writing balances complexity with clarity. You&apos;re not trying to write at a 5th-grade level, but unnecessarily dense prose isn&apos;t a sign of intelligence—it&apos;s a barrier to communication.
+          </p>
+
+          <h2 className={h2}>5. Thesis Statement Generator: Focus your argument</h2>
+          <p className={p}>
+            The thesis statement is arguably the most important sentence in your paper. It tells readers what you&apos;re arguing and why it matters. A weak or vague thesis leads to a weak paper; a clear, specific thesis gives your writing direction and makes it easier to stay focused.
+          </p>
+          <p className={p}>
+            A <a href="/tools/thesis-generator" onClick={handleNavigate('thesis-generator')} className={internalLink}>thesis generator tool</a> helps you craft strong thesis statements by prompting you to identify your topic, position, and supporting reasons. It doesn&apos;t write your thesis for you—it guides you through the thinking process that produces a good one.
+          </p>
+          <h3 className={h3}>What makes a strong thesis?</h3>
+          <p className={p}>
+            <strong>Specificity:</strong> &quot;Social media is bad&quot; is vague. &quot;Social media use of more than three hours daily negatively affects teenagers&apos; mental health by increasing anxiety and disrupting sleep patterns&quot; is specific.<br />
+            <strong>Arguability:</strong> A thesis should make a claim someone could disagree with. Stating obvious facts isn&apos;t argumentative.<br />
+            <strong>Scope:</strong> Your thesis should match what you can actually prove in your paper&apos;s length. Don&apos;t make claims you can&apos;t support.
+          </p>
+
+          <AIAssistantIllustration />
+
+          <h2 className={h2}>6. Essay Outline Generator: Structure your ideas</h2>
+          <p className={p}>
+            Good essays have clear structure. An introduction that hooks readers and states your thesis. Body paragraphs that each develop one main point with evidence. A conclusion that synthesizes your argument without simply repeating it. Getting this structure right before you start writing makes the actual drafting much easier.
+          </p>
+          <p className={p}>
+            An <a href="/tools/essay-outline" onClick={handleNavigate('essay-outline')} className={internalLink}>essay outline generator</a> helps you plan your paper&apos;s structure by breaking it into logical sections. You input your thesis and main points, and the tool creates a framework you can follow. This is especially useful for longer papers where keeping track of multiple arguments becomes challenging.
+          </p>
+          <p className={p}>
+            The <a href="https://writingcenter.unc.edu/tips-and-tools/reorganizing-drafts/" target="_blank" rel="noopener noreferrer" className={internalLink}>UNC Writing Center</a> recommends outlining as a way to identify gaps in your argument before you&apos;ve invested hours in drafting. It&apos;s much easier to reorganize an outline than a completed draft.
+          </p>
+
+          <h2 className={h2}>7. Text Case Converter: Fix formatting quickly</h2>
+          <p className={p}>
+            Ever accidentally typed a whole paragraph in caps lock? Or needed to convert a title from lowercase to Title Case? A <a href="/tools/case-converter" onClick={handleNavigate('case-converter')} className={internalLink}>text case converter</a> handles these formatting tasks instantly, saving you from tedious manual retyping.
+          </p>
+          <p className={p}>
+            Common conversions include:<br />
+            • <strong>UPPERCASE:</strong> All letters capitalized<br />
+            • <strong>lowercase:</strong> All letters in lowercase<br />
+            • <strong>Title Case:</strong> First Letter Of Each Word Capitalized<br />
+            • <strong>Sentence case:</strong> First letter of sentence capitalized<br />
+            • <strong>aLtErNaTiNg CaSe:</strong> For creative purposes<br />
+            • <strong>Capitalized Case:</strong> FIRST letter of each word
+          </p>
+          <h3 className={h3}>When case conversion matters</h3>
+          <p className={p}>
+            Citation styles have specific capitalization rules. APA uses sentence case for article titles in references but title case for journal names. MLA uses title case for titles in the works cited. Getting this wrong is a common citation error. A case converter helps you format text correctly without manual adjustment.
+          </p>
+
+          <h2 className={h2}>8. Paraphrasing and Writing Improvement Analyzer: Strengthen your prose</h2>
+          <p className={p}>
+            Paraphrasing—restating information in your own words—is a crucial academic skill. It lets you incorporate sources without over-relying on direct quotes. But paraphrasing poorly can lead to unintentional plagiarism or awkward phrasing. A <a href="/tools/paraphrasing-tips" onClick={handleNavigate('paraphrasing-tips')} className={internalLink}>writing improvement analyzer</a> helps you identify areas where your writing could be stronger.
+          </p>
+          <p className={p}>
+            These tools analyze your text for:<br />
+            • <strong>Overused words:</strong> Repeating the same word suggests limited vocabulary<br />
+            • <strong>Passive voice:</strong> &quot;Mistakes were made&quot; is weaker than &quot;The team made mistakes&quot;<br />
+            • <strong>Wordy phrases:</strong> &quot;Due to the fact that&quot; should just be &quot;because&quot;<br />
+            • <strong>Clichés:</strong> Phrases like &quot;at the end of the day&quot; weaken academic writing<br />
+            • <strong>Hedging language:</strong> Overuse of &quot;perhaps,&quot; &quot;maybe,&quot; &quot;it seems&quot; weakens your arguments<br />
+            • <strong>Weak verbs:</strong> Strong, specific verbs make writing more engaging
+          </p>
+          <p className={p}>
+            The goal isn&apos;t to eliminate all these patterns but to use them intentionally. Sometimes passive voice is appropriate. Occasionally hedging is accurate. The tool helps you make conscious choices rather than falling into unconscious habits.
+          </p>
+
+          <ComparisonIllustration />
+
+          <h2 className={h2}>How to integrate these tools into your writing workflow</h2>
+          <p className={p}>
+            Having access to tools is one thing; using them effectively is another. Here&apos;s a workflow that maximizes their value without interrupting your creative process:
+          </p>
+          <p className={p}>
+            <strong>Phase 1 - Planning:</strong> Use the thesis generator and essay outline tools before you start writing. Invest 15-20 minutes in planning to save hours of revision later.
+          </p>
+          <p className={p}>
+            <strong>Phase 2 - Drafting:</strong> Write without checking tools constantly. Let your ideas flow. Use the word counter occasionally to gauge progress, but don&apos;t obsess over it.
+          </p>
+          <p className={p}>
+            <strong>Phase 3 - Revision:</strong> Run your draft through the grammar checker and readability analyzer. Address the issues they identify. Check for overused words and weak verbs.
+          </p>
+          <p className={p}>
+            <strong>Phase 4 - Citations:</strong> Generate and format your citations. Double-check them against your style guide. Make sure every in-text citation has a corresponding reference.
+          </p>
+          <p className={p}>
+            <strong>Phase 5 - Final check:</strong> Verify word count meets requirements. Run a final grammar check. Read your paper aloud to catch any remaining awkward phrasing.
+          </p>
+
+          <h2 className={h2}>What these tools can&apos;t do</h2>
+          <p className={p}>
+            Free writing tools are powerful aids, but they have limitations. They can&apos;t:<br />
+            • <strong>Think for you:</strong> Tools can check your writing but can&apos;t develop your ideas or arguments.<br />
+            • <strong>Guarantee accuracy:</strong> Citation generators and grammar checkers make mistakes. Always verify.<br />
+            • <strong>Replace feedback from humans:</strong> Professors, tutors, and peers catch things tools miss.<br />
+            • <strong>Make you a better writer automatically:</strong> You need to understand the feedback and apply it consciously.
+          </p>
+          <p className={p}>
+            Use these tools as supplements to your own skills, not replacements. The goal is to become a better writer over time, not to rely on tools forever.
+          </p>
+
+          <h2 className={h2}>Frequently asked questions</h2>
+          <p className={faqQuestion}>Are these tools really free?</p>
+          <p className={p}>
+            Yes. The tools we&apos;ve linked work directly in your browser with no payment required for basic features. Some tools offer premium versions with additional capabilities, but the free versions handle most student needs.
+          </p>
+          <p className={faqQuestion}>Can I use these tools for any citation style?</p>
+          <p className={p}>
+            Most citation generators support APA, MLA, Chicago, and Harvard. Some also support IEEE, Vancouver, and other styles. Check that your required style is available before relying on any tool.
+          </p>
+          <p className={faqQuestion}>Will my professor know I used these tools?</p>
+          <p className={p}>
+            Using grammar checkers and citation tools is generally accepted and expected. These are learning aids, not cheating. However, always follow your institution&apos;s specific guidelines.
+          </p>
+          <p className={faqQuestion}>How accurate are readability scores?</p>
+          <p className={p}>
+            Readability formulas are approximations based on word and sentence length. They&apos;re useful indicators but don&apos;t capture everything about readability. Use them as one data point among many.
+          </p>
+          <p className={faqQuestion}>Should I use all these tools for every paper?</p>
+          <p className={p}>
+            Not necessarily. Use what&apos;s relevant. A short response paper might only need a word counter and grammar check. A research paper might need citation tools as well. Match tools to tasks.
+          </p>
+
+          <h2 className={h2}>Start improving your writing today</h2>
+          <p className={p}>
+            Good academic writing is a skill you develop over time, and the right tools accelerate that development. The free tools we&apos;ve covered—<a href="/tools/word-counter" onClick={handleNavigate('word-counter')} className={internalLink}>word counter</a>, <a href="/tools/citation-generator" onClick={handleNavigate('citation-generator')} className={internalLink}>citation generator</a>, <a href="/tools/grammar-checker" onClick={handleNavigate('grammar-checker')} className={internalLink}>grammar checker</a>, <a href="/tools/readability-checker" onClick={handleNavigate('readability-checker')} className={internalLink}>readability calculator</a>, <a href="/tools/thesis-generator" onClick={handleNavigate('thesis-generator')} className={internalLink}>thesis generator</a>, <a href="/tools/essay-outline" onClick={handleNavigate('essay-outline')} className={internalLink}>essay outliner</a>, <a href="/tools/case-converter" onClick={handleNavigate('case-converter')} className={internalLink}>case converter</a>, and <a href="/tools/paraphrasing-tips" onClick={handleNavigate('paraphrasing-tips')} className={internalLink}>writing analyzer</a>—address the most common challenges students face.
+          </p>
+          <p className={p}>
+            For even more comprehensive feedback on your academic writing, WriteScholar combines these capabilities with AI-powered analysis of structure, argumentation, and academic tone. Check our <a href="/features" onClick={handleNavigate('features')} className={internalLink}>features page</a> to see what&apos;s included, or explore our <a href="/pricing" onClick={handleNavigate('pricing')} className={internalLink}>pricing options</a> to find the right plan for your needs.
+          </p>
+          <a href="/signup" onClick={handleNavigate('signup')} className={ctaButton}>
+            Try WriteScholar Free →
+          </a>
+        </>
+      );
+
     case 'how-to-write-a-thesis-statement':
       return (
         <>

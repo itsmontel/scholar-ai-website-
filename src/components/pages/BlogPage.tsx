@@ -89,6 +89,30 @@ const BlogPage = ({ onNavigate, user, onLogout }: BlogPageProps) => {
       );
     }
 
+    if (post.slug.includes('free-writing-tools')) {
+      return (
+        <svg viewBox="0 0 200 140" fill="none" className="w-full h-full">
+          <rect width="200" height="140" fill="#E0F2FE" />
+          {/* Toolbox */}
+          <rect x="60" y="60" width="80" height="50" rx="4" fill="#BFDBFE" stroke="#3B82F6" strokeWidth="2" />
+          <rect x="60" y="52" width="80" height="12" rx="2" fill="#93C5FD" stroke="#3B82F6" strokeWidth="2" />
+          <rect x="90" y="48" width="20" height="8" rx="2" fill="#3B82F6" />
+          {/* Tools popping out */}
+          <rect x="70" y="25" width="6" height="30" rx="1" fill="#FCD34D" />
+          <rect x="70" y="20" width="6" height="8" rx="1" fill="#F59E0B" />
+          <rect x="90" y="18" width="8" height="38" rx="1" fill="#34D399" />
+          <circle cx="94" cy="14" r="6" fill="#10B981" />
+          <rect x="115" y="28" width="6" height="27" rx="1" fill="#F472B6" />
+          <polygon points="118,28 115,20 121,20" fill="#EC4899" />
+          {/* Stars/sparkles */}
+          <path d="M40 35 L42 40 L47 40 L43 44 L45 49 L40 46 L35 49 L37 44 L33 40 L38 40 Z" fill="#FBBF24" />
+          <path d="M160 25 L161 28 L164 28 L162 30 L163 33 L160 31 L157 33 L158 30 L156 28 L159 28 Z" fill="#FBBF24" />
+          <circle cx="155" cy="95" r="10" fill="white" stroke="#3B82F6" strokeWidth="2" />
+          <text x="152" y="99" fontSize="10" fontWeight="bold" fill="#3B82F6">8</text>
+        </svg>
+      );
+    }
+
     if (post.slug.includes('tool') || post.slug.includes('ai') || post.slug.includes('assistant')) {
       return (
         <svg viewBox="0 0 200 140" fill="none" className="w-full h-full">
@@ -247,9 +271,13 @@ const BlogPage = ({ onNavigate, user, onLogout }: BlogPageProps) => {
 
         {/* Page Header */}
         <header className="mb-12">
-          <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-3">
-            Blog
-          </h1>
+          <div className="flex items-center gap-3 mb-3">
+            <span className="text-3xl sm:text-4xl">🧊</span>
+            <h1 className="text-4xl sm:text-5xl font-bold text-gray-900">
+              Blog
+            </h1>
+            <span className="text-3xl sm:text-4xl">🧊</span>
+          </div>
           <p className="text-lg text-gray-600">
             Tips, guides, and insights for better academic writing
           </p>

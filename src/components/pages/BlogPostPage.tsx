@@ -145,9 +145,12 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ onNavigate, user, onLogout 
 
         <article>
           <header className="mb-8">
-            <time dateTime={post.date} className="text-sm text-gray-500 font-medium">
-              {new Date(post.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
-            </time>
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-xl">🧊</span>
+              <time dateTime={post.date} className="text-sm text-gray-500 font-medium">
+                {new Date(post.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+              </time>
+            </div>
             <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mt-2 mb-4">
               {post.title}
             </h1>
