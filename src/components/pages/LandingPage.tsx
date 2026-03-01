@@ -171,6 +171,28 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
     setInputText(topic);
   };
 
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    // Store file info for signup flow
+    localStorage.setItem('pendingAnalysis', JSON.stringify({ 
+      fileName: file.name,
+      fileType: file.type,
+      fromUpload: true 
+    }));
+    
+    // Show the same animation and results as paste
+    setShowFakeAnimation(true);
+    setTimeout(() => {
+      setShowFakeAnimation(false);
+      setShowFakeResults(true);
+    }, 15000);
+    
+    // Reset the input so the same file can be selected again
+    e.target.value = '';
+  };
+
   // Character illustration component - positioned outside the text area
   // Mobile: head only, top-right corner | Desktop: full body with pointing arm
   const CharacterIllustration = () => (
@@ -422,7 +444,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                 </div>
                 
                 {/* Submit button - below textarea */}
-                <div className="flex justify-center mt-4">
+                <div className="flex flex-col items-center mt-4">
                   <button
                     onClick={handleSubmit}
                     disabled={!inputText.trim()}
@@ -435,6 +457,28 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                     <span className="mr-2">✨</span>
                     {mode === 'analyze' ? 'Get Feedback' : 'Find Sources'}
                   </button>
+                  
+                  {/* Upload file option - only for analyze mode */}
+                  {mode === 'analyze' && (
+                    <div className="mt-3">
+                      <input
+                        type="file"
+                        id="landing-file-upload"
+                        accept=".pdf,.doc,.docx,.txt"
+                        className="hidden"
+                        onChange={handleFileUpload}
+                      />
+                      <label
+                        htmlFor="landing-file-upload"
+                        className="text-sm text-gray-500 hover:text-gray-700 cursor-pointer flex items-center transition-colors"
+                      >
+                        <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                        </svg>
+                        or upload a file
+                      </label>
+                    </div>
+                  )}
                 </div>
               </div>
                 
