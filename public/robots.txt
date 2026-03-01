@@ -4,8 +4,11 @@ Allow: /features
 Allow: /pricing
 Allow: /about
 Allow: /blog
+Allow: /blog/*
 Allow: /help
 Allow: /contact
+Allow: /tools/
+Allow: /tools/*
 
 Disallow: /dashboard
 Disallow: /analysis

@@ -1,12 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://writescholar.com/</loc><lastmod>2026-02-28</lastmod><priority>1.0</priority><changefreq>weekly</changefreq></url>
-  <url><loc>https://writescholar.com/features</loc><lastmod>2026-02-16</lastmod><priority>0.8</priority><changefreq>monthly</changefreq></url>
-  <url><loc>https://writescholar.com/pricing</loc><lastmod>2026-02-16</lastmod><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <!-- Main Pages -->
+  <url><loc>https://writescholar.com/</loc><lastmod>2026-03-01</lastmod><priority>1.0</priority><changefreq>weekly</changefreq></url>
+  <url><loc>https://writescholar.com/features</loc><lastmod>2026-03-01</lastmod><priority>0.9</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://writescholar.com/pricing</loc><lastmod>2026-03-01</lastmod><priority>0.9</priority><changefreq>monthly</changefreq></url>
   <url><loc>https://writescholar.com/about</loc><lastmod>2026-02-16</lastmod><priority>0.6</priority><changefreq>monthly</changefreq></url>
   <url><loc>https://writescholar.com/help</loc><lastmod>2026-02-16</lastmod><priority>0.7</priority><changefreq>monthly</changefreq></url>
   <url><loc>https://writescholar.com/contact</loc><lastmod>2026-02-16</lastmod><priority>0.5</priority><changefreq>monthly</changefreq></url>
-  <url><loc>https://writescholar.com/blog</loc><lastmod>2026-02-28</lastmod><priority>0.8</priority><changefreq>weekly</changefreq></url>
+
+  <!-- Free Tools (NEW - not indexed yet!) -->
+  <url><loc>https://writescholar.com/tools/word-counter</loc><lastmod>2026-03-01</lastmod><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://writescholar.com/tools/citation-generator</loc><lastmod>2026-03-01</lastmod><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://writescholar.com/tools/grammar-checker</loc><lastmod>2026-03-01</lastmod><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://writescholar.com/tools/readability-checker</loc><lastmod>2026-03-01</lastmod><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://writescholar.com/tools/thesis-generator</loc><lastmod>2026-03-01</lastmod><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://writescholar.com/tools/essay-outline</loc><lastmod>2026-03-01</lastmod><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://writescholar.com/tools/case-converter</loc><lastmod>2026-03-01</lastmod><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://writescholar.com/tools/paraphrasing-tips</loc><lastmod>2026-03-01</lastmod><priority>0.8</priority><changefreq>monthly</changefreq></url>
+
+  <!-- Blog -->
+  <url><loc>https://writescholar.com/blog</loc><lastmod>2026-03-01</lastmod><priority>0.8</priority><changefreq>weekly</changefreq></url>
+  <url><loc>https://writescholar.com/blog/free-writing-tools-every-student-needs</loc><lastmod>2026-03-01</lastmod><priority>0.7</priority><changefreq>monthly</changefreq></url>
   <url><loc>https://writescholar.com/blog/how-to-write-a-thesis-statement</loc><lastmod>2026-02-28</lastmod><priority>0.7</priority><changefreq>monthly</changefreq></url>
   <url><loc>https://writescholar.com/blog/how-to-write-apa-research-paper</loc><lastmod>2026-02-01</lastmod><priority>0.7</priority><changefreq>monthly</changefreq></url>
   <url><loc>https://writescholar.com/blog/citation-checker-academic-writing</loc><lastmod>2026-01-28</lastmod><priority>0.7</priority><changefreq>monthly</changefreq></url>
@@ -14,6 +28,8 @@
   <url><loc>https://writescholar.com/blog/grammar-checker-academic-writing</loc><lastmod>2026-01-20</lastmod><priority>0.7</priority><changefreq>monthly</changefreq></url>
   <url><loc>https://writescholar.com/blog/mla-vs-apa-vs-chicago-citation-style</loc><lastmod>2026-01-15</lastmod><priority>0.7</priority><changefreq>monthly</changefreq></url>
   <url><loc>https://writescholar.com/blog/ai-writing-assistant-for-students</loc><lastmod>2026-01-10</lastmod><priority>0.7</priority><changefreq>monthly</changefreq></url>
+
+  <!-- Legal -->
   <url><loc>https://writescholar.com/privacy</loc><lastmod>2026-01-01</lastmod><priority>0.3</priority><changefreq>yearly</changefreq></url>
   <url><loc>https://writescholar.com/terms</loc><lastmod>2026-01-01</lastmod><priority>0.3</priority><changefreq>yearly</changefreq></url>
 </urlset>
