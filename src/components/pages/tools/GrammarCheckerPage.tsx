@@ -275,18 +275,18 @@ const GrammarCheckerPage = ({ onNavigate, user, onLogout }: GrammarCheckerPagePr
             <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-red-100 mb-6 shadow-lg shadow-red-100">
               <svg viewBox="0 0 56 56" fill="none" className="w-16 h-16">
                 <circle cx="28" cy="28" r="28" fill="#FEE2E2"/>
-                <ellipse cx="28" cy="30" rx="14" ry="15" fill="#D4A574"/>
-                <path d="M14 26 Q12 14 24 10 Q28 8 32 10 Q44 14 42 26 Q40 18 34 14 Q28 10 22 14 Q16 18 14 26" fill="#3D2314"/>
-                <path d="M14 26 Q10 32 14 38" fill="#3D2314"/>
-                <path d="M42 26 Q46 32 42 38" fill="#3D2314"/>
-                <path d="M18 40 Q20 52 28 54 Q36 52 38 40" fill="#3D2314"/>
+                <ellipse cx="28" cy="30" rx="14" ry="15" fill="#E8B796"/>
+                {/* Short neat hair - no beard */}
+                <path d="M14 26 Q12 14 24 10 Q28 8 32 10 Q44 14 42 26 Q40 18 34 14 Q28 10 22 14 Q16 18 14 26" fill="#4A3728"/>
+                <path d="M14 26 Q10 32 14 38" fill="#4A3728"/>
+                <path d="M42 26 Q46 32 42 38" fill="#4A3728"/>
                 <ellipse cx="22" cy="30" rx="3" ry="3.5" fill="#1F2937"/>
                 <ellipse cx="34" cy="30" rx="3" ry="3.5" fill="#1F2937"/>
                 <circle cx="23" cy="29" r="1" fill="white"/>
                 <circle cx="35" cy="29" r="1" fill="white"/>
-                <path d="M26 44 Q28 47 30 44" stroke="#2D1810" strokeWidth="2" fill="none" strokeLinecap="round"/>
-                <ellipse cx="17" cy="34" rx="3" ry="2" fill="#E8A090" opacity="0.4"/>
-                <ellipse cx="39" cy="34" rx="3" ry="2" fill="#E8A090" opacity="0.4"/>
+                <path d="M24 42 Q28 47 32 42" stroke="#1F2937" strokeWidth="2" fill="none" strokeLinecap="round"/>
+                <ellipse cx="17" cy="34" rx="3" ry="2" fill="#FECACA" opacity="0.5"/>
+                <ellipse cx="39" cy="34" rx="3" ry="2" fill="#FECACA" opacity="0.5"/>
               </svg>
             </div>
             <span className="inline-flex items-center px-4 py-1.5 bg-red-100 text-red-700 rounded-full text-sm font-semibold mb-5">
