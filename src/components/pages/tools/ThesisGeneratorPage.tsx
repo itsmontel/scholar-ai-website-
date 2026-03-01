@@ -139,10 +139,11 @@ const ThesisGeneratorPage = ({ onNavigate, user, onLogout }: ThesisGeneratorPage
             <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-teal-100 mb-6 shadow-lg shadow-teal-100">
               <svg viewBox="0 0 56 56" fill="none" className="w-16 h-16">
                 <circle cx="28" cy="28" r="28" fill="#CCFBF1"/>
+                {/* Hair - smooth dome on top, soft sides */}
+                <path d="M14 18 Q14 4 28 4 Q42 4 42 18 Q42 26 28 27 Q14 26 14 18" fill="#14B8A6"/>
+                <path d="M14 20 Q8 35 14 45" stroke="#14B8A6" strokeWidth="4" fill="none" strokeLinecap="round"/>
+                <path d="M42 20 Q48 35 42 45" stroke="#14B8A6" strokeWidth="4" fill="none" strokeLinecap="round"/>
                 <ellipse cx="28" cy="30" rx="14" ry="15" fill="#FCD9B6"/>
-                <path d="M16 32 Q14 16 28 12 Q40 8 48 16 Q52 22 48 32 Q46 24 40 18 Q32 12 24 18 Q18 24 16 32" fill="#14B8A6"/>
-                <path d="M16 32 Q12 38 16 44" fill="#14B8A6"/>
-                <path d="M48 26 Q54 20 50 14" fill="#14B8A6"/>
                 <ellipse cx="22" cy="32" rx="3" ry="3.5" fill="#1F2937"/>
                 <ellipse cx="34" cy="32" rx="3" ry="3.5" fill="#1F2937"/>
                 <circle cx="23" cy="31" r="1" fill="white"/>

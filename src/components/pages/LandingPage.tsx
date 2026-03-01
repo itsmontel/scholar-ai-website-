@@ -150,8 +150,8 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
       }, 15000);
     } else {
       localStorage.setItem('pendingAnalysis', JSON.stringify({ text: inputText }));
-      setTimeout(() => {
-        setShowFakeAnimation(false);
+    setTimeout(() => {
+      setShowFakeAnimation(false);
         setShowFakeResults(true);
       }, 15000);
     }
@@ -159,7 +159,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
 
   const handleContinueToSignup = () => {
     setShowFakeResults(false);
-    onNavigate('signup');
+      onNavigate('signup');
   };
 
   const handleContinueToSignupFromCitations = () => {
@@ -217,8 +217,8 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
           {/* Cheeks (blush) */}
           <circle cx="20" cy="44" r="3" fill="#FECACA" opacity="0.5" />
           <circle cx="50" cy="44" r="3" fill="#FECACA" opacity="0.5" />
-        </svg>
-      </div>
+                        </svg>
+                      </div>
       
       {/* Tablet/Desktop version - full body with arm */}
       <div className="absolute hidden sm:block sm:right-4 sm:top-0 sm:w-24 sm:h-32 xl:-right-32 xl:w-28 xl:h-36 pointer-events-none z-10">
@@ -248,9 +248,9 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
           {/* Cheeks (blush) */}
           <circle cx="35" cy="44" r="3" fill="#FECACA" opacity="0.5" />
           <circle cx="65" cy="44" r="3" fill="#FECACA" opacity="0.5" />
-        </svg>
-      </div>
-    </>
+                        </svg>
+                  </div>
+                </>
   );
 
 
@@ -263,7 +263,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
             <a href="/" onClick={(e) => { e.preventDefault(); onNavigate('landing'); }} className="flex items-center space-x-2.5">
               <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center">
                 <span className="text-white font-bold text-xl">W</span>
-          </div>
+                      </div>
               <span className="text-2xl font-bold text-gray-900">WriteScholar</span>
             </a>
             
@@ -272,16 +272,16 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
               <a href="/pricing" onClick={(e) => { e.preventDefault(); onNavigate('pricing'); }} className="px-4 py-2.5 text-base text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-50 transition-colors font-medium">Pricing</a>
               <a href="/blog" onClick={(e) => { e.preventDefault(); onNavigate('blog'); }} className="px-4 py-2.5 text-base text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-50 transition-colors font-medium">Blog</a>
               <a href="/about" onClick={(e) => { e.preventDefault(); onNavigate('about'); }} className="px-4 py-2.5 text-base text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-50 transition-colors font-medium">About</a>
-        </div>
+                    </div>
             
             <div className="flex items-center space-x-3">
               <a href="/login" onClick={(e) => { e.preventDefault(); onNavigate('login'); }} className="hidden sm:inline-flex px-4 py-2.5 text-base text-gray-700 hover:text-gray-900 font-medium rounded-lg hover:bg-gray-50 transition-colors">Log in</a>
               <a href="/signup" onClick={(e) => { e.preventDefault(); onNavigate('signup'); }} className="inline-flex items-center px-5 py-2.5 bg-gray-900 text-white text-base font-semibold rounded-xl hover:bg-gray-800 hover:shadow-md transition-all duration-200">
                 Get Started
               </a>
-        </div>
-          </div>
-        </div>
+                      </div>
+                    </div>
+                  </div>
       </nav>
 
       {/* Hero Section with Sidebar */}
@@ -306,7 +306,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={`w-6 h-6 ${tool.color}`}>
                           <circle cx="11" cy="11" r="8" />
                           <path d="M21 21l-4.35-4.35" />
-                        </svg>
+                      </svg>
                       ) : (
                         <span className={`${tool.color} font-bold ${tool.id === 'tone' || tool.id === 'clarity' ? 'text-lg' : 'text-base'}`}>{tool.icon}</span>
                       )}
@@ -317,12 +317,12 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                       <div className="absolute left-full ml-3 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg whitespace-nowrap z-10">
                         {tool.name}
                         <div className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-gray-900" />
-                      </div>
+                  </div>
                     )}
                   </button>
                 ))}
-              </div>
-            </div>
+                    </div>
+                  </div>
 
             {/* Main Content */}
             <div className="flex-1 text-center max-w-4xl mx-auto">
@@ -474,14 +474,14 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                       >
                         <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                        </svg>
+                    </svg>
                         or upload a file
                       </label>
-                    </div>
-                  )}
                 </div>
+                  )}
               </div>
-                
+            </div>
+            
               {/* Suggested Topics - only for citations mode */}
               {mode === 'citations' && (
                 <div className="mb-10">
@@ -494,13 +494,13 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                         className="px-4 py-2 bg-gray-50 hover:bg-gray-100 text-gray-700 text-sm sm:text-base rounded-lg border border-gray-200 hover:border-gray-300 transition-all duration-200 hover:shadow-sm text-left"
                       >
                         {topic}
-                      </button>
+                    </button>
                     ))}
-                  </div>
-                </div>
-              )}
-            </div>
               </div>
+            </div>
+              )}
+          </div>
+        </div>
             </div>
       </section>
 
@@ -553,8 +553,8 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                 {category.label}
               </button>
             ))}
-          </div>
-          
+                  </div>
+                  
           {/* Content Area */}
           <div className="bg-white rounded-3xl p-8 sm:p-12 lg:p-16">
             <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
@@ -575,8 +575,8 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                   </svg>
                   Start for free
                 </button>
-              </div>
-              
+                  </div>
+                  
               {/* Woman Character Illustration - Different poses for each category */}
               <div className="order-1 lg:order-2 flex justify-center">
                 <div className="relative w-64 h-72 sm:w-80 sm:h-96">
@@ -859,11 +859,11 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                       <path d="M178 145 L190 158 L202 145" stroke="white" strokeWidth="3" fill="none" />
                     </svg>
                   )}
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
       </section>
 
       {/* See WriteScholar in Action */}
@@ -911,9 +911,9 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                 {/* Collar */}
                 <path d="M58 90 L70 105 L82 90" stroke="#2563EB" strokeWidth="2" fill="none" />
               </svg>
-            </div>
-          </div>
-
+             </div>
+                     </div>
+                     
           {/* Screenshot Showcase */}
           <div className="space-y-16">
             {/* Philosophy Essay Example */}
@@ -921,7 +921,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
               <div className="order-2 lg:order-1">
                 <div className="inline-flex items-center px-3 py-1.5 bg-purple-100 text-purple-700 rounded-full text-sm font-medium mb-4">
                   Philosophy Essay
-                  </div>
+                        </div>
                 <h3 className="text-2xl font-bold text-gray-900 mb-3">Philosophy Essay Analysis</h3>
                 <p className="text-gray-600 text-lg leading-relaxed mb-4">
                   See how WriteScholar analyzes a philosophy paper on justice and ethics, providing detailed feedback on argument structure, citation formatting, and academic tone.
@@ -931,7 +931,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                   <li className="flex items-center"><svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>APA citation validation</li>
                   <li className="flex items-center"><svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Areas for improvement highlighted</li>
                 </ul>
-                  </div>
+                           </div>
               <div className="order-1 lg:order-2">
                 <div className="rounded-2xl overflow-hidden shadow-2xl border border-gray-200">
                   <img 
@@ -939,9 +939,9 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                     alt="Philosophy essay analysis showing document feedback with structure analysis, citation checking, and improvement suggestions"
                     className="w-full h-auto"
                   />
-            </div>
-          </div>
-        </div>
+                              </div>
+                              </div>
+                              </div>
 
             {/* Multicultural Film Paper Example */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
@@ -952,12 +952,12 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                     alt="Multicultural film paper analysis showing comprehensive AI feedback on academic writing"
                     className="w-full h-auto"
                           />
-                        </div>
-                           </div>
+                            </div>
+                          </div>
               <div className="order-2 lg:order-2">
                 <div className="inline-flex items-center px-3 py-1.5 bg-blue-100 text-blue-700 rounded-full text-sm font-medium mb-4">
                   Film Studies
-                              </div>
+                    </div>
                 <h3 className="text-2xl font-bold text-gray-900 mb-3">Film Studies Paper Analysis</h3>
                 <p className="text-gray-600 text-lg leading-relaxed mb-4">
                   Watch WriteScholar analyze a multicultural film studies paper, identifying areas for clarity improvement and ensuring proper academic formatting.
@@ -967,10 +967,10 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                   <li className="flex items-center"><svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Grammar improvements</li>
                   <li className="flex items-center"><svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Detailed suggestions</li>
                 </ul>
-                              </div>
-                              </div>
-                            </div>
-                          </div>
+                  </div>
+                </div>
+              </div>
+           </div>
       </section>
 
       {/* Features Grid - bigger */}
@@ -1027,7 +1027,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                 <path d="M58 95 L70 108 L82 95" stroke="#059669" strokeWidth="2" fill="none" />
               </svg>
             </div>
-          </div>
+                </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
             {/* Structure Analysis - Asian man */}
@@ -1046,11 +1046,11 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                   <path d="M24 40 Q28 45 32 40" stroke="#1F2937" strokeWidth="2" fill="none" strokeLinecap="round"/>
                   <ellipse cx="18" cy="35" rx="3" ry="2" fill="#FECACA" opacity="0.4"/>
                   <ellipse cx="38" cy="35" rx="3" ry="2" fill="#FECACA" opacity="0.4"/>
-                </svg>
-              </div>
+                    </svg>
+                  </div>
               <h3 className="font-semibold text-gray-900 text-lg mb-2">Structure Analysis</h3>
               <p className="text-base text-gray-600 leading-relaxed">Get feedback on your essay organization, thesis clarity, and paragraph flow.</p>
-            </div>
+                </div>
             
             {/* Grammar Check - Black woman */}
             <div className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-lg hover:border-gray-300 hover:-translate-y-1 transition-all duration-200">
@@ -1100,11 +1100,11 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                   <ellipse cx="17" cy="36" rx="3" ry="2" fill="#FECACA" opacity="0.4"/>
                   <ellipse cx="39" cy="36" rx="3" ry="2" fill="#FECACA" opacity="0.4"/>
                 </svg>
-              </div>
+          </div>
               <h3 className="font-semibold text-gray-900 text-lg mb-2">Citation Checker</h3>
               <p className="text-base text-gray-600 leading-relaxed">Validate APA, MLA, Chicago, and Harvard citations. Fix formatting errors.</p>
-            </div>
-            
+        </div>
+
             {/* Academic Tone - Hispanic woman */}
             <div className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-lg hover:border-gray-300 hover:-translate-y-1 transition-all duration-200">
               <div className="w-14 h-14 rounded-full bg-orange-50 flex items-center justify-center mb-4 overflow-hidden">
@@ -1127,8 +1127,8 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
               </div>
               <h3 className="font-semibold text-gray-900 text-lg mb-2">Academic Tone</h3>
               <p className="text-base text-gray-600 leading-relaxed">Ensure your writing maintains appropriate formality and discipline conventions.</p>
-            </div>
-            
+          </div>
+          
             {/* Clarity Feedback - South Asian man */}
             <div className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-lg hover:border-gray-300 hover:-translate-y-1 transition-all duration-200">
               <div className="w-14 h-14 rounded-full bg-pink-50 flex items-center justify-center mb-4 overflow-hidden">
@@ -1147,11 +1147,11 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                   <path d="M24 41 Q28 46 32 41" stroke="#1F2937" strokeWidth="2" fill="none" strokeLinecap="round"/>
                   <ellipse cx="17" cy="35" rx="3" ry="2" fill="#D4A07A" opacity="0.5"/>
                   <ellipse cx="39" cy="35" rx="3" ry="2" fill="#D4A07A" opacity="0.5"/>
-                </svg>
-              </div>
+                      </svg>
+                    </div>
               <h3 className="font-semibold text-gray-900 text-lg mb-2">Clarity Feedback</h3>
               <p className="text-base text-gray-600 leading-relaxed">Identify unclear sentences and get suggestions for clearer expression.</p>
-            </div>
+                      </div>
             
             {/* Source Finder - East Asian woman */}
             <div className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-lg hover:border-gray-300 hover:-translate-y-1 transition-all duration-200">
@@ -1170,12 +1170,12 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                   <ellipse cx="17" cy="35" rx="3" ry="2" fill="#FECACA" opacity="0.4"/>
                   <ellipse cx="39" cy="35" rx="3" ry="2" fill="#FECACA" opacity="0.4"/>
                 </svg>
-              </div>
+                    </div>
               <h3 className="font-semibold text-gray-900 text-lg mb-2">Source Finder</h3>
               <p className="text-base text-gray-600 leading-relaxed">Search millions of academic papers to find relevant citations for your topic.</p>
-            </div>
+                </div>
+              </div>
           </div>
-            </div>
       </section>
 
       {/* FAQ Section - bigger */}
@@ -1221,8 +1221,8 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                 <circle cx="88" cy="15" r="10" fill="#F3F4F6" stroke="#E5E7EB" strokeWidth="1" />
                 <text x="88" y="20" textAnchor="middle" fontSize="14" fill="#6366F1" fontWeight="bold">?</text>
               </svg>
-            </div>
-          </div>
+                  </div>
+              </div>
 
           <div className="space-y-4">
             {faqs.map((faq, idx) => (
@@ -1238,11 +1238,11 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                   </button>
                 <div className={`overflow-hidden transition-all duration-300 ${openFAQ === idx ? 'max-h-56' : 'max-h-0'}`}>
                   <div className="px-6 pb-5 text-gray-600 text-base leading-relaxed">{faq.answer}</div>
+            </div>
+                  </div>
+            ))}
                 </div>
               </div>
-            ))}
-          </div>
-        </div>
       </section>
 
       {/* Pricing Section - bigger */}
@@ -1285,29 +1285,29 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                 {/* Dollar sign sparkle */}
                 <circle cx="92" cy="25" r="8" fill="#FEF3C7" />
                 <text x="92" y="29" textAnchor="middle" fontSize="12" fill="#F59E0B" fontWeight="bold">$</text>
-              </svg>
+                  </svg>
+              </div>
             </div>
-          </div>
-          
+
           <div className="flex items-center justify-center gap-6 mb-12 flex-wrap">
             <span className={`text-base flex-shrink-0 ${billingCycle === 'monthly' ? 'text-gray-900 font-medium' : 'text-gray-500'}`}>Monthly</span>
-            <button
-              onClick={() => setBillingCycle(billingCycle === 'monthly' ? 'annual' : 'monthly')}
+                <button
+                  onClick={() => setBillingCycle(billingCycle === 'monthly' ? 'annual' : 'monthly')}
               className="relative w-14 h-7 flex-shrink-0 bg-gray-200 rounded-full transition-colors overflow-hidden"
               aria-label={billingCycle === 'annual' ? 'Switch to monthly' : 'Switch to annual'}
-            >
+                >
               {/* Green fill shows selected side: left = Monthly, right = Annual */}
-              <span
+                  <span
                 className={`absolute inset-y-0 w-1/2 rounded-full bg-green-400 transition-all duration-200 ${billingCycle === 'annual' ? 'left-1/2' : 'left-0'}`}
                 aria-hidden
-              />
+                  />
               <span className={`absolute top-1 left-0 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 z-10 flex items-center justify-center ${billingCycle === 'annual' ? 'translate-x-8' : 'translate-x-1'}`}>
                 <span className="w-1.5 h-1.5 rounded-full bg-green-500" aria-hidden />
-              </span>
+                </span>
             </button>
             <span className={`text-base flex-shrink-0 min-w-[4rem] ${billingCycle === 'annual' ? 'text-gray-900 font-medium' : 'text-gray-500'}`}>Annual</span>
             {billingCycle === 'annual' && <span className="text-sm bg-green-100 text-green-700 px-3 py-1 rounded-full font-medium flex-shrink-0">Save 17%</span>}
-          </div>
+              </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             {/* Free */}
@@ -1323,7 +1323,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                 <li className="flex items-start"><svg className="w-5 h-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Basic grammar check</li>
               </ul>
               <button onClick={() => onNavigate('signup')} className="w-full py-3 bg-gray-100 hover:bg-gray-200 text-gray-900 font-medium rounded-xl transition-all duration-200 hover:shadow-sm text-base">Get Started Free</button>
-            </div>
+          </div>
 
             {/* Starter */}
             <div className="bg-white border-2 border-blue-500 rounded-2xl p-8 relative hover:shadow-xl hover:-translate-y-1 transition-all duration-200">
@@ -1332,7 +1332,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
               <p className="text-base text-gray-500 mb-5">Most popular for students</p>
               <div className="text-4xl font-bold text-gray-900 mb-8">
                 {billingCycle === 'monthly' ? '$19.99' : '$16.67'}<span className="text-lg font-normal text-gray-500">/mo</span>
-              </div>
+                  </div>
               {billingCycle === 'annual' && <p className="text-sm text-green-600 font-medium -mt-6 mb-6">$199.99 billed annually</p>}
               <ul className="space-y-4 mb-8 text-base text-gray-600">
                 <li className="flex items-start"><svg className="w-5 h-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Unlimited document uploads</li>
@@ -1342,7 +1342,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                 <li className="flex items-start"><svg className="w-5 h-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Export in multiple file formats</li>
               </ul>
               <button onClick={() => onNavigate('signup')} className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl transition-all duration-200 hover:shadow-md text-base">Get Started</button>
-            </div>
+                </div>
 
             {/* Premium */}
             <div className="bg-white border border-gray-200 rounded-2xl p-8 hover:shadow-lg hover:-translate-y-1 transition-all duration-200">
@@ -1358,9 +1358,9 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                 <li className="flex items-start"><svg className="w-5 h-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Advanced AI analysis</li>
                 <li className="flex items-start"><svg className="w-5 h-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Advanced grammar and style checking</li>
                 <li className="flex items-start"><svg className="w-5 h-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Additional premium features</li>
-              </ul>
+                  </ul>
               <button onClick={() => onNavigate('signup')} className="w-full py-3 bg-gray-900 hover:bg-gray-800 text-white font-medium rounded-xl transition-all duration-200 hover:shadow-md text-base">Get Started</button>
-            </div>
+                </div>
           </div>
             </div>
       </section>
@@ -1377,17 +1377,17 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
               <p className="text-lg text-gray-600 mb-10 max-w-xl mx-auto">
                 Start analyzing your essays and finding citations for free. No credit card required.
               </p>
-              <button 
-                onClick={() => onNavigate('signup')}
+                <button
+                  onClick={() => onNavigate('signup')}
                 className="inline-flex items-center px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl hover:-translate-y-0.5 text-lg"
-              >
+                >
                 Start Writing Better
                 <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                 </svg>
-              </button>
+                </button>
             </div>
-            
+
             {/* Group of characters - positioned at bottom, hidden on mobile */}
             <div className="hidden lg:flex justify-center mt-10">
               <svg viewBox="0 0 320 180" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-80 h-44">
@@ -1487,9 +1487,9 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                   <ellipse cx="4" cy="52" rx="7" ry="8" fill="#D4A574" />
                 </g>
               </svg>
-            </div>
-          </div>
-        </div>
+                      </div>
+                  </div>
+                </div>
       </section>
 
       <Footer onNavigate={onNavigate} />
@@ -1525,9 +1525,9 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                 <path d="M45 82 Q60 74 75 82" stroke="#1F2937" strokeWidth="2.5" fill="none" strokeLinecap="round" />
                 <ellipse cx="30" cy="70" rx="8" ry="5" fill="#FECACA" opacity="0.5" />
                 <ellipse cx="90" cy="70" rx="8" ry="5" fill="#FECACA" opacity="0.5" />
-              </svg>
-            </div>
-            
+                      </svg>
+                </div>
+
             <h3 className="text-xl font-bold text-gray-900 text-center mb-2">Analysis Complete</h3>
             <p className="text-gray-500 text-center text-sm mb-6">Your essay has been scanned — here's a quick preview</p>
             
@@ -1542,41 +1542,41 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                 <div>
                   <p className="text-red-800 font-semibold text-sm">Critical issues detected</p>
                   <p className="text-red-600 text-xs mt-0.5">Structural weaknesses and argument gaps that could significantly affect your grade</p>
-                </div>
               </div>
-              
+            </div>
+
               <div className="flex items-start p-3.5 bg-amber-50 rounded-xl border border-amber-100">
                 <span className="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center mr-3 flex-shrink-0 mt-0.5">
                   <svg className="w-4 h-4 text-amber-600" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                   </svg>
-                </span>
+                    </span>
                 <div>
                   <p className="text-amber-800 font-semibold text-sm">Several areas need improvement</p>
                   <p className="text-amber-600 text-xs mt-0.5">Grammar, clarity, and tone issues that should be addressed before submission</p>
+                      </div>
+                  </div>
                 </div>
-              </div>
-            </div>
-            
+
             {/* Urgency text */}
             <div className="bg-gray-50 rounded-xl p-3.5 mb-6">
               <p className="text-gray-600 text-sm text-center leading-relaxed">
                 <span className="font-semibold text-gray-800">Don't submit yet.</span> View the full breakdown with specific line-by-line feedback to fix these issues.
               </p>
-            </div>
-            
-            {/* CTA Button */}
-            <button
+                </div>
+
+                {/* CTA Button */}
+                <button
               onClick={handleContinueToSignup}
               className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all duration-200 hover:shadow-lg flex items-center justify-center"
-            >
+                >
               View full analysis — it's free
               <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>
-            </button>
-          </div>
-        </div>
+                </button>
+              </div>
+            </div>
       )}
 
       {/* Fake Citation Results Modal */}
@@ -1602,8 +1602,8 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                 <ellipse cx="30" cy="70" rx="8" ry="5" fill="#FECACA" opacity="0.5" />
                 <ellipse cx="90" cy="70" rx="8" ry="5" fill="#FECACA" opacity="0.5" />
               </svg>
-            </div>
-            
+          </div>
+
             <h3 className="text-xl font-bold text-gray-900 text-center mb-2">Citations Ready</h3>
             <p className="text-gray-500 text-center text-sm mb-5">We found high-quality sources that match your topic</p>
             
@@ -1611,13 +1611,13 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
               <p className="text-green-800 text-center text-sm leading-relaxed">
                 <span className="font-semibold">We've pulled together strong, relevant citations</span> for your paper — from peer-reviewed journals and academic sources that will strengthen your argument and reference list.
               </p>
-            </div>
-            
+        </div>
+
             <p className="text-gray-500 text-sm text-center mb-6">
               Sign up free to view your full citation list, copy formatted references, and add them to your draft.
             </p>
             
-            <button
+            <button 
               onClick={handleContinueToSignupFromCitations}
               className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all duration-200 hover:shadow-lg flex items-center justify-center"
             >
