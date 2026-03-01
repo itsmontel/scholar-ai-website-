@@ -50,42 +50,42 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
             <ul className="space-y-3">
               <li>
                 <a href="/tools/word-counter" onClick={(e) => { e.preventDefault(); onNavigate?.('word-counter'); }} className="text-gray-500 hover:text-gray-900 text-sm transition-colors">
-                  Word Counter
+                  Free Word Counter
                 </a>
               </li>
               <li>
                 <a href="/tools/citation-generator" onClick={(e) => { e.preventDefault(); onNavigate?.('citation-generator-tool'); }} className="text-gray-500 hover:text-gray-900 text-sm transition-colors">
-                  Citation Generator
+                  Free Citation Generator
                 </a>
               </li>
               <li>
                 <a href="/tools/grammar-checker" onClick={(e) => { e.preventDefault(); onNavigate?.('grammar-checker'); }} className="text-gray-500 hover:text-gray-900 text-sm transition-colors">
-                  Grammar Checker
+                  Free Grammar Checker
                 </a>
               </li>
               <li>
                 <a href="/tools/readability-score" onClick={(e) => { e.preventDefault(); onNavigate?.('readability-score'); }} className="text-gray-500 hover:text-gray-900 text-sm transition-colors">
-                  Readability Checker
+                  Free Readability Checker
                 </a>
               </li>
               <li>
                 <a href="/tools/thesis-generator" onClick={(e) => { e.preventDefault(); onNavigate?.('thesis-generator'); }} className="text-gray-500 hover:text-gray-900 text-sm transition-colors">
-                  Thesis Generator
+                  Free Thesis Generator
                 </a>
               </li>
               <li>
                 <a href="/tools/essay-outline" onClick={(e) => { e.preventDefault(); onNavigate?.('essay-outline'); }} className="text-gray-500 hover:text-gray-900 text-sm transition-colors">
-                  Essay Outline
+                  Free Essay Outline
                 </a>
               </li>
               <li>
                 <a href="/tools/text-case-converter" onClick={(e) => { e.preventDefault(); onNavigate?.('text-case-converter'); }} className="text-gray-500 hover:text-gray-900 text-sm transition-colors">
-                  Case Converter
+                  Free Case Converter
                 </a>
               </li>
               <li>
                 <a href="/tools/paraphrasing-tips" onClick={(e) => { e.preventDefault(); onNavigate?.('paraphrasing-tips'); }} className="text-gray-500 hover:text-gray-900 text-sm transition-colors">
-                  Paraphrasing Tips
+                  Free Paraphrasing Tips
                 </a>
               </li>
             </ul>

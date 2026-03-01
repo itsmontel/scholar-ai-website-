@@ -1178,6 +1178,427 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
           </div>
       </section>
 
+      {/* Free Tools Showcase */}
+      <section className="py-20 sm:py-24">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <span className="inline-block px-4 py-1.5 bg-green-100 text-green-700 rounded-full text-sm font-semibold mb-4">100% Free</span>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-5">
+              Try Our Free Writing Tools
+            </h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              No signup required. Use these tools instantly to improve your writing.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+            {/* Word Counter */}
+            <button
+              onClick={() => onNavigate('word-counter')}
+              className="group bg-white border border-gray-200 rounded-2xl p-5 sm:p-6 hover:shadow-lg hover:border-blue-300 hover:-translate-y-1 transition-all duration-200 text-left"
+            >
+              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" />
+                </svg>
+              </div>
+              <h3 className="font-semibold text-gray-900 mb-1">Word Counter</h3>
+              <p className="text-sm text-gray-500">Count words, characters & reading time</p>
+            </button>
+
+            {/* Citation Generator */}
+            <button
+              onClick={() => onNavigate('citation-generator-tool')}
+              className="group bg-white border border-gray-200 rounded-2xl p-5 sm:p-6 hover:shadow-lg hover:border-purple-300 hover:-translate-y-1 transition-all duration-200 text-left"
+            >
+              <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              </div>
+              <h3 className="font-semibold text-gray-900 mb-1">Citation Generator</h3>
+              <p className="text-sm text-gray-500">APA, MLA, Chicago & more</p>
+            </button>
+
+            {/* Grammar Checker */}
+            <button
+              onClick={() => onNavigate('grammar-checker')}
+              className="group bg-white border border-gray-200 rounded-2xl p-5 sm:p-6 hover:shadow-lg hover:border-green-300 hover:-translate-y-1 transition-all duration-200 text-left"
+            >
+              <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <h3 className="font-semibold text-gray-900 mb-1">Grammar Checker</h3>
+              <p className="text-sm text-gray-500">Fix spelling & punctuation</p>
+            </button>
+
+            {/* Readability Score */}
+            <button
+              onClick={() => onNavigate('readability-score')}
+              className="group bg-white border border-gray-200 rounded-2xl p-5 sm:p-6 hover:shadow-lg hover:border-orange-300 hover:-translate-y-1 transition-all duration-200 text-left"
+            >
+              <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+              </div>
+              <h3 className="font-semibold text-gray-900 mb-1">Readability Score</h3>
+              <p className="text-sm text-gray-500">Flesch-Kincaid & grade level</p>
+            </button>
+
+            {/* Thesis Generator */}
+            <button
+              onClick={() => onNavigate('thesis-generator')}
+              className="group bg-white border border-gray-200 rounded-2xl p-5 sm:p-6 hover:shadow-lg hover:border-teal-300 hover:-translate-y-1 transition-all duration-200 text-left"
+            >
+              <div className="w-12 h-12 bg-teal-100 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <svg className="w-6 h-6 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+              </div>
+              <h3 className="font-semibold text-gray-900 mb-1">Thesis Generator</h3>
+              <p className="text-sm text-gray-500">Create strong thesis statements</p>
+            </button>
+
+            {/* Essay Outline */}
+            <button
+              onClick={() => onNavigate('essay-outline')}
+              className="group bg-white border border-gray-200 rounded-2xl p-5 sm:p-6 hover:shadow-lg hover:border-indigo-300 hover:-translate-y-1 transition-all duration-200 text-left"
+            >
+              <div className="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <svg className="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                </svg>
+              </div>
+              <h3 className="font-semibold text-gray-900 mb-1">Essay Outline</h3>
+              <p className="text-sm text-gray-500">Structure your essay properly</p>
+            </button>
+
+            {/* Text Case Converter */}
+            <button
+              onClick={() => onNavigate('text-case-converter')}
+              className="group bg-white border border-gray-200 rounded-2xl p-5 sm:p-6 hover:shadow-lg hover:border-pink-300 hover:-translate-y-1 transition-all duration-200 text-left"
+            >
+              <div className="w-12 h-12 bg-pink-100 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <svg className="w-6 h-6 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+                </svg>
+              </div>
+              <h3 className="font-semibold text-gray-900 mb-1">Case Converter</h3>
+              <p className="text-sm text-gray-500">Uppercase, lowercase & more</p>
+            </button>
+
+            {/* Paraphrasing Tips */}
+            <button
+              onClick={() => onNavigate('paraphrasing-tips')}
+              className="group bg-white border border-gray-200 rounded-2xl p-5 sm:p-6 hover:shadow-lg hover:border-amber-300 hover:-translate-y-1 transition-all duration-200 text-left"
+            >
+              <div className="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <svg className="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+              </div>
+              <h3 className="font-semibold text-gray-900 mb-1">Paraphrasing Tips</h3>
+              <p className="text-sm text-gray-500">Improve vocabulary & style</p>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* Comparison Table - WriteScholar vs Others */}
+      <section className="py-20 sm:py-24 bg-gray-50">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-5">
+              Why Students Choose WriteScholar
+            </h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              See how WriteScholar compares to other popular writing tools
+            </p>
+          </div>
+
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
+            {/* Table Header */}
+            <div className="grid grid-cols-4 bg-gray-50 border-b border-gray-200">
+              <div className="p-4 sm:p-6 font-semibold text-gray-700">Feature</div>
+              <div className="p-4 sm:p-6 text-center">
+                <div className="flex flex-col items-center">
+                  <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center mb-1">
+                    <span className="text-white font-bold text-sm">W</span>
+                  </div>
+                  <span className="font-semibold text-gray-900 text-sm sm:text-base">WriteScholar</span>
+                </div>
+              </div>
+              <div className="p-4 sm:p-6 text-center">
+                <span className="font-medium text-gray-600 text-sm sm:text-base">Grammarly</span>
+              </div>
+              <div className="p-4 sm:p-6 text-center">
+                <span className="font-medium text-gray-600 text-sm sm:text-base">QuillBot</span>
+              </div>
+            </div>
+
+            {/* Table Rows */}
+            <div className="divide-y divide-gray-100">
+              {/* Academic Focus */}
+              <div className="grid grid-cols-4 items-center">
+                <div className="p-4 sm:p-6">
+                  <span className="font-medium text-gray-900 text-sm sm:text-base">Built for Academic Writing</span>
+                </div>
+                <div className="p-4 sm:p-6 text-center">
+                  <span className="inline-flex items-center justify-center w-8 h-8 bg-green-100 rounded-full">
+                    <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>
+                  </span>
+                </div>
+                <div className="p-4 sm:p-6 text-center">
+                  <span className="inline-flex items-center justify-center w-8 h-8 bg-gray-100 rounded-full">
+                    <svg className="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd"/></svg>
+                  </span>
+                </div>
+                <div className="p-4 sm:p-6 text-center">
+                  <span className="inline-flex items-center justify-center w-8 h-8 bg-gray-100 rounded-full">
+                    <svg className="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd"/></svg>
+                  </span>
+                </div>
+              </div>
+
+              {/* Citation Formatting */}
+              <div className="grid grid-cols-4 items-center bg-blue-50/30">
+                <div className="p-4 sm:p-6">
+                  <span className="font-medium text-gray-900 text-sm sm:text-base">Citation Generator & Checker</span>
+                </div>
+                <div className="p-4 sm:p-6 text-center">
+                  <span className="inline-flex items-center justify-center w-8 h-8 bg-green-100 rounded-full">
+                    <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>
+                  </span>
+                </div>
+                <div className="p-4 sm:p-6 text-center">
+                  <span className="inline-flex items-center justify-center w-8 h-8 bg-gray-100 rounded-full">
+                    <svg className="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd"/></svg>
+                  </span>
+                </div>
+                <div className="p-4 sm:p-6 text-center">
+                  <span className="inline-flex items-center justify-center w-8 h-8 bg-yellow-100 rounded-full">
+                    <span className="text-yellow-600 text-xs font-bold">~</span>
+                  </span>
+                </div>
+              </div>
+
+              {/* Essay Structure Analysis */}
+              <div className="grid grid-cols-4 items-center">
+                <div className="p-4 sm:p-6">
+                  <span className="font-medium text-gray-900 text-sm sm:text-base">Essay Structure Analysis</span>
+                </div>
+                <div className="p-4 sm:p-6 text-center">
+                  <span className="inline-flex items-center justify-center w-8 h-8 bg-green-100 rounded-full">
+                    <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>
+                  </span>
+                </div>
+                <div className="p-4 sm:p-6 text-center">
+                  <span className="inline-flex items-center justify-center w-8 h-8 bg-gray-100 rounded-full">
+                    <svg className="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd"/></svg>
+                  </span>
+                </div>
+                <div className="p-4 sm:p-6 text-center">
+                  <span className="inline-flex items-center justify-center w-8 h-8 bg-gray-100 rounded-full">
+                    <svg className="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd"/></svg>
+                  </span>
+                </div>
+              </div>
+
+              {/* Grammar & Spelling */}
+              <div className="grid grid-cols-4 items-center bg-blue-50/30">
+                <div className="p-4 sm:p-6">
+                  <span className="font-medium text-gray-900 text-sm sm:text-base">Grammar & Spelling Check</span>
+                </div>
+                <div className="p-4 sm:p-6 text-center">
+                  <span className="inline-flex items-center justify-center w-8 h-8 bg-green-100 rounded-full">
+                    <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>
+                  </span>
+                </div>
+                <div className="p-4 sm:p-6 text-center">
+                  <span className="inline-flex items-center justify-center w-8 h-8 bg-green-100 rounded-full">
+                    <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>
+                  </span>
+                </div>
+                <div className="p-4 sm:p-6 text-center">
+                  <span className="inline-flex items-center justify-center w-8 h-8 bg-green-100 rounded-full">
+                    <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>
+                  </span>
+                </div>
+              </div>
+
+              {/* Academic Source Finder */}
+              <div className="grid grid-cols-4 items-center">
+                <div className="p-4 sm:p-6">
+                  <span className="font-medium text-gray-900 text-sm sm:text-base">Academic Source Finder</span>
+                </div>
+                <div className="p-4 sm:p-6 text-center">
+                  <span className="inline-flex items-center justify-center w-8 h-8 bg-green-100 rounded-full">
+                    <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>
+                  </span>
+                </div>
+                <div className="p-4 sm:p-6 text-center">
+                  <span className="inline-flex items-center justify-center w-8 h-8 bg-gray-100 rounded-full">
+                    <svg className="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd"/></svg>
+                  </span>
+                </div>
+                <div className="p-4 sm:p-6 text-center">
+                  <span className="inline-flex items-center justify-center w-8 h-8 bg-gray-100 rounded-full">
+                    <svg className="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd"/></svg>
+                  </span>
+                </div>
+              </div>
+
+              {/* Free Tier */}
+              <div className="grid grid-cols-4 items-center bg-blue-50/30">
+                <div className="p-4 sm:p-6">
+                  <span className="font-medium text-gray-900 text-sm sm:text-base">Free Tools Available</span>
+                </div>
+                <div className="p-4 sm:p-6 text-center">
+                  <span className="inline-flex items-center justify-center px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold">8 Tools</span>
+                </div>
+                <div className="p-4 sm:p-6 text-center">
+                  <span className="inline-flex items-center justify-center px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-semibold">Limited</span>
+                </div>
+                <div className="p-4 sm:p-6 text-center">
+                  <span className="inline-flex items-center justify-center px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-semibold">Limited</span>
+                </div>
+              </div>
+
+              {/* Price */}
+              <div className="grid grid-cols-4 items-center">
+                <div className="p-4 sm:p-6">
+                  <span className="font-medium text-gray-900 text-sm sm:text-base">Starting Price</span>
+                </div>
+                <div className="p-4 sm:p-6 text-center">
+                  <span className="font-bold text-green-600 text-sm sm:text-base">Free / $19.99</span>
+                </div>
+                <div className="p-4 sm:p-6 text-center">
+                  <span className="font-medium text-gray-600 text-sm sm:text-base">$12/mo</span>
+                </div>
+                <div className="p-4 sm:p-6 text-center">
+                  <span className="font-medium text-gray-600 text-sm sm:text-base">$9.95/mo</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <p className="text-center text-gray-500 text-sm mt-6">
+            * Comparison based on publicly available feature information as of 2026
+          </p>
+        </div>
+      </section>
+
+      {/* Blog Preview Section */}
+      <section className="py-20 sm:py-24">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-12">
+            <div>
+              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-3">
+                From Our Blog
+              </h2>
+              <p className="text-lg text-gray-600">
+                Tips and guides to improve your academic writing
+              </p>
+            </div>
+            <button
+              onClick={() => onNavigate('blog')}
+              className="mt-4 sm:mt-0 inline-flex items-center text-blue-600 hover:text-blue-700 font-semibold transition-colors"
+            >
+              View all posts
+              <svg className="w-5 h-5 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              </svg>
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
+            {/* Blog Post 1 */}
+            <button
+              onClick={() => onNavigate('blog-post/free-writing-tools-every-student-needs')}
+              className="group bg-white border border-gray-200 rounded-2xl overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-200 text-left"
+            >
+              <div className="h-40 bg-gradient-to-br from-rose-100 to-pink-100 flex items-center justify-center">
+                <svg viewBox="0 0 120 80" fill="none" className="w-24 h-16">
+                  <rect x="30" y="30" width="60" height="40" rx="4" fill="#FECDD3" stroke="#F43F5E" strokeWidth="2" />
+                  <rect x="30" y="22" width="60" height="10" rx="2" fill="#FDA4AF" stroke="#F43F5E" strokeWidth="2" />
+                  <rect x="52" y="18" width="16" height="6" rx="2" fill="#F43F5E" />
+                  <rect x="38" y="12" width="5" height="22" rx="1" fill="#FCD34D" />
+                  <rect x="50" y="8" width="6" height="26" rx="1" fill="#34D399" />
+                  <rect x="64" y="14" width="5" height="20" rx="1" fill="#60A5FA" />
+                </svg>
+              </div>
+              <div className="p-5">
+                <span className="text-xs text-gray-500 font-medium">Mar 1, 2026</span>
+                <h3 className="font-semibold text-gray-900 mt-2 mb-2 group-hover:text-blue-600 transition-colors line-clamp-2">
+                  8 Free Writing Tools Every Student Needs in 2026
+                </h3>
+                <p className="text-sm text-gray-600 line-clamp-2">
+                  Discover the best free writing tools including word counters, grammar checkers, and citation generators.
+                </p>
+              </div>
+            </button>
+
+            {/* Blog Post 2 */}
+            <button
+              onClick={() => onNavigate('blog-post/how-to-write-a-thesis-statement')}
+              className="group bg-white border border-gray-200 rounded-2xl overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-200 text-left"
+            >
+              <div className="h-40 bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center">
+                <svg viewBox="0 0 120 80" fill="none" className="w-24 h-16">
+                  <rect x="25" y="15" width="70" height="50" rx="4" fill="white" stroke="#6366F1" strokeWidth="2" />
+                  <line x1="35" y1="28" x2="85" y2="28" stroke="#A5B4FC" strokeWidth="3" />
+                  <line x1="35" y1="38" x2="75" y2="38" stroke="#C7D2FE" strokeWidth="2" />
+                  <line x1="35" y1="46" x2="80" y2="46" stroke="#C7D2FE" strokeWidth="2" />
+                  <line x1="35" y1="54" x2="70" y2="54" stroke="#C7D2FE" strokeWidth="2" />
+                  <path d="M90 10 L93 18 L101 21 L93 24 L90 32 L87 24 L79 21 L87 18 Z" fill="#6366F1" />
+                </svg>
+              </div>
+              <div className="p-5">
+                <span className="text-xs text-gray-500 font-medium">Feb 28, 2026</span>
+                <h3 className="font-semibold text-gray-900 mt-2 mb-2 group-hover:text-blue-600 transition-colors line-clamp-2">
+                  How to Write a Thesis Statement: Examples for Any Essay
+                </h3>
+                <p className="text-sm text-gray-600 line-clamp-2">
+                  Learn how to write clear, arguable thesis statements with examples for argumentative and analytical essays.
+                </p>
+              </div>
+            </button>
+
+            {/* Blog Post 3 */}
+            <button
+              onClick={() => onNavigate('blog-post/how-to-write-apa-research-paper')}
+              className="group bg-white border border-gray-200 rounded-2xl overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-200 text-left"
+            >
+              <div className="h-40 bg-gradient-to-br from-purple-100 to-violet-100 flex items-center justify-center">
+                <svg viewBox="0 0 120 80" fill="none" className="w-24 h-16">
+                  <rect x="20" y="10" width="50" height="60" rx="3" fill="white" stroke="#8B5CF6" strokeWidth="2" />
+                  <rect x="50" y="15" width="50" height="60" rx="3" fill="white" stroke="#8B5CF6" strokeWidth="2" />
+                  <line x1="28" y1="22" x2="62" y2="22" stroke="#C4B5FD" strokeWidth="2" />
+                  <line x1="28" y1="30" x2="55" y2="30" stroke="#DDD6FE" strokeWidth="2" />
+                  <line x1="28" y1="38" x2="60" y2="38" stroke="#DDD6FE" strokeWidth="2" />
+                  <line x1="58" y1="27" x2="92" y2="27" stroke="#C4B5FD" strokeWidth="2" />
+                  <line x1="58" y1="35" x2="85" y2="35" stroke="#DDD6FE" strokeWidth="2" />
+                  <line x1="58" y1="43" x2="90" y2="43" stroke="#DDD6FE" strokeWidth="2" />
+                  <text x="85" y="65" fontSize="18" fill="#8B5CF6" fontWeight="bold">APA</text>
+                </svg>
+              </div>
+              <div className="p-5">
+                <span className="text-xs text-gray-500 font-medium">Feb 1, 2026</span>
+                <h3 className="font-semibold text-gray-900 mt-2 mb-2 group-hover:text-blue-600 transition-colors line-clamp-2">
+                  How to Write an APA Research Paper: Complete Guide
+                </h3>
+                <p className="text-sm text-gray-600 line-clamp-2">
+                  Step-by-step guide to formatting an APA research paper, from title page to references.
+                </p>
+              </div>
+            </button>
+          </div>
+        </div>
+      </section>
+
       {/* FAQ Section - bigger */}
       <section className="py-20 sm:py-24">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
