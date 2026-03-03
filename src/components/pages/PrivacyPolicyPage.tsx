@@ -27,15 +27,16 @@ const PrivacyPolicyPage: React.FC<PrivacyPolicyPageProps> = ({ onNavigate, user,
             <section className="mb-8">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">1. Information We Collect</h2>
               <div className="space-y-4 text-gray-700">
-                <p>
-                  We collect information you provide directly to us, such as when you create an account, 
-                  upload documents, or contact us for support.
-                </p>
+                <p>We collect the following types of information:</p>
                 <ul className="list-disc list-inside space-y-2 ml-4">
-                  <li><strong>Account Information:</strong> Name, email address, and password</li>
-                  <li><strong>Document Content:</strong> Academic documents you upload for analysis</li>
-                  <li><strong>Usage Data:</strong> How you interact with our service</li>
-                  <li><strong>Communication:</strong> Messages you send to our support team</li>
+                  <li><strong>Account Information:</strong> First name, last name, email address, and hashed password when you register. If you sign in via Google, we receive your name and email from Google OAuth.</li>
+                  <li><strong>Text Content You Submit:</strong> Essays, documents, notes, and other text you paste or upload to use our AI tools (Humanizer, Summarizer, Quiz Generator, Citation Finder, Essay Analyzer).</li>
+                  <li><strong>Uploaded Documents:</strong> PDF, DOCX, and TXT files you upload for analysis, stored securely in cloud storage.</li>
+                  <li><strong>Usage Data:</strong> Monthly word counts for Humanizer, Summarizer, and Quiz Generator; number of analyses, citation searches, and quiz generations performed; feature usage patterns.</li>
+                  <li><strong>Payment Information:</strong> Billing is processed by Stripe. We do not store your credit card number. We receive and store your Stripe customer ID and subscription status.</li>
+                  <li><strong>Email Subscription Status:</strong> Whether you have subscribed to or unsubscribed from marketing communications.</li>
+                  <li><strong>Communications:</strong> Messages you send to our support team.</li>
+                  <li><strong>Technical Data:</strong> IP address, browser type, and approximate location for security and rate-limiting purposes.</li>
                 </ul>
               </div>
             </section>
@@ -45,115 +46,171 @@ const PrivacyPolicyPage: React.FC<PrivacyPolicyPageProps> = ({ onNavigate, user,
               <div className="space-y-4 text-gray-700">
                 <p>We use the information we collect to:</p>
                 <ul className="list-disc list-inside space-y-2 ml-4">
-                  <li>Provide, maintain, and improve our AI analysis services</li>
-                  <li>Process and analyze your academic documents</li>
-                  <li>Send you technical notices and support messages</li>
-                  <li>Respond to your comments and questions</li>
-                  <li>Monitor and analyze usage patterns and trends</li>
+                  <li>Provide and operate all WriteScholar features and AI tools</li>
+                  <li>Process your text through AI models to deliver Humanizer, Summarizer, Quiz Generator, Citation Finder, and Essay Analyzer results</li>
+                  <li>Enforce monthly usage limits according to your subscription plan</li>
+                  <li>Send transactional emails: account verification, password reset, and billing notifications</li>
+                  <li>Send optional marketing emails about new features and updates (you may unsubscribe at any time)</li>
+                  <li>Respond to support requests and questions</li>
+                  <li>Detect and prevent abuse, fraud, and security threats</li>
+                  <li>Analyse aggregate usage patterns to improve the service</li>
                 </ul>
               </div>
             </section>
 
             <section className="mb-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">3. Information Sharing</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">3. Third-Party Service Providers</h2>
               <div className="space-y-4 text-gray-700">
                 <p>
-                  We do not sell, trade, or otherwise transfer your personal information to third parties 
-                  without your consent, except in the following circumstances:
+                  We share data with the following trusted service providers strictly as necessary to
+                  operate the service. We do not sell your personal data.
                 </p>
                 <ul className="list-disc list-inside space-y-2 ml-4">
-                  <li><strong>Service Providers:</strong> We may share information with trusted third parties who assist us in operating our service</li>
-                  <li><strong>Legal Requirements:</strong> We may disclose information when required by law or to protect our rights</li>
-                  <li><strong>Business Transfers:</strong> In the event of a merger or acquisition, user information may be transferred</li>
+                  <li><strong>OpenAI</strong> — Text you submit to AI-powered features (Humanizer, Summarizer, Quiz Generator, Citation Finder, Essay Analyzer) is sent to OpenAI's API for processing. OpenAI's use of API data is governed by their <a href="https://openai.com/policies/privacy-policy" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">Privacy Policy</a>.</li>
+                  <li><strong>Stripe</strong> — Payment processing and subscription management. Stripe receives your billing information. See <a href="https://stripe.com/privacy" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">Stripe's Privacy Policy</a>.</li>
+                  <li><strong>Supabase</strong> — Our primary database and optional file storage provider, hosting your account data, document metadata, usage records, and quiz history.</li>
+                  <li><strong>Amazon Web Services (S3)</strong> — Cloud storage for uploaded document files in production environments.</li>
+                  <li><strong>Email Provider (SMTP)</strong> — Transactional and marketing emails are delivered via our configured email service.</li>
                 </ul>
+                <p>
+                  We may also disclose information when required by law or to protect our legal rights.
+                  In the event of a merger or acquisition, user information may be transferred to the
+                  successor entity.
+                </p>
               </div>
             </section>
 
             <section className="mb-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">4. Data Security</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">4. AI Processing and Your Content</h2>
               <div className="space-y-4 text-gray-700">
                 <p>
-                  We implement appropriate security measures to protect your personal information against 
-                  unauthorized access, alteration, disclosure, or destruction. This includes:
+                  When you use AI-powered features, the text you submit is transmitted to OpenAI's API.
+                  We do not use your submitted content to train our own AI models. However, as an API
+                  customer, OpenAI's own data handling policies apply to data sent through their API.
                 </p>
+                <p>
+                  AI-generated outputs (humanized text, summaries, quiz questions, citation suggestions,
+                  essay feedback) are provided as tools to assist your work. We make no warranty that
+                  these outputs are accurate, original, or free from error. You are responsible for
+                  reviewing all AI outputs before use.
+                </p>
+              </div>
+            </section>
+
+            <section className="mb-8">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">5. Data Storage and Local Storage</h2>
+              <div className="space-y-4 text-gray-700">
+                <p>
+                  Your account data is stored in a secure cloud database (Supabase/PostgreSQL). Uploaded
+                  documents are stored in encrypted cloud object storage (Supabase Storage or AWS S3).
+                </p>
+                <p>
+                  WriteScholar stores your authentication token and basic account information (name,
+                  email, plan) in your browser's <strong>localStorage</strong> to keep you logged in
+                  between sessions. This data is not shared with third parties and is cleared when you
+                  log out.
+                </p>
+              </div>
+            </section>
+
+            <section className="mb-8">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">6. Data Security</h2>
+              <div className="space-y-4 text-gray-700">
+                <p>We protect your information using industry-standard measures including:</p>
                 <ul className="list-disc list-inside space-y-2 ml-4">
-                  <li>Encryption of data in transit and at rest</li>
-                  <li>Regular security assessments and updates</li>
-                  <li>Access controls and authentication measures</li>
-                  <li>Secure data storage and backup procedures</li>
+                  <li>HTTPS encryption for all data in transit</li>
+                  <li>Bcrypt password hashing (no plaintext passwords stored)</li>
+                  <li>JWT authentication with token expiry and refresh</li>
+                  <li>Rate limiting on all API endpoints to prevent abuse</li>
+                  <li>Security headers (HSTS, CSP, X-Frame-Options) via Helmet</li>
+                  <li>Input validation and sanitisation on all user-submitted data</li>
                 </ul>
+                <p>
+                  No method of transmission or storage is 100% secure. We cannot guarantee absolute
+                  security, but we take reasonable steps to protect your data.
+                </p>
               </div>
             </section>
 
             <section className="mb-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">5. Data Retention</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">7. Data Retention</h2>
               <div className="space-y-4 text-gray-700">
-                <p>
-                  We retain your personal information for as long as necessary to provide our services 
-                  and fulfill the purposes outlined in this privacy policy. Specifically:
-                </p>
+                <p>We retain data for as long as necessary to provide the service:</p>
                 <ul className="list-disc list-inside space-y-2 ml-4">
-                  <li><strong>Account Information:</strong> Retained while your account is active</li>
-                  <li><strong>Document Content:</strong> Retained for analysis purposes and service improvement</li>
-                  <li><strong>Usage Data:</strong> Retained for analytics and service optimization</li>
+                  <li><strong>Account data:</strong> Retained while your account is active. Deleted upon account deletion.</li>
+                  <li><strong>Uploaded documents:</strong> Retained until you delete them or your account.</li>
+                  <li><strong>Quiz history:</strong> Quizzes are automatically deleted after 7 days.</li>
+                  <li><strong>Citation history and analysis history:</strong> Retained until deleted by you or as part of periodic cleanup.</li>
+                  <li><strong>Monthly usage records:</strong> Retained for billing verification and limit enforcement.</li>
+                  <li><strong>Email subscription records:</strong> Retained to honour unsubscribe requests; unsubscribing prevents you from being re-added.</li>
                 </ul>
               </div>
             </section>
 
             <section className="mb-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">6. Your Rights</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">8. Your Rights</h2>
               <div className="space-y-4 text-gray-700">
-                <p>You have the right to:</p>
+                <p>You have the following rights regarding your personal data:</p>
                 <ul className="list-disc list-inside space-y-2 ml-4">
-                  <li>Access and update your personal information</li>
-                  <li>Request deletion of your account and associated data</li>
-                  <li>Opt out of certain communications</li>
-                  <li>Request a copy of your data</li>
-                  <li>Object to certain processing activities</li>
+                  <li><strong>Access &amp; Update:</strong> View and edit your profile at any time in Account Settings</li>
+                  <li><strong>Delete:</strong> Delete your account and all associated data via Account Settings or by contacting us</li>
+                  <li><strong>Unsubscribe:</strong> Opt out of marketing emails at any time via the unsubscribe link or Settings</li>
+                  <li><strong>Data Portability:</strong> Request a copy of your data by contacting privacy@writescholar.com</li>
+                  <li><strong>Withdraw Consent:</strong> Stop using the service and delete your account at any time</li>
                 </ul>
-              </div>
-            </section>
-
-            <section className="mb-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">7. Cookies and Tracking</h2>
-              <div className="space-y-4 text-gray-700">
                 <p>
-                  We use cookies and similar tracking technologies to enhance your experience and 
-                  analyze usage patterns. You can control cookie settings through your browser preferences.
+                  If you are located in the EU/EEA or UK, you may have additional rights under GDPR,
+                  including the right to lodge a complaint with your local supervisory authority.
                 </p>
               </div>
             </section>
 
             <section className="mb-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">8. Children's Privacy</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">9. Cookies and Browser Storage</h2>
               <div className="space-y-4 text-gray-700">
                 <p>
-                  Our service is not intended for children under 13 years of age. We do not knowingly 
-                  collect personal information from children under 13.
+                  WriteScholar uses browser <strong>localStorage</strong> (not cookies) to store your
+                  session token and basic user profile to keep you logged in. We do not currently use
+                  advertising cookies or third-party tracking pixels.
+                </p>
+                <p>
+                  We may use session cookies for security purposes (CSRF protection). You can clear
+                  localStorage and cookies through your browser settings, which will log you out.
                 </p>
               </div>
             </section>
 
             <section className="mb-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">9. Changes to This Policy</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">10. Children's Privacy</h2>
               <div className="space-y-4 text-gray-700">
                 <p>
-                  We may update this privacy policy from time to time. We will notify you of any 
-                  material changes by posting the new policy on this page and updating the "Last updated" date.
+                  WriteScholar is not intended for children under 13 years of age. We do not knowingly
+                  collect personal information from children under 13. If we become aware that we have
+                  collected such information, we will delete it promptly.
                 </p>
               </div>
             </section>
 
             <section className="mb-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">10. Contact Us</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">11. Changes to This Policy</h2>
               <div className="space-y-4 text-gray-700">
                 <p>
-                  If you have any questions about this privacy policy or our data practices, 
-                  please contact us at:
+                  We may update this privacy policy from time to time. We will notify you of material
+                  changes by email or in-app notice before they take effect, and by updating the
+                  "Last updated" date at the top of this page.
+                </p>
+              </div>
+            </section>
+
+            <section className="mb-8">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">12. Contact Us</h2>
+              <div className="space-y-4 text-gray-700">
+                <p>
+                  If you have any questions about this privacy policy or your personal data, please contact us:
                 </p>
                 <div className="bg-gray-50 p-4 rounded-lg">
-                  <p><strong>Email:</strong> privacy@writescholar.com</p>
-                  <p><strong>Address:</strong> WriteScholar Privacy Team</p>
+                  <p><strong>Privacy enquiries:</strong> privacy@writescholar.com</p>
+                  <p><strong>General support:</strong> support@writescholar.com</p>
                 </div>
               </div>
             </section>
