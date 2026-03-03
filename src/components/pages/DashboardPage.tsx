@@ -1820,7 +1820,7 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                       {usageStats.plan === 'free' ? 'Free plan: 1,000 words/month' : 'Starter plan: 999,999 words/month'}
                       {!isPremiumUser && ' • Bullet + Medium only'}
                     </p>
-                    <p className="text-teal-600 text-xs mt-0.5">Upgrade to Premium for all styles, lengths, and GPT-4.1 Mini</p>
+                    <p className="text-teal-600 text-xs mt-0.5">Upgrade to Premium for all styles, lengths, and our premium AI model</p>
                   </div>
                 </div>
                 <button onClick={() => onNavigate('pricing')} className="px-4 py-1.5 bg-teal-600 text-white text-xs font-semibold rounded-lg hover:bg-teal-700 transition-all">
@@ -2060,7 +2060,7 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                     ) : (
                       <>
                         <p className="text-amber-800 font-medium text-sm">Starter plan: Quiz limited to Mixed type + Medium difficulty</p>
-                        <p className="text-amber-600 text-xs mt-0.5">Upgrade to Premium for all quiz types, difficulties, and GPT-4.1 Mini</p>
+                        <p className="text-amber-600 text-xs mt-0.5">Upgrade to Premium for all quiz types, difficulties, and our premium AI model</p>
                       </>
                     )}
                   </div>

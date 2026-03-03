@@ -75,7 +75,7 @@ const TermsOfServicePage: React.FC<TermsOfServicePageProps> = ({ onNavigate, use
                 <ul className="list-disc list-inside space-y-2 ml-4">
                   <li><strong>Free</strong> — limited monthly usage: 1,000 words for Humanizer, 1,000 words for Summarizer, 3 quiz generations, essay analysis and citation searches included</li>
                   <li><strong>Starter ($19.99/month)</strong> — unlimited quiz generations and 999,999 words/month for Humanizer and Summarizer; mixed quiz type and medium difficulty</li>
-                  <li><strong>Premium ($39.99/month)</strong> — all Starter features plus all quiz types, all difficulty levels, and access to our most advanced AI model</li>
+                  <li><strong>Premium ($39.99/month)</strong> — all Starter features plus our top-tier premium AI model, all quiz types and difficulty levels, all summarizer styles and lengths, advanced essay analysis, and priority support</li>
                 </ul>
                 <p>
                   Monthly usage limits reset on the 1st of each calendar month. Unused allowances do not carry

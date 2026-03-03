@@ -237,7 +237,8 @@ const createCheckoutSession = async (customerId, planType, billingCycle, userId,
         });
 
         if (promoCodes.data.length > 0) {
-          // Apply the promo code automatically
+          // Stripe does not allow both `discounts` and `allow_promotion_codes` simultaneously
+          delete sessionConfig.allow_promotion_codes;
           sessionConfig.discounts = [{
             promotion_code: promoCodes.data[0].id
           }];

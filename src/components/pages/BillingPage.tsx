@@ -53,11 +53,12 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
       description: 'Perfect for getting started',
       icon: '🆓',
       features: [
-        '1MB total upload limit',
-        '3 document uploads per month',
-        '3 AI analyses per month',
-        '50% document annotation only',
-        'Basic support'
+        '3 documents per month',
+        '3 AI essay analyses per month',
+        '3 study tool generations/month',
+        '1,000 words/month Humanizer & Summarizer',
+        '2 citation searches per month',
+        'Basic grammar check'
       ],
       stripePriceId: ''
     },
@@ -66,15 +67,16 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
       name: 'Starter',
       price: billingCycle === 'monthly' ? 19.99 : 199.99,
       interval: billingCycle === 'monthly' ? 'month' : 'year',
-      description: 'Perfect for students',
+      description: 'Most popular for students',
       icon: '🚀',
       features: [
-        '25MB total upload limit',
         'Unlimited document uploads',
-        '999 AI analyses per month',
-        '100% document annotation',
-        'Priority support',
-        'Advanced analytics'
+        '999 AI essay analyses per month',
+        'Unlimited quiz, flashcard & crossword generation',
+        '999,999 words/month Humanizer & Summarizer',
+        'All citation styles',
+        'Export to PDF & Word',
+        'Study tools history'
       ],
       popular: true,
       stripePriceId: billingCycle === 'monthly' ? 'price_starter_monthly' : 'price_starter_yearly'
@@ -84,15 +86,16 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
       name: 'Premium',
       price: billingCycle === 'monthly' ? 39.99 : 399.99,
       interval: billingCycle === 'monthly' ? 'month' : 'year',
-      description: 'Perfect for Researchers',
+      description: 'For researchers and institutions',
       icon: '⭐',
       features: [
-        '1GB total upload limit',
-        'Unlimited document uploads',
-        '999 AI analyses per month',
-        '100% document annotation',
-        'Priority support',
-        'Advanced analytics'
+        'Everything in Starter',
+        'Our top-tier premium AI model',
+        'All quiz types & difficulty levels unlocked',
+        'All summarizer styles & lengths unlocked',
+        'Advanced AI essay analysis',
+        'Advanced grammar and style checking',
+        'Priority support'
       ],
       stripePriceId: billingCycle === 'monthly' ? 'price_premium_monthly' : 'price_premium_yearly'
     }

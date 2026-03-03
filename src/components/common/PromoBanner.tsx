@@ -10,14 +10,14 @@ const PromoBanner: React.FC = () => {
       <div className="max-w-7xl mx-auto flex items-center justify-center gap-2 sm:gap-4">
         <div className="flex items-center justify-center gap-2 sm:gap-3 text-center">
           <span className="text-xs sm:text-sm font-medium">
-            <span className="hidden sm:inline">🎉 New users get </span>
+            <span className="hidden sm:inline">🎉 Get </span>
             <span className="sm:hidden">🎉 </span>
-            <span className="font-semibold text-blue-400">$10 off</span>
-            <span className="hidden sm:inline"> any plan</span>
+            <span className="font-semibold text-blue-400">50% off</span>
+            <span className="hidden sm:inline"> your first month on any monthly plan</span>
           </span>
           <span className="text-gray-400 hidden sm:inline">•</span>
           <span className="bg-white/10 text-white px-2.5 sm:px-3 py-1 rounded-md font-medium text-xs sm:text-sm">
-            Code: <span className="text-blue-400">OFF10</span>
+            Code: <span className="text-blue-400">OFF50</span>
           </span>
         </div>
         

@@ -444,7 +444,7 @@ const SummarizerPage = ({ onNavigate, user }: SummarizerPageProps) => {
                       <p className="text-teal-800 font-medium text-sm">
                         {userPlan === 'free' ? 'Free plan: 1,000 words/month • Bullet + Medium only' : 'Starter plan: 999,999 words/month • Bullet + Medium only'}
                       </p>
-                      <p className="text-teal-600 text-xs mt-0.5">Upgrade to Premium for all styles, lengths, and GPT-4.1 Mini</p>
+                      <p className="text-teal-600 text-xs mt-0.5">Upgrade to Premium for all styles, lengths, and our premium AI model</p>
                     </div>
                   </div>
                   <button

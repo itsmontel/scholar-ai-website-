@@ -1925,7 +1925,7 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
                       ) : (
                         <>
                           <p className="text-amber-800 font-medium text-sm">Starter plan: Mixed type + Medium difficulty only</p>
-                          <p className="text-amber-600 text-xs mt-0.5">Upgrade to Premium for all quiz types, difficulties, and GPT-4.1 Mini</p>
+                          <p className="text-amber-600 text-xs mt-0.5">Upgrade to Premium for all quiz types, difficulties, and our premium AI model</p>
                         </>
                       )}
                     </div>
