@@ -932,18 +932,20 @@ router.post('/simple-analyze', authenticateToken, async (req, res) => {
         data: analysisResult
       });
     } catch (error) {
-      console.error('AI analysis failed:', error.message);
+      console.error('AI analysis failed:', error);
       res.status(500).json({
         success: false,
-        message: 'Analysis failed'
+        message: 'Analysis failed',
+        error: error.message
       });
     }
 
   } catch (error) {
-    console.error('SIMPLE Analysis Error:', error.message);
+    console.error('SIMPLE Analysis Error:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to perform analysis'
+      message: 'Failed to perform analysis',
+      error: error.message
     });
   }
 });
@@ -1104,10 +1106,11 @@ router.post('/analyze', authenticateToken, validateCreateAnalysis, async (req, r
     });
 
   } catch (error) {
-    console.error('Analysis error:', error.message);
+    console.error('Analysis error:', error);
     res.status(500).json({
       success: false,
-      message: 'Analysis failed'
+      message: 'Analysis failed',
+      error: error.message
     });
   }
 });
@@ -1122,6 +1125,16 @@ router.post('/save', authenticateToken, validateSaveAnalysis, async (req, res) =
     const { documentId, content, analysisResult, annotations, analysisType, citationStyle } = req.body;
     const userId = req.user.id;
 
+    console.log('Saving analysis with data:', {
+      documentId,
+      userId,
+      analysisType,
+      contentLength: content?.length,
+      analysisResultLength: analysisResult?.length,
+      annotationsCount: annotations?.length,
+      citationStyle
+    });
+
     // Save the analysis
     const savedAnalysis = await aiAnalysisService.saveAnalysis(
       documentId,
@@ -1133,6 +1146,8 @@ router.post('/save', authenticateToken, validateSaveAnalysis, async (req, res) =
       citationStyle
     );
 
+    console.log('Analysis saved successfully:', savedAnalysis);
+
     res.json({
       success: true,
       message: 'Analysis saved successfully',
@@ -1140,10 +1155,11 @@ router.post('/save', authenticateToken, validateSaveAnalysis, async (req, res) =
     });
 
   } catch (error) {
-    console.error('Save analysis error:', error.message);
+    console.error('Save analysis error:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to save analysis'
+      message: 'Failed to save analysis',
+      error: error.message
     });
   }
 });
@@ -1166,10 +1182,11 @@ router.get('/history', authenticateToken, validateGetAnalysisHistory, async (req
     });
 
   } catch (error) {
-    console.error('Analysis history error:', error.message);
+    console.error('Analysis history error:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to fetch analysis history'
+      message: 'Failed to fetch analysis history',
+      error: error.message
     });
   }
 });
@@ -1189,10 +1206,11 @@ router.get('/types', authenticateToken, async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Get analysis types error:', error.message);
+    console.error('Get analysis types error:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to fetch analysis types'
+      message: 'Failed to fetch analysis types',
+      error: error.message
     });
   }
 });
@@ -1209,7 +1227,13 @@ router.get('/quiz-history', authenticateToken, async (req, res) => {
     const userId = req.user.id;
     const limit = parseInt(req.query.limit) || 20;
 
+    console.log('=== QUIZ HISTORY REQUEST ===');
+    console.log('User ID:', userId);
+    console.log('Limit:', limit);
+
     const quizHistory = await aiAnalysisService.getQuizHistory(userId, limit);
+
+    console.log(`Found ${quizHistory.length} quizzes`);
 
     res.json({
       success: true,
@@ -1217,10 +1241,11 @@ router.get('/quiz-history', authenticateToken, async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Quiz history error:', error.message);
+    console.error('Quiz history error:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to fetch quiz history'
+      message: 'Failed to fetch quiz history',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
 });
@@ -1354,10 +1379,11 @@ router.get('/:analysisId', authenticateToken, validateAnalysisId, async (req, re
     });
 
   } catch (error) {
-    console.error('Get analysis error:', error.message);
+    console.error('Get analysis error:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to fetch analysis'
+      message: 'Failed to fetch analysis',
+      error: error.message
     });
   }
 });
@@ -1430,10 +1456,11 @@ router.get('/document/:documentId', authenticateToken, async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Get document analyses error:', error.message);
+    console.error('Get document analyses error:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to fetch document analyses'
+      message: 'Failed to fetch document analyses',
+      error: error.message
     });
   }
 });
@@ -1486,10 +1513,11 @@ router.delete('/:id', authenticateToken, validateAnalysisId, async (req, res) =>
     });
 
   } catch (error) {
-    console.error('Delete analysis error:', error.message);
+    console.error('Delete analysis error:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to delete analysis'
+      message: 'Failed to delete analysis',
+      error: error.message
     });
   }
 });
@@ -1501,6 +1529,10 @@ router.delete('/citation/:id', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
     const userId = req.user.id;
+
+    console.log('=== DELETE CITATION REQUEST ===');
+    console.log('Citation ID:', id);
+    console.log('User ID:', userId);
 
     const { createClient } = require('@supabase/supabase-js');
     const supabase = createClient(

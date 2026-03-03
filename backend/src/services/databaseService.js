@@ -20,12 +20,7 @@ class DatabaseService {
     const supabase = this.getSupabaseClient();
     
     try {
-      // Only log query type in production, full details in development
-      if (process.env.NODE_ENV === 'production') {
-        console.log('Executing query:', sql.trim().split(' ')[0]);
-      } else {
-        console.log('Executing query:', { sql, params: params.map((p, i) => typeof p === 'string' && p.length > 50 ? `[param${i}:truncated]` : p) });
-      }
+      console.log('Executing query:', { sql, params });
       
       // Handle different query types
       const queryType = sql.trim().split(' ')[0].toUpperCase();

@@ -120,10 +120,11 @@ router.post('/upload', authenticateToken, upload.single('document'), async (req,
         console.warn('⚠️ Warning: Parsed content is empty or null');
       }
     } catch (error) {
-      console.error('Document parsing failed:', error.message);
+      console.error('Document parsing failed:', error);
       return res.status(400).json({
         success: false,
-        message: 'Failed to parse document content'
+        message: 'Failed to parse document content',
+        error: error.message
       });
     }
 
@@ -136,17 +137,19 @@ router.post('/upload', authenticateToken, upload.single('document'), async (req,
       const uploadPromise = storageService.uploadFile(file.buffer, file.originalname, userId, file.mimetype);
       uploadResult = await Promise.race([uploadPromise, uploadTimeout]);
     } catch (error) {
-      console.error('Storage upload failed:', error.message);
+      console.error('Storage upload failed:', error);
       return res.status(500).json({
         success: false,
-        message: 'Failed to upload file to storage'
+        message: 'Failed to upload file to storage',
+        error: error.message
       });
     }
 
     if (!uploadResult.success) {
       return res.status(500).json({
         success: false,
-        message: 'File upload failed'
+        message: 'File upload failed',
+        error: uploadResult.error
       });
     }
 
@@ -195,10 +198,11 @@ router.post('/upload', authenticateToken, upload.single('document'), async (req,
       const dbPromise = documentService.createDocument(documentData);
       document = await Promise.race([dbPromise, dbTimeout]);
     } catch (error) {
-      console.error('Database save failed:', error.message);
+      console.error('Database save failed:', error);
       return res.status(500).json({
         success: false,
-        message: 'Failed to save document to database'
+        message: 'Failed to save document to database',
+        error: error.message
       });
     }
 
@@ -224,10 +228,11 @@ router.post('/upload', authenticateToken, upload.single('document'), async (req,
     });
 
   } catch (error) {
-    console.error('Document upload error:', error.message);
+    console.error('Document upload error:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to upload document'
+      message: 'Failed to upload document',
+      error: error.message
     });
   }
 });
@@ -257,10 +262,11 @@ router.get('/:id/content', authenticateToken, validateDocumentId, async (req, re
       }
     });
   } catch (error) {
-    console.error('Error fetching document content:', error.message);
+    console.error('Error fetching document content:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to fetch document content'
+      message: 'Failed to fetch document content',
+      error: error.message
     });
   }
 });
@@ -341,10 +347,11 @@ router.get('/', authenticateToken, validateGetDocuments, async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Get documents error:', error.message);
+    console.error('Get documents error:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to retrieve documents'
+      message: 'Failed to retrieve documents',
+      error: error.message
     });
   }
 });
@@ -386,10 +393,11 @@ router.get('/:id', authenticateToken, validateDocumentId, async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Get document error:', error.message);
+    console.error('Get document error:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to retrieve document'
+      message: 'Failed to retrieve document',
+      error: error.message
     });
   }
 });
@@ -423,10 +431,11 @@ router.get('/:id/download', authenticateToken, async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Get download URL error:', error.message);
+    console.error('Get download URL error:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to generate download URL'
+      message: 'Failed to generate download URL',
+      error: error.message
     });
   }
 });
@@ -462,10 +471,11 @@ router.put('/:id', authenticateToken, validateDocumentId, validateUpdateDocument
     });
 
   } catch (error) {
-    console.error('Update document error:', error.message);
+    console.error('Update document error:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to update document'
+      message: 'Failed to update document',
+      error: error.message
     });
   }
 });
@@ -503,10 +513,11 @@ router.delete('/:id', authenticateToken, validateDocumentId, async (req, res) =>
     });
 
   } catch (error) {
-    console.error('Delete document error:', error.message);
+    console.error('Delete document error:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to delete document'
+      message: 'Failed to delete document',
+      error: error.message
     });
   }
 });
@@ -528,10 +539,11 @@ router.get('/stats/overview', authenticateToken, async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Get document stats error:', error.message);
+    console.error('Get document stats error:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to retrieve document statistics'
+      message: 'Failed to retrieve document statistics',
+      error: error.message
     });
   }
 });
@@ -573,10 +585,11 @@ router.get('/search', authenticateToken, async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Search documents error:', error.message);
+    console.error('Search documents error:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to search documents'
+      message: 'Failed to search documents',
+      error: error.message
     });
   }
 });

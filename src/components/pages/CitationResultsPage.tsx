@@ -40,17 +40,9 @@ const CitationResultsPage = ({
   const hasOldData = searchResults.citations.some(c => !c.ready_to_use_sentence);
   const [showOldDataWarning, setShowOldDataWarning] = useState(hasOldData);
 
-  const escapeHtml = (text: string): string => {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-  };
-
   const makeLinksClickable = (citationText: string) => {
-    // First escape HTML to prevent XSS, then make URLs clickable
-    const escaped = escapeHtml(citationText);
     const urlRegex = /(https?:\/\/[^\s<]+)/g;
-    return escaped.replace(urlRegex, '<a href="$1" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800 underline">$1</a>');
+    return citationText.replace(urlRegex, '<a href="$1" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800 underline">$1</a>');
   };
 
   const getTypeIcon = (type: string) => {

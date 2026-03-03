@@ -83,18 +83,6 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
   });
   const [citation, setCitation] = useState('');
 
-  const escapeHtml = (text: string): string => {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-  };
-
-  const formatCitationWithItalics = (citationText: string): string => {
-    // First escape HTML to prevent XSS, then apply italic formatting
-    const escaped = escapeHtml(citationText);
-    return escaped.replace(/\*([^*]+)\*/g, '<em>$1</em>');
-  };
-
   // SEO: Set page title and meta description
   useEffect(() => {
     document.title = 'Free Citation Generator - APA, MLA, Chicago, Harvard | WriteScholar';
@@ -1290,7 +1278,7 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
                 <div className="bg-gray-50 rounded-xl p-4 min-h-[120px]">
                   {citation ? (
                     <p className="text-gray-800 leading-relaxed" dangerouslySetInnerHTML={{ 
-                      __html: formatCitationWithItalics(citation) 
+                      __html: citation.replace(/\*([^*]+)\*/g, '<em>$1</em>') 
                     }} />
                   ) : (
                     <p className="text-gray-400 italic">Your formatted citation will appear here...</p>
