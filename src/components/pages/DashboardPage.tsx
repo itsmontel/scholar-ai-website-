@@ -250,14 +250,11 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
 
   const fetchQuizUsage = async () => {
     try {
-      const token = localStorage.getItem('authToken');
-      if (!token) return;
+      if (!user) return;
 
       const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/analysis/quiz-usage`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' }
       });
 
       if (response.ok) {
@@ -282,14 +279,11 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
   const fetchUsageStats = async () => {
     try {
       setLoadingStats(true);
-      const token = localStorage.getItem('authToken');
-      if (!token) return;
+      if (!user) return;
 
       const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/subscriptions/usage`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' }
       });
 
       if (response.ok) {
@@ -307,7 +301,8 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
     const docsWithAnalysis = await Promise.all(
       documents.map(async (doc: any) => {
         const analysisResponse = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/analysis/document/${doc.id}`, {
-          headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` },
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' }
         });
         
         let hasAnalysis = false;
@@ -325,15 +320,14 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
   const fetchDocuments = async () => {
     try {
       setIsLoading(true);
-      const token = localStorage.getItem('authToken');
-      if (!token) {
+      if (!user) {
         setIsLoading(false);
         return;
       }
 
       const { BulletproofAPI } = await import('../../config/api');
       const result = await BulletproofAPI.safeRequest(
-        () => BulletproofAPI.get('/documents', token),
+        () => BulletproofAPI.get('/documents'),
         { documents: [] }
       );
 
@@ -342,26 +336,24 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
       } else if (result.error?.includes('401')) {
           try {
             const refreshResult = await BulletproofAPI.safeRequest(
-              () => BulletproofAPI.post('/auth/refresh', {}, token),
-              { token: null }
+              () => BulletproofAPI.post('/auth/refresh', {}),
+              null
             );
             
-            if (refreshResult.success && refreshResult.data?.token) {
-            localStorage.setItem('authToken', refreshResult.data.token);
-              const retryToken = refreshResult.data.token ?? undefined;
+            if (refreshResult.success) {
               const retryResult = await BulletproofAPI.safeRequest(
-                () => BulletproofAPI.get('/documents', retryToken),
+                () => BulletproofAPI.get('/documents'),
                 { documents: [] }
               );
-              if (retryResult.success) {
+              if (retryResult.success && retryResult.data?.documents) {
                 await processDocuments(retryResult.data.documents || []);
               }
             } else {
+              onLogout();
+            }
+          } catch {
             onLogout();
           }
-        } catch {
-          onLogout();
-        }
       } else {
         await processDocuments([]);
       }
@@ -416,8 +408,7 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
       setIsSearchingCitations(true);
       setShowSearchAnimation(true);
       
-      const token = localStorage.getItem('authToken');
-      if (!token) {
+      if (!user) {
         alert('Please log in to search for citations');
         onNavigate('login');
         return;
@@ -434,10 +425,8 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
 
       const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/analysis/citation-search`, {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           researchTopic: inputText,
           citationStyle: citationStyle,
@@ -495,11 +484,10 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
   const [humanizeError, setHumanizeError] = useState('');
 
   useEffect(() => {
-    if (mode === 'humanize') {
-      const token = localStorage.getItem('authToken');
-      if (token) {
+    if (mode === 'humanize' && user) {
         fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/analysis/humanize-usage`, {
-          headers: { 'Authorization': `Bearer ${token}` }
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' }
         })
           .then(r => r.json())
           .then(data => {
@@ -509,9 +497,8 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
             }
           })
           .catch(() => {});
-      }
     }
-  }, [mode, showHumanizeResult]);
+  }, [mode, showHumanizeResult, user]);
 
   const handleHumanize = async () => {
     if (inputText.trim().length === 0) return;
@@ -522,13 +509,10 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
     setHumanizeError('');
 
     try {
-      const token = localStorage.getItem('authToken');
       const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/analysis/humanize`, {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           text: inputText,
           mode: humanizeMode,
@@ -567,10 +551,10 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
     setIsSummarizing(true);
     setSummaryError('');
     try {
-      const token = localStorage.getItem('authToken');
       const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/analysis/summarize`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: inputText, style: summaryStyle, length: summaryLength })
       });
       const data = await response.json();
@@ -591,10 +575,10 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
     setIsGeneratingQuiz(true);
     setQuizError('');
     try {
-      const token = localStorage.getItem('authToken');
       const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/analysis/generate-quiz`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: inputText, quizType, difficulty: quizDifficulty, questionCount: quizQuestionCount })
       });
       const data = await response.json();
@@ -623,10 +607,10 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
     setIsGeneratingFlashcards(true);
     setQuizError('');
     try {
-      const token = localStorage.getItem('authToken');
       const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/analysis/generate-flashcards`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: inputText, cardCount: isFreeUser ? 15 : flashcardCount })
       });
       const data = await response.json();
@@ -651,10 +635,10 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
     setIsGeneratingCrossword(true);
     setQuizError('');
     try {
-      const token = localStorage.getItem('authToken');
       const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/analysis/generate-crossword`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: inputText, wordCount: isFreeUser ? 10 : crosswordWordCount })
       });
       const data = await response.json();

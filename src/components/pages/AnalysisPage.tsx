@@ -150,19 +150,20 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
     return () => clearInterval(checkPlanChanges);
   }, [currentPlan]);
 
+  const isLoggedIn = !!user || !!localStorage.getItem('user');
+
   const fetchDocuments = async () => {
     try {
       setIsLoading(true);
-      const token = localStorage.getItem('authToken');
-      if (!token) {
+      if (!isLoggedIn) {
         setError('Please log in to access documents');
         return;
       }
 
-      // Use bulletproof API with maximum reliability
+      // Use bulletproof API with maximum reliability (cookie sent via credentials: 'include')
       const { BulletproofAPI } = await import('../../config/api');
       const result = await BulletproofAPI.safeRequest(
-        () => BulletproofAPI.get('/documents', token),
+        () => BulletproofAPI.get('/documents'),
         { documents: [] }
       );
 
@@ -186,13 +187,12 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
 
   const fetchUserPlan = async () => {
     try {
-      const token = localStorage.getItem('authToken');
-      if (!token) return 'free';
+      if (!isLoggedIn) return 'free';
 
-      // Use bulletproof API for plan fetching
+      // Use bulletproof API for plan fetching (cookie sent via credentials: 'include')
       const { BulletproofAPI } = await import('../../config/api');
       const result = await BulletproofAPI.safeRequest(
-        () => BulletproofAPI.get('/subscriptions/current', token),
+        () => BulletproofAPI.get('/subscriptions/current'),
         { plan: 'free' }
       );
 
@@ -215,17 +215,14 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
 
   const fetchAnalysisTypes = async () => {
     try {
-      const token = localStorage.getItem('authToken');
-      if (!token) {
+      if (!isLoggedIn) {
         setError('Please log in to access analysis types');
         return;
       }
 
       const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/analysis/types`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
       });
 
       if (!response.ok) {
@@ -412,16 +409,13 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
 
   const fetchDocumentContent = async (documentId: string) => {
     try {
-      const token = localStorage.getItem('authToken');
-      if (!token) {
+      if (!isLoggedIn) {
         throw new Error('Please log in to access documents');
       }
 
       const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/documents/${documentId}/content`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
       });
 
       if (!response.ok) {
@@ -443,8 +437,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
       console.log('=== LOADING EXISTING ANALYSIS ===');
       console.log('Document ID:', documentId);
       
-      const token = localStorage.getItem('authToken');
-      if (!token) {
+      if (!isLoggedIn) {
         setError('Please log in to access analyses');
         return;
       }
@@ -457,10 +450,8 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
 
       // Get analysis data
       const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/analysis/document/${documentId}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
       });
 
       if (!response.ok) {
@@ -732,8 +723,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
       console.log('Using text content from dashboard');
     } else if (selectedDocument) {
       // Use selected document content
-      const token = localStorage.getItem('authToken');
-      if (!token) {
+      if (!isLoggedIn) {
         setError('Please log in to analyze documents');
         return;
       }
@@ -758,8 +748,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
     setAnnotations([]);
 
     try {
-      const token = localStorage.getItem('authToken');
-      if (!token) {
+      if (!isLoggedIn) {
         throw new Error('Please log in to analyze documents');
       }
 
@@ -772,8 +761,8 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
 
       const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/analysis/analyze`, {
         method: 'POST',
+        credentials: 'include',
         headers: {
-          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -851,10 +840,8 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
 
         const saveResponse = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/analysis/save`, {
           method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             documentId: selectedDocument,
             content: content,

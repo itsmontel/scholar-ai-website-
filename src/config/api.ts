@@ -20,6 +20,7 @@ const bulletproofFetch = async (
       
       const response = await fetch(url, {
         ...options,
+        credentials: 'include', // Always send cookies for httpOnly JWT auth
         signal: controller.signal
       });
       
@@ -102,10 +103,12 @@ export const authenticatedApiCall = async (endpoint: string, token: string, opti
 
 // Ultra-reliable API class for critical operations
 // Retry counts balanced to be bulletproof without hitting rate limits
+// Note: Token parameter is optional for backward compatibility; httpOnly cookie is preferred
 export class BulletproofAPI {
   // GET with strong reliability (7 retries = up to 7 attempts)
   static async get(endpoint: string, token?: string): Promise<Response> {
     const headers: HeadersInit = {};
+    // Token in header is optional fallback; httpOnly cookie is sent automatically via credentials: 'include'
     if (token) headers['Authorization'] = `Bearer ${token}`;
     
     const url = `${API_BASE_URL}${endpoint}`;

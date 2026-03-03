@@ -105,14 +105,11 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
   const fetchSubscriptionData = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('authToken');
       
-      // Fetch current subscription
+      // Fetch current subscription (cookie sent via credentials: 'include')
       const subscriptionResponse = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/subscriptions/current`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' }
       });
 
       if (subscriptionResponse.ok) {
@@ -122,10 +119,8 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
 
       // Fetch usage stats
       const usageResponse = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/subscriptions/usage`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' }
       });
 
       if (usageResponse.ok) {
@@ -147,17 +142,13 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
       setProcessing(planId);
       setError(null);
       
-      const token = localStorage.getItem('authToken');
-      
       // Check if user already has a subscription (not free plan)
       if (currentPlan !== 'free') {
         // User has existing subscription - redirect to billing portal to manage/change plan
         const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/subscriptions/billing-portal`, {
           method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          },
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             returnUrl: `${window.location.origin}/billing`
           })
@@ -174,10 +165,8 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
         // User is on free plan - create new checkout session
         const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/subscriptions/create-checkout-session`, {
           method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          },
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             planType: planId,
             billingCycle: billingCycle,
@@ -207,14 +196,10 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
       setProcessing('billing');
       setError(null);
       
-      const token = localStorage.getItem('authToken');
-      
       const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/subscriptions/billing-portal`, {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' }
       });
 
       const data = await response.json();

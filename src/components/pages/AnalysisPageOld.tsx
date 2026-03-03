@@ -104,20 +104,19 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
     }
   }, []);
 
+  const isLoggedIn = !!localStorage.getItem('user');
+
   const fetchDocuments = async () => {
     try {
       setIsLoading(true);
-      const token = localStorage.getItem('authToken');
-      if (!token) {
+      if (!isLoggedIn) {
         setError('Please log in to access documents');
         return;
       }
 
       const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/documents`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
       });
 
       if (!response.ok) {
@@ -135,17 +134,14 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
 
   const fetchAnalysisTypes = async () => {
     try {
-      const token = localStorage.getItem('authToken');
-      if (!token) {
+      if (!isLoggedIn) {
         setError('Please log in to access analysis types');
         return;
       }
 
       const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/analysis/types`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
       });
 
       if (!response.ok) {
@@ -421,16 +417,13 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
 
   const fetchDocumentContent = async (documentId: string) => {
     try {
-      const token = localStorage.getItem('authToken');
-      if (!token) {
+      if (!isLoggedIn) {
         throw new Error('Please log in to access documents');
       }
 
       const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/documents/${documentId}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
       });
 
       if (!response.ok) {
@@ -448,8 +441,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
 
   const loadExistingAnalysis = async (documentId: string) => {
     try {
-      const token = localStorage.getItem('authToken');
-      if (!token) {
+      if (!isLoggedIn) {
         setError('Please log in to access analyses');
         return;
       }
@@ -463,10 +455,8 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
 
       // Get the existing analysis
       const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/analysis/document/${documentId}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
       });
 
       if (!response.ok) {
@@ -531,8 +521,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
       content = documentContent;
     } else if (selectedDocument) {
       // Use selected document content
-      const token = localStorage.getItem('authToken');
-      if (!token) {
+      if (!isLoggedIn) {
         setError('Please log in to analyze documents');
         return;
       }
@@ -554,17 +543,14 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
     setAnnotations([]);
 
     try {
-      const token = localStorage.getItem('authToken');
-      if (!token) {
+      if (!isLoggedIn) {
         throw new Error('Please log in to analyze documents');
       }
 
       const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/analysis/analyze`, {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           documentId: selectedDocument || null,
           content: content,
@@ -635,10 +621,8 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
 
         const saveResponse = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/analysis/save`, {
           method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             documentId: selectedDocument,
             content: content,

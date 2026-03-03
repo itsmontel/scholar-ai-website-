@@ -5,6 +5,7 @@ const cors = require('cors');
 const compression = require('compression');
 const morgan = require('morgan');
 const session = require('express-session');
+const cookieParser = require('cookie-parser');
 const passport = require('./config/passport');
 
 const authRoutes = require('./routes/auth');
@@ -61,6 +62,9 @@ app.use('/api/webhooks', webhookRoutes);
 // Body parsing middleware
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Cookie parser for httpOnly JWT cookies
+app.use(cookieParser());
 
 // Session middleware for Passport
 app.use(session({

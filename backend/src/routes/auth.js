@@ -175,6 +175,16 @@ router.post('/login', validateLogin, async (req, res) => {
     // Generate JWT token
     const token = generateToken(user.id);
 
+    // Set httpOnly cookie with the JWT
+    const isProduction = process.env.NODE_ENV === 'production';
+    res.cookie('authToken', token, {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? 'strict' : 'lax',
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+      path: '/'
+    });
+
     res.json({
       success: true,
       message: 'Login successful',
@@ -187,8 +197,7 @@ router.post('/login', validateLogin, async (req, res) => {
           subscriptionPlan: user.subscription_plan,
           subscriptionStatus: user.subscription_status,
           emailVerified: user.email_verified
-        },
-        token
+        }
       }
     });
   } catch (error) {
@@ -541,11 +550,19 @@ router.post('/refresh', authenticateToken, async (req, res) => {
   try {
     const newToken = generateToken(req.user.id);
 
+    // Set new httpOnly cookie with the refreshed JWT
+    const isProduction = process.env.NODE_ENV === 'production';
+    res.cookie('authToken', newToken, {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? 'strict' : 'lax',
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+      path: '/'
+    });
+
     res.json({
       success: true,
-      data: {
-        token: newToken
-      }
+      message: 'Token refreshed successfully'
     });
   } catch (error) {
     console.error('Token refresh error:', error);
@@ -557,9 +574,18 @@ router.post('/refresh', authenticateToken, async (req, res) => {
 });
 
 // @route   POST /api/auth/logout
-// @desc    Logout user (client-side token removal)
-// @access  Private
-router.post('/logout', authenticateToken, (req, res) => {
+// @desc    Logout user (clear httpOnly cookie)
+// @access  Public (no auth required to clear cookie)
+router.post('/logout', (req, res) => {
+  // Clear the httpOnly cookie
+  res.cookie('authToken', '', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
+    maxAge: 0, // Expire immediately
+    path: '/'
+  });
+  
   res.json({
     success: true,
     message: 'Logged out successfully'
@@ -584,9 +610,20 @@ router.get('/google/callback',
       // Generate JWT token for the user
       const token = generateToken(req.user.id);
       
-      // Redirect to frontend with token
+      // Set httpOnly cookie with the JWT
+      const isProduction = process.env.NODE_ENV === 'production';
+      res.cookie('authToken', token, {
+        httpOnly: true,
+        secure: isProduction,
+        sameSite: isProduction ? 'strict' : 'lax',
+        maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+        path: '/'
+      });
+      
+      // Redirect to frontend with user data in fragment (not query) for security
+      // Token is NOT in URL - it's in the httpOnly cookie
       const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
-      res.redirect(`${frontendUrl}/auth/callback?token=${token}&user=${encodeURIComponent(JSON.stringify({
+      res.redirect(`${frontendUrl}/auth/callback#user=${encodeURIComponent(JSON.stringify({
         id: req.user.id,
         email: req.user.email,
         name: req.user.name,

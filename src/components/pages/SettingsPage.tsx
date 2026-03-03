@@ -21,17 +21,15 @@ const SettingsPage = ({ onNavigate, user, onLogout }: SettingsPageProps) => {
   // Fetch user stats
   const fetchUserStats = async () => {
     try {
-      const token = localStorage.getItem('authToken');
-      if (!token) {
+      if (!user) {
         setLoading(false);
         return;
       }
 
-      // Fetch user profile with subscription data (cache-busting)
+      // Fetch user profile with subscription data (cache-busting) (cookie sent via credentials: 'include')
       const profileResponse = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/users/profile?t=${Date.now()}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
       });
 
       if (profileResponse.ok) {
@@ -53,9 +51,8 @@ const SettingsPage = ({ onNavigate, user, onLogout }: SettingsPageProps) => {
 
       // Fetch document stats
       const statsResponse = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/documents/stats/overview`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
       });
 
       if (statsResponse.ok) {

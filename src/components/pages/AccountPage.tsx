@@ -63,17 +63,15 @@ const AccountPage = ({ onNavigate, user, onLogout }: AccountPageProps) => {
   // Fetch user stats and profile data
   const fetchUserData = async () => {
     try {
-      const token = localStorage.getItem('authToken');
-      if (!token) {
+      if (!displayUser) {
         setLoading(false);
         return;
       }
 
-      // Fetch user profile with cache-busting timestamp
+      // Fetch user profile with cache-busting timestamp (cookie sent via credentials: 'include')
       const profileResponse = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/users/profile?t=${Date.now()}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
       });
 
       if (profileResponse.ok) {
@@ -96,9 +94,8 @@ const AccountPage = ({ onNavigate, user, onLogout }: AccountPageProps) => {
 
       // Fetch document stats
       const statsResponse = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/documents/stats/overview`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
       });
 
       if (statsResponse.ok) {
@@ -169,13 +166,10 @@ const AccountPage = ({ onNavigate, user, onLogout }: AccountPageProps) => {
     setPasswordSuccess('');
 
     try {
-      const token = localStorage.getItem('authToken');
       const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/users/change-password`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           currentPassword: passwordData.currentPassword,
           newPassword: passwordData.newPassword
@@ -210,12 +204,10 @@ const AccountPage = ({ onNavigate, user, onLogout }: AccountPageProps) => {
     setDeleteLoading(true);
 
     try {
-      const token = localStorage.getItem('authToken');
       const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/users/account`, {
         method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        }
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' }
       });
 
       if (response.ok) {
@@ -225,7 +217,6 @@ const AccountPage = ({ onNavigate, user, onLogout }: AccountPageProps) => {
         
         // Wait for animation to complete, then clear data and redirect
         setTimeout(() => {
-          localStorage.removeItem('authToken');
           localStorage.removeItem('user');
           onLogout();
           onNavigate('login');

@@ -12,9 +12,8 @@ const AuthCallbackPage: React.FC<AuthCallbackPageProps> = ({ onNavigate, onLogin
   useEffect(() => {
     const handleAuthCallback = async () => {
       try {
+        // Check for error in query string
         const urlParams = new URLSearchParams(window.location.search);
-        const token = urlParams.get('token');
-        const userParam = urlParams.get('user');
         const errorParam = urlParams.get('error');
 
         if (errorParam) {
@@ -23,7 +22,13 @@ const AuthCallbackPage: React.FC<AuthCallbackPageProps> = ({ onNavigate, onLogin
           return;
         }
 
-        if (!token || !userParam) {
+        // Read user data from URL fragment (more secure - not sent to server/Referer)
+        // Token is now in httpOnly cookie, not in URL
+        const hash = window.location.hash.substring(1); // Remove the '#'
+        const hashParams = new URLSearchParams(hash);
+        const userParam = hashParams.get('user');
+
+        if (!userParam) {
           setError('Invalid authentication response.');
           setStatus('error');
           return;
@@ -32,9 +37,11 @@ const AuthCallbackPage: React.FC<AuthCallbackPageProps> = ({ onNavigate, onLogin
         // Parse user data
         const userData = JSON.parse(decodeURIComponent(userParam));
 
-        // Store token and user data
-        localStorage.setItem('authToken', token);
+        // Store user data only (token is in httpOnly cookie, not accessible to JS)
         localStorage.setItem('user', JSON.stringify(userData));
+
+        // Clear the URL fragment immediately for security
+        window.history.replaceState(null, '', window.location.pathname);
 
         // Call the parent component's onLogin
         onLogin(userData);
