@@ -88,6 +88,16 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
                   Paraphrasing Tips
                 </a>
               </li>
+              <li>
+                <a href="/tools/gpa-calculator" onClick={(e) => { e.preventDefault(); onNavigate?.('gpa-calculator'); }} className="text-gray-500 hover:text-gray-900 text-sm transition-colors">
+                  GPA Calculator
+                </a>
+              </li>
+              <li>
+                <a href="/tools/pomodoro-timer" onClick={(e) => { e.preventDefault(); onNavigate?.('pomodoro-timer'); }} className="text-gray-500 hover:text-gray-900 text-sm transition-colors">
+                  Pomodoro Timer
+                </a>
+              </li>
             </ul>
           </div>
 

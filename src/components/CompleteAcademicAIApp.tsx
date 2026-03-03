@@ -42,6 +42,8 @@ import GrammarCheckerPage from './pages/tools/GrammarCheckerPage';
 import HumanizerPage from './pages/tools/HumanizerPage';
 import SummarizerPage from './pages/tools/SummarizerPage';
 import QuizGeneratorPage from './pages/tools/QuizGeneratorPage';
+import GPACalculatorPage from './pages/tools/GPACalculatorPage';
+import PomodoroTimerPage from './pages/tools/PomodoroTimerPage';
 
 // Import common components
 import ErrorBoundary from './common/ErrorBoundary';
@@ -124,7 +126,9 @@ const AcademicAIApp = () => {
     'quiz-generator': { title: 'AI Quiz Generator – Create Study Quizzes from Text | WriteScholar', description: 'Turn notes, articles, and textbooks into interactive quizzes. Multiple choice, true/false questions. Perfect for exam prep. Free plan: 3 quizzes/month.' },
     'flashcard-generator': { title: 'AI Flashcard Generator – Create Study Flashcards from Text | WriteScholar', description: 'Transform your notes, articles, and textbooks into interactive flashcards. Perfect for memorization and exam prep. Free plan: 3 generations/month.' },
     'crossword-generator': { title: 'AI Crossword Generator – Create Study Crosswords from Text | WriteScholar', description: 'Turn your notes and study materials into engaging crossword puzzles. Fun way to memorize key terms. Free plan: 3 generations/month.' },
-    'quiz-history': { title: 'My Study Tools | WriteScholar', description: 'View and retake your saved quizzes, flashcards, and crosswords. Study materials are stored for 7 days.' }
+    'quiz-history': { title: 'My Study Tools | WriteScholar', description: 'View and retake your saved quizzes, flashcards, and crosswords. Study materials are stored for 7 days.' },
+    'gpa-calculator': { title: 'Free GPA Calculator - Calculate Grade Point Average | WriteScholar', description: 'Free GPA calculator for college and high school students. Calculate semester or cumulative GPA instantly. Add courses, credits, and grades. No signup required.' },
+    'pomodoro-timer': { title: 'Free Pomodoro Timer - Study Timer & Focus Tool | WriteScholar', description: 'Free Pomodoro timer for focused studying. Boost productivity with timed work sessions and breaks. Customizable focus and break intervals. No signup required.' }
   };
   useEffect(() => {
     const meta = pageMeta[currentPage];
@@ -305,6 +309,8 @@ const AcademicAIApp = () => {
       if (pathname === '/tools/quiz-generator' || pathname === '/quiz-generator') return 'quiz-generator';
       if (pathname === '/tools/flashcard-generator' || pathname === '/flashcard-generator') return 'flashcard-generator';
       if (pathname === '/tools/crossword-generator' || pathname === '/crossword-generator') return 'crossword-generator';
+      if (pathname === '/tools/gpa-calculator' || pathname === '/gpa-calculator') return 'gpa-calculator';
+      if (pathname === '/tools/pomodoro-timer' || pathname === '/pomodoro-timer') return 'pomodoro-timer';
       return 'landing';
     };
     
@@ -471,6 +477,8 @@ const AcademicAIApp = () => {
     'text-case-converter': '/tools/text-case-converter',
     'thesis-generator': '/tools/thesis-generator',
     'grammar-checker': '/tools/grammar-checker',
+    'gpa-calculator': '/tools/gpa-calculator',
+    'pomodoro-timer': '/tools/pomodoro-timer',
   };
 
   const navigateTo = (page: string, slug?: string) => {
@@ -629,6 +637,10 @@ const AcademicAIApp = () => {
         return <QuizGeneratorPage onNavigate={navigateTo} user={user} initialStudyToolMode="flashcards" />;
       case 'crossword-generator':
         return <QuizGeneratorPage onNavigate={navigateTo} user={user} initialStudyToolMode="crossword" />;
+      case 'gpa-calculator':
+        return <GPACalculatorPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
+      case 'pomodoro-timer':
+        return <PomodoroTimerPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'admin':
         return <AdminDashboard onNavigate={navigateTo} user={user} />;
       case 'collaboration':
