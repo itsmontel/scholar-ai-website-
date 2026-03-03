@@ -13,6 +13,7 @@ const PromoBanner: React.FC = () => {
             <span className="hidden sm:inline">🎉 Get </span>
             <span className="sm:hidden">🎉 </span>
             <span className="font-semibold text-blue-400">50% off</span>
+            <span className="sm:hidden"> first month</span>
             <span className="hidden sm:inline"> your first month on any monthly plan</span>
           </span>
           <span className="text-gray-400 hidden sm:inline">•</span>
