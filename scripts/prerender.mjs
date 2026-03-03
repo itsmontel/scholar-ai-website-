@@ -30,6 +30,8 @@ const staticRoutes = [
   '/tools/humanizer',
   '/tools/summarizer',
   '/tools/quiz-generator',
+  '/tools/flashcard-generator',
+  '/tools/crossword-generator',
   // Free tools
   '/tools/word-counter',
   '/tools/citation-generator',

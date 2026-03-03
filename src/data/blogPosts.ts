@@ -14,6 +14,14 @@ export interface BlogPostMeta {
 
 export const blogPostList: BlogPostMeta[] = [
   {
+    slug: 'ai-study-tools-flashcards-quizzes-crosswords',
+    title: 'AI Study Tools: How Flashcards, Quizzes & Crosswords Transform Learning',
+    description: 'Discover how AI-powered study tools like flashcards, quizzes, and crosswords can boost retention and make studying more effective. Learn why WriteScholar is the best choice for students.',
+    date: '2026-03-03',
+    author: 'WriteScholar Team',
+    readTime: '11 min read'
+  },
+  {
     slug: 'free-writing-tools-every-student-needs',
     title: '8 Free Writing Tools Every Student Needs in 2026',
     description: 'Discover the best free writing tools for students including word counters, grammar checkers, citation generators, and paraphrasing tools to improve your academic writing.',

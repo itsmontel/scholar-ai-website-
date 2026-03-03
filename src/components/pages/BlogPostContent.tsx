@@ -179,6 +179,141 @@ const ToolsIllustration = () => (
   </IllustrationWrapper>
 );
 
+const FlashcardsIllustration = () => (
+  <IllustrationWrapper bgColor="bg-cyan-50">
+    <svg viewBox="0 0 280 160" fill="none" className="w-full max-w-xs h-auto">
+      {/* Stack of flashcards */}
+      <rect x="50" y="70" width="90" height="60" rx="6" fill="#E0F2FE" stroke="#0EA5E9" strokeWidth="2" transform="rotate(-5 95 100)" />
+      <rect x="55" y="65" width="90" height="60" rx="6" fill="#BAE6FD" stroke="#0EA5E9" strokeWidth="2" transform="rotate(-2 100 95)" />
+      <rect x="60" y="60" width="90" height="60" rx="6" fill="white" stroke="#0EA5E9" strokeWidth="2" />
+      {/* Question mark on front card */}
+      <text x="105" y="98" textAnchor="middle" fontSize="32" fill="#0EA5E9" fontWeight="bold">?</text>
+      {/* Flipped card with answer */}
+      <rect x="165" y="50" width="80" height="55" rx="6" fill="#ECFDF5" stroke="#10B981" strokeWidth="2" />
+      <text x="205" y="85" textAnchor="middle" fontSize="24" fill="#10B981" fontWeight="bold">A</text>
+      {/* Flip arrow */}
+      <path d="M152 80 Q160 70 168 80" stroke="#6B7280" strokeWidth="2" fill="none" markerEnd="url(#arrow)" />
+      <polygon points="168,77 172,82 166,82" fill="#6B7280" />
+      {/* Brain icon */}
+      <circle cx="240" cy="130" r="18" fill="#F0FDFA" stroke="#14B8A6" strokeWidth="2" />
+      <path d="M232 130 Q235 120 240 125 Q245 120 248 130 Q250 138 240 140 Q230 138 232 130" fill="#14B8A6" />
+    </svg>
+  </IllustrationWrapper>
+);
+
+const QuizIllustration = () => (
+  <IllustrationWrapper bgColor="bg-violet-50">
+    <svg viewBox="0 0 280 160" fill="none" className="w-full max-w-xs h-auto">
+      {/* Quiz paper */}
+      <rect x="70" y="25" width="100" height="120" rx="4" fill="white" stroke="#8B5CF6" strokeWidth="2" />
+      {/* Question 1 with checkmark */}
+      <circle cx="90" cy="50" r="8" fill="#DDD6FE" stroke="#8B5CF6" strokeWidth="2" />
+      <text x="90" y="54" textAnchor="middle" fontSize="10" fill="#8B5CF6" fontWeight="bold">1</text>
+      <line x1="105" y1="50" x2="155" y2="50" stroke="#E5E7EB" strokeWidth="2" />
+      <path d="M160 47 L165 52 L173 42" stroke="#10B981" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+      {/* Question 2 with checkmark */}
+      <circle cx="90" cy="75" r="8" fill="#DDD6FE" stroke="#8B5CF6" strokeWidth="2" />
+      <text x="90" y="79" textAnchor="middle" fontSize="10" fill="#8B5CF6" fontWeight="bold">2</text>
+      <line x1="105" y1="75" x2="155" y2="75" stroke="#E5E7EB" strokeWidth="2" />
+      <path d="M160 72 L165 77 L173 67" stroke="#10B981" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+      {/* Question 3 with X */}
+      <circle cx="90" cy="100" r="8" fill="#DDD6FE" stroke="#8B5CF6" strokeWidth="2" />
+      <text x="90" y="104" textAnchor="middle" fontSize="10" fill="#8B5CF6" fontWeight="bold">3</text>
+      <line x1="105" y1="100" x2="155" y2="100" stroke="#E5E7EB" strokeWidth="2" />
+      <path d="M160 95 L172 107 M172 95 L160 107" stroke="#EF4444" strokeWidth="2.5" strokeLinecap="round" />
+      {/* Question 4 */}
+      <circle cx="90" cy="125" r="8" fill="#DDD6FE" stroke="#8B5CF6" strokeWidth="2" />
+      <text x="90" y="129" textAnchor="middle" fontSize="10" fill="#8B5CF6" fontWeight="bold">4</text>
+      <line x1="105" y1="125" x2="155" y2="125" stroke="#E5E7EB" strokeWidth="2" />
+      {/* Score badge */}
+      <circle cx="210" cy="70" r="30" fill="#8B5CF6" />
+      <text x="210" y="65" textAnchor="middle" fontSize="16" fill="white" fontWeight="bold">85%</text>
+      <text x="210" y="82" textAnchor="middle" fontSize="10" fill="#DDD6FE">Score</text>
+      {/* Student thinking */}
+      <circle cx="210" cy="130" r="15" fill="#FCD9B6" />
+      <circle cx="205" cy="128" r="2" fill="#1F2937" />
+      <circle cx="215" cy="128" r="2" fill="#1F2937" />
+      <path d="M205 135 Q210 138 215 135" stroke="#1F2937" strokeWidth="1.5" fill="none" strokeLinecap="round" />
+    </svg>
+  </IllustrationWrapper>
+);
+
+const CrosswordIllustration = () => (
+  <IllustrationWrapper bgColor="bg-amber-50">
+    <svg viewBox="0 0 280 160" fill="none" className="w-full max-w-xs h-auto">
+      {/* Crossword grid */}
+      <rect x="60" y="30" width="120" height="100" rx="4" fill="white" stroke="#F59E0B" strokeWidth="2" />
+      {/* Grid lines */}
+      <line x1="90" y1="30" x2="90" y2="130" stroke="#FCD34D" strokeWidth="1" />
+      <line x1="120" y1="30" x2="120" y2="130" stroke="#FCD34D" strokeWidth="1" />
+      <line x1="150" y1="30" x2="150" y2="130" stroke="#FCD34D" strokeWidth="1" />
+      <line x1="60" y1="55" x2="180" y2="55" stroke="#FCD34D" strokeWidth="1" />
+      <line x1="60" y1="80" x2="180" y2="80" stroke="#FCD34D" strokeWidth="1" />
+      <line x1="60" y1="105" x2="180" y2="105" stroke="#FCD34D" strokeWidth="1" />
+      {/* Filled letters */}
+      <text x="75" y="48" textAnchor="middle" fontSize="14" fill="#1F2937" fontWeight="bold">S</text>
+      <text x="105" y="48" textAnchor="middle" fontSize="14" fill="#1F2937" fontWeight="bold">T</text>
+      <text x="135" y="48" textAnchor="middle" fontSize="14" fill="#1F2937" fontWeight="bold">U</text>
+      <text x="165" y="48" textAnchor="middle" fontSize="14" fill="#1F2937" fontWeight="bold">D</text>
+      <text x="135" y="73" textAnchor="middle" fontSize="14" fill="#1F2937" fontWeight="bold">N</text>
+      <text x="135" y="98" textAnchor="middle" fontSize="14" fill="#1F2937" fontWeight="bold">I</text>
+      <text x="135" y="123" textAnchor="middle" fontSize="14" fill="#1F2937" fontWeight="bold">T</text>
+      {/* Black squares */}
+      <rect x="60" y="80" width="30" height="25" fill="#1F2937" />
+      <rect x="150" y="80" width="30" height="25" fill="#1F2937" />
+      <rect x="60" y="105" width="30" height="25" fill="#1F2937" />
+      <rect x="150" y="105" width="30" height="25" fill="#1F2937" />
+      {/* Clue numbers */}
+      <text x="64" y="40" fontSize="8" fill="#F59E0B" fontWeight="bold">1</text>
+      <text x="124" y="40" fontSize="8" fill="#F59E0B" fontWeight="bold">2</text>
+      {/* Pencil */}
+      <rect x="200" y="50" width="45" height="8" rx="1" fill="#FCD34D" transform="rotate(30 200 50)" />
+      <polygon points="195,62 200,55 200,65" fill="#F59E0B" transform="rotate(30 197 60)" />
+      {/* Lightbulb moment */}
+      <circle cx="230" cy="120" r="15" fill="#FEF3C7" stroke="#FCD34D" strokeWidth="2" />
+      <path d="M227 130 L233 130" stroke="#FCD34D" strokeWidth="2" />
+      <path d="M225 133 L235 133" stroke="#FCD34D" strokeWidth="2" />
+      <path d="M230 110 L230 118" stroke="#FCD34D" strokeWidth="2" />
+      <path d="M224 113 L228 117" stroke="#FCD34D" strokeWidth="2" />
+      <path d="M236 113 L232 117" stroke="#FCD34D" strokeWidth="2" />
+    </svg>
+  </IllustrationWrapper>
+);
+
+const StudyToolsHeroIllustration = () => (
+  <IllustrationWrapper bgColor="bg-gradient-to-r from-indigo-50 to-purple-50">
+    <svg viewBox="0 0 320 160" fill="none" className="w-full max-w-sm h-auto">
+      {/* Central brain/learning icon */}
+      <circle cx="160" cy="80" r="35" fill="#EEF2FF" stroke="#6366F1" strokeWidth="3" />
+      <path d="M145 80 Q150 65 160 70 Q170 65 175 80 Q178 95 160 100 Q142 95 145 80" fill="#6366F1" />
+      <circle cx="153" cy="78" r="3" fill="#EEF2FF" />
+      <circle cx="167" cy="78" r="3" fill="#EEF2FF" />
+      {/* Flashcard */}
+      <rect x="40" y="50" width="50" height="35" rx="4" fill="white" stroke="#0EA5E9" strokeWidth="2" />
+      <text x="65" y="72" textAnchor="middle" fontSize="16" fill="#0EA5E9" fontWeight="bold">?</text>
+      <path d="M95 67 L120 75" stroke="#9CA3AF" strokeWidth="2" strokeDasharray="4 2" />
+      {/* Quiz */}
+      <rect x="230" y="45" width="50" height="40" rx="4" fill="white" stroke="#8B5CF6" strokeWidth="2" />
+      <circle cx="245" cy="58" r="5" fill="#DDD6FE" />
+      <line x1="255" y1="58" x2="270" y2="58" stroke="#E5E7EB" strokeWidth="2" />
+      <circle cx="245" cy="72" r="5" fill="#DDD6FE" />
+      <line x1="255" y1="72" x2="270" y2="72" stroke="#E5E7EB" strokeWidth="2" />
+      <path d="M200 75 L225 70" stroke="#9CA3AF" strokeWidth="2" strokeDasharray="4 2" />
+      {/* Crossword */}
+      <rect x="135" y="125" width="50" height="30" rx="3" fill="white" stroke="#F59E0B" strokeWidth="2" />
+      <line x1="152" y1="125" x2="152" y2="155" stroke="#FCD34D" strokeWidth="1" />
+      <line x1="168" y1="125" x2="168" y2="155" stroke="#FCD34D" strokeWidth="1" />
+      <line x1="135" y1="140" x2="185" y2="140" stroke="#FCD34D" strokeWidth="1" />
+      <path d="M160 115 L160 125" stroke="#9CA3AF" strokeWidth="2" strokeDasharray="4 2" />
+      {/* Sparkles */}
+      <circle cx="120" cy="40" r="4" fill="#FCD34D" />
+      <circle cx="200" cy="35" r="3" fill="#10B981" />
+      <circle cx="100" cy="110" r="3" fill="#EC4899" />
+      <circle cx="220" cy="115" r="4" fill="#3B82F6" />
+    </svg>
+  </IllustrationWrapper>
+);
+
 /**
  * Renders full article body per slug for SEO and readability.
  * Content is 1,500+ words with internal links and CTAs.
@@ -190,6 +325,166 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
   };
 
   switch (slug) {
+    case 'ai-study-tools-flashcards-quizzes-crosswords':
+      return (
+        <>
+          <p className={p}>
+            Studying effectively is one of the biggest challenges students face. You read the textbook, highlight key passages, and review your notes. Yet when exam time comes, the information seems to vanish from memory. The problem isn&apos;t your intelligence or effort; it&apos;s often the study methods themselves. Passive reading and highlighting simply don&apos;t create the strong neural connections needed for long-term retention. This is where active learning tools like flashcards, quizzes, and crosswords come in, and when powered by AI, they become even more effective.
+          </p>
+          <p className={p}>
+            This comprehensive guide explores how AI-powered study tools transform the learning process, why active recall beats passive review, and how WriteScholar&apos;s <a href="/tools/quiz-generator" onClick={handleNavigate('quiz-generator')} className={internalLink}>quiz generator</a>, <a href="/tools/flashcard-generator" onClick={handleNavigate('flashcard-generator')} className={internalLink}>flashcard creator</a>, and <a href="/tools/crossword-generator" onClick={handleNavigate('crossword-generator')} className={internalLink}>crossword builder</a> can help you study smarter, not harder. Whether you&apos;re preparing for finals, learning a new subject, or helping students master difficult material, understanding these tools will change how you approach studying.
+          </p>
+
+          <StudyToolsHeroIllustration />
+
+          <h2 className={h2}>The science behind active recall</h2>
+          <p className={p}>
+            Decades of cognitive science research have established a clear finding: actively retrieving information from memory strengthens that memory far more than passively reviewing it. This phenomenon, known as the &quot;testing effect&quot; or &quot;retrieval practice,&quot; is one of the most robust findings in learning science. When you force your brain to recall information, whether through a quiz question, a flashcard prompt, or filling in a crossword clue, you&apos;re strengthening the neural pathways that store that knowledge.
+          </p>
+          <p className={p}>
+            A landmark study by Roediger and Karpicke (2006) demonstrated that students who took practice tests retained 50% more information after one week compared to students who simply re-read the material. The act of retrieval itself, even when you get the answer wrong initially, creates stronger and more durable memories than passive study methods. This is why flashcards, quizzes, and crosswords are so effective: they force active engagement with the material.
+          </p>
+          <p className={p}>
+            The challenge has always been creating these study materials. Manually writing flashcards takes hours. Designing quizzes requires careful thought about question types and difficulty levels. Building crossword puzzles from scratch is tedious and time-consuming. This is exactly where AI changes the game: it can generate high-quality study materials from your own notes, textbooks, or lecture content in seconds rather than hours.
+          </p>
+
+          <h2 className={h2}>How AI-powered flashcards accelerate learning</h2>
+          <p className={p}>
+            Flashcards have been a study staple for centuries, and for good reason. The simple act of seeing a prompt on one side and trying to recall the answer before flipping creates exactly the kind of active retrieval that strengthens memory. But traditional flashcard creation has a significant drawback: it takes forever. Students often spend more time making flashcards than actually studying them.
+          </p>
+
+          <FlashcardsIllustration />
+
+          <p className={p}>
+            AI-powered flashcard generators like WriteScholar&apos;s <a href="/tools/flashcard-generator" onClick={handleNavigate('flashcard-generator')} className={internalLink}>flashcard tool</a> solve this problem by analyzing your source material and automatically extracting key concepts, definitions, and relationships. You paste in your notes, a textbook chapter, or lecture transcript, and the AI identifies what&apos;s worth remembering and creates well-structured question-answer pairs. What used to take an hour now takes thirty seconds.
+          </p>
+          <p className={p}>
+            The quality of AI-generated flashcards has improved dramatically. Modern AI doesn&apos;t just pull random sentences from your text. It understands context, identifies the most important concepts, and formulates questions that test genuine understanding rather than mere recognition. You can specify how many cards you want, and the AI will prioritize the most critical information from your source material.
+          </p>
+          <p className={p}>
+            WriteScholar&apos;s flashcard generator also lets you customize the output. Need cards focused on definitions? Prefer questions that test application rather than recall? Want to emphasize certain topics over others? The AI adapts to your learning goals. And because the flashcards are generated from your own study materials, they&apos;re perfectly aligned with what you need to learn for your specific course or exam.
+          </p>
+
+          <h2 className={h2}>Why quizzes are the ultimate study tool</h2>
+          <p className={p}>
+            If flashcards are effective, quizzes take active recall to the next level. A well-designed quiz doesn&apos;t just test whether you can remember isolated facts. It tests whether you understand how concepts connect, can apply knowledge to new situations, and can distinguish between similar ideas. Multiple-choice questions, in particular, force you to evaluate options and make decisions, which engages deeper cognitive processing than simple recall.
+          </p>
+
+          <QuizIllustration />
+
+          <p className={p}>
+            Research shows that the format of practice testing matters. Multiple-choice questions that include plausible distractors (wrong answers that seem reasonable) are particularly effective because they force you to think carefully about why the correct answer is right and why the alternatives are wrong. True/false questions test your ability to evaluate statements critically. Short-answer questions require you to generate responses from memory without any cues.
+          </p>
+          <p className={p}>
+            WriteScholar&apos;s <a href="/tools/quiz-generator" onClick={handleNavigate('quiz-generator')} className={internalLink}>AI quiz generator</a> creates all these question types automatically from your source material. You can choose the difficulty level: easy questions for initial learning, medium for consolidation, hard for exam preparation. You can specify how many questions you want and what mix of question types works best for your learning style. The AI generates questions that test comprehension, not just memorization.
+          </p>
+          <p className={p}>
+            One of the most valuable features is immediate feedback. When you take a WriteScholar quiz, you see not just whether you got each question right or wrong, but explanations for the correct answers. This feedback loop is crucial for learning: it helps you identify gaps in your understanding and correct misconceptions before they become ingrained. Studies show that delayed feedback is less effective than immediate feedback, which is why real-time quiz results are so powerful for learning.
+          </p>
+
+          <h2 className={h2}>The surprising power of crossword puzzles for learning</h2>
+          <p className={p}>
+            Crossword puzzles might seem like entertainment rather than serious study tools, but research suggests they&apos;re remarkably effective for vocabulary acquisition, concept reinforcement, and making connections between ideas. The crossword format combines several learning principles: active recall (you must retrieve the answer from memory), contextual cues (the crossing letters provide hints), and the satisfaction of puzzle completion (which releases dopamine and reinforces learning).
+          </p>
+
+          <CrosswordIllustration />
+
+          <p className={p}>
+            What makes crosswords particularly valuable is how they test knowledge from multiple angles. A single word might be clued differently depending on which direction you&apos;re solving, forcing you to think about concepts from different perspectives. The interconnected nature of the puzzle means that getting one answer right helps you solve others, creating a web of associations that strengthens memory.
+          </p>
+          <p className={p}>
+            Creating crossword puzzles manually is notoriously difficult. You need to find words that intersect properly, write clues that are challenging but fair, and ensure the puzzle is actually solvable. WriteScholar&apos;s <a href="/tools/crossword-generator" onClick={handleNavigate('crossword-generator')} className={internalLink}>AI crossword generator</a> handles all of this automatically. You provide your study material, specify how many words you want in the puzzle, and the AI creates a complete crossword with clues derived from your content.
+          </p>
+          <p className={p}>
+            The crossword format is especially effective for learning terminology-heavy subjects like biology, medicine, law, or foreign languages. Instead of drilling vocabulary with boring repetition, you&apos;re solving a puzzle, which is inherently more engaging and memorable. Many students find that they remember terms better after solving a crossword than after reviewing flashcards, simply because the puzzle format creates stronger memory associations.
+          </p>
+
+          <h2 className={h2}>Combining study tools for maximum retention</h2>
+          <p className={p}>
+            The most effective study strategies don&apos;t rely on a single tool. They combine multiple approaches to attack learning from different angles. Research on &quot;interleaving&quot; shows that mixing different types of practice leads to better long-term retention than focusing on one approach. This is why WriteScholar offers flashcards, quizzes, and crosswords as complementary tools rather than alternatives.
+          </p>
+          <p className={p}>
+            A powerful study workflow might look like this: First, use flashcards for initial exposure to new material. The simple question-answer format helps you identify what you know and what you don&apos;t. Next, take a quiz to test deeper understanding and identify misconceptions. The multiple-choice format forces you to think critically about why answers are right or wrong. Finally, solve a crossword to reinforce vocabulary and make connections between concepts. Each tool strengthens different aspects of your knowledge.
+          </p>
+          <p className={p}>
+            Spacing is another crucial factor. The &quot;spacing effect&quot; demonstrates that distributed practice over time leads to better retention than massed practice (cramming). Instead of studying everything the night before an exam, use WriteScholar&apos;s tools throughout the semester. Generate a quiz after each lecture. Create flashcards for each chapter. Build crosswords for each unit. This distributed approach builds stronger, more durable memories.
+          </p>
+
+          <AIAssistantIllustration />
+
+          <h2 className={h2}>Why WriteScholar is the best choice for AI study tools</h2>
+          <p className={p}>
+            Not all AI study tools are created equal. Many flashcard apps simply pull random sentences from your text without understanding context. Generic quiz generators create shallow questions that test recognition rather than understanding. WriteScholar is different because it&apos;s built specifically for academic learning, with AI models trained to understand educational content and generate materials that actually help you learn.
+          </p>
+          <p className={p}>
+            <strong>Quality over quantity:</strong> WriteScholar&apos;s AI focuses on generating high-quality study materials rather than flooding you with mediocre content. Each flashcard, quiz question, and crossword clue is designed to test meaningful understanding. The AI identifies the most important concepts in your source material and creates questions that target those concepts specifically.
+          </p>
+          <p className={p}>
+            <strong>Customization:</strong> Every student learns differently, and every course has different requirements. WriteScholar lets you customize difficulty levels, question types, and the number of items generated. Studying for a comprehensive final? Generate a 50-question quiz. Need quick review before class? Create a 10-card flashcard deck. The tools adapt to your needs.
+          </p>
+          <p className={p}>
+            <strong>Export and accessibility:</strong> Your study materials shouldn&apos;t be locked in one app. WriteScholar lets you export flashcards, quizzes, and crosswords as PDF or Word documents. Print them out for offline study, share them with classmates, or keep them as reference materials. You own your study content.
+          </p>
+          <p className={p}>
+            <strong>Integration with writing tools:</strong> WriteScholar isn&apos;t just a study tool. It&apos;s a complete academic platform. The same AI that generates your flashcards can also <a href="/features" onClick={handleNavigate('features')} className={internalLink}>analyze your essays</a>, check your <a href="/tools/citation-generator" onClick={handleNavigate('citation-generator')} className={internalLink}>citations</a>, and improve your <a href="/tools/grammar-checker" onClick={handleNavigate('grammar-checker')} className={internalLink}>grammar</a>. Having all your academic tools in one place saves time and creates a seamless workflow from studying to writing.
+          </p>
+
+          <h2 className={h2}>Real-world applications: How students use WriteScholar study tools</h2>
+          <p className={p}>
+            <strong>Medical students</strong> use WriteScholar to master vast amounts of terminology and complex concepts. A single anatomy chapter might contain hundreds of terms. Generating flashcards manually would take hours. With WriteScholar, they paste in their notes and have a complete study deck in seconds. The crossword generator is particularly popular for learning drug names and their mechanisms of action.
+          </p>
+          <p className={p}>
+            <strong>Law students</strong> rely on the quiz generator to prepare for case-based exams. Legal education requires not just memorizing rules but understanding how to apply them to new situations. WriteScholar&apos;s AI creates scenario-based questions that test application, not just recall. Students can generate quizzes from case briefs, statute summaries, or lecture notes.
+          </p>
+          <p className={p}>
+            <strong>Language learners</strong> find the flashcard and crossword tools invaluable for vocabulary acquisition. Learning a new language requires memorizing thousands of words, and active recall is far more effective than passive review. The crossword format is especially helpful because it tests spelling and forces learners to think about words in context.
+          </p>
+          <p className={p}>
+            <strong>High school students</strong> use WriteScholar to prepare for standardized tests and AP exams. The ability to generate practice quizzes from study guides and textbook chapters means unlimited practice opportunities. Teachers also use the tools to create study materials for their students, saving hours of preparation time.
+          </p>
+
+          <h2 className={h2}>Getting started with WriteScholar study tools</h2>
+          <p className={p}>
+            Using WriteScholar&apos;s study tools is straightforward. From your <a href="/dashboard" onClick={handleNavigate('dashboard')} className={internalLink}>dashboard</a>, select the study tool you want to use: flashcards, quiz, or crossword. Paste in your source material: this could be notes from class, a textbook chapter, a Wikipedia article, or any text you need to learn. Customize your settings (number of items, difficulty level, question types), and click generate. Within seconds, you&apos;ll have professional-quality study materials ready to use.
+          </p>
+          <p className={p}>
+            For flashcards, you can study them directly in the browser with a flip-card interface, or export them for offline use. Quizzes give you immediate feedback on each question, with explanations for correct answers. Crosswords can be solved interactively online or printed for pencil-and-paper solving. All your generated materials are saved to your account, so you can return to them anytime.
+          </p>
+          <p className={p}>
+            The best part? You can try all of these tools for free. WriteScholar offers a generous free tier that lets you experience the power of AI-generated study materials before committing to a subscription. See our <a href="/pricing" onClick={handleNavigate('pricing')} className={internalLink}>pricing page</a> for details on what&apos;s included at each level.
+          </p>
+
+          <h2 className={h2}>Frequently asked questions</h2>
+          <p className={faqQuestion}>How accurate are AI-generated study materials?</p>
+          <p className={p}>
+            WriteScholar&apos;s AI is highly accurate because it generates content directly from your source material rather than making things up. The flashcards, quiz questions, and crossword clues are all derived from the text you provide. However, you should always review generated materials to ensure they align with your learning goals and course requirements.
+          </p>
+          <p className={faqQuestion}>What types of content work best for generating study materials?</p>
+          <p className={p}>
+            WriteScholar works well with lecture notes, textbook chapters, study guides, Wikipedia articles, research papers, and any educational text. The AI performs best with well-structured content that contains clear concepts, definitions, and facts. Very short texts may not provide enough material for comprehensive study tools.
+          </p>
+          <p className={faqQuestion}>How many flashcards, quiz questions, or crossword words can I generate?</p>
+          <p className={p}>
+            You can customize the number of items based on your needs. Flashcard decks can range from a handful of cards to dozens. Quizzes can include anywhere from 5 to 25 questions. Crosswords typically work best with 10-20 words to maintain solvability. The AI will generate as many items as your source material can support.
+          </p>
+          <p className={faqQuestion}>Is using AI study tools considered cheating?</p>
+          <p className={p}>
+            No. Using AI to generate study materials is no different from using a textbook, study guide, or tutoring service. You&apos;re still doing the learning yourself. The AI just helps you create better practice materials more efficiently. WriteScholar&apos;s tools are designed to help you learn, not to do your work for you.
+          </p>
+
+          <h2 className={h2}>Transform your studying with AI-powered tools</h2>
+          <p className={p}>
+            The science is clear: active recall through flashcards, quizzes, and crosswords dramatically improves learning outcomes compared to passive review. The barrier has always been the time required to create these materials. AI removes that barrier entirely. With WriteScholar, you can generate a complete study toolkit from any source material in seconds, giving you more time to actually learn.
+          </p>
+          <p className={p}>
+            Whether you&apos;re a medical student drowning in terminology, a law student preparing for the bar, a language learner building vocabulary, or a high schooler studying for the SAT, WriteScholar&apos;s study tools can help you learn more effectively. Stop highlighting textbooks and hoping the information sticks. Start using active recall tools that are proven to work.
+          </p>
+          <a href="/signup" onClick={handleNavigate('signup')} className={ctaButton}>
+            Try WriteScholar Free →
+          </a>
+        </>
+      );
+
     case 'free-writing-tools-every-student-needs':
       return (
         <>
