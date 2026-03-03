@@ -3,14 +3,18 @@ import Header from '../common/Header';
 import Footer from '../common/Footer';
 import { DocumentCardSkeleton } from '../common/LoadingSpinner';
 import AnalysisAnimation from '../common/AnalysisAnimation';
+import { jsPDF } from 'jspdf';
+import { Document, Packer, Paragraph, TextRun, HeadingLevel } from 'docx';
+import { saveAs } from 'file-saver';
 
 interface DashboardProps {
   onNavigate: (page: string) => void;
   user: any;
   onLogout: () => void;
+  initialMode?: 'analyze' | 'citations' | 'humanize' | 'summarize' | 'quiz';
 }
 
-const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
+const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: DashboardProps) => {
   const [inputText, setInputText] = useState('');
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
   const [showWordWarning, setShowWordWarning] = useState(false);
@@ -18,7 +22,13 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [showAnalysisPopup, setShowAnalysisPopup] = useState(false);
   const [analysisComplete, setAnalysisComplete] = useState(false);
-  const [mode, setMode] = useState<'analyze' | 'citations' | 'humanize' | 'summarize' | 'quiz'>('analyze');
+  const [mode, setMode] = useState<'analyze' | 'citations' | 'humanize' | 'summarize' | 'quiz'>(initialMode);
+
+  // Sync tab when navigating to dashboard via footer (e.g. "Analyze Essay" or "Citations")
+  useEffect(() => {
+    setMode(initialMode);
+  }, [initialMode]);
+
   const [citationStyle, setCitationStyle] = useState('APA');
   const [citationYearRange, setCitationYearRange] = useState('all');
   const [isSearchingCitations, setIsSearchingCitations] = useState(false);
@@ -141,7 +151,7 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
       </div>
 
       {/* Desktop - man peeking from behind right edge, hands gripping the top */}
-      <div className="absolute hidden sm:block -right-8 xl:-right-16 pointer-events-none z-20" style={{ top: '-110px', width: '120px', height: '160px' }}>
+      <div className="absolute hidden sm:block -right-4 xl:-right-10 pointer-events-none z-20" style={{ top: '-110px', width: '120px', height: '160px' }}>
         <svg viewBox="0 0 120 160" fill="none" xmlns="http://www.w3.org/2000/svg">
           {/* Body - light blue shirt, cut off at bottom (behind the box) */}
           <path d="M35 105 Q35 130 60 138 Q85 130 85 105" fill="#60A5FA" />
@@ -524,6 +534,106 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
     }
   };
 
+  const exportQuizToPDF = () => {
+    if (!quizResult) return;
+    const doc = new jsPDF();
+    let yPos = 20;
+    const pageHeight = doc.internal.pageSize.height;
+    const margin = 20;
+    const lineHeight = 7;
+
+    doc.setFontSize(18);
+    doc.setFont('helvetica', 'bold');
+    const titleText = doc.splitTextToSize(quizResult.title || 'Quiz', 170);
+    doc.text(titleText, margin, yPos);
+    yPos += titleText.length * 8 + 5;
+
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Type: ${quizResult.quizType} | Difficulty: ${quizResult.difficulty} | Questions: ${quizResult.questions.length}`, margin, yPos);
+    yPos += 15;
+
+    quizResult.questions.forEach((q: any, idx: number) => {
+      if (yPos > pageHeight - 60) { doc.addPage(); yPos = 20; }
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
+      const questionText = `${idx + 1}. ${q.question}`;
+      const splitQuestion = doc.splitTextToSize(questionText, 170);
+      doc.text(splitQuestion, margin, yPos);
+      yPos += splitQuestion.length * lineHeight + 3;
+
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      if (q.type === 'true_false') {
+        doc.text('   [ ] True    [ ] False', margin, yPos);
+        yPos += lineHeight;
+      } else if (q.options) {
+        q.options.forEach((opt: string) => {
+          if (yPos > pageHeight - 30) { doc.addPage(); yPos = 20; }
+          const optText = `   [ ] ${opt}`;
+          const splitOpt = doc.splitTextToSize(optText, 165);
+          doc.text(splitOpt, margin, yPos);
+          yPos += splitOpt.length * lineHeight;
+        });
+      }
+      yPos += 8;
+    });
+
+    doc.addPage();
+    yPos = 20;
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Answer Key', margin, yPos);
+    yPos += 12;
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    quizResult.questions.forEach((q: any, idx: number) => {
+      if (yPos > pageHeight - 30) { doc.addPage(); yPos = 20; }
+      doc.text(`${idx + 1}. ${q.correctAnswer}`, margin, yPos);
+      yPos += lineHeight;
+      if (q.explanation) {
+        const expText = doc.splitTextToSize(`   Explanation: ${q.explanation}`, 165);
+        doc.text(expText, margin, yPos);
+        yPos += expText.length * lineHeight + 3;
+      }
+    });
+
+    doc.save(`quiz-${Date.now()}.pdf`);
+  };
+
+  const exportQuizToDOCX = async () => {
+    if (!quizResult) return;
+    const children: any[] = [];
+
+    children.push(new Paragraph({ text: quizResult.title || 'Quiz', heading: HeadingLevel.HEADING_1 }));
+    children.push(new Paragraph({ children: [new TextRun({ text: `Type: ${quizResult.quizType} | Difficulty: ${quizResult.difficulty} | Questions: ${quizResult.questions.length}`, size: 20, color: '666666' })] }));
+    children.push(new Paragraph({ text: '' }));
+
+    quizResult.questions.forEach((q: any, idx: number) => {
+      children.push(new Paragraph({ children: [new TextRun({ text: `${idx + 1}. ${q.question}`, bold: true })] }));
+      if (q.type === 'true_false') {
+        children.push(new Paragraph({ text: '   ☐ True    ☐ False' }));
+      } else if (q.options) {
+        q.options.forEach((opt: string) => {
+          children.push(new Paragraph({ text: `   ☐ ${opt}` }));
+        });
+      }
+      children.push(new Paragraph({ text: '' }));
+    });
+
+    children.push(new Paragraph({ text: 'Answer Key', heading: HeadingLevel.HEADING_2 }));
+    quizResult.questions.forEach((q: any, idx: number) => {
+      children.push(new Paragraph({ children: [new TextRun({ text: `${idx + 1}. `, bold: true }), new TextRun({ text: q.correctAnswer })] }));
+      if (q.explanation) {
+        children.push(new Paragraph({ children: [new TextRun({ text: `   Explanation: ${q.explanation}`, italics: true, size: 20, color: '666666' })] }));
+      }
+    });
+
+    const docFile = new Document({ sections: [{ children }] });
+    const blob = await Packer.toBlob(docFile);
+    saveAs(blob, `quiz-${Date.now()}.docx`);
+  };
+
   const handleSubmit = () => {
     if (mode === 'humanize') {
       handleHumanize();
@@ -580,7 +690,7 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
       </div>
 
       {/* Main Content */}
-      <main className="max-w-5xl mx-auto px-3 sm:px-6 py-8 sm:py-14 w-full min-w-0 overflow-x-hidden pr-16 sm:pr-24 xl:pr-28">
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-14 w-full min-w-0 overflow-x-hidden">
         {/* Welcome */}
         <div className="text-center mb-10 sm:mb-12">
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-3">
@@ -593,7 +703,7 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
             ) : mode === 'analyze' ? (
               <>Analyze your <span className="text-blue-600">academic writing</span></>
             ) : (
-              <>Find <span className="text-blue-600">citations</span> for your research</>
+              <>Find <span className="text-cyan-600">citations</span> for your research</>
             )}
           </h1>
           <p className="text-lg text-gray-600">
@@ -616,7 +726,7 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
               <button
               onClick={() => { setMode('analyze'); setInputText(''); setShowWordWarning(false); setShowHumanizeResult(false); setSummaryResult(null); setQuizResult(null); }}
               className={`px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-sm sm:text-base font-medium transition-all ${
-                mode === 'analyze' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'
+                mode === 'analyze' ? 'bg-white text-blue-700 shadow-sm' : 'text-blue-600 hover:text-blue-700'
               }`}
             >
               Analyze Essay
@@ -624,7 +734,7 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
               <button
               onClick={() => { setMode('citations'); setInputText(''); setShowWordWarning(false); setShowHumanizeResult(false); setSummaryResult(null); setQuizResult(null); }}
               className={`px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-sm sm:text-base font-medium transition-all ${
-                mode === 'citations' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'
+                mode === 'citations' ? 'bg-white text-cyan-700 shadow-sm' : 'text-cyan-600 hover:text-cyan-700'
               }`}
             >
               Citations
@@ -662,7 +772,7 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
         {mode === 'analyze' && (
           <>
             {/* Primary: Upload Section */}
-            <div className="relative mb-8">
+            <div className="relative mb-8 overflow-visible">
               {/* Character illustration */}
               <CharacterIllustration />
               
@@ -791,7 +901,7 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
             </div>
 
             {/* Input Area */}
-            <div className="mb-8 relative">
+            <div className="mb-8 relative overflow-visible">
               <CharacterIllustration />
               
               <div className="relative bg-white rounded-2xl border-2 border-gray-200 hover:border-gray-300 focus-within:border-blue-500 transition-colors">
@@ -1351,7 +1461,20 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
                       {Math.round((userAnswers.filter(a => a.isCorrect).length / userAnswers.length) * 100)}%
                     </div>
                     <p className="text-gray-600">{userAnswers.filter(a => a.isCorrect).length} out of {userAnswers.length} correct</p>
-                    <div className="flex justify-center gap-3 mt-6">
+                    
+                    {/* Export Buttons */}
+                    <div className="flex justify-center gap-2 mt-6 mb-4">
+                      <button onClick={exportQuizToPDF} className="px-4 py-2 bg-red-50 text-red-700 font-medium rounded-lg hover:bg-red-100 transition-colors flex items-center gap-2 text-sm">
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd"/></svg>
+                        Download PDF
+                      </button>
+                      <button onClick={exportQuizToDOCX} className="px-4 py-2 bg-blue-50 text-blue-700 font-medium rounded-lg hover:bg-blue-100 transition-colors flex items-center gap-2 text-sm">
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd"/></svg>
+                        Download DOCX
+                      </button>
+                    </div>
+                    
+                    <div className="flex justify-center gap-3">
                       <button onClick={() => { setCurrentQuestion(0); setUserAnswers([]); setQuizCompleted(false); setSelectedAnswer(''); setShowQuizResult(false); }} className="px-6 py-3 bg-gray-100 text-gray-700 font-semibold rounded-xl">Try Again</button>
                       <button onClick={() => { setQuizResult(null); setIsQuizMode(false); }} className="px-6 py-3 bg-gradient-to-r from-amber-600 to-orange-600 text-white font-semibold rounded-xl">New Quiz</button>
                     </div>

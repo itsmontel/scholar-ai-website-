@@ -2,6 +2,9 @@ import { useState, useEffect } from 'react';
 import Header from '../../common/Header';
 import Footer from '../../common/Footer';
 import AnalysisAnimation from '../../common/AnalysisAnimation';
+import { jsPDF } from 'jspdf';
+import { Document, Packer, Paragraph, TextRun, HeadingLevel } from 'docx';
+import { saveAs } from 'file-saver';
 
 interface QuizGeneratorPageProps {
   onNavigate: (page: string) => void;
@@ -61,6 +64,38 @@ const QuizGeneratorPage = ({ onNavigate, user }: QuizGeneratorPageProps) => {
     const metaDescription = document.querySelector('meta[name="description"]');
     if (metaDescription) {
       metaDescription.setAttribute('content', 'Turn any article, textbook, or research paper into interactive quizzes. Multiple choice, true/false, and fill-in-the-blank questions. Premium AI tool.');
+    }
+  }, []);
+
+  // Load saved quiz from Quiz History "Take Quiz" button
+  useEffect(() => {
+    const saved = localStorage.getItem('savedQuiz');
+    if (!saved) return;
+    try {
+      const parsed = JSON.parse(saved);
+      // Normalize API shape (snake_case) to component shape (camelCase)
+      const normalized: Quiz = {
+        title: parsed.title || 'Quiz',
+        questions: parsed.questions || [],
+        quizType: parsed.quiz_type || parsed.quizType || 'mixed',
+        difficulty: parsed.difficulty || 'medium',
+        questionCount: parsed.question_count ?? parsed.questionCount ?? parsed.questions?.length ?? 10,
+        sourceWordCount: parsed.source_word_count ?? parsed.sourceWordCount ?? 0
+      };
+      if (normalized.questions.length > 0) {
+        setQuiz(normalized);
+        setIsQuizMode(true);
+        setCurrentQuestion(0);
+        setUserAnswers([]);
+        setSelectedAnswer('');
+        setShowResult(false);
+        setQuizCompleted(false);
+        setError(null);
+      }
+    } catch (e) {
+      console.error('Failed to load saved quiz:', e);
+    } finally {
+      localStorage.removeItem('savedQuiz');
     }
   }, []);
 
@@ -218,6 +253,106 @@ const QuizGeneratorPage = ({ onNavigate, user }: QuizGeneratorPageProps) => {
     URL.revokeObjectURL(url);
   };
 
+  const exportQuizToPDF = () => {
+    if (!quiz) return;
+    const doc = new jsPDF();
+    let yPos = 20;
+    const pageHeight = doc.internal.pageSize.height;
+    const margin = 20;
+    const lineHeight = 7;
+
+    doc.setFontSize(18);
+    doc.setFont('helvetica', 'bold');
+    const titleText = doc.splitTextToSize(quiz.title || 'Quiz', 170);
+    doc.text(titleText, margin, yPos);
+    yPos += titleText.length * 8 + 5;
+
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Type: ${quiz.quizType} | Difficulty: ${quiz.difficulty} | Questions: ${quiz.questions.length}`, margin, yPos);
+    yPos += 15;
+
+    quiz.questions.forEach((q, idx) => {
+      if (yPos > pageHeight - 60) { doc.addPage(); yPos = 20; }
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
+      const questionText = `${idx + 1}. ${q.question}`;
+      const splitQuestion = doc.splitTextToSize(questionText, 170);
+      doc.text(splitQuestion, margin, yPos);
+      yPos += splitQuestion.length * lineHeight + 3;
+
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      if (q.type === 'true_false') {
+        doc.text('   [ ] True    [ ] False', margin, yPos);
+        yPos += lineHeight;
+      } else if (q.options) {
+        q.options.forEach((opt: string) => {
+          if (yPos > pageHeight - 30) { doc.addPage(); yPos = 20; }
+          const optText = `   [ ] ${opt}`;
+          const splitOpt = doc.splitTextToSize(optText, 165);
+          doc.text(splitOpt, margin, yPos);
+          yPos += splitOpt.length * lineHeight;
+        });
+      }
+      yPos += 8;
+    });
+
+    doc.addPage();
+    yPos = 20;
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Answer Key', margin, yPos);
+    yPos += 12;
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    quiz.questions.forEach((q, idx) => {
+      if (yPos > pageHeight - 30) { doc.addPage(); yPos = 20; }
+      doc.text(`${idx + 1}. ${q.correctAnswer}`, margin, yPos);
+      yPos += lineHeight;
+      if (q.explanation) {
+        const expText = doc.splitTextToSize(`   Explanation: ${q.explanation}`, 165);
+        doc.text(expText, margin, yPos);
+        yPos += expText.length * lineHeight + 3;
+      }
+    });
+
+    doc.save(`quiz-${Date.now()}.pdf`);
+  };
+
+  const exportQuizToDOCX = async () => {
+    if (!quiz) return;
+    const children: any[] = [];
+
+    children.push(new Paragraph({ text: quiz.title || 'Quiz', heading: HeadingLevel.HEADING_1 }));
+    children.push(new Paragraph({ children: [new TextRun({ text: `Type: ${quiz.quizType} | Difficulty: ${quiz.difficulty} | Questions: ${quiz.questions.length}`, size: 20, color: '666666' })] }));
+    children.push(new Paragraph({ text: '' }));
+
+    quiz.questions.forEach((q, idx) => {
+      children.push(new Paragraph({ children: [new TextRun({ text: `${idx + 1}. ${q.question}`, bold: true })] }));
+      if (q.type === 'true_false') {
+        children.push(new Paragraph({ text: '   ☐ True    ☐ False' }));
+      } else if (q.options) {
+        q.options.forEach((opt: string) => {
+          children.push(new Paragraph({ text: `   ☐ ${opt}` }));
+        });
+      }
+      children.push(new Paragraph({ text: '' }));
+    });
+
+    children.push(new Paragraph({ text: 'Answer Key', heading: HeadingLevel.HEADING_2 }));
+    quiz.questions.forEach((q, idx) => {
+      children.push(new Paragraph({ children: [new TextRun({ text: `${idx + 1}. `, bold: true }), new TextRun({ text: q.correctAnswer })] }));
+      if (q.explanation) {
+        children.push(new Paragraph({ children: [new TextRun({ text: `   Explanation: ${q.explanation}`, italics: true, size: 20, color: '666666' })] }));
+      }
+    });
+
+    const docFile = new Document({ sections: [{ children }] });
+    const blob = await Packer.toBlob(docFile);
+    saveAs(blob, `quiz-${Date.now()}.docx`);
+  };
+
   const typeOptions = [
     { value: 'mixed', label: 'Mixed', description: 'Variety of question types' },
     { value: 'multiple_choice', label: 'MCQ', description: 'A, B, C, D options' },
@@ -322,7 +457,21 @@ const QuizGeneratorPage = ({ onNavigate, user }: QuizGeneratorPageProps) => {
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          <div className="flex flex-col sm:flex-row gap-3 justify-center flex-wrap">
+            <button
+              onClick={exportQuizToPDF}
+              className="px-4 py-2.5 bg-red-50 text-red-700 font-medium rounded-xl hover:bg-red-100 transition-all flex items-center justify-center gap-2 text-sm"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+              Download PDF
+            </button>
+            <button
+              onClick={exportQuizToDOCX}
+              className="px-4 py-2.5 bg-blue-50 text-blue-700 font-medium rounded-xl hover:bg-blue-100 transition-all flex items-center justify-center gap-2 text-sm"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+              Download DOCX
+            </button>
             <button
               onClick={resetQuiz}
               className="px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl transition-all flex items-center justify-center gap-2"
@@ -550,7 +699,7 @@ const QuizGeneratorPage = ({ onNavigate, user }: QuizGeneratorPageProps) => {
                 {quiz.questions.length} questions • {quiz.difficulty} difficulty • {quiz.quizType} format
               </p>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-wrap">
               <button
                 onClick={startQuiz}
                 className="px-5 py-2.5 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white font-semibold rounded-xl transition-all flex items-center gap-2"
@@ -558,13 +707,20 @@ const QuizGeneratorPage = ({ onNavigate, user }: QuizGeneratorPageProps) => {
                 🧠 Start Quiz
               </button>
               <button
-                onClick={downloadQuiz}
-                className="p-2.5 text-gray-600 hover:text-amber-600 hover:bg-amber-50 rounded-xl transition-all"
-                title="Download quiz"
+                onClick={exportQuizToPDF}
+                className="px-4 py-2.5 bg-red-50 text-red-700 rounded-xl hover:bg-red-100 transition-all font-medium text-sm flex items-center gap-1.5"
+                title="Download as PDF"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                </svg>
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                PDF
+              </button>
+              <button
+                onClick={exportQuizToDOCX}
+                className="px-4 py-2.5 bg-blue-50 text-blue-700 rounded-xl hover:bg-blue-100 transition-all font-medium text-sm flex items-center gap-1.5"
+                title="Download as Word"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                DOCX
               </button>
             </div>
           </div>

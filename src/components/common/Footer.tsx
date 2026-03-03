@@ -37,7 +37,7 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
                 </a>
               </li>
               <li>
-                <a href="/blog" onClick={(e) => { e.preventDefault(); onNavigate?.('blog'); }} className="text-gray-500 hover:text-gray-900 text-sm transition-colors">
+                <a href="/blog" onClick={(e) => { e.preventDefault(); onNavigate?.('blog'); }} className="text-indigo-600 hover:text-indigo-700 text-sm font-medium transition-colors">
                   Blog
                 </a>
               </li>
@@ -97,6 +97,18 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
               AI Tools
             </h4>
             <ul className="space-y-3">
+              <li>
+                <a href="/tools/analyze" onClick={(e) => { e.preventDefault(); onNavigate?.('analyze'); }} className="text-blue-600 hover:text-blue-700 text-sm font-medium transition-colors flex items-center gap-1.5">
+                  Analyze Essay
+                  <span className="text-xs opacity-75">📊</span>
+                </a>
+              </li>
+              <li>
+                <a href="/tools/citations" onClick={(e) => { e.preventDefault(); onNavigate?.('citations'); }} className="text-cyan-600 hover:text-cyan-700 text-sm font-medium transition-colors flex items-center gap-1.5">
+                  Citations Finder
+                  <span className="text-xs opacity-75">📚</span>
+                </a>
+              </li>
               <li>
                 <a href="/tools/humanizer" onClick={(e) => { e.preventDefault(); onNavigate?.('humanizer'); }} className="text-violet-600 hover:text-violet-700 text-sm font-medium transition-colors flex items-center gap-1.5">
                   AI Humanizer

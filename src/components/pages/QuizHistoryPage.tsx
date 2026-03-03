@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react';
 import Header from '../common/Header';
 import Footer from '../common/Footer';
+import { jsPDF } from 'jspdf';
+import { Document, Packer, Paragraph, TextRun, HeadingLevel } from 'docx';
+import { saveAs } from 'file-saver';
 
 interface QuizQuestion {
   id: number;
@@ -164,6 +167,108 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
     }
   };
 
+  const exportQuizToPDF = (quiz: Quiz) => {
+    const qType = quiz.quiz_type || 'mixed';
+    const qs = quiz.questions || [];
+    const doc = new jsPDF();
+    let yPos = 20;
+    const pageHeight = doc.internal.pageSize.height;
+    const margin = 20;
+    const lineHeight = 7;
+
+    doc.setFontSize(18);
+    doc.setFont('helvetica', 'bold');
+    const titleText = doc.splitTextToSize(quiz.title || 'Quiz', 170);
+    doc.text(titleText, margin, yPos);
+    yPos += titleText.length * 8 + 5;
+
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Type: ${qType} | Difficulty: ${quiz.difficulty} | Questions: ${qs.length}`, margin, yPos);
+    yPos += 15;
+
+    qs.forEach((q: QuizQuestion, idx: number) => {
+      if (yPos > pageHeight - 60) { doc.addPage(); yPos = 20; }
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
+      const questionText = `${idx + 1}. ${q.question}`;
+      const splitQuestion = doc.splitTextToSize(questionText, 170);
+      doc.text(splitQuestion, margin, yPos);
+      yPos += splitQuestion.length * lineHeight + 3;
+
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      if (q.type === 'true_false') {
+        doc.text('   [ ] True    [ ] False', margin, yPos);
+        yPos += lineHeight;
+      } else if (q.options) {
+        q.options.forEach((opt: string) => {
+          if (yPos > pageHeight - 30) { doc.addPage(); yPos = 20; }
+          const optText = `   [ ] ${opt}`;
+          const splitOpt = doc.splitTextToSize(optText, 165);
+          doc.text(splitOpt, margin, yPos);
+          yPos += splitOpt.length * lineHeight;
+        });
+      }
+      yPos += 8;
+    });
+
+    doc.addPage();
+    yPos = 20;
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Answer Key', margin, yPos);
+    yPos += 12;
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    qs.forEach((q: QuizQuestion, idx: number) => {
+      if (yPos > pageHeight - 30) { doc.addPage(); yPos = 20; }
+      doc.text(`${idx + 1}. ${q.correctAnswer}`, margin, yPos);
+      yPos += lineHeight;
+      if (q.explanation) {
+        const expText = doc.splitTextToSize(`   Explanation: ${q.explanation}`, 165);
+        doc.text(expText, margin, yPos);
+        yPos += expText.length * lineHeight + 3;
+      }
+    });
+
+    doc.save(`quiz-${Date.now()}.pdf`);
+  };
+
+  const exportQuizToDOCX = async (quiz: Quiz) => {
+    const qType = quiz.quiz_type || 'mixed';
+    const qs = quiz.questions || [];
+    const children: any[] = [];
+
+    children.push(new Paragraph({ text: quiz.title || 'Quiz', heading: HeadingLevel.HEADING_1 }));
+    children.push(new Paragraph({ children: [new TextRun({ text: `Type: ${qType} | Difficulty: ${quiz.difficulty} | Questions: ${qs.length}`, size: 20, color: '666666' })] }));
+    children.push(new Paragraph({ text: '' }));
+
+    qs.forEach((q: QuizQuestion, idx: number) => {
+      children.push(new Paragraph({ children: [new TextRun({ text: `${idx + 1}. ${q.question}`, bold: true })] }));
+      if (q.type === 'true_false') {
+        children.push(new Paragraph({ text: '   ☐ True    ☐ False' }));
+      } else if (q.options) {
+        q.options.forEach((opt: string) => {
+          children.push(new Paragraph({ text: `   ☐ ${opt}` }));
+        });
+      }
+      children.push(new Paragraph({ text: '' }));
+    });
+
+    children.push(new Paragraph({ text: 'Answer Key', heading: HeadingLevel.HEADING_2 }));
+    qs.forEach((q: QuizQuestion, idx: number) => {
+      children.push(new Paragraph({ children: [new TextRun({ text: `${idx + 1}. `, bold: true }), new TextRun({ text: q.correctAnswer })] }));
+      if (q.explanation) {
+        children.push(new Paragraph({ children: [new TextRun({ text: `   Explanation: ${q.explanation}`, italics: true, size: 20, color: '666666' })] }));
+      }
+    });
+
+    const docFile = new Document({ sections: [{ children }] });
+    const blob = await Packer.toBlob(docFile);
+    saveAs(blob, `quiz-${Date.now()}.docx`);
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-amber-50 via-white to-orange-50">
@@ -299,14 +404,29 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
                       </div>
                     </div>
                     
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <button
                         onClick={() => startQuiz(quiz)}
                         className="px-4 py-2.5 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-xl hover:from-amber-700 hover:to-orange-700 transition-all font-medium text-sm"
                       >
                         Take Quiz
                       </button>
-                      
+                      <button
+                        onClick={() => exportQuizToPDF(quiz)}
+                        className="px-4 py-2.5 bg-red-50 text-red-700 rounded-xl hover:bg-red-100 transition-all font-medium text-sm flex items-center gap-1.5"
+                        title="Download as PDF"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                        PDF
+                      </button>
+                      <button
+                        onClick={() => exportQuizToDOCX(quiz)}
+                        className="px-4 py-2.5 bg-blue-50 text-blue-700 rounded-xl hover:bg-blue-100 transition-all font-medium text-sm flex items-center gap-1.5"
+                        title="Download as Word"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                        DOCX
+                      </button>
                       <button
                         onClick={() => handleDeleteClick(quiz.id)}
                         className="p-2.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors"

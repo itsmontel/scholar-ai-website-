@@ -415,7 +415,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
             ) : mode === 'analyze' ? (
                   <>Your essay — improved with <span className="text-blue-600">AI assistance</span></>
             ) : (
-                  <>Find <span className="text-blue-600">academic citations</span> instantly</>
+                  <>Find <span className="text-cyan-600">academic citations</span> instantly</>
             )}
           </h1>
               
@@ -460,7 +460,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
               <button
                     onClick={() => { setMode('analyze'); setInputText(''); }}
                     className={`px-5 sm:px-6 py-2.5 rounded-full text-base font-medium transition-all ${
-                      mode === 'analyze' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'
+                      mode === 'analyze' ? 'bg-white text-blue-700 shadow-sm' : 'text-blue-600 hover:text-blue-700'
                     }`}
                   >
                     Analyze Essay
@@ -468,7 +468,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
               <button
                     onClick={() => { setMode('citations'); setInputText(''); }}
                     className={`px-5 sm:px-6 py-2.5 rounded-full text-base font-medium transition-all ${
-                      mode === 'citations' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'
+                      mode === 'citations' ? 'bg-white text-cyan-700 shadow-sm' : 'text-cyan-600 hover:text-cyan-700'
                     }`}
                   >
                     Find Citations
@@ -504,7 +504,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
           
               {/* Helper text - left on mobile to avoid crowding character, center on larger screens */}
               <p className={`text-sm mb-4 flex items-center justify-start md:justify-center ${
-                mode === 'humanize' ? 'text-violet-600' : mode === 'summarize' ? 'text-teal-600' : mode === 'quiz' ? 'text-amber-600' : 'text-amber-600'
+                mode === 'humanize' ? 'text-violet-600' : mode === 'summarize' ? 'text-teal-600' : mode === 'quiz' ? 'text-amber-600' : mode === 'analyze' ? 'text-blue-600' : 'text-cyan-600'
               }`}>
                 <span className="mr-1.5">{mode === 'humanize' ? '✨' : mode === 'summarize' ? '📝' : mode === 'quiz' ? '🧠' : '💡'}</span>
                 {mode === 'humanize' ? 'Humanize ChatGPT, Gemini, Claude text — 1,000 free words/month'

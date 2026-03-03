@@ -537,6 +537,10 @@ const AcademicAIApp = () => {
         return <UnsubscribePage onNavigate={navigateTo} />;
       case 'dashboard':
         return <DashboardPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
+      case 'analyze':
+        return isLoggedIn ? <DashboardPage onNavigate={navigateTo} user={user} onLogout={handleLogout} initialMode="analyze" /> : <LandingPage onNavigate={navigateTo} />;
+      case 'citations':
+        return isLoggedIn ? <DashboardPage onNavigate={navigateTo} user={user} onLogout={handleLogout} initialMode="citations" /> : <LandingPage onNavigate={navigateTo} />;
       case 'analysis':
         return <AnalysisPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'analysis-history':

@@ -984,6 +984,145 @@ router.get('/types', authenticateToken, async (req, res) => {
   }
 });
 
+// =====================
+// Quiz History Endpoints (must be before /:analysisId catch-all)
+// =====================
+
+// @route   GET /api/analysis/quiz-history
+// @desc    Get user's saved quizzes
+// @access  Private (Premium only)
+router.get('/quiz-history', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const limit = parseInt(req.query.limit) || 20;
+
+    console.log('=== QUIZ HISTORY REQUEST ===');
+    console.log('User ID:', userId);
+    console.log('Limit:', limit);
+
+    const quizHistory = await aiAnalysisService.getQuizHistory(userId, limit);
+
+    console.log(`Found ${quizHistory.length} quizzes`);
+
+    res.json({
+      success: true,
+      data: quizHistory
+    });
+
+  } catch (error) {
+    console.error('Quiz history error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch quiz history',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
+// @route   GET /api/analysis/quiz/:id
+// @desc    Get a specific quiz by ID
+// @access  Private (Premium only)
+router.get('/quiz/:id', authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+
+    console.log('=== GET QUIZ REQUEST ===');
+    console.log('Quiz ID:', id);
+    console.log('User ID:', userId);
+
+    const quiz = await aiAnalysisService.getQuizById(userId, id);
+
+    if (!quiz) {
+      return res.status(404).json({
+        success: false,
+        message: 'Quiz not found or has expired'
+      });
+    }
+
+    res.json({
+      success: true,
+      data: quiz
+    });
+
+  } catch (error) {
+    console.error('Get quiz error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch quiz',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
+// @route   DELETE /api/analysis/quiz/:id
+// @desc    Delete a specific quiz
+// @access  Private
+router.delete('/quiz/:id', authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+
+    console.log('=== DELETE QUIZ REQUEST ===');
+    console.log('Quiz ID:', id);
+    console.log('User ID:', userId);
+
+    const deleted = await aiAnalysisService.deleteQuiz(userId, id);
+
+    if (!deleted) {
+      return res.status(404).json({
+        success: false,
+        message: 'Quiz not found or access denied'
+      });
+    }
+
+    console.log('Quiz deleted successfully');
+
+    res.json({
+      success: true,
+      message: 'Quiz deleted successfully'
+    });
+
+  } catch (error) {
+    console.error('Delete quiz error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to delete quiz',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
+// @route   POST /api/analysis/cleanup-quizzes
+// @desc    Clean up expired quizzes (called by cron or admin)
+// @access  Private (admin or cron job)
+router.post('/cleanup-quizzes', async (req, res) => {
+  try {
+    const cronSecret = req.headers['x-cron-secret'];
+    if (process.env.CRON_SECRET && cronSecret !== process.env.CRON_SECRET) {
+      return res.status(401).json({
+        success: false,
+        message: 'Unauthorized'
+      });
+    }
+
+    const result = await aiAnalysisService.cleanupExpiredQuizzes();
+
+    res.json({
+      success: true,
+      message: `Cleaned up ${result.deleted} expired quizzes`
+    });
+
+  } catch (error) {
+    console.error('Cleanup quizzes error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to cleanup quizzes',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
 /**
  * @route GET /api/analysis/:analysisId
  * @desc Get specific analysis by ID
@@ -1208,146 +1347,6 @@ router.delete('/citation/:id', authenticateToken, async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to delete citation search',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined
-    });
-  }
-});
-
-// =====================
-// Quiz History Endpoints
-// =====================
-
-// @route   GET /api/analysis/quiz-history
-// @desc    Get user's saved quizzes
-// @access  Private (Premium only)
-router.get('/quiz-history', authenticateToken, async (req, res) => {
-  try {
-    const userId = req.user.id;
-    const limit = parseInt(req.query.limit) || 20;
-
-    console.log('=== QUIZ HISTORY REQUEST ===');
-    console.log('User ID:', userId);
-    console.log('Limit:', limit);
-
-    const quizHistory = await aiAnalysisService.getQuizHistory(userId, limit);
-
-    console.log(`Found ${quizHistory.length} quizzes`);
-
-    res.json({
-      success: true,
-      data: quizHistory
-    });
-
-  } catch (error) {
-    console.error('Quiz history error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to fetch quiz history',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined
-    });
-  }
-});
-
-// @route   GET /api/analysis/quiz/:id
-// @desc    Get a specific quiz by ID
-// @access  Private (Premium only)
-router.get('/quiz/:id', authenticateToken, async (req, res) => {
-  try {
-    const { id } = req.params;
-    const userId = req.user.id;
-
-    console.log('=== GET QUIZ REQUEST ===');
-    console.log('Quiz ID:', id);
-    console.log('User ID:', userId);
-
-    const quiz = await aiAnalysisService.getQuizById(userId, id);
-
-    if (!quiz) {
-      return res.status(404).json({
-        success: false,
-        message: 'Quiz not found or has expired'
-      });
-    }
-
-    res.json({
-      success: true,
-      data: quiz
-    });
-
-  } catch (error) {
-    console.error('Get quiz error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to fetch quiz',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined
-    });
-  }
-});
-
-// @route   DELETE /api/analysis/quiz/:id
-// @desc    Delete a specific quiz
-// @access  Private
-router.delete('/quiz/:id', authenticateToken, async (req, res) => {
-  try {
-    const { id } = req.params;
-    const userId = req.user.id;
-
-    console.log('=== DELETE QUIZ REQUEST ===');
-    console.log('Quiz ID:', id);
-    console.log('User ID:', userId);
-
-    const deleted = await aiAnalysisService.deleteQuiz(userId, id);
-
-    if (!deleted) {
-      return res.status(404).json({
-        success: false,
-        message: 'Quiz not found or access denied'
-      });
-    }
-
-    console.log('Quiz deleted successfully');
-
-    res.json({
-      success: true,
-      message: 'Quiz deleted successfully'
-    });
-
-  } catch (error) {
-    console.error('Delete quiz error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to delete quiz',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined
-    });
-  }
-});
-
-// @route   POST /api/analysis/cleanup-quizzes
-// @desc    Clean up expired quizzes (called by cron or admin)
-// @access  Private (admin or cron job)
-router.post('/cleanup-quizzes', async (req, res) => {
-  try {
-    // This could be called by a cron job with a secret key
-    const cronSecret = req.headers['x-cron-secret'];
-    if (process.env.CRON_SECRET && cronSecret !== process.env.CRON_SECRET) {
-      return res.status(401).json({
-        success: false,
-        message: 'Unauthorized'
-      });
-    }
-
-    const result = await aiAnalysisService.cleanupExpiredQuizzes();
-
-    res.json({
-      success: true,
-      message: `Cleaned up ${result.deleted} expired quizzes`
-    });
-
-  } catch (error) {
-    console.error('Cleanup quizzes error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to cleanup quizzes',
       error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }

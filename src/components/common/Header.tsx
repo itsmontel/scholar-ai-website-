@@ -222,16 +222,6 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
               🧠 Quizzes
               <span className="px-1.5 py-0.5 text-[10px] font-bold bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-full">PRO</span>
             </button>
-            <button 
-              onClick={() => onNavigate?.('blog')}
-              className={`px-4 py-2.5 text-base font-medium rounded-xl transition-all duration-200 ${
-                currentPage === 'blog' 
-                  ? 'text-blue-600 bg-blue-50' 
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-              }`}
-            >
-              Blog
-            </button>
           </nav>
 
           {/* Mobile Menu Button */}
