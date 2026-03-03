@@ -241,7 +241,7 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
       setTimeout(() => {
         setShowFakeAnimation(false);
         setShowSignupPrompt(true);
-      }, 2500);
+      }, 14000);
       return;
     }
 
@@ -300,7 +300,7 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
 
   const handleGenerateFlashcards = async () => {
     if (!inputText.trim()) return;
-    if (!user) { setShowFakeAnimation(true); setTimeout(() => { setShowFakeAnimation(false); setShowSignupPrompt(true); }, 2500); return; }
+    if (!user) { setShowFakeAnimation(true); setTimeout(() => { setShowFakeAnimation(false); setShowSignupPrompt(true); }, 14000); return; }
     if (quizExhausted) { setError('You\'ve used all 3 study tool generations this month. Upgrade for unlimited access.'); return; }
     setIsLoading(true);
     setError(null);
@@ -325,7 +325,7 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
 
   const handleGenerateCrossword = async () => {
     if (!inputText.trim()) return;
-    if (!user) { setShowFakeAnimation(true); setTimeout(() => { setShowFakeAnimation(false); setShowSignupPrompt(true); }, 2500); return; }
+    if (!user) { setShowFakeAnimation(true); setTimeout(() => { setShowFakeAnimation(false); setShowSignupPrompt(true); }, 14000); return; }
     if (quizExhausted) { setError('You\'ve used all 3 study tool generations this month. Upgrade for unlimited access.'); return; }
     setIsLoading(true);
     setError(null);
@@ -969,58 +969,7 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
     { value: 'hard', label: 'Hard', description: 'Analysis & synthesis' }
   ];
 
-  if (showFakeAnimation) {
-    return (
-      <div className="min-h-screen flex flex-col bg-gradient-to-br from-amber-50 via-white to-orange-50">
-        <Header onNavigate={onNavigate} user={user} />
-        <main className="flex-1 flex items-center justify-center">
-          <div className="text-center">
-            <AnalysisAnimation text="Preparing your quiz..." />
-            <p className="text-gray-500 mt-4">Please wait...</p>
-          </div>
-        </main>
-        <Footer onNavigate={onNavigate} />
-      </div>
-    );
-  }
-
-  if (showSignupPrompt) {
-    return (
-      <div className="min-h-screen flex flex-col bg-gradient-to-br from-amber-50 via-white to-orange-50">
-        <Header onNavigate={onNavigate} user={user} />
-        <main className="flex-1 flex items-center justify-center px-4">
-          <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center">
-            <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl flex items-center justify-center">
-              <span className="text-3xl">🧠</span>
-            </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Sign Up to Continue</h2>
-            <p className="text-gray-600 mb-6">Create a free account to get 3 quiz generations per month, plus Humanizer and Summarizer.</p>
-            <div className="space-y-3">
-              <button
-                onClick={() => onNavigate('signup')}
-                className="w-full py-3 px-4 bg-gradient-to-r from-amber-600 to-orange-600 text-white font-semibold rounded-xl hover:from-amber-700 hover:to-orange-700 transition-all"
-              >
-                Sign Up Free
-              </button>
-              <button
-                onClick={() => onNavigate('login')}
-                className="w-full py-3 px-4 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition-all"
-              >
-                Log In
-              </button>
-              <button
-                onClick={() => setShowSignupPrompt(false)}
-                className="text-gray-500 hover:text-gray-700 text-sm"
-              >
-                ← Back to Quiz Generator
-              </button>
-            </div>
-          </div>
-        </main>
-        <Footer onNavigate={onNavigate} />
-      </div>
-    );
-  }
+  const loggedOutAnimationText = studyToolMode === 'flashcards' ? 'Generating flashcards' : studyToolMode === 'crossword' ? 'Generating crossword puzzle' : 'Generating quiz questions';
 
   const renderQuizTaking = () => {
     if (!quiz || !isQuizMode) return null;
@@ -2085,6 +2034,77 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
                 View Plans
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Logged-out: same popup animation as landing page */}
+      {showFakeAnimation && (
+        <AnalysisAnimation isPopup={true} text={loggedOutAnimationText} isComplete={false} />
+      )}
+
+      {/* Logged-out: sign-up modal (same as landing page Study Tools modal) */}
+      {showSignupPrompt && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 backdrop-blur-sm p-4">
+          <div className="relative bg-white rounded-2xl p-6 sm:p-8 max-w-md w-full mx-4 shadow-2xl animate-fade-in">
+            <button type="button" onClick={() => setShowSignupPrompt(false)} className="absolute top-4 right-4 p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors" aria-label="Close">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+            <div className="flex justify-center mb-4">
+              <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center">
+                <span className="text-3xl">{studyToolMode === 'flashcards' ? '🃏' : studyToolMode === 'crossword' ? '🧩' : '📝'}</span>
+              </div>
+            </div>
+            <h3 className="text-xl font-bold text-gray-900 text-center mb-2">
+              {studyToolMode === 'flashcards' ? 'Flashcards Generated' : studyToolMode === 'crossword' ? 'Crossword Generated' : 'Quiz Generated'}
+            </h3>
+            <p className="text-gray-500 text-center text-sm mb-5">
+              {studyToolMode === 'flashcards' ? 'We\'ve created flip cards from your content' : studyToolMode === 'crossword' ? 'We\'ve created a puzzle from your content' : 'We\'ve created questions from your content'}
+            </p>
+            <div className="space-y-3 mb-5">
+              <div className="flex items-start p-3.5 bg-amber-50 rounded-xl border border-amber-100">
+                <span className="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center mr-3 flex-shrink-0 mt-0.5">
+                  <svg className="w-4 h-4 text-amber-600" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                </span>
+                <div>
+                  <p className="text-amber-800 font-semibold text-sm">
+                    {studyToolMode === 'flashcards' ? 'Interactive flip cards' : studyToolMode === 'crossword' ? 'Interactive crossword puzzle' : 'Multiple choice & true/false'}
+                  </p>
+                  <p className="text-amber-600 text-xs mt-0.5">
+                    {studyToolMode === 'flashcards' ? 'Perfect for memorization and quick review' : studyToolMode === 'crossword' ? 'Fun way to learn key vocabulary' : 'Mix question types for better retention'}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-start p-3.5 bg-amber-50 rounded-xl border border-amber-100">
+                <span className="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center mr-3 flex-shrink-0 mt-0.5">
+                  <svg className="w-4 h-4 text-amber-600" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                </span>
+                <div>
+                  <p className="text-amber-800 font-semibold text-sm">3 free generations per month</p>
+                  <p className="text-amber-600 text-xs mt-0.5">Sign up to unlock Study Tools — upgrade for unlimited</p>
+                </div>
+              </div>
+            </div>
+            <div className="bg-gray-50 rounded-xl p-3.5 mb-6">
+              <p className="text-gray-600 text-sm text-center leading-relaxed">
+                <span className="font-semibold text-gray-800">
+                  {studyToolMode === 'flashcards' ? 'Turn any notes into flashcards.' : studyToolMode === 'crossword' ? 'Turn key terms into puzzles.' : 'Turn any notes into a quiz.'}
+                </span> Great for exam prep and study sessions.
+              </p>
+            </div>
+            <button
+              onClick={() => { setShowSignupPrompt(false); onNavigate('signup'); }}
+              className="w-full py-3.5 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-xl transition-all duration-200 hover:shadow-lg flex items-center justify-center"
+            >
+              Sign up to unlock Study Tools — it&apos;s free
+              <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              </svg>
+            </button>
           </div>
         </div>
       )}
