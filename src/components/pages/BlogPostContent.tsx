@@ -1,4 +1,5 @@
 import React from 'react';
+import NewsletterSubscription from '../common/NewsletterSubscription';
 
 interface BlogPostContentProps {
   slug: string;
@@ -2024,4 +2025,17 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
   }
 };
 
-export default BlogPostContent;
+const BlogPostContentWrapper: React.FC<BlogPostContentProps> = (props) => {
+  const content = BlogPostContent(props);
+  
+  if (!content) return null;
+  
+  return (
+    <>
+      {content}
+      <NewsletterSubscription variant="blog" />
+    </>
+  );
+};
+
+export default BlogPostContentWrapper;

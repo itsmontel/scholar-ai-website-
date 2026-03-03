@@ -273,6 +273,80 @@ router.get('/list', authenticateToken, emailSubscriptionLimiter, async (req, res
   }
 });
 
+// @route   POST /api/email-subscriptions/newsletter
+// @desc    Subscribe to newsletter (for blog visitors)
+// @access  Public (but rate limited)
+router.post('/newsletter', emailSubscriptionLimiter, async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    // Validate email format
+    let normalizedEmail;
+    try {
+      normalizedEmail = validateEmail(email);
+    } catch (error) {
+      return res.status(400).json({
+        success: false,
+        message: error.message
+      });
+    }
+
+    // Check if email already exists in newsletter subscriptions
+    const existingResult = await query(
+      'SELECT id, is_subscribed FROM email_subscriptions WHERE email = $1 AND subscription_type = $2',
+      [normalizedEmail, 'newsletter']
+    );
+
+    if (existingResult.rows.length > 0) {
+      const existing = existingResult.rows[0];
+      
+      // If already unsubscribed, allow re-subscription
+      if (!existing.is_subscribed) {
+        await query(
+          `UPDATE email_subscriptions 
+           SET is_subscribed = true, 
+               unsubscribed_at = NULL,
+               updated_at = CURRENT_TIMESTAMP
+           WHERE id = $1`,
+          [existing.id]
+        );
+
+        return res.json({
+          success: true,
+          message: 'Welcome back! You\'ve been re-subscribed to our newsletter.',
+          data: { email: normalizedEmail }
+        });
+      }
+
+      return res.json({
+        success: true,
+        message: 'You\'re already subscribed to our newsletter!',
+        data: { email: normalizedEmail }
+      });
+    }
+
+    // Insert new newsletter subscription
+    const result = await query(
+      `INSERT INTO email_subscriptions (email, user_id, is_subscribed, subscription_type, created_at, updated_at)
+       VALUES ($1, NULL, true, 'newsletter', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+       RETURNING id, email, is_subscribed, created_at`,
+      [normalizedEmail]
+    );
+
+    res.status(201).json({
+      success: true,
+      message: 'Thanks for subscribing! You\'ll receive our latest updates.',
+      data: result.rows[0]
+    });
+  } catch (error) {
+    console.error('Error subscribing to newsletter:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to subscribe. Please try again.'
+    });
+  }
+});
+
 // @route   GET /api/email-subscriptions/check
 // @desc    Check if email is subscribed
 // @access  Public (but rate limited)

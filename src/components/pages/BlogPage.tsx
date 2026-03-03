@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import Header from '../common/Header';
 import Footer from '../common/Footer';
+import NewsletterSubscription from '../common/NewsletterSubscription';
 import { blogPostList, BlogPostMeta } from '../../data/blogPosts';
 
 interface BlogPageProps {
@@ -316,6 +317,11 @@ const BlogPage = ({ onNavigate, user, onLogout }: BlogPageProps) => {
 
         {/* Pagination */}
         {renderPagination()}
+
+        {/* Newsletter signup */}
+        <div className="mt-12 sm:mt-16">
+          <NewsletterSubscription variant="blog" />
+        </div>
 
         {/* CTA Section - Different for logged-in users */}
         <section className="mt-16 sm:mt-20 bg-gray-900 rounded-2xl p-8 sm:p-12 text-center">
