@@ -38,14 +38,17 @@ const CitationHistoryPage = ({ onNavigate, user, onLogout }: CitationHistoryProp
   const fetchCitationHistory = async () => {
     try {
       setIsLoading(true);
-      if (!user) {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
         onNavigate('login');
         return;
       }
 
       const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/analysis/citation-history`, {
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' }
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       });
 
       const data = await response.json();
@@ -98,15 +101,18 @@ const CitationHistoryPage = ({ onNavigate, user, onLogout }: CitationHistoryProp
   const confirmDelete = async (searchId: string) => {
     try {
       setIsDeleting(true);
-      if (!user) {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
         onNavigate('login');
         return;
       }
 
       const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/analysis/citation/${searchId}`, {
         method: 'DELETE',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' }
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       });
 
       const data = await response.json();

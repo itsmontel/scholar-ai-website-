@@ -1,25 +1,10 @@
 const jwt = require('jsonwebtoken');
 const userService = require('../services/userService');
 
-// Helper to extract token from request (cookie first, then Authorization header)
-const extractToken = (req) => {
-  // First check httpOnly cookie (preferred, more secure)
-  if (req.cookies && req.cookies.authToken) {
-    return req.cookies.authToken;
-  }
-  
-  // Fallback to Authorization header for backward compatibility
-  const authHeader = req.headers['authorization'];
-  if (authHeader && authHeader.startsWith('Bearer ')) {
-    return authHeader.split(' ')[1];
-  }
-  
-  return null;
-};
-
 const authenticateToken = async (req, res, next) => {
   try {
-    const token = extractToken(req);
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
 
     if (!token) {
       return res.status(401).json({
@@ -109,7 +94,8 @@ const requireSubscription = (requiredPlan = 'basic') => {
 
 const optionalAuth = async (req, res, next) => {
   try {
-    const token = extractToken(req);
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
 
     if (!token) {
       req.user = null;

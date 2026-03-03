@@ -27,9 +27,11 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
       if (!user) return;
       
       try {
+        const token = localStorage.getItem('authToken');
         const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/subscriptions/current`, {
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
         });
 
         if (response.ok) {
@@ -54,10 +56,13 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
 
     if (currentPlan !== 'free') {
       try {
+        const token = localStorage.getItem('authToken');
         const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/subscriptions/billing-portal`, {
           method: 'POST',
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
           body: JSON.stringify({
             returnUrl: `${window.location.origin}/pricing`
           })
@@ -97,10 +102,13 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
     if (currentPlan === 'free') return;
     
     try {
+      const token = localStorage.getItem('authToken');
       const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/subscriptions/billing-portal`, {
         method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
         body: JSON.stringify({
           returnUrl: `${window.location.origin}/pricing`
         })

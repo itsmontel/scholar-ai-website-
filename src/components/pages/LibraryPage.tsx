@@ -198,20 +198,20 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
     setFilteredDocuments(filtered);
   }, [documents, searchTerm, timeFilter]);
 
-  const isLoggedIn = !!user || !!localStorage.getItem('user');
-
   const fetchDocuments = async () => {
     try {
       setLoadingDocuments(true);
-      if (!isLoggedIn) {
+      const token = localStorage.getItem('authToken');
+      
+      if (!token) {
         setError('Please log in to view documents.');
         return;
       }
       
-      // Use bulletproof API for ultra-reliable document fetching (cookie sent via credentials: 'include')
+      // Use bulletproof API for ultra-reliable document fetching
       const { BulletproofAPI } = await import('../../config/api');
       const result = await BulletproofAPI.safeRequest(
-        () => BulletproofAPI.get('/documents?limit=100'),
+        () => BulletproofAPI.get('/documents?limit=100', token),
         { documents: [] as any[] }
       );
 
@@ -248,9 +248,12 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
   const fetchDocumentContent = async (documentId: string) => {
     try {
       setLoadingContent(true);
+      const token = localStorage.getItem('authToken');
+      
       const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/documents/${documentId}/content`, {
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
       });
 
       if (!response.ok) {
@@ -270,9 +273,12 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
   const fetchDocumentAnalysis = async (documentId: string) => {
     try {
       setLoadingAnalysis(true);
+      const token = localStorage.getItem('authToken');
+      
       const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/analysis/document/${documentId}`, {
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
       });
 
       if (!response.ok) {
@@ -312,10 +318,14 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
 
   const handleRenameDocument = async (documentId: string, newTitle: string) => {
     try {
+      const token = localStorage.getItem('authToken');
+      
       const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/documents/${documentId}`, {
         method: 'PUT',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({ title: newTitle }),
       });
 
@@ -349,10 +359,13 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
     }
 
     try {
+      const token = localStorage.getItem('authToken');
+
       const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/documents/${documentId}`, {
         method: 'DELETE',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
       });
 
       if (!response.ok) {

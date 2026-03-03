@@ -12,8 +12,9 @@ const AuthCallbackPage: React.FC<AuthCallbackPageProps> = ({ onNavigate, onLogin
   useEffect(() => {
     const handleAuthCallback = async () => {
       try {
-        // Check for error in query string
         const urlParams = new URLSearchParams(window.location.search);
+        const token = urlParams.get('token');
+        const userParam = urlParams.get('user');
         const errorParam = urlParams.get('error');
 
         if (errorParam) {
@@ -22,90 +23,18 @@ const AuthCallbackPage: React.FC<AuthCallbackPageProps> = ({ onNavigate, onLogin
           return;
         }
 
-        // Read user data from URL fragment (more secure - not sent to server/Referer)
-        // Token is now in httpOnly cookie, not in URL
-        const hash = window.location.hash.substring(1); // Remove the '#'
-        const hashParams = new URLSearchParams(hash);
-        const userParam = hashParams.get('user');
-
-        // Also check query string for backward compatibility (in case backend sends ?user= instead of #user=)
-        const userParamQuery = urlParams.get('user');
-        // Also check for token in query string (old format) - if present, try to fetch user from /auth/me
-        const tokenParam = urlParams.get('token');
-        
-        let finalUserParam = userParam || userParamQuery;
-
-        // Debug logging
-        console.log('AuthCallback - URL:', window.location.href);
-        console.log('AuthCallback - Hash:', window.location.hash);
-        console.log('AuthCallback - userParam from hash:', userParam);
-        console.log('AuthCallback - userParam from query:', userParamQuery);
-        console.log('AuthCallback - tokenParam:', tokenParam ? 'present' : 'not present');
-
-        // If we have a token but no user data, try to fetch user from /auth/me
-        // This handles the case where the cookie was set but user data wasn't in the URL
-        if (!finalUserParam && !tokenParam) {
-          // Try to fetch current user from the server (cookie should be set)
-          try {
-            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
-            const response = await fetch(`${apiUrl}/auth/me`, {
-              credentials: 'include'
-            });
-            
-            if (response.ok) {
-              const data = await response.json();
-              if (data.success && data.data?.user) {
-                console.log('AuthCallback - Fetched user from /auth/me:', data.data.user);
-                const userData = {
-                  id: data.data.user.id,
-                  email: data.data.user.email,
-                  name: data.data.user.firstName && data.data.user.lastName 
-                    ? `${data.data.user.firstName} ${data.data.user.lastName}` 
-                    : data.data.user.name || data.data.user.email,
-                  firstName: data.data.user.firstName,
-                  lastName: data.data.user.lastName,
-                  plan: data.data.user.subscriptionPlan || 'free',
-                  subscription_status: data.data.user.subscriptionStatus,
-                  email_verified: data.data.user.emailVerified
-                };
-                
-                localStorage.setItem('user', JSON.stringify(userData));
-                window.history.replaceState(null, '', window.location.pathname);
-                onLogin(userData);
-                setStatus('success');
-                setTimeout(() => {
-                  onNavigate('dashboard');
-                }, 1500);
-                return;
-              }
-            }
-          } catch (fetchError) {
-            console.log('AuthCallback - Could not fetch user from /auth/me:', fetchError);
-          }
-        }
-
-        if (!finalUserParam) {
-          // If user is already logged in (has user data in localStorage), redirect to dashboard
-          const existingUser = localStorage.getItem('user');
-          if (existingUser) {
-            console.log('AuthCallback - User already logged in, redirecting to dashboard');
-            onNavigate('dashboard');
-            return;
-          }
-          
-          setError('Invalid authentication response. Please try logging in again.');
+        if (!token || !userParam) {
+          setError('Invalid authentication response.');
           setStatus('error');
           return;
         }
 
         // Parse user data
-        const userData = JSON.parse(decodeURIComponent(finalUserParam));
+        const userData = JSON.parse(decodeURIComponent(userParam));
 
-        // Store user data only (token is in httpOnly cookie, not accessible to JS)
+        // Store token and user data
+        localStorage.setItem('authToken', token);
         localStorage.setItem('user', JSON.stringify(userData));
-
-        // Clear the URL fragment immediately for security
-        window.history.replaceState(null, '', window.location.pathname);
 
         // Call the parent component's onLogin
         onLogin(userData);

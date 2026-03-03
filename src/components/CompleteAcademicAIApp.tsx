@@ -76,19 +76,17 @@ const AcademicAIApp = () => {
   const [user, setUser] = useState<User | null>(null);
 
   // Initialize user state from localStorage on mount
-  // Note: Token is now in httpOnly cookie (not accessible to JS), only user data is in localStorage
   useEffect(() => {
     if (typeof window !== 'undefined') {
       try {
+        const token = localStorage.getItem('authToken');
         const userData = localStorage.getItem('user');
-        if (userData) {
+        if (token && userData) {
           const parsedUser = JSON.parse(userData);
           console.log('Initializing user state from localStorage:', parsedUser);
           setIsLoggedIn(true);
           setUser(parsedUser);
         }
-        // Clean up legacy authToken if present
-        localStorage.removeItem('authToken');
       } catch (error) {
         console.error('Error parsing initial user data:', error);
         localStorage.removeItem('authToken');
@@ -147,43 +145,44 @@ const AcademicAIApp = () => {
   const validateAndRefreshToken = async () => {
     try {
       console.log('Validating token...');
-      // Token is now in httpOnly cookie - we just need to check if we have user data
-      const userData = localStorage.getItem('user');
-      if (!userData) {
-        console.log('No user data found, skipping validation');
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        console.log('No token found, skipping validation');
         return;
       }
 
-      // Use bulletproof API for token validation (cookie is sent automatically)
+      // Use bulletproof API for token validation
       const { BulletproofAPI } = await import('../config/api');
-      const response = await BulletproofAPI.get('/auth/me');
+      const response = await BulletproofAPI.get('/auth/me', token);
 
       console.log('Token validation response status:', response.status);
       if (response.status === 401) {
         // Token expired, try to refresh
         console.log('Token expired, attempting refresh...');
-        const refreshResponse = await BulletproofAPI.post('/auth/refresh', {});
+        const refreshResponse = await BulletproofAPI.post('/auth/refresh', {}, token);
 
         if (refreshResponse.ok) {
-          console.log('Token refreshed successfully (new cookie set by server)');
+          const refreshData = await refreshResponse.json();
+          localStorage.setItem('authToken', refreshData.data.token);
+          console.log('Token refreshed successfully');
           
           // After successful refresh, get updated user data
-          const userResponse = await BulletproofAPI.get('/auth/me');
+          const userResponse = await BulletproofAPI.get('/auth/me', refreshData.data.token);
           
           if (userResponse.ok) {
-            const userDataResponse = await userResponse.json();
-            if (userDataResponse.data && userDataResponse.data.user && userDataResponse.data.user.email) {
+            const userData = await userResponse.json();
+            if (userData.data && userData.data.user && userData.data.user.email) {
               const updatedUser = {
-                id: userDataResponse.data.user.id,
-                email: userDataResponse.data.user.email,
-                name: userDataResponse.data.user.firstName && userDataResponse.data.user.lastName 
-                  ? `${userDataResponse.data.user.firstName} ${userDataResponse.data.user.lastName}` 
-                  : userDataResponse.data.user.name || userDataResponse.data.user.email,
-                firstName: userDataResponse.data.user.firstName,
-                lastName: userDataResponse.data.user.lastName,
-                plan: userDataResponse.data.user.subscriptionPlan || 'free',
-                subscription_status: userDataResponse.data.user.subscriptionStatus,
-                email_verified: userDataResponse.data.user.emailVerified
+                id: userData.data.user.id,
+                email: userData.data.user.email,
+                name: userData.data.user.firstName && userData.data.user.lastName 
+                  ? `${userData.data.user.firstName} ${userData.data.user.lastName}` 
+                  : userData.data.user.name || userData.data.user.email,
+                firstName: userData.data.user.firstName,
+                lastName: userData.data.user.lastName,
+                plan: userData.data.user.subscriptionPlan || 'free',
+                subscription_status: userData.data.user.subscriptionStatus,
+                email_verified: userData.data.user.emailVerified
               };
               setUser(updatedUser);
               localStorage.setItem('user', JSON.stringify(updatedUser));
@@ -203,6 +202,7 @@ const AcademicAIApp = () => {
             console.log('No cached user data and on protected route, clearing auth state');
             setIsLoggedIn(false);
             setUser(null);
+            localStorage.removeItem('authToken');
             localStorage.removeItem('user');
             setCurrentPage('login');
           }
@@ -326,9 +326,9 @@ const AcademicAIApp = () => {
       setCurrentPage(newPage);
       
       // Restore user data from localStorage when navigating back/forward
-      // Note: Token is in httpOnly cookie, only user data is in localStorage
+      const storedToken = localStorage.getItem('authToken');
       const storedUserData = localStorage.getItem('user');
-      if (storedUserData) {
+      if (storedToken && storedUserData) {
         try {
           const userData = JSON.parse(storedUserData);
           setIsLoggedIn(true);
@@ -359,9 +359,10 @@ const AcademicAIApp = () => {
   // Sync user data from localStorage when it changes (e.g., from another tab or after login)
   useEffect(() => {
     const handleStorageChange = () => {
+      const token = localStorage.getItem('authToken');
       const userData = localStorage.getItem('user');
       
-      if (userData) {
+      if (token && userData) {
         try {
           const parsedUser = JSON.parse(userData);
           console.log('Syncing user data from storage change:', parsedUser);
@@ -408,13 +409,17 @@ const AcademicAIApp = () => {
         try {
           const refreshResponse = await originalFetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/auth/refresh`, {
             method: 'POST',
-            credentials: 'include', // Cookie is sent automatically
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+            },
           });
 
           if (refreshResponse.ok) {
-            console.log('Token refreshed automatically (new cookie set by server)');
+            const refreshData = await refreshResponse.json();
+            localStorage.setItem('authToken', refreshData.data.token);
+            console.log('Token refreshed automatically');
             
-            // Retry the original request (cookie will be sent automatically)
+            // Retry the original request with new token
             const retryResponse = await originalFetch(...args);
             return retryResponse;
           } else {
@@ -428,6 +433,7 @@ const AcademicAIApp = () => {
               console.log('No cached user data on protected route, clearing auth state');
               setIsLoggedIn(false);
               setUser(null);
+              localStorage.removeItem('authToken');
               localStorage.removeItem('user');
               setCurrentPage('login');
             }
@@ -482,9 +488,9 @@ const AcademicAIApp = () => {
     window.scrollTo(0, 0);
     
     // Ensure user data is restored on navigation
-    // Token is in httpOnly cookie, only user data is in localStorage
+    const token = localStorage.getItem('authToken');
     const userData = localStorage.getItem('user');
-    if (userData && !user) {
+    if (token && userData && !user) {
       try {
         const parsedUser = JSON.parse(userData);
         console.log('Restoring user data on navigation:', parsedUser);
@@ -507,20 +513,11 @@ const AcademicAIApp = () => {
     setUser(userData);
   };
 
-  const handleLogout = async () => {
-    // Call logout endpoint to clear httpOnly cookie
-    try {
-      await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/auth/logout`, {
-        method: 'POST',
-        credentials: 'include',
-      });
-    } catch (error) {
-      console.error('Logout API call failed:', error);
-    }
-    
+  const handleLogout = () => {
     setIsLoggedIn(false);
     setUser(null);
     setCurrentPage('landing');
+    localStorage.removeItem('authToken');
     localStorage.removeItem('user');
   };
 

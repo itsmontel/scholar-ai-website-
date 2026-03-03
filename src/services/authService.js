@@ -2,8 +2,7 @@ import { API_BASE_URL } from '../config/api.js';
 
 class AuthService {
   constructor() {
-    // Token is now in httpOnly cookie (not accessible to JS) - this is for backward compatibility only
-    this.token = localStorage.getItem('authToken'); // Legacy fallback
+    this.token = localStorage.getItem('authToken');
     this.user = JSON.parse(localStorage.getItem('user') || 'null');
     this.refreshPromise = null; // Prevent multiple simultaneous refresh calls
   }
@@ -15,7 +14,6 @@ class AuthService {
         headers: {
           'Content-Type': 'application/json',
         },
-        credentials: 'include', // Include cookies
         body: JSON.stringify(userData),
       });
 
@@ -39,7 +37,6 @@ class AuthService {
         headers: {
           'Content-Type': 'application/json',
         },
-        credentials: 'include', // Include cookies - server sets httpOnly cookie
         body: JSON.stringify({ email, password }),
       });
 
@@ -49,13 +46,12 @@ class AuthService {
         throw new Error(data.message || 'Login failed');
       }
 
-      // Store user data only (token is in httpOnly cookie, not accessible to JS)
+      // Store token and user data
+      this.token = data.data.token;
       this.user = data.data.user;
-      localStorage.setItem('user', JSON.stringify(this.user));
       
-      // Clear legacy token from localStorage if present
-      localStorage.removeItem('authToken');
-      this.token = null;
+      localStorage.setItem('authToken', this.token);
+      localStorage.setItem('user', JSON.stringify(this.user));
 
       return data;
     } catch (error) {
@@ -82,12 +78,16 @@ class AuthService {
 
   async _performTokenRefresh() {
     try {
+      if (!this.token) {
+        throw new Error('No token to refresh');
+      }
+
       const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
         method: 'POST',
         headers: {
+          'Authorization': `Bearer ${this.token}`,
           'Content-Type': 'application/json',
         },
-        credentials: 'include', // Cookie is sent automatically
       });
 
       const data = await response.json();
@@ -96,8 +96,11 @@ class AuthService {
         throw new Error(data.message || 'Token refresh failed');
       }
 
-      // Token is refreshed in httpOnly cookie by server
-      return true;
+      // Update token
+      this.token = data.data.token;
+      localStorage.setItem('authToken', this.token);
+
+      return this.token;
     } catch (error) {
       console.error('Token refresh error:', error);
       // If refresh fails, clear auth data
@@ -108,21 +111,22 @@ class AuthService {
 
   async logout() {
     try {
-      // Call logout endpoint to clear httpOnly cookie
-      await fetch(`${API_BASE_URL}/auth/logout`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include', // Include cookies so server can clear them
-      });
+      if (this.token) {
+        await fetch(`${API_BASE_URL}/auth/logout`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${this.token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+      }
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
       // Clear local storage regardless of API call success
       this.token = null;
       this.user = null;
-      localStorage.removeItem('authToken'); // Clear legacy token
+      localStorage.removeItem('authToken');
       localStorage.removeItem('user');
     }
   }
@@ -221,12 +225,16 @@ class AuthService {
 
   async getCurrentUser() {
     try {
+      if (!this.token) {
+        throw new Error('No authentication token');
+      }
+
       const response = await fetch(`${API_BASE_URL}/auth/me`, {
         method: 'GET',
         headers: {
+          'Authorization': `Bearer ${this.token}`,
           'Content-Type': 'application/json',
         },
-        credentials: 'include', // Cookie is sent automatically
       });
 
       const data = await response.json();
@@ -246,8 +254,7 @@ class AuthService {
   }
 
   isAuthenticated() {
-    // Check if we have user data (token is in httpOnly cookie, not accessible)
-    return !!this.user;
+    return !!this.token && !!this.user;
   }
 
   isEmailVerified() {
@@ -255,8 +262,7 @@ class AuthService {
   }
 
   getToken() {
-    // Token is in httpOnly cookie - return null (legacy compatibility)
-    return null;
+    return this.token;
   }
 
   getUser() {
@@ -265,25 +271,25 @@ class AuthService {
 
   // Make authenticated API calls with automatic token refresh
   async authenticatedFetch(url, options = {}) {
-    const makeRequest = async () => {
+    const makeRequest = async (token) => {
       return fetch(url, {
         ...options,
-        credentials: 'include', // Cookie is sent automatically
         headers: {
           ...options.headers,
+          'Authorization': `Bearer ${token}`,
         },
       });
     };
 
     try {
-      // First attempt with current cookie
-      let response = await makeRequest();
+      // First attempt with current token
+      let response = await makeRequest(this.token);
 
       // If token expired, try to refresh and retry
       if (response.status === 401) {
         console.log('Token expired, attempting refresh...');
-        await this.refreshToken();
-        response = await makeRequest();
+        const newToken = await this.refreshToken();
+        response = await makeRequest(newToken);
       }
 
       return response;

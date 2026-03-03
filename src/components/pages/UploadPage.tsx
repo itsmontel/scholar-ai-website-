@@ -106,7 +106,8 @@ const UploadPage = ({ onNavigate, user, onLogout }: UploadPageProps) => {
     setUploadProgress(0);
 
     try {
-      if (!user && !localStorage.getItem('user')) {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
         setError('Please log in to upload documents.');
         return;
       }
@@ -127,7 +128,9 @@ const UploadPage = ({ onNavigate, user, onLogout }: UploadPageProps) => {
 
       const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/documents/upload`, {
         method: 'POST',
-        credentials: 'include',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
         body: formData,
       });
 

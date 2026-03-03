@@ -55,11 +55,14 @@ const HumanizerPage = ({ onNavigate, user, onLogout }: HumanizerPageProps) => {
 
   const fetchUsage = async () => {
     try {
-      if (!user) return;
+      const token = localStorage.getItem('authToken');
+      if (!token) return;
 
       const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/analysis/humanize-usage`, {
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' }
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       });
 
       if (response.ok) {
@@ -126,15 +129,18 @@ const HumanizerPage = ({ onNavigate, user, onLogout }: HumanizerPageProps) => {
       setShowResult(false);
       setHumanizedResult('');
 
-      if (!user) {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
         onNavigate('login');
         return;
       }
 
       const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/analysis/humanize`, {
         method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
         body: JSON.stringify({
           text: inputText,
           mode: humanizeMode,

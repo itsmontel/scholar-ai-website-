@@ -48,7 +48,6 @@ const LoginPage = ({ onNavigate, onLogin }: LoginPageProps) => {
         headers: {
           'Content-Type': 'application/json',
         },
-        credentials: 'include', // Include cookies - server sets httpOnly cookie
         body: JSON.stringify({
           email: formData.email,
           password: formData.password,
@@ -78,7 +77,7 @@ const LoginPage = ({ onNavigate, onLogin }: LoginPageProps) => {
         email_verified: data.data.user.emailVerified
       };
 
-      // Store user data only (token is in httpOnly cookie, not accessible to JS)
+      localStorage.setItem('authToken', data.data.token);
       localStorage.setItem('user', JSON.stringify(transformedUser));
 
       onLogin(transformedUser);

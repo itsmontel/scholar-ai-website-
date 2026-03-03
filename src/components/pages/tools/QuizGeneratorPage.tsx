@@ -201,9 +201,14 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
     const fetchQuizUsage = async () => {
       if (!user) return;
       try {
+        const token = localStorage.getItem('authToken');
+        if (!token) return;
+
         const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/analysis/quiz-usage`, {
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json' }
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
         });
 
         if (response.ok) {
@@ -249,10 +254,13 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
     setError(null);
 
     try {
+      const token = localStorage.getItem('authToken') || localStorage.getItem('token');
       const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/analysis/generate-quiz`, {
         method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({
           text: inputText,
           quizType,
@@ -297,10 +305,10 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
     setIsLoading(true);
     setError(null);
     try {
+      const token = localStorage.getItem('authToken') || localStorage.getItem('token');
       const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/analysis/generate-flashcards`, {
         method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ text: inputText, cardCount: isFreeUser ? 15 : flashcardCount })
       });
       const data = await response.json();
@@ -322,10 +330,10 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
     setIsLoading(true);
     setError(null);
     try {
+      const token = localStorage.getItem('authToken') || localStorage.getItem('token');
       const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/analysis/generate-crossword`, {
         method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ text: inputText, wordCount: isFreeUser ? 10 : crosswordWordCount })
       });
       const data = await response.json();

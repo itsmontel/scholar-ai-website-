@@ -33,8 +33,10 @@ const StripeCheckout: React.FC<StripeCheckoutProps> = ({
         `${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/subscriptions/validate-promo-code`,
         {
           method: 'POST',
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+          },
           body: JSON.stringify({ promoCode: promoCode.trim() })
         }
       );
@@ -72,8 +74,10 @@ const StripeCheckout: React.FC<StripeCheckoutProps> = ({
       // Create checkout session on backend - let backend handle price ID mapping
       const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/subscriptions/create-checkout-session`, {
         method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+        },
         body: JSON.stringify({
           planType,
           billingCycle,

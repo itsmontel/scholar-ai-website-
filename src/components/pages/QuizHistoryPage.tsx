@@ -80,14 +80,17 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
   const fetchStudyToolHistory = async () => {
     try {
       setIsLoading(true);
-      if (!user) {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
         onNavigate('login');
         return;
       }
 
       const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/analysis/quiz-history`, {
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' }
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       });
 
       const data = await response.json();
@@ -175,15 +178,18 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
   const confirmDelete = async (quizId: string) => {
     try {
       setIsDeleting(true);
-      if (!user) {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
         onNavigate('login');
         return;
       }
 
       const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/analysis/quiz/${quizId}`, {
         method: 'DELETE',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' }
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       });
 
       const data = await response.json();

@@ -51,18 +51,19 @@ const AnalysisHistoryPage: React.FC<AnalysisHistoryPageProps> = ({ onNavigate, u
     filterAnalyses();
   }, [analyses, timeFilter]);
 
-  const isLoggedIn = !!user || !!localStorage.getItem('user');
-
   const fetchAnalysisHistory = async () => {
     try {
-      if (!isLoggedIn) {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
         setError('Please log in to view analysis history');
         return;
       }
 
       const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/analysis/history?limit=100`, {
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
       });
 
       if (!response.ok) {
@@ -114,15 +115,18 @@ const AnalysisHistoryPage: React.FC<AnalysisHistoryPageProps> = ({ onNavigate, u
 
     setIsDeleting(analysisId);
     try {
-      if (!isLoggedIn) {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
         setError('Please log in to delete analysis');
         return;
       }
 
       const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/analysis/${analysisId}`, {
         method: 'DELETE',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
       });
 
       if (!response.ok) {

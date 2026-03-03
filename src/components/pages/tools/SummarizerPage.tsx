@@ -55,10 +55,13 @@ const SummarizerPage = ({ onNavigate, user }: SummarizerPageProps) => {
     setError(null);
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/analysis/summarize`, {
+      const token = localStorage.getItem('authToken') || localStorage.getItem('token');
+      const response = await fetch('/api/analysis/summarize', {
         method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({
           text: inputText,
           style,
