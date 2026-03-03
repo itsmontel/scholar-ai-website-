@@ -176,16 +176,23 @@ router.post('/login', validateLogin, async (req, res) => {
     const token = generateToken(user.id);
 
     // Set httpOnly cookie with the JWT
-    // In dev, frontend (e.g. localhost:5173) and API (e.g. localhost:3001) are different origins,
-    // so we need sameSite: 'none' for the cookie to be sent with credentials: 'include'
+    // For cross-origin requests (frontend on different subdomain than API), we need:
+    // - sameSite: 'none' (allows cross-origin cookie sending)
+    // - secure: true (required for sameSite: 'none')
+    // - domain: set via COOKIE_DOMAIN env var for subdomain sharing (e.g., '.writescholar.com')
     const isProduction = process.env.NODE_ENV === 'production';
-    res.cookie('authToken', token, {
+    const cookieOptions = {
       httpOnly: true,
-      secure: true, // required for sameSite: 'none'; localhost is treated as secure
-      sameSite: isProduction ? 'strict' : 'none',
+      secure: true, // required for sameSite: 'none'; HTTPS required in production
+      sameSite: 'none', // Required for cross-origin (different subdomains or ports)
       maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
       path: '/'
-    });
+    };
+    // Add domain for subdomain cookie sharing in production (e.g., COOKIE_DOMAIN=.writescholar.com)
+    if (isProduction && process.env.COOKIE_DOMAIN) {
+      cookieOptions.domain = process.env.COOKIE_DOMAIN;
+    }
+    res.cookie('authToken', token, cookieOptions);
 
     res.json({
       success: true,
@@ -554,13 +561,17 @@ router.post('/refresh', authenticateToken, async (req, res) => {
 
     // Set new httpOnly cookie with the refreshed JWT
     const isProduction = process.env.NODE_ENV === 'production';
-    res.cookie('authToken', newToken, {
+    const cookieOptions = {
       httpOnly: true,
-      secure: isProduction,
-      sameSite: isProduction ? 'strict' : 'lax',
+      secure: true,
+      sameSite: 'none',
       maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
       path: '/'
-    });
+    };
+    if (isProduction && process.env.COOKIE_DOMAIN) {
+      cookieOptions.domain = process.env.COOKIE_DOMAIN;
+    }
+    res.cookie('authToken', newToken, cookieOptions);
 
     res.json({
       success: true,
@@ -581,13 +592,17 @@ router.post('/refresh', authenticateToken, async (req, res) => {
 router.post('/logout', (req, res) => {
     // Clear the httpOnly cookie (same options as when setting, so it clears correctly)
   const isProduction = process.env.NODE_ENV === 'production';
-  res.cookie('authToken', '', {
+  const cookieOptions = {
     httpOnly: true,
     secure: true,
-    sameSite: isProduction ? 'strict' : 'none',
+    sameSite: 'none',
     maxAge: 0, // Expire immediately
     path: '/'
-  });
+  };
+  if (isProduction && process.env.COOKIE_DOMAIN) {
+    cookieOptions.domain = process.env.COOKIE_DOMAIN;
+  }
+  res.cookie('authToken', '', cookieOptions);
   
   res.json({
     success: true,
@@ -613,15 +628,19 @@ router.get('/google/callback',
       // Generate JWT token for the user
       const token = generateToken(req.user.id);
       
-      // Set httpOnly cookie with the JWT (sameSite: 'none' in dev for cross-origin request from frontend)
+      // Set httpOnly cookie with the JWT
       const isProduction = process.env.NODE_ENV === 'production';
-      res.cookie('authToken', token, {
+      const cookieOptions = {
         httpOnly: true,
         secure: true,
-        sameSite: isProduction ? 'strict' : 'none',
+        sameSite: 'none',
         maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
         path: '/'
-      });
+      };
+      if (isProduction && process.env.COOKIE_DOMAIN) {
+        cookieOptions.domain = process.env.COOKIE_DOMAIN;
+      }
+      res.cookie('authToken', token, cookieOptions);
       
       // Redirect to frontend with user data in fragment (not query) for security
       // Token is NOT in URL - it's in the httpOnly cookie
