@@ -132,7 +132,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
     },
     {
       question: "Can I create study quizzes from my notes?",
-      answer: "Yes! The Quiz Generator turns any text into interactive quizzes with multiple choice and true/false questions. Paste your study notes, textbook chapters, or articles and get instant quizzes. Available to paid subscribers."
+      answer: "Yes! The Quiz Generator turns any text into interactive quizzes with multiple choice and true/false questions. Paste your study notes, textbook chapters, or articles and get instant quizzes. Free users get 3 quizzes/month; paid plans have unlimited."
     },
     {
       question: "How does the Paper Summarizer work?",
@@ -148,7 +148,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
     },
     {
       question: "What's the difference between Free, Starter, and Premium?",
-      answer: "Free includes 1,000 words for Humanizer and Summarizer, plus essay analysis. Starter adds the Quiz Generator with basic options. Premium unlocks all features, quiz types, and our most advanced AI model."
+      answer: "Free includes 1,000 words for Humanizer and Summarizer, 3 quizzes/month, and essay analysis. Starter adds unlimited quizzes with basic options (999,999 words). Premium unlocks all quiz types, difficulties, and our most advanced AI model (GPT-4.1 Mini)."
     }
   ];
 
@@ -509,7 +509,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                 <span className="mr-1.5">{mode === 'humanize' ? '✨' : mode === 'summarize' ? '📝' : mode === 'quiz' ? '🧠' : '💡'}</span>
                 {mode === 'humanize' ? 'Humanize ChatGPT, Gemini, Claude text — 1,000 free words/month'
                   : mode === 'summarize' ? 'Paste 50+ words — get bullet or paragraph summaries'
-                  : mode === 'quiz' ? 'Paid feature — turn notes into quiz questions'
+                  : mode === 'quiz' ? '3 free quizzes/month — turn notes into study questions'
                   : mode === 'analyze' ? 'AI analyzes, you refine for submission'
                   : 'Find sources, format citations automatically'}
               </p>

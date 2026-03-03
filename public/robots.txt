@@ -15,6 +15,7 @@ Disallow: /analysis
 Disallow: /analysis-history
 Disallow: /citation-results
 Disallow: /citation-history
+Disallow: /quiz-history
 Disallow: /settings
 Disallow: /profile
 Disallow: /library

@@ -121,7 +121,7 @@ const AcademicAIApp = () => {
     'grammar-checker': { title: 'Free Grammar Checker | WriteScholar', description: 'Check your writing for common spelling mistakes, grammar errors, punctuation issues, and style suggestions. Quick client-side grammar check.' },
     'humanizer': { title: 'AI Humanizer – Bypass AI Detection | WriteScholar', description: 'Transform AI-generated text from ChatGPT, Claude, Gemini into undetectable human writing. Bypass Turnitin, GPTZero, and other AI detectors. Free to try.' },
     'summarizer': { title: 'AI Summarizer – Condense Papers & Articles | WriteScholar', description: 'Summarize research papers, articles, and textbooks into key points. Bullet points or paragraphs. Perfect for literature reviews. Free to try.' },
-    'quiz-generator': { title: 'AI Quiz Generator – Create Study Quizzes from Text | WriteScholar', description: 'Turn notes, articles, and textbooks into interactive quizzes. Multiple choice, true/false questions. Perfect for exam prep. Paid feature.' },
+    'quiz-generator': { title: 'AI Quiz Generator – Create Study Quizzes from Text | WriteScholar', description: 'Turn notes, articles, and textbooks into interactive quizzes. Multiple choice, true/false questions. Perfect for exam prep. Free plan: 3 quizzes/month.' },
     'quiz-history': { title: 'My Quizzes | WriteScholar', description: 'View and retake your saved quizzes. Quizzes are stored for 7 days.' }
   };
   useEffect(() => {
@@ -298,6 +298,8 @@ const AcademicAIApp = () => {
       if (pathname === '/tools/thesis-generator' || pathname === '/thesis-generator') return 'thesis-generator';
       if (pathname === '/tools/grammar-checker' || pathname === '/grammar-checker') return 'grammar-checker';
       if (pathname === '/tools/humanizer' || pathname === '/humanizer') return 'humanizer';
+      if (pathname === '/tools/summarizer' || pathname === '/summarizer') return 'summarizer';
+      if (pathname === '/tools/quiz-generator' || pathname === '/quiz-generator') return 'quiz-generator';
       return 'landing';
     };
     
@@ -448,13 +450,29 @@ const AcademicAIApp = () => {
   }, [isLoggedIn, currentPage]);
 
   // Navigation function (slug optional for blog posts)
+  // Canonical URL map – pages whose URL differs from /${page}
+  const pageUrlMap: Record<string, string> = {
+    landing: '/',
+    humanizer: '/tools/humanizer',
+    summarizer: '/tools/summarizer',
+    'quiz-generator': '/tools/quiz-generator',
+    'word-counter': '/tools/word-counter',
+    'citation-generator-tool': '/tools/citation-generator',
+    'readability-score': '/tools/readability-score',
+    'paraphrasing-tips': '/tools/paraphrasing-tips',
+    'essay-outline': '/tools/essay-outline',
+    'text-case-converter': '/tools/text-case-converter',
+    'thesis-generator': '/tools/thesis-generator',
+    'grammar-checker': '/tools/grammar-checker',
+  };
+
   const navigateTo = (page: string, slug?: string) => {
     setCurrentPage(page);
-    // Update URL to match the page
-    if (page === 'landing') {
-      window.history.pushState({}, '', '/');
-    } else if (page === 'blog-post' && slug) {
+    // Update URL to canonical form
+    if (page === 'blog-post' && slug) {
       window.history.pushState({}, '', `/blog/${slug}`);
+    } else if (pageUrlMap[page]) {
+      window.history.pushState({}, '', pageUrlMap[page]);
     } else {
       window.history.pushState({}, '', `/${page}`);
     }

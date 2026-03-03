@@ -26,6 +26,19 @@ const staticRoutes = [
   '/terms',
   '/login',
   '/signup',
+  // AI tools
+  '/tools/humanizer',
+  '/tools/summarizer',
+  '/tools/quiz-generator',
+  // Free tools
+  '/tools/word-counter',
+  '/tools/citation-generator',
+  '/tools/grammar-checker',
+  '/tools/readability-score',
+  '/tools/thesis-generator',
+  '/tools/essay-outline',
+  '/tools/text-case-converter',
+  '/tools/paraphrasing-tips',
 ];
 
 let blogSlugs = [];

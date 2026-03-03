@@ -57,13 +57,29 @@ const QuizGeneratorPage = ({ onNavigate, user }: QuizGeneratorPageProps) => {
   const isPremiumUser = user && (user.subscription_plan === 'premium' || user.plan === 'premium');
   const userPlan = user?.subscription_plan || user?.plan || 'free';
   const isPaidUser = user && (userPlan === 'starter' || userPlan === 'premium');
+  const isFreeUser = user && userPlan === 'free';
   const wordCount = inputText.trim().split(/\s+/).filter(Boolean).length;
+  
+  // Quiz usage state for free users
+  const [quizUsage, setQuizUsage] = useState({
+    generationsUsed: 0,
+    generationLimit: 3,
+    generationsRemaining: 3,
+    maxWordsPerGeneration: 5000,
+    wordsUsed: 0,
+    wordLimit: 15000,
+    plan: 'free'
+  });
+  
+  // Free users can use quiz with limits; paid users have unlimited
+  const canUseQuiz = isPaidUser || (isFreeUser && (quizUsage.generationLimit === -1 || quizUsage.generationsRemaining > 0));
+  const quizExhausted = isFreeUser && quizUsage.generationLimit !== -1 && quizUsage.generationsRemaining <= 0;
 
   useEffect(() => {
     document.title = 'AI Quiz Generator – Create Quizzes from Documents | WriteScholar';
     const metaDescription = document.querySelector('meta[name="description"]');
     if (metaDescription) {
-      metaDescription.setAttribute('content', 'Turn any article, textbook, or research paper into interactive quizzes. Multiple choice, true/false, and fill-in-the-blank questions. Premium AI tool.');
+      metaDescription.setAttribute('content', 'Turn any article, textbook, or research paper into interactive quizzes. Multiple choice, true/false, and fill-in-the-blank questions. Free plan: 3 quizzes/month.');
     }
   }, []);
 
@@ -99,6 +115,43 @@ const QuizGeneratorPage = ({ onNavigate, user }: QuizGeneratorPageProps) => {
     }
   }, []);
 
+  // Fetch quiz usage for logged-in users
+  useEffect(() => {
+    const fetchQuizUsage = async () => {
+      if (!user) return;
+      try {
+        const token = localStorage.getItem('authToken');
+        if (!token) return;
+
+        const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/analysis/quiz-usage`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success) {
+            setQuizUsage({
+              generationsUsed: data.data.generationsUsed || 0,
+              generationLimit: data.data.generationLimit ?? 3,
+              generationsRemaining: data.data.generationsRemaining ?? 3,
+              maxWordsPerGeneration: data.data.maxWordsPerGeneration || 5000,
+              wordsUsed: data.data.wordsUsed || 0,
+              wordLimit: data.data.wordLimit || 15000,
+              plan: data.data.plan || 'free'
+            });
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching quiz usage:', error);
+      }
+    };
+
+    fetchQuizUsage();
+  }, [user]);
+
   const handleGenerateQuiz = async () => {
     if (!inputText.trim()) return;
 
@@ -111,8 +164,8 @@ const QuizGeneratorPage = ({ onNavigate, user }: QuizGeneratorPageProps) => {
       return;
     }
 
-    if (!isPaidUser) {
-      setError('Quiz Generator requires a paid subscription. Upgrade to Starter or Premium to access.');
+    if (quizExhausted) {
+      setError('You\'ve used all 3 quiz generations this month. Upgrade for unlimited quizzes.');
       return;
     }
 
@@ -121,7 +174,7 @@ const QuizGeneratorPage = ({ onNavigate, user }: QuizGeneratorPageProps) => {
 
     try {
       const token = localStorage.getItem('authToken') || localStorage.getItem('token');
-      const response = await fetch('/api/analysis/generate-quiz', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/analysis/generate-quiz`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -142,12 +195,21 @@ const QuizGeneratorPage = ({ onNavigate, user }: QuizGeneratorPageProps) => {
       }
 
       setQuiz(data.data);
-      setIsQuizMode(true);  // Go directly to quiz mode
+      setIsQuizMode(true);
       setCurrentQuestion(0);
       setUserAnswers([]);
       setQuizCompleted(false);
       setSelectedAnswer('');
       setShowResult(false);
+      
+      // Refresh quiz usage after successful generation
+      if (isFreeUser) {
+        setQuizUsage(prev => ({
+          ...prev,
+          generationsUsed: prev.generationsUsed + 1,
+          generationsRemaining: Math.max(0, prev.generationsRemaining - 1)
+        }));
+      }
     } catch (err: any) {
       setError(err.message || 'Something went wrong. Please try again.');
     } finally {
@@ -391,7 +453,7 @@ const QuizGeneratorPage = ({ onNavigate, user }: QuizGeneratorPageProps) => {
               <span className="text-3xl">🧠</span>
             </div>
             <h2 className="text-2xl font-bold text-gray-900 mb-2">Sign Up to Continue</h2>
-            <p className="text-gray-600 mb-6">Create a free account to access the AI Quiz Generator and other premium tools.</p>
+            <p className="text-gray-600 mb-6">Create a free account to get 3 quiz generations per month, plus Humanizer and Summarizer.</p>
             <div className="space-y-3">
               <button
                 onClick={() => onNavigate('signup')}
@@ -857,20 +919,27 @@ const QuizGeneratorPage = ({ onNavigate, user }: QuizGeneratorPageProps) => {
                     <div className="flex items-center gap-2">
                       <span className="text-xs font-medium text-gray-500 whitespace-nowrap">Questions:</span>
                       <select
-                        value={questionCount}
-                        onChange={(e) => setQuestionCount(Number(e.target.value))}
-                        className="px-2 py-1.5 bg-gray-100 border-0 rounded-lg text-xs font-medium text-gray-700 focus:ring-2 focus:ring-amber-200"
+                        value={isFreeUser ? 10 : questionCount}
+                        onChange={(e) => !isFreeUser && setQuestionCount(Number(e.target.value))}
+                        disabled={isFreeUser}
+                        className={`px-2 py-1.5 bg-gray-100 border-0 rounded-lg text-xs font-medium text-gray-700 focus:ring-2 focus:ring-amber-200 ${isFreeUser ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        title={isFreeUser ? 'Free plan: 10 questions only' : ''}
                       >
-                        {[5, 10, 15, 20, 25].map(n => (
-                          <option key={n} value={n}>{n}</option>
-                        ))}
+                        {isFreeUser ? (
+                          <option value={10}>10</option>
+                        ) : (
+                          [5, 10, 15, 20, 25].map(n => (
+                            <option key={n} value={n}>{n}</option>
+                          ))
+                        )}
                       </select>
+                      {isFreeUser && <span className="text-[9px]">🔒</span>}
                     </div>
 
                     {/* Generate Button */}
                     <button
                       onClick={handleGenerateQuiz}
-                      disabled={isLoading || !inputText.trim() || wordCount < 100}
+                      disabled={isLoading || !inputText.trim() || wordCount < 100 || wordCount > quizUsage.maxWordsPerGeneration || quizExhausted}
                       className="w-full sm:w-auto sm:ml-auto px-4 sm:px-6 py-2 sm:py-2.5 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white font-semibold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-amber-200/50 text-sm"
                     >
                       {isLoading ? (
@@ -936,8 +1005,21 @@ const QuizGeneratorPage = ({ onNavigate, user }: QuizGeneratorPageProps) => {
                   </div>
                   <div className="px-3 sm:px-5 py-2.5 sm:py-3 border-t border-gray-100 bg-gray-50/50">
                     <div className="flex items-center justify-between text-xs sm:text-sm text-gray-500">
-                      <span className={wordCount < 100 ? 'text-amber-600' : ''}>{wordCount.toLocaleString()} words</span>
+                      <span className={`${
+                        wordCount < 100 ? 'text-amber-600' : 
+                        wordCount > quizUsage.maxWordsPerGeneration ? 'text-red-600' : 
+                        ''
+                      }`}>
+                        {wordCount.toLocaleString()} words
+                        {wordCount >= 100 && wordCount <= quizUsage.maxWordsPerGeneration && ` / ${quizUsage.maxWordsPerGeneration.toLocaleString()} max`}
+                      </span>
                       {wordCount < 100 && <span className="text-amber-600">Minimum 100 words</span>}
+                      {wordCount > quizUsage.maxWordsPerGeneration && (
+                        <span className="text-red-600">
+                          Exceeds {quizUsage.maxWordsPerGeneration.toLocaleString()} word limit
+                          {isFreeUser && ' (upgrade for 15,000)'}
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -964,7 +1046,7 @@ const QuizGeneratorPage = ({ onNavigate, user }: QuizGeneratorPageProps) => {
                 </div>
                 <div className="flex-1">
                   <p className="text-red-800 text-sm">{error}</p>
-                  {!isPaidUser && user && (
+                  {(quizExhausted || (error && error.includes('Upgrade'))) && user && (
                     <button
                       onClick={() => onNavigate('pricing')}
                       className="mt-2 px-4 py-1.5 bg-gradient-to-r from-amber-600 to-orange-600 text-white text-sm font-medium rounded-lg hover:from-amber-700 hover:to-orange-700 transition-all inline-flex items-center gap-2"
@@ -976,32 +1058,43 @@ const QuizGeneratorPage = ({ onNavigate, user }: QuizGeneratorPageProps) => {
               </div>
             )}
 
-            {/* Lock Overlay for Free Users */}
-            {user && !isPaidUser && !quiz && (
+            {/* Lock Overlay for Free Users who exhausted their limit */}
+            {user && quizExhausted && !quiz && (
               <div className="mt-6 mx-3 sm:mx-0">
                 <div className="bg-gradient-to-r from-amber-600 to-orange-600 rounded-2xl p-6 text-white text-center">
                   <span className="text-4xl mb-3 block">🔒</span>
-                  <h3 className="text-xl font-bold mb-2">Paid Feature</h3>
-                  <p className="text-amber-100 mb-4">Upgrade to Starter or Premium to unlock the AI Quiz Generator</p>
+                  <h3 className="text-xl font-bold mb-2">Monthly Limit Reached</h3>
+                  <p className="text-amber-100 mb-4">You've used all 3 quiz generations this month. Upgrade for unlimited quizzes!</p>
                   <button
                     onClick={() => onNavigate('pricing')}
                     className="px-6 py-2.5 bg-white text-amber-700 font-semibold rounded-xl hover:bg-amber-50 transition-all inline-flex items-center gap-2"
                   >
-                    👑 View Plans
+                    👑 Upgrade Now
                   </button>
                 </div>
               </div>
             )}
 
-            {/* Plan Info for starter users */}
-            {user && isPaidUser && !isPremiumUser && !quiz && (
+            {/* Plan Info for free and starter users */}
+            {user && !isPremiumUser && !quizExhausted && !quiz && (
               <div className="mt-6 mx-3 sm:mx-0">
                 <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-5 flex items-center justify-between flex-wrap gap-3">
                   <div className="flex items-center gap-3">
                     <span className="text-2xl">🧠</span>
                     <div>
-                      <p className="text-amber-800 font-medium text-sm">Starter plan: Mixed type + Medium difficulty only</p>
-                      <p className="text-amber-600 text-xs mt-0.5">Upgrade to Premium for all quiz types, difficulties, and GPT-4.1 Mini</p>
+                      {isFreeUser ? (
+                        <>
+                          <p className="text-amber-800 font-medium text-sm">
+                            Free plan: {quizUsage.generationsRemaining} of {quizUsage.generationLimit} quizzes remaining • Mixed type • Medium difficulty • 10 questions • Max {(quizUsage.maxWordsPerGeneration || 5000).toLocaleString()} words
+                          </p>
+                          <p className="text-amber-600 text-xs mt-0.5">Upgrade for unlimited quizzes, all options, and up to 15,000 words</p>
+                        </>
+                      ) : (
+                        <>
+                          <p className="text-amber-800 font-medium text-sm">Starter plan: Mixed type + Medium difficulty only</p>
+                          <p className="text-amber-600 text-xs mt-0.5">Upgrade to Premium for all quiz types, difficulties, and GPT-4.1 Mini</p>
+                        </>
+                      )}
                     </div>
                   </div>
                   <button onClick={() => onNavigate('pricing')} className="px-4 py-1.5 bg-amber-600 text-white text-xs font-semibold rounded-lg hover:bg-amber-700 transition-all">

@@ -62,6 +62,15 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
   const [selectedAnswer, setSelectedAnswer] = useState('');
   const [showQuizResult, setShowQuizResult] = useState(false);
   const [quizCompleted, setQuizCompleted] = useState(false);
+  const [quizUsage, setQuizUsage] = useState({
+    generationsUsed: 0,
+    generationLimit: 3,
+    generationsRemaining: 3,
+    maxWordsPerGeneration: 5000,
+    wordsUsed: 0,
+    wordLimit: 15000,
+    plan: 'free'
+  });
 
   const [usageStats, setUsageStats] = useState({
     documentsUploaded: 0,
@@ -208,6 +217,44 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
     fetchUsageStats();
   }, []);
 
+  // Fetch quiz usage when switching to quiz mode
+  useEffect(() => {
+    if (mode === 'quiz') {
+      fetchQuizUsage();
+    }
+  }, [mode]);
+
+  const fetchQuizUsage = async () => {
+    try {
+      const token = localStorage.getItem('authToken');
+      if (!token) return;
+
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/analysis/quiz-usage`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          setQuizUsage({
+            generationsUsed: data.data.generationsUsed || 0,
+            generationLimit: data.data.generationLimit ?? 3,
+            generationsRemaining: data.data.generationsRemaining ?? 3,
+            maxWordsPerGeneration: data.data.maxWordsPerGeneration || 5000,
+            wordsUsed: data.data.wordsUsed || 0,
+            wordLimit: data.data.wordLimit || 15000,
+            plan: data.data.plan || 'free'
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching quiz usage:', error);
+    }
+  };
+
   const fetchUsageStats = async () => {
     try {
       setLoadingStats(true);
@@ -316,13 +363,20 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
 
   const isPremiumUser = usageStats.plan === 'premium';
   const isPaidUser = usageStats.plan === 'starter' || usageStats.plan === 'premium';
-  const canUseQuiz = isPaidUser;
+  const isFreeUser = usageStats.plan === 'free';
+  // Free users can use quiz with limits (3 generations/month); paid users have unlimited
+  const canUseQuiz = isPaidUser || (isFreeUser && (quizUsage.generationLimit === -1 || quizUsage.generationsRemaining > 0));
+  const quizExhausted = isFreeUser && quizUsage.generationLimit !== -1 && quizUsage.generationsRemaining <= 0;
   
   const isTextValid = () => {
     if (mode === 'citations') return inputText.trim().length > 0;
     if (mode === 'humanize') return inputText.trim().length > 0;
     if (mode === 'summarize') return getWordCount(inputText) >= 50;
-    if (mode === 'quiz') return getWordCount(inputText) >= 100;
+    if (mode === 'quiz') {
+      const wordCount = getWordCount(inputText);
+      const maxWords = quizUsage.maxWordsPerGeneration || 15000;
+      return wordCount >= 100 && wordCount <= maxWords;
+    }
     return getWordCount(inputText) >= 200;
   };
 
@@ -505,8 +559,8 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
   };
 
   const handleGenerateQuiz = async () => {
-    if (!canUseQuiz) {
-      setQuizError('Quiz Generator requires a paid subscription. Upgrade to Starter or Premium to access.');
+    if (quizExhausted) {
+      setQuizError('You\'ve used all 3 quiz generations this month. Upgrade for unlimited quizzes.');
       return;
     }
     setIsGeneratingQuiz(true);
@@ -521,12 +575,14 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || 'Quiz generation failed');
       setQuizResult(data.data);
-      setIsQuizMode(true);  // Go directly to quiz mode
+      setIsQuizMode(true);
       setCurrentQuestion(0);
       setUserAnswers([]);
       setQuizCompleted(false);
       setSelectedAnswer('');
       setShowQuizResult(false);
+      // Refresh quiz usage after successful generation
+      fetchQuizUsage();
     } catch (error: any) {
       setQuizError(error.message || 'Quiz generation failed. Please try again.');
     } finally {
@@ -714,7 +770,7 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
               : mode === 'quiz'
               ? 'Turn any content into interactive quiz questions'
               : mode === 'analyze' 
-              ? 'Paste your text to get AI-powered feedback on structure, grammar, and citations'
+              ? 'Upload your document or paste your text to get our advanced AI feedback on structure, grammar, and citations'
               : 'Enter your topic to discover relevant academic sources'
             }
           </p>
@@ -1419,29 +1475,40 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
         {/* QUIZ MODE */}
         {mode === 'quiz' && (
           <>
-            {/* Lock for free users */}
-            {!canUseQuiz && (
+            {/* Exhausted generations banner for free users */}
+            {quizExhausted && (
               <div className="mb-6 bg-gradient-to-r from-amber-600 to-orange-600 rounded-2xl p-6 text-white text-center">
                 <span className="text-4xl mb-3 block">🔒</span>
-                <h3 className="text-xl font-bold mb-2">Paid Feature</h3>
-                <p className="text-amber-100 mb-4">Quiz Generator requires a Starter or Premium subscription</p>
+                <h3 className="text-xl font-bold mb-2">Monthly Limit Reached</h3>
+                <p className="text-amber-100 mb-4">You've used all 3 quiz generations this month. Upgrade for unlimited quizzes!</p>
                 <button
                   onClick={() => onNavigate('pricing')}
                   className="px-6 py-2.5 bg-white text-amber-700 font-semibold rounded-xl hover:bg-amber-50 transition-all inline-flex items-center gap-2"
                 >
-                  👑 View Plans
+                  👑 Upgrade Now
                 </button>
               </div>
             )}
 
-            {/* Plan info banner for starter users */}
-            {isPaidUser && !isPremiumUser && (
+            {/* Plan info banner for free and starter users */}
+            {!isPremiumUser && !quizExhausted && (
               <div className="mb-6 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-4 flex items-center justify-between flex-wrap gap-3">
                 <div className="flex items-center gap-3">
                   <span className="text-2xl">🧠</span>
                   <div>
-                    <p className="text-amber-800 font-medium text-sm">Starter plan: Mixed type + Medium difficulty only</p>
-                    <p className="text-amber-600 text-xs mt-0.5">Upgrade to Premium for all quiz types, difficulties, and GPT-4.1 Mini</p>
+                    {isFreeUser ? (
+                      <>
+                        <p className="text-amber-800 font-medium text-sm">
+                          Free plan: {quizUsage.generationsRemaining} of {quizUsage.generationLimit} quizzes remaining • Mixed type • Medium difficulty • 10 questions • Max {(quizUsage.maxWordsPerGeneration || 5000).toLocaleString()} words
+                        </p>
+                        <p className="text-amber-600 text-xs mt-0.5">Upgrade for unlimited quizzes, all options, and up to 15,000 words</p>
+                      </>
+                    ) : (
+                      <>
+                        <p className="text-amber-800 font-medium text-sm">Starter plan: Mixed type + Medium difficulty only</p>
+                        <p className="text-amber-600 text-xs mt-0.5">Upgrade to Premium for all quiz types, difficulties, and GPT-4.1 Mini</p>
+                      </>
+                    )}
                   </div>
                 </div>
                 <button onClick={() => onNavigate('pricing')} className="px-4 py-1.5 bg-amber-600 text-white text-xs font-semibold rounded-lg hover:bg-amber-700 transition-all">
@@ -1610,11 +1677,20 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                       </div>
                       <div className="flex items-center gap-1.5 flex-shrink-0">
                         <span className="text-xs font-medium text-gray-500">Questions:</span>
-                        <select value={quizQuestionCount} onChange={(e) => setQuizQuestionCount(Number(e.target.value))}
-                          className="px-2 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-medium"
+                        <select 
+                          value={isFreeUser ? 10 : quizQuestionCount} 
+                          onChange={(e) => !isFreeUser && setQuizQuestionCount(Number(e.target.value))}
+                          disabled={isFreeUser}
+                          className={`px-2 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-medium ${isFreeUser ? 'opacity-50 cursor-not-allowed' : ''}`}
+                          title={isFreeUser ? 'Free plan: 10 questions only' : ''}
                         >
-                          {[5, 10, 15, 20, 25].map(n => <option key={n} value={n}>{n}</option>)}
+                          {isFreeUser ? (
+                            <option value={10}>10</option>
+                          ) : (
+                            [5, 10, 15, 20, 25].map(n => <option key={n} value={n}>{n}</option>)
+                          )}
                         </select>
+                        {isFreeUser && <span className="text-[9px]">🔒</span>}
                       </div>
                     </div>
                     <button
@@ -1674,8 +1750,15 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                     )}
                   </div>
                   <div className="flex items-center justify-between px-3 sm:px-5 py-2.5 sm:py-3 bg-gray-50/30 border-t border-gray-100">
-                    <span className={`text-xs font-medium ${getWordCount(inputText) < 100 ? 'text-amber-600' : 'text-gray-400'}`}>
-                      {getWordCount(inputText)} words {getWordCount(inputText) < 100 && '(min 100)'}
+                    <span className={`text-xs font-medium ${
+                      getWordCount(inputText) < 100 ? 'text-amber-600' : 
+                      (isFreeUser && getWordCount(inputText) > quizUsage.maxWordsPerGeneration) ? 'text-red-600' : 
+                      'text-gray-400'
+                    }`}>
+                      {getWordCount(inputText)} words 
+                      {getWordCount(inputText) < 100 && ' (min 100)'}
+                      {isFreeUser && getWordCount(inputText) > quizUsage.maxWordsPerGeneration && ` (max ${quizUsage.maxWordsPerGeneration.toLocaleString()})`}
+                      {isFreeUser && getWordCount(inputText) <= quizUsage.maxWordsPerGeneration && getWordCount(inputText) >= 100 && ` / ${quizUsage.maxWordsPerGeneration.toLocaleString()} max`}
                     </span>
                   </div>
                 </div>
@@ -1685,7 +1768,7 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
             {quizError && (
               <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-2xl text-center">
                 <p className="text-red-700 text-sm font-medium">{quizError}</p>
-                {!canUseQuiz && (
+                {(quizExhausted || quizError.includes('Upgrade')) && (
                   <button onClick={() => onNavigate('pricing')} className="mt-2 px-4 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold rounded-lg">
                     View Plans
                   </button>

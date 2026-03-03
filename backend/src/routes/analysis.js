@@ -321,8 +321,11 @@ router.get('/quiz-usage', authenticateToken, async (req, res) => {
       .eq('user_id', userId)
       .gte('created_at', startOfMonth.toISOString());
 
+    const generationsUsed = (error || !data) ? 0 : (data || []).length;
     const wordsUsed = (error || !data) ? 0 : (data || []).reduce((sum, row) => sum + (row.words_count || 0), 0);
     const wordLimit = planLimits.quizWordsPerMonth;
+    const generationLimit = planLimits.quizGenerationsPerMonth;
+    const maxWordsPerGeneration = planLimits.quizMaxWordsPerGeneration;
 
     res.json({
       success: true,
@@ -330,6 +333,10 @@ router.get('/quiz-usage', authenticateToken, async (req, res) => {
         wordsUsed,
         wordLimit,
         wordsRemaining: Math.max(0, wordLimit - wordsUsed),
+        generationsUsed,
+        generationLimit,
+        generationsRemaining: generationLimit === -1 ? -1 : Math.max(0, generationLimit - generationsUsed),
+        maxWordsPerGeneration,
         plan: userPlan
       }
     });
@@ -341,7 +348,7 @@ router.get('/quiz-usage', authenticateToken, async (req, res) => {
 
 // @route   POST /api/analysis/generate-quiz
 // @desc    Generate quiz questions from text
-// @access  Private (paid users - free users cannot use quiz)
+// @access  Private (all users - free users limited to 3 generations/month with restrictions)
 router.post('/generate-quiz', authenticateToken, async (req, res) => {
   try {
     const { text, quizType, difficulty, questionCount } = req.body;
@@ -349,19 +356,18 @@ router.post('/generate-quiz', authenticateToken, async (req, res) => {
     const userPlan = req.user.subscription_plan || 'free';
     const planLimits = subscriptionService.PLAN_LIMITS[userPlan] || subscriptionService.PLAN_LIMITS.free;
 
-    // Free users cannot use quiz generator
-    if (userPlan === 'free') {
-      return res.status(403).json({
-        success: false,
-        message: 'Quiz Generator requires a paid subscription. Upgrade to Starter or Premium to access.',
-        upgrade: true
-      });
-    }
-
-    // Enforce quiz type/difficulty restrictions for starter users
+    // Enforce quiz type/difficulty/count restrictions based on plan
+    // Free & Starter: mixed type, medium difficulty, 10 questions
+    // Premium: full customization
     let effectiveType = quizType || 'mixed';
     let effectiveDifficulty = difficulty || 'medium';
-    if (userPlan !== 'premium') {
+    let effectiveCount = questionCount || 10;
+    
+    if (userPlan === 'free') {
+      effectiveType = 'mixed';
+      effectiveDifficulty = 'medium';
+      effectiveCount = 10;
+    } else if (userPlan === 'starter') {
       effectiveType = 'mixed';
       effectiveDifficulty = 'medium';
     }
@@ -374,11 +380,14 @@ router.post('/generate-quiz', authenticateToken, async (req, res) => {
     }
 
     const wordCount = text.trim().split(/\s+/).length;
+    const maxWordsPerGeneration = planLimits.quizMaxWordsPerGeneration || 15000;
 
-    if (wordCount > 15000) {
+    if (wordCount > maxWordsPerGeneration) {
       return res.status(400).json({
         success: false,
-        message: 'Text exceeds maximum of 15,000 words per request'
+        message: userPlan === 'free' 
+          ? `Free plan allows up to ${maxWordsPerGeneration.toLocaleString()} words per quiz. Upgrade for up to 15,000 words.`
+          : `Text exceeds maximum of ${maxWordsPerGeneration.toLocaleString()} words per request`
       });
     }
 
@@ -389,7 +398,7 @@ router.post('/generate-quiz', authenticateToken, async (req, res) => {
       });
     }
 
-    // Check word usage
+    // Check usage limits
     const { createClient } = require('@supabase/supabase-js');
     const supabase = createClient(
       process.env.SUPABASE_URL,
@@ -406,23 +415,38 @@ router.post('/generate-quiz', authenticateToken, async (req, res) => {
       .eq('user_id', userId)
       .gte('created_at', startOfMonth.toISOString());
 
+    const generationsThisMonth = usageError ? 0 : (usageData || []).length;
     const wordsUsedThisMonth = usageError ? 0 : (usageData || []).reduce((sum, row) => sum + (row.words_count || 0), 0);
     const wordLimit = planLimits.quizWordsPerMonth;
+    const generationLimit = planLimits.quizGenerationsPerMonth;
 
+    // Check generation limit for free users
+    if (generationLimit !== -1 && generationsThisMonth >= generationLimit) {
+      return res.status(429).json({
+        success: false,
+        message: `You've used all ${generationLimit} quiz generations this month. Upgrade for unlimited quizzes.`,
+        generationsUsed: generationsThisMonth,
+        generationLimit,
+        upgrade: true
+      });
+    }
+
+    // Check word limit
     if (wordsUsedThisMonth + wordCount > wordLimit) {
       const remaining = Math.max(0, wordLimit - wordsUsedThisMonth);
       return res.status(429).json({
         success: false,
         message: remaining === 0
-          ? `You've used all ${wordLimit.toLocaleString()} quiz words this month. Limit resets next month.`
-          : `This text is ${wordCount} words but you only have ${remaining} quiz words remaining this month.`,
+          ? `You've used all ${wordLimit.toLocaleString()} quiz words this month. ${userPlan === 'free' ? 'Upgrade for 999,999 words/month.' : 'Limit resets next month.'}`
+          : `This text is ${wordCount} words but you only have ${remaining} quiz words remaining this month.${userPlan === 'free' ? ' Upgrade for 999,999 words/month.' : ''}`,
         wordsUsed: wordsUsedThisMonth,
         wordLimit,
-        wordsRemaining: remaining
+        wordsRemaining: remaining,
+        upgrade: userPlan === 'free'
       });
     }
 
-    const count = Math.min(Math.max(questionCount || 10, 5), 25);
+    const count = Math.min(Math.max(effectiveCount, 5), 25);
     const result = await aiAnalysisService.generateQuiz(
       text,
       effectiveType,
