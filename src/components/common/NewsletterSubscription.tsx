@@ -22,8 +22,8 @@ const NewsletterSubscription: React.FC<NewsletterSubscriptionProps> = ({ variant
     setMessage('');
 
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
-      const response = await fetch(`${apiUrl}/api/email-subscriptions/newsletter`, {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+      const response = await fetch(`${apiUrl}/email-subscriptions/newsletter`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

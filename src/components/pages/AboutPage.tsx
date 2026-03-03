@@ -53,7 +53,7 @@ const AboutPage = ({ onNavigate, user, onLogout }: AboutPageProps) => {
               Empowering academic<br className="hidden sm:block" /> excellence worldwide
             </h1>
             <p className="text-lg text-gray-500 leading-relaxed">
-              We're building AI-powered tools to help students and researchers write better, cite accurately, and achieve their scholarly goals.
+              We're building the complete AI toolkit for students: essay analysis, humanizing, summarizing, citation finding, quizzes, flashcards, crosswords, and more.
             </p>
           </div>
         </div>
@@ -72,7 +72,7 @@ const AboutPage = ({ onNavigate, user, onLogout }: AboutPageProps) => {
                 We help students, researchers, and academics improve their work and achieve their scholarly goals—whether they're writing their first essay or publishing groundbreaking research.
               </p>
               <div className="space-y-3">
-                {['Instant AI-powered feedback', 'Professional-grade citation tools', 'Continuous improvement through learning'].map((item, i) => (
+                {['AI essay analysis and feedback', 'Humanizer, summarizer, and citation finder', 'Study tools: quizzes, flashcards, crosswords'].map((item, i) => (
                   <div key={i} className="flex items-center space-x-3">
                     <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
                       <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -104,6 +104,90 @@ const AboutPage = ({ onNavigate, user, onLogout }: AboutPageProps) => {
                   <div className="text-blue-100">Availability</div>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* What We Offer Section */}
+      <section className="py-16 sm:py-20 border-b border-gray-100">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <div className="text-center mb-12">
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">What we offer</h2>
+            <p className="text-gray-500 max-w-xl mx-auto">
+              A complete suite of AI-powered tools for academic success
+            </p>
+          </div>
+          
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-md transition-shadow">
+              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
+                <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              </div>
+              <h3 className="font-semibold text-gray-900 mb-2">AI Essay Analyzer</h3>
+              <p className="text-gray-500 text-sm">Get detailed feedback on structure, argumentation, grammar, and style. Like having a professor review your work instantly.</p>
+            </div>
+            
+            <div className="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-md transition-shadow">
+              <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
+                <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                </svg>
+              </div>
+              <h3 className="font-semibold text-gray-900 mb-2">AI Humanizer</h3>
+              <p className="text-gray-500 text-sm">Transform AI-generated or stiff text into natural, human-sounding writing that maintains your voice and passes detection tools.</p>
+            </div>
+            
+            <div className="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-md transition-shadow">
+              <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mb-4">
+                <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16m-7 6h7" />
+                </svg>
+              </div>
+              <h3 className="font-semibold text-gray-900 mb-2">AI Summarizer</h3>
+              <p className="text-gray-500 text-sm">Condense lengthy articles, textbooks, or research papers into clear bullet points, paragraphs, or key takeaways.</p>
+            </div>
+            
+            <div className="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-md transition-shadow">
+              <div className="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center mb-4">
+                <svg className="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+              <h3 className="font-semibold text-gray-900 mb-2">Citation Finder</h3>
+              <p className="text-gray-500 text-sm">Find real, verifiable academic sources for any claim. Get properly formatted citations in APA, MLA, Chicago, and Harvard styles.</p>
+            </div>
+            
+            <div className="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-md transition-shadow">
+              <div className="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center mb-4">
+                <svg className="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                </svg>
+              </div>
+              <h3 className="font-semibold text-gray-900 mb-2">Quiz Generator</h3>
+              <p className="text-gray-500 text-sm">Turn any notes or text into interactive quizzes. Multiple choice, true/false, and fill-in-the-blank with adjustable difficulty.</p>
+            </div>
+            
+            <div className="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-md transition-shadow">
+              <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center mb-4">
+                <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                </svg>
+              </div>
+              <h3 className="font-semibold text-gray-900 mb-2">Flashcard Creator</h3>
+              <p className="text-gray-500 text-sm">Generate study flashcards from any content. Flip through them in-app or export to PDF for on-the-go studying.</p>
+            </div>
+            
+            <div className="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-md transition-shadow sm:col-span-2 lg:col-span-1">
+              <div className="w-10 h-10 bg-pink-100 rounded-lg flex items-center justify-center mb-4">
+                <svg className="w-5 h-5 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z" />
+                </svg>
+              </div>
+              <h3 className="font-semibold text-gray-900 mb-2">Crossword Builder</h3>
+              <p className="text-gray-500 text-sm">Create fun, interactive crossword puzzles from your study material. An engaging way to learn vocabulary and key concepts.</p>
             </div>
           </div>
         </div>
@@ -236,13 +320,16 @@ const AboutPage = ({ onNavigate, user, onLogout }: AboutPageProps) => {
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6">Our story</h2>
             <div className="text-gray-500 leading-relaxed space-y-4 text-left">
               <p>
-                WriteScholar was born from a simple observation: academic writing is one of the most challenging aspects of scholarly work, yet access to quality feedback is often limited by time, cost, and availability of expert reviewers.
+                WriteScholar started with a simple goal: give students access to the kind of feedback that used to require expensive tutors or professors with limited office hours. We saw how AI could bridge that gap.
               </p>
               <p>
-                Our team of researchers, educators, and AI specialists came together with a shared vision: to create a platform that could provide instant, comprehensive feedback on academic writing, helping students and researchers improve their work.
+                What began as an essay analyzer has grown into a complete academic toolkit. Our AI Humanizer helps you refine AI-assisted drafts into natural, authentic writing. The Summarizer condenses long readings into digestible points. Our Citation Finder locates real, verifiable sources for your claims.
               </p>
               <p>
-                Today, WriteScholar serves users worldwide, from undergraduate students working on their first research papers to PhD candidates and established researchers looking to refine their scholarly communication.
+                We didn't stop at writing. Studying effectively is just as important, so we built tools that turn any notes into interactive quizzes, flashcards, and crossword puzzles. Active recall beats passive reading every time.
+              </p>
+              <p>
+                Today, students around the world use WriteScholar to write better papers, study smarter, and save hours of work. We're just getting started.
               </p>
             </div>
           </div>
@@ -257,8 +344,8 @@ const AboutPage = ({ onNavigate, user, onLogout }: AboutPageProps) => {
           </h2>
           <p className="text-gray-400 mb-8 max-w-xl mx-auto">
             {user 
-              ? 'Head to your dashboard to analyze documents and find citations.'
-              : 'Join thousands of students and researchers who trust WriteScholar.'
+              ? 'Head to your dashboard to analyze essays, humanize text, find citations, or create study materials.'
+              : 'Join students worldwide who use WriteScholar to write better and study smarter.'
             }
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">

@@ -210,7 +210,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
     },
     {
       question: "What payment methods do you accept?",
-      answer: "We accept PayPal, Visa, and Mastercard payments processed securely through Stripe. All transactions are encrypted and secure."
+      answer: "We accept Visa and Mastercard payments processed securely through Stripe. All transactions are encrypted and secure."
     },
     {
       question: "Do you offer student discounts?",
