@@ -117,9 +117,9 @@ const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
     {
       id: 7,
       category: 'analysis',
-      question: 'What AI model does WriteScholar use?',
-      answer: 'WriteScholar uses OpenAI\'s advanced language models to provide intelligent analysis of your academic writing. The system is specifically trained to understand academic writing conventions and provide relevant, actionable feedback for improving your work.',
-      tags: ['ai', 'openai', 'model']
+      question: 'What AI technology does WriteScholar use?',
+      answer: 'WriteScholar uses advanced natural language processing algorithms to provide intelligent analysis of your academic writing. Our system is specifically designed to understand academic writing conventions and provide relevant, actionable feedback for improving your work.',
+      tags: ['ai', 'technology', 'model']
     },
     {
       id: 8,

@@ -88,6 +88,11 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
                   Free Paraphrasing Tips
                 </a>
               </li>
+              <li>
+                <a href="/tools/humanizer" onClick={(e) => { e.preventDefault(); onNavigate?.('humanizer'); }} className="text-violet-600 hover:text-violet-700 text-sm font-medium transition-colors">
+                  AI Humanizer ✨
+                </a>
+              </li>
             </ul>
           </div>
           

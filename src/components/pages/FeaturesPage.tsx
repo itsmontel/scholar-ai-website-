@@ -222,6 +222,16 @@ const FeaturesPage = ({ onNavigate, user, onLogout }: FeaturesPageProps) => {
               <h3 className="font-semibold text-gray-900 text-lg mb-2">Academic Vocabulary</h3>
               <p className="text-base text-gray-600 leading-relaxed">Enhance your writing with suggestions for more formal, academic-appropriate language and terminology.</p>
             </div>
+
+            {/* AI Humanizer - Premium */}
+            <button onClick={() => onNavigate('humanizer')} className="bg-gradient-to-br from-violet-50 to-purple-50 border-2 border-violet-200 rounded-2xl p-6 hover:shadow-xl hover:border-violet-400 transition-all text-left relative group">
+              <div className="absolute top-3 right-3 px-2 py-0.5 bg-violet-600 text-white text-[10px] font-bold rounded-full">PRO</div>
+              <div className="w-14 h-14 rounded-full bg-violet-100 flex items-center justify-center mb-4">
+                <span className="text-2xl">✨</span>
+              </div>
+              <h3 className="font-semibold text-gray-900 text-lg mb-2">AI Text Humanizer</h3>
+              <p className="text-base text-gray-600 leading-relaxed">Transform AI-generated text into natural, human-sounding writing with multiple modes and intensity levels.</p>
+            </button>
           </div>
         </div>
       </section>

@@ -2484,6 +2484,153 @@ IMPORTANT REQUIREMENTS:
       }
     ];
   }
+  async humanizeText(text, mode = 'standard', intensity = 'medium', userPlan = 'starter') {
+    if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY === 'your_openai_api_key_here') {
+      console.log('OpenAI API key not configured - returning original text');
+      return text;
+    }
+
+    // Always use gpt-4.1-mini for humanizer — best balance of quality and speed
+    const selectedModel = 'gpt-4.1-mini';
+    const maxTokens = 8000;
+
+    const intensityInstructions = {
+      light: `Make targeted but impactful changes:
+- Swap out the most glaring AI-specific phrases (see banned list) for simpler, direct alternatives
+- Add contractions in 40-60% of places where they'd naturally appear
+- Break up 2-3 of the longest sentences
+- Change 1-2 paragraph openers so they don't start with a transition word
+- Keep 80-85% of original wording intact`,
+
+      medium: `Rewrite with a human voice throughout:
+- Replace all banned AI vocabulary and sentence openers
+- Apply contractions consistently where they feel natural
+- Vary sentence lengths meaningfully: some under 10 words, some over 30
+- Rewrite 40-50% of sentence structures so they open differently
+- Add 2-3 natural imperfections: a hedging phrase, a slightly tangential observation, a question the writer poses to themselves
+- Let some transitions be abrupt or minimal rather than always perfectly smooth
+- Vary paragraph lengths: some 1-2 sentences, some 4-5
+- Preserve all facts, arguments, and meaning exactly`,
+
+      aggressive: `Fully reimagine in a human voice while keeping all facts and structure:
+- Rewrite virtually every sentence — new structure, new opening, same meaning
+- Mix sentence lengths dramatically: some fragments (1-5 words), some long and winding (35+ words)
+- Use contractions freely throughout
+- Add first-person observations or asides where they fit ("I'd argue...", "which, honestly, makes sense")
+- Let some paragraphs be a single sentence. Let others run long
+- Use simple connecting words ("also", "but", "so", "which means") instead of formal transitions
+- Add small rhetorical questions or self-corrections that feel spontaneous
+- Make at least 2 sentence openers start with "And" or "But"
+- The result should feel like a smart, engaged student wrote this on a deadline`
+    };
+
+    const modeInstructions = {
+      standard: `Aim for natural college-student writing: clear, competent, slightly informal. Not overly polished, not sloppy. The writer knows what they're saying and says it directly.`,
+      academic: `Sound like a real student in an academic discipline. Keep technical terms and citation-adjacent language where appropriate. Use first-person occasionally ("I argue", "this suggests to me"). Let the formality be genuine rather than performed — real academic writing has rhythm, conviction, and the occasional awkward sentence. It does not sound like a press release.`,
+      casual: `Write like a smart person explaining something to a friend. Contractions everywhere. Start sentences with "And", "But", "So", "Look". Use "a lot" instead of "numerous". Keep sentences punchy. The occasional fragment is fine. The tone is confident and direct.`,
+      creative: `Write with genuine voice and rhythm. Vary the tempo: short bursts followed by longer, more flowing sentences. Use unexpected word choices. Let the writing have a point of view. Think personal essay, not report.`
+    };
+
+    const systemPrompt = `You are a professional ghostwriter who specialises in making AI-generated text completely undetectable. Your rewrites pass GPTZero, Turnitin AI Detection, ZeroGPT, Originality.ai, and Copyleaks at the highest settings. You have studied how AI detectors work and you know exactly what patterns they flag.
+
+════════════════════════════════════════
+ABSOLUTE BANS — NEVER USE THESE
+════════════════════════════════════════
+
+BANNED PUNCTUATION / STRUCTURAL PATTERNS:
+- Em dashes (— or –) used as mid-sentence asides. This is the single biggest AI tell. Professors and detectors both flag it. Do not use them AT ALL. If you need a pause or aside, use commas, parentheses, or restructure the sentence.
+- Bulleted or numbered lists inside prose paragraphs (unless the original had them)
+- Three-part parallel structures that are too neat (e.g. "X, Y, and Z" repeated as a structural pattern)
+- Every paragraph starting with a transition word
+
+BANNED VOCABULARY (never use these words or phrases):
+delve, delves, delving | tapestry | nuanced, nuance | multifaceted | leverage (as a verb) | utilize, utilization | facilitate | paramount | groundbreaking | game-changer | cutting-edge | it is worth noting | it is important to note | it is worth mentioning | needless to say | in today's world / society / landscape | in the realm of | as we navigate | the ever-evolving | plays a crucial role | plays a vital role | is a testament to | serves as a testament | at its core | in conclusion | to summarize | to sum up | in summary | furthermore (as a sentence opener) | moreover (as a sentence opener) | additionally (as a sentence opener) | this highlights | this underscores | this demonstrates | this showcases | this essay will | this paper will | this report will | one must | one should | one can | individuals (meaning "people") | plethora | myriad (as a standalone adjective: "a myriad of") | robust (meaning thorough/strong in a vague sense) | seamlessly | holistic | impactful (as a vague filler adjective) | transformative | synergy | aforementioned | heretofore | thus (at sentence start unless truly necessary) | hence (at sentence start) | whilst (unless writing in British English) | commence | endeavour | ascertain | procurement
+
+BANNED SENTENCE OPENERS (never start a sentence with):
+"It is important to...", "It should be noted that...", "It is worth...", "There are many...", "There are several...", "In today's...", "In recent years...", "Over the course of...", "Throughout history...", "As a result of this...", "This is because..."
+
+BANNED STRUCTURAL PATTERNS:
+- Intro paragraph that announces what the essay will do ("This essay will explore...")
+- Conclusion paragraph that restates every single point made
+- Every paragraph following exactly the same length
+- Perfect topic-sentence-then-evidence structure in every single paragraph (vary it)
+
+════════════════════════════════════════
+REQUIRED HUMAN PATTERNS
+════════════════════════════════════════
+
+SENTENCE VARIETY (mandatory):
+- Include at least 2 sentences under 10 words
+- Include at least 1 sentence over 30 words that winds naturally
+- No more than 3 consecutive sentences of similar length
+- Vary sentence openers: some start with the subject, some with a dependent clause, some with a short adverb, some with "And" or "But"
+
+VOCABULARY:
+- Use contractions wherever natural (don't, can't, it's, they've, we're, wouldn't)
+- Replace formal Latinate words with shorter Anglo-Saxon alternatives where meaning is preserved (e.g. "use" not "utilise", "start" not "commence", "find out" not "ascertain")
+- Use hedging language that sounds genuine: "probably", "seems like", "from what I can tell", "in most cases", "generally speaking", "which is fair to say"
+- Occasionally use a slightly informal word in an otherwise formal sentence — real writers do this
+
+TRANSITIONS:
+- Use simple connectors: "but", "so", "which means", "because of this", "and yet", "still", "even so"
+- Some paragraphs can start directly with a claim, no transition at all
+- Avoid starting more than 2 paragraphs with any transition word
+
+PUNCTUATION:
+- Use commas for pauses (not em dashes)
+- Use parentheses sparingly for genuine asides (not as a substitute for em dashes)
+- Occasional short sentences followed by longer ones create natural rhythm
+- Do not use semicolons excessively — use a period and start a new sentence
+
+════════════════════════════════════════
+FIXED RULES
+════════════════════════════════════════
+- Preserve ALL factual claims, data, arguments, and evidence exactly
+- Preserve the overall structure (introduction, body, conclusion) and paragraph order
+- Keep technical and discipline-specific terminology — do not simplify specialist language
+- Stay within 5% of the original word count
+- Return ONLY the rewritten text. No preamble, no explanation, no "Here is the rewritten version:" label.
+
+════════════════════════════════════════
+WRITING MODE: ${modeInstructions[mode] || modeInstructions.standard}
+
+INTENSITY LEVEL: ${intensityInstructions[intensity] || intensityInstructions.medium}
+════════════════════════════════════════`;
+
+    try {
+      const completion = await this.openai.chat.completions.create({
+        model: selectedModel,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: `Rewrite the following text according to all instructions above:\n\n${text}` }
+        ],
+        max_tokens: maxTokens,
+        temperature: 0.82,
+        top_p: 0.92,
+        frequency_penalty: 0.45,
+        presence_penalty: 0.15,
+      });
+
+      let result = completion.choices[0]?.message?.content;
+      if (!result) {
+        throw new Error('No response from OpenAI');
+      }
+      
+      // Post-process: Remove any em dashes that slipped through (replace with commas or restructure)
+      // Em dash (—) and en dash (–) are major AI tells
+      result = result
+        .replace(/\s*—\s*/g, ', ')  // Em dash to comma
+        .replace(/\s*–\s*/g, ', ')  // En dash to comma
+        .replace(/,\s*,/g, ',')     // Clean up double commas
+        .replace(/,\s*\./g, '.')    // Clean up comma before period
+        .trim();
+      
+      return result;
+    } catch (error) {
+      console.error('OpenAI humanize error:', error);
+      throw new Error('Failed to humanize text: ' + error.message);
+    }
+  }
 }
 
 module.exports = new AIAnalysisService();

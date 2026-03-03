@@ -12,12 +12,15 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
   const [isFocused, setIsFocused] = useState(false);
   const [openFAQ, setOpenFAQ] = useState<number | null>(null);
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('monthly');
-  const [mode, setMode] = useState<'analyze' | 'citations'>('analyze');
+  const [mode, setMode] = useState<'analyze' | 'citations' | 'humanize'>('analyze');
   const [citationStyle, setCitationStyle] = useState('APA');
   const [citationYearRange, setCitationYearRange] = useState('all');
   const [showFakeAnimation, setShowFakeAnimation] = useState(false);
   const [showFakeResults, setShowFakeResults] = useState(false);
   const [showFakeCitationResults, setShowFakeCitationResults] = useState(false);
+  const [showFakeHumanizeResults, setShowFakeHumanizeResults] = useState(false);
+  const [humanizeMode, setHumanizeMode] = useState<'standard' | 'academic' | 'casual' | 'creative'>('standard');
+  const [humanizeIntensity, setHumanizeIntensity] = useState<'light' | 'medium' | 'aggressive'>('medium');
   const [activeToolHover, setActiveToolHover] = useState<string | null>(null);
   const [activeHelpCategory, setActiveHelpCategory] = useState('essays');
 
@@ -66,9 +69,15 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
     "Type your essay question and discover literature..."
   ];
 
-  const placeholders = mode === 'analyze' ? analyzePlaceholders : citationPlaceholders;
+  const humanizePlaceholders = [
+    "Paste your AI-generated text here to humanize it...",
+    "Transform your text into natural human writing...",
+    "Make AI text undetectable — paste it here..."
+  ];
 
-  const suggestedTopics = mode === 'analyze' ? [
+  const placeholders = mode === 'humanize' ? humanizePlaceholders : mode === 'analyze' ? analyzePlaceholders : citationPlaceholders;
+
+  const suggestedTopics = mode === 'humanize' ? [] : mode === 'analyze' ? [
     "The impact of social media on student mental health",
     "Climate change effects on global agriculture",
     "Artificial intelligence in healthcare",
@@ -138,7 +147,17 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
   const handleSubmit = () => {
     if (!inputText.trim()) return;
     setShowFakeAnimation(true);
-    if (mode === 'citations') {
+    if (mode === 'humanize') {
+      localStorage.setItem('pendingHumanize', JSON.stringify({
+        text: inputText,
+        mode: humanizeMode,
+        intensity: humanizeIntensity
+      }));
+      setTimeout(() => {
+        setShowFakeAnimation(false);
+        setShowFakeHumanizeResults(true);
+      }, 8000);
+    } else if (mode === 'citations') {
       localStorage.setItem('pendingCitationSearch', JSON.stringify({
         topic: inputText,
         style: citationStyle,
@@ -159,6 +178,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
 
   const handleContinueToSignup = () => {
     setShowFakeResults(false);
+    setShowFakeHumanizeResults(false);
       onNavigate('signup');
   };
 
@@ -336,7 +356,9 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
             <div className="flex-1 text-center max-w-4xl mx-auto">
               {/* H1 - bigger */}
               <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-900 tracking-tight leading-tight mb-5 sm:mb-7" style={{ letterSpacing: '-0.02em' }}>
-            {mode === 'analyze' ? (
+            {mode === 'humanize' ? (
+                  <>Make AI text <span className="text-violet-600">undetectable</span></>
+            ) : mode === 'analyze' ? (
                   <>Your essay — improved with <span className="text-blue-600">AI assistance</span></>
             ) : (
                   <>Find <span className="text-blue-600">academic citations</span> instantly</>
@@ -345,7 +367,13 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
               
               {/* Feature badges - bigger */}
               <div className="flex flex-wrap justify-center gap-x-5 gap-y-2 mb-7 sm:mb-9 text-base text-gray-600">
-              {mode === 'analyze' ? (
+              {mode === 'humanize' ? (
+                <>
+                    <span className="flex items-center"><svg className="w-5 h-5 text-violet-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Bypass AI detectors</span>
+                    <span className="flex items-center"><svg className="w-5 h-5 text-violet-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Natural human tone</span>
+                    <span className="flex items-center"><svg className="w-5 h-5 text-violet-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Advanced AI</span>
+                </>
+              ) : mode === 'analyze' ? (
                 <>
                     <span className="flex items-center"><svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Structure analysis</span>
                     <span className="flex items-center"><svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Grammar &amp; clarity</span>
@@ -379,13 +407,22 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                   >
                     Find Citations
               </button>
+              <button
+                    onClick={() => { setMode('humanize'); setInputText(''); }}
+                    className={`px-5 sm:px-6 py-2.5 rounded-full text-base font-medium transition-all relative ${
+                      mode === 'humanize' ? 'bg-white text-violet-700 shadow-sm' : 'text-violet-600 hover:text-violet-700'
+                    }`}
+                  >
+                    Humanize
+                    <span className="absolute -top-2 -right-1 px-1.5 py-0.5 bg-violet-600 text-white text-[10px] font-bold rounded-full leading-none">PRO</span>
+              </button>
             </div>
           </div>
           
               {/* Helper text - left on mobile to avoid crowding character, center on larger screens */}
-              <p className="text-sm text-amber-600 mb-4 flex items-center justify-start md:justify-center">
-                <span className="mr-1.5">💡</span>
-                {mode === 'analyze' ? 'AI analyzes, you refine for submission' : 'Find sources, format citations automatically'}
+              <p className={`text-sm mb-4 flex items-center justify-start md:justify-center ${mode === 'humanize' ? 'text-violet-600' : 'text-amber-600'}`}>
+                <span className="mr-1.5">{mode === 'humanize' ? '✨' : '💡'}</span>
+                {mode === 'humanize' ? 'Humanize ChatGPT, Gemini, Claude text — 1,000 free words/month' : mode === 'analyze' ? 'AI analyzes, you refine for submission' : 'Find sources, format citations automatically'}
               </p>
 
               {/* Citation Options (citations mode only) */}
@@ -429,6 +466,39 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
               </div>
             )}
 
+              {/* Humanize Options (humanize mode only) */}
+            {mode === 'humanize' && (
+              <div className="flex justify-center mb-4">
+                  <div className="inline-flex items-center gap-3 flex-wrap justify-center">
+                    <div className="inline-flex items-center bg-violet-50 rounded-xl px-4 py-2.5 border border-violet-200">
+                      <span className="text-violet-600 mr-2 text-sm">Mode:</span>
+                      <select
+                        value={humanizeMode}
+                        onChange={(e) => setHumanizeMode(e.target.value as any)}
+                        className="bg-transparent font-medium text-gray-900 outline-none cursor-pointer text-sm"
+                      >
+                        <option value="standard">Standard</option>
+                        <option value="academic">Academic</option>
+                        <option value="casual">Casual</option>
+                        <option value="creative">Creative</option>
+                      </select>
+                    </div>
+                    <div className="inline-flex items-center bg-violet-50 rounded-xl px-4 py-2.5 border border-violet-200">
+                      <span className="text-violet-600 mr-2 text-sm">Intensity:</span>
+                      <select
+                        value={humanizeIntensity}
+                        onChange={(e) => setHumanizeIntensity(e.target.value as any)}
+                        className="bg-transparent font-medium text-gray-900 outline-none cursor-pointer text-sm"
+                      >
+                        <option value="light">Light</option>
+                        <option value="medium">Medium</option>
+                        <option value="aggressive">Heavy</option>
+                      </select>
+                    </div>
+                </div>
+              </div>
+            )}
+
               {/* Input Area with Character outside */}
               <div className="relative mb-5">
                 {/* Character illustration - positioned outside to the right */}
@@ -436,8 +506,8 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                 
                 <div className={`relative bg-white rounded-2xl border-2 shadow-sm transition-all duration-200 ${
                   isFocused
-                    ? 'border-blue-500 shadow-lg ring-4 ring-blue-100'
-                    : 'border-blue-100 hover:border-blue-200'
+                    ? (mode === 'humanize' ? 'border-violet-500 shadow-lg ring-4 ring-violet-100' : 'border-blue-500 shadow-lg ring-4 ring-blue-100')
+                    : (mode === 'humanize' ? 'border-violet-100 hover:border-violet-200' : 'border-blue-100 hover:border-blue-200')
                 }`}>
                   <textarea
                     value={inputText}
@@ -467,7 +537,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                     }`}
                   >
                     <span className="mr-2">✨</span>
-                    {mode === 'analyze' ? 'Get Feedback' : 'Find Sources'}
+                    {mode === 'humanize' ? 'Humanize Text' : mode === 'analyze' ? 'Get Feedback' : 'Find Sources'}
                   </button>
                   
                   {/* Upload file option - only for analyze mode */}
@@ -1362,6 +1432,28 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
               <p className="text-sm text-gray-500">Improve vocabulary & style</p>
             </button>
           </div>
+
+          {/* Premium Humanizer Card */}
+          <div className="mt-6">
+            <button
+              onClick={() => onNavigate('humanizer')}
+              className="group w-full bg-gradient-to-r from-violet-50 to-purple-50 border-2 border-violet-200 rounded-2xl p-6 sm:p-8 hover:shadow-xl hover:border-violet-400 hover:-translate-y-1 transition-all duration-200 text-left relative overflow-hidden"
+            >
+              <div className="absolute top-3 right-3 px-3 py-1 bg-violet-600 text-white text-xs font-bold rounded-full">PREMIUM</div>
+              <div className="flex items-center gap-6">
+                <div className="w-14 h-14 bg-violet-100 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                  <span className="text-2xl">✨</span>
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg font-bold text-gray-900 mb-1">AI Text Humanizer</h3>
+                  <p className="text-sm text-gray-600">Humanize ChatGPT, GPT-4, Gemini, Claude &amp; LLaMA text. Bypass AI detectors with natural, human-sounding writing.</p>
+                </div>
+                <svg className="w-6 h-6 text-violet-500 flex-shrink-0 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
+            </button>
+          </div>
         </div>
       </section>
 
@@ -1540,6 +1632,28 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                 <div className="p-4 sm:p-6 text-center">
                   <span className="inline-flex items-center justify-center w-8 h-8 bg-green-100 rounded-full">
                     <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>
+                  </span>
+                </div>
+                <div className="p-4 sm:p-6 text-center">
+                  <span className="inline-flex items-center justify-center w-8 h-8 bg-gray-100 rounded-full">
+                    <svg className="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd"/></svg>
+                  </span>
+                </div>
+              </div>
+
+              {/* AI Humanizer */}
+              <div className="grid grid-cols-4 items-center">
+                <div className="p-4 sm:p-6">
+                  <span className="font-medium text-gray-900 text-sm sm:text-base">AI Text Humanizer</span>
+                </div>
+                <div className="p-4 sm:p-6 text-center">
+                  <span className="inline-flex items-center justify-center w-8 h-8 bg-green-100 rounded-full">
+                    <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>
+                  </span>
+                </div>
+                <div className="p-4 sm:p-6 text-center">
+                  <span className="inline-flex items-center justify-center w-8 h-8 bg-gray-100 rounded-full">
+                    <svg className="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd"/></svg>
                   </span>
                 </div>
                 <div className="p-4 sm:p-6 text-center">
@@ -2022,6 +2136,10 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
         <AnalysisAnimation isPopup={true} text="Analyzing your writing" isComplete={false} />
       )}
 
+      {showFakeAnimation && mode === 'humanize' && (
+        <AnalysisAnimation isPopup={true} text="Humanizing your text" isComplete={false} />
+      )}
+
       {/* Fake Results Modal */}
       {showFakeResults && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 backdrop-blur-sm p-4">
@@ -2141,6 +2259,64 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
               className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all duration-200 hover:shadow-lg flex items-center justify-center"
             >
               See my citations — it's free
+              <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Fake Humanize Results Modal */}
+      {showFakeHumanizeResults && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl p-6 sm:p-8 max-w-md w-full mx-4 shadow-2xl animate-fade-in">
+            <div className="flex justify-center mb-4">
+              <div className="w-16 h-16 bg-violet-100 rounded-full flex items-center justify-center">
+                <span className="text-3xl">✨</span>
+              </div>
+          </div>
+
+            <h3 className="text-xl font-bold text-gray-900 text-center mb-2">Text Humanized</h3>
+            <p className="text-gray-500 text-center text-sm mb-5">Your text has been transformed into natural human writing</p>
+            
+            <div className="space-y-3 mb-5">
+              <div className="flex items-start p-3.5 bg-green-50 rounded-xl border border-green-100">
+                <span className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center mr-3 flex-shrink-0 mt-0.5">
+                  <svg className="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                </span>
+                <div>
+                  <p className="text-green-800 font-semibold text-sm">AI detection bypassed</p>
+                  <p className="text-green-600 text-xs mt-0.5">Text rewritten to pass GPTZero, Turnitin AI, and other detectors</p>
+                </div>
+              </div>
+
+              <div className="flex items-start p-3.5 bg-violet-50 rounded-xl border border-violet-100">
+                <span className="w-8 h-8 bg-violet-100 rounded-lg flex items-center justify-center mr-3 flex-shrink-0 mt-0.5">
+                  <svg className="w-4 h-4 text-violet-600" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                </span>
+                <div>
+                  <p className="text-violet-800 font-semibold text-sm">Meaning preserved</p>
+                  <p className="text-violet-600 text-xs mt-0.5">All arguments and facts intact — just sounds naturally human</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-gray-50 rounded-xl p-3.5 mb-6">
+              <p className="text-gray-600 text-sm text-center leading-relaxed">
+                <span className="font-semibold text-gray-800">Sign up to access the full humanizer.</span> Get your rewritten text and use it with all modes and intensity levels.
+              </p>
+            </div>
+
+            <button 
+              onClick={handleContinueToSignup}
+              className="w-full py-3.5 bg-violet-600 hover:bg-violet-700 text-white font-semibold rounded-xl transition-all duration-200 hover:shadow-lg flex items-center justify-center"
+            >
+              Get my humanized text — sign up
               <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>

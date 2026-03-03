@@ -38,6 +38,7 @@ import EssayOutlineGeneratorPage from './pages/tools/EssayOutlineGeneratorPage';
 import TextCaseConverterPage from './pages/tools/TextCaseConverterPage';
 import ThesisGeneratorPage from './pages/tools/ThesisGeneratorPage';
 import GrammarCheckerPage from './pages/tools/GrammarCheckerPage';
+import HumanizerPage from './pages/tools/HumanizerPage';
 
 // Import common components
 import ErrorBoundary from './common/ErrorBoundary';
@@ -289,6 +290,7 @@ const AcademicAIApp = () => {
       if (pathname === '/tools/text-case-converter' || pathname === '/text-case-converter') return 'text-case-converter';
       if (pathname === '/tools/thesis-generator' || pathname === '/thesis-generator') return 'thesis-generator';
       if (pathname === '/tools/grammar-checker' || pathname === '/grammar-checker') return 'grammar-checker';
+      if (pathname === '/tools/humanizer' || pathname === '/humanizer') return 'humanizer';
       return 'landing';
     };
     
@@ -579,6 +581,8 @@ const AcademicAIApp = () => {
         return <ThesisGeneratorPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'grammar-checker':
         return <GrammarCheckerPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
+      case 'humanizer':
+        return <HumanizerPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'admin':
         return <AdminDashboard onNavigate={navigateTo} user={user} />;
       case 'collaboration':

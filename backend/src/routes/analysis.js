@@ -12,6 +12,142 @@ const aiAnalysisService = require('../services/aiAnalysisService');
 const documentService = require('../services/documentService');
 const subscriptionService = require('../services/subscriptionService');
 
+// @route   GET /api/analysis/humanize-usage
+// @desc    Get user's humanize word usage this month
+// @access  Private
+router.get('/humanize-usage', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const userPlan = req.user.subscription_plan || 'free';
+    const planLimits = subscriptionService.PLAN_LIMITS[userPlan] || subscriptionService.PLAN_LIMITS.free;
+
+    const { createClient } = require('@supabase/supabase-js');
+    const supabase = createClient(
+      process.env.SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
+    );
+
+    const startOfMonth = new Date();
+    startOfMonth.setDate(1);
+    startOfMonth.setHours(0, 0, 0, 0);
+
+    const { data, error } = await supabase
+      .from('humanize_usage')
+      .select('words_count')
+      .eq('user_id', userId)
+      .gte('created_at', startOfMonth.toISOString());
+
+    const wordsUsed = (error || !data) ? 0 : (data || []).reduce((sum, row) => sum + (row.words_count || 0), 0);
+    const wordLimit = planLimits.humanizeWordsPerMonth;
+
+    res.json({
+      success: true,
+      data: {
+        wordsUsed,
+        wordLimit,
+        wordsRemaining: Math.max(0, wordLimit - wordsUsed),
+        plan: userPlan
+      }
+    });
+  } catch (error) {
+    console.error('Humanize usage error:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch usage' });
+  }
+});
+
+// @route   POST /api/analysis/humanize
+// @desc    Humanize AI-generated text using OpenAI
+// @access  Private (all users, word-limited)
+router.post('/humanize', authenticateToken, async (req, res) => {
+  try {
+    const { text, mode, intensity } = req.body;
+    const userId = req.user.id;
+    const userPlan = req.user.subscription_plan || 'free';
+    const planLimits = subscriptionService.PLAN_LIMITS[userPlan] || subscriptionService.PLAN_LIMITS.free;
+
+    if (!text || text.trim().length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Text is required'
+      });
+    }
+
+    const wordCount = text.trim().split(/\s+/).length;
+
+    if (wordCount > 5000) {
+      return res.status(400).json({
+        success: false,
+        message: 'Text exceeds maximum of 5,000 words per request'
+      });
+    }
+
+    const { createClient } = require('@supabase/supabase-js');
+    const supabase = createClient(
+      process.env.SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
+    );
+
+    const startOfMonth = new Date();
+    startOfMonth.setDate(1);
+    startOfMonth.setHours(0, 0, 0, 0);
+
+    const { data: usageData, error: usageError } = await supabase
+      .from('humanize_usage')
+      .select('words_count')
+      .eq('user_id', userId)
+      .gte('created_at', startOfMonth.toISOString());
+
+    const wordsUsedThisMonth = usageError ? 0 : (usageData || []).reduce((sum, row) => sum + (row.words_count || 0), 0);
+    const wordLimit = planLimits.humanizeWordsPerMonth;
+
+    if (wordsUsedThisMonth + wordCount > wordLimit) {
+      const remaining = Math.max(0, wordLimit - wordsUsedThisMonth);
+      return res.status(429).json({
+        success: false,
+        message: remaining === 0
+          ? `You've used all ${wordLimit.toLocaleString()} words this month. ${userPlan === 'free' ? 'Upgrade for 999,999 words/month.' : 'Limit resets next month.'}`
+          : `This text is ${wordCount} words but you only have ${remaining} words remaining this month.${userPlan === 'free' ? ' Upgrade for 999,999 words/month.' : ''}`,
+        wordsUsed: wordsUsedThisMonth,
+        wordLimit,
+        wordsRemaining: remaining,
+        upgrade: userPlan === 'free'
+      });
+    }
+
+    const humanizedText = await aiAnalysisService.humanizeText(text, mode || 'standard', intensity || 'medium', userPlan);
+
+    // Record usage (don't block response if this fails)
+    supabase.from('humanize_usage').insert({
+      user_id: userId,
+      words_count: wordCount,
+      mode: mode || 'standard',
+      intensity: intensity || 'medium'
+    }).then(() => {}).catch(err => console.error('Failed to record humanize usage:', err));
+
+    res.json({
+      success: true,
+      message: 'Text humanized successfully',
+      data: {
+        originalText: text,
+        humanizedText: humanizedText,
+        mode: mode || 'standard',
+        intensity: intensity || 'medium',
+        wordsUsed: wordsUsedThisMonth + wordCount,
+        wordLimit,
+        wordsRemaining: Math.max(0, wordLimit - wordsUsedThisMonth - wordCount)
+      }
+    });
+
+  } catch (error) {
+    console.error('Humanize error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Humanization failed. Please try again.',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
 // @route   POST /api/analysis/citation-search
 // @desc    Search for relevant citations based on research topic
 // @access  Private

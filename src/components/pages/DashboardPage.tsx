@@ -18,11 +18,18 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [showAnalysisPopup, setShowAnalysisPopup] = useState(false);
   const [analysisComplete, setAnalysisComplete] = useState(false);
-  const [mode, setMode] = useState<'analyze' | 'citations'>('analyze');
+  const [mode, setMode] = useState<'analyze' | 'citations' | 'humanize'>('analyze');
   const [citationStyle, setCitationStyle] = useState('APA');
   const [citationYearRange, setCitationYearRange] = useState('all');
   const [isSearchingCitations, setIsSearchingCitations] = useState(false);
   const [showSearchAnimation, setShowSearchAnimation] = useState(false);
+  const [humanizeMode, setHumanizeMode] = useState<'standard' | 'academic' | 'casual' | 'creative'>('standard');
+  const [humanizeIntensity, setHumanizeIntensity] = useState<'light' | 'medium' | 'aggressive'>('medium');
+  const [isHumanizing, setIsHumanizing] = useState(false);
+  const [humanizedResult, setHumanizedResult] = useState('');
+  const [showHumanizeResult, setShowHumanizeResult] = useState(false);
+  const [humanizeCopied, setHumanizeCopied] = useState(false);
+  const [showHighlights, setShowHighlights] = useState(false);
   const [usageStats, setUsageStats] = useState({
     documentsUploaded: 0,
     documentsAnalyzed: 0,
@@ -52,7 +59,13 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
     "Type your essay question and discover literature..."
   ];
 
-  const placeholders = mode === 'analyze' ? analyzePlaceholders : citationPlaceholders;
+  const humanizePlaceholders = [
+    "Paste your AI-generated text here to humanize it...",
+    "Transform AI text into natural human writing...",
+    "Make your text undetectable by AI checkers..."
+  ];
+
+  const placeholders = mode === 'humanize' ? humanizePlaceholders : mode === 'analyze' ? analyzePlaceholders : citationPlaceholders;
 
   const suggestedTopics = mode === 'analyze' ? [
     "Analyze my essay structure",
@@ -66,61 +79,69 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
     "Remote work productivity research"
   ];
 
-  // Character illustration component - positioned outside the text area
-  // Mobile: head only, top-right corner | Desktop: full body with pointing arm
+  // Character illustration component - same as landing page (man with hands gripping the box)
   const CharacterIllustration = () => (
     <>
-      {/* Mobile version - head only, positioned top-right */}
-      <div className="absolute -right-2 -top-10 w-14 h-14 sm:hidden pointer-events-none z-10">
+      {/* Mobile version - small head peeking over top-right corner */}
+      <div className="absolute -right-2 -top-9 w-14 h-14 sm:hidden pointer-events-none z-20">
         <svg viewBox="0 0 70 70" fill="none" xmlns="http://www.w3.org/2000/svg">
-          {/* Head */}
-          <circle cx="35" cy="38" r="22" fill="#FCD9B6" />
-          {/* Hair */}
-          <path d="M13 32 Q15 12 35 16 Q55 12 57 32 Q61 22 49 18 Q35 8 21 18 Q9 22 13 32" fill="#4B5563" />
-          {/* Eyes */}
-          <circle cx="27" cy="36" r="3.5" fill="#1F2937" />
-          <circle cx="43" cy="36" r="3.5" fill="#1F2937" />
-          <circle cx="28" cy="34.5" r="1.2" fill="white" />
-          <circle cx="44" cy="34.5" r="1.2" fill="white" />
-          {/* Eyebrows */}
-          <path d="M22 28 Q27 25 32 28" stroke="#4B5563" strokeWidth="1.5" fill="none" strokeLinecap="round" />
-          <path d="M38 28 Q43 25 48 28" stroke="#4B5563" strokeWidth="1.5" fill="none" strokeLinecap="round" />
-          {/* Smile */}
-          <path d="M27 48 Q35 55 43 48" stroke="#1F2937" strokeWidth="2" fill="none" strokeLinecap="round" />
-          {/* Cheeks (blush) */}
-          <circle cx="20" cy="44" r="3" fill="#FECACA" opacity="0.5" />
-          <circle cx="50" cy="44" r="3" fill="#FECACA" opacity="0.5" />
+          <circle cx="35" cy="28" r="20" fill="#E8B796" />
+          <path d="M15 24 Q14 8 28 4 Q35 1 42 4 Q56 8 55 24 Q52 16 42 12 Q35 8 28 12 Q18 16 15 24" fill="#4A3728" />
+          <path d="M15 24 Q10 30 15 36" fill="#4A3728" />
+          <path d="M55 24 Q60 30 55 36" fill="#4A3728" />
+          <ellipse cx="28" cy="28" rx="3" ry="3.5" fill="#1F2937" />
+          <ellipse cx="42" cy="28" rx="3" ry="3.5" fill="#1F2937" />
+          <circle cx="29" cy="26.5" r="1.2" fill="white" />
+          <circle cx="43" cy="26.5" r="1.2" fill="white" />
+          <path d="M28 40 Q35 46 42 40" stroke="#1F2937" strokeWidth="2" fill="none" strokeLinecap="round" />
+          <circle cx="20" cy="34" r="3" fill="#FECACA" opacity="0.5" />
+          <circle cx="50" cy="34" r="3" fill="#FECACA" opacity="0.5" />
+          <ellipse cx="26" cy="55" rx="6" ry="5" fill="#E8B796" />
+          <ellipse cx="44" cy="55" rx="6" ry="5" fill="#E8B796" />
         </svg>
       </div>
-      
-      {/* Tablet/Desktop version - full body with arm */}
-      <div className="absolute hidden sm:block sm:right-4 sm:top-0 sm:w-24 sm:h-32 xl:-right-28 xl:w-24 xl:h-32 pointer-events-none z-10">
-        <svg viewBox="0 0 100 130" fill="none" xmlns="http://www.w3.org/2000/svg">
-          {/* Body */}
-          <ellipse cx="50" cy="115" rx="18" ry="8" fill="#E0E7FF" />
-          <path d="M36 65 Q36 100 50 108 Q64 100 64 65" fill="#6366F1" />
+
+      {/* Desktop - man peeking from behind right edge, hands gripping the top */}
+      <div className="absolute hidden sm:block -right-8 xl:-right-16 pointer-events-none z-20" style={{ top: '-110px', width: '120px', height: '160px' }}>
+        <svg viewBox="0 0 120 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+          {/* Body - light blue shirt, cut off at bottom (behind the box) */}
+          <path d="M35 105 Q35 130 60 138 Q85 130 85 105" fill="#60A5FA" />
+          <path d="M48 101 L60 112 L72 101" stroke="#3B82F6" strokeWidth="2" fill="none" />
+          {/* Neck */}
+          <rect x="52" y="88" width="16" height="18" rx="2" fill="#E8B796" />
           {/* Head */}
-          <circle cx="50" cy="38" r="22" fill="#FCD9B6" />
-          {/* Hair */}
-          <path d="M28 32 Q30 12 50 16 Q70 12 72 32 Q76 22 64 18 Q50 8 36 18 Q24 22 28 32" fill="#4B5563" />
-          {/* Eyes */}
-          <circle cx="42" cy="36" r="3.5" fill="#1F2937" />
-          <circle cx="58" cy="36" r="3.5" fill="#1F2937" />
-          <circle cx="43" cy="34.5" r="1.2" fill="white" />
-          <circle cx="59" cy="34.5" r="1.2" fill="white" />
-          {/* Eyebrows */}
-          <path d="M37 28 Q42 25 47 28" stroke="#4B5563" strokeWidth="1.5" fill="none" strokeLinecap="round" />
-          <path d="M53 28 Q58 25 63 28" stroke="#4B5563" strokeWidth="1.5" fill="none" strokeLinecap="round" />
-          {/* Smile */}
-          <path d="M42 48 Q50 55 58 48" stroke="#1F2937" strokeWidth="2" fill="none" strokeLinecap="round" />
-          {/* Arm pointing left toward input */}
-          <path d="M36 75 Q15 82 5 95" stroke="#FCD9B6" strokeWidth="8" fill="none" strokeLinecap="round" />
-          <circle cx="3" cy="98" r="5" fill="#FCD9B6" />
-          {/* Shirt collar */}
-          <path d="M42 62 L50 68 L58 62" stroke="white" strokeWidth="2" fill="none" />
-          {/* Cheeks (blush) */}
-          <circle cx="35" cy="44" r="3" fill="#FECACA" opacity="0.5" />
-          <circle cx="65" cy="44" r="3" fill="#FECACA" opacity="0.5" />
+          <ellipse cx="60" cy="52" rx="30" ry="34" fill="#E8B796" />
+          {/* Hair - short neat brown male hair */}
+          <path d="M30 44 Q28 18 44 10 Q60 2 76 10 Q92 18 90 44 Q88 30 76 22 Q60 12 44 22 Q32 30 30 44" fill="#4A3728" />
+          <path d="M30 44 Q24 52 30 62" fill="#4A3728" />
+          <path d="M90 44 Q96 52 90 62" fill="#4A3728" />
+          {/* Eyes - looking left toward the text box */}
+          <ellipse cx="48" cy="50" rx="4.5" ry="5.5" fill="#1F2937" />
+          <ellipse cx="72" cy="50" rx="4.5" ry="5.5" fill="#1F2937" />
+          <circle cx="46" cy="48" r="2" fill="white" />
+          <circle cx="70" cy="48" r="2" fill="white" />
+          {/* Eyebrows - friendly */}
+          <path d="M38 38 Q48 33 58 38" stroke="#4A3728" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+          <path d="M62 38 Q72 33 82 38" stroke="#4A3728" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+          {/* Warm smile */}
+          <path d="M47 70 Q60 82 73 70" stroke="#1F2937" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+          {/* Cheeks */}
+          <ellipse cx="34" cy="62" rx="5" ry="3.5" fill="#FECACA" opacity="0.5" />
+          <ellipse cx="86" cy="62" rx="5" ry="3.5" fill="#FECACA" opacity="0.5" />
+          {/* Left arm reaching down to grip the edge of the box */}
+          <path d="M34 110 Q18 125 12 145" stroke="#E8B796" strokeWidth="11" fill="none" strokeLinecap="round" />
+          {/* Left hand - fingers curled over edge */}
+          <ellipse cx="10" cy="148" rx="8" ry="6" fill="#E8B796" />
+          <path d="M4 144 Q3 148 5 152" stroke="#D4A574" strokeWidth="1.2" fill="none" />
+          <path d="M9 143 Q8 148 10 153" stroke="#D4A574" strokeWidth="1.2" fill="none" />
+          <path d="M14 144 Q13 148 15 152" stroke="#D4A574" strokeWidth="1.2" fill="none" />
+          {/* Right arm reaching down */}
+          <path d="M86 110 Q100 125 106 145" stroke="#E8B796" strokeWidth="11" fill="none" strokeLinecap="round" />
+          {/* Right hand */}
+          <ellipse cx="108" cy="148" rx="8" ry="6" fill="#E8B796" />
+          <path d="M102 144 Q101 148 103 152" stroke="#D4A574" strokeWidth="1.2" fill="none" />
+          <path d="M107 143 Q106 148 108 153" stroke="#D4A574" strokeWidth="1.2" fill="none" />
+          <path d="M112 144 Q111 148 113 152" stroke="#D4A574" strokeWidth="1.2" fill="none" />
         </svg>
       </div>
     </>
@@ -245,6 +266,7 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
 
   const isTextValid = () => {
     if (mode === 'citations') return inputText.trim().length > 0;
+    if (mode === 'humanize') return inputText.trim().length > 0;
     return getWordCount(inputText) >= 200;
   };
 
@@ -333,8 +355,83 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
     }, 4000);
   };
 
+  const [humanizeWordsUsed, setHumanizeWordsUsed] = useState(0);
+  const [humanizeWordLimit, setHumanizeWordLimit] = useState(1000);
+  const [humanizeError, setHumanizeError] = useState('');
+
+  useEffect(() => {
+    if (mode === 'humanize') {
+      const token = localStorage.getItem('authToken');
+      if (token) {
+        fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/analysis/humanize-usage`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        })
+          .then(r => r.json())
+          .then(data => {
+            if (data.success) {
+              setHumanizeWordsUsed(data.data.wordsUsed);
+              setHumanizeWordLimit(data.data.wordLimit);
+            }
+          })
+          .catch(() => {});
+      }
+    }
+  }, [mode, showHumanizeResult]);
+
+  const handleHumanize = async () => {
+    if (inputText.trim().length === 0) return;
+
+    setIsHumanizing(true);
+    setHumanizedResult('');
+    setShowHumanizeResult(false);
+    setHumanizeError('');
+
+    try {
+      const token = localStorage.getItem('authToken');
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/analysis/humanize`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          text: inputText,
+          mode: humanizeMode,
+          intensity: humanizeIntensity
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        if (response.status === 429 && data.upgrade) {
+          setHumanizeError(data.message);
+        } else if (response.status === 429) {
+          setHumanizeError(data.message);
+        } else {
+          throw new Error(data.message || 'Humanization failed');
+        }
+        return;
+      }
+
+      setHumanizedResult(data.data.humanizedText);
+      setShowHumanizeResult(true);
+      if (data.data.wordsUsed !== undefined) {
+        setHumanizeWordsUsed(data.data.wordsUsed);
+        setHumanizeWordLimit(data.data.wordLimit);
+      }
+    } catch (error: any) {
+      console.error('Humanize error:', error);
+      setHumanizeError(error.message || 'Humanization failed. Please try again.');
+    } finally {
+      setIsHumanizing(false);
+    }
+  };
+
   const handleSubmit = () => {
-    if (mode === 'citations') {
+    if (mode === 'humanize') {
+      handleHumanize();
+    } else if (mode === 'citations') {
       handleCitationSearch();
     } else {
       handleAnalyze();
@@ -387,14 +484,18 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
         {/* Welcome */}
         <div className="text-center mb-10 sm:mb-12">
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-3">
-            {mode === 'analyze' ? (
+            {mode === 'humanize' ? (
+              <>Make AI text <span className="text-violet-600">undetectable</span></>
+            ) : mode === 'analyze' ? (
               <>Analyze your <span className="text-blue-600">academic writing</span></>
             ) : (
               <>Find <span className="text-blue-600">citations</span> for your research</>
             )}
           </h1>
           <p className="text-lg text-gray-600">
-            {mode === 'analyze' 
+            {mode === 'humanize'
+              ? 'Paste AI-generated text to transform it into natural human writing'
+              : mode === 'analyze' 
               ? 'Paste your text to get AI-powered feedback on structure, grammar, and citations'
               : 'Enter your topic to discover relevant academic sources'
             }
@@ -405,7 +506,7 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
         <div className="flex justify-center mb-7">
           <div className="inline-flex bg-gray-100 rounded-full p-1.5">
               <button
-              onClick={() => { setMode('analyze'); setInputText(''); setShowWordWarning(false); }}
+              onClick={() => { setMode('analyze'); setInputText(''); setShowWordWarning(false); setShowHumanizeResult(false); }}
               className={`px-5 py-2.5 rounded-full text-base font-medium transition-all ${
                 mode === 'analyze' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'
               }`}
@@ -413,12 +514,21 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
               Analyze Essay
               </button>
               <button
-              onClick={() => { setMode('citations'); setInputText(''); setShowWordWarning(false); }}
+              onClick={() => { setMode('citations'); setInputText(''); setShowWordWarning(false); setShowHumanizeResult(false); }}
               className={`px-5 py-2.5 rounded-full text-base font-medium transition-all ${
                 mode === 'citations' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'
               }`}
             >
               Find Citations
+              </button>
+              <button
+              onClick={() => { setMode('humanize'); setInputText(''); setShowWordWarning(false); }}
+              className={`px-5 py-2.5 rounded-full text-base font-medium transition-all relative ${
+                mode === 'humanize' ? 'bg-white text-violet-700 shadow-sm' : 'text-violet-600 hover:text-violet-700'
+              }`}
+            >
+              Humanize
+              {usageStats.plan === 'free' && <span className="absolute -top-2 -right-1 px-1.5 py-0.5 bg-violet-600 text-white text-[10px] font-bold rounded-full leading-none">PRO</span>}
               </button>
             </div>
           </div>
@@ -625,6 +735,254 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
                 ))}
               </div>
             </div>
+          </>
+        )}
+
+        {/* HUMANIZE MODE - matches HumanizerPage design */}
+        {mode === 'humanize' && (
+          <>
+            <div className="bg-white rounded-3xl shadow-xl shadow-violet-100/50 border border-gray-100 overflow-hidden mb-6">
+              {/* Toolbar */}
+              <div className="bg-gradient-to-r from-violet-50 to-purple-50 border-b border-gray-100 px-5 py-4">
+                <div className="flex flex-wrap items-center justify-between gap-4">
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-medium text-gray-500">Mode:</span>
+                      <div className="flex items-center bg-white rounded-xl px-1 py-1 shadow-sm border border-gray-200">
+                      {([
+                        { id: 'standard', label: 'Standard', tooltip: 'Natural college-student writing, clear and slightly informal' },
+                        { id: 'academic', label: 'Academic', tooltip: 'Formal academic tone with technical terms, keeps citations' },
+                        { id: 'casual', label: 'Casual', tooltip: 'Conversational tone, like explaining to a friend' },
+                        { id: 'creative', label: 'Creative', tooltip: 'Personal essay style with varied rhythm' }
+                      ] as const).map((m) => (
+                        <button
+                          key={m.id}
+                          onClick={() => setHumanizeMode(m.id)}
+                          title={m.tooltip}
+                          className={`px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                            humanizeMode === m.id ? 'bg-violet-600 text-white shadow-sm' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                          }`}
+                        >
+                          {m.label}
+                        </button>
+                      ))}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-medium text-gray-500">Intensity:</span>
+                      <div className="flex items-center bg-white rounded-xl px-1 py-1 shadow-sm border border-gray-200">
+                      {([
+                        { id: 'light', label: 'Light', tooltip: 'Minimal changes (~15-20%), fixes obvious AI phrases' },
+                        { id: 'medium', label: 'Medium', tooltip: 'Balanced rewrite (~40-50%), adds natural variation' },
+                        { id: 'aggressive', label: 'Heavy', tooltip: 'Full rewrite, completely different wording, same meaning' }
+                      ] as const).map((intensity) => (
+                        <button
+                          key={intensity.id}
+                          onClick={() => setHumanizeIntensity(intensity.id)}
+                          title={intensity.tooltip}
+                          className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                            humanizeIntensity === intensity.id ? 'bg-violet-600 text-white shadow-sm' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                          }`}
+                        >
+                          {intensity.label}
+                        </button>
+                      ))}
+                      </div>
+                    </div>
+                  </div>
+                  <button
+                    onClick={handleSubmit}
+                    disabled={!isTextValid() || isHumanizing}
+                    className={`px-6 py-2.5 rounded-xl flex items-center justify-center transition-all font-semibold text-sm ${
+                      isTextValid() && !isHumanizing
+                        ? 'bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white shadow-lg shadow-violet-200 hover:shadow-xl hover:shadow-violet-300 cursor-pointer transform hover:-translate-y-0.5'
+                        : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                    }`}
+                  >
+                    {isHumanizing ? (
+                      <>
+                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Humanizing...
+                      </>
+                    ) : (
+                      <>
+                        <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                        Humanize
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              {/* Editor Panels */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-gray-100">
+                {/* Left Panel */}
+                <div className="flex flex-col">
+                  <div className="flex items-center justify-between px-5 py-3 bg-gray-50/50 border-b border-gray-100">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-gray-300"></div>
+                      <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Original</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button onClick={() => setInputText('')} className={`text-xs text-gray-400 hover:text-gray-600 transition-colors ${!inputText ? 'invisible' : ''}`}>Clear</button>
+                      <button onClick={() => navigator.clipboard.readText().then(text => setInputText(text))} className="flex items-center gap-1 text-xs text-violet-600 hover:text-violet-700 font-medium transition-colors">
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+                        Paste
+                      </button>
+                    </div>
+                  </div>
+                  <textarea
+                    value={inputText}
+                    onChange={(e) => { setInputText(e.target.value); setShowWordWarning(false); }}
+                    onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey && isTextValid()) { e.preventDefault(); handleSubmit(); }}}
+                    placeholder={placeholders[placeholderIndex]}
+                    disabled={isHumanizing}
+                    className="w-full min-h-[280px] sm:min-h-[350px] p-5 text-gray-800 text-[15px] border-none outline-none resize-none bg-transparent placeholder-gray-400 leading-relaxed"
+                  />
+                  <div className="flex items-center justify-between px-5 py-3 bg-gray-50/30 border-t border-gray-100">
+                    <span className="text-xs text-gray-400 font-medium">{inputText.split(/\s+/).filter(Boolean).length} words</span>
+                  </div>
+                </div>
+
+                {/* Right Panel */}
+                <div className="flex flex-col bg-gradient-to-br from-violet-50/30 to-purple-50/30">
+                  <div className="flex items-center justify-between px-5 py-3 bg-violet-50/50 border-b border-violet-100/50">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-violet-400"></div>
+                      <span className="text-xs font-semibold text-violet-600 uppercase tracking-wider">Humanized</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      {showHumanizeResult && humanizedResult && (
+                        <>
+                          <button
+                            onClick={() => setShowHighlights(!showHighlights)}
+                            className={`flex items-center gap-1.5 text-xs font-medium transition-all px-2 py-1 rounded-lg ${
+                              showHighlights ? 'bg-violet-100 text-violet-700' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+                            }`}
+                          >
+                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                            </svg>
+                            Highlights
+                          </button>
+                          <button
+                            onClick={() => { navigator.clipboard.writeText(humanizedResult); setHumanizeCopied(true); setTimeout(() => setHumanizeCopied(false), 2000); }}
+                            className={`flex items-center gap-1 text-xs font-medium transition-all ${humanizeCopied ? 'text-green-600' : 'text-violet-600 hover:text-violet-700'}`}
+                          >
+                            {humanizeCopied ? (<> <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg> Copied! </>) : (<> <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg> Copy All </>)}
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex-1 min-h-[280px] sm:min-h-[350px] max-h-[280px] sm:max-h-[350px] overflow-y-auto">
+                    {showHumanizeResult && humanizedResult ? (
+                      <div className="p-5 text-gray-800 text-[15px] leading-relaxed">
+                        {showHighlights ? (
+                          (() => {
+                            // Build a Set of normalized original words for O(1) lookup
+                            const normalize = (word: string) => word.toLowerCase().replace(/[^\w]/g, '');
+                            const originalWordSet = new Set(inputText.split(/\s+/).filter(Boolean).map(normalize));
+                            const humanizedTokens = humanizedResult.split(/(\s+)/);
+                            
+                            return humanizedTokens.map((token, idx) => {
+                              if (/^\s+$/.test(token)) {
+                                return <span key={idx}>{token}</span>;
+                              }
+                              const existsInOriginal = originalWordSet.has(normalize(token));
+                              if (!existsInOriginal) {
+                                return <span key={idx} className="bg-violet-100/80 text-violet-900 underline decoration-violet-400/60 decoration-2 underline-offset-2 rounded-sm px-0.5">{token}</span>;
+                              }
+                              return <span key={idx}>{token}</span>;
+                            });
+                          })()
+                        ) : (
+                          humanizedResult
+                        )}
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-center h-full text-gray-400 p-5">
+                        {isHumanizing ? (
+                          <div className="flex flex-col items-center gap-4">
+                            <div className="relative">
+                              <div className="w-12 h-12 border-4 border-violet-200 rounded-full"></div>
+                              <div className="absolute top-0 left-0 w-12 h-12 border-4 border-violet-600 rounded-full border-t-transparent animate-spin"></div>
+                            </div>
+                            <div className="text-center">
+                              <p className="text-sm font-medium text-gray-600">Humanizing your text...</p>
+                              <p className="text-xs text-gray-400 mt-1">This usually takes 5-10 seconds</p>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="text-center">
+                            <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-violet-100/50 flex items-center justify-center">
+                              <svg className="w-8 h-8 text-violet-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                              </svg>
+                            </div>
+                            <p className="text-sm text-gray-500">Your humanized text will appear here</p>
+                            <p className="text-xs text-gray-400 mt-1">Paste text on the left and click Humanize</p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex items-center justify-between px-5 py-3 bg-violet-50/30 border-t border-violet-100/50">
+                    <span className="text-xs text-gray-400 font-medium">{showHumanizeResult ? `${humanizedResult.split(/\s+/).filter(Boolean).length} words` : ''}</span>
+                    {showHumanizeResult && humanizedResult && (
+                      <button onClick={() => { setShowHumanizeResult(false); setHumanizedResult(''); }} className="text-xs text-gray-400 hover:text-gray-600 transition-colors">Clear result</button>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Usage Bar */}
+              <div className="px-5 py-4 bg-gray-50 border-t border-gray-100">
+                <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs text-gray-500">Monthly usage:</span>
+                    {humanizeWordLimit >= 999999 ? (
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-semibold text-gray-700">{humanizeWordsUsed.toLocaleString()} words used</span>
+                        <span className="px-2 py-0.5 bg-gradient-to-r from-violet-100 to-purple-100 text-violet-700 text-[10px] font-bold rounded-full">UNLIMITED</span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <div className="w-32 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                          <div
+                            className={`h-full rounded-full transition-all ${humanizeWordsUsed / humanizeWordLimit > 0.9 ? 'bg-red-500' : 'bg-gradient-to-r from-violet-500 to-purple-500'}`}
+                            style={{ width: `${Math.min(100, (humanizeWordsUsed / humanizeWordLimit) * 100)}%` }}
+                          />
+                        </div>
+                        <span className="text-xs font-semibold text-gray-700">{humanizeWordsUsed.toLocaleString()} / {humanizeWordLimit.toLocaleString()}</span>
+                      </div>
+                    )}
+                  </div>
+                  {humanizeWordLimit < 999999 && (
+                    <button onClick={() => onNavigate('pricing')} className="text-xs text-violet-600 hover:text-violet-700 font-semibold flex items-center gap-1 transition-colors">
+                      Upgrade for unlimited
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {humanizeError && (
+              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-2xl text-center">
+                <p className="text-red-700 text-sm font-medium">{humanizeError}</p>
+                {humanizeWordLimit < 999999 && (
+                  <button onClick={() => onNavigate('pricing')} className="mt-2 px-4 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold rounded-lg transition-colors">
+                    Upgrade for unlimited words/month
+                  </button>
+                )}
+              </div>
+            )}
           </>
         )}
 

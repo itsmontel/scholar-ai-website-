@@ -18,6 +18,9 @@
   <url><loc>https://writescholar.com/tools/text-case-converter</loc><lastmod>2026-03-01</lastmod><priority>0.8</priority><changefreq>monthly</changefreq></url>
   <url><loc>https://writescholar.com/tools/paraphrasing-tips</loc><lastmod>2026-03-01</lastmod><priority>0.8</priority><changefreq>monthly</changefreq></url>
 
+  <!-- Premium Tools - AI Humanizer for ChatGPT, GPT-5, Gemini, Claude, LLaMA -->
+  <url><loc>https://writescholar.com/tools/humanizer</loc><lastmod>2026-03-02</lastmod><priority>0.95</priority><changefreq>weekly</changefreq></url>
+
   <!-- Blog -->
   <url><loc>https://writescholar.com/blog</loc><lastmod>2026-03-01</lastmod><priority>0.8</priority><changefreq>weekly</changefreq></url>
   <url><loc>https://writescholar.com/blog/free-writing-tools-every-student-needs</loc><lastmod>2026-03-01</lastmod><priority>0.7</priority><changefreq>monthly</changefreq></url>

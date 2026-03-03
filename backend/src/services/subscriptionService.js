@@ -12,29 +12,32 @@ const PLAN_LIMITS = {
   free: {
     documentsPerMonth: 3,
     analysesPerMonth: 3,
-    citationSearchesPerMonth: 2, // 2 citation searches per month for free users
-    maxDocumentSize: 1024 * 1024, // 1MB per document
-    maxTotalStorage: 1024 * 1024, // 1MB total storage
-    maxAnalysisPercentage: 50, // 50% of document
+    citationSearchesPerMonth: 2,
+    humanizeWordsPerMonth: 1000,
+    maxDocumentSize: 1024 * 1024,
+    maxTotalStorage: 1024 * 1024,
+    maxAnalysisPercentage: 50,
     name: 'Free'
   },
   starter: {
-    documentsPerMonth: -1, // unlimited
-    analysesPerMonth: 999, // 999 analyses per month
-    citationSearchesPerMonth: 999, // 999 citation searches per month
-    maxDocumentSize: 25 * 1024 * 1024, // 25MB per document
-    maxTotalStorage: 25 * 1024 * 1024, // 25MB total storage
-    maxAnalysisPercentage: 100, // 100% of document
+    documentsPerMonth: -1,
+    analysesPerMonth: 999,
+    citationSearchesPerMonth: 999,
+    humanizeWordsPerMonth: 999999,
+    maxDocumentSize: 25 * 1024 * 1024,
+    maxTotalStorage: 25 * 1024 * 1024,
+    maxAnalysisPercentage: 100,
     name: 'Starter',
     price: 19.99
   },
   premium: {
-    documentsPerMonth: -1, // unlimited
-    analysesPerMonth: 999, // 999 analyses per month
-    citationSearchesPerMonth: 999, // 999 citation searches per month
-    maxDocumentSize: 1024 * 1024 * 1024, // 1GB per document
-    maxTotalStorage: 1024 * 1024 * 1024, // 1GB total storage
-    maxAnalysisPercentage: 100, // 100% of document
+    documentsPerMonth: -1,
+    analysesPerMonth: 999,
+    citationSearchesPerMonth: 999,
+    humanizeWordsPerMonth: 999999,
+    maxDocumentSize: 1024 * 1024 * 1024,
+    maxTotalStorage: 1024 * 1024 * 1024,
+    maxAnalysisPercentage: 100,
     name: 'Premium',
     price: 39.99
   }
