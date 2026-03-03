@@ -1434,7 +1434,7 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
                           <span className="text-xs font-medium text-gray-500 whitespace-nowrap">Type:</span>
                           <div className="flex gap-1 p-1 bg-gray-100 rounded-lg">
                             {typeOptions.map((opt) => {
-                              const locked = !isPremiumUser && opt.value !== 'mixed';
+                              const locked = user != null && !isPremiumUser && opt.value !== 'mixed';
                               return (
                                 <button key={opt.value} onClick={() => !locked && setQuizType(opt.value as any)} disabled={locked} title={locked ? 'Premium only' : opt.description}
                                   className={`px-2 sm:px-3 py-1.5 rounded-md text-xs font-medium transition-all whitespace-nowrap ${locked ? 'text-gray-300 cursor-not-allowed' : quizType === opt.value ? 'bg-white text-amber-700 shadow-sm' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'}`}>
@@ -1448,7 +1448,7 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
                           <span className="text-xs font-medium text-gray-500 whitespace-nowrap">Difficulty:</span>
                           <div className="flex gap-1 p-1 bg-gray-100 rounded-lg">
                             {difficultyOptions.map((opt) => {
-                              const locked = !isPremiumUser && opt.value !== 'medium';
+                              const locked = user != null && !isPremiumUser && opt.value !== 'medium';
                               return (
                                 <button key={opt.value} onClick={() => !locked && setDifficulty(opt.value as any)} disabled={locked} title={locked ? 'Premium only' : opt.description}
                                   className={`px-2 sm:px-3 py-1.5 rounded-md text-xs font-medium transition-all whitespace-nowrap ${locked ? 'text-gray-300 cursor-not-allowed' : difficulty === opt.value ? 'bg-white text-amber-700 shadow-sm' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'}`}>
@@ -1460,11 +1460,11 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
                         </div>
                         <div className="flex items-center gap-2">
                           <span className="text-xs font-medium text-gray-500 whitespace-nowrap">Questions:</span>
-                          <select value={isFreeUser ? 10 : questionCount} onChange={(e) => !isFreeUser && setQuestionCount(Number(e.target.value))} disabled={isFreeUser}
-                            className={`px-2 py-1.5 bg-gray-100 border-0 rounded-lg text-xs font-medium text-gray-700 focus:ring-2 focus:ring-amber-200 ${isFreeUser ? 'opacity-50 cursor-not-allowed' : ''}`}>
-                            {isFreeUser ? <option value={10}>10</option> : [5, 10, 15, 20, 25].map(n => <option key={n} value={n}>{n}</option>)}
+                          <select value={user != null && isFreeUser ? 10 : questionCount} onChange={(e) => setQuestionCount(Number(e.target.value))} disabled={user != null && isFreeUser}
+                            className={`px-2 py-1.5 bg-gray-100 border-0 rounded-lg text-xs font-medium text-gray-700 focus:ring-2 focus:ring-amber-200 ${user != null && isFreeUser ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                            {user != null && isFreeUser ? <option value={10}>10</option> : [5, 10, 15, 20, 25].map(n => <option key={n} value={n}>{n}</option>)}
                           </select>
-                          {isFreeUser && <span className="text-[9px]">🔒</span>}
+                          {user != null && isFreeUser && <span className="text-[9px]">🔒</span>}
                         </div>
                         <button onClick={handleGenerate} disabled={isLoading || !inputText.trim() || wordCount < 100 || wordCount > quizUsage.maxWordsPerGeneration || quizExhausted}
                           className="w-full sm:w-auto sm:ml-auto px-4 sm:px-6 py-2 sm:py-2.5 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white font-semibold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-amber-200/50 text-sm">
@@ -1580,10 +1580,11 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
                       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
                         <div className="flex items-center gap-2">
                           <span className="text-xs font-medium text-gray-500">Cards:</span>
-                          <select value={isFreeUser ? 15 : flashcardCount} onChange={(e) => !isFreeUser && setFlashcardCount(Number(e.target.value))} disabled={isFreeUser}
-                            className={`px-2 py-1.5 bg-gray-100 border-0 rounded-lg text-xs font-medium text-gray-700 ${isFreeUser ? 'opacity-50 cursor-not-allowed' : ''}`}>
-                            {isFreeUser ? <option value={15}>15</option> : [5, 10, 15, 20, 25, 30].map(n => <option key={n} value={n}>{n}</option>)}
+                          <select value={user != null && isFreeUser ? 15 : flashcardCount} onChange={(e) => setFlashcardCount(Number(e.target.value))} disabled={user != null && isFreeUser}
+                            className={`px-2 py-1.5 bg-gray-100 border-0 rounded-lg text-xs font-medium text-gray-700 ${user != null && isFreeUser ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                            {user != null && isFreeUser ? <option value={15}>15</option> : [5, 10, 15, 20, 25, 30].map(n => <option key={n} value={n}>{n}</option>)}
                           </select>
+                          {user != null && isFreeUser && <span className="text-[9px]">🔒</span>}
                         </div>
                         <button onClick={handleGenerate} disabled={isLoading || !inputText.trim() || wordCount < 50 || wordCount > quizUsage.maxWordsPerGeneration || quizExhausted}
                           className="w-full sm:w-auto sm:ml-auto px-4 sm:px-6 py-2 sm:py-2.5 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white font-semibold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-amber-200/50 text-sm">
@@ -1833,10 +1834,11 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
                       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
                         <div className="flex items-center gap-2">
                           <span className="text-xs font-medium text-gray-500">Words:</span>
-                          <select value={isFreeUser ? 10 : crosswordWordCount} onChange={(e) => !isFreeUser && setCrosswordWordCount(Number(e.target.value))} disabled={isFreeUser}
-                            className={`px-2 py-1.5 bg-gray-100 border-0 rounded-lg text-xs font-medium text-gray-700 ${isFreeUser ? 'opacity-50 cursor-not-allowed' : ''}`}>
-                            {isFreeUser ? <option value={10}>10</option> : [6, 8, 10, 12, 15].map(n => <option key={n} value={n}>{n}</option>)}
+                          <select value={user != null && isFreeUser ? 10 : crosswordWordCount} onChange={(e) => setCrosswordWordCount(Number(e.target.value))} disabled={user != null && isFreeUser}
+                            className={`px-2 py-1.5 bg-gray-100 border-0 rounded-lg text-xs font-medium text-gray-700 ${user != null && isFreeUser ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                            {user != null && isFreeUser ? <option value={10}>10</option> : [6, 8, 10, 12, 15].map(n => <option key={n} value={n}>{n}</option>)}
                           </select>
+                          {user != null && isFreeUser && <span className="text-[9px]">🔒</span>}
                         </div>
                         <button onClick={handleGenerate} disabled={isLoading || !inputText.trim() || wordCount < 50 || wordCount > quizUsage.maxWordsPerGeneration || quizExhausted}
                           className="w-full sm:w-auto sm:ml-auto px-4 sm:px-6 py-2 sm:py-2.5 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white font-semibold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-amber-200/50 text-sm">

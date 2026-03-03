@@ -225,7 +225,7 @@ const SummarizerPage = ({ onNavigate, user }: SummarizerPageProps) => {
                     <span className="text-xs font-medium text-gray-500 whitespace-nowrap">Style:</span>
                     <div className="flex gap-1 p-1 bg-gray-100 rounded-lg">
                       {styleOptions.map((opt) => {
-                        const locked = !isPremiumUser && opt.value !== 'bullet';
+                        const locked = user != null && !isPremiumUser && opt.value !== 'bullet';
                         return (
                           <button
                             key={opt.value}
@@ -252,7 +252,7 @@ const SummarizerPage = ({ onNavigate, user }: SummarizerPageProps) => {
                     <span className="text-xs font-medium text-gray-500 whitespace-nowrap">Length:</span>
                     <div className="flex gap-1 p-1 bg-gray-100 rounded-lg">
                       {lengthOptions.map((opt) => {
-                        const locked = !isPremiumUser && opt.value !== 'medium';
+                        const locked = user != null && !isPremiumUser && opt.value !== 'medium';
                         return (
                           <button
                             key={opt.value}
