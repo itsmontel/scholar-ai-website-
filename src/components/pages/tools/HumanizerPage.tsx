@@ -176,12 +176,12 @@ const HumanizerPage = ({ onNavigate, user, onLogout }: HumanizerPageProps) => {
   const outputWordCount = humanizedResult.split(/\s+/).filter(Boolean).length;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-violet-50/50 via-white to-white">
+    <div className="min-h-screen w-full min-w-0 overflow-x-hidden bg-gradient-to-b from-violet-50/50 via-white to-white">
       {user ? (
         <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="humanizer" />
       ) : (
-        <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-100">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-100 overflow-x-hidden">
+          <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 min-w-0">
             <div className="flex items-center justify-between h-18 py-4">
               <a href="/" onClick={(e) => { e.preventDefault(); onNavigate('landing'); }} className="flex items-center space-x-2.5">
                 <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center">
@@ -207,38 +207,44 @@ const HumanizerPage = ({ onNavigate, user, onLogout }: HumanizerPageProps) => {
       )}
 
       {/* Hero Section */}
-      <section className="pt-10 sm:pt-16 pb-6">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
-          <div className="inline-flex items-center gap-2 mb-5">
-            <span className="inline-flex items-center px-3 py-1 bg-violet-100 text-violet-700 rounded-full text-xs font-semibold uppercase tracking-wide">
+      <section className="pt-6 sm:pt-16 pb-4 sm:pb-6">
+        <div className="max-w-4xl mx-auto px-3 sm:px-6 text-center">
+          <div className="inline-flex flex-wrap items-center justify-center gap-2 mb-4 sm:mb-5">
+            <span className="inline-flex items-center px-2.5 sm:px-3 py-1 bg-violet-100 text-violet-700 rounded-full text-[10px] sm:text-xs font-semibold uppercase tracking-wide">
               Free Tool
             </span>
-            <span className="inline-flex items-center px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold">
-              1,000 words/month free
-            </span>
+            {user && wordLimit >= 999999 ? (
+              <span className="inline-flex items-center px-2.5 sm:px-3 py-1 bg-violet-200/80 text-violet-800 rounded-full text-[10px] sm:text-xs font-semibold">
+                Unlimited words
+              </span>
+            ) : (
+              <span className="inline-flex items-center px-2.5 sm:px-3 py-1 bg-green-100 text-green-700 rounded-full text-[10px] sm:text-xs font-semibold">
+                1,000 words/month free
+              </span>
+            )}
           </div>
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 leading-tight">
+          <h1 className="text-xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-3 sm:mb-4 leading-tight px-1">
             AI Humanizer – Free Tool to Humanize Your AI Text
           </h1>
-          <p className="text-lg text-gray-500 leading-relaxed max-w-2xl mx-auto">
+          <p className="text-sm sm:text-lg text-gray-500 leading-relaxed max-w-2xl mx-auto px-1">
             Transform AI-generated content from ChatGPT, GPT-5, Gemini, Claude, LLaMA, and other AI models into clear, natural, human-like text
           </p>
         </div>
       </section>
 
       {/* Main Editor Section */}
-      <section className="pb-12 sm:pb-16">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+      <section className="pb-8 sm:pb-16 px-0 sm:px-0">
+        <div className="max-w-6xl mx-auto px-3 sm:px-6 w-full min-w-0">
           {/* Editor Card */}
-          <div className="bg-white rounded-3xl shadow-xl shadow-violet-100/50 border border-gray-100 overflow-hidden">
+          <div className="bg-white rounded-2xl sm:rounded-3xl shadow-xl shadow-violet-100/50 border border-gray-100 overflow-hidden min-w-0">
             {/* Toolbar */}
-            <div className="bg-gradient-to-r from-violet-50 to-purple-50 border-b border-gray-100 px-5 py-4">
-              <div className="flex flex-wrap items-center justify-between gap-4">
-                <div className="flex items-center gap-3 flex-wrap">
+            <div className="bg-gradient-to-r from-violet-50 to-purple-50 border-b border-gray-100 px-3 sm:px-5 py-3 sm:py-4">
+              <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center justify-between gap-3 sm:gap-4">
+                <div className="flex flex-wrap items-center gap-2 sm:gap-3 min-w-0 overflow-x-auto sm:overflow-visible">
                   {/* Mode Selector */}
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-medium text-gray-500">Mode:</span>
-                    <div className="flex items-center bg-white rounded-xl px-1 py-1 shadow-sm border border-gray-200">
+                  <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+                    <span className="text-xs font-medium text-gray-500 flex-shrink-0">Mode:</span>
+                    <div className="flex items-center bg-white rounded-xl px-0.5 sm:px-1 py-1 shadow-sm border border-gray-200">
                     {([
                       { id: 'standard', label: 'Standard', tooltip: 'Natural college-student writing, clear and slightly informal' },
                       { id: 'academic', label: 'Academic', tooltip: 'Formal academic tone with technical terms, keeps citations' },
@@ -249,7 +255,7 @@ const HumanizerPage = ({ onNavigate, user, onLogout }: HumanizerPageProps) => {
                         key={m.id}
                         onClick={() => setHumanizeMode(m.id)}
                         title={m.tooltip}
-                        className={`px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                        className={`px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all whitespace-nowrap ${
                           humanizeMode === m.id
                             ? 'bg-violet-600 text-white shadow-sm'
                             : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
@@ -262,9 +268,9 @@ const HumanizerPage = ({ onNavigate, user, onLogout }: HumanizerPageProps) => {
                   </div>
                   
                   {/* Intensity Selector */}
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-medium text-gray-500">Intensity:</span>
-                    <div className="flex items-center bg-white rounded-xl px-1 py-1 shadow-sm border border-gray-200">
+                  <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+                    <span className="text-xs font-medium text-gray-500 flex-shrink-0">Intensity:</span>
+                    <div className="flex items-center bg-white rounded-xl px-0.5 sm:px-1 py-1 shadow-sm border border-gray-200">
                     {([
                       { id: 'light', label: 'Light', tooltip: 'Minimal changes (~15-20%), fixes obvious AI phrases' },
                       { id: 'medium', label: 'Medium', tooltip: 'Balanced rewrite (~40-50%), adds natural variation' },
@@ -274,7 +280,7 @@ const HumanizerPage = ({ onNavigate, user, onLogout }: HumanizerPageProps) => {
                         key={intensity.id}
                         onClick={() => setHumanizeIntensity(intensity.id)}
                         title={intensity.tooltip}
-                        className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                        className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all whitespace-nowrap ${
                           humanizeIntensity === intensity.id
                             ? 'bg-violet-600 text-white shadow-sm'
                             : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
@@ -291,7 +297,7 @@ const HumanizerPage = ({ onNavigate, user, onLogout }: HumanizerPageProps) => {
                 <button
                   onClick={handleSubmit}
                   disabled={!inputText.trim() || isHumanizing}
-                  className={`px-6 py-2.5 rounded-xl flex items-center justify-center transition-all font-semibold text-sm ${
+                  className={`w-full sm:w-auto px-6 py-2.5 rounded-xl flex items-center justify-center transition-all font-semibold text-sm flex-shrink-0 ${
                     inputText.trim() && !isHumanizing
                       ? 'bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white shadow-lg shadow-violet-200 hover:shadow-xl hover:shadow-violet-300 cursor-pointer transform hover:-translate-y-0.5'
                       : 'bg-gray-200 text-gray-400 cursor-not-allowed'
@@ -318,15 +324,15 @@ const HumanizerPage = ({ onNavigate, user, onLogout }: HumanizerPageProps) => {
             </div>
 
             {/* Editor Panels */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-gray-100">
+            <div className="grid grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-gray-100 min-w-0">
               {/* Left Panel - Input */}
-              <div className="flex flex-col">
-                <div className="flex items-center justify-between px-5 py-3 bg-gray-50/50 border-b border-gray-100">
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-gray-300"></div>
-                    <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Original</span>
+              <div className="flex flex-col min-w-0">
+                <div className="flex items-center justify-between px-3 sm:px-5 py-2.5 sm:py-3 bg-gray-50/50 border-b border-gray-100 gap-2 min-w-0">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <div className="w-2 h-2 rounded-full bg-gray-300 flex-shrink-0"></div>
+                    <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider truncate">Original</span>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
                     <button
                       onClick={() => setInputText('')}
                       className={`text-xs text-gray-400 hover:text-gray-600 transition-colors ${!inputText ? 'invisible' : ''}`}
@@ -344,7 +350,7 @@ const HumanizerPage = ({ onNavigate, user, onLogout }: HumanizerPageProps) => {
                     </button>
                   </div>
                 </div>
-                <div className="relative flex-1">
+                <div className="relative flex-1 min-w-0">
                   <textarea
                     value={inputText}
                     onChange={(e) => setInputText(e.target.value)}
@@ -352,13 +358,13 @@ const HumanizerPage = ({ onNavigate, user, onLogout }: HumanizerPageProps) => {
                     onBlur={() => setIsFocused(false)}
                     placeholder={placeholders[placeholderIndex]}
                     disabled={isHumanizing}
-                    className="w-full h-full min-h-[320px] sm:min-h-[400px] p-5 text-gray-800 text-[15px] border-none outline-none resize-none bg-transparent placeholder-gray-400 leading-relaxed"
+                    className="w-full min-w-0 h-full min-h-[240px] sm:min-h-[320px] md:min-h-[400px] p-3 sm:p-5 text-gray-800 text-[15px] border-none outline-none resize-none bg-transparent placeholder-gray-400 leading-relaxed"
                   />
                   {isFocused && (
                     <div className="absolute inset-0 pointer-events-none border-2 border-violet-200 rounded-none" style={{ margin: '-1px' }}></div>
                   )}
                 </div>
-                <div className="flex items-center justify-between px-5 py-3 bg-gray-50/30 border-t border-gray-100">
+                <div className="flex items-center justify-between px-3 sm:px-5 py-2.5 sm:py-3 bg-gray-50/30 border-t border-gray-100">
                   <span className="text-xs text-gray-400 font-medium">{wordCount.toLocaleString()} words</span>
                   {!user && wordCount > 0 && (
                     <span className="text-xs text-gray-400">
@@ -369,30 +375,30 @@ const HumanizerPage = ({ onNavigate, user, onLogout }: HumanizerPageProps) => {
               </div>
 
               {/* Right Panel - Output */}
-              <div className="flex flex-col bg-gradient-to-br from-violet-50/30 to-purple-50/30">
-                <div className="flex items-center justify-between px-5 py-3 bg-violet-50/50 border-b border-violet-100/50">
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-violet-400"></div>
+              <div className="flex flex-col bg-gradient-to-br from-violet-50/30 to-purple-50/30 min-w-0">
+                <div className="flex flex-wrap items-center justify-between gap-2 px-3 sm:px-5 py-2.5 sm:py-3 bg-violet-50/50 border-b border-violet-100/50 min-w-0">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <div className="w-2 h-2 rounded-full bg-violet-400 flex-shrink-0"></div>
                     <span className="text-xs font-semibold text-violet-600 uppercase tracking-wider">Humanized</span>
                     {showResult && (
-                      <span className="ml-2 px-2 py-0.5 bg-violet-100 text-violet-600 text-[10px] font-semibold rounded-full">
+                      <span className="ml-1 sm:ml-2 px-1.5 sm:px-2 py-0.5 bg-violet-100 text-violet-600 text-[10px] font-semibold rounded-full flex-shrink-0">
                         {highlightedResult.filter(w => w.changed && !/^\s+$/.test(w.text)).length} changes
                       </span>
                     )}
                   </div>
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
                     {showResult && humanizedResult && (
                       <>
                         <button
                           onClick={() => setShowHighlights(!showHighlights)}
-                          className={`flex items-center gap-1.5 text-xs font-medium transition-all px-2 py-1 rounded-lg ${
+                          className={`flex items-center gap-1 sm:gap-1.5 text-xs font-medium transition-all px-1.5 sm:px-2 py-1 rounded-lg ${
                             showHighlights ? 'bg-violet-100 text-violet-700' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
                           }`}
                         >
-                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
                           </svg>
-                          Highlights
+                          <span className="hidden sm:inline">Highlights</span>
                         </button>
                         <button
                           onClick={() => {
@@ -420,9 +426,9 @@ const HumanizerPage = ({ onNavigate, user, onLogout }: HumanizerPageProps) => {
                     )}
                   </div>
                 </div>
-                <div className="flex-1 min-h-[320px] sm:min-h-[400px] max-h-[320px] sm:max-h-[400px] overflow-y-auto">
+                <div className="flex-1 min-h-[240px] sm:min-h-[320px] md:min-h-[400px] max-h-[280px] sm:max-h-[320px] md:max-h-[400px] overflow-y-auto overflow-x-hidden min-w-0">
                   {showResult && humanizedResult ? (
-                    <div className="p-5 text-gray-800 text-[15px] leading-relaxed">
+                    <div className="p-3 sm:p-5 text-gray-800 text-[15px] leading-relaxed break-words">
                       {showHighlights ? (
                         highlightedResult.map((item, index) => (
                           item.changed ? (
@@ -467,7 +473,7 @@ const HumanizerPage = ({ onNavigate, user, onLogout }: HumanizerPageProps) => {
                     </div>
                   )}
                 </div>
-                <div className="flex items-center justify-between px-5 py-3 bg-violet-50/30 border-t border-violet-100/50">
+                <div className="flex items-center justify-between px-3 sm:px-5 py-2.5 sm:py-3 bg-violet-50/30 border-t border-violet-100/50">
                   <span className="text-xs text-gray-400 font-medium">
                     {showResult ? `${outputWordCount.toLocaleString()} words` : ''}
                   </span>
@@ -485,8 +491,8 @@ const HumanizerPage = ({ onNavigate, user, onLogout }: HumanizerPageProps) => {
 
             {/* Usage Bar (for logged in users) */}
             {user && (
-              <div className="px-5 py-4 bg-gray-50 border-t border-gray-100">
-                <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
+              <div className="px-3 sm:px-5 py-3 sm:py-4 bg-gray-50 border-t border-gray-100">
+                <div className="flex flex-wrap items-center justify-center gap-x-4 sm:gap-x-6 gap-y-2">
                   <div className="flex items-center gap-3">
                     <span className="text-xs text-gray-500">Monthly usage:</span>
                     {wordLimit >= 999999 ? (
@@ -524,7 +530,7 @@ const HumanizerPage = ({ onNavigate, user, onLogout }: HumanizerPageProps) => {
 
           {/* Error Message */}
           {error && (
-            <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-2xl text-center max-w-xl mx-auto">
+            <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-red-50 border border-red-200 rounded-2xl text-center max-w-xl mx-auto">
               <p className="text-red-700 text-sm font-medium">{error}</p>
               {wordLimit < 999999 && (
                 <button onClick={() => onNavigate('pricing')} className="mt-2 px-4 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold rounded-lg transition-colors">
@@ -537,8 +543,8 @@ const HumanizerPage = ({ onNavigate, user, onLogout }: HumanizerPageProps) => {
       </section>
 
       {/* Feature Cards */}
-      <section className="py-16 bg-white border-t border-gray-100">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6">
+      <section className="py-10 sm:py-16 bg-white border-t border-gray-100 overflow-x-hidden">
+        <div className="max-w-5xl mx-auto px-3 sm:px-6 w-full min-w-0">
           <div className="text-center mb-10">
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">
               Why Use WriteScholar's AI Humanizer?
@@ -589,8 +595,8 @@ const HumanizerPage = ({ onNavigate, user, onLogout }: HumanizerPageProps) => {
       </section>
 
       {/* SEO Content Section */}
-      <section className="py-16 bg-gray-50 border-t border-gray-100">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6">
+      <section className="py-10 sm:py-16 bg-gray-50 border-t border-gray-100 overflow-x-hidden">
+        <div className="max-w-4xl mx-auto px-3 sm:px-6 w-full min-w-0">
           <h2 className="text-xl font-bold text-gray-900 mb-4 text-center">
             Humanize Text from Any AI Model
           </h2>
