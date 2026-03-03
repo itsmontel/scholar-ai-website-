@@ -480,7 +480,7 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
       </div>
 
       {/* Main Content */}
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
+      <main className="max-w-5xl mx-auto px-3 sm:px-6 py-8 sm:py-14 w-full min-w-0 overflow-x-hidden">
         {/* Welcome */}
         <div className="text-center mb-10 sm:mb-12">
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-3">
@@ -741,14 +741,14 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
         {/* HUMANIZE MODE - matches HumanizerPage design */}
         {mode === 'humanize' && (
           <>
-            <div className="bg-white rounded-3xl shadow-xl shadow-violet-100/50 border border-gray-100 overflow-hidden mb-6">
+            <div className="bg-white rounded-2xl sm:rounded-3xl shadow-xl shadow-violet-100/50 border border-gray-100 overflow-hidden mb-6 min-w-0">
               {/* Toolbar */}
-              <div className="bg-gradient-to-r from-violet-50 to-purple-50 border-b border-gray-100 px-5 py-4">
-                <div className="flex flex-wrap items-center justify-between gap-4">
-                  <div className="flex items-center gap-3 flex-wrap">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-medium text-gray-500">Mode:</span>
-                      <div className="flex items-center bg-white rounded-xl px-1 py-1 shadow-sm border border-gray-200">
+              <div className="bg-gradient-to-r from-violet-50 to-purple-50 border-b border-gray-100 px-3 sm:px-5 py-3 sm:py-4">
+                <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center justify-between gap-3 sm:gap-4">
+                  <div className="flex flex-wrap items-center gap-2 sm:gap-3 min-w-0 overflow-x-auto sm:overflow-visible">
+                    <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+                      <span className="text-xs font-medium text-gray-500 flex-shrink-0">Mode:</span>
+                      <div className="flex items-center bg-white rounded-xl px-0.5 sm:px-1 py-1 shadow-sm border border-gray-200">
                       {([
                         { id: 'standard', label: 'Standard', tooltip: 'Natural college-student writing, clear and slightly informal' },
                         { id: 'academic', label: 'Academic', tooltip: 'Formal academic tone with technical terms, keeps citations' },
@@ -759,7 +759,7 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
                           key={m.id}
                           onClick={() => setHumanizeMode(m.id)}
                           title={m.tooltip}
-                          className={`px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                          className={`px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all whitespace-nowrap ${
                             humanizeMode === m.id ? 'bg-violet-600 text-white shadow-sm' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                           }`}
                         >
@@ -768,9 +768,9 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
                       ))}
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-medium text-gray-500">Intensity:</span>
-                      <div className="flex items-center bg-white rounded-xl px-1 py-1 shadow-sm border border-gray-200">
+                    <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+                      <span className="text-xs font-medium text-gray-500 flex-shrink-0">Intensity:</span>
+                      <div className="flex items-center bg-white rounded-xl px-0.5 sm:px-1 py-1 shadow-sm border border-gray-200">
                       {([
                         { id: 'light', label: 'Light', tooltip: 'Minimal changes (~15-20%), fixes obvious AI phrases' },
                         { id: 'medium', label: 'Medium', tooltip: 'Balanced rewrite (~40-50%), adds natural variation' },
@@ -780,7 +780,7 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
                           key={intensity.id}
                           onClick={() => setHumanizeIntensity(intensity.id)}
                           title={intensity.tooltip}
-                          className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                          className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all whitespace-nowrap ${
                             humanizeIntensity === intensity.id ? 'bg-violet-600 text-white shadow-sm' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                           }`}
                         >
@@ -793,7 +793,7 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
                   <button
                     onClick={handleSubmit}
                     disabled={!isTextValid() || isHumanizing}
-                    className={`px-6 py-2.5 rounded-xl flex items-center justify-center transition-all font-semibold text-sm ${
+                    className={`w-full sm:w-auto px-6 py-2.5 rounded-xl flex items-center justify-center transition-all font-semibold text-sm flex-shrink-0 ${
                       isTextValid() && !isHumanizing
                         ? 'bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white shadow-lg shadow-violet-200 hover:shadow-xl hover:shadow-violet-300 cursor-pointer transform hover:-translate-y-0.5'
                         : 'bg-gray-200 text-gray-400 cursor-not-allowed'
@@ -820,15 +820,15 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
               </div>
 
               {/* Editor Panels */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-gray-100">
+              <div className="grid grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-gray-100 min-w-0">
                 {/* Left Panel */}
-                <div className="flex flex-col">
-                  <div className="flex items-center justify-between px-5 py-3 bg-gray-50/50 border-b border-gray-100">
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full bg-gray-300"></div>
-                      <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Original</span>
+                <div className="flex flex-col min-w-0">
+                  <div className="flex items-center justify-between px-3 sm:px-5 py-2.5 sm:py-3 bg-gray-50/50 border-b border-gray-100 gap-2 min-w-0">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <div className="w-2 h-2 rounded-full bg-gray-300 flex-shrink-0"></div>
+                      <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider truncate">Original</span>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
                       <button onClick={() => setInputText('')} className={`text-xs text-gray-400 hover:text-gray-600 transition-colors ${!inputText ? 'invisible' : ''}`}>Clear</button>
                       <button onClick={() => navigator.clipboard.readText().then(text => setInputText(text))} className="flex items-center gap-1 text-xs text-violet-600 hover:text-violet-700 font-medium transition-colors">
                         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
@@ -842,33 +842,33 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
                     onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey && isTextValid()) { e.preventDefault(); handleSubmit(); }}}
                     placeholder={placeholders[placeholderIndex]}
                     disabled={isHumanizing}
-                    className="w-full min-h-[280px] sm:min-h-[350px] p-5 text-gray-800 text-[15px] border-none outline-none resize-none bg-transparent placeholder-gray-400 leading-relaxed"
+                    className="w-full min-w-0 min-h-[240px] sm:min-h-[280px] md:min-h-[350px] p-3 sm:p-5 text-gray-800 text-[15px] border-none outline-none resize-none bg-transparent placeholder-gray-400 leading-relaxed"
                   />
-                  <div className="flex items-center justify-between px-5 py-3 bg-gray-50/30 border-t border-gray-100">
+                  <div className="flex items-center justify-between px-3 sm:px-5 py-2.5 sm:py-3 bg-gray-50/30 border-t border-gray-100">
                     <span className="text-xs text-gray-400 font-medium">{inputText.split(/\s+/).filter(Boolean).length} words</span>
                   </div>
                 </div>
 
                 {/* Right Panel */}
-                <div className="flex flex-col bg-gradient-to-br from-violet-50/30 to-purple-50/30">
-                  <div className="flex items-center justify-between px-5 py-3 bg-violet-50/50 border-b border-violet-100/50">
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full bg-violet-400"></div>
+                <div className="flex flex-col bg-gradient-to-br from-violet-50/30 to-purple-50/30 min-w-0">
+                  <div className="flex flex-wrap items-center justify-between gap-2 px-3 sm:px-5 py-2.5 sm:py-3 bg-violet-50/50 border-b border-violet-100/50 min-w-0">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <div className="w-2 h-2 rounded-full bg-violet-400 flex-shrink-0"></div>
                       <span className="text-xs font-semibold text-violet-600 uppercase tracking-wider">Humanized</span>
                     </div>
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
                       {showHumanizeResult && humanizedResult && (
                         <>
                           <button
                             onClick={() => setShowHighlights(!showHighlights)}
-                            className={`flex items-center gap-1.5 text-xs font-medium transition-all px-2 py-1 rounded-lg ${
+                            className={`flex items-center gap-1 sm:gap-1.5 text-xs font-medium transition-all px-1.5 sm:px-2 py-1 rounded-lg ${
                               showHighlights ? 'bg-violet-100 text-violet-700' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
                             }`}
                           >
-                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
                             </svg>
-                            Highlights
+                            <span className="hidden sm:inline">Highlights</span>
                           </button>
                           <button
                             onClick={() => { navigator.clipboard.writeText(humanizedResult); setHumanizeCopied(true); setTimeout(() => setHumanizeCopied(false), 2000); }}
@@ -880,9 +880,9 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
                       )}
                     </div>
                   </div>
-                  <div className="flex-1 min-h-[280px] sm:min-h-[350px] max-h-[280px] sm:max-h-[350px] overflow-y-auto">
+                  <div className="flex-1 min-h-[240px] sm:min-h-[280px] md:min-h-[350px] max-h-[260px] sm:max-h-[280px] md:max-h-[350px] overflow-y-auto overflow-x-hidden min-w-0">
                     {showHumanizeResult && humanizedResult ? (
-                      <div className="p-5 text-gray-800 text-[15px] leading-relaxed">
+                      <div className="p-3 sm:p-5 text-gray-800 text-[15px] leading-relaxed break-words">
                         {showHighlights ? (
                           (() => {
                             // Build a Set of normalized original words for O(1) lookup
@@ -932,7 +932,7 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
                       </div>
                     )}
                   </div>
-                  <div className="flex items-center justify-between px-5 py-3 bg-violet-50/30 border-t border-violet-100/50">
+                  <div className="flex items-center justify-between px-3 sm:px-5 py-2.5 sm:py-3 bg-violet-50/30 border-t border-violet-100/50">
                     <span className="text-xs text-gray-400 font-medium">{showHumanizeResult ? `${humanizedResult.split(/\s+/).filter(Boolean).length} words` : ''}</span>
                     {showHumanizeResult && humanizedResult && (
                       <button onClick={() => { setShowHumanizeResult(false); setHumanizedResult(''); }} className="text-xs text-gray-400 hover:text-gray-600 transition-colors">Clear result</button>
@@ -942,8 +942,8 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
               </div>
 
               {/* Usage Bar */}
-              <div className="px-5 py-4 bg-gray-50 border-t border-gray-100">
-                <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
+              <div className="px-3 sm:px-5 py-3 sm:py-4 bg-gray-50 border-t border-gray-100">
+                <div className="flex flex-wrap items-center justify-center gap-x-4 sm:gap-x-6 gap-y-2">
                   <div className="flex items-center gap-3">
                     <span className="text-xs text-gray-500">Monthly usage:</span>
                     {humanizeWordLimit >= 999999 ? (
@@ -974,7 +974,7 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
             </div>
 
             {humanizeError && (
-              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-2xl text-center">
+              <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-red-50 border border-red-200 rounded-2xl text-center">
                 <p className="text-red-700 text-sm font-medium">{humanizeError}</p>
                 {humanizeWordLimit < 999999 && (
                   <button onClick={() => onNavigate('pricing')} className="mt-2 px-4 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold rounded-lg transition-colors">
