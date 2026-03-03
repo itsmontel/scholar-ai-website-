@@ -176,11 +176,13 @@ router.post('/login', validateLogin, async (req, res) => {
     const token = generateToken(user.id);
 
     // Set httpOnly cookie with the JWT
+    // In dev, frontend (e.g. localhost:5173) and API (e.g. localhost:3001) are different origins,
+    // so we need sameSite: 'none' for the cookie to be sent with credentials: 'include'
     const isProduction = process.env.NODE_ENV === 'production';
     res.cookie('authToken', token, {
       httpOnly: true,
-      secure: isProduction,
-      sameSite: isProduction ? 'strict' : 'lax',
+      secure: true, // required for sameSite: 'none'; localhost is treated as secure
+      sameSite: isProduction ? 'strict' : 'none',
       maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
       path: '/'
     });
@@ -577,11 +579,12 @@ router.post('/refresh', authenticateToken, async (req, res) => {
 // @desc    Logout user (clear httpOnly cookie)
 // @access  Public (no auth required to clear cookie)
 router.post('/logout', (req, res) => {
-  // Clear the httpOnly cookie
+    // Clear the httpOnly cookie (same options as when setting, so it clears correctly)
+  const isProduction = process.env.NODE_ENV === 'production';
   res.cookie('authToken', '', {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
+    secure: true,
+    sameSite: isProduction ? 'strict' : 'none',
     maxAge: 0, // Expire immediately
     path: '/'
   });
@@ -610,12 +613,12 @@ router.get('/google/callback',
       // Generate JWT token for the user
       const token = generateToken(req.user.id);
       
-      // Set httpOnly cookie with the JWT
+      // Set httpOnly cookie with the JWT (sameSite: 'none' in dev for cross-origin request from frontend)
       const isProduction = process.env.NODE_ENV === 'production';
       res.cookie('authToken', token, {
         httpOnly: true,
-        secure: isProduction,
-        sameSite: isProduction ? 'strict' : 'lax',
+        secure: true,
+        sameSite: isProduction ? 'strict' : 'none',
         maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
         path: '/'
       });
