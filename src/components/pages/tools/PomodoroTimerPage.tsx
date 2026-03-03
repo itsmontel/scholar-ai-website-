@@ -390,20 +390,20 @@ const PomodoroTimerPage = ({ onNavigate, user, onLogout }: PomodoroTimerPageProp
             {/* Settings & Stats Panel */}
             <div className="space-y-6">
               {/* Session Stats */}
-              <div className={`bg-gradient-to-br ${colors.bg} rounded-2xl p-6 text-white`}>
+              <div className={`bg-gradient-to-br ${colors.bg} rounded-2xl p-4 sm:p-6 text-white overflow-hidden`}>
                 <h3 className="text-lg font-semibold mb-4 opacity-90">Today&apos;s Progress</h3>
                 <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <span className="opacity-80">Pomodoros</span>
-                    <span className="text-2xl font-bold">{completedPomodoros}</span>
+                  <div className="flex justify-between items-center gap-3 min-w-0">
+                    <span className="opacity-80 shrink min-w-0 truncate">Pomodoros</span>
+                    <span className="text-2xl font-bold shrink-0 tabular-nums">{completedPomodoros}</span>
                   </div>
-                  <div className="flex justify-between items-center">
-                    <span className="opacity-80">Focus Time</span>
-                    <span className="text-xl font-bold">{totalFocusTime} min</span>
+                  <div className="flex justify-between items-center gap-3 min-w-0">
+                    <span className="opacity-80 shrink min-w-0 truncate">Focus Time</span>
+                    <span className="text-xl font-bold shrink-0 tabular-nums">{totalFocusTime} min</span>
                   </div>
-                  <div className="flex justify-between items-center">
-                    <span className="opacity-80">Until Long Break</span>
-                    <span className="text-xl font-bold">{4 - (completedPomodoros % 4)}</span>
+                  <div className="flex justify-between items-center gap-3 min-w-0">
+                    <span className="opacity-80 shrink min-w-0 truncate">Until Long Break</span>
+                    <span className="text-xl font-bold shrink-0 tabular-nums">{4 - (completedPomodoros % 4)}</span>
                   </div>
                 </div>
                 <button
