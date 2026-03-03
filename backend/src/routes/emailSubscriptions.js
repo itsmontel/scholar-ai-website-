@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { query } = require('../database/connection');
+const { query, getSupabase } = require('../database/connection');
 const { authenticateToken } = require('../middleware/auth');
 const { emailSubscriptionLimiter } = require('../middleware/rateLimiting');
 const Joi = require('joi');
@@ -274,13 +274,12 @@ router.get('/list', authenticateToken, emailSubscriptionLimiter, async (req, res
 });
 
 // @route   POST /api/email-subscriptions/newsletter
-// @desc    Subscribe to newsletter (for blog visitors)
+// @desc    Subscribe to newsletter (for blog visitors). Saves to Supabase newsletter_subscriptions table.
 // @access  Public (but rate limited)
 router.post('/newsletter', emailSubscriptionLimiter, async (req, res) => {
   try {
     const { email } = req.body;
 
-    // Validate email format
     let normalizedEmail;
     try {
       normalizedEmail = validateEmail(email);
@@ -291,52 +290,55 @@ router.post('/newsletter', emailSubscriptionLimiter, async (req, res) => {
       });
     }
 
-    // Check if email already exists in newsletter subscriptions
-    const existingResult = await query(
-      'SELECT id, is_subscribed FROM email_subscriptions WHERE email = $1 AND subscription_type = $2',
-      [normalizedEmail, 'newsletter']
-    );
+    const supabase = getSupabase();
 
-    if (existingResult.rows.length > 0) {
-      const existing = existingResult.rows[0];
-      
-      // If already unsubscribed, allow re-subscription
-      if (!existing.is_subscribed) {
-        await query(
-          `UPDATE email_subscriptions 
-           SET is_subscribed = true, 
-               unsubscribed_at = NULL,
-               updated_at = CURRENT_TIMESTAMP
-           WHERE id = $1`,
-          [existing.id]
-        );
+    const { data: existing, error: selectError } = await supabase
+      .from('newsletter_subscriptions')
+      .select('id, email, subscribed_at')
+      .eq('email', normalizedEmail)
+      .maybeSingle();
 
-        return res.json({
-          success: true,
-          message: 'Welcome back! You\'ve been re-subscribed to our newsletter.',
-          data: { email: normalizedEmail }
-        });
-      }
+    if (selectError) {
+      console.error('Newsletter select error:', selectError);
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to subscribe. Please try again.'
+      });
+    }
 
+    if (existing) {
       return res.json({
         success: true,
-        message: 'You\'re already subscribed to our newsletter!',
+        message: "You're already subscribed to our newsletter!",
         data: { email: normalizedEmail }
       });
     }
 
-    // Insert new newsletter subscription
-    const result = await query(
-      `INSERT INTO email_subscriptions (email, user_id, is_subscribed, subscription_type, created_at, updated_at)
-       VALUES ($1, NULL, true, 'newsletter', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-       RETURNING id, email, is_subscribed, created_at`,
-      [normalizedEmail]
-    );
+    const { data: inserted, error: insertError } = await supabase
+      .from('newsletter_subscriptions')
+      .insert({ email: normalizedEmail })
+      .select('id, email, subscribed_at')
+      .single();
+
+    if (insertError) {
+      if (insertError.code === '23505') {
+        return res.json({
+          success: true,
+          message: "You're already subscribed to our newsletter!",
+          data: { email: normalizedEmail }
+        });
+      }
+      console.error('Newsletter insert error:', insertError);
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to subscribe. Please try again.'
+      });
+    }
 
     res.status(201).json({
       success: true,
-      message: 'Thanks for subscribing! You\'ll receive our latest updates.',
-      data: result.rows[0]
+      message: "Thanks for subscribing! You'll receive our latest updates.",
+      data: inserted
     });
   } catch (error) {
     console.error('Error subscribing to newsletter:', error);
