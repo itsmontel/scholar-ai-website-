@@ -313,17 +313,15 @@ router.get('/verify-email', async (req, res) => {
       return res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:5173'}?error=missing-token`);
     }
 
-    console.log('Verification attempt with token:', token);
-
     // Use userService to find and update the user
     const user = await userService.findUserByVerificationToken(token);
     
     if (!user) {
-      console.log('No user found with token:', token);
+      console.log('Email verification failed: invalid or expired token');
       return res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:5173'}?error=invalid-token`);
     }
 
-    console.log('User found:', user.email);
+    console.log('Email verification successful for user:', user.id);
 
     // Update the user to mark email as verified
     const updatedUser = await userService.updateUser(user.id, {
@@ -331,7 +329,7 @@ router.get('/verify-email', async (req, res) => {
       email_verification_token: null
     });
 
-    console.log('User updated:', updatedUser);
+    console.log('User email verified successfully');
 
     // Send welcome email
     const welcomeResult = await emailService.sendWelcomeEmail(user.email);

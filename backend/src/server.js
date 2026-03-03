@@ -29,6 +29,16 @@ if (process.env.USE_SUPABASE_STORAGE === 'true') {
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// Validate required environment variables in production
+if (process.env.NODE_ENV === 'production') {
+  const requiredEnvVars = ['JWT_SECRET', 'SESSION_SECRET', 'SUPABASE_URL', 'SUPABASE_ANON_KEY'];
+  const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
+  if (missingVars.length > 0) {
+    console.error(`FATAL: Missing required environment variables: ${missingVars.join(', ')}`);
+    process.exit(1);
+  }
+}
+
 // Security middleware
 app.use(securityMiddleware);
 app.use(compression());
@@ -54,7 +64,7 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Session middleware for Passport
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'your-session-secret-key',
+  secret: process.env.SESSION_SECRET || (process.env.NODE_ENV === 'production' ? undefined : 'dev-session-secret-key'),
   resave: false,
   saveUninitialized: false,
   cookie: {

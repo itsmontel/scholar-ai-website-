@@ -22,21 +22,16 @@ router.post('/stripe', express.raw({ type: 'application/json' }), async (req, re
     const signature = req.headers['stripe-signature'];
     const payload = req.body;
 
-    // Verify webhook signature (bypass for testing)
+    // Verify webhook signature
     let event;
-    if (signature && signature.includes('fake_signature_for_testing')) {
-      console.log('🔥 WEBHOOK: Bypassing signature verification for testing');
-      event = JSON.parse(payload);
-    } else {
-      const verificationResult = subscriptionService.verifyWebhookSignature(payload, signature);
-      
-      if (!verificationResult.success) {
-        console.error('Webhook signature verification failed:', verificationResult.error);
-        return res.status(400).json({ error: 'Invalid signature' });
-      }
-
-      event = verificationResult.event;
+    const verificationResult = subscriptionService.verifyWebhookSignature(payload, signature);
+    
+    if (!verificationResult.success) {
+      console.error('Webhook signature verification failed');
+      return res.status(400).json({ error: 'Invalid signature' });
     }
+
+    event = verificationResult.event;
     console.log(`Received Stripe webhook: ${event.type}`);
 
     // Handle different event types
