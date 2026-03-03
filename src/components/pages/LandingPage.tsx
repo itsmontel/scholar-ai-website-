@@ -13,6 +13,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
   const [openFAQ, setOpenFAQ] = useState<number | null>(null);
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('monthly');
   const [mode, setMode] = useState<'analyze' | 'citations' | 'humanize' | 'summarize' | 'quiz'>('analyze');
+  const [studyToolMode, setStudyToolMode] = useState<'quiz' | 'flashcards' | 'crossword'>('quiz');
   const [citationStyle, setCitationStyle] = useState('APA');
   const [citationYearRange, setCitationYearRange] = useState('all');
   const [showFakeAnimation, setShowFakeAnimation] = useState(false);
@@ -28,6 +29,8 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
   const [quizType, setQuizType] = useState<'mixed' | 'multiple_choice' | 'true_false' | 'fill_blank'>('mixed');
   const [quizDifficulty, setQuizDifficulty] = useState<'easy' | 'medium' | 'hard'>('medium');
   const [quizQuestionCount, setQuizQuestionCount] = useState(10);
+  const [flashcardCount, setFlashcardCount] = useState(15);
+  const [crosswordWordCount, setCrosswordWordCount] = useState(10);
   const [activeToolHover, setActiveToolHover] = useState<string | null>(null);
   const [activeHelpCategory, setActiveHelpCategory] = useState('essays');
 
@@ -94,9 +97,27 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
     "Test your knowledge with AI-generated questions..."
   ];
 
+  const flashcardPlaceholders = [
+    "Paste your notes to create flashcards...",
+    "Turn any content into study cards...",
+    "Memorize key concepts with flip cards..."
+  ];
+
+  const crosswordPlaceholders = [
+    "Paste content to generate a crossword puzzle...",
+    "Turn key terms into an interactive puzzle...",
+    "Learn vocabulary with crossword clues..."
+  ];
+
+  const getStudyToolPlaceholders = () => {
+    if (studyToolMode === 'flashcards') return flashcardPlaceholders;
+    if (studyToolMode === 'crossword') return crosswordPlaceholders;
+    return quizPlaceholders;
+  };
+
   const placeholders = mode === 'humanize' ? humanizePlaceholders
     : mode === 'summarize' ? summarizePlaceholders
-    : mode === 'quiz' ? quizPlaceholders
+    : mode === 'quiz' ? getStudyToolPlaceholders()
     : mode === 'analyze' ? analyzePlaceholders
     : citationPlaceholders;
 
@@ -205,11 +226,14 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
         setShowFakeSummaryResults(true);
       }, 6000);
     } else if (mode === 'quiz') {
-      localStorage.setItem('pendingQuiz', JSON.stringify({
+      localStorage.setItem('pendingStudyTool', JSON.stringify({
         text: inputText,
+        studyToolMode,
         quizType,
         difficulty: quizDifficulty,
-        questionCount: quizQuestionCount
+        questionCount: quizQuestionCount,
+        flashcardCount,
+        crosswordWordCount
       }));
       setTimeout(() => {
         setShowFakeAnimation(false);
@@ -411,6 +435,8 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
             ) : mode === 'summarize' ? (
                   <>Summarize <span className="text-teal-600">any document</span></>
             ) : mode === 'quiz' ? (
+                  studyToolMode === 'flashcards' ? <>Generate <span className="text-amber-600">flashcards</span></> :
+                  studyToolMode === 'crossword' ? <>Generate a <span className="text-amber-600">crossword puzzle</span></> :
                   <>Generate <span className="text-amber-600">quiz questions</span></>
             ) : mode === 'analyze' ? (
                   <>Your essay — improved with <span className="text-blue-600">AI assistance</span></>
@@ -434,11 +460,25 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                     <span className="flex items-center"><svg className="w-5 h-5 text-teal-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>1,000 words free</span>
                 </>
               ) : mode === 'quiz' ? (
-                <>
+                studyToolMode === 'flashcards' ? (
+                  <>
+                    <span className="flex items-center"><svg className="w-5 h-5 text-amber-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Flip card study sets</span>
+                    <span className="flex items-center"><svg className="w-5 h-5 text-amber-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Memorization aid</span>
+                    <span className="flex items-center"><svg className="w-5 h-5 text-amber-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>3 free/month</span>
+                  </>
+                ) : studyToolMode === 'crossword' ? (
+                  <>
+                    <span className="flex items-center"><svg className="w-5 h-5 text-amber-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Interactive puzzles</span>
+                    <span className="flex items-center"><svg className="w-5 h-5 text-amber-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Vocabulary builder</span>
+                    <span className="flex items-center"><svg className="w-5 h-5 text-amber-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>3 free/month</span>
+                  </>
+                ) : (
+                  <>
                     <span className="flex items-center"><svg className="w-5 h-5 text-amber-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Multiple choice &amp; T/F</span>
                     <span className="flex items-center"><svg className="w-5 h-5 text-amber-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Exam prep</span>
-                    <span className="flex items-center"><svg className="w-5 h-5 text-amber-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Paid feature</span>
-                </>
+                    <span className="flex items-center"><svg className="w-5 h-5 text-amber-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>3 free/month</span>
+                  </>
+                )
               ) : mode === 'analyze' ? (
                 <>
                     <span className="flex items-center"><svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Structure analysis</span>
@@ -496,7 +536,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                       mode === 'quiz' ? 'bg-white text-amber-700 shadow-sm' : 'text-amber-600 hover:text-amber-700'
                     }`}
                   >
-                    Quiz
+                    Study Tools
                     <span className="absolute -top-2 -right-1 px-1.5 py-0.5 bg-amber-600 text-white text-[10px] font-bold rounded-full leading-none">PRO</span>
               </button>
             </div>
@@ -506,10 +546,10 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
               <p className={`text-sm mb-4 flex items-center justify-start md:justify-center ${
                 mode === 'humanize' ? 'text-violet-600' : mode === 'summarize' ? 'text-teal-600' : mode === 'quiz' ? 'text-amber-600' : mode === 'analyze' ? 'text-blue-600' : 'text-cyan-600'
               }`}>
-                <span className="mr-1.5">{mode === 'humanize' ? '✨' : mode === 'summarize' ? '📝' : mode === 'quiz' ? '🧠' : '💡'}</span>
+                <span className="mr-1.5">{mode === 'humanize' ? '✨' : mode === 'summarize' ? '📝' : mode === 'quiz' ? (studyToolMode === 'flashcards' ? '🃏' : studyToolMode === 'crossword' ? '🧩' : '📝') : '💡'}</span>
                 {mode === 'humanize' ? 'Humanize ChatGPT, Gemini, Claude text — 1,000 free words/month'
                   : mode === 'summarize' ? 'Paste 50+ words — get bullet or paragraph summaries'
-                  : mode === 'quiz' ? '3 free quizzes/month — turn notes into study questions'
+                  : mode === 'quiz' ? (studyToolMode === 'flashcards' ? '3 free generations/month — turn notes into flip cards' : studyToolMode === 'crossword' ? '3 free generations/month — turn key terms into puzzles' : '3 free generations/month — turn notes into study questions')
                   : mode === 'analyze' ? 'AI analyzes, you refine for submission'
                   : 'Find sources, format citations automatically'}
               </p>
@@ -621,47 +661,108 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
               </div>
             )}
 
-              {/* Quiz Options (quiz mode only) */}
+              {/* Study Tools Options (quiz mode only) */}
             {mode === 'quiz' && (
-              <div className="flex justify-center mb-4">
-                <div className="inline-flex items-center gap-3 flex-wrap justify-center">
-                  <div className="inline-flex items-center bg-amber-50 rounded-xl px-4 py-2.5 border border-amber-200">
-                    <span className="text-amber-700 mr-2 text-sm">Type:</span>
-                    <select
-                      value={quizType}
-                      onChange={(e) => setQuizType(e.target.value as any)}
-                      className="bg-transparent font-medium text-gray-900 outline-none cursor-pointer text-sm"
-                    >
-                      <option value="mixed">Mixed</option>
-                      <option value="multiple_choice">Multiple choice</option>
-                      <option value="true_false">True/False</option>
-                      <option value="fill_blank">Fill blank</option>
-                    </select>
-                  </div>
-                  <div className="inline-flex items-center bg-amber-50 rounded-xl px-4 py-2.5 border border-amber-200">
-                    <span className="text-amber-700 mr-2 text-sm">Difficulty:</span>
-                    <select
-                      value={quizDifficulty}
-                      onChange={(e) => setQuizDifficulty(e.target.value as any)}
-                      className="bg-transparent font-medium text-gray-900 outline-none cursor-pointer text-sm"
-                    >
-                      <option value="easy">Easy</option>
-                      <option value="medium">Medium</option>
-                      <option value="hard">Hard</option>
-                    </select>
-                  </div>
-                  <div className="inline-flex items-center bg-amber-50 rounded-xl px-4 py-2.5 border border-amber-200">
-                    <span className="text-amber-700 mr-2 text-sm">Questions:</span>
-                    <select
-                      value={quizQuestionCount}
-                      onChange={(e) => setQuizQuestionCount(Number(e.target.value))}
-                      className="bg-transparent font-medium text-gray-900 outline-none cursor-pointer text-sm"
-                    >
-                      {[5, 10, 15, 20, 25].map(n => <option key={n} value={n}>{n}</option>)}
-                    </select>
+              <>
+                {/* Study Tool Sub-Mode Tabs */}
+                <div className="flex items-center justify-center gap-2 mb-4">
+                  <div className="inline-flex items-center bg-amber-50 border border-amber-200 rounded-2xl p-1.5">
+                    {([
+                      { key: 'quiz' as const, label: 'Quiz', icon: '📝' },
+                      { key: 'flashcards' as const, label: 'Flashcards', icon: '🃏' },
+                      { key: 'crossword' as const, label: 'Crossword', icon: '🧩' },
+                    ]).map((tool) => (
+                      <button
+                        key={tool.key}
+                        onClick={() => { setStudyToolMode(tool.key); setInputText(''); }}
+                        className={`px-4 sm:px-5 py-2 rounded-xl text-sm font-medium transition-all flex items-center gap-1.5 ${
+                          studyToolMode === tool.key
+                            ? 'bg-white text-amber-700 shadow-sm border border-amber-200'
+                            : 'text-amber-600 hover:text-amber-800 hover:bg-amber-100/50'
+                        }`}
+                      >
+                        <span className="text-base">{tool.icon}</span>
+                        <span className="hidden sm:inline">{tool.label}</span>
+                      </button>
+                    ))}
                   </div>
                 </div>
-              </div>
+
+                {/* Quiz-specific options */}
+                {studyToolMode === 'quiz' && (
+                  <div className="flex justify-center mb-4">
+                    <div className="inline-flex items-center gap-3 flex-wrap justify-center">
+                      <div className="inline-flex items-center bg-amber-50 rounded-xl px-4 py-2.5 border border-amber-200">
+                        <span className="text-amber-700 mr-2 text-sm">Type:</span>
+                        <select
+                          value={quizType}
+                          onChange={(e) => setQuizType(e.target.value as any)}
+                          className="bg-transparent font-medium text-gray-900 outline-none cursor-pointer text-sm"
+                        >
+                          <option value="mixed">Mixed</option>
+                          <option value="multiple_choice">Multiple choice</option>
+                          <option value="true_false">True/False</option>
+                          <option value="fill_blank">Fill blank</option>
+                        </select>
+                      </div>
+                      <div className="inline-flex items-center bg-amber-50 rounded-xl px-4 py-2.5 border border-amber-200">
+                        <span className="text-amber-700 mr-2 text-sm">Difficulty:</span>
+                        <select
+                          value={quizDifficulty}
+                          onChange={(e) => setQuizDifficulty(e.target.value as any)}
+                          className="bg-transparent font-medium text-gray-900 outline-none cursor-pointer text-sm"
+                        >
+                          <option value="easy">Easy</option>
+                          <option value="medium">Medium</option>
+                          <option value="hard">Hard</option>
+                        </select>
+                      </div>
+                      <div className="inline-flex items-center bg-amber-50 rounded-xl px-4 py-2.5 border border-amber-200">
+                        <span className="text-amber-700 mr-2 text-sm">Questions:</span>
+                        <select
+                          value={quizQuestionCount}
+                          onChange={(e) => setQuizQuestionCount(Number(e.target.value))}
+                          className="bg-transparent font-medium text-gray-900 outline-none cursor-pointer text-sm"
+                        >
+                          {[5, 10, 15, 20, 25].map(n => <option key={n} value={n}>{n}</option>)}
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Flashcard-specific options */}
+                {studyToolMode === 'flashcards' && (
+                  <div className="flex justify-center mb-4">
+                    <div className="inline-flex items-center bg-amber-50 rounded-xl px-4 py-2.5 border border-amber-200">
+                      <span className="text-amber-700 mr-2 text-sm">Cards:</span>
+                      <select
+                        value={flashcardCount}
+                        onChange={(e) => setFlashcardCount(Number(e.target.value))}
+                        className="bg-transparent font-medium text-gray-900 outline-none cursor-pointer text-sm"
+                      >
+                        {[5, 10, 15, 20, 25, 30].map(n => <option key={n} value={n}>{n}</option>)}
+                      </select>
+                    </div>
+                  </div>
+                )}
+
+                {/* Crossword-specific options */}
+                {studyToolMode === 'crossword' && (
+                  <div className="flex justify-center mb-4">
+                    <div className="inline-flex items-center bg-amber-50 rounded-xl px-4 py-2.5 border border-amber-200">
+                      <span className="text-amber-700 mr-2 text-sm">Words:</span>
+                      <select
+                        value={crosswordWordCount}
+                        onChange={(e) => setCrosswordWordCount(Number(e.target.value))}
+                        className="bg-transparent font-medium text-gray-900 outline-none cursor-pointer text-sm"
+                      >
+                        {[5, 8, 10, 12, 15].map(n => <option key={n} value={n}>{n}</option>)}
+                      </select>
+                    </div>
+                  </div>
+                )}
+              </>
             )}
 
               {/* Input Area with Character outside */}
@@ -702,7 +803,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                     }`}
                   >
                     <span className="mr-2">✨</span>
-                    {mode === 'humanize' ? 'Humanize Text' : mode === 'summarize' ? 'Summarize' : mode === 'quiz' ? 'Generate Quiz' : mode === 'analyze' ? 'Get Feedback' : 'Find Sources'}
+                    {mode === 'humanize' ? 'Humanize Text' : mode === 'summarize' ? 'Summarize' : mode === 'quiz' ? (studyToolMode === 'flashcards' ? 'Generate Flashcards' : studyToolMode === 'crossword' ? 'Generate Crossword' : 'Generate Quiz') : mode === 'analyze' ? 'Get Feedback' : 'Find Sources'}
                   </button>
                   
                   {/* Upload file option - only for analyze mode */}
@@ -2310,7 +2411,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
       )}
 
       {showFakeAnimation && mode === 'quiz' && (
-        <AnalysisAnimation isPopup={true} text="Generating quiz questions" isComplete={false} />
+        <AnalysisAnimation isPopup={true} text={studyToolMode === 'flashcards' ? 'Generating flashcards' : studyToolMode === 'crossword' ? 'Generating crossword puzzle' : 'Generating quiz questions'} isComplete={false} />
       )}
 
       {/* Fake Results Modal */}
@@ -2551,17 +2652,21 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
         </div>
       )}
 
-      {/* Fake Quiz Results Modal */}
+      {/* Fake Study Tools Results Modal */}
       {showFakeQuizResults && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 backdrop-blur-sm p-4">
           <div className="bg-white rounded-2xl p-6 sm:p-8 max-w-md w-full mx-4 shadow-2xl animate-fade-in">
             <div className="flex justify-center mb-4">
               <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center">
-                <span className="text-3xl">🧠</span>
+                <span className="text-3xl">{studyToolMode === 'flashcards' ? '🃏' : studyToolMode === 'crossword' ? '🧩' : '📝'}</span>
               </div>
             </div>
-            <h3 className="text-xl font-bold text-gray-900 text-center mb-2">Quiz Generated</h3>
-            <p className="text-gray-500 text-center text-sm mb-5">We&apos;ve created questions from your content</p>
+            <h3 className="text-xl font-bold text-gray-900 text-center mb-2">
+              {studyToolMode === 'flashcards' ? 'Flashcards Generated' : studyToolMode === 'crossword' ? 'Crossword Generated' : 'Quiz Generated'}
+            </h3>
+            <p className="text-gray-500 text-center text-sm mb-5">
+              {studyToolMode === 'flashcards' ? 'We\'ve created flip cards from your content' : studyToolMode === 'crossword' ? 'We\'ve created a puzzle from your content' : 'We\'ve created questions from your content'}
+            </p>
             <div className="space-y-3 mb-5">
               <div className="flex items-start p-3.5 bg-amber-50 rounded-xl border border-amber-100">
                 <span className="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center mr-3 flex-shrink-0 mt-0.5">
@@ -2570,8 +2675,12 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                   </svg>
                 </span>
                 <div>
-                  <p className="text-amber-800 font-semibold text-sm">Multiple choice &amp; true/false</p>
-                  <p className="text-amber-600 text-xs mt-0.5">Mix question types for better retention</p>
+                  <p className="text-amber-800 font-semibold text-sm">
+                    {studyToolMode === 'flashcards' ? 'Interactive flip cards' : studyToolMode === 'crossword' ? 'Interactive crossword puzzle' : 'Multiple choice & true/false'}
+                  </p>
+                  <p className="text-amber-600 text-xs mt-0.5">
+                    {studyToolMode === 'flashcards' ? 'Perfect for memorization and quick review' : studyToolMode === 'crossword' ? 'Fun way to learn key vocabulary' : 'Mix question types for better retention'}
+                  </p>
                 </div>
               </div>
               <div className="flex items-start p-3.5 bg-amber-50 rounded-xl border border-amber-100">
@@ -2581,21 +2690,23 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                   </svg>
                 </span>
                 <div>
-                  <p className="text-amber-800 font-semibold text-sm">Starter or Premium required</p>
-                  <p className="text-amber-600 text-xs mt-0.5">Sign up and upgrade to unlock the Quiz Generator</p>
+                  <p className="text-amber-800 font-semibold text-sm">3 free generations per month</p>
+                  <p className="text-amber-600 text-xs mt-0.5">Sign up to unlock Study Tools — upgrade for unlimited</p>
                 </div>
               </div>
             </div>
             <div className="bg-gray-50 rounded-xl p-3.5 mb-6">
               <p className="text-gray-600 text-sm text-center leading-relaxed">
-                <span className="font-semibold text-gray-800">Turn any notes into a quiz.</span> Great for exam prep and study sessions.
+                <span className="font-semibold text-gray-800">
+                  {studyToolMode === 'flashcards' ? 'Turn any notes into flashcards.' : studyToolMode === 'crossword' ? 'Turn key terms into puzzles.' : 'Turn any notes into a quiz.'}
+                </span> Great for exam prep and study sessions.
               </p>
             </div>
             <button
               onClick={handleContinueToSignup}
               className="w-full py-3.5 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-xl transition-all duration-200 hover:shadow-lg flex items-center justify-center"
             >
-              Sign up to unlock Quiz — it&apos;s free
+              Sign up to unlock Study Tools — it&apos;s free
               <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>

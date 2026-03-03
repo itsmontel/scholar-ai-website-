@@ -122,7 +122,9 @@ const AcademicAIApp = () => {
     'humanizer': { title: 'AI Humanizer – Bypass AI Detection | WriteScholar', description: 'Transform AI-generated text from ChatGPT, Claude, Gemini into undetectable human writing. Bypass Turnitin, GPTZero, and other AI detectors. Free to try.' },
     'summarizer': { title: 'AI Summarizer – Condense Papers & Articles | WriteScholar', description: 'Summarize research papers, articles, and textbooks into key points. Bullet points or paragraphs. Perfect for literature reviews. Free to try.' },
     'quiz-generator': { title: 'AI Quiz Generator – Create Study Quizzes from Text | WriteScholar', description: 'Turn notes, articles, and textbooks into interactive quizzes. Multiple choice, true/false questions. Perfect for exam prep. Free plan: 3 quizzes/month.' },
-    'quiz-history': { title: 'My Quizzes | WriteScholar', description: 'View and retake your saved quizzes. Quizzes are stored for 7 days.' }
+    'flashcard-generator': { title: 'AI Flashcard Generator – Create Study Flashcards from Text | WriteScholar', description: 'Transform your notes, articles, and textbooks into interactive flashcards. Perfect for memorization and exam prep. Free plan: 3 generations/month.' },
+    'crossword-generator': { title: 'AI Crossword Generator – Create Study Crosswords from Text | WriteScholar', description: 'Turn your notes and study materials into engaging crossword puzzles. Fun way to memorize key terms. Free plan: 3 generations/month.' },
+    'quiz-history': { title: 'My Study Tools | WriteScholar', description: 'View and retake your saved quizzes, flashcards, and crosswords. Study materials are stored for 7 days.' }
   };
   useEffect(() => {
     const meta = pageMeta[currentPage];
@@ -272,6 +274,7 @@ const AcademicAIApp = () => {
       if (pathname === '/analysis-history') return 'analysis-history';
       if (pathname === '/citation-results') return 'citation-results';
       if (pathname === '/citation-history') return 'citation-history';
+      if (pathname === '/quiz-history') return 'quiz-history';
       if (pathname === '/upload') return 'upload';
       if (pathname === '/settings') return 'settings';
       if (pathname === '/profile') return 'profile';
@@ -300,6 +303,8 @@ const AcademicAIApp = () => {
       if (pathname === '/tools/humanizer' || pathname === '/humanizer') return 'humanizer';
       if (pathname === '/tools/summarizer' || pathname === '/summarizer') return 'summarizer';
       if (pathname === '/tools/quiz-generator' || pathname === '/quiz-generator') return 'quiz-generator';
+      if (pathname === '/tools/flashcard-generator' || pathname === '/flashcard-generator') return 'flashcard-generator';
+      if (pathname === '/tools/crossword-generator' || pathname === '/crossword-generator') return 'crossword-generator';
       return 'landing';
     };
     
@@ -456,6 +461,8 @@ const AcademicAIApp = () => {
     humanizer: '/tools/humanizer',
     summarizer: '/tools/summarizer',
     'quiz-generator': '/tools/quiz-generator',
+    'flashcard-generator': '/tools/flashcard-generator',
+    'crossword-generator': '/tools/crossword-generator',
     'word-counter': '/tools/word-counter',
     'citation-generator-tool': '/tools/citation-generator',
     'readability-score': '/tools/readability-score',
@@ -617,7 +624,11 @@ const AcademicAIApp = () => {
       case 'summarizer':
         return <SummarizerPage onNavigate={navigateTo} user={user} />;
       case 'quiz-generator':
-        return <QuizGeneratorPage onNavigate={navigateTo} user={user} />;
+        return <QuizGeneratorPage onNavigate={navigateTo} user={user} initialStudyToolMode="quiz" />;
+      case 'flashcard-generator':
+        return <QuizGeneratorPage onNavigate={navigateTo} user={user} initialStudyToolMode="flashcards" />;
+      case 'crossword-generator':
+        return <QuizGeneratorPage onNavigate={navigateTo} user={user} initialStudyToolMode="crossword" />;
       case 'admin':
         return <AdminDashboard onNavigate={navigateTo} user={user} />;
       case 'collaboration':

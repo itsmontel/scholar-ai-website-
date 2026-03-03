@@ -50,6 +50,7 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
   const [summaryCopied, setSummaryCopied] = useState(false);
   
   // Quiz generator state
+  const [studyToolMode, setStudyToolMode] = useState<'quiz' | 'flashcards' | 'crossword'>('quiz');
   const [quizType, setQuizType] = useState<'mixed' | 'multiple_choice' | 'true_false' | 'fill_blank'>('mixed');
   const [quizDifficulty, setQuizDifficulty] = useState<'easy' | 'medium' | 'hard'>('medium');
   const [quizQuestionCount, setQuizQuestionCount] = useState(10);
@@ -62,6 +63,29 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
   const [selectedAnswer, setSelectedAnswer] = useState('');
   const [showQuizResult, setShowQuizResult] = useState(false);
   const [quizCompleted, setQuizCompleted] = useState(false);
+  
+  // Flashcard state
+  const [flashcardResult, setFlashcardResult] = useState<any>(null);
+  const [flashcardCount, setFlashcardCount] = useState(15);
+  const [isGeneratingFlashcards, setIsGeneratingFlashcards] = useState(false);
+  const [currentCard, setCurrentCard] = useState(0);
+  const [isFlipped, setIsFlipped] = useState(false);
+  const [knownCards, setKnownCards] = useState<Set<number>>(new Set());
+  
+  // Crossword state
+  const [crosswordResult, setCrosswordResult] = useState<any>(null);
+  const [crosswordWordCount, setCrosswordWordCount] = useState(10);
+  const [isGeneratingCrossword, setIsGeneratingCrossword] = useState(false);
+  const [crosswordAnswers, setCrosswordAnswers] = useState<Record<string, string>>({});
+  const [crosswordChecked, setCrosswordChecked] = useState(false);
+  const [selectedClue, setSelectedClue] = useState<number | null>(null);
+  const [selectedCell, setSelectedCell] = useState<{ row: number; col: number } | null>(null);
+  const [selectedDirection, setSelectedDirection] = useState<'across' | 'down'>('across');
+  const [hintsUsed, setHintsUsed] = useState(0);
+  
+  // Upgrade modal state (for locked features like export)
+  const [showExportUpgradeModal, setShowExportUpgradeModal] = useState(false);
+  
   const [quizUsage, setQuizUsage] = useState({
     generationsUsed: 0,
     generationLimit: 3,
@@ -375,7 +399,8 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
     if (mode === 'quiz') {
       const wordCount = getWordCount(inputText);
       const maxWords = quizUsage.maxWordsPerGeneration || 15000;
-      return wordCount >= 100 && wordCount <= maxWords;
+      const minWords = studyToolMode === 'quiz' ? 100 : 50;
+      return wordCount >= minWords && wordCount <= maxWords;
     }
     return getWordCount(inputText) >= 200;
   };
@@ -590,6 +615,297 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
     }
   };
 
+  const handleGenerateFlashcards = async () => {
+    if (quizExhausted) {
+      setQuizError('You\'ve used all 3 study tool generations this month. Upgrade for unlimited access.');
+      return;
+    }
+    setIsGeneratingFlashcards(true);
+    setQuizError('');
+    try {
+      const token = localStorage.getItem('authToken');
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/analysis/generate-flashcards`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ text: inputText, cardCount: isFreeUser ? 15 : flashcardCount })
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || 'Flashcard generation failed');
+      setFlashcardResult(data.data);
+      setCurrentCard(0);
+      setIsFlipped(false);
+      setKnownCards(new Set());
+      fetchQuizUsage();
+    } catch (error: any) {
+      setQuizError(error.message || 'Flashcard generation failed. Please try again.');
+    } finally {
+      setIsGeneratingFlashcards(false);
+    }
+  };
+
+  const handleGenerateCrossword = async () => {
+    if (quizExhausted) {
+      setQuizError('You\'ve used all 3 study tool generations this month. Upgrade for unlimited access.');
+      return;
+    }
+    setIsGeneratingCrossword(true);
+    setQuizError('');
+    try {
+      const token = localStorage.getItem('authToken');
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/analysis/generate-crossword`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ text: inputText, wordCount: isFreeUser ? 10 : crosswordWordCount })
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || 'Crossword generation failed');
+      setCrosswordResult(data.data);
+      setCrosswordAnswers({});
+      setCrosswordChecked(false);
+      setSelectedClue(null);
+      setSelectedCell(null);
+      setHintsUsed(0);
+      fetchQuizUsage();
+    } catch (error: any) {
+      setQuizError(error.message || 'Crossword generation failed. Please try again.');
+    } finally {
+      setIsGeneratingCrossword(false);
+    }
+  };
+
+  // Get the letter at a specific cell position based on user's answers
+  const getCellLetter = (rowIdx: number, colIdx: number): string => {
+    if (!crosswordResult?.placedWords) return '';
+    
+    for (const pw of crosswordResult.placedWords) {
+      const answer = crosswordAnswers[`word-${pw.number}`] || '';
+      let letterIndex = -1;
+      
+      if (pw.direction === 'across' && rowIdx === pw.row && colIdx >= pw.col && colIdx < pw.col + pw.length) {
+        letterIndex = colIdx - pw.col;
+      } else if (pw.direction === 'down' && colIdx === pw.col && rowIdx >= pw.row && rowIdx < pw.row + pw.length) {
+        letterIndex = rowIdx - pw.row;
+      }
+      
+      if (letterIndex >= 0 && letterIndex < answer.length) {
+        return answer[letterIndex];
+      }
+    }
+    return '';
+  };
+
+  // Get word(s) that pass through a specific cell
+  const getWordsAtCell = (rowIdx: number, colIdx: number): any[] => {
+    if (!crosswordResult?.placedWords) return [];
+    return crosswordResult.placedWords.filter((pw: any) => {
+      if (pw.direction === 'across') {
+        return rowIdx === pw.row && colIdx >= pw.col && colIdx < pw.col + pw.length;
+      }
+      return colIdx === pw.col && rowIdx >= pw.row && rowIdx < pw.row + pw.length;
+    });
+  };
+
+  // Handle cell click in crossword
+  const handleCellClick = (rowIdx: number, colIdx: number) => {
+    if (crosswordChecked) return;
+    
+    const wordsAtCell = getWordsAtCell(rowIdx, colIdx);
+    if (wordsAtCell.length === 0) return;
+    
+    // If clicking the same cell, toggle direction
+    if (selectedCell?.row === rowIdx && selectedCell?.col === colIdx) {
+      const hasAcross = wordsAtCell.some((pw: any) => pw.direction === 'across');
+      const hasDown = wordsAtCell.some((pw: any) => pw.direction === 'down');
+      if (hasAcross && hasDown) {
+        setSelectedDirection(selectedDirection === 'across' ? 'down' : 'across');
+        const newWord = wordsAtCell.find((pw: any) => pw.direction === (selectedDirection === 'across' ? 'down' : 'across'));
+        if (newWord) setSelectedClue(newWord.number);
+      }
+    } else {
+      setSelectedCell({ row: rowIdx, col: colIdx });
+      // Prefer the current direction if available, otherwise use whatever is available
+      const preferredWord = wordsAtCell.find((pw: any) => pw.direction === selectedDirection);
+      const word = preferredWord || wordsAtCell[0];
+      if (word) {
+        setSelectedDirection(word.direction);
+        setSelectedClue(word.number);
+      }
+    }
+  };
+
+  // Handle keyboard input for crossword
+  const handleCrosswordKeyDown = (e: React.KeyboardEvent) => {
+    if (crosswordChecked || !selectedCell || !crosswordResult) return;
+    
+    const { row, col } = selectedCell;
+    const wordsAtCell = getWordsAtCell(row, col);
+    const currentWord = wordsAtCell.find((pw: any) => pw.direction === selectedDirection) || wordsAtCell[0];
+    
+    if (!currentWord) return;
+    
+    const answerKey = `word-${currentWord.number}`;
+    const currentAnswer = crosswordAnswers[answerKey] || '';
+    
+    // Calculate position in the word
+    const letterIndex = selectedDirection === 'across' 
+      ? col - currentWord.col 
+      : row - currentWord.row;
+    
+    if (e.key.length === 1 && /[a-zA-Z]/.test(e.key)) {
+      e.preventDefault();
+      // Build new answer with the letter at the correct position
+      let newAnswer = currentAnswer.split('');
+      while (newAnswer.length <= letterIndex) newAnswer.push('');
+      newAnswer[letterIndex] = e.key.toUpperCase();
+      setCrosswordAnswers({ ...crosswordAnswers, [answerKey]: newAnswer.join('') });
+      
+      // Move to next cell
+      if (letterIndex < currentWord.length - 1) {
+        if (selectedDirection === 'across') {
+          setSelectedCell({ row, col: col + 1 });
+        } else {
+          setSelectedCell({ row: row + 1, col });
+        }
+      }
+    } else if (e.key === 'Backspace') {
+      e.preventDefault();
+      let newAnswer = currentAnswer.split('');
+      if (letterIndex < newAnswer.length && newAnswer[letterIndex]) {
+        // Delete current cell
+        newAnswer[letterIndex] = '';
+        setCrosswordAnswers({ ...crosswordAnswers, [answerKey]: newAnswer.join('').replace(/\s+$/, '') });
+      } else if (letterIndex > 0) {
+        // Move back and delete
+        newAnswer[letterIndex - 1] = '';
+        setCrosswordAnswers({ ...crosswordAnswers, [answerKey]: newAnswer.join('').replace(/\s+$/, '') });
+        if (selectedDirection === 'across') {
+          setSelectedCell({ row, col: col - 1 });
+        } else {
+          setSelectedCell({ row: row - 1, col });
+        }
+      }
+    } else if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      const nextCol = col + 1;
+      if (crosswordResult.grid[row] && crosswordResult.grid[row][nextCol] !== '' && crosswordResult.grid[row][nextCol] !== undefined) {
+        setSelectedCell({ row, col: nextCol });
+        setSelectedDirection('across');
+        const newWords = getWordsAtCell(row, nextCol);
+        const newWord = newWords.find((pw: any) => pw.direction === 'across') || newWords[0];
+        if (newWord) setSelectedClue(newWord.number);
+      }
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      const prevCol = col - 1;
+      if (prevCol >= 0 && crosswordResult.grid[row] && crosswordResult.grid[row][prevCol] !== '' && crosswordResult.grid[row][prevCol] !== undefined) {
+        setSelectedCell({ row, col: prevCol });
+        setSelectedDirection('across');
+        const newWords = getWordsAtCell(row, prevCol);
+        const newWord = newWords.find((pw: any) => pw.direction === 'across') || newWords[0];
+        if (newWord) setSelectedClue(newWord.number);
+      }
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      const nextRow = row + 1;
+      if (crosswordResult.grid[nextRow] && crosswordResult.grid[nextRow][col] !== '' && crosswordResult.grid[nextRow][col] !== undefined) {
+        setSelectedCell({ row: nextRow, col });
+        setSelectedDirection('down');
+        const newWords = getWordsAtCell(nextRow, col);
+        const newWord = newWords.find((pw: any) => pw.direction === 'down') || newWords[0];
+        if (newWord) setSelectedClue(newWord.number);
+      }
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      const prevRow = row - 1;
+      if (prevRow >= 0 && crosswordResult.grid[prevRow] && crosswordResult.grid[prevRow][col] !== '' && crosswordResult.grid[prevRow][col] !== undefined) {
+        setSelectedCell({ row: prevRow, col });
+        setSelectedDirection('down');
+        const newWords = getWordsAtCell(prevRow, col);
+        const newWord = newWords.find((pw: any) => pw.direction === 'down') || newWords[0];
+        if (newWord) setSelectedClue(newWord.number);
+      }
+    } else if (e.key === 'Tab') {
+      e.preventDefault();
+      // Move to next word
+      const currentWordIndex = crosswordResult.placedWords.findIndex((pw: any) => pw.number === selectedClue);
+      const nextWordIndex = (currentWordIndex + 1) % crosswordResult.placedWords.length;
+      const nextWord = crosswordResult.placedWords[nextWordIndex];
+      if (nextWord) {
+        setSelectedClue(nextWord.number);
+        setSelectedDirection(nextWord.direction);
+        setSelectedCell({ row: nextWord.row, col: nextWord.col });
+      }
+    }
+  };
+
+  // Reveal one unfilled letter from the selected word (or any word if none selected)
+  const handleCrosswordHint = () => {
+    if (!crosswordResult?.placedWords || crosswordChecked) return;
+
+    // Prefer the currently selected word, otherwise pick first word with missing letters
+    const candidateWords = selectedClue !== null
+      ? crosswordResult.placedWords.filter((pw: any) => pw.number === selectedClue)
+      : crosswordResult.placedWords;
+
+    for (const pw of candidateWords) {
+      const answerKey = `word-${pw.number}`;
+      const currentAnswer = (crosswordAnswers[answerKey] || '').split('');
+
+      // Find the first missing or wrong letter in this word
+      let hintIndex = -1;
+      for (let i = 0; i < pw.word.length; i++) {
+        if (!currentAnswer[i] || currentAnswer[i] !== pw.word[i]) {
+          hintIndex = i;
+          break;
+        }
+      }
+
+      if (hintIndex >= 0) {
+        // Fill in that letter
+        const newAnswer = currentAnswer.slice();
+        while (newAnswer.length <= hintIndex) newAnswer.push('');
+        newAnswer[hintIndex] = pw.word[hintIndex];
+        setCrosswordAnswers({ ...crosswordAnswers, [answerKey]: newAnswer.join('') });
+
+        // Move cell selection to the hinted position
+        if (pw.direction === 'across') {
+          setSelectedCell({ row: pw.row, col: pw.col + hintIndex });
+        } else {
+          setSelectedCell({ row: pw.row + hintIndex, col: pw.col });
+        }
+        setSelectedClue(pw.number);
+        setSelectedDirection(pw.direction);
+        setHintsUsed(h => h + 1);
+        return;
+      }
+    }
+
+    // If selected word is fully correct, fall back to any word with missing letters
+    if (selectedClue !== null) {
+      for (const pw of crosswordResult.placedWords) {
+        const answerKey = `word-${pw.number}`;
+        const currentAnswer = (crosswordAnswers[answerKey] || '').split('');
+        for (let i = 0; i < pw.word.length; i++) {
+          if (!currentAnswer[i] || currentAnswer[i] !== pw.word[i]) {
+            const newAnswer = currentAnswer.slice();
+            while (newAnswer.length <= i) newAnswer.push('');
+            newAnswer[i] = pw.word[i];
+            setCrosswordAnswers({ ...crosswordAnswers, [answerKey]: newAnswer.join('') });
+            if (pw.direction === 'across') {
+              setSelectedCell({ row: pw.row, col: pw.col + i });
+            } else {
+              setSelectedCell({ row: pw.row + i, col: pw.col });
+            }
+            setSelectedClue(pw.number);
+            setSelectedDirection(pw.direction);
+            setHintsUsed(h => h + 1);
+            return;
+          }
+        }
+      }
+    }
+  };
+
   const exportQuizToPDF = () => {
     if (!quizResult) return;
     const doc = new jsPDF();
@@ -690,6 +1006,216 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
     saveAs(blob, `quiz-${Date.now()}.docx`);
   };
 
+  const exportFlashcardsToPDF = () => {
+    if (!flashcardResult?.cards?.length) return;
+    const doc = new jsPDF();
+    const margin = 20;
+    const pageHeight = doc.internal.pageSize.height;
+    let yPos = 20;
+
+    doc.setFontSize(18);
+    doc.setFont('helvetica', 'bold');
+    const titleLines = doc.splitTextToSize(flashcardResult.title || 'Flashcards', 170);
+    doc.text(titleLines, margin, yPos);
+    yPos += titleLines.length * 8 + 4;
+
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(100);
+    doc.text(`${flashcardResult.cards.length} cards`, margin, yPos);
+    doc.setTextColor(0);
+    yPos += 12;
+
+    flashcardResult.cards.forEach((card: any, idx: number) => {
+      if (yPos > pageHeight - 50) { doc.addPage(); yPos = 20; }
+
+      // Card number
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(180, 120, 0);
+      doc.text(`Card ${idx + 1}`, margin, yPos);
+      doc.setTextColor(0);
+      yPos += 6;
+
+      // Front
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Front:', margin, yPos);
+      yPos += 6;
+      doc.setFont('helvetica', 'normal');
+      const frontLines = doc.splitTextToSize(card.front || '', 165);
+      doc.text(frontLines, margin + 4, yPos);
+      yPos += frontLines.length * 6 + 4;
+
+      // Back
+      if (yPos > pageHeight - 30) { doc.addPage(); yPos = 20; }
+      doc.setFont('helvetica', 'bold');
+      doc.text('Back:', margin, yPos);
+      yPos += 6;
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(60, 100, 60);
+      const backLines = doc.splitTextToSize(card.back || '', 165);
+      doc.text(backLines, margin + 4, yPos);
+      doc.setTextColor(0);
+      yPos += backLines.length * 6 + 10;
+
+      // Divider
+      if (idx < flashcardResult.cards.length - 1) {
+        doc.setDrawColor(220);
+        doc.line(margin, yPos - 4, 190, yPos - 4);
+      }
+    });
+
+    doc.save(`flashcards-${Date.now()}.pdf`);
+  };
+
+  const exportFlashcardsToDOCX = async () => {
+    if (!flashcardResult?.cards?.length) return;
+    const children: any[] = [];
+
+    children.push(new Paragraph({ text: flashcardResult.title || 'Flashcards', heading: HeadingLevel.HEADING_1 }));
+    children.push(new Paragraph({ children: [new TextRun({ text: `${flashcardResult.cards.length} cards`, size: 20, color: '666666' })] }));
+    children.push(new Paragraph({ text: '' }));
+
+    flashcardResult.cards.forEach((card: any, idx: number) => {
+      children.push(new Paragraph({ children: [new TextRun({ text: `Card ${idx + 1}`, bold: true, color: 'B47800', size: 20 })] }));
+      children.push(new Paragraph({ children: [new TextRun({ text: 'Front: ', bold: true }), new TextRun({ text: card.front || '' })] }));
+      children.push(new Paragraph({ children: [new TextRun({ text: 'Back: ', bold: true }), new TextRun({ text: card.back || '', color: '3C643C' })] }));
+      children.push(new Paragraph({ text: '' }));
+    });
+
+    const docFile = new Document({ sections: [{ children }] });
+    const blob = await Packer.toBlob(docFile);
+    saveAs(blob, `flashcards-${Date.now()}.docx`);
+  };
+
+  const exportCrosswordToPDF = () => {
+    if (!crosswordResult?.placedWords?.length) return;
+    const doc = new jsPDF();
+    const margin = 20;
+    const pageHeight = doc.internal.pageSize.height;
+    let yPos = 20;
+
+    doc.setFontSize(18);
+    doc.setFont('helvetica', 'bold');
+    const titleLines = doc.splitTextToSize(crosswordResult.title || 'Crossword', 170);
+    doc.text(titleLines, margin, yPos);
+    yPos += titleLines.length * 8 + 4;
+
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(100);
+    doc.text(`${crosswordResult.placedWords.length} words`, margin, yPos);
+    doc.setTextColor(0);
+    yPos += 12;
+
+    // Draw crossword grid
+    const grid = crosswordResult.grid;
+    if (grid?.length) {
+      const cellSize = Math.min(8, Math.floor(160 / grid[0].length));
+      const gridStartX = margin;
+      const gridStartY = yPos;
+
+      grid.forEach((row: string[], ri: number) => {
+        row.forEach((cell: string, ci: number) => {
+          const x = gridStartX + ci * cellSize;
+          const y = gridStartY + ri * cellSize;
+          if (cell !== '') {
+            doc.setDrawColor(100, 100, 100);
+            doc.setFillColor(255, 255, 255);
+            doc.rect(x, y, cellSize, cellSize, 'FD');
+            // Cell number
+            const wordAtCell = crosswordResult.placedWords.find((pw: any) => pw.row === ri && pw.col === ci);
+            if (wordAtCell) {
+              doc.setFontSize(4);
+              doc.setTextColor(80, 80, 80);
+              doc.text(String(wordAtCell.number), x + 0.5, y + 3.5);
+              doc.setTextColor(0, 0, 0);
+            }
+          } else {
+            doc.setFillColor(40, 40, 40);
+            doc.rect(x, y, cellSize, cellSize, 'F');
+          }
+        });
+      });
+
+      yPos = gridStartY + grid.length * cellSize + 14;
+    }
+
+    // Clues
+    ['across', 'down'].forEach(dir => {
+      const words = crosswordResult.placedWords
+        .filter((pw: any) => pw.direction === dir)
+        .sort((a: any, b: any) => a.number - b.number);
+      if (!words.length) return;
+
+      if (yPos > pageHeight - 30) { doc.addPage(); yPos = 20; }
+      doc.setFontSize(13);
+      doc.setFont('helvetica', 'bold');
+      doc.text(dir === 'across' ? 'Across' : 'Down', margin, yPos);
+      yPos += 8;
+
+      words.forEach((pw: any) => {
+        if (yPos > pageHeight - 15) { doc.addPage(); yPos = 20; }
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
+        const clueText = doc.splitTextToSize(`${pw.number}. ${pw.clue} (${pw.word.length} letters)`, 165);
+        doc.text(clueText, margin + 2, yPos);
+        yPos += clueText.length * 6 + 2;
+      });
+      yPos += 4;
+    });
+
+    // Answer key
+    if (yPos > pageHeight - 40) { doc.addPage(); yPos = 20; }
+    doc.setFontSize(13);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Answer Key', margin, yPos);
+    yPos += 8;
+    const allWords = [...crosswordResult.placedWords].sort((a: any, b: any) => a.number - b.number);
+    allWords.forEach((pw: any) => {
+      if (yPos > pageHeight - 12) { doc.addPage(); yPos = 20; }
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`${pw.number}. ${pw.word} (${pw.direction})`, margin + 2, yPos);
+      yPos += 6;
+    });
+
+    doc.save(`crossword-${Date.now()}.pdf`);
+  };
+
+  const exportCrosswordToDOCX = async () => {
+    if (!crosswordResult?.placedWords?.length) return;
+    const children: any[] = [];
+
+    children.push(new Paragraph({ text: crosswordResult.title || 'Crossword', heading: HeadingLevel.HEADING_1 }));
+    children.push(new Paragraph({ children: [new TextRun({ text: `${crosswordResult.placedWords.length} words`, size: 20, color: '666666' })] }));
+    children.push(new Paragraph({ text: '' }));
+
+    ['across', 'down'].forEach(dir => {
+      const words = crosswordResult.placedWords
+        .filter((pw: any) => pw.direction === dir)
+        .sort((a: any, b: any) => a.number - b.number);
+      if (!words.length) return;
+
+      children.push(new Paragraph({ text: dir === 'across' ? 'Across' : 'Down', heading: HeadingLevel.HEADING_2 }));
+      words.forEach((pw: any) => {
+        children.push(new Paragraph({ children: [new TextRun({ text: `${pw.number}. `, bold: true }), new TextRun({ text: `${pw.clue} (${pw.word.length} letters)` })] }));
+      });
+      children.push(new Paragraph({ text: '' }));
+    });
+
+    children.push(new Paragraph({ text: 'Answer Key', heading: HeadingLevel.HEADING_2 }));
+    const allWords = [...crosswordResult.placedWords].sort((a: any, b: any) => a.number - b.number);
+    allWords.forEach((pw: any) => {
+      children.push(new Paragraph({ children: [new TextRun({ text: `${pw.number}. `, bold: true }), new TextRun({ text: `${pw.word}`, color: '1A5C1A' }), new TextRun({ text: ` (${pw.direction})`, italics: true, color: '666666' })] }));
+    });
+
+    const docFile = new Document({ sections: [{ children }] });
+    const blob = await Packer.toBlob(docFile);
+    saveAs(blob, `crossword-${Date.now()}.docx`);
+  };
+
   const handleSubmit = () => {
     if (mode === 'humanize') {
       handleHumanize();
@@ -698,7 +1224,9 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
     } else if (mode === 'summarize') {
       handleSummarize();
     } else if (mode === 'quiz') {
-      handleGenerateQuiz();
+      if (studyToolMode === 'flashcards') handleGenerateFlashcards();
+      else if (studyToolMode === 'crossword') handleGenerateCrossword();
+      else handleGenerateQuiz();
     } else {
       handleAnalyze();
     }
@@ -755,6 +1283,8 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
             ) : mode === 'summarize' ? (
               <>Summarize <span className="text-teal-600">any document</span></>
             ) : mode === 'quiz' ? (
+              studyToolMode === 'flashcards' ? <>Generate <span className="text-amber-600">flashcards</span></> :
+              studyToolMode === 'crossword' ? <>Generate a <span className="text-amber-600">crossword puzzle</span></> :
               <>Generate <span className="text-amber-600">quiz questions</span></>
             ) : mode === 'analyze' ? (
               <>Analyze your <span className="text-blue-600">academic writing</span></>
@@ -768,7 +1298,7 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
               : mode === 'summarize'
               ? 'Transform lengthy papers into concise key points instantly'
               : mode === 'quiz'
-              ? 'Turn any content into interactive quiz questions'
+              ? (studyToolMode === 'flashcards' ? 'Turn your notes into flip-card study sets' : studyToolMode === 'crossword' ? 'Turn key terms into an interactive crossword puzzle' : 'Turn any content into interactive quiz questions')
               : mode === 'analyze' 
               ? 'Upload your document or paste your text to get our advanced AI feedback on structure, grammar, and citations'
               : 'Enter your topic to discover relevant academic sources'
@@ -813,12 +1343,12 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
               Summarize
               </button>
               <button
-              onClick={() => { setMode('quiz'); setInputText(''); setShowWordWarning(false); setShowHumanizeResult(false); setSummaryResult(null); }}
+              onClick={() => { setMode('quiz'); setInputText(''); setShowWordWarning(false); setShowHumanizeResult(false); setSummaryResult(null); setFlashcardResult(null); setCrosswordResult(null); }}
               className={`px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-sm sm:text-base font-medium transition-all relative ${
                 mode === 'quiz' ? 'bg-white text-amber-700 shadow-sm' : 'text-amber-600 hover:text-amber-700'
               }`}
             >
-              Quiz
+              Study Tools
               {usageStats.plan === 'free' && <span className="absolute -top-2 -right-1 px-1.5 py-0.5 bg-amber-600 text-white text-[10px] font-bold rounded-full leading-none">PRO</span>}
               </button>
             </div>
@@ -1472,15 +2002,39 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
           </>
         )}
 
-        {/* QUIZ MODE */}
+        {/* STUDY TOOLS MODE (Quiz / Flashcards / Crossword) */}
         {mode === 'quiz' && (
           <>
+            {/* Study Tool Sub-Mode Tabs */}
+            <div className="flex items-center justify-center gap-2 mb-6">
+              <div className="inline-flex items-center bg-amber-50 border border-amber-200 rounded-2xl p-1.5">
+                {([
+                  { key: 'quiz' as const, label: 'Quiz', icon: '📝' },
+                  { key: 'flashcards' as const, label: 'Flashcards', icon: '🃏' },
+                  { key: 'crossword' as const, label: 'Crossword', icon: '🧩' },
+                ]).map((tool) => (
+                  <button
+                    key={tool.key}
+                    onClick={() => { setStudyToolMode(tool.key); setQuizResult(null); setFlashcardResult(null); setCrosswordResult(null); setQuizError(''); setIsQuizMode(false); }}
+                    className={`px-4 sm:px-5 py-2 rounded-xl text-sm font-medium transition-all flex items-center gap-1.5 ${
+                      studyToolMode === tool.key
+                        ? 'bg-white text-amber-700 shadow-sm border border-amber-200'
+                        : 'text-amber-600 hover:text-amber-800 hover:bg-amber-100/50'
+                    }`}
+                  >
+                    <span className="text-base">{tool.icon}</span>
+                    <span className="hidden sm:inline">{tool.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
             {/* Exhausted generations banner for free users */}
             {quizExhausted && (
               <div className="mb-6 bg-gradient-to-r from-amber-600 to-orange-600 rounded-2xl p-6 text-white text-center">
                 <span className="text-4xl mb-3 block">🔒</span>
                 <h3 className="text-xl font-bold mb-2">Monthly Limit Reached</h3>
-                <p className="text-amber-100 mb-4">You've used all 3 quiz generations this month. Upgrade for unlimited quizzes!</p>
+                <p className="text-amber-100 mb-4">You've used all 3 study tool generations this month. Upgrade for unlimited access!</p>
                 <button
                   onClick={() => onNavigate('pricing')}
                   className="px-6 py-2.5 bg-white text-amber-700 font-semibold rounded-xl hover:bg-amber-50 transition-all inline-flex items-center gap-2"
@@ -1499,13 +2053,13 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                     {isFreeUser ? (
                       <>
                         <p className="text-amber-800 font-medium text-sm">
-                          Free plan: {quizUsage.generationsRemaining} of {quizUsage.generationLimit} quizzes remaining • Mixed type • Medium difficulty • 10 questions • Max {(quizUsage.maxWordsPerGeneration || 5000).toLocaleString()} words
+                          Free plan: {quizUsage.generationsRemaining} of {quizUsage.generationLimit} generations remaining • Max {(quizUsage.maxWordsPerGeneration || 5000).toLocaleString()} words
                         </p>
-                        <p className="text-amber-600 text-xs mt-0.5">Upgrade for unlimited quizzes, all options, and up to 15,000 words</p>
+                        <p className="text-amber-600 text-xs mt-0.5">Upgrade for unlimited quizzes, flashcards, crosswords, and up to 15,000 words</p>
                       </>
                     ) : (
                       <>
-                        <p className="text-amber-800 font-medium text-sm">Starter plan: Mixed type + Medium difficulty only</p>
+                        <p className="text-amber-800 font-medium text-sm">Starter plan: Quiz limited to Mixed type + Medium difficulty</p>
                         <p className="text-amber-600 text-xs mt-0.5">Upgrade to Premium for all quiz types, difficulties, and GPT-4.1 Mini</p>
                       </>
                     )}
@@ -1517,252 +2071,789 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
               </div>
             )}
 
-            {/* Quiz Taking View */}
-            {quizResult && isQuizMode && (
-              <div className={`bg-white rounded-2xl sm:rounded-3xl shadow-xl border border-gray-100 overflow-hidden mb-6 ${!canUseQuiz ? 'opacity-50 pointer-events-none' : ''}`}>
-                {quizCompleted ? (
-                  <div className="p-8 text-center">
-                    <div className={`w-24 h-24 mx-auto rounded-full flex items-center justify-center mb-4 text-4xl ${userAnswers.filter(a => a.isCorrect).length / userAnswers.length >= 0.7 ? 'bg-gradient-to-br from-green-500 to-emerald-600' : 'bg-gradient-to-br from-amber-500 to-orange-600'}`}>🏆</div>
-                    <h2 className="text-3xl font-bold text-gray-900 mb-2">Quiz Complete!</h2>
-                    <div className="text-5xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent my-4">
-                      {Math.round((userAnswers.filter(a => a.isCorrect).length / userAnswers.length) * 100)}%
-                    </div>
-                    <p className="text-gray-600">{userAnswers.filter(a => a.isCorrect).length} out of {userAnswers.length} correct</p>
-                    
-                    {/* Export Buttons */}
-                    <div className="flex justify-center gap-2 mt-6 mb-4">
-                      <button onClick={exportQuizToPDF} className="px-4 py-2 bg-red-50 text-red-700 font-medium rounded-lg hover:bg-red-100 transition-colors flex items-center gap-2 text-sm">
-                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd"/></svg>
-                        Download PDF
-                      </button>
-                      <button onClick={exportQuizToDOCX} className="px-4 py-2 bg-blue-50 text-blue-700 font-medium rounded-lg hover:bg-blue-100 transition-colors flex items-center gap-2 text-sm">
-                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd"/></svg>
-                        Download DOCX
-                      </button>
-                    </div>
-                    
-                    <div className="flex justify-center gap-3">
-                      <button onClick={() => { setCurrentQuestion(0); setUserAnswers([]); setQuizCompleted(false); setSelectedAnswer(''); setShowQuizResult(false); }} className="px-6 py-3 bg-gray-100 text-gray-700 font-semibold rounded-xl">Try Again</button>
-                      <button onClick={() => { setQuizResult(null); setIsQuizMode(false); }} className="px-6 py-3 bg-gradient-to-r from-amber-600 to-orange-600 text-white font-semibold rounded-xl">New Quiz</button>
-                    </div>
-                  </div>
-                ) : (
-                  <>
-                    <div className="h-2 bg-gray-100"><div className="h-full bg-gradient-to-r from-amber-500 to-orange-500" style={{ width: `${((currentQuestion + 1) / quizResult.questions.length) * 100}%` }}></div></div>
-                    <div className="p-6">
-                      <div className="flex justify-between mb-4">
-                        <span className="text-sm text-gray-500">Question {currentQuestion + 1} of {quizResult.questions.length}</span>
-                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${quizResult.questions[currentQuestion]?.type === 'multiple_choice' ? 'bg-blue-100 text-blue-700' : quizResult.questions[currentQuestion]?.type === 'true_false' ? 'bg-purple-100 text-purple-700' : 'bg-green-100 text-green-700'}`}>
-                          {quizResult.questions[currentQuestion]?.type?.replace('_', ' ')}
-                        </span>
-                      </div>
-                      <h3 className="text-xl font-semibold text-gray-900 mb-6">{quizResult.questions[currentQuestion]?.question}</h3>
-                      <div className="space-y-3 mb-6">
-                        {quizResult.questions[currentQuestion]?.type === 'multiple_choice' && quizResult.questions[currentQuestion]?.options?.map((opt: string, idx: number) => {
-                          const letter = opt.charAt(0);
-                          const isSelected = selectedAnswer === letter;
-                          const isCorrect = showQuizResult && letter === quizResult.questions[currentQuestion].correctAnswer;
-                          const isWrong = showQuizResult && isSelected && letter !== quizResult.questions[currentQuestion].correctAnswer;
-                          return (
-                            <button key={idx} onClick={() => !showQuizResult && setSelectedAnswer(letter)} disabled={showQuizResult}
-                              className={`w-full p-4 rounded-xl border-2 text-left flex items-center gap-3 ${isCorrect ? 'border-green-500 bg-green-50' : isWrong ? 'border-red-500 bg-red-50' : isSelected ? 'border-amber-500 bg-amber-50' : 'border-gray-200 hover:border-amber-300'}`}
-                            >
-                              <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${isCorrect ? 'bg-green-500 text-white' : isWrong ? 'bg-red-500 text-white' : isSelected ? 'bg-amber-500 text-white' : 'bg-gray-100'}`}>{letter}</span>
-                              <span>{opt.substring(3)}</span>
-                            </button>
-                          );
-                        })}
-                        {quizResult.questions[currentQuestion]?.type === 'true_false' && ['true', 'false'].map((opt) => {
-                          const isSelected = selectedAnswer === opt;
-                          const isCorrect = showQuizResult && opt === quizResult.questions[currentQuestion].correctAnswer;
-                          const isWrong = showQuizResult && isSelected && opt !== quizResult.questions[currentQuestion].correctAnswer;
-                          return (
-                            <button key={opt} onClick={() => !showQuizResult && setSelectedAnswer(opt)} disabled={showQuizResult}
-                              className={`w-full p-4 rounded-xl border-2 text-left flex items-center gap-3 ${isCorrect ? 'border-green-500 bg-green-50' : isWrong ? 'border-red-500 bg-red-50' : isSelected ? 'border-amber-500 bg-amber-50' : 'border-gray-200 hover:border-amber-300'}`}
-                            >
-                              <span className={`w-8 h-8 rounded-full flex items-center justify-center ${isCorrect ? 'bg-green-500 text-white' : isWrong ? 'bg-red-500 text-white' : isSelected ? 'bg-amber-500 text-white' : 'bg-gray-100'}`}>{opt === 'true' ? '✓' : '✗'}</span>
-                              <span className="capitalize font-medium">{opt}</span>
-                            </button>
-                          );
-                        })}
-                        {quizResult.questions[currentQuestion]?.type === 'fill_blank' && quizResult.questions[currentQuestion]?.options?.map((opt: string, idx: number) => {
-                          const letter = opt.charAt(0);
-                          const isSelected = selectedAnswer === letter;
-                          const isCorrect = showQuizResult && letter === quizResult.questions[currentQuestion].correctAnswer;
-                          const isWrong = showQuizResult && isSelected && letter !== quizResult.questions[currentQuestion].correctAnswer;
-                          return (
-                            <button key={idx} onClick={() => !showQuizResult && setSelectedAnswer(letter)} disabled={showQuizResult}
-                              className={`w-full p-4 rounded-xl border-2 text-left flex items-center gap-3 ${isCorrect ? 'border-green-500 bg-green-50' : isWrong ? 'border-red-500 bg-red-50' : isSelected ? 'border-amber-500 bg-amber-50' : 'border-gray-200 hover:border-amber-300'}`}
-                            >
-                              <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${isCorrect ? 'bg-green-500 text-white' : isWrong ? 'bg-red-500 text-white' : isSelected ? 'bg-amber-500 text-white' : 'bg-gray-100'}`}>{letter}</span>
-                              <span>{opt.substring(3)}</span>
-                            </button>
-                          );
-                        })}
-                      </div>
-                      {showQuizResult && quizResult.questions[currentQuestion]?.explanation && (
-                        <div className="p-4 bg-blue-50 rounded-xl mb-6 border border-blue-100">
-                          <p className="text-sm text-blue-700">💡 {quizResult.questions[currentQuestion].explanation}</p>
+            {/* ============ QUIZ SUB-MODE ============ */}
+            {studyToolMode === 'quiz' && (
+              <>
+                {/* Quiz Taking View */}
+                {quizResult && isQuizMode && (
+                  <div className={`bg-white rounded-2xl sm:rounded-3xl shadow-xl border border-gray-100 overflow-hidden mb-6 ${!canUseQuiz ? 'opacity-50 pointer-events-none' : ''}`}>
+                    {quizCompleted ? (
+                      <div className="p-8 text-center">
+                        <div className={`w-24 h-24 mx-auto rounded-full flex items-center justify-center mb-4 text-4xl ${userAnswers.filter(a => a.isCorrect).length / userAnswers.length >= 0.7 ? 'bg-gradient-to-br from-green-500 to-emerald-600' : 'bg-gradient-to-br from-amber-500 to-orange-600'}`}>🏆</div>
+                        <h2 className="text-3xl font-bold text-gray-900 mb-2">Quiz Complete!</h2>
+                        <div className="text-5xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent my-4">
+                          {Math.round((userAnswers.filter(a => a.isCorrect).length / userAnswers.length) * 100)}%
                         </div>
-                      )}
-                      <div className="flex justify-between">
-                        <button onClick={() => { if (currentQuestion > 0) { setCurrentQuestion(currentQuestion - 1); setShowQuizResult(false); setSelectedAnswer(''); } }} disabled={currentQuestion === 0} className="px-4 py-2 text-gray-600 disabled:opacity-30">← Previous</button>
-                        {!showQuizResult ? (
-                          <button onClick={() => {
-                            const q = quizResult.questions[currentQuestion];
-                            const ans = selectedAnswer;
-                            const correct = ans === q.correctAnswer;
-                            setUserAnswers([...userAnswers, { questionId: q.id, answer: ans, isCorrect: correct }]);
-                            setShowQuizResult(true);
-                          }} disabled={!selectedAnswer} className="px-6 py-3 bg-gradient-to-r from-amber-600 to-orange-600 text-white font-semibold rounded-xl disabled:opacity-50">Submit</button>
-                        ) : (
-                          <button onClick={() => {
-                            if (currentQuestion + 1 >= quizResult.questions.length) { setQuizCompleted(true); }
-                            else { setCurrentQuestion(currentQuestion + 1); setSelectedAnswer(''); setShowQuizResult(false); }
-                          }} className="px-6 py-3 bg-gradient-to-r from-amber-600 to-orange-600 text-white font-semibold rounded-xl">
-                            {currentQuestion + 1 >= quizResult.questions.length ? '🏆 See Results' : 'Next →'}
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  </>
-                )}
-              </div>
-            )}
-
-            {/* Quiz Input Form */}
-            {!quizResult && (
-              <div className={`bg-white rounded-2xl sm:rounded-3xl shadow-xl shadow-amber-100/50 border border-gray-100 overflow-hidden mb-6 min-w-0 ${!canUseQuiz ? 'opacity-50 pointer-events-none' : ''}`}>
-                {/* Toolbar */}
-                <div className="bg-gradient-to-r from-amber-50 to-orange-50 border-b border-gray-100 px-3 sm:px-5 py-3 sm:py-4">
-                  <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center justify-between gap-3 sm:gap-4">
-                    <div className="flex flex-wrap items-center gap-2 sm:gap-3 min-w-0 overflow-x-auto sm:overflow-visible">
-                      <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
-                        <span className="text-xs font-medium text-gray-500 flex-shrink-0">Type:</span>
-                        <div className="flex items-center bg-white rounded-xl px-0.5 sm:px-1 py-1 shadow-sm border border-gray-200">
-                          {(['mixed', 'multiple_choice', 'true_false', 'fill_blank'] as const).map((t) => {
-                            const locked = !isPremiumUser && t !== 'mixed';
-                            return (
-                              <button key={t} onClick={() => !locked && setQuizType(t)} disabled={locked} title={locked ? 'Premium only' : ''}
-                                className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all whitespace-nowrap ${
-                                  locked ? 'text-gray-300 cursor-not-allowed' :
-                                  quizType === t ? 'bg-amber-600 text-white shadow-sm' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                                }`}
-                              >
-                                {t === 'mixed' ? 'Mixed' : t === 'multiple_choice' ? 'MCQ' : t === 'true_false' ? 'T/F' : 'Fill'}
-                                {locked && <span className="ml-1 text-[9px]">🔒</span>}
+                        <p className="text-gray-600">{userAnswers.filter(a => a.isCorrect).length} out of {userAnswers.length} correct</p>
+                        <div className="flex justify-center gap-2 mt-6 mb-4">
+                          {isPaidUser ? (
+                            <>
+                              <button onClick={exportQuizToPDF} className="px-4 py-2 bg-red-50 text-red-700 font-medium rounded-lg hover:bg-red-100 transition-colors flex items-center gap-2 text-sm">
+                                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd"/></svg>
+                                Download PDF
                               </button>
-                            );
-                          })}
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
-                        <span className="text-xs font-medium text-gray-500">Difficulty:</span>
-                        <div className="flex items-center bg-white rounded-xl px-0.5 sm:px-1 py-1 shadow-sm border border-gray-200">
-                          {(['easy', 'medium', 'hard'] as const).map((d) => {
-                            const locked = !isPremiumUser && d !== 'medium';
-                            return (
-                              <button key={d} onClick={() => !locked && setQuizDifficulty(d)} disabled={locked} title={locked ? 'Premium only' : ''}
-                                className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all whitespace-nowrap ${
-                                  locked ? 'text-gray-300 cursor-not-allowed' :
-                                  quizDifficulty === d ? 'bg-amber-600 text-white shadow-sm' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                                }`}
-                              >
-                                {d.charAt(0).toUpperCase() + d.slice(1)}
-                                {locked && <span className="ml-1 text-[9px]">🔒</span>}
+                              <button onClick={exportQuizToDOCX} className="px-4 py-2 bg-blue-50 text-blue-700 font-medium rounded-lg hover:bg-blue-100 transition-colors flex items-center gap-2 text-sm">
+                                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd"/></svg>
+                                Download DOCX
                               </button>
-                            );
-                          })}
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-1.5 flex-shrink-0">
-                        <span className="text-xs font-medium text-gray-500">Questions:</span>
-                        <select 
-                          value={isFreeUser ? 10 : quizQuestionCount} 
-                          onChange={(e) => !isFreeUser && setQuizQuestionCount(Number(e.target.value))}
-                          disabled={isFreeUser}
-                          className={`px-2 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-medium ${isFreeUser ? 'opacity-50 cursor-not-allowed' : ''}`}
-                          title={isFreeUser ? 'Free plan: 10 questions only' : ''}
-                        >
-                          {isFreeUser ? (
-                            <option value={10}>10</option>
+                            </>
                           ) : (
-                            [5, 10, 15, 20, 25].map(n => <option key={n} value={n}>{n}</option>)
+                            <>
+                              <button onClick={() => setShowExportUpgradeModal(true)} className="px-4 py-2 bg-gray-100 text-gray-400 font-medium rounded-lg transition-colors flex items-center gap-2 text-sm cursor-pointer">
+                                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd"/></svg>
+                                PDF
+                                <svg className="w-3.5 h-3.5 text-amber-500" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" /></svg>
+                              </button>
+                              <button onClick={() => setShowExportUpgradeModal(true)} className="px-4 py-2 bg-gray-100 text-gray-400 font-medium rounded-lg transition-colors flex items-center gap-2 text-sm cursor-pointer">
+                                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd"/></svg>
+                                DOCX
+                                <svg className="w-3.5 h-3.5 text-amber-500" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" /></svg>
+                              </button>
+                            </>
                           )}
-                        </select>
-                        {isFreeUser && <span className="text-[9px]">🔒</span>}
-                      </div>
-                    </div>
-                    <button
-                      onClick={handleSubmit}
-                      disabled={!isTextValid() || isGeneratingQuiz || !canUseQuiz}
-                      className={`w-full sm:w-auto px-6 py-2.5 rounded-xl flex items-center justify-center transition-all font-semibold text-sm flex-shrink-0 ${
-                        isTextValid() && !isGeneratingQuiz && canUseQuiz
-                          ? 'bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white shadow-lg shadow-amber-200 cursor-pointer'
-                          : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                      }`}
-                    >
-                      {isGeneratingQuiz ? (
-                        <>
-                          <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                          </svg>
-                          Generating...
-                        </>
-                      ) : (
-                        <>✨ Generate Quiz</>
-                      )}
-                    </button>
-                  </div>
-                </div>
-
-                {/* Input Area */}
-                <div className="flex flex-col min-w-0">
-                  <div className="flex items-center justify-between px-3 sm:px-5 py-2.5 sm:py-3 bg-gray-50/50 border-b border-gray-100">
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full bg-amber-400"></div>
-                      <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Source Material</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <button onClick={() => setInputText('')} className={`text-xs text-gray-400 hover:text-gray-600 ${!inputText ? 'invisible' : ''}`}>Clear</button>
-                      <button onClick={() => navigator.clipboard.readText().then(text => setInputText(text))} className="text-xs text-amber-600 hover:text-amber-700 font-medium">Paste</button>
-                    </div>
-                  </div>
-                  <div className="relative">
-                    {isGeneratingQuiz ? (
-                      <div className="min-h-[350px] flex items-center justify-center">
-                        <div className="flex flex-col items-center gap-4">
-                          <div className="relative">
-                            <div className="w-12 h-12 border-4 border-amber-200 rounded-full"></div>
-                            <div className="absolute top-0 left-0 w-12 h-12 border-4 border-amber-600 rounded-full border-t-transparent animate-spin"></div>
-                          </div>
-                          <p className="text-sm font-medium text-gray-600">Creating quiz questions...</p>
+                        </div>
+                        <div className="flex justify-center gap-3">
+                          <button onClick={() => { setCurrentQuestion(0); setUserAnswers([]); setQuizCompleted(false); setSelectedAnswer(''); setShowQuizResult(false); }} className="px-6 py-3 bg-gray-100 text-gray-700 font-semibold rounded-xl">Try Again</button>
+                          <button onClick={() => { setQuizResult(null); setIsQuizMode(false); }} className="px-6 py-3 bg-gradient-to-r from-amber-600 to-orange-600 text-white font-semibold rounded-xl">New Quiz</button>
                         </div>
                       </div>
                     ) : (
-                      <textarea
-                        value={inputText}
-                        onChange={(e) => setInputText(e.target.value)}
-                        placeholder={placeholders[placeholderIndex]}
-                        className="w-full min-h-[300px] sm:min-h-[350px] p-3 sm:p-5 text-gray-800 text-[15px] border-none outline-none resize-none bg-transparent placeholder-gray-400 leading-relaxed"
-                      />
+                      <>
+                        <div className="h-2 bg-gray-100"><div className="h-full bg-gradient-to-r from-amber-500 to-orange-500" style={{ width: `${((currentQuestion + 1) / quizResult.questions.length) * 100}%` }}></div></div>
+                        <div className="p-6">
+                          <div className="flex justify-between mb-4">
+                            <span className="text-sm text-gray-500">Question {currentQuestion + 1} of {quizResult.questions.length}</span>
+                            <span className={`px-3 py-1 rounded-full text-xs font-semibold ${quizResult.questions[currentQuestion]?.type === 'multiple_choice' ? 'bg-blue-100 text-blue-700' : quizResult.questions[currentQuestion]?.type === 'true_false' ? 'bg-purple-100 text-purple-700' : 'bg-green-100 text-green-700'}`}>
+                              {quizResult.questions[currentQuestion]?.type?.replace('_', ' ')}
+                            </span>
+                          </div>
+                          <h3 className="text-xl font-semibold text-gray-900 mb-6">{quizResult.questions[currentQuestion]?.question}</h3>
+                          <div className="space-y-3 mb-6">
+                            {quizResult.questions[currentQuestion]?.type === 'multiple_choice' && quizResult.questions[currentQuestion]?.options?.map((opt: string, idx: number) => {
+                              const letter = opt.charAt(0);
+                              const isSelected = selectedAnswer === letter;
+                              const isCorrect = showQuizResult && letter === quizResult.questions[currentQuestion].correctAnswer;
+                              const isWrong = showQuizResult && isSelected && letter !== quizResult.questions[currentQuestion].correctAnswer;
+                              return (
+                                <button key={idx} onClick={() => !showQuizResult && setSelectedAnswer(letter)} disabled={showQuizResult}
+                                  className={`w-full p-4 rounded-xl border-2 text-left flex items-center gap-3 ${isCorrect ? 'border-green-500 bg-green-50' : isWrong ? 'border-red-500 bg-red-50' : isSelected ? 'border-amber-500 bg-amber-50' : 'border-gray-200 hover:border-amber-300'}`}
+                                >
+                                  <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${isCorrect ? 'bg-green-500 text-white' : isWrong ? 'bg-red-500 text-white' : isSelected ? 'bg-amber-500 text-white' : 'bg-gray-100'}`}>{letter}</span>
+                                  <span>{opt.substring(3)}</span>
+                                </button>
+                              );
+                            })}
+                            {quizResult.questions[currentQuestion]?.type === 'true_false' && ['true', 'false'].map((opt) => {
+                              const isSelected = selectedAnswer === opt;
+                              const isCorrect = showQuizResult && opt === quizResult.questions[currentQuestion].correctAnswer;
+                              const isWrong = showQuizResult && isSelected && opt !== quizResult.questions[currentQuestion].correctAnswer;
+                              return (
+                                <button key={opt} onClick={() => !showQuizResult && setSelectedAnswer(opt)} disabled={showQuizResult}
+                                  className={`w-full p-4 rounded-xl border-2 text-left flex items-center gap-3 ${isCorrect ? 'border-green-500 bg-green-50' : isWrong ? 'border-red-500 bg-red-50' : isSelected ? 'border-amber-500 bg-amber-50' : 'border-gray-200 hover:border-amber-300'}`}
+                                >
+                                  <span className={`w-8 h-8 rounded-full flex items-center justify-center ${isCorrect ? 'bg-green-500 text-white' : isWrong ? 'bg-red-500 text-white' : isSelected ? 'bg-amber-500 text-white' : 'bg-gray-100'}`}>{opt === 'true' ? '✓' : '✗'}</span>
+                                  <span className="capitalize font-medium">{opt}</span>
+                                </button>
+                              );
+                            })}
+                            {quizResult.questions[currentQuestion]?.type === 'fill_blank' && quizResult.questions[currentQuestion]?.options?.map((opt: string, idx: number) => {
+                              const letter = opt.charAt(0);
+                              const isSelected = selectedAnswer === letter;
+                              const isCorrect = showQuizResult && letter === quizResult.questions[currentQuestion].correctAnswer;
+                              const isWrong = showQuizResult && isSelected && letter !== quizResult.questions[currentQuestion].correctAnswer;
+                              return (
+                                <button key={idx} onClick={() => !showQuizResult && setSelectedAnswer(letter)} disabled={showQuizResult}
+                                  className={`w-full p-4 rounded-xl border-2 text-left flex items-center gap-3 ${isCorrect ? 'border-green-500 bg-green-50' : isWrong ? 'border-red-500 bg-red-50' : isSelected ? 'border-amber-500 bg-amber-50' : 'border-gray-200 hover:border-amber-300'}`}
+                                >
+                                  <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${isCorrect ? 'bg-green-500 text-white' : isWrong ? 'bg-red-500 text-white' : isSelected ? 'bg-amber-500 text-white' : 'bg-gray-100'}`}>{letter}</span>
+                                  <span>{opt.substring(3)}</span>
+                                </button>
+                              );
+                            })}
+                          </div>
+                          {showQuizResult && quizResult.questions[currentQuestion]?.explanation && (
+                            <div className="p-4 bg-blue-50 rounded-xl mb-6 border border-blue-100">
+                              <p className="text-sm text-blue-700">💡 {quizResult.questions[currentQuestion].explanation}</p>
+                            </div>
+                          )}
+                          <div className="flex justify-between">
+                            <button onClick={() => { if (currentQuestion > 0) { setCurrentQuestion(currentQuestion - 1); setShowQuizResult(false); setSelectedAnswer(''); } }} disabled={currentQuestion === 0} className="px-4 py-2 text-gray-600 disabled:opacity-30">← Previous</button>
+                            {!showQuizResult ? (
+                              <button onClick={() => {
+                                const q = quizResult.questions[currentQuestion];
+                                const ans = selectedAnswer;
+                                const correct = ans === q.correctAnswer;
+                                setUserAnswers([...userAnswers, { questionId: q.id, answer: ans, isCorrect: correct }]);
+                                setShowQuizResult(true);
+                              }} disabled={!selectedAnswer} className="px-6 py-3 bg-gradient-to-r from-amber-600 to-orange-600 text-white font-semibold rounded-xl disabled:opacity-50">Submit</button>
+                            ) : (
+                              <button onClick={() => {
+                                if (currentQuestion + 1 >= quizResult.questions.length) { setQuizCompleted(true); }
+                                else { setCurrentQuestion(currentQuestion + 1); setSelectedAnswer(''); setShowQuizResult(false); }
+                              }} className="px-6 py-3 bg-gradient-to-r from-amber-600 to-orange-600 text-white font-semibold rounded-xl">
+                                {currentQuestion + 1 >= quizResult.questions.length ? '🏆 See Results' : 'Next →'}
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      </>
                     )}
                   </div>
-                  <div className="flex items-center justify-between px-3 sm:px-5 py-2.5 sm:py-3 bg-gray-50/30 border-t border-gray-100">
-                    <span className={`text-xs font-medium ${
-                      getWordCount(inputText) < 100 ? 'text-amber-600' : 
-                      (isFreeUser && getWordCount(inputText) > quizUsage.maxWordsPerGeneration) ? 'text-red-600' : 
-                      'text-gray-400'
-                    }`}>
-                      {getWordCount(inputText)} words 
-                      {getWordCount(inputText) < 100 && ' (min 100)'}
-                      {isFreeUser && getWordCount(inputText) > quizUsage.maxWordsPerGeneration && ` (max ${quizUsage.maxWordsPerGeneration.toLocaleString()})`}
-                      {isFreeUser && getWordCount(inputText) <= quizUsage.maxWordsPerGeneration && getWordCount(inputText) >= 100 && ` / ${quizUsage.maxWordsPerGeneration.toLocaleString()} max`}
-                    </span>
+                )}
+
+                {/* Quiz Input Form */}
+                {!quizResult && (
+                  <div className={`bg-white rounded-2xl sm:rounded-3xl shadow-xl shadow-amber-100/50 border border-gray-100 overflow-hidden mb-6 min-w-0 ${!canUseQuiz ? 'opacity-50 pointer-events-none' : ''}`}>
+                    <div className="bg-gradient-to-r from-amber-50 to-orange-50 border-b border-gray-100 px-3 sm:px-5 py-3 sm:py-4">
+                      <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center justify-between gap-3 sm:gap-4">
+                        <div className="flex flex-wrap items-center gap-2 sm:gap-3 min-w-0 overflow-x-auto sm:overflow-visible">
+                          <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+                            <span className="text-xs font-medium text-gray-500 flex-shrink-0">Type:</span>
+                            <div className="flex items-center bg-white rounded-xl px-0.5 sm:px-1 py-1 shadow-sm border border-gray-200">
+                              {(['mixed', 'multiple_choice', 'true_false', 'fill_blank'] as const).map((t) => {
+                                const locked = !isPremiumUser && t !== 'mixed';
+                                return (
+                                  <button key={t} onClick={() => !locked && setQuizType(t)} disabled={locked} title={locked ? 'Premium only' : ''}
+                                    className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all whitespace-nowrap ${
+                                      locked ? 'text-gray-300 cursor-not-allowed' :
+                                      quizType === t ? 'bg-amber-600 text-white shadow-sm' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                                    }`}
+                                  >
+                                    {t === 'mixed' ? 'Mixed' : t === 'multiple_choice' ? 'MCQ' : t === 'true_false' ? 'T/F' : 'Fill'}
+                                    {locked && <span className="ml-1 text-[9px]">🔒</span>}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+                            <span className="text-xs font-medium text-gray-500">Difficulty:</span>
+                            <div className="flex items-center bg-white rounded-xl px-0.5 sm:px-1 py-1 shadow-sm border border-gray-200">
+                              {(['easy', 'medium', 'hard'] as const).map((d) => {
+                                const locked = !isPremiumUser && d !== 'medium';
+                                return (
+                                  <button key={d} onClick={() => !locked && setQuizDifficulty(d)} disabled={locked} title={locked ? 'Premium only' : ''}
+                                    className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all whitespace-nowrap ${
+                                      locked ? 'text-gray-300 cursor-not-allowed' :
+                                      quizDifficulty === d ? 'bg-amber-600 text-white shadow-sm' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                                    }`}
+                                  >
+                                    {d.charAt(0).toUpperCase() + d.slice(1)}
+                                    {locked && <span className="ml-1 text-[9px]">🔒</span>}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-1.5 flex-shrink-0">
+                            <span className="text-xs font-medium text-gray-500">Questions:</span>
+                            <select
+                              value={isFreeUser ? 10 : quizQuestionCount}
+                              onChange={(e) => !isFreeUser && setQuizQuestionCount(Number(e.target.value))}
+                              disabled={isFreeUser}
+                              className={`px-2 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-medium ${isFreeUser ? 'opacity-50 cursor-not-allowed' : ''}`}
+                              title={isFreeUser ? 'Free plan: 10 questions only' : ''}
+                            >
+                              {isFreeUser ? (
+                                <option value={10}>10</option>
+                              ) : (
+                                [5, 10, 15, 20, 25].map(n => <option key={n} value={n}>{n}</option>)
+                              )}
+                            </select>
+                            {isFreeUser && <span className="text-[9px]">🔒</span>}
+                          </div>
+                        </div>
+                        <button
+                          onClick={handleSubmit}
+                          disabled={!isTextValid() || isGeneratingQuiz || !canUseQuiz}
+                          className={`w-full sm:w-auto px-6 py-2.5 rounded-xl flex items-center justify-center transition-all font-semibold text-sm flex-shrink-0 ${
+                            isTextValid() && !isGeneratingQuiz && canUseQuiz
+                              ? 'bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white shadow-lg shadow-amber-200 cursor-pointer'
+                              : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                          }`}
+                        >
+                          {isGeneratingQuiz ? (
+                            <>
+                              <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                              </svg>
+                              Generating...
+                            </>
+                          ) : (
+                            <>✨ Generate Quiz</>
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                    <div className="flex flex-col min-w-0">
+                      <div className="flex items-center justify-between px-3 sm:px-5 py-2.5 sm:py-3 bg-gray-50/50 border-b border-gray-100">
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2 rounded-full bg-amber-400"></div>
+                          <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Source Material</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <button onClick={() => setInputText('')} className={`text-xs text-gray-400 hover:text-gray-600 ${!inputText ? 'invisible' : ''}`}>Clear</button>
+                          <button onClick={() => navigator.clipboard.readText().then(text => setInputText(text))} className="text-xs text-amber-600 hover:text-amber-700 font-medium">Paste</button>
+                        </div>
+                      </div>
+                      <div className="relative">
+                        {isGeneratingQuiz ? (
+                          <div className="min-h-[350px] flex items-center justify-center">
+                            <div className="flex flex-col items-center gap-4">
+                              <div className="relative">
+                                <div className="w-12 h-12 border-4 border-amber-200 rounded-full"></div>
+                                <div className="absolute top-0 left-0 w-12 h-12 border-4 border-amber-600 rounded-full border-t-transparent animate-spin"></div>
+                              </div>
+                              <p className="text-sm font-medium text-gray-600">Creating quiz questions...</p>
+                            </div>
+                          </div>
+                        ) : (
+                          <textarea
+                            value={inputText}
+                            onChange={(e) => setInputText(e.target.value)}
+                            placeholder={placeholders[placeholderIndex]}
+                            className="w-full min-h-[300px] sm:min-h-[350px] p-3 sm:p-5 text-gray-800 text-[15px] border-none outline-none resize-none bg-transparent placeholder-gray-400 leading-relaxed"
+                          />
+                        )}
+                      </div>
+                      <div className="flex items-center justify-between px-3 sm:px-5 py-2.5 sm:py-3 bg-gray-50/30 border-t border-gray-100">
+                        <span className={`text-xs font-medium ${
+                          getWordCount(inputText) < 100 ? 'text-amber-600' :
+                          (isFreeUser && getWordCount(inputText) > quizUsage.maxWordsPerGeneration) ? 'text-red-600' :
+                          'text-gray-400'
+                        }`}>
+                          {getWordCount(inputText)} words
+                          {getWordCount(inputText) < 100 && ' (min 100)'}
+                          {isFreeUser && getWordCount(inputText) > quizUsage.maxWordsPerGeneration && ` (max ${quizUsage.maxWordsPerGeneration.toLocaleString()})`}
+                          {isFreeUser && getWordCount(inputText) <= quizUsage.maxWordsPerGeneration && getWordCount(inputText) >= 100 && ` / ${quizUsage.maxWordsPerGeneration.toLocaleString()} max`}
+                        </span>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
+                )}
+              </>
+            )}
+
+            {/* ============ FLASHCARD SUB-MODE ============ */}
+            {studyToolMode === 'flashcards' && (
+              <>
+                {/* Flashcard Interactive View */}
+                {flashcardResult && flashcardResult.cards?.length > 0 ? (
+                  <div className="mb-6">
+                    <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+                      <h3 className="text-lg font-bold text-gray-900">{flashcardResult.title}</h3>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        {isPaidUser ? (
+                          <>
+                            <button onClick={exportFlashcardsToPDF} className="px-3 py-1.5 bg-red-50 text-red-700 font-medium rounded-lg hover:bg-red-100 transition-colors flex items-center gap-1.5 text-xs">
+                              <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd"/></svg>
+                              PDF
+                            </button>
+                            <button onClick={exportFlashcardsToDOCX} className="px-3 py-1.5 bg-blue-50 text-blue-700 font-medium rounded-lg hover:bg-blue-100 transition-colors flex items-center gap-1.5 text-xs">
+                              <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd"/></svg>
+                              DOCX
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <button onClick={() => setShowExportUpgradeModal(true)} className="px-3 py-1.5 bg-gray-100 text-gray-400 font-medium rounded-lg flex items-center gap-1.5 text-xs cursor-pointer">
+                              <svg className="w-3 h-3 text-amber-500" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd"/></svg>
+                              PDF
+                            </button>
+                            <button onClick={() => setShowExportUpgradeModal(true)} className="px-3 py-1.5 bg-gray-100 text-gray-400 font-medium rounded-lg flex items-center gap-1.5 text-xs cursor-pointer">
+                              <svg className="w-3 h-3 text-amber-500" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd"/></svg>
+                              DOCX
+                            </button>
+                          </>
+                        )}
+                        <button onClick={() => { setFlashcardResult(null); setCurrentCard(0); setIsFlipped(false); setKnownCards(new Set()); }}
+                          className="px-4 py-2 text-sm text-amber-700 bg-amber-50 rounded-lg hover:bg-amber-100 font-medium">
+                          New Deck
+                        </button>
+                      </div>
+                    </div>
+                    {/* Progress bar */}
+                    <div className="flex items-center gap-3 mb-5">
+                      <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
+                        <div className="h-full bg-gradient-to-r from-amber-500 to-orange-500 transition-all duration-300" style={{ width: `${((currentCard + 1) / flashcardResult.cards.length) * 100}%` }}></div>
+                      </div>
+                      <span className="text-xs text-gray-500 font-medium">{currentCard + 1} / {flashcardResult.cards.length}</span>
+                      {knownCards.size > 0 && <span className="text-xs text-green-600 font-medium">{knownCards.size} mastered</span>}
+                    </div>
+                    {/* The flip card */}
+                    <div
+                      onClick={() => setIsFlipped(!isFlipped)}
+                      className="relative cursor-pointer select-none mx-auto max-w-2xl mb-6"
+                      style={{ perspective: '1000px' }}
+                    >
+                      <div
+                        className="relative w-full transition-transform duration-500"
+                        style={{ transformStyle: 'preserve-3d', transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)' }}
+                      >
+                        {/* Front */}
+                        <div className="w-full min-h-[280px] sm:min-h-[320px] bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-200 rounded-3xl p-8 flex flex-col items-center justify-center text-center shadow-lg"
+                          style={{ backfaceVisibility: 'hidden' }}>
+                          <span className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-4">Front</span>
+                          <p className="text-xl sm:text-2xl font-semibold text-gray-900 leading-relaxed">{flashcardResult.cards[currentCard]?.front}</p>
+                          <p className="text-xs text-amber-400 mt-6">Click to flip</p>
+                        </div>
+                        {/* Back */}
+                        <div className="absolute inset-0 w-full min-h-[280px] sm:min-h-[320px] bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-3xl p-8 flex flex-col items-center justify-center text-center shadow-lg"
+                          style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}>
+                          <span className="text-xs font-bold text-blue-500 uppercase tracking-widest mb-4">Back</span>
+                          <p className="text-lg sm:text-xl text-gray-800 leading-relaxed">{flashcardResult.cards[currentCard]?.back}</p>
+                          <p className="text-xs text-blue-400 mt-6">Click to flip back</p>
+                        </div>
+                      </div>
+                    </div>
+                    {/* Navigation + Know/Don't Know */}
+                    <div className="flex items-center justify-center gap-3 flex-wrap">
+                      <button onClick={() => { setCurrentCard(Math.max(0, currentCard - 1)); setIsFlipped(false); }}
+                        disabled={currentCard === 0}
+                        className="px-4 py-2.5 rounded-xl text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 disabled:opacity-30 transition-all">
+                        ← Previous
+                      </button>
+                      <button onClick={() => {
+                          const newKnown = new Set(knownCards);
+                          if (newKnown.has(currentCard)) newKnown.delete(currentCard); else newKnown.add(currentCard);
+                          setKnownCards(newKnown);
+                        }}
+                        className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition-all ${
+                          knownCards.has(currentCard) ? 'bg-green-500 text-white shadow-md' : 'bg-green-50 text-green-700 border border-green-200 hover:bg-green-100'
+                        }`}>
+                        {knownCards.has(currentCard) ? '✓ Mastered' : 'Mark as Known'}
+                      </button>
+                      <button onClick={() => { setCurrentCard(Math.min(flashcardResult.cards.length - 1, currentCard + 1)); setIsFlipped(false); }}
+                        disabled={currentCard >= flashcardResult.cards.length - 1}
+                        className="px-4 py-2.5 rounded-xl text-sm font-medium bg-gradient-to-r from-amber-600 to-orange-600 text-white hover:from-amber-700 hover:to-orange-700 disabled:opacity-30 transition-all">
+                        Next →
+                      </button>
+                    </div>
+                    {/* Summary when all reviewed */}
+                    {knownCards.size === flashcardResult.cards.length && (
+                      <div className="mt-6 p-6 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-2xl text-center">
+                        <span className="text-4xl mb-2 block">🎉</span>
+                        <h3 className="text-xl font-bold text-green-800">All cards mastered!</h3>
+                        <p className="text-green-600 text-sm mt-1">You've marked all {flashcardResult.cards.length} cards as known. Great job!</p>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  /* Flashcard Input Form */
+                  <div className={`bg-white rounded-2xl sm:rounded-3xl shadow-xl shadow-amber-100/50 border border-gray-100 overflow-hidden mb-6 min-w-0 ${!canUseQuiz ? 'opacity-50 pointer-events-none' : ''}`}>
+                    <div className="bg-gradient-to-r from-amber-50 to-orange-50 border-b border-gray-100 px-3 sm:px-5 py-3 sm:py-4">
+                      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4">
+                        <div className="flex items-center gap-3">
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-xs font-medium text-gray-500">Cards:</span>
+                            <select value={isFreeUser ? 15 : flashcardCount}
+                              onChange={(e) => !isFreeUser && setFlashcardCount(Number(e.target.value))}
+                              disabled={isFreeUser}
+                              className={`px-2 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-medium ${isFreeUser ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                              {isFreeUser ? <option value={15}>15</option> : [5, 10, 15, 20, 25, 30].map(n => <option key={n} value={n}>{n}</option>)}
+                            </select>
+                          </div>
+                        </div>
+                        <button
+                          onClick={handleSubmit}
+                          disabled={!isTextValid() || isGeneratingFlashcards || !canUseQuiz}
+                          className={`w-full sm:w-auto px-6 py-2.5 rounded-xl flex items-center justify-center transition-all font-semibold text-sm flex-shrink-0 ${
+                            isTextValid() && !isGeneratingFlashcards && canUseQuiz
+                              ? 'bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white shadow-lg shadow-amber-200 cursor-pointer'
+                              : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                          }`}
+                        >
+                          {isGeneratingFlashcards ? (
+                            <>
+                              <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                              </svg>
+                              Generating...
+                            </>
+                          ) : (
+                            <>🃏 Generate Flashcards</>
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                    <div className="flex flex-col min-w-0">
+                      <div className="flex items-center justify-between px-3 sm:px-5 py-2.5 sm:py-3 bg-gray-50/50 border-b border-gray-100">
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2 rounded-full bg-amber-400"></div>
+                          <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Source Material</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <button onClick={() => setInputText('')} className={`text-xs text-gray-400 hover:text-gray-600 ${!inputText ? 'invisible' : ''}`}>Clear</button>
+                          <button onClick={() => navigator.clipboard.readText().then(text => setInputText(text))} className="text-xs text-amber-600 hover:text-amber-700 font-medium">Paste</button>
+                        </div>
+                      </div>
+                      <div className="relative">
+                        {isGeneratingFlashcards ? (
+                          <div className="min-h-[350px] flex items-center justify-center">
+                            <div className="flex flex-col items-center gap-4">
+                              <div className="relative">
+                                <div className="w-12 h-12 border-4 border-amber-200 rounded-full"></div>
+                                <div className="absolute top-0 left-0 w-12 h-12 border-4 border-amber-600 rounded-full border-t-transparent animate-spin"></div>
+                              </div>
+                              <p className="text-sm font-medium text-gray-600">Creating your flashcard deck...</p>
+                            </div>
+                          </div>
+                        ) : (
+                          <textarea
+                            value={inputText}
+                            onChange={(e) => setInputText(e.target.value)}
+                            placeholder="Paste your study notes, textbook content, or any material to turn into flashcards..."
+                            className="w-full min-h-[300px] sm:min-h-[350px] p-3 sm:p-5 text-gray-800 text-[15px] border-none outline-none resize-none bg-transparent placeholder-gray-400 leading-relaxed"
+                          />
+                        )}
+                      </div>
+                      <div className="flex items-center justify-between px-3 sm:px-5 py-2.5 sm:py-3 bg-gray-50/30 border-t border-gray-100">
+                        <span className={`text-xs font-medium ${
+                          getWordCount(inputText) < 50 ? 'text-amber-600' :
+                          (isFreeUser && getWordCount(inputText) > quizUsage.maxWordsPerGeneration) ? 'text-red-600' :
+                          'text-gray-400'
+                        }`}>
+                          {getWordCount(inputText)} words
+                          {getWordCount(inputText) < 50 && ' (min 50)'}
+                          {isFreeUser && getWordCount(inputText) > quizUsage.maxWordsPerGeneration && ` (max ${quizUsage.maxWordsPerGeneration.toLocaleString()})`}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+
+            {/* ============ CROSSWORD SUB-MODE ============ */}
+            {studyToolMode === 'crossword' && (
+              <>
+                {/* Crossword Interactive View */}
+                {crosswordResult && crosswordResult.placedWords?.length > 0 ? (
+                  <div className="mb-6">
+                    <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+                      <h3 className="text-lg font-bold text-gray-900">{crosswordResult.title}</h3>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        {isPaidUser ? (
+                          <>
+                            <button onClick={exportCrosswordToPDF} className="px-3 py-1.5 bg-red-50 text-red-700 font-medium rounded-lg hover:bg-red-100 transition-colors flex items-center gap-1.5 text-xs">
+                              <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd"/></svg>
+                              PDF
+                            </button>
+                            <button onClick={exportCrosswordToDOCX} className="px-3 py-1.5 bg-blue-50 text-blue-700 font-medium rounded-lg hover:bg-blue-100 transition-colors flex items-center gap-1.5 text-xs">
+                              <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd"/></svg>
+                              DOCX
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <button onClick={() => setShowExportUpgradeModal(true)} className="px-3 py-1.5 bg-gray-100 text-gray-400 font-medium rounded-lg flex items-center gap-1.5 text-xs cursor-pointer">
+                              <svg className="w-3 h-3 text-amber-500" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd"/></svg>
+                              PDF
+                            </button>
+                            <button onClick={() => setShowExportUpgradeModal(true)} className="px-3 py-1.5 bg-gray-100 text-gray-400 font-medium rounded-lg flex items-center gap-1.5 text-xs cursor-pointer">
+                              <svg className="w-3 h-3 text-amber-500" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd"/></svg>
+                              DOCX
+                            </button>
+                          </>
+                        )}
+                        {!crosswordChecked && (
+                          <>
+                            <button
+                              onClick={handleCrosswordHint}
+                              className="px-4 py-2 text-sm font-medium bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 transition-colors flex items-center gap-1.5"
+                              title="Reveal one letter from the selected word"
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                              Hint {hintsUsed > 0 && <span className="text-xs bg-purple-200 text-purple-800 rounded-full px-1.5 py-0.5 font-bold">{hintsUsed}</span>}
+                            </button>
+                            <button onClick={() => setCrosswordChecked(true)}
+                              className="px-4 py-2 text-sm font-semibold bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-lg hover:from-amber-700 hover:to-orange-700">
+                              Check Answers
+                            </button>
+                          </>
+                        )}
+                        <button onClick={() => { setCrosswordResult(null); setCrosswordAnswers({}); setCrosswordChecked(false); setSelectedClue(null); setSelectedCell(null); setSelectedDirection('across'); setHintsUsed(0); }}
+                          className="px-4 py-2 text-sm text-amber-700 bg-amber-50 rounded-lg hover:bg-amber-100 font-medium">
+                          New Puzzle
+                        </button>
+                      </div>
+                    </div>
+
+                    {crosswordChecked && (() => {
+                      // Only count words that were attempted (have some answer)
+                      const attemptedWords = crosswordResult.placedWords.filter((pw: any) => 
+                        (crosswordAnswers[`word-${pw.number}`] || '').length > 0
+                      );
+                      const total = attemptedWords.length;
+                      const correct = attemptedWords.filter((pw: any) => {
+                        const ans = (crosswordAnswers[`word-${pw.number}`] || '').toUpperCase();
+                        return ans === pw.word;
+                      }).length;
+                      const notAttempted = crosswordResult.placedWords.length - total;
+                      
+                      return (
+                        <div className={`mb-4 p-4 rounded-2xl text-center ${total === 0 ? 'bg-gray-50 border border-gray-200' : correct === total ? 'bg-green-50 border border-green-200' : 'bg-amber-50 border border-amber-200'}`}>
+                          <span className="text-3xl mb-1 block">{total === 0 ? '✏️' : correct === total ? '🎉' : '📊'}</span>
+                          {total === 0 ? (
+                            <>
+                              <p className="font-bold text-lg">No answers submitted</p>
+                              <p className="text-sm text-gray-600">Type in some answers and try again!</p>
+                            </>
+                          ) : (
+                            <>
+                              <p className="font-bold text-lg">{correct} / {total} correct</p>
+                              <p className="text-sm text-gray-600">
+                                {correct === total ? 'Perfect score on attempted words!' : 'Check the highlighted answers below.'}
+                                {notAttempted > 0 && ` (${notAttempted} word${notAttempted > 1 ? 's' : ''} not attempted)`}
+                              </p>
+                            </>
+                          )}
+                        </div>
+                      );
+                    })()}
+
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      {/* Crossword Grid - Now Interactive */}
+                      <div 
+                        className="bg-white rounded-2xl border border-gray-200 p-4 overflow-x-auto focus:outline-none focus:ring-2 focus:ring-amber-400"
+                        tabIndex={0}
+                        onKeyDown={handleCrosswordKeyDown}
+                      >
+                        <p className="text-xs text-gray-500 mb-3">Click a cell to type, or use the clue inputs below. Arrow keys to navigate.</p>
+                        <div className="inline-block">
+                          {crosswordResult.grid?.map((row: string[], rowIdx: number) => (
+                            <div key={rowIdx} className="flex">
+                              {row.map((cell: string, colIdx: number) => {
+                                if (cell === '') {
+                                  return <div key={colIdx} className="w-8 h-8 sm:w-9 sm:h-9"></div>;
+                                }
+                                const wordAtCell = crosswordResult.placedWords.find((pw: any) => pw.row === rowIdx && pw.col === colIdx);
+                                const cellNumber = wordAtCell?.number;
+                                const typedLetter = getCellLetter(rowIdx, colIdx);
+                                const isSelectedCell = selectedCell?.row === rowIdx && selectedCell?.col === colIdx;
+                                
+                                let isHighlighted = false;
+                                if (selectedClue !== null) {
+                                  const sel = crosswordResult.placedWords.find((pw: any) => pw.number === selectedClue);
+                                  if (sel) {
+                                    if (sel.direction === 'across' && rowIdx === sel.row && colIdx >= sel.col && colIdx < sel.col + sel.length) isHighlighted = true;
+                                    if (sel.direction === 'down' && colIdx === sel.col && rowIdx >= sel.row && rowIdx < sel.row + sel.length) isHighlighted = true;
+                                  }
+                                }
+                                
+                                let cellColor = 'bg-white border-gray-300 hover:border-amber-300';
+                                if (isSelectedCell) cellColor = 'bg-amber-200 border-amber-500 ring-2 ring-amber-400';
+                                else if (isHighlighted) cellColor = 'bg-amber-50 border-amber-400';
+                                
+                                if (crosswordChecked) {
+                                  const wordsThrough = crosswordResult.placedWords.filter((pw: any) => {
+                                    if (pw.direction === 'across') return rowIdx === pw.row && colIdx >= pw.col && colIdx < pw.col + pw.length;
+                                    return colIdx === pw.col && rowIdx >= pw.row && rowIdx < pw.row + pw.length;
+                                  });
+                                  // Only check words that have been attempted (have some answer)
+                                  const attemptedWords = wordsThrough.filter((pw: any) => (crosswordAnswers[`word-${pw.number}`] || '').length > 0);
+                                  const anyCorrect = attemptedWords.some((pw: any) => (crosswordAnswers[`word-${pw.number}`] || '').toUpperCase() === pw.word);
+                                  const anyWrong = attemptedWords.some((pw: any) => {
+                                    const ans = (crosswordAnswers[`word-${pw.number}`] || '').toUpperCase();
+                                    return ans !== pw.word;
+                                  });
+                                  if (attemptedWords.length > 0) {
+                                    if (anyCorrect && !anyWrong) cellColor = 'bg-green-50 border-green-400';
+                                    else if (anyWrong) cellColor = 'bg-red-50 border-red-400';
+                                  }
+                                }
+                                return (
+                                  <div 
+                                    key={colIdx} 
+                                    onClick={() => handleCellClick(rowIdx, colIdx)}
+                                    className={`w-8 h-8 sm:w-9 sm:h-9 border ${cellColor} flex items-center justify-center relative cursor-pointer transition-colors`}
+                                  >
+                                    {cellNumber && <span className="absolute top-0 left-0.5 text-[8px] font-bold text-gray-500 leading-none">{cellNumber}</span>}
+                                    {/* Show typed letter or revealed answer */}
+                                    <span className="text-xs sm:text-sm font-bold text-gray-700">
+                                      {crosswordChecked ? cell : typedLetter}
+                                    </span>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Clues List */}
+                      <div className="space-y-4">
+                        {['across', 'down'].map(dir => {
+                          const words = crosswordResult.placedWords.filter((pw: any) => pw.direction === dir).sort((a: any, b: any) => a.number - b.number);
+                          if (words.length === 0) return null;
+                          return (
+                            <div key={dir}>
+                              <h4 className="text-sm font-bold text-gray-700 uppercase tracking-wider mb-2">{dir === 'across' ? 'Across →' : 'Down ↓'}</h4>
+                              <div className="space-y-2">
+                                {words.map((pw: any) => {
+                                  const answerKey = `word-${pw.number}`;
+                                  const hasAnswer = (crosswordAnswers[answerKey] || '').length > 0;
+                                  const isCorrect = crosswordChecked && hasAnswer && (crosswordAnswers[answerKey] || '').toUpperCase() === pw.word;
+                                  const isWrong = crosswordChecked && hasAnswer && (crosswordAnswers[answerKey] || '').toUpperCase() !== pw.word;
+                                  const isNotAttempted = crosswordChecked && !hasAnswer;
+                                  return (
+                                    <div key={pw.number}
+                                      onClick={() => {
+                                        const newSelected = selectedClue === pw.number ? null : pw.number;
+                                        setSelectedClue(newSelected);
+                                        if (newSelected !== null) {
+                                          setSelectedCell({ row: pw.row, col: pw.col });
+                                          setSelectedDirection(pw.direction);
+                                        } else {
+                                          setSelectedCell(null);
+                                        }
+                                      }}
+                                      className={`p-3 rounded-xl border cursor-pointer transition-all ${
+                                        selectedClue === pw.number ? 'border-amber-400 bg-amber-50 shadow-sm' :
+                                        isCorrect ? 'border-green-300 bg-green-50' :
+                                        isWrong ? 'border-red-300 bg-red-50' :
+                                        isNotAttempted ? 'border-gray-200 bg-gray-50 opacity-60' :
+                                        'border-gray-200 hover:border-gray-300 bg-white'
+                                      }`}>
+                                      <div className="flex items-start gap-2 mb-2">
+                                        <span className="text-xs font-bold text-amber-600 bg-amber-100 rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0">{pw.number}</span>
+                                        <p className="text-sm text-gray-700">{pw.clue} <span className="text-gray-400">({pw.word.length} letters)</span></p>
+                                      </div>
+                                      <input
+                                        type="text"
+                                        maxLength={pw.word.length}
+                                        value={crosswordAnswers[answerKey] || ''}
+                                        onChange={(e) => {
+                                          const newValue = e.target.value.toUpperCase().replace(/[^A-Z]/g, '');
+                                          setCrosswordAnswers({ ...crosswordAnswers, [answerKey]: newValue });
+                                          // Sync cell selection to this word
+                                          setSelectedClue(pw.number);
+                                          setSelectedDirection(pw.direction);
+                                          // Move cursor to end of typed word
+                                          const cellOffset = Math.min(newValue.length, pw.word.length - 1);
+                                          if (pw.direction === 'across') {
+                                            setSelectedCell({ row: pw.row, col: pw.col + cellOffset });
+                                          } else {
+                                            setSelectedCell({ row: pw.row + cellOffset, col: pw.col });
+                                          }
+                                        }}
+                                        onFocus={() => {
+                                          setSelectedClue(pw.number);
+                                          setSelectedDirection(pw.direction);
+                                          setSelectedCell({ row: pw.row, col: pw.col });
+                                        }}
+                                        onClick={(e) => e.stopPropagation()}
+                                        disabled={crosswordChecked}
+                                        placeholder={'_'.repeat(pw.word.length)}
+                                        className={`w-full px-3 py-2 border rounded-lg text-sm font-mono tracking-[0.3em] uppercase ${
+                                          isCorrect ? 'border-green-400 bg-green-50 text-green-700' :
+                                          isWrong ? 'border-red-400 bg-red-50 text-red-700' :
+                                          'border-gray-200 bg-gray-50 text-gray-800'
+                                        } ${crosswordChecked ? 'cursor-not-allowed' : ''}`}
+                                      />
+                                      {isWrong && crosswordChecked && (
+                                        <p className="text-xs text-red-500 mt-1">Answer: <span className="font-mono font-bold">{pw.word}</span></p>
+                                      )}
+                                      {isNotAttempted && (
+                                        <p className="text-xs text-gray-400 mt-1 italic">Not attempted</p>
+                                      )}
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  /* Crossword Input Form */
+                  <div className={`bg-white rounded-2xl sm:rounded-3xl shadow-xl shadow-amber-100/50 border border-gray-100 overflow-hidden mb-6 min-w-0 ${!canUseQuiz ? 'opacity-50 pointer-events-none' : ''}`}>
+                    <div className="bg-gradient-to-r from-amber-50 to-orange-50 border-b border-gray-100 px-3 sm:px-5 py-3 sm:py-4">
+                      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4">
+                        <div className="flex items-center gap-3">
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-xs font-medium text-gray-500">Words:</span>
+                            <select value={isFreeUser ? 10 : crosswordWordCount}
+                              onChange={(e) => !isFreeUser && setCrosswordWordCount(Number(e.target.value))}
+                              disabled={isFreeUser}
+                              className={`px-2 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-medium ${isFreeUser ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                              {isFreeUser ? <option value={10}>10</option> : [6, 8, 10, 12, 15].map(n => <option key={n} value={n}>{n}</option>)}
+                            </select>
+                          </div>
+                        </div>
+                        <button
+                          onClick={handleSubmit}
+                          disabled={!isTextValid() || isGeneratingCrossword || !canUseQuiz}
+                          className={`w-full sm:w-auto px-6 py-2.5 rounded-xl flex items-center justify-center transition-all font-semibold text-sm flex-shrink-0 ${
+                            isTextValid() && !isGeneratingCrossword && canUseQuiz
+                              ? 'bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white shadow-lg shadow-amber-200 cursor-pointer'
+                              : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                          }`}
+                        >
+                          {isGeneratingCrossword ? (
+                            <>
+                              <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                              </svg>
+                              Generating...
+                            </>
+                          ) : (
+                            <>🧩 Generate Crossword</>
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                    <div className="flex flex-col min-w-0">
+                      <div className="flex items-center justify-between px-3 sm:px-5 py-2.5 sm:py-3 bg-gray-50/50 border-b border-gray-100">
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2 rounded-full bg-amber-400"></div>
+                          <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Source Material</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <button onClick={() => setInputText('')} className={`text-xs text-gray-400 hover:text-gray-600 ${!inputText ? 'invisible' : ''}`}>Clear</button>
+                          <button onClick={() => navigator.clipboard.readText().then(text => setInputText(text))} className="text-xs text-amber-600 hover:text-amber-700 font-medium">Paste</button>
+                        </div>
+                      </div>
+                      <div className="relative">
+                        {isGeneratingCrossword ? (
+                          <div className="min-h-[350px] flex items-center justify-center">
+                            <div className="flex flex-col items-center gap-4">
+                              <div className="relative">
+                                <div className="w-12 h-12 border-4 border-amber-200 rounded-full"></div>
+                                <div className="absolute top-0 left-0 w-12 h-12 border-4 border-amber-600 rounded-full border-t-transparent animate-spin"></div>
+                              </div>
+                              <p className="text-sm font-medium text-gray-600">Building your crossword puzzle...</p>
+                            </div>
+                          </div>
+                        ) : (
+                          <textarea
+                            value={inputText}
+                            onChange={(e) => setInputText(e.target.value)}
+                            placeholder="Paste your study notes or textbook content — key terms will be extracted for the crossword puzzle..."
+                            className="w-full min-h-[300px] sm:min-h-[350px] p-3 sm:p-5 text-gray-800 text-[15px] border-none outline-none resize-none bg-transparent placeholder-gray-400 leading-relaxed"
+                          />
+                        )}
+                      </div>
+                      <div className="flex items-center justify-between px-3 sm:px-5 py-2.5 sm:py-3 bg-gray-50/30 border-t border-gray-100">
+                        <span className={`text-xs font-medium ${
+                          getWordCount(inputText) < 50 ? 'text-amber-600' :
+                          (isFreeUser && getWordCount(inputText) > quizUsage.maxWordsPerGeneration) ? 'text-red-600' :
+                          'text-gray-400'
+                        }`}>
+                          {getWordCount(inputText)} words
+                          {getWordCount(inputText) < 50 && ' (min 50)'}
+                          {isFreeUser && getWordCount(inputText) > quizUsage.maxWordsPerGeneration && ` (max ${quizUsage.maxWordsPerGeneration.toLocaleString()})`}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </>
             )}
 
             {quizError && (
@@ -1855,6 +2946,70 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
           isComplete={false}
           variant="citations"
         />
+      )}
+
+      {/* Export Upgrade Modal (for locked export features) */}
+      {showExportUpgradeModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 bg-gradient-to-br from-amber-100 to-orange-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-amber-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Unlock Export Feature</h3>
+              <p className="text-gray-600">
+                Export your quizzes, flashcards, and crosswords to PDF or Word documents with a paid plan.
+              </p>
+            </div>
+            
+            <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl p-4 mb-6">
+              <h4 className="font-semibold text-amber-900 mb-3">Paid Plan Benefits:</h4>
+              <ul className="space-y-2 text-sm text-amber-800">
+                <li className="flex items-center gap-2">
+                  <svg className="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                  Export to PDF & Word documents
+                </li>
+                <li className="flex items-center gap-2">
+                  <svg className="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                  Permanent storage (no 7-day limit)
+                </li>
+                <li className="flex items-center gap-2">
+                  <svg className="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                  Unlimited study tool generations
+                </li>
+                <li className="flex items-center gap-2">
+                  <svg className="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                  All difficulty & question types
+                </li>
+              </ul>
+            </div>
+            
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowExportUpgradeModal(false)}
+                className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors font-medium"
+              >
+                Maybe Later
+              </button>
+              <button
+                onClick={() => { setShowExportUpgradeModal(false); onNavigate('pricing'); }}
+                className="flex-1 px-4 py-3 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-xl hover:from-amber-700 hover:to-orange-700 transition-all font-medium"
+              >
+                View Plans
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       <Footer onNavigate={onNavigate} />

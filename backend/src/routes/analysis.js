@@ -463,8 +463,8 @@ router.post('/generate-quiz', authenticateToken, async (req, res) => {
       difficulty: effectiveDifficulty
     }).then(() => {}).catch(err => console.error('Failed to record quiz usage:', err));
 
-    // Save quiz to history
-    aiAnalysisService.saveQuiz(userId, result, text)
+    // Save quiz to history (pass userPlan for expiration logic)
+    aiAnalysisService.saveQuiz(userId, result, text, userPlan)
       .then(savedQuiz => {
         if (savedQuiz) {
           console.log('Quiz saved to history:', savedQuiz.id);
@@ -483,6 +483,213 @@ router.post('/generate-quiz', authenticateToken, async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Quiz generation failed. Please try again.',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
+// @route   POST /api/analysis/generate-flashcards
+// @desc    Generate flashcards from text
+// @access  Private
+router.post('/generate-flashcards', authenticateToken, async (req, res) => {
+  try {
+    const { text, cardCount } = req.body;
+    const userId = req.user.id;
+    const userPlan = req.user.subscription_plan || 'free';
+    const planLimits = subscriptionService.PLAN_LIMITS[userPlan] || subscriptionService.PLAN_LIMITS.free;
+
+    if (!text || text.trim().length === 0) {
+      return res.status(400).json({ success: false, message: 'Text is required' });
+    }
+
+    const wordCount = text.trim().split(/\s+/).length;
+    const maxWordsPerGeneration = planLimits.quizMaxWordsPerGeneration || 15000;
+
+    if (wordCount > maxWordsPerGeneration) {
+      return res.status(400).json({
+        success: false,
+        message: userPlan === 'free'
+          ? `Free plan allows up to ${maxWordsPerGeneration.toLocaleString()} words. Upgrade for up to 15,000 words.`
+          : `Text exceeds maximum of ${maxWordsPerGeneration.toLocaleString()} words per request`
+      });
+    }
+
+    if (wordCount < 50) {
+      return res.status(400).json({
+        success: false,
+        message: 'Text must be at least 50 words to generate flashcards'
+      });
+    }
+
+    // Check usage limits (shares quiz usage pool)
+    const { createClient } = require('@supabase/supabase-js');
+    const supabase = createClient(
+      process.env.SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
+    );
+
+    const startOfMonth = new Date();
+    startOfMonth.setDate(1);
+    startOfMonth.setHours(0, 0, 0, 0);
+
+    const { data: usageData, error: usageError } = await supabase
+      .from('quiz_usage')
+      .select('words_count')
+      .eq('user_id', userId)
+      .gte('created_at', startOfMonth.toISOString());
+
+    const generationsThisMonth = usageError ? 0 : (usageData || []).length;
+    const wordsUsedThisMonth = usageError ? 0 : (usageData || []).reduce((sum, row) => sum + (row.words_count || 0), 0);
+    const generationLimit = planLimits.quizGenerationsPerMonth;
+    const wordLimit = planLimits.quizWordsPerMonth;
+
+    if (generationLimit !== -1 && generationsThisMonth >= generationLimit) {
+      return res.status(429).json({
+        success: false,
+        message: `You've used all ${generationLimit} study tool generations this month. Upgrade for unlimited access.`,
+        upgrade: true
+      });
+    }
+
+    if (wordsUsedThisMonth + wordCount > wordLimit) {
+      return res.status(429).json({
+        success: false,
+        message: `Word limit reached for this month.${userPlan === 'free' ? ' Upgrade for 999,999 words/month.' : ''}`,
+        upgrade: userPlan === 'free'
+      });
+    }
+
+    let effectiveCount = cardCount || 15;
+    if (userPlan === 'free') effectiveCount = Math.min(effectiveCount, 15);
+    effectiveCount = Math.min(Math.max(effectiveCount, 5), 30);
+
+    const result = await aiAnalysisService.generateFlashcards(text, effectiveCount, userPlan);
+
+    supabase.from('quiz_usage').insert({
+      user_id: userId,
+      words_count: wordCount,
+      quiz_type: 'flashcards',
+      difficulty: 'medium'
+    }).then(() => {}).catch(err => console.error('Failed to record flashcard usage:', err));
+
+    // Save flashcards to history (pass userPlan for expiration logic)
+    aiAnalysisService.saveFlashcards(userId, result, text, userPlan)
+      .then(savedFlashcards => {
+        if (savedFlashcards) {
+          console.log('Flashcards saved to history:', savedFlashcards.id);
+        }
+      })
+      .catch(error => console.error('Failed to save flashcards to history:', error));
+
+    res.json({ success: true, message: 'Flashcards generated successfully', data: result });
+  } catch (error) {
+    console.error('Flashcard generation error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Flashcard generation failed. Please try again.',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
+// @route   POST /api/analysis/generate-crossword
+// @desc    Generate crossword puzzle from text
+// @access  Private
+router.post('/generate-crossword', authenticateToken, async (req, res) => {
+  try {
+    const { text, wordCount: requestedWordCount } = req.body;
+    const userId = req.user.id;
+    const userPlan = req.user.subscription_plan || 'free';
+    const planLimits = subscriptionService.PLAN_LIMITS[userPlan] || subscriptionService.PLAN_LIMITS.free;
+
+    if (!text || text.trim().length === 0) {
+      return res.status(400).json({ success: false, message: 'Text is required' });
+    }
+
+    const wordCount = text.trim().split(/\s+/).length;
+    const maxWordsPerGeneration = planLimits.quizMaxWordsPerGeneration || 15000;
+
+    if (wordCount > maxWordsPerGeneration) {
+      return res.status(400).json({
+        success: false,
+        message: userPlan === 'free'
+          ? `Free plan allows up to ${maxWordsPerGeneration.toLocaleString()} words. Upgrade for up to 15,000 words.`
+          : `Text exceeds maximum of ${maxWordsPerGeneration.toLocaleString()} words per request`
+      });
+    }
+
+    if (wordCount < 50) {
+      return res.status(400).json({
+        success: false,
+        message: 'Text must be at least 50 words to generate a crossword'
+      });
+    }
+
+    const { createClient } = require('@supabase/supabase-js');
+    const supabase = createClient(
+      process.env.SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
+    );
+
+    const startOfMonth = new Date();
+    startOfMonth.setDate(1);
+    startOfMonth.setHours(0, 0, 0, 0);
+
+    const { data: usageData, error: usageError } = await supabase
+      .from('quiz_usage')
+      .select('words_count')
+      .eq('user_id', userId)
+      .gte('created_at', startOfMonth.toISOString());
+
+    const generationsThisMonth = usageError ? 0 : (usageData || []).length;
+    const wordsUsedThisMonth = usageError ? 0 : (usageData || []).reduce((sum, row) => sum + (row.words_count || 0), 0);
+    const generationLimit = planLimits.quizGenerationsPerMonth;
+    const wordLimitMonth = planLimits.quizWordsPerMonth;
+
+    if (generationLimit !== -1 && generationsThisMonth >= generationLimit) {
+      return res.status(429).json({
+        success: false,
+        message: `You've used all ${generationLimit} study tool generations this month. Upgrade for unlimited access.`,
+        upgrade: true
+      });
+    }
+
+    if (wordsUsedThisMonth + wordCount > wordLimitMonth) {
+      return res.status(429).json({
+        success: false,
+        message: `Word limit reached for this month.${userPlan === 'free' ? ' Upgrade for 999,999 words/month.' : ''}`,
+        upgrade: userPlan === 'free'
+      });
+    }
+
+    let effectiveWordCount = requestedWordCount || 10;
+    if (userPlan === 'free') effectiveWordCount = Math.min(effectiveWordCount, 10);
+    effectiveWordCount = Math.min(Math.max(effectiveWordCount, 6), 15);
+
+    const result = await aiAnalysisService.generateCrossword(text, effectiveWordCount, userPlan);
+
+    supabase.from('quiz_usage').insert({
+      user_id: userId,
+      words_count: wordCount,
+      quiz_type: 'crossword',
+      difficulty: 'medium'
+    }).then(() => {}).catch(err => console.error('Failed to record crossword usage:', err));
+
+    // Save crossword to history (pass userPlan for expiration logic)
+    aiAnalysisService.saveCrossword(userId, result, text, userPlan)
+      .then(savedCrossword => {
+        if (savedCrossword) {
+          console.log('Crossword saved to history:', savedCrossword.id);
+        }
+      })
+      .catch(error => console.error('Failed to save crossword to history:', error));
+
+    res.json({ success: true, message: 'Crossword generated successfully', data: result });
+  } catch (error) {
+    console.error('Crossword generation error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Crossword generation failed. Please try again.',
       error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }

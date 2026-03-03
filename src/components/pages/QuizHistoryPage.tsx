@@ -14,16 +14,43 @@ interface QuizQuestion {
   explanation: string;
 }
 
-interface Quiz {
+interface FlashCard {
+  id: number;
+  front: string;
+  back: string;
+}
+
+interface PlacedWord {
+  id: number;
+  word: string;
+  clue: string;
+  number: number;
+  direction: 'across' | 'down';
+  row: number;
+  col: number;
+  length: number;
+}
+
+interface CrosswordData {
+  grid: string[][];
+  clues: {
+    across: Array<{ number: number; clue: string; answer: string; row: number; col: number; }>;
+    down: Array<{ number: number; clue: string; answer: string; row: number; col: number; }>;
+  };
+  gridSize: { width: number; height: number; };
+  placedWords?: PlacedWord[];
+}
+
+interface StudyTool {
   id: string;
   title: string;
   quiz_type: string;
   difficulty: string;
   question_count: number;
-  questions: QuizQuestion[];
+  questions: QuizQuestion[] | FlashCard[] | CrosswordData;
   source_word_count: number;
   created_at: string;
-  expires_at: string;
+  expires_at: string | null;
 }
 
 interface QuizHistoryProps {
@@ -32,18 +59,25 @@ interface QuizHistoryProps {
   onLogout: () => void;
 }
 
+type FilterType = 'all' | 'quiz' | 'flashcards' | 'crossword';
+
 const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
-  const [quizzes, setQuizzes] = useState<Quiz[]>([]);
+  const [studyTools, setStudyTools] = useState<StudyTool[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [filter, setFilter] = useState<FilterType>('all');
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+
+  const userPlan = user?.plan || user?.subscription_plan || 'free';
+  const isPaidUser = userPlan === 'starter' || userPlan === 'premium';
 
   useEffect(() => {
-    fetchQuizHistory();
+    fetchStudyToolHistory();
   }, []);
 
-  const fetchQuizHistory = async () => {
+  const fetchStudyToolHistory = async () => {
     try {
       setIsLoading(true);
       const token = localStorage.getItem('authToken');
@@ -62,21 +96,39 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Failed to fetch quiz history');
+        throw new Error(data.message || 'Failed to fetch study tool history');
       }
 
       if (data.success) {
-        setQuizzes(data.data || []);
+        setStudyTools(data.data || []);
       } else {
-        throw new Error('Failed to fetch quiz history');
+        throw new Error('Failed to fetch study tool history');
       }
 
     } catch (error) {
-      console.error('Quiz history error:', error);
-      setError(error instanceof Error ? error.message : 'Failed to load quiz history');
+      console.error('Study tool history error:', error);
+      setError(error instanceof Error ? error.message : 'Failed to load study tool history');
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const filteredTools = studyTools.filter(tool => {
+    if (filter === 'all') return true;
+    if (filter === 'quiz') return !['flashcards', 'crossword'].includes(tool.quiz_type);
+    return tool.quiz_type === filter;
+  });
+
+  const getToolIcon = (type: string) => {
+    if (type === 'flashcards') return '🃏';
+    if (type === 'crossword') return '🧩';
+    return '📝';
+  };
+
+  const getToolTypeName = (type: string) => {
+    if (type === 'flashcards') return 'Flashcards';
+    if (type === 'crossword') return 'Crossword';
+    return 'Quiz';
   };
 
   const formatDate = (dateString: string) => {
@@ -89,7 +141,8 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
     });
   };
 
-  const getDaysRemaining = (expiresAt: string) => {
+  const getDaysRemaining = (expiresAt: string | null) => {
+    if (!expiresAt) return null; // null means permanent (paid users)
     const now = new Date();
     const expires = new Date(expiresAt);
     const diffTime = expires.getTime() - now.getTime();
@@ -97,12 +150,20 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
     return diffDays;
   };
 
-  const startQuiz = (quiz: Quiz) => {
-    localStorage.setItem('savedQuiz', JSON.stringify(quiz));
-    onNavigate('quiz-generator');
+  const startStudyTool = (tool: StudyTool) => {
+    if (tool.quiz_type === 'flashcards') {
+      localStorage.setItem('savedFlashcards', JSON.stringify(tool));
+      onNavigate('flashcard-generator');
+    } else if (tool.quiz_type === 'crossword') {
+      localStorage.setItem('savedCrossword', JSON.stringify(tool));
+      onNavigate('crossword-generator');
+    } else {
+      localStorage.setItem('savedQuiz', JSON.stringify(tool));
+      onNavigate('quiz-generator');
+    }
   };
 
-  const startNewQuiz = () => {
+  const startNewStudyTool = () => {
     onNavigate('quiz-generator');
   };
 
@@ -134,15 +195,15 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Failed to delete quiz');
+        throw new Error(data.message || 'Failed to delete study tool');
       }
 
-      setQuizzes(quizzes.filter(quiz => quiz.id !== quizId));
+      setStudyTools(studyTools.filter(tool => tool.id !== quizId));
       setDeleteConfirmId(null);
 
     } catch (error) {
-      console.error('Delete quiz error:', error);
-      setError(error instanceof Error ? error.message : 'Failed to delete quiz');
+      console.error('Delete study tool error:', error);
+      setError(error instanceof Error ? error.message : 'Failed to delete study tool');
     } finally {
       setIsDeleting(false);
     }
@@ -163,13 +224,15 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
       case 'true_false': return 'True/False';
       case 'fill_blank': return 'Fill in the Blank';
       case 'mixed': return 'Mixed';
+      case 'flashcards': return 'Flashcards';
+      case 'crossword': return 'Crossword';
       default: return type;
     }
   };
 
-  const exportQuizToPDF = (quiz: Quiz) => {
+  const exportQuizToPDF = (quiz: StudyTool) => {
     const qType = quiz.quiz_type || 'mixed';
-    const qs = quiz.questions || [];
+    const qs = (quiz.questions as QuizQuestion[]) || [];
     const doc = new jsPDF();
     let yPos = 20;
     const pageHeight = doc.internal.pageSize.height;
@@ -235,9 +298,9 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
     doc.save(`quiz-${Date.now()}.pdf`);
   };
 
-  const exportQuizToDOCX = async (quiz: Quiz) => {
+  const exportQuizToDOCX = async (quiz: StudyTool) => {
     const qType = quiz.quiz_type || 'mixed';
-    const qs = quiz.questions || [];
+    const qs = (quiz.questions as QuizQuestion[]) || [];
     const children: any[] = [];
 
     children.push(new Paragraph({ text: quiz.title || 'Quiz', heading: HeadingLevel.HEADING_1 }));
@@ -269,6 +332,224 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
     saveAs(blob, `quiz-${Date.now()}.docx`);
   };
 
+  const exportFlashcardsToPDF = (tool: StudyTool) => {
+    const cards = (tool.questions as FlashCard[]) || [];
+    if (!cards.length) return;
+    const doc = new jsPDF();
+    const margin = 20;
+    const pageHeight = doc.internal.pageSize.height;
+    let yPos = 20;
+
+    doc.setFontSize(18);
+    doc.setFont('helvetica', 'bold');
+    const titleLines = doc.splitTextToSize(tool.title || 'Flashcards', 170);
+    doc.text(titleLines, margin, yPos);
+    yPos += titleLines.length * 8 + 4;
+
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(100, 100, 100);
+    doc.text(`${cards.length} cards`, margin, yPos);
+    doc.setTextColor(0, 0, 0);
+    yPos += 12;
+
+    cards.forEach((card: FlashCard, idx: number) => {
+      if (yPos > pageHeight - 50) { doc.addPage(); yPos = 20; }
+
+      // Card number
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(180, 120, 0);
+      doc.text(`Card ${idx + 1}`, margin, yPos);
+      doc.setTextColor(0, 0, 0);
+      yPos += 6;
+
+      // Front
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Front:', margin, yPos);
+      yPos += 6;
+      doc.setFont('helvetica', 'normal');
+      const frontLines = doc.splitTextToSize(card.front || '', 165);
+      doc.text(frontLines, margin + 4, yPos);
+      yPos += frontLines.length * 6 + 4;
+
+      // Back
+      if (yPos > pageHeight - 30) { doc.addPage(); yPos = 20; }
+      doc.setFont('helvetica', 'bold');
+      doc.text('Back:', margin, yPos);
+      yPos += 6;
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(60, 100, 60);
+      const backLines = doc.splitTextToSize(card.back || '', 165);
+      doc.text(backLines, margin + 4, yPos);
+      doc.setTextColor(0, 0, 0);
+      yPos += backLines.length * 6 + 10;
+
+      // Divider
+      if (idx < cards.length - 1) {
+        doc.setDrawColor(220, 220, 220);
+        doc.line(margin, yPos - 4, 190, yPos - 4);
+      }
+    });
+
+    doc.save(`flashcards-${Date.now()}.pdf`);
+  };
+
+  const exportFlashcardsToDOCX = async (tool: StudyTool) => {
+    const cards = (tool.questions as FlashCard[]) || [];
+    if (!cards.length) return;
+    const children: any[] = [];
+
+    children.push(new Paragraph({ text: tool.title || 'Flashcards', heading: HeadingLevel.HEADING_1 }));
+    children.push(new Paragraph({ children: [new TextRun({ text: `${cards.length} cards`, size: 20, color: '666666' })] }));
+    children.push(new Paragraph({ text: '' }));
+
+    cards.forEach((card: FlashCard, idx: number) => {
+      children.push(new Paragraph({ children: [new TextRun({ text: `Card ${idx + 1}`, bold: true, color: 'B47800', size: 20 })] }));
+      children.push(new Paragraph({ children: [new TextRun({ text: 'Front: ', bold: true }), new TextRun({ text: card.front || '' })] }));
+      children.push(new Paragraph({ children: [new TextRun({ text: 'Back: ', bold: true }), new TextRun({ text: card.back || '', color: '3C643C' })] }));
+      children.push(new Paragraph({ text: '' }));
+    });
+
+    const docFile = new Document({ sections: [{ children }] });
+    const blob = await Packer.toBlob(docFile);
+    saveAs(blob, `flashcards-${Date.now()}.docx`);
+  };
+
+  const exportCrosswordToPDF = (tool: StudyTool) => {
+    const crosswordData = tool.questions as CrosswordData;
+    const placedWords = crosswordData?.placedWords || [];
+    if (!placedWords.length) return;
+    
+    const doc = new jsPDF();
+    const margin = 20;
+    const pageHeight = doc.internal.pageSize.height;
+    let yPos = 20;
+
+    doc.setFontSize(18);
+    doc.setFont('helvetica', 'bold');
+    const titleLines = doc.splitTextToSize(tool.title || 'Crossword', 170);
+    doc.text(titleLines, margin, yPos);
+    yPos += titleLines.length * 8 + 4;
+
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(100, 100, 100);
+    doc.text(`${placedWords.length} words`, margin, yPos);
+    doc.setTextColor(0, 0, 0);
+    yPos += 12;
+
+    // Draw crossword grid
+    const grid = crosswordData.grid;
+    if (grid?.length) {
+      const cellSize = Math.min(8, Math.floor(160 / grid[0].length));
+      const gridStartX = margin;
+      const gridStartY = yPos;
+
+      grid.forEach((row: string[], ri: number) => {
+        row.forEach((cell: string, ci: number) => {
+          const x = gridStartX + ci * cellSize;
+          const y = gridStartY + ri * cellSize;
+          if (cell !== '') {
+            doc.setDrawColor(100, 100, 100);
+            doc.setFillColor(255, 255, 255);
+            doc.rect(x, y, cellSize, cellSize, 'FD');
+            // Cell number
+            const wordAtCell = placedWords.find((pw: PlacedWord) => pw.row === ri && pw.col === ci);
+            if (wordAtCell) {
+              doc.setFontSize(4);
+              doc.setTextColor(80, 80, 80);
+              doc.text(String(wordAtCell.number), x + 0.5, y + 3.5);
+              doc.setTextColor(0, 0, 0);
+            }
+          } else {
+            doc.setFillColor(40, 40, 40);
+            doc.rect(x, y, cellSize, cellSize, 'F');
+          }
+        });
+      });
+
+      yPos = gridStartY + grid.length * cellSize + 14;
+    }
+
+    // Clues
+    ['across', 'down'].forEach(dir => {
+      const words = placedWords
+        .filter((pw: PlacedWord) => pw.direction === dir)
+        .sort((a: PlacedWord, b: PlacedWord) => a.number - b.number);
+      if (!words.length) return;
+
+      if (yPos > pageHeight - 30) { doc.addPage(); yPos = 20; }
+      doc.setFontSize(13);
+      doc.setFont('helvetica', 'bold');
+      doc.text(dir === 'across' ? 'Across' : 'Down', margin, yPos);
+      yPos += 8;
+
+      words.forEach((pw: PlacedWord) => {
+        if (yPos > pageHeight - 15) { doc.addPage(); yPos = 20; }
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
+        const clueText = doc.splitTextToSize(`${pw.number}. ${pw.clue} (${pw.word.length} letters)`, 165);
+        doc.text(clueText, margin + 2, yPos);
+        yPos += clueText.length * 6 + 2;
+      });
+      yPos += 4;
+    });
+
+    // Answer key
+    if (yPos > pageHeight - 40) { doc.addPage(); yPos = 20; }
+    doc.setFontSize(13);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Answer Key', margin, yPos);
+    yPos += 8;
+    const allWords = [...placedWords].sort((a: PlacedWord, b: PlacedWord) => a.number - b.number);
+    allWords.forEach((pw: PlacedWord) => {
+      if (yPos > pageHeight - 12) { doc.addPage(); yPos = 20; }
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`${pw.number}. ${pw.word} (${pw.direction})`, margin + 2, yPos);
+      yPos += 6;
+    });
+
+    doc.save(`crossword-${Date.now()}.pdf`);
+  };
+
+  const exportCrosswordToDOCX = async (tool: StudyTool) => {
+    const crosswordData = tool.questions as CrosswordData;
+    const placedWords = crosswordData?.placedWords || [];
+    if (!placedWords.length) return;
+    
+    const children: any[] = [];
+
+    children.push(new Paragraph({ text: tool.title || 'Crossword', heading: HeadingLevel.HEADING_1 }));
+    children.push(new Paragraph({ children: [new TextRun({ text: `${placedWords.length} words`, size: 20, color: '666666' })] }));
+    children.push(new Paragraph({ text: '' }));
+
+    ['across', 'down'].forEach(dir => {
+      const words = placedWords
+        .filter((pw: PlacedWord) => pw.direction === dir)
+        .sort((a: PlacedWord, b: PlacedWord) => a.number - b.number);
+      if (!words.length) return;
+
+      children.push(new Paragraph({ text: dir === 'across' ? 'Across' : 'Down', heading: HeadingLevel.HEADING_2 }));
+      words.forEach((pw: PlacedWord) => {
+        children.push(new Paragraph({ children: [new TextRun({ text: `${pw.number}. `, bold: true }), new TextRun({ text: `${pw.clue} (${pw.word.length} letters)` })] }));
+      });
+      children.push(new Paragraph({ text: '' }));
+    });
+
+    children.push(new Paragraph({ text: 'Answer Key', heading: HeadingLevel.HEADING_2 }));
+    const allWords = [...placedWords].sort((a: PlacedWord, b: PlacedWord) => a.number - b.number);
+    allWords.forEach((pw: PlacedWord) => {
+      children.push(new Paragraph({ children: [new TextRun({ text: `${pw.number}. `, bold: true }), new TextRun({ text: `${pw.word}`, color: '1A5C1A' }), new TextRun({ text: ` (${pw.direction})`, italics: true, color: '666666' })] }));
+    });
+
+    const docFile = new Document({ sections: [{ children }] });
+    const blob = await Packer.toBlob(docFile);
+    saveAs(blob, `crossword-${Date.now()}.docx`);
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-amber-50 via-white to-orange-50">
@@ -277,7 +558,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
           <div className="flex items-center justify-center min-h-64">
             <div className="text-center">
               <div className="animate-spin w-12 h-12 border-4 border-amber-600 border-t-transparent rounded-full mx-auto mb-4"></div>
-              <p className="text-gray-600">Loading quiz history...</p>
+              <p className="text-gray-600">Loading study tools...</p>
             </div>
           </div>
         </main>
@@ -299,7 +580,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
             <h2 className="text-2xl font-bold text-gray-900 mb-2">Error Loading History</h2>
             <p className="text-gray-600 mb-6">{error}</p>
             <button
-              onClick={fetchQuizHistory}
+              onClick={fetchStudyToolHistory}
               className="px-6 py-3 bg-amber-600 text-white rounded-xl font-medium hover:bg-amber-700 transition-colors"
             >
               Try Again
@@ -320,117 +601,227 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
           <div className="flex items-center gap-3 mb-4">
             <span className="text-4xl">🧠</span>
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900">
-              My Quizzes
+              My Study Tools
             </h1>
           </div>
           <p className="text-lg text-gray-600 mb-6">
-            Retake your saved quizzes or create new ones from your study materials
+            Review your saved quizzes, flashcards, and crosswords
           </p>
           
           <button
-            onClick={startNewQuiz}
+            onClick={startNewStudyTool}
             className="inline-flex items-center px-5 py-3 bg-gradient-to-r from-amber-600 to-orange-600 text-white font-semibold rounded-xl hover:from-amber-700 hover:to-orange-700 transition-all shadow-lg shadow-amber-200/50"
           >
             <span className="mr-2">✨</span>
-            Create New Quiz
+            Create New Study Tool
           </button>
         </div>
 
-        {/* Storage Notice */}
-        <div className="mb-8 p-5 bg-amber-50 border border-amber-200 rounded-2xl">
-          <div className="flex items-start">
-            <div className="w-10 h-10 bg-gradient-to-br from-amber-500 to-orange-500 rounded-xl flex items-center justify-center flex-shrink-0 text-white">
-              ⏰
-            </div>
-            <div className="ml-4">
-              <h3 className="font-semibold text-amber-800 mb-1">Quiz Expiration Notice</h3>
-              <p className="text-sm text-amber-700">
-                Quizzes are automatically removed <strong>7 days</strong> after creation. Make sure to retake any quizzes you want to study before they expire.
-              </p>
-            </div>
+        {/* Filter Tabs */}
+        <div className="mb-6">
+          <div className="inline-flex items-center bg-amber-50 border border-amber-200 rounded-2xl p-1.5">
+            {([
+              { key: 'all' as FilterType, label: 'All', icon: '📚' },
+              { key: 'quiz' as FilterType, label: 'Quizzes', icon: '📝' },
+              { key: 'flashcards' as FilterType, label: 'Flashcards', icon: '🃏' },
+              { key: 'crossword' as FilterType, label: 'Crosswords', icon: '🧩' },
+            ]).map((tab) => (
+              <button
+                key={tab.key}
+                onClick={() => setFilter(tab.key)}
+                className={`px-4 py-2 rounded-xl text-sm font-medium transition-all flex items-center gap-1.5 ${
+                  filter === tab.key
+                    ? 'bg-white text-amber-700 shadow-sm border border-amber-200'
+                    : 'text-amber-600 hover:text-amber-800 hover:bg-amber-100/50'
+                }`}
+              >
+                <span>{tab.icon}</span>
+                <span className="hidden sm:inline">{tab.label}</span>
+              </button>
+            ))}
           </div>
         </div>
 
-        {/* Quiz History */}
-        {quizzes.length === 0 ? (
+        {/* Storage Notice - different for free vs paid users */}
+        {isPaidUser ? (
+          <div className="mb-8 p-5 bg-green-50 border border-green-200 rounded-2xl">
+            <div className="flex items-start">
+              <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-500 rounded-xl flex items-center justify-center flex-shrink-0 text-white">
+                ✓
+              </div>
+              <div className="ml-4">
+                <h3 className="font-semibold text-green-800 mb-1">Unlimited Storage</h3>
+                <p className="text-sm text-green-700">
+                  Your study tools are saved <strong>permanently</strong> and can be accessed anytime. Export to PDF or Word whenever you need them.
+                </p>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="mb-8 p-5 bg-amber-50 border border-amber-200 rounded-2xl">
+            <div className="flex items-start">
+              <div className="w-10 h-10 bg-gradient-to-br from-amber-500 to-orange-500 rounded-xl flex items-center justify-center flex-shrink-0 text-white">
+                ⏰
+              </div>
+              <div className="ml-4">
+                <h3 className="font-semibold text-amber-800 mb-1">Free Plan - 7 Day Storage</h3>
+                <p className="text-sm text-amber-700">
+                  Study tools are automatically removed <strong>7 days</strong> after creation.{' '}
+                  <button onClick={() => onNavigate('pricing')} className="underline font-medium hover:text-amber-900">
+                    Upgrade to a paid plan
+                  </button>{' '}
+                  for permanent storage and PDF/Word export.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Study Tool History */}
+        {filteredTools.length === 0 ? (
           <div className="text-center py-16">
             <div className="w-20 h-20 bg-gradient-to-br from-amber-100 to-orange-100 rounded-2xl flex items-center justify-center mx-auto mb-4 text-4xl">
               🧠
             </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">No Quizzes Yet</h2>
-            <p className="text-gray-600 mb-6">Generate your first quiz from any study material to get started</p>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+              {filter === 'all' ? 'No Study Tools Yet' : `No ${getTypeLabel(filter === 'quiz' ? 'mixed' : filter)} Yet`}
+            </h2>
+            <p className="text-gray-600 mb-6">
+              {filter === 'all' 
+                ? 'Generate your first study tool from any study material to get started'
+                : `Create your first ${filter === 'quiz' ? 'quiz' : filter} to see it here`}
+            </p>
             <button
-              onClick={startNewQuiz}
+              onClick={startNewStudyTool}
               className="px-6 py-3 bg-gradient-to-r from-amber-600 to-orange-600 text-white font-semibold rounded-xl hover:from-amber-700 hover:to-orange-700 transition-all"
             >
-              Create Your First Quiz
+              Create Study Tool
             </button>
           </div>
         ) : (
           <div className="space-y-4">
-            {quizzes.map((quiz) => {
-              const daysRemaining = getDaysRemaining(quiz.expires_at);
+            {filteredTools.map((tool) => {
+              const daysRemaining = getDaysRemaining(tool.expires_at);
+              const isQuiz = !['flashcards', 'crossword'].includes(tool.quiz_type);
+              const toolIcon = getToolIcon(tool.quiz_type);
+              const toolTypeName = getToolTypeName(tool.quiz_type);
+              
               return (
                 <div
-                  key={quiz.id}
+                  key={tool.id}
                   className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-md hover:border-amber-200 transition-all"
                 >
                   <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                     <div className="flex-1">
-                      <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                        {quiz.title}
-                      </h3>
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-xl">{toolIcon}</span>
+                        <h3 className="text-xl font-semibold text-gray-900">
+                          {tool.title}
+                        </h3>
+                      </div>
                       <div className="flex flex-wrap items-center gap-2 text-sm text-gray-500">
                         <span className="flex items-center">
                           <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                           </svg>
-                          {formatDate(quiz.created_at)}
+                          {formatDate(tool.created_at)}
                         </span>
-                        <span className={`px-2.5 py-1 rounded-lg text-xs font-medium ${getDifficultyColor(quiz.difficulty)}`}>
-                          {quiz.difficulty.charAt(0).toUpperCase() + quiz.difficulty.slice(1)}
-                        </span>
-                        <span className="px-2.5 py-1 bg-blue-50 text-blue-700 rounded-lg text-xs font-medium">
-                          {getTypeLabel(quiz.quiz_type)}
+                        {isQuiz && (
+                          <span className={`px-2.5 py-1 rounded-lg text-xs font-medium ${getDifficultyColor(tool.difficulty)}`}>
+                            {tool.difficulty.charAt(0).toUpperCase() + tool.difficulty.slice(1)}
+                          </span>
+                        )}
+                        <span className={`px-2.5 py-1 rounded-lg text-xs font-medium ${
+                          tool.quiz_type === 'flashcards' ? 'bg-purple-50 text-purple-700' :
+                          tool.quiz_type === 'crossword' ? 'bg-green-50 text-green-700' :
+                          'bg-blue-50 text-blue-700'
+                        }`}>
+                          {getTypeLabel(tool.quiz_type)}
                         </span>
                         <span className="px-2.5 py-1 bg-gray-100 text-gray-700 rounded-lg text-xs font-medium">
-                          {quiz.question_count} Questions
+                          {tool.question_count} {tool.quiz_type === 'flashcards' ? 'Cards' : tool.quiz_type === 'crossword' ? 'Words' : 'Questions'}
                         </span>
-                        <span className={`px-2.5 py-1 rounded-lg text-xs font-medium ${
-                          daysRemaining <= 2 ? 'bg-red-50 text-red-700' : 'bg-purple-50 text-purple-700'
-                        }`}>
-                          {daysRemaining <= 0 ? 'Expires today' : `${daysRemaining} days left`}
-                        </span>
+                        {daysRemaining === null ? (
+                          <span className="px-2.5 py-1 rounded-lg text-xs font-medium bg-green-50 text-green-700">
+                            ✓ Saved permanently
+                          </span>
+                        ) : (
+                          <span className={`px-2.5 py-1 rounded-lg text-xs font-medium ${
+                            daysRemaining <= 2 ? 'bg-red-50 text-red-700' : 'bg-purple-50 text-purple-700'
+                          }`}>
+                            {daysRemaining <= 0 ? 'Expires today' : `${daysRemaining} days left`}
+                          </span>
+                        )}
                       </div>
                     </div>
                     
                     <div className="flex items-center gap-2 flex-wrap">
                       <button
-                        onClick={() => startQuiz(quiz)}
+                        onClick={() => startStudyTool(tool)}
                         className="px-4 py-2.5 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-xl hover:from-amber-700 hover:to-orange-700 transition-all font-medium text-sm"
                       >
-                        Take Quiz
+                        {tool.quiz_type === 'flashcards' ? 'Study Cards' : tool.quiz_type === 'crossword' ? 'Play Crossword' : 'Take Quiz'}
                       </button>
+
+                      {/* Export buttons for all tool types */}
+                      {isPaidUser ? (
+                        <>
+                          <button
+                            onClick={() => {
+                              if (tool.quiz_type === 'flashcards') exportFlashcardsToPDF(tool);
+                              else if (tool.quiz_type === 'crossword') exportCrosswordToPDF(tool);
+                              else exportQuizToPDF(tool);
+                            }}
+                            className="px-4 py-2.5 bg-red-50 text-red-700 rounded-xl hover:bg-red-100 transition-all font-medium text-sm flex items-center gap-1.5"
+                            title="Download as PDF"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                            PDF
+                          </button>
+                          <button
+                            onClick={() => {
+                              if (tool.quiz_type === 'flashcards') exportFlashcardsToDOCX(tool);
+                              else if (tool.quiz_type === 'crossword') exportCrosswordToDOCX(tool);
+                              else exportQuizToDOCX(tool);
+                            }}
+                            className="px-4 py-2.5 bg-blue-50 text-blue-700 rounded-xl hover:bg-blue-100 transition-all font-medium text-sm flex items-center gap-1.5"
+                            title="Download as Word"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                            DOCX
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <button
+                            onClick={() => setShowUpgradeModal(true)}
+                            className="px-4 py-2.5 bg-gray-100 text-gray-400 rounded-xl transition-all font-medium text-sm flex items-center gap-1.5 cursor-pointer"
+                            title="Upgrade to export as PDF"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                            PDF
+                            <svg className="w-3.5 h-3.5 text-amber-500" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                            </svg>
+                          </button>
+                          <button
+                            onClick={() => setShowUpgradeModal(true)}
+                            className="px-4 py-2.5 bg-gray-100 text-gray-400 rounded-xl transition-all font-medium text-sm flex items-center gap-1.5 cursor-pointer"
+                            title="Upgrade to export as Word"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                            DOCX
+                            <svg className="w-3.5 h-3.5 text-amber-500" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                            </svg>
+                          </button>
+                        </>
+                      )}
+
                       <button
-                        onClick={() => exportQuizToPDF(quiz)}
-                        className="px-4 py-2.5 bg-red-50 text-red-700 rounded-xl hover:bg-red-100 transition-all font-medium text-sm flex items-center gap-1.5"
-                        title="Download as PDF"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                        PDF
-                      </button>
-                      <button
-                        onClick={() => exportQuizToDOCX(quiz)}
-                        className="px-4 py-2.5 bg-blue-50 text-blue-700 rounded-xl hover:bg-blue-100 transition-all font-medium text-sm flex items-center gap-1.5"
-                        title="Download as Word"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                        DOCX
-                      </button>
-                      <button
-                        onClick={() => handleDeleteClick(quiz.id)}
+                        onClick={() => handleDeleteClick(tool.id)}
                         className="p-2.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors"
-                        title="Delete quiz"
+                        title={`Delete ${toolTypeName.toLowerCase()}`}
                       >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -439,11 +830,11 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
                     </div>
                   </div>
 
-                  {/* Question Types Preview */}
-                  {quiz.questions && quiz.questions.length > 0 && (
+                  {/* Preview - only for quizzes */}
+                  {isQuiz && Array.isArray(tool.questions) && tool.questions.length > 0 && (
                     <div className="flex flex-wrap items-center gap-2 mt-4 pt-4 border-t border-gray-100">
                       <span className="text-sm text-gray-500 font-medium">Sample questions:</span>
-                      {quiz.questions.slice(0, 2).map((q, index) => (
+                      {(tool.questions as QuizQuestion[]).slice(0, 2).map((q, index) => (
                         <span
                           key={index}
                           className="px-2.5 py-1 bg-gray-100 text-gray-700 rounded-lg text-xs max-w-xs truncate"
@@ -451,11 +842,44 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
                           {q.question.length > 50 ? q.question.substring(0, 50) + '...' : q.question}
                         </span>
                       ))}
-                      {quiz.questions.length > 2 && (
+                      {(tool.questions as QuizQuestion[]).length > 2 && (
                         <span className="text-xs text-gray-500">
-                          +{quiz.questions.length - 2} more
+                          +{(tool.questions as QuizQuestion[]).length - 2} more
                         </span>
                       )}
+                    </div>
+                  )}
+                  
+                  {/* Preview - for flashcards */}
+                  {tool.quiz_type === 'flashcards' && Array.isArray(tool.questions) && tool.questions.length > 0 && (
+                    <div className="flex flex-wrap items-center gap-2 mt-4 pt-4 border-t border-gray-100">
+                      <span className="text-sm text-gray-500 font-medium">Sample cards:</span>
+                      {(tool.questions as FlashCard[]).slice(0, 2).map((card, index) => (
+                        <span
+                          key={index}
+                          className="px-2.5 py-1 bg-purple-50 text-purple-700 rounded-lg text-xs max-w-xs truncate"
+                        >
+                          {card.front.length > 40 ? card.front.substring(0, 40) + '...' : card.front}
+                        </span>
+                      ))}
+                      {(tool.questions as FlashCard[]).length > 2 && (
+                        <span className="text-xs text-gray-500">
+                          +{(tool.questions as FlashCard[]).length - 2} more
+                        </span>
+                      )}
+                    </div>
+                  )}
+                  
+                  {/* Preview - for crosswords */}
+                  {tool.quiz_type === 'crossword' && (
+                    <div className="flex flex-wrap items-center gap-2 mt-4 pt-4 border-t border-gray-100">
+                      <span className="text-sm text-gray-500 font-medium">Puzzle info:</span>
+                      <span className="px-2.5 py-1 bg-green-50 text-green-700 rounded-lg text-xs">
+                        {((tool.questions as CrosswordData)?.clues?.across?.length || 0)} Across
+                      </span>
+                      <span className="px-2.5 py-1 bg-green-50 text-green-700 rounded-lg text-xs">
+                        {((tool.questions as CrosswordData)?.clues?.down?.length || 0)} Down
+                      </span>
                     </div>
                   )}
                 </div>
@@ -475,11 +899,11 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                 </svg>
               </div>
-              <h3 className="text-xl font-bold text-gray-900">Delete Quiz?</h3>
+              <h3 className="text-xl font-bold text-gray-900">Delete Study Tool?</h3>
             </div>
             
             <p className="text-gray-600 mb-6">
-              Are you sure you want to delete this quiz? This action cannot be undone.
+              Are you sure you want to delete this? This action cannot be undone.
             </p>
             
             <div className="flex gap-3">
@@ -503,6 +927,70 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
                 ) : (
                   'Delete'
                 )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Upgrade Modal for Export Feature */}
+      {showUpgradeModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 bg-gradient-to-br from-amber-100 to-orange-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-amber-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Unlock Export Feature</h3>
+              <p className="text-gray-600">
+                Export your quizzes, flashcards, and crosswords to PDF or Word documents with a paid plan.
+              </p>
+            </div>
+            
+            <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl p-4 mb-6">
+              <h4 className="font-semibold text-amber-900 mb-3">Paid Plan Benefits:</h4>
+              <ul className="space-y-2 text-sm text-amber-800">
+                <li className="flex items-center gap-2">
+                  <svg className="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                  Export to PDF & Word documents
+                </li>
+                <li className="flex items-center gap-2">
+                  <svg className="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                  Permanent storage (no 7-day limit)
+                </li>
+                <li className="flex items-center gap-2">
+                  <svg className="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                  Unlimited study tool generations
+                </li>
+                <li className="flex items-center gap-2">
+                  <svg className="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                  All difficulty & question types
+                </li>
+              </ul>
+            </div>
+            
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowUpgradeModal(false)}
+                className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors font-medium"
+              >
+                Maybe Later
+              </button>
+              <button
+                onClick={() => { setShowUpgradeModal(false); onNavigate('pricing'); }}
+                className="flex-1 px-4 py-3 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-xl hover:from-amber-700 hover:to-orange-700 transition-all font-medium"
+              >
+                View Plans
               </button>
             </div>
           </div>

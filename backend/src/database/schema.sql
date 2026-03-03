@@ -166,3 +166,37 @@ CREATE TRIGGER update_document_analyses_updated_at BEFORE UPDATE ON document_ana
 DROP TRIGGER IF EXISTS update_email_subscriptions_updated_at ON email_subscriptions;
 CREATE TRIGGER update_email_subscriptions_updated_at BEFORE UPDATE ON email_subscriptions
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- Quizzes/Study Tools table (for quizzes, flashcards, crosswords)
+CREATE TABLE IF NOT EXISTS quizzes (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    title VARCHAR(500) NOT NULL,
+    quiz_type VARCHAR(50) NOT NULL, -- 'mixed', 'multiple_choice', 'true_false', 'fill_blank', 'flashcards', 'crossword'
+    difficulty VARCHAR(50) DEFAULT 'medium',
+    question_count INTEGER DEFAULT 0,
+    questions JSONB, -- Stores questions array, flashcard cards, or crossword data
+    source_word_count INTEGER DEFAULT 0,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    expires_at TIMESTAMP WITH TIME ZONE -- NULL for permanent (paid users), timestamp for free users
+);
+
+-- Indexes for quizzes table
+CREATE INDEX IF NOT EXISTS idx_quizzes_user_id ON quizzes(user_id);
+CREATE INDEX IF NOT EXISTS idx_quizzes_quiz_type ON quizzes(quiz_type);
+CREATE INDEX IF NOT EXISTS idx_quizzes_created_at ON quizzes(created_at);
+CREATE INDEX IF NOT EXISTS idx_quizzes_expires_at ON quizzes(expires_at);
+
+-- Quiz usage tracking table
+CREATE TABLE IF NOT EXISTS quiz_usage (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    month_year VARCHAR(7) NOT NULL, -- Format: 'YYYY-MM'
+    generations_used INTEGER DEFAULT 0,
+    words_used INTEGER DEFAULT 0,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(user_id, month_year)
+);
+
+CREATE INDEX IF NOT EXISTS idx_quiz_usage_user_month ON quiz_usage(user_id, month_year);

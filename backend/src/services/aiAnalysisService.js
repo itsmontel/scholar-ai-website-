@@ -2465,16 +2465,21 @@ IMPORTANT REQUIREMENTS:
 
   /**
    * Save quiz to history
+   * @param {string} userPlan - User's subscription plan ('free', 'starter', 'premium')
    */
-  async saveQuiz(userId, quiz, sourceText) {
+  async saveQuiz(userId, quiz, sourceText, userPlan = 'free') {
     try {
-      console.log('Saving quiz to history:', { userId, quizTitle: quiz.title });
+      console.log('Saving quiz to history:', { userId, quizTitle: quiz.title, userPlan });
       
       const { createClient } = require('@supabase/supabase-js');
       const supabase = createClient(
         process.env.SUPABASE_URL,
         process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
       );
+
+      // Free users: 7 days expiration; Paid users (starter/premium): no expiration (null)
+      const isPaidUser = userPlan === 'starter' || userPlan === 'premium';
+      const expiresAt = isPaidUser ? null : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
 
       const quizData = {
         user_id: userId,
@@ -2485,7 +2490,7 @@ IMPORTANT REQUIREMENTS:
         questions: quiz.questions,
         source_word_count: quiz.sourceWordCount || sourceText?.trim().split(/\s+/).length || 0,
         created_at: new Date().toISOString(),
-        expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() // 7 days from now
+        expires_at: expiresAt
       };
 
       const { data, error } = await supabase
@@ -2507,7 +2512,119 @@ IMPORTANT REQUIREMENTS:
   }
 
   /**
+   * Save flashcards to history
+   * @param {string} userPlan - User's subscription plan ('free', 'starter', 'premium')
+   */
+  async saveFlashcards(userId, flashcards, sourceText, userPlan = 'free') {
+    try {
+      console.log('Saving flashcards to history:', { userId, title: flashcards.title, userPlan });
+
+      const { createClient } = require('@supabase/supabase-js');
+      const supabase = createClient(
+        process.env.SUPABASE_URL,
+        process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
+      );
+
+      // Free users: 7 days expiration; Paid users (starter/premium): no expiration (null)
+      const isPaidUser = userPlan === 'starter' || userPlan === 'premium';
+      const expiresAt = isPaidUser ? null : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+
+      const flashcardData = {
+        user_id: userId,
+        title: flashcards.title,
+        quiz_type: 'flashcards',
+        difficulty: 'mixed',
+        question_count: flashcards.cards?.length || 0,
+        questions: flashcards.cards,
+        source_word_count: sourceText?.trim().split(/\s+/).length || 0,
+        created_at: new Date().toISOString(),
+        expires_at: expiresAt
+      };
+
+      const { data, error } = await supabase
+        .from('quizzes')
+        .insert([flashcardData])
+        .select();
+
+      if (error) {
+        console.error('Error saving flashcards:', error);
+        throw error;
+      }
+
+      console.log('Flashcards saved successfully:', data[0]?.id);
+      return data[0];
+    } catch (error) {
+      console.error('Database error in saveFlashcards:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Save crossword to history
+   * @param {string} userPlan - User's subscription plan ('free', 'starter', 'premium')
+   */
+  async saveCrossword(userId, crossword, sourceText, userPlan = 'free') {
+    try {
+      console.log('Saving crossword to history:', { userId, title: crossword.title, userPlan });
+
+      const { createClient } = require('@supabase/supabase-js');
+      const supabase = createClient(
+        process.env.SUPABASE_URL,
+        process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
+      );
+
+      // Free users: 7 days expiration; Paid users (starter/premium): no expiration (null)
+      const isPaidUser = userPlan === 'starter' || userPlan === 'premium';
+      const expiresAt = isPaidUser ? null : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+
+      // Build clues object from placedWords for display in history
+      const cluesFromPlacedWords = {
+        across: (crossword.placedWords || [])
+          .filter(pw => pw.direction === 'across')
+          .map(pw => ({ number: pw.number, clue: pw.clue, answer: pw.word, row: pw.row, col: pw.col })),
+        down: (crossword.placedWords || [])
+          .filter(pw => pw.direction === 'down')
+          .map(pw => ({ number: pw.number, clue: pw.clue, answer: pw.word, row: pw.row, col: pw.col }))
+      };
+
+      const crosswordData = {
+        user_id: userId,
+        title: crossword.title,
+        quiz_type: 'crossword',
+        difficulty: 'mixed',
+        question_count: crossword.placedWords?.length || 0,
+        questions: {
+          grid: crossword.grid,
+          clues: cluesFromPlacedWords,
+          gridSize: crossword.gridSize,
+          placedWords: crossword.placedWords
+        },
+        source_word_count: sourceText?.trim().split(/\s+/).length || 0,
+        created_at: new Date().toISOString(),
+        expires_at: expiresAt
+      };
+
+      const { data, error } = await supabase
+        .from('quizzes')
+        .insert([crosswordData])
+        .select();
+
+      if (error) {
+        console.error('Error saving crossword:', error);
+        throw error;
+      }
+
+      console.log('Crossword saved successfully:', data[0]?.id);
+      return data[0];
+    } catch (error) {
+      console.error('Database error in saveCrossword:', error);
+      return null;
+    }
+  }
+
+  /**
    * Get quiz history for a user
+   * Returns items that are either permanent (expires_at is null) or not yet expired
    */
   async getQuizHistory(userId, limit = 20) {
     try {
@@ -2517,11 +2634,12 @@ IMPORTANT REQUIREMENTS:
         process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
       );
 
+      // Get items where expires_at is null (permanent) OR expires_at is in the future
       const { data, error } = await supabase
         .from('quizzes')
         .select('*')
         .eq('user_id', userId)
-        .gt('expires_at', new Date().toISOString()) // Only get non-expired quizzes
+        .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`)
         .order('created_at', { ascending: false })
         .limit(limit);
 
@@ -2539,6 +2657,7 @@ IMPORTANT REQUIREMENTS:
 
   /**
    * Get a specific quiz by ID
+   * Returns item if it's permanent (expires_at is null) or not yet expired
    */
   async getQuizById(userId, quizId) {
     try {
@@ -2553,7 +2672,7 @@ IMPORTANT REQUIREMENTS:
         .select('*')
         .eq('id', quizId)
         .eq('user_id', userId)
-        .gt('expires_at', new Date().toISOString())
+        .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`)
         .single();
 
       if (error) {
@@ -2579,14 +2698,23 @@ IMPORTANT REQUIREMENTS:
         process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
       );
 
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('quizzes')
         .delete()
         .eq('id', quizId)
-        .eq('user_id', userId);
+        .eq('user_id', userId)
+        .select();
 
       if (error) {
         console.error('Error deleting quiz:', error);
+        return false;
+      }
+
+      const rowsDeleted = (data || []).length;
+      console.log(`Delete result: ${rowsDeleted} row(s) removed from quizzes table`);
+
+      if (rowsDeleted === 0) {
+        console.warn(`No rows deleted — quiz ${quizId} not found for user ${userId} or blocked by RLS`);
         return false;
       }
 
@@ -2995,6 +3123,292 @@ DO NOT include any text outside the JSON object.`;
       console.error('OpenAI quiz generation error:', error);
       throw new Error('Failed to generate quiz: ' + error.message);
     }
+  }
+  async generateFlashcards(text, cardCount = 15, userPlan = 'starter') {
+    if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY === 'your_openai_api_key_here') {
+      throw new Error('OpenAI API key not configured');
+    }
+
+    const selectedModel = userPlan === 'premium' ? 'gpt-4.1-mini' : 'gpt-4.1-nano';
+
+    const systemPrompt = `You are an expert study-aid creator. Generate exactly ${cardCount} flashcards from the provided text.
+
+Each flashcard has a FRONT (question, term, or prompt) and a BACK (answer, definition, or explanation).
+
+Guidelines:
+- Cover the most important concepts, terms, and facts
+- Make fronts concise and specific
+- Make backs clear and informative (1-3 sentences)
+- Vary between definition cards, concept cards, and application cards
+- Order them from foundational concepts to more complex ideas
+
+Return valid JSON in this EXACT format:
+{
+  "title": "Flashcard deck title based on the content",
+  "cards": [
+    {
+      "id": 1,
+      "front": "Question or term on the front of the card",
+      "back": "Answer or definition on the back of the card"
+    }
+  ]
+}
+
+DO NOT include any text outside the JSON object.`;
+
+    try {
+      const completion = await this.openai.chat.completions.create({
+        model: selectedModel,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: `Generate ${cardCount} flashcards from this text:\n\n${text}` }
+        ],
+        max_tokens: 3000,
+        temperature: 0.7,
+      });
+
+      const responseText = completion.choices[0].message.content.trim();
+      let result;
+      try {
+        result = JSON.parse(responseText);
+      } catch {
+        const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          result = JSON.parse(jsonMatch[0]);
+        } else {
+          throw new Error('Failed to parse flashcard response');
+        }
+      }
+
+      return {
+        ...result,
+        cardCount: result.cards?.length || cardCount,
+        sourceWordCount: text.trim().split(/\s+/).length
+      };
+    } catch (error) {
+      console.error('OpenAI flashcard generation error:', error);
+      throw new Error('Failed to generate flashcards: ' + error.message);
+    }
+  }
+
+  async generateCrossword(text, wordCount = 12, userPlan = 'starter') {
+    if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY === 'your_openai_api_key_here') {
+      throw new Error('OpenAI API key not configured');
+    }
+
+    const selectedModel = userPlan === 'premium' ? 'gpt-4.1-mini' : 'gpt-4.1-nano';
+
+    const systemPrompt = `You are an expert crossword puzzle creator for educational content. Extract exactly ${wordCount} key terms from the provided text and create clues for them.
+
+Rules for terms:
+- Each term must be a SINGLE WORD (no spaces, no hyphens) of 3-12 letters
+- Only use letters A-Z (no numbers, no special characters)
+- Terms should be important vocabulary, concepts, or names from the text
+- All terms must be UPPERCASE
+
+Rules for clues:
+- Each clue should be a concise hint (one sentence) that helps the student recall the term
+- Clues should test understanding, not just definition recall
+
+Return valid JSON in this EXACT format:
+{
+  "title": "Crossword title based on the content",
+  "words": [
+    {
+      "id": 1,
+      "word": "PHOTOSYNTHESIS",
+      "clue": "Process by which plants convert sunlight into energy"
+    }
+  ]
+}
+
+CRITICAL: Every "word" value must be a single word with ONLY uppercase A-Z letters, 3-12 characters long.
+DO NOT include any text outside the JSON object.`;
+
+    try {
+      const completion = await this.openai.chat.completions.create({
+        model: selectedModel,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: `Extract ${wordCount} key terms and create crossword clues from this text:\n\n${text}` }
+        ],
+        max_tokens: 2000,
+        temperature: 0.7,
+      });
+
+      const responseText = completion.choices[0].message.content.trim();
+      let result;
+      try {
+        result = JSON.parse(responseText);
+      } catch {
+        const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          result = JSON.parse(jsonMatch[0]);
+        } else {
+          throw new Error('Failed to parse crossword response');
+        }
+      }
+
+      // Clean words: strip non-alpha, uppercase, filter valid
+      if (result.words) {
+        result.words = result.words
+          .map(w => ({ ...w, word: w.word.replace(/[^A-Za-z]/g, '').toUpperCase() }))
+          .filter(w => w.word.length >= 3 && w.word.length <= 12);
+      }
+
+      // Generate the crossword grid layout
+      const grid = this.buildCrosswordGrid(result.words || []);
+
+      return {
+        ...result,
+        grid: grid.grid,
+        placedWords: grid.placedWords,
+        gridSize: grid.size,
+        wordCount: grid.placedWords.length,
+        sourceWordCount: text.trim().split(/\s+/).length
+      };
+    } catch (error) {
+      console.error('OpenAI crossword generation error:', error);
+      throw new Error('Failed to generate crossword: ' + error.message);
+    }
+  }
+
+  /**
+   * Build a crossword grid from a list of words.
+   * Simple greedy placement: place the longest word first, then try to intersect subsequent words.
+   */
+  buildCrosswordGrid(words) {
+    if (!words || words.length === 0) return { grid: [], placedWords: [], size: 0 };
+
+    const sorted = [...words].sort((a, b) => b.word.length - a.word.length);
+    const SIZE = 20;
+    const grid = Array.from({ length: SIZE }, () => Array(SIZE).fill(''));
+    const placedWords = [];
+    let number = 1;
+
+    // Place first word horizontally in the middle
+    const first = sorted[0];
+    const startRow = Math.floor(SIZE / 2);
+    const startCol = Math.floor((SIZE - first.word.length) / 2);
+    for (let i = 0; i < first.word.length; i++) {
+      grid[startRow][startCol + i] = first.word[i];
+    }
+    placedWords.push({
+      ...first,
+      number: number++,
+      direction: 'across',
+      row: startRow,
+      col: startCol,
+      length: first.word.length
+    });
+
+    // Try to place remaining words by finding intersections
+    for (let wi = 1; wi < sorted.length; wi++) {
+      const w = sorted[wi];
+      let placed = false;
+
+      for (const pw of placedWords) {
+        if (placed) break;
+        for (let pi = 0; pi < pw.word.length; pi++) {
+          if (placed) break;
+          for (let ci = 0; ci < w.word.length; ci++) {
+            if (w.word[ci] !== pw.word[pi]) continue;
+
+            // Try perpendicular placement
+            const isAcross = pw.direction === 'down';
+            let r, c;
+            if (isAcross) {
+              r = pw.row + pi;
+              c = pw.col - ci;
+            } else {
+              r = pw.row - ci;
+              c = pw.col + pi;
+            }
+
+            // Check bounds
+            if (isAcross && (c < 0 || c + w.word.length > SIZE)) continue;
+            if (!isAcross && (r < 0 || r + w.word.length > SIZE)) continue;
+
+            // Check every cell the new word would occupy
+            let canPlace = true;
+            for (let k = 0; k < w.word.length; k++) {
+              const cr = isAcross ? r : r + k;
+              const cc = isAcross ? c + k : c;
+              const existing = grid[cr][cc];
+
+              if (existing === '') {
+                // Check adjacency — no parallel touching
+                if (isAcross) {
+                  if ((cr > 0 && grid[cr - 1][cc] !== '' && k !== ci) ||
+                      (cr < SIZE - 1 && grid[cr + 1][cc] !== '' && k !== ci)) {
+                    canPlace = false; break;
+                  }
+                } else {
+                  if ((cc > 0 && grid[cr][cc - 1] !== '' && k !== ci) ||
+                      (cc < SIZE - 1 && grid[cr][cc + 1] !== '' && k !== ci)) {
+                    canPlace = false; break;
+                  }
+                }
+              } else if (existing !== w.word[k]) {
+                canPlace = false; break;
+              }
+            }
+
+            // Check cell before and after the word is empty
+            if (canPlace) {
+              if (isAcross) {
+                if (c > 0 && grid[r][c - 1] !== '') canPlace = false;
+                if (c + w.word.length < SIZE && grid[r][c + w.word.length] !== '') canPlace = false;
+              } else {
+                if (r > 0 && grid[r - 1][c] !== '') canPlace = false;
+                if (r + w.word.length < SIZE && grid[r + w.word.length][c] !== '') canPlace = false;
+              }
+            }
+
+            if (canPlace) {
+              for (let k = 0; k < w.word.length; k++) {
+                const cr = isAcross ? r : r + k;
+                const cc = isAcross ? c + k : c;
+                grid[cr][cc] = w.word[k];
+              }
+              placedWords.push({
+                ...w,
+                number: number++,
+                direction: isAcross ? 'across' : 'down',
+                row: r,
+                col: c,
+                length: w.word.length
+              });
+              placed = true;
+            }
+          }
+        }
+      }
+    }
+
+    // Trim grid to the bounding box of placed letters
+    let minR = SIZE, maxR = 0, minC = SIZE, maxC = 0;
+    for (let r = 0; r < SIZE; r++) {
+      for (let c = 0; c < SIZE; c++) {
+        if (grid[r][c] !== '') {
+          minR = Math.min(minR, r); maxR = Math.max(maxR, r);
+          minC = Math.min(minC, c); maxC = Math.max(maxC, c);
+        }
+      }
+    }
+
+    const trimmed = [];
+    for (let r = minR; r <= maxR; r++) {
+      trimmed.push(grid[r].slice(minC, maxC + 1));
+    }
+
+    const adjusted = placedWords.map(pw => ({
+      ...pw,
+      row: pw.row - minR,
+      col: pw.col - minC
+    }));
+
+    return { grid: trimmed, placedWords: adjusted, size: Math.max(maxR - minR + 1, maxC - minC + 1) };
   }
 }
 
