@@ -18,10 +18,11 @@ interface FeaturesPageProps {
 
 const FeaturesPage = ({ onNavigate, user, onLogout }: FeaturesPageProps) => {
   const benefits = [
-    { label: "Instant Feedback", description: "Get results in seconds, not days" },
-    { label: "Multiple Citation Styles", description: "APA, MLA, Chicago, and more" },
-    { label: "Unlimited Documents", description: "No restrictions on uploads" },
-    { label: "Cloud Storage", description: "Access your work anywhere" }
+    { label: "AI Humanizer", description: "Bypass AI detectors with natural text" },
+    { label: "Quiz Generator", description: "Create study quizzes from any text" },
+    { label: "Paper Summarizer", description: "Condense articles into key points" },
+    { label: "Citation Finder", description: "APA, MLA, Chicago, Harvard styles" },
+    { label: "Essay Checker", description: "Professor-style feedback instantly" }
   ];
 
   return (
@@ -66,10 +67,10 @@ const FeaturesPage = ({ onNavigate, user, onLogout }: FeaturesPageProps) => {
               Features
             </span>
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-6 leading-tight">
-              Everything you need for<br className="hidden sm:block" /> academic excellence
+              The complete AI toolkit<br className="hidden sm:block" /> for students
             </h1>
             <p className="text-lg text-gray-500 leading-relaxed">
-              Powerful AI tools designed specifically for students and researchers. Write better papers, find reliable citations, and improve your academic writing.
+              AI Humanizer to bypass detectors, Quiz Generator for exam prep, Paper Summarizer for research, Citation Finder, and Essay Checker. Everything you need in one place.
             </p>
           </div>
         </div>
@@ -223,14 +224,34 @@ const FeaturesPage = ({ onNavigate, user, onLogout }: FeaturesPageProps) => {
               <p className="text-base text-gray-600 leading-relaxed">Enhance your writing with suggestions for more formal, academic-appropriate language and terminology.</p>
             </div>
 
-            {/* AI Humanizer - Premium */}
+            {/* AI Humanizer */}
             <button onClick={() => onNavigate('humanizer')} className="bg-gradient-to-br from-violet-50 to-purple-50 border-2 border-violet-200 rounded-2xl p-6 hover:shadow-xl hover:border-violet-400 transition-all text-left relative group">
-              <div className="absolute top-3 right-3 px-2 py-0.5 bg-violet-600 text-white text-[10px] font-bold rounded-full">PRO</div>
+              <div className="absolute top-3 right-3 px-2 py-0.5 bg-violet-600 text-white text-[10px] font-bold rounded-full">FREE</div>
               <div className="w-14 h-14 rounded-full bg-violet-100 flex items-center justify-center mb-4">
                 <span className="text-2xl">✨</span>
               </div>
-              <h3 className="font-semibold text-gray-900 text-lg mb-2">AI Text Humanizer</h3>
-              <p className="text-base text-gray-600 leading-relaxed">Transform AI-generated text into natural, human-sounding writing with multiple modes and intensity levels.</p>
+              <h3 className="font-semibold text-gray-900 text-lg mb-2">AI Humanizer</h3>
+              <p className="text-base text-gray-600 leading-relaxed">Transform ChatGPT, Claude, Gemini text into natural human writing. Bypass AI detectors. 1,000 free words/month.</p>
+            </button>
+
+            {/* Text Summarizer */}
+            <button onClick={() => onNavigate('summarizer')} className="bg-gradient-to-br from-emerald-50 to-green-50 border-2 border-emerald-200 rounded-2xl p-6 hover:shadow-xl hover:border-emerald-400 transition-all text-left relative group">
+              <div className="absolute top-3 right-3 px-2 py-0.5 bg-emerald-600 text-white text-[10px] font-bold rounded-full">FREE</div>
+              <div className="w-14 h-14 rounded-full bg-emerald-100 flex items-center justify-center mb-4">
+                <span className="text-2xl">📝</span>
+              </div>
+              <h3 className="font-semibold text-gray-900 text-lg mb-2">Paper Summarizer</h3>
+              <p className="text-base text-gray-600 leading-relaxed">Condense research papers, articles, and textbooks into key points. Bullet points or paragraphs. 1,000 free words/month.</p>
+            </button>
+
+            {/* Quiz Generator */}
+            <button onClick={() => onNavigate('quiz-generator')} className="bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-200 rounded-2xl p-6 hover:shadow-xl hover:border-amber-400 transition-all text-left relative group">
+              <div className="absolute top-3 right-3 px-2 py-0.5 bg-amber-600 text-white text-[10px] font-bold rounded-full">PAID</div>
+              <div className="w-14 h-14 rounded-full bg-amber-100 flex items-center justify-center mb-4">
+                <span className="text-2xl">🧠</span>
+              </div>
+              <h3 className="font-semibold text-gray-900 text-lg mb-2">Quiz Generator</h3>
+              <p className="text-base text-gray-600 leading-relaxed">Turn any text into interactive study quizzes. Multiple choice and true/false questions. Perfect for exam prep.</p>
             </button>
           </div>
         </div>
@@ -242,7 +263,7 @@ const FeaturesPage = ({ onNavigate, user, onLogout }: FeaturesPageProps) => {
           <div className="text-center mb-12">
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">How it works</h2>
             <p className="text-gray-500 max-w-xl mx-auto">
-              Get started in minutes with our simple three-step process
+              Get started in seconds with any of our AI tools
             </p>
           </div>
           
@@ -251,24 +272,24 @@ const FeaturesPage = ({ onNavigate, user, onLogout }: FeaturesPageProps) => {
               <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 text-white font-bold text-xl">
                 1
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Upload or paste</h3>
-              <p className="text-gray-500">Upload your document or paste your text directly into the editor</p>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Paste your text</h3>
+              <p className="text-gray-500">Paste essays, AI-generated text, research papers, or study notes</p>
             </div>
             
             <div className="text-center">
               <div className="w-16 h-16 bg-green-600 rounded-2xl flex items-center justify-center mx-auto mb-4 text-white font-bold text-xl">
                 2
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">AI analyzes</h3>
-              <p className="text-gray-500">Our AI reviews grammar, structure, citations, and academic style</p>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Choose your tool</h3>
+              <p className="text-gray-500">Humanize, summarize, quiz, find citations, or analyze your essay</p>
             </div>
             
             <div className="text-center">
               <div className="w-16 h-16 bg-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4 text-white font-bold text-xl">
                 3
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Get feedback</h3>
-              <p className="text-gray-500">Receive detailed suggestions to improve your academic writing</p>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Get results</h3>
+              <p className="text-gray-500">Instant results you can copy, study from, or submit with confidence</p>
             </div>
           </div>
         </div>
@@ -300,12 +321,12 @@ const FeaturesPage = ({ onNavigate, user, onLogout }: FeaturesPageProps) => {
             <div className="bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl p-8 text-white">
               <div className="grid grid-cols-2 gap-6">
                 <div className="text-center p-4">
-                  <div className="text-4xl font-bold mb-1">24/7</div>
-                  <div className="text-blue-100">Always Available</div>
+                  <div className="text-4xl font-bold mb-1">5+</div>
+                  <div className="text-blue-100">AI Tools</div>
                 </div>
                 <div className="text-center p-4">
-                  <div className="text-4xl font-bold mb-1">99.9%</div>
-                  <div className="text-blue-100">Uptime</div>
+                  <div className="text-4xl font-bold mb-1">1K</div>
+                  <div className="text-blue-100">Free Words/Mo</div>
                 </div>
                 <div className="text-center p-4">
                   <div className="text-4xl font-bold mb-1">50K+</div>
@@ -325,12 +346,12 @@ const FeaturesPage = ({ onNavigate, user, onLogout }: FeaturesPageProps) => {
       <section className="py-16 sm:py-20 bg-gray-900">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
           <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4">
-            {user ? 'Start improving your writing today' : 'Ready to transform your academic writing?'}
+            {user ? 'Start using your AI toolkit' : 'Ready to level up your studies?'}
           </h2>
           <p className="text-gray-400 mb-8 max-w-xl mx-auto">
             {user 
-              ? 'Head to your dashboard to analyze your documents, find citations, and get AI-powered feedback.'
-              : 'Join thousands of students and researchers who trust WriteScholar for academic excellence.'
+              ? 'Head to your dashboard to humanize text, generate quizzes, summarize papers, find citations, and more.'
+              : 'Join thousands of students using AI Humanizer, Quiz Generator, Summarizer, and more.'
             }
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">

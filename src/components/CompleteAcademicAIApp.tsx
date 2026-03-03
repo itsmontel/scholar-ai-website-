@@ -11,6 +11,7 @@ import AnalysisPage from './pages/AnalysisPage';
 import AnalysisHistoryPage from './pages/AnalysisHistoryPage';
 import CitationResultsPage from './pages/CitationResultsPage';
 import CitationHistoryPage from './pages/CitationHistoryPage';
+import QuizHistoryPage from './pages/QuizHistoryPage';
 import UploadPage from './pages/UploadPage';
 import SettingsPage from './pages/SettingsPage';
 import AccountPage from './pages/AccountPage';
@@ -39,6 +40,8 @@ import TextCaseConverterPage from './pages/tools/TextCaseConverterPage';
 import ThesisGeneratorPage from './pages/tools/ThesisGeneratorPage';
 import GrammarCheckerPage from './pages/tools/GrammarCheckerPage';
 import HumanizerPage from './pages/tools/HumanizerPage';
+import SummarizerPage from './pages/tools/SummarizerPage';
+import QuizGeneratorPage from './pages/tools/QuizGeneratorPage';
 
 // Import common components
 import ErrorBoundary from './common/ErrorBoundary';
@@ -93,21 +96,21 @@ const AcademicAIApp = () => {
   }, []);
 
   // Route protection for authenticated pages
-  const protectedRoutes = ['dashboard', 'analysis', 'analysis-history', 'citation-results', 'citation-history', 'upload', 'settings', 'profile', 'library', 'account', 'billing'];
+  const protectedRoutes = ['dashboard', 'analysis', 'analysis-history', 'citation-results', 'citation-history', 'quiz-history', 'upload', 'settings', 'profile', 'library', 'account', 'billing'];
 
   // SEO: dynamic document title and meta description per page (SPA)
   const pageMeta: Record<string, { title: string; description: string }> = {
-    landing: { title: 'WriteScholar — AI Academic Writing Assistant', description: 'Get instant AI feedback on your academic papers. WriteScholar analyzes structure, grammar, citations (APA, MLA, Chicago), and academic rigor. Free to start.' },
-    features: { title: 'Features | WriteScholar', description: 'Explore WriteScholar\'s AI-powered features: academic writing analysis, APA/MLA/Chicago citation validation, grammar & style checking, and document management.' },
-    pricing: { title: 'Pricing | WriteScholar', description: 'Start free with 5 AI analyses per month. Upgrade to Pro for 999 analyses, advanced grammar checking, and priority support. Annual plans save 2 months.' },
-    about: { title: 'About | WriteScholar', description: 'WriteScholar helps students and researchers improve academic writing with AI analysis. Serving 10,000+ documents across 50+ countries.' },
-    help: { title: 'Help & FAQ | WriteScholar', description: 'Get answers about WriteScholar: supported citation styles (APA, Harvard, MLA, Chicago), file formats, analysis features, and account management.' },
-    contact: { title: 'Contact | WriteScholar', description: 'Contact WriteScholar support for help with your academic writing tool.' },
+    landing: { title: 'WriteScholar — AI Study Tools: Humanizer, Quiz Generator, Essay Checker', description: 'The complete AI toolkit for students. Humanize AI text, generate quizzes from notes, summarize papers, find citations, get essay feedback. Free to start.' },
+    features: { title: 'Features | WriteScholar', description: 'AI Humanizer to bypass detectors, Quiz Generator from text, Paper Summarizer, Citation Finder, Essay Checker. All the tools students need.' },
+    pricing: { title: 'Pricing | WriteScholar', description: 'Free plan with AI Humanizer, Summarizer, and Essay Checker. Starter adds Quiz Generator. Premium unlocks all features and models. Annual plans save 2 months.' },
+    about: { title: 'About | WriteScholar', description: 'WriteScholar is the complete AI toolkit for students. Humanize AI text, generate quizzes, summarize papers, find citations. Serving students worldwide.' },
+    help: { title: 'Help & FAQ | WriteScholar', description: 'Get help with AI Humanizer, Quiz Generator, Paper Summarizer, Citation Finder. Supported citation styles: APA, Harvard, MLA, Chicago.' },
+    contact: { title: 'Contact | WriteScholar', description: 'Contact WriteScholar support for help with AI tools for students.' },
     privacy: { title: 'Privacy Policy | WriteScholar', description: 'WriteScholar privacy policy and data handling.' },
     terms: { title: 'Terms of Service | WriteScholar', description: 'WriteScholar terms of service.' },
-    login: { title: 'Log in | WriteScholar', description: 'Log in to your WriteScholar account.' },
-    signup: { title: 'Sign up | WriteScholar', description: 'Create your free WriteScholar account.' },
-    blog: { title: 'Blog | WriteScholar', description: 'Guides on APA research papers, citation checker tools, grammar for academic writing, and how to use AI writing assistants for students.' },
+    login: { title: 'Log in | WriteScholar', description: 'Log in to access AI Humanizer, Quiz Generator, Summarizer, and more.' },
+    signup: { title: 'Sign up | WriteScholar', description: 'Create your free account. Get AI Humanizer, Paper Summarizer, Essay Checker, and Citation Finder.' },
+    blog: { title: 'Blog | WriteScholar', description: 'Guides on humanizing AI text, creating study quizzes, summarizing research papers, APA/MLA citations, and academic writing tips.' },
     'word-counter': { title: 'Free Word Counter Tool | WriteScholar', description: 'Count words, characters, sentences, and paragraphs instantly. Free online word counter for essays, academic papers, and assignments with word limits.' },
     'citation-generator-tool': { title: 'Free Citation Generator - APA, MLA, Chicago, Harvard | WriteScholar', description: 'Generate properly formatted citations in APA, MLA, Chicago, and Harvard styles. Free citation generator for research papers, essays, and bibliographies.' },
     'readability-score': { title: 'Free Readability Score Calculator | WriteScholar', description: 'Check your text readability with Flesch-Kincaid scores. Free readability checker shows grade level and reading ease for academic writing.' },
@@ -115,7 +118,11 @@ const AcademicAIApp = () => {
     'essay-outline': { title: 'Free Essay Outline Generator | WriteScholar', description: 'Generate structured essay outlines for argumentative, expository, narrative, compare-contrast, persuasive, and research papers. Free outline templates.' },
     'text-case-converter': { title: 'Free Text Case Converter | WriteScholar', description: 'Convert text to UPPERCASE, lowercase, Title Case, Sentence case, and more. Perfect for formatting titles, headings, and fixing caps lock mistakes.' },
     'thesis-generator': { title: 'Free Thesis Statement Generator | WriteScholar', description: 'Create strong thesis statements for argumentative, expository, analytical, and compare-contrast essays. Template-based thesis builder.' },
-    'grammar-checker': { title: 'Free Grammar Checker | WriteScholar', description: 'Check your writing for common spelling mistakes, grammar errors, punctuation issues, and style suggestions. Quick client-side grammar check.' }
+    'grammar-checker': { title: 'Free Grammar Checker | WriteScholar', description: 'Check your writing for common spelling mistakes, grammar errors, punctuation issues, and style suggestions. Quick client-side grammar check.' },
+    'humanizer': { title: 'AI Humanizer – Bypass AI Detection | WriteScholar', description: 'Transform AI-generated text from ChatGPT, Claude, Gemini into undetectable human writing. Bypass Turnitin, GPTZero, and other AI detectors. Free to try.' },
+    'summarizer': { title: 'AI Summarizer – Condense Papers & Articles | WriteScholar', description: 'Summarize research papers, articles, and textbooks into key points. Bullet points or paragraphs. Perfect for literature reviews. Free to try.' },
+    'quiz-generator': { title: 'AI Quiz Generator – Create Study Quizzes from Text | WriteScholar', description: 'Turn notes, articles, and textbooks into interactive quizzes. Multiple choice, true/false questions. Perfect for exam prep. Paid feature.' },
+    'quiz-history': { title: 'My Quizzes | WriteScholar', description: 'View and retake your saved quizzes. Quizzes are stored for 7 days.' }
   };
   useEffect(() => {
     const meta = pageMeta[currentPage];
@@ -552,6 +559,8 @@ const AcademicAIApp = () => {
         }
       case 'citation-history':
         return <CitationHistoryPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
+      case 'quiz-history':
+        return <QuizHistoryPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'upload':
         return <UploadPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'settings':
@@ -583,6 +592,10 @@ const AcademicAIApp = () => {
         return <GrammarCheckerPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'humanizer':
         return <HumanizerPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
+      case 'summarizer':
+        return <SummarizerPage onNavigate={navigateTo} user={user} />;
+      case 'quiz-generator':
+        return <QuizGeneratorPage onNavigate={navigateTo} user={user} />;
       case 'admin':
         return <AdminDashboard onNavigate={navigateTo} user={user} />;
       case 'collaboration':

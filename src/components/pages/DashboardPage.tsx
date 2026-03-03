@@ -18,7 +18,7 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [showAnalysisPopup, setShowAnalysisPopup] = useState(false);
   const [analysisComplete, setAnalysisComplete] = useState(false);
-  const [mode, setMode] = useState<'analyze' | 'citations' | 'humanize'>('analyze');
+  const [mode, setMode] = useState<'analyze' | 'citations' | 'humanize' | 'summarize' | 'quiz'>('analyze');
   const [citationStyle, setCitationStyle] = useState('APA');
   const [citationYearRange, setCitationYearRange] = useState('all');
   const [isSearchingCitations, setIsSearchingCitations] = useState(false);
@@ -30,6 +30,29 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
   const [showHumanizeResult, setShowHumanizeResult] = useState(false);
   const [humanizeCopied, setHumanizeCopied] = useState(false);
   const [showHighlights, setShowHighlights] = useState(false);
+  
+  // Summarizer state
+  const [summaryStyle, setSummaryStyle] = useState<'bullet' | 'paragraph' | 'tldr' | 'detailed'>('bullet');
+  const [summaryLength, setSummaryLength] = useState<'short' | 'medium' | 'long'>('medium');
+  const [isSummarizing, setIsSummarizing] = useState(false);
+  const [summaryResult, setSummaryResult] = useState<{ summary: string; originalWordCount: number; summaryWordCount: number } | null>(null);
+  const [summaryError, setSummaryError] = useState('');
+  const [summaryCopied, setSummaryCopied] = useState(false);
+  
+  // Quiz generator state
+  const [quizType, setQuizType] = useState<'mixed' | 'multiple_choice' | 'true_false' | 'fill_blank'>('mixed');
+  const [quizDifficulty, setQuizDifficulty] = useState<'easy' | 'medium' | 'hard'>('medium');
+  const [quizQuestionCount, setQuizQuestionCount] = useState(10);
+  const [isGeneratingQuiz, setIsGeneratingQuiz] = useState(false);
+  const [quizResult, setQuizResult] = useState<any>(null);
+  const [quizError, setQuizError] = useState('');
+  const [isQuizMode, setIsQuizMode] = useState(false);
+  const [currentQuestion, setCurrentQuestion] = useState(0);
+  const [userAnswers, setUserAnswers] = useState<{questionId: number; answer: string; isCorrect: boolean}[]>([]);
+  const [selectedAnswer, setSelectedAnswer] = useState('');
+  const [showQuizResult, setShowQuizResult] = useState(false);
+  const [quizCompleted, setQuizCompleted] = useState(false);
+
   const [usageStats, setUsageStats] = useState({
     documentsUploaded: 0,
     documentsAnalyzed: 0,
@@ -65,7 +88,23 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
     "Make your text undetectable by AI checkers..."
   ];
 
-  const placeholders = mode === 'humanize' ? humanizePlaceholders : mode === 'analyze' ? analyzePlaceholders : citationPlaceholders;
+  const summarizePlaceholders = [
+    "Paste your article, paper, or document to summarize...",
+    "Transform lengthy content into key points...",
+    "Get concise summaries in seconds..."
+  ];
+
+  const quizPlaceholders = [
+    "Paste content to generate quiz questions...",
+    "Turn any text into an interactive quiz...",
+    "Test your knowledge with AI-generated questions..."
+  ];
+
+  const placeholders = mode === 'humanize' ? humanizePlaceholders 
+    : mode === 'summarize' ? summarizePlaceholders 
+    : mode === 'quiz' ? quizPlaceholders 
+    : mode === 'analyze' ? analyzePlaceholders 
+    : citationPlaceholders;
 
   const suggestedTopics = mode === 'analyze' ? [
     "Analyze my essay structure",
@@ -228,8 +267,9 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
             
             if (refreshResult.success && refreshResult.data?.token) {
             localStorage.setItem('authToken', refreshResult.data.token);
+              const retryToken = refreshResult.data.token ?? undefined;
               const retryResult = await BulletproofAPI.safeRequest(
-              () => BulletproofAPI.get('/documents', refreshResult.data.token),
+                () => BulletproofAPI.get('/documents', retryToken),
                 { documents: [] }
               );
               if (retryResult.success) {
@@ -264,9 +304,15 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
   };
 
+  const isPremiumUser = usageStats.plan === 'premium';
+  const isPaidUser = usageStats.plan === 'starter' || usageStats.plan === 'premium';
+  const canUseQuiz = isPaidUser;
+  
   const isTextValid = () => {
     if (mode === 'citations') return inputText.trim().length > 0;
     if (mode === 'humanize') return inputText.trim().length > 0;
+    if (mode === 'summarize') return getWordCount(inputText) >= 50;
+    if (mode === 'quiz') return getWordCount(inputText) >= 100;
     return getWordCount(inputText) >= 200;
   };
 
@@ -428,11 +474,65 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
     }
   };
 
+  const handleSummarize = async () => {
+    setIsSummarizing(true);
+    setSummaryError('');
+    try {
+      const token = localStorage.getItem('authToken');
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/analysis/summarize`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ text: inputText, style: summaryStyle, length: summaryLength })
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || 'Summarization failed');
+      setSummaryResult(data.data);
+    } catch (error: any) {
+      setSummaryError(error.message || 'Summarization failed. Please try again.');
+    } finally {
+      setIsSummarizing(false);
+    }
+  };
+
+  const handleGenerateQuiz = async () => {
+    if (!canUseQuiz) {
+      setQuizError('Quiz Generator requires a paid subscription. Upgrade to Starter or Premium to access.');
+      return;
+    }
+    setIsGeneratingQuiz(true);
+    setQuizError('');
+    try {
+      const token = localStorage.getItem('authToken');
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/analysis/generate-quiz`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ text: inputText, quizType, difficulty: quizDifficulty, questionCount: quizQuestionCount })
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || 'Quiz generation failed');
+      setQuizResult(data.data);
+      setIsQuizMode(true);  // Go directly to quiz mode
+      setCurrentQuestion(0);
+      setUserAnswers([]);
+      setQuizCompleted(false);
+      setSelectedAnswer('');
+      setShowQuizResult(false);
+    } catch (error: any) {
+      setQuizError(error.message || 'Quiz generation failed. Please try again.');
+    } finally {
+      setIsGeneratingQuiz(false);
+    }
+  };
+
   const handleSubmit = () => {
     if (mode === 'humanize') {
       handleHumanize();
     } else if (mode === 'citations') {
       handleCitationSearch();
+    } else if (mode === 'summarize') {
+      handleSummarize();
+    } else if (mode === 'quiz') {
+      handleGenerateQuiz();
     } else {
       handleAnalyze();
     }
@@ -480,12 +580,16 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
       </div>
 
       {/* Main Content */}
-      <main className="max-w-5xl mx-auto px-3 sm:px-6 py-8 sm:py-14 w-full min-w-0 overflow-x-hidden">
+      <main className="max-w-5xl mx-auto px-3 sm:px-6 py-8 sm:py-14 w-full min-w-0 overflow-x-hidden pr-16 sm:pr-24 xl:pr-28">
         {/* Welcome */}
         <div className="text-center mb-10 sm:mb-12">
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-3">
             {mode === 'humanize' ? (
               <>Make AI text <span className="text-violet-600">undetectable</span></>
+            ) : mode === 'summarize' ? (
+              <>Summarize <span className="text-teal-600">any document</span></>
+            ) : mode === 'quiz' ? (
+              <>Generate <span className="text-amber-600">quiz questions</span></>
             ) : mode === 'analyze' ? (
               <>Analyze your <span className="text-blue-600">academic writing</span></>
             ) : (
@@ -495,6 +599,10 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
           <p className="text-lg text-gray-600">
             {mode === 'humanize'
               ? 'Paste AI-generated text to transform it into natural human writing'
+              : mode === 'summarize'
+              ? 'Transform lengthy papers into concise key points instantly'
+              : mode === 'quiz'
+              ? 'Turn any content into interactive quiz questions'
               : mode === 'analyze' 
               ? 'Paste your text to get AI-powered feedback on structure, grammar, and citations'
               : 'Enter your topic to discover relevant academic sources'
@@ -504,31 +612,48 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
 
           {/* Mode Toggle */}
         <div className="flex justify-center mb-7">
-          <div className="inline-flex bg-gray-100 rounded-full p-1.5">
+          <div className="inline-flex flex-wrap justify-center bg-gray-100 rounded-full p-1.5 gap-1">
               <button
-              onClick={() => { setMode('analyze'); setInputText(''); setShowWordWarning(false); setShowHumanizeResult(false); }}
-              className={`px-5 py-2.5 rounded-full text-base font-medium transition-all ${
+              onClick={() => { setMode('analyze'); setInputText(''); setShowWordWarning(false); setShowHumanizeResult(false); setSummaryResult(null); setQuizResult(null); }}
+              className={`px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-sm sm:text-base font-medium transition-all ${
                 mode === 'analyze' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'
               }`}
             >
               Analyze Essay
               </button>
               <button
-              onClick={() => { setMode('citations'); setInputText(''); setShowWordWarning(false); setShowHumanizeResult(false); }}
-              className={`px-5 py-2.5 rounded-full text-base font-medium transition-all ${
+              onClick={() => { setMode('citations'); setInputText(''); setShowWordWarning(false); setShowHumanizeResult(false); setSummaryResult(null); setQuizResult(null); }}
+              className={`px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-sm sm:text-base font-medium transition-all ${
                 mode === 'citations' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'
               }`}
             >
-              Find Citations
+              Citations
               </button>
               <button
-              onClick={() => { setMode('humanize'); setInputText(''); setShowWordWarning(false); }}
-              className={`px-5 py-2.5 rounded-full text-base font-medium transition-all relative ${
+              onClick={() => { setMode('humanize'); setInputText(''); setShowWordWarning(false); setSummaryResult(null); setQuizResult(null); }}
+              className={`px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-sm sm:text-base font-medium transition-all relative ${
                 mode === 'humanize' ? 'bg-white text-violet-700 shadow-sm' : 'text-violet-600 hover:text-violet-700'
               }`}
             >
               Humanize
               {usageStats.plan === 'free' && <span className="absolute -top-2 -right-1 px-1.5 py-0.5 bg-violet-600 text-white text-[10px] font-bold rounded-full leading-none">PRO</span>}
+              </button>
+              <button
+              onClick={() => { setMode('summarize'); setInputText(''); setShowWordWarning(false); setShowHumanizeResult(false); setQuizResult(null); }}
+              className={`px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-sm sm:text-base font-medium transition-all relative ${
+                mode === 'summarize' ? 'bg-white text-teal-700 shadow-sm' : 'text-teal-600 hover:text-teal-700'
+              }`}
+            >
+              Summarize
+              </button>
+              <button
+              onClick={() => { setMode('quiz'); setInputText(''); setShowWordWarning(false); setShowHumanizeResult(false); setSummaryResult(null); }}
+              className={`px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-sm sm:text-base font-medium transition-all relative ${
+                mode === 'quiz' ? 'bg-white text-amber-700 shadow-sm' : 'text-amber-600 hover:text-amber-700'
+              }`}
+            >
+              Quiz
+              {usageStats.plan === 'free' && <span className="absolute -top-2 -right-1 px-1.5 py-0.5 bg-amber-600 text-white text-[10px] font-bold rounded-full leading-none">PRO</span>}
               </button>
             </div>
           </div>
@@ -979,6 +1104,467 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
                 {humanizeWordLimit < 999999 && (
                   <button onClick={() => onNavigate('pricing')} className="mt-2 px-4 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold rounded-lg transition-colors">
                     Upgrade for unlimited words/month
+                  </button>
+                )}
+              </div>
+            )}
+          </>
+        )}
+
+        {/* SUMMARIZE MODE */}
+        {mode === 'summarize' && (
+          <>
+            {/* Plan info banner */}
+            {!isPremiumUser && (
+              <div className="mb-6 bg-gradient-to-r from-teal-50 to-emerald-50 border border-teal-200 rounded-2xl p-4 flex items-center justify-between flex-wrap gap-3">
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">📝</span>
+                  <div>
+                    <p className="text-teal-800 font-medium text-sm">
+                      {usageStats.plan === 'free' ? 'Free plan: 1,000 words/month' : 'Starter plan: 999,999 words/month'}
+                      {!isPremiumUser && ' • Bullet + Medium only'}
+                    </p>
+                    <p className="text-teal-600 text-xs mt-0.5">Upgrade to Premium for all styles, lengths, and GPT-4.1 Mini</p>
+                  </div>
+                </div>
+                <button onClick={() => onNavigate('pricing')} className="px-4 py-1.5 bg-teal-600 text-white text-xs font-semibold rounded-lg hover:bg-teal-700 transition-all">
+                  Upgrade
+                </button>
+              </div>
+            )}
+            
+            <div className="bg-white rounded-2xl sm:rounded-3xl shadow-xl shadow-teal-100/50 border border-gray-100 overflow-hidden mb-6 min-w-0">
+              {/* Toolbar */}
+              <div className="bg-gradient-to-r from-teal-50 to-emerald-50 border-b border-gray-100 px-3 sm:px-5 py-3 sm:py-4">
+                <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center justify-between gap-3 sm:gap-4">
+                  <div className="flex flex-wrap items-center gap-2 sm:gap-3 min-w-0 overflow-x-auto sm:overflow-visible">
+                    <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+                      <span className="text-xs font-medium text-gray-500 flex-shrink-0">Style:</span>
+                      <div className="flex items-center bg-white rounded-xl px-0.5 sm:px-1 py-1 shadow-sm border border-gray-200">
+                        {(['bullet', 'paragraph', 'tldr', 'detailed'] as const).map((s) => {
+                          const locked = !isPremiumUser && s !== 'bullet';
+                          return (
+                            <button
+                              key={s}
+                              onClick={() => !locked && setSummaryStyle(s)}
+                              disabled={locked}
+                              title={locked ? 'Premium only' : ''}
+                              className={`px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all whitespace-nowrap relative ${
+                                locked ? 'text-gray-300 cursor-not-allowed' :
+                                summaryStyle === s ? 'bg-teal-600 text-white shadow-sm' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                              }`}
+                            >
+                              {s === 'bullet' ? 'Bullet' : s === 'paragraph' ? 'Paragraph' : s === 'tldr' ? 'TL;DR' : 'Detailed'}
+                              {locked && <span className="ml-1 text-[9px]">🔒</span>}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+                      <span className="text-xs font-medium text-gray-500 flex-shrink-0">Length:</span>
+                      <div className="flex items-center bg-white rounded-xl px-0.5 sm:px-1 py-1 shadow-sm border border-gray-200">
+                        {(['short', 'medium', 'long'] as const).map((l) => {
+                          const locked = !isPremiumUser && l !== 'medium';
+                          return (
+                            <button
+                              key={l}
+                              onClick={() => !locked && setSummaryLength(l)}
+                              disabled={locked}
+                              title={locked ? 'Premium only' : ''}
+                              className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all whitespace-nowrap ${
+                                locked ? 'text-gray-300 cursor-not-allowed' :
+                                summaryLength === l ? 'bg-teal-600 text-white shadow-sm' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                              }`}
+                            >
+                              {l.charAt(0).toUpperCase() + l.slice(1)}
+                              {locked && <span className="ml-1 text-[9px]">🔒</span>}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                  <button
+                    onClick={handleSubmit}
+                    disabled={!isTextValid() || isSummarizing}
+                    className={`w-full sm:w-auto px-6 py-2.5 rounded-xl flex items-center justify-center transition-all font-semibold text-sm flex-shrink-0 ${
+                      isTextValid() && !isSummarizing
+                        ? 'bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white shadow-lg shadow-teal-200 cursor-pointer'
+                        : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                    }`}
+                  >
+                    {isSummarizing ? (
+                      <>
+                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Summarizing...
+                      </>
+                    ) : (
+                      <>✨ Summarize</>
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              {/* Editor Panels */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-gray-100 min-w-0">
+                {/* Left Panel */}
+                <div className="flex flex-col min-w-0">
+                  <div className="flex items-center justify-between px-3 sm:px-5 py-2.5 sm:py-3 bg-gray-50/50 border-b border-gray-100">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-gray-300"></div>
+                      <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Original</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button onClick={() => setInputText('')} className={`text-xs text-gray-400 hover:text-gray-600 ${!inputText ? 'invisible' : ''}`}>Clear</button>
+                      <button onClick={() => navigator.clipboard.readText().then(text => setInputText(text))} className="text-xs text-teal-600 hover:text-teal-700 font-medium">Paste</button>
+                    </div>
+                  </div>
+                  <textarea
+                    value={inputText}
+                    onChange={(e) => setInputText(e.target.value)}
+                    placeholder={placeholders[placeholderIndex]}
+                    disabled={isSummarizing}
+                    className="w-full min-h-[280px] sm:min-h-[350px] p-3 sm:p-5 text-gray-800 text-[15px] border-none outline-none resize-none bg-transparent placeholder-gray-400 leading-relaxed"
+                  />
+                  <div className="flex items-center justify-between px-3 sm:px-5 py-2.5 sm:py-3 bg-gray-50/30 border-t border-gray-100">
+                    <span className={`text-xs font-medium ${getWordCount(inputText) < 50 ? 'text-amber-600' : 'text-gray-400'}`}>
+                      {getWordCount(inputText)} words {getWordCount(inputText) < 50 && '(min 50)'}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Right Panel */}
+                <div className="flex flex-col bg-gradient-to-br from-teal-50/30 to-emerald-50/30 min-w-0">
+                  <div className="flex items-center justify-between px-3 sm:px-5 py-2.5 sm:py-3 bg-teal-50/50 border-b border-teal-100/50">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-teal-400"></div>
+                      <span className="text-xs font-semibold text-teal-600 uppercase tracking-wider">Summary</span>
+                      {summaryResult && (
+                        <span className="px-2 py-0.5 bg-teal-100 text-teal-700 text-[10px] font-bold rounded-full">
+                          {Math.round((1 - summaryResult.summaryWordCount / summaryResult.originalWordCount) * 100)}% shorter
+                        </span>
+                      )}
+                    </div>
+                    {summaryResult && (
+                      <button
+                        onClick={() => { navigator.clipboard.writeText(summaryResult.summary); setSummaryCopied(true); setTimeout(() => setSummaryCopied(false), 2000); }}
+                        className={`text-xs font-medium ${summaryCopied ? 'text-green-600' : 'text-teal-600 hover:text-teal-700'}`}
+                      >
+                        {summaryCopied ? '✓ Copied!' : 'Copy'}
+                      </button>
+                    )}
+                  </div>
+                  <div className="flex-1 min-h-[280px] sm:min-h-[350px] max-h-[350px] overflow-y-auto">
+                    {summaryResult ? (
+                      <div className="p-3 sm:p-5 text-gray-800 text-[15px] leading-relaxed whitespace-pre-wrap break-words">
+                        {summaryResult.summary}
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-center h-full text-gray-400 p-5">
+                        {isSummarizing ? (
+                          <div className="flex flex-col items-center gap-4">
+                            <div className="relative">
+                              <div className="w-12 h-12 border-4 border-teal-200 rounded-full"></div>
+                              <div className="absolute top-0 left-0 w-12 h-12 border-4 border-teal-600 rounded-full border-t-transparent animate-spin"></div>
+                            </div>
+                            <p className="text-sm font-medium text-gray-600">Creating your summary...</p>
+                          </div>
+                        ) : (
+                          <div className="text-center">
+                            <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-teal-100/50 flex items-center justify-center text-3xl">📝</div>
+                            <p className="text-sm text-gray-500">Your summary will appear here</p>
+                            <p className="text-xs text-gray-400 mt-1">Paste text on the left and click Summarize</p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex items-center justify-between px-3 sm:px-5 py-2.5 sm:py-3 bg-teal-50/30 border-t border-teal-100/50">
+                    <span className="text-xs text-gray-400 font-medium">{summaryResult ? `${summaryResult.summaryWordCount} words` : ''}</span>
+                    {summaryResult && (
+                      <button onClick={() => setSummaryResult(null)} className="text-xs text-gray-400 hover:text-gray-600">Clear</button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {summaryError && (
+              <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-2xl text-center">
+                <p className="text-red-700 text-sm font-medium">{summaryError}</p>
+                {usageStats.plan === 'free' && (
+                  <button onClick={() => onNavigate('pricing')} className="mt-2 px-4 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold rounded-lg">
+                    Upgrade Plan
+                  </button>
+                )}
+              </div>
+            )}
+          </>
+        )}
+
+        {/* QUIZ MODE */}
+        {mode === 'quiz' && (
+          <>
+            {/* Lock for free users */}
+            {!canUseQuiz && (
+              <div className="mb-6 bg-gradient-to-r from-amber-600 to-orange-600 rounded-2xl p-6 text-white text-center">
+                <span className="text-4xl mb-3 block">🔒</span>
+                <h3 className="text-xl font-bold mb-2">Paid Feature</h3>
+                <p className="text-amber-100 mb-4">Quiz Generator requires a Starter or Premium subscription</p>
+                <button
+                  onClick={() => onNavigate('pricing')}
+                  className="px-6 py-2.5 bg-white text-amber-700 font-semibold rounded-xl hover:bg-amber-50 transition-all inline-flex items-center gap-2"
+                >
+                  👑 View Plans
+                </button>
+              </div>
+            )}
+
+            {/* Plan info banner for starter users */}
+            {isPaidUser && !isPremiumUser && (
+              <div className="mb-6 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-4 flex items-center justify-between flex-wrap gap-3">
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">🧠</span>
+                  <div>
+                    <p className="text-amber-800 font-medium text-sm">Starter plan: Mixed type + Medium difficulty only</p>
+                    <p className="text-amber-600 text-xs mt-0.5">Upgrade to Premium for all quiz types, difficulties, and GPT-4.1 Mini</p>
+                  </div>
+                </div>
+                <button onClick={() => onNavigate('pricing')} className="px-4 py-1.5 bg-amber-600 text-white text-xs font-semibold rounded-lg hover:bg-amber-700 transition-all">
+                  Upgrade
+                </button>
+              </div>
+            )}
+
+            {/* Quiz Taking View */}
+            {quizResult && isQuizMode && (
+              <div className={`bg-white rounded-2xl sm:rounded-3xl shadow-xl border border-gray-100 overflow-hidden mb-6 ${!canUseQuiz ? 'opacity-50 pointer-events-none' : ''}`}>
+                {quizCompleted ? (
+                  <div className="p-8 text-center">
+                    <div className={`w-24 h-24 mx-auto rounded-full flex items-center justify-center mb-4 text-4xl ${userAnswers.filter(a => a.isCorrect).length / userAnswers.length >= 0.7 ? 'bg-gradient-to-br from-green-500 to-emerald-600' : 'bg-gradient-to-br from-amber-500 to-orange-600'}`}>🏆</div>
+                    <h2 className="text-3xl font-bold text-gray-900 mb-2">Quiz Complete!</h2>
+                    <div className="text-5xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent my-4">
+                      {Math.round((userAnswers.filter(a => a.isCorrect).length / userAnswers.length) * 100)}%
+                    </div>
+                    <p className="text-gray-600">{userAnswers.filter(a => a.isCorrect).length} out of {userAnswers.length} correct</p>
+                    <div className="flex justify-center gap-3 mt-6">
+                      <button onClick={() => { setCurrentQuestion(0); setUserAnswers([]); setQuizCompleted(false); setSelectedAnswer(''); setShowQuizResult(false); }} className="px-6 py-3 bg-gray-100 text-gray-700 font-semibold rounded-xl">Try Again</button>
+                      <button onClick={() => { setQuizResult(null); setIsQuizMode(false); }} className="px-6 py-3 bg-gradient-to-r from-amber-600 to-orange-600 text-white font-semibold rounded-xl">New Quiz</button>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <div className="h-2 bg-gray-100"><div className="h-full bg-gradient-to-r from-amber-500 to-orange-500" style={{ width: `${((currentQuestion + 1) / quizResult.questions.length) * 100}%` }}></div></div>
+                    <div className="p-6">
+                      <div className="flex justify-between mb-4">
+                        <span className="text-sm text-gray-500">Question {currentQuestion + 1} of {quizResult.questions.length}</span>
+                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${quizResult.questions[currentQuestion]?.type === 'multiple_choice' ? 'bg-blue-100 text-blue-700' : quizResult.questions[currentQuestion]?.type === 'true_false' ? 'bg-purple-100 text-purple-700' : 'bg-green-100 text-green-700'}`}>
+                          {quizResult.questions[currentQuestion]?.type?.replace('_', ' ')}
+                        </span>
+                      </div>
+                      <h3 className="text-xl font-semibold text-gray-900 mb-6">{quizResult.questions[currentQuestion]?.question}</h3>
+                      <div className="space-y-3 mb-6">
+                        {quizResult.questions[currentQuestion]?.type === 'multiple_choice' && quizResult.questions[currentQuestion]?.options?.map((opt: string, idx: number) => {
+                          const letter = opt.charAt(0);
+                          const isSelected = selectedAnswer === letter;
+                          const isCorrect = showQuizResult && letter === quizResult.questions[currentQuestion].correctAnswer;
+                          const isWrong = showQuizResult && isSelected && letter !== quizResult.questions[currentQuestion].correctAnswer;
+                          return (
+                            <button key={idx} onClick={() => !showQuizResult && setSelectedAnswer(letter)} disabled={showQuizResult}
+                              className={`w-full p-4 rounded-xl border-2 text-left flex items-center gap-3 ${isCorrect ? 'border-green-500 bg-green-50' : isWrong ? 'border-red-500 bg-red-50' : isSelected ? 'border-amber-500 bg-amber-50' : 'border-gray-200 hover:border-amber-300'}`}
+                            >
+                              <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${isCorrect ? 'bg-green-500 text-white' : isWrong ? 'bg-red-500 text-white' : isSelected ? 'bg-amber-500 text-white' : 'bg-gray-100'}`}>{letter}</span>
+                              <span>{opt.substring(3)}</span>
+                            </button>
+                          );
+                        })}
+                        {quizResult.questions[currentQuestion]?.type === 'true_false' && ['true', 'false'].map((opt) => {
+                          const isSelected = selectedAnswer === opt;
+                          const isCorrect = showQuizResult && opt === quizResult.questions[currentQuestion].correctAnswer;
+                          const isWrong = showQuizResult && isSelected && opt !== quizResult.questions[currentQuestion].correctAnswer;
+                          return (
+                            <button key={opt} onClick={() => !showQuizResult && setSelectedAnswer(opt)} disabled={showQuizResult}
+                              className={`w-full p-4 rounded-xl border-2 text-left flex items-center gap-3 ${isCorrect ? 'border-green-500 bg-green-50' : isWrong ? 'border-red-500 bg-red-50' : isSelected ? 'border-amber-500 bg-amber-50' : 'border-gray-200 hover:border-amber-300'}`}
+                            >
+                              <span className={`w-8 h-8 rounded-full flex items-center justify-center ${isCorrect ? 'bg-green-500 text-white' : isWrong ? 'bg-red-500 text-white' : isSelected ? 'bg-amber-500 text-white' : 'bg-gray-100'}`}>{opt === 'true' ? '✓' : '✗'}</span>
+                              <span className="capitalize font-medium">{opt}</span>
+                            </button>
+                          );
+                        })}
+                        {quizResult.questions[currentQuestion]?.type === 'fill_blank' && quizResult.questions[currentQuestion]?.options?.map((opt: string, idx: number) => {
+                          const letter = opt.charAt(0);
+                          const isSelected = selectedAnswer === letter;
+                          const isCorrect = showQuizResult && letter === quizResult.questions[currentQuestion].correctAnswer;
+                          const isWrong = showQuizResult && isSelected && letter !== quizResult.questions[currentQuestion].correctAnswer;
+                          return (
+                            <button key={idx} onClick={() => !showQuizResult && setSelectedAnswer(letter)} disabled={showQuizResult}
+                              className={`w-full p-4 rounded-xl border-2 text-left flex items-center gap-3 ${isCorrect ? 'border-green-500 bg-green-50' : isWrong ? 'border-red-500 bg-red-50' : isSelected ? 'border-amber-500 bg-amber-50' : 'border-gray-200 hover:border-amber-300'}`}
+                            >
+                              <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${isCorrect ? 'bg-green-500 text-white' : isWrong ? 'bg-red-500 text-white' : isSelected ? 'bg-amber-500 text-white' : 'bg-gray-100'}`}>{letter}</span>
+                              <span>{opt.substring(3)}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                      {showQuizResult && quizResult.questions[currentQuestion]?.explanation && (
+                        <div className="p-4 bg-blue-50 rounded-xl mb-6 border border-blue-100">
+                          <p className="text-sm text-blue-700">💡 {quizResult.questions[currentQuestion].explanation}</p>
+                        </div>
+                      )}
+                      <div className="flex justify-between">
+                        <button onClick={() => { if (currentQuestion > 0) { setCurrentQuestion(currentQuestion - 1); setShowQuizResult(false); setSelectedAnswer(''); } }} disabled={currentQuestion === 0} className="px-4 py-2 text-gray-600 disabled:opacity-30">← Previous</button>
+                        {!showQuizResult ? (
+                          <button onClick={() => {
+                            const q = quizResult.questions[currentQuestion];
+                            const ans = selectedAnswer;
+                            const correct = ans === q.correctAnswer;
+                            setUserAnswers([...userAnswers, { questionId: q.id, answer: ans, isCorrect: correct }]);
+                            setShowQuizResult(true);
+                          }} disabled={!selectedAnswer} className="px-6 py-3 bg-gradient-to-r from-amber-600 to-orange-600 text-white font-semibold rounded-xl disabled:opacity-50">Submit</button>
+                        ) : (
+                          <button onClick={() => {
+                            if (currentQuestion + 1 >= quizResult.questions.length) { setQuizCompleted(true); }
+                            else { setCurrentQuestion(currentQuestion + 1); setSelectedAnswer(''); setShowQuizResult(false); }
+                          }} className="px-6 py-3 bg-gradient-to-r from-amber-600 to-orange-600 text-white font-semibold rounded-xl">
+                            {currentQuestion + 1 >= quizResult.questions.length ? '🏆 See Results' : 'Next →'}
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
+
+            {/* Quiz Input Form */}
+            {!quizResult && (
+              <div className={`bg-white rounded-2xl sm:rounded-3xl shadow-xl shadow-amber-100/50 border border-gray-100 overflow-hidden mb-6 min-w-0 ${!canUseQuiz ? 'opacity-50 pointer-events-none' : ''}`}>
+                {/* Toolbar */}
+                <div className="bg-gradient-to-r from-amber-50 to-orange-50 border-b border-gray-100 px-3 sm:px-5 py-3 sm:py-4">
+                  <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center justify-between gap-3 sm:gap-4">
+                    <div className="flex flex-wrap items-center gap-2 sm:gap-3 min-w-0 overflow-x-auto sm:overflow-visible">
+                      <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+                        <span className="text-xs font-medium text-gray-500 flex-shrink-0">Type:</span>
+                        <div className="flex items-center bg-white rounded-xl px-0.5 sm:px-1 py-1 shadow-sm border border-gray-200">
+                          {(['mixed', 'multiple_choice', 'true_false', 'fill_blank'] as const).map((t) => {
+                            const locked = !isPremiumUser && t !== 'mixed';
+                            return (
+                              <button key={t} onClick={() => !locked && setQuizType(t)} disabled={locked} title={locked ? 'Premium only' : ''}
+                                className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all whitespace-nowrap ${
+                                  locked ? 'text-gray-300 cursor-not-allowed' :
+                                  quizType === t ? 'bg-amber-600 text-white shadow-sm' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                                }`}
+                              >
+                                {t === 'mixed' ? 'Mixed' : t === 'multiple_choice' ? 'MCQ' : t === 'true_false' ? 'T/F' : 'Fill'}
+                                {locked && <span className="ml-1 text-[9px]">🔒</span>}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+                        <span className="text-xs font-medium text-gray-500">Difficulty:</span>
+                        <div className="flex items-center bg-white rounded-xl px-0.5 sm:px-1 py-1 shadow-sm border border-gray-200">
+                          {(['easy', 'medium', 'hard'] as const).map((d) => {
+                            const locked = !isPremiumUser && d !== 'medium';
+                            return (
+                              <button key={d} onClick={() => !locked && setQuizDifficulty(d)} disabled={locked} title={locked ? 'Premium only' : ''}
+                                className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all whitespace-nowrap ${
+                                  locked ? 'text-gray-300 cursor-not-allowed' :
+                                  quizDifficulty === d ? 'bg-amber-600 text-white shadow-sm' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                                }`}
+                              >
+                                {d.charAt(0).toUpperCase() + d.slice(1)}
+                                {locked && <span className="ml-1 text-[9px]">🔒</span>}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1.5 flex-shrink-0">
+                        <span className="text-xs font-medium text-gray-500">Questions:</span>
+                        <select value={quizQuestionCount} onChange={(e) => setQuizQuestionCount(Number(e.target.value))}
+                          className="px-2 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-medium"
+                        >
+                          {[5, 10, 15, 20, 25].map(n => <option key={n} value={n}>{n}</option>)}
+                        </select>
+                      </div>
+                    </div>
+                    <button
+                      onClick={handleSubmit}
+                      disabled={!isTextValid() || isGeneratingQuiz || !canUseQuiz}
+                      className={`w-full sm:w-auto px-6 py-2.5 rounded-xl flex items-center justify-center transition-all font-semibold text-sm flex-shrink-0 ${
+                        isTextValid() && !isGeneratingQuiz && canUseQuiz
+                          ? 'bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white shadow-lg shadow-amber-200 cursor-pointer'
+                          : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                      }`}
+                    >
+                      {isGeneratingQuiz ? (
+                        <>
+                          <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                          Generating...
+                        </>
+                      ) : (
+                        <>✨ Generate Quiz</>
+                      )}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Input Area */}
+                <div className="flex flex-col min-w-0">
+                  <div className="flex items-center justify-between px-3 sm:px-5 py-2.5 sm:py-3 bg-gray-50/50 border-b border-gray-100">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-amber-400"></div>
+                      <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Source Material</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button onClick={() => setInputText('')} className={`text-xs text-gray-400 hover:text-gray-600 ${!inputText ? 'invisible' : ''}`}>Clear</button>
+                      <button onClick={() => navigator.clipboard.readText().then(text => setInputText(text))} className="text-xs text-amber-600 hover:text-amber-700 font-medium">Paste</button>
+                    </div>
+                  </div>
+                  <div className="relative">
+                    {isGeneratingQuiz ? (
+                      <div className="min-h-[350px] flex items-center justify-center">
+                        <div className="flex flex-col items-center gap-4">
+                          <div className="relative">
+                            <div className="w-12 h-12 border-4 border-amber-200 rounded-full"></div>
+                            <div className="absolute top-0 left-0 w-12 h-12 border-4 border-amber-600 rounded-full border-t-transparent animate-spin"></div>
+                          </div>
+                          <p className="text-sm font-medium text-gray-600">Creating quiz questions...</p>
+                        </div>
+                      </div>
+                    ) : (
+                      <textarea
+                        value={inputText}
+                        onChange={(e) => setInputText(e.target.value)}
+                        placeholder={placeholders[placeholderIndex]}
+                        className="w-full min-h-[300px] sm:min-h-[350px] p-3 sm:p-5 text-gray-800 text-[15px] border-none outline-none resize-none bg-transparent placeholder-gray-400 leading-relaxed"
+                      />
+                    )}
+                  </div>
+                  <div className="flex items-center justify-between px-3 sm:px-5 py-2.5 sm:py-3 bg-gray-50/30 border-t border-gray-100">
+                    <span className={`text-xs font-medium ${getWordCount(inputText) < 100 ? 'text-amber-600' : 'text-gray-400'}`}>
+                      {getWordCount(inputText)} words {getWordCount(inputText) < 100 && '(min 100)'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {quizError && (
+              <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-2xl text-center">
+                <p className="text-red-700 text-sm font-medium">{quizError}</p>
+                {!canUseQuiz && (
+                  <button onClick={() => onNavigate('pricing')} className="mt-2 px-4 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold rounded-lg">
+                    View Plans
                   </button>
                 )}
               </div>

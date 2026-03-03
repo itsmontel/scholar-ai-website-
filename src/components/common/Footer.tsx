@@ -8,7 +8,7 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
   return (
     <footer className="bg-gray-50 border-t border-gray-200">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-8 mb-12">
+        <div className="grid grid-cols-2 md:grid-cols-6 gap-8 mb-12">
           {/* Logo and Description */}
           <div className="col-span-2 md:col-span-1">
             <div className="flex items-center space-x-2.5 mb-4">
@@ -50,47 +50,69 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
             <ul className="space-y-3">
               <li>
                 <a href="/tools/word-counter" onClick={(e) => { e.preventDefault(); onNavigate?.('word-counter'); }} className="text-gray-500 hover:text-gray-900 text-sm transition-colors">
-                  Free Word Counter
+                  Word Counter
                 </a>
               </li>
               <li>
                 <a href="/tools/citation-generator" onClick={(e) => { e.preventDefault(); onNavigate?.('citation-generator-tool'); }} className="text-gray-500 hover:text-gray-900 text-sm transition-colors">
-                  Free Citation Generator
+                  Citation Generator
                 </a>
               </li>
               <li>
                 <a href="/tools/grammar-checker" onClick={(e) => { e.preventDefault(); onNavigate?.('grammar-checker'); }} className="text-gray-500 hover:text-gray-900 text-sm transition-colors">
-                  Free Grammar Checker
+                  Grammar Checker
                 </a>
               </li>
               <li>
                 <a href="/tools/readability-score" onClick={(e) => { e.preventDefault(); onNavigate?.('readability-score'); }} className="text-gray-500 hover:text-gray-900 text-sm transition-colors">
-                  Free Readability Checker
+                  Readability Checker
                 </a>
               </li>
               <li>
                 <a href="/tools/thesis-generator" onClick={(e) => { e.preventDefault(); onNavigate?.('thesis-generator'); }} className="text-gray-500 hover:text-gray-900 text-sm transition-colors">
-                  Free Thesis Generator
+                  Thesis Generator
                 </a>
               </li>
               <li>
                 <a href="/tools/essay-outline" onClick={(e) => { e.preventDefault(); onNavigate?.('essay-outline'); }} className="text-gray-500 hover:text-gray-900 text-sm transition-colors">
-                  Free Essay Outline
+                  Essay Outline
                 </a>
               </li>
               <li>
                 <a href="/tools/text-case-converter" onClick={(e) => { e.preventDefault(); onNavigate?.('text-case-converter'); }} className="text-gray-500 hover:text-gray-900 text-sm transition-colors">
-                  Free Case Converter
+                  Case Converter
                 </a>
               </li>
               <li>
                 <a href="/tools/paraphrasing-tips" onClick={(e) => { e.preventDefault(); onNavigate?.('paraphrasing-tips'); }} className="text-gray-500 hover:text-gray-900 text-sm transition-colors">
-                  Free Paraphrasing Tips
+                  Paraphrasing Tips
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          {/* AI Tools Links */}
+          <div>
+            <h4 className="font-semibold text-gray-900 mb-4 text-sm flex items-center gap-2">
+              AI Tools
+            </h4>
+            <ul className="space-y-3">
+              <li>
+                <a href="/tools/humanizer" onClick={(e) => { e.preventDefault(); onNavigate?.('humanizer'); }} className="text-violet-600 hover:text-violet-700 text-sm font-medium transition-colors flex items-center gap-1.5">
+                  AI Humanizer
+                  <span className="text-xs opacity-75">✨</span>
                 </a>
               </li>
               <li>
-                <a href="/tools/humanizer" onClick={(e) => { e.preventDefault(); onNavigate?.('humanizer'); }} className="text-violet-600 hover:text-violet-700 text-sm font-medium transition-colors">
-                  AI Humanizer ✨
+                <a href="/tools/summarizer" onClick={(e) => { e.preventDefault(); onNavigate?.('summarizer'); }} className="text-teal-600 hover:text-teal-700 text-sm font-medium transition-colors flex items-center gap-1.5">
+                  AI Summarizer
+                  <span className="text-xs opacity-75">📝</span>
+                </a>
+              </li>
+              <li>
+                <a href="/tools/quiz-generator" onClick={(e) => { e.preventDefault(); onNavigate?.('quiz-generator'); }} className="text-amber-600 hover:text-amber-700 text-sm font-medium transition-colors flex items-center gap-1.5">
+                  AI Quiz Generator
+                  <span className="text-xs opacity-75">🧠</span>
                 </a>
               </li>
             </ul>

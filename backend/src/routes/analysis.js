@@ -148,6 +148,322 @@ router.post('/humanize', authenticateToken, async (req, res) => {
   }
 });
 
+// @route   GET /api/analysis/summarize-usage
+// @desc    Get user's summarize word usage this month
+// @access  Private
+router.get('/summarize-usage', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const userPlan = req.user.subscription_plan || 'free';
+    const planLimits = subscriptionService.PLAN_LIMITS[userPlan] || subscriptionService.PLAN_LIMITS.free;
+
+    const { createClient } = require('@supabase/supabase-js');
+    const supabase = createClient(
+      process.env.SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
+    );
+
+    const startOfMonth = new Date();
+    startOfMonth.setDate(1);
+    startOfMonth.setHours(0, 0, 0, 0);
+
+    const { data, error } = await supabase
+      .from('summarize_usage')
+      .select('words_count')
+      .eq('user_id', userId)
+      .gte('created_at', startOfMonth.toISOString());
+
+    const wordsUsed = (error || !data) ? 0 : (data || []).reduce((sum, row) => sum + (row.words_count || 0), 0);
+    const wordLimit = planLimits.summarizeWordsPerMonth;
+
+    res.json({
+      success: true,
+      data: {
+        wordsUsed,
+        wordLimit,
+        wordsRemaining: Math.max(0, wordLimit - wordsUsed),
+        plan: userPlan
+      }
+    });
+  } catch (error) {
+    console.error('Summarize usage error:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch summarize usage' });
+  }
+});
+
+// @route   POST /api/analysis/summarize
+// @desc    Summarize text into key points
+// @access  Private (all users with word limits)
+router.post('/summarize', authenticateToken, async (req, res) => {
+  try {
+    const { text, style, length } = req.body;
+    const userId = req.user.id;
+    const userPlan = req.user.subscription_plan || 'free';
+    const planLimits = subscriptionService.PLAN_LIMITS[userPlan] || subscriptionService.PLAN_LIMITS.free;
+
+    // Enforce style/length restrictions for non-premium users
+    let effectiveStyle = style || 'bullet';
+    let effectiveLength = length || 'medium';
+    if (userPlan !== 'premium') {
+      effectiveStyle = 'bullet';
+      effectiveLength = 'medium';
+    }
+
+    if (!text || text.trim().length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Text is required'
+      });
+    }
+
+    const wordCount = text.trim().split(/\s+/).length;
+
+    if (wordCount > 10000) {
+      return res.status(400).json({
+        success: false,
+        message: 'Text exceeds maximum of 10,000 words per request'
+      });
+    }
+
+    if (wordCount < 50) {
+      return res.status(400).json({
+        success: false,
+        message: 'Text must be at least 50 words to summarize'
+      });
+    }
+
+    // Check word usage
+    const { createClient } = require('@supabase/supabase-js');
+    const supabase = createClient(
+      process.env.SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
+    );
+
+    const startOfMonth = new Date();
+    startOfMonth.setDate(1);
+    startOfMonth.setHours(0, 0, 0, 0);
+
+    const { data: usageData, error: usageError } = await supabase
+      .from('summarize_usage')
+      .select('words_count')
+      .eq('user_id', userId)
+      .gte('created_at', startOfMonth.toISOString());
+
+    const wordsUsedThisMonth = usageError ? 0 : (usageData || []).reduce((sum, row) => sum + (row.words_count || 0), 0);
+    const wordLimit = planLimits.summarizeWordsPerMonth;
+
+    if (wordsUsedThisMonth + wordCount > wordLimit) {
+      const remaining = Math.max(0, wordLimit - wordsUsedThisMonth);
+      return res.status(429).json({
+        success: false,
+        message: remaining === 0
+          ? `You've used all ${wordLimit.toLocaleString()} summarize words this month. ${userPlan === 'free' ? 'Upgrade for 999,999 words/month.' : 'Limit resets next month.'}`
+          : `This text is ${wordCount} words but you only have ${remaining} summarize words remaining this month.${userPlan === 'free' ? ' Upgrade for 999,999 words/month.' : ''}`,
+        wordsUsed: wordsUsedThisMonth,
+        wordLimit,
+        wordsRemaining: remaining,
+        upgrade: userPlan === 'free'
+      });
+    }
+
+    const result = await aiAnalysisService.summarizeText(text, effectiveStyle, effectiveLength, userPlan);
+
+    // Record usage
+    supabase.from('summarize_usage').insert({
+      user_id: userId,
+      words_count: wordCount,
+      style: effectiveStyle,
+      length: effectiveLength
+    }).then(() => {}).catch(err => console.error('Failed to record summarize usage:', err));
+
+    res.json({
+      success: true,
+      message: 'Text summarized successfully',
+      data: {
+        ...result,
+        wordsUsed: wordsUsedThisMonth + wordCount,
+        wordLimit
+      }
+    });
+
+  } catch (error) {
+    console.error('Summarize error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Summarization failed. Please try again.',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
+// @route   GET /api/analysis/quiz-usage
+// @desc    Get user's quiz word usage this month
+// @access  Private
+router.get('/quiz-usage', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const userPlan = req.user.subscription_plan || 'free';
+    const planLimits = subscriptionService.PLAN_LIMITS[userPlan] || subscriptionService.PLAN_LIMITS.free;
+
+    const { createClient } = require('@supabase/supabase-js');
+    const supabase = createClient(
+      process.env.SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
+    );
+
+    const startOfMonth = new Date();
+    startOfMonth.setDate(1);
+    startOfMonth.setHours(0, 0, 0, 0);
+
+    const { data, error } = await supabase
+      .from('quiz_usage')
+      .select('words_count')
+      .eq('user_id', userId)
+      .gte('created_at', startOfMonth.toISOString());
+
+    const wordsUsed = (error || !data) ? 0 : (data || []).reduce((sum, row) => sum + (row.words_count || 0), 0);
+    const wordLimit = planLimits.quizWordsPerMonth;
+
+    res.json({
+      success: true,
+      data: {
+        wordsUsed,
+        wordLimit,
+        wordsRemaining: Math.max(0, wordLimit - wordsUsed),
+        plan: userPlan
+      }
+    });
+  } catch (error) {
+    console.error('Quiz usage error:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch quiz usage' });
+  }
+});
+
+// @route   POST /api/analysis/generate-quiz
+// @desc    Generate quiz questions from text
+// @access  Private (paid users - free users cannot use quiz)
+router.post('/generate-quiz', authenticateToken, async (req, res) => {
+  try {
+    const { text, quizType, difficulty, questionCount } = req.body;
+    const userId = req.user.id;
+    const userPlan = req.user.subscription_plan || 'free';
+    const planLimits = subscriptionService.PLAN_LIMITS[userPlan] || subscriptionService.PLAN_LIMITS.free;
+
+    // Free users cannot use quiz generator
+    if (userPlan === 'free') {
+      return res.status(403).json({
+        success: false,
+        message: 'Quiz Generator requires a paid subscription. Upgrade to Starter or Premium to access.',
+        upgrade: true
+      });
+    }
+
+    // Enforce quiz type/difficulty restrictions for starter users
+    let effectiveType = quizType || 'mixed';
+    let effectiveDifficulty = difficulty || 'medium';
+    if (userPlan !== 'premium') {
+      effectiveType = 'mixed';
+      effectiveDifficulty = 'medium';
+    }
+
+    if (!text || text.trim().length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Text is required'
+      });
+    }
+
+    const wordCount = text.trim().split(/\s+/).length;
+
+    if (wordCount > 15000) {
+      return res.status(400).json({
+        success: false,
+        message: 'Text exceeds maximum of 15,000 words per request'
+      });
+    }
+
+    if (wordCount < 100) {
+      return res.status(400).json({
+        success: false,
+        message: 'Text must be at least 100 words to generate meaningful questions'
+      });
+    }
+
+    // Check word usage
+    const { createClient } = require('@supabase/supabase-js');
+    const supabase = createClient(
+      process.env.SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
+    );
+
+    const startOfMonth = new Date();
+    startOfMonth.setDate(1);
+    startOfMonth.setHours(0, 0, 0, 0);
+
+    const { data: usageData, error: usageError } = await supabase
+      .from('quiz_usage')
+      .select('words_count')
+      .eq('user_id', userId)
+      .gte('created_at', startOfMonth.toISOString());
+
+    const wordsUsedThisMonth = usageError ? 0 : (usageData || []).reduce((sum, row) => sum + (row.words_count || 0), 0);
+    const wordLimit = planLimits.quizWordsPerMonth;
+
+    if (wordsUsedThisMonth + wordCount > wordLimit) {
+      const remaining = Math.max(0, wordLimit - wordsUsedThisMonth);
+      return res.status(429).json({
+        success: false,
+        message: remaining === 0
+          ? `You've used all ${wordLimit.toLocaleString()} quiz words this month. Limit resets next month.`
+          : `This text is ${wordCount} words but you only have ${remaining} quiz words remaining this month.`,
+        wordsUsed: wordsUsedThisMonth,
+        wordLimit,
+        wordsRemaining: remaining
+      });
+    }
+
+    const count = Math.min(Math.max(questionCount || 10, 5), 25);
+    const result = await aiAnalysisService.generateQuiz(
+      text,
+      effectiveType,
+      effectiveDifficulty,
+      count,
+      userPlan
+    );
+
+    // Record usage
+    supabase.from('quiz_usage').insert({
+      user_id: userId,
+      words_count: wordCount,
+      quiz_type: effectiveType,
+      difficulty: effectiveDifficulty
+    }).then(() => {}).catch(err => console.error('Failed to record quiz usage:', err));
+
+    // Save quiz to history
+    aiAnalysisService.saveQuiz(userId, result, text)
+      .then(savedQuiz => {
+        if (savedQuiz) {
+          console.log('Quiz saved to history:', savedQuiz.id);
+        }
+      })
+      .catch(error => console.error('Failed to save quiz to history:', error));
+
+    res.json({
+      success: true,
+      message: 'Quiz generated successfully',
+      data: result
+    });
+
+  } catch (error) {
+    console.error('Quiz generation error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Quiz generation failed. Please try again.',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
 // @route   POST /api/analysis/citation-search
 // @desc    Search for relevant citations based on research topic
 // @access  Private
@@ -892,6 +1208,146 @@ router.delete('/citation/:id', authenticateToken, async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to delete citation search',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
+// =====================
+// Quiz History Endpoints
+// =====================
+
+// @route   GET /api/analysis/quiz-history
+// @desc    Get user's saved quizzes
+// @access  Private (Premium only)
+router.get('/quiz-history', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const limit = parseInt(req.query.limit) || 20;
+
+    console.log('=== QUIZ HISTORY REQUEST ===');
+    console.log('User ID:', userId);
+    console.log('Limit:', limit);
+
+    const quizHistory = await aiAnalysisService.getQuizHistory(userId, limit);
+
+    console.log(`Found ${quizHistory.length} quizzes`);
+
+    res.json({
+      success: true,
+      data: quizHistory
+    });
+
+  } catch (error) {
+    console.error('Quiz history error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch quiz history',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
+// @route   GET /api/analysis/quiz/:id
+// @desc    Get a specific quiz by ID
+// @access  Private (Premium only)
+router.get('/quiz/:id', authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+
+    console.log('=== GET QUIZ REQUEST ===');
+    console.log('Quiz ID:', id);
+    console.log('User ID:', userId);
+
+    const quiz = await aiAnalysisService.getQuizById(userId, id);
+
+    if (!quiz) {
+      return res.status(404).json({
+        success: false,
+        message: 'Quiz not found or has expired'
+      });
+    }
+
+    res.json({
+      success: true,
+      data: quiz
+    });
+
+  } catch (error) {
+    console.error('Get quiz error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch quiz',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
+// @route   DELETE /api/analysis/quiz/:id
+// @desc    Delete a specific quiz
+// @access  Private
+router.delete('/quiz/:id', authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+
+    console.log('=== DELETE QUIZ REQUEST ===');
+    console.log('Quiz ID:', id);
+    console.log('User ID:', userId);
+
+    const deleted = await aiAnalysisService.deleteQuiz(userId, id);
+
+    if (!deleted) {
+      return res.status(404).json({
+        success: false,
+        message: 'Quiz not found or access denied'
+      });
+    }
+
+    console.log('Quiz deleted successfully');
+
+    res.json({
+      success: true,
+      message: 'Quiz deleted successfully'
+    });
+
+  } catch (error) {
+    console.error('Delete quiz error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to delete quiz',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
+// @route   POST /api/analysis/cleanup-quizzes
+// @desc    Clean up expired quizzes (called by cron or admin)
+// @access  Private (admin or cron job)
+router.post('/cleanup-quizzes', async (req, res) => {
+  try {
+    // This could be called by a cron job with a secret key
+    const cronSecret = req.headers['x-cron-secret'];
+    if (process.env.CRON_SECRET && cronSecret !== process.env.CRON_SECRET) {
+      return res.status(401).json({
+        success: false,
+        message: 'Unauthorized'
+      });
+    }
+
+    const result = await aiAnalysisService.cleanupExpiredQuizzes();
+
+    res.json({
+      success: true,
+      message: `Cleaned up ${result.deleted} expired quizzes`
+    });
+
+  } catch (error) {
+    console.error('Cleanup quizzes error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to cleanup quizzes',
       error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }

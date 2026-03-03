@@ -12,15 +12,22 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
   const [isFocused, setIsFocused] = useState(false);
   const [openFAQ, setOpenFAQ] = useState<number | null>(null);
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('monthly');
-  const [mode, setMode] = useState<'analyze' | 'citations' | 'humanize'>('analyze');
+  const [mode, setMode] = useState<'analyze' | 'citations' | 'humanize' | 'summarize' | 'quiz'>('analyze');
   const [citationStyle, setCitationStyle] = useState('APA');
   const [citationYearRange, setCitationYearRange] = useState('all');
   const [showFakeAnimation, setShowFakeAnimation] = useState(false);
   const [showFakeResults, setShowFakeResults] = useState(false);
   const [showFakeCitationResults, setShowFakeCitationResults] = useState(false);
   const [showFakeHumanizeResults, setShowFakeHumanizeResults] = useState(false);
+  const [showFakeSummaryResults, setShowFakeSummaryResults] = useState(false);
+  const [showFakeQuizResults, setShowFakeQuizResults] = useState(false);
   const [humanizeMode, setHumanizeMode] = useState<'standard' | 'academic' | 'casual' | 'creative'>('standard');
   const [humanizeIntensity, setHumanizeIntensity] = useState<'light' | 'medium' | 'aggressive'>('medium');
+  const [summaryStyle, setSummaryStyle] = useState<'bullet' | 'paragraph' | 'tldr' | 'detailed'>('bullet');
+  const [summaryLength, setSummaryLength] = useState<'short' | 'medium' | 'long'>('medium');
+  const [quizType, setQuizType] = useState<'mixed' | 'multiple_choice' | 'true_false' | 'fill_blank'>('mixed');
+  const [quizDifficulty, setQuizDifficulty] = useState<'easy' | 'medium' | 'hard'>('medium');
+  const [quizQuestionCount, setQuizQuestionCount] = useState(10);
   const [activeToolHover, setActiveToolHover] = useState<string | null>(null);
   const [activeHelpCategory, setActiveHelpCategory] = useState('essays');
 
@@ -75,7 +82,23 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
     "Make AI text undetectable — paste it here..."
   ];
 
-  const placeholders = mode === 'humanize' ? humanizePlaceholders : mode === 'analyze' ? analyzePlaceholders : citationPlaceholders;
+  const summarizePlaceholders = [
+    "Paste your article, paper, or document to summarize...",
+    "Transform lengthy content into key points...",
+    "Get concise summaries in seconds..."
+  ];
+
+  const quizPlaceholders = [
+    "Paste content to generate quiz questions...",
+    "Turn any text into an interactive quiz...",
+    "Test your knowledge with AI-generated questions..."
+  ];
+
+  const placeholders = mode === 'humanize' ? humanizePlaceholders
+    : mode === 'summarize' ? summarizePlaceholders
+    : mode === 'quiz' ? quizPlaceholders
+    : mode === 'analyze' ? analyzePlaceholders
+    : citationPlaceholders;
 
   const suggestedTopics = mode === 'humanize' ? [] : mode === 'analyze' ? [
     "The impact of social media on student mental health",
@@ -104,24 +127,28 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
 
   const faqs = [
     {
-      question: "How does the AI writing analysis work?",
-      answer: "WriteScholar uses advanced AI to analyze your writing for structure, clarity, grammar, citation formatting, and academic tone. You get specific, actionable feedback similar to what a professor would provide."
+      question: "What is the AI Humanizer and how does it work?",
+      answer: "The AI Humanizer transforms text from ChatGPT, Claude, Gemini, and other AI models into natural human-sounding writing. It bypasses AI detection tools like Turnitin and GPTZero while preserving your original meaning. Free users get 1,000 words/month."
     },
     {
-      question: "Is my document content private?",
-      answer: "Yes. We use enterprise-grade encryption. Your content is never shared with third parties or used to train AI models. You can delete your documents at any time."
+      question: "Can I create study quizzes from my notes?",
+      answer: "Yes! The Quiz Generator turns any text into interactive quizzes with multiple choice and true/false questions. Paste your study notes, textbook chapters, or articles and get instant quizzes. Available to paid subscribers."
+    },
+    {
+      question: "How does the Paper Summarizer work?",
+      answer: "Paste any research paper, article, or document and get concise summaries as bullet points or paragraphs. Choose short, medium, or detailed formats. Perfect for literature reviews and exam prep."
     },
     {
       question: "What citation styles are supported?",
-      answer: "We support APA 7th edition, MLA 9th edition, Chicago (notes-bibliography and author-date), Harvard, IEEE, and Vancouver. Our citation checker validates formatting and catches common errors."
+      answer: "We support APA 7th edition, MLA 9th edition, Chicago (notes-bibliography and author-date), Harvard, IEEE, and Vancouver. The citation finder searches academic databases for relevant sources."
     },
     {
-      question: "Can I use this for my thesis or dissertation?",
-      answer: "Yes. WriteScholar handles documents of any length and provides chapter-by-chapter analysis for longer works. Premium users get feedback on methodology and literature review structure."
+      question: "Is my content private and secure?",
+      answer: "Yes. We use enterprise-grade encryption. Your content is never shared with third parties or used to train AI models. You can delete your documents at any time."
     },
     {
-      question: "How is this different from Grammarly?",
-      answer: "While Grammarly is general-purpose, WriteScholar is built for academic writing. We understand academic tone, citation requirements, discipline-specific conventions, and research paper structure."
+      question: "What's the difference between Free, Starter, and Premium?",
+      answer: "Free includes 1,000 words for Humanizer and Summarizer, plus essay analysis. Starter adds the Quiz Generator with basic options. Premium unlocks all features, quiz types, and our most advanced AI model."
     }
   ];
 
@@ -167,10 +194,31 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
         setShowFakeAnimation(false);
         setShowFakeCitationResults(true);
       }, 15000);
+    } else if (mode === 'summarize') {
+      localStorage.setItem('pendingSummary', JSON.stringify({
+        text: inputText,
+        style: summaryStyle,
+        length: summaryLength
+      }));
+      setTimeout(() => {
+        setShowFakeAnimation(false);
+        setShowFakeSummaryResults(true);
+      }, 6000);
+    } else if (mode === 'quiz') {
+      localStorage.setItem('pendingQuiz', JSON.stringify({
+        text: inputText,
+        quizType,
+        difficulty: quizDifficulty,
+        questionCount: quizQuestionCount
+      }));
+      setTimeout(() => {
+        setShowFakeAnimation(false);
+        setShowFakeQuizResults(true);
+      }, 8000);
     } else {
       localStorage.setItem('pendingAnalysis', JSON.stringify({ text: inputText }));
-    setTimeout(() => {
-      setShowFakeAnimation(false);
+      setTimeout(() => {
+        setShowFakeAnimation(false);
         setShowFakeResults(true);
       }, 15000);
     }
@@ -179,7 +227,9 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
   const handleContinueToSignup = () => {
     setShowFakeResults(false);
     setShowFakeHumanizeResults(false);
-      onNavigate('signup');
+    setShowFakeSummaryResults(false);
+    setShowFakeQuizResults(false);
+    onNavigate('signup');
   };
 
   const handleContinueToSignupFromCitations = () => {
@@ -232,8 +282,8 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
           <circle cx="50" cy="34" r="3" fill="#FECACA" opacity="0.5" />
           <ellipse cx="26" cy="55" rx="6" ry="5" fill="#E8B796" />
           <ellipse cx="44" cy="55" rx="6" ry="5" fill="#E8B796" />
-        </svg>
-      </div>
+                        </svg>
+                      </div>
 
       {/* Desktop - man peeking from behind right edge, hands gripping the top */}
       <div className="absolute hidden sm:block -right-8 xl:-right-16 pointer-events-none z-20" style={{ top: '-110px', width: '120px', height: '160px' }}>
@@ -276,9 +326,9 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
           <path d="M102 144 Q101 148 103 152" stroke="#D4A574" strokeWidth="1.2" fill="none" />
           <path d="M107 143 Q106 148 108 153" stroke="#D4A574" strokeWidth="1.2" fill="none" />
           <path d="M112 144 Q111 148 113 152" stroke="#D4A574" strokeWidth="1.2" fill="none" />
-        </svg>
-      </div>
-    </>
+                        </svg>
+                  </div>
+                </>
   );
 
 
@@ -358,6 +408,10 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
               <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-900 tracking-tight leading-tight mb-5 sm:mb-7" style={{ letterSpacing: '-0.02em' }}>
             {mode === 'humanize' ? (
                   <>Make AI text <span className="text-violet-600">undetectable</span></>
+            ) : mode === 'summarize' ? (
+                  <>Summarize <span className="text-teal-600">any document</span></>
+            ) : mode === 'quiz' ? (
+                  <>Generate <span className="text-amber-600">quiz questions</span></>
             ) : mode === 'analyze' ? (
                   <>Your essay — improved with <span className="text-blue-600">AI assistance</span></>
             ) : (
@@ -372,6 +426,18 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                     <span className="flex items-center"><svg className="w-5 h-5 text-violet-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Bypass AI detectors</span>
                     <span className="flex items-center"><svg className="w-5 h-5 text-violet-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Natural human tone</span>
                     <span className="flex items-center"><svg className="w-5 h-5 text-violet-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Advanced AI</span>
+                </>
+              ) : mode === 'summarize' ? (
+                <>
+                    <span className="flex items-center"><svg className="w-5 h-5 text-teal-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Bullet or paragraph</span>
+                    <span className="flex items-center"><svg className="w-5 h-5 text-teal-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Short to detailed</span>
+                    <span className="flex items-center"><svg className="w-5 h-5 text-teal-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>1,000 words free</span>
+                </>
+              ) : mode === 'quiz' ? (
+                <>
+                    <span className="flex items-center"><svg className="w-5 h-5 text-amber-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Multiple choice &amp; T/F</span>
+                    <span className="flex items-center"><svg className="w-5 h-5 text-amber-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Exam prep</span>
+                    <span className="flex items-center"><svg className="w-5 h-5 text-amber-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Paid feature</span>
                 </>
               ) : mode === 'analyze' ? (
                 <>
@@ -390,7 +456,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
 
               {/* Mode Toggle - bigger */}
               <div className="flex justify-center mb-5">
-                <div className="inline-flex bg-gray-100 rounded-full p-1.5 shadow-sm">
+                <div className="inline-flex flex-wrap justify-center bg-gray-100 rounded-full p-1.5 shadow-sm gap-1">
               <button
                     onClick={() => { setMode('analyze'); setInputText(''); }}
                     className={`px-5 sm:px-6 py-2.5 rounded-full text-base font-medium transition-all ${
@@ -416,13 +482,36 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                     Humanize
                     <span className="absolute -top-2 -right-1 px-1.5 py-0.5 bg-violet-600 text-white text-[10px] font-bold rounded-full leading-none">PRO</span>
               </button>
+              <button
+                    onClick={() => { setMode('summarize'); setInputText(''); }}
+                    className={`px-5 sm:px-6 py-2.5 rounded-full text-base font-medium transition-all ${
+                      mode === 'summarize' ? 'bg-white text-teal-700 shadow-sm' : 'text-teal-600 hover:text-teal-700'
+                    }`}
+                  >
+                    Summarize
+              </button>
+              <button
+                    onClick={() => { setMode('quiz'); setInputText(''); }}
+                    className={`px-5 sm:px-6 py-2.5 rounded-full text-base font-medium transition-all relative ${
+                      mode === 'quiz' ? 'bg-white text-amber-700 shadow-sm' : 'text-amber-600 hover:text-amber-700'
+                    }`}
+                  >
+                    Quiz
+                    <span className="absolute -top-2 -right-1 px-1.5 py-0.5 bg-amber-600 text-white text-[10px] font-bold rounded-full leading-none">PRO</span>
+              </button>
             </div>
           </div>
           
               {/* Helper text - left on mobile to avoid crowding character, center on larger screens */}
-              <p className={`text-sm mb-4 flex items-center justify-start md:justify-center ${mode === 'humanize' ? 'text-violet-600' : 'text-amber-600'}`}>
-                <span className="mr-1.5">{mode === 'humanize' ? '✨' : '💡'}</span>
-                {mode === 'humanize' ? 'Humanize ChatGPT, Gemini, Claude text — 1,000 free words/month' : mode === 'analyze' ? 'AI analyzes, you refine for submission' : 'Find sources, format citations automatically'}
+              <p className={`text-sm mb-4 flex items-center justify-start md:justify-center ${
+                mode === 'humanize' ? 'text-violet-600' : mode === 'summarize' ? 'text-teal-600' : mode === 'quiz' ? 'text-amber-600' : 'text-amber-600'
+              }`}>
+                <span className="mr-1.5">{mode === 'humanize' ? '✨' : mode === 'summarize' ? '📝' : mode === 'quiz' ? '🧠' : '💡'}</span>
+                {mode === 'humanize' ? 'Humanize ChatGPT, Gemini, Claude text — 1,000 free words/month'
+                  : mode === 'summarize' ? 'Paste 50+ words — get bullet or paragraph summaries'
+                  : mode === 'quiz' ? 'Paid feature — turn notes into quiz questions'
+                  : mode === 'analyze' ? 'AI analyzes, you refine for submission'
+                  : 'Find sources, format citations automatically'}
               </p>
 
               {/* Citation Options (citations mode only) */}
@@ -482,7 +571,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                         <option value="casual">Casual</option>
                         <option value="creative">Creative</option>
                       </select>
-                    </div>
+                </div>
                     <div className="inline-flex items-center bg-violet-50 rounded-xl px-4 py-2.5 border border-violet-200">
                       <span className="text-violet-600 mr-2 text-sm">Intensity:</span>
                       <select
@@ -494,7 +583,83 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                         <option value="medium">Medium</option>
                         <option value="aggressive">Heavy</option>
                       </select>
-                    </div>
+              </div>
+                </div>
+              </div>
+            )}
+
+              {/* Summarize Options (summarize mode only) */}
+            {mode === 'summarize' && (
+              <div className="flex justify-center mb-4">
+                <div className="inline-flex items-center gap-3 flex-wrap justify-center">
+                  <div className="inline-flex items-center bg-teal-50 rounded-xl px-4 py-2.5 border border-teal-200">
+                    <span className="text-teal-600 mr-2 text-sm">Style:</span>
+                    <select
+                      value={summaryStyle}
+                      onChange={(e) => setSummaryStyle(e.target.value as any)}
+                      className="bg-transparent font-medium text-gray-900 outline-none cursor-pointer text-sm"
+                    >
+                      <option value="bullet">Bullet</option>
+                      <option value="paragraph">Paragraph</option>
+                      <option value="tldr">TL;DR</option>
+                      <option value="detailed">Detailed</option>
+                    </select>
+                  </div>
+                  <div className="inline-flex items-center bg-teal-50 rounded-xl px-4 py-2.5 border border-teal-200">
+                    <span className="text-teal-600 mr-2 text-sm">Length:</span>
+                    <select
+                      value={summaryLength}
+                      onChange={(e) => setSummaryLength(e.target.value as any)}
+                      className="bg-transparent font-medium text-gray-900 outline-none cursor-pointer text-sm"
+                    >
+                      <option value="short">Short</option>
+                      <option value="medium">Medium</option>
+                      <option value="long">Long</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            )}
+
+              {/* Quiz Options (quiz mode only) */}
+            {mode === 'quiz' && (
+              <div className="flex justify-center mb-4">
+                <div className="inline-flex items-center gap-3 flex-wrap justify-center">
+                  <div className="inline-flex items-center bg-amber-50 rounded-xl px-4 py-2.5 border border-amber-200">
+                    <span className="text-amber-700 mr-2 text-sm">Type:</span>
+                    <select
+                      value={quizType}
+                      onChange={(e) => setQuizType(e.target.value as any)}
+                      className="bg-transparent font-medium text-gray-900 outline-none cursor-pointer text-sm"
+                    >
+                      <option value="mixed">Mixed</option>
+                      <option value="multiple_choice">Multiple choice</option>
+                      <option value="true_false">True/False</option>
+                      <option value="fill_blank">Fill blank</option>
+                    </select>
+                  </div>
+                  <div className="inline-flex items-center bg-amber-50 rounded-xl px-4 py-2.5 border border-amber-200">
+                    <span className="text-amber-700 mr-2 text-sm">Difficulty:</span>
+                    <select
+                      value={quizDifficulty}
+                      onChange={(e) => setQuizDifficulty(e.target.value as any)}
+                      className="bg-transparent font-medium text-gray-900 outline-none cursor-pointer text-sm"
+                    >
+                      <option value="easy">Easy</option>
+                      <option value="medium">Medium</option>
+                      <option value="hard">Hard</option>
+                    </select>
+                  </div>
+                  <div className="inline-flex items-center bg-amber-50 rounded-xl px-4 py-2.5 border border-amber-200">
+                    <span className="text-amber-700 mr-2 text-sm">Questions:</span>
+                    <select
+                      value={quizQuestionCount}
+                      onChange={(e) => setQuizQuestionCount(Number(e.target.value))}
+                      className="bg-transparent font-medium text-gray-900 outline-none cursor-pointer text-sm"
+                    >
+                      {[5, 10, 15, 20, 25].map(n => <option key={n} value={n}>{n}</option>)}
+                    </select>
+                  </div>
                 </div>
               </div>
             )}
@@ -506,8 +671,8 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                 
                 <div className={`relative bg-white rounded-2xl border-2 shadow-sm transition-all duration-200 ${
                   isFocused
-                    ? (mode === 'humanize' ? 'border-violet-500 shadow-lg ring-4 ring-violet-100' : 'border-blue-500 shadow-lg ring-4 ring-blue-100')
-                    : (mode === 'humanize' ? 'border-violet-100 hover:border-violet-200' : 'border-blue-100 hover:border-blue-200')
+                    ? (mode === 'humanize' ? 'border-violet-500 shadow-lg ring-4 ring-violet-100' : mode === 'summarize' ? 'border-teal-500 shadow-lg ring-4 ring-teal-100' : mode === 'quiz' ? 'border-amber-500 shadow-lg ring-4 ring-amber-100' : 'border-blue-500 shadow-lg ring-4 ring-blue-100')
+                    : (mode === 'humanize' ? 'border-violet-100 hover:border-violet-200' : mode === 'summarize' ? 'border-teal-100 hover:border-teal-200' : mode === 'quiz' ? 'border-amber-100 hover:border-amber-200' : 'border-blue-100 hover:border-blue-200')
                 }`}>
                   <textarea
                     value={inputText}
@@ -537,7 +702,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                     }`}
                   >
                     <span className="mr-2">✨</span>
-                    {mode === 'humanize' ? 'Humanize Text' : mode === 'analyze' ? 'Get Feedback' : 'Find Sources'}
+                    {mode === 'humanize' ? 'Humanize Text' : mode === 'summarize' ? 'Summarize' : mode === 'quiz' ? 'Generate Quiz' : mode === 'analyze' ? 'Get Feedback' : 'Find Sources'}
                   </button>
                   
                   {/* Upload file option - only for analyze mode */}
@@ -943,9 +1108,9 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                   )}
                   </div>
                 </div>
-              </div>
-            </div>
-          </div>
+                  </div>
+                  </div>
+                  </div>
       </section>
 
       {/* See WriteScholar in Action */}
@@ -993,9 +1158,9 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                 {/* Collar */}
                 <path d="M58 90 L70 105 L82 90" stroke="#2563EB" strokeWidth="2" fill="none" />
               </svg>
-             </div>
-                     </div>
-                     
+                  </div>
+                  </div>
+                  
           {/* Screenshot Showcase */}
           <div className="space-y-16">
             {/* Philosophy Essay Example */}
@@ -1023,8 +1188,8 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                   />
                               </div>
                               </div>
-                              </div>
-
+                  </div>
+                  
             {/* Multicultural Film Paper Example */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
               <div className="order-1 lg:order-1">
@@ -1034,12 +1199,12 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                     alt="Multicultural film paper analysis showing comprehensive AI feedback on academic writing"
                     className="w-full h-auto"
                           />
-                            </div>
-                          </div>
+                  </div>
+                </div>
               <div className="order-2 lg:order-2">
                 <div className="inline-flex items-center px-3 py-1.5 bg-blue-100 text-blue-700 rounded-full text-sm font-medium mb-4">
                   Film Studies
-                    </div>
+              </div>
                 <h3 className="text-2xl font-bold text-gray-900 mb-3">Film Studies Paper Analysis</h3>
                 <p className="text-gray-600 text-lg leading-relaxed mb-4">
                   Watch WriteScholar analyze a multicultural film studies paper, identifying areas for clarity improvement and ensuring proper academic formatting.
@@ -1049,9 +1214,9 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                   <li className="flex items-center"><svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Grammar improvements</li>
                   <li className="flex items-center"><svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Detailed suggestions</li>
                 </ul>
-                  </div>
-                </div>
-              </div>
+            </div>
+          </div>
+        </div>
            </div>
       </section>
 
@@ -1109,8 +1274,8 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                 <path d="M58 95 L70 108 L82 95" stroke="#059669" strokeWidth="2" fill="none" />
               </svg>
             </div>
-                </div>
-
+             </div>
+           
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
             {/* Structure Analysis - Asian man */}
             <div className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-lg hover:border-gray-300 hover:-translate-y-1 transition-all duration-200">
@@ -1132,8 +1297,8 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                   </div>
               <h3 className="font-semibold text-gray-900 text-lg mb-2">Structure Analysis</h3>
               <p className="text-base text-gray-600 leading-relaxed">Get feedback on your essay organization, thesis clarity, and paragraph flow.</p>
-                </div>
-            
+                     </div>
+                     
             {/* Grammar Check - Black woman */}
             <div className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-lg hover:border-gray-300 hover:-translate-y-1 transition-all duration-200">
               <div className="w-14 h-14 rounded-full bg-green-50 flex items-center justify-center mb-4 overflow-hidden">
@@ -1155,11 +1320,11 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                   <ellipse cx="18" cy="35" rx="3" ry="2" fill="#C9958A" opacity="0.4"/>
                   <ellipse cx="38" cy="35" rx="3" ry="2" fill="#C9958A" opacity="0.4"/>
                 </svg>
-              </div>
+                        </div>
               <h3 className="font-semibold text-gray-900 text-lg mb-2">Grammar Check</h3>
               <p className="text-base text-gray-600 leading-relaxed">Catch grammar, spelling, and punctuation errors with AI-powered suggestions.</p>
-            </div>
-            
+                           </div>
+                          
             {/* Citation Checker - White man with glasses */}
             <div className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-lg hover:border-gray-300 hover:-translate-y-1 transition-all duration-200">
               <div className="w-14 h-14 rounded-full bg-purple-50 flex items-center justify-center mb-4 overflow-hidden">
@@ -1182,10 +1347,10 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                   <ellipse cx="17" cy="36" rx="3" ry="2" fill="#FECACA" opacity="0.4"/>
                   <ellipse cx="39" cy="36" rx="3" ry="2" fill="#FECACA" opacity="0.4"/>
                 </svg>
-          </div>
+                              </div>
               <h3 className="font-semibold text-gray-900 text-lg mb-2">Citation Checker</h3>
               <p className="text-base text-gray-600 leading-relaxed">Validate APA, MLA, Chicago, and Harvard citations. Fix formatting errors.</p>
-        </div>
+                              </div>
 
             {/* Academic Tone - Hispanic woman */}
             <div className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-lg hover:border-gray-300 hover:-translate-y-1 transition-all duration-200">
@@ -1206,10 +1371,10 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                   <ellipse cx="17" cy="35" rx="3" ry="2" fill="#E8A090" opacity="0.5"/>
                   <ellipse cx="39" cy="35" rx="3" ry="2" fill="#E8A090" opacity="0.5"/>
                 </svg>
-              </div>
+                              </div>
               <h3 className="font-semibold text-gray-900 text-lg mb-2">Academic Tone</h3>
               <p className="text-base text-gray-600 leading-relaxed">Ensure your writing maintains appropriate formality and discipline conventions.</p>
-          </div>
+                            </div>
           
             {/* Clarity Feedback - South Asian man */}
             <div className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-lg hover:border-gray-300 hover:-translate-y-1 transition-all duration-200">
@@ -1230,10 +1395,10 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                   <ellipse cx="17" cy="35" rx="3" ry="2" fill="#D4A07A" opacity="0.5"/>
                   <ellipse cx="39" cy="35" rx="3" ry="2" fill="#D4A07A" opacity="0.5"/>
                       </svg>
-                    </div>
+                          </div>
               <h3 className="font-semibold text-gray-900 text-lg mb-2">Clarity Feedback</h3>
               <p className="text-base text-gray-600 leading-relaxed">Identify unclear sentences and get suggestions for clearer expression.</p>
-                      </div>
+                    </div>
             
             {/* Source Finder - East Asian woman */}
             <div className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-lg hover:border-gray-300 hover:-translate-y-1 transition-all duration-200">
@@ -1252,12 +1417,12 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                   <ellipse cx="17" cy="35" rx="3" ry="2" fill="#FECACA" opacity="0.4"/>
                   <ellipse cx="39" cy="35" rx="3" ry="2" fill="#FECACA" opacity="0.4"/>
                 </svg>
-                    </div>
+                  </div>
               <h3 className="font-semibold text-gray-900 text-lg mb-2">Source Finder</h3>
               <p className="text-base text-gray-600 leading-relaxed">Search millions of academic papers to find relevant citations for your topic.</p>
                 </div>
               </div>
-          </div>
+           </div>
       </section>
 
       {/* Free Tools Showcase */}
@@ -1317,7 +1482,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                 <path d="M58 95 L70 108 L82 95" stroke="#7C3AED" strokeWidth="2" fill="none" />
               </svg>
             </div>
-          </div>
+                </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
             {/* Word Counter */}
@@ -1328,8 +1493,8 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
               <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                 <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" />
-                </svg>
-              </div>
+                    </svg>
+                  </div>
               <h3 className="font-semibold text-gray-900 mb-1">Word Counter</h3>
               <p className="text-sm text-gray-500">Count words, characters & reading time</p>
             </button>
@@ -1343,7 +1508,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                 <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
-              </div>
+                </div>
               <h3 className="font-semibold text-gray-900 mb-1">Citation Generator</h3>
               <p className="text-sm text-gray-500">APA, MLA, Chicago & more</p>
             </button>
@@ -1371,7 +1536,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                 <svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                 </svg>
-              </div>
+            </div>
               <h3 className="font-semibold text-gray-900 mb-1">Readability Score</h3>
               <p className="text-sm text-gray-500">Flesch-Kincaid & grade level</p>
             </button>
@@ -1385,7 +1550,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                 <svg className="w-6 h-6 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
-              </div>
+          </div>
               <h3 className="font-semibold text-gray-900 mb-1">Thesis Generator</h3>
               <p className="text-sm text-gray-500">Create strong thesis statements</p>
             </button>
@@ -1399,7 +1564,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                 <svg className="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
                 </svg>
-              </div>
+        </div>
               <h3 className="font-semibold text-gray-900 mb-1">Essay Outline</h3>
               <p className="text-sm text-gray-500">Structure your essay properly</p>
             </button>
@@ -1413,25 +1578,25 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                 <svg className="w-6 h-6 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
                 </svg>
-              </div>
+          </div>
               <h3 className="font-semibold text-gray-900 mb-1">Case Converter</h3>
               <p className="text-sm text-gray-500">Uppercase, lowercase & more</p>
             </button>
 
             {/* Paraphrasing Tips */}
-            <button
+                  <button
               onClick={() => onNavigate('paraphrasing-tips')}
               className="group bg-white border border-gray-200 rounded-2xl p-5 sm:p-6 hover:shadow-lg hover:border-amber-300 hover:-translate-y-1 transition-all duration-200 text-left"
             >
               <div className="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                 <svg className="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
-              </div>
+                      </svg>
+                    </div>
               <h3 className="font-semibold text-gray-900 mb-1">Paraphrasing Tips</h3>
               <p className="text-sm text-gray-500">Improve vocabulary & style</p>
-            </button>
-          </div>
+                  </button>
+                      </div>
 
           {/* Premium Humanizer Card */}
           <div className="mt-6">
@@ -1443,7 +1608,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
               <div className="flex items-center gap-6">
                 <div className="w-14 h-14 bg-violet-100 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
                   <span className="text-2xl">✨</span>
-                </div>
+                    </div>
                 <div className="flex-1">
                   <h3 className="text-lg font-bold text-gray-900 mb-1">AI Text Humanizer</h3>
                   <p className="text-sm text-gray-600">Humanize ChatGPT, GPT-4, Gemini, Claude &amp; LLaMA text. Bypass AI detectors with natural, human-sounding writing.</p>
@@ -1519,15 +1684,15 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                     <span className="text-white font-bold text-sm">W</span>
                   </div>
                   <span className="font-semibold text-gray-900 text-sm sm:text-base">WriteScholar</span>
-                </div>
-              </div>
-              <div className="p-4 sm:p-6 text-center">
-                <span className="font-medium text-gray-600 text-sm sm:text-base">Grammarly</span>
-              </div>
-              <div className="p-4 sm:p-6 text-center">
-                <span className="font-medium text-gray-600 text-sm sm:text-base">QuillBot</span>
               </div>
             </div>
+              <div className="p-4 sm:p-6 text-center">
+                <span className="font-medium text-gray-600 text-sm sm:text-base">Grammarly</span>
+                  </div>
+              <div className="p-4 sm:p-6 text-center">
+                <span className="font-medium text-gray-600 text-sm sm:text-base">QuillBot</span>
+                </div>
+              </div>
 
             {/* Table Rows */}
             <div className="divide-y divide-gray-100">
@@ -1535,7 +1700,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
               <div className="grid grid-cols-4 items-center">
                 <div className="p-4 sm:p-6">
                   <span className="font-medium text-gray-900 text-sm sm:text-base">Built for Academic Writing</span>
-                </div>
+                  </div>
                 <div className="p-4 sm:p-6 text-center">
                   <span className="inline-flex items-center justify-center w-8 h-8 bg-green-100 rounded-full">
                     <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>
@@ -1545,35 +1710,35 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                   <span className="inline-flex items-center justify-center w-8 h-8 bg-gray-100 rounded-full">
                     <svg className="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd"/></svg>
                   </span>
-                </div>
+            </div>
                 <div className="p-4 sm:p-6 text-center">
                   <span className="inline-flex items-center justify-center w-8 h-8 bg-gray-100 rounded-full">
                     <svg className="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd"/></svg>
                   </span>
+                  </div>
                 </div>
-              </div>
 
               {/* Citation Formatting */}
               <div className="grid grid-cols-4 items-center bg-blue-50/30">
                 <div className="p-4 sm:p-6">
                   <span className="font-medium text-gray-900 text-sm sm:text-base">Citation Generator & Checker</span>
-                </div>
-                <div className="p-4 sm:p-6 text-center">
-                  <span className="inline-flex items-center justify-center w-8 h-8 bg-green-100 rounded-full">
-                    <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>
-                  </span>
-                </div>
-                <div className="p-4 sm:p-6 text-center">
-                  <span className="inline-flex items-center justify-center w-8 h-8 bg-green-100 rounded-full">
-                    <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>
-                  </span>
-                </div>
-                <div className="p-4 sm:p-6 text-center">
-                  <span className="inline-flex items-center justify-center w-8 h-8 bg-green-100 rounded-full">
-                    <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>
-                  </span>
-                </div>
               </div>
+                <div className="p-4 sm:p-6 text-center">
+                  <span className="inline-flex items-center justify-center w-8 h-8 bg-green-100 rounded-full">
+                    <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>
+                  </span>
+            </div>
+                <div className="p-4 sm:p-6 text-center">
+                  <span className="inline-flex items-center justify-center w-8 h-8 bg-green-100 rounded-full">
+                    <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>
+                  </span>
+          </div>
+                <div className="p-4 sm:p-6 text-center">
+                  <span className="inline-flex items-center justify-center w-8 h-8 bg-green-100 rounded-full">
+                    <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>
+                  </span>
+          </div>
+        </div>
 
               {/* Essay Structure Analysis */}
               <div className="grid grid-cols-4 items-center">
@@ -1584,7 +1749,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                   <span className="inline-flex items-center justify-center w-8 h-8 bg-green-100 rounded-full">
                     <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>
                   </span>
-                </div>
+              </div>
                 <div className="p-4 sm:p-6 text-center">
                   <span className="inline-flex items-center justify-center w-8 h-8 bg-yellow-100 rounded-full">
                     <span className="text-yellow-600 text-xs font-bold">~</span>
@@ -1594,8 +1759,8 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                   <span className="inline-flex items-center justify-center w-8 h-8 bg-gray-100 rounded-full">
                     <svg className="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd"/></svg>
                   </span>
-                </div>
               </div>
+            </div>
 
               {/* Grammar & Spelling */}
               <div className="grid grid-cols-4 items-center bg-blue-50/30">
@@ -1605,18 +1770,18 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                 <div className="p-4 sm:p-6 text-center">
                   <span className="inline-flex items-center justify-center w-8 h-8 bg-green-100 rounded-full">
                     <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>
-                  </span>
+                </span>
+                </div>
+                <div className="p-4 sm:p-6 text-center">
+                  <span className="inline-flex items-center justify-center w-8 h-8 bg-green-100 rounded-full">
+                    <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>
+                </span>
                 </div>
                 <div className="p-4 sm:p-6 text-center">
                   <span className="inline-flex items-center justify-center w-8 h-8 bg-green-100 rounded-full">
                     <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>
                   </span>
-                </div>
-                <div className="p-4 sm:p-6 text-center">
-                  <span className="inline-flex items-center justify-center w-8 h-8 bg-green-100 rounded-full">
-                    <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>
-                  </span>
-                </div>
+              </div>
               </div>
 
               {/* Academic Source Finder */}
@@ -1638,8 +1803,8 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                   <span className="inline-flex items-center justify-center w-8 h-8 bg-gray-100 rounded-full">
                     <svg className="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd"/></svg>
                   </span>
-                </div>
-              </div>
+            </div>
+          </div>
 
               {/* AI Humanizer */}
               <div className="grid grid-cols-4 items-center">
@@ -1649,7 +1814,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                 <div className="p-4 sm:p-6 text-center">
                   <span className="inline-flex items-center justify-center w-8 h-8 bg-green-100 rounded-full">
                     <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>
-                  </span>
+                    </span>
                 </div>
                 <div className="p-4 sm:p-6 text-center">
                   <span className="inline-flex items-center justify-center w-8 h-8 bg-gray-100 rounded-full">
@@ -1659,9 +1824,9 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                 <div className="p-4 sm:p-6 text-center">
                   <span className="inline-flex items-center justify-center w-8 h-8 bg-gray-100 rounded-full">
                     <svg className="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd"/></svg>
-                  </span>
+                    </span>
+                  </div>
                 </div>
-              </div>
 
               {/* Free Tier */}
               <div className="grid grid-cols-4 items-center bg-blue-50/30">
@@ -1722,7 +1887,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
               View all posts
               <svg className="w-5 h-5 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-              </svg>
+                      </svg>
             </button>
           </div>
 
@@ -1740,7 +1905,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                   <rect x="38" y="12" width="5" height="22" rx="1" fill="#FCD34D" />
                   <rect x="50" y="8" width="6" height="26" rx="1" fill="#34D399" />
                   <rect x="64" y="14" width="5" height="20" rx="1" fill="#60A5FA" />
-                </svg>
+                      </svg>
               </div>
               <div className="p-5">
                 <span className="text-xs text-gray-500 font-medium">Mar 1, 2026</span>
@@ -1766,7 +1931,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                   <line x1="35" y1="46" x2="80" y2="46" stroke="#C7D2FE" strokeWidth="2" />
                   <line x1="35" y1="54" x2="70" y2="54" stroke="#C7D2FE" strokeWidth="2" />
                   <path d="M90 10 L93 18 L101 21 L93 24 L90 32 L87 24 L79 21 L87 18 Z" fill="#6366F1" />
-                </svg>
+                      </svg>
               </div>
               <div className="p-5">
                 <span className="text-xs text-gray-500 font-medium">Feb 28, 2026</span>
@@ -1795,7 +1960,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                   <line x1="58" y1="35" x2="85" y2="35" stroke="#DDD6FE" strokeWidth="2" />
                   <line x1="58" y1="43" x2="90" y2="43" stroke="#DDD6FE" strokeWidth="2" />
                   <text x="85" y="65" fontSize="18" fill="#8B5CF6" fontWeight="bold">APA</text>
-                </svg>
+                      </svg>
               </div>
               <div className="p-5">
                 <span className="text-xs text-gray-500 font-medium">Feb 1, 2026</span>
@@ -1853,14 +2018,14 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                 {/* Question mark bubble */}
                 <circle cx="88" cy="15" r="10" fill="#F3F4F6" stroke="#E5E7EB" strokeWidth="1" />
                 <text x="88" y="20" textAnchor="middle" fontSize="14" fill="#6366F1" fontWeight="bold">?</text>
-              </svg>
+                      </svg>
                   </div>
-              </div>
+                </div>
 
           <div className="space-y-4">
             {faqs.map((faq, idx) => (
               <div key={idx} className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:border-gray-300 hover:shadow-sm transition-all duration-200">
-                  <button
+                <button
                   onClick={() => setOpenFAQ(openFAQ === idx ? null : idx)}
                   className="w-full px-6 py-5 text-left flex items-center justify-between hover:bg-gray-50 transition-all duration-200"
                 >
@@ -1868,11 +2033,11 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                   <svg className={`w-5 h-5 text-gray-400 flex-shrink-0 transition-transform ${openFAQ === idx ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                       </svg>
-                  </button>
+                </button>
                 <div className={`overflow-hidden transition-all duration-300 ${openFAQ === idx ? 'max-h-56' : 'max-h-0'}`}>
                   <div className="px-6 pb-5 text-gray-600 text-base leading-relaxed">{faq.answer}</div>
+              </div>
             </div>
-                  </div>
             ))}
                 </div>
               </div>
@@ -1919,8 +2084,8 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                 <circle cx="92" cy="25" r="8" fill="#FEF3C7" />
                 <text x="92" y="29" textAnchor="middle" fontSize="12" fill="#F59E0B" fontWeight="bold">$</text>
                   </svg>
+                </div>
               </div>
-            </div>
 
           <div className="flex items-center justify-center gap-6 mb-12 flex-wrap">
             <span className={`text-base flex-shrink-0 ${billingCycle === 'monthly' ? 'text-gray-900 font-medium' : 'text-gray-500'}`}>Monthly</span>
@@ -1936,11 +2101,11 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                   />
               <span className={`absolute top-1 left-0 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 z-10 flex items-center justify-center ${billingCycle === 'annual' ? 'translate-x-8' : 'translate-x-1'}`}>
                 <span className="w-1.5 h-1.5 rounded-full bg-green-500" aria-hidden />
-                </span>
+                    </span>
             </button>
             <span className={`text-base flex-shrink-0 min-w-[4rem] ${billingCycle === 'annual' ? 'text-gray-900 font-medium' : 'text-gray-500'}`}>Annual</span>
             {billingCycle === 'annual' && <span className="text-sm bg-green-100 text-green-700 px-3 py-1 rounded-full font-medium flex-shrink-0">Save 17%</span>}
-              </div>
+                      </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             {/* Free */}
@@ -1956,7 +2121,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                 <li className="flex items-start"><svg className="w-5 h-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Basic grammar check</li>
               </ul>
               <button onClick={() => onNavigate('signup')} className="w-full py-3 bg-gray-100 hover:bg-gray-200 text-gray-900 font-medium rounded-xl transition-all duration-200 hover:shadow-sm text-base">Get Started Free</button>
-          </div>
+                  </div>
 
             {/* Starter */}
             <div className="bg-white border-2 border-blue-500 rounded-2xl p-8 relative hover:shadow-xl hover:-translate-y-1 transition-all duration-200">
@@ -2019,7 +2184,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                 </svg>
                 </button>
-            </div>
+              </div>
 
             {/* Group of characters - positioned at bottom, hidden on mobile */}
             <div className="hidden lg:flex justify-center mt-10">
@@ -2120,7 +2285,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                   <ellipse cx="4" cy="52" rx="7" ry="8" fill="#D4A574" />
                 </g>
               </svg>
-                      </div>
+            </div>
                   </div>
                 </div>
       </section>
@@ -2138,6 +2303,14 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
 
       {showFakeAnimation && mode === 'humanize' && (
         <AnalysisAnimation isPopup={true} text="Humanizing your text" isComplete={false} />
+      )}
+
+      {showFakeAnimation && mode === 'summarize' && (
+        <AnalysisAnimation isPopup={true} text="Creating your summary" isComplete={false} />
+      )}
+
+      {showFakeAnimation && mode === 'quiz' && (
+        <AnalysisAnimation isPopup={true} text="Generating quiz questions" isComplete={false} />
       )}
 
       {/* Fake Results Modal */}
@@ -2175,11 +2348,11 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                   <svg className="w-4 h-4 text-red-600" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                   </svg>
-                </span>
+                    </span>
                 <div>
                   <p className="text-red-800 font-semibold text-sm">Critical issues detected</p>
                   <p className="text-red-600 text-xs mt-0.5">Structural weaknesses and argument gaps that could significantly affect your grade</p>
-              </div>
+                      </div>
             </div>
 
               <div className="flex items-start p-3.5 bg-amber-50 rounded-xl border border-amber-100">
@@ -2187,7 +2360,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                   <svg className="w-4 h-4 text-amber-600" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                   </svg>
-                    </span>
+                        </span>
                 <div>
                   <p className="text-amber-800 font-semibold text-sm">Several areas need improvement</p>
                   <p className="text-amber-600 text-xs mt-0.5">Grammar, clarity, and tone issues that should be addressed before submission</p>
@@ -2264,7 +2437,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
               </svg>
             </button>
           </div>
-        </div>
+          </div>
       )}
 
       {/* Fake Humanize Results Modal */}
@@ -2274,8 +2447,8 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
             <div className="flex justify-center mb-4">
               <div className="w-16 h-16 bg-violet-100 rounded-full flex items-center justify-center">
                 <span className="text-3xl">✨</span>
-              </div>
-          </div>
+        </div>
+      </div>
 
             <h3 className="text-xl font-bold text-gray-900 text-center mb-2">Text Humanized</h3>
             <p className="text-gray-500 text-center text-sm mb-5">Your text has been transformed into natural human writing</p>
@@ -2302,21 +2475,127 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                 <div>
                   <p className="text-violet-800 font-semibold text-sm">Meaning preserved</p>
                   <p className="text-violet-600 text-xs mt-0.5">All arguments and facts intact — just sounds naturally human</p>
-                </div>
+                  </div>
               </div>
-            </div>
-
+              </div>
+              
             <div className="bg-gray-50 rounded-xl p-3.5 mb-6">
               <p className="text-gray-600 text-sm text-center leading-relaxed">
                 <span className="font-semibold text-gray-800">Sign up to access the full humanizer.</span> Get your rewritten text and use it with all modes and intensity levels.
               </p>
-            </div>
+                </div>
 
             <button 
               onClick={handleContinueToSignup}
               className="w-full py-3.5 bg-violet-600 hover:bg-violet-700 text-white font-semibold rounded-xl transition-all duration-200 hover:shadow-lg flex items-center justify-center"
             >
               Get my humanized text — sign up
+              <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Fake Summary Results Modal */}
+      {showFakeSummaryResults && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl p-6 sm:p-8 max-w-md w-full mx-4 shadow-2xl animate-fade-in">
+            <div className="flex justify-center mb-4">
+              <div className="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center">
+                <span className="text-3xl">📝</span>
+              </div>
+            </div>
+            <h3 className="text-xl font-bold text-gray-900 text-center mb-2">Summary Ready</h3>
+            <p className="text-gray-500 text-center text-sm mb-5">Your document has been condensed into key points</p>
+            <div className="space-y-3 mb-5">
+              <div className="flex items-start p-3.5 bg-teal-50 rounded-xl border border-teal-100">
+                <span className="w-8 h-8 bg-teal-100 rounded-lg flex items-center justify-center mr-3 flex-shrink-0 mt-0.5">
+                  <svg className="w-4 h-4 text-teal-600" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                </span>
+                <div>
+                  <p className="text-teal-800 font-semibold text-sm">Bullet or paragraph format</p>
+                  <p className="text-teal-600 text-xs mt-0.5">Short, medium, or detailed — you choose</p>
+                </div>
+              </div>
+              <div className="flex items-start p-3.5 bg-green-50 rounded-xl border border-green-100">
+                <span className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center mr-3 flex-shrink-0 mt-0.5">
+                  <svg className="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                </span>
+                <div>
+                  <p className="text-green-800 font-semibold text-sm">1,000 words free per month</p>
+                  <p className="text-green-600 text-xs mt-0.5">Perfect for papers, articles, and exam prep</p>
+                </div>
+              </div>
+            </div>
+            <div className="bg-gray-50 rounded-xl p-3.5 mb-6">
+              <p className="text-gray-600 text-sm text-center leading-relaxed">
+                <span className="font-semibold text-gray-800">Sign up to get your full summary.</span> Copy it, share it, or use it in your notes.
+              </p>
+            </div>
+            <button
+              onClick={handleContinueToSignup}
+              className="w-full py-3.5 bg-teal-600 hover:bg-teal-700 text-white font-semibold rounded-xl transition-all duration-200 hover:shadow-lg flex items-center justify-center"
+            >
+              Get my summary — it&apos;s free
+              <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Fake Quiz Results Modal */}
+      {showFakeQuizResults && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl p-6 sm:p-8 max-w-md w-full mx-4 shadow-2xl animate-fade-in">
+            <div className="flex justify-center mb-4">
+              <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center">
+                <span className="text-3xl">🧠</span>
+              </div>
+            </div>
+            <h3 className="text-xl font-bold text-gray-900 text-center mb-2">Quiz Generated</h3>
+            <p className="text-gray-500 text-center text-sm mb-5">We&apos;ve created questions from your content</p>
+            <div className="space-y-3 mb-5">
+              <div className="flex items-start p-3.5 bg-amber-50 rounded-xl border border-amber-100">
+                <span className="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center mr-3 flex-shrink-0 mt-0.5">
+                  <svg className="w-4 h-4 text-amber-600" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                </span>
+                <div>
+                  <p className="text-amber-800 font-semibold text-sm">Multiple choice &amp; true/false</p>
+                  <p className="text-amber-600 text-xs mt-0.5">Mix question types for better retention</p>
+                </div>
+              </div>
+              <div className="flex items-start p-3.5 bg-amber-50 rounded-xl border border-amber-100">
+                <span className="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center mr-3 flex-shrink-0 mt-0.5">
+                  <svg className="w-4 h-4 text-amber-600" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                </span>
+                <div>
+                  <p className="text-amber-800 font-semibold text-sm">Starter or Premium required</p>
+                  <p className="text-amber-600 text-xs mt-0.5">Sign up and upgrade to unlock the Quiz Generator</p>
+                </div>
+              </div>
+            </div>
+            <div className="bg-gray-50 rounded-xl p-3.5 mb-6">
+              <p className="text-gray-600 text-sm text-center leading-relaxed">
+                <span className="font-semibold text-gray-800">Turn any notes into a quiz.</span> Great for exam prep and study sessions.
+              </p>
+            </div>
+            <button
+              onClick={handleContinueToSignup}
+              className="w-full py-3.5 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-xl transition-all duration-200 hover:shadow-lg flex items-center justify-center"
+            >
+              Sign up to unlock Quiz — it&apos;s free
               <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>

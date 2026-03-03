@@ -2464,6 +2464,171 @@ IMPORTANT REQUIREMENTS:
   }
 
   /**
+   * Save quiz to history
+   */
+  async saveQuiz(userId, quiz, sourceText) {
+    try {
+      console.log('Saving quiz to history:', { userId, quizTitle: quiz.title });
+      
+      const { createClient } = require('@supabase/supabase-js');
+      const supabase = createClient(
+        process.env.SUPABASE_URL,
+        process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
+      );
+
+      const quizData = {
+        user_id: userId,
+        title: quiz.title,
+        quiz_type: quiz.quizType,
+        difficulty: quiz.difficulty,
+        question_count: quiz.questions?.length || quiz.questionCount,
+        questions: quiz.questions,
+        source_word_count: quiz.sourceWordCount || sourceText?.trim().split(/\s+/).length || 0,
+        created_at: new Date().toISOString(),
+        expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() // 7 days from now
+      };
+
+      const { data, error } = await supabase
+        .from('quizzes')
+        .insert([quizData])
+        .select();
+
+      if (error) {
+        console.error('Error saving quiz:', error);
+        return null;
+      }
+
+      console.log('Quiz saved successfully:', data[0]?.id);
+      return data[0];
+    } catch (error) {
+      console.error('Database error in saveQuiz:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Get quiz history for a user
+   */
+  async getQuizHistory(userId, limit = 20) {
+    try {
+      const { createClient } = require('@supabase/supabase-js');
+      const supabase = createClient(
+        process.env.SUPABASE_URL,
+        process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
+      );
+
+      const { data, error } = await supabase
+        .from('quizzes')
+        .select('*')
+        .eq('user_id', userId)
+        .gt('expires_at', new Date().toISOString()) // Only get non-expired quizzes
+        .order('created_at', { ascending: false })
+        .limit(limit);
+
+      if (error) {
+        console.error('Error fetching quiz history:', error);
+        throw error;
+      }
+
+      return data || [];
+    } catch (error) {
+      console.error('Database error in getQuizHistory:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get a specific quiz by ID
+   */
+  async getQuizById(userId, quizId) {
+    try {
+      const { createClient } = require('@supabase/supabase-js');
+      const supabase = createClient(
+        process.env.SUPABASE_URL,
+        process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
+      );
+
+      const { data, error } = await supabase
+        .from('quizzes')
+        .select('*')
+        .eq('id', quizId)
+        .eq('user_id', userId)
+        .gt('expires_at', new Date().toISOString())
+        .single();
+
+      if (error) {
+        console.error('Error fetching quiz:', error);
+        return null;
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Database error in getQuizById:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Delete a specific quiz
+   */
+  async deleteQuiz(userId, quizId) {
+    try {
+      const { createClient } = require('@supabase/supabase-js');
+      const supabase = createClient(
+        process.env.SUPABASE_URL,
+        process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
+      );
+
+      const { error } = await supabase
+        .from('quizzes')
+        .delete()
+        .eq('id', quizId)
+        .eq('user_id', userId);
+
+      if (error) {
+        console.error('Error deleting quiz:', error);
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Database error in deleteQuiz:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Clean up expired quizzes (7+ days old)
+   * This should be called periodically (e.g., via a cron job)
+   */
+  async cleanupExpiredQuizzes() {
+    try {
+      const { createClient } = require('@supabase/supabase-js');
+      const supabase = createClient(
+        process.env.SUPABASE_URL,
+        process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
+      );
+
+      const { data, error } = await supabase
+        .from('quizzes')
+        .delete()
+        .lt('expires_at', new Date().toISOString())
+        .select();
+
+      if (error) {
+        console.error('Error cleaning up expired quizzes:', error);
+        return { deleted: 0 };
+      }
+
+      console.log(`Cleaned up ${data?.length || 0} expired quizzes`);
+      return { deleted: data?.length || 0 };
+    } catch (error) {
+      console.error('Database error in cleanupExpiredQuizzes:', error);
+      return { deleted: 0 };
+    }
+  }
+
+  /**
    * Get available analysis types
    */
   getAnalysisTypes() {
@@ -2490,8 +2655,7 @@ IMPORTANT REQUIREMENTS:
       return text;
     }
 
-    // Always use gpt-4.1-mini for humanizer — best balance of quality and speed
-    const selectedModel = 'gpt-4.1-mini';
+    const selectedModel = userPlan === 'premium' ? 'gpt-4.1-mini' : 'gpt-4.1-nano';
     const maxTokens = 8000;
 
     const intensityInstructions = {
@@ -2629,6 +2793,207 @@ INTENSITY LEVEL: ${intensityInstructions[intensity] || intensityInstructions.med
     } catch (error) {
       console.error('OpenAI humanize error:', error);
       throw new Error('Failed to humanize text: ' + error.message);
+    }
+  }
+
+  /**
+   * Summarize text into key points
+   * @param {string} text - The text to summarize
+   * @param {string} style - Summary style: 'bullet', 'paragraph', 'tldr', 'detailed'
+   * @param {number} length - Target length: 'short', 'medium', 'long'
+   * @returns {Object} Summarized content
+   */
+  async summarizeText(text, style = 'bullet', length = 'medium', userPlan = 'free') {
+    if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY === 'your_openai_api_key_here') {
+      console.log('OpenAI API key not configured');
+      throw new Error('OpenAI API key not configured');
+    }
+
+    const selectedModel = userPlan === 'premium' ? 'gpt-4.1-mini' : 'gpt-4.1-nano';
+
+    const lengthInstructions = {
+      short: 'Create a very concise summary (3-5 key points or 50-100 words).',
+      medium: 'Create a balanced summary (5-8 key points or 150-250 words).',
+      long: 'Create a comprehensive summary (8-12 key points or 300-500 words) that captures nuances and supporting details.'
+    };
+
+    const styleInstructions = {
+      bullet: `Format the summary as bullet points. Each bullet should be a complete, standalone insight. Use clear, direct language. Group related points under headers if the content covers multiple topics.`,
+      paragraph: `Write the summary as flowing paragraphs. Start with the main thesis/argument, then cover key supporting points. End with any conclusions or implications.`,
+      tldr: `Create an ultra-concise "TL;DR" summary in 1-3 sentences that captures the absolute essence. Then provide 3-5 "Key Takeaways" as short bullet points.`,
+      detailed: `Create a structured summary with:
+1. **Overview** (2-3 sentences)
+2. **Main Arguments/Points** (organized by theme)
+3. **Key Evidence/Examples** mentioned
+4. **Conclusions/Implications**
+5. **Critical Notes** (any limitations, biases, or gaps)`
+    };
+
+    const systemPrompt = `You are an expert academic summarizer. Your summaries are:
+- Accurate: You never add information not present in the original
+- Clear: You use plain language and avoid jargon unless it's essential
+- Structured: Your summaries are easy to scan and understand
+- Insightful: You identify what matters most, not just what's mentioned first
+
+${lengthInstructions[length] || lengthInstructions.medium}
+
+${styleInstructions[style] || styleInstructions.bullet}
+
+IMPORTANT:
+- Preserve the original meaning accurately
+- Identify the author's main argument or thesis
+- Highlight key evidence, data, or examples
+- Note any conclusions or implications
+- Return ONLY the summary, no meta-commentary like "Here is the summary:"`;
+
+    try {
+      const completion = await this.openai.chat.completions.create({
+        model: selectedModel,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: `Summarize the following text:\n\n${text}` }
+        ],
+        max_tokens: 2000,
+        temperature: 0.3,
+      });
+
+      const summary = completion.choices[0]?.message?.content;
+      if (!summary) {
+        throw new Error('No response from OpenAI');
+      }
+
+      return {
+        summary: summary.trim(),
+        style,
+        length,
+        originalWordCount: text.trim().split(/\s+/).length,
+        summaryWordCount: summary.trim().split(/\s+/).length
+      };
+    } catch (error) {
+      console.error('OpenAI summarize error:', error);
+      throw new Error('Failed to summarize text: ' + error.message);
+    }
+  }
+
+  /**
+   * Generate quiz questions from text
+   * @param {string} text - The text to generate questions from
+   * @param {string} quizType - Quiz type: 'multiple_choice', 'true_false', 'fill_blank', 'mixed'
+   * @param {string} difficulty - Difficulty: 'easy', 'medium', 'hard'
+   * @param {number} questionCount - Number of questions to generate
+   * @returns {Object} Quiz with questions and answers
+   */
+  async generateQuiz(text, quizType = 'mixed', difficulty = 'medium', questionCount = 10, userPlan = 'starter') {
+    if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY === 'your_openai_api_key_here') {
+      console.log('OpenAI API key not configured');
+      throw new Error('OpenAI API key not configured');
+    }
+
+    const selectedModel = userPlan === 'premium' ? 'gpt-4.1-mini' : 'gpt-4.1-nano';
+
+    const difficultyInstructions = {
+      easy: 'Create straightforward questions that test basic recall and comprehension. Focus on main ideas and explicit facts.',
+      medium: 'Create questions that require understanding and application. Include some questions that connect ideas or require inference.',
+      hard: 'Create challenging questions that test deep understanding, analysis, and synthesis. Include questions about implications, comparisons, and critical evaluation.'
+    };
+
+    const typeInstructions = {
+      multiple_choice: `Generate ONLY multiple choice questions. Each question should have:
+- A clear question stem
+- 4 options (A, B, C, D)
+- Only ONE correct answer
+- Plausible distractors (wrong answers that seem reasonable)`,
+      true_false: `Generate ONLY true/false questions. Each statement should:
+- Be clearly true or false (not ambiguous)
+- Test understanding, not trick the reader
+- Cover important concepts from the text`,
+      fill_blank: `Generate ONLY fill-in-the-blank style questions BUT presented as multiple choice. Each question should:
+- Have a sentence with a blank indicated by "___"
+- Provide 4 options (A, B, C, D) for what fills the blank
+- Only ONE correct answer
+- Include plausible wrong options that could fit grammatically`,
+      mixed: `Generate a MIX of question types:
+- About 50% standard multiple choice (4 options each)
+- About 25% true/false
+- About 25% fill-in-the-blank style (with 4 multiple choice options)
+Distribute types throughout the quiz for variety.`
+    };
+
+    const systemPrompt = `You are an expert quiz creator for academic content. Your quizzes are:
+- Educational: Questions reinforce learning and test understanding
+- Fair: Questions are clear and unambiguous
+- Varied: Different cognitive levels (recall, comprehension, application, analysis)
+- Engaging: Questions are interesting and well-crafted
+
+${difficultyInstructions[difficulty] || difficultyInstructions.medium}
+
+${typeInstructions[quizType] || typeInstructions.mixed}
+
+Generate exactly ${questionCount} questions.
+
+IMPORTANT: Return your response as valid JSON in this exact format:
+{
+  "title": "Quiz title based on content",
+  "questions": [
+    {
+      "id": 1,
+      "type": "multiple_choice" | "true_false" | "fill_blank",
+      "question": "The question text (for fill_blank, include ___ where the blank is)",
+      "options": ["A) option1", "B) option2", "C) option3", "D) option4"],
+      "correctAnswer": "A" | "B" | "C" | "D" | "true" | "false",
+      "explanation": "Brief explanation of why this is correct"
+    }
+  ]
+}
+
+CRITICAL RULES:
+- For multiple_choice: options is required, correctAnswer must be "A", "B", "C", or "D"
+- For true_false: options should be omitted, correctAnswer must be "true" or "false"
+- For fill_blank: options is REQUIRED (4 choices for what fills the blank), correctAnswer must be "A", "B", "C", or "D"
+
+DO NOT include any text outside the JSON object.`;
+
+    try {
+      const completion = await this.openai.chat.completions.create({
+        model: selectedModel,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: `Generate a ${difficulty} difficulty quiz with ${questionCount} ${quizType === 'mixed' ? 'mixed-type' : quizType.replace('_', ' ')} questions based on this text:\n\n${text}` }
+        ],
+        max_tokens: 4000,
+        temperature: 0.7,
+      });
+
+      const responseText = completion.choices[0]?.message?.content;
+      if (!responseText) {
+        throw new Error('No response from OpenAI');
+      }
+
+      // Parse the JSON response
+      let quiz;
+      try {
+        // Try to extract JSON if there's extra text
+        const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          quiz = JSON.parse(jsonMatch[0]);
+        } else {
+          quiz = JSON.parse(responseText);
+        }
+      } catch (parseError) {
+        console.error('Failed to parse quiz JSON:', parseError);
+        throw new Error('Failed to parse quiz response');
+      }
+
+      return {
+        ...quiz,
+        quizType,
+        difficulty,
+        questionCount: quiz.questions?.length || questionCount,
+        sourceWordCount: text.trim().split(/\s+/).length
+      };
+    } catch (error) {
+      console.error('OpenAI quiz generation error:', error);
+      throw new Error('Failed to generate quiz: ' + error.message);
     }
   }
 }

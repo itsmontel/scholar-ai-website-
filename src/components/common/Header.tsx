@@ -110,6 +110,40 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
     return 'text-green-600';
   };
 
+  // ── Logged-out (public) header ────────────────────────────────────────────
+  if (!user) {
+    return (
+      <header className="bg-white/95 backdrop-blur-md border-b border-gray-100 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
+          <div className="flex items-center justify-between">
+            <button
+              onClick={() => onNavigate?.('landing')}
+              className="flex items-center space-x-2.5 hover:opacity-80 transition-opacity duration-200"
+            >
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center">
+                <span className="text-white font-bold text-xl">W</span>
+              </div>
+              <span className="text-2xl font-bold text-gray-900">WriteScholar</span>
+            </button>
+
+            <nav className="hidden md:flex items-center space-x-2">
+              <button onClick={() => onNavigate?.('features')} className={`px-4 py-2.5 text-base font-medium rounded-lg hover:bg-gray-50 transition-colors ${currentPage === 'features' ? 'text-blue-600' : 'text-gray-600 hover:text-gray-900'}`}>Features</button>
+              <button onClick={() => onNavigate?.('pricing')} className={`px-4 py-2.5 text-base font-medium rounded-lg hover:bg-gray-50 transition-colors ${currentPage === 'pricing' ? 'text-blue-600' : 'text-gray-600 hover:text-gray-900'}`}>Pricing</button>
+              <button onClick={() => onNavigate?.('blog')} className={`px-4 py-2.5 text-base font-medium rounded-lg hover:bg-gray-50 transition-colors ${currentPage === 'blog' ? 'text-blue-600' : 'text-gray-600 hover:text-gray-900'}`}>Blog</button>
+              <button onClick={() => onNavigate?.('about')} className={`px-4 py-2.5 text-base font-medium rounded-lg hover:bg-gray-50 transition-colors ${currentPage === 'about' ? 'text-blue-600' : 'text-gray-600 hover:text-gray-900'}`}>About</button>
+            </nav>
+
+            <div className="flex items-center space-x-3">
+              <button onClick={() => onNavigate?.('login')} className="hidden sm:inline-flex px-4 py-2.5 text-base text-gray-700 hover:text-gray-900 font-medium rounded-lg hover:bg-gray-50 transition-colors">Log in</button>
+              <button onClick={() => onNavigate?.('signup')} className="inline-flex items-center px-5 py-2.5 bg-gray-900 text-white text-base font-semibold rounded-xl hover:bg-gray-800 hover:shadow-md transition-all duration-200">Get Started</button>
+            </div>
+          </div>
+        </div>
+      </header>
+    );
+  }
+
+  // ── Logged-in header ───────────────────────────────────────────────────────
   return (
     <header className="bg-white/95 backdrop-blur-md border-b border-gray-100 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
@@ -176,6 +210,17 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
               }`}
             >
               Citations
+            </button>
+            <button 
+              onClick={() => onNavigate?.('quiz-history')}
+              className={`px-4 py-2.5 text-base font-medium rounded-xl transition-all duration-200 flex items-center gap-1.5 ${
+                currentPage === 'quiz-history' 
+                  ? 'text-amber-600 bg-amber-50' 
+                  : 'text-amber-600 hover:text-amber-700 hover:bg-amber-50/50'
+              }`}
+            >
+              🧠 Quizzes
+              <span className="px-1.5 py-0.5 text-[10px] font-bold bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-full">PRO</span>
             </button>
             <button 
               onClick={() => onNavigate?.('blog')}
@@ -462,17 +507,28 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
             >
               AI Analysis
             </button>
-            <button 
+            <button
               onClick={() => { onNavigate?.('citation-history'); setIsMobileMenuOpen(false); }}
               className={`w-full text-left px-4 py-3 rounded-xl font-medium transition-all duration-200 ${
-                currentPage === 'citations' 
-                  ? 'text-blue-600 bg-blue-50' 
+                currentPage === 'citations'
+                  ? 'text-blue-600 bg-blue-50'
                   : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
               }`}
             >
               Citations
             </button>
-            <button 
+            <button
+              onClick={() => { onNavigate?.('quiz-history'); setIsMobileMenuOpen(false); }}
+              className={`w-full text-left px-4 py-3 rounded-xl font-medium transition-all duration-200 flex items-center justify-between ${
+                currentPage === 'quiz-history'
+                  ? 'text-amber-600 bg-amber-50'
+                  : 'text-amber-600 hover:text-amber-700 hover:bg-amber-50/50'
+              }`}
+            >
+              <span className="flex items-center gap-2">🧠 Quizzes</span>
+              <span className="px-1.5 py-0.5 text-[10px] font-bold bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-full">PRO</span>
+            </button>
+            <button
               onClick={() => { onNavigate?.('blog'); setIsMobileMenuOpen(false); }}
               className={`w-full text-left px-4 py-3 rounded-xl font-medium transition-all duration-200 ${
                 currentPage === 'blog' 

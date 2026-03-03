@@ -14,6 +14,15 @@ class EmailService {
                           process.env.EMAIL_USER !== 'your_email@gmail.com' &&
                           process.env.EMAIL_PASS !== 'your_app_password';
 
+    console.log('📧 Email Configuration Check:');
+    console.log(`   HOST: ${process.env.EMAIL_HOST || 'NOT SET'}`);
+    console.log(`   PORT: ${process.env.EMAIL_PORT || '587 (default)'}`);
+    console.log(`   USER: ${process.env.EMAIL_USER ? '*** (hidden)' : 'NOT SET'}`);
+    console.log(`   PASS: ${process.env.EMAIL_PASS ? '****' : 'NOT SET'}`);
+    console.log(`   FROM: ${process.env.EMAIL_FROM || (process.env.EMAIL_USER ? '*** (hidden)' : 'NOT SET')}`);
+    console.log(`   REPLY_TO: ${process.env.EMAIL_REPLY_TO || 'support@writescholar.com'}`);
+    console.log(`   Valid Config: ${hasValidConfig ? 'YES' : 'NO'}`);
+
     if (hasValidConfig) {
       this.transporter = nodemailer.createTransport({
         host: process.env.EMAIL_HOST,
@@ -29,7 +38,9 @@ class EmailService {
       this.transporter.verify((error, success) => {
         if (error) {
           console.log('❌ Email service configuration error:', error.message);
+          console.log('   Full error:', error);
           console.log('📧 Email verification links will be logged to console instead');
+          this.transporter = null; // Disable if verification fails
         } else {
           console.log('✅ Email service is ready to send messages');
         }
@@ -42,11 +53,13 @@ class EmailService {
   }
 
   async sendVerificationEmail(email, verificationToken) {
+    console.log(`📧 Attempting to send verification email to: ${email}`);
+    
     if (!this.transporter) {
       const verificationUrl = `${process.env.BACKEND_URL || 'http://localhost:3001'}/api/auth/verify-email?token=${verificationToken}`;
       
       console.log('\n' + '='.repeat(80));
-      console.log('📧 EMAIL VERIFICATION (Development Mode)');
+      console.log('📧 EMAIL VERIFICATION (Development Mode - No transporter)');
       console.log('='.repeat(80));
       console.log(`📬 To: ${email}`);
       console.log(`🔗 Verification Link: ${verificationUrl}`);
@@ -61,23 +74,27 @@ class EmailService {
 
     try {
       const verificationUrl = `${process.env.BACKEND_URL || 'http://localhost:3001'}/api/auth/verify-email?token=${verificationToken}`;
+      console.log(`📧 Verification URL: ${verificationUrl}`);
       
+      const fromAddress = process.env.EMAIL_FROM || process.env.EMAIL_USER;
+      const replyToAddress = process.env.EMAIL_REPLY_TO || 'support@writescholar.com';
       const mailOptions = {
-        from: `"WriteScholar" <${process.env.EMAIL_FROM || process.env.EMAIL_USER}>`,
+        from: `"WriteScholar" <${fromAddress}>`,
         to: email,
+        replyTo: replyToAddress,
         subject: 'Verify Your WriteScholar Account',
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center;">
               <h1 style="color: white; margin: 0; font-size: 28px;">WriteScholar</h1>
-              <p style="color: white; margin: 10px 0 0 0; font-size: 16px;">Academic Writing Assistant</p>
+              <p style="color: white; margin: 10px 0 0 0; font-size: 16px;">AI Toolkit for Students</p>
             </div>
             
             <div style="padding: 30px; background: #f8f9fa;">
               <h2 style="color: #333; margin-bottom: 20px;">Welcome to WriteScholar!</h2>
               
               <p style="color: #666; line-height: 1.6; margin-bottom: 25px;">
-                Thank you for signing up for WriteScholar. To complete your registration and start using our AI-powered academic writing assistant, please verify your email address by clicking the button below.
+                Thank you for signing up for WriteScholar. To complete your registration and start using our AI toolkit—essay feedback, citation finder, summarizer, quiz generator, humanizer, and more—please verify your email address by clicking the button below.
               </p>
               
               <div style="text-align: center; margin: 30px 0;">
@@ -108,17 +125,26 @@ class EmailService {
             
             <div style="background: #333; color: white; padding: 20px; text-align: center; font-size: 14px;">
               <p style="margin: 0;">© 2026 WriteScholar. All rights reserved.</p>
-              <p style="margin: 5px 0 0 0;">Enhancing academic writing with AI</p>
+              <p style="margin: 5px 0 0 0;">Your AI toolkit for academic success</p>
             </div>
           </div>
         `
       };
 
+      console.log(`📧 Sending email from: ${process.env.EMAIL_FROM ? `WriteScholar <${fromAddress}>` : '*** (hidden)'}`);
       const result = await this.transporter.sendMail(mailOptions);
-      console.log('✅ Verification email sent to:', email);
+      console.log('✅ Verification email sent successfully!');
+      console.log(`   📬 To: ${email}`);
+      console.log(`   📨 Message ID: ${result.messageId}`);
       return { success: true, messageId: result.messageId };
     } catch (error) {
-      console.error('❌ Failed to send verification email:', error);
+      console.error('❌ Failed to send verification email:');
+      console.error(`   Error: ${error.message}`);
+      console.error(`   Code: ${error.code || 'N/A'}`);
+      console.error(`   Response: ${error.response || 'N/A'}`);
+      if (error.responseCode) {
+        console.error(`   Response Code: ${error.responseCode}`);
+      }
       return { success: false, error: error.message };
     }
   }
@@ -143,9 +169,12 @@ class EmailService {
     try {
       const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/reset-password?token=${resetToken}`;
       
+      const fromAddress = process.env.EMAIL_FROM || process.env.EMAIL_USER;
+      const replyToAddress = process.env.EMAIL_REPLY_TO || 'support@writescholar.com';
       const mailOptions = {
-        from: `"WriteScholar" <${process.env.EMAIL_FROM || process.env.EMAIL_USER}>`,
+        from: `"WriteScholar" <${fromAddress}>`,
         to: email,
+        replyTo: replyToAddress,
         subject: 'Reset Your WriteScholar Password',
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -211,32 +240,36 @@ class EmailService {
     }
 
     try {
+      const fromAddress = process.env.EMAIL_FROM || process.env.EMAIL_USER;
+      const replyToAddress = process.env.EMAIL_REPLY_TO || 'support@writescholar.com';
       const mailOptions = {
-        from: `"WriteScholar" <${process.env.EMAIL_FROM || process.env.EMAIL_USER}>`,
+        from: `"WriteScholar" <${fromAddress}>`,
         to: email,
+        replyTo: replyToAddress,
         subject: 'Welcome to WriteScholar - Your Account is Verified!',
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center;">
               <h1 style="color: white; margin: 0; font-size: 28px;">WriteScholar</h1>
-              <p style="color: white; margin: 10px 0 0 0; font-size: 16px;">Welcome to the Future of Academic Writing</p>
+              <p style="color: white; margin: 10px 0 0 0; font-size: 16px;">AI Toolkit for Students</p>
             </div>
             
             <div style="padding: 30px; background: #f8f9fa;">
               <h2 style="color: #333; margin-bottom: 20px;">Welcome to WriteScholar!</h2>
               
               <p style="color: #666; line-height: 1.6; margin-bottom: 25px;">
-                Congratulations! Your WriteScholar account has been successfully verified. You're now ready to enhance your academic writing with our AI-powered analysis tools.
+                Congratulations! Your WriteScholar account has been successfully verified. You're now ready to use our full AI toolkit for academic success.
               </p>
               
               <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #667eea;">
                 <h3 style="color: #333; margin-top: 0;">What you can do now:</h3>
                 <ul style="color: #666; line-height: 1.8;">
-                  <li>Upload your research papers and essays</li>
-                  <li>Get AI-powered feedback on structure and clarity</li>
-                  <li>Check citations and formatting</li>
-                  <li>Improve your academic writing style</li>
-                  <li>Access detailed analysis reports</li>
+                  <li>Get essay feedback and writing analysis</li>
+                  <li>Find and format citations (APA, MLA, Chicago)</li>
+                  <li>Summarize papers and articles</li>
+                  <li>Generate quizzes from any text</li>
+                  <li>Humanize AI-written text</li>
+                  <li>Access your dashboard and all tools</li>
                 </ul>
               </div>
               
@@ -249,18 +282,18 @@ class EmailService {
                           border-radius: 8px; 
                           font-weight: bold; 
                           display: inline-block;">
-                  Start Writing Better
+                  Go to Dashboard
                 </a>
               </div>
               
               <p style="color: #999; font-size: 14px; margin-top: 30px;">
-                If you have any questions, feel free to reach out to our support team.
+                If you have any questions, reply to this email or contact support@writescholar.com.
               </p>
             </div>
             
             <div style="background: #333; color: white; padding: 20px; text-align: center; font-size: 14px;">
               <p style="margin: 0;">© 2026 WriteScholar. All rights reserved.</p>
-              <p style="margin: 5px 0 0 0;">Enhancing academic writing with AI</p>
+              <p style="margin: 5px 0 0 0;">Your AI toolkit for academic success</p>
             </div>
           </div>
         `

@@ -14,6 +14,9 @@ EMAIL_HOST=smtp.gmail.com
 EMAIL_PORT=587
 EMAIL_USER=your_actual_email@gmail.com
 EMAIL_PASS=your_16_character_app_password
+# Optional: address shown as "From" (e.g. noreply@writescholar.com).
+# With Gmail SMTP this only works if you use Google Workspace for your domain.
+EMAIL_FROM=noreply@writescholar.com
 ```
 
 ## Option 2: SendGrid (Recommended for Production)
