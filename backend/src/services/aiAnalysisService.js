@@ -2949,12 +2949,12 @@ INTENSITY LEVEL: ${intensityInstructions[intensity] || intensityInstructions.med
       bullet: `Format the summary as bullet points. Each bullet should be a complete, standalone insight. Use clear, direct language. Group related points under headers if the content covers multiple topics.`,
       paragraph: `Write the summary as flowing paragraphs. Start with the main thesis/argument, then cover key supporting points. End with any conclusions or implications.`,
       tldr: `Create an ultra-concise "TL;DR" summary in 1-3 sentences that captures the absolute essence. Then provide 3-5 "Key Takeaways" as short bullet points.`,
-      detailed: `Create a structured summary with:
-1. **Overview** (2-3 sentences)
-2. **Main Arguments/Points** (organized by theme)
-3. **Key Evidence/Examples** mentioned
-4. **Conclusions/Implications**
-5. **Critical Notes** (any limitations, biases, or gaps)`
+      detailed: `Create a structured summary with plain text section headers (no markdown). Use:
+1. Overview (2-3 sentences)
+2. Main Arguments/Points (organized by theme)
+3. Key Evidence/Examples mentioned
+4. Conclusions/Implications
+5. Critical Notes (any limitations, biases, or gaps)`
     };
 
     const systemPrompt = `You are an expert academic summarizer. Your summaries are:
@@ -2972,7 +2972,8 @@ IMPORTANT:
 - Identify the author's main argument or thesis
 - Highlight key evidence, data, or examples
 - Note any conclusions or implications
-- Return ONLY the summary, no meta-commentary like "Here is the summary:"`;
+- Return ONLY the summary, no meta-commentary like "Here is the summary:"
+- Do NOT use markdown formatting: no asterisks for bold (** or *), no underscores for emphasis. Output plain text only.`;
 
     try {
       const completion = await this.openai.chat.completions.create({
@@ -2985,13 +2986,19 @@ IMPORTANT:
         temperature: 0.3,
       });
 
-      const summary = completion.choices[0]?.message?.content;
+      let summary = completion.choices[0]?.message?.content;
       if (!summary) {
         throw new Error('No response from OpenAI');
       }
+      // Strip markdown bold/emphasis so **word** or *word* becomes plain "word"
+      summary = summary.trim()
+        .replace(/\*\*([^*]+)\*\*/g, '$1')
+        .replace(/\*([^*]+)\*/g, '$1')
+        .replace(/__([^_]+)__/g, '$1')
+        .replace(/_([^_]+)_/g, '$1');
 
       return {
-        summary: summary.trim(),
+        summary,
         style,
         length,
         originalWordCount: text.trim().split(/\s+/).length,
