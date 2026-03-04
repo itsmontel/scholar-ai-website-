@@ -486,6 +486,251 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
         </>
       );
 
+    case 'students-who-get-as-dont-work-harder':
+      return (
+        <>
+          <p className={p}>
+            You already know someone like this.
+          </p>
+          <p className={p}>
+            They show up to the same lectures. They have the same 24 hours in a day. They&apos;re not sleeping less than you, skipping social events, or drinking five espressos a night in the library.
+          </p>
+          <p className={p}>
+            But somehow, come results day, they&apos;re the ones walking away with the grade that makes everyone else ask the same question: <em>How?</em>
+          </p>
+          <p className={p}>
+            Here&apos;s what nobody tells you about the students who consistently perform well. It&apos;s not intelligence. It&apos;s not luck. It&apos;s not even hard work in the traditional sense.
+          </p>
+          <p className={p}>
+            It&apos;s leverage.
+          </p>
+
+          <IllustrationWrapper bgColor="bg-indigo-50">
+            <svg viewBox="0 0 320 160" fill="none" className="w-full max-w-sm h-auto">
+              {/* Podium */}
+              <rect x="100" y="100" width="50" height="50" rx="3" fill="#6366F1" />
+              <rect x="60" y="115" width="45" height="35" rx="3" fill="#A5B4FC" />
+              <rect x="145" y="120" width="45" height="30" rx="3" fill="#C7D2FE" />
+              {/* Person 1 (winner) */}
+              <circle cx="125" cy="78" r="14" fill="#FCD9B6" />
+              <path d="M108 70 Q108 58 125 60 Q142 58 142 70" fill="#1F2937" />
+              <circle cx="119" cy="76" r="2" fill="#1F2937" />
+              <circle cx="131" cy="76" r="2" fill="#1F2937" />
+              <path d="M120 85 Q125 89 130 85" stroke="#1F2937" strokeWidth="1.5" fill="none" strokeLinecap="round" />
+              {/* Trophy */}
+              <rect x="119" y="56" width="12" height="12" rx="2" fill="#FCD34D" stroke="#F59E0B" strokeWidth="1.5" />
+              <text x="125" y="66" textAnchor="middle" fontSize="8" fill="#F59E0B" fontWeight="bold">A</text>
+              {/* Person 2 (left) */}
+              <circle cx="82" cy="90" r="12" fill="#FCD9B6" />
+              <path d="M68 83 Q68 73 82 74 Q96 73 96 83" fill="#4B5563" />
+              <circle cx="77" cy="88" r="1.5" fill="#1F2937" />
+              <circle cx="87" cy="88" r="1.5" fill="#1F2937" />
+              {/* Person 3 (right) */}
+              <circle cx="167" cy="93" r="12" fill="#FCD9B6" />
+              <path d="M153 86 Q153 76 167 77 Q181 76 181 86" fill="#6B7280" />
+              <circle cx="162" cy="91" r="1.5" fill="#1F2937" />
+              <circle cx="172" cy="91" r="1.5" fill="#1F2937" />
+              {/* Sparkles */}
+              <circle cx="250" cy="40" r="5" fill="#FCD34D" />
+              <circle cx="70" cy="40" r="4" fill="#10B981" />
+              <circle cx="260" cy="100" r="4" fill="#EC4899" />
+            </svg>
+          </IllustrationWrapper>
+
+          <h2 className={h2}>I. Effort is not the same as output</h2>
+          <p className={p}>
+            Take a look at this quote:
+          </p>
+          <blockquote className="border-l-4 border-indigo-400 pl-4 my-6 italic text-gray-700">
+            &ldquo;Insanity is doing the same thing over and over and expecting different results.&rdquo;
+            <br /><span className="text-sm font-medium text-gray-500 not-italic">Albert Einstein</span>
+          </blockquote>
+          <p className={p}>
+            Most students who struggle aren&apos;t struggling because they don&apos;t try. They&apos;re struggling because they&apos;re trying the wrong things.
+          </p>
+          <p className={p}>
+            Rereading your notes for the fourth time the night before an exam is effort. Nobody would argue that. But it produces almost nothing in terms of actual memory retention. Neuroscience has known this for decades. Yet here we are, still doing it.
+          </p>
+          <p className={p}>
+            The students who consistently perform well have figured something out. Output is what matters, not hours logged. And they protect their output obsessively.
+          </p>
+
+          <h2 className={h2}>II. The three types of students</h2>
+          <p className={p}>
+            Every lecture hall is quietly divided into three groups. Nobody talks about it, but it&apos;s there.
+          </p>
+
+          <IllustrationWrapper bgColor="bg-blue-50">
+            <svg viewBox="0 0 320 160" fill="none" className="w-full max-w-sm h-auto">
+              {/* Three columns */}
+              {/* Passive */}
+              <rect x="20" y="30" width="80" height="110" rx="6" fill="#F1F5F9" stroke="#CBD5E1" strokeWidth="2" />
+              <text x="60" y="52" textAnchor="middle" fontSize="9" fill="#64748B" fontWeight="bold">PASSIVE</text>
+              <circle cx="60" cy="75" r="14" fill="#FCD9B6" />
+              <path d="M48 68 Q48 59 60 61 Q72 59 72 68" fill="#94A3B8" />
+              <circle cx="56" cy="74" r="1.5" fill="#1F2937" />
+              <circle cx="64" cy="74" r="1.5" fill="#1F2937" />
+              <path d="M56 82 Q60 84 64 82" stroke="#1F2937" strokeWidth="1.5" fill="none" strokeLinecap="round" />
+              <rect x="30" y="100" width="60" height="6" rx="1" fill="#E2E8F0" />
+              <rect x="30" y="112" width="50" height="6" rx="1" fill="#E2E8F0" />
+              <rect x="30" y="124" width="55" height="6" rx="1" fill="#E2E8F0" />
+              {/* Stressed */}
+              <rect x="120" y="30" width="80" height="110" rx="6" fill="#FEF2F2" stroke="#FECACA" strokeWidth="2" />
+              <text x="160" y="52" textAnchor="middle" fontSize="9" fill="#EF4444" fontWeight="bold">STRESSED</text>
+              <circle cx="160" cy="75" r="14" fill="#FCD9B6" />
+              <path d="M148 68 Q148 59 160 61 Q172 59 172 68" fill="#374151" />
+              <circle cx="156" cy="74" r="1.5" fill="#1F2937" />
+              <circle cx="164" cy="74" r="1.5" fill="#1F2937" />
+              <path d="M156 83 Q160 80 164 83" stroke="#1F2937" strokeWidth="1.5" fill="none" strokeLinecap="round" />
+              <rect x="130" y="100" width="60" height="5" rx="1" fill="#FECACA" />
+              <rect x="130" y="110" width="55" height="5" rx="1" fill="#FECACA" />
+              <rect x="130" y="120" width="60" height="5" rx="1" fill="#FECACA" />
+              <rect x="130" y="130" width="40" height="5" rx="1" fill="#FECACA" />
+              {/* Leverage */}
+              <rect x="220" y="30" width="80" height="110" rx="6" fill="#F0FDF4" stroke="#86EFAC" strokeWidth="2" />
+              <text x="260" y="52" textAnchor="middle" fontSize="9" fill="#16A34A" fontWeight="bold">LEVERAGE</text>
+              <circle cx="260" cy="75" r="14" fill="#FCD9B6" />
+              <path d="M248 68 Q248 59 260 61 Q272 59 272 68" fill="#1F2937" />
+              <circle cx="256" cy="74" r="1.5" fill="#1F2937" />
+              <circle cx="264" cy="74" r="1.5" fill="#1F2937" />
+              <path d="M256 82 Q260 86 264 82" stroke="#1F2937" strokeWidth="1.5" fill="none" strokeLinecap="round" />
+              <rect x="230" y="100" width="60" height="6" rx="3" fill="#86EFAC" />
+              <rect x="230" y="112" width="50" height="6" rx="3" fill="#86EFAC" />
+              <circle cx="300" cy="60" r="12" fill="#FEF3C7" stroke="#FCD34D" strokeWidth="2" />
+              <text x="300" y="65" textAnchor="middle" fontSize="14" fill="#F59E0B" fontWeight="bold">A</text>
+            </svg>
+          </IllustrationWrapper>
+
+          <h3 className={h3}>Group One: The Passive Students</h3>
+          <p className={p}>
+            They attend class, take notes, reread those notes, and hope for the best. They work hard in the traditional sense. But their study method is passive. They&apos;re consumers of information, not processors of it.
+          </p>
+          <h3 className={h3}>Group Two: The Stressed Students</h3>
+          <p className={p}>
+            They do everything. Every past paper, every extra reading, every highlighter colour. They&apos;re exhausted. They&apos;re anxious. And paradoxically, the volume of work creates so much noise that the important concepts get buried.
+          </p>
+          <h3 className={h3}>Group Three: The Leverage Students</h3>
+          <p className={p}>
+            These are the ones getting the A&apos;s. They spend less time absorbing content and more time testing themselves on it. They summarise before they reread. They quiz themselves before they feel ready. They treat their study time like a professional treats their working hours, with intention, systems, and tools.
+          </p>
+          <p className={p}>
+            The gap between Group One and Group Three isn&apos;t talent. It&apos;s method.
+          </p>
+
+          <h2 className={h2}>III. Why testing yourself is the cheat code nobody uses</h2>
+          <p className={p}>
+            There&apos;s a concept in cognitive psychology called the testing effect.
+          </p>
+          <p className={p}>
+            The short version: retrieving information from your memory strengthens that memory far more powerfully than simply reading it again.
+          </p>
+          <p className={p}>
+            In other words, a student who reads their notes for one hour is not as prepared as a student who spends 30 minutes reading and 30 minutes answering questions about what they just read.
+          </p>
+          <p className={p}>
+            Not convinced? Ask yourself the last time you genuinely recalled information you had only read passively. Now think about something you were tested on years ago that you can still remember today. That&apos;s the testing effect in action.
+          </p>
+          <p className={p}>
+            The problem is that creating your own quiz questions is tedious. Writing out flashcards by hand is time-consuming. By the time you&apos;ve spent an hour making the materials, you&apos;ve got no energy left to actually use them.
+          </p>
+          <p className={p}>
+            This is exactly the problem tools like WriteScholar&apos;s <a href="/tools/quiz-generator" onClick={handleNavigate('quiz-generator')} className={internalLink}>Quiz Generator</a> were built to solve. Paste your lecture notes, textbook chapter, or article, and it generates a full quiz in seconds. Multiple choice or true/false, you choose. What used to take an hour of prep now takes thirty seconds. The only thing left to do is actually learn.
+          </p>
+          <p className={p}>
+            The same goes for flashcards. The <a href="/tools/flashcard-generator" onClick={handleNavigate('flashcard-generator')} className={internalLink}>Flashcard Generator</a> turns any text into a ready-to-use deck. No formatting. No copying. Just your material, instantly testable.
+          </p>
+
+          <QuizIllustration />
+
+          <h2 className={h2}>IV. The compound interest of good study habits</h2>
+          <p className={p}>
+            Jim Rohn once said:
+          </p>
+          <blockquote className="border-l-4 border-indigo-400 pl-4 my-6 italic text-gray-700">
+            &ldquo;Success is nothing more than a few simple disciplines, practised every day.&rdquo;
+            <br /><span className="text-sm font-medium text-gray-500 not-italic">Jim Rohn</span>
+          </blockquote>
+          <p className={p}>
+            Studying is no different. The students who ace their finals aren&apos;t doing anything dramatically different on results day. They&apos;re simply the product of dozens of small, consistent study sessions that compound over time.
+          </p>
+          <p className={p}>
+            One quiz session the week after a lecture isn&apos;t enough. But one session after the lecture, another three days later, and one before the exam creates spaced repetition. That&apos;s the difference between cramming and actually knowing the material.
+          </p>
+          <p className={p}>
+            The Leverage Students understand this. And the tools they use are built around it. WriteScholar saves every quiz, flashcard deck, and crossword you generate, so you can come back to them as many times as you need throughout the semester.
+          </p>
+
+          <h2 className={h2}>V. Writing well is not optional</h2>
+          <p className={p}>
+            Here&apos;s something academic institutions rarely say out loud: your grade is rarely just about what you know. It&apos;s almost always about how well you communicate what you know.
+          </p>
+          <p className={p}>
+            Two students can understand the same concept equally well. One writes a clear, well-structured argument. One writes everything they know in the order they thought of it. One gets a First. One doesn&apos;t.
+          </p>
+          <p className={p}>
+            This is where most students lose marks they&apos;ve already earned. Not because they don&apos;t understand the material, but because the essay doesn&apos;t show it.
+          </p>
+          <p className={p}>
+            If you&apos;ve ever submitted something and thought, <em>I knew all of that, I just didn&apos;t communicate it well</em>, you&apos;re not alone. That&apos;s the majority of students.
+          </p>
+          <p className={p}>
+            WriteScholar&apos;s <a href="/tools/analyze" onClick={handleNavigate('analyze')} className={internalLink}>Essay Analyser</a> is built specifically for this. It reads your essay the way a professor does, looking at structure, argument quality, clarity, and academic style. Then it gives you detailed feedback before you submit. Not after. Before. That&apos;s the difference between knowing you could have done better in hindsight and actually doing better.
+          </p>
+
+          <WritingIllustration />
+
+          <h2 className={h2}>VI. Stop wasting time on the mechanics</h2>
+          <p className={p}>
+            Think about how many hours you&apos;ve spent this term on things that are not actually studying. Formatting references. Trying to remember whether APA puts the year before or after the author&apos;s name. Rewriting a paragraph because you&apos;re not sure if it sounds academic enough. Googling how to cite a website in Chicago style at 11pm.
+          </p>
+          <p className={p}>
+            These are not learning activities. They&apos;re administrative overhead.
+          </p>
+          <p className={p}>
+            The Leverage Students eliminate these tasks as quickly as possible. A <a href="/tools/citation-generator" onClick={handleNavigate('citation-generator-tool')} className={internalLink}>Citation Generator</a> formats your references in APA, MLA, Chicago, or Harvard in seconds. An <a href="/tools/summarizer" onClick={handleNavigate('summarizer')} className={internalLink}>AI Summariser</a> condenses a 40-page paper into the key points you actually need before deciding if it&apos;s worth reading in full.
+          </p>
+          <p className={p}>
+            These aren&apos;t shortcuts to understanding. They&apos;re shortcuts to the parts that don&apos;t require your brain. Free up your mental energy for the things that actually improve your grade.
+          </p>
+
+          <h2 className={h2}>VII. The student you want to be already exists</h2>
+          <p className={p}>
+            Here&apos;s the uncomfortable truth. The version of you that consistently performs, that walks out of exams knowing the material, that submits work they&apos;re actually proud of, already exists. You&apos;re not waiting for more intelligence. You&apos;re not waiting to become a different person.
+          </p>
+          <p className={p}>
+            You&apos;re waiting for better habits and better tools.
+          </p>
+          <blockquote className="border-l-4 border-indigo-400 pl-4 my-6 italic text-gray-700">
+            &ldquo;We are what we repeatedly do. Excellence, then, is not an act, but a habit.&rdquo;
+            <br /><span className="text-sm font-medium text-gray-500 not-italic">Aristotle</span>
+          </blockquote>
+          <p className={p}>
+            The A-grade students aren&apos;t smarter than you. They&apos;ve simply built systems that make excellent output inevitable. Build your system. Use the tools available to you. Test yourself obsessively. Write clearly. Eliminate the administrative overhead.
+          </p>
+          <p className={p}>
+            Then watch what happens to your results.
+          </p>
+
+          <h2 className={h2}>Frequently asked questions</h2>
+          <p className={faqQuestion}>What is the testing effect?</p>
+          <p className={p}>
+            The testing effect is a well-established finding in cognitive psychology: actively retrieving information from memory strengthens that memory far more than passively reviewing it. Every time you quiz yourself, you make the information harder to forget.
+          </p>
+          <p className={faqQuestion}>How is using AI tools different from cheating?</p>
+          <p className={p}>
+            Using AI tools to create study materials, format citations, or get essay feedback is no different from using a tutor, a study guide, or a grammar handbook. The tools help you learn and communicate better. You are still doing the thinking, writing, and revising yourself.
+          </p>
+          <p className={faqQuestion}>How do I start using WriteScholar&apos;s study tools?</p>
+          <p className={p}>
+            Create a free account at <a href="/signup" onClick={handleNavigate('signup')} className={internalLink}>writescholar.com</a>, then head to the <a href="/tools/quiz-generator" onClick={handleNavigate('quiz-generator')} className={internalLink}>Quiz Generator</a>, <a href="/tools/flashcard-generator" onClick={handleNavigate('flashcard-generator')} className={internalLink}>Flashcard Generator</a>, or any other tool. Paste in your study material, choose your settings, and generate in seconds. No credit card required.
+          </p>
+
+          <a href="/signup" onClick={handleNavigate('signup')} className={ctaButton}>
+            Try WriteScholar Free →
+          </a>
+        </>
+      );
+
     case 'free-writing-tools-every-student-needs':
       return (
         <>

@@ -14,6 +14,14 @@ export interface BlogPostMeta {
 
 export const blogPostList: BlogPostMeta[] = [
   {
+    slug: 'students-who-get-as-dont-work-harder',
+    title: "The Students Who Always Get A's Don't Work Harder Than You. Here's What They Actually Do.",
+    description: "It's not intelligence, luck, or staying up later. The students who consistently get top grades have figured out one thing: leverage. Here's the method behind their results.",
+    date: '2026-03-04',
+    author: 'WriteScholar Team',
+    readTime: '8 min read'
+  },
+  {
     slug: 'ai-study-tools-flashcards-quizzes-crosswords',
     title: 'AI Study Tools: How Flashcards, Quizzes & Crosswords Transform Learning',
     description: 'Discover how AI-powered study tools like flashcards, quizzes, and crosswords can boost retention and make studying more effective. Learn why WriteScholar is the best choice for students.',
