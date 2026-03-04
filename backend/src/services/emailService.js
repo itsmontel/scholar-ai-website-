@@ -285,6 +285,25 @@ class EmailService {
                   Go to Dashboard
                 </a>
               </div>
+
+              <div style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); padding: 24px; border-radius: 12px; margin: 28px 0; border: 1px solid #bae6fd;">
+                <h3 style="color: #0c4a6e; margin-top: 0; margin-bottom: 12px;">Your free gift: Ultimate Study Tips Guide</h3>
+                <p style="color: #0369a1; line-height: 1.6; margin-bottom: 16px;">
+                  As a thank you for joining, we've put together a 10–12 page PDF guide with our best study tips: active recall, spaced repetition, and how to use WriteScholar's tools to get better grades.
+                </p>
+                <div style="text-align: center;">
+                  <a href="${(process.env.FRONTEND_URL || 'http://localhost:5173').replace(/\/$/, '')}/downloads/writescholar-ultimate-study-tips-guide.pdf"
+                     style="background: #0284c7;
+                            color: white;
+                            padding: 12px 24px;
+                            text-decoration: none;
+                            border-radius: 8px;
+                            font-weight: bold;
+                            display: inline-block;">
+                    Download free PDF →
+                  </a>
+                </div>
+              </div>
               
               <p style="color: #999; font-size: 14px; margin-top: 30px;">
                 If you have any questions, reply to this email or contact support@writescholar.com.

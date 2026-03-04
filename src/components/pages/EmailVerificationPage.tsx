@@ -126,8 +126,11 @@ const EmailVerificationPage = ({ onNavigate }: EmailVerificationPageProps) => {
             Email Verified Successfully!
           </h1>
           
-          <p className="text-gray-600 mb-6">
+          <p className="text-gray-600 mb-2">
             Your email has been successfully verified. Welcome to WriteScholar!
+          </p>
+          <p className="text-gray-500 text-sm mb-6">
+            We&apos;ve sent you a welcome email with a link to your free <strong>Ultimate Study Tips Guide</strong> (PDF).
           </p>
 
           {/* Countdown */}

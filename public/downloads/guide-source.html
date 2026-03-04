@@ -1,0 +1,1291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WriteScholar Ultimate Study Tips Guide</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      color: #1e293b;
+      background: white;
+      font-size: 13px;
+      line-height: 1.65;
+    }
+
+    /* ---- PAGE SETUP ---- */
+    .page {
+      width: 210mm;
+      min-height: 297mm;
+      margin: 0 auto;
+      background: white;
+      position: relative;
+      overflow: hidden;
+      page-break-after: always;
+    }
+
+    /* ---- COVER ---- */
+    .cover {
+      background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #2563eb 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 297mm;
+      padding: 40px;
+      text-align: center;
+    }
+
+    .cover-logo {
+      width: 56px;
+      height: 56px;
+      background: white;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+      font-size: 26px;
+      font-weight: 900;
+      color: #4f46e5;
+    }
+
+    .cover-brand {
+      color: rgba(255,255,255,0.9);
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 48px;
+    }
+
+    .cover-tag {
+      background: rgba(255,255,255,0.15);
+      color: white;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 6px 16px;
+      border-radius: 99px;
+      display: inline-block;
+      margin-bottom: 24px;
+    }
+
+    .cover h1 {
+      font-size: 42px;
+      font-weight: 900;
+      color: white;
+      line-height: 1.15;
+      margin-bottom: 20px;
+      max-width: 480px;
+    }
+
+    .cover h1 span { color: #fde68a; }
+
+    .cover-sub {
+      color: rgba(255,255,255,0.8);
+      font-size: 15px;
+      max-width: 380px;
+      margin-bottom: 56px;
+      line-height: 1.7;
+    }
+
+    .cover-pills {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 60px;
+    }
+
+    .cover-pill {
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.3);
+      color: white;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 7px 16px;
+      border-radius: 99px;
+    }
+
+    .cover-footer {
+      position: absolute;
+      bottom: 32px;
+      left: 0; right: 0;
+      text-align: center;
+      color: rgba(255,255,255,0.5);
+      font-size: 11px;
+    }
+
+    .cover-wave {
+      position: absolute;
+      bottom: 0;
+      left: 0; right: 0;
+    }
+
+    /* ---- CONTENT PAGES ---- */
+    .content-page {
+      padding: 0;
+      min-height: 297mm;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .page-header {
+      background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+      padding: 18px 36px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .page-header-brand {
+      color: white;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    .page-header-chapter {
+      color: rgba(255,255,255,0.7);
+      font-size: 11px;
+      font-weight: 500;
+    }
+
+    .page-body {
+      flex: 1;
+      padding: 32px 40px 28px;
+    }
+
+    .chapter-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #6366f1;
+      margin-bottom: 8px;
+    }
+
+    h2.chapter-title {
+      font-size: 26px;
+      font-weight: 900;
+      color: #1e293b;
+      line-height: 1.2;
+      margin-bottom: 6px;
+    }
+
+    h2.chapter-title span { color: #6366f1; }
+
+    .title-underline {
+      width: 48px;
+      height: 4px;
+      background: linear-gradient(90deg, #6366f1, #7c3aed);
+      border-radius: 2px;
+      margin-bottom: 20px;
+    }
+
+    p { margin-bottom: 12px; color: #374151; font-size: 13px; }
+    p strong { color: #1e293b; }
+
+    h3 {
+      font-size: 15px;
+      font-weight: 800;
+      color: #1e293b;
+      margin-top: 20px;
+      margin-bottom: 8px;
+    }
+
+    /* ---- CALLOUT BOXES ---- */
+    .callout {
+      border-radius: 14px;
+      padding: 16px 20px;
+      margin: 18px 0;
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+    }
+
+    .callout-blue  { background: #eff6ff; border-left: 4px solid #3b82f6; }
+    .callout-purple { background: #f5f3ff; border-left: 4px solid #7c3aed; }
+    .callout-green  { background: #f0fdf4; border-left: 4px solid #22c55e; }
+    .callout-amber  { background: #fffbeb; border-left: 4px solid #f59e0b; }
+    .callout-rose   { background: #fff1f2; border-left: 4px solid #f43f5e; }
+
+    .callout-icon {
+      font-size: 22px;
+      line-height: 1;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .callout p { margin: 0; color: #374151; }
+    .callout strong { display: block; margin-bottom: 4px; font-size: 13px; color: #1e293b; }
+
+    /* ---- QUOTE ---- */
+    .big-quote {
+      background: linear-gradient(135deg, #f5f3ff, #eff6ff);
+      border-radius: 16px;
+      padding: 22px 26px;
+      margin: 20px 0;
+      position: relative;
+    }
+
+    .big-quote::before {
+      content: '\201C';
+      position: absolute;
+      top: 8px;
+      left: 18px;
+      font-size: 60px;
+      color: #c7d2fe;
+      line-height: 1;
+      font-family: Georgia, serif;
+    }
+
+    .big-quote p {
+      font-size: 15px;
+      font-weight: 600;
+      color: #312e81;
+      font-style: italic;
+      padding-left: 24px;
+      margin: 0 0 8px;
+    }
+
+    .big-quote cite {
+      font-size: 11px;
+      color: #6366f1;
+      font-weight: 700;
+      padding-left: 24px;
+      font-style: normal;
+    }
+
+    /* ---- STAT CARDS ---- */
+    .stat-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin: 18px 0;
+    }
+
+    .stat-card {
+      border-radius: 14px;
+      padding: 16px;
+      text-align: center;
+    }
+
+    .stat-card .stat-num {
+      font-size: 28px;
+      font-weight: 900;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .stat-card .stat-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #6b7280;
+    }
+
+    .stat-blue   { background: #eff6ff; }
+    .stat-blue .stat-num   { color: #2563eb; }
+    .stat-purple { background: #f5f3ff; }
+    .stat-purple .stat-num { color: #7c3aed; }
+    .stat-green  { background: #f0fdf4; }
+    .stat-green .stat-num  { color: #16a34a; }
+
+    /* ---- STEPS ---- */
+    .steps { margin: 16px 0; }
+
+    .step {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      margin-bottom: 14px;
+    }
+
+    .step-num {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #6366f1, #7c3aed);
+      color: white;
+      font-size: 13px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .step-content { flex: 1; }
+    .step-title { font-size: 13px; font-weight: 700; color: #1e293b; margin-bottom: 3px; }
+    .step-desc  { font-size: 12px; color: #64748b; margin: 0; }
+
+    /* ---- CHECKLIST ---- */
+    .checklist { margin: 14px 0; }
+
+    .check-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .check-box {
+      width: 20px;
+      height: 20px;
+      border-radius: 6px;
+      background: #e0e7ff;
+      border: 2px solid #a5b4fc;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .check-text { font-size: 12.5px; color: #374151; margin: 0; }
+    .check-text strong { color: #1e293b; }
+
+    /* ---- TWO-COLUMN GRID ---- */
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin: 16px 0;
+    }
+
+    .col-card {
+      border-radius: 14px;
+      padding: 16px;
+    }
+
+    .col-card h4 {
+      font-size: 13px;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .col-card ul {
+      padding-left: 16px;
+    }
+
+    .col-card ul li {
+      font-size: 12px;
+      color: #4b5563;
+      margin-bottom: 5px;
+    }
+
+    /* ---- TOOL CARDS ---- */
+    .tool-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin: 16px 0;
+    }
+
+    .tool-card {
+      border-radius: 14px;
+      padding: 16px;
+      border: 1px solid transparent;
+    }
+
+    .tool-card-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+
+    .tool-card h4 {
+      font-size: 13px;
+      font-weight: 800;
+      margin-bottom: 5px;
+    }
+
+    .tool-card p { font-size: 11.5px; margin: 0; color: #6b7280; }
+
+    .tc-indigo { background: #eef2ff; border-color: #c7d2fe; }
+    .tc-indigo .tool-card-icon { background: #e0e7ff; }
+    .tc-indigo h4 { color: #3730a3; }
+
+    .tc-violet { background: #f5f3ff; border-color: #ddd6fe; }
+    .tc-violet .tool-card-icon { background: #ede9fe; }
+    .tc-violet h4 { color: #5b21b6; }
+
+    .tc-teal { background: #f0fdfa; border-color: #99f6e4; }
+    .tc-teal .tool-card-icon { background: #ccfbf1; }
+    .tc-teal h4 { color: #0f766e; }
+
+    .tc-amber { background: #fffbeb; border-color: #fde68a; }
+    .tc-amber .tool-card-icon { background: #fef3c7; }
+    .tc-amber h4 { color: #b45309; }
+
+    .tc-blue { background: #eff6ff; border-color: #bfdbfe; }
+    .tc-blue .tool-card-icon { background: #dbeafe; }
+    .tc-blue h4 { color: #1d4ed8; }
+
+    .tc-rose { background: #fff1f2; border-color: #fecdd3; }
+    .tc-rose .tool-card-icon { background: #ffe4e6; }
+    .tc-rose h4 { color: #be123c; }
+
+    /* ---- TIMELINE ---- */
+    .timeline { margin: 16px 0; }
+
+    .tl-item {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .tl-left {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .tl-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #6366f1, #7c3aed);
+      flex-shrink: 0;
+      margin-top: 3px;
+    }
+
+    .tl-line {
+      width: 2px;
+      flex: 1;
+      background: #e0e7ff;
+      margin-top: 4px;
+    }
+
+    .tl-content { flex: 1; }
+    .tl-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #6366f1; margin-bottom: 2px; }
+    .tl-title { font-size: 13px; font-weight: 700; color: #1e293b; margin-bottom: 3px; }
+    .tl-desc  { font-size: 12px; color: #64748b; margin: 0; }
+
+    /* ---- BACK COVER ---- */
+    .back-cover {
+      background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #1e40af 100%);
+      min-height: 297mm;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 48px 40px;
+      text-align: center;
+      position: relative;
+    }
+
+    .back-cover h2 {
+      font-size: 32px;
+      font-weight: 900;
+      color: white;
+      line-height: 1.2;
+      margin-bottom: 16px;
+      max-width: 420px;
+    }
+
+    .back-cover h2 span { color: #fde68a; }
+
+    .back-cover p {
+      color: rgba(255,255,255,0.75);
+      font-size: 14px;
+      max-width: 380px;
+      margin-bottom: 32px;
+    }
+
+    .back-cta {
+      background: white;
+      color: #4f46e5;
+      font-size: 15px;
+      font-weight: 800;
+      padding: 14px 36px;
+      border-radius: 99px;
+      display: inline-block;
+      text-decoration: none;
+      margin-bottom: 48px;
+    }
+
+    .back-features {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      width: 100%;
+      max-width: 520px;
+    }
+
+    .back-feature {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 12px;
+      padding: 14px 10px;
+      text-align: center;
+    }
+
+    .back-feature .bf-icon { font-size: 22px; margin-bottom: 6px; }
+    .back-feature .bf-title { color: white; font-size: 12px; font-weight: 700; }
+
+    .back-url {
+      position: absolute;
+      bottom: 28px;
+      color: rgba(255,255,255,0.4);
+      font-size: 11px;
+    }
+
+    /* ---- PAGE FOOTER ---- */
+    .page-footer {
+      padding: 10px 40px;
+      border-top: 1px solid #f1f5f9;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .pf-brand { font-size: 11px; color: #94a3b8; font-weight: 600; }
+    .pf-page  { font-size: 11px; color: #cbd5e1; }
+
+    /* ---- HIGHLIGHT BAR ---- */
+    .highlight-bar {
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      border-radius: 12px;
+      padding: 14px 20px;
+      color: white;
+      font-size: 13px;
+      font-weight: 600;
+      margin: 16px 0;
+    }
+
+    .highlight-bar span { color: #fde68a; }
+
+    /* ---- PRINT ---- */
+    @media print {
+      body { margin: 0; }
+      .page { margin: 0; page-break-after: always; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ===== COVER ===== -->
+<div class="page">
+  <div class="cover">
+    <div class="cover-logo">W</div>
+    <div class="cover-brand">WriteScholar</div>
+    <div class="cover-tag">Free Student Guide</div>
+    <h1>Ultimate <span>Study Tips</span> Guide</h1>
+    <p class="cover-sub">The science-backed playbook for getting better grades without working more hours.</p>
+    <div class="cover-pills">
+      <div class="cover-pill">Active Recall</div>
+      <div class="cover-pill">Spaced Repetition</div>
+      <div class="cover-pill">Study Systems</div>
+      <div class="cover-pill">AI Tools</div>
+      <div class="cover-pill">Essay Writing</div>
+    </div>
+    <svg width="320" height="120" viewBox="0 0 320 120" fill="none">
+      <!-- Central brain icon -->
+      <circle cx="160" cy="60" r="42" fill="rgba(255,255,255,0.12)"/>
+      <path d="M143 60 Q148 44 160 50 Q172 44 177 60 Q181 76 160 82 Q139 76 143 60" fill="rgba(255,255,255,0.6)"/>
+      <circle cx="154" cy="57" r="4" fill="rgba(255,255,255,0.9)"/>
+      <circle cx="166" cy="57" r="4" fill="rgba(255,255,255,0.9)"/>
+      <!-- Flashcard left -->
+      <rect x="56" y="44" width="54" height="36" rx="6" fill="rgba(255,255,255,0.18)" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"/>
+      <text x="83" y="67" text-anchor="middle" font-size="18" fill="white" font-weight="bold">?</text>
+      <!-- Quiz right -->
+      <rect x="210" y="40" width="54" height="44" rx="6" fill="rgba(255,255,255,0.18)" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"/>
+      <circle cx="226" cy="54" r="5" fill="rgba(255,255,255,0.5)"/>
+      <line x1="235" y1="54" x2="254" y2="54" stroke="rgba(255,255,255,0.4)" stroke-width="2"/>
+      <circle cx="226" cy="70" r="5" fill="rgba(255,255,255,0.5)"/>
+      <line x1="235" y1="70" x2="254" y2="70" stroke="rgba(255,255,255,0.4)" stroke-width="2"/>
+      <!-- Connecting lines -->
+      <path d="M115 62 L118 62" stroke="rgba(255,255,255,0.3)" stroke-width="1.5" stroke-dasharray="3 3"/>
+      <path d="M202 62 L205 62" stroke="rgba(255,255,255,0.3)" stroke-width="1.5" stroke-dasharray="3 3"/>
+      <!-- Stars -->
+      <circle cx="90" cy="22" r="4" fill="rgba(253,230,138,0.8)"/>
+      <circle cx="230" cy="16" r="3" fill="rgba(167,243,208,0.8)"/>
+      <circle cx="70" cy="100" r="3" fill="rgba(252,165,165,0.8)"/>
+      <circle cx="250" cy="104" r="4" fill="rgba(196,181,253,0.8)"/>
+    </svg>
+    <div class="cover-footer">writescholar.com &nbsp;|&nbsp; Free for all new members</div>
+  </div>
+</div>
+
+<!-- ===== PAGE 1: Intro ===== -->
+<div class="page">
+  <div class="content-page">
+    <div class="page-header">
+      <span class="page-header-brand">WriteScholar</span>
+      <span class="page-header-chapter">Introduction</span>
+    </div>
+    <div class="page-body">
+      <div class="chapter-label">Introduction</div>
+      <h2 class="chapter-title">The students who <span>get A's</span> are not smarter than you.</h2>
+      <div class="title-underline"></div>
+
+      <p>You already know someone like this. They show up to the same lectures. They have the same 24 hours. They are not pulling all-nighters or skipping social events. But come results day, they walk away with the grade that makes everyone ask: <strong>how?</strong></p>
+
+      <p>The answer is not intelligence or luck. It is leverage. The right study method applied consistently creates results that no amount of passive rereading ever will.</p>
+
+      <div class="big-quote">
+        <p>We are what we repeatedly do. Excellence, then, is not an act but a habit.</p>
+        <cite>Aristotle</cite>
+      </div>
+
+      <p>This guide is a practical playbook for building better study habits, understanding the science behind memory, and using the right tools so your effort actually produces results. Every tip in here is grounded in cognitive science research and designed to fit into a real student schedule.</p>
+
+      <div class="stat-row">
+        <div class="stat-card stat-blue">
+          <div class="stat-num">50%</div>
+          <div class="stat-label">more retention from active testing vs. rereading</div>
+        </div>
+        <div class="stat-card stat-purple">
+          <div class="stat-num">2.3x</div>
+          <div class="stat-label">better recall with spaced repetition over cramming</div>
+        </div>
+        <div class="stat-card stat-green">
+          <div class="stat-num">8+</div>
+          <div class="stat-label">pages of proven techniques inside this guide</div>
+        </div>
+      </div>
+
+      <h3>What is inside this guide</h3>
+      <div class="checklist">
+        <div class="check-item"><div class="check-box"></div><p class="check-text"><strong>The testing effect</strong> and why quizzing yourself beats rereading every time.</p></div>
+        <div class="check-item"><div class="check-box"></div><p class="check-text"><strong>Spaced repetition</strong> and the exact schedule to use so you never cram again.</p></div>
+        <div class="check-item"><div class="check-box"></div><p class="check-text"><strong>Active recall techniques</strong> including flashcards, self-quizzing, and the Feynman method.</p></div>
+        <div class="check-item"><div class="check-box"></div><p class="check-text"><strong>Writing and essay skills</strong> so you communicate what you know and get the grade it deserves.</p></div>
+        <div class="check-item"><div class="check-box"></div><p class="check-text"><strong>AI study tools</strong> that save hours of prep and let you focus on actual learning.</p></div>
+        <div class="check-item"><div class="check-box"></div><p class="check-text"><strong>A weekly study template</strong> you can copy and adapt to your own schedule.</p></div>
+      </div>
+    </div>
+    <div class="page-footer">
+      <span class="pf-brand">WriteScholar Ultimate Study Guide</span>
+      <span class="pf-page">2</span>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PAGE 2: Testing Effect ===== -->
+<div class="page">
+  <div class="content-page">
+    <div class="page-header">
+      <span class="page-header-brand">WriteScholar</span>
+      <span class="page-header-chapter">Chapter 1 &nbsp;|&nbsp; The Testing Effect</span>
+    </div>
+    <div class="page-body">
+      <div class="chapter-label">Chapter 01</div>
+      <h2 class="chapter-title">The <span>testing effect:</span> the cheat code nobody uses</h2>
+      <div class="title-underline"></div>
+
+      <p>There is a concept in cognitive psychology that changes everything once you understand it. It is called the <strong>testing effect</strong>, also known as retrieval practice.</p>
+
+      <p>The short version: the act of retrieving information from your memory strengthens that memory far more powerfully than reading the information again. When you force your brain to recall something, even if you get it wrong, you are building a stronger and more durable memory trace.</p>
+
+      <div class="callout callout-blue">
+        <div class="callout-icon">&#128203;</div>
+        <div>
+          <strong>The research</strong>
+          <p>A landmark study by Roediger and Karpicke (2006) found that students who tested themselves retained <strong>50% more information</strong> after one week compared to students who only reread the material. That is not a small difference. That is the difference between a pass and a distinction.</p>
+        </div>
+      </div>
+
+      <p>The problem is that most students feel like rereading is productive. It is familiar, comfortable, and the information feels easier to understand each time you go through it. That feeling of ease is the trap. The brain is not being challenged, so nothing new is being stored.</p>
+
+      <h3>How to apply the testing effect immediately</h3>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-content">
+            <div class="step-title">Read once, then close the material</div>
+            <div class="step-desc">Go through a section of your notes or textbook once. Then close it and try to write down everything you just learned from memory. Do not look back.</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-content">
+            <div class="step-title">Compare and identify gaps</div>
+            <div class="step-desc">Open your notes and compare. What did you miss? What was wrong? Those gaps are exactly where your brain needs more work.</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-content">
+            <div class="step-title">Repeat at intervals</div>
+            <div class="step-desc">Come back to the same material 2 days later and test yourself again. Then again 5 days after that. Each retrieval makes the memory stronger.</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <div class="step-content">
+            <div class="step-title">Use tools to remove the prep time</div>
+            <div class="step-desc">Creating quiz questions and flashcards manually is slow. WriteScholar's Quiz Generator and Flashcard Generator create them from your notes in seconds.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-purple">
+        <div class="callout-icon">&#128161;</div>
+        <div>
+          <strong>Key insight</strong>
+          <p>Struggling to recall something is not a sign you studied badly. It is the process working. The effort of retrieval is what creates the memory. Embrace the difficulty.</p>
+        </div>
+      </div>
+    </div>
+    <div class="page-footer">
+      <span class="pf-brand">WriteScholar Ultimate Study Guide</span>
+      <span class="pf-page">3</span>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PAGE 3: Spaced Repetition ===== -->
+<div class="page">
+  <div class="content-page">
+    <div class="page-header">
+      <span class="page-header-brand">WriteScholar</span>
+      <span class="page-header-chapter">Chapter 2 &nbsp;|&nbsp; Spaced Repetition</span>
+    </div>
+    <div class="page-body">
+      <div class="chapter-label">Chapter 02</div>
+      <h2 class="chapter-title"><span>Spaced repetition:</span> never cram again</h2>
+      <div class="title-underline"></div>
+
+      <p>Cramming feels effective because the information is fresh in short-term memory. But within 72 hours, most of it is gone. The forgetting curve, first described by psychologist Hermann Ebbinghaus, shows that without any review, people forget roughly 70% of new information within 24 hours.</p>
+
+      <p>Spaced repetition solves this by deliberately timing your reviews to happen just before you are about to forget the material. Each review resets the forgetting curve and extends the gap before you need to review again.</p>
+
+      <h3>The spacing schedule</h3>
+      <div class="timeline">
+        <div class="tl-item">
+          <div class="tl-left"><div class="tl-dot"></div><div class="tl-line"></div></div>
+          <div class="tl-content">
+            <div class="tl-label">Session 1</div>
+            <div class="tl-title">Same day as the lecture</div>
+            <div class="tl-desc">Within a few hours of learning, do a quick review. This first review has the biggest impact on long-term retention.</div>
+          </div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-left"><div class="tl-dot"></div><div class="tl-line"></div></div>
+          <div class="tl-content">
+            <div class="tl-label">Session 2</div>
+            <div class="tl-title">2 days later</div>
+            <div class="tl-desc">Return to the material before you have fully forgotten it. This is the point where retrieval is still challenging but possible.</div>
+          </div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-left"><div class="tl-dot"></div><div class="tl-line"></div></div>
+          <div class="tl-content">
+            <div class="tl-label">Session 3</div>
+            <div class="tl-title">1 week later</div>
+            <div class="tl-desc">By now the initial review has faded. Testing yourself again at this point locks the information into long-term memory.</div>
+          </div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-left"><div class="tl-dot"></div></div>
+          <div class="tl-content">
+            <div class="tl-label">Session 4</div>
+            <div class="tl-title">2 to 3 weeks before the exam</div>
+            <div class="tl-desc">A final review pass. At this point the exam is not about learning the material. It is about confirming what you already know.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-green">
+        <div class="callout-icon">&#9989;</div>
+        <div>
+          <strong>The key rule</strong>
+          <p>Start early. Spaced repetition only works if there is enough time to space the sessions. If you start the week before an exam, you are cramming with extra steps. Start from week one of the semester.</p>
+        </div>
+      </div>
+
+      <div class="highlight-bar">
+        Use WriteScholar to generate quiz questions and flashcards immediately after each lecture. Save them. Come back to them on your scheduled review days. <span>That is spaced repetition made simple.</span>
+      </div>
+    </div>
+    <div class="page-footer">
+      <span class="pf-brand">WriteScholar Ultimate Study Guide</span>
+      <span class="pf-page">4</span>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PAGE 4: Active Recall ===== -->
+<div class="page">
+  <div class="content-page">
+    <div class="page-header">
+      <span class="page-header-brand">WriteScholar</span>
+      <span class="page-header-chapter">Chapter 3 &nbsp;|&nbsp; Active Recall Techniques</span>
+    </div>
+    <div class="page-body">
+      <div class="chapter-label">Chapter 03</div>
+      <h2 class="chapter-title"><span>Active recall</span> techniques that actually work</h2>
+      <div class="title-underline"></div>
+
+      <p>Active recall is the umbrella term for any study method that involves generating information from memory rather than passively consuming it. The testing effect is the mechanism behind why it works. Here are the four most effective active recall techniques for students.</p>
+
+      <div class="two-col">
+        <div class="col-card" style="background:#eff6ff;border-radius:14px;padding:16px;">
+          <h4 style="color:#1d4ed8;font-size:13px;font-weight:800;margin-bottom:8px;">&#127881; Flashcards</h4>
+          <p style="font-size:12px;color:#374151;margin:0;">Write a concept on one side, the answer on the other. Go through the deck and say the answer before flipping. Mark the cards you got wrong and repeat those more often. Works best for definitions, vocabulary, and key concepts.</p>
+        </div>
+        <div class="col-card" style="background:#f5f3ff;border-radius:14px;padding:16px;">
+          <h4 style="color:#5b21b6;font-size:13px;font-weight:800;margin-bottom:8px;">&#128203; Practice quizzes</h4>
+          <p style="font-size:12px;color:#374151;margin:0;">Multiple choice and true/false questions force you to evaluate options, not just recall. The act of deciding why one answer is correct and others are wrong deepens understanding significantly.</p>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <div class="col-card" style="background:#f0fdf4;border-radius:14px;padding:16px;">
+          <h4 style="color:#15803d;font-size:13px;font-weight:800;margin-bottom:8px;">&#128161; The Feynman Technique</h4>
+          <p style="font-size:12px;color:#374151;margin:0;">After studying a topic, close your notes and explain it out loud in plain language as if you are teaching it to someone with no background. Where you stumble is where your understanding has gaps.</p>
+        </div>
+        <div class="col-card" style="background:#fffbeb;border-radius:14px;padding:16px;">
+          <h4 style="color:#b45309;font-size:13px;font-weight:800;margin-bottom:8px;">&#9997;&#65039; Brain dumps</h4>
+          <p style="font-size:12px;color:#374151;margin:0;">Open a blank page and write down everything you know about a topic without looking at your notes. The gaps you notice are your study priorities for the next session.</p>
+        </div>
+      </div>
+
+      <h3>Which technique for which situation</h3>
+      <div class="callout callout-blue">
+        <div class="callout-icon">&#128366;</div>
+        <div>
+          <strong>Learning new terminology or definitions</strong>
+          <p>Flashcards are the fastest way to get new terms into memory. Generate a deck from your notes right after the lecture while the material is fresh.</p>
+        </div>
+      </div>
+      <div class="callout callout-purple">
+        <div class="callout-icon">&#128203;</div>
+        <div>
+          <strong>Understanding concepts and applying them</strong>
+          <p>Use practice quizzes with scenario-based questions. These force you to use the knowledge, not just recognise it on a page.</p>
+        </div>
+      </div>
+      <div class="callout callout-amber">
+        <div class="callout-icon">&#127775;</div>
+        <div>
+          <strong>Checking whether you really understand</strong>
+          <p>Use the Feynman technique. If you cannot explain it simply, you do not understand it yet. That is genuinely useful feedback before an exam.</p>
+        </div>
+      </div>
+    </div>
+    <div class="page-footer">
+      <span class="pf-brand">WriteScholar Ultimate Study Guide</span>
+      <span class="pf-page">5</span>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PAGE 5: Writing + Essays ===== -->
+<div class="page">
+  <div class="content-page">
+    <div class="page-header">
+      <span class="page-header-brand">WriteScholar</span>
+      <span class="page-header-chapter">Chapter 4 &nbsp;|&nbsp; Writing and Essays</span>
+    </div>
+    <div class="page-body">
+      <div class="chapter-label">Chapter 04</div>
+      <h2 class="chapter-title">Your grade is not just about <span>what you know</span></h2>
+      <div class="title-underline"></div>
+
+      <p>Here is something most students only discover after getting a disappointing grade on work they felt confident about. Your mark is almost never purely about what you know. It is about <strong>how clearly and effectively you communicate what you know.</strong></p>
+
+      <p>Two students can have identical understanding of a concept. One writes a clear, structured argument with a strong thesis, logical paragraphs, and evidence. The other writes everything they know in the order it came to mind. One gets a First. The other does not.</p>
+
+      <div class="big-quote">
+        <p>If you can't explain it simply, you don't understand it well enough.</p>
+        <cite>Albert Einstein</cite>
+      </div>
+
+      <h3>The anatomy of a strong academic essay</h3>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-content">
+            <div class="step-title">Start with a clear thesis statement</div>
+            <div class="step-desc">One specific, arguable claim that tells the reader exactly what your essay is going to prove. Every paragraph should support this claim directly.</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-content">
+            <div class="step-title">One idea per paragraph</div>
+            <div class="step-desc">Each paragraph has a topic sentence, evidence, and analysis. If you are covering two different points in one paragraph, split it.</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-content">
+            <div class="step-title">Evidence is not enough on its own</div>
+            <div class="step-desc">A quotation or statistic without analysis is just decoration. Explain what the evidence shows, why it matters, and how it supports your argument.</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <div class="step-content">
+            <div class="step-title">Get feedback before you submit</div>
+            <div class="step-desc">The single best change you can make to your essay process. Use WriteScholar's Essay Analyser to see your work the way a professor does, before the grade is decided.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-rose">
+        <div class="callout-icon">&#128683;</div>
+        <div>
+          <strong>The most common mistake</strong>
+          <p>Submitting the first draft. Students who perform consistently well treat their first draft as a starting point, not a finished product. Write, review, revise. Then review again. WriteScholar's Essay Analyser makes this process much faster.</p>
+        </div>
+      </div>
+
+      <div class="callout callout-green">
+        <div class="callout-icon">&#127775;</div>
+        <div>
+          <strong>Citations matter more than students think</strong>
+          <p>A poorly formatted reference list signals carelessness to a professor. Use a citation generator that handles APA, MLA, Chicago, and Harvard formatting so references are never a source of lost marks.</p>
+        </div>
+      </div>
+    </div>
+    <div class="page-footer">
+      <span class="pf-brand">WriteScholar Ultimate Study Guide</span>
+      <span class="pf-page">6</span>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PAGE 6: AI Tools ===== -->
+<div class="page">
+  <div class="content-page">
+    <div class="page-header">
+      <span class="page-header-brand">WriteScholar</span>
+      <span class="page-header-chapter">Chapter 5 &nbsp;|&nbsp; AI Study Tools</span>
+    </div>
+    <div class="page-body">
+      <div class="chapter-label">Chapter 05</div>
+      <h2 class="chapter-title">Work smarter with <span>AI tools</span></h2>
+      <div class="title-underline"></div>
+
+      <p>The Leverage Students do not spend more time studying. They eliminate the tasks that waste time and redirect that energy toward actual learning. AI tools are the fastest way to do this. Here are the WriteScholar tools and how to use each one in your study workflow.</p>
+
+      <div class="tool-grid">
+        <div class="tool-card tc-violet">
+          <div class="tool-card-icon">&#10024;</div>
+          <h4>AI Quiz Generator</h4>
+          <p>Paste your notes or a textbook chapter and get multiple choice and true/false questions instantly. Use these for spaced repetition sessions throughout the semester.</p>
+        </div>
+        <div class="tool-card tc-indigo">
+          <div class="tool-card-icon">&#127881;</div>
+          <h4>Flashcard Generator</h4>
+          <p>Turns any text into a ready-to-use flip-card deck. No copying, no formatting. Generate after every lecture for an immediate active recall session.</p>
+        </div>
+        <div class="tool-card tc-amber">
+          <div class="tool-card-icon">&#129519;</div>
+          <h4>Crossword Generator</h4>
+          <p>Perfect for vocabulary-heavy subjects. A crossword tests spelling, context, and recall from multiple angles. Effective and genuinely more engaging than drilling terms alone.</p>
+        </div>
+        <div class="tool-card tc-teal">
+          <div class="tool-card-icon">&#128221;</div>
+          <h4>AI Summariser</h4>
+          <p>Paste a 40-page paper and get a concise summary of the key points. Use this to quickly judge whether a source is worth reading in full before spending an hour on it.</p>
+        </div>
+        <div class="tool-card tc-blue">
+          <div class="tool-card-icon">&#128218;</div>
+          <h4>Citation Finder</h4>
+          <p>Enter your research topic and get properly formatted citations in APA, MLA, Chicago, or Harvard. Stops reference formatting from eating into your actual writing time.</p>
+        </div>
+        <div class="tool-card tc-rose">
+          <div class="tool-card-icon">&#128202;</div>
+          <h4>Essay Analyser</h4>
+          <p>Submit your draft and get professor-style feedback on structure, argument, clarity, and academic style. Use it before you submit, not after you get the grade back.</p>
+        </div>
+      </div>
+
+      <div class="callout callout-blue">
+        <div class="callout-icon">&#128073;</div>
+        <div>
+          <strong>The Leverage Student workflow</strong>
+          <p>After a lecture: generate flashcards and save them. Before an exam: run through those flashcards, then take a full quiz. Writing an essay: use the Summariser on sources, Essay Analyser on your draft, Citation Finder for references. Every step is faster and the output is better.</p>
+        </div>
+      </div>
+    </div>
+    <div class="page-footer">
+      <span class="pf-brand">WriteScholar Ultimate Study Guide</span>
+      <span class="pf-page">7</span>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PAGE 7: Study System ===== -->
+<div class="page">
+  <div class="content-page">
+    <div class="page-header">
+      <span class="page-header-brand">WriteScholar</span>
+      <span class="page-header-chapter">Chapter 6 &nbsp;|&nbsp; Your Weekly Study System</span>
+    </div>
+    <div class="page-body">
+      <div class="chapter-label">Chapter 06</div>
+      <h2 class="chapter-title">Build a <span>weekly system</span> that compounds</h2>
+      <div class="title-underline"></div>
+
+      <p>Knowledge compounds exactly like money. Small, consistent deposits over time produce results that a single large effort cannot match. The students who perform best are usually not the ones who study more. They are the ones who study consistently from the start of semester.</p>
+
+      <div class="big-quote">
+        <p>Success is nothing more than a few simple disciplines, practised every day.</p>
+        <cite>Jim Rohn</cite>
+      </div>
+
+      <h3>The weekly study template</h3>
+      <p>Copy this structure and adapt it to your own timetable. The goal is to build in regular retrieval practice so you never need to cram.</p>
+
+      <div class="two-col">
+        <div class="col-card" style="background:#f5f3ff; border-radius:14px; padding:16px; border:1px solid #e9d5ff;">
+          <h4 style="color:#5b21b6;font-size:13px;margin-bottom:10px;">Same day as each lecture</h4>
+          <ul>
+            <li>Review your notes once for understanding</li>
+            <li>Generate flashcards from your notes</li>
+            <li>Do a 5-minute brain dump from memory</li>
+            <li>Note the 3 things you are least confident about</li>
+          </ul>
+        </div>
+        <div class="col-card" style="background:#eff6ff; border-radius:14px; padding:16px; border:1px solid #bfdbfe;">
+          <h4 style="color:#1d4ed8;font-size:13px;margin-bottom:10px;">2 days after each lecture</h4>
+          <ul>
+            <li>Run through the flashcard deck</li>
+            <li>Answer a 10-question quiz from your notes</li>
+            <li>Focus extra time on the 3 weak points</li>
+            <li>No rereading. Retrieval only.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="two-col">
+        <div class="col-card" style="background:#f0fdf4; border-radius:14px; padding:16px; border:1px solid #bbf7d0;">
+          <h4 style="color:#15803d;font-size:13px;margin-bottom:10px;">Weekly review (Sunday, 45 min)</h4>
+          <ul>
+            <li>Review flashcards for the whole week</li>
+            <li>Do a mixed quiz covering all lectures</li>
+            <li>Summarise each topic in 3 bullet points</li>
+            <li>Update your "still unsure about" list</li>
+          </ul>
+        </div>
+        <div class="col-card" style="background:#fffbeb; border-radius:14px; padding:16px; border:1px solid #fde68a;">
+          <h4 style="color:#b45309;font-size:13px;margin-bottom:10px;">2 weeks before any exam</h4>
+          <ul>
+            <li>Targeted review of weak areas only</li>
+            <li>Full past paper or practice exam</li>
+            <li>Essay plan practice for written exams</li>
+            <li>No new material. Consolidation only.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="callout callout-purple">
+        <div class="callout-icon">&#128161;</div>
+        <div>
+          <strong>The most important habit</strong>
+          <p>Do the same-day review. It is the highest-value 15 minutes in your entire study week. Skipping it means you start from scratch at the next review instead of building on a foundation.</p>
+        </div>
+      </div>
+    </div>
+    <div class="page-footer">
+      <span class="pf-brand">WriteScholar Ultimate Study Guide</span>
+      <span class="pf-page">8</span>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PAGE 8: Focus & Mindset ===== -->
+<div class="page">
+  <div class="content-page">
+    <div class="page-header">
+      <span class="page-header-brand">WriteScholar</span>
+      <span class="page-header-chapter">Chapter 7 &nbsp;|&nbsp; Focus and Mindset</span>
+    </div>
+    <div class="page-body">
+      <div class="chapter-label">Chapter 07</div>
+      <h2 class="chapter-title">Focus, productivity, and <span>protecting your time</span></h2>
+      <div class="title-underline"></div>
+
+      <p>Method is only half the equation. The other half is protecting the time and mental energy to execute it. This chapter covers the most practical adjustments that make a real difference to your output without adding more hours.</p>
+
+      <h3>The Pomodoro Technique</h3>
+      <p>The Pomodoro Technique is one of the most well-tested productivity systems for students. The principle is simple: work in focused 25-minute blocks with short breaks in between. After four blocks, take a longer break.</p>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-content">
+            <div class="step-title">Set a timer for 25 minutes</div>
+            <div class="step-desc">Phone away, notifications off. The only task is the one in front of you. Use WriteScholar's free Pomodoro Timer at writescholar.com/tools/pomodoro-timer.</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-content">
+            <div class="step-title">Work until the timer goes off</div>
+            <div class="step-desc">If a distraction comes to mind, write it down and deal with it later. Do not switch tasks.</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-content">
+            <div class="step-title">Take a 5-minute break</div>
+            <div class="step-desc">Stand up, stretch, move away from the screen. The break is not optional. It is what makes the next block productive.</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <div class="step-content">
+            <div class="step-title">After four blocks, take a 15 to 30-minute break</div>
+            <div class="step-desc">This longer break resets your working memory. Four focused Pomodoros produce more output than three unfocused hours.</div>
+          </div>
+        </div>
+      </div>
+
+      <h3>Three habits that separate high performers</h3>
+      <div class="callout callout-blue">
+        <div class="callout-icon">&#127760;</div>
+        <div>
+          <strong>Study your hardest subject first</strong>
+          <p>Willpower and focus are highest at the start of a session. Saving the difficult work for later means doing it when you are least equipped to handle it.</p>
+        </div>
+      </div>
+      <div class="callout callout-green">
+        <div class="callout-icon">&#9989;</div>
+        <div>
+          <strong>End every session with a plan for the next one</strong>
+          <p>Write down the first task you will do when you sit down again. This eliminates the "where do I start" friction that wastes the first 10 minutes of every session.</p>
+        </div>
+      </div>
+      <div class="callout callout-amber">
+        <div class="callout-icon">&#128267;</div>
+        <div>
+          <strong>Sleep is not optional</strong>
+          <p>Memory consolidation happens during sleep. Studying until 3am and sleeping 4 hours is a net negative. The material you reviewed is more likely to stick after a full night's sleep than after an all-nighter.</p>
+        </div>
+      </div>
+    </div>
+    <div class="page-footer">
+      <span class="pf-brand">WriteScholar Ultimate Study Guide</span>
+      <span class="pf-page">9</span>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PAGE 9: Quick Reference ===== -->
+<div class="page">
+  <div class="content-page">
+    <div class="page-header">
+      <span class="page-header-brand">WriteScholar</span>
+      <span class="page-header-chapter">Quick Reference &nbsp;|&nbsp; Your Complete Checklist</span>
+    </div>
+    <div class="page-body">
+      <div class="chapter-label">Quick Reference</div>
+      <h2 class="chapter-title">The complete <span>study checklist</span></h2>
+      <div class="title-underline"></div>
+
+      <p>Use this page as your quick reference. Tick each habit off as it becomes part of your routine. You do not need all of them on day one. Pick two or three, make them automatic, then add the next ones.</p>
+
+      <div class="two-col" style="margin-top:18px;">
+        <div>
+          <h3 style="margin-bottom:12px;">Every lecture</h3>
+          <div class="checklist">
+            <div class="check-item"><div class="check-box"></div><p class="check-text">Take notes actively, not just passively copying slides</p></div>
+            <div class="check-item"><div class="check-box"></div><p class="check-text">Within the same day, do a 5-minute brain dump from memory</p></div>
+            <div class="check-item"><div class="check-box"></div><p class="check-text">Generate a flashcard deck from the lecture notes</p></div>
+            <div class="check-item"><div class="check-box"></div><p class="check-text">Note the 3 things you understood least</p></div>
+          </div>
+
+          <h3 style="margin-top:16px;margin-bottom:12px;">Every study session</h3>
+          <div class="checklist">
+            <div class="check-item"><div class="check-box"></div><p class="check-text">Start with retrieval, not rereading</p></div>
+            <div class="check-item"><div class="check-box"></div><p class="check-text">Use the Pomodoro Technique to protect focus</p></div>
+            <div class="check-item"><div class="check-box"></div><p class="check-text">End the session by writing down the next task</p></div>
+          </div>
+
+          <h3 style="margin-top:16px;margin-bottom:12px;">Every week</h3>
+          <div class="checklist">
+            <div class="check-item"><div class="check-box"></div><p class="check-text">Do a mixed review of the week's flashcard decks</p></div>
+            <div class="check-item"><div class="check-box"></div><p class="check-text">Take a full quiz covering all lectures</p></div>
+            <div class="check-item"><div class="check-box"></div><p class="check-text">Update your weak-areas list</p></div>
+          </div>
+        </div>
+
+        <div>
+          <h3 style="margin-bottom:12px;">Every essay</h3>
+          <div class="checklist">
+            <div class="check-item"><div class="check-box"></div><p class="check-text">Write a clear thesis statement before writing the body</p></div>
+            <div class="check-item"><div class="check-box"></div><p class="check-text">One clear idea per paragraph</p></div>
+            <div class="check-item"><div class="check-box"></div><p class="check-text">Analyse the evidence, do not just quote it</p></div>
+            <div class="check-item"><div class="check-box"></div><p class="check-text">Use WriteScholar's Essay Analyser before submitting</p></div>
+            <div class="check-item"><div class="check-box"></div><p class="check-text">Format all references correctly with a citation tool</p></div>
+          </div>
+
+          <h3 style="margin-top:16px;margin-bottom:12px;">Before every exam</h3>
+          <div class="checklist">
+            <div class="check-item"><div class="check-box"></div><p class="check-text">Start review at least 2 weeks before</p></div>
+            <div class="check-item"><div class="check-box"></div><p class="check-text">Prioritise weak areas, not comfort zones</p></div>
+            <div class="check-item"><div class="check-box"></div><p class="check-text">Do at least one full practice paper under timed conditions</p></div>
+            <div class="check-item"><div class="check-box"></div><p class="check-text">Get a full night of sleep the night before</p></div>
+          </div>
+
+          <div class="callout callout-purple" style="margin-top:18px;">
+            <div class="callout-icon">&#128073;</div>
+            <div>
+              <strong>One rule above all others</strong>
+              <p>Start early. Every technique in this guide is more effective when you give it time to work. Spaced repetition needs space. Revision needs rest. Starting from week one changes everything.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="page-footer">
+      <span class="pf-brand">WriteScholar Ultimate Study Guide</span>
+      <span class="pf-page">10</span>
+    </div>
+  </div>
+</div>
+
+<!-- ===== BACK COVER ===== -->
+<div class="page">
+  <div class="back-cover">
+    <div class="cover-logo" style="margin-bottom:20px;">W</div>
+    <div class="cover-brand" style="margin-bottom:32px;">WriteScholar</div>
+    <h2>Ready to put this into practice? <span>Start for free today.</span></h2>
+    <p>Every tool mentioned in this guide is available on WriteScholar. Quiz generator, flashcards, crosswords, essay analyser, summariser, citation finder, and more. Free to start, no credit card required.</p>
+    <a class="back-cta" href="https://writescholar.com/signup">Try WriteScholar Free</a>
+    <div class="back-features">
+      <div class="back-feature">
+        <div class="bf-icon">&#127881;</div>
+        <div class="bf-title">Quiz Generator</div>
+      </div>
+      <div class="back-feature">
+        <div class="bf-icon">&#10024;</div>
+        <div class="bf-title">AI Humanizer</div>
+      </div>
+      <div class="back-feature">
+        <div class="bf-icon">&#128202;</div>
+        <div class="bf-title">Essay Analyser</div>
+      </div>
+      <div class="back-feature">
+        <div class="bf-icon">&#128218;</div>
+        <div class="bf-title">Citation Finder</div>
+      </div>
+      <div class="back-feature">
+        <div class="bf-icon">&#128221;</div>
+        <div class="bf-title">AI Summariser</div>
+      </div>
+      <div class="back-feature">
+        <div class="bf-icon">&#128336;</div>
+        <div class="bf-title">Pomodoro Timer</div>
+      </div>
+    </div>
+    <div class="back-url">writescholar.com &nbsp;|&nbsp; Your AI toolkit for academic success</div>
+  </div>
+</div>
+
+</body>
+</html>
