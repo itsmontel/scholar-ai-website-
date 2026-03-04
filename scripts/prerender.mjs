@@ -41,6 +41,8 @@ const staticRoutes = [
   '/tools/essay-outline',
   '/tools/text-case-converter',
   '/tools/paraphrasing-tips',
+  '/tools/gpa-calculator',
+  '/tools/pomodoro-timer',
 ];
 
 let blogSlugs = [];
