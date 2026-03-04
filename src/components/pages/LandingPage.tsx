@@ -2213,7 +2213,13 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
             <div className="bg-white border border-gray-200 rounded-2xl p-8 hover:shadow-lg hover:-translate-y-1 transition-all duration-200">
               <h3 className="text-xl font-bold text-gray-900 mb-1">Free</h3>
               <p className="text-base text-gray-500 mb-5">Perfect for getting started</p>
-              <div className="text-4xl font-bold text-gray-900 mb-8">$0<span className="text-lg font-normal text-gray-500">/mo</span></div>
+              <div className="text-4xl font-bold text-gray-900 mb-4">$0<span className="text-lg font-normal text-gray-500">/mo</span></div>
+              <div className="bg-indigo-50 border border-indigo-100 rounded-lg px-3 py-2 mb-6 flex items-center gap-2">
+                <svg className="w-5 h-5 text-indigo-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
+                <span className="text-sm text-indigo-700 font-medium">Free study tips guide on signup</span>
+              </div>
               <ul className="space-y-4 mb-8 text-base text-gray-600">
                 <li className="flex items-start"><svg className="w-5 h-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>3 documents per month</li>
                 <li className="flex items-start"><svg className="w-5 h-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>3 AI essay analyses per month</li>

@@ -1,6 +1,7 @@
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const userService = require('../services/userService');
+const emailService = require('../services/emailService');
 
 // Serialize user for session
 passport.serializeUser((user, done) => {
@@ -60,6 +61,12 @@ passport.use(new GoogleStrategy({
       picture: profile.photos?.[0]?.value,
       emailVerified: true // Google accounts are pre-verified
     });
+
+    // Send welcome email with free study tips guide (same as email/password signups)
+    const welcomeResult = await emailService.sendWelcomeEmail(newUser.email || email);
+    if (!welcomeResult.success) {
+      console.error('Failed to send welcome email to Google signup:', welcomeResult.error);
+    }
 
     return done(null, newUser);
   } catch (error) {
