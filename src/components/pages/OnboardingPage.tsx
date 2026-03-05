@@ -2,8 +2,9 @@ import { useState } from 'react';
 
 interface OnboardingPageProps {
   onNavigate: (page: string) => void;
-  user?: { id: string; email: string } | null;
+  user?: { id: string; email: string; name?: string } | null;
   onComplete?: () => void;
+  onUserUpdate?: (updates: { name: string }) => void;
 }
 
 type Step = 'profile' | 'grade' | 'referral' | 'goals' | 'features' | 'trial';
@@ -272,9 +273,9 @@ const TrialIllustration = () => (
   </svg>
 );
 
-const OnboardingPage = ({ onNavigate, user, onComplete }: OnboardingPageProps) => {
+const OnboardingPage = ({ onNavigate, user, onComplete, onUserUpdate }: OnboardingPageProps) => {
   const [currentStep, setCurrentStep] = useState<Step>('profile');
-  const [username, setUsername] = useState('');
+  const [username, setUsername] = useState(user?.name && !user.name.includes('@') ? user.name : '');
   const [dob, setDob] = useState('');
   const [selectedGrade, setSelectedGrade] = useState<string | null>(null);
   const [selectedReferral, setSelectedReferral] = useState<string | null>(null);
@@ -286,7 +287,30 @@ const OnboardingPage = ({ onNavigate, user, onComplete }: OnboardingPageProps) =
   const stepIndex = steps.indexOf(currentStep);
   const progress = ((stepIndex + 1) / steps.length) * 100;
 
-  const goNext = () => {
+  const saveUsername = async () => {
+    if (!username.trim() || !user?.id) return;
+    try {
+      const token = localStorage.getItem('authToken');
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/users/profile`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ name: username.trim() })
+      });
+      if (res.ok) {
+        onUserUpdate?.({ name: username.trim() });
+      }
+    } catch (e) {
+      console.error('Failed to save username:', e);
+    }
+  };
+
+  const goNext = async () => {
+    if (currentStep === 'profile' && username.trim() && user?.id) {
+      await saveUsername();
+    }
     const nextIndex = stepIndex + 1;
     if (nextIndex < steps.length) {
       setCurrentStep(steps[nextIndex]);
@@ -314,6 +338,10 @@ const OnboardingPage = ({ onNavigate, user, onComplete }: OnboardingPageProps) =
     if (!user) {
       onNavigate('login');
       return;
+    }
+
+    if (username.trim() && user.id) {
+      await saveUsername();
     }
 
     setIsLoadingCheckout(true);
@@ -350,7 +378,10 @@ const OnboardingPage = ({ onNavigate, user, onComplete }: OnboardingPageProps) =
     }
   };
 
-  const handleSkip = () => {
+  const handleSkip = async () => {
+    if (username.trim() && user?.id) {
+      await saveUsername();
+    }
     if (user && onComplete) {
       onComplete();
     } else {
@@ -403,19 +434,13 @@ const OnboardingPage = ({ onNavigate, user, onComplete }: OnboardingPageProps) =
   return (
     <div className="min-h-screen flex flex-col" style={{ background: 'linear-gradient(180deg, #FAFAF9 0%, #F5F5F4 50%, #ECFCCB 100%)' }}>
       {/* Top bar */}
-      <div className="px-6 pt-6 pb-2 flex items-center justify-between">
+      <div className="px-6 pt-6 pb-2 flex items-center">
         <div className="flex items-center space-x-2.5">
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(180deg, #292524 0%, #1c1917 100%)' }}>
-            <span className="text-lime-400 font-bold text-sm">W</span>
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: '#262626' }}>
+            <span className="font-bold text-sm" style={{ color: '#a3e635' }}>W</span>
           </div>
           <span className="text-lg font-semibold text-stone-800">WriteScholar</span>
         </div>
-        <button
-          onClick={handleSkip}
-          className="text-sm text-stone-400 hover:text-stone-600 transition-colors"
-        >
-          Skip for now
-        </button>
       </div>
 
       {/* Progress bar */}
@@ -728,12 +753,6 @@ const OnboardingPage = ({ onNavigate, user, onComplete }: OnboardingPageProps) =
                     <div className="w-0.5 h-10 bg-stone-200 my-1"></div>
                     <div className="w-8 h-8 rounded-full bg-stone-200 flex items-center justify-center">
                       <svg className="w-4 h-4 text-stone-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3" />
-                      </svg>
-                    </div>
-                    <div className="w-0.5 h-10 bg-stone-200 my-1"></div>
-                    <div className="w-8 h-8 rounded-full bg-stone-200 flex items-center justify-center">
-                      <svg className="w-4 h-4 text-stone-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
                     </div>
@@ -742,10 +761,6 @@ const OnboardingPage = ({ onNavigate, user, onComplete }: OnboardingPageProps) =
                     <div>
                       <p className="font-semibold text-stone-800 text-sm">Today: Instant access</p>
                       <p className="text-stone-500 text-sm">Full access to all features, completely free</p>
-                    </div>
-                    <div>
-                      <p className="font-semibold text-stone-800 text-sm">Day 6: Reminder email</p>
-                      <p className="text-stone-500 text-sm">We'll remind you before the trial ends</p>
                     </div>
                     <div>
                       <p className="font-semibold text-stone-800 text-sm">Day 7: Trial ends</p>

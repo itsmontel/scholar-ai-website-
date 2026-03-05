@@ -98,7 +98,7 @@ class EmailService {
                     
                     <!-- Header -->
                     <tr>
-                      <td style="background: linear-gradient(180deg, #292524 0%, #1c1917 100%); padding: 32px 40px; text-align: center;">
+                      <td style="background: #262626; padding: 32px 40px; text-align: center;">
                         <h1 style="margin: 0; font-size: 28px; font-weight: 600; color: #a3e635; letter-spacing: -0.5px;">WriteScholar</h1>
                       </td>
                     </tr>
@@ -106,7 +106,7 @@ class EmailService {
                     <!-- Main Content -->
                     <tr>
                       <td style="padding: 40px;">
-                        <h2 style="margin: 0 0 8px 0; font-size: 24px; font-weight: 600; color: #1c1917; text-align: center;">Verify your email</h2>
+                        <h2 style="margin: 0 0 8px 0; font-size: 24px; font-weight: 600; color: #262626; text-align: center;">Verify your email</h2>
                         <p style="margin: 0 0 32px 0; font-size: 15px; color: #78716c; text-align: center; line-height: 1.5;">
                           Thanks for signing up! Please confirm your email address to get started.
                         </p>
@@ -117,7 +117,7 @@ class EmailService {
                             <td align="center" style="padding: 8px 0 32px 0;">
                               <a href="${verificationUrl}" 
                                  style="display: inline-block; 
-                                        background-color: #1c1917; 
+                                        background-color: #262626; 
                                         color: #ffffff; 
                                         font-size: 16px; 
                                         font-weight: 600; 
@@ -237,7 +237,7 @@ class EmailService {
                     
                     <!-- Header -->
                     <tr>
-                      <td style="background: linear-gradient(180deg, #292524 0%, #1c1917 100%); padding: 32px 40px; text-align: center;">
+                      <td style="background: #262626; padding: 32px 40px; text-align: center;">
                         <h1 style="margin: 0; font-size: 28px; font-weight: 600; color: #a3e635; letter-spacing: -0.5px;">WriteScholar</h1>
                       </td>
                     </tr>
@@ -252,7 +252,7 @@ class EmailService {
                           </div>
                         </div>
                         
-                        <h2 style="margin: 0 0 8px 0; font-size: 24px; font-weight: 600; color: #1c1917; text-align: center;">Reset your password</h2>
+                        <h2 style="margin: 0 0 8px 0; font-size: 24px; font-weight: 600; color: #262626; text-align: center;">Reset your password</h2>
                         <p style="margin: 0 0 32px 0; font-size: 15px; color: #78716c; text-align: center; line-height: 1.5;">
                           We received a request to reset your password. Click below to choose a new one.
                         </p>
@@ -263,7 +263,7 @@ class EmailService {
                             <td align="center" style="padding: 8px 0 32px 0;">
                               <a href="${resetUrl}" 
                                  style="display: inline-block; 
-                                        background-color: #1c1917; 
+                                        background-color: #262626; 
                                         color: #ffffff; 
                                         font-size: 16px; 
                                         font-weight: 600; 
@@ -363,7 +363,7 @@ class EmailService {
                     
                     <!-- Header -->
                     <tr>
-                      <td style="background: linear-gradient(180deg, #292524 0%, #1c1917 100%); padding: 32px 40px; text-align: center;">
+                      <td style="background: #262626; padding: 32px 40px; text-align: center;">
                         <h1 style="margin: 0; font-size: 28px; font-weight: 600; color: #a3e635; letter-spacing: -0.5px;">WriteScholar</h1>
                       </td>
                     </tr>
@@ -378,7 +378,7 @@ class EmailService {
                           </div>
                         </div>
                         
-                        <h2 style="margin: 0 0 8px 0; font-size: 24px; font-weight: 600; color: #1c1917; text-align: center;">You're all set!</h2>
+                        <h2 style="margin: 0 0 8px 0; font-size: 24px; font-weight: 600; color: #262626; text-align: center;">You're all set!</h2>
                         <p style="margin: 0 0 32px 0; font-size: 15px; color: #78716c; text-align: center; line-height: 1.5;">
                           Your account is verified and ready to go. Start exploring our AI toolkit for academic success.
                         </p>
@@ -387,7 +387,7 @@ class EmailService {
                         <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin-bottom: 32px;">
                           <tr>
                             <td style="background-color: #fafaf9; border-radius: 12px; padding: 20px;">
-                              <p style="margin: 0 0 12px 0; font-size: 14px; font-weight: 600; color: #1c1917;">What you can do:</p>
+                              <p style="margin: 0 0 12px 0; font-size: 14px; font-weight: 600; color: #262626;">What you can do:</p>
                               <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
                                 <tr>
                                   <td style="padding: 6px 0; font-size: 14px; color: #57534e;">
@@ -425,7 +425,7 @@ class EmailService {
                             <td align="center" style="padding: 0 0 32px 0;">
                               <a href="${loginUrl}"
                                  style="display: inline-block; 
-                                        background-color: #1c1917; 
+                                        background-color: #262626; 
                                         color: #ffffff; 
                                         font-size: 16px; 
                                         font-weight: 600; 
@@ -443,14 +443,14 @@ class EmailService {
                           <tr>
                             <td style="border: 2px dashed #d9f99d; border-radius: 12px; padding: 20px; text-align: center;">
                               <p style="margin: 0 0 4px 0; font-size: 12px; font-weight: 600; color: #65a30d; text-transform: uppercase; letter-spacing: 0.5px;">Free Gift</p>
-                              <p style="margin: 0 0 12px 0; font-size: 16px; font-weight: 600; color: #1c1917;">Ultimate Study Tips Guide</p>
+                              <p style="margin: 0 0 12px 0; font-size: 16px; font-weight: 600; color: #262626;">Ultimate Study Tips Guide</p>
                               <p style="margin: 0 0 16px 0; font-size: 13px; color: #78716c; line-height: 1.5;">
                                 A 10-page PDF with active recall, spaced repetition, and tips to boost your grades.
                               </p>
                               <a href="${pdfUrl}" 
                                  style="display: inline-block; 
-                                        background-color: #84cc16; 
-                                        color: #1c1917; 
+                                        background-color: #a3e635; 
+                                        color: #262626; 
                                         font-size: 14px; 
                                         font-weight: 600; 
                                         text-decoration: none; 

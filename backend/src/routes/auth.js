@@ -213,7 +213,7 @@ router.get('/me', authenticateToken, async (req, res) => {
 
     const { data: user, error } = await supabase
       .from('users')
-      .select('id, email, first_name, last_name, institution, research_field, subscription_plan, subscription_status, created_at, last_login, email_verified')
+      .select('id, email, first_name, last_name, name, institution, research_field, subscription_plan, subscription_status, created_at, last_login, email_verified')
       .eq('id', req.user.id)
       .single();
 
@@ -232,6 +232,7 @@ router.get('/me', authenticateToken, async (req, res) => {
           email: user.email,
           firstName: user.first_name,
           lastName: user.last_name,
+          name: user.name,
           institution: user.institution,
           researchField: user.research_field,
           subscriptionPlan: user.subscription_plan,

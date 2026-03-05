@@ -281,7 +281,7 @@ const AccountPage = ({ onNavigate, user, onLogout }: AccountPageProps) => {
               </div>
               <div className="flex items-center justify-between py-3 border-b border-stone-200">
                 <div>
-                  <div className="font-semibold text-stone-800">Name</div>
+                  <div className="font-semibold text-stone-800">Username</div>
                   <div className="text-stone-600">{displayUser?.name || (displayUser ? 'Not available' : 'Loading...')}</div>
                 </div>
               </div>

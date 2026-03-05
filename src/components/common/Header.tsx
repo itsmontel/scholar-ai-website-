@@ -127,8 +127,8 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
               onClick={() => onNavigate?.('landing')}
               className="flex items-center space-x-2.5 hover:opacity-80 transition-opacity duration-200"
             >
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center">
-                <span className="text-white font-bold text-xl">W</span>
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: '#262626' }}>
+                <span className="font-bold text-xl" style={{ color: '#a3e635' }}>W</span>
               </div>
               <span className="text-2xl font-bold text-stone-800">WriteScholar</span>
             </button>
@@ -138,7 +138,8 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
                 <button
                   key={id}
                   onClick={() => onNavigate?.(id)}
-                  className={`px-4 py-2.5 text-base font-medium rounded-lg hover:bg-stone-100/50 transition-colors ${currentPage === id ? 'text-lime-600' : 'text-stone-600 hover:text-stone-900'}`}
+                  className={`px-4 py-2.5 text-base font-medium rounded-lg hover:bg-stone-100/50 transition-colors ${currentPage === id ? '' : 'text-stone-600 hover:text-stone-900'}`}
+                  style={currentPage === id ? { color: '#a3e635' } : undefined}
                 >
                   {label}
                 </button>
@@ -168,14 +169,15 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
                 <button
                   key={id}
                   onClick={() => { onNavigate?.(id); setIsMobileMenuOpen(false); }}
-                  className={`w-full text-left px-4 py-3 text-base rounded-xl font-medium transition-colors ${currentPage === id ? 'text-lime-600 bg-lime-50' : 'text-stone-600 hover:text-stone-900 hover:bg-stone-50'}`}
+                  className={`w-full text-left px-4 py-3 text-base rounded-xl font-medium transition-colors ${currentPage === id ? 'bg-stone-100' : 'text-stone-600 hover:text-stone-900 hover:bg-stone-50'}`}
+                  style={currentPage === id ? { color: '#a3e635' } : undefined}
                 >
                   {label}
                 </button>
               ))}
               <div className="border-t border-stone-100 mt-3 pt-3">
                 <button onClick={() => { onNavigate?.('login'); setIsMobileMenuOpen(false); }} className="w-full text-left px-4 py-3 rounded-xl font-medium text-stone-600 hover:text-stone-900 hover:bg-stone-50">Log in</button>
-                <button onClick={() => { onNavigate?.('signup'); setIsMobileMenuOpen(false); }} className="w-full text-left px-4 py-3 rounded-xl font-medium text-lime-600 bg-lime-50 hover:bg-lime-100">Try Free</button>
+                <button onClick={() => { onNavigate?.('signup'); setIsMobileMenuOpen(false); }} className="w-full text-left px-4 py-3 rounded-xl font-medium text-stone-900 hover:opacity-90" style={{ backgroundColor: '#a3e635' }}>Try Free</button>
               </div>
             </div>
           </div>
@@ -194,8 +196,8 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
             onClick={() => onNavigate?.('dashboard')}
             className="flex items-center space-x-2.5 hover:opacity-80 transition-opacity duration-200"
           >
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center">
-              <span className="text-white font-bold text-xl">W</span>
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: '#262626' }}>
+              <span className="font-bold text-xl" style={{ color: '#a3e635' }}>W</span>
             </div>
             <span className="text-2xl font-bold text-stone-800">WriteScholar</span>
           </button>
@@ -205,63 +207,57 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
             <button 
               onClick={() => onNavigate?.('dashboard')}
               className={`px-4 py-2.5 text-base font-medium rounded-xl transition-all duration-200 ${
-                currentPage === 'dashboard' 
-                  ? 'text-lime-600 bg-lime-50' 
-                  : 'text-stone-600 hover:text-stone-900 hover:bg-stone-50'
+                currentPage === 'dashboard' ? 'bg-stone-100' : 'text-stone-600 hover:text-stone-900 hover:bg-stone-50'
               }`}
+              style={currentPage === 'dashboard' ? { color: '#a3e635' } : undefined}
             >
               Dashboard
             </button>
             <button 
               onClick={() => onNavigate?.('library')}
               className={`px-4 py-2.5 text-base font-medium rounded-xl transition-all duration-200 ${
-                currentPage === 'library' 
-                  ? 'text-lime-600 bg-lime-50' 
-                  : 'text-stone-600 hover:text-stone-900 hover:bg-stone-50'
+                currentPage === 'library' ? 'bg-stone-100' : 'text-stone-600 hover:text-stone-900 hover:bg-stone-50'
               }`}
+              style={currentPage === 'library' ? { color: '#a3e635' } : undefined}
             >
               Library
             </button>
             <button 
               onClick={() => onNavigate?.('upload')}
               className={`px-4 py-2.5 text-base font-medium rounded-xl transition-all duration-200 ${
-                currentPage === 'upload' 
-                  ? 'text-lime-600 bg-lime-50' 
-                  : 'text-stone-600 hover:text-stone-900 hover:bg-stone-50'
+                currentPage === 'upload' ? 'bg-stone-100' : 'text-stone-600 hover:text-stone-900 hover:bg-stone-50'
               }`}
+              style={currentPage === 'upload' ? { color: '#a3e635' } : undefined}
             >
               Upload
             </button>
             <button 
               onClick={() => onNavigate?.('analysis')}
               className={`px-4 py-2.5 text-base font-medium rounded-xl transition-all duration-200 ${
-                currentPage === 'analysis' 
-                  ? 'text-lime-600 bg-lime-50' 
-                  : 'text-stone-600 hover:text-stone-900 hover:bg-stone-50'
+                currentPage === 'analysis' ? 'bg-stone-100' : 'text-stone-600 hover:text-stone-900 hover:bg-stone-50'
               }`}
+              style={currentPage === 'analysis' ? { color: '#a3e635' } : undefined}
             >
               AI Analysis
             </button>
             <button 
               onClick={() => onNavigate?.('citation-history')}
               className={`px-4 py-2.5 text-base font-medium rounded-xl transition-all duration-200 ${
-                currentPage === 'citations' 
-                  ? 'text-lime-600 bg-lime-50' 
-                  : 'text-stone-600 hover:text-stone-900 hover:bg-stone-50'
+                currentPage === 'citations' ? 'bg-stone-100' : 'text-stone-600 hover:text-stone-900 hover:bg-stone-50'
               }`}
+              style={currentPage === 'citations' ? { color: '#a3e635' } : undefined}
             >
               Citations
             </button>
             <button 
               onClick={() => onNavigate?.('quiz-history')}
               className={`px-4 py-2.5 text-base font-medium rounded-xl transition-all duration-200 flex items-center gap-1.5 ${
-                currentPage === 'quiz-history' 
-                  ? 'text-lime-600 bg-lime-50' 
-                  : 'text-lime-600 hover:text-lime-700 hover:bg-lime-50/50'
+                currentPage === 'quiz-history' ? 'bg-stone-100' : 'hover:bg-stone-50'
               }`}
+              style={{ color: '#a3e635' }}
             >
               🧠 Saved Tools
-              <span className="px-1.5 py-0.5 text-[10px] font-bold bg-lime-500 text-stone-900 rounded-full">PRO</span>
+              <span className="px-1.5 py-0.5 text-[10px] font-bold text-stone-900 rounded-full" style={{ backgroundColor: '#a3e635' }}>PRO</span>
             </button>
           </nav>
 
@@ -282,13 +278,13 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                 className="flex items-center space-x-3 p-2 rounded-xl hover:bg-stone-50 transition-colors duration-200"
               >
-                <div className="w-9 h-9 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center">
-                  <span className="text-white text-sm font-semibold">
-                    {user.email ? user.email.charAt(0).toUpperCase() : 'U'}
+                <div className="w-9 h-9 rounded-xl flex items-center justify-center text-white" style={{ background: '#262626' }}>
+                  <span className="text-sm font-semibold">
+                    {(user.name || user.email) ? (user.name || user.email).charAt(0).toUpperCase() : 'U'}
                   </span>
                 </div>
                 <div className="hidden md:block text-left">
-                  <div className="text-sm font-semibold text-stone-800">{user.email || 'Loading...'}</div>
+                  <div className="text-sm font-semibold text-stone-800">{user.name || user.email || 'Loading...'}</div>
                   <div className="text-xs text-stone-500 capitalize">{usageStats?.plan || 'Free'} Plan</div>
                 </div>
                 <svg 
@@ -307,7 +303,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
                   {/* User Info Section */}
                   <div className="px-4 py-4 border-b border-stone-100 bg-stone-50/50 rounded-t-2xl">
                     <div className="text-sm font-semibold text-stone-800">
-                      {user?.email ? user.email : (user ? 'Email not available' : 'Loading...')}
+                      {user?.name || user?.email || (user ? 'Email not available' : 'Loading...')}
                     </div>
                     <div className="text-xs text-stone-500 capitalize mt-0.5">{usageStats?.plan || 'Free'} Plan</div>
                     

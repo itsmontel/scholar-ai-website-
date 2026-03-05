@@ -199,9 +199,9 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
       limitations: [],
       popular: true,
       buttonText: !user 
-        ? 'Start 7-Day Free Trial' 
+        ? 'Try for Free' 
         : (currentPlan === 'free' 
-          ? (isTrialEligible ? 'Start 7-Day Free Trial' : 'Upgrade to Starter') 
+          ? (isTrialEligible ? 'Try for Free' : 'Upgrade to Starter') 
           : 'Switch to Starter'),
       buttonAction: () => handlePlanAction('starter')
     },
@@ -223,9 +223,9 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
       limitations: [],
       popular: false,
       buttonText: !user 
-        ? 'Start 7-Day Free Trial' 
+        ? 'Try for Free' 
         : (currentPlan === 'free' 
-          ? (isTrialEligible ? 'Start 7-Day Free Trial' : 'Upgrade to Premium') 
+          ? (isTrialEligible ? 'Try for Free' : 'Upgrade to Premium') 
           : 'Switch to Premium'),
       buttonAction: () => handlePlanAction('premium')
     }

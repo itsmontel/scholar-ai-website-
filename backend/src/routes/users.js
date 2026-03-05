@@ -64,7 +64,7 @@ router.get('/profile', authenticateToken, async (req, res) => {
 // @access  Private
 router.put('/profile', authenticateToken, validateUpdateProfile, async (req, res) => {
   try {
-    const { firstName, lastName, institution, researchField } = req.body;
+    const { firstName, lastName, name, institution, researchField } = req.body;
     const userId = req.user.id;
 
     const supabase = createClient(
@@ -75,6 +75,7 @@ router.put('/profile', authenticateToken, validateUpdateProfile, async (req, res
     const updateData = {};
     if (firstName !== undefined) updateData.first_name = firstName;
     if (lastName !== undefined) updateData.last_name = lastName;
+    if (name !== undefined) updateData.name = name;
     if (institution !== undefined) updateData.institution = institution;
     if (researchField !== undefined) updateData.research_field = researchField;
     updateData.updated_at = new Date().toISOString();
@@ -83,7 +84,7 @@ router.put('/profile', authenticateToken, validateUpdateProfile, async (req, res
       .from('users')
       .update(updateData)
       .eq('id', userId)
-      .select('id, first_name, last_name, institution, research_field, updated_at')
+      .select('id, first_name, last_name, name, institution, research_field, updated_at')
       .single();
 
     if (error || !data) {
@@ -101,6 +102,7 @@ router.put('/profile', authenticateToken, validateUpdateProfile, async (req, res
           id: data.id,
           firstName: data.first_name,
           lastName: data.last_name,
+          name: data.name,
           institution: data.institution,
           researchField: data.research_field,
           updatedAt: data.updated_at

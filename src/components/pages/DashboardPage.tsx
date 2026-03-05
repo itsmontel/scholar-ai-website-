@@ -1669,7 +1669,7 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
               className={`px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-sm sm:text-base font-medium transition-all ${
                 mode === 'analyze' ? 'bg-white shadow-sm border' : ''
               }`}
-              style={mode === 'analyze' ? { color: '#2E6FEA', borderColor: '#BFDBFE' } : { color: '#2E6FEA' }}
+              style={mode === 'analyze' ? { color: '#7ab308', borderColor: '#a3e635' } : { color: '#7ab308' }}
             >
               Analyze Essay
               </button>

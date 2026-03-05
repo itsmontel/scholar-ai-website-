@@ -120,7 +120,7 @@ const SettingsPage = ({ onNavigate, user, onLogout }: SettingsPageProps) => {
     </div>
               <div className="flex items-center justify-between py-3 border-b border-stone-200">
       <div>
-                  <div className="font-semibold text-stone-800">Name</div>
+                  <div className="font-semibold text-stone-800">Username</div>
                   <div className="text-stone-600">{user?.name || 'Loading...'}</div>
                 </div>
               </div>

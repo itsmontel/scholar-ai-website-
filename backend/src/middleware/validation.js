@@ -195,6 +195,7 @@ const validationSchemas = {
   updateProfile: Joi.object({
     firstName: Joi.string().min(2).max(50).optional(),
     lastName: Joi.string().min(2).max(50).optional(),
+    name: Joi.string().min(1).max(100).optional(),
     institution: Joi.string().max(255).optional(),
     researchField: Joi.string().max(255).optional()
   }).min(1), // At least one field must be provided

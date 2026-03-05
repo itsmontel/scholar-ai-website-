@@ -187,9 +187,9 @@ const AcademicAIApp = () => {
               const updatedUser = {
                 id: userData.data.user.id,
                 email: userData.data.user.email,
-                name: userData.data.user.firstName && userData.data.user.lastName 
+                name: userData.data.user.name || (userData.data.user.firstName && userData.data.user.lastName 
                   ? `${userData.data.user.firstName} ${userData.data.user.lastName}` 
-                  : userData.data.user.name || userData.data.user.email,
+                  : null) || userData.data.user.email,
                 firstName: userData.data.user.firstName,
                 lastName: userData.data.user.lastName,
                 plan: userData.data.user.subscriptionPlan || 'free',
@@ -601,6 +601,13 @@ const AcademicAIApp = () => {
             <OnboardingPage
               onNavigate={navigateTo}
               user={user}
+              onUserUpdate={(updates) => {
+                if (user && updates.name) {
+                  const updatedUser = { ...user, name: updates.name };
+                  setUser(updatedUser);
+                  localStorage.setItem('user', JSON.stringify(updatedUser));
+                }
+              }}
               onComplete={() => {
                 localStorage.setItem('writescholar_onboarding_completed', 'true');
                 navigateTo('dashboard');
@@ -615,6 +622,13 @@ const AcademicAIApp = () => {
             <OnboardingPage
               onNavigate={navigateTo}
               user={user}
+              onUserUpdate={(updates) => {
+                if (user && updates.name) {
+                  const updatedUser = { ...user, name: updates.name };
+                  setUser(updatedUser);
+                  localStorage.setItem('user', JSON.stringify(updatedUser));
+                }
+              }}
               onComplete={() => {
                 localStorage.setItem('writescholar_onboarding_completed', 'true');
                 navigateTo('analyze');
@@ -629,6 +643,13 @@ const AcademicAIApp = () => {
             <OnboardingPage
               onNavigate={navigateTo}
               user={user}
+              onUserUpdate={(updates) => {
+                if (user && updates.name) {
+                  const updatedUser = { ...user, name: updates.name };
+                  setUser(updatedUser);
+                  localStorage.setItem('user', JSON.stringify(updatedUser));
+                }
+              }}
               onComplete={() => {
                 localStorage.setItem('writescholar_onboarding_completed', 'true');
                 navigateTo('citations');

@@ -97,7 +97,7 @@ const ProfilePage = ({ onNavigate, user, onLogout }: ProfilePageProps) => {
         <h3 className="text-xl font-bold text-stone-800 mb-6">Profile Information</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label className="block text-sm font-medium text-stone-700 mb-2">Name</label>
+            <label className="block text-sm font-medium text-stone-700 mb-2">Username</label>
             <div className="text-stone-800">{profileData.name}</div>
             </div>
           <div>

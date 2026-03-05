@@ -67,9 +67,9 @@ const LoginPage = ({ onNavigate, onLogin }: LoginPageProps) => {
       const transformedUser = {
         id: data.data.user.id,
         email: data.data.user.email,
-        name: data.data.user.firstName && data.data.user.lastName 
-          ? `${data.data.user.firstName} ${data.data.user.lastName}` 
-          : data.data.user.name || data.data.user.email,
+        name: data.data.user.name || (data.data.user.firstName && data.data.user.lastName
+          ? `${data.data.user.firstName} ${data.data.user.lastName}`
+          : null) || data.data.user.email,
         firstName: data.data.user.firstName,
         lastName: data.data.user.lastName,
         plan: data.data.user.subscriptionPlan || 'free',

@@ -7,6 +7,12 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        writescholar: {
+          DEFAULT: '#a3e635',
+          light: '#bef264',
+          dark: '#84cc16',
+        },
+        writescholarBg: '#262626',
         primary: {
           50: '#eff6ff',
           100: '#dbeafe',

@@ -6,19 +6,19 @@ const PromoBanner: React.FC = () => {
   if (isDismissed) return null;
 
   return (
-    <div className="sticky sm:relative top-0 left-0 right-0 bg-gray-900 text-white py-2 sm:py-2.5 px-2 sm:px-4 z-30">
+    <div className="sticky sm:relative top-0 left-0 right-0 text-white py-2 sm:py-2.5 px-2 sm:px-4 z-30" style={{ background: '#262626' }}>
       <div className="max-w-7xl mx-auto flex items-center justify-center gap-2 sm:gap-4">
         <div className="flex items-center justify-center gap-2 sm:gap-3 text-center">
           <span className="text-xs sm:text-sm font-medium">
             <span className="hidden sm:inline">🎉 Get </span>
             <span className="sm:hidden">🎉 </span>
-            <span className="font-semibold text-blue-400">50% off</span>
+            <span className="font-semibold" style={{ color: '#a3e635' }}>50% off</span>
             <span className="sm:hidden"> first month</span>
             <span className="hidden sm:inline"> your first month on any monthly plan</span>
           </span>
           <span className="text-gray-400 hidden sm:inline">•</span>
           <span className="bg-white/10 text-white px-2.5 sm:px-3 py-1 rounded-md font-medium text-xs sm:text-sm">
-            Code: <span className="text-blue-400">OFF50</span>
+            Code: <span style={{ color: '#a3e635' }}>OFF50</span>
           </span>
         </div>
         

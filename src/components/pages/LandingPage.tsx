@@ -358,7 +358,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
 
   // Mode-specific hero headlines with topic colors
   const getHeroHeadline = () => {
-    if (mode === 'analyze') return <>Your essay — improved with <span style={{ color: '#2E6FEA' }}>AI assistance</span></>;
+    if (mode === 'analyze') return <>Your essay — improved with <span style={{ color: '#7ab308' }}>AI assistance</span></>;
     if (mode === 'citations') return <>Find <span style={{ color: '#22A7AB' }}>academic citations</span> instantly</>;
     if (mode === 'humanize') return <>Make AI text <span style={{ color: '#9B59B6' }}>undetectable</span></>;
     if (mode === 'summarize') return <>Summarize <span style={{ color: '#28B463' }}>any document</span></>;
@@ -367,7 +367,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
       if (studyToolMode === 'crossword') return <>Generate a <span style={{ color: '#D35400' }}>crossword puzzle</span></>;
       return <>Generate <span style={{ color: '#D35400' }}>quiz questions</span></>;
     }
-    return <>Your essay — improved with <span style={{ color: '#2E6FEA' }}>AI assistance</span></>;
+    return <>Your essay — improved with <span style={{ color: '#7ab308' }}>AI assistance</span></>;
   };
 
   return (
@@ -377,9 +377,9 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-18 py-4">
             <a href="/" onClick={(e) => { e.preventDefault(); onNavigate('landing'); }} className="flex items-center space-x-2.5">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center">
-                <span className="text-white font-bold text-xl">W</span>
-                      </div>
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: '#262626' }}>
+                <span className="font-bold text-xl" style={{ color: '#a3e635' }}>W</span>
+              </div>
               <span className="text-2xl font-bold text-stone-800">WriteScholar</span>
             </a>
             
@@ -393,7 +393,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
             
             <div className="flex items-center space-x-3">
               <a href="/login" onClick={(e) => { e.preventDefault(); onNavigate('login'); }} className="hidden sm:inline-flex px-4 py-2.5 text-base text-stone-600 hover:text-stone-900 font-medium rounded-lg hover:bg-stone-100/50 transition-colors">Log in</a>
-              <a href="/signup" onClick={(e) => { e.preventDefault(); onNavigate('signup'); }} className="inline-flex items-center px-5 py-2.5 bg-lime-400 text-stone-900 text-base font-semibold rounded-full hover:bg-lime-300 hover:shadow-md transition-all duration-200">
+              <a href="/signup" onClick={(e) => { e.preventDefault(); onNavigate('signup'); }} className="inline-flex items-center px-5 py-2.5 text-stone-900 text-base font-semibold rounded-full hover:opacity-90 hover:shadow-md transition-all duration-200" style={{ background: '#a3e635' }}>
                 Try Free
               </a>
                       </div>
@@ -431,9 +431,9 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                     <span className="text-[11px] text-stone-600 text-center leading-tight max-w-[70px]">{tool.name}</span>
                     
                     {activeToolHover === tool.id && (
-                      <div className="absolute left-full ml-3 px-3 py-2 bg-stone-800 text-white text-sm rounded-lg whitespace-nowrap z-10">
+                      <div className="absolute left-full ml-3 px-3 py-2 text-white text-sm rounded-lg whitespace-nowrap z-10" style={{ background: '#262626' }}>
                         {tool.name}
-                        <div className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-stone-800" />
+                        <div className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent" style={{ borderRightColor: '#262626' }} />
                   </div>
                     )}
                   </button>
@@ -461,7 +461,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                     className={`px-5 sm:px-6 py-2.5 rounded-full text-base font-medium transition-all ${
                       mode === 'analyze' ? 'bg-white shadow-sm border' : ''
                     }`}
-                    style={mode === 'analyze' ? { color: '#2E6FEA', borderColor: '#BFDBFE' } : { color: '#2E6FEA' }}
+                    style={mode === 'analyze' ? { color: '#7ab308', borderColor: '#a3e635' } : { color: '#7ab308' }}
                   >
                     Analyze Essay
                   </button>
@@ -495,10 +495,10 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                   </button>
                   <button
                     onClick={() => { setMode('quiz'); setInputText(''); }}
-                    className={`px-5 sm:px-6 py-2.5 rounded-full text-base font-medium transition-all relative ${
-                      mode === 'quiz' ? 'bg-white shadow-sm border' : ''
+                    className={`px-5 sm:px-6 py-2.5 rounded-full text-base font-semibold transition-all relative ${
+                      mode === 'quiz' ? 'bg-white shadow-md border-2 ring-2 ring-orange-200/50' : 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-lg hover:shadow-xl hover:from-orange-600 hover:to-amber-600'
                     }`}
-                    style={mode === 'quiz' ? { color: '#D35400', borderColor: '#FADBD8' } : { color: '#D35400' }}
+                    style={mode === 'quiz' ? { color: '#D35400', borderColor: '#FADBD8' } : {}}
                   >
                     Study Tools
                     <span className="absolute -top-2 -right-1 px-1.5 py-0.5 text-white text-[10px] font-bold rounded-full leading-none" style={{ backgroundColor: '#D35400' }}>PRO</span>
@@ -1122,7 +1122,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                     ? 'text-white'
                     : 'bg-white text-stone-600 hover:bg-stone-50 border border-stone-200'
                 }`}
-                style={activeHelpCategory === category.id ? { background: 'linear-gradient(180deg, #292524 0%, #1c1917 100%)' } : undefined}
+                style={activeHelpCategory === category.id ? { background: '#262626' } : undefined}
               >
                 {category.label}
               </button>
@@ -1142,7 +1142,8 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                 </p>
                 <button
                   onClick={() => onNavigate('signup')}
-                  className="inline-flex items-center px-6 py-3 bg-lime-400 text-stone-900 font-semibold rounded-full hover:bg-lime-300 hover:-translate-y-0.5 hover:shadow-lg transition-all duration-200"
+                  className="inline-flex items-center px-6 py-3 text-stone-900 font-semibold rounded-full hover:opacity-90 hover:-translate-y-0.5 hover:shadow-lg transition-all duration-200"
+                  style={{ background: '#a3e635' }}
                 >
                   Start for free
                 </button>

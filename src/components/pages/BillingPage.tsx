@@ -32,6 +32,7 @@ interface UsageStats {
 const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout }) => {
   const [currentPlan, setCurrentPlan] = useState<string>('free');
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
+  const [isTrialEligible, setIsTrialEligible] = useState<boolean>(true);
   const [usageStats, setUsageStats] = useState<UsageStats>({
     documentsUploaded: 0,
     documentsAnalyzed: 0,
@@ -103,7 +104,26 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
 
   useEffect(() => {
     fetchSubscriptionData();
+    checkTrialEligibility();
   }, []);
+
+  const checkTrialEligibility = async () => {
+    try {
+      const token = localStorage.getItem('authToken');
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/subscriptions/trial-eligibility`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setIsTrialEligible(data.eligible);
+      }
+    } catch (error) {
+      console.error('Error checking trial eligibility:', error);
+    }
+  };
 
   const fetchSubscriptionData = async () => {
     try {
@@ -414,6 +434,15 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
                 </ul>
               </div>
 
+              {/* Trial badge for paid plans */}
+              {plan.id !== 'free' && currentPlan === 'free' && isTrialEligible && (
+                <div className="mb-4">
+                  <span className="bg-violet-500 text-white px-3 py-1 rounded-full text-xs font-semibold">
+                    7-Day Free Trial
+                  </span>
+                </div>
+              )}
+
               {/* CTA Button */}
               <button
                 onClick={() => handleUpgrade(plan.id)}
@@ -436,7 +465,7 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
                 ) : plan.id === 'free' ? (
                   'Stay Free'
                 ) : currentPlan === 'free' ? (
-                  `Upgrade to ${plan.name}`
+                  isTrialEligible ? 'Try for Free' : `Upgrade to ${plan.name}`
                 ) : (
                   `Switch to ${plan.name}`
                 )}

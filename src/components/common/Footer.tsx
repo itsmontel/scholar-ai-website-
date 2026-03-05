@@ -6,14 +6,14 @@ interface FooterProps {
 
 const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
   return (
-    <footer className="border-t border-stone-300" style={{ background: 'linear-gradient(180deg, #292524 0%, #1c1917 100%)' }}>
+    <footer className="border-t border-stone-300" style={{ background: '#262626' }}>
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
         <div className="grid grid-cols-2 md:grid-cols-6 gap-8 mb-12">
           {/* Logo and Description */}
           <div className="col-span-2 md:col-span-1">
             <div className="flex items-center space-x-2.5 mb-4">
-              <div className="w-9 h-9 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center">
-                <span className="text-white font-bold text-lg">W</span>
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: '#262626', border: '1px solid rgba(163, 230, 53, 0.4)' }}>
+                <span className="font-bold text-lg" style={{ color: '#a3e635' }}>W</span>
               </div>
               <span className="text-xl font-bold text-white">WriteScholar</span>
             </div>
@@ -47,7 +47,7 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
                 </a>
               </li>
               <li>
-                <a href="/blog" onClick={(e) => { e.preventDefault(); onNavigate?.('blog'); }} className="text-lime-400 hover:text-lime-300 text-sm font-medium transition-colors">
+                <a href="/blog" onClick={(e) => { e.preventDefault(); onNavigate?.('blog'); }} className="text-sm font-medium transition-colors hover:opacity-90" style={{ color: '#a3e635' }}>
                   Blog
                 </a>
               </li>
@@ -118,7 +118,7 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
             </h4>
             <ul className="space-y-3">
               <li>
-                <a href="/tools/analyze" onClick={(e) => { e.preventDefault(); onNavigate?.('analyze'); }} className="text-lime-400 hover:text-lime-300 text-sm font-medium transition-colors flex items-center gap-1.5">
+                <a href="/tools/analyze" onClick={(e) => { e.preventDefault(); onNavigate?.('analyze'); }} className="text-sm font-medium transition-colors flex items-center gap-1.5 hover:opacity-90" style={{ color: '#7ab308' }}>
                   Analyze Essay
                   <span className="text-xs opacity-75">📊</span>
                 </a>
@@ -209,7 +209,7 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
         </div>
         
         {/* Bottom Bar */}
-        <div className="pt-8 border-t border-stone-600 flex justify-center">
+        <div className="pt-8 border-t flex justify-center" style={{ borderColor: 'rgba(255,255,255,0.15)' }}>
           <p className="text-stone-500 text-sm">
             © 2026 WriteScholar. All rights reserved.
           </p>
