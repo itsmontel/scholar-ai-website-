@@ -633,6 +633,29 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
           </button>
         </div>
 
+        {/* Lightning Reflex Quiz Banner */}
+        <button
+          onClick={() => onNavigate('lightning-reflex-quiz')}
+          className="w-full mb-8 group relative overflow-hidden rounded-2xl border border-indigo-200/60 transition-all hover:shadow-lg hover:-translate-y-0.5"
+          style={{ background: 'linear-gradient(135deg, #4f46e5 0%, #6366f1 40%, #818cf8 100%)' }}
+        >
+          <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 80% 30%, rgba(255,255,255,0.3) 0%, transparent 60%)' }} />
+          <div className="relative px-5 py-4 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className="w-11 h-11 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center text-2xl shrink-0">
+                ⚡
+              </div>
+              <div className="text-left">
+                <div className="text-white font-bold text-base">Lightning Reflex Quiz</div>
+                <div className="text-indigo-200 text-sm">Fast-paced AI quiz game — test your knowledge at speed</div>
+              </div>
+            </div>
+            <div className="shrink-0 px-4 py-2 rounded-xl bg-white/20 text-white text-sm font-semibold group-hover:bg-white/30 transition-colors">
+              Play Now →
+            </div>
+          </div>
+        </button>
+
         {/* Filter tabs - pill style */}
         <div className="flex flex-wrap gap-2 mb-8">
           {filterTabs.map((tab) => (

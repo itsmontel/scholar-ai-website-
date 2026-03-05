@@ -1587,4 +1587,39 @@ router.delete('/citation/:id', authenticateToken, async (req, res) => {
   }
 });
 
+// @route   POST /api/analysis/generate-reflex-questions
+// @desc    Generate questions for Lightning Reflex Quiz from a topic or notes
+// @access  Private
+router.post('/generate-reflex-questions', authenticateToken, async (req, res) => {
+  try {
+    const { inputType, content } = req.body;
+    const userPlan = req.user.subscription_plan || 'free';
+
+    if (!content || content.trim().length === 0) {
+      return res.status(400).json({ success: false, message: 'Content is required' });
+    }
+
+    if (!['topic', 'notes'].includes(inputType)) {
+      return res.status(400).json({ success: false, message: 'inputType must be "topic" or "notes"' });
+    }
+
+    if (inputType === 'topic' && content.trim().length < 2) {
+      return res.status(400).json({ success: false, message: 'Topic must be at least 2 characters' });
+    }
+
+    if (inputType === 'notes' && content.trim().split(/\s+/).length < 20) {
+      return res.status(400).json({ success: false, message: 'Notes must be at least 20 words' });
+    }
+
+    const result = await aiAnalysisService.generateReflexQuestions(inputType, content, userPlan);
+    res.json({ success: true, data: result });
+  } catch (error) {
+    console.error('Generate reflex questions error:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to generate questions'
+    });
+  }
+});
+
 module.exports = router;

@@ -46,6 +46,7 @@ import SummarizerPage from './pages/tools/SummarizerPage';
 import QuizGeneratorPage from './pages/tools/QuizGeneratorPage';
 import GPACalculatorPage from './pages/tools/GPACalculatorPage';
 import PomodoroTimerPage from './pages/tools/PomodoroTimerPage';
+import LightningReflexQuizPage from './pages/tools/LightningReflexQuizPage';
 
 // Import common components
 import ErrorBoundary from './common/ErrorBoundary';
@@ -131,7 +132,8 @@ const AcademicAIApp = () => {
     'crossword-generator': { title: 'AI Crossword Generator – Create Study Crosswords from Text | WriteScholar', description: 'Turn your notes and study materials into engaging crossword puzzles. Fun way to memorize key terms. Free plan: 3 generations/month.' },
     'quiz-history': { title: 'My Study Tools | WriteScholar', description: 'View and retake your saved quizzes, flashcards, and crosswords. Study materials are stored for 7 days.' },
     'gpa-calculator': { title: 'Free GPA Calculator - Calculate Grade Point Average | WriteScholar', description: 'Free GPA calculator for college and high school students. Calculate semester or cumulative GPA instantly. Add courses, credits, and grades. No signup required.' },
-    'pomodoro-timer': { title: 'Free Pomodoro Timer - Study Timer & Focus Tool | WriteScholar', description: 'Free Pomodoro timer for focused studying. Boost productivity with timed work sessions and breaks. Customizable focus and break intervals. No signup required.' }
+    'pomodoro-timer': { title: 'Free Pomodoro Timer - Study Timer & Focus Tool | WriteScholar', description: 'Free Pomodoro timer for focused studying. Boost productivity with timed work sessions and breaks. Customizable focus and break intervals. No signup required.' },
+    'lightning-reflex-quiz': { title: 'Lightning Reflex Quiz - AI Study Game | WriteScholar', description: 'Test your knowledge at lightning speed! AI generates quiz questions that fall as tiles. Click the correct answer before time runs out. Build streaks and beat your high score.' }
   };
   useEffect(() => {
     const meta = pageMeta[currentPage];
@@ -315,6 +317,7 @@ const AcademicAIApp = () => {
       if (pathname === '/tools/crossword-generator' || pathname === '/crossword-generator') return 'crossword-generator';
       if (pathname === '/tools/gpa-calculator' || pathname === '/gpa-calculator') return 'gpa-calculator';
       if (pathname === '/tools/pomodoro-timer' || pathname === '/pomodoro-timer') return 'pomodoro-timer';
+      if (pathname === '/tools/lightning-reflex-quiz' || pathname === '/lightning-reflex-quiz') return 'lightning-reflex-quiz';
       // Dashboard modes
       if (pathname === '/tools/analyze' || pathname === '/analyze') return 'analyze';
       if (pathname === '/tools/citations' || pathname === '/citations') return 'citations';
@@ -486,6 +489,7 @@ const AcademicAIApp = () => {
     'grammar-checker': '/tools/grammar-checker',
     'gpa-calculator': '/tools/gpa-calculator',
     'pomodoro-timer': '/tools/pomodoro-timer',
+    'lightning-reflex-quiz': '/tools/lightning-reflex-quiz',
     'analyze': '/tools/analyze',
     'citations': '/tools/citations',
     'why-students-choose': '/why-students-choose',
@@ -653,6 +657,8 @@ const AcademicAIApp = () => {
         return <GPACalculatorPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'pomodoro-timer':
         return <PomodoroTimerPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
+      case 'lightning-reflex-quiz':
+        return <LightningReflexQuizPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'admin':
         return <AdminDashboard onNavigate={navigateTo} user={user} />;
       case 'collaboration':

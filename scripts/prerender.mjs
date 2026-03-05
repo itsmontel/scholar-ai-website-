@@ -44,6 +44,7 @@ const staticRoutes = [
   '/tools/paraphrasing-tips',
   '/tools/gpa-calculator',
   '/tools/pomodoro-timer',
+  '/tools/lightning-reflex-quiz',
 ];
 
 let blogSlugs = [];

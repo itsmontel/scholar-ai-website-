@@ -3465,6 +3465,82 @@ DO NOT include any text outside the JSON object.`;
 
     return { grid: trimmed, placedWords: adjusted, size: Math.max(maxR - minR + 1, maxC - minC + 1) };
   }
+
+  async generateReflexQuestions(inputType, content, userPlan = 'free') {
+    if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY === 'your_openai_api_key_here') {
+      throw new Error('OpenAI API key not configured');
+    }
+
+    const selectedModel = userPlan === 'premium' ? 'gpt-4.1-mini' : 'gpt-4.1-nano';
+
+    const systemPrompt = `You are a quiz question generator for a fast-paced arcade-style reflex game.
+
+Generate exactly 20 multiple-choice questions. Each question MUST have exactly 4 answer options.
+
+Rules:
+- Questions should be SHORT (max 12 words) so players can read quickly
+- Answers should be 1-4 words max (players must read them as tiles fall)
+- One clearly correct answer per question
+- Three plausible but wrong distractors
+- Vary difficulty: mix easy recall with harder application questions
+- Make them fun and engaging
+
+Return ONLY valid JSON in this exact format:
+{
+  "questions": [
+    {
+      "id": "q1",
+      "prompt": "Short question text?",
+      "answers": ["Correct Answer", "Wrong 1", "Wrong 2", "Wrong 3"],
+      "correctIndex": 0
+    }
+  ]
+}
+
+CRITICAL: The correct answer MUST always be at index 0 in the answers array. The game shuffles them before display.
+DO NOT include any text outside the JSON object.`;
+
+    const userPrompt = inputType === 'topic'
+      ? `Generate 20 fast-paced quiz questions about: ${content}`
+      : `Generate 20 fast-paced quiz questions from these study notes:\n\n${content.substring(0, 8000)}`;
+
+    try {
+      const completion = await this.openai.chat.completions.create({
+        model: selectedModel,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userPrompt }
+        ],
+        max_tokens: 3000,
+        temperature: 0.8,
+      });
+
+      const responseText = completion.choices[0]?.message?.content;
+      if (!responseText) throw new Error('No response from AI');
+
+      let parsed;
+      try {
+        const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+        parsed = jsonMatch ? JSON.parse(jsonMatch[0]) : JSON.parse(responseText);
+      } catch (parseError) {
+        console.error('Failed to parse reflex questions JSON:', parseError);
+        throw new Error('Failed to parse questions response');
+      }
+
+      if (!parsed.questions || !Array.isArray(parsed.questions) || parsed.questions.length === 0) {
+        throw new Error('No questions generated');
+      }
+
+      parsed.questions = parsed.questions.filter(q =>
+        q.prompt && Array.isArray(q.answers) && q.answers.length === 4 && typeof q.correctIndex === 'number'
+      );
+
+      return parsed;
+    } catch (error) {
+      console.error('OpenAI reflex question generation error:', error);
+      throw new Error('Failed to generate questions: ' + error.message);
+    }
+  }
 }
 
 module.exports = new AIAnalysisService();
