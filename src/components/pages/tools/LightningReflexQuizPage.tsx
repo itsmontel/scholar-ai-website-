@@ -64,7 +64,7 @@ const SPEED_DECREASE_PER_5 = 600;
 const BASE_SCORE = 100;
 const MAX_REACTION_BONUS = 200;
 const STREAK_BONUS_PER = 10;
-const ROUND_DELAY_MS = 200;
+const ROUND_DELAY_MS = 0;
 const BEST_SCORE_KEY = 'cb-best';
 const BEST_STREAK_KEY = 'cb-best-streak';
 
@@ -217,7 +217,11 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
       setQuestions([...questionsRef.current]);
     }
     sync('qIdx', next);
-    transitionRef.current = setTimeout(() => spawnRound(next, fallDurationRef.current), ROUND_DELAY_MS);
+    if (ROUND_DELAY_MS > 0) {
+      transitionRef.current = setTimeout(() => spawnRound(next, fallDurationRef.current), ROUND_DELAY_MS);
+    } else {
+      spawnRound(next, fallDurationRef.current);
+    }
   }, [spawnRound, sync]);
 
   const endGame = useCallback(() => {
@@ -272,7 +276,7 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
       setCraters(prev => prev.map(c =>
         c.id === crater.id ? { ...c, status: 'correct' as const, frozenTop: hitY - CRATER_SIZE / 2 } : { ...c, status: 'missed' as const }
       ));
-      setTimeout(() => advanceQuestion(), 120);
+      setTimeout(() => advanceQuestion(), 60);
     } else {
       setCraters(prev => {
         const correct = prev.find(c => c.isCorrect);
@@ -288,7 +292,7 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
           return { ...c, status: 'missed' as const };
         });
       });
-      setTimeout(() => loseLife(), 200);
+      setTimeout(() => loseLife(), 60);
     }
   }, [advanceQuestion, loseLife, sync]);
 
@@ -686,7 +690,6 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
             const isFalling = crater.status === 'falling';
             const isOk = crater.status === 'correct';
             const isBad = crater.status === 'wrong';
-            const isMissed = crater.status === 'missed';
 
             const wrapStyle: React.CSSProperties = {
               position: 'absolute',
@@ -698,15 +701,12 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
             if (isFalling) {
               wrapStyle.animation = `lrqFall ${crater.fallDurationMs}ms linear forwards`;
             } else if (isOk) {
-              wrapStyle.animation = 'lrqCraterCorrect 0.6s ease-out forwards';
               wrapStyle.top = crater.frozenTop != null ? `${crater.frozenTop}px` : '40%';
             } else if (isBad) {
-              wrapStyle.animation = 'lrqCraterWrong 0.6s ease-out forwards';
               wrapStyle.top = crater.frozenTop != null ? `${crater.frozenTop}px` : '40%';
             } else {
-              wrapStyle.opacity = 0.15;
+              wrapStyle.opacity = 0;
               wrapStyle.pointerEvents = 'none';
-              wrapStyle.transition = 'opacity 0.4s';
               wrapStyle.top = crater.frozenTop != null ? `${crater.frozenTop}px` : '40%';
             }
 
@@ -742,8 +742,12 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
                   alignItems: 'center',
                   justifyContent: 'center',
                   textAlign: 'center' as const,
-                  transition: isMissed ? 'opacity 0.4s' : undefined,
-                  animation: isFalling ? 'lrqCraterBob 3s ease-in-out infinite' : undefined,
+                  overflow: 'hidden' as const,
+                  animation: isFalling
+                    ? 'lrqCraterBob 3s ease-in-out infinite'
+                    : isOk  ? 'lrqCraterCorrect 0.45s ease-out forwards'
+                    : isBad ? 'lrqCraterWrong 0.45s ease-out forwards'
+                    : undefined,
                 }}>
                   {/* Crater inner ring */}
                   <div className="absolute inset-[6px] rounded-full pointer-events-none" style={{
@@ -756,17 +760,16 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
                   <span style={{
                     color: txt,
                     fontWeight: 700,
-                    fontSize: crater.text.length > 14 ? '9px' : crater.text.length > 10 ? '10px' : crater.text.length > 7 ? '11px' : '13px',
-                    lineHeight: 1.2,
+                    fontSize: crater.text.length > 14 ? '8.5px' : crater.text.length > 10 ? '10px' : crater.text.length > 7 ? '11px' : '12px',
+                    lineHeight: 1.25,
                     textAlign: 'center' as const,
-                    whiteSpace: 'nowrap' as const,
-                    overflow: 'hidden' as const,
-                    textOverflow: 'ellipsis' as const,
-                    maxWidth: `${CRATER_SIZE - 18}px`,
-                    textShadow: '0 1px 3px rgba(0,0,0,0.5)',
+                    maxWidth: `${Math.floor(CRATER_SIZE * 0.68)}px`,
+                    wordBreak: 'break-word' as const,
+                    overflowWrap: 'anywhere' as const,
+                    textShadow: '0 1px 3px rgba(0,0,0,0.6)',
                     position: 'relative',
                     zIndex: 2,
-                    padding: '0 4px',
+                    display: 'block',
                   }}>
                     {crater.text}
                   </span>
