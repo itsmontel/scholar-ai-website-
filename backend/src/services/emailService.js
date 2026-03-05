@@ -340,8 +340,9 @@ class EmailService {
     try {
       const fromAddress = process.env.EMAIL_FROM || process.env.EMAIL_USER;
       const replyToAddress = process.env.EMAIL_REPLY_TO || 'support@writescholar.com';
-      const dashboardUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
-      const pdfUrl = `${dashboardUrl.replace(/\/$/, '')}/downloads/writescholar-ultimate-study-tips-guide.pdf`;
+      const frontendUrl = (process.env.FRONTEND_URL || 'http://localhost:5173').replace(/\/$/, '');
+      const pdfUrl = `${frontendUrl}/downloads/writescholar-ultimate-study-tips-guide.pdf`;
+      const loginUrl = `${frontendUrl}/login`;
       const mailOptions = {
         from: `"WriteScholar" <${fromAddress}>`,
         to: email,
@@ -422,7 +423,7 @@ class EmailService {
                         <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
                           <tr>
                             <td align="center" style="padding: 0 0 32px 0;">
-                              <a href="${dashboardUrl}/dashboard" 
+                              <a href="${loginUrl}"
                                  style="display: inline-block; 
                                         background-color: #1c1917; 
                                         color: #ffffff; 
@@ -431,7 +432,7 @@ class EmailService {
                                         text-decoration: none; 
                                         padding: 14px 32px; 
                                         border-radius: 50px;">
-                                Go to Dashboard
+                                Log in to Dashboard
                               </a>
                             </td>
                           </tr>

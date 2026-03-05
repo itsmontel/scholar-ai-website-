@@ -308,9 +308,10 @@ router.post('/verify-email', async (req, res) => {
 router.get('/verify-email', async (req, res) => {
   try {
     const { token } = req.query;
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
 
     if (!token) {
-      return res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:5173'}?error=missing-token`);
+      return res.redirect(`${frontendUrl}/login?error=missing-token`);
     }
 
     console.log('Verification attempt with token:', token);
@@ -320,18 +321,16 @@ router.get('/verify-email', async (req, res) => {
     
     if (!user) {
       console.log('No user found with token:', token);
-      return res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:5173'}?error=invalid-token`);
+      return res.redirect(`${frontendUrl}/login?error=invalid-token`);
     }
 
     console.log('User found:', user.email);
 
     // Update the user to mark email as verified
-    const updatedUser = await userService.updateUser(user.id, {
+    await userService.updateUser(user.id, {
       email_verified: true,
       email_verification_token: null
     });
-
-    console.log('User updated:', updatedUser);
 
     // Send welcome email
     const welcomeResult = await emailService.sendWelcomeEmail(user.email);
@@ -339,11 +338,11 @@ router.get('/verify-email', async (req, res) => {
       console.error('Failed to send welcome email:', welcomeResult.error);
     }
 
-    // Redirect to email verification success page
-    res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:5173'}/email-verification?verified=true`);
+    // Redirect to email verification success page (user logs in with password)
+    res.redirect(`${frontendUrl}/email-verification?verified=true`);
   } catch (error) {
     console.error('Email verification error:', error);
-    res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:5173'}?error=verification-failed`);
+    res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:5173'}/login?error=verification-failed`);
   }
 });
 

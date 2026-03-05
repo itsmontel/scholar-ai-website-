@@ -40,10 +40,11 @@ const AuthCallbackPage: React.FC<AuthCallbackPageProps> = ({ onNavigate, onLogin
         onLogin(userData);
         setStatus('success');
 
-        // Redirect to dashboard after a short delay
+        // Remove token from URL for security, then redirect to dashboard
+        window.history.replaceState(null, '', '/auth/callback');
         setTimeout(() => {
           onNavigate('dashboard');
-        }, 1500);
+        }, 800);
 
       } catch (error) {
         console.error('Auth callback error:', error);

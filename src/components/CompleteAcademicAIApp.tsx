@@ -6,6 +6,7 @@ import LandingPage from './pages/LandingPage';
 import SignUpPage from './pages/SignUpPage';
 import LoginPage from './pages/LoginPage';
 import EmailVerificationPage from './pages/EmailVerificationPage';
+import OnboardingPage from './pages/OnboardingPage';
 import AuthCallbackPage from './pages/AuthCallbackPage';
 import DashboardPage from './pages/DashboardPage';
 import AnalysisPage from './pages/AnalysisPage';
@@ -272,6 +273,7 @@ const AcademicAIApp = () => {
     // Set initial page based on URL
     const getPageFromPath = (pathname: string) => {
       if (pathname === '/email-verification') return 'email-verification';
+      if (pathname === '/onboarding') return 'onboarding';
       if (pathname === '/auth/callback') return 'auth-callback';
       if (pathname === '/signup') return 'signup';
       if (pathname === '/login') return 'login';
@@ -564,6 +566,8 @@ const AcademicAIApp = () => {
         return <ResetPasswordPage onNavigate={navigateTo} />;
       case 'email-verification':
         return <EmailVerificationPage onNavigate={navigateTo} />;
+      case 'onboarding':
+        return <OnboardingPage onNavigate={navigateTo} />;
       case 'auth-callback':
         return <AuthCallbackPage onNavigate={navigateTo} onLogin={handleLogin} />;
       case 'pricing':
@@ -591,10 +595,47 @@ const AcademicAIApp = () => {
       case 'unsubscribe':
         return <UnsubscribePage onNavigate={navigateTo} />;
       case 'dashboard':
+        // First-time users see onboarding before dashboard
+        if (isLoggedIn && !localStorage.getItem('writescholar_onboarding_completed')) {
+          return (
+            <OnboardingPage
+              onNavigate={navigateTo}
+              user={user}
+              onComplete={() => {
+                localStorage.setItem('writescholar_onboarding_completed', 'true');
+                navigateTo('dashboard');
+              }}
+            />
+          );
+        }
         return <DashboardPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'analyze':
+        if (isLoggedIn && !localStorage.getItem('writescholar_onboarding_completed')) {
+          return (
+            <OnboardingPage
+              onNavigate={navigateTo}
+              user={user}
+              onComplete={() => {
+                localStorage.setItem('writescholar_onboarding_completed', 'true');
+                navigateTo('analyze');
+              }}
+            />
+          );
+        }
         return isLoggedIn ? <DashboardPage onNavigate={navigateTo} user={user} onLogout={handleLogout} initialMode="analyze" /> : <LandingPage onNavigate={navigateTo} />;
       case 'citations':
+        if (isLoggedIn && !localStorage.getItem('writescholar_onboarding_completed')) {
+          return (
+            <OnboardingPage
+              onNavigate={navigateTo}
+              user={user}
+              onComplete={() => {
+                localStorage.setItem('writescholar_onboarding_completed', 'true');
+                navigateTo('citations');
+              }}
+            />
+          );
+        }
         return isLoggedIn ? <DashboardPage onNavigate={navigateTo} user={user} onLogout={handleLogout} initialMode="citations" /> : <LandingPage onNavigate={navigateTo} />;
       case 'analysis':
         return <AnalysisPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;

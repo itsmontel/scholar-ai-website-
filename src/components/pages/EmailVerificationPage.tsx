@@ -29,7 +29,7 @@ const EmailVerificationPage = ({ onNavigate }: EmailVerificationPageProps) => {
         setCountdown((prev) => {
           if (prev <= 1) {
             clearInterval(timer);
-            onNavigate('dashboard');
+            onNavigate('onboarding');
             return 0;
           }
           return prev - 1;
@@ -134,18 +134,18 @@ const EmailVerificationPage = ({ onNavigate }: EmailVerificationPageProps) => {
           </p>
 
           {/* Countdown */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-            <p className="text-blue-800 text-sm">
-              Redirecting to your dashboard in {countdown} seconds...
+          <div className="bg-lime-50 border border-lime-200 rounded-lg p-4 mb-6">
+            <p className="text-lime-800 text-sm">
+              Getting things ready in {countdown} seconds...
             </p>
           </div>
 
           {/* Manual redirect button */}
           <button
-            onClick={() => onNavigate('dashboard')}
-            className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 rounded-lg font-semibold hover:shadow-lg transform hover:scale-[1.02] transition-all duration-300"
+            onClick={() => onNavigate('onboarding')}
+            className="w-full bg-stone-900 text-white py-3 rounded-full font-semibold hover:bg-stone-800 transition-all"
           >
-            Go to Dashboard
+            Continue
           </button>
         </div>
       </div>
