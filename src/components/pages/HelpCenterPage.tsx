@@ -163,10 +163,10 @@ const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
       title: 'Start Your First Analysis',
       description: 'Upload a document or paste text to get AI-powered feedback',
       action: () => onNavigate?.('dashboard'),
-      color: 'blue',
+      color: 'lime',
       icon: (
         <svg viewBox="0 0 56 56" fill="none" className="w-14 h-14">
-          <circle cx="28" cy="28" r="28" fill="#DBEAFE"/>
+          <circle cx="28" cy="28" r="28" fill="#D9F99D"/>
           <ellipse cx="28" cy="30" rx="14" ry="15" fill="#E8C4A0"/>
           <path d="M14 26 Q12 16 20 12 Q28 8 36 12 Q44 16 42 26 Q40 20 34 16 Q28 12 22 16 Q16 20 14 26" fill="#1F2937"/>
           <ellipse cx="22" cy="30" rx="3" ry="3.5" fill="#1F2937"/>
@@ -181,10 +181,10 @@ const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
       title: 'View Analysis History',
       description: 'Access all your saved analyses and results',
       action: () => onNavigate?.('analysis-history'),
-      color: 'purple',
+      color: 'lime',
       icon: (
         <svg viewBox="0 0 56 56" fill="none" className="w-14 h-14">
-          <circle cx="28" cy="28" r="28" fill="#F3E8FF"/>
+          <circle cx="28" cy="28" r="28" fill="#ECFCCB"/>
           <ellipse cx="28" cy="30" rx="14" ry="15" fill="#FCD9B6"/>
           <path d="M14 24 Q12 12 22 10 Q28 8 34 10 Q44 12 42 24 Q40 18 34 14 Q28 10 22 14 Q16 18 14 24" fill="#8B6914"/>
           <ellipse cx="21" cy="30" rx="6" ry="5" fill="none" stroke="#374151" strokeWidth="2"/>
@@ -200,10 +200,10 @@ const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
       title: 'Upload Documents',
       description: 'Upload PDF, DOC, DOCX, or TXT files for analysis',
       action: () => onNavigate?.('dashboard'),
-      color: 'green',
+      color: 'lime',
       icon: (
         <svg viewBox="0 0 56 56" fill="none" className="w-14 h-14">
-          <circle cx="28" cy="28" r="28" fill="#D1FAE5"/>
+          <circle cx="28" cy="28" r="28" fill="#BEF264"/>
           <ellipse cx="28" cy="30" rx="14" ry="15" fill="#8B5A2B"/>
           <path d="M14 28 Q12 18 20 14 Q28 10 36 14 Q44 18 42 28 Q40 22 34 18 Q28 14 22 18 Q16 22 14 28" fill="#1F2937"/>
           <ellipse cx="16" cy="30" rx="5" ry="7" fill="#1F2937"/>
@@ -220,10 +220,10 @@ const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
       title: 'Contact Support',
       description: 'Get help from our expert team',
       action: () => onNavigate?.('contact'),
-      color: 'orange',
+      color: 'lime',
       icon: (
         <svg viewBox="0 0 56 56" fill="none" className="w-14 h-14">
-          <circle cx="28" cy="28" r="28" fill="#FFEDD5"/>
+          <circle cx="28" cy="28" r="28" fill="#D9F99D"/>
           <ellipse cx="28" cy="30" rx="14" ry="15" fill="#D4A574"/>
           <path d="M12 26 Q10 14 20 10 Q28 6 36 10 Q46 14 44 26 Q42 18 34 14 Q28 10 22 14 Q16 18 12 26" fill="#3D2314"/>
           <path d="M12 26 Q6 40 16 48" fill="#3D2314"/>
@@ -372,8 +372,8 @@ const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
           <div className="grid lg:grid-cols-4 gap-8">
             {/* Categories Sidebar */}
             <div className="lg:col-span-1">
-              <div className="bg-white border border-gray-200 rounded-2xl p-5 sticky top-24">
-                <h3 className="font-semibold text-gray-900 mb-4">Browse by Category</h3>
+              <div className="bg-white border border-stone-200 rounded-2xl p-5 sticky top-24">
+                <h3 className="font-semibold text-stone-900 mb-4">Browse by Category</h3>
                 <div className="space-y-1">
                   {categories.map((category) => (
                     <button
@@ -381,8 +381,8 @@ const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
                       onClick={() => setSelectedCategory(category.id)}
                       className={`w-full flex items-center justify-between p-3 rounded-xl text-left transition-all ${
                         selectedCategory === category.id
-                          ? 'bg-blue-50 text-blue-600'
-                          : 'hover:bg-gray-50 text-gray-600'
+                          ? 'bg-lime-50 text-lime-600'
+                          : 'hover:bg-stone-50 text-stone-600'
                       }`}
                     >
                       <div className="flex items-center space-x-3">
@@ -391,8 +391,8 @@ const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
                       </div>
                       <span className={`text-xs px-2 py-0.5 rounded-full ${
                         selectedCategory === category.id
-                          ? 'bg-blue-100 text-blue-600'
-                          : 'bg-gray-100 text-gray-400'
+                          ? 'bg-lime-100 text-lime-600'
+                          : 'bg-stone-100 text-stone-400'
                       }`}>
                         {category.count}
                       </span>
@@ -401,17 +401,17 @@ const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
                 </div>
 
                 {/* Contact Support Card */}
-                <div className="mt-6 p-5 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl text-white">
-                  <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mb-3">
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="mt-6 p-5 bg-lime-400 rounded-xl">
+                  <div className="w-12 h-12 bg-stone-900/20 rounded-xl flex items-center justify-center mb-3">
+                    <svg className="w-6 h-6 text-stone-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                     </svg>
                   </div>
-                  <h4 className="font-semibold mb-1">Still need help?</h4>
-                  <p className="text-blue-100 text-sm mb-4">Our support team is here to assist you.</p>
+                  <h4 className="font-semibold mb-1 text-stone-900">Still need help?</h4>
+                  <p className="text-stone-700 text-sm mb-4">Our support team is here to assist you.</p>
                   <button 
                     onClick={() => onNavigate?.('contact')}
-                    className="w-full bg-white text-blue-600 py-2.5 rounded-xl text-sm font-medium hover:bg-blue-50 transition-colors"
+                    className="w-full bg-stone-900 text-lime-400 py-2.5 rounded-xl text-sm font-medium hover:bg-stone-800 transition-colors"
                   >
                     Contact Support
                   </button>
@@ -423,10 +423,10 @@ const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
             <div className="lg:col-span-3">
               {/* Results Header */}
               <div className="mb-6">
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                <h2 className="text-2xl font-bold text-stone-900 mb-2">
                   {selectedCategory === 'all' ? 'Frequently Asked Questions' : categories.find(c => c.id === selectedCategory)?.name}
                 </h2>
-                <p className="text-gray-500">
+                <p className="text-stone-500">
                   {filteredFAQs.length} article{filteredFAQs.length !== 1 ? 's' : ''} found
                   {searchQuery && ` for "${searchQuery}"`}
                 </p>
@@ -434,17 +434,17 @@ const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
 
               {/* FAQ List */}
               {filteredFAQs.length === 0 ? (
-                <div className="bg-white border border-gray-200 rounded-2xl p-12 text-center">
-                  <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="bg-white border border-stone-200 rounded-2xl p-12 text-center">
+                  <div className="w-16 h-16 bg-lime-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <svg className="w-8 h-8 text-lime-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
                   </div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">No articles found</h3>
-                  <p className="text-gray-500 mb-6">Try adjusting your search terms or browse a different category</p>
+                  <h3 className="text-xl font-semibold text-stone-900 mb-2">No articles found</h3>
+                  <p className="text-stone-500 mb-6">Try adjusting your search terms or browse a different category</p>
                   <button 
                     onClick={() => { setSearchQuery(''); setSelectedCategory('all'); }}
-                    className="bg-gray-900 text-white px-6 py-3 rounded-xl font-medium hover:bg-gray-800 transition-colors"
+                    className="bg-lime-400 text-stone-900 px-6 py-3 rounded-xl font-medium hover:bg-lime-300 transition-colors"
                   >
                     Clear Filters
                   </button>
@@ -452,25 +452,25 @@ const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
               ) : (
                 <div className="space-y-3">
                   {filteredFAQs.map((faq) => (
-                    <div key={faq.id} className="bg-white border border-gray-200 rounded-2xl overflow-hidden hover:border-gray-300 transition-all">
+                    <div key={faq.id} className="bg-white border border-stone-200 rounded-2xl overflow-hidden hover:border-stone-300 transition-all">
                       <button
                         onClick={() => toggleFAQ(faq.id)}
-                        className="w-full p-6 text-left hover:bg-gray-50 transition-colors"
+                        className="w-full p-6 text-left hover:bg-stone-50 transition-colors"
                       >
                         <div className="flex items-start justify-between">
                           <div className="flex-1 pr-4">
-                            <h3 className="font-semibold text-gray-900 text-base mb-2">{faq.question}</h3>
+                            <h3 className="font-semibold text-stone-900 text-base mb-2">{faq.question}</h3>
                             {/* Tags */}
                             <div className="flex flex-wrap gap-2">
                               {faq.tags.map((tag, index) => (
-                                <span key={index} className="px-2.5 py-1 bg-gray-100 text-gray-500 rounded-lg text-xs">
+                                <span key={index} className="px-2.5 py-1 bg-stone-100 text-stone-500 rounded-lg text-xs">
                                   {tag}
                                 </span>
                               ))}
                             </div>
                           </div>
                           <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 transition-all ${
-                            openFAQ === faq.id ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-400'
+                            openFAQ === faq.id ? 'bg-lime-100 text-lime-600' : 'bg-stone-100 text-stone-400'
                           }`}>
                             <svg 
                               className={`w-4 h-4 transform transition-transform ${
@@ -488,8 +488,8 @@ const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
                       
                       {openFAQ === faq.id && (
                         <div className="px-6 pb-6">
-                          <div className="border-t border-gray-100 pt-4">
-                            <p className="text-gray-600 leading-relaxed">{faq.answer}</p>
+                          <div className="border-t border-stone-100 pt-4">
+                            <p className="text-stone-600 leading-relaxed">{faq.answer}</p>
                           </div>
                         </div>
                       )}

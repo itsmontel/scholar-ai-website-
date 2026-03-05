@@ -563,7 +563,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
         <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
           <div className="flex items-center justify-center min-h-64">
             <div className="text-center">
-              <div className="animate-spin w-10 h-10 border-2 border-stone-300 border-t-[#D35400] rounded-full mx-auto mb-4"></div>
+              <div className="animate-spin w-10 h-10 border-2 border-stone-300 border-t-lime-500 rounded-full mx-auto mb-4"></div>
               <p className="text-sm text-stone-500">Loading study tools...</p>
             </div>
           </div>
@@ -587,8 +587,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
             <p className="text-sm text-stone-500 mb-6">{error}</p>
             <button
               onClick={fetchStudyToolHistory}
-              className="px-5 py-2.5 rounded-xl font-medium text-white text-sm"
-              style={{ background: 'linear-gradient(135deg, #D35400 0%, #E67E22 100%)' }}
+              className="px-5 py-2.5 rounded-xl font-medium text-stone-900 bg-lime-400 hover:bg-lime-300 text-sm transition-colors"
             >
               Try Again
             </button>
@@ -615,7 +614,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 mb-10">
           <div>
             <div className="flex items-center gap-3 mb-2">
-              <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl" style={{ background: 'linear-gradient(135deg, #D35400 0%, #E67E22 100%)', boxShadow: '0 4px 14px rgba(211, 84, 0, 0.25)' }}>
+              <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl bg-lime-400 shadow-lg shadow-lime-400/30">
                 🧠
               </div>
               <div>
@@ -630,8 +629,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
           </div>
           <button
             onClick={startNewStudyTool}
-            className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold text-white transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 shrink-0"
-            style={{ background: 'linear-gradient(135deg, #D35400 0%, #E67E22 100%)', boxShadow: '0 4px 14px rgba(211, 84, 0, 0.3)' }}
+            className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold text-stone-900 bg-lime-400 hover:bg-lime-300 transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 shrink-0"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -671,14 +669,13 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
               onClick={() => setFilter(tab.key)}
               className={`px-4 py-2.5 rounded-xl text-sm font-medium transition-all flex items-center gap-2 ${
                 filter === tab.key
-                  ? 'text-white shadow-md'
+                  ? 'bg-lime-400 text-stone-900 shadow-md'
                   : 'bg-white/80 text-stone-600 hover:bg-white hover:text-stone-900 border border-stone-200/80'
               }`}
-              style={filter === tab.key ? { background: 'linear-gradient(135deg, #D35400 0%, #E67E22 100%)' } : {}}
             >
               <span>{tab.icon}</span>
               <span>{tab.label}</span>
-              <span className={`text-xs px-1.5 py-0.5 rounded-md ${filter === tab.key ? 'bg-white/20' : 'bg-stone-100'}`}>
+              <span className={`text-xs px-1.5 py-0.5 rounded-md ${filter === tab.key ? 'bg-stone-900/20' : 'bg-stone-100'}`}>
                 {tab.count}
               </span>
             </button>
@@ -719,7 +716,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
         {/* Study Tool Grid */}
         {filteredTools.length === 0 ? (
           <div className="bg-white rounded-2xl border border-stone-200/80 shadow-sm p-12 sm:p-16 text-center">
-            <div className="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 text-4xl" style={{ background: 'linear-gradient(135deg, rgba(211,84,0,0.1) 0%, rgba(230,126,34,0.1) 100%)' }}>
+            <div className="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 text-4xl bg-lime-100">
               🧠
             </div>
             <h2 className="text-xl font-bold text-stone-900 mb-2">
@@ -732,8 +729,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
             </p>
             <button
               onClick={startNewStudyTool}
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-white transition-all hover:shadow-lg"
-              style={{ background: 'linear-gradient(135deg, #D35400 0%, #E67E22 100%)' }}
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-stone-900 bg-lime-400 hover:bg-lime-300 transition-all hover:shadow-lg"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -809,8 +805,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
                       <div className="flex items-center gap-2 flex-wrap sm:justify-end">
                         <button
                           onClick={() => startStudyTool(tool)}
-                          className="px-4 py-2.5 rounded-xl font-medium text-sm text-white transition-all flex items-center gap-2"
-                          style={{ background: 'linear-gradient(135deg, #D35400 0%, #E67E22 100%)' }}
+                          className="px-4 py-2.5 rounded-xl font-medium text-sm text-stone-900 bg-lime-400 hover:bg-lime-300 transition-all flex items-center gap-2"
                         >
                           {tool.quiz_type === 'flashcards' ? 'Study' : tool.quiz_type === 'crossword' || tool.quiz_type === 'crater_blast' ? 'Play' : 'Take Quiz'}
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -971,8 +966,8 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
         <div className="fixed inset-0 bg-stone-900/40 backdrop-blur-sm flex items-center justify-center z-50 px-4">
           <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 border border-stone-200/80">
             <div className="text-center mb-6">
-              <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4" style={{ background: 'linear-gradient(135deg, rgba(211,84,0,0.15) 0%, rgba(230,126,34,0.15) 100%)' }}>
-                <svg className="w-7 h-7" style={{ color: '#D35400' }} fill="currentColor" viewBox="0 0 20 20">
+              <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4 bg-lime-100">
+                <svg className="w-7 h-7 text-lime-600" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
                 </svg>
               </div>
@@ -1000,8 +995,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
               </button>
               <button
                 onClick={() => { setShowUpgradeModal(false); onNavigate('pricing'); }}
-                className="flex-1 px-4 py-2.5 text-white rounded-xl font-medium text-sm transition-all"
-                style={{ background: 'linear-gradient(135deg, #D35400 0%, #E67E22 100%)' }}
+                className="flex-1 px-4 py-2.5 text-stone-900 bg-lime-400 hover:bg-lime-300 rounded-xl font-medium text-sm transition-all"
               >
                 View Plans
               </button>

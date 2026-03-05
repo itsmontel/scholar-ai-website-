@@ -3,7 +3,6 @@ const multer = require('multer');
 const router = express.Router();
 const { authenticateToken } = require('../middleware/auth');
 const documentParser = require('../services/documentParser');
-const streakService = require('../services/streakService');
 
 const parseUpload = multer({
   storage: multer.memoryStorage(),
@@ -202,7 +201,6 @@ router.post('/humanize', authenticateToken, async (req, res) => {
     }).then(() => {}).catch(err => console.error('Failed to record humanize usage:', err));
 
     // Record streak activity (fire and forget)
-    streakService.recordActivity(userId, 'humanizer_used').catch(() => {});
 
     res.json({
       success: true,
@@ -364,7 +362,6 @@ router.post('/summarize', authenticateToken, async (req, res) => {
     }).then(() => {}).catch(err => console.error('Failed to record summarize usage:', err));
 
     // Record streak activity (fire and forget)
-    streakService.recordActivity(userId, 'summarizer_used').catch(() => {});
 
     res.json({
       success: true,
@@ -563,7 +560,6 @@ router.post('/generate-quiz', authenticateToken, async (req, res) => {
       .catch(error => console.error('Failed to save quiz to history:', error));
 
     // Record streak activity (fire and forget)
-    streakService.recordActivity(userId, 'quiz_generated').catch(() => {});
 
     res.json({
       success: true,
@@ -675,7 +671,6 @@ router.post('/generate-flashcards', authenticateToken, async (req, res) => {
       .catch(error => console.error('Failed to save flashcards to history:', error));
 
     // Record streak activity (fire and forget)
-    streakService.recordActivity(userId, 'flashcards_generated').catch(() => {});
 
     res.json({ success: true, message: 'Flashcards generated successfully', data: result });
   } catch (error) {
@@ -781,7 +776,6 @@ router.post('/generate-crossword', authenticateToken, async (req, res) => {
       .catch(error => console.error('Failed to save crossword to history:', error));
 
     // Record streak activity (fire and forget)
-    streakService.recordActivity(userId, 'crossword_generated').catch(() => {});
 
     res.json({ success: true, message: 'Crossword generated successfully', data: result });
   } catch (error) {
@@ -854,7 +848,6 @@ router.post('/citation-search', authenticateToken, async (req, res) => {
       .catch(error => console.error('Failed to save citation search to history:', error));
 
     // Record streak activity (fire and forget)
-    streakService.recordActivity(userId, 'citation_search').catch(() => {});
 
     res.json({
       success: true,
@@ -1033,7 +1026,6 @@ router.post('/simple-analyze', authenticateToken, async (req, res) => {
       console.log('✅ AI analysis completed');
 
       // Record streak activity (fire and forget)
-      streakService.recordActivity(userId, 'essay_analysis').catch(() => {});
 
       res.status(200).json({
         success: true,
@@ -1203,9 +1195,6 @@ router.post('/analyze', authenticateToken, validateCreateAnalysis, async (req, r
       console.error('Failed to auto-save analysis:', saveError);
       // Don't fail the request if save fails, just log it
     }
-
-    // Record streak activity (fire and forget)
-    streakService.recordActivity(userId, 'essay_analysis').catch(() => {});
 
     res.json({
       success: true,

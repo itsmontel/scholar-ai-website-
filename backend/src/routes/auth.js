@@ -174,7 +174,7 @@ router.post('/login', validateLogin, async (req, res) => {
     await userService.updateUser(user.id, { last_login: new Date().toISOString() });
 
     // Record streak activity (fire and forget)
-    streakService.recordActivity(user.id, 'login').catch(() => {});
+    streakService.recordLogin(user.id).catch(() => {});
 
     // Generate JWT token
     const token = generateToken(user.id);
@@ -588,7 +588,7 @@ router.get('/google/callback',
   async (req, res) => {
     try {
       // Record streak activity (fire and forget)
-      streakService.recordActivity(req.user.id, 'login').catch(() => {});
+      streakService.recordLogin(req.user.id).catch(() => {});
 
       // Generate JWT token for the user
       const token = generateToken(req.user.id);

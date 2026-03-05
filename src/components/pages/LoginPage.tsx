@@ -164,8 +164,8 @@ const LoginPage = ({ onNavigate, onLogin }: LoginPageProps) => {
         {/* Header */}
         <div className="p-6 pt-20 sm:pt-6">
           <div className="flex items-center space-x-2.5">
-            <div className="w-9 h-9 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center">
-              <span className="text-white font-bold text-lg">W</span>
+            <div className="w-9 h-9 bg-lime-400 rounded-xl flex items-center justify-center shadow-md">
+              <span className="text-stone-900 font-bold text-lg">W</span>
             </div>
             <span className="text-xl font-bold text-stone-800">WriteScholar</span>
           </div>

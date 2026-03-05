@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 
 interface StreakData {
   currentStreak: number;
@@ -70,17 +71,7 @@ const StreakWidget = ({ compact = false }: StreakWidgetProps) => {
     return result;
   };
 
-  const streakActions = [
-    { icon: '🔐', label: 'Log in' },
-    { icon: '📝', label: 'Analyze an essay' },
-    { icon: '🧠', label: 'Generate a quiz' },
-    { icon: '🃏', label: 'Create flashcards' },
-    { icon: '🧩', label: 'Generate a crossword' },
-    { icon: '✨', label: 'Use the humanizer' },
-    { icon: '📄', label: 'Summarize a document' },
-    { icon: '🔍', label: 'Search for citations' },
-    { icon: '📤', label: 'Upload a document' },
-  ];
+  const streakAction = { icon: '🔐', label: 'Log in to your account each day' };
 
   // Use fallback data when API fails or returns nothing - always show the UI
   const data = streakData ?? {
@@ -156,8 +147,8 @@ const StreakWidget = ({ compact = false }: StreakWidgetProps) => {
           {data.currentStreak === 0 
             ? "Start your streak today!" 
             : data.hasActivityToday
-              ? "Great job! Come back tomorrow to continue your streak!"
-              : "Complete an action to keep your streak going!"}
+              ? "Great job! Log in tomorrow to continue your streak!"
+              : "Log in today to keep your streak going!"}
         </p>
 
         {/* Weekly calendar - compact for sidebar fit */}
@@ -207,12 +198,16 @@ const StreakWidget = ({ compact = false }: StreakWidgetProps) => {
         )}
       </div>
 
-      {/* Info Modal */}
-      {showInfoModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+      {/* Info Modal - rendered via portal to avoid layout/z-index issues */}
+      {showInfoModal && createPortal(
+        <div 
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999] p-4"
+          onClick={() => setShowInfoModal(false)}
+        >
           <div 
             className="bg-white rounded-2xl p-6 sm:p-8 max-w-md w-full shadow-2xl relative"
             style={{ background: 'linear-gradient(180deg, #FEF9E7 0%, #FFFFFF 30%)' }}
+            onClick={e => e.stopPropagation()}
           >
             <button
               onClick={() => setShowInfoModal(false)}
@@ -225,24 +220,12 @@ const StreakWidget = ({ compact = false }: StreakWidgetProps) => {
 
             <div className="text-center mb-6">
               <span className="text-6xl mb-4 block">🔥</span>
-              <h3 className="text-2xl font-bold text-stone-800 mb-2">Actions that earn a streak</h3>
-              <p className="text-stone-500">Keep your streak going by completing any of these actions.</p>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {streakActions.map((action, index) => (
-                <div key={index} className="flex items-center gap-3">
-                  <div 
-                    className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
-                    style={{ backgroundColor: '#262626' }}
-                  >
-                    <svg className="w-4 h-4 text-lime-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                    </svg>
-                  </div>
-                  <span className="text-stone-700 font-medium text-sm">{action.label}</span>
-                </div>
-              ))}
+              <h3 className="text-2xl font-bold text-stone-800 mb-2">How to earn a streak</h3>
+              <p className="text-stone-600 mb-6">Log in to your account each day. That&apos;s it!</p>
+              <div className="flex items-center justify-center gap-3 bg-stone-100 rounded-xl py-4 px-6">
+                <span className="text-3xl">🔐</span>
+                <span className="text-stone-700 font-medium">{streakAction.label}</span>
+              </div>
             </div>
 
             <button
@@ -253,7 +236,8 @@ const StreakWidget = ({ compact = false }: StreakWidgetProps) => {
               Got it!
             </button>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );

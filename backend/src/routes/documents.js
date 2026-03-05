@@ -22,7 +22,6 @@ const storageService = getStorageService();
 const documentParser = require('../services/documentParser');
 const documentService = require('../services/documentService');
 const subscriptionService = require('../services/subscriptionService');
-const streakService = require('../services/streakService');
 
 const router = express.Router();
 
@@ -208,9 +207,6 @@ router.post('/upload', authenticateToken, upload.single('document'), async (req,
     }
 
     console.log(`✅ Upload completed: ${document.id}`);
-
-    // Record streak activity (fire and forget)
-    streakService.recordActivity(req.user.id, 'document_upload').catch(() => {});
 
     res.status(201).json({
       success: true,
