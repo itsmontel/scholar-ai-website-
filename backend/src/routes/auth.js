@@ -13,6 +13,7 @@ const {
 } = require('../middleware/validation');
 const emailService = require('../services/emailService');
 const userService = require('../services/userService');
+const streakService = require('../services/streakService');
 
 const router = express.Router();
 
@@ -171,6 +172,9 @@ router.post('/login', validateLogin, async (req, res) => {
 
     // Update last login
     await userService.updateUser(user.id, { last_login: new Date().toISOString() });
+
+    // Record streak activity (fire and forget)
+    streakService.recordActivity(user.id, 'login').catch(() => {});
 
     // Generate JWT token
     const token = generateToken(user.id);
@@ -583,6 +587,9 @@ router.get('/google/callback',
   passport.authenticate('google', { session: false }),
   async (req, res) => {
     try {
+      // Record streak activity (fire and forget)
+      streakService.recordActivity(req.user.id, 'login').catch(() => {});
+
       // Generate JWT token for the user
       const token = generateToken(req.user.id);
       

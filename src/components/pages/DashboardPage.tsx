@@ -3,6 +3,7 @@ import Header from '../common/Header';
 import Footer from '../common/Footer';
 import { DocumentCardSkeleton } from '../common/LoadingSpinner';
 import AnalysisAnimation from '../common/AnalysisAnimation';
+import StreakWidget from '../common/StreakWidget';
 import { jsPDF } from 'jspdf';
 import { Document, Packer, Paragraph, TextRun, HeadingLevel } from 'docx';
 import { saveAs } from 'file-saver';
@@ -1510,8 +1511,15 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
       {/* Main Content */}
       <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-1 sm:pt-2 pb-8 sm:pb-14 w-full min-w-0 overflow-x-hidden lg:ml-24 lg:mr-auto">
         <div className="grid grid-cols-1 lg:grid-cols-[240px_1fr] gap-6 items-start">
-          {/* LEFT SIDEBAR: Calendar / Schedule */}
-          <aside className="order-2 lg:order-1 bg-white rounded-2xl shadow-sm border border-stone-100 p-4 sticky top-16">
+          {/* LEFT SIDEBAR: Streak + Calendar / Schedule */}
+          <aside className="order-2 lg:order-1 space-y-4 sticky top-16 min-w-0">
+            {/* Streak Widget - desktop only (mobile shows it at top of main content) */}
+            <div className="hidden lg:block min-w-0">
+              <StreakWidget />
+            </div>
+
+            {/* Schedule Section */}
+            <div className="bg-white rounded-2xl shadow-sm border border-stone-100 p-4">
             <div className="flex items-center justify-between mb-3">
               <h3 className="font-semibold text-stone-800 flex items-center gap-2 text-sm">
                 <span className="text-lg">📅</span> Schedule
@@ -1624,10 +1632,16 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
             >
               + Add Event
             </button>
+            </div>
           </aside>
 
           {/* RIGHT MAIN CONTENT */}
           <div className="order-1 lg:order-2 min-w-0 pt-6 sm:pt-10">
+            {/* Streak widget - visible on mobile only (sidebar has it on desktop) */}
+            <div className="mb-6 lg:hidden">
+              <StreakWidget />
+            </div>
+
             {/* Welcome */}
             {/* Free ebook for new users (hidden after 24 hours or when dismissed) */}
             {showEbookBanner && !ebookBannerDismissed && (

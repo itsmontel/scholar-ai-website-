@@ -16,6 +16,7 @@ interface AccountPageProps {
   onNavigate: (page: string) => void;
   user: User | null;
   onLogout: () => void;
+  onUserUpdate?: (updates: { name?: string }) => void;
 }
 
 interface UserStats {
@@ -34,7 +35,7 @@ interface PasswordChangeData {
   confirmPassword: string;
 }
 
-const AccountPage = ({ onNavigate, user, onLogout }: AccountPageProps) => {
+const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPageProps) => {
   const [userStats, setUserStats] = useState<UserStats>({
     memberSince: '',
     totalDocuments: 0,
@@ -59,6 +60,10 @@ const AccountPage = ({ onNavigate, user, onLogout }: AccountPageProps) => {
   const [deleteConfirmation, setDeleteConfirmation] = useState('');
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [showDeletionAnimation, setShowDeletionAnimation] = useState(false);
+  const [username, setUsername] = useState('');
+  const [usernameLoading, setUsernameLoading] = useState(false);
+  const [usernameError, setUsernameError] = useState('');
+  const [usernameSuccess, setUsernameSuccess] = useState('');
 
   // Fetch user stats and profile data
   const fetchUserData = async () => {
@@ -80,7 +85,7 @@ const AccountPage = ({ onNavigate, user, onLogout }: AccountPageProps) => {
         const profileData = await profileResponse.json();
         const userData = profileData.data.user;
         const createdDate = new Date(userData.createdAt);
-        
+        setUsername(userData.name || '');
         setUserStats(prev => ({
           ...prev,
           memberSince: createdDate.toLocaleDateString('en-US', {
@@ -124,10 +129,8 @@ const AccountPage = ({ onNavigate, user, onLogout }: AccountPageProps) => {
 
   // Sync display user with prop user
   useEffect(() => {
-    console.log('AccountPage - user prop changed:', user);
     if (user) {
       setDisplayUser(user);
-      console.log('AccountPage - setDisplayUser with:', user);
     } else if (typeof window !== 'undefined') {
       // Fallback to localStorage if no user prop
       try {
@@ -151,6 +154,49 @@ const AccountPage = ({ onNavigate, user, onLogout }: AccountPageProps) => {
       setLoading(false);
     }
   }, [displayUser]);
+
+  const handleSaveUsername = async () => {
+    const trimmed = username.trim();
+    if (!trimmed) {
+      setUsernameError('Username cannot be empty');
+      return;
+    }
+    setUsernameLoading(true);
+    setUsernameError('');
+    setUsernameSuccess('');
+    try {
+      const token = localStorage.getItem('authToken');
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/users/profile`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ name: trimmed }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setUsernameSuccess('Username updated!');
+        onUserUpdate?.({ name: trimmed });
+        if (typeof window !== 'undefined') {
+          try {
+            const stored = localStorage.getItem('user');
+            if (stored) {
+              const parsed = JSON.parse(stored);
+              localStorage.setItem('user', JSON.stringify({ ...parsed, name: trimmed }));
+            }
+          } catch (_) {}
+        }
+        setTimeout(() => setUsernameSuccess(''), 3000);
+      } else {
+        setUsernameError(data.message || 'Failed to update username');
+      }
+    } catch (e) {
+      setUsernameError('Failed to update username');
+    } finally {
+      setUsernameLoading(false);
+    }
+  };
 
   // Handle password change
   const handlePasswordChange = async () => {
@@ -279,11 +325,26 @@ const AccountPage = ({ onNavigate, user, onLogout }: AccountPageProps) => {
                   </div>
                 </div>
               </div>
-              <div className="flex items-center justify-between py-3 border-b border-stone-200">
-                <div>
-                  <div className="font-semibold text-stone-800">Username</div>
-                  <div className="text-stone-600">{displayUser?.name || (displayUser ? 'Not available' : 'Loading...')}</div>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 py-3 border-b border-stone-200">
+                <div className="flex-1">
+                  <div className="font-semibold text-stone-800 mb-1">Username</div>
+                  <input
+                    type="text"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    placeholder="Enter username"
+                    className="w-full sm:max-w-xs px-4 py-2.5 border border-stone-200 rounded-xl focus:ring-2 focus:ring-lime-500 focus:border-lime-500 transition-all text-stone-800"
+                  />
+                  {usernameError && <p className="text-red-600 text-sm mt-1">{usernameError}</p>}
+                  {usernameSuccess && <p className="text-lime-600 text-sm mt-1">{usernameSuccess}</p>}
                 </div>
+                <button
+                  onClick={handleSaveUsername}
+                  disabled={usernameLoading || !username.trim()}
+                  className="bg-lime-400 hover:bg-lime-300 disabled:bg-stone-300 text-stone-900 px-5 py-2.5 rounded-full font-medium transition-colors shrink-0"
+                >
+                  {usernameLoading ? 'Saving...' : 'Save'}
+                </button>
               </div>
               <div className="flex items-center justify-between py-3">
                 <div>

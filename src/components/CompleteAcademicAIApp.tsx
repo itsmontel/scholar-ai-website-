@@ -691,7 +691,26 @@ const AcademicAIApp = () => {
       case 'library':
         return <LibraryPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'account':
-        return <AccountPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
+        return (
+          <AccountPage
+            onNavigate={navigateTo}
+            user={user}
+            onLogout={handleLogout}
+            onUserUpdate={(updates) => {
+              if (user && updates.name) {
+                const updatedUser = { ...user, name: updates.name };
+                setUser(updatedUser);
+                try {
+                  const stored = localStorage.getItem('user');
+                  if (stored) {
+                    const parsed = JSON.parse(stored);
+                    localStorage.setItem('user', JSON.stringify({ ...parsed, name: updates.name }));
+                  }
+                } catch (_) {}
+              }
+            }}
+          />
+        );
       case 'billing':
         return <BillingPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       // Free Tools

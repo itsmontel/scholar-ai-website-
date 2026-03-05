@@ -1,0 +1,262 @@
+import { useState, useEffect } from 'react';
+
+interface StreakData {
+  currentStreak: number;
+  longestStreak: number;
+  totalActivityDays: number;
+  hasActivityToday: boolean;
+  weekActivities: string[];
+}
+
+interface StreakWidgetProps {
+  compact?: boolean;
+}
+
+const StreakWidget = ({ compact = false }: StreakWidgetProps) => {
+  const [streakData, setStreakData] = useState<StreakData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [showInfoModal, setShowInfoModal] = useState(false);
+
+  const fetchStreak = async () => {
+    try {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/streaks`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setStreakData(data.data);
+      }
+    } catch (error) {
+      console.error('Error fetching streak:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchStreak();
+  }, []);
+
+  const getWeekDays = () => {
+    const days = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+    const today = new Date();
+    const result = [];
+    
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date(today);
+      date.setDate(today.getDate() - i);
+      const dateStr = date.toISOString().split('T')[0];
+      const dayIndex = date.getDay();
+      const isToday = i === 0;
+      const hasActivity = data.weekActivities?.includes(dateStr) || false;
+      
+      result.push({
+        label: days[dayIndex],
+        date: dateStr,
+        hasActivity,
+        isToday
+      });
+    }
+    
+    return result;
+  };
+
+  const streakActions = [
+    { icon: '🔐', label: 'Log in' },
+    { icon: '📝', label: 'Analyze an essay' },
+    { icon: '🧠', label: 'Generate a quiz' },
+    { icon: '🃏', label: 'Create flashcards' },
+    { icon: '🧩', label: 'Generate a crossword' },
+    { icon: '✨', label: 'Use the humanizer' },
+    { icon: '📄', label: 'Summarize a document' },
+    { icon: '🔍', label: 'Search for citations' },
+    { icon: '📤', label: 'Upload a document' },
+  ];
+
+  // Use fallback data when API fails or returns nothing - always show the UI
+  const data = streakData ?? {
+    currentStreak: 0,
+    longestStreak: 0,
+    totalActivityDays: 0,
+    hasActivityToday: false,
+    weekActivities: []
+  };
+
+  if (loading && compact) {
+    return (
+      <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-stone-100 animate-pulse">
+        <span className="w-4 h-4 bg-stone-200 rounded"></span>
+        <span className="w-6 h-4 bg-stone-200 rounded"></span>
+      </div>
+    );
+  }
+
+  // Compact badge version (for header or sidebar)
+  if (compact) {
+    return (
+      <button
+        onClick={() => setShowInfoModal(true)}
+        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-all hover:scale-105"
+        style={{ backgroundColor: 'rgba(163, 230, 53, 0.15)' }}
+        title="View your streak"
+      >
+        <span className="text-lg">🔥</span>
+        <span className="font-bold text-stone-800">{data.currentStreak}</span>
+      </button>
+    );
+  }
+
+  // Full widget version - show loading skeleton when loading
+  if (loading) {
+    return (
+      <div className="rounded-2xl p-5 border border-stone-200 bg-stone-50 animate-pulse">
+        <div className="flex items-center justify-center gap-2 mb-3">
+          <span className="w-10 h-10 bg-stone-200 rounded-full"></span>
+          <span className="w-10 h-10 bg-stone-200 rounded"></span>
+        </div>
+        <div className="h-4 bg-stone-200 rounded w-3/4 mx-auto mb-5"></div>
+        <div className="bg-white rounded-xl border border-stone-200 p-4 mb-4">
+          <div className="flex justify-between">
+            {[1,2,3,4,5,6,7].map(i => (
+              <div key={i} className="w-8 h-8 rounded-full bg-stone-200"></div>
+            ))}
+          </div>
+        </div>
+        <div className="h-10 bg-stone-200 rounded-full"></div>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <div 
+        className="rounded-2xl p-4 border-2 shadow-sm min-w-0"
+        style={{ 
+          background: 'linear-gradient(135deg, rgba(163, 230, 53, 0.18) 0%, rgba(163, 230, 53, 0.08) 100%)',
+          borderColor: 'rgba(163, 230, 53, 0.55)'
+        }}
+      >
+        {/* Header with streak count */}
+        <div className="flex items-center justify-center gap-2 mb-3">
+          <span className="text-4xl">🔥</span>
+          <span className="text-4xl font-bold text-stone-800">{data.currentStreak}</span>
+        </div>
+
+        {/* Message */}
+        <p className="text-center text-stone-600 font-medium mb-5">
+          {data.currentStreak === 0 
+            ? "Start your streak today!" 
+            : data.hasActivityToday
+              ? "Great job! Come back tomorrow to continue your streak!"
+              : "Complete an action to keep your streak going!"}
+        </p>
+
+        {/* Weekly calendar - compact for sidebar fit */}
+        <div className="bg-white rounded-xl border border-stone-200 p-3 mb-4 min-w-0">
+          <div className="grid grid-cols-7 gap-0.5">
+            {getWeekDays().map((day, index) => (
+              <div key={index} className="flex flex-col items-center gap-1 min-w-0">
+                <div 
+                  className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 transition-all text-sm ${
+                    day.hasActivity 
+                      ? '' 
+                      : 'bg-stone-100'
+                  } ${day.isToday && !day.hasActivity ? 'ring-2 ring-lime-400 ring-offset-0' : ''}`}
+                  style={day.hasActivity ? { backgroundColor: 'rgba(163, 230, 53, 0.2)' } : undefined}
+                >
+                  {day.hasActivity ? '🔥' : ''}
+                </div>
+                <span className={`text-[10px] font-semibold truncate w-full text-center ${day.isToday ? 'text-lime-600' : 'text-stone-500'}`}>
+                  {day.label}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Action button */}
+        <button
+          onClick={() => setShowInfoModal(true)}
+          className="w-full py-2.5 px-4 rounded-full border border-stone-200 bg-white text-stone-700 font-medium text-sm hover:bg-stone-50 transition-colors"
+        >
+          How to earn a streak
+        </button>
+
+        {/* Stats row */}
+        {data.longestStreak > 0 && (
+          <div className="flex items-center justify-center gap-4 mt-4 pt-4 border-t border-stone-200">
+            <div className="text-center">
+              <div className="text-lg font-bold text-stone-800">{data.longestStreak}</div>
+              <div className="text-xs text-stone-500">Longest streak</div>
+            </div>
+            <div className="w-px h-8 bg-stone-200"></div>
+            <div className="text-center">
+              <div className="text-lg font-bold text-stone-800">{data.totalActivityDays}</div>
+              <div className="text-xs text-stone-500">Total days</div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Info Modal */}
+      {showInfoModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+          <div 
+            className="bg-white rounded-2xl p-6 sm:p-8 max-w-md w-full shadow-2xl relative"
+            style={{ background: 'linear-gradient(180deg, #FEF9E7 0%, #FFFFFF 30%)' }}
+          >
+            <button
+              onClick={() => setShowInfoModal(false)}
+              className="absolute top-4 right-4 w-8 h-8 rounded-full bg-stone-800 text-white flex items-center justify-center hover:bg-stone-700 transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+
+            <div className="text-center mb-6">
+              <span className="text-6xl mb-4 block">🔥</span>
+              <h3 className="text-2xl font-bold text-stone-800 mb-2">Actions that earn a streak</h3>
+              <p className="text-stone-500">Keep your streak going by completing any of these actions.</p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {streakActions.map((action, index) => (
+                <div key={index} className="flex items-center gap-3">
+                  <div 
+                    className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
+                    style={{ backgroundColor: '#262626' }}
+                  >
+                    <svg className="w-4 h-4 text-lime-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <span className="text-stone-700 font-medium text-sm">{action.label}</span>
+                </div>
+              ))}
+            </div>
+
+            <button
+              onClick={() => setShowInfoModal(false)}
+              className="w-full mt-6 py-3 rounded-full font-semibold text-white transition-colors"
+              style={{ backgroundColor: '#262626' }}
+            >
+              Got it!
+            </button>
+          </div>
+        </div>
+      )}
+    </>
+  );
+};
+
+export default StreakWidget;

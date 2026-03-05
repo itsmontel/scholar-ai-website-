@@ -252,9 +252,12 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
             <button 
               onClick={() => onNavigate?.('quiz-history')}
               className={`px-4 py-2.5 text-base font-medium rounded-xl transition-all duration-200 flex items-center gap-1.5 ${
-                currentPage === 'quiz-history' ? 'bg-stone-100' : 'hover:bg-stone-50'
+                currentPage === 'quiz-history' ? 'ring-2 ring-[#a3e635]/50' : 'hover:opacity-90'
               }`}
-              style={{ color: '#a3e635' }}
+              style={{
+                backgroundColor: '#262626',
+                color: '#a3e635'
+              }}
             >
               🧠 Saved Tools
               <span className="px-1.5 py-0.5 text-[10px] font-bold text-stone-900 rounded-full" style={{ backgroundColor: '#a3e635' }}>PRO</span>
@@ -547,13 +550,12 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
             <button
               onClick={() => { onNavigate?.('quiz-history'); setIsMobileMenuOpen(false); }}
               className={`w-full text-left px-4 py-3 rounded-xl font-medium transition-all duration-200 flex items-center justify-between ${
-                currentPage === 'quiz-history'
-                  ? 'text-lime-600 bg-lime-50'
-                  : 'text-lime-600 hover:text-lime-700 hover:bg-lime-50/50'
+                currentPage === 'quiz-history' ? 'ring-2 ring-[#a3e635]/50' : 'hover:opacity-90'
               }`}
+              style={{ backgroundColor: '#262626', color: '#a3e635' }}
             >
               <span className="flex items-center gap-2">🧠 Saved Tools</span>
-              <span className="px-1.5 py-0.5 text-[10px] font-bold bg-lime-500 text-stone-900 rounded-full">PRO</span>
+              <span className="px-1.5 py-0.5 text-[10px] font-bold text-stone-900 rounded-full" style={{ backgroundColor: '#a3e635' }}>PRO</span>
             </button>
             <button
               onClick={() => { onNavigate?.('blog'); setIsMobileMenuOpen(false); }}

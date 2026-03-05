@@ -21,7 +21,7 @@ router.get('/profile', authenticateToken, async (req, res) => {
 
     const { data, error } = await supabase
       .from('users')
-      .select('id, email, first_name, last_name, institution, research_field, subscription_plan, subscription_status, created_at, last_login, email_verified')
+      .select('id, email, name, first_name, last_name, institution, research_field, subscription_plan, subscription_status, created_at, last_login, email_verified')
       .eq('id', userId)
       .single();
 
@@ -38,6 +38,7 @@ router.get('/profile', authenticateToken, async (req, res) => {
         user: {
           id: data.id,
           email: data.email,
+          name: data.name,
           firstName: data.first_name,
           lastName: data.last_name,
           institution: data.institution,
