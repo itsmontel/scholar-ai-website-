@@ -86,10 +86,12 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
   // Upgrade modal state (for locked features like export)
   const [showExportUpgradeModal, setShowExportUpgradeModal] = useState(false);
 
-  // Ebook banner: show only for 24 hours after first dashboard visit
+  // Ebook banner: show for 24 hours after first dashboard visit, or until user dismisses
   const EBOOK_BANNER_KEY = 'writescholar_ebook_banner_first_seen';
+  const EBOOK_BANNER_DISMISSED_KEY = 'writescholar_ebook_banner_dismissed';
   const EBOOK_BANNER_MS = 24 * 60 * 60 * 1000;
   const [showEbookBanner, setShowEbookBanner] = useState(true);
+  const [ebookBannerDismissed, setEbookBannerDismissed] = useState(() => localStorage.getItem(EBOOK_BANNER_DISMISSED_KEY) === '1');
   useEffect(() => {
     const raw = localStorage.getItem(EBOOK_BANNER_KEY);
     const firstSeen = raw ? parseInt(raw, 10) : null;
@@ -101,6 +103,10 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
       setShowEbookBanner(now - firstSeen < EBOOK_BANNER_MS);
     }
   }, []);
+  const dismissEbookBanner = () => {
+    localStorage.setItem(EBOOK_BANNER_DISMISSED_KEY, '1');
+    setEbookBannerDismissed(true);
+  };
   
   const [quizUsage, setQuizUsage] = useState({
     generationsUsed: 0,
@@ -1292,55 +1298,36 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
       {/* Main Content */}
       <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-14 w-full min-w-0 overflow-x-hidden">
         {/* Welcome */}
-        <div className="text-center mb-10 sm:mb-12">
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl text-stone-800 mb-3" style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 400 }}>
-            {mode === 'humanize' ? (
-              <>Make AI text <span className="italic" style={{ color: '#9B59B6' }}>undetectable</span></>
-            ) : mode === 'summarize' ? (
-              <>Summarize <span className="italic" style={{ color: '#28B463' }}>any document</span></>
-            ) : mode === 'quiz' ? (
-              studyToolMode === 'flashcards' ? <>Generate <span className="italic" style={{ color: '#D35400' }}>flashcards</span></> :
-              studyToolMode === 'crossword' ? <>Generate a <span className="italic" style={{ color: '#D35400' }}>crossword puzzle</span></> :
-              <>Generate <span className="italic" style={{ color: '#D35400' }}>quiz questions</span></>
-            ) : mode === 'analyze' ? (
-              <>Your essay — improved with <span className="italic" style={{ color: '#2E6FEA' }}>AI assistance</span></>
-            ) : (
-              <>Find <span className="italic" style={{ color: '#22A7AB' }}>academic citations</span> for your research</>
-            )}
-          </h1>
-          <p className="text-lg text-stone-500">
-            {mode === 'humanize'
-              ? 'Paste AI-generated text to transform it into natural human writing'
-              : mode === 'summarize'
-              ? 'Transform lengthy papers into concise key points instantly'
-              : mode === 'quiz'
-              ? (studyToolMode === 'flashcards' ? 'Turn your notes into flip-card study sets' : studyToolMode === 'crossword' ? 'Turn key terms into an interactive crossword puzzle' : 'Turn any content into interactive quiz questions')
-              : mode === 'analyze' 
-              ? 'Upload your document or paste your text to get our advanced AI feedback on structure, grammar, and citations'
-              : 'Enter your topic to discover relevant academic sources'
-            }
-          </p>
-          </div>
-
-          {/* Free ebook for new users (hidden after 24 hours from first dashboard visit) */}
-          {showEbookBanner && (
-            <a
-              href="/downloads/writescholar-ultimate-study-tips-guide.pdf"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mb-8 flex items-center gap-4 rounded-2xl border border-lime-200 bg-gradient-to-r from-lime-50 to-green-50 p-4 transition-shadow hover:shadow-md"
-            >
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-lime-100">
-                <svg className="h-6 w-6 text-lime-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+          {/* Free ebook for new users (hidden after 24 hours or when dismissed) */}
+          {showEbookBanner && !ebookBannerDismissed && (
+            <div className="mb-8 relative">
+              <a
+                href="/downloads/writescholar-ultimate-study-tips-guide.pdf"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-4 rounded-2xl border border-lime-200 bg-gradient-to-r from-lime-50 to-green-50 p-4 pr-12 transition-shadow hover:shadow-md"
+              >
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-lime-100">
+                  <svg className="h-6 w-6 text-lime-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                  </svg>
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="font-semibold text-stone-800">Your free ebook</p>
+                  <p className="text-sm text-stone-500">WriteScholar Ultimate Study Tips Guide (PDF)</p>
+                </div>
+                <span className="shrink-0 text-sm font-medium text-lime-600">Download →</span>
+              </a>
+              <button
+                onClick={(e) => { e.preventDefault(); dismissEbookBanner(); }}
+                className="absolute top-3 right-3 p-1.5 rounded-lg text-stone-400 hover:text-stone-600 hover:bg-stone-100 transition-colors"
+                aria-label="Dismiss"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="font-semibold text-stone-800">Your free ebook</p>
-                <p className="text-sm text-stone-500">WriteScholar Ultimate Study Tips Guide (PDF)</p>
-              </div>
-              <span className="shrink-0 text-sm font-medium text-lime-600">Download →</span>
-            </a>
+              </button>
+            </div>
           )}
 
           {/* Mode Toggle - topic colors: Analyze #2E6FEA, Citations #22A7AB, Humanize #9B59B6, Summarize #28B463, Study Tools #D35400 */}
