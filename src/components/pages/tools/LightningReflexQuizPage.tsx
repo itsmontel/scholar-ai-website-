@@ -64,12 +64,12 @@ const SPEED_DECREASE_PER_5 = 600;
 const BASE_SCORE = 100;
 const MAX_REACTION_BONUS = 200;
 const STREAK_BONUS_PER = 10;
-const ROUND_DELAY_MS = 700;
-const BEST_SCORE_KEY = 'lrq-best';
-const BEST_STREAK_KEY = 'lrq-best-streak';
+const ROUND_DELAY_MS = 200;
+const BEST_SCORE_KEY = 'cb-best';
+const BEST_STREAK_KEY = 'cb-best-streak';
 
-const CRATER_SIZE = 78;
-const LANE_CENTERS = [14, 38, 62, 86];
+const CRATER_SIZE = 96;
+const LANE_CENTERS = [14, 37, 63, 86];
 
 const TOPIC_SUGGESTIONS = [
   'Capital Cities', 'The Solar System', 'Human Body', 'World History',
@@ -145,9 +145,9 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
   const handleHitRef = useRef<(crater: Crater, x: number, y: number) => void>(() => {});
 
   useEffect(() => {
-    document.title = 'Lightning Reflex Quiz | WriteScholar';
+    document.title = 'Crater Blast | WriteScholar';
     const meta = document.querySelector('meta[name="description"]');
-    if (meta) meta.setAttribute('content', 'Test your knowledge with this AI-powered reflex quiz game. Shoot the correct falling crater before time runs out!');
+    if (meta) meta.setAttribute('content', 'Crater Blast — the AI-powered quiz shooter. Blast the correct falling crater before it lands. Build streaks, beat your high score!');
   }, []);
 
   useEffect(() => {
@@ -272,7 +272,7 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
       setCraters(prev => prev.map(c =>
         c.id === crater.id ? { ...c, status: 'correct' as const, frozenTop: hitY - CRATER_SIZE / 2 } : { ...c, status: 'missed' as const }
       ));
-      setTimeout(() => advanceQuestion(), 600);
+      setTimeout(() => advanceQuestion(), 120);
     } else {
       setCraters(prev => {
         const correct = prev.find(c => c.isCorrect);
@@ -288,7 +288,7 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
           return { ...c, status: 'missed' as const };
         });
       });
-      setTimeout(() => loseLife(), 800);
+      setTimeout(() => loseLife(), 200);
     }
   }, [advanceQuestion, loseLife, sync]);
 
@@ -372,6 +372,24 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
     fireCannon(e.clientX - r.left, e.clientY - r.top);
   }, [gameState, fireCannon]);
 
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    const a = playAreaRef.current;
+    if (!a || gameState !== 'playing') return;
+    const r = a.getBoundingClientRect();
+    const t = e.touches[0];
+    const angle = Math.atan2(t.clientX - r.left - r.width / 2, r.height - 40 - (t.clientY - r.top)) * (180 / Math.PI);
+    setCannonAngle(Math.max(-65, Math.min(65, angle)));
+  }, [gameState]);
+
+  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+    if (gameState !== 'playing' || roundResolvedRef.current || projDataRef.current) return;
+    const a = playAreaRef.current;
+    if (!a) return;
+    const r = a.getBoundingClientRect();
+    const t = e.changedTouches[0];
+    fireCannon(t.clientX - r.left, t.clientY - r.top);
+  }, [gameState, fireCannon]);
+
   const handleCraterAnimEnd = useCallback((_craterId: string, isCorrect: boolean) => {
     if (roundResolvedRef.current || !gameActiveRef.current) return;
     if (!isCorrect) return;
@@ -445,10 +463,10 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
             <span className="text-4xl sm:text-5xl drop-shadow-sm">⚡</span>
           </div>
           <h1 className="text-3xl sm:text-4xl font-extrabold text-stone-900 tracking-tight mb-3">
-            Lightning Reflex Quiz
+            Crater Blast
           </h1>
           <p className="text-stone-600 text-base sm:text-lg max-w-md mx-auto leading-relaxed">
-            AI-generated questions fall as craters. Aim your cannon and blast the correct answer before it lands.
+            AI-generated quiz craters fall from the sky. Aim your cannon and blast the correct answer before it lands.
           </p>
           {bestScore > 0 && (
             <div className="mt-4 inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm rounded-full px-5 py-2.5 text-sm font-semibold text-stone-700 shadow-sm border border-stone-200/60">
@@ -534,7 +552,7 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
                   Generating...
                 </span>
               ) : (
-                <>⚡ Start Game</>
+                <>💥 Start Blasting</>
               )}
             </button>
 
@@ -555,7 +573,7 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {[
               { step: 1, text: 'Answer craters fall from the sky', icon: '🌑' },
-              { step: 2, text: 'Click to aim and shoot your cannon', icon: '🎯' },
+              { step: 2, text: 'Tap or click to fire your cannon', icon: '🎯' },
               { step: 3, text: 'Hit the correct answer to score points', icon: '✅', accent: 'green' },
               { step: 4, text: 'Wrong hit or miss costs a life', icon: '❤️', accent: 'red' },
             ].map(({ step, text, icon, accent }) => (
@@ -569,7 +587,7 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
 
         {/* Feature badges */}
         <div className="mt-8 flex flex-wrap justify-center gap-3">
-          {['AI-Powered', '20 Questions', 'Endless Rounds'].map((badge, i) => (
+          {['AI-Powered', '20 Questions', 'Endless Rounds', 'Mobile Friendly'].map((badge, i) => (
             <span key={i} className="px-4 py-2 rounded-full bg-white/80 border border-stone-200/60 text-xs font-medium text-stone-600 shadow-sm">
               {badge}
             </span>
@@ -585,8 +603,8 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
         <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 mb-5 shadow-lg shadow-blue-600/20">
           <span className="text-3xl animate-pulse">⚡</span>
         </div>
-        <h2 className="text-lg font-bold text-stone-800 mb-1">Generating Questions...</h2>
-        <p className="text-stone-500 text-sm">AI is crafting your targets</p>
+        <h2 className="text-lg font-bold text-stone-800 mb-1">Generating Craters...</h2>
+        <p className="text-stone-500 text-sm">AI is loading your targets</p>
         <div className="mt-5 flex justify-center gap-1.5">
           {[0, 1, 2].map(i => (
             <div key={i} className="w-2 h-2 rounded-full bg-blue-500" style={{ animation: `lrqPulse 1s ease-in-out ${i * 0.2}s infinite` }} />
@@ -639,9 +657,11 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
         <div
           ref={playAreaRef}
           className="flex-1 relative overflow-hidden cursor-crosshair"
-          style={{ background: 'linear-gradient(180deg, #0f172a 0%, #1e293b 60%, #334155 100%)', minHeight: '420px', touchAction: 'none', userSelect: 'none' }}
+          style={{ background: 'linear-gradient(180deg, #0f172a 0%, #1e293b 60%, #334155 100%)', minHeight: '380px', touchAction: 'none', userSelect: 'none' }}
           onMouseMove={handleMouseMove}
           onClick={handleClick}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
         >
           {/* Stars (memoized positions via key) */}
           <div className="absolute inset-0 pointer-events-none">
@@ -736,13 +756,17 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
                   <span style={{
                     color: txt,
                     fontWeight: 700,
-                    fontSize: crater.text.length > 12 ? '10px' : crater.text.length > 8 ? '11px' : '12px',
-                    lineHeight: 1.25,
-                    padding: '10px',
-                    wordBreak: 'break-word' as const,
+                    fontSize: crater.text.length > 14 ? '9px' : crater.text.length > 10 ? '10px' : crater.text.length > 7 ? '11px' : '13px',
+                    lineHeight: 1.2,
+                    textAlign: 'center' as const,
+                    whiteSpace: 'nowrap' as const,
+                    overflow: 'hidden' as const,
+                    textOverflow: 'ellipsis' as const,
+                    maxWidth: `${CRATER_SIZE - 18}px`,
                     textShadow: '0 1px 3px rgba(0,0,0,0.5)',
                     position: 'relative',
                     zIndex: 2,
+                    padding: '0 4px',
                   }}>
                     {crater.text}
                   </span>
@@ -910,7 +934,7 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
               <div className="flex gap-3 pt-1">
                 <button onClick={handlePlayAgain}
                   className="flex-1 py-3.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold shadow-md shadow-blue-600/20 active:scale-[0.98] transition-all">
-                  ⚡ Play Again
+                  💥 Play Again
                 </button>
                 <button onClick={handleNewTopic}
                   className="flex-1 py-3.5 rounded-xl bg-stone-100 text-stone-700 font-bold hover:bg-stone-200 active:scale-[0.98] transition-all border border-stone-200">
@@ -926,7 +950,7 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%)' }}>
-      <Header onNavigate={onNavigate} user={user} onLogout={onLogout || (() => {})} currentPage="lightning-reflex-quiz" />
+      <Header onNavigate={onNavigate} user={user} onLogout={onLogout || (() => {})} currentPage="crater-blast" />
       {gameState === 'menu' && renderMenu()}
       {gameState === 'loading' && renderLoading()}
       {gameState === 'playing' && renderGame()}

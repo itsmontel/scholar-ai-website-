@@ -155,9 +155,9 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
                 </a>
               </li>
               <li>
-                <a href="/tools/lightning-reflex-quiz" onClick={(e) => { e.preventDefault(); onNavigate?.('lightning-reflex-quiz'); }} className="text-indigo-600 hover:text-indigo-700 text-sm font-medium transition-colors flex items-center gap-1.5">
-                  Lightning Reflex Quiz
-                  <span className="text-xs opacity-75">⚡</span>
+                <a href="/tools/crater-blast" onClick={(e) => { e.preventDefault(); onNavigate?.('crater-blast'); }} className="text-indigo-600 hover:text-indigo-700 text-sm font-medium transition-colors flex items-center gap-1.5">
+                  Crater Blast
+                  <span className="text-xs opacity-75">💥</span>
                 </a>
               </li>
             </ul>
