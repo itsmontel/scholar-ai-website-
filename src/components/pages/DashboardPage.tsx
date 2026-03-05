@@ -118,6 +118,116 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
     plan: 'free'
   });
 
+  // Calendar / Study Events state
+  interface StudyEvent {
+    id: string;
+    title: string;
+    event_date: string;
+    event_time?: string;
+    event_type: 'exam' | 'test' | 'midterm' | 'assignment' | 'quiz' | 'other';
+    course?: string;
+    notes?: string;
+  }
+  const [studyEvents, setStudyEvents] = useState<StudyEvent[]>([]);
+  const [loadingEvents, setLoadingEvents] = useState(true);
+  const [showAddEventModal, setShowAddEventModal] = useState(false);
+  const [newEvent, setNewEvent] = useState({ title: '', event_date: '', event_time: '', event_type: 'other', course: '', notes: '' });
+  const [calendarMonth, setCalendarMonth] = useState(new Date());
+
+  // Fetch study events
+  useEffect(() => {
+    const fetchStudyEvents = async () => {
+      try {
+        const token = localStorage.getItem('authToken');
+        if (!token) return;
+        const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/analysis/study-events`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (data.success) setStudyEvents(data.data || []);
+      } catch (err) {
+        console.error('Failed to fetch study events:', err);
+      } finally {
+        setLoadingEvents(false);
+      }
+    };
+    fetchStudyEvents();
+  }, []);
+
+  const addStudyEvent = async () => {
+    if (!newEvent.title || !newEvent.event_date) return;
+    try {
+      const token = localStorage.getItem('authToken');
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/analysis/study-events`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify(newEvent)
+      });
+      const data = await res.json();
+      if (data.success) {
+        setStudyEvents(prev => [...prev, data.data].sort((a, b) => new Date(a.event_date).getTime() - new Date(b.event_date).getTime()));
+        setNewEvent({ title: '', event_date: '', event_time: '', event_type: 'other', course: '', notes: '' });
+        setShowAddEventModal(false);
+      }
+    } catch (err) {
+      console.error('Failed to add study event:', err);
+    }
+  };
+
+  const deleteStudyEvent = async (id: string) => {
+    try {
+      const token = localStorage.getItem('authToken');
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/analysis/study-events/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (data.success) {
+        setStudyEvents(prev => prev.filter(e => e.id !== id));
+      }
+    } catch (err) {
+      console.error('Failed to delete study event:', err);
+    }
+  };
+
+  // Calendar helper functions
+  const getCalendarDays = () => {
+    const year = calendarMonth.getFullYear();
+    const month = calendarMonth.getMonth();
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const daysInPrevMonth = new Date(year, month, 0).getDate();
+    
+    const days: { day: number; isCurrentMonth: boolean; date: string }[] = [];
+    for (let i = firstDay - 1; i >= 0; i--) {
+      const d = daysInPrevMonth - i;
+      days.push({ day: d, isCurrentMonth: false, date: `${year}-${String(month).padStart(2, '0')}-${String(d).padStart(2, '0')}` });
+    }
+    for (let i = 1; i <= daysInMonth; i++) {
+      days.push({ day: i, isCurrentMonth: true, date: `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}` });
+    }
+    const remaining = 42 - days.length;
+    for (let i = 1; i <= remaining; i++) {
+      days.push({ day: i, isCurrentMonth: false, date: `${year}-${String(month + 2).padStart(2, '0')}-${String(i).padStart(2, '0')}` });
+    }
+    return days;
+  };
+
+  const getEventsForDate = (dateStr: string) => studyEvents.filter(e => e.event_date === dateStr);
+  const getUpcomingEvents = () => {
+    const today = new Date().toISOString().split('T')[0];
+    return studyEvents.filter(e => e.event_date >= today).slice(0, 5);
+  };
+  const isToday = (dateStr: string) => new Date().toISOString().split('T')[0] === dateStr;
+  const eventTypeColors: Record<string, { bg: string; border: string; text: string; dot: string }> = {
+    exam: { bg: 'bg-red-50', border: 'border-red-100', text: 'text-red-600', dot: 'bg-red-400' },
+    midterm: { bg: 'bg-red-50', border: 'border-red-100', text: 'text-red-600', dot: 'bg-red-400' },
+    test: { bg: 'bg-orange-50', border: 'border-orange-100', text: 'text-orange-600', dot: 'bg-orange-400' },
+    quiz: { bg: 'bg-amber-50', border: 'border-amber-100', text: 'text-amber-600', dot: 'bg-amber-400' },
+    assignment: { bg: 'bg-blue-50', border: 'border-blue-100', text: 'text-blue-600', dot: 'bg-blue-400' },
+    other: { bg: 'bg-stone-50', border: 'border-stone-200', text: 'text-stone-600', dot: 'bg-stone-400' }
+  };
+
   const [usageStats, setUsageStats] = useState({
     documentsUploaded: 0,
     documentsAnalyzed: 0,
@@ -1328,42 +1438,148 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
       </div>
 
       {/* Main Content */}
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-14 w-full min-w-0 overflow-x-hidden">
-        {/* Welcome */}
-          {/* Free ebook for new users (hidden after 24 hours or when dismissed) */}
-          {showEbookBanner && !ebookBannerDismissed && (
-            <div className="mb-8 relative">
-              <a
-                href="/downloads/writescholar-ultimate-study-tips-guide.pdf"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-4 rounded-2xl border border-lime-200 bg-gradient-to-r from-lime-50 to-green-50 p-4 pr-12 transition-shadow hover:shadow-md"
-              >
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-lime-100">
-                  <svg className="h-6 w-6 text-lime-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                  </svg>
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="font-semibold text-stone-800">Your free ebook</p>
-                  <p className="text-sm text-stone-500">WriteScholar Ultimate Study Tips Guide (PDF)</p>
-                </div>
-                <span className="shrink-0 text-sm font-medium text-lime-600">Download →</span>
-              </a>
-              <button
-                onClick={(e) => { e.preventDefault(); dismissEbookBanner(); }}
-                className="absolute top-3 right-3 p-1.5 rounded-lg text-stone-400 hover:text-stone-600 hover:bg-stone-100 transition-colors"
-                aria-label="Dismiss"
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-1 sm:pt-2 pb-8 sm:pb-14 w-full min-w-0 overflow-x-hidden lg:ml-24 lg:mr-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-[240px_1fr] gap-6 items-start">
+          {/* LEFT SIDEBAR: Calendar / Schedule */}
+          <aside className="order-2 lg:order-1 bg-white rounded-2xl shadow-sm border border-stone-100 p-4 sticky top-16">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-semibold text-stone-800 flex items-center gap-2 text-sm">
+                <span className="text-lg">📅</span> Schedule
+              </h3>
+              <button 
+                onClick={() => setShowAddEventModal(true)}
+                className="text-stone-400 hover:text-lime-600 transition-colors"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                 </svg>
               </button>
             </div>
-          )}
+            
+            {/* Mini Calendar View */}
+            <div className="mb-4">
+              <div className="flex items-center justify-between mb-2 text-xs font-medium text-stone-600">
+                <button 
+                  onClick={() => setCalendarMonth(new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() - 1))}
+                  className="p-1 hover:bg-stone-100 rounded"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+                </button>
+                <span className="font-semibold">{calendarMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</span>
+                <button 
+                  onClick={() => setCalendarMonth(new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + 1))}
+                  className="p-1 hover:bg-stone-100 rounded"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                </button>
+              </div>
+              <div className="grid grid-cols-7 gap-0.5 text-center text-[10px] mb-1 text-stone-400 font-medium">
+                <div>S</div><div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div>
+              </div>
+              <div className="grid grid-cols-7 gap-0.5 text-center text-xs">
+                {getCalendarDays().map((d, i) => {
+                  const events = getEventsForDate(d.date);
+                  const today = isToday(d.date);
+                  return (
+                    <div 
+                      key={i} 
+                      className={`p-1 relative cursor-pointer rounded transition-colors ${
+                        !d.isCurrentMonth ? 'text-stone-300' : 
+                        today ? 'bg-lime-500 text-white font-bold' : 
+                        'text-stone-700 hover:bg-stone-100'
+                      }`}
+                    >
+                      {d.day}
+                      {events.length > 0 && !today && (
+                        <span className={`absolute bottom-0 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full ${eventTypeColors[events[0].event_type]?.dot || 'bg-stone-400'}`}></span>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
 
-          {/* Mode Toggle - topic colors: Analyze #2E6FEA, Citations #22A7AB, Humanize #9B59B6, Summarize #28B463, Study Tools #D35400 */}
-        <div className="flex justify-center mb-7">
+            {/* Upcoming Events List */}
+            <div className="space-y-2">
+              <h4 className="text-[10px] font-semibold text-stone-400 uppercase tracking-wider">Upcoming</h4>
+              
+              {loadingEvents ? (
+                <div className="text-center py-4 text-stone-400 text-xs">Loading...</div>
+              ) : getUpcomingEvents().length === 0 ? (
+                <div className="text-center py-4 text-stone-400 text-xs">No upcoming events</div>
+              ) : (
+                getUpcomingEvents().map(event => {
+                  const colors = eventTypeColors[event.event_type] || eventTypeColors.other;
+                  const eventDate = new Date(event.event_date + 'T00:00:00');
+                  return (
+                    <div key={event.id} className={`flex gap-2 p-2 rounded-lg ${colors.bg} border ${colors.border} group relative`}>
+                      <div className={`flex flex-col items-center justify-center w-9 h-9 bg-white rounded-lg shadow-sm ${colors.text} flex-shrink-0`}>
+                        <span className="text-[8px] font-bold uppercase leading-none">{eventDate.toLocaleDateString('en-US', { month: 'short' })}</span>
+                        <span className="text-sm font-bold leading-none">{eventDate.getDate()}</span>
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-xs font-semibold text-stone-800 truncate">{event.title}</p>
+                        <p className="text-[10px] text-stone-500 truncate">
+                          {event.course && `${event.course} • `}{event.event_time || 'All day'}
+                        </p>
+                      </div>
+                      <button 
+                        onClick={() => deleteStudyEvent(event.id)}
+                        className="absolute top-1 right-1 p-1 text-stone-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                      </button>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+            
+            <button 
+              onClick={() => setShowAddEventModal(true)}
+              className="w-full mt-3 py-2 text-xs font-medium text-stone-500 bg-stone-50 hover:bg-lime-50 hover:text-lime-700 rounded-lg transition-colors border border-stone-200 border-dashed"
+            >
+              + Add Event
+            </button>
+          </aside>
+
+          {/* RIGHT MAIN CONTENT */}
+          <div className="order-1 lg:order-2 min-w-0 pt-6 sm:pt-10">
+            {/* Welcome */}
+            {/* Free ebook for new users (hidden after 24 hours or when dismissed) */}
+            {showEbookBanner && !ebookBannerDismissed && (
+              <div className="mb-8 relative">
+                <a
+                  href="/downloads/writescholar-ultimate-study-tips-guide.pdf"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-4 rounded-2xl border border-lime-200 bg-gradient-to-r from-lime-50 to-green-50 p-4 pr-12 transition-shadow hover:shadow-md"
+                >
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-lime-100">
+                    <svg className="h-6 w-6 text-lime-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                    </svg>
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="font-semibold text-stone-800">Your free ebook</p>
+                    <p className="text-sm text-stone-500">WriteScholar Ultimate Study Tips Guide (PDF)</p>
+                  </div>
+                  <span className="shrink-0 text-sm font-medium text-lime-600">Download →</span>
+                </a>
+                <button
+                  onClick={(e) => { e.preventDefault(); dismissEbookBanner(); }}
+                  className="absolute top-3 right-3 p-1.5 rounded-lg text-stone-400 hover:text-stone-600 hover:bg-stone-100 transition-colors"
+                  aria-label="Dismiss"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            )}
+
+            {/* Mode Toggle - topic colors: Analyze #2E6FEA, Citations #22A7AB, Humanize #9B59B6, Summarize #28B463, Study Tools #D35400 */}
+          <div className="flex justify-center mb-7">
           <div className="inline-flex flex-wrap justify-center bg-stone-100 rounded-full p-1.5 gap-1">
               <button
               onClick={() => { setMode('analyze'); setInputText(''); setShowWordWarning(false); setShowHumanizeResult(false); setSummaryResult(null); setQuizResult(null); }}
@@ -1706,17 +1922,17 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                       <div className="w-2 h-2 rounded-full bg-gray-300 flex-shrink-0"></div>
                       <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider truncate">Original</span>
                     </div>
-                    <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+                    <div className="flex items-center gap-2 flex-shrink-0">
                       <input ref={parseFileInputRef} type="file" accept=".pdf,.doc,.docx,.txt,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain" onChange={handleParseDocument} className="hidden" />
-                      <button onClick={() => parseFileInputRef.current?.click()} disabled={isParsingDoc} className="flex items-center gap-1 text-xs text-violet-600 hover:text-violet-700 font-medium transition-colors disabled:opacity-50">
-                        {isParsingDoc ? <span className="w-3.5 h-3.5 border border-violet-400 border-t-transparent rounded-full animate-spin" /> : <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>}
-                        {isParsingDoc ? 'Parsing...' : 'Upload'}
+                      <button onClick={() => parseFileInputRef.current?.click()} disabled={isParsingDoc} className="flex items-center gap-2 px-3 py-2 rounded-lg bg-violet-100 text-violet-700 hover:bg-violet-200 font-semibold text-sm transition-colors disabled:opacity-50 border border-violet-200">
+                        {isParsingDoc ? <span className="w-4 h-4 border-2 border-violet-400 border-t-transparent rounded-full animate-spin" /> : <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>}
+                        {isParsingDoc ? 'Parsing...' : 'Upload Document'}
                       </button>
-                      <button onClick={() => setInputText('')} className={`text-xs text-gray-400 hover:text-gray-600 transition-colors ${!inputText ? 'invisible' : ''}`}>Clear</button>
-                      <button onClick={() => navigator.clipboard.readText().then(text => setInputText(text))} className="flex items-center gap-1 text-xs text-violet-600 hover:text-violet-700 font-medium transition-colors">
+                      <button onClick={() => navigator.clipboard.readText().then(text => setInputText(text))} className="flex items-center gap-1.5 px-2 py-1.5 text-xs text-gray-600 hover:text-violet-600 hover:bg-violet-50 rounded-lg transition-colors">
                         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
                         Paste
                       </button>
+                      <button onClick={() => setInputText('')} className={`flex items-center gap-1.5 px-2 py-1.5 text-xs text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors ${!inputText ? 'invisible' : ''}`}>Clear</button>
                     </div>
                   </div>
                   <textarea
@@ -1981,11 +2197,12 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                     </div>
                     <div className="flex items-center gap-2">
                       <input ref={parseFileInputRef} type="file" accept=".pdf,.doc,.docx,.txt,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain" onChange={handleParseDocument} className="hidden" />
-                      <button onClick={() => parseFileInputRef.current?.click()} disabled={isParsingDoc} className="text-xs text-teal-600 hover:text-teal-700 font-medium disabled:opacity-50">
-                        {isParsingDoc ? 'Parsing...' : 'Upload'}
+                      <button onClick={() => parseFileInputRef.current?.click()} disabled={isParsingDoc} className="flex items-center gap-2 px-3 py-2 rounded-lg bg-teal-100 text-teal-700 hover:bg-teal-200 font-semibold text-sm transition-colors disabled:opacity-50 border border-teal-200">
+                        {isParsingDoc ? <span className="w-4 h-4 border-2 border-teal-500 border-t-transparent rounded-full animate-spin" /> : <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>}
+                        {isParsingDoc ? 'Parsing...' : 'Upload Document'}
                       </button>
-                      <button onClick={() => setInputText('')} className={`text-xs text-gray-400 hover:text-gray-600 ${!inputText ? 'invisible' : ''}`}>Clear</button>
-                      <button onClick={() => navigator.clipboard.readText().then(text => setInputText(text))} className="text-xs text-teal-600 hover:text-teal-700 font-medium">Paste</button>
+                      <button onClick={() => navigator.clipboard.readText().then(text => setInputText(text))} className="flex items-center gap-1.5 px-2 py-1.5 text-xs text-gray-600 hover:text-teal-600 hover:bg-teal-50 rounded-lg transition-colors">Paste</button>
+                      <button onClick={() => setInputText('')} className={`flex items-center gap-1.5 px-2 py-1.5 text-xs text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors ${!inputText ? 'invisible' : ''}`}>Clear</button>
                     </div>
                   </div>
                   <textarea
@@ -3017,6 +3234,8 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
             </div>
           )}
         </div>
+        </div>
+        </div>
       </main>
 
       {/* Analysis Popup */}
@@ -3100,6 +3319,111 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                 className="flex-1 px-4 py-3 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-xl hover:from-amber-700 hover:to-orange-700 transition-all font-medium"
               >
                 View Plans
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add Study Event Modal */}
+      {showAddEventModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4" onClick={() => setShowAddEventModal(false)}>
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-5">
+              <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                <span className="text-xl">📅</span> Add Study Event
+              </h3>
+              <button onClick={() => setShowAddEventModal(false)} className="text-stone-400 hover:text-stone-600">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-stone-700 mb-1">Event Title *</label>
+                <input
+                  type="text"
+                  value={newEvent.title}
+                  onChange={e => setNewEvent(prev => ({ ...prev, title: e.target.value }))}
+                  placeholder="e.g. Biology Midterm"
+                  className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-lime-500 focus:border-lime-500 text-sm"
+                />
+              </div>
+              
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-stone-700 mb-1">Date *</label>
+                  <input
+                    type="date"
+                    value={newEvent.event_date}
+                    onChange={e => setNewEvent(prev => ({ ...prev, event_date: e.target.value }))}
+                    className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-lime-500 focus:border-lime-500 text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-stone-700 mb-1">Time</label>
+                  <input
+                    type="time"
+                    value={newEvent.event_time}
+                    onChange={e => setNewEvent(prev => ({ ...prev, event_time: e.target.value }))}
+                    className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-lime-500 focus:border-lime-500 text-sm"
+                  />
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-stone-700 mb-1">Event Type</label>
+                  <select
+                    value={newEvent.event_type}
+                    onChange={e => setNewEvent(prev => ({ ...prev, event_type: e.target.value }))}
+                    className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-lime-500 focus:border-lime-500 text-sm"
+                  >
+                    <option value="exam">Exam</option>
+                    <option value="midterm">Midterm</option>
+                    <option value="test">Test</option>
+                    <option value="quiz">Quiz</option>
+                    <option value="assignment">Assignment</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-stone-700 mb-1">Course</label>
+                  <input
+                    type="text"
+                    value={newEvent.course}
+                    onChange={e => setNewEvent(prev => ({ ...prev, course: e.target.value }))}
+                    placeholder="e.g. BIO 101"
+                    className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-lime-500 focus:border-lime-500 text-sm"
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-stone-700 mb-1">Notes (optional)</label>
+                <textarea
+                  value={newEvent.notes}
+                  onChange={e => setNewEvent(prev => ({ ...prev, notes: e.target.value }))}
+                  placeholder="Any additional details..."
+                  rows={2}
+                  className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-lime-500 focus:border-lime-500 text-sm resize-none"
+                />
+              </div>
+            </div>
+            
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => setShowAddEventModal(false)}
+                className="flex-1 px-4 py-2.5 border border-stone-300 text-stone-700 rounded-xl hover:bg-stone-50 transition-colors font-medium text-sm"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={addStudyEvent}
+                disabled={!newEvent.title || !newEvent.event_date}
+                className="flex-1 px-4 py-2.5 bg-lime-600 text-white rounded-xl hover:bg-lime-700 transition-colors font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Add Event
               </button>
             </div>
           </div>

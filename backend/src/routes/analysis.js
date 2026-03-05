@@ -1736,4 +1736,143 @@ router.post('/generate-reflex-questions', authenticateToken, async (req, res) =>
   }
 });
 
+// ==================== STUDY EVENTS (Calendar) ====================
+
+// @route   GET /api/analysis/study-events
+// @desc    Get all study events for a user
+// @access  Private
+router.get('/study-events', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { createClient } = require('@supabase/supabase-js');
+    const supabase = createClient(
+      process.env.SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
+    );
+
+    const { data, error } = await supabase
+      .from('study_events')
+      .select('*')
+      .eq('user_id', userId)
+      .order('event_date', { ascending: true });
+
+    if (error) throw error;
+
+    res.json({ success: true, data: data || [] });
+  } catch (error) {
+    console.error('Get study events error:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch study events' });
+  }
+});
+
+// @route   POST /api/analysis/study-events
+// @desc    Create a new study event
+// @access  Private
+router.post('/study-events', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { title, event_date, event_time, event_type, course, notes } = req.body;
+
+    if (!title || !event_date) {
+      return res.status(400).json({ success: false, message: 'Title and date are required' });
+    }
+
+    const { createClient } = require('@supabase/supabase-js');
+    const supabase = createClient(
+      process.env.SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
+    );
+
+    const { data, error } = await supabase
+      .from('study_events')
+      .insert({
+        user_id: userId,
+        title,
+        event_date,
+        event_time: event_time || null,
+        event_type: event_type || 'other',
+        course: course || null,
+        notes: notes || null
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    res.json({ success: true, data });
+  } catch (error) {
+    console.error('Create study event error:', error);
+    res.status(500).json({ success: false, message: 'Failed to create study event' });
+  }
+});
+
+// @route   PUT /api/analysis/study-events/:id
+// @desc    Update a study event
+// @access  Private
+router.put('/study-events/:id', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { id } = req.params;
+    const { title, event_date, event_time, event_type, course, notes } = req.body;
+
+    const { createClient } = require('@supabase/supabase-js');
+    const supabase = createClient(
+      process.env.SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
+    );
+
+    const { data, error } = await supabase
+      .from('study_events')
+      .update({
+        title,
+        event_date,
+        event_time,
+        event_type,
+        course,
+        notes,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', id)
+      .eq('user_id', userId)
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    res.json({ success: true, data });
+  } catch (error) {
+    console.error('Update study event error:', error);
+    res.status(500).json({ success: false, message: 'Failed to update study event' });
+  }
+});
+
+// @route   DELETE /api/analysis/study-events/:id
+// @desc    Delete a study event
+// @access  Private
+router.delete('/study-events/:id', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { id } = req.params;
+
+    const { createClient } = require('@supabase/supabase-js');
+    const supabase = createClient(
+      process.env.SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
+    );
+
+    const { error } = await supabase
+      .from('study_events')
+      .delete()
+      .eq('id', id)
+      .eq('user_id', userId);
+
+    if (error) throw error;
+
+    res.json({ success: true, message: 'Event deleted successfully' });
+  } catch (error) {
+    console.error('Delete study event error:', error);
+    res.status(500).json({ success: false, message: 'Failed to delete study event' });
+  }
+});
+
 module.exports = router;

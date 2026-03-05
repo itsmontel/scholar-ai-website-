@@ -346,12 +346,12 @@ const HumanizerPage = ({ onNavigate, user, onLogout }: HumanizerPageProps) => {
             <div className="grid grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-gray-100 min-w-0">
               {/* Left Panel - Input */}
               <div className="flex flex-col min-w-0">
-                <div className="flex items-center justify-between px-3 sm:px-5 py-2.5 sm:py-3 bg-gray-50/50 border-b border-gray-100 gap-2 min-w-0">
+                <div className="flex items-center justify-between px-3 sm:px-5 py-2.5 sm:py-3 bg-gray-50/50 border-b border-gray-100 gap-2 min-w-0 flex-wrap">
                   <div className="flex items-center gap-2 min-w-0">
                     <div className="w-2 h-2 rounded-full bg-gray-300 flex-shrink-0"></div>
                     <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider truncate">Original</span>
                   </div>
-                  <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+                  <div className="flex items-center gap-2 flex-shrink-0">
                     <input
                       ref={fileInputRef}
                       type="file"
@@ -362,31 +362,31 @@ const HumanizerPage = ({ onNavigate, user, onLogout }: HumanizerPageProps) => {
                     <button
                       onClick={() => fileInputRef.current?.click()}
                       disabled={isParsing}
-                      className="flex items-center gap-1 text-xs text-violet-600 hover:text-violet-700 font-medium transition-colors disabled:opacity-50"
+                      className="flex items-center gap-2 px-3 py-2 rounded-lg bg-violet-100 text-violet-700 hover:bg-violet-200 font-semibold text-sm transition-colors disabled:opacity-50 border border-violet-200"
                     >
                       {isParsing ? (
-                        <span className="w-3.5 h-3.5 border border-violet-400 border-t-transparent rounded-full animate-spin" />
+                        <span className="w-4 h-4 border-2 border-violet-400 border-t-transparent rounded-full animate-spin" />
                       ) : (
-                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                         </svg>
                       )}
-                      {isParsing ? 'Parsing...' : 'Upload'}
-                    </button>
-                    <button
-                      onClick={() => setInputText('')}
-                      className={`text-xs text-gray-400 hover:text-gray-600 transition-colors ${!inputText ? 'invisible' : ''}`}
-                    >
-                      Clear
+                      {isParsing ? 'Parsing...' : 'Upload Document'}
                     </button>
                     <button
                       onClick={() => navigator.clipboard.readText().then(text => setInputText(text))}
-                      className="flex items-center gap-1 text-xs text-violet-600 hover:text-violet-700 font-medium transition-colors"
+                      className="flex items-center gap-1.5 px-2 py-1.5 text-xs text-gray-600 hover:text-violet-600 hover:bg-violet-50 rounded-lg transition-colors"
                     >
                       <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                       </svg>
                       Paste
+                    </button>
+                    <button
+                      onClick={() => setInputText('')}
+                      className={`flex items-center gap-1.5 px-2 py-1.5 text-xs text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors ${!inputText ? 'invisible' : ''}`}
+                    >
+                      Clear
                     </button>
                   </div>
                 </div>
