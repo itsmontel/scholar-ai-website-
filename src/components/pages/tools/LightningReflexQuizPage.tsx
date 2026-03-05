@@ -52,7 +52,7 @@ interface Explosion {
   isCorrect: boolean;
 }
 
-type GameState = 'menu' | 'loading' | 'playing' | 'gameover';
+type GameState = 'menu' | 'loading' | 'ready' | 'playing' | 'gameover';
 type InputMode = 'topic' | 'notes';
 
 /* ────────────────────── Config ────────────────────── */
@@ -65,8 +65,6 @@ const BASE_SCORE = 100;
 const MAX_REACTION_BONUS = 200;
 const STREAK_BONUS_PER = 10;
 const ROUND_DELAY_MS = 0;
-const BEST_SCORE_KEY = 'cb-best';
-const BEST_STREAK_KEY = 'cb-best-streak';
 
 const CRATER_SIZE = 96;
 const LANE_CENTERS = [14, 37, 63, 86];
@@ -93,10 +91,6 @@ function computePoints(reactionMs: number, streak: number) {
   return { base: BASE_SCORE, reactionBonus, streakBonus, total: BASE_SCORE + reactionBonus + streakBonus };
 }
 
-function loadNumber(key: string): number {
-  try { return parseInt(localStorage.getItem(key) || '0', 10) || 0; } catch { return 0; }
-}
-
 /* ────────────────────── Component ────────────────────── */
 
 const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflexQuizPageProps) => {
@@ -114,8 +108,6 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
   const [streak, setStreak] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
   const [longestStreak, setLongestStreak] = useState(0);
-  const [bestScore, setBestScore] = useState(() => loadNumber(BEST_SCORE_KEY));
-  const [bestStreak, setBestStreak] = useState(() => loadNumber(BEST_STREAK_KEY));
   const [fallDuration, setFallDuration] = useState(BASE_FALL_DURATION);
   const [scorePopups, setScorePopups] = useState<ScorePopup[]>([]);
   const [screenEffect, setScreenEffect] = useState('');
@@ -125,6 +117,9 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
   const [projPos, setProjPos] = useState<{ x: number; y: number } | null>(null);
   const [cannonFiring, setCannonFiring] = useState(false);
   const [explosions, setExplosions] = useState<Explosion[]>([]);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
+  const [loadedFromSavedGame, setLoadedFromSavedGame] = useState(false);
 
   const livesRef = useRef(INITIAL_LIVES);
   const scoreRef = useRef(0);
@@ -148,6 +143,28 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
     document.title = 'Crater Blast | WriteScholar';
     const meta = document.querySelector('meta[name="description"]');
     if (meta) meta.setAttribute('content', 'Crater Blast — the AI-powered quiz shooter. Blast the correct falling crater before it lands. Build streaks, beat your high score!');
+  }, []);
+
+  useEffect(() => {
+    const saved = localStorage.getItem('savedCraterBlast');
+    if (saved && gameState === 'menu') {
+      try {
+        const tool = JSON.parse(saved);
+        const qs = tool.questions?.questions ?? (Array.isArray(tool.questions) ? tool.questions : []);
+        if (qs.length > 0) {
+          localStorage.removeItem('savedCraterBlast');
+          questionsRef.current = shuffle(qs);
+          setQuestions([...questionsRef.current]);
+          setInputText(tool.questions?.sourceText || tool.title || '');
+          setInputMode((tool.questions?.inputType || 'topic') as InputMode);
+          setLoadedFromSavedGame(true);
+          resetGameState();
+          setGameState('ready');
+        }
+      } catch {
+        localStorage.removeItem('savedCraterBlast');
+      }
+    }
   }, []);
 
   useEffect(() => {
@@ -229,11 +246,6 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
     setCraters([]);
     setProjPos(null);
     projDataRef.current = null;
-
-    const fs = scoreRef.current;
-    const fl = longestStreakRef.current;
-    if (fs > loadNumber(BEST_SCORE_KEY)) { localStorage.setItem(BEST_SCORE_KEY, String(fs)); setBestScore(fs); }
-    if (fl > loadNumber(BEST_STREAK_KEY)) { localStorage.setItem(BEST_STREAK_KEY, String(fl)); setBestStreak(fl); }
     setGameState('gameover');
   }, []);
 
@@ -408,6 +420,16 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
     setError(null);
     setIsLoading(true);
     setGameState('loading');
+
+    const token = localStorage.getItem('authToken');
+    if (!user || !token) {
+      await new Promise(r => setTimeout(r, 2500));
+      setIsLoading(false);
+      onNavigate('signup');
+      return;
+    }
+
+    setLoadedFromSavedGame(false);
     try {
       const qs = await fetchQuestions();
       if (!qs || qs.length === 0) throw new Error('No questions generated. Try a different topic.');
@@ -415,6 +437,7 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
       setQuestions(qs);
       resetGameState();
       setGameState('playing');
+      window.scrollTo(0, 0);
       setTimeout(() => spawnRound(0, BASE_FALL_DURATION), 500);
     } catch (err: any) {
       setError(err.message || 'Something went wrong.');
@@ -435,13 +458,48 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
     setQuestions([...questionsRef.current]);
     resetGameState();
     setGameState('playing');
+    window.scrollTo(0, 0);
+    setTimeout(() => spawnRound(0, BASE_FALL_DURATION), 500);
+  };
+
+  const handleStartFromReady = () => {
+    setGameState('playing');
+    window.scrollTo(0, 0);
     setTimeout(() => spawnRound(0, BASE_FALL_DURATION), 500);
   };
 
   const handleNewTopic = () => {
     gameActiveRef.current = false;
     setCraters([]); setProjPos(null); projDataRef.current = null;
-    setInputText(''); setError(null); setGameState('menu');
+    setInputText(''); setError(null); setLoadedFromSavedGame(false); setGameState('menu');
+  };
+
+  const handleSaveGame = async () => {
+    if (!user || questions.length === 0 || isSaving || saveSuccess) return;
+    setIsSaving(true);
+    setSaveSuccess(false);
+    try {
+      const token = localStorage.getItem('authToken');
+      if (!token) { setIsSaving(false); return; }
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+      const res = await fetch(`${apiUrl}/analysis/save-crater-blast`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({
+          questions,
+          title: inputText.trim().slice(0, 80) || 'Crater Blast Game',
+          inputType: inputMode,
+          sourceText: inputText.trim(),
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Failed to save');
+      setSaveSuccess(true);
+    } catch (err: any) {
+      setError(err.message || 'Failed to save game');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const currentQuestion = questions.length > 0 ? questions[currentQIdx % questions.length] : null;
@@ -472,12 +530,6 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
           <p className="text-stone-600 text-base sm:text-lg max-w-md mx-auto leading-relaxed">
             AI-generated quiz craters fall from the sky. Aim your cannon and blast the correct answer before it lands.
           </p>
-          {bestScore > 0 && (
-            <div className="mt-4 inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm rounded-full px-5 py-2.5 text-sm font-semibold text-stone-700 shadow-sm border border-stone-200/60">
-              <span className="text-amber-500">🏆</span>
-              Best score: {bestScore.toLocaleString()}
-            </div>
-          )}
         </div>
 
         {/* Main card */}
@@ -608,12 +660,41 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
           <span className="text-3xl animate-pulse">⚡</span>
         </div>
         <h2 className="text-lg font-bold text-stone-800 mb-1">Generating Craters...</h2>
-        <p className="text-stone-500 text-sm">AI is loading your targets</p>
+        <p className="text-stone-500 text-sm">loading your targets</p>
         <div className="mt-5 flex justify-center gap-1.5">
           {[0, 1, 2].map(i => (
             <div key={i} className="w-2 h-2 rounded-full bg-blue-500" style={{ animation: `lrqPulse 1s ease-in-out ${i * 0.2}s infinite` }} />
           ))}
         </div>
+      </div>
+    </div>
+  );
+
+  const renderReady = () => (
+    <div className="relative flex-1 min-h-[calc(100vh-200px)] flex items-center justify-center px-4" style={{ background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 50%, #EDEBE8 100%)' }}>
+      <div className="w-full max-w-md text-center">
+        <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl mb-6 shadow-xl"
+          style={{ background: 'linear-gradient(145deg, #4f46e5 0%, #6366f1 50%, #8b5cf6 100%)' }}>
+          <span className="text-4xl">💥</span>
+        </div>
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-stone-900 tracking-tight mb-2">Crater Blast</h1>
+        <p className="text-stone-600 text-sm mb-1 truncate max-w-full px-4" title={inputText}>
+          {inputText.trim() || 'Saved game'}
+        </p>
+        <p className="text-stone-500 text-xs mb-8">{questions.length} questions ready</p>
+        <button
+          onClick={handleStartFromReady}
+          className="w-full max-w-xs mx-auto py-4 rounded-xl text-white font-bold text-base shadow-lg active:scale-[0.99] transition-all"
+          style={{ background: 'linear-gradient(135deg, #4f46e5 0%, #6366f1 100%)', boxShadow: '0 10px 30px -5px rgba(99, 102, 241, 0.4)' }}
+        >
+          💥 Start Game
+        </button>
+        <button
+          onClick={() => { setGameState('menu'); setInputText(''); setQuestions([]); questionsRef.current = []; setLoadedFromSavedGame(false); }}
+          className="mt-4 text-sm text-stone-500 hover:text-stone-700 font-medium"
+        >
+          ← Choose different topic
+        </button>
       </div>
     </div>
   );
@@ -892,7 +973,6 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
   };
 
   const renderGameOver = () => {
-    const isNewBest = score >= bestScore && score > 0;
     const totalAnswered = correctCount + (INITIAL_LIVES - lives);
     const accuracy = totalAnswered > 0 ? Math.round((correctCount / totalAnswered) * 100) : 0;
 
@@ -900,15 +980,11 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
       <div className="flex-1 flex items-center justify-center px-4 py-12" style={{ background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%)' }}>
         <div className="w-full max-w-md">
           <div className="bg-white rounded-2xl shadow-sm border border-stone-200/80 overflow-hidden">
-            <div className="px-6 py-8 text-center" style={{
-              background: isNewBest
-                ? 'linear-gradient(135deg, #f59e0b, #ef4444)'
-                : 'linear-gradient(135deg, #1e293b, #334155)',
-            }}>
+            <div className="px-6 py-8 text-center" style={{ background: 'linear-gradient(135deg, #1e293b, #334155)' }}>
               <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-white/15 backdrop-blur-sm mb-3">
-                <span className="text-3xl">{isNewBest ? '🏆' : '💥'}</span>
+                <span className="text-3xl">💥</span>
               </div>
-              <h2 className="text-xl font-bold text-white mb-1">{isNewBest ? 'New High Score!' : 'Game Over'}</h2>
+              <h2 className="text-xl font-bold text-white mb-1">Game Over</h2>
               <div className="text-4xl font-black text-white mt-2 tabular-nums">{score.toLocaleString()}</div>
               <p className="text-white/60 text-sm mt-1">points</p>
             </div>
@@ -927,22 +1003,48 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
                 ))}
               </div>
 
-              {!isNewBest && bestScore > 0 && (
-                <div className="text-center text-sm text-stone-500">
-                  🏆 Best: <span className="font-semibold text-stone-700">{bestScore.toLocaleString()}</span>
-                  {bestStreak > 0 && <span className="ml-2">🔥 Streak: <span className="font-semibold text-stone-700">{bestStreak}</span></span>}
+              <div className="flex flex-col gap-3 pt-1">
+                <div className="flex gap-3">
+                  <button onClick={handlePlayAgain}
+                    className="flex-1 py-3.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold shadow-md shadow-blue-600/20 active:scale-[0.98] transition-all">
+                    💥 Play Again
+                  </button>
+                  <button onClick={handleNewTopic}
+                    className="flex-1 py-3.5 rounded-xl bg-stone-100 text-stone-700 font-bold hover:bg-stone-200 active:scale-[0.98] transition-all border border-stone-200">
+                    New Topic
+                  </button>
                 </div>
-              )}
-
-              <div className="flex gap-3 pt-1">
-                <button onClick={handlePlayAgain}
-                  className="flex-1 py-3.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold shadow-md shadow-blue-600/20 active:scale-[0.98] transition-all">
-                  💥 Play Again
-                </button>
-                <button onClick={handleNewTopic}
-                  className="flex-1 py-3.5 rounded-xl bg-stone-100 text-stone-700 font-bold hover:bg-stone-200 active:scale-[0.98] transition-all border border-stone-200">
-                  New Topic
-                </button>
+                {user && (
+                  <>
+                    {loadedFromSavedGame ? (
+                      <div className="w-full py-3 rounded-xl font-medium border flex items-center justify-center gap-2 bg-emerald-50 border-emerald-200 text-emerald-700">
+                        ✓ Already saved to Saved Tools — replay anytime
+                      </div>
+                    ) : (
+                      <button
+                        onClick={handleSaveGame}
+                        disabled={isSaving || saveSuccess}
+                        className="w-full py-3 rounded-xl font-semibold transition-all border flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                        style={{
+                          background: saveSuccess ? 'linear-gradient(135deg, #22c55e, #16a34a)' : 'white',
+                          color: saveSuccess ? 'white' : '#64748b',
+                          borderColor: saveSuccess ? '#22c55e' : '#e2e8f0',
+                        }}
+                      >
+                        {isSaving ? (
+                          <span className="w-4 h-4 border-2 border-stone-300 border-t-stone-600 rounded-full animate-spin" />
+                        ) : saveSuccess ? (
+                          '✓ Saved to Saved Tools'
+                        ) : (
+                          '💾 Save Game to Replay Later'
+                        )}
+                      </button>
+                    )}
+                    {error && (
+                      <p className="text-red-600 text-sm text-center">{error}</p>
+                    )}
+                  </>
+                )}
               </div>
             </div>
           </div>
@@ -956,6 +1058,7 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout || (() => {})} currentPage="crater-blast" />
       {gameState === 'menu' && renderMenu()}
       {gameState === 'loading' && renderLoading()}
+      {gameState === 'ready' && renderReady()}
       {gameState === 'playing' && renderGame()}
       {gameState === 'gameover' && renderGameOver()}
       {gameState !== 'playing' && <Footer onNavigate={onNavigate} />}

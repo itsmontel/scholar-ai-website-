@@ -1,6 +1,42 @@
 const express = require('express');
+const multer = require('multer');
 const router = express.Router();
 const { authenticateToken } = require('../middleware/auth');
+const documentParser = require('../services/documentParser');
+
+const parseUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 50 * 1024 * 1024 }, // Match the 50MB limit from regular uploads
+  fileFilter: (req, file, cb) => {
+    console.log('[multer] File received:', file.originalname, 'mimetype:', file.mimetype);
+    if (documentParser.isSupportedFileType(file.mimetype)) {
+      console.log('[multer] File type accepted');
+      cb(null, true);
+    } else {
+      console.log('[multer] File type rejected:', file.mimetype);
+      cb(new Error('Unsupported file type. Use PDF, DOCX, DOC, or TXT.'), false);
+    }
+  },
+});
+
+// Error handler for multer errors
+const handleMulterError = (err, req, res, next) => {
+  // Ensure CORS headers are set for multer errors too
+  const origin = req.headers.origin;
+  if (origin) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+  }
+
+  if (err instanceof multer.MulterError) {
+    console.error('[multer] MulterError:', err.code, err.message);
+    return res.status(400).json({ success: false, message: `Upload error: ${err.message}` });
+  } else if (err) {
+    console.error('[multer] Error:', err.message);
+    return res.status(400).json({ success: false, message: err.message });
+  }
+  next();
+};
 const { 
   validateCreateAnalysis,
   validateSaveAnalysis,
@@ -55,6 +91,39 @@ router.get('/humanize-usage', authenticateToken, async (req, res) => {
   }
 });
 
+// @route   POST /api/analysis/parse-document
+// @desc    Parse PDF, DOCX, DOC, or TXT to extract text (for Humanize/Summarize)
+// @access  Private
+router.post('/parse-document', authenticateToken, parseUpload.single('file'), handleMulterError, async (req, res) => {
+  console.log('[parse-document] Request received');
+  console.log('[parse-document] User:', req.user?.id);
+  console.log('[parse-document] File:', req.file ? { name: req.file.originalname, size: req.file.size, type: req.file.mimetype } : 'No file');
+  
+  try {
+    const file = req.file;
+    if (!file) {
+      console.log('[parse-document] Error: No file uploaded');
+      return res.status(400).json({ success: false, message: 'No file uploaded' });
+    }
+    const parsed = await documentParser.parseDocument(file.buffer, file.mimetype, file.originalname);
+    if (!parsed.content || parsed.content.trim().length === 0) {
+      console.log('[parse-document] Error: Could not extract text');
+      return res.status(400).json({ success: false, message: 'Could not extract text from document' });
+    }
+    console.log('[parse-document] Success: Parsed', parsed.wordCount, 'words');
+    res.json({
+      success: true,
+      data: { content: parsed.content, wordCount: parsed.wordCount },
+    });
+  } catch (error) {
+    console.error('[parse-document] Error:', error);
+    res.status(400).json({
+      success: false,
+      message: error.message || 'Failed to parse document',
+    });
+  }
+});
+
 // @route   POST /api/analysis/humanize
 // @desc    Humanize AI-generated text using OpenAI
 // @access  Private (all users, word-limited)
@@ -78,6 +147,13 @@ router.post('/humanize', authenticateToken, async (req, res) => {
       return res.status(400).json({
         success: false,
         message: 'Text exceeds maximum of 5,000 words per request'
+      });
+    }
+
+    if (userPlan === 'free' && wordCount > 1000) {
+      return res.status(400).json({
+        success: false,
+        message: 'Free plan allows up to 1,000 words per document. Upgrade for up to 5,000 words.'
       });
     }
 
@@ -218,10 +294,17 @@ router.post('/summarize', authenticateToken, async (req, res) => {
 
     const wordCount = text.trim().split(/\s+/).length;
 
-    if (wordCount > 10000) {
+    if (wordCount > 5000) {
       return res.status(400).json({
         success: false,
-        message: 'Text exceeds maximum of 10,000 words per request'
+        message: 'Text exceeds maximum of 5,000 words per request'
+      });
+    }
+
+    if (userPlan === 'free' && wordCount > 1000) {
+      return res.status(400).json({
+        success: false,
+        message: 'Free plan allows up to 1,000 words per document. Upgrade for up to 5,000 words.'
       });
     }
 
@@ -1222,6 +1305,37 @@ router.get('/types', authenticateToken, async (req, res) => {
 // =====================
 // Quiz History Endpoints (must be before /:analysisId catch-all)
 // =====================
+
+// @route   POST /api/analysis/save-crater-blast
+// @desc    Save a Crater Blast game to history for replay
+// @access  Private
+router.post('/save-crater-blast', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const userPlan = req.user.subscription_plan || req.user.plan || 'free';
+    const { questions, title, inputType, sourceText } = req.body;
+
+    if (!questions || !Array.isArray(questions) || questions.length === 0) {
+      return res.status(400).json({ success: false, message: 'Questions are required' });
+    }
+
+    const saved = await aiAnalysisService.saveCraterBlastGame(userId, {
+      questions,
+      title: title || sourceText?.slice(0, 80) || 'Crater Blast Game',
+      inputType: inputType || 'topic',
+      sourceText: sourceText || ''
+    }, userPlan);
+
+    if (!saved) {
+      return res.status(500).json({ success: false, message: 'Failed to save game' });
+    }
+
+    res.json({ success: true, data: saved });
+  } catch (error) {
+    console.error('Save Crater Blast error:', error);
+    res.status(500).json({ success: false, message: error.message || 'Failed to save game' });
+  }
+});
 
 // @route   GET /api/analysis/quiz-history
 // @desc    Get user's saved quizzes

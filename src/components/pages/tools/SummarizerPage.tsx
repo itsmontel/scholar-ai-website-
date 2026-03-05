@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Header from '../../common/Header';
 import Footer from '../../common/Footer';
 import AnalysisAnimation from '../../common/AnalysisAnimation';
@@ -26,8 +26,12 @@ const SummarizerPage = ({ onNavigate, user }: SummarizerPageProps) => {
   const [length, setLength] = useState<'short' | 'medium' | 'long'>('medium');
   const [showFakeAnimation, setShowFakeAnimation] = useState(false);
   const [showSignupPrompt, setShowSignupPrompt] = useState(false);
+  const [isParsing, setIsParsing] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const isPremiumUser = user && (user.subscription_plan === 'premium' || user.plan === 'premium');
+  const isFreeUser = !user || (user?.subscription_plan !== 'starter' && user?.subscription_plan !== 'premium' && user?.plan !== 'starter' && user?.plan !== 'premium');
+  const maxWords = isFreeUser ? 1000 : 5000;
   const userPlan = user?.subscription_plan || user?.plan || 'free';
   const wordCount = inputText.trim().split(/\s+/).filter(Boolean).length;
 
@@ -56,7 +60,7 @@ const SummarizerPage = ({ onNavigate, user }: SummarizerPageProps) => {
 
     try {
       const token = localStorage.getItem('authToken') || localStorage.getItem('token');
-      const response = await fetch('/api/analysis/summarize', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/analysis/summarize`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -117,6 +121,48 @@ const SummarizerPage = ({ onNavigate, user }: SummarizerPageProps) => {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    e.target.value = '';
+    if (!user) {
+      setShowFakeAnimation(true);
+      setTimeout(() => { setShowFakeAnimation(false); setShowSignupPrompt(true); }, 2500);
+      return;
+    }
+    const token = localStorage.getItem('authToken') || localStorage.getItem('token');
+    if (!token) { onNavigate('signup'); return; }
+    setIsParsing(true);
+    setError(null);
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+      console.log('[Summarizer] Uploading file:', file.name, 'size:', file.size, 'type:', file.type);
+      console.log('[Summarizer] API URL:', apiUrl);
+      console.log('[Summarizer] Token exists:', !!token);
+      
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      const res = await fetch(`${apiUrl}/analysis/parse-document`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+        body: formData,
+      });
+      
+      console.log('[Summarizer] Response status:', res.status);
+      const data = await res.json();
+      console.log('[Summarizer] Response data:', data);
+      
+      if (!res.ok) throw new Error(data.message || 'Failed to parse document');
+      setInputText(data.data.content || '');
+    } catch (err: any) {
+      console.error('[Summarizer] Upload error:', err);
+      setError(err.message || 'Failed to parse document');
+    } finally {
+      setIsParsing(false);
+    }
   };
 
   const styleOptions = [
@@ -277,7 +323,7 @@ const SummarizerPage = ({ onNavigate, user }: SummarizerPageProps) => {
                   {/* Summarize Button */}
                   <button
                     onClick={handleSummarize}
-                    disabled={isLoading || !inputText.trim() || wordCount < 50}
+                    disabled={isLoading || !inputText.trim() || wordCount < 50 || wordCount > maxWords}
                     className="w-full sm:w-auto sm:ml-auto px-4 sm:px-6 py-2 sm:py-2.5 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white font-semibold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-teal-200/50 text-sm"
                   >
                     {isLoading ? (
@@ -309,6 +355,27 @@ const SummarizerPage = ({ onNavigate, user }: SummarizerPageProps) => {
                       <span className="text-sm font-semibold text-gray-700">Original Text</span>
                     </div>
                     <div className="flex items-center gap-1">
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept=".pdf,.doc,.docx,.txt,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"
+                        onChange={handleFileUpload}
+                        className="hidden"
+                      />
+                      <button
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={isParsing}
+                        className="p-1.5 text-gray-400 hover:text-teal-600 hover:bg-teal-50 rounded-lg transition-colors disabled:opacity-50"
+                        title="Upload PDF, Word, or TXT"
+                      >
+                        {isParsing ? (
+                          <span className="w-4 h-4 border border-teal-500 border-t-transparent rounded-full animate-spin block" />
+                        ) : (
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                          </svg>
+                        )}
+                      </button>
                       <button
                         onClick={handlePaste}
                         className="p-1.5 text-gray-400 hover:text-teal-600 hover:bg-teal-50 rounded-lg transition-colors"
@@ -339,7 +406,10 @@ const SummarizerPage = ({ onNavigate, user }: SummarizerPageProps) => {
                   </div>
                   <div className="px-3 sm:px-5 py-2.5 sm:py-3 border-t border-gray-100 bg-gray-50/50">
                     <div className="flex items-center justify-between text-xs sm:text-sm text-gray-500">
-                      <span className={wordCount < 50 ? 'text-amber-600' : ''}>{wordCount.toLocaleString()} words</span>
+                      <span className={wordCount < 50 || wordCount > maxWords ? 'text-amber-600' : ''}>
+                        {wordCount.toLocaleString()} words{wordCount > 0 && ` / ${maxWords.toLocaleString()} max`}
+                        {wordCount > maxWords && isFreeUser && ' — Upgrade for 5,000 words'}
+                      </span>
                       {wordCount < 50 && <span className="text-amber-600">Minimum 50 words</span>}
                     </div>
                   </div>

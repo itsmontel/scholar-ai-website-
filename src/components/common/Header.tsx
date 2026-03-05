@@ -260,7 +260,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
                   : 'text-lime-600 hover:text-lime-700 hover:bg-lime-50/50'
               }`}
             >
-              🧠 Study Tools
+              🧠 Saved Tools
               <span className="px-1.5 py-0.5 text-[10px] font-bold bg-lime-500 text-stone-900 rounded-full">PRO</span>
             </button>
           </nav>
@@ -556,7 +556,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
                   : 'text-lime-600 hover:text-lime-700 hover:bg-lime-50/50'
               }`}
             >
-              <span className="flex items-center gap-2">🧠 Study Tools</span>
+              <span className="flex items-center gap-2">🧠 Saved Tools</span>
               <span className="px-1.5 py-0.5 text-[10px] font-bold bg-lime-500 text-stone-900 rounded-full">PRO</span>
             </button>
             <button

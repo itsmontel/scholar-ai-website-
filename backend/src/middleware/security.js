@@ -40,7 +40,7 @@ const securityMiddleware = [
   // Custom middleware to validate request size
   (req, res, next) => {
     const contentLength = parseInt(req.get('content-length') || '0');
-    const maxSize = 10 * 1024 * 1024; // 10MB
+    const maxSize = 50 * 1024 * 1024; // 50MB
 
     if (contentLength > maxSize) {
       return res.status(413).json({
@@ -58,12 +58,18 @@ const securityMiddleware = [
       const contentType = req.get('content-type');
       
       // Allow multipart/form-data for file uploads
-      if (req.path.includes('/upload') && contentType && contentType.includes('multipart/form-data')) {
+      if ((req.path.includes('/upload') || req.path.includes('/parse-document')) && contentType && contentType.includes('multipart/form-data')) {
         return next();
       }
       
       // For other endpoints, require JSON content type
       if (!contentType || !contentType.includes('application/json')) {
+        // Ensure CORS headers are set for early errors
+        const origin = req.headers.origin;
+        if (origin) {
+          res.setHeader('Access-Control-Allow-Origin', origin);
+          res.setHeader('Access-Control-Allow-Credentials', 'true');
+        }
         return res.status(400).json({
           success: false,
           message: 'Content-Type must be application/json'

@@ -40,7 +40,7 @@ app.use(generalLimiter);
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
     ? (process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',') : [process.env.FRONTEND_URL || 'https://writescholar.com'])
-    : ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:5173'],
+    : ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:5173', 'http://localhost:5174'],
   credentials: true
 }));
 
@@ -49,8 +49,8 @@ app.use(cors({
 app.use('/api/webhooks', webhookRoutes);
 
 // Body parsing middleware
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
 // Session middleware for Passport
 app.use(session({

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Header from '../common/Header';
 import Footer from '../common/Footer';
 import { DocumentCardSkeleton } from '../common/LoadingSpinner';
@@ -50,7 +50,7 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
   const [summaryCopied, setSummaryCopied] = useState(false);
   
   // Quiz generator state
-  const [studyToolMode, setStudyToolMode] = useState<'quiz' | 'flashcards' | 'crossword'>('quiz');
+  const [studyToolMode, setStudyToolMode] = useState<'quiz' | 'flashcards' | 'crossword' | 'crater_blast'>('quiz');
   const [quizType, setQuizType] = useState<'mixed' | 'multiple_choice' | 'true_false' | 'fill_blank'>('mixed');
   const [quizDifficulty, setQuizDifficulty] = useState<'easy' | 'medium' | 'hard'>('medium');
   const [quizQuestionCount, setQuizQuestionCount] = useState(10);
@@ -414,10 +414,12 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
   const canUseQuiz = isPaidUser || (isFreeUser && (quizUsage.generationLimit === -1 || quizUsage.generationsRemaining > 0));
   const quizExhausted = isFreeUser && quizUsage.generationLimit !== -1 && quizUsage.generationsRemaining <= 0;
   
+  const humanizeSummarizeMaxWords = isFreeUser ? 1000 : 5000;
+
   const isTextValid = () => {
     if (mode === 'citations') return inputText.trim().length > 0;
-    if (mode === 'humanize') return inputText.trim().length > 0;
-    if (mode === 'summarize') return getWordCount(inputText) >= 50;
+    if (mode === 'humanize') return inputText.trim().length > 0 && getWordCount(inputText) <= humanizeSummarizeMaxWords;
+    if (mode === 'summarize') return getWordCount(inputText) >= 50 && getWordCount(inputText) <= humanizeSummarizeMaxWords;
     if (mode === 'quiz') {
       const wordCount = getWordCount(inputText);
       const maxWords = quizUsage.maxWordsPerGeneration || 15000;
@@ -515,6 +517,8 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
   const [humanizeWordsUsed, setHumanizeWordsUsed] = useState(0);
   const [humanizeWordLimit, setHumanizeWordLimit] = useState(1000);
   const [humanizeError, setHumanizeError] = useState('');
+  const [isParsingDoc, setIsParsingDoc] = useState(false);
+  const parseFileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (mode === 'humanize') {
@@ -1238,6 +1242,34 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
     saveAs(blob, `crossword-${Date.now()}.docx`);
   };
 
+  const handleParseDocument = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    e.target.value = '';
+    const token = localStorage.getItem('authToken');
+    if (!token) return;
+    setIsParsingDoc(true);
+    setHumanizeError('');
+    setSummaryError('');
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/analysis/parse-document`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+        body: formData,
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Failed to parse document');
+      setInputText(data.data.content || '');
+    } catch (err: any) {
+      if (mode === 'humanize') setHumanizeError(err.message || 'Failed to parse document');
+      else setSummaryError(err.message || 'Failed to parse document');
+    } finally {
+      setIsParsingDoc(false);
+    }
+  };
+
   const handleSubmit = () => {
     if (mode === 'humanize') {
       handleHumanize();
@@ -1675,6 +1707,11 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                       <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider truncate">Original</span>
                     </div>
                     <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+                      <input ref={parseFileInputRef} type="file" accept=".pdf,.doc,.docx,.txt,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain" onChange={handleParseDocument} className="hidden" />
+                      <button onClick={() => parseFileInputRef.current?.click()} disabled={isParsingDoc} className="flex items-center gap-1 text-xs text-violet-600 hover:text-violet-700 font-medium transition-colors disabled:opacity-50">
+                        {isParsingDoc ? <span className="w-3.5 h-3.5 border border-violet-400 border-t-transparent rounded-full animate-spin" /> : <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>}
+                        {isParsingDoc ? 'Parsing...' : 'Upload'}
+                      </button>
                       <button onClick={() => setInputText('')} className={`text-xs text-gray-400 hover:text-gray-600 transition-colors ${!inputText ? 'invisible' : ''}`}>Clear</button>
                       <button onClick={() => navigator.clipboard.readText().then(text => setInputText(text))} className="flex items-center gap-1 text-xs text-violet-600 hover:text-violet-700 font-medium transition-colors">
                         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
@@ -1691,7 +1728,10 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                     className="w-full min-w-0 min-h-[240px] sm:min-h-[280px] md:min-h-[350px] p-3 sm:p-5 text-gray-800 text-[15px] border-none outline-none resize-none bg-transparent placeholder-gray-400 leading-relaxed"
                   />
                   <div className="flex items-center justify-between px-3 sm:px-5 py-2.5 sm:py-3 bg-gray-50/30 border-t border-gray-100">
-                    <span className="text-xs text-gray-400 font-medium">{inputText.split(/\s+/).filter(Boolean).length} words</span>
+                    <span className={`text-xs font-medium ${getWordCount(inputText) > humanizeSummarizeMaxWords ? 'text-red-600' : 'text-gray-400'}`}>
+                      {getWordCount(inputText)} words / {humanizeSummarizeMaxWords.toLocaleString()} max
+                      {getWordCount(inputText) > humanizeSummarizeMaxWords && isFreeUser && ' — Upgrade for 5,000'}
+                    </span>
                   </div>
                 </div>
 
@@ -1940,6 +1980,10 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                       <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Original</span>
                     </div>
                     <div className="flex items-center gap-2">
+                      <input ref={parseFileInputRef} type="file" accept=".pdf,.doc,.docx,.txt,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain" onChange={handleParseDocument} className="hidden" />
+                      <button onClick={() => parseFileInputRef.current?.click()} disabled={isParsingDoc} className="text-xs text-teal-600 hover:text-teal-700 font-medium disabled:opacity-50">
+                        {isParsingDoc ? 'Parsing...' : 'Upload'}
+                      </button>
                       <button onClick={() => setInputText('')} className={`text-xs text-gray-400 hover:text-gray-600 ${!inputText ? 'invisible' : ''}`}>Clear</button>
                       <button onClick={() => navigator.clipboard.readText().then(text => setInputText(text))} className="text-xs text-teal-600 hover:text-teal-700 font-medium">Paste</button>
                     </div>
@@ -1952,8 +1996,10 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                     className="w-full min-h-[280px] sm:min-h-[350px] p-3 sm:p-5 text-gray-800 text-[15px] border-none outline-none resize-none bg-transparent placeholder-gray-400 leading-relaxed"
                   />
                   <div className="flex items-center justify-between px-3 sm:px-5 py-2.5 sm:py-3 bg-gray-50/30 border-t border-gray-100">
-                    <span className={`text-xs font-medium ${getWordCount(inputText) < 50 ? 'text-amber-600' : 'text-gray-400'}`}>
-                      {getWordCount(inputText)} words {getWordCount(inputText) < 50 && '(min 50)'}
+                    <span className={`text-xs font-medium ${getWordCount(inputText) < 50 ? 'text-amber-600' : getWordCount(inputText) > humanizeSummarizeMaxWords ? 'text-red-600' : 'text-gray-400'}`}>
+                      {getWordCount(inputText)} words / {humanizeSummarizeMaxWords.toLocaleString()} max
+                      {getWordCount(inputText) < 50 && ' (min 50)'}
+                      {getWordCount(inputText) > humanizeSummarizeMaxWords && isFreeUser && ' — Upgrade for 5,000'}
                     </span>
                   </div>
                 </div>
@@ -2037,6 +2083,7 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                   { key: 'quiz' as const, label: 'Quiz', icon: '📝' },
                   { key: 'flashcards' as const, label: 'Flashcards', icon: '🃏' },
                   { key: 'crossword' as const, label: 'Crossword', icon: '🧩' },
+                  { key: 'crater_blast' as const, label: 'Crater Blast', icon: '💥' },
                 ]).map((tool) => (
                   <button
                     key={tool.key}
@@ -2879,6 +2926,28 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                   </div>
                 )}
               </>
+            )}
+
+            {/* ============ CRATER BLAST SUB-MODE ============ */}
+            {studyToolMode === 'crater_blast' && (
+              <div className="bg-white rounded-2xl sm:rounded-3xl shadow-xl border border-gray-100 overflow-hidden mb-6">
+                <div className="p-8 sm:p-10 text-center">
+                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4" style={{ background: 'linear-gradient(135deg, #4f46e5 0%, #6366f1 100%)' }}>
+                    <span className="text-3xl">💥</span>
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">Crater Blast</h3>
+                  <p className="text-gray-600 text-sm max-w-md mx-auto mb-6">
+                    AI-generated quiz craters fall from the sky. Aim your cannon and blast the correct answer before it lands. Build streaks and test your reflexes!
+                  </p>
+                  <button
+                    onClick={() => onNavigate('crater-blast')}
+                    className="px-6 py-3 rounded-xl font-semibold text-white transition-all hover:shadow-lg"
+                    style={{ background: 'linear-gradient(135deg, #4f46e5 0%, #6366f1 100%)' }}
+                  >
+                    Play Crater Blast →
+                  </button>
+                </div>
+              </div>
             )}
 
             {quizError && (

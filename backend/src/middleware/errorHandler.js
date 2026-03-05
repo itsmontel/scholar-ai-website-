@@ -5,6 +5,21 @@ const errorHandler = (err, req, res, next) => {
   // Log error for debugging
   console.error('Error:', err);
 
+  // Ensure CORS headers are set on error responses
+  const origin = req.headers.origin;
+  const allowedOrigins = process.env.NODE_ENV === 'production'
+    ? (process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',') : [process.env.FRONTEND_URL || 'https://writescholar.com'])
+    : ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:5173', 'http://localhost:5174'];
+  
+  if (origin && allowedOrigins.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+  } else if (process.env.NODE_ENV === 'development') {
+    // Fallback for development if origin isn't strictly matched
+    res.setHeader('Access-Control-Allow-Origin', origin || '*');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+  }
+
   // Mongoose bad ObjectId
   if (err.name === 'CastError') {
     const message = 'Resource not found';
@@ -34,15 +49,20 @@ const errorHandler = (err, req, res, next) => {
     error = { message, statusCode: 401 };
   }
 
-  // File upload errors
-  if (err.code === 'LIMIT_FILE_SIZE') {
-    const message = 'File too large';
-    error = { message, statusCode: 413 };
+  // Multer file upload errors
+  if (err.name === 'MulterError') {
+    if (err.code === 'LIMIT_FILE_SIZE') {
+      error = { message: 'File too large', statusCode: 413 };
+    } else if (err.code === 'LIMIT_UNEXPECTED_FILE') {
+      error = { message: 'Unexpected file field', statusCode: 400 };
+    } else {
+      error = { message: `Upload error: ${err.message}`, statusCode: 400 };
+    }
   }
 
-  if (err.code === 'LIMIT_UNEXPECTED_FILE') {
-    const message = 'Unexpected file field';
-    error = { message, statusCode: 400 };
+  // File type rejection from multer fileFilter
+  if (err.message && err.message.includes('Unsupported file type')) {
+    error = { message: err.message, statusCode: 400 };
   }
 
   // Rate limiting errors

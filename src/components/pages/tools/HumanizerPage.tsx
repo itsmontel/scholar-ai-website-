@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import Header from '../../common/Header';
 import Footer from '../../common/Footer';
 import AnalysisAnimation from '../../common/AnalysisAnimation';
@@ -25,6 +25,8 @@ const HumanizerPage = ({ onNavigate, user, onLogout }: HumanizerPageProps) => {
   const [isFocused, setIsFocused] = useState(false);
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
   const [showHighlights, setShowHighlights] = useState(false);
+  const [isParsing, setIsParsing] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const placeholders = [
     "Paste your AI-generated text here to humanize it...",
@@ -174,6 +176,50 @@ const HumanizerPage = ({ onNavigate, user, onLogout }: HumanizerPageProps) => {
 
   const wordCount = inputText.trim().split(/\s+/).filter(Boolean).length;
   const outputWordCount = humanizedResult.split(/\s+/).filter(Boolean).length;
+  const isFreeUser = !user || (user?.subscription_plan !== 'starter' && user?.subscription_plan !== 'premium' && user?.plan !== 'starter' && user?.plan !== 'premium');
+  const maxWords = isFreeUser ? 1000 : 5000;
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    e.target.value = '';
+    if (!user) {
+      setShowFakeAnimation(true);
+      setTimeout(() => { setShowFakeAnimation(false); setShowSignupPrompt(true); }, 2500);
+      return;
+    }
+    const token = localStorage.getItem('authToken');
+    if (!token) { onNavigate('signup'); return; }
+    setIsParsing(true);
+    setError('');
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+      console.log('[Humanizer] Uploading file:', file.name, 'size:', file.size, 'type:', file.type);
+      console.log('[Humanizer] API URL:', apiUrl);
+      console.log('[Humanizer] Token exists:', !!token);
+      
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      const res = await fetch(`${apiUrl}/analysis/parse-document`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+        body: formData,
+      });
+      
+      console.log('[Humanizer] Response status:', res.status);
+      const data = await res.json();
+      console.log('[Humanizer] Response data:', data);
+      
+      if (!res.ok) throw new Error(data.message || 'Failed to parse document');
+      setInputText(data.data.content || '');
+    } catch (err: any) {
+      console.error('[Humanizer] Upload error:', err);
+      setError(err.message || 'Failed to parse document');
+    } finally {
+      setIsParsing(false);
+    }
+  };
 
   return (
     <div className="min-h-screen w-full min-w-0 overflow-x-hidden" style={{ background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%)' }}>
@@ -269,7 +315,7 @@ const HumanizerPage = ({ onNavigate, user, onLogout }: HumanizerPageProps) => {
                 {/* Humanize Button */}
                 <button
                   onClick={handleSubmit}
-                  disabled={!inputText.trim() || isHumanizing}
+                  disabled={!inputText.trim() || isHumanizing || wordCount > maxWords}
                   className={`w-full sm:w-auto px-6 py-2.5 rounded-xl flex items-center justify-center transition-all font-semibold text-sm flex-shrink-0 ${
                     inputText.trim() && !isHumanizing
                       ? 'bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white shadow-lg shadow-violet-200 hover:shadow-xl hover:shadow-violet-300 cursor-pointer transform hover:-translate-y-0.5'
@@ -306,6 +352,27 @@ const HumanizerPage = ({ onNavigate, user, onLogout }: HumanizerPageProps) => {
                     <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider truncate">Original</span>
                   </div>
                   <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept=".pdf,.doc,.docx,.txt,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"
+                      onChange={handleFileUpload}
+                      className="hidden"
+                    />
+                    <button
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={isParsing}
+                      className="flex items-center gap-1 text-xs text-violet-600 hover:text-violet-700 font-medium transition-colors disabled:opacity-50"
+                    >
+                      {isParsing ? (
+                        <span className="w-3.5 h-3.5 border border-violet-400 border-t-transparent rounded-full animate-spin" />
+                      ) : (
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                        </svg>
+                      )}
+                      {isParsing ? 'Parsing...' : 'Upload'}
+                    </button>
                     <button
                       onClick={() => setInputText('')}
                       className={`text-xs text-gray-400 hover:text-gray-600 transition-colors ${!inputText ? 'invisible' : ''}`}
@@ -338,7 +405,10 @@ const HumanizerPage = ({ onNavigate, user, onLogout }: HumanizerPageProps) => {
                   )}
                 </div>
                 <div className="flex items-center justify-between px-3 sm:px-5 py-2.5 sm:py-3 bg-gray-50/30 border-t border-gray-100">
-                  <span className="text-xs text-gray-400 font-medium">{wordCount.toLocaleString()} words</span>
+                  <span className={`text-xs font-medium ${wordCount > maxWords ? 'text-red-600' : 'text-gray-400'}`}>
+                    {wordCount.toLocaleString()} words{wordCount > 0 && ` / ${maxWords.toLocaleString()} max`}
+                    {wordCount > maxWords && isFreeUser && ' — Upgrade for 5,000 words'}
+                  </span>
                   {!user && wordCount > 0 && (
                     <span className="text-xs text-gray-400">
                       <button onClick={() => onNavigate('pricing')} className="text-violet-600 hover:underline font-medium">Upgrade</button> for unlimited

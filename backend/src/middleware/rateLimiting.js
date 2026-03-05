@@ -2,7 +2,7 @@ const rateLimit = require('express-rate-limit');
 
 // Skip rate limiting in development
 const skip = (req) => {
-  return process.env.NODE_ENV === 'development' && req.ip === '::1';
+  return process.env.NODE_ENV === 'development';
 };
 
 // General rate limiting - Adjusted for bulletproof API retry logic

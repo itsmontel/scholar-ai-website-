@@ -2671,6 +2671,60 @@ IMPORTANT REQUIREMENTS:
   }
 
   /**
+   * Save Crater Blast game to history
+   * @param {string} userId
+   * @param {object} payload - { questions, title, inputType, sourceText }
+   * @param {string} userPlan - 'free', 'starter', 'premium'
+   */
+  async saveCraterBlastGame(userId, payload, userPlan = 'free') {
+    try {
+      const { createClient } = require('@supabase/supabase-js');
+      const supabase = createClient(
+        process.env.SUPABASE_URL,
+        process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
+      );
+
+      const isPaidUser = userPlan === 'starter' || userPlan === 'premium';
+      const expiresAt = isPaidUser ? null : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+
+      const title = (payload.title || payload.sourceText || 'Crater Blast Game').toString().slice(0, 200);
+      const wordCount = (payload.sourceText || '').toString().trim().split(/\s+/).length;
+
+      const gameData = {
+        user_id: userId,
+        title,
+        quiz_type: 'crater_blast',
+        difficulty: 'mixed',
+        question_count: (payload.questions || []).length,
+        questions: {
+          questions: payload.questions || [],
+          inputType: payload.inputType || 'topic',
+          sourceText: (payload.sourceText || '').toString().slice(0, 10000)
+        },
+        source_word_count: wordCount,
+        created_at: new Date().toISOString(),
+        expires_at: expiresAt
+      };
+
+      const { data, error } = await supabase
+        .from('quizzes')
+        .insert([gameData])
+        .select();
+
+      if (error) {
+        console.error('Error saving Crater Blast game:', error);
+        return null;
+      }
+
+      console.log('Crater Blast game saved successfully:', data[0]?.id);
+      return data[0];
+    } catch (error) {
+      console.error('Database error in saveCraterBlastGame:', error);
+      return null;
+    }
+  }
+
+  /**
    * Get quiz history for a user
    * Returns items that are either permanent (expires_at is null) or not yet expired
    */

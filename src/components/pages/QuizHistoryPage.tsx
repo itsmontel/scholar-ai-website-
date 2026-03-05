@@ -59,7 +59,7 @@ interface QuizHistoryProps {
   onLogout: () => void;
 }
 
-type FilterType = 'all' | 'quiz' | 'flashcards' | 'crossword';
+type FilterType = 'all' | 'quiz' | 'flashcards' | 'crossword' | 'crater_blast';
 
 const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
   const [studyTools, setStudyTools] = useState<StudyTool[]>([]);
@@ -115,19 +115,21 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
 
   const filteredTools = studyTools.filter(tool => {
     if (filter === 'all') return true;
-    if (filter === 'quiz') return !['flashcards', 'crossword'].includes(tool.quiz_type);
+    if (filter === 'quiz') return !['flashcards', 'crossword', 'crater_blast'].includes(tool.quiz_type);
     return tool.quiz_type === filter;
   });
 
   const getToolIcon = (type: string) => {
     if (type === 'flashcards') return '🃏';
     if (type === 'crossword') return '🧩';
+    if (type === 'crater_blast') return '💥';
     return '📝';
   };
 
   const getToolTypeName = (type: string) => {
     if (type === 'flashcards') return 'Flashcards';
     if (type === 'crossword') return 'Crossword';
+    if (type === 'crater_blast') return 'Crater Blast';
     return 'Quiz';
   };
 
@@ -157,6 +159,9 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
     } else if (tool.quiz_type === 'crossword') {
       localStorage.setItem('savedCrossword', JSON.stringify(tool));
       onNavigate('crossword-generator');
+    } else if (tool.quiz_type === 'crater_blast') {
+      localStorage.setItem('savedCraterBlast', JSON.stringify(tool));
+      onNavigate('crater-blast');
     } else {
       localStorage.setItem('savedQuiz', JSON.stringify(tool));
       onNavigate('quiz-generator');
@@ -226,6 +231,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
       case 'mixed': return 'Mixed';
       case 'flashcards': return 'Flashcards';
       case 'crossword': return 'Crossword';
+      case 'crater_blast': return 'Crater Blast';
       default: return type;
     }
   };
@@ -594,9 +600,10 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
 
   const filterTabs = [
     { key: 'all' as FilterType, label: 'All', icon: '📚', count: studyTools.length },
-    { key: 'quiz' as FilterType, label: 'Quizzes', icon: '📝', count: studyTools.filter(t => !['flashcards', 'crossword'].includes(t.quiz_type)).length },
+    { key: 'quiz' as FilterType, label: 'Quizzes', icon: '📝', count: studyTools.filter(t => !['flashcards', 'crossword', 'crater_blast'].includes(t.quiz_type)).length },
     { key: 'flashcards' as FilterType, label: 'Flashcards', icon: '🃏', count: studyTools.filter(t => t.quiz_type === 'flashcards').length },
     { key: 'crossword' as FilterType, label: 'Crosswords', icon: '🧩', count: studyTools.filter(t => t.quiz_type === 'crossword').length },
+    { key: 'crater_blast' as FilterType, label: 'Crater Blast', icon: '💥', count: studyTools.filter(t => t.quiz_type === 'crater_blast').length },
   ];
 
   return (
@@ -738,14 +745,18 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
           <div className="grid gap-4 sm:gap-5">
             {filteredTools.map((tool) => {
               const daysRemaining = getDaysRemaining(tool.expires_at);
-              const isQuiz = !['flashcards', 'crossword'].includes(tool.quiz_type);
+              const isQuiz = !['flashcards', 'crossword', 'crater_blast'].includes(tool.quiz_type);
               const toolIcon = getToolIcon(tool.quiz_type);
               const typeColors = {
                 quiz: { bg: 'bg-blue-50', text: 'text-blue-700' },
                 flashcards: { bg: 'bg-violet-50', text: 'text-violet-700' },
                 crossword: { bg: 'bg-emerald-50', text: 'text-emerald-700' },
+                crater_blast: { bg: 'bg-indigo-50', text: 'text-indigo-700' },
               };
-              const colors = tool.quiz_type === 'flashcards' ? typeColors.flashcards : tool.quiz_type === 'crossword' ? typeColors.crossword : typeColors.quiz;
+              const colors = tool.quiz_type === 'flashcards' ? typeColors.flashcards
+                : tool.quiz_type === 'crossword' ? typeColors.crossword
+                : tool.quiz_type === 'crater_blast' ? typeColors.crater_blast
+                : typeColors.quiz;
               
               return (
                 <div
@@ -779,7 +790,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
                                 {getTypeLabel(tool.quiz_type)}
                               </span>
                               <span className="px-2 py-0.5 rounded-md text-xs font-medium bg-stone-100 text-stone-600">
-                                {tool.question_count} {tool.quiz_type === 'flashcards' ? 'cards' : tool.quiz_type === 'crossword' ? 'words' : 'questions'}
+                                {tool.question_count} {tool.quiz_type === 'flashcards' ? 'cards' : tool.quiz_type === 'crossword' ? 'words' : tool.quiz_type === 'crater_blast' ? 'questions' : 'questions'}
                               </span>
                               {daysRemaining === null ? (
                                 <span className="px-2 py-0.5 rounded-md text-xs font-medium bg-emerald-50 text-emerald-700">
@@ -801,13 +812,13 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
                           className="px-4 py-2.5 rounded-xl font-medium text-sm text-white transition-all flex items-center gap-2"
                           style={{ background: 'linear-gradient(135deg, #D35400 0%, #E67E22 100%)' }}
                         >
-                          {tool.quiz_type === 'flashcards' ? 'Study' : tool.quiz_type === 'crossword' ? 'Play' : 'Take Quiz'}
+                          {tool.quiz_type === 'flashcards' ? 'Study' : tool.quiz_type === 'crossword' || tool.quiz_type === 'crater_blast' ? 'Play' : 'Take Quiz'}
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                           </svg>
                         </button>
 
-                        {isPaidUser ? (
+                        {isPaidUser && tool.quiz_type !== 'crater_blast' ? (
                           <>
                             <button
                               onClick={() => {
@@ -856,7 +867,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
                     </div>
 
                     {/* Preview strip */}
-                    {(isQuiz && Array.isArray(tool.questions) && tool.questions.length > 0) || (tool.quiz_type === 'flashcards' && Array.isArray(tool.questions) && tool.questions.length > 0) || tool.quiz_type === 'crossword' ? (
+                    {(isQuiz && Array.isArray(tool.questions) && tool.questions.length > 0) || (tool.quiz_type === 'flashcards' && Array.isArray(tool.questions) && tool.questions.length > 0) || tool.quiz_type === 'crossword' || (tool.quiz_type === 'crater_blast' && (tool.questions as any)?.questions?.length > 0) ? (
                       <div className="mt-4 pt-4 border-t border-stone-100 flex flex-wrap items-center gap-2">
                         {isQuiz && (
                           <>
@@ -892,6 +903,14 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
                             </span>
                             <span className="px-2 py-1 bg-emerald-50 text-emerald-700 rounded-lg text-xs">
                               {((tool.questions as CrosswordData)?.clues?.down?.length || 0)} down
+                            </span>
+                          </>
+                        )}
+                        {tool.quiz_type === 'crater_blast' && (
+                          <>
+                            <span className="text-xs text-stone-500 font-medium">Game:</span>
+                            <span className="px-2 py-1 bg-indigo-50 text-indigo-700 rounded-lg text-xs">
+                              {((tool.questions as any)?.questions?.length || 0)} questions
                             </span>
                           </>
                         )}
