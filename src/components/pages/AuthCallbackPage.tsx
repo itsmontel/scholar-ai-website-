@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 interface AuthCallbackPageProps {
   onNavigate: (page: string) => void;
@@ -8,8 +8,11 @@ interface AuthCallbackPageProps {
 const AuthCallbackPage: React.FC<AuthCallbackPageProps> = ({ onNavigate, onLogin }) => {
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const [error, setError] = useState<string>('');
+  const processedRef = useRef(false);
 
   useEffect(() => {
+    if (processedRef.current) return;
+
     const handleAuthCallback = async () => {
       try {
         const urlParams = new URLSearchParams(window.location.search);
@@ -18,40 +21,39 @@ const AuthCallbackPage: React.FC<AuthCallbackPageProps> = ({ onNavigate, onLogin
         const errorParam = urlParams.get('error');
 
         // Prioritize successful auth - if we have token and user, process them
-        // even if there's an error param from a previous attempt
         if (token && userParam) {
-          // Parse user data
+          processedRef.current = true;
           const userData = JSON.parse(decodeURIComponent(userParam));
 
-          // Store token and user data
           localStorage.setItem('authToken', token);
           localStorage.setItem('user', JSON.stringify(userData));
-
-          // Call the parent component's onLogin
           onLogin(userData);
           setStatus('success');
 
-          // Remove token from URL for security, then redirect to dashboard
           window.history.replaceState(null, '', '/auth/callback');
-          setTimeout(() => {
-            onNavigate('dashboard');
-          }, 800);
+          setTimeout(() => onNavigate('dashboard'), 800);
           return;
         }
 
-        // Only show error if we don't have valid auth data
+        // If URL is empty but we have auth in storage, we likely just processed
+        // (e.g. React Strict Mode re-ran the effect after replaceState)
+        if (!token && !userParam && localStorage.getItem('authToken')) {
+          processedRef.current = true;
+          setStatus('success');
+          setTimeout(() => onNavigate('dashboard'), 300);
+          return;
+        }
+
         if (errorParam) {
           setError('Authentication failed. Please try again.');
           setStatus('error');
           return;
         }
 
-        // No token/user and no error - invalid response
         setError('Invalid authentication response.');
         setStatus('error');
-
-      } catch (error) {
-        console.error('Auth callback error:', error);
+      } catch (err) {
+        console.error('Auth callback error:', err);
         setError('Failed to process authentication.');
         setStatus('error');
       }
