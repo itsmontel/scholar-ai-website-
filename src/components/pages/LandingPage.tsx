@@ -371,7 +371,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
   };
 
   return (
-    <main className="min-h-screen" style={{ background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%)' }} role="main">
+    <main className="min-h-screen" style={{ background: '#FAF8F5' }} role="main">
       {/* Navigation */}
       <nav className="sticky top-0 z-50 backdrop-blur-md border-b border-stone-200/60" style={{ background: 'rgba(250, 248, 245, 0.95)' }} aria-label="Main navigation">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -980,7 +980,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
       </section>
 
       {/* Trusted by Universities - Animated Carousel */}
-      <section className="py-16 sm:py-20 border-y border-stone-200/60 overflow-hidden" style={{ background: '#FAF8F5' }}>
+      <section className="py-16 sm:py-20 border-y border-stone-200/60 overflow-hidden" style={{ background: '#F7F5F2' }}>
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-wrap items-center justify-center gap-6 mb-12">
             <img src={customersImg} alt="WriteScholar customers" className="h-14 sm:h-20 object-contain" />
@@ -1010,7 +1010,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
       </section>
 
       {/* Your uniqueness in each step - Aithor style feature section */}
-      <section className="py-20" style={{ background: 'linear-gradient(180deg, #F5F3F0 0%, #FAF8F5 100%)' }}>
+      <section className="py-20" style={{ background: '#FAF8F5' }}>
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl sm:text-4xl text-stone-800 text-center mb-14 font-sans font-normal">
             Your toolkit in each step
@@ -1105,7 +1105,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
       </section>
 
       {/* WriteScholar Can Help You With */}
-      <section className="py-20 sm:py-24" style={{ background: 'linear-gradient(180deg, #FAF8F5 0%, #F0EDE8 100%)' }}>
+      <section className="py-20 sm:py-24" style={{ background: '#F0EDE8' }}>
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl sm:text-4xl lg:text-5xl text-stone-800 text-center mb-10 font-sans font-normal">
             WriteScholar can help you with
@@ -1119,9 +1119,10 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                 onClick={() => setActiveHelpCategory(category.id)}
                 className={`px-4 sm:px-6 py-2.5 rounded-full text-sm sm:text-base font-medium transition-all ${
                   activeHelpCategory === category.id
-                    ? 'bg-stone-800 text-white'
+                    ? 'text-white'
                     : 'bg-white text-stone-600 hover:bg-stone-50 border border-stone-200'
                 }`}
+                style={activeHelpCategory === category.id ? { background: 'linear-gradient(180deg, #292524 0%, #1c1917 100%)' } : undefined}
               >
                 {category.label}
               </button>
@@ -1544,7 +1545,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
       </section>
 
       {/* Features Grid - bigger */}
-      <section className="py-20 sm:py-24 bg-stone-50">
+      <section className="py-20 sm:py-24" style={{ background: '#F7F5F2' }}>
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="relative mb-14">
             <h2 className="text-3xl sm:text-4xl lg:text-5xl text-stone-800 text-center mb-5" style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 400 }}>
@@ -1946,7 +1947,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
       </section>
 
       {/* Blog Preview Section */}
-      <section className="py-20 sm:py-24">
+      <section className="py-20 sm:py-24" style={{ background: '#F0EDE8' }}>
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-12">
             <div>
@@ -2054,7 +2055,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
       </section>
 
       {/* FAQ Section - bigger */}
-      <section className="py-20 sm:py-24">
+      <section className="py-20 sm:py-24" style={{ background: '#F7F5F2' }}>
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="relative mb-12">
             <h2 className="text-3xl sm:text-4xl lg:text-5xl text-stone-800 text-center mb-5" style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 400 }}>
@@ -2121,7 +2122,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
       </section>
 
       {/* Final CTA - bigger */}
-      <section className="py-20 sm:py-24">
+      <section className="py-20 sm:py-24" style={{ background: '#FAF8F5' }}>
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="bg-gradient-to-br from-lime-50 to-stone-50 rounded-3xl p-8 sm:p-12 lg:p-16 relative overflow-hidden">
             {/* Text content - always centered */}
