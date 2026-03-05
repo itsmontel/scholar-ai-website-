@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 interface OnboardingPageProps {
   onNavigate: (page: string) => void;
@@ -282,6 +282,28 @@ const OnboardingPage = ({ onNavigate, user, onComplete, onUserUpdate }: Onboardi
   const [selectedGoals, setSelectedGoals] = useState<string[]>([]);
   const [selectedPlan, setSelectedPlan] = useState<'starter' | 'premium'>('starter');
   const [isLoadingCheckout, setIsLoadingCheckout] = useState(false);
+  const [trialSecondsLeft, setTrialSecondsLeft] = useState(10 * 60);
+  const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    if (currentStep === 'trial') {
+      setTrialSecondsLeft(10 * 60);
+      countdownRef.current = setInterval(() => {
+        setTrialSecondsLeft(s => (s > 0 ? s - 1 : 0));
+      }, 1000);
+    } else {
+      if (countdownRef.current) clearInterval(countdownRef.current);
+    }
+    return () => {
+      if (countdownRef.current) clearInterval(countdownRef.current);
+    };
+  }, [currentStep]);
+
+  const formatCountdown = (secs: number) => {
+    const m = Math.floor(secs / 60).toString().padStart(2, '0');
+    const s = (secs % 60).toString().padStart(2, '0');
+    return `${m}:${s}`;
+  };
 
   const steps: Step[] = ['profile', 'grade', 'referral', 'goals', 'features', 'trial'];
   const stepIndex = steps.indexOf(currentStep);
@@ -830,6 +852,18 @@ const OnboardingPage = ({ onNavigate, user, onComplete, onUserUpdate }: Onboardi
                   <p className="text-sm font-semibold text-stone-800">Bonus: Free Study Tips Guide</p>
                   <p className="text-xs text-stone-500">10-page PDF with proven study techniques, sent to your email</p>
                 </div>
+              </div>
+
+              {/* Urgency countdown */}
+              <div className="flex items-center justify-center gap-2 bg-red-50 border border-red-200 rounded-xl px-4 py-3 mb-4">
+                <svg className="w-4 h-4 text-red-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <p className="text-sm font-semibold text-red-700">
+                  Offer expires in{' '}
+                  <span className="font-mono text-red-600">{formatCountdown(trialSecondsLeft)}</span>
+                  {' '}don't miss your free trial!
+                </p>
               </div>
 
               {/* CTA */}

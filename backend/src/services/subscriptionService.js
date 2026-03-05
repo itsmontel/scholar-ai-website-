@@ -287,9 +287,8 @@ const createCheckoutSession = async (customerId, planType, billingCycle, userId,
       
       if (applyTrial) {
         console.log(`User ${userEmail} is eligible for 7-day free trial`);
-        // Record the trial usage now (before checkout completes)
-        // This prevents race conditions where user opens multiple checkout sessions
-        await recordTrialUsage(userEmail, customerId, planType);
+        // Trial usage is recorded in the webhook (checkout.session.completed) only after
+        // the user actually enters card details and completes checkout — not just by opening it.
       } else {
         console.log(`User ${userEmail} is NOT eligible for trial: ${trialEligibility.reason}`);
       }
