@@ -261,7 +261,7 @@ const AnalysisHistoryPage: React.FC<AnalysisHistoryPageProps> = ({ onNavigate, u
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%)' }}>
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading analysis history...</p>
@@ -271,7 +271,7 @@ const AnalysisHistoryPage: React.FC<AnalysisHistoryPageProps> = ({ onNavigate, u
   }
 
   return (
-    <div className={showHeader ? "min-h-screen bg-white" : ""}>
+    <div className={showHeader ? "min-h-screen" : ""} style={showHeader ? { background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%)' } : undefined}>
       {showHeader && <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="analysis-history" />}
 
       <div className={showHeader ? "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10" : "p-6"}>

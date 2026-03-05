@@ -242,17 +242,17 @@ const AccountPage = ({ onNavigate, user, onLogout }: AccountPageProps) => {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%)' }}>
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="account" />
 
       {/* Main Content */}
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
         {/* Page Header */}
         <div className="text-center mb-10">
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl text-stone-800 mb-4" style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 400 }}>
             Account Settings
           </h1>
-          <p className="text-lg text-gray-600">
+          <p className="text-lg text-stone-600">
             Manage your profile, subscription, and security settings.
           </p>
         </div>
@@ -260,16 +260,16 @@ const AccountPage = ({ onNavigate, user, onLogout }: AccountPageProps) => {
         {/* Settings List */}
         <div className="space-y-6">
           {/* Profile Information */}
-          <div className="bg-white border border-gray-200 rounded-2xl p-6 sm:p-8">
-            <h2 className="text-xl font-bold text-gray-900 mb-6">Profile Information</h2>
+          <div className="bg-white border border-stone-200 rounded-2xl p-6 sm:p-8">
+            <h2 className="text-xl font-bold text-stone-800 mb-6">Profile Information</h2>
             <div className="space-y-4">
-              <div className="flex items-center justify-between py-3 border-b border-gray-200">
+              <div className="flex items-center justify-between py-3 border-b border-stone-200">
                 <div>
-                  <div className="font-semibold text-gray-900">Email</div>
-                  <div className="text-gray-600 flex items-center">
+                  <div className="font-semibold text-stone-800">Email</div>
+                  <div className="text-stone-600 flex items-center">
                     {displayUser?.email ? displayUser.email : (displayUser ? 'Email not available' : 'Loading...')}
                     {userStats.emailVerified && (
-                      <span className="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                      <span className="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-lime-100 text-lime-800">
                         <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                         </svg>
@@ -279,16 +279,16 @@ const AccountPage = ({ onNavigate, user, onLogout }: AccountPageProps) => {
                   </div>
                 </div>
               </div>
-              <div className="flex items-center justify-between py-3 border-b border-gray-200">
+              <div className="flex items-center justify-between py-3 border-b border-stone-200">
                 <div>
-                  <div className="font-semibold text-gray-900">Name</div>
-                  <div className="text-gray-600">{displayUser?.name || (displayUser ? 'Not available' : 'Loading...')}</div>
+                  <div className="font-semibold text-stone-800">Name</div>
+                  <div className="text-stone-600">{displayUser?.name || (displayUser ? 'Not available' : 'Loading...')}</div>
                 </div>
               </div>
               <div className="flex items-center justify-between py-3">
                 <div>
-                  <div className="font-semibold text-gray-900">Member Since</div>
-                  <div className="text-gray-600">{loading ? 'Loading...' : userStats.memberSince}</div>
+                  <div className="font-semibold text-stone-800">Member Since</div>
+                  <div className="text-stone-600">{loading ? 'Loading...' : userStats.memberSince}</div>
                 </div>
               </div>
             </div>
@@ -296,17 +296,17 @@ const AccountPage = ({ onNavigate, user, onLogout }: AccountPageProps) => {
 
 
           {/* Subscription */}
-          <div className="bg-white border border-gray-200 rounded-2xl p-6 sm:p-8">
-            <h2 className="text-xl font-bold text-gray-900 mb-6">Subscription</h2>
+          <div className="bg-white border border-stone-200 rounded-2xl p-6 sm:p-8">
+            <h2 className="text-xl font-bold text-stone-800 mb-6">Subscription</h2>
             <div className="space-y-4">
-              <div className="flex items-center justify-between py-3 border-b border-gray-200">
+              <div className="flex items-center justify-between py-3 border-b border-stone-200">
                 <div>
-                  <div className="font-semibold text-gray-900">Current Plan</div>
-                  <div className="text-gray-600 flex items-center">
+                  <div className="font-semibold text-stone-800">Current Plan</div>
+                  <div className="text-stone-600 flex items-center">
                     <span className="capitalize">{userStats.subscriptionPlan}</span>
                     <span className={`ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
                       userStats.subscriptionStatus === 'active'
-                        ? 'bg-green-100 text-green-800'
+                        ? 'bg-lime-100 text-lime-800'
                         : 'bg-yellow-100 text-yellow-800'
                     }`}>
                       {userStats.subscriptionStatus}
@@ -316,7 +316,7 @@ const AccountPage = ({ onNavigate, user, onLogout }: AccountPageProps) => {
                 {userStats.subscriptionPlan === 'free' && (
                   <button 
                     onClick={() => onNavigate('pricing')}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-medium transition-colors"
+                    className="bg-lime-400 hover:bg-lime-300 text-stone-900 px-5 py-2.5 rounded-full font-medium transition-colors"
                   >
                     Upgrade
                   </button>
@@ -324,8 +324,8 @@ const AccountPage = ({ onNavigate, user, onLogout }: AccountPageProps) => {
               </div>
               <div className="flex items-center justify-between py-3">
                 <div>
-                  <div className="font-semibold text-gray-900">Plan Features</div>
-                  <div className="text-gray-600">
+                  <div className="font-semibold text-stone-800">Plan Features</div>
+                  <div className="text-stone-600">
                     {userStats.subscriptionPlan === 'free'
                       ? '3 documents per month, Basic analysis, Standard support'
                       : userStats.subscriptionPlan === 'starter'
@@ -339,9 +339,9 @@ const AccountPage = ({ onNavigate, user, onLogout }: AccountPageProps) => {
               </div>
               
               {/* Plan Details */}
-              <div className="mt-4 p-4 bg-gray-50 rounded-xl border border-gray-200">
-                <div className="text-sm font-semibold text-gray-900 mb-3">What's included:</div>
-                <div className="space-y-2 text-sm text-gray-600">
+              <div className="mt-4 p-4 bg-stone-50 rounded-xl border border-stone-200">
+                <div className="text-sm font-semibold text-stone-800 mb-3">What's included:</div>
+                <div className="space-y-2 text-sm text-stone-600">
                   {userStats.subscriptionPlan === 'free' && (
                     <>
                       <div>• 5 document analyses per month</div>
@@ -373,16 +373,16 @@ const AccountPage = ({ onNavigate, user, onLogout }: AccountPageProps) => {
           </div>
 
           {/* Security */}
-          <div className="bg-white border border-gray-200 rounded-2xl p-6 sm:p-8">
-            <h2 className="text-xl font-bold text-gray-900 mb-6">Security</h2>
+          <div className="bg-white border border-stone-200 rounded-2xl p-6 sm:p-8">
+            <h2 className="text-xl font-bold text-stone-800 mb-6">Security</h2>
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 py-3">
               <div>
-                <div className="font-semibold text-gray-900">Password</div>
-                <div className="text-gray-500 text-sm">Last changed: Recently</div>
+                <div className="font-semibold text-stone-800">Password</div>
+                <div className="text-stone-500 text-sm">Last changed: Recently</div>
               </div>
               <button 
                 onClick={() => setShowPasswordModal(true)}
-                className="bg-gray-900 hover:bg-gray-800 text-white px-5 py-2.5 rounded-xl font-medium transition-colors"
+                className="bg-stone-800 hover:bg-stone-700 text-white px-5 py-2.5 rounded-full font-medium transition-colors"
               >
                 Change Password
               </button>
@@ -412,44 +412,44 @@ const AccountPage = ({ onNavigate, user, onLogout }: AccountPageProps) => {
       {showPasswordModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
           <div className="bg-white rounded-2xl p-6 sm:p-8 max-w-md w-full shadow-2xl">
-            <h3 className="text-xl font-bold text-gray-900 mb-6">Change Password</h3>
+            <h3 className="text-xl font-bold text-stone-800 mb-6">Change Password</h3>
             
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-stone-700 mb-2">
                   Current Password
                 </label>
                 <input
                   type="password"
                   value={passwordData.currentPassword}
                   onChange={(e) => setPasswordData(prev => ({ ...prev, currentPassword: e.target.value }))}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                  className="w-full px-4 py-3 border border-stone-200 rounded-xl focus:ring-2 focus:ring-lime-500 focus:border-lime-500 transition-all"
                   placeholder="Enter current password"
                 />
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-stone-700 mb-2">
                   New Password
                 </label>
                 <input
                   type="password"
                   value={passwordData.newPassword}
                   onChange={(e) => setPasswordData(prev => ({ ...prev, newPassword: e.target.value }))}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                  className="w-full px-4 py-3 border border-stone-200 rounded-xl focus:ring-2 focus:ring-lime-500 focus:border-lime-500 transition-all"
                   placeholder="Enter new password"
                 />
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-stone-700 mb-2">
                   Confirm New Password
                 </label>
                 <input
                   type="password"
                   value={passwordData.confirmPassword}
                   onChange={(e) => setPasswordData(prev => ({ ...prev, confirmPassword: e.target.value }))}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                  className="w-full px-4 py-3 border border-stone-200 rounded-xl focus:ring-2 focus:ring-lime-500 focus:border-lime-500 transition-all"
                   placeholder="Confirm new password"
                 />
               </div>
@@ -475,14 +475,14 @@ const AccountPage = ({ onNavigate, user, onLogout }: AccountPageProps) => {
                   setPasswordError('');
                   setPasswordSuccess('');
                 }}
-                className="px-5 py-2.5 text-gray-600 hover:text-gray-800 font-medium rounded-xl hover:bg-gray-100 transition-colors"
+                className="px-5 py-2.5 text-stone-600 hover:text-stone-800 font-medium rounded-full hover:bg-stone-100 transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={handlePasswordChange}
                 disabled={passwordLoading || !passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword}
-                className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white px-5 py-2.5 rounded-xl font-medium transition-colors"
+                className="bg-lime-400 hover:bg-lime-300 disabled:bg-stone-300 text-stone-900 px-5 py-2.5 rounded-full font-medium transition-colors"
               >
                 {passwordLoading ? 'Changing...' : 'Change Password'}
               </button>
@@ -501,8 +501,8 @@ const AccountPage = ({ onNavigate, user, onLogout }: AccountPageProps) => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Delete Account</h3>
-              <p className="text-gray-600 text-sm">
+              <h3 className="text-xl font-bold text-stone-800 mb-2">Delete Account</h3>
+              <p className="text-stone-600 text-sm">
                 This action is <strong>permanent and irreversible</strong>. You will lose:
               </p>
             </div>
@@ -531,14 +531,14 @@ const AccountPage = ({ onNavigate, user, onLogout }: AccountPageProps) => {
             </div>
 
             <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-stone-700 mb-2">
                 To confirm, type <strong>DELETE</strong> in the box below:
               </label>
               <input
                 type="text"
                 value={deleteConfirmation}
                 onChange={(e) => setDeleteConfirmation(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all"
+                className="w-full px-4 py-3 border border-stone-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all"
                 placeholder="Type DELETE to confirm"
               />
             </div>
@@ -549,14 +549,14 @@ const AccountPage = ({ onNavigate, user, onLogout }: AccountPageProps) => {
                   setShowDeleteModal(false);
                   setDeleteConfirmation('');
                 }}
-                className="px-5 py-2.5 text-gray-600 hover:text-gray-800 font-medium rounded-xl hover:bg-gray-100 transition-colors"
+                className="px-5 py-2.5 text-stone-600 hover:text-stone-800 font-medium rounded-full hover:bg-stone-100 transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={handleDeleteAccount}
                 disabled={deleteLoading || deleteConfirmation !== 'DELETE'}
-                className="bg-red-600 hover:bg-red-700 disabled:bg-gray-300 text-white px-5 py-2.5 rounded-xl font-medium transition-colors"
+                className="bg-red-600 hover:bg-red-700 disabled:bg-stone-300 text-white px-5 py-2.5 rounded-full font-medium transition-colors"
               >
                 {deleteLoading ? 'Deleting...' : 'Delete Account'}
               </button>
@@ -574,26 +574,26 @@ const AccountPage = ({ onNavigate, user, onLogout }: AccountPageProps) => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
               </svg>
             </div>
-            <h3 className="text-2xl font-bold text-gray-900 mb-4">Account Deletion in Progress</h3>
+            <h3 className="text-2xl font-bold text-stone-800 mb-4">Account Deletion in Progress</h3>
             <div className="space-y-3">
-              <div className="flex items-center justify-center space-x-2 text-gray-600">
+              <div className="flex items-center justify-center space-x-2 text-stone-600">
                 <div className="w-2 h-2 bg-red-500 rounded-full animate-bounce"></div>
                 <span>Removing your data...</span>
               </div>
-              <div className="flex items-center justify-center space-x-2 text-gray-600">
+              <div className="flex items-center justify-center space-x-2 text-stone-600">
                 <div className="w-2 h-2 bg-red-500 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
                 <span>Clearing documents...</span>
               </div>
-              <div className="flex items-center justify-center space-x-2 text-gray-600">
+              <div className="flex items-center justify-center space-x-2 text-stone-600">
                 <div className="w-2 h-2 bg-red-500 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
                 <span>Finalizing deletion...</span>
               </div>
             </div>
             <div className="mt-6">
-              <div className="w-full bg-gray-200 rounded-full h-2">
+              <div className="w-full bg-stone-200 rounded-full h-2">
                 <div className="bg-red-600 h-2 rounded-full animate-pulse" style={{width: '100%'}}></div>
               </div>
-              <p className="text-sm text-gray-500 mt-2">Your account will be permanently deleted</p>
+              <p className="text-sm text-stone-500 mt-2">Your account will be permanently deleted</p>
             </div>
           </div>
         </div>

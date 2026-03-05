@@ -251,36 +251,6 @@ const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
     setOpenFAQ(openFAQ === id ? null : id);
   };
 
-  // Public navigation for logged-out users
-  const PublicNav = () => (
-    <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-100" aria-label="Main navigation">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-18 py-4">
-          <a href="/" onClick={(e) => { e.preventDefault(); onNavigate?.('landing'); }} className="flex items-center space-x-2.5">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center">
-              <span className="text-white font-bold text-xl">W</span>
-            </div>
-            <span className="text-2xl font-bold text-gray-900">WriteScholar</span>
-          </a>
-          
-          <div className="hidden md:flex items-center space-x-2">
-            <a href="/features" onClick={(e) => { e.preventDefault(); onNavigate?.('features'); }} className="px-4 py-2.5 text-base text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-50 transition-colors font-medium">Features</a>
-            <a href="/pricing" onClick={(e) => { e.preventDefault(); onNavigate?.('pricing'); }} className="px-4 py-2.5 text-base text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-50 transition-colors font-medium">Pricing</a>
-            <a href="/blog" onClick={(e) => { e.preventDefault(); onNavigate?.('blog'); }} className="px-4 py-2.5 text-base text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-50 transition-colors font-medium">Blog</a>
-            <a href="/about" onClick={(e) => { e.preventDefault(); onNavigate?.('about'); }} className="px-4 py-2.5 text-base text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-50 transition-colors font-medium">About</a>
-          </div>
-          
-          <div className="flex items-center space-x-3">
-            <a href="/login" onClick={(e) => { e.preventDefault(); onNavigate?.('login'); }} className="hidden sm:inline-flex px-4 py-2.5 text-base text-gray-600 hover:text-gray-900 font-medium rounded-lg hover:bg-gray-50 transition-colors">Log in</a>
-            <a href="/signup" onClick={(e) => { e.preventDefault(); onNavigate?.('signup'); }} className="px-5 py-2.5 bg-gray-900 text-white text-base font-medium rounded-xl hover:bg-gray-800 transition-colors">
-              Get Started
-            </a>
-          </div>
-        </div>
-      </div>
-    </nav>
-  );
-
   // Category icon component with cute characters
   const getCategoryIcon = (categoryId: string) => {
     switch (categoryId) {
@@ -338,32 +308,27 @@ const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
   };
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Conditional Header */}
-      {user ? (
-        <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="help" />
-      ) : (
-        <PublicNav />
-      )}
+    <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%)' }}>
+      <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="help" />
 
       {/* Hero Section */}
-      <section className="py-16 sm:py-20 border-b border-gray-100 bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+      <section className="py-16 sm:py-20 border-b border-stone-100 bg-gradient-to-br from-lime-50/50 via-white to-stone-50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center max-w-3xl mx-auto">
-            <span className="inline-flex items-center px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-sm font-medium mb-6">
+            <span className="inline-flex items-center px-3 py-1 bg-lime-100 text-lime-700 rounded-full text-sm font-medium mb-6">
               Help Center
             </span>
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-6 leading-tight">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl text-stone-800 mb-6 leading-tight" style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 400 }}>
               How can we help you?
             </h1>
-            <p className="text-lg text-gray-500 leading-relaxed mb-8">
+            <p className="text-lg text-stone-500 leading-relaxed mb-8">
               Find answers to common questions and learn how to make the most of WriteScholar
             </p>
             
             {/* Search Bar */}
             <div className="max-w-xl mx-auto">
               <div className="relative">
-                <svg className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
                 <input
@@ -371,7 +336,7 @@ const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
                   placeholder="Search help topics..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-12 pr-6 py-4 text-base border border-gray-200 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white shadow-sm transition-all"
+                  className="w-full pl-12 pr-6 py-4 text-base border border-stone-200 rounded-2xl focus:ring-2 focus:ring-lime-500 focus:border-lime-500 bg-white shadow-sm transition-all"
                 />
               </div>
             </div>
@@ -380,21 +345,21 @@ const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
       </section>
 
       {/* Quick Actions */}
-      <section className="py-12 sm:py-16 bg-gray-50">
+      <section className="py-12 sm:py-16 bg-stone-50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-6 text-center">Quick Actions</h2>
+          <h2 className="text-xl font-bold text-stone-800 mb-6 text-center">Quick Actions</h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {quickActions.map((action, index) => (
               <button
                 key={index}
                 onClick={action.action}
-                className="p-6 bg-white border border-gray-200 rounded-2xl hover:shadow-lg hover:border-gray-300 transition-all text-left group"
+                className="p-6 bg-white border border-stone-200 rounded-2xl hover:shadow-lg hover:border-stone-300 transition-all text-left group"
               >
                 <div className="w-14 h-14 rounded-full mb-4 overflow-hidden">
                   {action.icon}
                 </div>
-                <h4 className="font-semibold text-gray-900 mb-1 group-hover:text-blue-600 transition-colors">{action.title}</h4>
-                <p className="text-gray-500 text-sm">{action.description}</p>
+                <h4 className="font-semibold text-stone-800 mb-1 group-hover:text-lime-600 transition-colors">{action.title}</h4>
+                <p className="text-stone-500 text-sm">{action.description}</p>
               </button>
             ))}
           </div>
@@ -538,19 +503,19 @@ const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 sm:py-20 bg-gray-900">
+      <section className="py-16 sm:py-20 bg-stone-800">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
-          <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4">
+          <h2 className="text-2xl sm:text-3xl text-white mb-4" style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 400 }}>
             Ready to improve your writing?
           </h2>
-          <p className="text-gray-400 mb-8 max-w-xl mx-auto">
+          <p className="text-stone-400 mb-8 max-w-xl mx-auto">
             Join thousands of students and researchers who trust WriteScholar for academic excellence.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             {user ? (
               <button 
                 onClick={() => onNavigate?.('dashboard')}
-                className="px-6 py-3 bg-white text-gray-900 font-semibold rounded-xl hover:bg-gray-100 transition-colors"
+                className="px-6 py-3 bg-lime-400 text-stone-900 font-semibold rounded-full hover:bg-lime-300 transition-colors"
               >
                 Go to Dashboard
               </button>
@@ -558,13 +523,13 @@ const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
               <>
                 <button 
                   onClick={() => onNavigate?.('signup')}
-                  className="px-6 py-3 bg-white text-gray-900 font-semibold rounded-xl hover:bg-gray-100 transition-colors"
+                  className="px-6 py-3 bg-lime-400 text-stone-900 font-semibold rounded-full hover:bg-lime-300 transition-colors"
                 >
-                  Get Started Free
+                  Try Free
                 </button>
                 <button 
                   onClick={() => onNavigate?.('pricing')}
-                  className="px-6 py-3 border border-gray-600 text-white font-medium rounded-xl hover:border-gray-500 transition-colors"
+                  className="px-6 py-3 border border-stone-600 text-white font-medium rounded-full hover:border-stone-500 transition-colors"
                 >
                   View Pricing
                 </button>

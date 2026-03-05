@@ -19,6 +19,7 @@ const staticRoutes = [
   '/features',
   '/pricing',
   '/about',
+  '/why-students-choose',
   '/blog',
   '/help',
   '/contact',

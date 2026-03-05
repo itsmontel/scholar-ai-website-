@@ -112,8 +112,15 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
 
   // ── Logged-out (public) header ────────────────────────────────────────────
   if (!user) {
+    const publicNavItems = [
+      { id: 'features', label: 'Features' },
+      { id: 'pricing', label: 'Pricing' },
+      { id: 'why-students-choose', label: 'Why Students Choose' },
+      { id: 'blog', label: 'Blog' },
+      { id: 'about', label: 'About' },
+    ];
     return (
-      <header className="bg-white/95 backdrop-blur-md border-b border-gray-100 sticky top-0 z-50">
+      <header className="backdrop-blur-md border-b border-stone-200/60 sticky top-0 z-50" style={{ background: 'rgba(250, 248, 245, 0.95)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
           <div className="flex items-center justify-between">
             <button
@@ -123,29 +130,63 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
               <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center">
                 <span className="text-white font-bold text-xl">W</span>
               </div>
-              <span className="text-2xl font-bold text-gray-900">WriteScholar</span>
+              <span className="text-2xl font-bold text-stone-800">WriteScholar</span>
             </button>
 
             <nav className="hidden md:flex items-center space-x-2">
-              <button onClick={() => onNavigate?.('features')} className={`px-4 py-2.5 text-base font-medium rounded-lg hover:bg-gray-50 transition-colors ${currentPage === 'features' ? 'text-blue-600' : 'text-gray-600 hover:text-gray-900'}`}>Features</button>
-              <button onClick={() => onNavigate?.('pricing')} className={`px-4 py-2.5 text-base font-medium rounded-lg hover:bg-gray-50 transition-colors ${currentPage === 'pricing' ? 'text-blue-600' : 'text-gray-600 hover:text-gray-900'}`}>Pricing</button>
-              <button onClick={() => onNavigate?.('blog')} className={`px-4 py-2.5 text-base font-medium rounded-lg hover:bg-gray-50 transition-colors ${currentPage === 'blog' ? 'text-blue-600' : 'text-gray-600 hover:text-gray-900'}`}>Blog</button>
-              <button onClick={() => onNavigate?.('about')} className={`px-4 py-2.5 text-base font-medium rounded-lg hover:bg-gray-50 transition-colors ${currentPage === 'about' ? 'text-blue-600' : 'text-gray-600 hover:text-gray-900'}`}>About</button>
+              {publicNavItems.map(({ id, label }) => (
+                <button
+                  key={id}
+                  onClick={() => onNavigate?.(id)}
+                  className={`px-4 py-2.5 text-base font-medium rounded-lg hover:bg-stone-100/50 transition-colors ${currentPage === id ? 'text-lime-600' : 'text-stone-600 hover:text-stone-900'}`}
+                >
+                  {label}
+                </button>
+              ))}
             </nav>
 
-            <div className="flex items-center space-x-3">
-              <button onClick={() => onNavigate?.('login')} className="hidden sm:inline-flex px-4 py-2.5 text-base text-gray-700 hover:text-gray-900 font-medium rounded-lg hover:bg-gray-50 transition-colors">Log in</button>
-              <button onClick={() => onNavigate?.('signup')} className="inline-flex items-center px-5 py-2.5 bg-gray-900 text-white text-base font-semibold rounded-xl hover:bg-gray-800 hover:shadow-md transition-all duration-200">Get Started</button>
+            <div className="flex items-center space-x-2 sm:space-x-3">
+              <button
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className="md:hidden p-2 rounded-lg hover:bg-stone-100/50 transition-colors"
+              >
+                <svg className="w-6 h-6 text-stone-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              </button>
+              <button onClick={() => onNavigate?.('login')} className="hidden sm:inline-flex px-4 py-2.5 text-base text-stone-600 hover:text-stone-900 font-medium rounded-lg hover:bg-stone-100/50 transition-colors">Log in</button>
+              <button onClick={() => onNavigate?.('signup')} className="inline-flex items-center px-5 py-2.5 bg-lime-400 text-stone-900 text-base font-semibold rounded-full hover:bg-lime-300 hover:shadow-md transition-all duration-200">Try Free</button>
             </div>
           </div>
         </div>
+
+        {/* Logged-out mobile menu */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden border-t border-stone-200/60 bg-white/95 backdrop-blur-sm mobile-menu-container">
+            <div className="px-4 py-4 space-y-1">
+              {publicNavItems.map(({ id, label }) => (
+                <button
+                  key={id}
+                  onClick={() => { onNavigate?.(id); setIsMobileMenuOpen(false); }}
+                  className={`w-full text-left px-4 py-3 text-base rounded-xl font-medium transition-colors ${currentPage === id ? 'text-lime-600 bg-lime-50' : 'text-stone-600 hover:text-stone-900 hover:bg-stone-50'}`}
+                >
+                  {label}
+                </button>
+              ))}
+              <div className="border-t border-stone-100 mt-3 pt-3">
+                <button onClick={() => { onNavigate?.('login'); setIsMobileMenuOpen(false); }} className="w-full text-left px-4 py-3 rounded-xl font-medium text-stone-600 hover:text-stone-900 hover:bg-stone-50">Log in</button>
+                <button onClick={() => { onNavigate?.('signup'); setIsMobileMenuOpen(false); }} className="w-full text-left px-4 py-3 rounded-xl font-medium text-lime-600 bg-lime-50 hover:bg-lime-100">Try Free</button>
+              </div>
+            </div>
+          </div>
+        )}
       </header>
     );
   }
 
   // ── Logged-in header ───────────────────────────────────────────────────────
   return (
-    <header className="bg-white/95 backdrop-blur-md border-b border-gray-100 sticky top-0 z-50">
+    <header className="backdrop-blur-md border-b border-stone-200/60 sticky top-0 z-50" style={{ background: 'rgba(250, 248, 245, 0.95)' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
@@ -156,7 +197,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
             <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center">
               <span className="text-white font-bold text-xl">W</span>
             </div>
-            <span className="text-2xl font-bold text-gray-900">WriteScholar</span>
+            <span className="text-2xl font-bold text-stone-800">WriteScholar</span>
           </button>
 
           {/* Navigation */}
@@ -165,8 +206,8 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
               onClick={() => onNavigate?.('dashboard')}
               className={`px-4 py-2.5 text-base font-medium rounded-xl transition-all duration-200 ${
                 currentPage === 'dashboard' 
-                  ? 'text-blue-600 bg-blue-50' 
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                  ? 'text-lime-600 bg-lime-50' 
+                  : 'text-stone-600 hover:text-stone-900 hover:bg-stone-50'
               }`}
             >
               Dashboard
@@ -175,8 +216,8 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
               onClick={() => onNavigate?.('library')}
               className={`px-4 py-2.5 text-base font-medium rounded-xl transition-all duration-200 ${
                 currentPage === 'library' 
-                  ? 'text-blue-600 bg-blue-50' 
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                  ? 'text-lime-600 bg-lime-50' 
+                  : 'text-stone-600 hover:text-stone-900 hover:bg-stone-50'
               }`}
             >
               Library
@@ -185,8 +226,8 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
               onClick={() => onNavigate?.('upload')}
               className={`px-4 py-2.5 text-base font-medium rounded-xl transition-all duration-200 ${
                 currentPage === 'upload' 
-                  ? 'text-blue-600 bg-blue-50' 
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                  ? 'text-lime-600 bg-lime-50' 
+                  : 'text-stone-600 hover:text-stone-900 hover:bg-stone-50'
               }`}
             >
               Upload
@@ -195,8 +236,8 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
               onClick={() => onNavigate?.('analysis')}
               className={`px-4 py-2.5 text-base font-medium rounded-xl transition-all duration-200 ${
                 currentPage === 'analysis' 
-                  ? 'text-blue-600 bg-blue-50' 
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                  ? 'text-lime-600 bg-lime-50' 
+                  : 'text-stone-600 hover:text-stone-900 hover:bg-stone-50'
               }`}
             >
               AI Analysis
@@ -205,8 +246,8 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
               onClick={() => onNavigate?.('citation-history')}
               className={`px-4 py-2.5 text-base font-medium rounded-xl transition-all duration-200 ${
                 currentPage === 'citations' 
-                  ? 'text-blue-600 bg-blue-50' 
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                  ? 'text-lime-600 bg-lime-50' 
+                  : 'text-stone-600 hover:text-stone-900 hover:bg-stone-50'
               }`}
             >
               Citations
@@ -215,21 +256,21 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
               onClick={() => onNavigate?.('quiz-history')}
               className={`px-4 py-2.5 text-base font-medium rounded-xl transition-all duration-200 flex items-center gap-1.5 ${
                 currentPage === 'quiz-history' 
-                  ? 'text-amber-600 bg-amber-50' 
-                  : 'text-amber-600 hover:text-amber-700 hover:bg-amber-50/50'
+                  ? 'text-lime-600 bg-lime-50' 
+                  : 'text-lime-600 hover:text-lime-700 hover:bg-lime-50/50'
               }`}
             >
               🧠 Study Tools
-              <span className="px-1.5 py-0.5 text-[10px] font-bold bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-full">PRO</span>
+              <span className="px-1.5 py-0.5 text-[10px] font-bold bg-lime-500 text-stone-900 rounded-full">PRO</span>
             </button>
           </nav>
 
           {/* Mobile Menu Button */}
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="lg:hidden p-2 rounded-xl hover:bg-gray-50 transition-colors duration-200"
+            className="lg:hidden p-2 rounded-xl hover:bg-stone-50 transition-colors duration-200"
           >
-            <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-6 h-6 text-stone-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           </button>
@@ -239,7 +280,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
             <div className="relative dropdown-container">
               <button
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="flex items-center space-x-3 p-2 rounded-xl hover:bg-gray-50 transition-colors duration-200"
+                className="flex items-center space-x-3 p-2 rounded-xl hover:bg-stone-50 transition-colors duration-200"
               >
                 <div className="w-9 h-9 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center">
                   <span className="text-white text-sm font-semibold">
@@ -247,11 +288,11 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
                   </span>
                 </div>
                 <div className="hidden md:block text-left">
-                  <div className="text-sm font-semibold text-gray-900">{user.email || 'Loading...'}</div>
-                  <div className="text-xs text-gray-500 capitalize">{usageStats?.plan || 'Free'} Plan</div>
+                  <div className="text-sm font-semibold text-stone-800">{user.email || 'Loading...'}</div>
+                  <div className="text-xs text-stone-500 capitalize">{usageStats?.plan || 'Free'} Plan</div>
                 </div>
                 <svg 
-                  className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`} 
+                  className={`w-4 h-4 text-stone-400 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`} 
                   fill="none" 
                   stroke="currentColor" 
                   viewBox="0 0 24 24"
@@ -262,13 +303,13 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
 
               {/* Dropdown Menu */}
               {isDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-xl border border-gray-200 z-[60]">
+                <div className="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-xl border border-stone-200 z-[60]">
                   {/* User Info Section */}
-                  <div className="px-4 py-4 border-b border-gray-100 bg-gray-50/50 rounded-t-2xl">
-                    <div className="text-sm font-semibold text-gray-900">
+                  <div className="px-4 py-4 border-b border-stone-100 bg-stone-50/50 rounded-t-2xl">
+                    <div className="text-sm font-semibold text-stone-800">
                       {user?.email ? user.email : (user ? 'Email not available' : 'Loading...')}
                     </div>
-                    <div className="text-xs text-gray-500 capitalize mt-0.5">{usageStats?.plan || 'Free'} Plan</div>
+                    <div className="text-xs text-stone-500 capitalize mt-0.5">{usageStats?.plan || 'Free'} Plan</div>
                     
                     {/* Usage Statistics */}
                     {loadingUsage ? (
@@ -324,7 +365,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
                   <div className="py-2">
                     <button 
                       onClick={() => { onNavigate?.('dashboard'); setIsDropdownOpen(false); }}
-                      className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200"
+                      className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-stone-700 hover:bg-stone-50 transition-colors duration-200"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z" />
@@ -334,7 +375,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
                     </button>
                     <button 
                       onClick={() => { onNavigate?.('library'); setIsDropdownOpen(false); }}
-                      className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200"
+                      className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-stone-700 hover:bg-stone-50 transition-colors duration-200"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
@@ -343,7 +384,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
                     </button>
                     <button 
                       onClick={() => { onNavigate?.('upload'); setIsDropdownOpen(false); }}
-                      className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200"
+                      className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-stone-700 hover:bg-stone-50 transition-colors duration-200"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
@@ -352,7 +393,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
                     </button>
                     <button 
                       onClick={() => { onNavigate?.('analysis'); setIsDropdownOpen(false); }}
-                      className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200"
+                      className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-stone-700 hover:bg-stone-50 transition-colors duration-200"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
@@ -361,7 +402,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
                     </button>
                     <button 
                       onClick={() => { onNavigate?.('analysis-history'); setIsDropdownOpen(false); }}
-                      className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200"
+                      className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-stone-700 hover:bg-stone-50 transition-colors duration-200"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
@@ -370,7 +411,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
                     </button>
                     <button 
                       onClick={() => { onNavigate?.('citation-history'); setIsDropdownOpen(false); }}
-                      className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200"
+                      className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-stone-700 hover:bg-stone-50 transition-colors duration-200"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -379,7 +420,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
                     </button>
                     <button 
                       onClick={() => { onNavigate?.('blog'); setIsDropdownOpen(false); }}
-                      className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200"
+                      className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-stone-700 hover:bg-stone-50 transition-colors duration-200"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
@@ -388,7 +429,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
                     </button>
                     <button 
                       onClick={() => { onNavigate?.('account'); setIsDropdownOpen(false); }}
-                      className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200"
+                      className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-stone-700 hover:bg-stone-50 transition-colors duration-200"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -397,7 +438,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
                     </button>
                     <button 
                       onClick={() => { onNavigate?.('billing'); setIsDropdownOpen(false); }}
-                      className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200"
+                      className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-stone-700 hover:bg-stone-50 transition-colors duration-200"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
@@ -407,13 +448,13 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
                   </div>
 
                   {/* Divider */}
-                  <div className="border-t border-gray-100"></div>
+                  <div className="border-t border-stone-100"></div>
 
                   {/* Additional Links */}
                   <div className="py-2">
                     <button 
                       onClick={() => { onNavigate?.('pricing'); setIsDropdownOpen(false); }}
-                      className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-blue-600 hover:bg-blue-50 transition-colors duration-200"
+                      className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-lime-600 hover:bg-lime-50 transition-colors duration-200"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -422,7 +463,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
                     </button>
                     <button 
                       onClick={() => { onNavigate?.('help'); setIsDropdownOpen(false); }}
-                      className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200"
+                      className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-stone-700 hover:bg-stone-50 transition-colors duration-200"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -432,7 +473,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
                   </div>
 
                   {/* Divider */}
-                  <div className="border-t border-gray-100"></div>
+                  <div className="border-t border-stone-100"></div>
 
                   {/* Logout */}
                   <div className="py-2">
@@ -455,14 +496,14 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
 
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
-        <div className="lg:hidden bg-white border-t border-gray-100 mobile-menu-container z-[60]">
+        <div className="lg:hidden bg-white border-t border-stone-100 mobile-menu-container z-[60]">
           <div className="px-4 sm:px-6 py-4 space-y-1">
             <button 
               onClick={() => { onNavigate?.('dashboard'); setIsMobileMenuOpen(false); }}
               className={`w-full text-left px-4 py-3 rounded-xl font-medium transition-all duration-200 ${
                 currentPage === 'dashboard' 
-                  ? 'text-blue-600 bg-blue-50' 
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                  ? 'text-lime-600 bg-lime-50' 
+                  : 'text-stone-600 hover:text-stone-900 hover:bg-stone-50'
               }`}
             >
               Dashboard
@@ -471,8 +512,8 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
               onClick={() => { onNavigate?.('library'); setIsMobileMenuOpen(false); }}
               className={`w-full text-left px-4 py-3 rounded-xl font-medium transition-all duration-200 ${
                 currentPage === 'library' 
-                  ? 'text-blue-600 bg-blue-50' 
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                  ? 'text-lime-600 bg-lime-50' 
+                  : 'text-stone-600 hover:text-stone-900 hover:bg-stone-50'
               }`}
             >
               Library
@@ -481,8 +522,8 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
               onClick={() => { onNavigate?.('upload'); setIsMobileMenuOpen(false); }}
               className={`w-full text-left px-4 py-3 rounded-xl font-medium transition-all duration-200 ${
                 currentPage === 'upload' 
-                  ? 'text-blue-600 bg-blue-50' 
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                  ? 'text-lime-600 bg-lime-50' 
+                  : 'text-stone-600 hover:text-stone-900 hover:bg-stone-50'
               }`}
             >
               Upload
@@ -491,8 +532,8 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
               onClick={() => { onNavigate?.('analysis'); setIsMobileMenuOpen(false); }}
               className={`w-full text-left px-4 py-3 rounded-xl font-medium transition-all duration-200 ${
                 currentPage === 'analysis' 
-                  ? 'text-blue-600 bg-blue-50' 
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                  ? 'text-lime-600 bg-lime-50' 
+                  : 'text-stone-600 hover:text-stone-900 hover:bg-stone-50'
               }`}
             >
               AI Analysis
@@ -501,8 +542,8 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
               onClick={() => { onNavigate?.('citation-history'); setIsMobileMenuOpen(false); }}
               className={`w-full text-left px-4 py-3 rounded-xl font-medium transition-all duration-200 ${
                 currentPage === 'citations'
-                  ? 'text-blue-600 bg-blue-50'
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                  ? 'text-lime-600 bg-lime-50'
+                  : 'text-stone-600 hover:text-stone-900 hover:bg-stone-50'
               }`}
             >
               Citations
@@ -511,19 +552,19 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
               onClick={() => { onNavigate?.('quiz-history'); setIsMobileMenuOpen(false); }}
               className={`w-full text-left px-4 py-3 rounded-xl font-medium transition-all duration-200 flex items-center justify-between ${
                 currentPage === 'quiz-history'
-                  ? 'text-amber-600 bg-amber-50'
-                  : 'text-amber-600 hover:text-amber-700 hover:bg-amber-50/50'
+                  ? 'text-lime-600 bg-lime-50'
+                  : 'text-lime-600 hover:text-lime-700 hover:bg-lime-50/50'
               }`}
             >
               <span className="flex items-center gap-2">🧠 Study Tools</span>
-              <span className="px-1.5 py-0.5 text-[10px] font-bold bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-full">PRO</span>
+              <span className="px-1.5 py-0.5 text-[10px] font-bold bg-lime-500 text-stone-900 rounded-full">PRO</span>
             </button>
             <button
               onClick={() => { onNavigate?.('blog'); setIsMobileMenuOpen(false); }}
               className={`w-full text-left px-4 py-3 rounded-xl font-medium transition-all duration-200 ${
                 currentPage === 'blog' 
-                  ? 'text-blue-600 bg-blue-50' 
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                  ? 'text-lime-600 bg-lime-50' 
+                  : 'text-stone-600 hover:text-stone-900 hover:bg-stone-50'
               }`}
             >
               Blog

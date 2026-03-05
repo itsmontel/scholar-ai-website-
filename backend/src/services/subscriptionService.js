@@ -59,6 +59,12 @@ const PLAN_LIMITS = {
 };
 
 
+// Get user's plan string (free, starter, premium) - for retention policies etc.
+const getUserPlan = async (userId) => {
+  const { plan } = await getUserSubscriptionDetails(userId);
+  return plan || 'free';
+};
+
 // Get user's subscription details
 const getUserSubscriptionDetails = async (userId) => {
   try {
@@ -470,28 +476,33 @@ const validatePromoCode = async (promoCode) => {
 // Auto-delete citations older than 30 days to save space
 const cleanupOldCitations = async () => {
   try {
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    
+    const now = new Date().toISOString();
+
     // Use service role key to delete across all users
     const { createClient } = require('@supabase/supabase-js');
     const supabaseServiceRole = createClient(
       process.env.SUPABASE_URL,
       process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
     );
-    
+
+    // Delete citations that have expired (expires_at is set and is in the past)
+    // Citations with expires_at = null (paid users) are never deleted
+    // Free users have 7-day expiration set when citation is created
     const { data, error } = await supabaseServiceRole
       .from('citation_searches')
       .delete()
-      .lt('created_at', thirtyDaysAgo.toISOString());
-    
+      .not('expires_at', 'is', null)
+      .lt('expires_at', now)
+      .select('id');
+
     if (error) {
-      console.error('Error cleaning up old citations:', error);
+      console.error('Error cleaning up expired citations:', error);
       return { success: false, error: error.message };
     }
-    
-    console.log(`✅ Successfully cleaned up citations older than 30 days`);
-    return { success: true, deletedCount: data ? data.length : 0 };
+
+    const deletedCount = data?.length || 0;
+    console.log(`✅ Successfully cleaned up ${deletedCount} expired citations (free user 7-day retention)`);
+    return { success: true, deletedCount };
   } catch (error) {
     console.error('Error in cleanupOldCitations:', error);
     return { success: false, error: error.message };
@@ -502,6 +513,7 @@ module.exports = {
   supabase,
   PLAN_LIMITS,
   getPriceId,
+  getUserPlan,
   getUserSubscriptionDetails,
   checkLimit,
   getRemainingUsage,

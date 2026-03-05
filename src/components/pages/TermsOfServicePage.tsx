@@ -18,16 +18,16 @@ interface TermsOfServicePageProps {
 
 const TermsOfServicePage: React.FC<TermsOfServicePageProps> = ({ onNavigate, user, onLogout }) => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+    <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%)' }}>
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="terms" />
       
       <main className="max-w-4xl mx-auto px-6 py-16">
-        <div className="bg-white/90 backdrop-blur-xl rounded-2xl shadow-xl border border-gray-200/50 p-8 md:p-12">
+        <div className="bg-white/90 backdrop-blur-xl rounded-2xl shadow-xl border border-stone-200/50 p-8 md:p-12">
           <div className="text-center mb-12">
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+            <h1 className="text-4xl md:text-5xl text-stone-800 mb-6" style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 400 }}>
               Terms of Service
             </h1>
-            <p className="text-lg text-gray-600">
+            <p className="text-lg text-stone-600">
               Last updated: {new Date().toLocaleDateString()}
             </p>
           </div>
@@ -276,17 +276,17 @@ const TermsOfServicePage: React.FC<TermsOfServicePageProps> = ({ onNavigate, use
             </section>
           </div>
 
-          <div className="mt-12 pt-8 border-t border-gray-200">
+          <div className="mt-12 pt-8 border-t border-stone-200">
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button
                 onClick={() => onNavigate('dashboard')}
-                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-3 rounded-lg font-semibold transition-all duration-200 shadow-lg hover:shadow-xl"
+                className="bg-lime-400 hover:bg-lime-300 text-stone-900 px-8 py-3 rounded-full font-semibold transition-all duration-200 shadow-lg hover:shadow-xl"
               >
                 Back to Dashboard
               </button>
               <button
                 onClick={() => onNavigate('privacy')}
-                className="border-2 border-gray-300 hover:border-gray-400 text-gray-700 hover:text-gray-900 px-8 py-3 rounded-lg font-semibold transition-all duration-200"
+                className="border-2 border-stone-300 hover:border-stone-400 text-stone-700 hover:text-stone-900 px-8 py-3 rounded-full font-semibold transition-all duration-200"
               >
                 View Privacy Policy
               </button>

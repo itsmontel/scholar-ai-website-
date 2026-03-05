@@ -60,7 +60,7 @@ const AuthCallbackPage: React.FC<AuthCallbackPageProps> = ({ onNavigate, onLogin
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex items-center justify-center p-4">
+    <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%)' }}>
       <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center">
         <div className="flex items-center space-x-2 justify-center mb-8">
           <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-500 rounded-lg flex items-center justify-center">

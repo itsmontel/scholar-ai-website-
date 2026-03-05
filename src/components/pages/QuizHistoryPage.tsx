@@ -214,7 +214,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
       case 'easy': return 'bg-green-50 text-green-700';
       case 'medium': return 'bg-amber-50 text-amber-700';
       case 'hard': return 'bg-red-50 text-red-700';
-      default: return 'bg-gray-50 text-gray-700';
+      default: return 'bg-stone-50 text-stone-700';
     }
   };
 
@@ -552,13 +552,13 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-amber-50 via-white to-orange-50">
+      <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%)' }}>
         <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="quiz-history" />
         <main className="max-w-5xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
           <div className="flex items-center justify-center min-h-64">
             <div className="text-center">
               <div className="animate-spin w-12 h-12 border-4 border-amber-600 border-t-transparent rounded-full mx-auto mb-4"></div>
-              <p className="text-gray-600">Loading study tools...</p>
+              <p className="text-stone-600">Loading study tools...</p>
             </div>
           </div>
         </main>
@@ -568,7 +568,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-amber-50 via-white to-orange-50">
+      <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%)' }}>
         <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="quiz-history" />
         <main className="max-w-5xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
           <div className="text-center py-16">
@@ -577,8 +577,8 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 19.5c-.77.833.192 2.5 1.732 2.5z" />
               </svg>
             </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Error Loading History</h2>
-            <p className="text-gray-600 mb-6">{error}</p>
+            <h2 className="text-2xl font-bold text-stone-900 mb-2">Error Loading History</h2>
+            <p className="text-stone-600 mb-6">{error}</p>
             <button
               onClick={fetchStudyToolHistory}
               className="px-6 py-3 bg-amber-600 text-white rounded-xl font-medium hover:bg-amber-700 transition-colors"
@@ -592,7 +592,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-white to-orange-50">
+    <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%)' }}>
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="quiz-history" />
 
       <main className="max-w-5xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
@@ -600,11 +600,11 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
         <div className="mb-10">
           <div className="flex items-center gap-3 mb-4">
             <span className="text-4xl">🧠</span>
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-stone-900">
               My Study Tools
             </h1>
           </div>
-          <p className="text-lg text-gray-600 mb-6">
+          <p className="text-lg text-stone-600 mb-6">
             Review your saved quizzes, flashcards, and crosswords
           </p>
           
@@ -683,10 +683,10 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
             <div className="w-20 h-20 bg-gradient-to-br from-amber-100 to-orange-100 rounded-2xl flex items-center justify-center mx-auto mb-4 text-4xl">
               🧠
             </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            <h2 className="text-2xl font-bold text-stone-900 mb-2">
               {filter === 'all' ? 'No Study Tools Yet' : `No ${getTypeLabel(filter === 'quiz' ? 'mixed' : filter)} Yet`}
             </h2>
-            <p className="text-gray-600 mb-6">
+            <p className="text-stone-600 mb-6">
               {filter === 'all' 
                 ? 'Generate your first study tool from any study material to get started'
                 : `Create your first ${filter === 'quiz' ? 'quiz' : filter} to see it here`}
@@ -715,11 +715,11 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
                         <span className="text-xl">{toolIcon}</span>
-                        <h3 className="text-xl font-semibold text-gray-900">
+                        <h3 className="text-xl font-semibold text-stone-900">
                           {tool.title}
                         </h3>
                       </div>
-                      <div className="flex flex-wrap items-center gap-2 text-sm text-gray-500">
+                      <div className="flex flex-wrap items-center gap-2 text-sm text-stone-500">
                         <span className="flex items-center">
                           <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -734,11 +734,11 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
                         <span className={`px-2.5 py-1 rounded-lg text-xs font-medium ${
                           tool.quiz_type === 'flashcards' ? 'bg-purple-50 text-purple-700' :
                           tool.quiz_type === 'crossword' ? 'bg-green-50 text-green-700' :
-                          'bg-blue-50 text-blue-700'
+                          'bg-lime-50 text-lime-700'
                         }`}>
                           {getTypeLabel(tool.quiz_type)}
                         </span>
-                        <span className="px-2.5 py-1 bg-gray-100 text-gray-700 rounded-lg text-xs font-medium">
+                        <span className="px-2.5 py-1 bg-stone-100 text-stone-700 rounded-lg text-xs font-medium">
                           {tool.question_count} {tool.quiz_type === 'flashcards' ? 'Cards' : tool.quiz_type === 'crossword' ? 'Words' : 'Questions'}
                         </span>
                         {daysRemaining === null ? (
@@ -784,7 +784,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
                               else if (tool.quiz_type === 'crossword') exportCrosswordToDOCX(tool);
                               else exportQuizToDOCX(tool);
                             }}
-                            className="px-4 py-2.5 bg-blue-50 text-blue-700 rounded-xl hover:bg-blue-100 transition-all font-medium text-sm flex items-center gap-1.5"
+                            className="px-4 py-2.5 bg-lime-50 text-lime-700 rounded-xl hover:bg-lime-100 transition-all font-medium text-sm flex items-center gap-1.5"
                             title="Download as Word"
                           >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
@@ -795,7 +795,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
                         <>
                           <button
                             onClick={() => setShowUpgradeModal(true)}
-                            className="px-4 py-2.5 bg-gray-100 text-gray-400 rounded-xl transition-all font-medium text-sm flex items-center gap-1.5 cursor-pointer"
+                            className="px-4 py-2.5 bg-stone-100 text-stone-400 rounded-xl transition-all font-medium text-sm flex items-center gap-1.5 cursor-pointer"
                             title="Upgrade to export as PDF"
                           >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
@@ -806,7 +806,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
                           </button>
                           <button
                             onClick={() => setShowUpgradeModal(true)}
-                            className="px-4 py-2.5 bg-gray-100 text-gray-400 rounded-xl transition-all font-medium text-sm flex items-center gap-1.5 cursor-pointer"
+                            className="px-4 py-2.5 bg-stone-100 text-stone-400 rounded-xl transition-all font-medium text-sm flex items-center gap-1.5 cursor-pointer"
                             title="Upgrade to export as Word"
                           >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
@@ -820,7 +820,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
 
                       <button
                         onClick={() => handleDeleteClick(tool.id)}
-                        className="p-2.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors"
+                        className="p-2.5 text-stone-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors"
                         title={`Delete ${toolTypeName.toLowerCase()}`}
                       >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -832,18 +832,18 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
 
                   {/* Preview - only for quizzes */}
                   {isQuiz && Array.isArray(tool.questions) && tool.questions.length > 0 && (
-                    <div className="flex flex-wrap items-center gap-2 mt-4 pt-4 border-t border-gray-100">
-                      <span className="text-sm text-gray-500 font-medium">Sample questions:</span>
+                    <div className="flex flex-wrap items-center gap-2 mt-4 pt-4 border-t border-stone-100">
+                      <span className="text-sm text-stone-500 font-medium">Sample questions:</span>
                       {(tool.questions as QuizQuestion[]).slice(0, 2).map((q, index) => (
                         <span
                           key={index}
-                          className="px-2.5 py-1 bg-gray-100 text-gray-700 rounded-lg text-xs max-w-xs truncate"
+                          className="px-2.5 py-1 bg-stone-100 text-stone-700 rounded-lg text-xs max-w-xs truncate"
                         >
                           {q.question.length > 50 ? q.question.substring(0, 50) + '...' : q.question}
                         </span>
                       ))}
                       {(tool.questions as QuizQuestion[]).length > 2 && (
-                        <span className="text-xs text-gray-500">
+                        <span className="text-xs text-stone-500">
                           +{(tool.questions as QuizQuestion[]).length - 2} more
                         </span>
                       )}
@@ -852,8 +852,8 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
                   
                   {/* Preview - for flashcards */}
                   {tool.quiz_type === 'flashcards' && Array.isArray(tool.questions) && tool.questions.length > 0 && (
-                    <div className="flex flex-wrap items-center gap-2 mt-4 pt-4 border-t border-gray-100">
-                      <span className="text-sm text-gray-500 font-medium">Sample cards:</span>
+                    <div className="flex flex-wrap items-center gap-2 mt-4 pt-4 border-t border-stone-100">
+                      <span className="text-sm text-stone-500 font-medium">Sample cards:</span>
                       {(tool.questions as FlashCard[]).slice(0, 2).map((card, index) => (
                         <span
                           key={index}
@@ -863,7 +863,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
                         </span>
                       ))}
                       {(tool.questions as FlashCard[]).length > 2 && (
-                        <span className="text-xs text-gray-500">
+                        <span className="text-xs text-stone-500">
                           +{(tool.questions as FlashCard[]).length - 2} more
                         </span>
                       )}
@@ -872,8 +872,8 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
                   
                   {/* Preview - for crosswords */}
                   {tool.quiz_type === 'crossword' && (
-                    <div className="flex flex-wrap items-center gap-2 mt-4 pt-4 border-t border-gray-100">
-                      <span className="text-sm text-gray-500 font-medium">Puzzle info:</span>
+                    <div className="flex flex-wrap items-center gap-2 mt-4 pt-4 border-t border-stone-100">
+                      <span className="text-sm text-stone-500 font-medium">Puzzle info:</span>
                       <span className="px-2.5 py-1 bg-green-50 text-green-700 rounded-lg text-xs">
                         {((tool.questions as CrosswordData)?.clues?.across?.length || 0)} Across
                       </span>
@@ -899,10 +899,10 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                 </svg>
               </div>
-              <h3 className="text-xl font-bold text-gray-900">Delete Study Tool?</h3>
+              <h3 className="text-xl font-bold text-stone-900">Delete Study Tool?</h3>
             </div>
-            
-            <p className="text-gray-600 mb-6">
+
+            <p className="text-stone-600 mb-6">
               Are you sure you want to delete this? This action cannot be undone.
             </p>
             
@@ -910,7 +910,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
               <button
                 onClick={cancelDelete}
                 disabled={isDeleting}
-                className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors disabled:opacity-50 font-medium"
+                className="flex-1 px-4 py-3 border border-stone-300 text-stone-700 rounded-xl hover:bg-stone-50 transition-colors disabled:opacity-50 font-medium"
               >
                 Cancel
               </button>
@@ -943,8 +943,8 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
                   <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
                 </svg>
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Unlock Export Feature</h3>
-              <p className="text-gray-600">
+              <h3 className="text-xl font-bold text-stone-900 mb-2">Unlock Export Feature</h3>
+              <p className="text-stone-600">
                 Export your quizzes, flashcards, and crosswords to PDF or Word documents with a paid plan.
               </p>
             </div>
@@ -982,7 +982,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
             <div className="flex gap-3">
               <button
                 onClick={() => setShowUpgradeModal(false)}
-                className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors font-medium"
+                className="flex-1 px-4 py-3 border border-stone-300 text-stone-700 rounded-xl hover:bg-stone-50 transition-colors font-medium"
               >
                 Maybe Later
               </button>

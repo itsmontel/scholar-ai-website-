@@ -427,7 +427,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
             <strong>Export and accessibility:</strong> Your study materials shouldn&apos;t be locked in one app. WriteScholar lets you export flashcards, quizzes, and crosswords as PDF or Word documents. Print them out for offline study, share them with classmates, or keep them as reference materials. You own your study content.
           </p>
           <p className={p}>
-            <strong>Integration with writing tools:</strong> WriteScholar isn&apos;t just a study tool. It&apos;s a complete academic platform. The same AI that generates your flashcards can also <a href="/features" onClick={handleNavigate('features')} className={internalLink}>analyze your essays</a>, check your <a href="/tools/citation-generator" onClick={handleNavigate('citation-generator')} className={internalLink}>citations</a>, and improve your <a href="/tools/grammar-checker" onClick={handleNavigate('grammar-checker')} className={internalLink}>grammar</a>. Having all your academic tools in one place saves time and creates a seamless workflow from studying to writing.
+            <strong>Integration with writing tools:</strong> WriteScholar isn&apos;t just a study tool. It&apos;s a complete academic platform. The same AI that generates your flashcards can also <a href="/features" onClick={handleNavigate('features')} className={internalLink}>analyze your essays</a>, check your <a href="/tools/citation-generator" onClick={handleNavigate('citation-generator-tool')} className={internalLink}>citations</a>, and improve your <a href="/tools/grammar-checker" onClick={handleNavigate('grammar-checker')} className={internalLink}>grammar</a>. Having all your academic tools in one place saves time and creates a seamless workflow from studying to writing.
           </p>
 
           <h2 className={h2}>Real-world applications: How students use WriteScholar study tools</h2>
@@ -778,7 +778,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
             Citation formatting is one of the most tedious parts of academic writing. APA, MLA, Chicago, Harvard, IEEE, Vancouver—each style has different rules for punctuation, capitalization, and order of elements. One misplaced comma or missing period can cost you points, even when your argument is excellent.
           </p>
           <p className={p}>
-            A <a href="/tools/citation-generator" onClick={handleNavigate('citation-generator')} className={internalLink}>citation generator</a> creates properly formatted references from the information you provide. Enter the author, title, publication date, and other details, and the tool outputs a citation in your chosen style. This saves time and reduces errors, especially when you have dozens of sources.
+            A <a href="/tools/citation-generator" onClick={handleNavigate('citation-generator-tool')} className={internalLink}>citation generator</a> creates properly formatted references from the information you provide. Enter the author, title, publication date, and other details, and the tool outputs a citation in your chosen style. This saves time and reduces errors, especially when you have dozens of sources.
           </p>
           <h3 className={h3}>Supported source types</h3>
           <p className={p}>
@@ -821,7 +821,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
 
           <h2 className={h2}>4. Readability Score Calculator: Write clearly for your audience</h2>
           <p className={p}>
-            Clear writing communicates ideas effectively. Overly complex sentences, excessive jargon, and convoluted structure make your work harder to read—and may obscure your actual argument. A <a href="/tools/readability-checker" onClick={handleNavigate('readability-checker')} className={internalLink}>readability score calculator</a> analyzes your text using established formulas to tell you how accessible your writing is.
+            Clear writing communicates ideas effectively. Overly complex sentences, excessive jargon, and convoluted structure make your work harder to read—and may obscure your actual argument. A <a href="/tools/readability-score" onClick={handleNavigate('readability-score')} className={internalLink}>readability score calculator</a> analyzes your text using established formulas to tell you how accessible your writing is.
           </p>
           <p className={p}>
             Common readability metrics include:<br />
@@ -865,7 +865,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
 
           <h2 className={h2}>7. Text Case Converter: Fix formatting quickly</h2>
           <p className={p}>
-            Ever accidentally typed a whole paragraph in caps lock? Or needed to convert a title from lowercase to Title Case? A <a href="/tools/case-converter" onClick={handleNavigate('case-converter')} className={internalLink}>text case converter</a> handles these formatting tasks instantly, saving you from tedious manual retyping.
+            Ever accidentally typed a whole paragraph in caps lock? Or needed to convert a title from lowercase to Title Case? A <a href="/tools/text-case-converter" onClick={handleNavigate('text-case-converter')} className={internalLink}>text case converter</a> handles these formatting tasks instantly, saving you from tedious manual retyping.
           </p>
           <p className={p}>
             Common conversions include:<br />
@@ -956,7 +956,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
 
           <h2 className={h2}>Start improving your writing today</h2>
           <p className={p}>
-            Good academic writing is a skill you develop over time, and the right tools accelerate that development. The free tools we&apos;ve covered—<a href="/tools/word-counter" onClick={handleNavigate('word-counter')} className={internalLink}>word counter</a>, <a href="/tools/citation-generator" onClick={handleNavigate('citation-generator')} className={internalLink}>citation generator</a>, <a href="/tools/grammar-checker" onClick={handleNavigate('grammar-checker')} className={internalLink}>grammar checker</a>, <a href="/tools/readability-checker" onClick={handleNavigate('readability-checker')} className={internalLink}>readability calculator</a>, <a href="/tools/thesis-generator" onClick={handleNavigate('thesis-generator')} className={internalLink}>thesis generator</a>, <a href="/tools/essay-outline" onClick={handleNavigate('essay-outline')} className={internalLink}>essay outliner</a>, <a href="/tools/case-converter" onClick={handleNavigate('case-converter')} className={internalLink}>case converter</a>, and <a href="/tools/paraphrasing-tips" onClick={handleNavigate('paraphrasing-tips')} className={internalLink}>writing analyzer</a>—address the most common challenges students face.
+            Good academic writing is a skill you develop over time, and the right tools accelerate that development. The free tools we&apos;ve covered—<a href="/tools/word-counter" onClick={handleNavigate('word-counter')} className={internalLink}>word counter</a>, <a href="/tools/citation-generator" onClick={handleNavigate('citation-generator-tool')} className={internalLink}>citation generator</a>, <a href="/tools/grammar-checker" onClick={handleNavigate('grammar-checker')} className={internalLink}>grammar checker</a>, <a href="/tools/readability-score" onClick={handleNavigate('readability-score')} className={internalLink}>readability calculator</a>, <a href="/tools/thesis-generator" onClick={handleNavigate('thesis-generator')} className={internalLink}>thesis generator</a>, <a href="/tools/essay-outline" onClick={handleNavigate('essay-outline')} className={internalLink}>essay outliner</a>, <a href="/tools/text-case-converter" onClick={handleNavigate('text-case-converter')} className={internalLink}>case converter</a>, and <a href="/tools/paraphrasing-tips" onClick={handleNavigate('paraphrasing-tips')} className={internalLink}>writing analyzer</a>—address the most common challenges students face.
           </p>
           <p className={p}>
             For even more comprehensive feedback on your academic writing, WriteScholar combines these capabilities with AI-powered analysis of structure, argumentation, and academic tone. Check our <a href="/features" onClick={handleNavigate('features')} className={internalLink}>features page</a> to see what&apos;s included, or explore our <a href="/pricing" onClick={handleNavigate('pricing')} className={internalLink}>pricing options</a> to find the right plan for your needs.

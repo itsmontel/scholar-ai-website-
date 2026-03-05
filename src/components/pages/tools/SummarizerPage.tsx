@@ -134,7 +134,7 @@ const SummarizerPage = ({ onNavigate, user }: SummarizerPageProps) => {
 
   if (showFakeAnimation) {
     return (
-      <div className="min-h-screen flex flex-col bg-gradient-to-br from-teal-50 via-white to-emerald-50">
+      <div className="min-h-screen flex flex-col" style={{ background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%)' }}>
         <Header onNavigate={onNavigate} user={user} />
         <main className="flex-1 flex items-center justify-center">
           <div className="text-center">
@@ -149,31 +149,31 @@ const SummarizerPage = ({ onNavigate, user }: SummarizerPageProps) => {
 
   if (showSignupPrompt) {
     return (
-      <div className="min-h-screen flex flex-col bg-gradient-to-br from-teal-50 via-white to-emerald-50">
+      <div className="min-h-screen flex flex-col" style={{ background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%)' }}>
         <Header onNavigate={onNavigate} user={user} />
         <main className="flex-1 flex items-center justify-center px-4">
           <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center">
             <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-teal-500 to-emerald-600 rounded-2xl flex items-center justify-center">
               <span className="text-3xl">📝</span>
             </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Sign Up to Continue</h2>
-            <p className="text-gray-600 mb-6">Create a free account to access the AI Summarizer and other premium tools.</p>
+            <h2 className="text-2xl font-bold text-stone-800 mb-2">Sign Up to Continue</h2>
+            <p className="text-stone-600 mb-6">Create a free account to access the AI Summarizer and other premium tools.</p>
             <div className="space-y-3">
               <button
                 onClick={() => onNavigate('signup')}
-                className="w-full py-3 px-4 bg-gradient-to-r from-teal-600 to-emerald-600 text-white font-semibold rounded-xl hover:from-teal-700 hover:to-emerald-700 transition-all"
+                className="w-full py-3 px-4 bg-lime-400 text-stone-900 font-semibold rounded-full hover:bg-lime-300 transition-all"
               >
                 Sign Up Free
               </button>
               <button
                 onClick={() => onNavigate('login')}
-                className="w-full py-3 px-4 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition-all"
+                className="w-full py-3 px-4 bg-stone-100 text-stone-700 font-semibold rounded-full hover:bg-stone-200 transition-all"
               >
                 Log In
               </button>
               <button
                 onClick={() => setShowSignupPrompt(false)}
-                className="text-gray-500 hover:text-gray-700 text-sm"
+                className="text-stone-500 hover:text-stone-700 text-sm"
               >
                 ← Back to Summarizer
               </button>
@@ -186,7 +186,7 @@ const SummarizerPage = ({ onNavigate, user }: SummarizerPageProps) => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-teal-50 via-white to-emerald-50">
+    <div className="min-h-screen flex flex-col" style={{ background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%)' }}>
       <Header onNavigate={onNavigate} user={user} />
       
       <main className="flex-1 w-full min-w-0 overflow-x-hidden">
@@ -202,11 +202,11 @@ const SummarizerPage = ({ onNavigate, user }: SummarizerPageProps) => {
               </span>
             </div>
             
-            <h1 className="text-2xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-3 sm:mb-4 leading-tight">
-              AI <span className="bg-gradient-to-r from-teal-600 to-emerald-600 bg-clip-text text-transparent">Summarizer</span>
+            <h1 className="text-2xl sm:text-4xl lg:text-5xl text-stone-800 mb-3 sm:mb-4 leading-tight" style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 400 }}>
+              AI <span className="text-lime-600 italic">Summarizer</span>
             </h1>
             
-            <p className="text-sm sm:text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed px-2">
+            <p className="text-sm sm:text-lg text-stone-600 max-w-2xl mx-auto leading-relaxed px-2">
               Transform lengthy papers, articles, and documents into concise key points. 
               Perfect for literature reviews, research synthesis, and quick comprehension.
             </p>
@@ -460,10 +460,10 @@ const SummarizerPage = ({ onNavigate, user }: SummarizerPageProps) => {
         </div>
 
         {/* Features Section */}
-        <div className="py-12 sm:py-16 px-4 sm:px-6 lg:px-8 bg-white border-t border-gray-100">
+        <div className="py-12 sm:py-16 px-4 sm:px-6 lg:px-8 bg-white border-t border-stone-100">
           <div className="max-w-5xl mx-auto">
-            <h2 className="text-2xl sm:text-3xl font-bold text-center text-gray-900 mb-8 sm:mb-12">
-              Why Use Our <span className="text-teal-600">AI Summarizer</span>?
+            <h2 className="text-2xl sm:text-3xl text-center text-stone-800 mb-8 sm:mb-12" style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 400 }}>
+              Why Use Our <span className="text-lime-600 italic">AI Summarizer</span>?
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
               {[
@@ -483,12 +483,12 @@ const SummarizerPage = ({ onNavigate, user }: SummarizerPageProps) => {
                   description: 'Reduce a 20-page paper to key insights in under a minute. Focus on what matters most.'
                 }
               ].map((feature, idx) => (
-                <div key={idx} className="bg-gradient-to-br from-gray-50 to-white p-6 rounded-2xl border border-gray-100 hover:shadow-lg transition-shadow">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-teal-500 to-emerald-600 flex items-center justify-center mb-4 shadow-lg shadow-teal-200/50 text-2xl">
+                <div key={idx} className="bg-gradient-to-br from-stone-50 to-white p-6 rounded-2xl border border-stone-200 hover:shadow-lg transition-shadow">
+                  <div className="w-12 h-12 rounded-xl bg-lime-400 flex items-center justify-center mb-4 shadow-lg shadow-lime-200/50 text-2xl">
                     {feature.icon}
                   </div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">{feature.title}</h3>
-                  <p className="text-gray-600 text-sm leading-relaxed">{feature.description}</p>
+                  <h3 className="text-lg font-semibold text-stone-800 mb-2">{feature.title}</h3>
+                  <p className="text-stone-600 text-sm leading-relaxed">{feature.description}</p>
                 </div>
               ))}
             </div>

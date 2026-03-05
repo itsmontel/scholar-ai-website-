@@ -19,52 +19,52 @@ const ContactPage = ({ onNavigate, user, onLogout }: ContactPageProps) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+    <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%)' }}>
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} />
 
       {/* Main Content */}
       <main className="max-w-4xl mx-auto px-6 py-16">
         {/* Page Header */}
         <div className="text-center mb-16">
-          <div className="inline-flex items-center px-4 py-2 bg-blue-50/80 text-blue-700 rounded-full text-sm font-medium mb-8 border border-blue-200/50">
+          <div className="inline-flex items-center px-4 py-2 bg-lime-50/80 text-lime-700 rounded-full text-sm font-medium mb-8 border border-lime-200/50">
             <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
             </svg>
             Get in Touch
           </div>
-          <h1 className="text-5xl font-bold text-gray-900 mb-6">
-            Contact <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">WriteScholar</span>
+          <h1 className="text-5xl text-stone-800 mb-6" style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 400 }}>
+            Contact <span className="text-lime-600 italic">WriteScholar</span>
           </h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+          <p className="text-xl text-stone-600 max-w-2xl mx-auto">
             Have questions or need support? We're here to help you succeed with your academic writing.
           </p>
         </div>
 
         {/* How to Contact Us */}
-        <div className="bg-white/90 backdrop-blur-xl border border-gray-200/60 rounded-2xl p-8 shadow-lg mb-12">
+        <div className="bg-white/90 backdrop-blur-xl border border-stone-200/60 rounded-2xl p-8 shadow-lg mb-12">
           <div className="text-center mb-8">
-            <div className="w-20 h-20 bg-gradient-to-r from-blue-100 to-purple-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <svg className="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-20 h-20 bg-lime-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <svg className="w-10 h-10 text-lime-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 002 2v10a2 2 0 002 2z" />
               </svg>
             </div>
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Get in Touch</h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            <h2 className="text-3xl font-bold text-stone-800 mb-4">Get in Touch</h2>
+            <p className="text-lg text-stone-600 max-w-2xl mx-auto">
               Send us an email directly and we'll respond within 24 hours. Choose the appropriate subject line for faster assistance.
             </p>
           </div>
 
           {/* Email Address */}
-          <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-xl p-6 mb-8">
+          <div className="bg-gradient-to-r from-lime-50 to-green-50 border border-lime-200 rounded-xl p-6 mb-8">
             <div className="flex items-center justify-between">
           <div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">Email Address</h3>
-                <p className="text-2xl font-bold text-blue-600">support@writescholar.com</p>
-                <p className="text-sm text-gray-600 mt-1">We respond within 24 hours</p>
+                <h3 className="text-xl font-semibold text-stone-800 mb-2">Email Address</h3>
+                <p className="text-2xl font-bold text-lime-600">support@writescholar.com</p>
+                <p className="text-sm text-stone-600 mt-1">We respond within 24 hours</p>
               </div>
               <button
                 onClick={() => copyToClipboard('support@writescholar.com')}
-                className="bg-white hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-lg border border-gray-300 transition-colors duration-200 flex items-center space-x-2"
+                className="bg-white hover:bg-stone-50 text-stone-700 px-4 py-2 rounded-lg border border-stone-300 transition-colors duration-200 flex items-center space-x-2"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
@@ -76,11 +76,11 @@ const ContactPage = ({ onNavigate, user, onLogout }: ContactPageProps) => {
 
           {/* Subject Line Templates */}
           <div className="space-y-6">
-            <h3 className="text-xl font-semibold text-gray-900 mb-4">Recommended Subject Lines</h3>
+            <h3 className="text-xl font-semibold text-stone-800 mb-4">Recommended Subject Lines</h3>
             
             <div className="grid md:grid-cols-2 gap-4">
               {/* Technical Support */}
-              <div className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+              <div className="bg-white border border-stone-200 rounded-lg p-4 hover:shadow-md transition-shadow">
                 <div className="flex items-start space-x-3">
                   <div className="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center flex-shrink-0">
                     <svg className="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -88,9 +88,9 @@ const ContactPage = ({ onNavigate, user, onLogout }: ContactPageProps) => {
                     </svg>
                   </div>
                   <div className="flex-1">
-                    <h4 className="font-semibold text-gray-900 mb-1">Technical Support</h4>
-                    <p className="text-sm text-gray-600 mb-2">For bugs, errors, or technical issues</p>
-                    <div className="bg-gray-50 rounded px-3 py-2 text-sm font-mono text-gray-700">
+                    <h4 className="font-semibold text-stone-800 mb-1">Technical Support</h4>
+                    <p className="text-sm text-stone-600 mb-2">For bugs, errors, or technical issues</p>
+                    <div className="bg-stone-50 rounded px-3 py-2 text-sm font-mono text-stone-700">
                       [TECH SUPPORT] - Issue with [describe problem]
                     </div>
                   </div>
@@ -98,7 +98,7 @@ const ContactPage = ({ onNavigate, user, onLogout }: ContactPageProps) => {
               </div>
 
               {/* Billing Support */}
-              <div className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+              <div className="bg-white border border-stone-200 rounded-lg p-4 hover:shadow-md transition-shadow">
                 <div className="flex items-start space-x-3">
                   <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
                     <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -106,9 +106,9 @@ const ContactPage = ({ onNavigate, user, onLogout }: ContactPageProps) => {
                     </svg>
                   </div>
                   <div className="flex-1">
-                    <h4 className="font-semibold text-gray-900 mb-1">Billing & Subscriptions</h4>
-                    <p className="text-sm text-gray-600 mb-2">For payment, billing, or subscription questions</p>
-                    <div className="bg-gray-50 rounded px-3 py-2 text-sm font-mono text-gray-700">
+                    <h4 className="font-semibold text-stone-800 mb-1">Billing & Subscriptions</h4>
+                    <p className="text-sm text-stone-600 mb-2">For payment, billing, or subscription questions</p>
+                    <div className="bg-stone-50 rounded px-3 py-2 text-sm font-mono text-stone-700">
                       [BILLING] - Question about [subscription/payment]
                     </div>
                   </div>
@@ -116,17 +116,17 @@ const ContactPage = ({ onNavigate, user, onLogout }: ContactPageProps) => {
         </div>
 
               {/* Feature Request */}
-              <div className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+              <div className="bg-white border border-stone-200 rounded-lg p-4 hover:shadow-md transition-shadow">
                 <div className="flex items-start space-x-3">
-                  <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="w-8 h-8 bg-lime-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <svg className="w-4 h-4 text-lime-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                     </svg>
                   </div>
                   <div className="flex-1">
-                    <h4 className="font-semibold text-gray-900 mb-1">Feature Request</h4>
-                    <p className="text-sm text-gray-600 mb-2">Suggest new features or improvements</p>
-                    <div className="bg-gray-50 rounded px-3 py-2 text-sm font-mono text-gray-700">
+                    <h4 className="font-semibold text-stone-800 mb-1">Feature Request</h4>
+                    <p className="text-sm text-stone-600 mb-2">Suggest new features or improvements</p>
+                    <div className="bg-stone-50 rounded px-3 py-2 text-sm font-mono text-stone-700">
                       [FEATURE REQUEST] - [describe your idea]
                     </div>
                   </div>
@@ -134,17 +134,17 @@ const ContactPage = ({ onNavigate, user, onLogout }: ContactPageProps) => {
         </div>
 
               {/* General Inquiry */}
-              <div className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+              <div className="bg-white border border-stone-200 rounded-lg p-4 hover:shadow-md transition-shadow">
                 <div className="flex items-start space-x-3">
-                  <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <svg className="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="w-8 h-8 bg-stone-200 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <svg className="w-4 h-4 text-stone-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   </div>
                   <div className="flex-1">
-                    <h4 className="font-semibold text-gray-900 mb-1">General Question</h4>
-                    <p className="text-sm text-gray-600 mb-2">For general questions or feedback</p>
-                    <div className="bg-gray-50 rounded px-3 py-2 text-sm font-mono text-gray-700">
+                    <h4 className="font-semibold text-stone-800 mb-1">General Question</h4>
+                    <p className="text-sm text-stone-600 mb-2">For general questions or feedback</p>
+                    <div className="bg-stone-50 rounded px-3 py-2 text-sm font-mono text-stone-700">
                       [QUESTION] - [your question here]
                     </div>
                   </div>
@@ -154,9 +154,9 @@ const ContactPage = ({ onNavigate, user, onLogout }: ContactPageProps) => {
         </div>
 
           {/* Email Template */}
-          <div className="mt-8 bg-gray-50 border border-gray-200 rounded-xl p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Email Template</h3>
-            <div className="bg-white border border-gray-300 rounded-lg p-4 font-mono text-sm text-gray-700 space-y-2">
+          <div className="mt-8 bg-stone-50 border border-stone-200 rounded-xl p-6">
+            <h3 className="text-lg font-semibold text-stone-800 mb-4">Email Template</h3>
+            <div className="bg-white border border-stone-300 rounded-lg p-4 font-mono text-sm text-stone-700 space-y-2">
               <div><strong>To:</strong> support@writescholar.com</div>
               <div><strong>Subject:</strong> [CATEGORY] - Brief description of your issue</div>
               <div className="border-t pt-2 mt-2">
@@ -183,7 +183,7 @@ Thank you for your help!
 
 Best regards,
 [Your Name]`)}
-              className="mt-4 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors duration-200 flex items-center space-x-2"
+              className="mt-4 bg-lime-500 hover:bg-lime-400 text-stone-900 px-4 py-2 rounded-lg transition-colors duration-200 flex items-center space-x-2"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
@@ -196,14 +196,14 @@ Best regards,
         {/* Contact Information */}
         <div className="mt-16 grid md:grid-cols-3 gap-8">
           <div className="text-center">
-            <div className="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-16 h-16 bg-lime-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-lime-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
               </svg>
                   </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Email Support</h3>
-            <p className="text-gray-600 mb-2">support@writescholar.com</p>
-            <p className="text-sm text-gray-500">We respond within 24 hours</p>
+            <h3 className="text-lg font-semibold text-stone-800 mb-2">Email Support</h3>
+            <p className="text-stone-600 mb-2">support@writescholar.com</p>
+            <p className="text-sm text-stone-500">We respond within 24 hours</p>
           </div>
 
           <div className="text-center">
@@ -212,20 +212,20 @@ Best regards,
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Response Time</h3>
-            <p className="text-gray-600 mb-2">24 hours or less</p>
-            <p className="text-sm text-gray-500">Monday - Friday</p>
+            <h3 className="text-lg font-semibold text-stone-800 mb-2">Response Time</h3>
+            <p className="text-stone-600 mb-2">24 hours or less</p>
+            <p className="text-sm text-stone-500">Monday - Friday</p>
             </div>
 
           <div className="text-center">
-            <div className="w-16 h-16 bg-purple-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-16 h-16 bg-stone-200 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-stone-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Help Center</h3>
-            <p className="text-gray-600 mb-2">Browse our FAQ</p>
-            <p className="text-sm text-gray-500">Find answers instantly</p>
+            <h3 className="text-lg font-semibold text-stone-800 mb-2">Help Center</h3>
+            <p className="text-stone-600 mb-2">Browse our FAQ</p>
+            <p className="text-sm text-stone-500">Find answers instantly</p>
           </div>
         </div>
       </main>

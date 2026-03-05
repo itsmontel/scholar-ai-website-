@@ -84,24 +84,24 @@ const SettingsPage = ({ onNavigate, user, onLogout }: SettingsPageProps) => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+    <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%)' }}>
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="account" />
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         {/* Page Header */}
         <div className="text-center mb-12 sm:mb-16">
-          <div className="inline-flex items-center px-3 sm:px-4 py-1.5 sm:py-2 bg-blue-50/80 text-blue-700 rounded-full text-xs sm:text-sm font-medium mb-6 sm:mb-8 border border-blue-200/50">
+          <div className="inline-flex items-center px-3 sm:px-4 py-1.5 sm:py-2 bg-lime-50/80 text-lime-700 rounded-full text-xs sm:text-sm font-medium mb-6 sm:mb-8 border border-lime-200/50">
             <svg className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
             Account Management
       </div>
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-4 sm:mb-6 leading-tight tracking-tight">
-            Account <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">Settings</span>
+          <h1 className="text-3xl sm:text-4xl md:text-5xl text-stone-800 mb-4 sm:mb-6 leading-tight tracking-tight" style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 400 }}>
+            Account <span className="text-lime-600 italic">Settings</span>
           </h1>
-          <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed px-4">
+          <p className="text-lg sm:text-xl text-stone-600 max-w-3xl mx-auto leading-relaxed px-4">
             Manage your profile, subscription, security settings, and preferences all in one place.
           </p>
         </div>
@@ -109,67 +109,67 @@ const SettingsPage = ({ onNavigate, user, onLogout }: SettingsPageProps) => {
         {/* Settings List */}
         <div className="max-w-4xl mx-auto space-y-8">
           {/* Profile Information */}
-          <div className="bg-white/90 backdrop-blur-xl border border-gray-200/60 rounded-2xl p-8 shadow-lg">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Profile Information</h2>
+          <div className="bg-white/90 backdrop-blur-xl border border-stone-200/60 rounded-2xl p-8 shadow-lg">
+            <h2 className="text-2xl font-bold text-stone-800 mb-6">Profile Information</h2>
             <div className="space-y-4">
-              <div className="flex items-center justify-between py-3 border-b border-gray-200">
+              <div className="flex items-center justify-between py-3 border-b border-stone-200">
                 <div>
-                  <div className="font-semibold text-gray-900">Email</div>
-                  <div className="text-gray-600">{user?.email || 'Loading...'}</div>
+                  <div className="font-semibold text-stone-800">Email</div>
+                  <div className="text-stone-600">{user?.email || 'Loading...'}</div>
       </div>
     </div>
-              <div className="flex items-center justify-between py-3 border-b border-gray-200">
+              <div className="flex items-center justify-between py-3 border-b border-stone-200">
       <div>
-                  <div className="font-semibold text-gray-900">Name</div>
-                  <div className="text-gray-600">{user?.name || 'Loading...'}</div>
+                  <div className="font-semibold text-stone-800">Name</div>
+                  <div className="text-stone-600">{user?.name || 'Loading...'}</div>
                 </div>
               </div>
               <div className="flex items-center justify-between py-3">
               <div>
-                  <div className="font-semibold text-gray-900">Member Since</div>
-                  <div className="text-gray-600">{loading ? 'Loading...' : userStats.memberSince}</div>
+                  <div className="font-semibold text-stone-800">Member Since</div>
+                  <div className="text-stone-600">{loading ? 'Loading...' : userStats.memberSince}</div>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Usage Statistics */}
-          <div className="bg-white/90 backdrop-blur-xl border border-gray-200/60 rounded-2xl p-8 shadow-lg">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Usage Statistics</h2>
+          <div className="bg-white/90 backdrop-blur-xl border border-stone-200/60 rounded-2xl p-8 shadow-lg">
+            <h2 className="text-2xl font-bold text-stone-800 mb-6">Usage Statistics</h2>
             <div className="space-y-4">
-              <div className="flex items-center justify-between py-3 border-b border-gray-200">
+              <div className="flex items-center justify-between py-3 border-b border-stone-200">
                 <div>
-                  <div className="font-semibold text-gray-900">Total Documents</div>
-                  <div className="text-gray-600">{loading ? 'Loading...' : userStats.totalDocuments}</div>
+                  <div className="font-semibold text-stone-800">Total Documents</div>
+                  <div className="text-stone-600">{loading ? 'Loading...' : userStats.totalDocuments}</div>
               </div>
               </div>
-              <div className="flex items-center justify-between py-3 border-b border-gray-200">
+              <div className="flex items-center justify-between py-3 border-b border-stone-200">
                 <div>
-                  <div className="font-semibold text-gray-900">Documents Analyzed</div>
-                  <div className="text-gray-600">{loading ? 'Loading...' : userStats.documentsAnalyzed}</div>
+                  <div className="font-semibold text-stone-800">Documents Analyzed</div>
+                  <div className="text-stone-600">{loading ? 'Loading...' : userStats.documentsAnalyzed}</div>
             </div>
               </div>
               <div className="flex items-center justify-between py-3">
               <div>
-                  <div className="font-semibold text-gray-900">Last Activity</div>
-                  <div className="text-gray-600">{loading ? 'Loading...' : userStats.lastActivity}</div>
+                  <div className="font-semibold text-stone-800">Last Activity</div>
+                  <div className="text-stone-600">{loading ? 'Loading...' : userStats.lastActivity}</div>
                 </div>
               </div>
           </div>
       </div>
 
           {/* Subscription */}
-          <div className="bg-white/90 backdrop-blur-xl border border-gray-200/60 rounded-2xl p-8 shadow-lg">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Subscription</h2>
+          <div className="bg-white/90 backdrop-blur-xl border border-stone-200/60 rounded-2xl p-8 shadow-lg">
+            <h2 className="text-2xl font-bold text-stone-800 mb-6">Subscription</h2>
             <div className="space-y-4">
-              <div className="flex items-center justify-between py-3 border-b border-gray-200">
+              <div className="flex items-center justify-between py-3 border-b border-stone-200">
                 <div>
-                  <div className="font-semibold text-gray-900">Current Plan</div>
-                  <div className="text-gray-600 flex items-center">
+                  <div className="font-semibold text-stone-800">Current Plan</div>
+                  <div className="text-stone-600 flex items-center">
                     <span className="capitalize">{userStats.subscriptionPlan}</span>
                     <span className={`ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
                       userStats.subscriptionStatus === 'active'
-                        ? 'bg-green-100 text-green-800'
+                        ? 'bg-lime-100 text-lime-800'
                         : 'bg-yellow-100 text-yellow-800'
                     }`}>
                       {userStats.subscriptionStatus}
@@ -179,7 +179,7 @@ const SettingsPage = ({ onNavigate, user, onLogout }: SettingsPageProps) => {
                 {userStats.subscriptionPlan === 'free' && (
                   <button 
                     onClick={() => onNavigate('pricing')}
-                    className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg font-medium hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+                    className="bg-lime-400 hover:bg-lime-300 text-stone-900 px-4 py-2 rounded-full font-medium transition-all duration-200"
                   >
                     Upgrade
                   </button>
@@ -187,8 +187,8 @@ const SettingsPage = ({ onNavigate, user, onLogout }: SettingsPageProps) => {
               </div>
               <div className="flex items-center justify-between py-3">
                 <div>
-                  <div className="font-semibold text-gray-900">Plan Features</div>
-                  <div className="text-gray-600">
+                  <div className="font-semibold text-stone-800">Plan Features</div>
+                  <div className="text-stone-600">
                     {userStats.subscriptionPlan === 'free' 
                       ? '3 analyses per month' 
                       : userStats.subscriptionPlan === 'starter' || userStats.subscriptionPlan === 'premium'
@@ -202,24 +202,24 @@ const SettingsPage = ({ onNavigate, user, onLogout }: SettingsPageProps) => {
           </div>
 
           {/* Security */}
-          <div className="bg-white/90 backdrop-blur-xl border border-gray-200/60 rounded-2xl p-8 shadow-lg">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Security</h2>
+          <div className="bg-white/90 backdrop-blur-xl border border-stone-200/60 rounded-2xl p-8 shadow-lg">
+            <h2 className="text-2xl font-bold text-stone-800 mb-6">Security</h2>
             <div className="space-y-4">
-              <div className="flex items-center justify-between py-3 border-b border-gray-200">
+              <div className="flex items-center justify-between py-3 border-b border-stone-200">
                 <div>
-                  <div className="font-semibold text-gray-900">Password</div>
-                  <div className="text-gray-600">Last changed: Never</div>
+                  <div className="font-semibold text-stone-800">Password</div>
+                  <div className="text-stone-600">Last changed: Never</div>
                 </div>
-                <button className="text-blue-600 hover:text-blue-700 font-medium">
+                <button className="text-lime-600 hover:text-lime-700 font-medium">
                   Change Password
                 </button>
               </div>
               <div className="flex items-center justify-between py-3">
                 <div>
-                  <div className="font-semibold text-gray-900">Two-Factor Authentication</div>
-                  <div className="text-gray-600">Not enabled</div>
+                  <div className="font-semibold text-stone-800">Two-Factor Authentication</div>
+                  <div className="text-stone-600">Not enabled</div>
                 </div>
-                <button className="text-blue-600 hover:text-blue-700 font-medium">
+                <button className="text-lime-600 hover:text-lime-700 font-medium">
                   Enable 2FA
                 </button>
               </div>
@@ -227,27 +227,27 @@ const SettingsPage = ({ onNavigate, user, onLogout }: SettingsPageProps) => {
           </div>
 
           {/* Preferences */}
-          <div className="bg-white/90 backdrop-blur-xl border border-gray-200/60 rounded-2xl p-8 shadow-lg">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Preferences</h2>
+          <div className="bg-white/90 backdrop-blur-xl border border-stone-200/60 rounded-2xl p-8 shadow-lg">
+            <h2 className="text-2xl font-bold text-stone-800 mb-6">Preferences</h2>
             <div className="space-y-4">
-              <div className="flex items-center justify-between py-3 border-b border-gray-200">
+              <div className="flex items-center justify-between py-3 border-b border-stone-200">
                 <div>
-                  <div className="font-semibold text-gray-900">Email Notifications</div>
-                  <div className="text-gray-600">Receive updates about your documents</div>
+                  <div className="font-semibold text-stone-800">Email Notifications</div>
+                  <div className="text-stone-600">Receive updates about your documents</div>
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer">
                   <input type="checkbox" className="sr-only peer" defaultChecked />
-                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                  <div className="w-11 h-6 bg-stone-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-lime-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-stone-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-lime-500"></div>
                 </label>
               </div>
               <div className="flex items-center justify-between py-3">
                 <div>
-                  <div className="font-semibold text-gray-900">Dark Mode</div>
-                  <div className="text-gray-600">Switch to dark theme</div>
+                  <div className="font-semibold text-stone-800">Dark Mode</div>
+                  <div className="text-stone-600">Switch to dark theme</div>
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer">
                   <input type="checkbox" className="sr-only peer" />
-                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                  <div className="w-11 h-6 bg-stone-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-lime-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-stone-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-lime-500"></div>
                 </label>
                   </div>
                 </div>

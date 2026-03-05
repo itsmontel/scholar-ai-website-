@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { logger } from '../utils/logger';
 
 // Import all page components
 import LandingPage from './pages/LandingPage';
@@ -21,6 +22,7 @@ import ProfilePage from './pages/ProfilePage';
 import LibraryPage from './pages/LibraryPage';
 import FAQPage from './pages/HelpCenterPage';
 import AboutPage from './pages/AboutPage';
+import WhyStudentsChoosePage from './pages/WhyStudentsChoosePage';
 import ContactPage from './pages/ContactPage';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import TermsOfServicePage from './pages/TermsOfServicePage';
@@ -85,12 +87,12 @@ const AcademicAIApp = () => {
         const userData = localStorage.getItem('user');
         if (token && userData) {
           const parsedUser = JSON.parse(userData);
-          console.log('Initializing user state from localStorage:', parsedUser);
+          logger.log('Initializing user state from localStorage:', parsedUser);
           setIsLoggedIn(true);
           setUser(parsedUser);
         }
       } catch (error) {
-        console.error('Error parsing initial user data:', error);
+        logger.error('Error parsing initial user data:', error);
         localStorage.removeItem('authToken');
         localStorage.removeItem('user');
       }
@@ -106,6 +108,7 @@ const AcademicAIApp = () => {
     features: { title: 'Features | WriteScholar', description: 'AI Humanizer to bypass detectors, Quiz Generator from text, Paper Summarizer, Citation Finder, Essay Checker. All the tools students need.' },
     pricing: { title: 'Pricing | WriteScholar', description: 'Free plan with AI Humanizer, Summarizer, and Essay Checker. Starter adds Quiz Generator. Premium unlocks all features and models. Annual plans save 2 months.' },
     about: { title: 'About | WriteScholar', description: 'WriteScholar is the complete AI toolkit for students. Humanize AI text, generate quizzes, summarize papers, find citations. Serving students worldwide.' },
+    'why-students-choose': { title: 'Why Students Choose WriteScholar | Compare Writing Tools', description: 'See how WriteScholar compares to Grammarly and QuillBot. Built for academic writing, citation finder, AI humanizer, essay analysis, and more.' },
     help: { title: 'Help & FAQ | WriteScholar', description: 'Get help with AI Humanizer, Quiz Generator, Paper Summarizer, Citation Finder. Supported citation styles: APA, Harvard, MLA, Chicago.' },
     contact: { title: 'Contact | WriteScholar', description: 'Contact WriteScholar support for help with AI tools for students.' },
     privacy: { title: 'Privacy Policy | WriteScholar', description: 'WriteScholar privacy policy and data handling.' },
@@ -148,10 +151,10 @@ const AcademicAIApp = () => {
   // Validate and refresh token if needed
   const validateAndRefreshToken = async () => {
     try {
-      console.log('Validating token...');
+      logger.log('Validating token...');
       const token = localStorage.getItem('authToken');
       if (!token) {
-        console.log('No token found, skipping validation');
+        logger.log('No token found, skipping validation');
         return;
       }
 
@@ -159,16 +162,16 @@ const AcademicAIApp = () => {
       const { BulletproofAPI } = await import('../config/api');
       const response = await BulletproofAPI.get('/auth/me', token);
 
-      console.log('Token validation response status:', response.status);
+      logger.log('Token validation response status:', response.status);
       if (response.status === 401) {
         // Token expired, try to refresh
-        console.log('Token expired, attempting refresh...');
+        logger.log('Token expired, attempting refresh...');
         const refreshResponse = await BulletproofAPI.post('/auth/refresh', {}, token);
 
         if (refreshResponse.ok) {
           const refreshData = await refreshResponse.json();
           localStorage.setItem('authToken', refreshData.data.token);
-          console.log('Token refreshed successfully');
+          logger.log('Token refreshed successfully');
           
           // After successful refresh, get updated user data
           const userResponse = await BulletproofAPI.get('/auth/me', refreshData.data.token);
@@ -190,20 +193,20 @@ const AcademicAIApp = () => {
               };
               setUser(updatedUser);
               localStorage.setItem('user', JSON.stringify(updatedUser));
-              console.log('User data updated after token refresh:', updatedUser);
+              logger.log('User data updated after token refresh:', updatedUser);
             } else {
-              console.log('Invalid user data after token refresh, keeping existing user data');
+              logger.log('Invalid user data after token refresh, keeping existing user data');
             }
           }
         } else {
           // Refresh failed - but DON'T clear auth state immediately
           // Keep user logged in with cached data for better UX
-          console.log('Token refresh failed, but keeping user logged in with cached data');
+          logger.log('Token refresh failed, but keeping user logged in with cached data');
           
           // Only clear if we're on a protected route and have no cached user data
           const cachedUser = localStorage.getItem('user');
           if (!cachedUser && protectedRoutes.includes(currentPage)) {
-            console.log('No cached user data and on protected route, clearing auth state');
+            logger.log('No cached user data and on protected route, clearing auth state');
             setIsLoggedIn(false);
             setUser(null);
             localStorage.removeItem('authToken');
@@ -229,20 +232,20 @@ const AcademicAIApp = () => {
           };
           setUser(updatedUser);
           localStorage.setItem('user', JSON.stringify(updatedUser));
-          console.log('User data updated from /auth/me:', updatedUser);
+          logger.log('User data updated from /auth/me:', updatedUser);
         } else {
-          console.log('Invalid user data from /auth/me, keeping existing user data');
+          logger.log('Invalid user data from /auth/me, keeping existing user data');
         }
-        console.log('Token is valid, user data updated');
+        logger.log('Token is valid, user data updated');
       } else {
         // Other error status - keep user logged in with cached data
-        console.log('Server error during validation, keeping user logged in with cached data');
+        logger.log('Server error during validation, keeping user logged in with cached data');
       }
     } catch (error) {
-      console.error('Token validation error:', error);
+      logger.error('Token validation error:', error);
       // On network error, always keep the user logged in locally
       // They can still browse with cached data
-      console.log('Network error during validation, keeping user logged in with cached data');
+      logger.log('Network error during validation, keeping user logged in with cached data');
     }
   };
 
@@ -253,13 +256,13 @@ const AcademicAIApp = () => {
     // Validate token in background if user is logged in
     // User state is already initialized from localStorage, so no need to set it again
     if (isLoggedIn && user) {
-      console.log('User already logged in from initial state:', user);
+      logger.log('User already logged in from initial state:', user);
       // Validate token in background, but don't let failures clear the user immediately
       setTimeout(() => {
         validateAndRefreshToken();
       }, 100); // Small delay to ensure UI renders first
     } else {
-      console.log('No user logged in on initial load');
+      logger.log('No user logged in on initial load');
     }
     
     // Set initial page based on URL
@@ -273,6 +276,7 @@ const AcademicAIApp = () => {
       if (pathname === '/pricing') return 'pricing';
       if (pathname === '/features') return 'features';
       if (pathname === '/about') return 'about';
+      if (pathname === '/why-students-choose' || pathname === '/compare') return 'why-students-choose';
       if (pathname === '/contact') return 'contact';
       if (pathname === '/analysis') return 'analysis';
       if (pathname === '/analysis-history') return 'analysis-history';
@@ -311,6 +315,9 @@ const AcademicAIApp = () => {
       if (pathname === '/tools/crossword-generator' || pathname === '/crossword-generator') return 'crossword-generator';
       if (pathname === '/tools/gpa-calculator' || pathname === '/gpa-calculator') return 'gpa-calculator';
       if (pathname === '/tools/pomodoro-timer' || pathname === '/pomodoro-timer') return 'pomodoro-timer';
+      // Dashboard modes
+      if (pathname === '/tools/analyze' || pathname === '/analyze') return 'analyze';
+      if (pathname === '/tools/citations' || pathname === '/citations') return 'citations';
       return 'landing';
     };
     
@@ -328,7 +335,7 @@ const AcademicAIApp = () => {
     const handlePopState = () => {
       const newPath = window.location.pathname;
       const newPage = getPageFromPath(newPath);
-      console.log('Browser navigation detected, changing page to:', newPage);
+      logger.log('Browser navigation detected, changing page to:', newPage);
       setCurrentPage(newPage);
       
       // Restore user data from localStorage when navigating back/forward
@@ -339,9 +346,9 @@ const AcademicAIApp = () => {
           const userData = JSON.parse(storedUserData);
           setIsLoggedIn(true);
           setUser(userData);
-          console.log('User data restored on navigation:', userData);
+          logger.log('User data restored on navigation:', userData);
         } catch (error) {
-          console.error('Error restoring user data:', error);
+          logger.error('Error restoring user data:', error);
         }
       }
     };
@@ -356,7 +363,7 @@ const AcademicAIApp = () => {
   // Handle authentication state changes - redirect to dashboard if logged in and on landing page
   useEffect(() => {
     if (isLoggedIn && currentPage === 'landing') {
-      console.log('User logged in, redirecting from landing to dashboard');
+      logger.log('User logged in, redirecting from landing to dashboard');
       setCurrentPage('dashboard');
       window.history.replaceState(null, '', '/dashboard');
     }
@@ -371,11 +378,11 @@ const AcademicAIApp = () => {
       if (token && userData) {
         try {
           const parsedUser = JSON.parse(userData);
-          console.log('Syncing user data from storage change:', parsedUser);
+          logger.log('Syncing user data from storage change:', parsedUser);
           setIsLoggedIn(true);
           setUser(parsedUser);
         } catch (error) {
-          console.error('Error syncing user data:', error);
+          logger.error('Error syncing user data:', error);
         }
       } else if (!token) {
         // If token is removed, log out
@@ -423,7 +430,7 @@ const AcademicAIApp = () => {
           if (refreshResponse.ok) {
             const refreshData = await refreshResponse.json();
             localStorage.setItem('authToken', refreshData.data.token);
-            console.log('Token refreshed automatically');
+            logger.log('Token refreshed automatically');
             
             // Retry the original request with new token
             const retryResponse = await originalFetch(...args);
@@ -431,12 +438,12 @@ const AcademicAIApp = () => {
           } else {
             // Refresh failed - but DON'T clear auth state automatically
             // Let the user continue with cached data
-            console.log('Auto-refresh failed, but keeping user logged in with cached data');
+            logger.log('Auto-refresh failed, but keeping user logged in with cached data');
             
             // Only clear auth if we're on a protected route and have no cached user
             const cachedUser = localStorage.getItem('user');
             if (!cachedUser && protectedRoutes.includes(currentPage)) {
-              console.log('No cached user data on protected route, clearing auth state');
+              logger.log('No cached user data on protected route, clearing auth state');
               setIsLoggedIn(false);
               setUser(null);
               localStorage.removeItem('authToken');
@@ -445,9 +452,9 @@ const AcademicAIApp = () => {
             }
           }
         } catch (error) {
-          console.error('Auto-refresh failed:', error);
+          logger.error('Auto-refresh failed:', error);
           // Don't logout on network errors - keep user logged in with cached data
-          console.log('Network error during auto-refresh, keeping user logged in');
+          logger.log('Network error during auto-refresh, keeping user logged in');
         }
       }
       
@@ -479,6 +486,9 @@ const AcademicAIApp = () => {
     'grammar-checker': '/tools/grammar-checker',
     'gpa-calculator': '/tools/gpa-calculator',
     'pomodoro-timer': '/tools/pomodoro-timer',
+    'analyze': '/tools/analyze',
+    'citations': '/tools/citations',
+    'why-students-choose': '/why-students-choose',
   };
 
   const navigateTo = (page: string, slug?: string) => {
@@ -501,11 +511,11 @@ const AcademicAIApp = () => {
     if (token && userData && !user) {
       try {
         const parsedUser = JSON.parse(userData);
-        console.log('Restoring user data on navigation:', parsedUser);
+        logger.log('Restoring user data on navigation:', parsedUser);
         setIsLoggedIn(true);
         setUser(parsedUser);
       } catch (error) {
-        console.error('Error restoring user on navigation:', error);
+        logger.error('Error restoring user on navigation:', error);
       }
     }
   };
@@ -554,6 +564,8 @@ const AcademicAIApp = () => {
         return <FeaturesPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'about':
         return <AboutPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
+      case 'why-students-choose':
+        return <WhyStudentsChoosePage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'contact':
         return <ContactPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'privacy':
@@ -652,7 +664,7 @@ const AcademicAIApp = () => {
 
   return (
     <ErrorBoundary>
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%)' }}>
       <PromoBanner />
       {renderCurrentPage()}
     </div>
@@ -663,7 +675,7 @@ const AcademicAIApp = () => {
 
 // Admin Dashboard Component
 const AdminDashboard = ({ onNavigate, user: _user }: UserProps) => (
-  <div className="min-h-screen bg-gray-50">
+  <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%)' }}>
     {/* Navigation */}
     <nav className="bg-white border-b border-gray-200 px-8 py-4">
       <div className="flex items-center justify-between">
@@ -752,7 +764,7 @@ const AdminDashboard = ({ onNavigate, user: _user }: UserProps) => (
 
 // Collaboration Page Component
 const CollaborationPage = ({ onNavigate, user: _user }: UserProps) => (
-  <div className="min-h-screen bg-gray-50">
+  <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%)' }}>
     {/* Navigation */}
     <nav className="bg-white border-b border-gray-200 px-8 py-4">
       <div className="flex items-center justify-between">

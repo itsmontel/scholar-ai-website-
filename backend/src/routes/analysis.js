@@ -746,8 +746,12 @@ router.post('/citation-search', authenticateToken, async (req, res) => {
 
     console.log('Citation search completed successfully');
 
+    // Get user's plan for retention policy (free: 7 days, paid: permanent)
+    const userPlan = await subscriptionService.getUserPlan(userId);
+
     // Save search to history (don't block response if this fails)
-    aiAnalysisService.saveCitationSearch(userId, researchTopic, style, searchResults, yearRange)
+    // Pass userPlan to determine retention: free users get 7-day expiration, paid users get permanent storage
+    aiAnalysisService.saveCitationSearch(userId, researchTopic, style, searchResults, yearRange, userPlan)
       .catch(error => console.error('Failed to save citation search to history:', error));
 
     res.json({

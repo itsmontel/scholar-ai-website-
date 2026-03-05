@@ -445,14 +445,14 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
         );
       case 'txt':
         return (
-          <div className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center">
-            <span className="text-gray-600 font-bold text-xs">TXT</span>
+          <div className="w-10 h-10 bg-stone-100 rounded-xl flex items-center justify-center">
+            <span className="text-stone-600 font-bold text-xs">TXT</span>
           </div>
         );
       default:
         return (
-          <div className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center">
-            <span className="text-gray-600 font-bold text-xs">FILE</span>
+          <div className="w-10 h-10 bg-stone-100 rounded-xl flex items-center justify-center">
+            <span className="text-stone-600 font-bold text-xs">FILE</span>
           </div>
         );
     }
@@ -462,7 +462,7 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
     if (!documentContent) {
   return (
         <div className="prose max-w-none">
-          <div className="whitespace-pre-wrap text-gray-800 leading-relaxed">
+          <div className="whitespace-pre-wrap text-stone-800 leading-relaxed">
             {documentContent}
               </div>
         </div>
@@ -472,7 +472,7 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
     // Show plain text in Library (highlighting is done in Analysis page)
     return (
       <div className="prose max-w-none">
-        <div className="whitespace-pre-wrap text-gray-800 leading-relaxed">
+        <div className="whitespace-pre-wrap text-stone-800 leading-relaxed">
           {documentContent}
                 </div>
                 </div>
@@ -480,18 +480,18 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%)' }}>
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="library" />
 
       {/* Mobile Navigation Tabs */}
-      <div className="md:hidden bg-white border-b border-gray-100 sticky top-0 z-10">
+      <div className="md:hidden bg-white border-b border-stone-100 sticky top-0 z-10">
         <div className="flex">
           <button
             onClick={() => setMobileView('list')}
             className={`flex-1 py-3.5 text-sm font-medium transition-colors ${
               mobileView === 'list'
-                ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50/50'
-                : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                ? 'text-lime-600 border-b-2 border-lime-600 bg-lime-50/50'
+                : 'text-stone-500 hover:text-stone-700 hover:bg-stone-50'
             }`}
           >
             Documents
@@ -500,8 +500,8 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
             onClick={() => setMobileView('document')}
             className={`flex-1 py-3.5 text-sm font-medium transition-colors ${
               mobileView === 'document'
-                ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50/50'
-                : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                ? 'text-lime-600 border-b-2 border-lime-600 bg-lime-50/50'
+                : 'text-stone-500 hover:text-stone-700 hover:bg-stone-50'
             }`}
             disabled={!selectedDocument}
           >
@@ -511,8 +511,8 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
             onClick={() => setMobileView('analysis')}
             className={`flex-1 py-3.5 text-sm font-medium transition-colors ${
               mobileView === 'analysis'
-                ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50/50'
-                : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                ? 'text-lime-600 border-b-2 border-lime-600 bg-lime-50/50'
+                : 'text-stone-500 hover:text-stone-700 hover:bg-stone-50'
             }`}
             disabled={!selectedDocument}
           >
@@ -524,13 +524,13 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
       <div ref={containerRef} className="flex min-h-[calc(100vh-80px)] md:h-[calc(100vh-80px)]">
         {/* Left Panel - Document Library */}
         <div 
-          className={`w-full md:border-r border-gray-100 bg-gray-50/50 flex flex-col md:w-auto ${
+          className={`w-full md:border-r border-stone-100 bg-stone-50/50 flex flex-col md:w-auto ${
             mobileView !== 'list' ? 'hidden md:flex' : ''
           }`}
           style={{ width: window.innerWidth < 768 ? '100%' : `${leftPanelWidth}%` }}
         >
-          <div className="p-4 md:p-5 border-b border-gray-100 bg-white">
-            <h2 className="text-lg md:text-xl font-bold text-gray-900 mb-4 md:mb-5">My Documents</h2>
+          <div className="p-4 md:p-5 border-b border-stone-100 bg-white">
+            <h2 className="text-lg md:text-xl font-bold text-stone-900 mb-4 md:mb-5">My Documents</h2>
             
             {/* Search Bar */}
             <div className="relative mb-4">
@@ -539,10 +539,10 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Search documents..."
-                className="w-full pl-10 pr-4 py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition-all"
+                className="w-full pl-10 pr-4 py-2.5 text-sm bg-stone-50 border border-stone-200 rounded-xl focus:ring-2 focus:ring-lime-500 focus:border-lime-500 focus:bg-white transition-all"
               />
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="h-5 w-5 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
               </div>
@@ -554,8 +554,8 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
                 onClick={() => setTimeFilter('all')}
                 className={`px-3 py-1.5 text-xs md:text-sm rounded-lg font-medium transition-all ${
                   timeFilter === 'all' 
-                    ? 'bg-blue-600 text-white' 
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    ? 'bg-lime-500 text-stone-900' 
+                    : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
                 }`}
               >
                 All
@@ -564,8 +564,8 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
                 onClick={() => setTimeFilter('last7days')}
                 className={`px-3 py-1.5 text-xs md:text-sm rounded-lg font-medium transition-all ${
                   timeFilter === 'last7days' 
-                    ? 'bg-blue-600 text-white' 
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    ? 'bg-lime-500 text-stone-900' 
+                    : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
                 }`}
               >
                 Last 7 days
@@ -574,8 +574,8 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
                 onClick={() => setTimeFilter('lastmonth')}
                 className={`px-3 py-1.5 text-xs md:text-sm rounded-lg font-medium transition-all ${
                   timeFilter === 'lastmonth' 
-                    ? 'bg-blue-600 text-white' 
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    ? 'bg-lime-500 text-stone-900' 
+                    : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
                 }`}
               >
                 Last month
@@ -584,14 +584,14 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
 
             {/* View Toggle */}
             <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-500">View:</span>
-              <div className="flex bg-gray-100 rounded-xl p-1">
+              <span className="text-sm text-stone-500">View:</span>
+              <div className="flex bg-stone-100 rounded-xl p-1">
                 <button
                   onClick={() => setViewMode('grid')}
                   className={`p-2 rounded-lg transition-all ${
                     viewMode === 'grid'
-                      ? 'bg-white text-blue-600 shadow-sm'
-                      : 'text-gray-500 hover:text-gray-700'
+                      ? 'bg-white text-lime-600 shadow-sm'
+                      : 'text-stone-500 hover:text-stone-700'
                   }`}
                   title="Grid View"
                 >
@@ -603,8 +603,8 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
                   onClick={() => setViewMode('list')}
                   className={`p-2 rounded-lg transition-all ${
                     viewMode === 'list'
-                      ? 'bg-white text-blue-600 shadow-sm'
-                      : 'text-gray-500 hover:text-gray-700'
+                      ? 'bg-white text-lime-600 shadow-sm'
+                      : 'text-stone-500 hover:text-stone-700'
                   }`}
                   title="List View"
                 >
@@ -624,16 +624,16 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
               </div>
             ) : filteredDocuments.length === 0 ? (
               <div className="p-6 text-center">
-                <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-16 h-16 bg-stone-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
                 </div>
-                <p className="text-gray-500 mb-3">No documents found</p>
+                <p className="text-stone-500 mb-3">No documents found</p>
                 {searchTerm && (
                   <button 
                     onClick={() => setSearchTerm('')}
-                    className="text-blue-600 hover:text-blue-700 font-medium text-sm"
+                    className="text-lime-600 hover:text-lime-700 font-medium text-sm"
                   >
                     Clear search
                   </button>
@@ -647,13 +647,13 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
                     className={`${viewMode === 'grid' 
                       ? `p-4 rounded-xl transition-all duration-200 border-2 hover:shadow-md ${
                           selectedDocument?.id === document.id
-                            ? 'bg-blue-50 border-blue-500'
-                            : 'bg-white border-gray-200 hover:border-gray-300'
+                            ? 'bg-lime-50 border-lime-500'
+                            : 'bg-white border-stone-200 hover:border-stone-300'
                         }`
                       : `py-2 px-3 rounded-xl transition-all duration-150 cursor-pointer border ${
                           selectedDocument?.id === document.id
-                            ? 'bg-blue-50 border-blue-500'
-                            : 'bg-white border-gray-200 hover:bg-gray-50 hover:border-gray-300'
+                            ? 'bg-lime-50 border-lime-500'
+                            : 'bg-white border-stone-200 hover:bg-stone-50 hover:border-stone-300'
                         }`
                     }`}
                   >
@@ -668,7 +668,7 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
                                 e.stopPropagation();
                                 startEditing(document);
                               }}
-                              className="p-1 text-gray-400 hover:text-blue-600"
+                              className="p-1 text-stone-400 hover:text-lime-600"
                               title="Rename"
                             >
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -680,7 +680,7 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
                                 e.stopPropagation();
                                 handleDeleteDocument(document.id);
                               }}
-                              className="p-1 text-gray-400 hover:text-red-600"
+                              className="p-1 text-stone-400 hover:text-red-600"
                               title="Delete"
                             >
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -701,7 +701,7 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
                     
                     {/* Document title */}
                     <div className="mb-2">
-                      <h3 className="text-sm font-medium text-gray-900 truncate">
+                      <h3 className="text-sm font-medium text-stone-900 truncate">
                         {document.title}
                       </h3>
                     </div>

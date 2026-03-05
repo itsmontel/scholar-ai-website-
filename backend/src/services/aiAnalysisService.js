@@ -2392,16 +2392,21 @@ IMPORTANT REQUIREMENTS:
 
   /**
    * Save citation search to history
+   * @param {string} userPlan - User's subscription plan ('free', 'starter', 'premium')
    */
-  async saveCitationSearch(userId, researchTopic, citationStyle, searchResults, yearRange = 'all') {
+  async saveCitationSearch(userId, researchTopic, citationStyle, searchResults, yearRange = 'all', userPlan = 'free') {
     try {
-      console.log('Saving citation search to history:', { userId, researchTopic, citationStyle, yearRange });
+      console.log('Saving citation search to history:', { userId, researchTopic, citationStyle, yearRange, userPlan });
       
       const { createClient } = require('@supabase/supabase-js');
       const supabase = createClient(
         process.env.SUPABASE_URL,
         process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
       );
+
+      // Free users: 7 days expiration; Paid users (starter/premium): no expiration (null)
+      const isPaidUser = userPlan === 'starter' || userPlan === 'premium';
+      const expiresAt = isPaidUser ? null : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
 
       // Note: yearRange is already included in searchResults.yearRange
       // so we don't need a separate column - it's stored in the JSONB field
@@ -2410,7 +2415,8 @@ IMPORTANT REQUIREMENTS:
         research_topic: researchTopic,
         citation_style: citationStyle,
         search_results: searchResults,
-        created_at: new Date().toISOString()
+        created_at: new Date().toISOString(),
+        expires_at: expiresAt
       };
 
       const { data, error } = await supabase
@@ -2435,6 +2441,7 @@ IMPORTANT REQUIREMENTS:
 
   /**
    * Get citation search history for a user
+   * Filters out expired citations automatically
    */
   async getCitationHistory(userId, limit = 20) {
     try {
@@ -2444,10 +2451,16 @@ IMPORTANT REQUIREMENTS:
         process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
       );
 
+      const now = new Date().toISOString();
+
+      // Get citations that either:
+      // 1. Have no expiration (expires_at is null) - paid users
+      // 2. Haven't expired yet (expires_at > now) - free users within 7 days
       const { data, error } = await supabase
         .from('citation_searches')
         .select('*')
         .eq('user_id', userId)
+        .or(`expires_at.is.null,expires_at.gt.${now}`)
         .order('created_at', { ascending: false })
         .limit(limit);
 
@@ -2460,6 +2473,41 @@ IMPORTANT REQUIREMENTS:
     } catch (error) {
       console.error('Database error in getCitationHistory:', error);
       throw error;
+    }
+  }
+
+  /**
+   * Cleanup expired citation searches (run periodically)
+   * Removes citations where expires_at is in the past
+   */
+  async cleanupExpiredCitations() {
+    try {
+      const { createClient } = require('@supabase/supabase-js');
+      const supabase = createClient(
+        process.env.SUPABASE_URL,
+        process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
+      );
+
+      const now = new Date().toISOString();
+
+      const { data, error } = await supabase
+        .from('citation_searches')
+        .delete()
+        .not('expires_at', 'is', null)
+        .lt('expires_at', now)
+        .select('id');
+
+      if (error) {
+        console.error('Error cleaning up expired citations:', error);
+        return { deleted: 0, error: error.message };
+      }
+
+      const deletedCount = data?.length || 0;
+      console.log(`Cleaned up ${deletedCount} expired citation searches`);
+      return { deleted: deletedCount };
+    } catch (error) {
+      console.error('Database error in cleanupExpiredCitations:', error);
+      return { deleted: 0, error: error.message };
     }
   }
 

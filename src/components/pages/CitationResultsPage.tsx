@@ -94,7 +94,7 @@ const CitationResultsPage = ({
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%)' }}>
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="dashboard" />
 
       <main className="max-w-5xl mx-auto px-4 sm:px-6 py-10 sm:py-14">

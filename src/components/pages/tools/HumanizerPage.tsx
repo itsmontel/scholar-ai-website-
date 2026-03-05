@@ -176,35 +176,8 @@ const HumanizerPage = ({ onNavigate, user, onLogout }: HumanizerPageProps) => {
   const outputWordCount = humanizedResult.split(/\s+/).filter(Boolean).length;
 
   return (
-    <div className="min-h-screen w-full min-w-0 overflow-x-hidden bg-gradient-to-b from-violet-50/50 via-white to-white">
-      {user ? (
-        <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="humanizer" />
-      ) : (
-        <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-100 overflow-x-hidden">
-          <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 min-w-0">
-            <div className="flex items-center justify-between h-18 py-4">
-              <a href="/" onClick={(e) => { e.preventDefault(); onNavigate('landing'); }} className="flex items-center space-x-2.5">
-                <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center">
-                  <span className="text-white font-bold text-xl">W</span>
-                </div>
-                <span className="text-2xl font-bold text-gray-900">WriteScholar</span>
-              </a>
-              <div className="hidden md:flex items-center space-x-2">
-                <a href="/features" onClick={(e) => { e.preventDefault(); onNavigate('features'); }} className="px-4 py-2.5 text-base text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-50 transition-colors font-medium">Features</a>
-                <a href="/pricing" onClick={(e) => { e.preventDefault(); onNavigate('pricing'); }} className="px-4 py-2.5 text-base text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-50 transition-colors font-medium">Pricing</a>
-                <a href="/blog" onClick={(e) => { e.preventDefault(); onNavigate('blog'); }} className="px-4 py-2.5 text-base text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-50 transition-colors font-medium">Blog</a>
-                <a href="/about" onClick={(e) => { e.preventDefault(); onNavigate('about'); }} className="px-4 py-2.5 text-base text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-50 transition-colors font-medium">About</a>
-              </div>
-              <div className="flex items-center space-x-3">
-                <a href="/login" onClick={(e) => { e.preventDefault(); onNavigate('login'); }} className="hidden sm:inline-flex px-4 py-2.5 text-base text-gray-600 hover:text-gray-900 font-medium rounded-lg hover:bg-gray-50 transition-colors">Log in</a>
-                <a href="/signup" onClick={(e) => { e.preventDefault(); onNavigate('signup'); }} className="px-5 py-2.5 bg-gray-900 text-white text-base font-medium rounded-xl hover:bg-gray-800 transition-colors">
-                  Get Started
-                </a>
-              </div>
-            </div>
-          </div>
-        </nav>
-      )}
+    <div className="min-h-screen w-full min-w-0 overflow-x-hidden" style={{ background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%)' }}>
+      <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="humanizer" />
 
       {/* Hero Section */}
       <section className="pt-6 sm:pt-16 pb-4 sm:pb-6">
@@ -223,10 +196,10 @@ const HumanizerPage = ({ onNavigate, user, onLogout }: HumanizerPageProps) => {
               </span>
             )}
           </div>
-          <h1 className="text-xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-3 sm:mb-4 leading-tight px-1">
+          <h1 className="text-xl sm:text-4xl lg:text-5xl text-stone-800 mb-3 sm:mb-4 leading-tight px-1" style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 400 }}>
             AI Humanizer – Free Tool to Humanize Your AI Text
           </h1>
-          <p className="text-sm sm:text-lg text-gray-500 leading-relaxed max-w-2xl mx-auto px-1">
+          <p className="text-sm sm:text-lg text-stone-500 leading-relaxed max-w-2xl mx-auto px-1">
             Transform AI-generated content from ChatGPT, GPT-5, Gemini, Claude, LLaMA, and other AI models into clear, natural, human-like text
           </p>
         </div>
@@ -543,69 +516,69 @@ const HumanizerPage = ({ onNavigate, user, onLogout }: HumanizerPageProps) => {
       </section>
 
       {/* Feature Cards */}
-      <section className="py-10 sm:py-16 bg-white border-t border-gray-100 overflow-x-hidden">
+      <section className="py-10 sm:py-16 bg-white border-t border-stone-100 overflow-x-hidden">
         <div className="max-w-5xl mx-auto px-3 sm:px-6 w-full min-w-0">
           <div className="text-center mb-10">
-            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">
+            <h2 className="text-2xl sm:text-3xl text-stone-800 mb-3" style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 400 }}>
               Why Use WriteScholar's AI Humanizer?
             </h2>
-            <p className="text-gray-500 max-w-xl mx-auto">
+            <p className="text-stone-500 max-w-xl mx-auto">
               The most advanced AI text humanizer, trusted by thousands of students and professionals
             </p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            <div className="group bg-gradient-to-br from-violet-50 to-purple-50 rounded-2xl p-6 border border-violet-100 hover:shadow-lg hover:shadow-violet-100/50 transition-all">
+            <div className="group bg-gradient-to-br from-lime-50 to-green-50 rounded-2xl p-6 border border-lime-200 hover:shadow-lg hover:shadow-lime-100/50 transition-all">
               <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center mb-4 shadow-sm group-hover:scale-110 transition-transform">
-                <svg className="w-6 h-6 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-6 h-6 text-lime-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                 </svg>
               </div>
-              <h3 className="font-bold text-gray-900 text-base mb-2">Smart Rewriting</h3>
-              <p className="text-gray-600 text-sm leading-relaxed">Advanced sentence restructuring and natural tone adjustments.</p>
+              <h3 className="font-bold text-stone-800 text-base mb-2">Smart Rewriting</h3>
+              <p className="text-stone-600 text-sm leading-relaxed">Advanced sentence restructuring and natural tone adjustments.</p>
             </div>
-            <div className="group bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-100 hover:shadow-lg hover:shadow-blue-100/50 transition-all">
+            <div className="group bg-gradient-to-br from-stone-50 to-stone-100 rounded-2xl p-6 border border-stone-200 hover:shadow-lg hover:shadow-stone-100/50 transition-all">
               <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center mb-4 shadow-sm group-hover:scale-110 transition-transform">
-                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-6 h-6 text-stone-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
                 </svg>
               </div>
-              <h3 className="font-bold text-gray-900 text-base mb-2">4 Writing Modes</h3>
-              <p className="text-gray-600 text-sm leading-relaxed">Standard, Academic, Casual, or Creative writing styles.</p>
+              <h3 className="font-bold text-stone-800 text-base mb-2">4 Writing Modes</h3>
+              <p className="text-stone-600 text-sm leading-relaxed">Standard, Academic, Casual, or Creative writing styles.</p>
             </div>
-            <div className="group bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-6 border border-green-100 hover:shadow-lg hover:shadow-green-100/50 transition-all">
+            <div className="group bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-6 border border-green-200 hover:shadow-lg hover:shadow-green-100/50 transition-all">
               <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center mb-4 shadow-sm group-hover:scale-110 transition-transform">
                 <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                 </svg>
               </div>
-              <h3 className="font-bold text-gray-900 text-base mb-2">Bypasses Detectors</h3>
-              <p className="text-gray-600 text-sm leading-relaxed">Passes GPTZero, Turnitin AI, ZeroGPT, Originality.ai.</p>
+              <h3 className="font-bold text-stone-800 text-base mb-2">Bypasses Detectors</h3>
+              <p className="text-stone-600 text-sm leading-relaxed">Passes GPTZero, Turnitin AI, ZeroGPT, Originality.ai.</p>
             </div>
-            <div className="group bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl p-6 border border-amber-100 hover:shadow-lg hover:shadow-amber-100/50 transition-all">
+            <div className="group bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl p-6 border border-amber-200 hover:shadow-lg hover:shadow-amber-100/50 transition-all">
               <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center mb-4 shadow-sm group-hover:scale-110 transition-transform">
                 <svg className="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
               </div>
-              <h3 className="font-bold text-gray-900 text-base mb-2">Instant Results</h3>
-              <p className="text-gray-600 text-sm leading-relaxed">Get humanized text in seconds, not minutes.</p>
+              <h3 className="font-bold text-stone-800 text-base mb-2">Instant Results</h3>
+              <p className="text-stone-600 text-sm leading-relaxed">Get humanized text in seconds, not minutes.</p>
             </div>
           </div>
         </div>
       </section>
 
       {/* SEO Content Section */}
-      <section className="py-10 sm:py-16 bg-gray-50 border-t border-gray-100 overflow-x-hidden">
+      <section className="py-10 sm:py-16 bg-stone-50 border-t border-stone-100 overflow-x-hidden">
         <div className="max-w-4xl mx-auto px-3 sm:px-6 w-full min-w-0">
-          <h2 className="text-xl font-bold text-gray-900 mb-4 text-center">
+          <h2 className="text-xl font-bold text-stone-800 mb-4 text-center">
             Humanize Text from Any AI Model
           </h2>
-          <p className="text-gray-600 mb-8 leading-relaxed text-center max-w-2xl mx-auto">
+          <p className="text-stone-600 mb-8 leading-relaxed text-center max-w-2xl mx-auto">
             Our AI humanizer works with content from all major AI writing tools including <strong>ChatGPT</strong>, <strong>GPT-4</strong>, <strong>GPT-5</strong>, <strong>Google Gemini</strong>, <strong>Anthropic Claude</strong>, <strong>Meta LLaMA</strong>, <strong>Mistral</strong>, <strong>Perplexity</strong>, and more.
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {['ChatGPT', 'GPT-4 / GPT-5', 'Gemini', 'Claude', 'LLaMA', 'Mistral', 'Perplexity', 'Jasper AI'].map((model) => (
-              <div key={model} className="py-3 px-4 bg-white rounded-xl text-sm text-gray-600 font-medium text-center border border-gray-100 shadow-sm">
+              <div key={model} className="py-3 px-4 bg-white rounded-xl text-sm text-stone-600 font-medium text-center border border-stone-200 shadow-sm">
                 {model}
               </div>
             ))}
@@ -640,23 +613,23 @@ const HumanizerPage = ({ onNavigate, user, onLogout }: HumanizerPageProps) => {
               </svg>
             </div>
             
-            <h3 className="text-2xl font-bold text-gray-900 mb-2">Almost There!</h3>
-            <p className="text-gray-500 mb-6">
-              Sign up for free to humanize your text. Get <span className="font-semibold text-violet-600">1,000 words/month</span> completely free!
+            <h3 className="text-2xl font-bold text-stone-800 mb-2">Almost There!</h3>
+            <p className="text-stone-500 mb-6">
+              Sign up for free to humanize your text. Get <span className="font-semibold text-lime-600">1,000 words/month</span> completely free!
             </p>
             
             <div className="space-y-3">
               <button
                 onClick={() => onNavigate('signup')}
-                className="w-full px-6 py-3.5 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white font-semibold rounded-xl transition-all shadow-lg shadow-violet-200"
+                className="w-full px-6 py-3.5 bg-lime-400 hover:bg-lime-300 text-stone-900 font-semibold rounded-full transition-all shadow-lg shadow-lime-200"
               >
                 Sign Up Free
               </button>
               <button
                 onClick={() => { setShowSignupPrompt(false); onNavigate('login'); }}
-                className="w-full px-6 py-3 text-gray-600 hover:text-gray-900 font-medium rounded-xl transition-colors"
+                className="w-full px-6 py-3 text-stone-600 hover:text-stone-900 font-medium rounded-xl transition-colors"
               >
-                Already have an account? <span className="text-violet-600">Log in</span>
+                Already have an account? <span className="text-lime-600">Log in</span>
               </button>
             </div>
           </div>

@@ -197,8 +197,8 @@ const BlogPage = ({ onNavigate, user, onLogout }: BlogPageProps) => {
               onClick={() => handlePageChange(page as number)}
               className={`w-10 h-10 flex items-center justify-center rounded-lg text-sm font-medium transition-colors ${
                 currentPage === page
-                  ? 'bg-indigo-500 text-white'
-                  : 'text-gray-700 hover:bg-gray-100'
+                  ? 'bg-lime-500 text-stone-900'
+                  : 'text-stone-700 hover:bg-stone-100'
               }`}
             >
               {page}
@@ -221,38 +221,8 @@ const BlogPage = ({ onNavigate, user, onLogout }: BlogPageProps) => {
   };
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Conditional Header - Show logged-in header if user exists */}
-      {user ? (
-        <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="blog" />
-      ) : (
-        <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-100" aria-label="Main navigation">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-18 py-4">
-              <a href="/" onClick={(e) => { e.preventDefault(); onNavigate('landing'); }} className="flex items-center space-x-2.5">
-                <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center">
-                  <span className="text-white font-bold text-xl">W</span>
-                </div>
-                <span className="text-2xl font-bold text-gray-900">WriteScholar</span>
-              </a>
-              
-              <div className="hidden md:flex items-center space-x-2">
-                <a href="/features" onClick={(e) => { e.preventDefault(); onNavigate('features'); }} className="px-4 py-2.5 text-base text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-50 transition-colors font-medium">Features</a>
-                <a href="/pricing" onClick={(e) => { e.preventDefault(); onNavigate('pricing'); }} className="px-4 py-2.5 text-base text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-50 transition-colors font-medium">Pricing</a>
-                <a href="/blog" onClick={(e) => { e.preventDefault(); onNavigate('blog'); }} className="px-4 py-2.5 text-base text-blue-600 hover:text-blue-700 rounded-lg hover:bg-blue-50 transition-colors font-medium">Blog</a>
-                <a href="/about" onClick={(e) => { e.preventDefault(); onNavigate('about'); }} className="px-4 py-2.5 text-base text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-50 transition-colors font-medium">About</a>
-              </div>
-              
-              <div className="flex items-center space-x-3">
-                <a href="/login" onClick={(e) => { e.preventDefault(); onNavigate('login'); }} className="hidden sm:inline-flex px-4 py-2.5 text-base text-gray-700 hover:text-gray-900 font-medium rounded-lg hover:bg-gray-50 transition-colors">Log in</a>
-                <a href="/signup" onClick={(e) => { e.preventDefault(); onNavigate('signup'); }} className="inline-flex items-center px-5 py-2.5 bg-gray-900 text-white text-base font-semibold rounded-xl hover:bg-gray-800 transition-colors">
-                  Get Started
-                </a>
-              </div>
-            </div>
-          </div>
-        </nav>
-      )}
+    <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%)' }}>
+      <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="blog" />
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
         {/* Breadcrumbs */}
@@ -274,12 +244,12 @@ const BlogPage = ({ onNavigate, user, onLogout }: BlogPageProps) => {
         <header className="mb-12">
           <div className="flex items-center gap-3 mb-3">
             <span className="text-3xl sm:text-4xl">🧊</span>
-            <h1 className="text-4xl sm:text-5xl font-bold text-gray-900">
+            <h1 className="text-4xl sm:text-5xl text-stone-800" style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 400 }}>
               Blog
             </h1>
             <span className="text-3xl sm:text-4xl">🧊</span>
           </div>
-          <p className="text-lg text-gray-600">
+          <p className="text-lg text-stone-500">
             Tips, guides, and insights for better academic writing
           </p>
         </header>
@@ -299,15 +269,15 @@ const BlogPage = ({ onNavigate, user, onLogout }: BlogPageProps) => {
               
               {/* Content */}
               <div>
-                <h2 className="text-xl font-semibold text-gray-900 mb-3 group-hover:text-indigo-600 transition-colors leading-snug line-clamp-2">
+                <h2 className="text-xl font-semibold text-stone-800 mb-3 group-hover:text-lime-600 transition-colors leading-snug line-clamp-2">
                   {post.title}
                 </h2>
-                <p className="text-gray-600 text-base leading-relaxed mb-4 line-clamp-2">
+                <p className="text-stone-500 text-base leading-relaxed mb-4 line-clamp-2">
                   {post.description}
                 </p>
                 
                 {/* Read time badge */}
-                <span className="inline-block px-3 py-1.5 bg-gray-100 text-gray-600 text-sm font-medium rounded-lg">
+                <span className="inline-block px-3 py-1.5 bg-stone-100 text-stone-600 text-sm font-medium rounded-lg">
                   {getReadTimeMinutes(post.readTime)} minutes
                 </span>
               </div>
@@ -324,11 +294,11 @@ const BlogPage = ({ onNavigate, user, onLogout }: BlogPageProps) => {
         </div>
 
         {/* CTA Section - Different for logged-in users */}
-        <section className="mt-16 sm:mt-20 bg-gray-900 rounded-2xl p-8 sm:p-12 text-center">
-          <h2 className="text-2xl sm:text-3xl font-bold text-white mb-3">
+        <section className="mt-16 sm:mt-20 bg-stone-800 rounded-2xl p-8 sm:p-12 text-center">
+          <h2 className="text-2xl sm:text-3xl text-white mb-3" style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 400 }}>
             {user ? 'Put these tips into practice' : 'Ready to improve your academic writing?'}
           </h2>
-          <p className="text-gray-300 mb-6 max-w-lg mx-auto">
+          <p className="text-stone-300 mb-6 max-w-lg mx-auto">
             {user 
               ? 'Head to your dashboard to start writing with AI-powered feedback and citation tools.'
               : 'Get AI-powered feedback on your essays, citations, and more. Start writing better today.'
@@ -339,14 +309,14 @@ const BlogPage = ({ onNavigate, user, onLogout }: BlogPageProps) => {
               <>
                 <button 
                   onClick={() => onNavigate('dashboard')}
-                  className="w-full sm:w-auto px-6 py-3 bg-white hover:bg-gray-100 text-gray-900 font-semibold rounded-xl transition-colors"
+                  className="w-full sm:w-auto px-6 py-3 bg-lime-400 hover:bg-lime-300 text-stone-900 font-semibold rounded-full transition-colors"
                 >
                   Go to Dashboard
                 </button>
                 {user.plan === 'Free' && (
                   <button 
                     onClick={() => onNavigate('billing')}
-                    className="w-full sm:w-auto px-6 py-3 border border-gray-600 hover:border-gray-500 text-white font-medium rounded-xl transition-colors"
+                    className="w-full sm:w-auto px-6 py-3 border border-stone-500 hover:border-stone-400 text-white font-medium rounded-full transition-colors"
                   >
                     Upgrade Plan
                   </button>
@@ -356,13 +326,13 @@ const BlogPage = ({ onNavigate, user, onLogout }: BlogPageProps) => {
               <>
                 <button 
                   onClick={() => onNavigate('signup')}
-                  className="w-full sm:w-auto px-6 py-3 bg-white hover:bg-gray-100 text-gray-900 font-semibold rounded-xl transition-colors"
+                  className="w-full sm:w-auto px-6 py-3 bg-lime-400 hover:bg-lime-300 text-stone-900 font-semibold rounded-full transition-colors"
                 >
-                  Get Started Free
+                  Try Free
                 </button>
                 <button 
                   onClick={() => onNavigate('features')}
-                  className="w-full sm:w-auto px-6 py-3 border border-gray-600 hover:border-gray-500 text-white font-medium rounded-xl transition-colors"
+                  className="w-full sm:w-auto px-6 py-3 border border-stone-500 hover:border-stone-400 text-white font-medium rounded-full transition-colors"
                 >
                   Learn More
                 </button>

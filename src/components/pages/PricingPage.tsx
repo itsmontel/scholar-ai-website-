@@ -88,7 +88,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
   };
 
   const getFreePlanButtonText = () => {
-    if (!user) return 'Get Started Free';
+    if (!user) return 'Try Free';
     if (currentPlan === 'free') return 'Current Plan';
     return 'Switch to Free';
   };
@@ -170,7 +170,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
       ],
       limitations: [],
       popular: true,
-      buttonText: !user ? 'Get Started' : (currentPlan === 'free' ? 'Upgrade to Starter' : 'Switch to Starter'),
+      buttonText: !user ? 'Try Free' : (currentPlan === 'free' ? 'Upgrade to Starter' : 'Switch to Starter'),
       buttonAction: () => handlePlanAction('starter')
     },
     {
@@ -190,7 +190,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
       ],
       limitations: [],
       popular: false,
-      buttonText: !user ? 'Get Started' : (currentPlan === 'free' ? 'Upgrade to Premium' : 'Switch to Premium'),
+      buttonText: !user ? 'Try Free' : (currentPlan === 'free' ? 'Upgrade to Premium' : 'Switch to Premium'),
       buttonAction: () => handlePlanAction('premium')
     }
   ];
@@ -249,72 +249,42 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
   };
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Conditional Header - Show logged-in header if user exists */}
-      {user ? (
-        <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="pricing" />
-      ) : (
-        <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-100" aria-label="Main navigation">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-18 py-4">
-              <a href="/" onClick={(e) => { e.preventDefault(); onNavigate('landing'); }} className="flex items-center space-x-2.5">
-                <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center">
-                  <span className="text-white font-bold text-xl">W</span>
-                </div>
-                <span className="text-2xl font-bold text-gray-900">WriteScholar</span>
-              </a>
-              
-              <div className="hidden md:flex items-center space-x-2">
-                <a href="/features" onClick={(e) => { e.preventDefault(); onNavigate('features'); }} className="px-4 py-2.5 text-base text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-50 transition-colors font-medium">Features</a>
-                <a href="/pricing" onClick={(e) => { e.preventDefault(); onNavigate('pricing'); }} className="px-4 py-2.5 text-base text-blue-600 hover:text-blue-700 rounded-lg hover:bg-blue-50 transition-colors font-medium">Pricing</a>
-                <a href="/blog" onClick={(e) => { e.preventDefault(); onNavigate('blog'); }} className="px-4 py-2.5 text-base text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-50 transition-colors font-medium">Blog</a>
-                <a href="/about" onClick={(e) => { e.preventDefault(); onNavigate('about'); }} className="px-4 py-2.5 text-base text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-50 transition-colors font-medium">About</a>
-              </div>
-              
-              <div className="flex items-center space-x-3">
-                <a href="/login" onClick={(e) => { e.preventDefault(); onNavigate('login'); }} className="hidden sm:inline-flex px-4 py-2.5 text-base text-gray-700 hover:text-gray-900 font-medium rounded-lg hover:bg-gray-50 transition-colors">Log in</a>
-                <a href="/signup" onClick={(e) => { e.preventDefault(); onNavigate('signup'); }} className="inline-flex items-center px-5 py-2.5 bg-gray-900 text-white text-base font-semibold rounded-xl hover:bg-gray-800 transition-colors">
-                  Get Started
-                </a>
-              </div>
-            </div>
-          </div>
-        </nav>
-      )}
+    <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%)' }}>
+      <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="pricing" />
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
         {/* Header */}
         <div className="text-center mb-10">
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
-            Simple, transparent pricing
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl text-stone-800 mb-4" style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 400 }}>
+            Simple, <span className="text-lime-600 italic">transparent</span> pricing
           </h1>
-          <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
+          <p className="text-lg text-stone-500 mb-8 max-w-2xl mx-auto">
             Choose the plan that fits your needs. Upgrade anytime.
           </p>
 
           {/* Billing Toggle */}
           <div className="flex items-center justify-center mb-12">
-            <div className="bg-gray-100 rounded-xl p-1.5 flex">
+            <div className="bg-stone-100 rounded-full p-1.5 flex">
               <button
                 onClick={() => setBillingCycle('monthly')}
-                className={`px-6 py-2.5 rounded-lg text-base font-semibold transition-all ${
+                className={`px-6 py-2.5 rounded-full text-base font-semibold transition-all ${
                   billingCycle === 'monthly'
-                    ? 'bg-white text-gray-900 shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900'
+                    ? 'bg-white text-stone-800 shadow-sm'
+                    : 'text-stone-600 hover:text-stone-800'
                 }`}
               >
                 Bill Monthly
               </button>
               <button
                 onClick={() => setBillingCycle('yearly')}
-                className={`px-6 py-2.5 rounded-lg text-base font-semibold transition-all ${
+                className={`px-6 py-2.5 rounded-full text-base font-semibold transition-all ${
                   billingCycle === 'yearly'
-                    ? 'bg-white text-gray-900 shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900'
+                    ? 'bg-white text-stone-800 shadow-sm'
+                    : 'text-stone-600 hover:text-stone-800'
                 }`}
               >
                 Bill Yearly
-                <span className="ml-2 px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
+                <span className="ml-2 px-2 py-1 bg-lime-100 text-lime-700 text-xs rounded-full">
                   Save 17%
                 </span>
               </button>
@@ -329,33 +299,33 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
               key={plan.id}
               className={`relative bg-white border rounded-2xl p-8 hover:shadow-lg transition-all ${
                 plan.popular 
-                  ? 'border-blue-500 ring-2 ring-blue-200'
-                  : 'border-gray-200'
+                  ? 'border-lime-500 ring-2 ring-lime-200'
+                  : 'border-stone-200'
               }`}
             >
               {plan.popular && (
                 <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                  <span className="bg-blue-600 text-white px-4 py-1 rounded-full text-sm font-semibold">
+                  <span className="bg-lime-500 text-stone-900 px-4 py-1 rounded-full text-sm font-semibold">
                     Most Popular
                   </span>
                 </div>
               )}
 
               <div className="text-center mb-8">
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">{plan.name}</h3>
-                <p className="text-gray-600 mb-6">{plan.description}</p>
+                <h3 className="text-2xl text-stone-800 mb-2" style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 400 }}>{plan.name}</h3>
+                <p className="text-stone-500 mb-6">{plan.description}</p>
                 
                 <div className="mb-4">
-                  <span className="text-4xl font-bold text-gray-900">
+                  <span className="text-4xl font-bold text-stone-800">
                     ${getPrice(plan)}
                   </span>
-                  <span className="text-gray-600 ml-2">
+                  <span className="text-stone-500 ml-2">
                     /{billingCycle === 'yearly' ? 'year' : 'month'}
                   </span>
                 </div>
 
                 {getSavings(plan) > 0 && (
-                  <div className="text-green-600 text-sm font-medium mb-4">
+                  <div className="text-lime-600 text-sm font-medium mb-4">
                     Save {getSavings(plan)}% with yearly billing
                   </div>
                 )}
@@ -365,10 +335,10 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
                 <ul className="space-y-3">
                   {plan.features.map((feature, index) => (
                     <li key={index} className="flex items-start">
-                      <svg className="w-5 h-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-5 h-5 text-lime-500 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
-                      <span className="text-gray-700">{feature}</span>
+                      <span className="text-stone-600">{feature}</span>
                     </li>
                   ))}
                 </ul>
@@ -377,12 +347,12 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
               <button
                 onClick={plan.id === currentPlan ? undefined : plan.buttonAction}
                 disabled={plan.id === currentPlan}
-                className={`w-full py-3 px-6 rounded-xl font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
+                className={`w-full py-3 px-6 rounded-full font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
                   plan.id === currentPlan
-                    ? 'bg-gray-100 text-gray-500 cursor-not-allowed'
+                    ? 'bg-stone-100 text-stone-500 cursor-not-allowed'
                     : plan.popular
-                    ? 'bg-blue-600 hover:bg-blue-700 text-white'
-                    : 'bg-gray-100 hover:bg-gray-200 text-gray-900'
+                    ? 'bg-lime-400 hover:bg-lime-300 text-stone-900'
+                    : 'bg-stone-100 hover:bg-stone-200 text-stone-800'
                 }`}
               >
                 {plan.id === currentPlan ? 'Current Plan' : plan.buttonText}
@@ -392,24 +362,24 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
         </div>
 
         {/* FAQ Section */}
-        <div className="bg-gray-50 border border-gray-200 rounded-2xl p-6 sm:p-8 mb-10">
-          <h2 className="text-xl font-bold text-gray-900 mb-6 text-center">Frequently Asked Questions</h2>
+        <div className="bg-white border border-stone-200 rounded-2xl p-6 sm:p-8 mb-10">
+          <h2 className="text-xl text-stone-800 mb-6 text-center" style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 400 }}>Frequently Asked Questions</h2>
           <div className="grid md:grid-cols-2 gap-6">
             {faqs.map((faq, index) => (
               <div key={index} className="space-y-2">
-                <h3 className="font-semibold text-gray-900 text-sm">{faq.question}</h3>
-                <p className="text-gray-600 text-sm leading-relaxed">{faq.answer}</p>
+                <h3 className="font-semibold text-stone-800 text-sm">{faq.question}</h3>
+                <p className="text-stone-500 text-sm leading-relaxed">{faq.answer}</p>
               </div>
             ))}
           </div>
         </div>
 
         {/* CTA Section - Different for logged-in users */}
-        <div className="text-center bg-gray-900 rounded-2xl p-8 sm:p-10">
-          <h2 className="text-2xl font-bold text-white mb-3">
+        <div className="text-center bg-stone-800 rounded-2xl p-8 sm:p-10">
+          <h2 className="text-2xl text-white mb-3" style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 400 }}>
             {user ? 'Start writing with AI today' : 'Ready to improve your academic writing?'}
           </h2>
-          <p className="text-gray-300 mb-6 max-w-xl mx-auto">
+          <p className="text-stone-300 mb-6 max-w-xl mx-auto">
             {user 
               ? 'Head to your dashboard to start analyzing documents and finding citations.'
               : 'Join thousands of students and researchers who trust WriteScholar.'
@@ -420,13 +390,13 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
               <>
                 <button 
                   onClick={() => onNavigate('dashboard')}
-                  className="bg-white hover:bg-gray-100 text-gray-900 px-6 py-3 rounded-xl font-semibold transition-colors"
+                  className="bg-lime-400 hover:bg-lime-300 text-stone-900 px-6 py-3 rounded-full font-semibold transition-colors"
                 >
                   Go to Dashboard
                 </button>
                 <button 
                   onClick={() => onNavigate('contact')}
-                  className="border border-gray-600 hover:border-gray-500 text-white px-6 py-3 rounded-xl font-semibold transition-colors"
+                  className="border border-stone-500 hover:border-stone-400 text-white px-6 py-3 rounded-full font-semibold transition-colors"
                 >
                   Contact Support
                 </button>
@@ -435,13 +405,13 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
               <>
                 <button 
                   onClick={() => onNavigate('signup')}
-                  className="bg-white hover:bg-gray-100 text-gray-900 px-6 py-3 rounded-xl font-semibold transition-colors"
+                  className="bg-lime-400 hover:bg-lime-300 text-stone-900 px-6 py-3 rounded-full font-semibold transition-colors"
                 >
-                  Get Started Free
+                  Try Free
                 </button>
                 <button 
                   onClick={() => onNavigate('contact')}
-                  className="border border-gray-600 hover:border-gray-500 text-white px-6 py-3 rounded-xl font-semibold transition-colors"
+                  className="border border-stone-500 hover:border-stone-400 text-white px-6 py-3 rounded-full font-semibold transition-colors"
                 >
                   Contact Sales
                 </button>

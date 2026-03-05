@@ -177,37 +177,8 @@ const PomodoroTimerPage = ({ onNavigate, user, onLogout }: PomodoroTimerPageProp
   const colors = getModeColor();
 
   return (
-    <div className="min-h-screen bg-white">
-      {user ? (
-        <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="pomodoro-timer" />
-      ) : (
-        <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-100">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-18 py-4">
-              <a href="/" onClick={(e) => { e.preventDefault(); onNavigate('landing'); }} className="flex items-center space-x-2.5">
-                <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center">
-                  <span className="text-white font-bold text-xl">W</span>
-                </div>
-                <span className="text-2xl font-bold text-gray-900">WriteScholar</span>
-              </a>
-              
-              <div className="hidden md:flex items-center space-x-2">
-                <a href="/features" onClick={(e) => { e.preventDefault(); onNavigate('features'); }} className="px-4 py-2.5 text-base text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-50 transition-colors font-medium">Features</a>
-                <a href="/pricing" onClick={(e) => { e.preventDefault(); onNavigate('pricing'); }} className="px-4 py-2.5 text-base text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-50 transition-colors font-medium">Pricing</a>
-                <a href="/blog" onClick={(e) => { e.preventDefault(); onNavigate('blog'); }} className="px-4 py-2.5 text-base text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-50 transition-colors font-medium">Blog</a>
-                <a href="/about" onClick={(e) => { e.preventDefault(); onNavigate('about'); }} className="px-4 py-2.5 text-base text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-50 transition-colors font-medium">About</a>
-              </div>
-              
-              <div className="flex items-center space-x-3">
-                <a href="/login" onClick={(e) => { e.preventDefault(); onNavigate('login'); }} className="hidden sm:inline-flex px-4 py-2.5 text-base text-gray-600 hover:text-gray-900 font-medium rounded-lg hover:bg-gray-50 transition-colors">Log in</a>
-                <a href="/signup" onClick={(e) => { e.preventDefault(); onNavigate('signup'); }} className="px-5 py-2.5 bg-gray-900 text-white text-base font-medium rounded-xl hover:bg-gray-800 transition-colors">
-                  Get Started
-                </a>
-              </div>
-            </div>
-          </div>
-        </nav>
-      )}
+    <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%)' }}>
+      <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="pomodoro-timer" />
 
       {/* Hero Section */}
       <section className="py-16 sm:py-20 bg-gradient-to-b from-rose-50/50 to-white">

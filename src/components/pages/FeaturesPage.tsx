@@ -26,50 +26,20 @@ const FeaturesPage = ({ onNavigate, user, onLogout }: FeaturesPageProps) => {
   ];
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Conditional Header */}
-      {user ? (
-        <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="features" />
-      ) : (
-        <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-100" aria-label="Main navigation">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-18 py-4">
-              <a href="/" onClick={(e) => { e.preventDefault(); onNavigate('landing'); }} className="flex items-center space-x-2.5">
-                <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center">
-                  <span className="text-white font-bold text-xl">W</span>
-                </div>
-                <span className="text-2xl font-bold text-gray-900">WriteScholar</span>
-              </a>
-              
-              <div className="hidden md:flex items-center space-x-2">
-                <a href="/features" onClick={(e) => { e.preventDefault(); onNavigate('features'); }} className="px-4 py-2.5 text-base text-blue-600 font-medium rounded-lg bg-blue-50">Features</a>
-                <a href="/pricing" onClick={(e) => { e.preventDefault(); onNavigate('pricing'); }} className="px-4 py-2.5 text-base text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-50 transition-colors font-medium">Pricing</a>
-                <a href="/blog" onClick={(e) => { e.preventDefault(); onNavigate('blog'); }} className="px-4 py-2.5 text-base text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-50 transition-colors font-medium">Blog</a>
-                <a href="/about" onClick={(e) => { e.preventDefault(); onNavigate('about'); }} className="px-4 py-2.5 text-base text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-50 transition-colors font-medium">About</a>
-              </div>
-              
-              <div className="flex items-center space-x-3">
-                <a href="/login" onClick={(e) => { e.preventDefault(); onNavigate('login'); }} className="hidden sm:inline-flex px-4 py-2.5 text-base text-gray-600 hover:text-gray-900 font-medium rounded-lg hover:bg-gray-50 transition-colors">Log in</a>
-                <a href="/signup" onClick={(e) => { e.preventDefault(); onNavigate('signup'); }} className="px-5 py-2.5 bg-gray-900 text-white text-base font-medium rounded-xl hover:bg-gray-800 transition-colors">
-                  Get Started
-                </a>
-              </div>
-            </div>
-          </div>
-        </nav>
-      )}
+    <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%)' }}>
+      <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="features" />
 
       {/* Hero Section */}
-      <section className="py-16 sm:py-20 border-b border-gray-100">
+      <section className="py-16 sm:py-20 border-b border-stone-200/60">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center max-w-3xl mx-auto">
-            <span className="inline-flex items-center px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-sm font-medium mb-6">
+            <span className="inline-flex items-center px-3 py-1 bg-lime-50 text-lime-600 rounded-full text-sm font-medium mb-6">
               Features
             </span>
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-6 leading-tight">
-              The complete AI toolkit<br className="hidden sm:block" /> for students
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl text-stone-800 mb-6 leading-tight" style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 400 }}>
+              The complete AI toolkit<br className="hidden sm:block" /> for <span className="text-lime-600 italic">students</span>
             </h1>
-            <p className="text-lg text-gray-500 leading-relaxed">
+            <p className="text-lg text-stone-500 leading-relaxed">
               AI Humanizer to bypass detectors, Quiz Generator for exam prep, Paper Summarizer for research, Citation Finder, and Essay Checker. Everything you need in one place.
             </p>
           </div>
@@ -77,11 +47,11 @@ const FeaturesPage = ({ onNavigate, user, onLogout }: FeaturesPageProps) => {
       </section>
 
       {/* Features Grid with Cute Characters */}
-      <section className="py-16 sm:py-20 bg-gray-50">
+      <section className="py-16 sm:py-20" style={{ background: 'linear-gradient(180deg, #F5F3F0 0%, #FAF8F5 100%)' }}>
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
             {/* AI-Powered Analysis - Asian man */}
-            <div className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-lg hover:border-gray-300 transition-all">
+            <div className="bg-white border border-stone-200 rounded-2xl p-6 hover:shadow-lg hover:border-stone-300 transition-all">
               <div className="w-14 h-14 rounded-full bg-blue-50 flex items-center justify-center mb-4 overflow-hidden">
                 <svg viewBox="0 0 56 56" fill="none" className="w-14 h-14">
                   <circle cx="28" cy="28" r="28" fill="#DBEAFE"/>
@@ -98,12 +68,12 @@ const FeaturesPage = ({ onNavigate, user, onLogout }: FeaturesPageProps) => {
                   <ellipse cx="38" cy="35" rx="3" ry="2" fill="#FECACA" opacity="0.4"/>
                 </svg>
               </div>
-              <h3 className="font-semibold text-gray-900 text-lg mb-2">AI-Powered Analysis</h3>
-              <p className="text-base text-gray-600 leading-relaxed">Advanced natural language processing provides detailed feedback on your academic writing, identifying strengths and areas for improvement.</p>
+              <h3 className="font-semibold text-stone-800 text-lg mb-2">AI-Powered Analysis</h3>
+              <p className="text-base text-stone-500 leading-relaxed">Advanced natural language processing provides detailed feedback on your academic writing, identifying strengths and areas for improvement.</p>
             </div>
             
             {/* Citation Generator - Black woman */}
-            <div className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-lg hover:border-gray-300 transition-all">
+            <div className="bg-white border border-stone-200 rounded-2xl p-6 hover:shadow-lg hover:border-stone-300 transition-all">
               <div className="w-14 h-14 rounded-full bg-green-50 flex items-center justify-center mb-4 overflow-hidden">
                 <svg viewBox="0 0 56 56" fill="none" className="w-14 h-14">
                   <circle cx="28" cy="28" r="28" fill="#D1FAE5"/>
@@ -123,12 +93,12 @@ const FeaturesPage = ({ onNavigate, user, onLogout }: FeaturesPageProps) => {
                   <ellipse cx="38" cy="35" rx="3" ry="2" fill="#C9958A" opacity="0.4"/>
                 </svg>
               </div>
-              <h3 className="font-semibold text-gray-900 text-lg mb-2">Citation Generator</h3>
-              <p className="text-base text-gray-600 leading-relaxed">Instantly find and format academic citations in APA, MLA, Chicago, Harvard, IEEE, and Vancouver styles.</p>
+              <h3 className="font-semibold text-stone-800 text-lg mb-2">Citation Generator</h3>
+              <p className="text-base text-stone-500 leading-relaxed">Instantly find and format academic citations in APA, MLA, Chicago, Harvard, IEEE, and Vancouver styles.</p>
             </div>
             
             {/* Grammar & Style Check - White man with glasses */}
-            <div className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-lg hover:border-gray-300 transition-all">
+            <div className="bg-white border border-stone-200 rounded-2xl p-6 hover:shadow-lg hover:border-stone-300 transition-all">
               <div className="w-14 h-14 rounded-full bg-purple-50 flex items-center justify-center mb-4 overflow-hidden">
                 <svg viewBox="0 0 56 56" fill="none" className="w-14 h-14">
                   <circle cx="28" cy="28" r="28" fill="#F3E8FF"/>
@@ -150,12 +120,12 @@ const FeaturesPage = ({ onNavigate, user, onLogout }: FeaturesPageProps) => {
                   <ellipse cx="39" cy="36" rx="3" ry="2" fill="#FECACA" opacity="0.4"/>
                 </svg>
               </div>
-              <h3 className="font-semibold text-gray-900 text-lg mb-2">Grammar & Style Check</h3>
-              <p className="text-base text-gray-600 leading-relaxed">Comprehensive grammar checking, style suggestions, and readability improvements to enhance your writing quality.</p>
+              <h3 className="font-semibold text-stone-800 text-lg mb-2">Grammar & Style Check</h3>
+              <p className="text-base text-stone-500 leading-relaxed">Comprehensive grammar checking, style suggestions, and readability improvements to enhance your writing quality.</p>
             </div>
             
             {/* Document Library - Hispanic woman */}
-            <div className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-lg hover:border-gray-300 transition-all">
+            <div className="bg-white border border-stone-200 rounded-2xl p-6 hover:shadow-lg hover:border-stone-300 transition-all">
               <div className="w-14 h-14 rounded-full bg-orange-50 flex items-center justify-center mb-4 overflow-hidden">
                 <svg viewBox="0 0 56 56" fill="none" className="w-14 h-14">
                   <circle cx="28" cy="28" r="28" fill="#FFEDD5"/>
@@ -174,12 +144,12 @@ const FeaturesPage = ({ onNavigate, user, onLogout }: FeaturesPageProps) => {
                   <ellipse cx="39" cy="35" rx="3" ry="2" fill="#E8A090" opacity="0.5"/>
                 </svg>
               </div>
-              <h3 className="font-semibold text-gray-900 text-lg mb-2">Document Library</h3>
-              <p className="text-base text-gray-600 leading-relaxed">Organize and manage your academic documents with our intuitive library system and cloud storage.</p>
+              <h3 className="font-semibold text-stone-800 text-lg mb-2">Document Library</h3>
+              <p className="text-base text-stone-500 leading-relaxed">Organize and manage your academic documents with our intuitive library system and cloud storage.</p>
             </div>
             
             {/* Structure Analysis - South Asian man */}
-            <div className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-lg hover:border-gray-300 transition-all">
+            <div className="bg-white border border-stone-200 rounded-2xl p-6 hover:shadow-lg hover:border-stone-300 transition-all">
               <div className="w-14 h-14 rounded-full bg-pink-50 flex items-center justify-center mb-4 overflow-hidden">
                 <svg viewBox="0 0 56 56" fill="none" className="w-14 h-14">
                   <circle cx="28" cy="28" r="28" fill="#FCE7F3"/>
@@ -198,12 +168,12 @@ const FeaturesPage = ({ onNavigate, user, onLogout }: FeaturesPageProps) => {
                   <ellipse cx="39" cy="35" rx="3" ry="2" fill="#D4A07A" opacity="0.5"/>
                 </svg>
               </div>
-              <h3 className="font-semibold text-gray-900 text-lg mb-2">Structure Analysis</h3>
-              <p className="text-base text-gray-600 leading-relaxed">Get detailed feedback on your essay structure including introduction, body paragraphs, and conclusion.</p>
+              <h3 className="font-semibold text-stone-800 text-lg mb-2">Structure Analysis</h3>
+              <p className="text-base text-stone-500 leading-relaxed">Get detailed feedback on your essay structure including introduction, body paragraphs, and conclusion.</p>
             </div>
             
             {/* Academic Vocabulary - East Asian woman */}
-            <div className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-lg hover:border-gray-300 transition-all">
+            <div className="bg-white border border-stone-200 rounded-2xl p-6 hover:shadow-lg hover:border-stone-300 transition-all">
               <div className="w-14 h-14 rounded-full bg-indigo-50 flex items-center justify-center mb-4 overflow-hidden">
                 <svg viewBox="0 0 56 56" fill="none" className="w-14 h-14">
                   <circle cx="28" cy="28" r="28" fill="#E0E7FF"/>
@@ -220,38 +190,38 @@ const FeaturesPage = ({ onNavigate, user, onLogout }: FeaturesPageProps) => {
                   <ellipse cx="39" cy="35" rx="3" ry="2" fill="#FECACA" opacity="0.4"/>
                 </svg>
               </div>
-              <h3 className="font-semibold text-gray-900 text-lg mb-2">Academic Vocabulary</h3>
-              <p className="text-base text-gray-600 leading-relaxed">Enhance your writing with suggestions for more formal, academic-appropriate language and terminology.</p>
+              <h3 className="font-semibold text-stone-800 text-lg mb-2">Academic Vocabulary</h3>
+              <p className="text-base text-stone-500 leading-relaxed">Enhance your writing with suggestions for more formal, academic-appropriate language and terminology.</p>
             </div>
 
             {/* AI Humanizer */}
             <button onClick={() => onNavigate('humanizer')} className="bg-gradient-to-br from-violet-50 to-purple-50 border-2 border-violet-200 rounded-2xl p-6 hover:shadow-xl hover:border-violet-400 transition-all text-left relative group">
-              <div className="absolute top-3 right-3 px-2 py-0.5 bg-violet-600 text-white text-[10px] font-bold rounded-full">FREE</div>
+              <div className="absolute top-3 right-3 px-2 py-0.5 bg-violet-500 text-white text-[10px] font-bold rounded-full">FREE</div>
               <div className="w-14 h-14 rounded-full bg-violet-100 flex items-center justify-center mb-4">
                 <span className="text-2xl">✨</span>
               </div>
-              <h3 className="font-semibold text-gray-900 text-lg mb-2">AI Humanizer</h3>
-              <p className="text-base text-gray-600 leading-relaxed">Transform ChatGPT, Claude, Gemini text into natural human writing. Bypass AI detectors. 1,000 free words/month.</p>
+              <h3 className="font-semibold text-violet-700 text-lg mb-2">AI Humanizer</h3>
+              <p className="text-base text-stone-500 leading-relaxed">Transform ChatGPT, Claude, Gemini text into natural human writing. Bypass AI detectors. 1,000 free words/month.</p>
             </button>
 
             {/* Text Summarizer */}
-            <button onClick={() => onNavigate('summarizer')} className="bg-gradient-to-br from-emerald-50 to-green-50 border-2 border-emerald-200 rounded-2xl p-6 hover:shadow-xl hover:border-emerald-400 transition-all text-left relative group">
-              <div className="absolute top-3 right-3 px-2 py-0.5 bg-emerald-600 text-white text-[10px] font-bold rounded-full">FREE</div>
-              <div className="w-14 h-14 rounded-full bg-emerald-100 flex items-center justify-center mb-4">
+            <button onClick={() => onNavigate('summarizer')} className="bg-gradient-to-br from-teal-50 to-emerald-50 border-2 border-teal-200 rounded-2xl p-6 hover:shadow-xl hover:border-teal-400 transition-all text-left relative group">
+              <div className="absolute top-3 right-3 px-2 py-0.5 bg-teal-500 text-white text-[10px] font-bold rounded-full">FREE</div>
+              <div className="w-14 h-14 rounded-full bg-teal-100 flex items-center justify-center mb-4">
                 <span className="text-2xl">📝</span>
               </div>
-              <h3 className="font-semibold text-gray-900 text-lg mb-2">Paper Summarizer</h3>
-              <p className="text-base text-gray-600 leading-relaxed">Condense research papers, articles, and textbooks into key points. Bullet points or paragraphs. 1,000 free words/month.</p>
+              <h3 className="font-semibold text-teal-700 text-lg mb-2">Paper Summarizer</h3>
+              <p className="text-base text-stone-500 leading-relaxed">Condense research papers, articles, and textbooks into key points. Bullet points or paragraphs. 1,000 free words/month.</p>
             </button>
 
             {/* Quiz Generator */}
             <button onClick={() => onNavigate('quiz-generator')} className="bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-200 rounded-2xl p-6 hover:shadow-xl hover:border-amber-400 transition-all text-left relative group">
-              <div className="absolute top-3 right-3 px-2 py-0.5 bg-amber-600 text-white text-[10px] font-bold rounded-full">PAID</div>
+              <div className="absolute top-3 right-3 px-2 py-0.5 bg-amber-500 text-white text-[10px] font-bold rounded-full">PAID</div>
               <div className="w-14 h-14 rounded-full bg-amber-100 flex items-center justify-center mb-4">
                 <span className="text-2xl">🧠</span>
               </div>
-              <h3 className="font-semibold text-gray-900 text-lg mb-2">Quiz Generator</h3>
-              <p className="text-base text-gray-600 leading-relaxed">Turn any text into interactive study quizzes. Multiple choice and true/false questions. Perfect for exam prep.</p>
+              <h3 className="font-semibold text-amber-700 text-lg mb-2">Quiz Generator</h3>
+              <p className="text-base text-stone-500 leading-relaxed">Turn any text into interactive study quizzes. Multiple choice and true/false questions. Perfect for exam prep.</p>
             </button>
           </div>
         </div>
@@ -261,80 +231,80 @@ const FeaturesPage = ({ onNavigate, user, onLogout }: FeaturesPageProps) => {
       <section className="py-16 sm:py-20">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-12">
-            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">How it works</h2>
-            <p className="text-gray-500 max-w-xl mx-auto">
+            <h2 className="text-2xl sm:text-3xl text-stone-800 mb-4" style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 400 }}>How it works</h2>
+            <p className="text-stone-500 max-w-xl mx-auto">
               Get started in seconds with any of our AI tools
             </p>
           </div>
           
           <div className="grid md:grid-cols-3 gap-8">
             <div className="text-center">
-              <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 text-white font-bold text-xl">
+              <div className="w-16 h-16 bg-lime-400 rounded-2xl flex items-center justify-center mx-auto mb-4 text-stone-900 font-bold text-xl">
                 1
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Paste your text</h3>
-              <p className="text-gray-500">Paste essays, AI-generated text, research papers, or study notes</p>
+              <h3 className="text-lg font-semibold text-stone-800 mb-2">Paste your text</h3>
+              <p className="text-stone-500">Paste essays, AI-generated text, research papers, or study notes</p>
             </div>
             
             <div className="text-center">
-              <div className="w-16 h-16 bg-green-600 rounded-2xl flex items-center justify-center mx-auto mb-4 text-white font-bold text-xl">
+              <div className="w-16 h-16 bg-lime-400 rounded-2xl flex items-center justify-center mx-auto mb-4 text-stone-900 font-bold text-xl">
                 2
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Choose your tool</h3>
-              <p className="text-gray-500">Humanize, summarize, quiz, find citations, or analyze your essay</p>
+              <h3 className="text-lg font-semibold text-stone-800 mb-2">Choose your tool</h3>
+              <p className="text-stone-500">Humanize, summarize, quiz, find citations, or analyze your essay</p>
             </div>
             
             <div className="text-center">
-              <div className="w-16 h-16 bg-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4 text-white font-bold text-xl">
+              <div className="w-16 h-16 bg-lime-400 rounded-2xl flex items-center justify-center mx-auto mb-4 text-stone-900 font-bold text-xl">
                 3
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Get results</h3>
-              <p className="text-gray-500">Instant results you can copy, study from, or submit with confidence</p>
+              <h3 className="text-lg font-semibold text-stone-800 mb-2">Get results</h3>
+              <p className="text-stone-500">Instant results you can copy, study from, or submit with confidence</p>
             </div>
           </div>
         </div>
       </section>
 
       {/* Benefits Section */}
-      <section className="py-16 sm:py-20 bg-gray-50">
+      <section className="py-16 sm:py-20" style={{ background: 'linear-gradient(180deg, #F5F3F0 0%, #FAF8F5 100%)' }}>
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
-              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6">Why choose WriteScholar?</h2>
+              <h2 className="text-2xl sm:text-3xl text-stone-800 mb-6" style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 400 }}>Why choose WriteScholar?</h2>
               <div className="space-y-4">
                 {benefits.map((benefit, index) => (
                   <div key={index} className="flex items-start space-x-3">
-                    <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="w-6 h-6 bg-lime-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <svg className="w-4 h-4 text-lime-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                       </svg>
                     </div>
                     <div>
-                      <span className="font-medium text-gray-900">{benefit.label}</span>
-                      <span className="text-gray-500"> — {benefit.description}</span>
+                      <span className="font-medium text-stone-800">{benefit.label}</span>
+                      <span className="text-stone-500"> — {benefit.description}</span>
                     </div>
                   </div>
                 ))}
               </div>
             </div>
             
-            <div className="bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl p-8 text-white">
+            <div className="bg-stone-800 rounded-2xl p-8 text-white">
               <div className="grid grid-cols-2 gap-6">
                 <div className="text-center p-4">
-                  <div className="text-4xl font-bold mb-1">5+</div>
-                  <div className="text-blue-100">AI Tools</div>
+                  <div className="text-4xl font-bold mb-1 text-lime-400">5+</div>
+                  <div className="text-stone-300">AI Tools</div>
                 </div>
                 <div className="text-center p-4">
-                  <div className="text-4xl font-bold mb-1">1K</div>
-                  <div className="text-blue-100">Free Words/Mo</div>
+                  <div className="text-4xl font-bold mb-1 text-lime-400">1K</div>
+                  <div className="text-stone-300">Free Words/Mo</div>
                 </div>
                 <div className="text-center p-4">
-                  <div className="text-4xl font-bold mb-1">50K+</div>
-                  <div className="text-blue-100">Students</div>
+                  <div className="text-4xl font-bold mb-1 text-lime-400">50K+</div>
+                  <div className="text-stone-300">Students</div>
                 </div>
                 <div className="text-center p-4">
-                  <div className="text-4xl font-bold mb-1">6</div>
-                  <div className="text-blue-100">Citation Styles</div>
+                  <div className="text-4xl font-bold mb-1 text-lime-400">6</div>
+                  <div className="text-stone-300">Citation Styles</div>
                 </div>
               </div>
             </div>
@@ -343,12 +313,12 @@ const FeaturesPage = ({ onNavigate, user, onLogout }: FeaturesPageProps) => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 sm:py-20 bg-gray-900">
+      <section className="py-16 sm:py-20 bg-stone-800">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
-          <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4">
+          <h2 className="text-2xl sm:text-3xl text-white mb-4" style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 400 }}>
             {user ? 'Start using your AI toolkit' : 'Ready to level up your studies?'}
           </h2>
-          <p className="text-gray-400 mb-8 max-w-xl mx-auto">
+          <p className="text-stone-400 mb-8 max-w-xl mx-auto">
             {user 
               ? 'Head to your dashboard to humanize text, generate quizzes, summarize papers, find citations, and more.'
               : 'Join thousands of students using AI Humanizer, Quiz Generator, Summarizer, and more.'
@@ -359,14 +329,14 @@ const FeaturesPage = ({ onNavigate, user, onLogout }: FeaturesPageProps) => {
               <>
                 <button 
                   onClick={() => onNavigate('dashboard')}
-                  className="px-6 py-3 bg-white text-gray-900 font-semibold rounded-xl hover:bg-gray-100 transition-colors"
+                  className="px-6 py-3 bg-lime-400 text-stone-900 font-semibold rounded-full hover:bg-lime-300 transition-colors"
                 >
                   Go to Dashboard
                 </button>
                 {user.plan === 'Free' && (
                   <button 
                     onClick={() => onNavigate('billing')}
-                    className="px-6 py-3 border border-gray-600 text-white font-medium rounded-xl hover:border-gray-500 transition-colors"
+                    className="px-6 py-3 border border-stone-500 text-white font-medium rounded-full hover:border-stone-400 transition-colors"
                   >
                     Upgrade Plan
                   </button>
@@ -376,13 +346,13 @@ const FeaturesPage = ({ onNavigate, user, onLogout }: FeaturesPageProps) => {
               <>
                 <button 
                   onClick={() => onNavigate('signup')}
-                  className="px-6 py-3 bg-white text-gray-900 font-semibold rounded-xl hover:bg-gray-100 transition-colors"
+                  className="px-6 py-3 bg-lime-400 text-stone-900 font-semibold rounded-full hover:bg-lime-300 transition-colors"
                 >
-                  Get Started Free
+                  Try Free
                 </button>
                 <button 
                   onClick={() => onNavigate('pricing')}
-                  className="px-6 py-3 border border-gray-600 text-white font-medium rounded-xl hover:border-gray-500 transition-colors"
+                  className="px-6 py-3 border border-stone-500 text-white font-medium rounded-full hover:border-stone-400 transition-colors"
                 >
                   View Pricing
                 </button>

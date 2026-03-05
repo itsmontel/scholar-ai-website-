@@ -1055,7 +1055,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
 
   const renderHighlightedText = () => {
     if (!documentContent) {
-      return <div className="text-gray-700 leading-relaxed">No document content available.</div>;
+      return <div className="text-stone-700 leading-relaxed">No document content available.</div>;
     }
 
     const displayContent = getDisplayContent();
@@ -1081,19 +1081,19 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
           {currentPlan === 'free' && (
             <div className="mt-8 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg">
               <div className="flex items-center space-x-3 mb-3">
-                <div className="p-2 bg-blue-500 rounded-full">
-                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="p-2 bg-lime-500 rounded-full">
+                  <svg className="w-5 h-5 text-stone-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m0 0v2m0-2h2m-2 0H9m12-9V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-9z" />
                   </svg>
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900">Want to see the full document?</h3>
-                  <p className="text-sm text-gray-600">Upgrade to view the complete analysis with all annotations.</p>
+                  <h3 className="text-lg font-semibold text-stone-900">Want to see the full document?</h3>
+                  <p className="text-sm text-stone-600">Upgrade to view the complete analysis with all annotations.</p>
                 </div>
               </div>
               <button
                 onClick={() => onNavigate?.('billing')}
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                className="px-6 py-2 bg-lime-400 text-stone-900 rounded-lg hover:bg-lime-300 transition-colors"
               >
                 Upgrade Now
               </button>
@@ -1137,7 +1137,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
 
     // Render each paragraph separately to preserve spacing
     return (
-      <div className="text-gray-700 leading-relaxed">
+      <div className="text-stone-700 leading-relaxed">
         {paragraphs.map((paragraph, paragraphIndex) => {
           const paragraphStart = displayContent.indexOf(paragraph);
           const paragraphEnd = paragraphStart + paragraph.length;
@@ -1175,7 +1175,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
               const textBefore = paragraph.slice(lastIndex, relativeStart);
               if (textBefore.trim()) {
                 parts.push(
-                  <span key={`text-${paragraphIndex}-${lastIndex}`} className="text-gray-700">
+                  <span key={`text-${paragraphIndex}-${lastIndex}`} className="text-stone-700">
                     {renderTextWithItalics(textBefore, `text-${paragraphIndex}-${lastIndex}`)}
                   </span>
                 );
@@ -1232,25 +1232,25 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
         
         {/* Upgrade prompt for hidden annotations */}
         {hiddenAnnotationsCount > 0 && (
-          <div className="mt-8 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg">
+          <div className="mt-8 p-6 bg-gradient-to-r from-lime-50 to-green-50 border border-lime-200 rounded-lg">
             <div className="flex items-center space-x-3 mb-3">
-              <div className="p-2 bg-blue-500 rounded-full">
-                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="p-2 bg-lime-500 rounded-full">
+                <svg className="w-5 h-5 text-stone-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m0 0v2m0-2h2m-2 0H9m12-9V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002-2v-9z" />
                 </svg>
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-gray-900">
+                <h3 className="text-lg font-semibold text-stone-900">
                   {hiddenAnnotationsCount} more annotation{hiddenAnnotationsCount > 1 ? 's' : ''} available
                 </h3>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-stone-600">
                   Upgrade to view all annotations across the full document and unlock complete analysis insights.
                 </p>
               </div>
             </div>
             <button
               onClick={() => onNavigate?.('billing')}
-              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="px-6 py-2 bg-lime-400 text-stone-900 rounded-lg hover:bg-lime-300 transition-colors"
             >
               Upgrade Now
             </button>
@@ -1287,17 +1287,17 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%)' }}>
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading analysis tools...</p>
+          <p className="mt-4 text-stone-600">Loading analysis tools...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%)' }}>
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="analysis" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -1305,16 +1305,16 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
         <div className="mb-10">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-stone-900">
                 AI Scholar Analysis
               </h1>
-              <p className="mt-3 text-lg text-gray-600">
+              <p className="mt-3 text-lg text-stone-600">
                 Get comprehensive AI-powered feedback on your academic documents
               </p>
             </div>
             <button
               onClick={() => onNavigate?.('analysis-history')}
-              className="flex items-center space-x-2 px-5 py-3 bg-gray-900 text-white rounded-xl hover:bg-gray-800 transition-colors"
+              className="flex items-center space-x-2 px-5 py-3 bg-stone-800 text-white rounded-xl hover:bg-stone-700 transition-colors"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
@@ -1363,13 +1363,13 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
         {!analysisResult ? (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Analysis Configuration */}
-            <div className="bg-white border border-gray-200 rounded-2xl p-6 sm:p-8">
-              <h2 className="text-xl font-bold text-gray-900 mb-6">Configure Analysis</h2>
+            <div className="bg-white border border-stone-200 rounded-2xl p-6 sm:p-8">
+              <h2 className="text-xl font-bold text-stone-900 mb-6">Configure Analysis</h2>
               
               {/* Document Selection */}
               {!documentContent && (
                 <div className="mb-6">
-                  <label className="block text-base font-medium text-gray-900 mb-2">
+                  <label className="block text-base font-medium text-stone-900 mb-2">
                     Select Document
                   </label>
                   <select
@@ -1390,14 +1390,14 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
               
               {/* Text Content Notice */}
               {documentContent && !selectedDocument && (
-                <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-xl">
+                <div className="mb-6 p-4 bg-lime-50 border border-lime-200 rounded-xl">
                   <div className="flex items-center space-x-2">
-                    <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5 text-lime-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    <span className="font-medium text-blue-800">Text Analysis Mode</span>
+                    <span className="font-medium text-lime-800">Text Analysis Mode</span>
                   </div>
-                  <p className="text-sm text-blue-700 mt-2">
+                  <p className="text-sm text-lime-700 mt-2">
                     Analyzing text content from dashboard. Select citation style and run analysis.
                   </p>
                 </div>
@@ -1405,7 +1405,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
 
               {/* Analysis Type Selection */}
               <div className="mb-6">
-                <label className="block text-base font-medium text-gray-900 mb-3">
+                <label className="block text-base font-medium text-stone-900 mb-3">
                   Analysis Type
                 </label>
                 <div className="space-y-3">
@@ -1414,22 +1414,22 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                       key={type.id}
                       className={`p-4 border-2 rounded-xl cursor-pointer transition-all ${
                         selectedAnalysisType === type.id
-                          ? 'border-blue-500 bg-blue-50'
-                          : 'border-gray-200 hover:border-gray-300'
+                          ? 'border-lime-500 bg-lime-50'
+                          : 'border-stone-200 hover:border-stone-300'
                       }`}
                       onClick={() => setSelectedAnalysisType(type.id)}
                     >
                       <div className="flex items-center space-x-4">
                         <span className="text-2xl">{type.icon}</span>
                         <div className="flex-1">
-                          <h3 className="font-semibold text-gray-900">{type.name}</h3>
-                          <p className="text-sm text-gray-600 mt-0.5">{type.description}</p>
-                          <p className="text-xs text-gray-500 mt-1">⏱️ {type.estimatedTime}</p>
+                          <h3 className="font-semibold text-stone-900">{type.name}</h3>
+                          <p className="text-sm text-stone-600 mt-0.5">{type.description}</p>
+                          <p className="text-xs text-stone-500 mt-1">⏱️ {type.estimatedTime}</p>
                         </div>
                         <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
                           selectedAnalysisType === type.id
-                            ? 'border-blue-500 bg-blue-500'
-                            : 'border-gray-300'
+                            ? 'border-lime-500 bg-lime-500'
+                            : 'border-stone-300'
                         }`}>
                           {selectedAnalysisType === type.id && (
                             <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
@@ -1445,7 +1445,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
 
               {/* Citation Style Selection */}
               <div className="mb-6">
-                <label className="block text-base font-medium text-gray-900 mb-2">
+                <label className="block text-base font-medium text-stone-900 mb-2">
                   Citation Style
                 </label>
                 <select
@@ -1462,7 +1462,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                   <option value="IEEE">IEEE</option>
                   <option value="Vancouver">Vancouver</option>
                 </select>
-                <p className="text-sm text-gray-500 mt-2">
+                <p className="text-sm text-stone-500 mt-2">
                   Select the citation style used in your document
                 </p>
               </div>
@@ -1471,7 +1471,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
               <button
                 onClick={handleAnalyze}
                 disabled={(!selectedDocument && !documentContent) || !selectedAnalysisType || isAnalyzing}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3.5 px-4 rounded-xl font-semibold text-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="w-full bg-lime-400 hover:bg-lime-300 text-stone-900 py-3.5 px-4 rounded-xl font-semibold text-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 {isAnalyzing ? (
                   <LoadingSpinner 
@@ -1486,31 +1486,31 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
             </div>
 
             {/* Document Preview */}
-            <div className="bg-white border border-gray-200 rounded-2xl p-6 sm:p-8">
-              <h2 className="text-xl font-bold text-gray-900 mb-6">Document Preview</h2>
+            <div className="bg-white border border-stone-200 rounded-2xl p-6 sm:p-8">
+              <h2 className="text-xl font-bold text-stone-900 mb-6">Document Preview</h2>
               
               {!selectedDocument && !documentContent ? (
                 <div className="text-center py-16">
-                  <div className="w-20 h-20 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <svg className="w-10 h-10 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <div className="w-20 h-20 bg-stone-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <svg className="w-10 h-10 text-stone-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
                   </div>
-                  <h3 className="text-lg font-medium text-gray-900">No document selected</h3>
-                  <p className="mt-2 text-gray-500">
+                  <h3 className="text-lg font-medium text-stone-900">No document selected</h3>
+                  <p className="mt-2 text-stone-500">
                     Select a document to preview its content
                   </p>
                 </div>
               ) : selectedDocument && isLoadingPreview ? (
                 <div className="text-center py-16">
                   <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mx-auto"></div>
-                  <p className="mt-4 text-gray-600">Loading document preview...</p>
+                  <p className="mt-4 text-stone-600">Loading document preview...</p>
                 </div>
               ) : previewContent || documentContent ? (
                 <div className="max-h-[500px] overflow-y-auto">
-                  <div className="bg-gray-50 rounded-xl p-5 border border-gray-200">
+                  <div className="bg-stone-50 rounded-xl p-5 border border-stone-200">
                     <div className="flex items-center justify-between mb-4">
-                      <h3 className="font-medium text-gray-900">
+                      <h3 className="font-medium text-stone-900">
                         {selectedDocument 
                           ? documents.find(doc => doc.id === selectedDocument)?.title || 'Document Content'
                           : 'Text Content from Dashboard'

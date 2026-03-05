@@ -1249,38 +1249,38 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%)' }}>
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="dashboard" />
 
       {/* Usage Stats Bar */}
-      <div className="border-b border-gray-100 bg-gray-50/50">
+      <div className="border-b border-stone-200/60" style={{ background: 'rgba(250, 248, 245, 0.8)' }}>
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3">
           <div className="flex items-center justify-center flex-wrap gap-4 sm:gap-8 text-sm">
               <div className="flex items-center space-x-2">
-              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-              <span className="text-gray-600">Documents:</span>
-              <span className="font-medium text-gray-900">
+              <div className="w-2 h-2 bg-lime-500 rounded-full"></div>
+              <span className="text-stone-500">Documents:</span>
+              <span className="font-medium text-stone-800">
                     {loadingStats ? '...' : `${usageStats.documentsUploaded}/${usageStats.planLimits.documentsPerMonth === -1 ? '∞' : usageStats.planLimits.documentsPerMonth}`}
               </span>
               </div>
               <div className="flex items-center space-x-2">
-              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              <span className="text-gray-600">Analyses:</span>
-              <span className="font-medium text-gray-900">
+              <div className="w-2 h-2 bg-lime-500 rounded-full"></div>
+              <span className="text-stone-500">Analyses:</span>
+              <span className="font-medium text-stone-800">
                     {loadingStats ? '...' : `${usageStats.documentsAnalyzed}/${usageStats.planLimits.analysesPerMonth === -1 ? '∞' : usageStats.planLimits.analysesPerMonth}`}
               </span>
               </div>
               <div className="flex items-center space-x-2">
-              <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-              <span className="text-gray-600">Storage:</span>
-              <span className="font-medium text-gray-900">
+              <div className="w-2 h-2 bg-lime-500 rounded-full"></div>
+              <span className="text-stone-500">Storage:</span>
+              <span className="font-medium text-stone-800">
                 {loadingStats ? '...' : formatBytes(usageStats.storageUsed)}
               </span>
               </div>
               {usageStats.plan === 'free' && !loadingStats && (
                   <button
                     onClick={() => onNavigate('pricing')}
-                className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-full transition-colors"
+                className="px-3 py-1 bg-lime-400 hover:bg-lime-300 text-stone-900 text-xs font-medium rounded-full transition-colors"
                   >
                 Upgrade
                   </button>
@@ -1293,22 +1293,22 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
       <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-14 w-full min-w-0 overflow-x-hidden">
         {/* Welcome */}
         <div className="text-center mb-10 sm:mb-12">
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-3">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl text-stone-800 mb-3" style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 400 }}>
             {mode === 'humanize' ? (
-              <>Make AI text <span className="text-violet-600">undetectable</span></>
+              <>Make AI text <span className="italic" style={{ color: '#9B59B6' }}>undetectable</span></>
             ) : mode === 'summarize' ? (
-              <>Summarize <span className="text-teal-600">any document</span></>
+              <>Summarize <span className="italic" style={{ color: '#28B463' }}>any document</span></>
             ) : mode === 'quiz' ? (
-              studyToolMode === 'flashcards' ? <>Generate <span className="text-amber-600">flashcards</span></> :
-              studyToolMode === 'crossword' ? <>Generate a <span className="text-amber-600">crossword puzzle</span></> :
-              <>Generate <span className="text-amber-600">quiz questions</span></>
+              studyToolMode === 'flashcards' ? <>Generate <span className="italic" style={{ color: '#D35400' }}>flashcards</span></> :
+              studyToolMode === 'crossword' ? <>Generate a <span className="italic" style={{ color: '#D35400' }}>crossword puzzle</span></> :
+              <>Generate <span className="italic" style={{ color: '#D35400' }}>quiz questions</span></>
             ) : mode === 'analyze' ? (
-              <>Analyze your <span className="text-blue-600">academic writing</span></>
+              <>Your essay — improved with <span className="italic" style={{ color: '#2E6FEA' }}>AI assistance</span></>
             ) : (
-              <>Find <span className="text-cyan-600">citations</span> for your research</>
+              <>Find <span className="italic" style={{ color: '#22A7AB' }}>academic citations</span> for your research</>
             )}
           </h1>
-          <p className="text-lg text-gray-600">
+          <p className="text-lg text-stone-500">
             {mode === 'humanize'
               ? 'Paste AI-generated text to transform it into natural human writing'
               : mode === 'summarize'
@@ -1328,65 +1328,70 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
               href="/downloads/writescholar-ultimate-study-tips-guide.pdf"
               target="_blank"
               rel="noopener noreferrer"
-              className="mb-8 flex items-center gap-4 rounded-2xl border border-sky-200 bg-gradient-to-r from-sky-50 to-blue-50 p-4 transition-shadow hover:shadow-md"
+              className="mb-8 flex items-center gap-4 rounded-2xl border border-lime-200 bg-gradient-to-r from-lime-50 to-green-50 p-4 transition-shadow hover:shadow-md"
             >
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-sky-100">
-                <svg className="h-6 w-6 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-lime-100">
+                <svg className="h-6 w-6 text-lime-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                 </svg>
               </div>
               <div className="min-w-0 flex-1">
-                <p className="font-semibold text-gray-900">Your free ebook</p>
-                <p className="text-sm text-gray-600">WriteScholar Ultimate Study Tips Guide (PDF)</p>
+                <p className="font-semibold text-stone-800">Your free ebook</p>
+                <p className="text-sm text-stone-500">WriteScholar Ultimate Study Tips Guide (PDF)</p>
               </div>
-              <span className="shrink-0 text-sm font-medium text-sky-600">Download →</span>
+              <span className="shrink-0 text-sm font-medium text-lime-600">Download →</span>
             </a>
           )}
 
-          {/* Mode Toggle */}
+          {/* Mode Toggle - topic colors: Analyze #2E6FEA, Citations #22A7AB, Humanize #9B59B6, Summarize #28B463, Study Tools #D35400 */}
         <div className="flex justify-center mb-7">
-          <div className="inline-flex flex-wrap justify-center bg-gray-100 rounded-full p-1.5 gap-1">
+          <div className="inline-flex flex-wrap justify-center bg-stone-100 rounded-full p-1.5 gap-1">
               <button
               onClick={() => { setMode('analyze'); setInputText(''); setShowWordWarning(false); setShowHumanizeResult(false); setSummaryResult(null); setQuizResult(null); }}
               className={`px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-sm sm:text-base font-medium transition-all ${
-                mode === 'analyze' ? 'bg-white text-blue-700 shadow-sm' : 'text-blue-600 hover:text-blue-700'
+                mode === 'analyze' ? 'bg-white shadow-sm border' : ''
               }`}
+              style={mode === 'analyze' ? { color: '#2E6FEA', borderColor: '#BFDBFE' } : { color: '#2E6FEA' }}
             >
               Analyze Essay
               </button>
               <button
               onClick={() => { setMode('citations'); setInputText(''); setShowWordWarning(false); setShowHumanizeResult(false); setSummaryResult(null); setQuizResult(null); }}
               className={`px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-sm sm:text-base font-medium transition-all ${
-                mode === 'citations' ? 'bg-white text-cyan-700 shadow-sm' : 'text-cyan-600 hover:text-cyan-700'
+                mode === 'citations' ? 'bg-white shadow-sm border' : ''
               }`}
+              style={mode === 'citations' ? { color: '#22A7AB', borderColor: '#A7F3F5' } : { color: '#22A7AB' }}
             >
-              Citations
+              Find Citations
               </button>
               <button
               onClick={() => { setMode('humanize'); setInputText(''); setShowWordWarning(false); setSummaryResult(null); setQuizResult(null); }}
               className={`px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-sm sm:text-base font-medium transition-all relative ${
-                mode === 'humanize' ? 'bg-white text-violet-700 shadow-sm' : 'text-violet-600 hover:text-violet-700'
+                mode === 'humanize' ? 'bg-white shadow-sm border' : ''
               }`}
+              style={mode === 'humanize' ? { color: '#9B59B6', borderColor: '#E8DAEF' } : { color: '#9B59B6' }}
             >
               Humanize
-              {usageStats.plan === 'free' && <span className="absolute -top-2 -right-1 px-1.5 py-0.5 bg-violet-600 text-white text-[10px] font-bold rounded-full leading-none">PRO</span>}
+              {usageStats.plan === 'free' && <span className="absolute -top-2 -right-1 px-1.5 py-0.5 text-white text-[10px] font-bold rounded-full leading-none" style={{ backgroundColor: '#9B59B6' }}>PRO</span>}
               </button>
               <button
               onClick={() => { setMode('summarize'); setInputText(''); setShowWordWarning(false); setShowHumanizeResult(false); setQuizResult(null); }}
               className={`px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-sm sm:text-base font-medium transition-all relative ${
-                mode === 'summarize' ? 'bg-white text-teal-700 shadow-sm' : 'text-teal-600 hover:text-teal-700'
+                mode === 'summarize' ? 'bg-white shadow-sm border' : ''
               }`}
+              style={mode === 'summarize' ? { color: '#28B463', borderColor: '#ABEBC6' } : { color: '#28B463' }}
             >
               Summarize
               </button>
               <button
               onClick={() => { setMode('quiz'); setInputText(''); setShowWordWarning(false); setShowHumanizeResult(false); setSummaryResult(null); setFlashcardResult(null); setCrosswordResult(null); }}
               className={`px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-sm sm:text-base font-medium transition-all relative ${
-                mode === 'quiz' ? 'bg-white text-amber-700 shadow-sm' : 'text-amber-600 hover:text-amber-700'
+                mode === 'quiz' ? 'bg-white shadow-sm border' : ''
               }`}
+              style={mode === 'quiz' ? { color: '#D35400', borderColor: '#FADBD8' } : { color: '#D35400' }}
             >
               Study Tools
-              {usageStats.plan === 'free' && <span className="absolute -top-2 -right-1 px-1.5 py-0.5 bg-amber-600 text-white text-[10px] font-bold rounded-full leading-none">PRO</span>}
+              {usageStats.plan === 'free' && <span className="absolute -top-2 -right-1 px-1.5 py-0.5 text-white text-[10px] font-bold rounded-full leading-none" style={{ backgroundColor: '#D35400' }}>PRO</span>}
               </button>
             </div>
           </div>
@@ -1401,19 +1406,19 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
               
               <div 
                 onClick={() => onNavigate('upload')}
-                className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-3xl p-10 sm:p-14 text-center border-2 border-dashed border-blue-200 hover:border-blue-400 cursor-pointer transition-all hover:shadow-lg group"
+                className="bg-gradient-to-br from-lime-50 to-green-50 rounded-3xl p-10 sm:p-14 text-center border-2 border-dashed border-lime-200 hover:border-lime-400 cursor-pointer transition-all hover:shadow-lg group"
               >
-                <div className="w-20 h-20 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform shadow-lg">
-                  <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-20 h-20 bg-lime-500 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform shadow-lg">
+                  <svg className="w-10 h-10 text-stone-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                   </svg>
                 </div>
-                <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">Upload Your Document</h2>
-                <p className="text-gray-600 text-lg mb-6 max-w-md mx-auto">
+                <h2 className="text-2xl sm:text-3xl font-semibold text-stone-800 mb-3">Upload Your Document</h2>
+                <p className="text-stone-500 text-lg mb-6 max-w-md mx-auto">
                   Drop your essay, thesis, or research paper here for comprehensive AI analysis
                 </p>
                 <button 
-                  className="inline-flex items-center px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-colors text-lg shadow-lg group-hover:shadow-xl"
+                  className="inline-flex items-center px-8 py-4 bg-lime-400 hover:bg-lime-300 text-stone-900 font-semibold rounded-full transition-colors text-lg shadow-lg group-hover:shadow-xl"
                 >
                   <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -1421,29 +1426,29 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                   Choose File
                 </button>
                 <div className="flex justify-center gap-3 mt-6">
-                  <span className="px-4 py-1.5 bg-white text-gray-600 text-sm font-medium rounded-lg border border-gray-200">PDF</span>
-                  <span className="px-4 py-1.5 bg-white text-gray-600 text-sm font-medium rounded-lg border border-gray-200">DOCX</span>
-                  <span className="px-4 py-1.5 bg-white text-gray-600 text-sm font-medium rounded-lg border border-gray-200">TXT</span>
+                  <span className="px-4 py-1.5 bg-white text-stone-600 text-sm font-medium rounded-lg border border-stone-200">PDF</span>
+                  <span className="px-4 py-1.5 bg-white text-stone-600 text-sm font-medium rounded-lg border border-stone-200">DOCX</span>
+                  <span className="px-4 py-1.5 bg-white text-stone-600 text-sm font-medium rounded-lg border border-stone-200">TXT</span>
                 </div>
               </div>
             </div>
 
             {/* Divider */}
             <div className="flex items-center justify-center mb-8">
-              <div className="flex-1 h-px bg-gray-200"></div>
-              <span className="px-4 text-gray-400 text-sm font-medium">or paste your text directly</span>
-              <div className="flex-1 h-px bg-gray-200"></div>
+              <div className="flex-1 h-px bg-stone-200"></div>
+              <span className="px-4 text-stone-400 text-sm font-medium">or paste your text directly</span>
+              <div className="flex-1 h-px bg-stone-200"></div>
             </div>
 
             {/* Secondary: Text Input (smaller) */}
             <div className="mb-12">
-              <div className="relative bg-white rounded-2xl border border-gray-200 hover:border-gray-300 focus-within:border-blue-500 transition-colors">
+              <div className="relative bg-white rounded-3xl border border-stone-200/80 shadow-sm hover:border-stone-300 hover:shadow-md focus-within:border-[#2E6FEA]/40 focus-within:shadow-xl focus-within:shadow-[#2E6FEA]/5 focus-within:ring-2 focus-within:ring-[#2E6FEA]/20 transition-all duration-300">
                 <textarea
                   value={inputText}
                   onChange={(e) => { setInputText(e.target.value); setShowWordWarning(false); }}
                   onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey && isTextValid()) { e.preventDefault(); handleSubmit(); }}}
                   placeholder={placeholders[placeholderIndex]}
-                  className="w-full min-h-[120px] p-5 text-gray-800 text-base border-none outline-none resize-none bg-transparent placeholder-gray-400 leading-relaxed"
+                  className="w-full min-h-[120px] p-5 text-stone-800 text-base border-none outline-none resize-none bg-transparent placeholder-stone-400 leading-relaxed"
                   onInput={(e) => {
                     const target = e.target as HTMLTextAreaElement;
                     target.style.height = 'auto';
@@ -1452,7 +1457,7 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                 />
                 
                 {/* Word count */}
-                <div className="absolute bottom-3 left-5 text-sm text-gray-400">
+                <div className="absolute bottom-3 left-5 text-sm text-stone-400">
                   {getWordCount(inputText)} words{getWordCount(inputText) < 200 ? ' (min 200)' : ''}
                 </div>
 
@@ -1469,13 +1474,12 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                 <button
                   onClick={handleSubmit}
                   disabled={!isTextValid()}
-                  className={`px-6 py-3 rounded-xl flex items-center justify-center transition-all font-semibold text-base ${
+                  className={`px-6 py-3 rounded-full flex items-center justify-center transition-all font-semibold text-base ${
                     isTextValid()
-                      ? 'bg-gray-900 hover:bg-gray-800 text-white shadow-md cursor-pointer'
-                      : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                      ? 'bg-lime-400 hover:bg-lime-300 text-stone-900 shadow-md cursor-pointer'
+                      : 'bg-stone-100 text-stone-400 cursor-not-allowed'
                   }`}
                 >
-                  <span className="mr-2">✨</span>
                   Analyze Text
                 </button>
               </div>
@@ -1489,12 +1493,12 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
             {/* Citation Options */}
             <div className="flex justify-center mb-5">
               <div className="inline-flex items-center gap-3 flex-wrap justify-center">
-                <div className="inline-flex items-center bg-gray-50 rounded-xl px-4 py-2.5 border border-gray-200">
-                  <span className="text-gray-500 mr-2 text-sm">Style:</span>
+                <div className="inline-flex items-center bg-white rounded-xl px-4 py-2.5 border border-stone-200">
+                  <span className="text-stone-500 mr-2 text-sm">Style:</span>
                   <select
                     value={citationStyle}
                     onChange={(e) => setCitationStyle(e.target.value)}
-                    className="bg-transparent font-medium text-gray-900 outline-none cursor-pointer text-sm"
+                    className="bg-transparent font-medium text-stone-800 outline-none cursor-pointer text-sm"
                   >
                     <option value="APA">APA 7th</option>
                     <option value="MLA">MLA 9th</option>
@@ -1505,12 +1509,12 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                   </select>
                 </div>
                 
-                <div className="inline-flex items-center bg-gray-50 rounded-xl px-4 py-2.5 border border-gray-200">
-                  <span className="text-gray-500 mr-2 text-sm">Year:</span>
+                <div className="inline-flex items-center bg-white rounded-xl px-4 py-2.5 border border-stone-200">
+                  <span className="text-stone-500 mr-2 text-sm">Year:</span>
                   <select
                     value={citationYearRange}
                     onChange={(e) => setCitationYearRange(e.target.value)}
-                    className="bg-transparent font-medium text-gray-900 outline-none cursor-pointer text-sm"
+                    className="bg-transparent font-medium text-stone-800 outline-none cursor-pointer text-sm"
                   >
                     <option value="all">All Time</option>
                     <option value="3">Last 3 Years</option>
@@ -1527,13 +1531,13 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
             <div className="mb-8 relative overflow-visible">
               <CharacterIllustration />
               
-              <div className="relative bg-white rounded-2xl border-2 border-gray-200 hover:border-gray-300 focus-within:border-blue-500 transition-colors">
+              <div className="relative bg-white rounded-3xl border border-stone-200/80 shadow-sm hover:border-stone-300 hover:shadow-md focus-within:border-[#22A7AB]/40 focus-within:shadow-xl focus-within:shadow-[#22A7AB]/5 focus-within:ring-2 focus-within:ring-[#22A7AB]/20 transition-all duration-300">
                 <textarea
                   value={inputText}
                   onChange={(e) => { setInputText(e.target.value); setShowWordWarning(false); }}
                   onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey && isTextValid()) { e.preventDefault(); handleSubmit(); }}}
                   placeholder={placeholders[placeholderIndex]}
-                  className="w-full min-h-[160px] sm:min-h-[180px] p-5 sm:p-6 text-gray-800 text-lg border-none outline-none resize-none bg-transparent placeholder-gray-400 leading-relaxed"
+                  className="w-full min-h-[160px] sm:min-h-[180px] p-5 sm:p-6 text-stone-800 text-lg border-none outline-none resize-none bg-transparent placeholder-stone-400 leading-relaxed"
                   style={{ fontSize: '18px' }}
                   onInput={(e) => {
                     const target = e.target as HTMLTextAreaElement;
@@ -1542,7 +1546,7 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                   }}
                 />
                 
-                <div className="absolute bottom-4 left-5 text-sm text-gray-400">
+                <div className="absolute bottom-4 left-5 text-sm text-stone-400">
                   {inputText.length} characters
                 </div>
 
@@ -1557,10 +1561,10 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                 <button
                   onClick={handleSubmit}
                   disabled={!isTextValid() || isSearchingCitations}
-                  className={`px-8 py-3.5 rounded-xl flex items-center justify-center transition-all font-semibold text-base ${
+                  className={`px-8 py-3.5 rounded-full flex items-center justify-center transition-all font-semibold text-base ${
                     isTextValid() && !isSearchingCitations
-                      ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg cursor-pointer'
-                      : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                      ? 'bg-lime-400 hover:bg-lime-300 text-stone-900 shadow-lg cursor-pointer'
+                      : 'bg-stone-200 text-stone-400 cursor-not-allowed'
                   }`}
                 >
                   {isSearchingCitations ? (
@@ -1569,10 +1573,7 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
                   ) : (
-                    <>
-                      <span className="mr-2">✨</span>
-                      Find Sources
-                    </>
+                    <>Find Sources</>
                   )}
                 </button>
               </div>
@@ -1580,13 +1581,13 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
 
             {/* Suggested Topics */}
             <div className="mb-12">
-              <p className="text-sm text-gray-500 text-center mb-4">Suggestions</p>
+              <p className="text-sm text-stone-500 text-center mb-4">Suggestions</p>
               <div className="flex flex-wrap justify-center gap-2.5">
                 {suggestedTopics.map((topic, idx) => (
                   <button 
                     key={idx}
                     onClick={() => setInputText(topic)}
-                    className="px-4 py-2 bg-gray-50 hover:bg-gray-100 text-gray-700 text-sm sm:text-base rounded-lg border border-gray-200 hover:border-gray-300 transition-colors"
+                    className="px-4 py-2 bg-white hover:bg-stone-50 text-stone-700 text-sm sm:text-base rounded-lg border border-stone-200 hover:border-stone-300 transition-colors"
                   >
                     {topic}
                   </button>
@@ -1599,9 +1600,9 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
         {/* HUMANIZE MODE - matches HumanizerPage design */}
         {mode === 'humanize' && (
           <>
-            <div className="bg-white rounded-2xl sm:rounded-3xl shadow-xl shadow-violet-100/50 border border-gray-100 overflow-hidden mb-6 min-w-0">
+            <div className="bg-white rounded-2xl sm:rounded-3xl shadow-xl shadow-stone-100/50 border border-stone-200 overflow-hidden mb-6 min-w-0">
               {/* Toolbar */}
-              <div className="bg-gradient-to-r from-violet-50 to-purple-50 border-b border-gray-100 px-3 sm:px-5 py-3 sm:py-4">
+              <div className="bg-gradient-to-r from-lime-50 to-green-50 border-b border-stone-100 px-3 sm:px-5 py-3 sm:py-4">
                 <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center justify-between gap-3 sm:gap-4">
                   <div className="flex flex-wrap items-center gap-2 sm:gap-3 min-w-0 overflow-x-auto sm:overflow-visible">
                     <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">

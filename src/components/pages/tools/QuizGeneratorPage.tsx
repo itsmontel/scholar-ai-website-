@@ -1362,7 +1362,7 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-amber-50 via-white to-orange-50">
+    <div className="min-h-screen flex flex-col" style={{ background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%)' }}>
       <Header onNavigate={onNavigate} user={user} />
       
       <main className="flex-1 w-full min-w-0 overflow-x-hidden">

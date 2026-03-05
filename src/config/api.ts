@@ -1,4 +1,6 @@
 // API Configuration
+import { logger } from '../utils/logger';
+
 export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
 // Ultra-bulletproof retry mechanism - NEVER fails on desktop
@@ -12,7 +14,7 @@ const bulletproofFetch = async (
   
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
-      console.log(`🔄 API attempt ${attempt}/${maxRetries}: ${url}`);
+      logger.log(`🔄 API attempt ${attempt}/${maxRetries}: ${url}`);
       
       // Create timeout controller
       const controller = new AbortController();
@@ -27,7 +29,7 @@ const bulletproofFetch = async (
       
       // Success - return immediately
       if (response.ok) {
-        console.log(`✅ API success on attempt ${attempt}: ${url}`);
+        logger.log(`✅ API success on attempt ${attempt}: ${url}`);
         return response;
       }
       
@@ -35,7 +37,7 @@ const bulletproofFetch = async (
       if (response.status === 429) {
         // Rate limited - use exponential backoff
         const rateLimitDelay = Math.min(10000 * Math.pow(2, attempt - 1), 60000); // Max 60s
-        console.warn(`⏳ Rate limited (429) - waiting ${rateLimitDelay}ms before retry`);
+        logger.warn(`⏳ Rate limited (429) - waiting ${rateLimitDelay}ms before retry`);
         await new Promise(resolve => setTimeout(resolve, rateLimitDelay));
         continue;
       }
@@ -43,7 +45,7 @@ const bulletproofFetch = async (
       if (response.status >= 400 && response.status < 500 && response.status !== 401) {
         // Client errors (except auth) - don't retry after 3 attempts
         if (attempt >= 3) {
-          console.warn(`❌ Client error ${response.status} - giving up after 3 attempts`);
+          logger.warn(`❌ Client error ${response.status} - giving up after 3 attempts`);
           return response;
         }
       }
@@ -54,11 +56,11 @@ const bulletproofFetch = async (
     } catch (error) {
       lastError = error instanceof Error ? error : new Error(String(error));
       
-      console.warn(`⚠️ Attempt ${attempt} failed:`, lastError.message);
+      logger.warn(`⚠️ Attempt ${attempt} failed:`, lastError.message);
       
       // If this is the last attempt, throw the error
       if (attempt === maxRetries) {
-        console.error(`💥 All ${maxRetries} attempts failed for ${url}`);
+        logger.error(`💥 All ${maxRetries} attempts failed for ${url}`);
         throw lastError;
       }
       
@@ -67,7 +69,7 @@ const bulletproofFetch = async (
       const jitter = Math.random() * 1000;
       const delay = Math.min(baseDelay + jitter, 15000); // Max 15s delay
       
-      console.log(`⏱️ Waiting ${Math.round(delay)}ms before retry...`);
+      logger.log(`⏱️ Waiting ${Math.round(delay)}ms before retry...`);
       await new Promise(resolve => setTimeout(resolve, delay));
     }
   }
@@ -171,7 +173,7 @@ export class BulletproofAPI {
       
       if (!response.ok) {
         const errorText = await response.text().catch(() => 'Unknown error');
-        console.error('API request failed:', response.status, errorText);
+        logger.error('API request failed:', response.status, errorText);
         
         return { 
           data: fallbackValue, 
@@ -185,7 +187,7 @@ export class BulletproofAPI {
       
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      console.error('API request crashed:', errorMessage);
+      logger.error('API request crashed:', errorMessage);
       
       return { 
         data: fallbackValue, 

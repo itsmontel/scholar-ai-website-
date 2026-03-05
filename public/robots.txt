@@ -3,6 +3,7 @@ Allow: /
 Allow: /features
 Allow: /pricing
 Allow: /about
+Allow: /why-students-choose
 Allow: /blog
 Allow: /blog/*
 Allow: /help
