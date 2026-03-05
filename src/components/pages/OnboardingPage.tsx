@@ -8,6 +8,270 @@ interface OnboardingPageProps {
 
 type Step = 'profile' | 'grade' | 'referral' | 'goals' | 'features' | 'trial';
 
+const ProfileIllustration = () => (
+  <svg viewBox="0 0 200 160" fill="none" className="w-48 h-36 mx-auto mb-6">
+    {/* Person with clipboard */}
+    <g transform="translate(60, 10)">
+      {/* Body */}
+      <path d="M30 70 Q25 95 30 130 L70 130 Q75 95 70 70" fill="#84CC16" />
+      {/* Neck */}
+      <rect x="42" y="52" width="16" height="20" fill="#FCD9B6" />
+      {/* Head */}
+      <ellipse cx="50" cy="32" rx="24" ry="26" fill="#FCD9B6" />
+      {/* Hair */}
+      <path d="M26 26 Q22 8 40 4 Q50 0 65 4 Q78 8 74 26 Q70 16 58 12 Q50 8 42 12 Q30 16 26 26" fill="#5D4037" />
+      {/* Eyes */}
+      <ellipse cx="40" cy="32" rx="4" ry="5" fill="#1F2937" />
+      <ellipse cx="60" cy="32" rx="4" ry="5" fill="#1F2937" />
+      <circle cx="41" cy="30" r="1.5" fill="white" />
+      <circle cx="61" cy="30" r="1.5" fill="white" />
+      {/* Smile */}
+      <path d="M40 44 Q50 54 60 44" stroke="#1F2937" strokeWidth="2" fill="none" strokeLinecap="round" />
+      {/* Blush */}
+      <ellipse cx="30" cy="38" rx="5" ry="3" fill="#FECACA" opacity="0.5" />
+      <ellipse cx="70" cy="38" rx="5" ry="3" fill="#FECACA" opacity="0.5" />
+    </g>
+    {/* Clipboard */}
+    <g transform="translate(115, 60)">
+      <rect x="0" y="0" width="45" height="60" rx="4" fill="#F5F5F4" stroke="#D6D3D1" strokeWidth="2" />
+      <rect x="12" y="-5" width="21" height="10" rx="2" fill="#78716C" />
+      <rect x="8" y="15" width="29" height="4" rx="1" fill="#A8A29E" />
+      <rect x="8" y="25" width="24" height="4" rx="1" fill="#A8A29E" />
+      <rect x="8" y="35" width="29" height="4" rx="1" fill="#A8A29E" />
+      <rect x="8" y="45" width="18" height="4" rx="1" fill="#A8A29E" />
+    </g>
+    {/* Floating elements */}
+    <circle cx="30" cy="40" r="8" fill="#ECFCCB" opacity="0.8" />
+    <circle cx="175" cy="30" r="6" fill="#D9F99D" opacity="0.8" />
+    <circle cx="20" cy="120" r="10" fill="#BEF264" opacity="0.6" />
+  </svg>
+);
+
+const GradeIllustration = () => (
+  <svg viewBox="0 0 200 160" fill="none" className="w-48 h-36 mx-auto mb-6">
+    {/* Student at desk */}
+    <g transform="translate(50, 20)">
+      {/* Desk */}
+      <rect x="0" y="90" width="100" height="8" rx="2" fill="#78716C" />
+      <rect x="5" y="98" width="8" height="40" fill="#57534E" />
+      <rect x="87" y="98" width="8" height="40" fill="#57534E" />
+      {/* Book on desk */}
+      <rect x="20" y="75" width="35" height="25" rx="2" fill="#3B82F6" />
+      <rect x="22" y="77" width="31" height="21" rx="1" fill="#60A5FA" />
+      <rect x="25" y="82" width="20" height="2" fill="white" opacity="0.6" />
+      <rect x="25" y="87" width="15" height="2" fill="white" opacity="0.6" />
+      {/* Person */}
+      <path d="M55 55 Q50 75 55 90 L85 90 Q90 75 85 55" fill="#8B5CF6" />
+      <rect x="63" y="38" width="14" height="18" fill="#E8B796" />
+      <ellipse cx="70" cy="22" rx="20" ry="22" fill="#E8B796" />
+      {/* Hair */}
+      <path d="M50 18 Q48 2 62 -2 Q70 -5 82 -2 Q92 2 90 18 Q86 8 76 5 Q70 2 64 5 Q54 8 50 18" fill="#1F2937" />
+      {/* Glasses */}
+      <ellipse cx="62" cy="22" rx="10" ry="8" fill="none" stroke="#374151" strokeWidth="2" />
+      <ellipse cx="78" cy="22" rx="10" ry="8" fill="none" stroke="#374151" strokeWidth="2" />
+      <path d="M72 22 L74 22" stroke="#374151" strokeWidth="2" />
+      {/* Eyes */}
+      <ellipse cx="62" cy="23" rx="3" ry="4" fill="#1F2937" />
+      <ellipse cx="78" cy="23" rx="3" ry="4" fill="#1F2937" />
+      <circle cx="63" cy="21" r="1" fill="white" />
+      <circle cx="79" cy="21" r="1" fill="white" />
+      {/* Smile */}
+      <path d="M62 34 Q70 42 78 34" stroke="#1F2937" strokeWidth="2" fill="none" strokeLinecap="round" />
+    </g>
+    {/* Graduation cap floating */}
+    <g transform="translate(150, 20)">
+      <path d="M0 20 L25 10 L50 20 L25 30 Z" fill="#1F2937" />
+      <rect x="22" y="10" width="6" height="15" fill="#1F2937" />
+      <rect x="20" y="5" width="10" height="8" fill="#1F2937" />
+      <path d="M50 20 L50 30 Q45 35 40 30" stroke="#FCD34D" strokeWidth="2" fill="none" />
+      <circle cx="40" cy="32" r="3" fill="#FCD34D" />
+    </g>
+    {/* Stars */}
+    <path d="M30 30 L32 36 L38 36 L33 40 L35 46 L30 42 L25 46 L27 40 L22 36 L28 36 Z" fill="#FCD34D" />
+    <path d="M170 100 L171 103 L174 103 L172 105 L173 108 L170 106 L167 108 L168 105 L166 103 L169 103 Z" fill="#FCD34D" />
+  </svg>
+);
+
+const ReferralIllustration = () => (
+  <svg viewBox="0 0 200 160" fill="none" className="w-48 h-36 mx-auto mb-6">
+    {/* Two people talking */}
+    {/* Person 1 */}
+    <g transform="translate(20, 30)">
+      <path d="M20 60 Q15 80 20 100 L50 100 Q55 80 50 60" fill="#10B981" />
+      <rect x="28" y="44" width="14" height="18" fill="#FCD9B6" />
+      <ellipse cx="35" cy="26" rx="18" ry="20" fill="#FCD9B6" />
+      <path d="M17 22 Q14 6 28 2 Q35 -1 46 2 Q54 6 52 22 Q48 12 40 9 Q35 6 30 9 Q20 12 17 22" fill="#B45309" />
+      <ellipse cx="28" cy="26" rx="3" ry="4" fill="#1F2937" />
+      <ellipse cx="42" cy="26" rx="3" ry="4" fill="#1F2937" />
+      <circle cx="29" cy="24" r="1" fill="white" />
+      <circle cx="43" cy="24" r="1" fill="white" />
+      <path d="M28 36 Q35 44 42 36" stroke="#1F2937" strokeWidth="2" fill="none" strokeLinecap="round" />
+    </g>
+    {/* Person 2 */}
+    <g transform="translate(110, 30)">
+      <path d="M20 60 Q15 80 20 100 L50 100 Q55 80 50 60" fill="#3B82F6" />
+      <rect x="28" y="44" width="14" height="18" fill="#E8B796" />
+      <ellipse cx="35" cy="26" rx="18" ry="20" fill="#E8B796" />
+      <path d="M17 22 Q14 6 28 2 Q35 -1 46 2 Q54 6 52 22 Q48 12 40 9 Q35 6 30 9 Q20 12 17 22" fill="#1F2937" />
+      <ellipse cx="28" cy="26" rx="3" ry="4" fill="#1F2937" />
+      <ellipse cx="42" cy="26" rx="3" ry="4" fill="#1F2937" />
+      <circle cx="29" cy="24" r="1" fill="white" />
+      <circle cx="43" cy="24" r="1" fill="white" />
+      <path d="M28 36 Q35 44 42 36" stroke="#1F2937" strokeWidth="2" fill="none" strokeLinecap="round" />
+    </g>
+    {/* Speech bubbles */}
+    <g transform="translate(60, 10)">
+      <ellipse cx="20" cy="15" rx="25" ry="18" fill="white" stroke="#D6D3D1" strokeWidth="2" />
+      <path d="M10 30 Q5 40 15 35" fill="white" stroke="#D6D3D1" strokeWidth="2" />
+      <text x="10" y="18" fontSize="12" fill="#84CC16" fontWeight="bold">Hi!</text>
+    </g>
+    <g transform="translate(100, 25)">
+      <ellipse cx="20" cy="15" rx="25" ry="18" fill="white" stroke="#D6D3D1" strokeWidth="2" />
+      <path d="M30 30 Q35 40 25 35" fill="white" stroke="#D6D3D1" strokeWidth="2" />
+      <text x="8" y="18" fontSize="12" fill="#3B82F6" fontWeight="bold">Hey!</text>
+    </g>
+    {/* Connection hearts */}
+    <path d="M100 90 C100 85 95 80 90 80 C85 80 80 85 80 90 C80 100 100 110 100 110 C100 110 120 100 120 90 C120 85 115 80 110 80 C105 80 100 85 100 90" fill="#F472B6" opacity="0.6" />
+  </svg>
+);
+
+const GoalsIllustration = () => (
+  <svg viewBox="0 0 200 160" fill="none" className="w-48 h-36 mx-auto mb-6">
+    {/* Person reaching for star */}
+    <g transform="translate(60, 30)">
+      {/* Body */}
+      <path d="M30 65 Q25 90 30 120 L60 120 Q65 90 60 65" fill="#F59E0B" />
+      {/* Neck */}
+      <rect x="38" y="48" width="14" height="18" fill="#D4A574" />
+      {/* Head */}
+      <ellipse cx="45" cy="30" rx="20" ry="22" fill="#D4A574" />
+      {/* Hair */}
+      <path d="M25 26 Q22 8 38 4 Q45 0 58 4 Q68 8 65 26 Q62 16 52 12 Q45 8 38 12 Q28 16 25 26" fill="#7C3AED" />
+      {/* Eyes looking up */}
+      <ellipse cx="38" cy="28" rx="3" ry="4" fill="#1F2937" />
+      <ellipse cx="52" cy="28" rx="3" ry="4" fill="#1F2937" />
+      <circle cx="38" cy="26" r="1.5" fill="white" />
+      <circle cx="52" cy="26" r="1.5" fill="white" />
+      {/* Excited smile */}
+      <path d="M38 40 Q45 50 52 40" stroke="#1F2937" strokeWidth="2" fill="none" strokeLinecap="round" />
+      {/* Arm reaching up */}
+      <path d="M60 70 Q75 50 85 25" stroke="#D4A574" strokeWidth="10" fill="none" strokeLinecap="round" />
+      <ellipse cx="87" cy="22" rx="6" ry="7" fill="#D4A574" />
+    </g>
+    {/* Target/Goal star */}
+    <g transform="translate(140, 5)">
+      <path d="M20 0 L24 14 L38 14 L26 22 L30 36 L20 28 L10 36 L14 22 L2 14 L16 14 Z" fill="#FCD34D" />
+      <path d="M20 8 L22 14 L28 14 L23 18 L25 24 L20 20 L15 24 L17 18 L12 14 L18 14 Z" fill="#FBBF24" />
+    </g>
+    {/* Checklist items floating */}
+    <g transform="translate(10, 40)">
+      <rect x="0" y="0" width="35" height="12" rx="3" fill="#ECFCCB" />
+      <circle cx="8" cy="6" r="3" fill="#84CC16" />
+      <path d="M6 6 L7.5 7.5 L10 5" stroke="white" strokeWidth="1.5" fill="none" />
+    </g>
+    <g transform="translate(15, 60)">
+      <rect x="0" y="0" width="35" height="12" rx="3" fill="#ECFCCB" />
+      <circle cx="8" cy="6" r="3" fill="#84CC16" />
+      <path d="M6 6 L7.5 7.5 L10 5" stroke="white" strokeWidth="1.5" fill="none" />
+    </g>
+    <g transform="translate(10, 80)">
+      <rect x="0" y="0" width="35" height="12" rx="3" fill="#FEF3C7" />
+      <circle cx="8" cy="6" r="3" fill="#D6D3D1" />
+    </g>
+    {/* Sparkles */}
+    <circle cx="160" cy="50" r="4" fill="#FCD34D" opacity="0.8" />
+    <circle cx="175" cy="35" r="3" fill="#FCD34D" opacity="0.6" />
+    <circle cx="130" cy="20" r="3" fill="#FCD34D" opacity="0.7" />
+  </svg>
+);
+
+const FeaturesIllustration = () => (
+  <svg viewBox="0 0 200 160" fill="none" className="w-48 h-36 mx-auto mb-6">
+    {/* Laptop with features */}
+    <g transform="translate(30, 40)">
+      {/* Laptop base */}
+      <rect x="0" y="70" width="140" height="8" rx="2" fill="#57534E" />
+      {/* Laptop screen */}
+      <rect x="10" y="0" width="120" height="75" rx="4" fill="#1F2937" />
+      <rect x="15" y="5" width="110" height="60" rx="2" fill="#F5F5F4" />
+      {/* Screen content - feature cards */}
+      <rect x="20" y="10" width="45" height="25" rx="2" fill="#ECFCCB" />
+      <rect x="70" y="10" width="50" height="25" rx="2" fill="#DBEAFE" />
+      <rect x="20" y="38" width="50" height="22" rx="2" fill="#FCE7F3" />
+      <rect x="75" y="38" width="45" height="22" rx="2" fill="#FEF3C7" />
+      {/* Icons on cards */}
+      <circle cx="32" cy="22" r="6" fill="#84CC16" />
+      <circle cx="85" cy="22" r="6" fill="#3B82F6" />
+      <circle cx="35" cy="49" r="6" fill="#EC4899" />
+      <circle cx="90" cy="49" r="6" fill="#F59E0B" />
+    </g>
+    {/* Floating checkmarks */}
+    <g transform="translate(10, 20)">
+      <circle cx="15" cy="15" r="12" fill="#84CC16" />
+      <path d="M10 15 L13 18 L20 11" stroke="white" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+    </g>
+    <g transform="translate(165, 30)">
+      <circle cx="15" cy="15" r="10" fill="#3B82F6" />
+      <path d="M11 15 L14 18 L19 12" stroke="white" strokeWidth="2" fill="none" strokeLinecap="round" />
+    </g>
+    <g transform="translate(170, 100)">
+      <circle cx="12" cy="12" r="9" fill="#F59E0B" />
+      <path d="M8 12 L11 15 L16 9" stroke="white" strokeWidth="2" fill="none" strokeLinecap="round" />
+    </g>
+    {/* Sparkles */}
+    <path d="M180 70 L182 76 L188 76 L183 80 L185 86 L180 82 L175 86 L177 80 L172 76 L178 76 Z" fill="#FCD34D" />
+  </svg>
+);
+
+const TrialIllustration = () => (
+  <svg viewBox="0 0 200 160" fill="none" className="w-48 h-36 mx-auto mb-4">
+    {/* Person celebrating */}
+    <g transform="translate(60, 25)">
+      {/* Body */}
+      <path d="M30 65 Q25 90 30 120 L60 120 Q65 90 60 65" fill="#84CC16" />
+      {/* Arms up celebrating */}
+      <path d="M30 70 Q10 50 5 30" stroke="#FCD9B6" strokeWidth="10" fill="none" strokeLinecap="round" />
+      <path d="M60 70 Q80 50 85 30" stroke="#FCD9B6" strokeWidth="10" fill="none" strokeLinecap="round" />
+      <ellipse cx="3" cy="27" rx="6" ry="7" fill="#FCD9B6" />
+      <ellipse cx="87" cy="27" rx="6" ry="7" fill="#FCD9B6" />
+      {/* Neck */}
+      <rect x="38" y="48" width="14" height="18" fill="#FCD9B6" />
+      {/* Head */}
+      <ellipse cx="45" cy="30" rx="20" ry="22" fill="#FCD9B6" />
+      {/* Hair */}
+      <path d="M25 26 Q22 8 38 4 Q45 0 58 4 Q68 8 65 26 Q62 16 52 12 Q45 8 38 12 Q28 16 25 26" fill="#B45309" />
+      {/* Happy eyes (closed) */}
+      <path d="M35 28 Q38 32 41 28" stroke="#1F2937" strokeWidth="2" fill="none" strokeLinecap="round" />
+      <path d="M49 28 Q52 32 55 28" stroke="#1F2937" strokeWidth="2" fill="none" strokeLinecap="round" />
+      {/* Big smile */}
+      <path d="M35 40 Q45 52 55 40" stroke="#1F2937" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+      {/* Blush */}
+      <ellipse cx="28" cy="36" rx="5" ry="3" fill="#FECACA" opacity="0.6" />
+      <ellipse cx="62" cy="36" rx="5" ry="3" fill="#FECACA" opacity="0.6" />
+    </g>
+    {/* Confetti */}
+    <rect x="20" y="20" width="8" height="8" rx="1" fill="#F472B6" transform="rotate(15 24 24)" />
+    <rect x="170" y="30" width="8" height="8" rx="1" fill="#3B82F6" transform="rotate(-20 174 34)" />
+    <rect x="30" y="100" width="6" height="6" rx="1" fill="#FCD34D" transform="rotate(30 33 103)" />
+    <rect x="160" y="90" width="7" height="7" rx="1" fill="#84CC16" transform="rotate(-15 163 93)" />
+    <circle cx="40" cy="50" r="4" fill="#8B5CF6" />
+    <circle cx="155" cy="60" r="5" fill="#F59E0B" />
+    <circle cx="180" cy="120" r="4" fill="#EC4899" />
+    <circle cx="25" cy="130" r="3" fill="#10B981" />
+    {/* Stars */}
+    <path d="M15 70 L17 76 L23 76 L18 80 L20 86 L15 82 L10 86 L12 80 L7 76 L13 76 Z" fill="#FCD34D" />
+    <path d="M175 15 L177 21 L183 21 L178 25 L180 31 L175 27 L170 31 L172 25 L167 21 L173 21 Z" fill="#FCD34D" />
+    {/* Gift box */}
+    <g transform="translate(5, 95)">
+      <rect x="0" y="10" width="30" height="25" rx="2" fill="#EC4899" />
+      <rect x="0" y="10" width="30" height="8" rx="2" fill="#F472B6" />
+      <rect x="12" y="10" width="6" height="25" fill="#FCD34D" />
+      <path d="M15 10 Q10 5 5 8 Q0 11 5 14" stroke="#FCD34D" strokeWidth="3" fill="none" />
+      <path d="M15 10 Q20 5 25 8 Q30 11 25 14" stroke="#FCD34D" strokeWidth="3" fill="none" />
+    </g>
+  </svg>
+);
+
 const OnboardingPage = ({ onNavigate, user, onComplete }: OnboardingPageProps) => {
   const [currentStep, setCurrentStep] = useState<Step>('profile');
   const [username, setUsername] = useState('');
@@ -16,6 +280,7 @@ const OnboardingPage = ({ onNavigate, user, onComplete }: OnboardingPageProps) =
   const [selectedReferral, setSelectedReferral] = useState<string | null>(null);
   const [selectedGoals, setSelectedGoals] = useState<string[]>([]);
   const [selectedPlan, setSelectedPlan] = useState<'starter' | 'premium'>('starter');
+  const [isLoadingCheckout, setIsLoadingCheckout] = useState(false);
 
   const steps: Step[] = ['profile', 'grade', 'referral', 'goals', 'features', 'trial'];
   const stepIndex = steps.indexOf(currentStep);
@@ -43,13 +308,45 @@ const OnboardingPage = ({ onNavigate, user, onComplete }: OnboardingPageProps) =
     );
   };
 
-  const handleStartTrial = () => {
-    if (user && onComplete) {
-      localStorage.setItem('writescholar_onboarding_completed', 'true');
-      onNavigate('pricing');
-    } else {
-      localStorage.setItem('writescholar_onboarding_completed', 'true');
+  const handleStartTrial = async () => {
+    localStorage.setItem('writescholar_onboarding_completed', 'true');
+    
+    if (!user) {
       onNavigate('login');
+      return;
+    }
+
+    setIsLoadingCheckout(true);
+
+    try {
+      const successUrl = `${window.location.origin}/dashboard?payment=success`;
+      const cancelUrl = `${window.location.origin}/dashboard?payment=cancelled`;
+
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/subscriptions/create-checkout-session`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+        },
+        body: JSON.stringify({
+          planType: selectedPlan,
+          billingCycle: 'monthly',
+          successUrl,
+          cancelUrl
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to create checkout session');
+      }
+
+      window.location.href = data.data.checkoutUrl;
+    } catch (err) {
+      console.error('Checkout error:', err);
+      setIsLoadingCheckout(false);
+      onNavigate('pricing');
     }
   };
 
@@ -138,6 +435,7 @@ const OnboardingPage = ({ onNavigate, user, onComplete }: OnboardingPageProps) =
           {/* Step 1: Username & DOB */}
           {currentStep === 'profile' && (
             <div className="animate-fadeIn">
+              <ProfileIllustration />
               <div className="text-center mb-8">
                 <h1 className="text-3xl text-stone-800 mb-2" style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 400 }}>
                   Set up your profile
@@ -182,6 +480,7 @@ const OnboardingPage = ({ onNavigate, user, onComplete }: OnboardingPageProps) =
           {/* Step 2: Grade */}
           {currentStep === 'grade' && (
             <div className="animate-fadeIn">
+              <GradeIllustration />
               <div className="text-center mb-8">
                 <h1 className="text-3xl text-stone-800 mb-2" style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 400 }}>
                   Welcome to WriteScholar!
@@ -232,6 +531,7 @@ const OnboardingPage = ({ onNavigate, user, onComplete }: OnboardingPageProps) =
           {/* Step 3: Referral */}
           {currentStep === 'referral' && (
             <div className="animate-fadeIn">
+              <ReferralIllustration />
               <div className="text-center mb-8">
                 <h1 className="text-3xl text-stone-800 mb-2" style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 400 }}>
                   How did you find us?
@@ -278,9 +578,10 @@ const OnboardingPage = ({ onNavigate, user, onComplete }: OnboardingPageProps) =
             </div>
           )}
 
-          {/* Step 3: Goals */}
+          {/* Step 4: Goals */}
           {currentStep === 'goals' && (
             <div className="animate-fadeIn">
+              <GoalsIllustration />
               <div className="text-center mb-8">
                 <h1 className="text-3xl text-stone-800 mb-2" style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 400 }}>
                   What brings you here?
@@ -327,9 +628,10 @@ const OnboardingPage = ({ onNavigate, user, onComplete }: OnboardingPageProps) =
             </div>
           )}
 
-          {/* Step 4: Feature comparison */}
+          {/* Step 5: Feature comparison */}
           {currentStep === 'features' && (
             <div className="animate-fadeIn">
+              <FeaturesIllustration />
               <div className="text-center mb-6">
                 <h1 className="text-3xl text-stone-800 mb-2" style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 400 }}>
                   Unlock <span className="text-lime-600">everything</span>
@@ -399,9 +701,10 @@ const OnboardingPage = ({ onNavigate, user, onComplete }: OnboardingPageProps) =
             </div>
           )}
 
-          {/* Step 5: Trial paywall */}
+          {/* Step 6: Trial paywall */}
           {currentStep === 'trial' && (
             <div className="animate-fadeIn">
+              <TrialIllustration />
               <div className="text-center mb-6">
                 <div className="inline-flex items-center gap-2 px-3 py-1 bg-lime-100 rounded-full mb-4">
                   <span className="w-2 h-2 bg-lime-500 rounded-full animate-pulse"></span>
@@ -517,10 +820,21 @@ const OnboardingPage = ({ onNavigate, user, onComplete }: OnboardingPageProps) =
               {/* CTA */}
               <button
                 onClick={handleStartTrial}
-                className="w-full py-4 rounded-full font-bold text-base transition-all text-stone-900 shadow-lg hover:shadow-xl hover:scale-[1.01]"
+                disabled={isLoadingCheckout}
+                className="w-full py-4 rounded-full font-bold text-base transition-all text-stone-900 shadow-lg hover:shadow-xl hover:scale-[1.01] disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:scale-100"
                 style={{ background: 'linear-gradient(135deg, #a3e635 0%, #84cc16 100%)' }}
               >
-                Start 7-day free trial for $0.00
+                {isLoadingCheckout ? (
+                  <span className="flex items-center justify-center">
+                    <svg className="animate-spin -ml-1 mr-2 h-5 w-5 text-stone-800" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Redirecting to checkout...
+                  </span>
+                ) : (
+                  'Start 7-day free trial for $0.00'
+                )}
               </button>
               <p className="text-center text-xs text-stone-400 mt-3">
                 Then ${selectedPlan === 'starter' ? '19.99' : '39.99'}/month. Cancel anytime before day 7 and pay nothing.

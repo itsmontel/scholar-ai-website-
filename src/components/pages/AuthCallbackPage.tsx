@@ -17,34 +17,38 @@ const AuthCallbackPage: React.FC<AuthCallbackPageProps> = ({ onNavigate, onLogin
         const userParam = urlParams.get('user');
         const errorParam = urlParams.get('error');
 
+        // Prioritize successful auth - if we have token and user, process them
+        // even if there's an error param from a previous attempt
+        if (token && userParam) {
+          // Parse user data
+          const userData = JSON.parse(decodeURIComponent(userParam));
+
+          // Store token and user data
+          localStorage.setItem('authToken', token);
+          localStorage.setItem('user', JSON.stringify(userData));
+
+          // Call the parent component's onLogin
+          onLogin(userData);
+          setStatus('success');
+
+          // Remove token from URL for security, then redirect to dashboard
+          window.history.replaceState(null, '', '/auth/callback');
+          setTimeout(() => {
+            onNavigate('dashboard');
+          }, 800);
+          return;
+        }
+
+        // Only show error if we don't have valid auth data
         if (errorParam) {
           setError('Authentication failed. Please try again.');
           setStatus('error');
           return;
         }
 
-        if (!token || !userParam) {
-          setError('Invalid authentication response.');
-          setStatus('error');
-          return;
-        }
-
-        // Parse user data
-        const userData = JSON.parse(decodeURIComponent(userParam));
-
-        // Store token and user data
-        localStorage.setItem('authToken', token);
-        localStorage.setItem('user', JSON.stringify(userData));
-
-        // Call the parent component's onLogin
-        onLogin(userData);
-        setStatus('success');
-
-        // Remove token from URL for security, then redirect to dashboard
-        window.history.replaceState(null, '', '/auth/callback');
-        setTimeout(() => {
-          onNavigate('dashboard');
-        }, 800);
+        // No token/user and no error - invalid response
+        setError('Invalid authentication response.');
+        setStatus('error');
 
       } catch (error) {
         console.error('Auth callback error:', error);
