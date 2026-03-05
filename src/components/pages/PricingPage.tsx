@@ -12,6 +12,7 @@ interface PricingPageProps {
 const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
   const [billingCycle, setBillingCycle] = useState('monthly');
   const [currentPlan, setCurrentPlan] = useState<string>('free');
+  const [isTrialEligible, setIsTrialEligible] = useState<boolean>(true);
   const [paymentModal, setPaymentModal] = useState<{
     isOpen: boolean;
     planType: 'starter' | 'premium';
@@ -44,6 +45,33 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
     };
 
     fetchCurrentPlan();
+  }, [user]);
+
+  useEffect(() => {
+    const checkTrialEligibility = async () => {
+      if (!user) {
+        setIsTrialEligible(true);
+        return;
+      }
+      
+      try {
+        const token = localStorage.getItem('authToken');
+        const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/subscriptions/trial-eligibility`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setIsTrialEligible(data.eligible);
+        }
+      } catch (error) {
+        console.error('Error checking trial eligibility:', error);
+      }
+    };
+
+    checkTrialEligibility();
   }, [user]);
 
   const handlePlanAction = async (planId: string) => {
@@ -170,7 +198,11 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
       ],
       limitations: [],
       popular: true,
-      buttonText: !user ? 'Try Free' : (currentPlan === 'free' ? 'Upgrade to Starter' : 'Switch to Starter'),
+      buttonText: !user 
+        ? 'Start 7-Day Free Trial' 
+        : (currentPlan === 'free' 
+          ? (isTrialEligible ? 'Start 7-Day Free Trial' : 'Upgrade to Starter') 
+          : 'Switch to Starter'),
       buttonAction: () => handlePlanAction('starter')
     },
     {
@@ -190,12 +222,20 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
       ],
       limitations: [],
       popular: false,
-      buttonText: !user ? 'Try Free' : (currentPlan === 'free' ? 'Upgrade to Premium' : 'Switch to Premium'),
+      buttonText: !user 
+        ? 'Start 7-Day Free Trial' 
+        : (currentPlan === 'free' 
+          ? (isTrialEligible ? 'Start 7-Day Free Trial' : 'Upgrade to Premium') 
+          : 'Switch to Premium'),
       buttonAction: () => handlePlanAction('premium')
     }
   ];
 
   const faqs = [
+    {
+      question: "How does the 7-day free trial work?",
+      answer: "New users get a 7-day free trial on Starter or Premium plans. Your card is collected at checkout but won't be charged until the trial ends. Cancel anytime during the trial to avoid charges. Each email address can only use one free trial."
+    },
     {
       question: "What's included in the free plan?",
       answer: "The free plan includes 3 documents per month, 3 AI essay analyses, 3 study tool generations (quiz, flashcards, or crossword), 1,000 words for the Humanizer and Summarizer, and 2 citation searches. It's perfect for students just getting started."
@@ -310,6 +350,15 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
                   </span>
                 </div>
               )}
+              
+              {/* Trial badge for paid plans */}
+              {plan.id !== 'free' && currentPlan === 'free' && isTrialEligible && (
+                <div className="absolute -top-4 right-4">
+                  <span className="bg-violet-500 text-white px-3 py-1 rounded-full text-xs font-semibold">
+                    7-Day Free Trial
+                  </span>
+                </div>
+              )}
 
               <div className="text-center mb-8">
                 <h3 className="text-2xl text-stone-800 mb-2" style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 400 }}>{plan.name}</h3>
@@ -382,7 +431,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
           <p className="text-stone-300 mb-6 max-w-xl mx-auto">
             {user 
               ? 'Head to your dashboard to start analyzing documents and finding citations.'
-              : 'Join thousands of students and researchers who trust WriteScholar.'
+              : 'Start your 7-day free trial today. No commitment, cancel anytime.'
             }
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
@@ -407,7 +456,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
                   onClick={() => onNavigate('signup')}
                   className="bg-lime-400 hover:bg-lime-300 text-stone-900 px-6 py-3 rounded-full font-semibold transition-colors"
                 >
-                  Try Free
+                  Start Free Trial
                 </button>
                 <button 
                   onClick={() => onNavigate('contact')}

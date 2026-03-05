@@ -187,6 +187,75 @@ const getPlanLimits = async (userId) => {
   }
 };
 
+// Check if an email is eligible for a free trial
+// Returns true if eligible, false if they've already used a trial
+const checkTrialEligibility = async (email) => {
+  try {
+    const normalizedEmail = email.toLowerCase().trim();
+    
+    // Check if this email has ever used a trial
+    const { data: existingTrial, error } = await supabase
+      .from('trial_usage')
+      .select('id, trial_started_at')
+      .ilike('email', normalizedEmail)
+      .limit(1)
+      .single();
+
+    if (error && error.code !== 'PGRST116') {
+      // PGRST116 = no rows found, which is what we want
+      console.error('Error checking trial eligibility:', error);
+      // On error, be conservative and don't give trial
+      return { eligible: false, reason: 'Error checking eligibility' };
+    }
+
+    if (existingTrial) {
+      console.log(`Email ${normalizedEmail} already used trial on ${existingTrial.trial_started_at}`);
+      return { 
+        eligible: false, 
+        reason: 'This email has already used a free trial',
+        previousTrialDate: existingTrial.trial_started_at
+      };
+    }
+
+    return { eligible: true };
+  } catch (error) {
+    console.error('Error in checkTrialEligibility:', error);
+    return { eligible: false, reason: 'Error checking eligibility' };
+  }
+};
+
+// Record that an email has used a trial
+const recordTrialUsage = async (email, stripeCustomerId, planType) => {
+  try {
+    const normalizedEmail = email.toLowerCase().trim();
+    
+    const { error } = await supabase
+      .from('trial_usage')
+      .insert({
+        email: normalizedEmail,
+        stripe_customer_id: stripeCustomerId,
+        trial_plan: planType,
+        trial_started_at: new Date().toISOString()
+      });
+
+    if (error) {
+      // If it's a duplicate key error, that's fine - trial was already recorded
+      if (error.code === '23505') {
+        console.log(`Trial already recorded for ${normalizedEmail}`);
+        return { success: true, alreadyRecorded: true };
+      }
+      console.error('Error recording trial usage:', error);
+      return { success: false, error: error.message };
+    }
+
+    console.log(`Recorded trial usage for ${normalizedEmail}`);
+    return { success: true };
+  } catch (error) {
+    console.error('Error in recordTrialUsage:', error);
+    return { success: false, error: error.message };
+  }
+};
+
 // Create Stripe customer
 const createStripeCustomer = async (email, name) => {
   try {
@@ -205,10 +274,26 @@ const createStripeCustomer = async (email, name) => {
 };
 
 // Create checkout session
-const createCheckoutSession = async (customerId, planType, billingCycle, userId, promoCode = null) => {
+const createCheckoutSession = async (customerId, planType, billingCycle, userId, promoCode = null, userEmail = null) => {
   try {
     // Get price ID based on plan and billing cycle
     const priceId = getPriceId(planType, billingCycle);
+    
+    // Check if user is eligible for a free trial
+    let applyTrial = false;
+    if (userEmail) {
+      const trialEligibility = await checkTrialEligibility(userEmail);
+      applyTrial = trialEligibility.eligible;
+      
+      if (applyTrial) {
+        console.log(`User ${userEmail} is eligible for 7-day free trial`);
+        // Record the trial usage now (before checkout completes)
+        // This prevents race conditions where user opens multiple checkout sessions
+        await recordTrialUsage(userEmail, customerId, planType);
+      } else {
+        console.log(`User ${userEmail} is NOT eligible for trial: ${trialEligibility.reason}`);
+      }
+    }
     
     const sessionConfig = {
       customer: customerId,
@@ -222,6 +307,15 @@ const createCheckoutSession = async (customerId, planType, billingCycle, userId,
       mode: 'subscription',
       success_url: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/dashboard?payment=success`,
       cancel_url: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/pricing?payment=cancelled`,
+      subscription_data: {
+        metadata: {
+          userId,
+          planType,
+          billingCycle,
+          source: 'writescholar',
+          hadTrial: applyTrial ? 'true' : 'false'
+        }
+      },
       metadata: {
         userId,
         planType,
@@ -231,6 +325,11 @@ const createCheckoutSession = async (customerId, planType, billingCycle, userId,
       // Allow customers to enter promo codes at checkout
       allow_promotion_codes: true
     };
+    
+    // Only add trial period if user is eligible
+    if (applyTrial) {
+      sessionConfig.subscription_data.trial_period_days = 7;
+    }
 
     // If a specific promo code is provided, apply it directly
     if (promoCode) {
@@ -519,6 +618,8 @@ module.exports = {
   getRemainingUsage,
   getPlanDetails,
   getPlanLimits,
+  checkTrialEligibility,
+  recordTrialUsage,
   createStripeCustomer,
   createCheckoutSession,
   getStripeSubscription,

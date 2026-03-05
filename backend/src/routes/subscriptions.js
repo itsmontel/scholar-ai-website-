@@ -53,12 +53,14 @@ router.post('/create-checkout-session', authenticateToken, async (req, res) => {
     }
 
     // Create checkout session with optional promo code
+    // Pass user email to check trial eligibility
     const sessionResult = await subscriptionService.createCheckoutSession(
       customerId,
       planType,
       billingCycle,
       userId,
-      promoCode || null
+      promoCode || null,
+      user.email  // Pass email for trial eligibility check
     );
 
     if (!sessionResult.success) {
@@ -532,6 +534,39 @@ router.post('/validate-promo-code', authenticateToken, async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to validate promo code',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
+// @route   GET /api/subscriptions/trial-eligibility
+// @desc    Check if user is eligible for a free trial
+// @access  Private
+router.get('/trial-eligibility', authenticateToken, async (req, res) => {
+  try {
+    const user = req.user;
+    
+    if (!user.email) {
+      return res.status(400).json({
+        success: false,
+        message: 'User email not found'
+      });
+    }
+
+    const eligibility = await subscriptionService.checkTrialEligibility(user.email);
+
+    res.json({
+      success: true,
+      eligible: eligibility.eligible,
+      reason: eligibility.reason || null,
+      previousTrialDate: eligibility.previousTrialDate || null
+    });
+
+  } catch (error) {
+    console.error('Error checking trial eligibility:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to check trial eligibility',
       error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }

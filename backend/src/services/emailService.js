@@ -84,50 +84,96 @@ class EmailService {
         replyTo: replyToAddress,
         subject: 'Verify Your WriteScholar Account',
         html: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center;">
-              <h1 style="color: white; margin: 0; font-size: 28px;">WriteScholar</h1>
-              <p style="color: white; margin: 10px 0 0 0; font-size: 16px;">AI Toolkit for Students</p>
-            </div>
-            
-            <div style="padding: 30px; background: #f8f9fa;">
-              <h2 style="color: #333; margin-bottom: 20px;">Welcome to WriteScholar!</h2>
-              
-              <p style="color: #666; line-height: 1.6; margin-bottom: 25px;">
-                Thank you for signing up for WriteScholar. To complete your registration and start using our AI toolkit—essay feedback, citation finder, summarizer, quiz generator, humanizer, and more—please verify your email address by clicking the button below.
-              </p>
-              
-              <div style="text-align: center; margin: 30px 0;">
-                <a href="${verificationUrl}" 
-                   style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
-                          color: white; 
-                          padding: 15px 30px; 
-                          text-decoration: none; 
-                          border-radius: 8px; 
-                          font-weight: bold; 
-                          display: inline-block;">
-                  Verify Email Address
-                </a>
-              </div>
-              
-              <p style="color: #666; line-height: 1.6; margin-bottom: 20px;">
-                If the button doesn't work, you can copy and paste this link into your browser:
-              </p>
-              
-              <p style="color: #667eea; word-break: break-all; background: #f1f3f4; padding: 10px; border-radius: 4px;">
-                ${verificationUrl}
-              </p>
-              
-              <p style="color: #999; font-size: 14px; margin-top: 30px;">
-                This verification link will expire in 24 hours. If you didn't create an account with WriteScholar, you can safely ignore this email.
-              </p>
-            </div>
-            
-            <div style="background: #333; color: white; padding: 20px; text-align: center; font-size: 14px;">
-              <p style="margin: 0;">© 2026 WriteScholar. All rights reserved.</p>
-              <p style="margin: 5px 0 0 0;">Your AI toolkit for academic success</p>
-            </div>
-          </div>
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          </head>
+          <body style="margin: 0; padding: 0; background-color: #f5f5f4; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
+            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #f5f5f4;">
+              <tr>
+                <td align="center" style="padding: 40px 20px;">
+                  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width: 480px; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
+                    
+                    <!-- Header -->
+                    <tr>
+                      <td style="background: linear-gradient(180deg, #292524 0%, #1c1917 100%); padding: 32px 40px; text-align: center;">
+                        <h1 style="margin: 0; font-size: 28px; font-weight: 600; color: #a3e635; letter-spacing: -0.5px;">WriteScholar</h1>
+                      </td>
+                    </tr>
+                    
+                    <!-- Main Content -->
+                    <tr>
+                      <td style="padding: 40px;">
+                        <h2 style="margin: 0 0 8px 0; font-size: 24px; font-weight: 600; color: #1c1917; text-align: center;">Verify your email</h2>
+                        <p style="margin: 0 0 32px 0; font-size: 15px; color: #78716c; text-align: center; line-height: 1.5;">
+                          Thanks for signing up! Please confirm your email address to get started.
+                        </p>
+                        
+                        <!-- Button -->
+                        <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+                          <tr>
+                            <td align="center" style="padding: 8px 0 32px 0;">
+                              <a href="${verificationUrl}" 
+                                 style="display: inline-block; 
+                                        background-color: #1c1917; 
+                                        color: #ffffff; 
+                                        font-size: 16px; 
+                                        font-weight: 600; 
+                                        text-decoration: none; 
+                                        padding: 14px 32px; 
+                                        border-radius: 50px;
+                                        transition: background-color 0.2s;">
+                                Confirm your email
+                              </a>
+                            </td>
+                          </tr>
+                        </table>
+                        
+                        <!-- Divider -->
+                        <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+                          <tr>
+                            <td style="border-top: 1px solid #e7e5e4; padding-top: 24px;">
+                              <p style="margin: 0 0 12px 0; font-size: 13px; color: #a8a29e; text-align: center;">
+                                Or copy and paste this link:
+                              </p>
+                              <p style="margin: 0; font-size: 13px; color: #78716c; word-break: break-all; text-align: center; background-color: #fafaf9; padding: 12px 16px; border-radius: 8px;">
+                                ${verificationUrl}
+                              </p>
+                            </td>
+                          </tr>
+                        </table>
+                      </td>
+                    </tr>
+                    
+                    <!-- Footer -->
+                    <tr>
+                      <td style="background-color: #fafaf9; padding: 24px 40px; border-top: 1px solid #e7e5e4;">
+                        <p style="margin: 0 0 4px 0; font-size: 12px; color: #a8a29e; text-align: center;">
+                          This link expires in 24 hours.
+                        </p>
+                        <p style="margin: 0; font-size: 12px; color: #a8a29e; text-align: center;">
+                          If you didn't sign up for WriteScholar, you can ignore this email.
+                        </p>
+                      </td>
+                    </tr>
+                    
+                    <!-- Brand Footer -->
+                    <tr>
+                      <td style="padding: 20px 40px; text-align: center;">
+                        <p style="margin: 0; font-size: 12px; color: #d6d3d1;">
+                          © 2026 WriteScholar · AI Toolkit for Students
+                        </p>
+                      </td>
+                    </tr>
+                    
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </body>
+          </html>
         `
       };
 
@@ -177,50 +223,102 @@ class EmailService {
         replyTo: replyToAddress,
         subject: 'Reset Your WriteScholar Password',
         html: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center;">
-              <h1 style="color: white; margin: 0; font-size: 28px;">WriteScholar</h1>
-              <p style="color: white; margin: 10px 0 0 0; font-size: 16px;">Password Reset Request</p>
-            </div>
-            
-            <div style="padding: 30px; background: #f8f9fa;">
-              <h2 style="color: #333; margin-bottom: 20px;">Password Reset Request</h2>
-              
-              <p style="color: #666; line-height: 1.6; margin-bottom: 25px;">
-                We received a request to reset your password for your WriteScholar account. If you made this request, click the button below to reset your password.
-              </p>
-              
-              <div style="text-align: center; margin: 30px 0;">
-                <a href="${resetUrl}" 
-                   style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
-                          color: white; 
-                          padding: 15px 30px; 
-                          text-decoration: none; 
-                          border-radius: 8px; 
-                          font-weight: bold; 
-                          display: inline-block;">
-                  Reset Password
-                </a>
-              </div>
-              
-              <p style="color: #666; line-height: 1.6; margin-bottom: 20px;">
-                If the button doesn't work, you can copy and paste this link into your browser:
-              </p>
-              
-              <p style="color: #667eea; word-break: break-all; background: #f1f3f4; padding: 10px; border-radius: 4px;">
-                ${resetUrl}
-              </p>
-              
-              <p style="color: #999; font-size: 14px; margin-top: 30px;">
-                This password reset link will expire in 1 hour. If you didn't request a password reset, you can safely ignore this email.
-              </p>
-            </div>
-            
-            <div style="background: #333; color: white; padding: 20px; text-align: center; font-size: 14px;">
-              <p style="margin: 0;">© 2026 WriteScholar. All rights reserved.</p>
-              <p style="margin: 5px 0 0 0;">Enhancing academic writing with AI</p>
-            </div>
-          </div>
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          </head>
+          <body style="margin: 0; padding: 0; background-color: #f5f5f4; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
+            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #f5f5f4;">
+              <tr>
+                <td align="center" style="padding: 40px 20px;">
+                  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width: 480px; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
+                    
+                    <!-- Header -->
+                    <tr>
+                      <td style="background: linear-gradient(180deg, #292524 0%, #1c1917 100%); padding: 32px 40px; text-align: center;">
+                        <h1 style="margin: 0; font-size: 28px; font-weight: 600; color: #a3e635; letter-spacing: -0.5px;">WriteScholar</h1>
+                      </td>
+                    </tr>
+                    
+                    <!-- Main Content -->
+                    <tr>
+                      <td style="padding: 40px;">
+                        <!-- Lock Icon -->
+                        <div style="text-align: center; margin-bottom: 24px;">
+                          <div style="display: inline-block; width: 56px; height: 56px; background-color: #fef3c7; border-radius: 50%; line-height: 56px; font-size: 24px;">
+                            🔐
+                          </div>
+                        </div>
+                        
+                        <h2 style="margin: 0 0 8px 0; font-size: 24px; font-weight: 600; color: #1c1917; text-align: center;">Reset your password</h2>
+                        <p style="margin: 0 0 32px 0; font-size: 15px; color: #78716c; text-align: center; line-height: 1.5;">
+                          We received a request to reset your password. Click below to choose a new one.
+                        </p>
+                        
+                        <!-- Button -->
+                        <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+                          <tr>
+                            <td align="center" style="padding: 8px 0 32px 0;">
+                              <a href="${resetUrl}" 
+                                 style="display: inline-block; 
+                                        background-color: #1c1917; 
+                                        color: #ffffff; 
+                                        font-size: 16px; 
+                                        font-weight: 600; 
+                                        text-decoration: none; 
+                                        padding: 14px 32px; 
+                                        border-radius: 50px;">
+                                Reset password
+                              </a>
+                            </td>
+                          </tr>
+                        </table>
+                        
+                        <!-- Divider -->
+                        <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+                          <tr>
+                            <td style="border-top: 1px solid #e7e5e4; padding-top: 24px;">
+                              <p style="margin: 0 0 12px 0; font-size: 13px; color: #a8a29e; text-align: center;">
+                                Or copy and paste this link:
+                              </p>
+                              <p style="margin: 0; font-size: 13px; color: #78716c; word-break: break-all; text-align: center; background-color: #fafaf9; padding: 12px 16px; border-radius: 8px;">
+                                ${resetUrl}
+                              </p>
+                            </td>
+                          </tr>
+                        </table>
+                      </td>
+                    </tr>
+                    
+                    <!-- Footer -->
+                    <tr>
+                      <td style="background-color: #fafaf9; padding: 24px 40px; border-top: 1px solid #e7e5e4;">
+                        <p style="margin: 0 0 4px 0; font-size: 12px; color: #a8a29e; text-align: center;">
+                          This link expires in 1 hour.
+                        </p>
+                        <p style="margin: 0; font-size: 12px; color: #a8a29e; text-align: center;">
+                          If you didn't request this, you can safely ignore this email.
+                        </p>
+                      </td>
+                    </tr>
+                    
+                    <!-- Brand Footer -->
+                    <tr>
+                      <td style="padding: 20px 40px; text-align: center;">
+                        <p style="margin: 0; font-size: 12px; color: #d6d3d1;">
+                          © 2026 WriteScholar · AI Toolkit for Students
+                        </p>
+                      </td>
+                    </tr>
+                    
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </body>
+          </html>
         `
       };
 
@@ -242,79 +340,154 @@ class EmailService {
     try {
       const fromAddress = process.env.EMAIL_FROM || process.env.EMAIL_USER;
       const replyToAddress = process.env.EMAIL_REPLY_TO || 'support@writescholar.com';
+      const dashboardUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+      const pdfUrl = `${dashboardUrl.replace(/\/$/, '')}/downloads/writescholar-ultimate-study-tips-guide.pdf`;
       const mailOptions = {
         from: `"WriteScholar" <${fromAddress}>`,
         to: email,
         replyTo: replyToAddress,
-        subject: 'Welcome to WriteScholar - Your Account is Verified!',
+        subject: 'Welcome to WriteScholar!',
         html: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center;">
-              <h1 style="color: white; margin: 0; font-size: 28px;">WriteScholar</h1>
-              <p style="color: white; margin: 10px 0 0 0; font-size: 16px;">AI Toolkit for Students</p>
-            </div>
-            
-            <div style="padding: 30px; background: #f8f9fa;">
-              <h2 style="color: #333; margin-bottom: 20px;">Welcome to WriteScholar!</h2>
-              
-              <p style="color: #666; line-height: 1.6; margin-bottom: 25px;">
-                Congratulations! Your WriteScholar account has been successfully verified. You're now ready to use our full AI toolkit for academic success.
-              </p>
-              
-              <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #667eea;">
-                <h3 style="color: #333; margin-top: 0;">What you can do now:</h3>
-                <ul style="color: #666; line-height: 1.8;">
-                  <li>Get essay feedback and writing analysis</li>
-                  <li>Find and format citations (APA, MLA, Chicago)</li>
-                  <li>Summarize papers and articles</li>
-                  <li>Generate quizzes from any text</li>
-                  <li>Humanize AI-written text</li>
-                  <li>Access your dashboard and all tools</li>
-                </ul>
-              </div>
-              
-              <div style="text-align: center; margin: 30px 0;">
-                <a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}/dashboard" 
-                   style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
-                          color: white; 
-                          padding: 15px 30px; 
-                          text-decoration: none; 
-                          border-radius: 8px; 
-                          font-weight: bold; 
-                          display: inline-block;">
-                  Go to Dashboard
-                </a>
-              </div>
-
-              <div style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); padding: 24px; border-radius: 12px; margin: 28px 0; border: 1px solid #bae6fd;">
-                <h3 style="color: #0c4a6e; margin-top: 0; margin-bottom: 12px;">Your free gift: Ultimate Study Tips Guide</h3>
-                <p style="color: #0369a1; line-height: 1.6; margin-bottom: 16px;">
-                  As a thank you for joining, we've put together a 10–12 page PDF guide with our best study tips: active recall, spaced repetition, and how to use WriteScholar's tools to get better grades.
-                </p>
-                <div style="text-align: center;">
-                  <a href="${(process.env.FRONTEND_URL || 'http://localhost:5173').replace(/\/$/, '')}/downloads/writescholar-ultimate-study-tips-guide.pdf"
-                     style="background: #0284c7;
-                            color: white;
-                            padding: 12px 24px;
-                            text-decoration: none;
-                            border-radius: 8px;
-                            font-weight: bold;
-                            display: inline-block;">
-                    Download free PDF →
-                  </a>
-                </div>
-              </div>
-              
-              <p style="color: #999; font-size: 14px; margin-top: 30px;">
-                If you have any questions, reply to this email or contact support@writescholar.com.
-              </p>
-            </div>
-            
-            <div style="background: #333; color: white; padding: 20px; text-align: center; font-size: 14px;">
-              <p style="margin: 0;">© 2026 WriteScholar. All rights reserved.</p>
-              <p style="margin: 5px 0 0 0;">Your AI toolkit for academic success</p>
-            </div>
-          </div>
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          </head>
+          <body style="margin: 0; padding: 0; background-color: #f5f5f4; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
+            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #f5f5f4;">
+              <tr>
+                <td align="center" style="padding: 40px 20px;">
+                  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width: 480px; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
+                    
+                    <!-- Header -->
+                    <tr>
+                      <td style="background: linear-gradient(180deg, #292524 0%, #1c1917 100%); padding: 32px 40px; text-align: center;">
+                        <h1 style="margin: 0; font-size: 28px; font-weight: 600; color: #a3e635; letter-spacing: -0.5px;">WriteScholar</h1>
+                      </td>
+                    </tr>
+                    
+                    <!-- Main Content -->
+                    <tr>
+                      <td style="padding: 40px;">
+                        <!-- Checkmark Icon -->
+                        <div style="text-align: center; margin-bottom: 24px;">
+                          <div style="display: inline-block; width: 56px; height: 56px; background-color: #ecfccb; border-radius: 50%; line-height: 56px; font-size: 24px;">
+                            ✓
+                          </div>
+                        </div>
+                        
+                        <h2 style="margin: 0 0 8px 0; font-size: 24px; font-weight: 600; color: #1c1917; text-align: center;">You're all set!</h2>
+                        <p style="margin: 0 0 32px 0; font-size: 15px; color: #78716c; text-align: center; line-height: 1.5;">
+                          Your account is verified and ready to go. Start exploring our AI toolkit for academic success.
+                        </p>
+                        
+                        <!-- Features List -->
+                        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin-bottom: 32px;">
+                          <tr>
+                            <td style="background-color: #fafaf9; border-radius: 12px; padding: 20px;">
+                              <p style="margin: 0 0 12px 0; font-size: 14px; font-weight: 600; color: #1c1917;">What you can do:</p>
+                              <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+                                <tr>
+                                  <td style="padding: 6px 0; font-size: 14px; color: #57534e;">
+                                    <span style="color: #84cc16; margin-right: 8px;">✓</span> Essay feedback & analysis
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td style="padding: 6px 0; font-size: 14px; color: #57534e;">
+                                    <span style="color: #84cc16; margin-right: 8px;">✓</span> Citation finder (APA, MLA, Chicago)
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td style="padding: 6px 0; font-size: 14px; color: #57534e;">
+                                    <span style="color: #84cc16; margin-right: 8px;">✓</span> Summarize papers & articles
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td style="padding: 6px 0; font-size: 14px; color: #57534e;">
+                                    <span style="color: #84cc16; margin-right: 8px;">✓</span> Quiz & flashcard generator
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td style="padding: 6px 0; font-size: 14px; color: #57534e;">
+                                    <span style="color: #84cc16; margin-right: 8px;">✓</span> Humanize AI-written text
+                                  </td>
+                                </tr>
+                              </table>
+                            </td>
+                          </tr>
+                        </table>
+                        
+                        <!-- Button -->
+                        <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+                          <tr>
+                            <td align="center" style="padding: 0 0 32px 0;">
+                              <a href="${dashboardUrl}/dashboard" 
+                                 style="display: inline-block; 
+                                        background-color: #1c1917; 
+                                        color: #ffffff; 
+                                        font-size: 16px; 
+                                        font-weight: 600; 
+                                        text-decoration: none; 
+                                        padding: 14px 32px; 
+                                        border-radius: 50px;">
+                                Go to Dashboard
+                              </a>
+                            </td>
+                          </tr>
+                        </table>
+                        
+                        <!-- Gift Section -->
+                        <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+                          <tr>
+                            <td style="border: 2px dashed #d9f99d; border-radius: 12px; padding: 20px; text-align: center;">
+                              <p style="margin: 0 0 4px 0; font-size: 12px; font-weight: 600; color: #65a30d; text-transform: uppercase; letter-spacing: 0.5px;">Free Gift</p>
+                              <p style="margin: 0 0 12px 0; font-size: 16px; font-weight: 600; color: #1c1917;">Ultimate Study Tips Guide</p>
+                              <p style="margin: 0 0 16px 0; font-size: 13px; color: #78716c; line-height: 1.5;">
+                                A 10-page PDF with active recall, spaced repetition, and tips to boost your grades.
+                              </p>
+                              <a href="${pdfUrl}" 
+                                 style="display: inline-block; 
+                                        background-color: #84cc16; 
+                                        color: #1c1917; 
+                                        font-size: 14px; 
+                                        font-weight: 600; 
+                                        text-decoration: none; 
+                                        padding: 10px 20px; 
+                                        border-radius: 50px;">
+                                Download PDF →
+                              </a>
+                            </td>
+                          </tr>
+                        </table>
+                      </td>
+                    </tr>
+                    
+                    <!-- Footer -->
+                    <tr>
+                      <td style="background-color: #fafaf9; padding: 24px 40px; border-top: 1px solid #e7e5e4;">
+                        <p style="margin: 0; font-size: 13px; color: #78716c; text-align: center; line-height: 1.5;">
+                          Questions? Just reply to this email or contact<br>
+                          <a href="mailto:support@writescholar.com" style="color: #57534e; text-decoration: underline;">support@writescholar.com</a>
+                        </p>
+                      </td>
+                    </tr>
+                    
+                    <!-- Brand Footer -->
+                    <tr>
+                      <td style="padding: 20px 40px; text-align: center;">
+                        <p style="margin: 0; font-size: 12px; color: #d6d3d1;">
+                          © 2026 WriteScholar · AI Toolkit for Students
+                        </p>
+                      </td>
+                    </tr>
+                    
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </body>
+          </html>
         `
       };
 
