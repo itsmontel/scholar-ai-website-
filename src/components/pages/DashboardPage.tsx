@@ -154,8 +154,35 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
     fetchStudyEvents();
   }, []);
 
+  const [addEventError, setAddEventError] = useState('');
+  const [addingEvent, setAddingEvent] = useState(false);
+  const [editingEvent, setEditingEvent] = useState<StudyEvent | null>(null);
+
+  const openAddModal = () => {
+    setEditingEvent(null);
+    setNewEvent({ title: '', event_date: '', event_time: '', event_type: 'other', course: '', notes: '' });
+    setAddEventError('');
+    setShowAddEventModal(true);
+  };
+
+  const openEditModal = (event: StudyEvent) => {
+    setEditingEvent(event);
+    setNewEvent({
+      title: event.title,
+      event_date: toDateStr(event.event_date) || event.event_date,
+      event_time: event.event_time || '',
+      event_type: event.event_type || 'other',
+      course: event.course || '',
+      notes: event.notes || ''
+    });
+    setAddEventError('');
+    setShowAddEventModal(true);
+  };
+
   const addStudyEvent = async () => {
     if (!newEvent.title || !newEvent.event_date) return;
+    setAddingEvent(true);
+    setAddEventError('');
     try {
       const token = localStorage.getItem('authToken');
       const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/analysis/study-events`, {
@@ -167,10 +194,52 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
       if (data.success) {
         setStudyEvents(prev => [...prev, data.data].sort((a, b) => new Date(a.event_date).getTime() - new Date(b.event_date).getTime()));
         setNewEvent({ title: '', event_date: '', event_time: '', event_type: 'other', course: '', notes: '' });
+        setEditingEvent(null);
         setShowAddEventModal(false);
+      } else {
+        setAddEventError(data.message || 'Failed to add event');
       }
     } catch (err) {
       console.error('Failed to add study event:', err);
+      setAddEventError('Network error. Please try again.');
+    } finally {
+      setAddingEvent(false);
+    }
+  };
+
+  const updateStudyEvent = async () => {
+    if (!editingEvent || !newEvent.title || !newEvent.event_date) return;
+    setAddingEvent(true);
+    setAddEventError('');
+    try {
+      const token = localStorage.getItem('authToken');
+      const payload = {
+        title: newEvent.title,
+        event_date: newEvent.event_date,
+        event_time: newEvent.event_time || null,
+        event_type: newEvent.event_type || 'other',
+        course: newEvent.course || null,
+        notes: newEvent.notes || null
+      };
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/analysis/study-events/${editingEvent.id}`, {
+        method: 'PUT',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (data.success) {
+        setStudyEvents(prev => prev.map(e => e.id === editingEvent.id ? data.data : e).sort((a, b) => new Date(a.event_date).getTime() - new Date(b.event_date).getTime()));
+        setNewEvent({ title: '', event_date: '', event_time: '', event_type: 'other', course: '', notes: '' });
+        setEditingEvent(null);
+        setShowAddEventModal(false);
+      } else {
+        setAddEventError(data.message || 'Failed to update event');
+      }
+    } catch (err) {
+      console.error('Failed to update study event:', err);
+      setAddEventError('Network error. Please try again.');
+    } finally {
+      setAddingEvent(false);
     }
   };
 
@@ -213,10 +282,11 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
     return days;
   };
 
-  const getEventsForDate = (dateStr: string) => studyEvents.filter(e => e.event_date === dateStr);
+  const toDateStr = (d: string) => (d || '').split('T')[0];
+  const getEventsForDate = (dateStr: string) => studyEvents.filter(e => toDateStr(e.event_date) === dateStr);
   const getUpcomingEvents = () => {
     const today = new Date().toISOString().split('T')[0];
-    return studyEvents.filter(e => e.event_date >= today).slice(0, 5);
+    return studyEvents.filter(e => toDateStr(e.event_date) >= today).slice(0, 5);
   };
   const isToday = (dateStr: string) => new Date().toISOString().split('T')[0] === dateStr;
   const eventTypeColors: Record<string, { bg: string; border: string; text: string; dot: string }> = {
@@ -1447,7 +1517,7 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                 <span className="text-lg">📅</span> Schedule
               </h3>
               <button 
-                onClick={() => setShowAddEventModal(true)}
+                onClick={openAddModal}
                 className="text-stone-400 hover:text-lime-600 transition-colors"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1510,25 +1580,38 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
               ) : (
                 getUpcomingEvents().map(event => {
                   const colors = eventTypeColors[event.event_type] || eventTypeColors.other;
-                  const eventDate = new Date(event.event_date + 'T00:00:00');
+                  const eventDate = new Date(toDateStr(event.event_date) + 'T00:00:00');
                   return (
                     <div key={event.id} className={`flex gap-2 p-2 rounded-lg ${colors.bg} border ${colors.border} group relative`}>
                       <div className={`flex flex-col items-center justify-center w-9 h-9 bg-white rounded-lg shadow-sm ${colors.text} flex-shrink-0`}>
                         <span className="text-[8px] font-bold uppercase leading-none">{eventDate.toLocaleDateString('en-US', { month: 'short' })}</span>
                         <span className="text-sm font-bold leading-none">{eventDate.getDate()}</span>
                       </div>
-                      <div className="min-w-0 flex-1">
+                      <div 
+                        className="min-w-0 flex-1 cursor-pointer"
+                        onClick={() => openEditModal(event)}
+                      >
                         <p className="text-xs font-semibold text-stone-800 truncate">{event.title}</p>
                         <p className="text-[10px] text-stone-500 truncate">
                           {event.course && `${event.course} • `}{event.event_time || 'All day'}
                         </p>
                       </div>
-                      <button 
-                        onClick={() => deleteStudyEvent(event.id)}
-                        className="absolute top-1 right-1 p-1 text-stone-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-                      </button>
+                      <div className="flex items-center gap-0.5 flex-shrink-0">
+                        <button 
+                          onClick={(e) => { e.stopPropagation(); openEditModal(event); }}
+                          className="p-1 text-stone-400 hover:text-lime-600 transition-colors"
+                          title="Edit"
+                        >
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                        </button>
+                        <button 
+                          onClick={(e) => { e.stopPropagation(); deleteStudyEvent(event.id); }}
+                          className="p-1 text-stone-400 hover:text-red-500 transition-colors"
+                          title="Delete"
+                        >
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                        </button>
+                      </div>
                     </div>
                   );
                 })
@@ -1536,7 +1619,7 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
             </div>
             
             <button 
-              onClick={() => setShowAddEventModal(true)}
+              onClick={openAddModal}
               className="w-full mt-3 py-2 text-xs font-medium text-stone-500 bg-stone-50 hover:bg-lime-50 hover:text-lime-700 rounded-lg transition-colors border border-stone-200 border-dashed"
             >
               + Add Event
@@ -1620,13 +1703,13 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
               </button>
               <button
               onClick={() => { setMode('quiz'); setInputText(''); setShowWordWarning(false); setShowHumanizeResult(false); setSummaryResult(null); setFlashcardResult(null); setCrosswordResult(null); }}
-              className={`px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-sm sm:text-base font-medium transition-all relative ${
-                mode === 'quiz' ? 'bg-white shadow-sm border' : ''
+              className={`px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-sm sm:text-base font-semibold transition-all relative ${
+                mode === 'quiz' ? 'bg-white shadow-md border-2 ring-2 ring-orange-200/50' : 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-lg hover:shadow-xl hover:from-orange-600 hover:to-amber-600'
               }`}
-              style={mode === 'quiz' ? { color: '#D35400', borderColor: '#FADBD8' } : { color: '#D35400' }}
+              style={mode === 'quiz' ? { color: '#D35400', borderColor: '#FADBD8' } : {}}
             >
               Study Tools
-              {usageStats.plan === 'free' && <span className="absolute -top-2 -right-1 px-1.5 py-0.5 text-white text-[10px] font-bold rounded-full leading-none" style={{ backgroundColor: '#D35400' }}>PRO</span>}
+              {usageStats.plan === 'free' && <span className="absolute -top-2 -right-1 px-1.5 py-0.5 text-white text-[10px] font-bold rounded-full leading-none bg-stone-900">PRO</span>}
               </button>
             </div>
           </div>
@@ -3325,15 +3408,15 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
         </div>
       )}
 
-      {/* Add Study Event Modal */}
+      {/* Add / Edit Study Event Modal */}
       {showAddEventModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4" onClick={() => setShowAddEventModal(false)}>
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4" onClick={() => { setShowAddEventModal(false); setEditingEvent(null); setAddEventError(''); }}>
           <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-5">
               <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                <span className="text-xl">📅</span> Add Study Event
+                <span className="text-xl">📅</span> {editingEvent ? 'Edit' : 'Add'} Study Event
               </h3>
-              <button onClick={() => setShowAddEventModal(false)} className="text-stone-400 hover:text-stone-600">
+              <button onClick={() => { setShowAddEventModal(false); setEditingEvent(null); setAddEventError(''); }} className="text-stone-400 hover:text-stone-600">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
               </button>
             </div>
@@ -3411,19 +3494,25 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
               </div>
             </div>
             
+            {addEventError && (
+              <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+                {addEventError}
+              </div>
+            )}
+            
             <div className="flex gap-3 mt-6">
               <button
-                onClick={() => setShowAddEventModal(false)}
+                onClick={() => { setShowAddEventModal(false); setEditingEvent(null); setAddEventError(''); }}
                 className="flex-1 px-4 py-2.5 border border-stone-300 text-stone-700 rounded-xl hover:bg-stone-50 transition-colors font-medium text-sm"
               >
                 Cancel
               </button>
               <button
-                onClick={addStudyEvent}
-                disabled={!newEvent.title || !newEvent.event_date}
+                onClick={editingEvent ? updateStudyEvent : addStudyEvent}
+                disabled={!newEvent.title || !newEvent.event_date || addingEvent}
                 className="flex-1 px-4 py-2.5 bg-lime-600 text-white rounded-xl hover:bg-lime-700 transition-colors font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Add Event
+                {addingEvent ? (editingEvent ? 'Saving...' : 'Adding...') : (editingEvent ? 'Save Changes' : 'Add Event')}
               </button>
             </div>
           </div>

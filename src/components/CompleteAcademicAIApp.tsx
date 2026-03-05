@@ -23,6 +23,7 @@ import LibraryPage from './pages/LibraryPage';
 import FAQPage from './pages/HelpCenterPage';
 import AboutPage from './pages/AboutPage';
 import WhyStudentsChoosePage from './pages/WhyStudentsChoosePage';
+import StudyToolsComparisonPage from './pages/StudyToolsComparisonPage';
 import ContactPage from './pages/ContactPage';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import TermsOfServicePage from './pages/TermsOfServicePage';
@@ -106,34 +107,35 @@ const AcademicAIApp = () => {
   // SEO: dynamic document title and meta description per page (SPA)
   const pageMeta: Record<string, { title: string; description: string }> = {
     landing: { title: 'WriteScholar — AI Study Tools: Humanizer, Quiz Generator, Essay Checker', description: 'The complete AI toolkit for students. Humanize AI text, generate quizzes from notes, summarize papers, find citations, get essay feedback. Free to start.' },
-    features: { title: 'Features | WriteScholar', description: 'AI Humanizer to bypass detectors, Quiz Generator from text, Paper Summarizer, Citation Finder, Essay Checker. All the tools students need.' },
-    pricing: { title: 'Pricing | WriteScholar', description: 'Free plan with AI Humanizer, Summarizer, and Essay Checker. Starter adds Quiz Generator. Premium unlocks all features and models. Annual plans save 2 months.' },
-    about: { title: 'About | WriteScholar', description: 'WriteScholar is the complete AI toolkit for students. Humanize AI text, generate quizzes, summarize papers, find citations. Serving students worldwide.' },
-    'why-students-choose': { title: 'Why Students Choose WriteScholar | Compare Writing Tools', description: 'See how WriteScholar compares to Grammarly and QuillBot. Built for academic writing, citation finder, AI humanizer, essay analysis, and more.' },
-    help: { title: 'Help & FAQ | WriteScholar', description: 'Get help with AI Humanizer, Quiz Generator, Paper Summarizer, Citation Finder. Supported citation styles: APA, Harvard, MLA, Chicago.' },
-    contact: { title: 'Contact | WriteScholar', description: 'Contact WriteScholar support for help with AI tools for students.' },
+    features: { title: 'AI Study Tools: Humanizer, Quiz Generator & More | WriteScholar', description: 'AI Humanizer to bypass detectors, Quiz Generator from text, Paper Summarizer, Citation Finder, Essay Checker. All the tools students need.' },
+    pricing: { title: 'Pricing Plans: Free, Starter & Premium | WriteScholar', description: 'Free plan with AI Humanizer, Summarizer, and Essay Checker. Starter adds Quiz Generator. Premium unlocks all features and models. Annual plans save 2 months.' },
+    about: { title: 'About WriteScholar: The AI Toolkit for Students', description: 'WriteScholar is the complete AI toolkit for students. Humanize AI text, generate quizzes, summarize papers, find citations. Serving students worldwide.' },
+    'why-students-choose': { title: 'WriteScholar vs Grammarly vs QuillBot: Honest Comparison 2026', description: 'See how WriteScholar compares to Grammarly and QuillBot. Built for academic writing, citation finder, AI humanizer, essay analysis, and more.' },
+    'study-tools-comparison': { title: 'WriteScholar vs Quizlet vs Knowt: Best AI Study Tools 2026', description: 'Compare WriteScholar, Quizlet, and Knowt. Quizzes, flashcards, crosswords—plus essay analysis, citations, and AI humanizer. See which fits your study style.' },
+    help: { title: 'Help & FAQ: AI Humanizer, Quiz Generator & More | WriteScholar', description: 'Get help with AI Humanizer, Quiz Generator, Paper Summarizer, Citation Finder. Supported citation styles: APA, Harvard, MLA, Chicago.' },
+    contact: { title: 'Contact WriteScholar Support | Get Help Fast', description: 'Contact WriteScholar support for help with AI tools for students.' },
     privacy: { title: 'Privacy Policy | WriteScholar', description: 'WriteScholar privacy policy and data handling.' },
     terms: { title: 'Terms of Service | WriteScholar', description: 'WriteScholar terms of service.' },
-    login: { title: 'Log in | WriteScholar', description: 'Log in to access AI Humanizer, Quiz Generator, Summarizer, and more.' },
-    signup: { title: 'Sign up | WriteScholar', description: 'Create your free account. Get AI Humanizer, Paper Summarizer, Essay Checker, and Citation Finder.' },
-    blog: { title: 'Blog | WriteScholar', description: 'Guides on humanizing AI text, creating study quizzes, summarizing research papers, APA/MLA citations, and academic writing tips.' },
-    'word-counter': { title: 'Free Word Counter Tool | WriteScholar', description: 'Count words, characters, sentences, and paragraphs instantly. Free online word counter for essays, academic papers, and assignments with word limits.' },
-    'citation-generator-tool': { title: 'Free Citation Generator - APA, MLA, Chicago, Harvard | WriteScholar', description: 'Generate properly formatted citations in APA, MLA, Chicago, and Harvard styles. Free citation generator for research papers, essays, and bibliographies.' },
-    'readability-score': { title: 'Free Readability Score Calculator | WriteScholar', description: 'Check your text readability with Flesch-Kincaid scores. Free readability checker shows grade level and reading ease for academic writing.' },
-    'paraphrasing-tips': { title: 'Free Paraphrasing Tips Tool | WriteScholar', description: 'Find overused words, passive voice, and wordy phrases in your writing. Free paraphrasing helper with synonym suggestions for better academic writing.' },
-    'essay-outline': { title: 'Free Essay Outline Generator | WriteScholar', description: 'Generate structured essay outlines for argumentative, expository, narrative, compare-contrast, persuasive, and research papers. Free outline templates.' },
-    'text-case-converter': { title: 'Free Text Case Converter | WriteScholar', description: 'Convert text to UPPERCASE, lowercase, Title Case, Sentence case, and more. Perfect for formatting titles, headings, and fixing caps lock mistakes.' },
-    'thesis-generator': { title: 'Free Thesis Statement Generator | WriteScholar', description: 'Create strong thesis statements for argumentative, expository, analytical, and compare-contrast essays. Template-based thesis builder.' },
-    'grammar-checker': { title: 'Free Grammar Checker | WriteScholar', description: 'Check your writing for common spelling mistakes, grammar errors, punctuation issues, and style suggestions. Quick client-side grammar check.' },
+    login: { title: 'Log In | WriteScholar', description: 'Log in to access AI Humanizer, Quiz Generator, Summarizer, and more.' },
+    signup: { title: 'Sign Up Free | WriteScholar', description: 'Create your free account. Get AI Humanizer, Paper Summarizer, Essay Checker, and Citation Finder.' },
+    blog: { title: 'Study Tips & Academic Writing Guides | WriteScholar Blog', description: 'Guides on humanizing AI text, creating study quizzes, summarizing research papers, APA/MLA citations, and academic writing tips.' },
+    'word-counter': { title: 'Free Word Counter Tool – Count Words & Characters Instantly | WriteScholar', description: 'Count words, characters, sentences, and paragraphs instantly. Free online word counter for essays, academic papers, and assignments with word limits.' },
+    'citation-generator-tool': { title: 'Free Citation Generator – APA, MLA, Chicago, Harvard | WriteScholar', description: 'Generate properly formatted citations in APA, MLA, Chicago, and Harvard styles. Free citation generator for research papers, essays, and bibliographies.' },
+    'readability-score': { title: 'Free Readability Score Calculator – Flesch-Kincaid & More | WriteScholar', description: 'Check your text readability with Flesch-Kincaid scores. Free readability checker shows grade level and reading ease for academic writing.' },
+    'paraphrasing-tips': { title: 'Free Paraphrasing Tips Tool – Find Overused Words & Improve Writing | WriteScholar', description: 'Find overused words, passive voice, and wordy phrases in your writing. Free paraphrasing helper with synonym suggestions for better academic writing.' },
+    'essay-outline': { title: 'Free Essay Outline Generator – Create Outlines in Seconds | WriteScholar', description: 'Generate structured essay outlines for argumentative, expository, narrative, compare-contrast, persuasive, and research papers. Free outline templates.' },
+    'text-case-converter': { title: 'Free Text Case Converter – UPPERCASE, lowercase, Title Case | WriteScholar', description: 'Convert text to UPPERCASE, lowercase, Title Case, Sentence case, and more. Perfect for formatting titles, headings, and fixing caps lock mistakes.' },
+    'thesis-generator': { title: 'Free Thesis Statement Generator – Create Strong Thesis Statements | WriteScholar', description: 'Create strong thesis statements for argumentative, expository, analytical, and compare-contrast essays. Template-based thesis builder.' },
+    'grammar-checker': { title: 'Free Grammar Checker – Fix Spelling & Grammar Errors | WriteScholar', description: 'Check your writing for common spelling mistakes, grammar errors, punctuation issues, and style suggestions. Quick client-side grammar check.' },
     'humanizer': { title: 'AI Humanizer – Bypass AI Detection | WriteScholar', description: 'Transform AI-generated text from ChatGPT, Claude, Gemini into undetectable human writing. Bypass Turnitin, GPTZero, and other AI detectors. Free to try.' },
     'summarizer': { title: 'AI Summarizer – Condense Papers & Articles | WriteScholar', description: 'Summarize research papers, articles, and textbooks into key points. Bullet points or paragraphs. Perfect for literature reviews. Free to try.' },
     'quiz-generator': { title: 'AI Quiz Generator – Create Study Quizzes from Text | WriteScholar', description: 'Turn notes, articles, and textbooks into interactive quizzes. Multiple choice, true/false questions. Perfect for exam prep. Free plan: 3 quizzes/month.' },
     'flashcard-generator': { title: 'AI Flashcard Generator – Create Study Flashcards from Text | WriteScholar', description: 'Transform your notes, articles, and textbooks into interactive flashcards. Perfect for memorization and exam prep. Free plan: 3 generations/month.' },
     'crossword-generator': { title: 'AI Crossword Generator – Create Study Crosswords from Text | WriteScholar', description: 'Turn your notes and study materials into engaging crossword puzzles. Fun way to memorize key terms. Free plan: 3 generations/month.' },
     'quiz-history': { title: 'My Study Tools | WriteScholar', description: 'View and retake your saved quizzes, flashcards, and crosswords. Study materials are stored for 7 days.' },
-    'gpa-calculator': { title: 'Free GPA Calculator - Calculate Grade Point Average | WriteScholar', description: 'Free GPA calculator for college and high school students. Calculate semester or cumulative GPA instantly. Add courses, credits, and grades. No signup required.' },
-    'pomodoro-timer': { title: 'Free Pomodoro Timer - Study Timer & Focus Tool | WriteScholar', description: 'Free Pomodoro timer for focused studying. Boost productivity with timed work sessions and breaks. Customizable focus and break intervals. No signup required.' },
-    'crater-blast': { title: 'Crater Blast - AI Quiz Shooter Game | WriteScholar', description: 'Blast the correct falling crater before it lands! AI generates quiz questions as craters. Aim your cannon, build streaks, and beat your high score.' }
+    'gpa-calculator': { title: 'Free GPA Calculator – Calculate Your Grade Point Average | WriteScholar', description: 'Free GPA calculator for college and high school students. Calculate semester or cumulative GPA instantly. Add courses, credits, and grades. No signup required.' },
+    'pomodoro-timer': { title: 'Free Pomodoro Timer – Study Timer & Focus Tool | WriteScholar', description: 'Free Pomodoro timer for focused studying. Boost productivity with timed work sessions and breaks. Customizable focus and break intervals. No signup required.' },
+    'crater-blast': { title: 'Crater Blast – AI Quiz Shooter Game | WriteScholar', description: 'Blast the correct falling crater before it lands! AI generates quiz questions as craters. Aim your cannon, build streaks, and beat your high score.' }
   };
   useEffect(() => {
     const meta = pageMeta[currentPage];
@@ -279,6 +281,7 @@ const AcademicAIApp = () => {
       if (pathname === '/features') return 'features';
       if (pathname === '/about') return 'about';
       if (pathname === '/why-students-choose' || pathname === '/compare') return 'why-students-choose';
+      if (pathname === '/vs-quizlet-knowt' || pathname === '/study-tools-comparison' || pathname === '/compare-study-tools') return 'study-tools-comparison';
       if (pathname === '/contact') return 'contact';
       if (pathname === '/analysis') return 'analysis';
       if (pathname === '/analysis-history') return 'analysis-history';
@@ -493,6 +496,7 @@ const AcademicAIApp = () => {
     'analyze': '/tools/analyze',
     'citations': '/tools/citations',
     'why-students-choose': '/why-students-choose',
+    'study-tools-comparison': '/vs-quizlet-knowt',
   };
 
   const navigateTo = (page: string, slug?: string) => {
@@ -570,6 +574,8 @@ const AcademicAIApp = () => {
         return <AboutPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'why-students-choose':
         return <WhyStudentsChoosePage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
+      case 'study-tools-comparison':
+        return <StudyToolsComparisonPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'contact':
         return <ContactPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'privacy':

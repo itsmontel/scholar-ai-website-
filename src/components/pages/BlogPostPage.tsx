@@ -47,7 +47,7 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ onNavigate, user, onLogout 
 
   useEffect(() => {
     if (post) {
-      document.title = `${post.title} | WriteScholar Blog`;
+      document.title = `${post.title} | WriteScholar`;
       let desc = document.querySelector('meta[name="description"]');
       const content = post.description;
       if (desc) desc.setAttribute('content', content);

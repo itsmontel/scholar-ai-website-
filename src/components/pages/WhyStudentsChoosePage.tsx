@@ -23,6 +23,14 @@ const WhyStudentsChoosePage: React.FC<WhyStudentsChoosePageProps> = ({ onNavigat
             <p className="text-lg text-stone-500">
               See how WriteScholar compares to other popular writing tools
             </p>
+            <p className="mt-3 text-sm text-stone-500">
+              <button
+                onClick={() => onNavigate('study-tools-comparison')}
+                className="text-lime-600 hover:text-lime-700 font-medium underline underline-offset-2"
+              >
+                Compare study tools: WriteScholar vs Quizlet vs Knowt →
+              </button>
+            </p>
           </div>
         </div>
       </section>
@@ -31,8 +39,8 @@ const WhyStudentsChoosePage: React.FC<WhyStudentsChoosePageProps> = ({ onNavigat
       <section className="py-20 sm:py-24" style={{ background: 'linear-gradient(180deg, #F5F3F0 0%, #FAF8F5 100%)' }}>
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="relative text-center mb-12">
-            {/* Character pointing at chart - positioned left */}
-            <div className="hidden lg:block absolute -left-12 xl:-left-8 top-1/2 -translate-y-1/2 w-28 h-36">
+            {/* Character pointing at chart */}
+            <div className="hidden lg:block absolute -left-[6rem] xl:-left-[7rem] top-0 -translate-y-[80%] w-28 h-36">
               <svg viewBox="0 0 140 180" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
                 <path d="M50 100 Q45 130 50 160 L90 160 Q95 130 90 100" fill="#3B82F6" />
                 <rect x="62" y="75" width="16" height="28" fill="#E8B796" />

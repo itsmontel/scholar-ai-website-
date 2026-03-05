@@ -15,7 +15,7 @@ export interface BlogPostMeta {
 export const blogPostList: BlogPostMeta[] = [
   {
     slug: 'students-who-get-as-dont-work-harder',
-    title: "The Students Who Always Get A's Don't Work Harder Than You. Here's What They Actually Do.",
+    title: "The Students Who Get A's Don't Work Harder—Here's Their Secret",
     description: "It's not intelligence, luck, or staying up later. The students who consistently get top grades have figured out one thing: leverage. Here's the method behind their results.",
     date: '2026-03-04',
     author: 'WriteScholar Team',
@@ -23,7 +23,7 @@ export const blogPostList: BlogPostMeta[] = [
   },
   {
     slug: 'ai-study-tools-flashcards-quizzes-crosswords',
-    title: 'AI Study Tools: How Flashcards, Quizzes & Crosswords Transform Learning',
+    title: 'How AI Flashcards, Quizzes & Crosswords Transform Learning (2026)',
     description: 'Discover how AI-powered study tools like flashcards, quizzes, and crosswords can boost retention and make studying more effective. Learn why WriteScholar is the best choice for students.',
     date: '2026-03-03',
     author: 'WriteScholar Team',
@@ -39,7 +39,7 @@ export const blogPostList: BlogPostMeta[] = [
   },
   {
     slug: 'how-to-write-a-thesis-statement',
-    title: 'How to Write a Thesis Statement: Examples for Any Essay',
+    title: 'How to Write a Thesis Statement: 5 Examples That Actually Work',
     description: 'Learn how to write a clear, arguable thesis statement for any essay or research paper. Includes examples for argumentative, analytical, and expository writing.',
     date: '2026-02-28',
     author: 'WriteScholar Team',
@@ -47,7 +47,7 @@ export const blogPostList: BlogPostMeta[] = [
   },
   {
     slug: 'how-to-write-apa-research-paper',
-    title: 'How to Write an APA Research Paper: Complete Guide (2026)',
+    title: 'How to Write an APA Research Paper: Step-by-Step Guide (2026)',
     description: 'Step-by-step guide to formatting and writing an APA research paper, from title page to references. Get the structure right and avoid common mistakes.',
     date: '2026-02-01',
     author: 'WriteScholar Team',
@@ -55,7 +55,7 @@ export const blogPostList: BlogPostMeta[] = [
   },
   {
     slug: 'citation-checker-academic-writing',
-    title: 'Why Use a Citation Checker? APA, MLA & Chicago Made Easy',
+    title: 'Citation Checker: Why APA, MLA & Chicago Are Suddenly Easy',
     description: 'A citation checker saves time and improves grades. Learn how AI citation tools validate APA, MLA, Chicago, and Harvard references in seconds.',
     date: '2026-01-28',
     author: 'WriteScholar Team',
@@ -63,7 +63,7 @@ export const blogPostList: BlogPostMeta[] = [
   },
   {
     slug: 'best-academic-writing-tools-for-students',
-    title: 'Best Academic Writing Tools for Students in 2026',
+    title: 'Best Academic Writing Tools for Students in 2026: The Complete Guide',
     description: 'Compare grammar checkers, citation tools, and AI writing assistants for essays and research papers. Find the right academic writing tool for you.',
     date: '2026-01-25',
     author: 'WriteScholar Team',
@@ -71,7 +71,7 @@ export const blogPostList: BlogPostMeta[] = [
   },
   {
     slug: 'grammar-checker-academic-writing',
-    title: 'Grammar Checker for Academic Writing: What to Look For',
+    title: 'Grammar Checker for Essays: 7 Features That Actually Matter',
     description: 'Not all grammar checkers are built for academic writing. Learn what makes a grammar checker suitable for essays, theses, and research papers.',
     date: '2026-01-20',
     author: 'WriteScholar Team',
@@ -79,7 +79,7 @@ export const blogPostList: BlogPostMeta[] = [
   },
   {
     slug: 'mla-vs-apa-vs-chicago-citation-style',
-    title: 'MLA vs APA vs Chicago: Which Citation Style Should You Use?',
+    title: 'MLA vs APA vs Chicago: Pick the Right One in 2 Minutes',
     description: 'Quick comparison of MLA, APA, and Chicago citation styles. Choose the right format for your discipline and avoid formatting errors.',
     date: '2026-01-15',
     author: 'WriteScholar Team',
@@ -87,7 +87,7 @@ export const blogPostList: BlogPostMeta[] = [
   },
   {
     slug: 'ai-writing-assistant-for-students',
-    title: 'AI Writing Assistant for Students: What You Need to Know',
+    title: 'AI Writing Assistant for Students: The Complete 2026 Guide',
     description: 'How AI writing assistants help with structure, clarity, and citations—and how to use them without compromising academic integrity.',
     date: '2026-01-10',
     author: 'WriteScholar Team',

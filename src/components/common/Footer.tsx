@@ -37,6 +37,11 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
                 </a>
               </li>
               <li>
+                <a href="/vs-quizlet-knowt" onClick={(e) => { e.preventDefault(); onNavigate?.('study-tools-comparison'); }} className="text-stone-500 hover:text-stone-900 text-sm transition-colors">
+                  vs Quizlet & Knowt
+                </a>
+              </li>
+              <li>
                 <a href="/pricing" onClick={(e) => { e.preventDefault(); onNavigate?.('pricing'); }} className="text-stone-500 hover:text-stone-900 text-sm transition-colors">
                   Pricing
                 </a>

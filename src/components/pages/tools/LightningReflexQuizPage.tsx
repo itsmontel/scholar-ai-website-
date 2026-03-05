@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import Header from '../../common/Header';
 import Footer from '../../common/Footer';
+import { CRATER_BLAST_WORD_BANK } from '../../../data/craterBlastWordBank';
 
 /* ────────────────────── Types ────────────────────── */
 
@@ -53,7 +54,7 @@ interface Explosion {
 }
 
 type GameState = 'menu' | 'loading' | 'ready' | 'playing' | 'gameover';
-type InputMode = 'topic' | 'notes';
+type InputMode = 'topic' | 'notes' | 'play-for-fun';
 
 /* ────────────────────── Config ────────────────────── */
 
@@ -94,8 +95,11 @@ function computePoints(reactionMs: number, streak: number) {
 /* ────────────────────── Component ────────────────────── */
 
 const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflexQuizPageProps) => {
+  const userPlan = (user?.plan || user?.subscription_plan || 'free').toLowerCase();
+  const canUseStudyTools = user && (userPlan === 'starter' || userPlan === 'premium');
+
   const [gameState, setGameState] = useState<GameState>('menu');
-  const [inputMode, setInputMode] = useState<InputMode>('topic');
+  const [inputMode, setInputMode] = useState<InputMode>('notes');
   const [inputText, setInputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -120,6 +124,7 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [loadedFromSavedGame, setLoadedFromSavedGame] = useState(false);
+  const [isPlayForFun, setIsPlayForFun] = useState(false);
 
   const livesRef = useRef(INITIAL_LIVES);
   const scoreRef = useRef(0);
@@ -144,6 +149,13 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
     const meta = document.querySelector('meta[name="description"]');
     if (meta) meta.setAttribute('content', 'Crater Blast — the AI-powered quiz shooter. Blast the correct falling crater before it lands. Build streaks, beat your high score!');
   }, []);
+
+  // Default to Play for Fun when not logged in (so locked-out users can play immediately)
+  useEffect(() => {
+    if (!user && gameState === 'menu') {
+      setInputMode('play-for-fun');
+    }
+  }, [user, gameState]);
 
   useEffect(() => {
     const saved = localStorage.getItem('savedCraterBlast');
@@ -418,17 +430,23 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
   const handleStartGame = async () => {
     if (!inputText.trim()) { setError('Please enter a topic or paste your notes.'); return; }
     setError(null);
-    setIsLoading(true);
-    setGameState('loading');
 
     const token = localStorage.getItem('authToken');
     if (!user || !token) {
+      setIsLoading(true);
+      setGameState('loading');
       await new Promise(r => setTimeout(r, 2500));
       setIsLoading(false);
       onNavigate('signup');
       return;
     }
+    if (!canUseStudyTools) {
+      onNavigate('signup');
+      return;
+    }
 
+    setIsLoading(true);
+    setGameState('loading');
     setLoadedFromSavedGame(false);
     try {
       const qs = await fetchQuestions();
@@ -471,7 +489,27 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
   const handleNewTopic = () => {
     gameActiveRef.current = false;
     setCraters([]); setProjPos(null); projDataRef.current = null;
-    setInputText(''); setError(null); setLoadedFromSavedGame(false); setGameState('menu');
+    setInputText(''); setError(null); setLoadedFromSavedGame(false); setIsPlayForFun(false); setGameState('menu');
+  };
+
+  const handleStartPlayForFun = () => {
+    setError(null);
+    const qs = CRATER_BLAST_WORD_BANK.map((q, i) => ({
+      id: `wb-${i}`,
+      prompt: q.prompt,
+      answers: q.answers,
+      correctIndex: q.correctIndex,
+    }));
+    const shuffled = shuffle(qs);
+    questionsRef.current = shuffled;
+    setQuestions(shuffled);
+    setInputText('General Knowledge');
+    setIsPlayForFun(true);
+    setLoadedFromSavedGame(false);
+    resetGameState();
+    setGameState('playing');
+    window.scrollTo(0, 0);
+    setTimeout(() => spawnRound(0, BASE_FALL_DURATION), 500);
   };
 
   const handleSaveGame = async () => {
@@ -536,22 +574,49 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
         <div className="bg-white rounded-3xl shadow-lg shadow-stone-200/50 border border-stone-200/60 overflow-hidden">
           <div className="p-6 sm:p-8 space-y-6">
             <div className="flex bg-stone-50 rounded-xl p-1.5 border border-stone-100">
-              {(['topic', 'notes'] as const).map(mode => (
-                <button
-                  key={mode}
-                  onClick={() => setInputMode(mode)}
-                  className={`flex-1 py-3 rounded-lg text-sm font-semibold transition-all duration-200 ${
-                    inputMode === mode
-                      ? 'bg-white text-stone-900 shadow-md border border-stone-200/80'
-                      : 'text-stone-500 hover:text-stone-700 hover:bg-stone-100/50'
-                  }`}
-                >
-                  {mode === 'topic' ? '📝 Topic' : '📄 Study Notes'}
-                </button>
-              ))}
+              {(['notes', 'topic', 'play-for-fun'] as const).map(mode => {
+                const isLocked = (mode === 'notes' || mode === 'topic') && !canUseStudyTools;
+                return (
+                  <button
+                    key={mode}
+                    onClick={() => {
+                      if (isLocked) {
+                        onNavigate('signup');
+                        return;
+                      }
+                      setInputMode(mode);
+                    }}
+                    className={`flex-1 py-3 rounded-lg text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-1 ${
+                      inputMode === mode
+                        ? 'bg-white text-stone-900 shadow-md border border-stone-200/80'
+                        : isLocked
+                          ? 'text-stone-400 hover:text-stone-600 hover:bg-stone-100/50'
+                          : 'text-stone-500 hover:text-stone-700 hover:bg-stone-100/50'
+                    }`}
+                    title={isLocked ? 'Sign up for Starter or Premium to use Study Notes and Topic' : undefined}
+                  >
+                    {isLocked && <span className="text-xs">🔒</span>}
+                    {mode === 'topic' ? '📝 Topic' : mode === 'notes' ? '📄 Study Notes' : '🎮 Play for Fun'}
+                  </button>
+                );
+              })}
             </div>
 
-            {inputMode === 'topic' ? (
+            {inputMode === 'play-for-fun' ? (
+              <div>
+                <p className="text-stone-600 text-sm mb-4">Blast craters with trivia questions. No setup needed, just play!</p>
+                <button
+                  onClick={handleStartPlayForFun}
+                  className="w-full py-4 rounded-xl text-white font-bold text-base shadow-lg active:scale-[0.99] transition-all duration-200"
+                  style={{
+                    background: 'linear-gradient(135deg, #3b82f6 0%, #6366f1 100%)',
+                    boxShadow: '0 10px 30px -5px rgba(99, 102, 241, 0.4)',
+                  }}
+                >
+                  🎮 Play for Fun
+                </button>
+              </div>
+            ) : inputMode === 'topic' ? (
               <div>
                 <label className="block text-sm font-medium text-stone-600 mb-2">What do you want to study?</label>
                 <input
@@ -591,31 +656,35 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
               </div>
             )}
 
-            <button
-              onClick={handleStartGame}
-              disabled={isLoading || !inputText.trim()}
-              className="w-full py-4 rounded-xl text-white font-bold text-base shadow-lg active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
-              style={{
-                background: inputText.trim()
-                  ? 'linear-gradient(135deg, #3b82f6 0%, #6366f1 100%)'
-                  : 'linear-gradient(135deg, #94a3b8 0%, #64748b 100%)',
-                boxShadow: inputText.trim() ? '0 10px 30px -5px rgba(99, 102, 241, 0.4)' : 'none',
-              }}
-            >
-              {isLoading ? (
-                <span className="flex items-center justify-center gap-2">
-                  <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
-                  Generating...
-                </span>
-              ) : (
-                <>💥 Start Blasting</>
-              )}
-            </button>
+            {inputMode !== 'play-for-fun' && (
+              <>
+                <button
+                  onClick={handleStartGame}
+                  disabled={isLoading || !inputText.trim()}
+                  className="w-full py-4 rounded-xl text-white font-bold text-base shadow-lg active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                  style={{
+                    background: inputText.trim()
+                      ? 'linear-gradient(135deg, #3b82f6 0%, #6366f1 100%)'
+                      : 'linear-gradient(135deg, #94a3b8 0%, #64748b 100%)',
+                    boxShadow: inputText.trim() ? '0 10px 30px -5px rgba(99, 102, 241, 0.4)' : 'none',
+                  }}
+                >
+                  {isLoading ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                      Generating...
+                    </span>
+                  ) : (
+                    <>💥 Start Blasting</>
+                  )}
+                </button>
 
-            {!user && (
-              <p className="text-center text-sm text-stone-500">
-                <button onClick={() => onNavigate('login')} className="text-blue-600 font-semibold hover:underline">Log in</button> to generate AI questions
-              </p>
+                {!user && (
+                  <p className="text-center text-sm text-stone-500">
+                    <button onClick={() => onNavigate('login')} className="text-blue-600 font-semibold hover:underline">Log in</button> to generate AI questions
+                  </p>
+                )}
+              </>
             )}
           </div>
         </div>
@@ -1011,10 +1080,10 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
                   </button>
                   <button onClick={handleNewTopic}
                     className="flex-1 py-3.5 rounded-xl bg-stone-100 text-stone-700 font-bold hover:bg-stone-200 active:scale-[0.98] transition-all border border-stone-200">
-                    New Topic
+                    {isPlayForFun ? 'Back to Menu' : 'New Topic'}
                   </button>
                 </div>
-                {user && (
+                {user && !isPlayForFun && (
                   <>
                     {loadedFromSavedGame ? (
                       <div className="w-full py-3 rounded-xl font-medium border flex items-center justify-center gap-2 bg-emerald-50 border-emerald-200 text-emerald-700">
