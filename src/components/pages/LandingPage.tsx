@@ -623,8 +623,8 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                       </div>
                     )},
                     { title: 'Flashcards', desc: 'Generate flashcards from any content', onClick: () => { setMode('quiz'); setStudyToolMode('flashcards'); }, gradient: 'from-pink-50 to-rose-50 dark:from-pink-900/20 dark:to-rose-900/20', accentClasses: { title: 'text-rose-700 dark:text-rose-400', orb: 'bg-rose-400/20', iconBg: 'bg-rose-100 dark:bg-rose-900/50' }, borderColor: 'border-pink-100 dark:border-pink-800/50', icon: '🃏', inner: (
-                      <div className="w-full min-w-[100px] flex-1 min-h-[72px] flex flex-col" style={{ perspective: '200px' }}>
-                        <div className="relative w-full flex-1 min-h-[60px] animate-flashcard-flip" style={{ transformStyle: 'preserve-3d' }}>
+                      <div className="w-full min-w-[100px] flex-1 min-h-[72px] flex flex-col overflow-visible" style={{ perspective: '200px' }}>
+                        <div className="relative w-[calc(100%+1.5rem)] -ml-3 flex-1 min-h-[60px] animate-flashcard-flip" style={{ transformStyle: 'preserve-3d' }}>
                           <div className="absolute inset-0 bg-gradient-to-br from-rose-400 to-pink-500 rounded-xl p-3 flex flex-col justify-center overflow-hidden" style={{ backfaceVisibility: 'hidden' }}>
                             <div className="text-white/80 text-[10px] sm:text-[11px]">Term</div>
                             <div className="text-white font-semibold text-sm sm:text-base truncate">Photosynthesis</div>
