@@ -893,27 +893,29 @@ const FriendsPage = ({ onNavigate, user, onLogout }: FriendsPageProps) => {
                         <p className="text-gray-500 text-sm py-4">You haven't shared anything yet</p>
                       ) : (
                         <div className="space-y-3">
-                          {sentShares.map((share) => (
-                            <div key={share.id} className="p-4 bg-gray-50 rounded-xl">
-                              <div className="flex flex-wrap items-start gap-3">
-                                <span className="text-2xl flex-shrink-0">{getItemTypeIcon(share.quiz?.quiz_type)}</span>
-                                <div className="min-w-0 flex-1">
-                                  <h4 className="font-medium text-gray-900 break-words">{share.quiz?.title || 'Unknown'}</h4>
-                                  <p className="text-sm text-gray-500">
-                                    Sent to {getName(share.receiver)} • {formatDate(share.created_at)}
-                                  </p>
+                          {sentShares.map((share) => {
+                            const statusClass = share.status === 'accepted'
+                              ? 'bg-green-100 text-green-700'
+                              : share.status === 'declined'
+                              ? 'bg-red-100 text-red-700'
+                              : 'bg-yellow-100 text-yellow-700';
+                            return (
+                              <div key={share.id} className="p-4 bg-gray-50 rounded-xl">
+                                <div className="flex flex-wrap items-start gap-3">
+                                  <span className="text-2xl flex-shrink-0">{getItemTypeIcon(share.quiz?.quiz_type)}</span>
+                                  <div className="min-w-0 flex-1">
+                                    <h4 className="font-medium text-gray-900 break-words">{share.quiz?.title || 'Unknown'}</h4>
+                                    <p className="text-sm text-gray-500">
+                                      Sent to {getName(share.receiver)} • {formatDate(share.created_at)}
+                                    </p>
+                                  </div>
+                                  <span className={`flex-shrink-0 px-3 py-1 text-xs font-medium rounded-full ${statusClass}`}>
+                                    {share.status.charAt(0).toUpperCase() + share.status.slice(1)}
+                                  </span>
                                 </div>
-                                <span className={`flex-shrink-0 px-3 py-1 text-xs font-medium rounded-full ${
-                                share.status === 'accepted' 
-                                  ? 'bg-green-100 text-green-700'
-                                  : share.status === 'declined'
-                                  ? 'bg-red-100 text-red-700'
-                                  : 'bg-yellow-100 text-yellow-700'
-                              }`}>
-                                {share.status.charAt(0).toUpperCase() + share.status.slice(1)}
-                              </span>
-                            </div>
-                          ))}
+                              </div>
+                            );
+                          })}
                         </div>
                       )}
                     </div>
