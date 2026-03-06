@@ -3,7 +3,8 @@ import Header from '../common/Header';
 
 interface User {
   id: string;
-  name: string;
+  name?: string;
+  username?: string;
   email: string;
   firstName?: string;
   lastName?: string;
@@ -16,7 +17,7 @@ interface AccountPageProps {
   onNavigate: (page: string) => void;
   user: User | null;
   onLogout: () => void;
-  onUserUpdate?: (updates: { name?: string }) => void;
+  onUserUpdate?: (updates: { username?: string; name?: string }) => void;
 }
 
 interface UserStats {
@@ -85,7 +86,7 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
         const profileData = await profileResponse.json();
         const userData = profileData.data.user;
         const createdDate = new Date(userData.createdAt);
-        setUsername(userData.name || '');
+        setUsername(userData.username || userData.name || '');
         setUserStats(prev => ({
           ...prev,
           memberSince: createdDate.toLocaleDateString('en-US', {
@@ -156,9 +157,17 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
   }, [displayUser]);
 
   const handleSaveUsername = async () => {
-    const trimmed = username.trim();
+    const trimmed = username.trim().toLowerCase().replace(/[^a-z0-9_]/g, '');
     if (!trimmed) {
       setUsernameError('Username cannot be empty');
+      return;
+    }
+    if (trimmed.length < 3) {
+      setUsernameError('Username must be at least 3 characters');
+      return;
+    }
+    if (!/^[a-z0-9_]+$/.test(trimmed)) {
+      setUsernameError('Username can only contain letters, numbers, and underscores');
       return;
     }
     setUsernameLoading(true);
@@ -166,24 +175,26 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
     setUsernameSuccess('');
     try {
       const token = localStorage.getItem('authToken');
-      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/users/profile`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/users/username`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify({ name: trimmed }),
+        body: JSON.stringify({ username: trimmed }),
       });
       const data = await res.json();
-      if (res.ok) {
+      if (res.ok && data.success) {
+        const newUsernameValue = data.data?.username || trimmed;
+        setUsername(newUsernameValue);
         setUsernameSuccess('Username updated!');
-        onUserUpdate?.({ name: trimmed });
+        onUserUpdate?.({ username: newUsernameValue });
         if (typeof window !== 'undefined') {
           try {
             const stored = localStorage.getItem('user');
             if (stored) {
               const parsed = JSON.parse(stored);
-              localStorage.setItem('user', JSON.stringify({ ...parsed, name: trimmed }));
+              localStorage.setItem('user', JSON.stringify({ ...parsed, username: newUsernameValue }));
             }
           } catch (_) {}
         }

@@ -782,17 +782,29 @@ const AcademicAIApp = () => {
             onNavigate={navigateTo}
             user={user}
             onLogout={handleLogout}
-            onUserUpdate={(updates) => {
-              if (user && updates.name) {
-                const updatedUser = { ...user, name: updates.name };
-                setUser(updatedUser);
-                try {
-                  const stored = localStorage.getItem('user');
-                  if (stored) {
-                    const parsed = JSON.parse(stored);
-                    localStorage.setItem('user', JSON.stringify({ ...parsed, name: updates.name }));
-                  }
-                } catch (_) {}
+            onUserUpdate={(updates: { username?: string; name?: string }) => {
+              if (user) {
+                if (updates.username !== undefined) {
+                  const updatedUser = { ...user, username: updates.username };
+                  setUser(updatedUser);
+                  try {
+                    const stored = localStorage.getItem('user');
+                    if (stored) {
+                      const parsed = JSON.parse(stored);
+                      localStorage.setItem('user', JSON.stringify({ ...parsed, username: updates.username }));
+                    }
+                  } catch (_) {}
+                } else if (updates.name) {
+                  const updatedUser = { ...user, name: updates.name };
+                  setUser(updatedUser);
+                  try {
+                    const stored = localStorage.getItem('user');
+                    if (stored) {
+                      const parsed = JSON.parse(stored);
+                      localStorage.setItem('user', JSON.stringify({ ...parsed, name: updates.name }));
+                    }
+                  } catch (_) {}
+                }
               }
             }}
           />
