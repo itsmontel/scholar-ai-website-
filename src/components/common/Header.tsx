@@ -266,7 +266,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
               <span className="font-black text-xl text-white">W</span>
               <div className="absolute inset-0 rounded-xl bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity" />
             </div>
-            <span className="hidden sm:inline text-xl font-extrabold tracking-tight text-indigo-600 dark:text-indigo-400">
+            <span className="text-base sm:text-xl font-extrabold tracking-tight text-indigo-600 dark:text-indigo-400 truncate max-w-[140px] sm:max-w-none">
               WriteScholar
             </span>
           </button>

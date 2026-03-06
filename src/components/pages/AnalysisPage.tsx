@@ -1187,7 +1187,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
             console.log(`Annotation ${annotation.id} (${annotation.type}): "${actualText.substring(0, 50)}..." (${relativeStart}-${relativeEnd} in paragraph ${paragraphIndex})`);
 
             const highlightClasses = {
-              strong: 'bg-violet-100 text-violet-900 border-b-2 border-violet-400 hover:bg-violet-200',
+              strong: 'bg-green-100 text-green-900 border-b-2 border-green-400 hover:bg-green-200',
               improve: 'bg-amber-100 text-amber-900 border-b-2 border-amber-400 hover:bg-amber-200',
               concern: 'bg-red-100 text-red-900 border-b-2 border-red-400 hover:bg-red-200'
             };
@@ -1264,7 +1264,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
     switch (type) {
       case 'strong':
         return (
-          <svg className="w-5 h-5 text-violet-600" fill="currentColor" viewBox="0 0 20 20">
+          <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
             <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
           </svg>
         );
@@ -1607,7 +1607,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
             <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
               <div className="flex flex-wrap items-center gap-6 text-sm">
                 <div className="flex items-center space-x-2">
-                  <div className="w-3 h-3 bg-violet-400 rounded-full"></div>
+                  <div className="w-3 h-3 bg-green-400 rounded-full"></div>
                   <span className="text-gray-600">Strong sections</span>
                 </div>
                 <div className="flex items-center space-x-2">
@@ -1691,16 +1691,16 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                     {/* Strong Points */}
                     <div>
                       <div className="flex items-center space-x-2 mb-3">
-                      <div className="flex items-center justify-center w-8 h-8 bg-violet-100 rounded-xl">
+                      <div className="flex items-center justify-center w-8 h-8 bg-green-100 rounded-xl">
                         {getAnnotationIcon('strong')}
                       </div>
-                      <h4 className="font-semibold text-violet-800">Strong Points ({getFilteredAnnotations('strong').length})</h4>
+                      <h4 className="font-semibold text-green-800">Strong Points ({getFilteredAnnotations('strong').length})</h4>
                       </div>
                       <div className="space-y-2">
                         {getFilteredAnnotations('strong').map((annotation) => (
                           <div
                             key={annotation.id}
-                            className={`bg-white rounded-xl p-4 border-l-4 border-violet-400 shadow-sm hover:shadow-md transition-all cursor-pointer ${
+                            className={`bg-white rounded-xl p-4 border-l-4 border-green-400 shadow-sm hover:shadow-md transition-all cursor-pointer ${
                               selectedAnnotation === annotation.id ? 'ring-2 ring-blue-500' : ''
                             }`}
                             onClick={() => scrollToAnnotation(annotation.id)}

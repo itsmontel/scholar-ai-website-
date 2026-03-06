@@ -1729,10 +1729,11 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
 
           {/* RIGHT MAIN CONTENT */}
           <div className="order-1 lg:order-2 min-w-0 pt-4 sm:pt-10 overflow-visible">
-            {/* Mobile Header: Streak widget + Badge widget in a nice row */}
-            <div className="flex items-center gap-3 mb-5 lg:hidden">
+            {/* Mobile Header: Compact streak + Badge widget in a row */}
+            <div className="flex items-center gap-3 mb-4 lg:hidden">
+              <StreakWidget compact />
               <div className="flex-1 min-w-0">
-                <StreakWidget />
+                <BadgeWidget onNavigate={onNavigate} mobileExpanded />
               </div>
             </div>
 
@@ -1812,7 +1813,7 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                   </p>
                 </div>
                 <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
-                  <BadgeWidget onNavigate={onNavigate} />
+                  <div className="hidden lg:block"><BadgeWidget onNavigate={onNavigate} /></div>
                   {usageStats.plan === 'free' && !loadingStats && (
                     <button
                       onClick={() => onNavigate('pricing')}
@@ -3618,6 +3619,69 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
           )}
         </div>
         </div>
+        </div>
+
+        {/* Mobile Schedule / Calendar - above footer */}
+        <div className="lg:hidden px-3 sm:px-6 pb-6">
+          <div className="bg-white dark:bg-stone-800 rounded-2xl shadow-lg shadow-stone-200/50 dark:shadow-stone-900/50 border border-stone-200/60 dark:border-stone-600/40 p-4">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-bold text-stone-800 dark:text-stone-100 flex items-center gap-2 text-sm">
+                <span className="text-lg">📅</span> Schedule
+              </h3>
+              <button onClick={openAddModal} className="text-stone-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors p-1 rounded-lg hover:bg-violet-50 dark:hover:bg-violet-900/30">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+              </button>
+            </div>
+            <div className="mb-4 bg-white/60 dark:bg-stone-800/60 backdrop-blur-sm rounded-xl p-3 border border-violet-200/50 dark:border-violet-800/30">
+              <div className="flex items-center justify-between mb-2 text-xs font-medium text-stone-600 dark:text-stone-400">
+                <button onClick={() => setCalendarMonth(new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() - 1))} className="p-1.5 hover:bg-violet-100 dark:hover:bg-violet-900/30 rounded-lg transition-colors text-violet-600">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+                </button>
+                <span className="font-bold text-stone-800 dark:text-stone-100 text-sm">{calendarMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</span>
+                <button onClick={() => setCalendarMonth(new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + 1))} className="p-1.5 hover:bg-violet-100 dark:hover:bg-violet-900/30 rounded-lg transition-colors text-violet-600">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                </button>
+              </div>
+              <div className="grid grid-cols-7 gap-0.5 text-center text-[10px] mb-1.5 text-violet-500 dark:text-violet-400 font-bold">
+                <div>S</div><div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div>
+              </div>
+              <div className="grid grid-cols-7 gap-0.5 text-center text-xs">
+                {getCalendarDays().map((d, i) => {
+                  const events = getEventsForDate(d.date);
+                  const today = isToday(d.date);
+                  return (
+                    <div key={i} className={`p-1 relative cursor-pointer rounded-lg transition-all ${!d.isCurrentMonth ? 'text-stone-300 dark:text-stone-600' : today ? 'bg-gradient-to-br from-violet-500 to-purple-600 text-white font-bold shadow-lg shadow-violet-500/30 scale-110' : 'text-stone-700 dark:text-stone-300 hover:bg-violet-100 dark:hover:bg-violet-900/30 hover:text-violet-700'}`}>
+                      {d.day}
+                      {events.length > 0 && !today && <span className={`absolute bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full ${eventTypeColors[events[0].event_type]?.dot || 'bg-violet-400'}`}></span>}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+            <div className="space-y-2">
+              <h4 className="text-[10px] font-semibold text-stone-400 uppercase tracking-wider">Upcoming</h4>
+              {loadingEvents ? <div className="text-center py-3 text-stone-400 text-xs">Loading...</div> : getUpcomingEvents().length === 0 ? <div className="text-center py-3 text-stone-400 text-xs">No upcoming events</div> : getUpcomingEvents().slice(0, 3).map(event => {
+                const colors = eventTypeColors[event.event_type] || eventTypeColors.other;
+                const eventDate = new Date(toDateStr(event.event_date) + 'T00:00:00');
+                return (
+                  <div key={event.id} className={`flex gap-2 p-2 rounded-xl ${colors.bg} dark:bg-opacity-50 border ${colors.border}`}>
+                    <div className={`flex flex-col items-center justify-center w-8 h-8 bg-white rounded-lg shadow-sm ${colors.text} flex-shrink-0`}>
+                      <span className="text-[8px] font-bold uppercase leading-none">{eventDate.toLocaleDateString('en-US', { month: 'short' })}</span>
+                      <span className="text-xs font-bold leading-none">{eventDate.getDate()}</span>
+                    </div>
+                    <div className="min-w-0 flex-1 cursor-pointer" onClick={() => openEditModal(event)}>
+                      <p className="text-xs font-semibold text-stone-800 dark:text-stone-100 truncate">{event.title}</p>
+                      <p className="text-[10px] text-stone-500 truncate">{event.course && `${event.course} • `}{event.event_time || 'All day'}</p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            <button onClick={openAddModal} className="w-full mt-3 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-400 hover:to-purple-500 rounded-xl transition-all shadow-lg shadow-violet-500/25 flex items-center justify-center gap-2">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+              Add Event
+            </button>
+          </div>
         </div>
       </main>
 

@@ -4,6 +4,8 @@ Allow: /features
 Allow: /pricing
 Allow: /about
 Allow: /why-students-choose
+Allow: /vs-quizlet-knowt
+Allow: /more-tools
 Allow: /blog
 Allow: /blog/*
 Allow: /help
@@ -23,6 +25,7 @@ Disallow: /library
 Disallow: /account
 Disallow: /billing
 Disallow: /upload
+Disallow: /badges
 Disallow: /auth-callback
 Disallow: /email-verification
 Disallow: /reset-password

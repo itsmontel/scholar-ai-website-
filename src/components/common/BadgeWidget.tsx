@@ -3,9 +3,10 @@ import { getTotalXP, getLevelInfo, getUnlockedCount, BADGES, getUnlockedBadges }
 
 interface BadgeWidgetProps {
   onNavigate: (page: string) => void;
+  mobileExpanded?: boolean;
 }
 
-const BadgeWidget = ({ onNavigate }: BadgeWidgetProps) => {
+const BadgeWidget = ({ onNavigate, mobileExpanded = false }: BadgeWidgetProps) => {
   const [showTooltip, setShowTooltip] = useState(false);
   const [totalXP, setTotalXP] = useState(0);
   const [unlockedCount, setUnlockedCount] = useState(0);
@@ -31,11 +32,15 @@ const BadgeWidget = ({ onNavigate }: BadgeWidgetProps) => {
         onClick={() => onNavigate('badges')}
         onMouseEnter={() => setShowTooltip(true)}
         onMouseLeave={() => setShowTooltip(false)}
-        className="relative flex items-center gap-2 px-3 py-2 rounded-2xl bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-amber-900/20 dark:to-yellow-900/20 border border-amber-200/60 dark:border-amber-700/40 hover:shadow-lg hover:shadow-amber-500/15 hover:border-amber-300 dark:hover:border-amber-600 hover:-translate-y-0.5 transition-all duration-300 group"
+        className={`relative flex items-center rounded-2xl bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-amber-900/20 dark:to-yellow-900/20 border border-amber-200/60 dark:border-amber-700/40 hover:shadow-lg hover:shadow-amber-500/15 hover:border-amber-300 dark:hover:border-amber-600 transition-all duration-300 group ${
+          mobileExpanded 
+            ? 'gap-3 px-4 py-3 w-full min-w-0 flex-row' 
+            : 'gap-2 px-3 py-2 hover:-translate-y-0.5'
+        }`}
       >
         {/* Animated trophy icon */}
-        <div className="relative">
-          <span className="text-xl group-hover:animate-[badge-bounce_0.6s_ease-in-out]">🏆</span>
+        <div className="relative flex-shrink-0">
+          <span className={`group-hover:animate-[badge-bounce_0.6s_ease-in-out] ${mobileExpanded ? 'text-2xl' : 'text-xl'}`}>🏆</span>
           {unlockedCount > 0 && (
             <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-violet-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center shadow-sm">
               {unlockedCount}
@@ -43,18 +48,18 @@ const BadgeWidget = ({ onNavigate }: BadgeWidgetProps) => {
           )}
         </div>
 
-        {/* Level indicator */}
-        <div className="hidden sm:flex flex-col items-start leading-none">
-          <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400">Lv.{levelInfo.level}</span>
-          <span className="text-[9px] text-stone-500 dark:text-stone-400 font-medium">{totalXP} XP</span>
-        </div>
-
-        {/* Mini XP progress */}
-        <div className="hidden sm:block w-12 h-1.5 bg-amber-200/50 dark:bg-amber-800/30 rounded-full overflow-hidden">
-          <div
-            className="h-full bg-gradient-to-r from-amber-400 to-yellow-400 rounded-full transition-all duration-500"
-            style={{ width: `${Math.max(levelInfo.progress * 100, 8)}%` }}
-          />
+        {/* Level, XP, progress bar - always show when mobileExpanded, else show on sm+ */}
+        <div className={`flex flex-col items-start leading-none min-w-0 flex-1 ${mobileExpanded ? 'flex' : 'hidden sm:flex'}`}>
+          <div className="flex items-center gap-2 w-full">
+            <span className={`font-bold text-amber-600 dark:text-amber-400 ${mobileExpanded ? 'text-sm' : 'text-[10px]'}`}>Lv.{levelInfo.level}</span>
+            <span className={`text-stone-500 dark:text-stone-400 font-medium ${mobileExpanded ? 'text-xs' : 'text-[9px]'}`}>{totalXP} XP</span>
+          </div>
+          <div className={`w-full bg-amber-200/50 dark:bg-amber-800/30 rounded-full overflow-hidden mt-1 ${mobileExpanded ? 'h-2' : 'h-1.5 w-12'}`}>
+            <div
+              className="h-full bg-gradient-to-r from-amber-400 to-yellow-400 rounded-full transition-all duration-500"
+              style={{ width: `${Math.max(levelInfo.progress * 100, 8)}%` }}
+            />
+          </div>
         </div>
       </button>
 

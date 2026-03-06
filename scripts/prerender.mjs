@@ -20,6 +20,8 @@ const staticRoutes = [
   '/pricing',
   '/about',
   '/why-students-choose',
+  '/vs-quizlet-knowt',
+  '/more-tools',
   '/blog',
   '/help',
   '/contact',

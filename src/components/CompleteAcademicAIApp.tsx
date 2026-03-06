@@ -109,12 +109,12 @@ const AcademicAIApp = () => {
 
   // SEO: dynamic document title and meta description per page (SPA)
   const pageMeta: Record<string, { title: string; description: string }> = {
-    landing: { title: 'WriteScholar — AI Study Tools: Humanizer, Quiz Generator, Essay Checker', description: 'The complete AI toolkit for students. Humanize AI text, generate quizzes from notes, summarize papers, find citations, get essay feedback. Free to start.' },
-    features: { title: 'AI Study Tools: Humanizer, Quiz Generator & More | WriteScholar', description: 'AI Humanizer to bypass detectors, Quiz Generator from text, Paper Summarizer, Citation Finder, Essay Checker. All the tools students need.' },
-    pricing: { title: 'Pricing Plans: Free, Starter & Premium | WriteScholar', description: 'Free plan with AI Humanizer, Summarizer, and Essay Checker. Starter adds Quiz Generator. Premium unlocks all features and models. Annual plans save 2 months.' },
-    about: { title: 'About WriteScholar: The AI Toolkit for Students', description: 'WriteScholar is the complete AI toolkit for students. Humanize AI text, generate quizzes, summarize papers, find citations. Serving students worldwide.' },
+    landing: { title: 'WriteScholar — #1 Free AI Study Toolkit | Quizlet & Knowt Alternative', description: '#1 free Quizlet & Knowt alternative with AI quiz generator, flashcard maker, crossword builder, AI humanizer, and paper summarizer. Trusted by students worldwide. Free to start.' },
+    features: { title: '#1 Free AI Study Tools — Quiz Generator, Flashcards, Humanizer | WriteScholar', description: 'AI quiz generator, flashcard maker, crossword builder, humanizer, summarizer, citation finder, essay checker — all free to start. The best Quizlet alternative for students.' },
+    pricing: { title: 'Pricing — Free Plan, Starter & Premium | WriteScholar', description: 'Start free with AI quizzes, flashcards, humanizer, and 10+ writing tools. Upgrade for unlimited usage. Better value than Quizlet Plus or Knowt premium.' },
+    about: { title: 'About WriteScholar — The #1 Free Quizlet & Knowt Alternative', description: 'WriteScholar is the #1 free alternative to Quizlet and Knowt. AI quizzes, flashcards, crosswords, humanizer, summarizer, citations — everything students need in one place.' },
     'why-students-choose': { title: 'WriteScholar vs Grammarly vs QuillBot: Honest Comparison 2026', description: 'See how WriteScholar compares to Grammarly and QuillBot. Built for academic writing, citation finder, AI humanizer, essay analysis, and more.' },
-    'study-tools-comparison': { title: 'WriteScholar vs Quizlet vs Knowt: Best AI Study Tools 2026', description: 'Compare WriteScholar, Quizlet, and Knowt. Quizzes, flashcards, crosswords—plus essay analysis, citations, and AI humanizer. See which fits your study style.' },
+    'study-tools-comparison': { title: 'WriteScholar vs Quizlet vs Knowt — #1 Free Alternative 2026', description: 'Why students are switching from Quizlet and Knowt to WriteScholar. AI quizzes, flashcards, crosswords — plus humanizer, citations, and essay analysis. Compare features side by side.' },
     help: { title: 'Help & FAQ: AI Humanizer, Quiz Generator & More | WriteScholar', description: 'Get help with AI Humanizer, Quiz Generator, Paper Summarizer, Citation Finder. Supported citation styles: APA, Harvard, MLA, Chicago.' },
     contact: { title: 'Contact WriteScholar Support | Get Help Fast', description: 'Contact WriteScholar support for help with AI tools for students.' },
     privacy: { title: 'Privacy Policy | WriteScholar', description: 'WriteScholar privacy policy and data handling.' },
@@ -130,11 +130,11 @@ const AcademicAIApp = () => {
     'text-case-converter': { title: 'Free Text Case Converter – UPPERCASE, lowercase, Title Case | WriteScholar', description: 'Convert text to UPPERCASE, lowercase, Title Case, Sentence case, and more. Perfect for formatting titles, headings, and fixing caps lock mistakes.' },
     'thesis-generator': { title: 'Free Thesis Statement Generator – Create Strong Thesis Statements | WriteScholar', description: 'Create strong thesis statements for argumentative, expository, analytical, and compare-contrast essays. Template-based thesis builder.' },
     'grammar-checker': { title: 'Free Grammar Checker – Fix Spelling & Grammar Errors | WriteScholar', description: 'Check your writing for common spelling mistakes, grammar errors, punctuation issues, and style suggestions. Quick client-side grammar check.' },
-    'humanizer': { title: 'AI Humanizer – Bypass AI Detection | WriteScholar', description: 'Transform AI-generated text from ChatGPT, Claude, Gemini into undetectable human writing. Bypass Turnitin, GPTZero, and other AI detectors. Free to try.' },
-    'summarizer': { title: 'AI Summarizer – Condense Papers & Articles | WriteScholar', description: 'Summarize research papers, articles, and textbooks into key points. Bullet points or paragraphs. Perfect for literature reviews. Free to try.' },
-    'quiz-generator': { title: 'AI Quiz Generator – Create Study Quizzes from Text | WriteScholar', description: 'Turn notes, articles, and textbooks into interactive quizzes. Multiple choice, true/false questions. Perfect for exam prep. Free plan: 3 quizzes/month.' },
-    'flashcard-generator': { title: 'AI Flashcard Generator – Create Study Flashcards from Text | WriteScholar', description: 'Transform your notes, articles, and textbooks into interactive flashcards. Perfect for memorization and exam prep. Free plan: 3 generations/month.' },
-    'crossword-generator': { title: 'AI Crossword Generator – Create Study Crosswords from Text | WriteScholar', description: 'Turn your notes and study materials into engaging crossword puzzles. Fun way to memorize key terms. Free plan: 3 generations/month.' },
+    'humanizer': { title: 'AI Humanizer – Bypass AI Detection Free | WriteScholar', description: 'Transform AI-generated text from ChatGPT, Claude, Gemini into undetectable human writing. Bypass Turnitin, GPTZero, and other AI detectors. A tool Quizlet and Knowt don\'t offer. Free to try.' },
+    'summarizer': { title: 'AI Summarizer – Condense Papers & Articles Free | WriteScholar', description: 'Summarize research papers, articles, and textbooks into key points. Bullet points or paragraphs. Better than Quizlet for literature reviews. Free to try.' },
+    'quiz-generator': { title: 'Free AI Quiz Generator — Best Quizlet Alternative | WriteScholar', description: '#1 free Quizlet alternative for quiz generation. Turn notes, articles, and textbooks into interactive quizzes with AI. Multiple choice, true/false, fill-in-the-blank. No manual entry needed.' },
+    'flashcard-generator': { title: 'Free AI Flashcard Generator — Best Quizlet & Knowt Alternative | WriteScholar', description: '#1 free alternative to Quizlet flashcards. AI generates flashcards from your notes, articles, and textbooks instantly. No manual typing. Perfect for exam prep.' },
+    'crossword-generator': { title: 'Free AI Crossword Generator — Unique Study Tool | WriteScholar', description: 'Turn your notes into fun crossword puzzles with AI. A study mode you won\'t find on Quizlet or Knowt. Memorize key terms the engaging way. Free to try.' },
     'quiz-history': { title: 'My Study Tools | WriteScholar', description: 'View and retake your saved quizzes, flashcards, and crosswords. Study materials are stored for 7 days.' },
     'gpa-calculator': { title: 'Free GPA Calculator – Calculate Your Grade Point Average | WriteScholar', description: 'Free GPA calculator for college and high school students. Calculate semester or cumulative GPA instantly. Add courses, credits, and grades. No signup required.' },
     'pomodoro-timer': { title: 'Free Pomodoro Timer – Study Timer & Focus Tool | WriteScholar', description: 'Free Pomodoro timer for focused studying. Boost productivity with timed work sessions and breaks. Customizable focus and break intervals. No signup required.' },
@@ -146,14 +146,32 @@ const AcademicAIApp = () => {
     const meta = pageMeta[currentPage];
     if (meta) {
       document.title = meta.title;
-      let desc = document.querySelector('meta[name="description"]');
-      if (desc) desc.setAttribute('content', meta.description);
-      else {
-        desc = document.createElement('meta');
-        desc.setAttribute('name', 'description');
-        desc.setAttribute('content', meta.description);
-        document.head.appendChild(desc);
-      }
+      const setMeta = (selector: string, attr: string, value: string) => {
+        let el = document.querySelector(selector);
+        if (el) el.setAttribute(attr, value);
+        else {
+          el = document.createElement('meta');
+          const isProperty = selector.includes('property=');
+          if (isProperty) {
+            const prop = selector.match(/property="([^"]+)"/)?.[1];
+            if (prop) el.setAttribute('property', prop);
+          } else {
+            const name = selector.match(/name="([^"]+)"/)?.[1];
+            if (name) el.setAttribute('name', name);
+          }
+          el.setAttribute(attr, value);
+          document.head.appendChild(el);
+        }
+      };
+      setMeta('meta[name="description"]', 'content', meta.description);
+      setMeta('meta[property="og:title"]', 'content', meta.title);
+      setMeta('meta[property="og:description"]', 'content', meta.description);
+      setMeta('meta[name="twitter:title"]', 'content', meta.title);
+      setMeta('meta[name="twitter:description"]', 'content', meta.description);
+
+      const canonical = document.querySelector('link[rel="canonical"]');
+      if (canonical) canonical.setAttribute('href', `https://writescholar.com${window.location.pathname}`);
+      setMeta('meta[property="og:url"]', 'content', `https://writescholar.com${window.location.pathname}`);
     }
   }, [currentPage]);
 

@@ -373,11 +373,11 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
   }) => (
     <button
       onClick={onClick}
-      className={`group relative bg-gradient-to-br ${gradient} rounded-3xl p-6 text-left hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 ease-out overflow-hidden border ${borderColor} h-[310px] flex flex-col`}
+      className={`group relative bg-gradient-to-br ${gradient} rounded-3xl p-4 sm:p-6 text-left hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 ease-out overflow-hidden border ${borderColor} h-[280px] sm:h-[310px] flex flex-col w-full`}
     >
       <div className={`absolute top-0 right-0 w-32 h-32 rounded-full -translate-y-1/2 translate-x-1/2 ${accentClasses.orb}`} />
-      <h3 className={`text-xl font-bold mb-3 relative z-10 flex-shrink-0 ${accentClasses.title}`}>{title}</h3>
-      <div className="relative z-10 bg-white dark:bg-stone-800 rounded-2xl p-5 shadow-lg mb-4 h-[140px] flex flex-col justify-center overflow-hidden">
+      <h3 className={`text-lg sm:text-xl font-bold mb-2 sm:mb-3 relative z-10 flex-shrink-0 ${accentClasses.title}`}>{title}</h3>
+      <div className="relative z-10 bg-white dark:bg-stone-800 rounded-2xl p-4 sm:p-5 shadow-lg mb-3 sm:mb-4 h-[120px] sm:h-[140px] flex flex-col justify-center overflow-hidden">
         <div className={`w-8 h-8 rounded-lg flex items-center justify-center mb-3 text-lg flex-shrink-0 ${accentClasses.iconBg}`}>
           {icon}
         </div>
@@ -388,7 +388,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
   );
 
   return (
-    <main className="min-h-screen relative transition-colors font-sans" role="main">
+    <main className="min-h-screen relative transition-colors font-sans overflow-x-hidden" role="main">
       {/* Sticky Header - Outside hero so it stays visible on scroll */}
       <nav className="sticky top-0 z-50 border-b border-stone-200/50 dark:border-stone-700/50 bg-white/95 dark:bg-stone-900/95 backdrop-blur-xl shadow-sm" aria-label="Main navigation">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -557,7 +557,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
             </h1>
             
             <p className="text-base sm:text-xl text-stone-600 dark:text-stone-400 mb-8 sm:mb-10 max-w-2xl mx-auto leading-relaxed px-2">
-              Paste your notes. Get quizzes, flashcards & crosswords in seconds. Essay feedback, citations, humanizer — we got you. No cap. 🙌
+              #1 alternative to Quizlet. Paste your notes. Get quizzes, flashcards & crosswords in seconds. Essay feedback, humanizer, we got you covered. 🙌
             </p>
             
             {/* Primary CTA - pill */}
@@ -575,7 +575,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
             </p>
             
             {/* Hero cards carousel - scrollable on mobile, arrow-nav on desktop */}
-            <div className="w-screen max-w-[100vw] relative left-1/2 -translate-x-1/2 mt-8 sm:mt-12 px-4 sm:pl-20 sm:pr-20 lg:pl-24 lg:pr-24">
+            <div className="w-[calc(100vw-2rem)] sm:w-screen sm:max-w-[100vw] relative left-1/2 -translate-x-1/2 mt-8 sm:mt-12 px-0 sm:pl-20 sm:pr-20 lg:pl-24 lg:pr-24">
               <button
                 onClick={() => setStudyCardsCarouselIndex((i) => Math.max(0, i - 1))}
                 disabled={studyCardsCarouselIndex === 0}
@@ -592,8 +592,8 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
               >
                 <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
               </button>
-              <div className="overflow-x-auto sm:overflow-hidden scrollbar-hide pb-4 sm:pb-0 -mx-4 px-4 sm:mx-0 sm:px-0 snap-x snap-mandatory sm:snap-none">
-                <div className="flex gap-3 sm:gap-4 sm:transition-transform sm:duration-500 sm:ease-out w-max sm:w-[160%]" style={{ transform: `translateX(-${studyCardsCarouselIndex * 12.5}%)` }}>
+              <div className="overflow-x-auto sm:overflow-hidden scrollbar-hide pb-4 sm:pb-0 sm:mx-0 sm:px-0 snap-x snap-mandatory sm:snap-none px-2">
+                <div className="flex gap-4 sm:gap-4 sm:transition-transform sm:duration-500 sm:ease-out w-max sm:w-[160%]" style={{ transform: `translateX(-${studyCardsCarouselIndex * 12.5}%)` }}>
                   {[
                     { title: 'Analyze', desc: 'Get professor-style feedback on your essays', onClick: () => setMode('analyze'), gradient: 'from-lime-50 to-emerald-50 dark:from-lime-900/20 dark:to-emerald-900/20', accentClasses: { title: 'text-lime-700 dark:text-lime-400', orb: 'bg-lime-400/20', iconBg: 'bg-lime-100 dark:bg-lime-900/50' }, borderColor: 'border-lime-100 dark:border-lime-800/50', icon: '📝', inner: (
                       <div className="space-y-2">
@@ -685,7 +685,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                       </div>
                     )},
                   ].map((card) => (
-                    <div key={card.title} className="flex-shrink-0 w-[140px] sm:w-auto sm:flex-[0_0_12.5%] snap-start">
+                    <div key={card.title} className="flex-shrink-0 w-[220px] sm:w-auto sm:flex-[0_0_12.5%] snap-start">
                       <StudyCard
                         title={card.title}
                         desc={card.desc}
@@ -781,12 +781,12 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
             const activeTab = tabs.find(t => t.id === activeStudyTab);
             return (
               <>
-                <div className="flex overflow-x-auto scrollbar-hide gap-2 sm:gap-3 mb-4 sm:mb-6 pb-2 sm:pb-0 -mx-4 px-4 sm:mx-0 sm:px-0 sm:flex-wrap sm:justify-center snap-x snap-mandatory sm:snap-none">
+                <div className="flex overflow-x-auto scrollbar-hide gap-2.5 sm:gap-3 mb-4 sm:mb-6 pb-2 sm:pb-0 sm:mx-0 sm:px-0 sm:flex-wrap sm:justify-center snap-x snap-mandatory sm:snap-none px-1">
                   {tabs.map((tab) => (
                     <button
                       key={tab.id}
                       onClick={() => setActiveStudyTab(tab.id)}
-                      className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2 sm:py-3 rounded-2xl font-semibold text-xs sm:text-base transition-all duration-300 flex-shrink-0 snap-start whitespace-nowrap ${activeStudyTab === tab.id ? tab.activeClasses + ' scale-105' : tab.inactiveClasses}`}
+                      className={`flex items-center gap-1.5 sm:gap-2 px-4 sm:px-5 py-2.5 sm:py-3 rounded-2xl font-semibold text-sm sm:text-base transition-all duration-300 flex-shrink-0 snap-start whitespace-nowrap ${activeStudyTab === tab.id ? tab.activeClasses + ' scale-105' : tab.inactiveClasses}`}
                     >
                       <span className="text-base sm:text-lg">{tab.icon}</span>
                       <span>{tab.label}</span>
@@ -1697,7 +1697,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
           </div>
 
           {/* Category Tabs - Colorful gradient pills matching toolkit style */}
-          <div className="flex overflow-x-auto scrollbar-hide gap-2 sm:gap-3 mb-8 sm:mb-12 -mx-4 px-4 sm:mx-0 sm:px-0 sm:flex-wrap sm:justify-center pb-2 sm:pb-0 snap-x snap-mandatory sm:snap-none">
+          <div className="flex overflow-x-auto scrollbar-hide gap-2.5 sm:gap-3 mb-8 sm:mb-12 sm:mx-0 sm:px-0 sm:flex-wrap sm:justify-center pb-2 sm:pb-0 snap-x snap-mandatory sm:snap-none px-1">
             {helpCategories.map((category) => {
               const gradients: Record<string, string> = {
                 essays: 'from-lime-500 to-emerald-600',
@@ -1718,7 +1718,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                 <button
                   key={category.id}
                   onClick={() => setActiveHelpCategory(category.id)}
-                  className={`px-4 sm:px-6 py-2.5 rounded-2xl text-sm sm:text-base font-bold transition-all duration-200 hover:scale-105 active:scale-95 flex-shrink-0 snap-start whitespace-nowrap ${
+                  className={`px-5 sm:px-6 py-2.5 rounded-2xl text-sm sm:text-base font-bold transition-all duration-200 hover:scale-105 active:scale-95 flex-shrink-0 snap-start whitespace-nowrap ${
                     isActive
                       ? `bg-gradient-to-r ${gradients[category.id] || 'from-indigo-500 to-violet-600'} text-white shadow-lg ${shadowColors[category.id] || 'shadow-indigo-500/30'}`
                       : 'bg-white dark:bg-stone-800 text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-700 border-2 border-stone-200 dark:border-stone-600'

@@ -899,7 +899,7 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
                           localStorage.setItem('viewAnalysisType', 'comprehensive');
                           localStorage.setItem('cameFromLibrary', 'true');
                         }}
-                        className="flex-1 min-w-[200px] bg-gradient-to-r from-indigo-500 to-violet-600 text-white px-4 py-3 rounded-xl hover:from-indigo-600 hover:to-violet-700 transition-colors font-medium flex items-center justify-center space-x-2 text-sm"
+                        className="flex-1 min-w-[200px] bg-gradient-to-r from-emerald-500 to-green-600 text-white px-4 py-3 rounded-xl hover:from-emerald-600 hover:to-green-700 transition-colors font-medium flex items-center justify-center space-x-2 text-sm"
                       >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -917,7 +917,7 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
                           localStorage.setItem('viewAnalysisType', 'citation');
                           localStorage.setItem('cameFromLibrary', 'true');
                         }}
-                        className="flex-1 min-w-[200px] bg-purple-600 text-white px-4 py-3 rounded-xl hover:bg-purple-700 transition-colors font-medium flex items-center justify-center space-x-2 text-sm"
+                        className="flex-1 min-w-[200px] bg-gradient-to-r from-emerald-500 to-green-600 text-white px-4 py-3 rounded-xl hover:from-emerald-600 hover:to-green-700 transition-colors font-medium flex items-center justify-center space-x-2 text-sm"
                       >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
@@ -1060,9 +1060,9 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
                           {/* Summary Section - Quick Stats */}
                           <div className="grid grid-cols-3 gap-2 mb-4">
                             {results.strong_points && results.strong_points.length > 0 && (
-                              <div className="text-center p-3 bg-violet-50 rounded-xl border border-violet-200">
-                                <div className="text-2xl font-bold text-violet-600">{results.strong_points.length}</div>
-                                <div className="text-xs text-violet-700 font-medium">Strengths</div>
+                              <div className="text-center p-3 bg-green-50 rounded-xl border border-green-200">
+                                <div className="text-2xl font-bold text-green-600">{results.strong_points.length}</div>
+                                <div className="text-xs text-green-700 font-medium">Strengths</div>
                               </div>
                             )}
                             {results.areas_to_improve && results.areas_to_improve.length > 0 && (

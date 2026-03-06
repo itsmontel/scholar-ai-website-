@@ -91,17 +91,17 @@ const StreakWidget = ({ compact = false }: StreakWidgetProps) => {
     );
   }
 
-  // Compact badge version (for header or sidebar)
+  // Compact badge version (for mobile header or sidebar)
   if (compact) {
     return (
       <button
         onClick={() => setShowInfoModal(true)}
-        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-all hover:scale-105"
+        className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full transition-all hover:scale-105 flex-shrink-0"
         style={{ backgroundColor: 'rgba(139, 92, 246, 0.15)' }}
         title="View your streak"
       >
-        <span className="text-lg">🔥</span>
-        <span className="font-bold text-stone-800">{data.currentStreak}</span>
+        <span className="text-base sm:text-lg">🔥</span>
+        <span className="font-bold text-stone-800 dark:text-stone-100 text-sm sm:text-base">{data.currentStreak}</span>
       </button>
     );
   }
