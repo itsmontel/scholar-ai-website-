@@ -356,12 +356,12 @@ const OnboardingPage = ({ onNavigate, user, onComplete, onUserUpdate }: Onboardi
   };
 
   const handleStartTrial = async () => {
-    localStorage.setItem('writescholar_onboarding_completed', 'true');
-    
     if (!user) {
       onNavigate('login');
       return;
     }
+
+    localStorage.setItem('writescholar_onboarding_completed', 'true');
 
     if (username.trim() && user.id) {
       await saveUsername();

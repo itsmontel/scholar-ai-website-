@@ -599,7 +599,27 @@ const AcademicAIApp = () => {
       case 'email-verification':
         return <EmailVerificationPage onNavigate={navigateTo} />;
       case 'onboarding':
-        return <OnboardingPage onNavigate={navigateTo} />;
+        // Onboarding requires login - redirect to login if not authenticated
+        if (!isLoggedIn) {
+          return <LoginPage onNavigate={navigateTo} onLogin={handleLogin} />;
+        }
+        return (
+          <OnboardingPage
+            onNavigate={navigateTo}
+            user={user}
+            onUserUpdate={(updates) => {
+              if (user && updates.name) {
+                const updatedUser = { ...user, name: updates.name };
+                setUser(updatedUser);
+                localStorage.setItem('user', JSON.stringify(updatedUser));
+              }
+            }}
+            onComplete={() => {
+              localStorage.setItem('writescholar_onboarding_completed', 'true');
+              navigateTo('dashboard');
+            }}
+          />
+        );
       case 'auth-callback':
         return <AuthCallbackPage onNavigate={navigateTo} onLogin={handleLogin} />;
       case 'pricing':

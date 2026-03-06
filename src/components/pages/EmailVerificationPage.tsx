@@ -29,7 +29,7 @@ const EmailVerificationPage = ({ onNavigate }: EmailVerificationPageProps) => {
         setCountdown((prev) => {
           if (prev <= 1) {
             clearInterval(timer);
-            onNavigate('onboarding');
+            onNavigate('login');
             return 0;
           }
           return prev - 1;
@@ -130,22 +130,22 @@ const EmailVerificationPage = ({ onNavigate }: EmailVerificationPageProps) => {
             Your email has been successfully verified. Welcome to WriteScholar!
           </p>
           <p className="text-gray-500 text-sm mb-6">
-            We&apos;ve sent you a welcome email with a link to your free <strong>Ultimate Study Tips Guide</strong> (PDF).
+            Please log in to continue. You&apos;ll then complete a quick onboarding to set up your account.
           </p>
 
           {/* Countdown */}
           <div className="bg-violet-50 border border-violet-200 rounded-lg p-4 mb-6">
             <p className="text-violet-800 text-sm">
-              Getting things ready in {countdown} seconds...
+              Redirecting to login in {countdown} seconds...
             </p>
           </div>
 
           {/* Manual redirect button */}
           <button
-            onClick={() => onNavigate('onboarding')}
+            onClick={() => onNavigate('login')}
             className="w-full bg-stone-900 text-white py-3 rounded-full font-semibold hover:bg-stone-800 transition-all"
           >
-            Continue
+            Continue to Login
           </button>
         </div>
       </div>

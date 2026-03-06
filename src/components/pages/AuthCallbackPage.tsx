@@ -31,7 +31,10 @@ const AuthCallbackPage: React.FC<AuthCallbackPageProps> = ({ onNavigate, onLogin
           setStatus('success');
 
           window.history.replaceState(null, '', '/auth/callback');
-          setTimeout(() => onNavigate('dashboard'), 800);
+          // New users go to onboarding; returning users go to dashboard
+          const hasCompletedOnboarding = localStorage.getItem('writescholar_onboarding_completed');
+          const nextPage = hasCompletedOnboarding ? 'dashboard' : 'onboarding';
+          setTimeout(() => onNavigate(nextPage), 800);
           return;
         }
 
@@ -40,7 +43,9 @@ const AuthCallbackPage: React.FC<AuthCallbackPageProps> = ({ onNavigate, onLogin
         if (!token && !userParam && localStorage.getItem('authToken')) {
           processedRef.current = true;
           setStatus('success');
-          setTimeout(() => onNavigate('dashboard'), 300);
+          const hasCompletedOnboarding = localStorage.getItem('writescholar_onboarding_completed');
+          const nextPage = hasCompletedOnboarding ? 'dashboard' : 'onboarding';
+          setTimeout(() => onNavigate(nextPage), 300);
           return;
         }
 
@@ -92,7 +97,7 @@ const AuthCallbackPage: React.FC<AuthCallbackPageProps> = ({ onNavigate, onLogin
               </svg>
             </div>
             <h2 className="text-xl font-semibold text-gray-900 mb-2">Welcome to WriteScholar!</h2>
-            <p className="text-gray-600">Redirecting you to your dashboard...</p>
+            <p className="text-gray-600">Redirecting you to get started...</p>
           </div>
         )}
 
