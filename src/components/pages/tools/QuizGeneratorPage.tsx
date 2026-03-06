@@ -87,8 +87,9 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
   // Export upgrade modal state
   const [showExportUpgradeModal, setShowExportUpgradeModal] = useState(false);
 
-  // Minimal UI when loaded from dashboard recents (no header, footer, or features section)
+  // Minimal UI when loaded from dashboard recents or study tools history (no header, footer, or features section)
   const [showMinimalUI, setShowMinimalUI] = useState(false);
+  const [openedFromHistory, setOpenedFromHistory] = useState(false);
   useEffect(() => {
     const minimal = localStorage.getItem('writescholar_minimal_ui') === 'true';
     if (minimal) {
@@ -143,6 +144,8 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
         setShowResult(false);
         setQuizCompleted(false);
         setError(null);
+        setShowMinimalUI(true);
+        setOpenedFromHistory(true);
       }
     } catch (e) {
       console.error('Failed to load saved quiz:', e);
@@ -168,6 +171,8 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
         });
         setStudyToolMode('flashcards');
         setError(null);
+        setShowMinimalUI(true);
+        setOpenedFromHistory(true);
       }
     } catch (e) {
       console.error('Failed to load saved flashcards:', e);
@@ -201,6 +206,8 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
         setSelectedDirection('across');
         setHintsUsed(0);
         setError(null);
+        setShowMinimalUI(true);
+        setOpenedFromHistory(true);
       }
     } catch (e) {
       console.error('Failed to load saved crossword:', e);
@@ -1398,19 +1405,13 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
       <main className="flex-1 w-full min-w-0 overflow-x-hidden">
         {/* Hero Section - minimal bar when loaded from recents */}
         {showMinimalUI ? (
-          <div className="sticky top-0 z-10 flex items-center justify-between gap-2 px-3 sm:px-6 py-3 bg-white/95 dark:bg-stone-800/95 backdrop-blur border-b border-stone-200 dark:border-stone-700">
-            <button onClick={() => onNavigate('dashboard')} className="p-2 -ml-2 text-stone-500 hover:text-stone-700 dark:text-stone-400 dark:hover:text-stone-200 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-700 transition-colors" aria-label="Back to dashboard">
+          <div className="sticky top-0 z-10 flex items-center gap-3 px-4 sm:px-6 py-4 bg-white/95 dark:bg-stone-800/95 backdrop-blur border-b border-stone-200 dark:border-stone-700">
+            <button onClick={() => onNavigate(openedFromHistory ? 'quiz-history' : 'dashboard')} className="p-2.5 -ml-2 text-stone-500 hover:text-stone-700 dark:text-stone-400 dark:hover:text-stone-200 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-700 transition-colors" aria-label={openedFromHistory ? 'Back to study tools' : 'Back to dashboard'}>
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
             </button>
-            <div className="flex items-center gap-1.5 p-1 bg-stone-100 dark:bg-stone-700 rounded-xl">
-              {(['quiz', 'flashcards', 'crossword'] as const).map((m) => (
-                <button key={m} onClick={() => { setStudyToolMode(m); setQuiz(null); setFlashcardResult(null); setCrosswordResult(null); setError(null); setIsQuizMode(false); }} className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1 ${studyToolMode === m ? 'bg-white dark:bg-stone-600 text-amber-700 dark:text-amber-300 shadow-sm' : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100'}`}>
-                  <span>{m === 'quiz' ? '📝' : m === 'flashcards' ? '🃏' : '🧩'}</span>
-                  <span className="hidden sm:inline">{m === 'quiz' ? 'Quiz' : m === 'flashcards' ? 'Flashcards' : 'Crossword'}</span>
-                </button>
-              ))}
-            </div>
-            <div className="w-9" />
+            <span className="text-sm font-medium text-stone-600 dark:text-stone-400">
+              {studyToolMode === 'quiz' ? 'Quiz' : studyToolMode === 'flashcards' ? 'Flashcards' : 'Crossword'}
+            </span>
           </div>
         ) : (
         <div className="pt-6 sm:pt-10 pb-4 sm:pb-8 px-3 sm:px-6 lg:px-8">
@@ -1466,7 +1467,7 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
         )}
 
         {/* Main Content */}
-        <div className="pb-8 sm:pb-16 px-0 sm:px-6 lg:px-8">
+        <div className={`pb-8 sm:pb-16 ${showMinimalUI ? 'pt-6 sm:pt-8 px-4 sm:px-6 lg:px-8' : 'px-0 sm:px-6 lg:px-8'}`}>
           <div className="max-w-6xl mx-auto">
             {/* === QUIZ MODE === */}
             {studyToolMode === 'quiz' && (
