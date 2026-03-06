@@ -355,14 +355,29 @@ const OnboardingPage = ({ onNavigate, user, onComplete, onUserUpdate }: Onboardi
     );
   };
 
+  const markOnboardingComplete = async (userId: string) => {
+    localStorage.setItem(`writescholar_onboarding_completed_${userId}`, 'true');
+    try {
+      const token = localStorage.getItem('authToken');
+      await fetch(
+        `${(import.meta as any).env?.VITE_API_URL || 'http://localhost:3001/api'}/users/complete-onboarding`,
+        {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}` }
+        }
+      );
+    } catch (e) {
+      console.error('Failed to persist onboarding completion to server:', e);
+    }
+  };
+
   const handleStartTrial = async () => {
     if (!user) {
       onNavigate('login');
       return;
     }
 
-    // Use user-specific key to avoid conflicts between different accounts in same browser
-    localStorage.setItem(`writescholar_onboarding_completed_${user.id}`, 'true');
+    await markOnboardingComplete(user.id);
 
     if (username.trim() && user.id) {
       await saveUsername();
@@ -407,9 +422,10 @@ const OnboardingPage = ({ onNavigate, user, onComplete, onUserUpdate }: Onboardi
       await saveUsername();
     }
     if (user && onComplete) {
+      await markOnboardingComplete(user.id);
       onComplete();
     } else if (user?.id) {
-      localStorage.setItem(`writescholar_onboarding_completed_${user.id}`, 'true');
+      await markOnboardingComplete(user.id);
       onNavigate('dashboard');
     } else {
       onNavigate('login');

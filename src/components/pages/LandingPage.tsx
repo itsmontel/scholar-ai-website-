@@ -2234,13 +2234,10 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                   </video>
                 </div>
                 <div className="p-6">
-                  <div className="flex items-center gap-3 mb-3">
+                  <div className="flex items-center gap-3">
                     <span className="w-10 h-10 rounded-xl bg-violet-100 dark:bg-violet-900/50 flex items-center justify-center text-lg">📝</span>
                     <h3 className="text-xl font-bold text-stone-800 dark:text-stone-100">Generate Quizzes</h3>
                   </div>
-                  <p className="text-stone-600 dark:text-stone-400 text-sm leading-relaxed">
-                    Instantly create multiple choice and true/false quizzes. Test yourself and track your progress.
-                  </p>
                 </div>
               </div>
             </div>
@@ -2261,13 +2258,10 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                   </video>
                 </div>
                 <div className="p-6">
-                  <div className="flex items-center gap-3 mb-3">
+                  <div className="flex items-center gap-3">
                     <span className="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center text-lg">🃏</span>
                     <h3 className="text-xl font-bold text-stone-800 dark:text-stone-100">Create Flashcards</h3>
                   </div>
-                  <p className="text-stone-600 dark:text-stone-400 text-sm leading-relaxed">
-                    Turn key concepts into flip cards. Perfect for memorization and quick review sessions.
-                  </p>
                 </div>
               </div>
             </div>
@@ -2288,13 +2282,10 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                   </video>
                 </div>
                 <div className="p-6">
-                  <div className="flex items-center gap-3 mb-3">
+                  <div className="flex items-center gap-3">
                     <span className="w-10 h-10 rounded-xl bg-rose-100 dark:bg-rose-900/50 flex items-center justify-center text-lg">🧩</span>
                     <h3 className="text-xl font-bold text-stone-800 dark:text-stone-100">Build Crosswords</h3>
                   </div>
-                  <p className="text-stone-600 dark:text-stone-400 text-sm leading-relaxed">
-                    Make studying fun with crossword puzzles. A creative way to learn and retain vocabulary.
-                  </p>
                 </div>
               </div>
             </div>

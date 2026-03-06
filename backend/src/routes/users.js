@@ -5,6 +5,7 @@ const { createClient } = require('@supabase/supabase-js');
 const { authenticateToken } = require('../middleware/auth');
 const { validateUpdateProfile, validateChangePassword } = require('../middleware/validation');
 const userService = require('../services/userService');
+const achievementsService = require('../services/achievementsService');
 
 const router = express.Router();
 
@@ -118,6 +119,32 @@ router.put('/profile', authenticateToken, validateUpdateProfile, async (req, res
       success: false,
       message: 'Failed to update profile'
     });
+  }
+});
+
+// @route   POST /api/users/complete-onboarding
+// @desc    Mark onboarding as completed for the current user
+// @access  Private
+router.post('/complete-onboarding', authenticateToken, async (req, res) => {
+  try {
+    const supabase = createClient(
+      process.env.SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY
+    );
+
+    const { error } = await supabase
+      .from('users')
+      .update({ onboarding_completed: true, updated_at: new Date().toISOString() })
+      .eq('id', req.user.id);
+
+    if (error) {
+      return res.status(500).json({ success: false, message: 'Failed to save onboarding status' });
+    }
+
+    res.json({ success: true, message: 'Onboarding marked as completed' });
+  } catch (error) {
+    console.error('Complete onboarding error:', error);
+    res.status(500).json({ success: false, message: 'Failed to save onboarding status' });
   }
 });
 
@@ -488,6 +515,54 @@ router.put('/username', authenticateToken, async (req, res) => {
     res.status(400).json({
       success: false,
       message: error.message || 'Failed to update username'
+    });
+  }
+});
+
+// @route   GET /api/users/achievements
+// @desc    Get user achievements (stats + unlocked badges)
+// @access  Private
+router.get('/achievements', authenticateToken, async (req, res) => {
+  try {
+    const achievements = await achievementsService.getAchievements(req.user.id);
+    res.json({
+      success: true,
+      data: {
+        stats: achievements.stats,
+        unlockedBadges: achievements.unlockedBadges
+      }
+    });
+  } catch (error) {
+    console.error('Get achievements error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to get achievements'
+    });
+  }
+});
+
+// @route   PUT /api/users/achievements
+// @desc    Save/merge user achievements
+// @access  Private
+router.put('/achievements', authenticateToken, async (req, res) => {
+  try {
+    const { stats, unlockedBadges } = req.body;
+    const achievements = await achievementsService.upsertAchievements(req.user.id, {
+      stats: stats || {},
+      unlockedBadges: unlockedBadges || {}
+    });
+    res.json({
+      success: true,
+      data: {
+        stats: achievements.stats,
+        unlockedBadges: achievements.unlockedBadges
+      }
+    });
+  } catch (error) {
+    console.error('Save achievements error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to save achievements'
     });
   }
 });

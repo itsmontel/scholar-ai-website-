@@ -146,12 +146,12 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
             {/* Logo */}
             <button
               onClick={() => onNavigate?.('landing')}
-              className="flex items-center gap-2.5 group"
+              className="flex items-center gap-2 sm:gap-2.5 group min-w-0 shrink"
             >
-              <div className="relative w-12 h-12 flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
-                <ScholarMascot size={48} animated={false} className="drop-shadow-lg" />
+              <div className="relative w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center group-hover:scale-105 transition-transform duration-300 shrink-0 overflow-hidden">
+                <ScholarMascot size={48} animated={false} className="drop-shadow-lg scale-[0.83] sm:scale-100 origin-center" />
               </div>
-              <span className="text-xl font-extrabold tracking-tight text-stone-800 dark:text-stone-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors duration-300">
+              <span className="text-base sm:text-xl font-extrabold tracking-tight text-stone-800 dark:text-stone-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors duration-300 truncate max-w-[110px] sm:max-w-none">
                 WriteScholar
               </span>
             </button>
@@ -174,22 +174,22 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
             </nav>
 
             {/* Right side */}
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center gap-2 sm:gap-3 min-w-0 shrink-0">
               <button 
                 onClick={() => onNavigate?.('login')} 
-                className="hidden sm:inline-flex px-5 py-2.5 text-sm font-semibold text-stone-600 dark:text-stone-300 hover:text-stone-900 dark:hover:text-white rounded-full hover:bg-stone-100 dark:hover:bg-stone-800 transition-all duration-300"
+                className="hidden sm:inline-flex px-5 py-2.5 text-sm font-semibold text-stone-600 dark:text-stone-300 hover:text-stone-900 dark:hover:text-white rounded-full hover:bg-stone-100 dark:hover:bg-stone-800 transition-all duration-300 shrink-0"
               >
                 Log in
               </button>
               <button 
                 onClick={() => onNavigate?.('signup')} 
-                className="inline-flex items-center px-6 py-2.5 text-white text-sm font-bold rounded-full bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 hover:scale-105 active:scale-95 transition-all duration-300 shadow-lg shadow-violet-500/25"
+                className="inline-flex items-center justify-center px-4 py-2 sm:px-6 sm:py-2.5 text-white text-xs sm:text-sm font-bold rounded-full bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 hover:scale-105 active:scale-95 transition-all duration-300 shadow-lg shadow-violet-500/25 whitespace-nowrap shrink-0"
               >
                 Sign up free
               </button>
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="md:hidden p-2 rounded-full hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors text-stone-600 dark:text-stone-400"
+                className="md:hidden p-2 rounded-full hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors text-stone-600 dark:text-stone-400 shrink-0"
                 aria-label="Toggle menu"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

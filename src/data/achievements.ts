@@ -145,6 +145,9 @@ export const BADGES: Badge[] = [
 
 const STATS_KEY = 'writescholar_achievement_stats';
 const UNLOCKED_KEY = 'writescholar_achievements_unlocked';
+const getApiBase = () => (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_API_URL)
+  ? (import.meta as any).env.VITE_API_URL
+  : 'http://localhost:3001/api';
 
 function defaultStats(): AchievementStats {
   return {
@@ -188,6 +191,7 @@ export function getStats(): AchievementStats {
 
 export function saveStats(stats: AchievementStats) {
   localStorage.setItem(STATS_KEY, JSON.stringify(stats));
+  persistToServer();
 }
 
 export function getUnlockedBadges(): Record<string, string> {
@@ -200,6 +204,66 @@ export function getUnlockedBadges(): Record<string, string> {
 
 export function saveUnlockedBadges(unlocked: Record<string, string>) {
   localStorage.setItem(UNLOCKED_KEY, JSON.stringify(unlocked));
+  persistToServer();
+}
+
+/** Persist current stats + badges to Supabase (fire-and-forget when logged in) */
+function persistToServer() {
+  const token = typeof localStorage !== 'undefined' ? localStorage.getItem('authToken') : null;
+  if (!token) return;
+  const stats = getStats();
+  const unlocked = getUnlockedBadges();
+  fetch(`${getApiBase()}/users/achievements`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify({ stats, unlockedBadges: unlocked }),
+  }).catch(() => { /* ignore */ });
+}
+
+/** Merge server achievements into localStorage (take best of both) */
+export function mergeFromServer(serverStats: Record<string, unknown>, serverBadges: Record<string, string>) {
+  const local = getStats();
+  const localBadges = getUnlockedBadges();
+
+  const numericKeys = [
+    'uploads_count', 'analyses_count', 'humanize_count', 'summaries_count',
+    'quizzes_count', 'flashcards_count', 'crosswords_count', 'citations_count',
+    'longest_streak', 'current_streak', 'tools_used_session', 'study_tools_session',
+    'exports_count', 'copies_count',
+  ];
+  const merged = { ...local };
+  for (const key of numericKeys) {
+    const s = (serverStats as any)[key];
+    if (s !== undefined && s !== null) {
+      merged[key as keyof AchievementStats] = Math.max((merged as any)[key] ?? 0, Number(s)) as any;
+    }
+  }
+  const boolKeys = ['used_after_10pm', 'used_before_7am', 'is_paid_user', 'midnight_usage', 'weekend_usage', 'visited_badges', 'first_login'];
+  for (const key of boolKeys) {
+    if ((serverStats as any)[key]) merged[key as keyof AchievementStats] = true as any;
+  }
+  if (Array.isArray(serverStats.tools_used_ever)) {
+    merged.tools_used_ever = [...new Set([...(merged.tools_used_ever || []), ...(serverStats.tools_used_ever as string[])])];
+  }
+  if (serverStats.paid_since && (!merged.paid_since || new Date(serverStats.paid_since as string) < new Date(merged.paid_since))) {
+    merged.paid_since = serverStats.paid_since as string;
+  }
+  if (serverStats.last_active_date && (!merged.last_active_date || new Date(serverStats.last_active_date as string) > new Date(merged.last_active_date))) {
+    merged.last_active_date = serverStats.last_active_date as string;
+  }
+
+  const mergedBadges = { ...localBadges };
+  for (const [id, date] of Object.entries(serverBadges)) {
+    if (!mergedBadges[id] || (date && new Date(date) < new Date(mergedBadges[id]))) {
+      mergedBadges[id] = date;
+    }
+  }
+
+  saveStats(merged);
+  saveUnlockedBadges(mergedBadges);
 }
 
 function applyTimeChecks(stats: AchievementStats) {

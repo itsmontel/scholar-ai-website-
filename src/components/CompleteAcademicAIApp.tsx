@@ -213,6 +213,13 @@ const AcademicAIApp = () => {
           
           if (userResponse.ok) {
             const userData = await userResponse.json();
+            if (userData.data?.achievements) {
+              const { mergeFromServer } = await import('../data/achievements');
+              mergeFromServer(
+                userData.data.achievements.stats || {},
+                userData.data.achievements.unlockedBadges || {}
+              );
+            }
             if (userData.data && userData.data.user && userData.data.user.email) {
               const updatedUser = {
                 id: userData.data.user.id,
@@ -252,6 +259,14 @@ const AcademicAIApp = () => {
         }
       } else if (response.ok) {
         const userData = await response.json();
+        // Sync achievements from server (cross-device)
+        if (userData.data?.achievements) {
+          const { mergeFromServer } = await import('../data/achievements');
+          mergeFromServer(
+            userData.data.achievements.stats || {},
+            userData.data.achievements.unlockedBadges || {}
+          );
+        }
         // Update user data from server
         if (userData.data && userData.data.user && userData.data.user.email) {
           const updatedUser = {

@@ -192,7 +192,8 @@ router.post('/login', validateLogin, async (req, res) => {
           lastName: user.last_name,
           subscriptionPlan: user.subscription_plan,
           subscriptionStatus: user.subscription_status,
-          emailVerified: user.email_verified
+          emailVerified: user.email_verified,
+          onboardingCompleted: user.onboarding_completed || false
         },
         token
       }
@@ -212,6 +213,7 @@ router.post('/login', validateLogin, async (req, res) => {
 router.get('/me', authenticateToken, async (req, res) => {
   try {
     const { createClient } = require('@supabase/supabase-js');
+    const achievementsService = require('../services/achievementsService');
     const supabase = createClient(
       process.env.SUPABASE_URL,
       process.env.SUPABASE_ANON_KEY
@@ -219,7 +221,7 @@ router.get('/me', authenticateToken, async (req, res) => {
 
     const { data: user, error } = await supabase
       .from('users')
-      .select('id, email, username, first_name, last_name, name, institution, research_field, subscription_plan, subscription_status, created_at, last_login, email_verified')
+      .select('id, email, username, first_name, last_name, name, institution, research_field, subscription_plan, subscription_status, created_at, last_login, email_verified, onboarding_completed')
       .eq('id', req.user.id)
       .single();
 
@@ -228,6 +230,13 @@ router.get('/me', authenticateToken, async (req, res) => {
         success: false,
         message: 'User not found'
       });
+    }
+
+    let achievements = { stats: {}, unlockedBadges: {} };
+    try {
+      achievements = await achievementsService.getAchievements(req.user.id);
+    } catch (achErr) {
+      console.error('Get achievements error (non-fatal):', achErr);
     }
 
     res.json({
@@ -246,7 +255,12 @@ router.get('/me', authenticateToken, async (req, res) => {
           subscriptionStatus: user.subscription_status,
           createdAt: user.created_at,
           lastLogin: user.last_login,
-          emailVerified: user.email_verified
+          emailVerified: user.email_verified,
+          onboardingCompleted: user.onboarding_completed || false
+        },
+        achievements: {
+          stats: achievements.stats,
+          unlockedBadges: achievements.unlockedBadges
         }
       }
     });
@@ -603,7 +617,8 @@ router.get('/google/callback',
         email: req.user.email,
         username: req.user.username,
         name: req.user.name,
-        profilePicture: req.user.profile_picture
+        profilePicture: req.user.profile_picture,
+        onboardingCompleted: req.user.onboarding_completed || false
       }))}`);
     } catch (error) {
       console.error('Google OAuth callback error:', error);

@@ -31,11 +31,40 @@ const AuthCallbackPage: React.FC<AuthCallbackPageProps> = ({ onNavigate, onLogin
           setStatus('success');
 
           window.history.replaceState(null, '', '/auth/callback');
-          // New users go to onboarding; returning users go to dashboard
-          // Use user-specific key to avoid conflicts between different accounts in same browser
-          const onboardingKey = `writescholar_onboarding_completed_${userData.id}`;
-          const hasCompletedOnboarding = localStorage.getItem(onboardingKey);
-          const nextPage = hasCompletedOnboarding ? 'dashboard' : 'onboarding';
+
+          // Fetch onboarding status from the server so it works across all browsers/devices
+          let onboardingCompleted = userData.onboardingCompleted || false;
+          try {
+            const meRes = await fetch(
+              `${(import.meta as any).env?.VITE_API_URL || 'http://localhost:3001/api'}/auth/me`,
+              { headers: { 'Authorization': `Bearer ${token}` } }
+            );
+            if (meRes.ok) {
+              const meData = await meRes.json();
+              onboardingCompleted = meData.data?.user?.onboardingCompleted || false;
+              // Sync achievements from server (cross-device)
+              if (meData.data?.achievements) {
+                const { mergeFromServer } = await import('../../data/achievements');
+                mergeFromServer(
+                  meData.data.achievements.stats || {},
+                  meData.data.achievements.unlockedBadges || {}
+                );
+              }
+              // Update stored user with server data
+              const updatedUser = { ...userData, onboardingCompleted };
+              localStorage.setItem('user', JSON.stringify(updatedUser));
+              onLogin(updatedUser);
+            }
+          } catch (_e) {
+            // Network error – fall back to the value from the OAuth redirect
+          }
+
+          // Also sync localStorage key for components that still check it
+          if (onboardingCompleted) {
+            localStorage.setItem(`writescholar_onboarding_completed_${userData.id}`, 'true');
+          }
+
+          const nextPage = onboardingCompleted ? 'dashboard' : 'onboarding';
           setTimeout(() => onNavigate(nextPage), 800);
           return;
         }
@@ -50,9 +79,11 @@ const AuthCallbackPage: React.FC<AuthCallbackPageProps> = ({ onNavigate, onLogin
           if (storedUser) {
             try {
               const parsedUser = JSON.parse(storedUser);
-              const onboardingKey = `writescholar_onboarding_completed_${parsedUser.id}`;
-              const hasCompletedOnboarding = localStorage.getItem(onboardingKey);
-              nextPage = hasCompletedOnboarding ? 'dashboard' : 'onboarding';
+              // Trust server value if present, otherwise fall back to localStorage key
+              const onboardingCompleted =
+                parsedUser.onboardingCompleted ||
+                !!localStorage.getItem(`writescholar_onboarding_completed_${parsedUser.id}`);
+              nextPage = onboardingCompleted ? 'dashboard' : 'onboarding';
             } catch (e) {
               // fallback to dashboard if user data is invalid
             }

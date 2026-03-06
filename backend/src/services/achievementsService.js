@@ -1,0 +1,122 @@
+const { createClient } = require('@supabase/supabase-js');
+
+/**
+ * Get user achievements from Supabase
+ */
+async function getAchievements(userId) {
+  const supabase = createClient(
+    process.env.SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_ROLE_KEY
+  );
+
+  const { data, error } = await supabase
+    .from('user_achievements')
+    .select('stats, unlocked_badges')
+    .eq('user_id', userId)
+    .single();
+
+  if (error && error.code !== 'PGRST116') {
+    throw error;
+  }
+
+  return {
+    stats: data?.stats || {},
+    unlockedBadges: data?.unlocked_badges || {}
+  };
+}
+
+/**
+ * Upsert user achievements (merge with existing)
+ * Takes max of numeric stats, merges badges (earliest date wins)
+ */
+async function upsertAchievements(userId, { stats = {}, unlockedBadges = {} }) {
+  const supabase = createClient(
+    process.env.SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_ROLE_KEY
+  );
+
+  const existing = await getAchievements(userId);
+
+  const mergedStats = mergeStats(existing.stats, stats);
+  const mergedBadges = mergeBadges(existing.unlockedBadges, unlockedBadges);
+
+  const { data, error } = await supabase
+    .from('user_achievements')
+    .upsert(
+      {
+        user_id: userId,
+        stats: mergedStats,
+        unlocked_badges: mergedBadges,
+        updated_at: new Date().toISOString()
+      },
+      { onConflict: 'user_id' }
+    )
+    .select('stats, unlocked_badges')
+    .single();
+
+  if (error) throw error;
+
+  return {
+    stats: data.stats,
+    unlockedBadges: data.unlocked_badges
+  };
+}
+
+function mergeStats(existing, incoming) {
+  const numericKeys = [
+    'uploads_count', 'analyses_count', 'humanize_count', 'summaries_count',
+    'quizzes_count', 'flashcards_count', 'crosswords_count', 'citations_count',
+    'longest_streak', 'current_streak', 'tools_used_session', 'study_tools_session',
+    'exports_count', 'copies_count'
+  ];
+
+  const merged = { ...existing };
+
+  for (const key of numericKeys) {
+    if (incoming[key] !== undefined) {
+      const existingVal = merged[key] ?? 0;
+      merged[key] = Math.max(existingVal, incoming[key]);
+    }
+  }
+
+  const boolKeys = ['used_after_10pm', 'used_before_7am', 'is_paid_user', 'midnight_usage', 'weekend_usage', 'visited_badges', 'first_login'];
+  for (const key of boolKeys) {
+    if (incoming[key] !== undefined) {
+      merged[key] = merged[key] || incoming[key];
+    }
+  }
+
+  if (incoming.tools_used_ever && Array.isArray(incoming.tools_used_ever)) {
+    const existingArr = merged.tools_used_ever || [];
+    merged.tools_used_ever = [...new Set([...existingArr, ...incoming.tools_used_ever])];
+  }
+
+  if (incoming.paid_since) {
+    if (!merged.paid_since || new Date(incoming.paid_since) < new Date(merged.paid_since)) {
+      merged.paid_since = incoming.paid_since;
+    }
+  }
+
+  if (incoming.last_active_date) {
+    if (!merged.last_active_date || new Date(incoming.last_active_date) > new Date(merged.last_active_date)) {
+      merged.last_active_date = incoming.last_active_date;
+    }
+  }
+
+  return merged;
+}
+
+function mergeBadges(existing, incoming) {
+  const merged = { ...existing };
+  for (const [badgeId, date] of Object.entries(incoming)) {
+    if (!merged[badgeId] || (date && new Date(date) < new Date(merged[badgeId]))) {
+      merged[badgeId] = date;
+    }
+  }
+  return merged;
+}
+
+module.exports = {
+  getAchievements,
+  upsertAchievements
+};
