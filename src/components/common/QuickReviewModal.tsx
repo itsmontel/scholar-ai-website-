@@ -249,7 +249,7 @@ const QuickReviewModal = ({ userName, userId, onComplete, onSkip }: QuickReviewM
   if (isLoading) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/60 backdrop-blur-sm animate-fadeIn">
-        <div className="bg-white rounded-3xl p-8 shadow-2xl">
+        <div className="bg-white rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-2xl">
           <div className="flex flex-col items-center gap-4">
             <div className="w-12 h-12 border-4 border-violet-200 border-t-violet-600 rounded-full animate-spin" />
             <p className="text-stone-600 font-medium">Preparing your review...</p>
@@ -262,12 +262,12 @@ const QuickReviewModal = ({ userName, userId, onComplete, onSkip }: QuickReviewM
   // No content state
   if (noContent) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/60 backdrop-blur-sm animate-fadeIn">
-        <div className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-stone-900/60 backdrop-blur-sm animate-fadeIn">
+        <div className="relative w-full max-w-md max-h-[90vh] overflow-y-auto bg-white rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden">
           <div className="h-3 bg-gradient-to-r from-violet-500 via-purple-500 to-fuchsia-500" />
-          <div className="p-8 text-center">
-            <div className="mb-4">
-              <ScholarMascot size={120} animated={true} />
+          <div className="p-4 sm:p-8 text-center">
+            <div className="mb-3 sm:mb-4">
+              <ScholarMascot size={100} animated={true} />
             </div>
             <h2 className="text-2xl font-bold text-stone-800 mb-2">
               Welcome back{userName ? `, ${userName}` : ''}!
@@ -293,8 +293,8 @@ const QuickReviewModal = ({ userName, userId, onComplete, onSkip }: QuickReviewM
     const message = scorePercentage >= 80 ? 'Amazing!' : scorePercentage >= 60 ? 'Great job!' : scorePercentage >= 40 ? 'Good effort!' : 'Keep practicing!';
     
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/60 backdrop-blur-sm animate-fadeIn overflow-y-auto">
-        <div className="relative w-full max-w-lg max-h-[calc(100vh-2rem)] bg-white rounded-3xl shadow-2xl overflow-hidden overflow-y-auto my-auto">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-stone-900/60 backdrop-blur-sm animate-fadeIn overflow-y-auto">
+        <div className="relative w-full max-w-lg max-h-[min(calc(100vh-1rem),90vh)] sm:max-h-[calc(100vh-2rem)] bg-white rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden overflow-y-auto my-auto">
           {/* Confetti-like decorations for good scores */}
           {scorePercentage >= 60 && (
             <>
@@ -307,45 +307,47 @@ const QuickReviewModal = ({ userName, userId, onComplete, onSkip }: QuickReviewM
           
           <div className="h-3 bg-gradient-to-r from-violet-500 via-purple-500 to-fuchsia-500" />
           
-          <div className="p-8 text-center">
-            <div className="mb-6">
-              <ScholarMascot size={140} animated={true} pose={scorePercentage >= 60 ? 'celebrating' : 'default'} />
+          <div className="p-4 sm:p-8 text-center overflow-y-auto">
+            <div className="mb-3 sm:mb-6 flex justify-center">
+              <div className="scale-75 sm:scale-100 origin-center">
+                <ScholarMascot size={120} animated={true} pose={scorePercentage >= 60 ? 'celebrating' : 'default'} />
+              </div>
             </div>
             
-            <span className="text-5xl mb-4 block">{emoji}</span>
-            <h2 className="text-3xl font-bold text-stone-800 mb-2">{message}</h2>
+            <span className="text-4xl sm:text-5xl mb-2 sm:mb-4 block">{emoji}</span>
+            <h2 className="text-2xl sm:text-3xl font-bold text-stone-800 mb-2">{message}</h2>
             
             {/* Score display */}
-            <div className="my-6">
-              <div className="inline-flex items-center gap-3 px-6 py-4 bg-gradient-to-r from-violet-50 to-purple-50 rounded-2xl border border-violet-100">
+            <div className="my-4 sm:my-6">
+              <div className="inline-flex flex-wrap items-center justify-center gap-2 sm:gap-3 px-4 sm:px-6 py-3 sm:py-4 bg-gradient-to-r from-violet-50 to-purple-50 rounded-xl sm:rounded-2xl border border-violet-100">
                 <div className="text-center">
-                  <div className="text-4xl font-bold bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">
+                  <div className="text-2xl sm:text-4xl font-bold bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">
                     {score}/{reviewItems.length}
                   </div>
-                  <div className="text-xs text-stone-500 font-medium">CORRECT</div>
+                  <div className="text-[10px] sm:text-xs text-stone-500 font-medium">CORRECT</div>
                 </div>
-                <div className="w-px h-12 bg-violet-200" />
+                <div className="w-px h-8 sm:h-12 bg-violet-200 hidden sm:block" />
                 <div className="text-center">
-                  <div className="text-4xl font-bold bg-gradient-to-r from-amber-500 to-orange-500 bg-clip-text text-transparent">
+                  <div className="text-2xl sm:text-4xl font-bold bg-gradient-to-r from-amber-500 to-orange-500 bg-clip-text text-transparent">
                     {scorePercentage}%
                   </div>
-                  <div className="text-xs text-stone-500 font-medium">SCORE</div>
+                  <div className="text-[10px] sm:text-xs text-stone-500 font-medium">SCORE</div>
                 </div>
                 {maxStreak > 1 && (
                   <>
-                    <div className="w-px h-12 bg-violet-200" />
+                    <div className="w-px h-8 sm:h-12 bg-violet-200 hidden sm:block" />
                     <div className="text-center">
-                      <div className="text-4xl font-bold bg-gradient-to-r from-emerald-500 to-teal-500 bg-clip-text text-transparent">
+                      <div className="text-2xl sm:text-4xl font-bold bg-gradient-to-r from-emerald-500 to-teal-500 bg-clip-text text-transparent">
                         {maxStreak}
                       </div>
-                      <div className="text-xs text-stone-500 font-medium">STREAK 🔥</div>
+                      <div className="text-[10px] sm:text-xs text-stone-500 font-medium">STREAK 🔥</div>
                     </div>
                   </>
                 )}
               </div>
             </div>
             
-            <p className="text-stone-500 mb-8">
+            <p className="text-stone-500 mb-4 sm:mb-8 text-sm sm:text-base">
               {scorePercentage >= 80 
                 ? "Your retention is excellent! Keep it up!" 
                 : scorePercentage >= 60 
@@ -355,7 +357,7 @@ const QuickReviewModal = ({ userName, userId, onComplete, onSkip }: QuickReviewM
             
             <button
               onClick={handleClose}
-              className="px-10 py-4 bg-gradient-to-r from-violet-600 to-purple-600 text-white rounded-full font-semibold text-lg shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all"
+              className="px-6 sm:px-10 py-3 sm:py-4 bg-gradient-to-r from-violet-600 to-purple-600 text-white rounded-full font-semibold text-base sm:text-lg shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all"
             >
               Continue to Dashboard
             </button>
@@ -367,42 +369,42 @@ const QuickReviewModal = ({ userName, userId, onComplete, onSkip }: QuickReviewM
 
   // Main review interface
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/60 backdrop-blur-sm animate-fadeIn overflow-y-auto">
-      <div className="relative w-full max-w-2xl max-h-[calc(100vh-2rem)] bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col my-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-stone-900/60 backdrop-blur-sm animate-fadeIn overflow-y-auto">
+      <div className="relative w-full max-w-2xl max-h-[min(calc(100vh-1rem),90vh)] sm:max-h-[calc(100vh-2rem)] bg-white rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden flex flex-col my-auto">
         {/* Header */}
         <div 
-          className="relative px-6 py-5"
+          className="relative px-4 py-3 sm:px-6 sm:py-5 flex-shrink-0"
           style={{ background: 'linear-gradient(135deg, #8B5CF6 0%, #7C3AED 50%, #6D28D9 100%)' }}
         >
           {/* Decorative elements */}
           <div className="absolute top-2 left-4 w-16 h-16 rounded-full bg-white/10 blur-xl" />
           <div className="absolute bottom-2 right-8 w-12 h-12 rounded-full bg-white/10 blur-lg" />
           
-          <div className="relative flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="hidden sm:block">
+          <div className="relative flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 sm:gap-4 min-w-0">
+              <div className="hidden sm:block flex-shrink-0">
                 <ScholarMascot size={50} animated={true} />
               </div>
-              <div>
-                <h2 className="text-xl font-bold text-white">Quick Review</h2>
-                <p className="text-violet-200 text-sm">
-                  {currentIndex === 0 ? `Welcome back${userName ? `, ${userName}` : ''}!` : `Question ${currentIndex + 1} of ${reviewItems.length}`}
+              <div className="min-w-0">
+                <h2 className="text-base sm:text-xl font-bold text-white truncate">Quick Review</h2>
+                <p className="text-violet-200 text-xs sm:text-sm truncate">
+                  {currentIndex === 0 ? `Welcome back${userName ? `, ${userName}` : ''}!` : `Q${currentIndex + 1}/${reviewItems.length}`}
                 </p>
               </div>
             </div>
             
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
               {/* Streak indicator */}
               {streak > 0 && (
-                <div className="flex items-center gap-1 px-3 py-1.5 bg-white/20 rounded-full">
-                  <span className="text-lg">🔥</span>
-                  <span className="text-white font-bold">{streak}</span>
+                <div className="flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 bg-white/20 rounded-full">
+                  <span className="text-sm sm:text-lg">🔥</span>
+                  <span className="text-white font-bold text-sm sm:text-base">{streak}</span>
                 </div>
               )}
               
               {/* Score */}
-              <div className="flex items-center gap-2 px-3 py-1.5 bg-white/20 rounded-full">
-                <span className="text-white font-semibold">{score}/{currentIndex + (answered ? 1 : 0)}</span>
+              <div className="flex items-center gap-2 px-2 sm:px-3 py-1 sm:py-1.5 bg-white/20 rounded-full">
+                <span className="text-white font-semibold text-sm sm:text-base">{score}/{currentIndex + (answered ? 1 : 0)}</span>
               </div>
               
               <button
@@ -417,7 +419,7 @@ const QuickReviewModal = ({ userName, userId, onComplete, onSkip }: QuickReviewM
           </div>
           
           {/* Progress bar */}
-          <div className="mt-4 h-1.5 bg-white/20 rounded-full overflow-hidden">
+          <div className="mt-2 sm:mt-4 h-1 sm:h-1.5 bg-white/20 rounded-full overflow-hidden">
             <div 
               className="h-full bg-white rounded-full transition-all duration-500 ease-out"
               style={{ width: `${progress}%` }}
@@ -426,11 +428,11 @@ const QuickReviewModal = ({ userName, userId, onComplete, onSkip }: QuickReviewM
         </div>
 
         {/* Content area - scrollable, constrained */}
-        <div className="flex-1 min-h-0 overflow-y-auto p-6 sm:p-8">
+        <div className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-8 overscroll-contain">
           {/* Source badge */}
           {currentItem && (
-            <div className="flex items-center justify-center mb-4 flex-shrink-0">
-              <span className="inline-flex items-center gap-2 px-3 py-1.5 bg-stone-100 rounded-full text-xs font-medium text-stone-500">
+            <div className="flex items-center justify-center mb-3 sm:mb-4 flex-shrink-0">
+              <span className="inline-flex items-center gap-2 px-2.5 sm:px-3 py-1 sm:py-1.5 bg-stone-100 rounded-full text-[10px] sm:text-xs font-medium text-stone-500 truncate max-w-full">
                 <span>{currentItem.type === 'quiz' ? '📝' : '🃏'}</span>
                 {currentItem.data.sourceTitle || 'Study Material'}
               </span>
@@ -439,9 +441,9 @@ const QuickReviewModal = ({ userName, userId, onComplete, onSkip }: QuickReviewM
 
           {/* Quiz question */}
           {currentItem?.type === 'quiz' && (
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               <div className="text-center min-w-0">
-                <h3 className="text-lg sm:text-xl font-semibold text-stone-800 leading-relaxed line-clamp-6">
+                <h3 className="text-base sm:text-xl font-semibold text-stone-800 leading-relaxed line-clamp-5 sm:line-clamp-6">
                   {currentItem.data.question}
                 </h3>
               </div>
@@ -458,7 +460,7 @@ const QuickReviewModal = ({ userName, userId, onComplete, onSkip }: QuickReviewM
                       key={idx}
                       onClick={() => handleQuizAnswer(option)}
                       disabled={answered}
-                      className={`w-full p-3 rounded-xl text-left font-medium transition-all border-2 min-w-0 ${
+                      className={`w-full p-2.5 sm:p-3 rounded-lg sm:rounded-xl text-left font-medium transition-all border-2 min-w-0 ${
                         showCorrect
                           ? 'bg-emerald-50 border-emerald-400 text-emerald-800'
                           : showWrong
@@ -488,7 +490,7 @@ const QuickReviewModal = ({ userName, userId, onComplete, onSkip }: QuickReviewM
                 
                 {/* True/False options - when no options array */}
                 {currentItem.data.type === 'true_false' && (!currentItem.data.options || currentItem.data.options.length === 0) && (
-                  <div className="flex gap-3 flex-shrink-0">
+                  <div className="flex gap-2 sm:gap-3 flex-shrink-0">
                     {['True', 'False'].map(option => {
                       const isSelected = selectedAnswer === option;
                       const isCorrect = isCorrectQuizAnswer(option, currentItem);
@@ -500,7 +502,7 @@ const QuickReviewModal = ({ userName, userId, onComplete, onSkip }: QuickReviewM
                           key={option}
                           onClick={() => handleQuizAnswer(option)}
                           disabled={answered}
-                          className={`flex-1 p-4 rounded-xl font-semibold text-lg transition-all border-2 ${
+                          className={`flex-1 p-3 sm:p-4 rounded-lg sm:rounded-xl font-semibold text-base sm:text-lg transition-all border-2 ${
                             showCorrect
                               ? 'bg-emerald-50 border-emerald-400 text-emerald-800'
                               : showWrong
@@ -520,19 +522,19 @@ const QuickReviewModal = ({ userName, userId, onComplete, onSkip }: QuickReviewM
               
               {/* Explanation after answering - scrollable if long */}
               {answered && currentItem.data.explanation && (
-                <div className="p-3 bg-blue-50 border border-blue-200 rounded-xl max-h-32 overflow-y-auto flex-shrink-0">
-                  <p className="text-sm text-blue-800">
-                    <span className="font-semibold">💡 Explanation:</span> {currentItem.data.explanation}
+                <div className="p-2.5 sm:p-3 bg-blue-50 border border-blue-200 rounded-xl max-h-24 sm:max-h-32 overflow-y-auto flex-shrink-0">
+                  <p className="text-xs sm:text-sm text-blue-800">
+                    <span className="font-semibold">💡</span> {currentItem.data.explanation}
                   </p>
                 </div>
               )}
               
               {/* Next button */}
               {answered && (
-                <div className="flex justify-center pt-2 flex-shrink-0">
+                <div className="flex justify-center pt-1 sm:pt-2 flex-shrink-0">
                   <button
                     onClick={goToNext}
-                    className="px-8 py-3 bg-gradient-to-r from-violet-600 to-purple-600 text-white rounded-full font-semibold shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all flex items-center gap-2"
+                    className="px-6 sm:px-8 py-2.5 sm:py-3 bg-gradient-to-r from-violet-600 to-purple-600 text-white rounded-full font-semibold text-sm sm:text-base shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-2"
                   >
                     {currentIndex === reviewItems.length - 1 ? 'See Results' : 'Next Question'}
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -561,7 +563,7 @@ const QuickReviewModal = ({ userName, userId, onComplete, onSkip }: QuickReviewM
                 >
                   {/* Front */}
                   <div
-                    className="w-full min-h-[160px] max-h-[200px] bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-200 rounded-2xl p-5 sm:p-6 flex flex-col items-center justify-center text-center shadow-lg overflow-y-auto"
+                    className="w-full min-h-[120px] sm:min-h-[160px] max-h-[160px] sm:max-h-[200px] bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-200 rounded-xl sm:rounded-2xl p-4 sm:p-6 flex flex-col items-center justify-center text-center shadow-lg overflow-y-auto"
                     style={{ backfaceVisibility: 'hidden' }}
                   >
                     <span className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-2 flex-shrink-0">Question</span>
@@ -573,7 +575,7 @@ const QuickReviewModal = ({ userName, userId, onComplete, onSkip }: QuickReviewM
                   
                   {/* Back */}
                   <div
-                    className="absolute inset-0 w-full min-h-[160px] max-h-[200px] bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-2xl p-5 sm:p-6 flex flex-col items-center justify-center text-center shadow-lg overflow-y-auto"
+                    className="absolute inset-0 w-full min-h-[120px] sm:min-h-[160px] max-h-[160px] sm:max-h-[200px] bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl sm:rounded-2xl p-4 sm:p-6 flex flex-col items-center justify-center text-center shadow-lg overflow-y-auto"
                     style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
                   >
                     <span className="text-xs font-bold text-blue-500 uppercase tracking-widest mb-2 flex-shrink-0">Answer</span>
@@ -586,16 +588,16 @@ const QuickReviewModal = ({ userName, userId, onComplete, onSkip }: QuickReviewM
               
               {/* Did you know it? buttons */}
               {isFlipped && (
-                <div className="flex justify-center gap-4 pt-2">
+                <div className="flex justify-center gap-2 sm:gap-4 pt-2 flex-wrap">
                   <button
                     onClick={() => handleFlashcardKnew(false)}
-                    className="px-6 py-3 bg-red-50 border-2 border-red-200 text-red-700 rounded-xl font-semibold hover:bg-red-100 transition-all flex items-center gap-2"
+                    className="px-4 sm:px-6 py-2.5 sm:py-3 bg-red-50 border-2 border-red-200 text-red-700 rounded-xl font-semibold text-sm sm:text-base hover:bg-red-100 transition-all flex items-center gap-2"
                   >
                     <span>😅</span> Still Learning
                   </button>
                   <button
                     onClick={() => handleFlashcardKnew(true)}
-                    className="px-6 py-3 bg-emerald-50 border-2 border-emerald-200 text-emerald-700 rounded-xl font-semibold hover:bg-emerald-100 transition-all flex items-center gap-2"
+                    className="px-4 sm:px-6 py-2.5 sm:py-3 bg-emerald-50 border-2 border-emerald-200 text-emerald-700 rounded-xl font-semibold text-sm sm:text-base hover:bg-emerald-100 transition-all flex items-center gap-2"
                   >
                     <span>🎯</span> Got It!
                   </button>

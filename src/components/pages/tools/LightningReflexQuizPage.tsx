@@ -125,6 +125,15 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [loadedFromSavedGame, setLoadedFromSavedGame] = useState(false);
   const [isPlayForFun, setIsPlayForFun] = useState(false);
+  const [showMinimalUI, setShowMinimalUI] = useState(false);
+
+  useEffect(() => {
+    const minimal = localStorage.getItem('writescholar_minimal_ui') === 'true';
+    if (minimal) {
+      localStorage.removeItem('writescholar_minimal_ui');
+      setShowMinimalUI(true);
+    }
+  }, []);
 
   const livesRef = useRef(INITIAL_LIVES);
   const scoreRef = useRef(0);
@@ -1124,13 +1133,22 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%)' }}>
-      <Header onNavigate={onNavigate} user={user} onLogout={onLogout || (() => {})} currentPage="crater-blast" />
+      {!showMinimalUI && <Header onNavigate={onNavigate} user={user} onLogout={onLogout || (() => {})} currentPage="crater-blast" />}
+      {showMinimalUI && (gameState === 'menu' || gameState === 'loading' || gameState === 'ready' || gameState === 'gameover') && (
+        <div className="sticky top-0 z-10 flex items-center justify-between px-3 py-2 bg-white/95 backdrop-blur border-b border-stone-200">
+          <button onClick={() => onNavigate('dashboard')} className="p-2 -ml-2 text-stone-500 hover:text-stone-700 rounded-lg hover:bg-stone-100 transition-colors" aria-label="Back to dashboard">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+          </button>
+          <span className="text-sm font-semibold text-stone-700">Crater Blast</span>
+          <div className="w-9" />
+        </div>
+      )}
       {gameState === 'menu' && renderMenu()}
       {gameState === 'loading' && renderLoading()}
       {gameState === 'ready' && renderReady()}
       {gameState === 'playing' && renderGame()}
       {gameState === 'gameover' && renderGameOver()}
-      {gameState !== 'playing' && <Footer onNavigate={onNavigate} />}
+      {!showMinimalUI && gameState !== 'playing' && <Footer onNavigate={onNavigate} />}
     </div>
   );
 };

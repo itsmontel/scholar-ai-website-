@@ -49,6 +49,8 @@ interface ActivityItem {
   subtitle: string;
   date: Date;
   navigateTo: string;
+  /** For quiz/flashcard/crossword: tool data to open directly */
+  toolData?: any;
 }
 
 const activityMeta: Record<ActivityItem['type'], { emoji: string; bg: string; label: string; cardBg: string; border: string; accent: string; shape: 'circle' | 'square' | 'diamond' }> = {
@@ -663,13 +665,20 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                 const activityType: ActivityItem['type'] = typeMap[tool.quiz_type] || 'quiz';
                 const countLabel = tool.question_count ? `${tool.question_count} questions` : '';
                 const diffLabel = tool.difficulty ? ` · ${tool.difficulty}` : '';
+                const navMap: Record<string, string> = {
+                  flashcards: 'flashcard-generator',
+                  crossword: 'crossword-generator',
+                  crater_blast: 'crater-blast',
+                };
+                const navigateTo = navMap[tool.quiz_type] || 'quiz-generator';
                 activities.push({
                   id: `tool-${tool.id}`,
                   type: activityType,
                   title: tool.title || 'Study Tool',
                   subtitle: `${countLabel}${diffLabel}`.trim() || activityMeta[activityType].label,
                   date: new Date(tool.created_at),
-                  navigateTo: 'quiz-history',
+                  navigateTo,
+                  toolData: tool,
                 });
               });
             }
@@ -713,6 +722,29 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
         activityMeta[a.type].label.toLowerCase().includes(searchQuery.toLowerCase())
       )
     : recentActivity;
+
+  const handleActivityClick = (activity: ActivityItem) => {
+    if (activity.toolData) {
+      const t = activity.toolData;
+      localStorage.setItem('writescholar_minimal_ui', 'true');
+      if (t.quiz_type === 'flashcards') {
+        localStorage.setItem('savedFlashcards', JSON.stringify(t));
+        onNavigate('flashcard-generator');
+      } else if (t.quiz_type === 'crossword') {
+        localStorage.setItem('savedCrossword', JSON.stringify(t));
+        onNavigate('crossword-generator');
+      } else if (t.quiz_type === 'crater_blast') {
+        localStorage.setItem('savedCraterBlast', JSON.stringify(t));
+        onNavigate('crater-blast');
+      } else {
+        localStorage.setItem('savedQuiz', JSON.stringify(t));
+        onNavigate('quiz-generator');
+      }
+    } else {
+      onNavigate(activity.navigateTo);
+    }
+    setSearchQuery('');
+  };
 
   const getWordCount = (text: string) => {
     return text.trim().split(/\s+/).filter(word => word.length > 0).length;
@@ -1787,20 +1819,12 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
 
           {/* RIGHT MAIN CONTENT */}
           <div className="order-1 lg:order-2 min-w-0 pt-4 sm:pt-10 overflow-visible">
-            {/* Mobile Header: Compact streak + Badge widget + Quick Review in a row */}
+            {/* Mobile Header: Compact streak + Badge widget */}
             <div className="flex items-stretch gap-2 mb-4 lg:hidden">
               <StreakWidget compact />
               <div className="flex-1 min-w-0">
                 <BadgeWidget onNavigate={onNavigate} mobileExpanded />
               </div>
-              {/* Mobile Quick Review Button */}
-              <button
-                onClick={() => setShowQuickReview(true)}
-                className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-violet-500 to-purple-600 rounded-xl shadow-md shadow-violet-500/20 text-white font-semibold text-xs whitespace-nowrap"
-              >
-                <span>🧠</span>
-                <span className="hidden sm:inline">Review</span>
-              </button>
             </div>
 
             {/* Search Bar - Optimized for mobile touch */}
@@ -1839,7 +1863,7 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                         return (
                           <button
                             key={activity.id}
-                            onClick={() => { onNavigate(activity.navigateTo); setSearchQuery(''); }}
+                            onClick={() => handleActivityClick(activity)}
                             className="w-full flex items-center gap-3 px-4 py-3 hover:bg-stone-50 dark:hover:bg-stone-700/50 transition-colors text-left group"
                           >
                             <div className={`w-9 h-9 ${meta.bg} rounded-xl flex items-center justify-center flex-shrink-0`}>
@@ -1877,6 +1901,15 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                   <p className="text-stone-500 dark:text-stone-400 mt-1 sm:mt-2 text-sm sm:text-base">
                     Everything you need to <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-600 to-purple-600 font-semibold">survive school</span>
                   </p>
+                  {/* Mobile Quick Review Button - full width below survive school */}
+                  <button
+                    onClick={() => setShowQuickReview(true)}
+                    className="mt-4 lg:hidden w-full flex items-center justify-center gap-2 px-4 py-3.5 bg-gradient-to-r from-violet-500 to-purple-600 rounded-xl shadow-md shadow-violet-500/20 text-white font-semibold text-sm active:scale-[0.98] transition-all"
+                  >
+                    <span className="text-lg">🧠</span>
+                    <span>Quick Review</span>
+                    <span className="text-violet-200/90 text-xs">— Test your memory</span>
+                  </button>
                 </div>
                 <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
                   <div className="hidden lg:block"><BadgeWidget onNavigate={onNavigate} /></div>
@@ -3543,7 +3576,7 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                   <div 
                     key={activity.id}
                     className={`relative overflow-hidden rounded-xl sm:rounded-2xl p-3 sm:p-4 border ${meta.border} bg-gradient-to-br ${meta.cardBg} sm:hover:shadow-xl sm:hover:-translate-y-1 active:scale-[0.98] transition-all duration-200 cursor-pointer group flex-shrink-0 w-[160px] sm:w-auto snap-start`}
-                    onClick={() => onNavigate(activity.navigateTo)}
+                    onClick={() => handleActivityClick(activity)}
                   >
                     {/* Decorative shapes - hidden on mobile for cleaner look */}
                     <div className="hidden sm:block">
