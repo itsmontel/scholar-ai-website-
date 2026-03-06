@@ -388,10 +388,10 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
                   className="flex items-center gap-2.5 p-1.5 pr-3 rounded-full bg-stone-100/80 dark:bg-stone-800/80 hover:bg-stone-200/80 dark:hover:bg-stone-700/80 transition-all duration-200"
                 >
                   <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white font-bold text-sm shadow-inner">
-                    {(user.name || user.email) ? (user.name || user.email).charAt(0).toUpperCase() : 'U'}
+                    {(user.username || user.name || user.email) ? (user.username || user.name || user.email).charAt(0).toUpperCase() : 'U'}
                   </div>
                   <div className="hidden md:block text-left">
-                    <div className="text-sm font-semibold text-stone-800 dark:text-stone-100 leading-tight">{user.name || user.email?.split('@')[0] || 'User'}</div>
+                    <div className="text-sm font-semibold text-stone-800 dark:text-stone-100 leading-tight">{user.username ? `@${user.username}` : user.name || user.email?.split('@')[0] || 'User'}</div>
                     <div className="text-xs text-stone-500 dark:text-stone-400 capitalize">{usageStats?.plan || 'Free'}</div>
                   </div>
                   <svg 
@@ -411,11 +411,11 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
                     <div className="px-4 py-4 bg-gradient-to-br from-stone-50 to-stone-100/50 dark:from-stone-800 dark:to-stone-800/50">
                       <div className="flex items-center gap-3">
                         <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-indigo-500/30">
-                          {(user.name || user.email) ? (user.name || user.email).charAt(0).toUpperCase() : 'U'}
+                          {(user.username || user.name || user.email) ? (user.username || user.name || user.email).charAt(0).toUpperCase() : 'U'}
                         </div>
                         <div>
                           <div className="text-sm font-semibold text-stone-800 dark:text-stone-100">
-                            {user?.name || user?.email || 'User'}
+                            {user?.username ? `@${user.username}` : user?.name || user?.email || 'User'}
                           </div>
                           <div className="flex items-center gap-1.5 mt-0.5">
                             <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${

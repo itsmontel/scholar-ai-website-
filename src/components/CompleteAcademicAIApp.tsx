@@ -64,6 +64,7 @@ import BadgeNotificationToast from './common/BadgeNotificationToast';
 interface User {
   id: string;
   name: string;
+  username?: string;
   email: string;
   firstName?: string;
   lastName?: string;
@@ -216,6 +217,7 @@ const AcademicAIApp = () => {
               const updatedUser = {
                 id: userData.data.user.id,
                 email: userData.data.user.email,
+                username: userData.data.user.username,
                 name: userData.data.user.name || (userData.data.user.firstName && userData.data.user.lastName 
                   ? `${userData.data.user.firstName} ${userData.data.user.lastName}` 
                   : null) || userData.data.user.email,
@@ -255,6 +257,7 @@ const AcademicAIApp = () => {
           const updatedUser = {
             id: userData.data.user.id,
             email: userData.data.user.email,
+            username: userData.data.user.username,
             name: userData.data.user.firstName && userData.data.user.lastName 
               ? `${userData.data.user.firstName} ${userData.data.user.lastName}` 
               : userData.data.user.name || userData.data.user.email,

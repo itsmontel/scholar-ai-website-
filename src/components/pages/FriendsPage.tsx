@@ -845,36 +845,34 @@ const FriendsPage = ({ onNavigate, user, onLogout }: FriendsPageProps) => {
                         <div className="space-y-3">
                           {incomingShares.map((share) => (
                             <div key={share.id} className="p-4 bg-green-50 rounded-xl border border-green-100">
-                              <div className="flex items-start justify-between mb-3">
-                                <div className="flex items-center gap-3">
-                                  <span className="text-2xl">{getItemTypeIcon(share.quiz?.quiz_type)}</span>
-                                  <div>
-                                    <h4 className="font-medium text-gray-900">{share.quiz?.title || 'Unknown'}</h4>
-                                    <p className="text-sm text-gray-500">
-                                      {getItemTypeName(share.quiz?.quiz_type)} • {share.quiz?.question_count} items
-                                    </p>
-                                  </div>
+                              <div className="flex items-start gap-3 mb-3">
+                                <span className="text-2xl flex-shrink-0">{getItemTypeIcon(share.quiz?.quiz_type)}</span>
+                                <div className="min-w-0 flex-1">
+                                  <h4 className="font-medium text-gray-900 break-words">{share.quiz?.title || 'Unknown'}</h4>
+                                  <p className="text-sm text-gray-500">
+                                    {getItemTypeName(share.quiz?.quiz_type)} • {share.quiz?.question_count} items
+                                  </p>
                                 </div>
                               </div>
-                              <div className="flex items-center justify-between">
-                                <p className="text-sm text-gray-600">
+                              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                                <p className="text-sm text-gray-600 break-words">
                                   From <span className="font-medium">{getName(share.sender)}</span>
                                   {share.message && (
-                                    <span className="ml-2 text-gray-500">"{share.message}"</span>
+                                    <span className="ml-1 sm:ml-2 text-gray-500">"{share.message}"</span>
                                   )}
                                 </p>
-                                <div className="flex gap-2">
+                                <div className="flex gap-2 flex-shrink-0">
                                   <button
                                     onClick={() => handleAcceptShare(share.id)}
                                     disabled={actionLoading === share.id}
-                                    className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
+                                    className="flex-1 sm:flex-none px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
                                   >
                                     Accept
                                   </button>
                                   <button
                                     onClick={() => handleDeclineShare(share.id)}
                                     disabled={actionLoading === share.id}
-                                    className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
+                                    className="flex-1 sm:flex-none px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
                                   >
                                     Decline
                                   </button>
@@ -896,17 +894,16 @@ const FriendsPage = ({ onNavigate, user, onLogout }: FriendsPageProps) => {
                       ) : (
                         <div className="space-y-3">
                           {sentShares.map((share) => (
-                            <div key={share.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
-                              <div className="flex items-center gap-3">
-                                <span className="text-2xl">{getItemTypeIcon(share.quiz?.quiz_type)}</span>
-                                <div>
-                                  <h4 className="font-medium text-gray-900">{share.quiz?.title || 'Unknown'}</h4>
+                            <div key={share.id} className="p-4 bg-gray-50 rounded-xl">
+                              <div className="flex flex-wrap items-start gap-3">
+                                <span className="text-2xl flex-shrink-0">{getItemTypeIcon(share.quiz?.quiz_type)}</span>
+                                <div className="min-w-0 flex-1">
+                                  <h4 className="font-medium text-gray-900 break-words">{share.quiz?.title || 'Unknown'}</h4>
                                   <p className="text-sm text-gray-500">
                                     Sent to {getName(share.receiver)} • {formatDate(share.created_at)}
                                   </p>
                                 </div>
-                              </div>
-                              <span className={`px-3 py-1 text-xs font-medium rounded-full ${
+                                <span className={`flex-shrink-0 px-3 py-1 text-xs font-medium rounded-full ${
                                 share.status === 'accepted' 
                                   ? 'bg-green-100 text-green-700'
                                   : share.status === 'declined'
