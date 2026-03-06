@@ -111,6 +111,7 @@ router.post('/register', validateRegister, async (req, res) => {
         user: {
           id: user.id,
           email: user.email,
+          username: user.username,
           subscriptionPlan: user.subscription_plan,
           emailVerified: false
         },
@@ -186,6 +187,7 @@ router.post('/login', validateLogin, async (req, res) => {
         user: {
           id: user.id,
           email: user.email,
+          username: user.username,
           firstName: user.first_name,
           lastName: user.last_name,
           subscriptionPlan: user.subscription_plan,
@@ -217,7 +219,7 @@ router.get('/me', authenticateToken, async (req, res) => {
 
     const { data: user, error } = await supabase
       .from('users')
-      .select('id, email, first_name, last_name, name, institution, research_field, subscription_plan, subscription_status, created_at, last_login, email_verified')
+      .select('id, email, username, first_name, last_name, name, institution, research_field, subscription_plan, subscription_status, created_at, last_login, email_verified')
       .eq('id', req.user.id)
       .single();
 
@@ -234,6 +236,7 @@ router.get('/me', authenticateToken, async (req, res) => {
         user: {
           id: user.id,
           email: user.email,
+          username: user.username,
           firstName: user.first_name,
           lastName: user.last_name,
           name: user.name,
@@ -598,6 +601,7 @@ router.get('/google/callback',
       res.redirect(`${frontendUrl}/auth/callback?token=${token}&user=${encodeURIComponent(JSON.stringify({
         id: req.user.id,
         email: req.user.email,
+        username: req.user.username,
         name: req.user.name,
         profilePicture: req.user.profile_picture
       }))}`);

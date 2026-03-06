@@ -78,12 +78,34 @@ class FriendsService {
       if (existingFriendship.status === 'pending') {
         throw new Error('A friend request is already pending');
       }
+      // Status is 'declined' - update to 'pending' instead of inserting (avoids unique constraint)
+      const { data: updatedData, error: updateError } = await this.supabase
+        .from('friends')
+        .update({ status: 'pending' })
+        .eq('id', existingFriendship.id)
+        .select()
+        .single();
+
+      if (updateError) {
+        console.error('Error re-sending friend request:', updateError);
+        throw updateError;
+      }
+
+      await this.createFriendNotification(friend.id, userId, 'friend_request');
+      return { message: 'Friend request sent!', request: updatedData };
     }
 
     const reverseRequest = await this.checkExistingFriendship(friend.id, userId);
     if (reverseRequest && reverseRequest.status === 'pending') {
       await this.acceptFriendRequest(userId, reverseRequest.id);
       return { message: 'Friend request accepted! You are now friends.', autoAccepted: true };
+    }
+    // If reverse request was declined, delete it so we can send fresh request from our side
+    if (reverseRequest && reverseRequest.status === 'declined') {
+      await this.supabase
+        .from('friends')
+        .delete()
+        .eq('id', reverseRequest.id);
     }
 
     const { data, error } = await this.supabase
