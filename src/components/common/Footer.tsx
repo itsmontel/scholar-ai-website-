@@ -12,10 +12,12 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
           {/* Logo and Description */}
           <div className="col-span-2 md:col-span-1">
             <div className="flex items-center space-x-2.5 mb-4">
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: '#262626', border: '1px solid rgba(163, 230, 53, 0.4)' }}>
-                <span className="font-bold text-lg" style={{ color: '#a3e635' }}>W</span>
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-gradient-to-br from-indigo-500 to-violet-600">
+                <span className="font-black text-lg text-white">W</span>
               </div>
-              <span className="text-xl font-bold text-white">WriteScholar</span>
+              <span className="text-xl font-extrabold tracking-tight text-white">
+                WriteScholar
+              </span>
             </div>
             <p className="text-stone-400 text-sm leading-relaxed">
               AI-powered academic writing assistant helping students and researchers achieve excellence.

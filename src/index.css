@@ -180,3 +180,22 @@
   0%, 100% { transform: rotate(-1.5deg) translateY(-2px); }
   50%       { transform: rotate(1.5deg)  translateY(2px); }
 }
+
+/* Turn Your Notes section - glow pulse */
+@keyframes notesGlowPulse {
+  0%, 100% { opacity: 0.25; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(1.02); }
+}
+@keyframes notesFadeInUp {
+  0% { opacity: 0; transform: translateY(24px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+/* Hide scrollbar for horizontal scroll containers */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}

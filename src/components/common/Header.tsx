@@ -39,7 +39,16 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [usageStats, setUsageStats] = useState<UsageStats | null>(null);
   const [loadingUsage, setLoadingUsage] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
 
+  // Track scroll for shadow effect
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 10);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -47,7 +56,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
       if (!target.closest('.dropdown-container')) {
         setIsDropdownOpen(false);
       }
-      if (!target.closest('.mobile-menu-container')) {
+      if (!target.closest('.mobile-menu-container') && !target.closest('.mobile-menu-button')) {
         setIsMobileMenuOpen(false);
       }
     };
@@ -102,7 +111,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
   };
 
   const getUsagePercentage = (used: number, limit: number): number => {
-    if (limit === -1) return 0; // Unlimited
+    if (limit === -1) return 0;
     return Math.min((used / limit) * 100, 100);
   };
 
@@ -117,40 +126,57 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
     const publicNavItems = [
       { id: 'features', label: 'Features' },
       { id: 'pricing', label: 'Pricing' },
-      { id: 'why-students-choose', label: 'Why Students Choose' },
+      { id: 'why-students-choose', label: 'Why Students' },
       { id: 'blog', label: 'Blog' },
       { id: 'about', label: 'About' },
     ];
     return (
-      <header className="backdrop-blur-md border-b border-stone-200/60 dark:border-stone-700/60 sticky top-0 z-50 bg-[rgba(250,248,245,0.95)] dark:bg-stone-900/95">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
-          <div className="flex items-center justify-between">
+      <header className={`sticky top-0 z-50 transition-all duration-300 ${
+        isScrolled 
+          ? 'bg-white/95 dark:bg-stone-900/95 backdrop-blur-xl shadow-lg shadow-stone-900/5 dark:shadow-black/20' 
+          : 'bg-white/80 dark:bg-stone-900/80 backdrop-blur-md'
+      }`}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16 sm:h-18">
+            {/* Logo */}
             <button
               onClick={() => onNavigate?.('landing')}
-              className="flex items-center space-x-2.5 hover:opacity-80 transition-opacity duration-200"
+              className="flex items-center gap-2.5 group"
             >
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-stone-800 dark:bg-stone-700">
-                <span className="font-bold text-xl text-lime-400">W</span>
+              <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-500/30 group-hover:shadow-indigo-500/40 group-hover:scale-105 transition-all duration-200">
+                <span className="font-black text-xl text-white">W</span>
+                <div className="absolute inset-0 rounded-xl bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity" />
               </div>
-              <span className="text-2xl font-bold text-stone-800 dark:text-stone-100">WriteScholar</span>
+              <span className="text-xl sm:text-2xl font-extrabold tracking-tight text-indigo-600 dark:text-indigo-400">
+                WriteScholar
+              </span>
             </button>
 
-            <nav className="hidden md:flex items-center space-x-2">
-              {publicNavItems.map(({ id, label }) => (
-                <button
-                  key={id}
-                  onClick={() => onNavigate?.(id)}
-                  className={`px-4 py-2.5 text-base font-medium rounded-lg transition-colors ${currentPage === id ? 'text-lime-600 dark:text-lime-400' : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100/50 dark:hover:bg-stone-800/50'}`}
-                >
-                  {label}
-                </button>
-              ))}
+            {/* Desktop Navigation */}
+            <nav className="hidden lg:flex items-center">
+              <div className="flex items-center bg-stone-100/80 dark:bg-stone-800/80 rounded-full p-1">
+                {publicNavItems.map(({ id, label }) => (
+                  <button
+                    key={id}
+                    onClick={() => onNavigate?.(id)}
+                    className={`px-4 py-2 text-sm font-medium rounded-full transition-all duration-200 ${
+                      currentPage === id 
+                        ? 'bg-white dark:bg-stone-700 text-stone-900 dark:text-stone-100 shadow-sm' 
+                        : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100'
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
             </nav>
 
-            <div className="flex items-center space-x-2 sm:space-x-3">
+            {/* Right side actions */}
+            <div className="flex items-center gap-2">
+              {/* Theme toggle */}
               <button
                 onClick={toggleTheme}
-                className="p-2 rounded-lg hover:bg-stone-100/50 dark:hover:bg-stone-800/50 transition-colors text-stone-600 dark:text-stone-400"
+                className="p-2.5 rounded-xl bg-stone-100/80 dark:bg-stone-800/80 hover:bg-stone-200/80 dark:hover:bg-stone-700/80 transition-colors text-stone-600 dark:text-stone-400"
                 aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
               >
                 {theme === 'dark' ? (
@@ -163,122 +189,178 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
                   </svg>
                 )}
               </button>
+
+              {/* Mobile menu button */}
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="md:hidden p-2 rounded-lg hover:bg-stone-100/50 dark:hover:bg-stone-800/50 transition-colors"
+                className="mobile-menu-button lg:hidden p-2.5 rounded-xl bg-stone-100/80 dark:bg-stone-800/80 hover:bg-stone-200/80 dark:hover:bg-stone-700/80 transition-colors"
+                aria-label="Toggle menu"
               >
-                <svg className="w-6 h-6 text-stone-600 dark:text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                <svg className={`w-5 h-5 text-stone-600 dark:text-stone-400 transition-transform duration-200 ${isMobileMenuOpen ? 'rotate-90' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  {isMobileMenuOpen ? (
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  ) : (
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  )}
                 </svg>
               </button>
-              <button onClick={() => onNavigate?.('login')} className="hidden sm:inline-flex px-4 py-2.5 text-base text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 font-medium rounded-lg hover:bg-stone-100/50 dark:hover:bg-stone-800/50 transition-colors">Log in</button>
-              <button onClick={() => onNavigate?.('signup')} className="inline-flex items-center px-5 py-2.5 bg-lime-400 text-stone-900 text-base font-semibold rounded-full hover:bg-lime-300 hover:shadow-md transition-all duration-200">Try Free</button>
+
+              {/* Auth buttons */}
+              <button 
+                onClick={() => onNavigate?.('login')} 
+                className="hidden sm:inline-flex px-4 py-2.5 text-sm font-medium text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 transition-colors"
+              >
+                Log in
+              </button>
+              <button 
+                onClick={() => onNavigate?.('signup')} 
+                className="inline-flex items-center gap-1.5 px-5 py-2.5 bg-gradient-to-r from-lime-400 to-emerald-500 text-stone-900 text-sm font-bold rounded-full hover:from-lime-300 hover:to-emerald-400 shadow-lg shadow-lime-500/25 hover:shadow-lime-500/40 hover:scale-105 active:scale-95 transition-all duration-200"
+              >
+                Try Free
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
+              </button>
             </div>
           </div>
         </div>
 
-        {/* Logged-out mobile menu */}
-        {isMobileMenuOpen && (
-          <div className="md:hidden border-t border-stone-200/60 dark:border-stone-700/60 bg-white/95 dark:bg-stone-900/95 backdrop-blur-sm mobile-menu-container">
-            <div className="px-4 py-4 space-y-1">
+        {/* Mobile menu */}
+        <div className={`lg:hidden mobile-menu-container overflow-hidden transition-all duration-300 ease-out ${
+          isMobileMenuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+        }`}>
+          <div className="px-4 py-4 bg-white/95 dark:bg-stone-900/95 backdrop-blur-xl border-t border-stone-200/60 dark:border-stone-700/60">
+            <div className="space-y-1">
               {publicNavItems.map(({ id, label }) => (
                 <button
                   key={id}
                   onClick={() => { onNavigate?.(id); setIsMobileMenuOpen(false); }}
-                  className={`w-full text-left px-4 py-3 text-base rounded-xl font-medium transition-colors ${currentPage === id ? 'bg-stone-100 dark:bg-stone-800 text-lime-600 dark:text-lime-400' : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-50 dark:hover:bg-stone-800/50'}`}
+                  className={`w-full text-left px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${
+                    currentPage === id 
+                      ? 'bg-lime-100 dark:bg-lime-900/30 text-lime-700 dark:text-lime-400' 
+                      : 'text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800'
+                  }`}
                 >
                   {label}
                 </button>
               ))}
-              <div className="border-t border-stone-100 dark:border-stone-700 mt-3 pt-3">
-                <button onClick={() => { onNavigate?.('login'); setIsMobileMenuOpen(false); }} className="w-full text-left px-4 py-3 rounded-xl font-medium text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-50 dark:hover:bg-stone-800/50">Log in</button>
-                <button onClick={() => { onNavigate?.('signup'); setIsMobileMenuOpen(false); }} className="w-full text-left px-4 py-3 rounded-xl font-medium text-stone-900 bg-lime-400 hover:bg-lime-300">Try Free</button>
+              <div className="pt-3 mt-3 border-t border-stone-200/60 dark:border-stone-700/60 flex gap-2">
+                <button 
+                  onClick={() => { onNavigate?.('login'); setIsMobileMenuOpen(false); }} 
+                  className="flex-1 px-4 py-3 rounded-xl text-sm font-medium text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
+                >
+                  Log in
+                </button>
+                <button 
+                  onClick={() => { onNavigate?.('signup'); setIsMobileMenuOpen(false); }} 
+                  className="flex-1 px-4 py-3 rounded-xl text-sm font-bold bg-gradient-to-r from-lime-400 to-emerald-500 text-stone-900 transition-colors"
+                >
+                  Try Free
+                </button>
               </div>
             </div>
           </div>
-        )}
+        </div>
       </header>
     );
   }
 
   // ── Logged-in header ───────────────────────────────────────────────────────
   return (
-    <header className="backdrop-blur-md border-b border-stone-200/60 dark:border-stone-700/60 sticky top-0 z-50 bg-[rgba(250,248,245,0.95)] dark:bg-stone-900/95">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
-        <div className="flex items-center justify-between">
+    <header className={`sticky top-0 z-50 transition-all duration-300 ${
+      isScrolled 
+        ? 'bg-white/95 dark:bg-stone-900/95 backdrop-blur-xl shadow-lg shadow-stone-900/5 dark:shadow-black/20' 
+        : 'bg-white/80 dark:bg-stone-900/80 backdrop-blur-md'
+    }`}>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16 sm:h-18">
           {/* Logo */}
           <button 
             onClick={() => onNavigate?.('dashboard')}
-            className="flex items-center space-x-2.5 hover:opacity-80 transition-opacity duration-200"
+            className="flex items-center gap-2.5 group"
           >
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-stone-800 dark:bg-stone-700">
-              <span className="font-bold text-xl text-lime-400">W</span>
+            <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-500/30 group-hover:shadow-indigo-500/40 group-hover:scale-105 transition-all duration-200">
+              <span className="font-black text-xl text-white">W</span>
+              <div className="absolute inset-0 rounded-xl bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity" />
             </div>
-            <span className="text-2xl font-bold text-stone-800 dark:text-stone-100">WriteScholar</span>
+            <span className="hidden sm:inline text-xl font-extrabold tracking-tight text-indigo-600 dark:text-indigo-400">
+              WriteScholar
+            </span>
           </button>
 
-          {/* Navigation */}
-          <nav className="hidden lg:flex items-center space-x-1">
-            <button 
-              onClick={() => onNavigate?.('dashboard')}
-              className={`px-4 py-2.5 text-base font-medium rounded-xl transition-all duration-200 ${
-                currentPage === 'dashboard' ? 'bg-stone-100 dark:bg-stone-800 text-lime-600 dark:text-lime-400' : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-50 dark:hover:bg-stone-800/50'
-              }`}
-            >
-              Dashboard
-            </button>
-            <button 
-              onClick={() => onNavigate?.('library')}
-              className={`px-4 py-2.5 text-base font-medium rounded-xl transition-all duration-200 ${
-                currentPage === 'library' ? 'bg-stone-100 dark:bg-stone-800 text-lime-600 dark:text-lime-400' : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-50 dark:hover:bg-stone-800/50'
-              }`}
-            >
-              Library
-            </button>
-            <button 
-              onClick={() => onNavigate?.('upload')}
-              className={`px-4 py-2.5 text-base font-medium rounded-xl transition-all duration-200 ${
-                currentPage === 'upload' ? 'bg-stone-100 dark:bg-stone-800 text-lime-600 dark:text-lime-400' : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-50 dark:hover:bg-stone-800/50'
-              }`}
-            >
-              Upload
-            </button>
-            <button 
-              onClick={() => onNavigate?.('analysis')}
-              className={`px-4 py-2.5 text-base font-medium rounded-xl transition-all duration-200 ${
-                currentPage === 'analysis' ? 'bg-stone-100 dark:bg-stone-800 text-lime-600 dark:text-lime-400' : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-50 dark:hover:bg-stone-800/50'
-              }`}
-            >
-              AI Analysis
-            </button>
-            <button 
-              onClick={() => onNavigate?.('citation-history')}
-              className={`px-4 py-2.5 text-base font-medium rounded-xl transition-all duration-200 ${
-                currentPage === 'citations' ? 'bg-stone-100 dark:bg-stone-800 text-lime-600 dark:text-lime-400' : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-50 dark:hover:bg-stone-800/50'
-              }`}
-            >
-              Citations
-            </button>
+          {/* Desktop Navigation */}
+          <nav className="hidden lg:flex items-center">
+            <div className="flex items-center bg-stone-100/80 dark:bg-stone-800/80 rounded-full p-1">
+              <button 
+                onClick={() => onNavigate?.('dashboard')}
+                className={`px-4 py-2 text-sm font-medium rounded-full transition-all duration-200 ${
+                  currentPage === 'dashboard' 
+                    ? 'bg-white dark:bg-stone-700 text-stone-900 dark:text-stone-100 shadow-sm' 
+                    : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100'
+                }`}
+              >
+                Dashboard
+              </button>
+              <button 
+                onClick={() => onNavigate?.('library')}
+                className={`px-4 py-2 text-sm font-medium rounded-full transition-all duration-200 ${
+                  currentPage === 'library' 
+                    ? 'bg-white dark:bg-stone-700 text-stone-900 dark:text-stone-100 shadow-sm' 
+                    : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100'
+                }`}
+              >
+                Library
+              </button>
+              <button 
+                onClick={() => onNavigate?.('upload')}
+                className={`px-4 py-2 text-sm font-medium rounded-full transition-all duration-200 ${
+                  currentPage === 'upload' 
+                    ? 'bg-white dark:bg-stone-700 text-stone-900 dark:text-stone-100 shadow-sm' 
+                    : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100'
+                }`}
+              >
+                Upload
+              </button>
+              <button 
+                onClick={() => onNavigate?.('analysis')}
+                className={`px-4 py-2 text-sm font-medium rounded-full transition-all duration-200 ${
+                  currentPage === 'analysis' 
+                    ? 'bg-white dark:bg-stone-700 text-stone-900 dark:text-stone-100 shadow-sm' 
+                    : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100'
+                }`}
+              >
+                AI Analysis
+              </button>
+              <button 
+                onClick={() => onNavigate?.('citation-history')}
+                className={`px-4 py-2 text-sm font-medium rounded-full transition-all duration-200 ${
+                  currentPage === 'citations' 
+                    ? 'bg-white dark:bg-stone-700 text-stone-900 dark:text-stone-100 shadow-sm' 
+                    : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100'
+                }`}
+              >
+                Citations
+              </button>
+            </div>
+            
+            {/* Pro button - separate from pill group */}
             <button 
               onClick={() => onNavigate?.('quiz-history')}
-              className={`px-4 py-2.5 text-base font-medium rounded-xl transition-all duration-200 flex items-center gap-1.5 ${
-                currentPage === 'quiz-history' ? 'ring-2 ring-[#a3e635]/50' : 'hover:opacity-90'
+              className={`ml-2 px-4 py-2 text-sm font-bold rounded-full transition-all duration-200 flex items-center gap-1.5 bg-gradient-to-r from-stone-800 to-stone-900 dark:from-stone-700 dark:to-stone-800 text-lime-400 hover:from-stone-700 hover:to-stone-800 shadow-lg shadow-stone-900/20 ${
+                currentPage === 'quiz-history' ? 'ring-2 ring-lime-400/50' : ''
               }`}
-              style={{
-                backgroundColor: '#262626',
-                color: '#a3e635'
-              }}
             >
-              🧠 Saved Tools
-              <span className="px-1.5 py-0.5 text-[10px] font-bold text-stone-900 rounded-full" style={{ backgroundColor: '#a3e635' }}>PRO</span>
+              <span>Saved Tools</span>
+              <span className="px-1.5 py-0.5 text-[10px] font-bold bg-lime-400 text-stone-900 rounded-full">PRO</span>
             </button>
           </nav>
 
-          {/* Theme toggle + Mobile Menu Button */}
-          <div className="flex items-center gap-1">
+          {/* Right side */}
+          <div className="flex items-center gap-2">
+            {/* Theme toggle */}
             <button
               onClick={toggleTheme}
-              className="p-2 rounded-xl hover:bg-stone-100/50 dark:hover:bg-stone-800/50 transition-colors text-stone-600 dark:text-stone-400"
+              className="p-2.5 rounded-xl bg-stone-100/80 dark:bg-stone-800/80 hover:bg-stone-200/80 dark:hover:bg-stone-700/80 transition-colors text-stone-600 dark:text-stone-400"
               aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
             >
               {theme === 'dark' ? (
@@ -291,315 +373,243 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
                 </svg>
               )}
             </button>
+
+            {/* Mobile menu button */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="lg:hidden p-2 rounded-xl hover:bg-stone-50 dark:hover:bg-stone-800/50 transition-colors duration-200"
+              className="mobile-menu-button lg:hidden p-2.5 rounded-xl bg-stone-100/80 dark:bg-stone-800/80 hover:bg-stone-200/80 dark:hover:bg-stone-700/80 transition-colors"
+              aria-label="Toggle menu"
             >
-              <svg className="w-6 h-6 text-stone-600 dark:text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              <svg className={`w-5 h-5 text-stone-600 dark:text-stone-400 transition-transform duration-200 ${isMobileMenuOpen ? 'rotate-90' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                {isMobileMenuOpen ? (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                ) : (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                )}
               </svg>
             </button>
-          </div>
 
-          {/* User Dropdown */}
-          {user && onLogout && (
-            <div className="relative dropdown-container">
-              <button
-                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="flex items-center space-x-3 p-2 rounded-xl hover:bg-stone-50 dark:hover:bg-stone-800/50 transition-colors duration-200"
-              >
-                <div className="w-9 h-9 rounded-xl flex items-center justify-center text-white" style={{ background: '#262626' }}>
-                  <span className="text-sm font-semibold">
-                    {(user.name || user.email) ? (user.name || user.email).charAt(0).toUpperCase() : 'U'}
-                  </span>
-                </div>
-                <div className="hidden md:block text-left">
-                  <div className="text-sm font-semibold text-stone-800 dark:text-stone-100">{user.name || user.email || 'Loading...'}</div>
-                  <div className="text-xs text-stone-500 dark:text-stone-400 capitalize">{usageStats?.plan || 'Free'} Plan</div>
-                </div>
-                <svg 
-                  className={`w-4 h-4 text-stone-400 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`} 
-                  fill="none" 
-                  stroke="currentColor" 
-                  viewBox="0 0 24 24"
+            {/* User Dropdown */}
+            {user && onLogout && (
+              <div className="relative dropdown-container">
+                <button
+                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  className="flex items-center gap-2.5 p-1.5 pr-3 rounded-full bg-stone-100/80 dark:bg-stone-800/80 hover:bg-stone-200/80 dark:hover:bg-stone-700/80 transition-all duration-200"
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white font-bold text-sm shadow-inner">
+                    {(user.name || user.email) ? (user.name || user.email).charAt(0).toUpperCase() : 'U'}
+                  </div>
+                  <div className="hidden md:block text-left">
+                    <div className="text-sm font-semibold text-stone-800 dark:text-stone-100 leading-tight">{user.name || user.email?.split('@')[0] || 'User'}</div>
+                    <div className="text-xs text-stone-500 dark:text-stone-400 capitalize">{usageStats?.plan || 'Free'}</div>
+                  </div>
+                  <svg 
+                    className={`w-4 h-4 text-stone-400 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`} 
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
 
-              {/* Dropdown Menu */}
-              {isDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-stone-800 rounded-2xl shadow-xl border border-stone-200 dark:border-stone-700 z-[60]">
-                  {/* User Info Section */}
-                  <div className="px-4 py-4 border-b border-stone-100 dark:border-stone-700 bg-stone-50/50 dark:bg-stone-800/50 rounded-t-2xl">
-                    <div className="text-sm font-semibold text-stone-800 dark:text-stone-100">
-                      {user?.name || user?.email || (user ? 'Email not available' : 'Loading...')}
-                    </div>
-                    <div className="text-xs text-stone-500 dark:text-stone-400 capitalize mt-0.5">{usageStats?.plan || 'Free'} Plan</div>
-                    
-                    {/* Usage Statistics */}
-                    {loadingUsage ? (
-                      <div className="mt-3 flex items-center justify-center">
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
-                        <span className="ml-2 text-xs text-stone-500 dark:text-stone-400">Loading usage...</span>
-                      </div>
-                    ) : usageStats ? (
-                      <div className="mt-3 space-y-2">
-                        {/* Storage Usage */}
-                        <div className="space-y-1">
-                          <div className="flex justify-between items-center">
-                            <span className="text-xs text-stone-600 dark:text-stone-400">Storage</span>
-                            <span className={`text-xs font-medium ${getUsageColor(getUsagePercentage(usageStats.storageUsed, usageStats.storageLimit))}`}>
-                              {formatBytes(usageStats.storageUsed)} / {usageStats.storageLimit === -1 ? '∞' : formatBytes(usageStats.storageLimit)}
+                {/* Dropdown Menu */}
+                {isDropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-72 bg-white dark:bg-stone-800 rounded-2xl shadow-2xl shadow-stone-900/10 dark:shadow-black/30 border border-stone-200/60 dark:border-stone-700/60 z-[60] overflow-hidden">
+                    {/* User Info Section */}
+                    <div className="px-4 py-4 bg-gradient-to-br from-stone-50 to-stone-100/50 dark:from-stone-800 dark:to-stone-800/50">
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-indigo-500/30">
+                          {(user.name || user.email) ? (user.name || user.email).charAt(0).toUpperCase() : 'U'}
+                        </div>
+                        <div>
+                          <div className="text-sm font-semibold text-stone-800 dark:text-stone-100">
+                            {user?.name || user?.email || 'User'}
+                          </div>
+                          <div className="flex items-center gap-1.5 mt-0.5">
+                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                              usageStats?.plan === 'premium' 
+                                ? 'bg-gradient-to-r from-amber-400 to-orange-500 text-stone-900' 
+                                : usageStats?.plan === 'starter' 
+                                  ? 'bg-lime-100 dark:bg-lime-900/50 text-lime-700 dark:text-lime-400' 
+                                  : 'bg-stone-200 dark:bg-stone-700 text-stone-600 dark:text-stone-400'
+                            }`}>
+                              {usageStats?.plan === 'premium' && '⭐ '}
+                              {(usageStats?.plan || 'Free').charAt(0).toUpperCase() + (usageStats?.plan || 'free').slice(1)}
                             </span>
                           </div>
-                          {usageStats.storageLimit !== -1 && (
-                            <div className="w-full bg-stone-200 dark:bg-stone-600 rounded-full h-1.5">
-                              <div 
-                                className={`h-1.5 rounded-full transition-all duration-300 ${
-                                  getUsagePercentage(usageStats.storageUsed, usageStats.storageLimit) >= 90 ? 'bg-red-500' :
-                                  getUsagePercentage(usageStats.storageUsed, usageStats.storageLimit) >= 70 ? 'bg-yellow-500' : 'bg-green-500'
-                                }`}
-                                style={{ width: `${getUsagePercentage(usageStats.storageUsed, usageStats.storageLimit)}%` }}
-                              ></div>
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Uploads Remaining */}
-                        <div className="flex justify-between items-center">
-                          <span className="text-xs text-stone-600 dark:text-stone-400">Uploads</span>
-                          <span className={`text-xs font-medium ${getUsageColor(getUsagePercentage(usageStats.documentsUploaded, usageStats.planLimits.documentsPerMonth))}`}>
-                            {usageStats.uploadsRemaining === -1 ? '∞' : usageStats.uploadsRemaining} left
-                          </span>
-                        </div>
-
-                        {/* Analyses Remaining */}
-                        <div className="flex justify-between items-center">
-                          <span className="text-xs text-stone-600 dark:text-stone-400">Analyses</span>
-                          <span className={`text-xs font-medium ${getUsageColor(getUsagePercentage(usageStats.documentsAnalyzed, usageStats.planLimits.analysesPerMonth))}`}>
-                            {usageStats.analysesRemaining === -1 ? '∞' : usageStats.analysesRemaining} left
-                          </span>
                         </div>
                       </div>
-                    ) : (
-                      <div className="mt-2 text-xs text-stone-500 dark:text-stone-400">Unable to load usage data</div>
-                    )}
+                      
+                      {/* Usage Statistics */}
+                      {loadingUsage ? (
+                        <div className="mt-4 flex items-center justify-center py-2">
+                          <div className="animate-spin rounded-full h-4 w-4 border-2 border-lime-500 border-t-transparent"></div>
+                          <span className="ml-2 text-xs text-stone-500 dark:text-stone-400">Loading usage...</span>
+                        </div>
+                      ) : usageStats ? (
+                        <div className="mt-4 space-y-2.5">
+                          {/* Storage Usage */}
+                          <div className="space-y-1">
+                            <div className="flex justify-between items-center">
+                              <span className="text-xs text-stone-600 dark:text-stone-400">Storage</span>
+                              <span className={`text-xs font-medium ${getUsageColor(getUsagePercentage(usageStats.storageUsed, usageStats.storageLimit))}`}>
+                                {formatBytes(usageStats.storageUsed)} / {usageStats.storageLimit === -1 ? '∞' : formatBytes(usageStats.storageLimit)}
+                              </span>
+                            </div>
+                            {usageStats.storageLimit !== -1 && (
+                              <div className="w-full bg-stone-200 dark:bg-stone-600 rounded-full h-1.5 overflow-hidden">
+                                <div 
+                                  className={`h-1.5 rounded-full transition-all duration-500 ${
+                                    getUsagePercentage(usageStats.storageUsed, usageStats.storageLimit) >= 90 ? 'bg-red-500' :
+                                    getUsagePercentage(usageStats.storageUsed, usageStats.storageLimit) >= 70 ? 'bg-yellow-500' : 'bg-lime-500'
+                                  }`}
+                                  style={{ width: `${getUsagePercentage(usageStats.storageUsed, usageStats.storageLimit)}%` }}
+                                ></div>
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="flex gap-4">
+                            <div className="flex-1">
+                              <span className="text-xs text-stone-600 dark:text-stone-400">Uploads</span>
+                              <div className={`text-sm font-semibold ${getUsageColor(getUsagePercentage(usageStats.documentsUploaded, usageStats.planLimits.documentsPerMonth))}`}>
+                                {usageStats.uploadsRemaining === -1 ? '∞' : usageStats.uploadsRemaining} left
+                              </div>
+                            </div>
+                            <div className="flex-1">
+                              <span className="text-xs text-stone-600 dark:text-stone-400">Analyses</span>
+                              <div className={`text-sm font-semibold ${getUsageColor(getUsagePercentage(usageStats.documentsAnalyzed, usageStats.planLimits.analysesPerMonth))}`}>
+                                {usageStats.analysesRemaining === -1 ? '∞' : usageStats.analysesRemaining} left
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ) : null}
+                    </div>
+
+                    {/* Navigation Links */}
+                    <div className="py-2">
+                      {[
+                        { id: 'dashboard', icon: 'M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2zM8 5a2 2 0 012-2h4a2 2 0 012 2v2H8V5z', label: 'Dashboard' },
+                        { id: 'library', icon: 'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10', label: 'Library' },
+                        { id: 'upload', icon: 'M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12', label: 'Upload' },
+                        { id: 'analysis', icon: 'M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z', label: 'AI Analysis' },
+                        { id: 'citation-history', icon: 'M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z', label: 'Citations' },
+                        { id: 'account', icon: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z', label: 'Account' },
+                        { id: 'billing', icon: 'M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z', label: 'Billing' },
+                      ].map(({ id, icon, label }) => (
+                        <button 
+                          key={id}
+                          onClick={() => { onNavigate?.(id); setIsDropdownOpen(false); }}
+                          className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-700/50 transition-colors"
+                        >
+                          <svg className="w-4 h-4 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={icon} />
+                          </svg>
+                          <span>{label}</span>
+                        </button>
+                      ))}
+                    </div>
+
+                    <div className="border-t border-stone-200/60 dark:border-stone-700/60" />
+
+                    {/* Upgrade & Help */}
+                    <div className="py-2">
+                      <button 
+                        onClick={() => { onNavigate?.('pricing'); setIsDropdownOpen(false); }}
+                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-lime-600 dark:text-lime-400 hover:bg-lime-50 dark:hover:bg-lime-900/20 transition-colors"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                        <span>Upgrade Plan</span>
+                      </button>
+                      <button 
+                        onClick={() => { onNavigate?.('help'); setIsDropdownOpen(false); }}
+                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-700/50 transition-colors"
+                      >
+                        <svg className="w-4 h-4 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span>Help & FAQ</span>
+                      </button>
+                    </div>
+
+                    <div className="border-t border-stone-200/60 dark:border-stone-700/60" />
+
+                    {/* Logout */}
+                    <div className="py-2">
+                      <button 
+                        onClick={handleLogout}
+                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                        </svg>
+                        <span>Log out</span>
+                      </button>
+                    </div>
                   </div>
-
-                  {/* Navigation Links */}
-                  <div className="py-2">
-                    <button 
-                      onClick={() => { onNavigate?.('dashboard'); setIsDropdownOpen(false); }}
-                      className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700/50 transition-colors duration-200"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5a2 2 0 012-2h4a2 2 0 012 2v2H8V5z" />
-                      </svg>
-                      <span>Dashboard</span>
-                    </button>
-                    <button 
-                      onClick={() => { onNavigate?.('library'); setIsDropdownOpen(false); }}
-                      className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700/50 transition-colors duration-200"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                      </svg>
-                      <span>Library</span>
-                    </button>
-                    <button 
-                      onClick={() => { onNavigate?.('upload'); setIsDropdownOpen(false); }}
-                      className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700/50 transition-colors duration-200"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                      </svg>
-                      <span>Upload</span>
-                    </button>
-                    <button 
-                      onClick={() => { onNavigate?.('analysis'); setIsDropdownOpen(false); }}
-                      className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700/50 transition-colors duration-200"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                      </svg>
-                      <span>AI Analysis</span>
-                    </button>
-                    <button 
-                      onClick={() => { onNavigate?.('analysis-history'); setIsDropdownOpen(false); }}
-                      className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700/50 transition-colors duration-200"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                      </svg>
-                      <span>AI History</span>
-                    </button>
-                    <button 
-                      onClick={() => { onNavigate?.('citation-history'); setIsDropdownOpen(false); }}
-                      className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700/50 transition-colors duration-200"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                      </svg>
-                      <span>Citation History</span>
-                    </button>
-                    <button 
-                      onClick={() => { onNavigate?.('blog'); setIsDropdownOpen(false); }}
-                      className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700/50 transition-colors duration-200"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
-                      </svg>
-                      <span>Blog</span>
-                    </button>
-                    <button 
-                      onClick={() => { onNavigate?.('account'); setIsDropdownOpen(false); }}
-                      className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700/50 transition-colors duration-200"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                      </svg>
-                      <span>Account</span>
-                    </button>
-                    <button 
-                      onClick={() => { onNavigate?.('billing'); setIsDropdownOpen(false); }}
-                      className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700/50 transition-colors duration-200"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                      </svg>
-                      <span>Billing</span>
-                    </button>
-                  </div>
-
-                  {/* Divider */}
-                  <div className="border-t border-stone-100 dark:border-stone-700"></div>
-
-                  {/* Additional Links */}
-                  <div className="py-2">
-                    <button 
-                      onClick={() => { onNavigate?.('pricing'); setIsDropdownOpen(false); }}
-                      className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-lime-600 dark:text-lime-400 hover:bg-lime-50 dark:hover:bg-lime-900/30 transition-colors duration-200"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                      </svg>
-                      <span>Upgrade Plan</span>
-                    </button>
-                    <button 
-                      onClick={() => { onNavigate?.('help'); setIsDropdownOpen(false); }}
-                      className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700/50 transition-colors duration-200"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      <span>FAQ</span>
-                    </button>
-                  </div>
-
-                  {/* Divider */}
-                  <div className="border-t border-stone-100 dark:border-stone-700"></div>
-
-                  {/* Logout */}
-                  <div className="py-2">
-                    <button 
-                      onClick={handleLogout}
-                      className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors duration-200"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                      </svg>
-                      <span>Logout</span>
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
       {/* Mobile Menu */}
-      {isMobileMenuOpen && (
-        <div className="lg:hidden bg-white dark:bg-stone-900 border-t border-stone-100 dark:border-stone-800 mobile-menu-container z-[60]">
-          <div className="px-4 sm:px-6 py-4 space-y-1">
-            <button 
-              onClick={() => { onNavigate?.('dashboard'); setIsMobileMenuOpen(false); }}
-              className={`w-full text-left px-4 py-3 rounded-xl font-medium transition-all duration-200 ${
-                currentPage === 'dashboard' 
-                  ? 'text-lime-600 dark:text-lime-400 bg-lime-50 dark:bg-lime-900/20' 
-                  : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-50 dark:hover:bg-stone-800/50'
-              }`}
-            >
-              Dashboard
-            </button>
-            <button 
-              onClick={() => { onNavigate?.('library'); setIsMobileMenuOpen(false); }}
-              className={`w-full text-left px-4 py-3 rounded-xl font-medium transition-all duration-200 ${
-                currentPage === 'library' 
-                  ? 'text-lime-600 dark:text-lime-400 bg-lime-50 dark:bg-lime-900/20' 
-                  : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-50 dark:hover:bg-stone-800/50'
-              }`}
-            >
-              Library
-            </button>
-            <button 
-              onClick={() => { onNavigate?.('upload'); setIsMobileMenuOpen(false); }}
-              className={`w-full text-left px-4 py-3 rounded-xl font-medium transition-all duration-200 ${
-                currentPage === 'upload' 
-                  ? 'text-lime-600 dark:text-lime-400 bg-lime-50 dark:bg-lime-900/20' 
-                  : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-50 dark:hover:bg-stone-800/50'
-              }`}
-            >
-              Upload
-            </button>
-            <button 
-              onClick={() => { onNavigate?.('analysis'); setIsMobileMenuOpen(false); }}
-              className={`w-full text-left px-4 py-3 rounded-xl font-medium transition-all duration-200 ${
-                currentPage === 'analysis' 
-                  ? 'text-lime-600 dark:text-lime-400 bg-lime-50 dark:bg-lime-900/20' 
-                  : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-50 dark:hover:bg-stone-800/50'
-              }`}
-            >
-              AI Analysis
-            </button>
-            <button
-              onClick={() => { onNavigate?.('citation-history'); setIsMobileMenuOpen(false); }}
-              className={`w-full text-left px-4 py-3 rounded-xl font-medium transition-all duration-200 ${
-                currentPage === 'citations'
-                  ? 'text-lime-600 dark:text-lime-400 bg-lime-50 dark:bg-lime-900/20'
-                  : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-50 dark:hover:bg-stone-800/50'
-              }`}
-            >
-              Citations
-            </button>
+      <div className={`lg:hidden mobile-menu-container overflow-hidden transition-all duration-300 ease-out ${
+        isMobileMenuOpen ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
+      }`}>
+        <div className="px-4 py-4 bg-white/95 dark:bg-stone-900/95 backdrop-blur-xl border-t border-stone-200/60 dark:border-stone-700/60">
+          <div className="space-y-1">
+            {[
+              { id: 'dashboard', label: 'Dashboard' },
+              { id: 'library', label: 'Library' },
+              { id: 'upload', label: 'Upload' },
+              { id: 'analysis', label: 'AI Analysis' },
+              { id: 'citation-history', label: 'Citations', page: 'citations' },
+            ].map(({ id, label, page }) => (
+              <button 
+                key={id}
+                onClick={() => { onNavigate?.(id); setIsMobileMenuOpen(false); }}
+                className={`w-full text-left px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${
+                  currentPage === (page || id)
+                    ? 'bg-lime-100 dark:bg-lime-900/30 text-lime-700 dark:text-lime-400' 
+                    : 'text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800'
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+            
+            {/* Pro button */}
             <button
               onClick={() => { onNavigate?.('quiz-history'); setIsMobileMenuOpen(false); }}
-              className={`w-full text-left px-4 py-3 rounded-xl font-medium transition-all duration-200 flex items-center justify-between ${
-                currentPage === 'quiz-history' ? 'ring-2 ring-[#a3e635]/50' : 'hover:opacity-90'
+              className={`w-full text-left px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200 flex items-center justify-between bg-gradient-to-r from-stone-800 to-stone-900 text-lime-400 ${
+                currentPage === 'quiz-history' ? 'ring-2 ring-lime-400/50' : ''
               }`}
-              style={{ backgroundColor: '#262626', color: '#a3e635' }}
             >
-              <span className="flex items-center gap-2">🧠 Saved Tools</span>
-              <span className="px-1.5 py-0.5 text-[10px] font-bold text-stone-900 rounded-full" style={{ backgroundColor: '#a3e635' }}>PRO</span>
+              <span>Saved Tools</span>
+              <span className="px-2 py-0.5 text-[10px] font-bold bg-lime-400 text-stone-900 rounded-full">PRO</span>
             </button>
+
             <button
               onClick={() => { onNavigate?.('blog'); setIsMobileMenuOpen(false); }}
-              className={`w-full text-left px-4 py-3 rounded-xl font-medium transition-all duration-200 ${
+              className={`w-full text-left px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${
                 currentPage === 'blog' 
-                  ? 'text-lime-600 dark:text-lime-400 bg-lime-50 dark:bg-lime-900/20' 
-                  : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-50 dark:hover:bg-stone-800/50'
+                  ? 'bg-lime-100 dark:bg-lime-900/30 text-lime-700 dark:text-lime-400' 
+                  : 'text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800'
               }`}
             >
               Blog
             </button>
           </div>
         </div>
-      )}
+      </div>
     </header>
   );
 };
 
 export default Header;
-

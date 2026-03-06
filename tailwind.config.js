@@ -63,6 +63,8 @@ module.exports = {
         'tool-show-1': 'toolShow1 4.5s ease-in-out infinite',
         'tool-show-2': 'toolShow2 4.5s ease-in-out infinite',
         'tool-show-3': 'toolShow3 4.5s ease-in-out infinite',
+        'notes-fade-in-up': 'notesFadeInUp 0.7s ease-out forwards',
+        'notes-glow-pulse': 'notesGlowPulse 4s ease-in-out infinite',
       },
       keyframes: {
         fadeIn: {
@@ -153,6 +155,14 @@ module.exports = {
         toolShow3: {
           '0%, 58%': { opacity: '0.4', transform: 'scale(0.95)' },
           '66%, 100%': { opacity: '1', transform: 'scale(1)' },
+        },
+        notesFadeInUp: {
+          '0%': { opacity: '0', transform: 'translateY(24px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        notesGlowPulse: {
+          '0%, 100%': { opacity: '0.25', transform: 'scale(1)' },
+          '50%': { opacity: '0.4', transform: 'scale(1.02)' },
         },
       },
       backgroundImage: {

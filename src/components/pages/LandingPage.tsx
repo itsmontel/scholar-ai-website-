@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import Footer from '../common/Footer';
 import { useTheme } from '../../contexts/ThemeContext';
 import AnalysisAnimation from '../common/AnalysisAnimation';
-import customersImg from '../../assets/images/CustomersWriteScholar.png';
+// customersImg placeholder - section is hidden
+const customersImg = '';
 
 interface LandingPageProps {
   onNavigate: (page: string, slug?: string) => void;
@@ -34,7 +35,9 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
   const [flashcardCount, setFlashcardCount] = useState(15);
   const [crosswordWordCount, setCrosswordWordCount] = useState(10);
   const [activeHelpCategory, setActiveHelpCategory] = useState('essays');
+  const [activeStudyTab, setActiveStudyTab] = useState('analyse');
   const [studyCardsCarouselIndex, setStudyCardsCarouselIndex] = useState(0);
+  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
 
   const helpCategories = [
     {
@@ -385,191 +388,349 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
 
   return (
     <main className="min-h-screen relative transition-colors font-sans" role="main">
-      {/* HERO SECTION - Old app lime/stone theme */}
-      <section className="relative bg-[#faf8f5] dark:bg-stone-900 overflow-hidden">
-        {/* Subtle gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-br from-lime-50/30 via-transparent to-emerald-50/20 dark:from-stone-900/50 dark:to-stone-900" />
-        
-        {/* Navigation */}
-        <nav className="relative z-50 border-b border-stone-200/60 dark:border-stone-700/40" aria-label="Main navigation">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-18 py-4">
-              <a href="/" onClick={(e) => { e.preventDefault(); onNavigate('landing'); }} className="flex items-center space-x-2.5 group">
-                <div className="w-10 h-10 rounded-2xl flex items-center justify-center bg-gradient-to-br from-lime-400 to-emerald-500 shadow-lg shadow-lime-500/30 group-hover:scale-105 transition-transform">
-                  <span className="font-extrabold text-xl text-white">W</span>
-                </div>
-                <span className="text-2xl font-extrabold text-stone-800 dark:text-stone-100 tracking-tight">WriteScholar</span>
-              </a>
-              
-              <div className="hidden md:flex items-center space-x-1">
-                <a href="/features" onClick={(e) => { e.preventDefault(); onNavigate('features'); }} className="px-4 py-2.5 text-sm text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 transition-all font-medium">Features</a>
-                <a href="/pricing" onClick={(e) => { e.preventDefault(); onNavigate('pricing'); }} className="px-4 py-2.5 text-sm text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 transition-all font-medium">Pricing</a>
-                <a href="/blog" onClick={(e) => { e.preventDefault(); onNavigate('blog'); }} className="px-4 py-2.5 text-sm text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 transition-all font-medium">Blog</a>
-                <a href="/about" onClick={(e) => { e.preventDefault(); onNavigate('about'); }} className="px-4 py-2.5 text-sm text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 transition-all font-medium">About</a>
+      {/* Sticky Header - Outside hero so it stays visible on scroll */}
+      <nav className="sticky top-0 z-50 border-b border-stone-200/50 dark:border-stone-700/50 bg-white/95 dark:bg-stone-900/95 backdrop-blur-xl shadow-sm" aria-label="Main navigation">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16 py-3">
+            <a href="/" onClick={(e) => { e.preventDefault(); onNavigate('landing'); }} className="flex items-center space-x-2.5 group">
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/30 group-hover:scale-105 transition-transform">
+                <span className="font-black text-lg text-white">W</span>
               </div>
-              
-              <div className="flex items-center space-x-3">
-                <button
-                  onClick={toggleTheme}
-                  className="p-2 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors text-stone-600 dark:text-stone-400"
-                  aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-                  </svg>
-                </button>
-                <a href="/login" onClick={(e) => { e.preventDefault(); onNavigate('login'); }} className="hidden sm:inline-flex px-4 py-2.5 text-sm text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 font-medium rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 transition-all">Log in</a>
-                <a href="/signup" onClick={(e) => { e.preventDefault(); onNavigate('signup'); }} className="inline-flex items-center px-5 py-2.5 text-stone-900 text-sm font-bold rounded-2xl hover:scale-105 active:scale-95 transition-all duration-200 bg-gradient-to-r from-lime-400 to-emerald-500 hover:from-lime-300 hover:to-emerald-400 shadow-lg shadow-lime-500/30">
-                  Sign up free
-                </a>
+              <span className="text-xl font-extrabold tracking-tight text-indigo-600 dark:text-indigo-400">
+                WriteScholar
+              </span>
+            </a>
+            
+            <div className="hidden md:flex items-center space-x-1">
+              <a href="/features" onClick={(e) => { e.preventDefault(); onNavigate('features'); }} className="px-4 py-2.5 text-sm text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 transition-all font-medium">Features</a>
+              <a href="/why-students-choose" onClick={(e) => { e.preventDefault(); onNavigate('why-students-choose'); }} className="px-4 py-2.5 text-sm text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 transition-all font-medium">Why Students Choose</a>
+              <a href="/pricing" onClick={(e) => { e.preventDefault(); onNavigate('pricing'); }} className="px-4 py-2.5 text-sm text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 transition-all font-medium">Pricing</a>
+              <a href="/blog" onClick={(e) => { e.preventDefault(); onNavigate('blog'); }} className="px-4 py-2.5 text-sm text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 transition-all font-medium">Blog</a>
+              <a href="/about" onClick={(e) => { e.preventDefault(); onNavigate('about'); }} className="px-4 py-2.5 text-sm text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 transition-all font-medium">About</a>
+            </div>
+            
+            <div className="flex items-center space-x-2 sm:space-x-3">
+              <button
+                onClick={toggleTheme}
+                className="p-2 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors text-stone-600 dark:text-stone-400"
+                aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+              </button>
+              <a href="/login" onClick={(e) => { e.preventDefault(); onNavigate('login'); }} className="hidden sm:inline-flex px-4 py-2.5 text-sm text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 font-medium rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 transition-all">Log in</a>
+              <a href="/signup" onClick={(e) => { e.preventDefault(); onNavigate('signup'); }} className="hidden sm:inline-flex items-center px-5 py-2.5 text-white text-sm font-bold rounded-xl bg-gradient-to-r from-blue-500 to-violet-500 hover:from-blue-400 hover:to-violet-400 hover:scale-105 active:scale-95 transition-all shadow-lg shadow-violet-500/25">
+                Sign up free
+              </a>
+              <button
+                onClick={() => setIsMobileNavOpen(!isMobileNavOpen)}
+                className="md:hidden p-2 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors text-stone-600 dark:text-stone-400"
+                aria-label="Toggle menu"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  {isMobileNavOpen ? (
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  ) : (
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  )}
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+        {isMobileNavOpen && (
+          <div className="md:hidden border-t border-stone-200/50 dark:border-stone-700/50 bg-white/95 dark:bg-stone-900/95 backdrop-blur-xl">
+            <div className="px-4 py-3 space-y-1">
+              <a href="/features" onClick={(e) => { e.preventDefault(); setIsMobileNavOpen(false); onNavigate('features'); }} className="block px-4 py-3 text-sm font-medium text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 transition-all">Features</a>
+              <a href="/why-students-choose" onClick={(e) => { e.preventDefault(); setIsMobileNavOpen(false); onNavigate('why-students-choose'); }} className="block px-4 py-3 text-sm font-medium text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 transition-all">Why Students Choose</a>
+              <a href="/pricing" onClick={(e) => { e.preventDefault(); setIsMobileNavOpen(false); onNavigate('pricing'); }} className="block px-4 py-3 text-sm font-medium text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 transition-all">Pricing</a>
+              <a href="/blog" onClick={(e) => { e.preventDefault(); setIsMobileNavOpen(false); onNavigate('blog'); }} className="block px-4 py-3 text-sm font-medium text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 transition-all">Blog</a>
+              <a href="/about" onClick={(e) => { e.preventDefault(); setIsMobileNavOpen(false); onNavigate('about'); }} className="block px-4 py-3 text-sm font-medium text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 transition-all">About</a>
+              <div className="pt-2 pb-1 flex flex-col gap-2">
+                <a href="/login" onClick={(e) => { e.preventDefault(); setIsMobileNavOpen(false); onNavigate('login'); }} className="block text-center px-4 py-3 text-sm font-medium text-stone-600 dark:text-stone-400 rounded-xl border border-stone-200 dark:border-stone-700 hover:bg-stone-100 dark:hover:bg-stone-800 transition-all">Log in</a>
+                <a href="/signup" onClick={(e) => { e.preventDefault(); setIsMobileNavOpen(false); onNavigate('signup'); }} className="block text-center px-4 py-3 text-white text-sm font-bold rounded-xl bg-gradient-to-r from-blue-500 to-violet-500 shadow-lg shadow-violet-500/25">Sign up free</a>
               </div>
             </div>
           </div>
-        </nav>
+        )}
+      </nav>
 
-        {/* Hero Content */}
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 lg:py-24">
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-            {/* Left: Text Content */}
-            <div className="text-center lg:text-left">
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-stone-800 dark:text-stone-100 leading-tight mb-6" style={{ letterSpacing: '-0.02em' }}>
-                The ultimate<br />
-                <span className="bg-gradient-to-r from-lime-500 via-emerald-500 to-teal-500 bg-clip-text text-transparent">study weapon.</span>
-              </h1>
-              <p className="text-lg sm:text-xl text-stone-600 dark:text-stone-400 mb-8 max-w-lg mx-auto lg:mx-0">
-                Use <span className="text-stone-800 dark:text-stone-100 font-semibold">AI</span> to analyze essays, find citations, create quizzes, and study smarter. Learn faster with intelligent tools.
-              </p>
-              
-              {/* CTA Buttons */}
-              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                <button
-                  onClick={() => onNavigate('signup')}
-                  className="px-8 py-4 bg-gradient-to-r from-lime-500 to-emerald-600 text-stone-900 font-bold rounded-2xl hover:from-lime-400 hover:to-emerald-500 hover:scale-105 active:scale-95 transition-all shadow-xl shadow-lime-500/30 text-lg"
-                >
-                  Get Started Free
-                </button>
-                <button
-                  onClick={() => onNavigate('features')}
-                  className="px-8 py-4 bg-white dark:bg-stone-800 border-2 border-stone-200 dark:border-stone-600 text-stone-800 dark:text-stone-100 font-bold rounded-2xl hover:bg-stone-50 dark:hover:bg-stone-700 hover:scale-105 active:scale-95 transition-all text-lg"
-                >
-                  See Features
-                </button>
-              </div>
-              
-              {/* Trust badge */}
-              <div className="mt-8 flex items-center justify-center lg:justify-start gap-3">
-                <div className="flex -space-x-2">
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-lime-400 to-emerald-500 border-2 border-[#faf8f5] dark:border-stone-900" />
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 border-2 border-[#faf8f5] dark:border-stone-900" />
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 border-2 border-[#faf8f5] dark:border-stone-900" />
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-teal-400 to-cyan-500 border-2 border-[#faf8f5] dark:border-stone-900" />
-                </div>
-                <span className="text-stone-600 dark:text-stone-400 text-sm">Trusted by <span className="text-stone-800 dark:text-stone-100 font-semibold">50,000+</span> students</span>
-              </div>
+      {/* HERO SECTION - Fun, Gen Z, full of energy */}
+      <section className="relative min-h-[70vh] sm:min-h-[85vh] flex flex-col overflow-hidden">
+        {/* Background */}
+        <div className="absolute inset-0 bg-gradient-to-b from-blue-50/60 via-stone-50 to-white dark:from-stone-950 dark:via-stone-900 dark:to-stone-900" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(99,102,241,0.18),transparent)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(139,92,246,0.14),transparent)]" />
+        
+        {/* Floating tool mockups - scattered around hero */}
+        <div className="absolute top-[18%] left-[8%] hidden lg:block animate-float">
+          <div className="bg-white dark:bg-stone-800 rounded-2xl p-3 shadow-xl border border-violet-200/60 dark:border-violet-800/40 rotate-[-6deg] hover:rotate-0 transition-transform">
+            <span className="text-2xl block mb-1">📝</span>
+            <span className="text-xs font-bold text-violet-600 dark:text-violet-400">Quiz</span>
+            <div className="mt-1.5 h-1.5 bg-violet-100 dark:bg-violet-900/50 rounded-full w-12" />
+          </div>
+        </div>
+        <div className="absolute top-[25%] right-[12%] hidden lg:block animate-float-delayed">
+          <div className="bg-white dark:bg-stone-800 rounded-2xl p-3 shadow-xl border border-rose-200/60 dark:border-rose-800/40 rotate-[4deg] hover:rotate-0 transition-transform">
+            <span className="text-2xl block mb-1">🃏</span>
+            <span className="text-xs font-bold text-rose-600 dark:text-rose-400">Cards</span>
+            <div className="mt-1.5 h-1.5 bg-rose-100 dark:bg-rose-900/50 rounded-full w-10" />
+          </div>
+        </div>
+        <div className="absolute bottom-[22%] left-[15%] hidden lg:block animate-float" style={{ animationDelay: '1s' }}>
+          <div className="bg-white dark:bg-stone-800 rounded-2xl p-3 shadow-xl border border-blue-200/60 dark:border-blue-800/40 rotate-[3deg] hover:rotate-0 transition-transform">
+            <span className="text-2xl block mb-1">🧩</span>
+            <span className="text-xs font-bold text-blue-600 dark:text-blue-400">Puzzle</span>
+            <div className="mt-1.5 grid grid-cols-3 gap-0.5">
+              {['C','A','T'].map((l,i)=>(<div key={i} className="w-4 h-4 rounded bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center text-[8px] font-bold text-blue-700">{l}</div>))}
+            </div>
+          </div>
+        </div>
+        <div className="absolute bottom-[28%] right-[10%] hidden lg:block animate-float-delayed">
+          <div className="bg-white dark:bg-stone-800 rounded-2xl p-3 shadow-xl border border-emerald-200/60 dark:border-emerald-800/40 rotate-[-5deg] hover:rotate-0 transition-transform">
+            <span className="text-2xl block mb-1">✨</span>
+            <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">Summarize</span>
+            <div className="mt-1.5 flex gap-1"><div className="w-2 h-2 rounded-full bg-emerald-400"/><div className="w-3 h-2 rounded-full bg-emerald-300/60"/></div>
+          </div>
+        </div>
+        <div className="absolute top-[35%] left-[5%] hidden xl:block text-4xl opacity-60 animate-float">🔥</div>
+        <div className="absolute top-[40%] right-[6%] hidden xl:block text-3xl opacity-50 animate-float-delayed">⚡</div>
+        <div className="absolute bottom-[35%] left-[6%] hidden xl:block text-3xl opacity-50 animate-float">💡</div>
+        <div className="absolute bottom-[30%] right-[5%] hidden xl:block text-4xl opacity-60 animate-float-delayed">🎯</div>
+
+        {/* Hero Content - Centered, flows into page */}
+        <div className="relative flex-1 flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8 py-10 sm:py-16 lg:py-24">
+          {/* Left character - celebrating */}
+          <div className="hidden lg:block absolute left-2 xl:left-6 top-[22%] -translate-y-1/2 w-20 h-24 xl:w-24 xl:h-28 animate-float z-10 opacity-90">
+            <svg viewBox="0 0 120 140" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+              <path d="M40 85 Q38 115 42 140 L78 140 Q82 115 80 85" fill="#F59E0B" />
+              <rect x="50" y="65" width="18" height="24" fill="#FCD9B6" />
+              <ellipse cx="59" cy="40" rx="28" ry="30" fill="#FCD9B6" />
+              <path d="M32 35 Q30 18 48 14 Q65 10 85 14 Q100 18 98 35" fill="#1F2937" />
+              <ellipse cx="48" cy="40" rx="4" ry="5" fill="#1F2937" />
+              <ellipse cx="70" cy="40" rx="4" ry="5" fill="#1F2937" />
+              <circle cx="49" cy="38" r="1.5" fill="white" />
+              <circle cx="71" cy="38" r="1.5" fill="white" />
+              <path d="M45 52 Q58 58 72 52" stroke="#1F2937" strokeWidth="2" fill="none" strokeLinecap="round" />
+              <path d="M35 90 Q15 95 5 110" stroke="#FCD9B6" strokeWidth="12" fill="none" strokeLinecap="round" />
+              <path d="M85 90 Q105 92 115 105" stroke="#FCD9B6" strokeWidth="12" fill="none" strokeLinecap="round" />
+              <ellipse cx="3" cy="112" rx="8" ry="9" fill="#FCD9B6" />
+              <ellipse cx="118" cy="108" rx="8" ry="9" fill="#FCD9B6" />
+              <path d="M55 80 L58 88 L66 91 L58 94 L55 102 L52 94 L44 91 L52 88 Z" fill="#F59E0B" />
+              <path d="M68 85 L70 90 L75 92 L70 94 L68 99 L66 94 L61 92 L66 90 Z" fill="#FBBF24" />
+            </svg>
+          </div>
+          {/* Right character - studying with book */}
+          <div className="hidden lg:block absolute right-2 xl:right-6 top-[22%] -translate-y-1/2 w-20 h-24 xl:w-24 xl:h-28 z-10 opacity-90">
+            <svg viewBox="0 0 140 160" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+              <path d="M50 95 Q45 125 50 155 L90 155 Q95 125 90 95" fill="#6366F1" />
+              <rect x="62" y="72" width="16" height="26" fill="#E8B796" />
+              <ellipse cx="70" cy="45" rx="30" ry="33" fill="#E8B796" />
+              <path d="M40 38 Q38 18 55 12 Q70 6 88 12 Q105 18 100 38 Q98 28 85 20 Q70 12 55 20 Q42 28 40 38" fill="#4A3728" />
+              <path d="M40 38 Q34 50 40 62" fill="#4A3728" />
+              <path d="M100 38 Q106 50 100 62" fill="#4A3728" />
+              <ellipse cx="58" cy="45" rx="4" ry="5" fill="#1F2937" />
+              <ellipse cx="82" cy="45" rx="4" ry="5" fill="#1F2937" />
+              <circle cx="59" cy="43" r="1.5" fill="white" />
+              <circle cx="83" cy="43" r="1.5" fill="white" />
+              <path d="M55 58 Q70 68 85 58" stroke="#1F2937" strokeWidth="2" fill="none" strokeLinecap="round" />
+              <ellipse cx="42" cy="52" rx="5" ry="3" fill="#FECACA" opacity="0.5" />
+              <ellipse cx="98" cy="52" rx="5" ry="3" fill="#FECACA" opacity="0.5" />
+              <path d="M45 98 Q20 100 5 115" stroke="#E8B796" strokeWidth="12" fill="none" strokeLinecap="round" />
+              <path d="M95 98 Q120 100 135 115" stroke="#E8B796" strokeWidth="12" fill="none" strokeLinecap="round" />
+              <ellipse cx="3" cy="118" rx="8" ry="9" fill="#E8B796" />
+              <ellipse cx="137" cy="118" rx="8" ry="9" fill="#E8B796" />
+              <rect x="25" y="95" width="90" height="55" rx="4" fill="#FEF3C7" stroke="#F59E0B" strokeWidth="2" />
+              <line x1="70" y1="95" x2="70" y2="150" stroke="#F59E0B" strokeWidth="1.5" />
+              <path d="M35 110 Q65 108 95 110" stroke="#92400E" strokeWidth="2" fill="none" />
+              <path d="M35 125 Q65 123 95 125" stroke="#92400E" strokeWidth="1.5" fill="none" />
+              <path d="M58 95 L70 108 L82 95" stroke="#4F46E5" strokeWidth="2" fill="none" />
+            </svg>
+          </div>
+          <div className="max-w-4xl mx-auto text-center">
+            {/* Hero headline */}
+            <h1 className="text-3xl sm:text-5xl lg:text-6xl xl:text-7xl font-extrabold text-stone-800 dark:text-stone-100 leading-[1.1] mb-4 sm:mb-6 tracking-tight" style={{ letterSpacing: '-0.03em' }}>
+              Everything you need to<br />
+              <span className="bg-gradient-to-r from-blue-500 to-violet-500 bg-clip-text text-transparent">survive school</span>
+            </h1>
+            
+            <p className="text-base sm:text-xl text-stone-600 dark:text-stone-400 mb-8 sm:mb-10 max-w-2xl mx-auto leading-relaxed px-2">
+              Paste your notes. Get quizzes, flashcards & crosswords in seconds. Essay feedback, citations, humanizer — we got you. No cap. 🙌
+            </p>
+            
+            {/* Primary CTA - pill */}
+            <div className="flex justify-center mb-4">
+              <button
+                onClick={() => document.getElementById('try-it-now')?.scrollIntoView({ behavior: 'smooth' })}
+                className="px-8 py-4 bg-gradient-to-r from-blue-500 to-violet-500 text-white font-bold rounded-full hover:from-blue-400 hover:to-violet-400 hover:scale-105 active:scale-95 transition-all shadow-xl shadow-violet-500/25 text-lg"
+              >
+                I'm ready to level up
+              </button>
             </div>
             
-            {/* Right: Device Mockups - Brainscape style */}
-            <div className="relative hidden lg:block">
-              {/* Floating mastery badge */}
-              <div className="absolute -top-4 right-8 bg-gradient-to-br from-lime-400 to-emerald-500 rounded-full w-20 h-20 flex flex-col items-center justify-center shadow-xl shadow-lime-500/30 animate-float z-20">
-                <span className="text-stone-900 font-extrabold text-2xl">97%</span>
-                <span className="text-stone-800/80 text-[10px] font-medium">Mastery</span>
-              </div>
-              
-              {/* Laptop mockup */}
-              <div className="relative bg-stone-200 dark:bg-stone-700 rounded-2xl p-2 shadow-2xl transform rotate-1 hover:rotate-0 transition-transform duration-500">
-                <div className="bg-white dark:bg-stone-800 rounded-xl overflow-hidden">
-                  {/* Browser bar */}
-                  <div className="bg-stone-100 dark:bg-stone-700 px-4 py-2 flex items-center gap-2">
-                    <div className="flex gap-1.5">
-                      <div className="w-3 h-3 rounded-full bg-red-400" />
-                      <div className="w-3 h-3 rounded-full bg-amber-400" />
-                      <div className="w-3 h-3 rounded-full bg-lime-400" />
-                    </div>
-                    <div className="flex-1 bg-stone-200 dark:bg-stone-600 rounded-lg px-3 py-1 text-stone-500 text-xs ml-4">writescholar.com</div>
-                  </div>
-                  {/* App content preview */}
-                  <div className="p-4 bg-white dark:bg-stone-800 h-64">
-                    <div className="flex items-center gap-3 mb-4">
-                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-lime-400 to-emerald-500 flex items-center justify-center">
-                        <span className="text-white font-bold">W</span>
+            <p className="text-sm text-stone-500 dark:text-stone-400 mb-12">
+              Trusted by 38k+ students
+            </p>
+            
+            {/* Hero cards carousel - scrollable on mobile, arrow-nav on desktop */}
+            <div className="w-screen max-w-[100vw] relative left-1/2 -translate-x-1/2 mt-8 sm:mt-12 px-4 sm:pl-20 sm:pr-20 lg:pl-24 lg:pr-24">
+              <button
+                onClick={() => setStudyCardsCarouselIndex((i) => Math.max(0, i - 1))}
+                disabled={studyCardsCarouselIndex === 0}
+                className="hidden sm:flex absolute left-4 sm:left-6 top-1/2 -translate-y-1/2 z-20 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white dark:bg-stone-800 shadow-lg border border-stone-200 dark:border-stone-600 items-center justify-center text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-700 hover:text-stone-900 dark:hover:text-stone-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-300"
+                aria-label="Previous"
+              >
+                <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+              </button>
+              <button
+                onClick={() => setStudyCardsCarouselIndex((i) => Math.min(3, i + 1))}
+                disabled={studyCardsCarouselIndex === 3}
+                className="hidden sm:flex absolute right-4 sm:right-6 top-1/2 -translate-y-1/2 z-20 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white dark:bg-stone-800 shadow-lg border border-stone-200 dark:border-stone-600 items-center justify-center text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-700 hover:text-stone-900 dark:hover:text-stone-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-300"
+                aria-label="Next"
+              >
+                <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+              </button>
+              <div className="overflow-x-auto sm:overflow-hidden scrollbar-hide pb-4 sm:pb-0 -mx-4 px-4 sm:mx-0 sm:px-0 snap-x snap-mandatory sm:snap-none">
+                <div className="flex gap-3 sm:gap-4 sm:transition-transform sm:duration-500 sm:ease-out w-max sm:w-[160%]" style={{ transform: `translateX(-${studyCardsCarouselIndex * 12.5}%)` }}>
+                  {[
+                    { title: 'Analyze', desc: 'Get professor-style feedback on your essays', onClick: () => setMode('analyze'), gradient: 'from-lime-50 to-emerald-50 dark:from-lime-900/20 dark:to-emerald-900/20', accentClasses: { title: 'text-lime-700 dark:text-lime-400', orb: 'bg-lime-400/20', iconBg: 'bg-lime-100 dark:bg-lime-900/50' }, borderColor: 'border-lime-100 dark:border-lime-800/50', icon: '📝', inner: (
+                      <div className="space-y-2">
+                        <div className="h-2 bg-stone-200 dark:bg-stone-600 rounded-full overflow-hidden"><div className="h-full w-full bg-lime-400 dark:bg-lime-500 rounded-full animate-line-grow origin-left" style={{ animationDelay: '0.2s' }} /></div>
+                        <div className="h-2 bg-stone-200 dark:bg-stone-600 rounded-full overflow-hidden"><div className="h-full w-full bg-lime-400 dark:bg-lime-500 rounded-full animate-line-grow origin-left" style={{ animationDelay: '0.6s' }} /></div>
+                        <div className="h-2 bg-stone-200 dark:bg-stone-600 rounded-full overflow-hidden"><div className="h-full w-full bg-lime-500 dark:bg-lime-400 rounded-full animate-line-grow origin-left" style={{ animationDelay: '1s' }} /></div>
                       </div>
-                      <div>
-                        <div className="text-stone-800 dark:text-stone-100 font-semibold text-sm">Biology: Cells</div>
-                        <div className="text-stone-500 text-xs">12 flashcards</div>
-                      </div>
-                    </div>
-                    {/* Flashcard preview */}
-                    <div className="bg-gradient-to-br from-lime-400 to-emerald-500 rounded-xl p-4 mb-3 shadow-lg">
-                      <div className="text-stone-800/70 text-xs mb-1">Term</div>
-                      <div className="text-stone-900 font-semibold">Mitochondria</div>
-                    </div>
-                    {/* Progress bars */}
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2">
-                        <div className="flex-1 h-2 bg-stone-200 dark:bg-stone-600 rounded-full overflow-hidden">
-                          <div className="h-full w-3/4 bg-gradient-to-r from-lime-400 to-emerald-500 rounded-full" />
+                    )},
+                    { title: 'Citations', desc: 'Find and format academic sources instantly', onClick: () => setMode('citations'), gradient: 'from-cyan-50 to-teal-50 dark:from-cyan-900/20 dark:to-teal-900/20', accentClasses: { title: 'text-teal-700 dark:text-teal-400', orb: 'bg-teal-400/20', iconBg: 'bg-teal-100 dark:bg-teal-900/50' }, borderColor: 'border-cyan-100 dark:border-cyan-800/50', icon: '🔍', inner: (
+                      <div className="space-y-1.5">
+                        <div className="text-[9px] text-teal-600 dark:text-teal-400 font-mono opacity-0 animate-fade-slide-in" style={{ animationDelay: '0.1s', animationFillMode: 'forwards' }}>Smith, J. (2024). Title...</div>
+                        <div className="text-[9px] text-teal-600 dark:text-teal-400 font-mono opacity-0 animate-fade-slide-in" style={{ animationDelay: '0.4s', animationFillMode: 'forwards' }}>Jones, M. (2023). Study...</div>
+                        <div className="flex gap-1 mt-2">
+                          <span className="px-1.5 py-0.5 bg-teal-100 dark:bg-teal-900/50 text-teal-700 dark:text-teal-300 text-[9px] rounded font-medium">APA</span>
+                          <span className="px-1.5 py-0.5 bg-stone-100 dark:bg-stone-700 text-stone-500 text-[9px] rounded">MLA</span>
                         </div>
-                        <span className="text-stone-500 text-xs">75%</span>
                       </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              {/* Phone mockup - floating to the right */}
-              <div className="absolute -right-8 bottom-0 w-40 bg-stone-200 dark:bg-stone-700 rounded-3xl p-1.5 shadow-2xl transform -rotate-6 hover:rotate-0 transition-transform duration-500 z-10">
-                <div className="bg-white dark:bg-stone-800 rounded-2xl overflow-hidden">
-                  <div className="p-3 h-56">
-                    <div className="text-stone-800 dark:text-stone-100 text-xs font-semibold mb-2">Quiz Results</div>
-                    <div className="bg-gradient-to-br from-lime-400 to-emerald-500 rounded-xl p-3 mb-2">
-                      <div className="text-stone-800/70 text-[10px]">Score</div>
-                      <div className="text-stone-900 font-bold text-xl">84%</div>
-                    </div>
-                    <div className="space-y-1.5">
-                      <div className="flex justify-between text-[10px]">
-                        <span className="text-stone-500">Correct</span>
-                        <span className="text-lime-600 font-medium">21/25</span>
+                    )},
+                    { title: 'Flashcards', desc: 'Generate flashcards from any content', onClick: () => { setMode('quiz'); setStudyToolMode('flashcards'); }, gradient: 'from-pink-50 to-rose-50 dark:from-pink-900/20 dark:to-rose-900/20', accentClasses: { title: 'text-rose-700 dark:text-rose-400', orb: 'bg-rose-400/20', iconBg: 'bg-rose-100 dark:bg-rose-900/50' }, borderColor: 'border-pink-100 dark:border-pink-800/50', icon: '🃏', inner: (
+                      <div className="h-16" style={{ perspective: '120px' }}>
+                        <div className="relative h-full animate-flashcard-flip" style={{ transformStyle: 'preserve-3d' }}>
+                          <div className="absolute inset-0 bg-gradient-to-br from-rose-400 to-pink-500 rounded-xl p-2.5 flex flex-col justify-center" style={{ backfaceVisibility: 'hidden' }}>
+                            <div className="text-white/80 text-[9px]">Term</div>
+                            <div className="text-white font-semibold text-xs">Photosynthesis</div>
+                          </div>
+                          <div className="absolute inset-0 bg-gradient-to-br from-pink-500 to-rose-600 rounded-xl p-2.5 flex flex-col justify-center items-center" style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}>
+                            <div className="text-white/90 text-[9px]">Definition</div>
+                            <div className="text-white font-medium text-xs text-center">Process plants use...</div>
+                          </div>
+                        </div>
                       </div>
-                      <div className="flex justify-between text-[10px]">
-                        <span className="text-stone-500">Time</span>
-                        <span className="text-stone-600 font-medium">12:34</span>
+                    )},
+                    { title: 'Practice Tests', desc: 'Create quizzes from your study material', onClick: () => { setMode('quiz'); setStudyToolMode('quiz'); }, gradient: 'from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20', accentClasses: { title: 'text-orange-700 dark:text-orange-400', orb: 'bg-orange-400/20', iconBg: 'bg-amber-100 dark:bg-amber-900/50' }, borderColor: 'border-amber-100 dark:border-amber-800/50', icon: '📋', inner: (
+                      <div className="relative h-14">
+                        <div className="absolute inset-0 animate-quiz-show">
+                          <div className="text-[10px] text-stone-500 mb-1">Q: What is 2 + 2?</div>
+                          <div className="flex gap-2">
+                            <span className="px-2 py-1 bg-amber-100 dark:bg-amber-900/50 text-amber-700 text-[9px] rounded font-medium">A</span>
+                            <span className="px-2 py-1 bg-stone-100 dark:bg-stone-700 text-stone-500 text-[9px] rounded">B</span>
+                            <span className="px-2 py-1 bg-stone-100 dark:bg-stone-700 text-stone-500 text-[9px] rounded">C</span>
+                          </div>
+                        </div>
+                        <div className="absolute inset-0 animate-quiz-hide flex flex-col justify-center">
+                          <div className="text-[10px] text-stone-500 mb-1">Correct!</div>
+                          <div className="text-orange-600 font-bold text-sm">✓ 4</div>
+                        </div>
                       </div>
+                    )},
+                    { title: 'Humanize', desc: 'Transform AI text into natural human writing', onClick: () => setMode('humanize'), gradient: 'from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20', accentClasses: { title: 'text-violet-700 dark:text-violet-400', orb: 'bg-violet-400/20', iconBg: 'bg-violet-100 dark:bg-violet-900/50' }, borderColor: 'border-violet-100 dark:border-violet-800/50', icon: '✨', inner: (
+                      <div className="relative h-12">
+                        <div className="absolute inset-0 animate-humanize-before">
+                          <div className="text-[10px] text-stone-500 mb-1">Before</div>
+                          <div className="text-stone-600 dark:text-stone-400 text-xs">Utilize the methodology...</div>
+                        </div>
+                        <div className="absolute inset-0 animate-humanize-after">
+                          <div className="text-[10px] text-violet-600 mb-1">After</div>
+                          <div className="text-violet-700 dark:text-violet-300 text-xs">Use the method...</div>
+                        </div>
+                      </div>
+                    )},
+                    { title: 'Summarize', desc: 'Turn long papers into concise bullet points', onClick: () => setMode('summarize'), gradient: 'from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20', accentClasses: { title: 'text-emerald-700 dark:text-emerald-400', orb: 'bg-emerald-400/20', iconBg: 'bg-emerald-100 dark:bg-emerald-900/50' }, borderColor: 'border-emerald-100 dark:border-emerald-800/50', icon: '📝', inner: (
+                      <div className="space-y-2">
+                        <div className="flex gap-1.5 items-center">
+                          <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 flex-shrink-0" />
+                          <div className="h-2 bg-stone-200 dark:bg-stone-600 rounded-full flex-1 overflow-hidden origin-left"><div className="h-full bg-emerald-400 dark:bg-emerald-500 rounded-full animate-summarize-shrink" /></div>
+                        </div>
+                        <div className="flex gap-1.5 items-center">
+                          <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 flex-shrink-0" />
+                          <div className="h-2 bg-stone-200 dark:bg-stone-600 rounded-full flex-1 overflow-hidden origin-left"><div className="h-full w-full bg-emerald-400 dark:bg-emerald-500 rounded-full animate-summarize-shrink" style={{ animationDelay: '0.3s' }} /></div>
+                        </div>
+                        <div className="flex gap-1.5 items-center">
+                          <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 flex-shrink-0" />
+                          <div className="h-2 bg-stone-200 dark:bg-stone-600 rounded-full flex-1 overflow-hidden origin-left"><div className="h-full w-full bg-emerald-500 dark:bg-emerald-400 rounded-full animate-summarize-shrink" style={{ animationDelay: '0.6s' }} /></div>
+                        </div>
+                      </div>
+                    )},
+                    { title: 'Study Tools', desc: 'Quizzes, flashcards & crosswords', onClick: () => setMode('quiz'), gradient: 'from-lime-50 to-green-50 dark:from-lime-900/20 dark:to-green-900/20', accentClasses: { title: 'text-lime-700 dark:text-lime-400', orb: 'bg-lime-400/20', iconBg: 'bg-lime-100 dark:bg-lime-900/50' }, borderColor: 'border-lime-100 dark:border-lime-800/50', icon: '🎯', inner: (
+                      <div className="flex gap-2">
+                        <div className="flex-1 text-center py-2 px-2 bg-lime-100 dark:bg-lime-900/50 rounded-lg text-lime-700 dark:text-lime-300 text-xs font-medium animate-tool-show-1">📝 Quiz</div>
+                        <div className="flex-1 text-center py-2 px-2 bg-lime-100 dark:bg-lime-900/50 rounded-lg text-lime-700 dark:text-lime-300 text-xs font-medium animate-tool-show-2">🃏 Cards</div>
+                        <div className="flex-1 text-center py-2 px-2 bg-lime-100 dark:bg-lime-900/50 rounded-lg text-lime-700 dark:text-lime-300 text-xs font-medium animate-tool-show-3">🧩 Puzzle</div>
+                      </div>
+                    )},
+                    { title: 'Crossword', desc: 'Generate crosswords from your notes', onClick: () => { setMode('quiz'); setStudyToolMode('crossword'); }, gradient: 'from-amber-50 to-yellow-50 dark:from-amber-900/20 dark:to-yellow-900/20', accentClasses: { title: 'text-amber-700 dark:text-amber-400', orb: 'bg-amber-400/20', iconBg: 'bg-amber-100 dark:bg-amber-900/50' }, borderColor: 'border-amber-100 dark:border-amber-800/50', icon: '🧩', inner: (
+                      <div className="grid grid-cols-5 gap-0.5">
+                        {[['C','A','T','#','#'],['O','#','#','#','#'],['D','O','G','#','#'],['#','#','#','#','#'],['#','#','#','#','#']].map((row, ri) => row.map((cell, ci) => (
+                          <div key={`${ri}-${ci}`} className={`aspect-square flex items-center justify-center rounded-sm text-[10px] font-bold transition-all duration-300 ${cell === '#' ? 'bg-stone-700 dark:bg-stone-800' : 'bg-amber-50 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 border border-amber-200/60 dark:border-amber-700/50 animate-cell-pop'}`} style={cell !== '#' ? { animationDelay: `${(ri * 5 + ci) * 50}ms` } : undefined}>{cell !== '#' ? cell : ''}</div>
+                        )))}
+                      </div>
+                    )},
+                  ].map((card) => (
+                    <div key={card.title} className="flex-shrink-0 w-[140px] sm:w-auto sm:flex-[0_0_12.5%] snap-start">
+                      <StudyCard
+                        title={card.title}
+                        desc={card.desc}
+                        onClick={card.onClick}
+                        gradient={card.gradient}
+                        accentClasses={card.accentClasses}
+                        borderColor={card.borderColor}
+                        icon={card.icon}
+                        innerContent={card.inner}
+                      />
                     </div>
-                  </div>
-                </div>
-              </div>
-              
-              {/* Floating card - contributors style */}
-              <div className="absolute -left-4 bottom-16 bg-white dark:bg-stone-800 rounded-2xl p-3 shadow-xl transform rotate-3 hover:rotate-0 transition-transform duration-500 w-36 border border-stone-200 dark:border-stone-600">
-                <div className="text-stone-600 text-[10px] font-medium mb-2">Study Streak 🔥</div>
-                <div className="flex items-center gap-2">
-                  <div className="text-2xl font-extrabold text-stone-800 dark:text-stone-100">14</div>
-                  <div className="text-stone-500 text-xs">days</div>
-                </div>
-                <div className="flex gap-1 mt-2">
-                  {[...Array(7)].map((_, i) => (
-                    <div key={i} className={`w-3 h-3 rounded-full ${i < 5 ? 'bg-gradient-to-br from-lime-400 to-emerald-500' : 'bg-stone-200 dark:bg-stone-600'}`} />
                   ))}
                 </div>
+              </div>
+              <div className="hidden sm:flex justify-center gap-2 mt-6">
+                {[0, 1, 2, 3].map((i) => (
+                  <button key={i} onClick={() => setStudyCardsCarouselIndex(i)} className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${studyCardsCarouselIndex === i ? 'bg-violet-500 w-8' : 'bg-stone-300 dark:bg-stone-600 hover:bg-stone-400'}`} aria-label={`Slide ${i + 1}`} />
+                ))}
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* FEATURE CARDS - "How do you want to study?" - Carousel */}
-      <section className="py-16 sm:py-20 bg-gradient-to-b from-stone-50 to-white dark:from-stone-900 dark:to-stone-900">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="relative text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-stone-800 dark:text-stone-100 mb-4">
-              How do you want to study?
-            </h2>
-            <p className="text-lg text-stone-600 dark:text-stone-400 max-w-2xl mx-auto">
-              Master whatever you're learning with WriteScholar's AI-powered tools and study activities.
-            </p>
-            {/* Cute character - studying with book */}
-            <div className="hidden lg:block absolute -right-4 xl:right-8 top-1/2 -translate-y-1/2 w-32 h-36">
+      {/* STUDY YOUR WAY - Tabbed video showcase */}
+      <section className="relative py-10 sm:py-20 bg-gradient-to-b from-stone-50 to-white dark:from-stone-900 dark:to-stone-900 overflow-hidden">
+        {/* Floating illustrations */}
+        <div className="absolute top-16 left-[6%] hidden lg:flex items-center gap-2 bg-white/90 dark:bg-stone-800/90 backdrop-blur rounded-2xl px-3 py-2 shadow-lg border border-lime-200/60 animate-float z-10">
+          <span className="text-2xl">📝</span><span className="text-xs font-bold text-lime-600 dark:text-lime-400">Analyse</span>
+        </div>
+        <div className="absolute top-28 right-[5%] hidden lg:flex items-center gap-2 bg-white/90 dark:bg-stone-800/90 backdrop-blur rounded-2xl px-3 py-2 shadow-lg border border-rose-200/60 animate-float-delayed z-10">
+          <span className="text-2xl">🃏</span><span className="text-xs font-bold text-rose-600 dark:text-rose-400">Flashcards</span>
+        </div>
+        <div className="absolute bottom-32 left-[8%] hidden lg:flex items-center gap-2 bg-white/90 dark:bg-stone-800/90 backdrop-blur rounded-2xl px-3 py-2 shadow-lg border border-violet-200/60 animate-float z-10" style={{ animationDelay: '0.5s' }}>
+          <span className="text-2xl">✨</span><span className="text-xs font-bold text-violet-600 dark:text-violet-400">Humanise</span>
+        </div>
+        <div className="absolute bottom-24 right-[7%] hidden lg:flex items-center gap-2 bg-white/90 dark:bg-stone-800/90 backdrop-blur rounded-2xl px-3 py-2 shadow-lg border border-amber-200/60 animate-float-delayed z-10" style={{ animationDelay: '0.3s' }}>
+          <span className="text-2xl">🧩</span><span className="text-xs font-bold text-amber-600 dark:text-amber-400">Crossword</span>
+        </div>
+        <div className="absolute top-1/3 left-[3%] hidden xl:block text-4xl opacity-40 animate-float">📚</div>
+        <div className="absolute top-2/5 right-[4%] hidden xl:block text-3xl opacity-35 animate-float-delayed">✏️</div>
+        <div className="absolute bottom-1/3 left-[4%] hidden xl:block text-3xl opacity-35 animate-float" style={{ animationDelay: '0.7s' }}>🎯</div>
+        <div className="absolute bottom-1/4 right-[3%] hidden xl:block text-4xl opacity-40 animate-float-delayed" style={{ animationDelay: '0.4s' }}>🚀</div>
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="relative flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-8 mb-10 sm:mb-14">
+            {/* Illustration - studying with book */}
+            <div className="hidden lg:block flex-shrink-0 w-24 h-28 xl:w-28 xl:h-32 animate-float">
               <svg viewBox="0 0 140 160" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
                 <path d="M50 95 Q45 125 50 155 L90 155 Q95 125 90 95" fill="#6366F1" />
                 <rect x="62" y="72" width="16" height="26" fill="#E8B796" />
@@ -584,12 +745,10 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                 <path d="M55 58 Q70 68 85 58" stroke="#1F2937" strokeWidth="2" fill="none" strokeLinecap="round" />
                 <ellipse cx="42" cy="52" rx="5" ry="3" fill="#FECACA" opacity="0.5" />
                 <ellipse cx="98" cy="52" rx="5" ry="3" fill="#FECACA" opacity="0.5" />
-                {/* Arms holding book */}
                 <path d="M45 98 Q20 100 5 115" stroke="#E8B796" strokeWidth="12" fill="none" strokeLinecap="round" />
                 <path d="M95 98 Q120 100 135 115" stroke="#E8B796" strokeWidth="12" fill="none" strokeLinecap="round" />
                 <ellipse cx="3" cy="118" rx="8" ry="9" fill="#E8B796" />
                 <ellipse cx="137" cy="118" rx="8" ry="9" fill="#E8B796" />
-                {/* Book */}
                 <rect x="25" y="95" width="90" height="55" rx="4" fill="#FEF3C7" stroke="#F59E0B" strokeWidth="2" />
                 <line x1="70" y1="95" x2="70" y2="150" stroke="#F59E0B" strokeWidth="1.5" />
                 <path d="M35 110 Q65 108 95 110" stroke="#92400E" strokeWidth="2" fill="none" />
@@ -597,278 +756,98 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                 <path d="M58 95 L70 108 L82 95" stroke="#4F46E5" strokeWidth="2" fill="none" />
               </svg>
             </div>
+            <div className="text-center sm:text-left">
+              <h2 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-stone-800 dark:text-stone-100 mb-3 sm:mb-4">
+                Study your way
+              </h2>
+              <p className="text-lg text-stone-600 dark:text-stone-400 max-w-2xl mx-auto sm:mx-0">
+                Pick a tool. Watch it work. It's really that easy.
+              </p>
+            </div>
           </div>
-          
-          {/* Carousel wrapper with arrows */}
+
+          {/* Tabs + descriptions */}
+          {(() => {
+            const tabs = [
+              { id: 'analyse', label: 'Analyse', icon: '📝', desc: 'Upload your paper and get professor-style feedback on structure, clarity, and how to improve.', activeClasses: 'bg-lime-500 text-white shadow-lg shadow-lime-500/30', inactiveClasses: 'bg-lime-50 dark:bg-lime-900/20 text-lime-700 dark:text-lime-400 border border-lime-200 dark:border-lime-800/50 hover:bg-lime-100 dark:hover:bg-lime-900/40' },
+              { id: 'flashcards', label: 'Flashcards', icon: '🃏', desc: 'Copy and paste your notes or content to generate flip cards for memorization and quick review.', activeClasses: 'bg-rose-500 text-white shadow-lg shadow-rose-500/30', inactiveClasses: 'bg-rose-50 dark:bg-rose-900/20 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-800/50 hover:bg-rose-100 dark:hover:bg-rose-900/40' },
+              { id: 'quiz', label: 'Practice Tests', icon: '📋', desc: 'Paste your study material and get instant quizzes — multiple choice, true/false, and more.', activeClasses: 'bg-amber-500 text-white shadow-lg shadow-amber-500/30', inactiveClasses: 'bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800/50 hover:bg-amber-100 dark:hover:bg-amber-900/40' },
+              { id: 'summarise', label: 'Summarise', icon: '📋', desc: 'Upload documents or copy and paste text to get concise bullet points or summaries in seconds.', activeClasses: 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30', inactiveClasses: 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/50 hover:bg-emerald-100 dark:hover:bg-emerald-900/40' },
+              { id: 'crossword', label: 'Crossword', icon: '🧩', desc: 'Paste key terms or notes to create an interactive crossword puzzle and test your vocabulary.', activeClasses: 'bg-violet-500 text-white shadow-lg shadow-violet-500/30', inactiveClasses: 'bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-400 border border-violet-200 dark:border-violet-800/50 hover:bg-violet-100 dark:hover:bg-violet-900/40' },
+              { id: 'humanise', label: 'Humanise', icon: '✨', desc: 'Paste AI-generated text to transform it into natural, human-sounding writing that bypasses detectors.', activeClasses: 'bg-purple-500 text-white shadow-lg shadow-purple-500/30', inactiveClasses: 'bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400 border border-purple-200 dark:border-purple-800/50 hover:bg-purple-100 dark:hover:bg-purple-900/40' },
+            ];
+            const activeTab = tabs.find(t => t.id === activeStudyTab);
+            return (
+              <>
+                <div className="flex overflow-x-auto scrollbar-hide gap-2 sm:gap-3 mb-4 sm:mb-6 pb-2 sm:pb-0 -mx-4 px-4 sm:mx-0 sm:px-0 sm:flex-wrap sm:justify-center snap-x snap-mandatory sm:snap-none">
+                  {tabs.map((tab) => (
+                    <button
+                      key={tab.id}
+                      onClick={() => setActiveStudyTab(tab.id)}
+                      className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2 sm:py-3 rounded-2xl font-semibold text-xs sm:text-base transition-all duration-300 flex-shrink-0 snap-start whitespace-nowrap ${activeStudyTab === tab.id ? tab.activeClasses + ' scale-105' : tab.inactiveClasses}`}
+                    >
+                      <span className="text-base sm:text-lg">{tab.icon}</span>
+                      <span>{tab.label}</span>
+                    </button>
+                  ))}
+                </div>
+                {activeTab && (
+                  <p className="text-center text-stone-600 dark:text-stone-400 text-base sm:text-lg max-w-2xl mx-auto mb-6 px-4">
+                    {activeTab.desc}
+                  </p>
+                )}
+              </>
+            );
+          })()}
+
+          {/* Video container */}
           <div className="relative">
-            {/* Left arrow */}
-            <button
-              onClick={() => setStudyCardsCarouselIndex((i) => Math.max(0, i - 1))}
-              disabled={studyCardsCarouselIndex === 0}
-              className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 sm:-translate-x-4 z-20 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white dark:bg-stone-800 shadow-lg border border-stone-200 dark:border-stone-600 flex items-center justify-center text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-700 hover:text-stone-900 dark:hover:text-stone-100 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-white dark:disabled:hover:bg-stone-800 transition-all duration-300"
-              aria-label="Previous slide"
-            >
-              <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-            </button>
-            
-            {/* Right arrow */}
-            <button
-              onClick={() => setStudyCardsCarouselIndex((i) => Math.min(1, i + 1))}
-              disabled={studyCardsCarouselIndex === 1}
-              className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-2 sm:translate-x-4 z-20 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white dark:bg-stone-800 shadow-lg border border-stone-200 dark:border-stone-600 flex items-center justify-center text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-700 hover:text-stone-900 dark:hover:text-stone-100 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-white dark:disabled:hover:bg-stone-800 transition-all duration-300"
-              aria-label="Next slide"
-            >
-              <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
-            
-            {/* Cards container - overflow hidden for slide effect */}
-            <div className="overflow-hidden px-2 sm:px-4">
-              <div 
-                className="flex transition-transform duration-500 ease-out"
-                style={{ transform: `translateX(-${studyCardsCarouselIndex * 100}%)` }}
-              >
-                {/* Slide 0: Analyze, Citations, Flashcards, Practice Tests */}
-                <div className="w-full flex-shrink-0">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <StudyCard
-                      title="Analyze"
-                      desc="Get professor-style feedback on your essays"
-                      onClick={() => setMode('analyze')}
-                      gradient="from-lime-50 to-emerald-50 dark:from-lime-900/20 dark:to-emerald-900/20"
-                      accentClasses={{ title: 'text-lime-700 dark:text-lime-400', orb: 'bg-lime-400/20', iconBg: 'bg-lime-100 dark:bg-lime-900/50' }}
-                      borderColor="border-lime-100 dark:border-lime-800/50"
-                      icon="📝"
-                      innerContent={
-                        <div className="space-y-2">
-                          <div className="h-2 bg-stone-200 dark:bg-stone-600 rounded-full overflow-hidden">
-                            <div className="h-full w-full bg-lime-400 dark:bg-lime-500 rounded-full animate-line-grow origin-left" style={{ animationDelay: '0.2s' }} />
-                          </div>
-                          <div className="h-2 bg-stone-200 dark:bg-stone-600 rounded-full overflow-hidden">
-                            <div className="h-full w-full bg-lime-400 dark:bg-lime-500 rounded-full animate-line-grow origin-left" style={{ animationDelay: '0.6s' }} />
-                          </div>
-                          <div className="h-2 bg-stone-200 dark:bg-stone-600 rounded-full overflow-hidden">
-                            <div className="h-full w-full bg-lime-500 dark:bg-lime-400 rounded-full animate-line-grow origin-left" style={{ animationDelay: '1s' }} />
-                          </div>
-                        </div>
-                      }
-                    />
-                    <StudyCard
-                      title="Citations"
-                      desc="Find and format academic sources instantly"
-                      onClick={() => setMode('citations')}
-                      gradient="from-cyan-50 to-teal-50 dark:from-cyan-900/20 dark:to-teal-900/20"
-                      accentClasses={{ title: 'text-teal-700 dark:text-teal-400', orb: 'bg-teal-400/20', iconBg: 'bg-teal-100 dark:bg-teal-900/50' }}
-                      borderColor="border-cyan-100 dark:border-cyan-800/50"
-                      icon="🔍"
-                      innerContent={
-                        <div className="space-y-1.5">
-                          <div className="text-[9px] text-teal-600 dark:text-teal-400 font-mono opacity-0 animate-fade-slide-in" style={{ animationDelay: '0.1s', animationFillMode: 'forwards' }}>Smith, J. (2024). Title...</div>
-                          <div className="text-[9px] text-teal-600 dark:text-teal-400 font-mono opacity-0 animate-fade-slide-in" style={{ animationDelay: '0.4s', animationFillMode: 'forwards' }}>Jones, M. (2023). Study...</div>
-                          <div className="flex gap-1 mt-2">
-                            <span className="px-1.5 py-0.5 bg-teal-100 dark:bg-teal-900/50 text-teal-700 dark:text-teal-300 text-[9px] rounded font-medium">APA</span>
-                            <span className="px-1.5 py-0.5 bg-stone-100 dark:bg-stone-700 text-stone-500 text-[9px] rounded">MLA</span>
-                          </div>
-                        </div>
-                      }
-                    />
-                    <StudyCard
-                      title="Flashcards"
-                      desc="Generate flashcards from any content"
-                      onClick={() => { setMode('quiz'); setStudyToolMode('flashcards'); }}
-                      gradient="from-pink-50 to-rose-50 dark:from-pink-900/20 dark:to-rose-900/20"
-                      accentClasses={{ title: 'text-rose-700 dark:text-rose-400', orb: 'bg-rose-400/20', iconBg: 'bg-rose-100 dark:bg-rose-900/50' }}
-                      borderColor="border-pink-100 dark:border-pink-800/50"
-                      icon="🃏"
-                      innerContent={
-                        <div className="h-16" style={{ perspective: '120px' }}>
-                          <div className="relative h-full animate-flashcard-flip" style={{ transformStyle: 'preserve-3d' }}>
-                            <div className="absolute inset-0 bg-gradient-to-br from-rose-400 to-pink-500 rounded-xl p-2.5 flex flex-col justify-center" style={{ backfaceVisibility: 'hidden' }}>
-                              <div className="text-white/80 text-[9px]">Term</div>
-                              <div className="text-white font-semibold text-xs">Photosynthesis</div>
-                            </div>
-                            <div className="absolute inset-0 bg-gradient-to-br from-pink-500 to-rose-600 rounded-xl p-2.5 flex flex-col justify-center items-center" style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}>
-                              <div className="text-white/90 text-[9px]">Definition</div>
-                              <div className="text-white font-medium text-xs text-center">Process plants use...</div>
-                            </div>
-                          </div>
-                        </div>
-                      }
-                    />
-                    <StudyCard
-                      title="Practice Tests"
-                      desc="Create quizzes from your study material"
-                      onClick={() => { setMode('quiz'); setStudyToolMode('quiz'); }}
-                      gradient="from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20"
-                      accentClasses={{ title: 'text-orange-700 dark:text-orange-400', orb: 'bg-orange-400/20', iconBg: 'bg-amber-100 dark:bg-amber-900/50' }}
-                      borderColor="border-amber-100 dark:border-amber-800/50"
-                      icon="📋"
-                      innerContent={
-                        <div className="relative h-14">
-                          <div className="absolute inset-0 animate-quiz-show">
-                            <div className="text-[10px] text-stone-500 mb-1">Q: What is 2 + 2?</div>
-                            <div className="flex gap-2">
-                              <span className="px-2 py-1 bg-amber-100 dark:bg-amber-900/50 text-amber-700 text-[9px] rounded font-medium">A</span>
-                              <span className="px-2 py-1 bg-stone-100 dark:bg-stone-700 text-stone-500 text-[9px] rounded">B</span>
-                              <span className="px-2 py-1 bg-stone-100 dark:bg-stone-700 text-stone-500 text-[9px] rounded">C</span>
-                            </div>
-                          </div>
-                          <div className="absolute inset-0 animate-quiz-hide flex flex-col justify-center">
-                            <div className="text-[10px] text-stone-500 mb-1">Correct!</div>
-                            <div className="text-orange-600 font-bold text-sm">✓ 4</div>
-                          </div>
-                        </div>
-                      }
-                    />
+            <div className="absolute -inset-2 bg-gradient-to-r from-blue-400/20 via-violet-400/20 to-purple-400/20 rounded-3xl blur-2xl animate-notes-glow-pulse"></div>
+            <div className="relative bg-white dark:bg-stone-800 rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl border border-stone-200/50 dark:border-stone-700">
+              {[
+                { id: 'analyse', src: '/analysevid.mp4', gradient: 'from-lime-500/10 to-emerald-500/10' },
+                { id: 'flashcards', src: '/flashcardsvid.mp4', gradient: 'from-rose-500/10 to-pink-500/10' },
+                { id: 'quiz', src: '/quizvid.mp4', gradient: 'from-amber-500/10 to-orange-500/10' },
+                { id: 'summarise', src: '/summarisevid.mp4', gradient: 'from-emerald-500/10 to-teal-500/10' },
+                { id: 'crossword', src: '/crosswordvid.mp4', gradient: 'from-violet-500/10 to-purple-500/10' },
+                { id: 'humanise', src: '/humanisevid.mp4', gradient: 'from-purple-500/10 to-fuchsia-500/10' },
+              ].map((vid) => (
+                activeStudyTab === vid.id && (
+                  <div key={vid.id} className={`bg-gradient-to-br ${vid.gradient} flex items-center justify-center min-h-[200px] sm:min-h-[360px]`}>
+                    <video
+                      key={vid.id}
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      className="w-full max-h-[40vh] sm:max-h-[60vh] object-contain"
+                    >
+                      <source src={vid.src} type="video/mp4" />
+                    </video>
                   </div>
-                </div>
-                
-                {/* Slide 1: Humanize, Summarize, Study Tools, Crossword */}
-                <div className="w-full flex-shrink-0">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <StudyCard
-                      title="Humanize"
-                      desc="Transform AI text into natural human writing"
-                      onClick={() => setMode('humanize')}
-                      gradient="from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20"
-                      accentClasses={{ title: 'text-violet-700 dark:text-violet-400', orb: 'bg-violet-400/20', iconBg: 'bg-violet-100 dark:bg-violet-900/50' }}
-                      borderColor="border-violet-100 dark:border-violet-800/50"
-                      icon="✨"
-                      innerContent={
-                        <div className="relative h-12">
-                          <div className="absolute inset-0 animate-humanize-before">
-                            <div className="text-[10px] text-stone-500 mb-1">Before</div>
-                            <div className="text-stone-600 dark:text-stone-400 text-xs">Utilize the methodology...</div>
-                          </div>
-                          <div className="absolute inset-0 animate-humanize-after">
-                            <div className="text-[10px] text-violet-600 mb-1">After</div>
-                            <div className="text-violet-700 dark:text-violet-300 text-xs">Use the method...</div>
-                          </div>
-                        </div>
-                      }
-                    />
-                    <StudyCard
-                      title="Summarize"
-                      desc="Turn long papers into concise bullet points"
-                      onClick={() => setMode('summarize')}
-                      gradient="from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20"
-                      accentClasses={{ title: 'text-emerald-700 dark:text-emerald-400', orb: 'bg-emerald-400/20', iconBg: 'bg-emerald-100 dark:bg-emerald-900/50' }}
-                      borderColor="border-emerald-100 dark:border-emerald-800/50"
-                      icon="📝"
-                      innerContent={
-                        <div className="space-y-2">
-                          <div className="flex gap-1.5 items-center">
-                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 flex-shrink-0" />
-                            <div className="h-2 bg-stone-200 dark:bg-stone-600 rounded-full flex-1 overflow-hidden origin-left">
-                              <div className="h-full bg-emerald-400 dark:bg-emerald-500 rounded-full animate-summarize-shrink" />
-                            </div>
-                          </div>
-                          <div className="flex gap-1.5 items-center">
-                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 flex-shrink-0" />
-                            <div className="h-2 bg-stone-200 dark:bg-stone-600 rounded-full flex-1 overflow-hidden origin-left">
-                              <div className="h-full w-full bg-emerald-400 dark:bg-emerald-500 rounded-full animate-summarize-shrink" style={{ animationDelay: '0.3s' }} />
-                            </div>
-                          </div>
-                          <div className="flex gap-1.5 items-center">
-                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 flex-shrink-0" />
-                            <div className="h-2 bg-stone-200 dark:bg-stone-600 rounded-full flex-1 overflow-hidden origin-left">
-                              <div className="h-full w-full bg-emerald-500 dark:bg-emerald-400 rounded-full animate-summarize-shrink" style={{ animationDelay: '0.6s' }} />
-                            </div>
-                          </div>
-                        </div>
-                      }
-                    />
-                    <StudyCard
-                      title="Study Tools"
-                      desc="Quizzes, flashcards & crosswords"
-                      onClick={() => setMode('quiz')}
-                      gradient="from-lime-50 to-green-50 dark:from-lime-900/20 dark:to-green-900/20"
-                      accentClasses={{ title: 'text-lime-700 dark:text-lime-400', orb: 'bg-lime-400/20', iconBg: 'bg-lime-100 dark:bg-lime-900/50' }}
-                      borderColor="border-lime-100 dark:border-lime-800/50"
-                      icon="🎯"
-                      innerContent={
-                        <div className="flex gap-2">
-                          <div className="flex-1 text-center py-2 px-2 bg-lime-100 dark:bg-lime-900/50 rounded-lg text-lime-700 dark:text-lime-300 text-xs font-medium animate-tool-show-1">📝 Quiz</div>
-                          <div className="flex-1 text-center py-2 px-2 bg-lime-100 dark:bg-lime-900/50 rounded-lg text-lime-700 dark:text-lime-300 text-xs font-medium animate-tool-show-2">🃏 Cards</div>
-                          <div className="flex-1 text-center py-2 px-2 bg-lime-100 dark:bg-lime-900/50 rounded-lg text-lime-700 dark:text-lime-300 text-xs font-medium animate-tool-show-3">🧩 Puzzle</div>
-                        </div>
-                      }
-                    />
-                    <StudyCard
-                      title="Crossword"
-                      desc="Generate crosswords from your notes"
-                      onClick={() => { setMode('quiz'); setStudyToolMode('crossword'); }}
-                      gradient="from-amber-50 to-yellow-50 dark:from-amber-900/20 dark:to-yellow-900/20"
-                      accentClasses={{ title: 'text-amber-700 dark:text-amber-400', orb: 'bg-amber-400/20', iconBg: 'bg-amber-100 dark:bg-amber-900/50' }}
-                      borderColor="border-amber-100 dark:border-amber-800/50"
-                      icon="🧩"
-                      innerContent={
-                        <div className="grid grid-cols-5 gap-0.5">
-                          {/* Real crossword: CAT (across), COD (down), DOG (across) */}
-                          {[
-                            ['C','A','T','#','#'],
-                            ['O','#','#','#','#'],
-                            ['D','O','G','#','#'],
-                            ['#','#','#','#','#'],
-                            ['#','#','#','#','#'],
-                          ].map((row, ri) => row.map((cell, ci) => (
-                            <div
-                              key={`${ri}-${ci}`}
-                              className={`aspect-square flex items-center justify-center rounded-sm text-[10px] font-bold transition-all duration-300 ${
-                                cell === '#'
-                                  ? 'bg-stone-700 dark:bg-stone-800'
-                                  : 'bg-amber-50 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 border border-amber-200/60 dark:border-amber-700/50 animate-cell-pop'
-                              }`}
-                              style={cell !== '#' ? { animationDelay: `${(ri * 5 + ci) * 50}ms` } : undefined}
-                            >
-                              {cell !== '#' ? cell : ''}
-                            </div>
-                          )))}
-                        </div>
-                      }
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            {/* Carousel dots */}
-            <div className="flex justify-center gap-2 mt-6">
-              <button
-                onClick={() => setStudyCardsCarouselIndex(0)}
-                className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${studyCardsCarouselIndex === 0 ? 'bg-lime-500 w-8' : 'bg-stone-300 dark:bg-stone-600 hover:bg-stone-400'}`}
-                aria-label="Go to slide 1"
-              />
-              <button
-                onClick={() => setStudyCardsCarouselIndex(1)}
-                className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${studyCardsCarouselIndex === 1 ? 'bg-lime-500 w-8' : 'bg-stone-300 dark:bg-stone-600 hover:bg-stone-400'}`}
-                aria-label="Go to slide 2"
-              />
+                )
+              ))}
             </div>
           </div>
-          
+
           {/* CTA */}
-          <div className="text-center mt-12">
+          <div className="text-center mt-10 sm:mt-12">
             <button
               onClick={() => onNavigate('signup')}
-              className="px-8 py-4 bg-gradient-to-r from-lime-500 to-emerald-600 text-stone-900 font-bold rounded-2xl hover:from-lime-400 hover:to-emerald-500 hover:scale-105 active:scale-95 transition-all shadow-xl shadow-lime-500/30 text-lg"
+              className="px-8 py-4 bg-gradient-to-r from-blue-500 to-violet-500 text-white font-bold rounded-2xl hover:from-blue-400 hover:to-violet-400 hover:scale-105 active:scale-95 transition-all shadow-xl shadow-violet-500/25 text-lg"
             >
-              Sign up for free
+              Try it free
             </button>
-            <p className="mt-4 text-slate-500 text-sm">I'm a teacher</p>
           </div>
         </div>
       </section>
 
-      {/* MAIN TOOL SECTION - Below the fold */}
-      <section className="py-16 bg-white dark:bg-stone-900">
+      {/* MAIN TOOL SECTION - Below the fold (hidden for now, may use later) */}
+      <section id="try-it-now" className="hidden py-16 bg-white dark:bg-stone-900 scroll-mt-20">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-8">
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-800 mb-2">Try it now</h2>
-            <p className="text-slate-600">Paste your content and see the magic happen</p>
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-stone-800 dark:text-stone-100 mb-2">Try it now</h2>
+            <p className="text-stone-600 dark:text-stone-400">Paste your content and watch the magic happen. Free, no signup. 👇</p>
           </div>
           
           {/* Mode Toggle - vibrant pills */}
@@ -1404,8 +1383,8 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
           </div>
       </section>
 
-      {/* Trusted by Universities */}
-      <section className="py-16 sm:py-20 bg-stone-50 dark:bg-stone-900/50 border-y border-stone-200 dark:border-stone-700">
+      {/* Trusted by Universities (hidden for now, may use later) */}
+      <section className="hidden py-16 sm:py-20 bg-stone-50 dark:bg-stone-900/50 border-y border-stone-200 dark:border-stone-700">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-wrap items-center justify-center gap-6 mb-12">
             <img src={customersImg} alt="WriteScholar customers" className="h-14 sm:h-20 object-contain" />
@@ -1433,8 +1412,138 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
         </div>
       </section>
 
-      {/* Feature Grid */}
-      <section className="py-20 bg-white dark:bg-stone-900">
+      {/* Try Our Free Writing Tools - moved here, styled like Complete Study Toolkit */}
+      <section className="py-12 sm:py-20 bg-white dark:bg-stone-900">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="relative text-center mb-8 sm:mb-14">
+            <span className="inline-block px-4 py-1.5 bg-lime-100 dark:bg-lime-900/50 text-lime-700 dark:text-lime-400 rounded-full text-sm font-semibold mb-4">100% Free</span>
+            <h2 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-stone-800 dark:text-stone-100 mb-4">
+              Try Our Free Writing Tools
+            </h2>
+            <p className="text-lg text-stone-600 dark:text-stone-400 max-w-2xl mx-auto">
+              No signup required. Use these tools instantly to improve your writing.
+            </p>
+            <div className="hidden lg:block absolute -right-4 xl:right-8 top-1/2 -translate-y-1/2 w-28 h-36">
+              <svg viewBox="0 0 140 180" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+                <path d="M50 100 Q45 130 50 160 L90 160 Q95 130 90 100" fill="#8B5CF6" />
+                <rect x="62" y="75" width="16" height="28" fill="#D4A574" />
+                <ellipse cx="70" cy="48" rx="32" ry="35" fill="#D4A574" />
+                <path d="M38 40 Q35 18 52 12 Q70 4 90 12 Q107 18 104 40 Q100 28 85 20 Q70 12 55 20 Q42 28 38 40" fill="#5D3A1A" />
+                <path d="M38 40 Q32 55 38 70" fill="#5D3A1A" />
+                <path d="M102 40 Q108 55 102 70" fill="#5D3A1A" />
+                <ellipse cx="56" cy="46" rx="5" ry="6" fill="#1F2937" />
+                <ellipse cx="84" cy="46" rx="5" ry="6" fill="#1F2937" />
+                <circle cx="57" cy="44" r="2" fill="white" />
+                <circle cx="85" cy="44" r="2" fill="white" />
+                <path d="M55 62 Q70 76 85 62" stroke="#1F2937" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+                <path d="M45 105 Q25 120 20 140" stroke="#D4A574" strokeWidth="12" fill="none" strokeLinecap="round" />
+                <path d="M95 105 Q115 120 120 140" stroke="#D4A574" strokeWidth="12" fill="none" strokeLinecap="round" />
+                <ellipse cx="18" cy="143" rx="8" ry="9" fill="#D4A574" />
+                <ellipse cx="122" cy="143" rx="8" ry="9" fill="#D4A574" />
+                <rect x="30" y="118" width="5" height="20" rx="1" fill="#FCD34D" />
+                <rect x="50" y="115" width="6" height="23" rx="1" fill="#60A5FA" />
+                <rect x="85" y="120" width="5" height="18" rx="1" fill="#F472B6" />
+                <rect x="105" y="117" width="5" height="21" rx="1" fill="#34D399" />
+                <path d="M58 95 L70 108 L82 95" stroke="#7C3AED" strokeWidth="2" fill="none" />
+              </svg>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
+            <button onClick={() => onNavigate('word-counter')} className="group relative bg-gradient-to-br from-lime-50 to-emerald-50 dark:from-lime-900/20 dark:to-emerald-900/20 rounded-3xl p-5 sm:p-6 text-left hover:shadow-2xl hover:shadow-lime-500/20 hover:-translate-y-2 transition-all duration-300 overflow-hidden border border-lime-100 dark:border-lime-800/50">
+              <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-lime-400/20 to-emerald-400/20 rounded-full -translate-y-1/2 translate-x-1/2" />
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-lime-500 to-emerald-600 flex items-center justify-center mb-4 shadow-lg shadow-lime-500/30 relative z-10">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" /></svg>
+              </div>
+              <h3 className="font-bold text-stone-800 dark:text-stone-100 text-base mb-1 relative z-10">Word Counter</h3>
+              <p className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed relative z-10">Count words, characters & reading time</p>
+            </button>
+
+            <button onClick={() => onNavigate('citation-generator-tool')} className="group relative bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20 rounded-3xl p-5 sm:p-6 text-left hover:shadow-2xl hover:shadow-violet-500/20 hover:-translate-y-2 transition-all duration-300 overflow-hidden border border-violet-100 dark:border-violet-800/50">
+              <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-violet-400/20 to-purple-400/20 rounded-full -translate-y-1/2 translate-x-1/2" />
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center mb-4 shadow-lg shadow-violet-500/30 relative z-10">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+              </div>
+              <h3 className="font-bold text-stone-800 dark:text-stone-100 text-base mb-1 relative z-10">Citation Generator</h3>
+              <p className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed relative z-10">APA, MLA, Chicago & more</p>
+            </button>
+
+            <button onClick={() => onNavigate('grammar-checker')} className="group relative bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 rounded-3xl p-5 sm:p-6 text-left hover:shadow-2xl hover:shadow-emerald-500/20 hover:-translate-y-2 transition-all duration-300 overflow-hidden border border-emerald-100 dark:border-emerald-800/50">
+              <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-emerald-400/20 to-teal-400/20 rounded-full -translate-y-1/2 translate-x-1/2" />
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center mb-4 shadow-lg shadow-emerald-500/30 relative z-10">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+              </div>
+              <h3 className="font-bold text-stone-800 dark:text-stone-100 text-base mb-1 relative z-10">Grammar Checker</h3>
+              <p className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed relative z-10">Fix spelling & punctuation</p>
+            </button>
+
+            <button onClick={() => onNavigate('readability-score')} className="group relative bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-3xl p-5 sm:p-6 text-left hover:shadow-2xl hover:shadow-amber-500/20 hover:-translate-y-2 transition-all duration-300 overflow-hidden border border-amber-100 dark:border-amber-800/50">
+              <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-amber-400/20 to-orange-400/20 rounded-full -translate-y-1/2 translate-x-1/2" />
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center mb-4 shadow-lg shadow-amber-500/30 relative z-10">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+              </div>
+              <h3 className="font-bold text-stone-800 dark:text-stone-100 text-base mb-1 relative z-10">Readability Score</h3>
+              <p className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed relative z-10">Flesch-Kincaid & grade level</p>
+            </button>
+
+            <button onClick={() => onNavigate('thesis-generator')} className="group relative bg-gradient-to-br from-cyan-50 to-teal-50 dark:from-cyan-900/20 dark:to-teal-900/20 rounded-3xl p-5 sm:p-6 text-left hover:shadow-2xl hover:shadow-cyan-500/20 hover:-translate-y-2 transition-all duration-300 overflow-hidden border border-cyan-100 dark:border-cyan-800/50">
+              <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-cyan-400/20 to-teal-400/20 rounded-full -translate-y-1/2 translate-x-1/2" />
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-cyan-500 to-teal-600 flex items-center justify-center mb-4 shadow-lg shadow-cyan-500/30 relative z-10">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+              </div>
+              <h3 className="font-bold text-stone-800 dark:text-stone-100 text-base mb-1 relative z-10">Thesis Generator</h3>
+              <p className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed relative z-10">Create strong thesis statements</p>
+            </button>
+
+            <button onClick={() => onNavigate('essay-outline')} className="group relative bg-gradient-to-br from-indigo-50 to-violet-50 dark:from-indigo-900/20 dark:to-violet-900/20 rounded-3xl p-5 sm:p-6 text-left hover:shadow-2xl hover:shadow-indigo-500/20 hover:-translate-y-2 transition-all duration-300 overflow-hidden border border-indigo-100 dark:border-indigo-800/50">
+              <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-indigo-400/20 to-violet-400/20 rounded-full -translate-y-1/2 translate-x-1/2" />
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center mb-4 shadow-lg shadow-indigo-500/30 relative z-10">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" /></svg>
+              </div>
+              <h3 className="font-bold text-stone-800 dark:text-stone-100 text-base mb-1 relative z-10">Essay Outline</h3>
+              <p className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed relative z-10">Structure your essay properly</p>
+            </button>
+
+            <button onClick={() => onNavigate('text-case-converter')} className="group relative bg-gradient-to-br from-pink-50 to-rose-50 dark:from-pink-900/20 dark:to-rose-900/20 rounded-3xl p-5 sm:p-6 text-left hover:shadow-2xl hover:shadow-pink-500/20 hover:-translate-y-2 transition-all duration-300 overflow-hidden border border-pink-100 dark:border-pink-800/50">
+              <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-pink-400/20 to-rose-400/20 rounded-full -translate-y-1/2 translate-x-1/2" />
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-pink-500 to-rose-600 flex items-center justify-center mb-4 shadow-lg shadow-pink-500/30 relative z-10">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" /></svg>
+              </div>
+              <h3 className="font-bold text-stone-800 dark:text-stone-100 text-base mb-1 relative z-10">Case Converter</h3>
+              <p className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed relative z-10">Uppercase, lowercase & more</p>
+            </button>
+
+            <button onClick={() => onNavigate('paraphrasing-tips')} className="group relative bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-900/20 dark:to-yellow-900/20 rounded-3xl p-5 sm:p-6 text-left hover:shadow-2xl hover:shadow-amber-500/20 hover:-translate-y-2 transition-all duration-300 overflow-hidden border border-amber-100 dark:border-amber-800/50">
+              <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-amber-400/20 to-yellow-400/20 rounded-full -translate-y-1/2 translate-x-1/2" />
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-500 to-yellow-600 flex items-center justify-center mb-4 shadow-lg shadow-amber-500/30 relative z-10">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+              </div>
+              <h3 className="font-bold text-stone-800 dark:text-stone-100 text-base mb-1 relative z-10">Paraphrasing Tips</h3>
+              <p className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed relative z-10">Improve vocabulary & style</p>
+            </button>
+          </div>
+
+          <div className="mt-8">
+            <button onClick={() => onNavigate('humanizer')} className="group w-full relative bg-gradient-to-br from-lime-50 to-emerald-50 dark:from-lime-900/20 dark:to-emerald-900/20 rounded-3xl p-6 sm:p-8 text-left hover:shadow-2xl hover:shadow-lime-500/20 hover:-translate-y-1 transition-all duration-300 overflow-hidden border-2 border-lime-200 dark:border-lime-700/50">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-lime-400/20 to-emerald-400/20 rounded-full -translate-y-1/2 translate-x-1/2" />
+              <div className="absolute top-4 right-4 px-3 py-1 bg-lime-500 text-stone-900 text-xs font-bold rounded-full">PREMIUM</div>
+              <div className="flex items-center gap-6 relative z-10">
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-lime-500 to-emerald-600 flex items-center justify-center flex-shrink-0 shadow-lg shadow-lime-500/30 group-hover:scale-110 transition-transform">
+                  <span className="text-2xl">✨</span>
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg font-bold text-stone-800 dark:text-stone-100 mb-1">AI Text Humanizer</h3>
+                  <p className="text-sm text-stone-600 dark:text-stone-400">Humanize ChatGPT, GPT-4, Gemini, Claude & LLaMA text. Bypass AI detectors with natural, human-sounding writing.</p>
+                </div>
+                <svg className="w-6 h-6 text-lime-600 flex-shrink-0 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+              </div>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* Feature Grid - Your complete study toolkit (hidden for now, may use later) */}
+      <section className="hidden py-20 bg-white dark:bg-stone-900">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="relative text-center mb-14">
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-stone-800 dark:text-stone-100 mb-4">
@@ -1570,39 +1679,65 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
         </div>
       </section>
 
-      {/* WriteScholar Can Help You With */}
-      <section className="py-20 sm:py-24 bg-gradient-to-b from-slate-50 to-white">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-800 text-center mb-10">
-            WriteScholar can help you with
-          </h2>
-          
-          {/* Category Tabs - Modern pills */}
-          <div className="flex flex-wrap justify-center gap-2 sm:gap-3 mb-12">
-            {helpCategories.map((category) => (
-              <button
-                key={category.id}
-                onClick={() => setActiveHelpCategory(category.id)}
-                className={`px-4 sm:px-6 py-2.5 rounded-2xl text-sm sm:text-base font-bold transition-all duration-200 hover:scale-105 active:scale-95 ${
-                  activeHelpCategory === category.id
-                    ? 'bg-gradient-to-r from-lime-500 to-emerald-600 text-stone-900 shadow-lg shadow-lime-500/30'
-                    : 'bg-white dark:bg-stone-800 text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-700 border-2 border-stone-200 dark:border-stone-600'
-                }`}
-              >
-                {category.label}
-              </button>
-            ))}
+      {/* What WriteScholar Can Help You With */}
+      <section className="relative py-12 sm:py-24 bg-white dark:bg-stone-900 overflow-hidden">
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="absolute top-0 left-[3%] hidden xl:block text-4xl opacity-20 animate-float">📖</div>
+          <div className="absolute top-8 right-[3%] hidden xl:block text-4xl opacity-20 animate-float-delayed">✍️</div>
+          <div className="relative text-center mb-12">
+            <span className="inline-block px-4 py-1.5 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-400 rounded-full text-sm font-semibold mb-4">Your Academic Toolkit</span>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-stone-800 dark:text-stone-100">
+              What WriteScholar Can Help You With
+            </h2>
+            <p className="mt-4 text-lg text-stone-600 dark:text-stone-400 max-w-2xl mx-auto">
+              Essays, exams, citations, and more — all in one place.
+            </p>
+          </div>
+
+          {/* Category Tabs - Colorful gradient pills matching toolkit style */}
+          <div className="flex overflow-x-auto scrollbar-hide gap-2 sm:gap-3 mb-8 sm:mb-12 -mx-4 px-4 sm:mx-0 sm:px-0 sm:flex-wrap sm:justify-center pb-2 sm:pb-0 snap-x snap-mandatory sm:snap-none">
+            {helpCategories.map((category) => {
+              const gradients: Record<string, string> = {
+                essays: 'from-lime-500 to-emerald-600',
+                exams: 'from-amber-500 to-orange-600',
+                summarizing: 'from-cyan-500 to-teal-600',
+                citations: 'from-violet-500 to-purple-600',
+                grammar: 'from-emerald-500 to-teal-600',
+              };
+              const shadowColors: Record<string, string> = {
+                essays: 'shadow-lime-500/30',
+                exams: 'shadow-amber-500/30',
+                summarizing: 'shadow-cyan-500/30',
+                citations: 'shadow-violet-500/30',
+                grammar: 'shadow-emerald-500/30',
+              };
+              const isActive = activeHelpCategory === category.id;
+              return (
+                <button
+                  key={category.id}
+                  onClick={() => setActiveHelpCategory(category.id)}
+                  className={`px-4 sm:px-6 py-2.5 rounded-2xl text-sm sm:text-base font-bold transition-all duration-200 hover:scale-105 active:scale-95 flex-shrink-0 snap-start whitespace-nowrap ${
+                    isActive
+                      ? `bg-gradient-to-r ${gradients[category.id] || 'from-indigo-500 to-violet-600'} text-white shadow-lg ${shadowColors[category.id] || 'shadow-indigo-500/30'}`
+                      : 'bg-white dark:bg-stone-800 text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-700 border-2 border-stone-200 dark:border-stone-600'
+                  }`}
+                >
+                  {category.label}
+                </button>
+              );
+            })}
           </div>
                   
-          {/* Content Area */}
-          <div className="bg-white rounded-3xl p-8 sm:p-12 lg:p-16 border border-slate-200 shadow-xl">
-            <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+          {/* Content Area - Gradient card style */}
+          <div className="relative bg-gradient-to-br from-stone-50 to-white dark:from-stone-800/50 dark:to-stone-900 rounded-2xl sm:rounded-3xl p-5 sm:p-12 lg:p-16 border border-stone-200 dark:border-stone-700 shadow-xl overflow-hidden">
+            <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-br from-indigo-400/10 to-violet-400/10 rounded-full -translate-y-1/2 translate-x-1/2" aria-hidden />
+            <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center relative z-10">
               {/* Text Content */}
               <div className="order-2 lg:order-1">
-                <h3 className="text-2xl sm:text-3xl font-bold text-slate-800 mb-4">
+                <h3 className="text-2xl sm:text-3xl font-bold text-stone-800 dark:text-stone-100 mb-4">
                   {helpCategories.find(c => c.id === activeHelpCategory)?.title}
                 </h3>
-                <p className="text-slate-600 text-lg leading-relaxed mb-8">
+                <p className="text-stone-600 dark:text-stone-400 text-lg leading-relaxed mb-8">
                   {helpCategories.find(c => c.id === activeHelpCategory)?.description}
                 </p>
                 <button
@@ -1615,7 +1750,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                   
               {/* Woman Character Illustration - Different poses for each category */}
               <div className="order-1 lg:order-2 flex justify-center">
-                <div className="relative w-64 h-72 sm:w-80 sm:h-96">
+                <div className="relative w-48 h-56 sm:w-80 sm:h-96">
                   {/* Essays - Writing at desk */}
                   {activeHelpCategory === 'essays' && (
                     <svg viewBox="0 0 320 380" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
@@ -1903,62 +2038,66 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
       </section>
 
       {/* See WriteScholar in Action - Study Tools Showcase */}
-      <section className="py-20 sm:py-28 bg-gradient-to-b from-amber-50/50 via-white to-stone-50 dark:from-stone-900 dark:via-stone-900 dark:to-stone-900 overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Header */}
-          <div className="relative text-center mb-16 sm:mb-20">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-100 dark:bg-amber-900/30 rounded-full mb-6">
-              <span className="text-amber-600 dark:text-amber-400 text-sm font-semibold">Study Smarter</span>
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-              <span className="text-amber-600 dark:text-amber-400 text-sm font-semibold">Not Harder</span>
-            </div>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-stone-800 dark:text-stone-100 mb-5">
+      <section className="relative py-12 sm:py-28 bg-white dark:bg-stone-900 overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-10%,rgba(99,102,241,0.08),transparent)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-10%,rgba(139,92,246,0.06),transparent)]" />
+        {/* Floating doodles */}
+        <div className="absolute top-24 left-[5%] hidden xl:block text-5xl opacity-40 animate-float">📚</div>
+        <div className="absolute top-40 right-[8%] hidden xl:block text-4xl opacity-35 animate-float-delayed">✏️</div>
+        <div className="absolute bottom-40 left-[7%] hidden xl:block text-4xl opacity-35 animate-float" style={{ animationDelay: '0.7s' }}>🎯</div>
+        <div className="absolute bottom-32 right-[5%] hidden xl:block text-5xl opacity-40 animate-float-delayed" style={{ animationDelay: '0.4s' }}>🚀</div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          {/* Header - matches Free Writing Tools / landing theme */}
+          <div className="relative text-center mb-10 sm:mb-20">
+            <span className="inline-block px-4 py-1.5 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-400 rounded-full text-sm font-semibold mb-4 animate-notes-fade-in-up opacity-0" style={{ animationDelay: '0.1s', animationFillMode: 'forwards' }}>
+              Study Smarter, Not Harder
+            </span>
+            <h2 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-stone-800 dark:text-stone-100 mb-4 sm:mb-5 animate-notes-fade-in-up opacity-0" style={{ animationDelay: '0.2s', animationFillMode: 'forwards' }}>
               Turn Your Notes Into<br className="hidden sm:block" />
-              <span className="bg-gradient-to-r from-amber-500 to-orange-500 bg-clip-text text-transparent">Interactive Study Tools</span>
+              <span className="bg-gradient-to-r from-indigo-500 to-violet-600 bg-clip-text text-transparent inline-block">Interactive Study Tools</span>
             </h2>
-            <p className="text-lg sm:text-xl text-stone-600 dark:text-stone-400 text-center max-w-2xl mx-auto">
-              Paste any notes, textbook content, or lecture material and instantly generate quizzes, flashcards, and crosswords
+            <p className="text-base sm:text-xl text-stone-600 dark:text-stone-400 text-center max-w-2xl mx-auto px-2 animate-notes-fade-in-up opacity-0" style={{ animationDelay: '0.3s', animationFillMode: 'forwards' }}>
+              Paste your notes. Get quizzes, flashcards & crosswords in seconds. It's that easy.
             </p>
           </div>
 
-          {/* Notes - Full width hero: content left, image right */}
-          <div className="mb-12 sm:mb-16">
+          {/* Notes - Full width hero: content left, image right - indigo/violet theme */}
+          <div className="mb-12 sm:mb-16 animate-notes-fade-in-up opacity-0" style={{ animationDelay: '0.4s', animationFillMode: 'forwards' }}>
             <div className="relative group">
-              <div className="absolute -inset-1 bg-gradient-to-r from-amber-400 to-orange-400 rounded-3xl blur-xl opacity-20 group-hover:opacity-30 transition-opacity duration-500"></div>
-              <div className="relative bg-white dark:bg-stone-800 rounded-3xl overflow-hidden shadow-2xl border border-stone-200/50 dark:border-stone-700">
+              <div className="absolute -inset-1 bg-gradient-to-r from-indigo-400 to-violet-400 rounded-3xl blur-xl opacity-15 group-hover:opacity-25 transition-opacity duration-500"></div>
+              <div className="relative bg-white dark:bg-stone-800 rounded-3xl overflow-hidden shadow-xl border border-stone-200/50 dark:border-stone-700 group-hover:shadow-indigo-500/10 dark:group-hover:shadow-indigo-900/20 transition-shadow duration-500">
                 <div className="grid lg:grid-cols-[1fr_1.15fr] gap-0">
                   {/* Content side - LEFT */}
-                  <div className="order-2 lg:order-1 p-8 sm:p-12 lg:p-16 flex flex-col justify-center">
-                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/50 dark:to-orange-900/50 flex items-center justify-center mb-6">
+                  <div className="order-2 lg:order-1 p-5 sm:p-12 lg:p-16 flex flex-col justify-center">
+                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center mb-6 shadow-lg shadow-indigo-500/30 group-hover:scale-110 transition-transform duration-300">
                       <span className="text-2xl">📝</span>
                     </div>
-                    <h3 className="text-2xl sm:text-3xl font-bold text-stone-800 dark:text-stone-100 mb-4">Paste Your Notes</h3>
-                    <p className="text-stone-600 dark:text-stone-400 text-lg leading-relaxed mb-6">
+                    <h3 className="text-xl sm:text-3xl font-bold text-stone-800 dark:text-stone-100 mb-3 sm:mb-4">Paste Your Notes</h3>
+                    <p className="text-stone-600 dark:text-stone-400 text-sm sm:text-lg leading-relaxed mb-4 sm:mb-6">
                       Drop in any lecture notes, textbook chapters, articles, or study material. Our AI reads and understands your content in seconds.
                     </p>
                     <ul className="space-y-3">
                       <li className="flex items-center gap-3 text-stone-600 dark:text-stone-400">
-                        <span className="w-6 h-6 rounded-full bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center flex-shrink-0">
-                          <svg className="w-3.5 h-3.5 text-amber-600" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>
+                        <span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center flex-shrink-0">
+                          <svg className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>
                         </span>
                         Works with any subject or topic
                       </li>
                       <li className="flex items-center gap-3 text-stone-600 dark:text-stone-400">
-                        <span className="w-6 h-6 rounded-full bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center flex-shrink-0">
-                          <svg className="w-3.5 h-3.5 text-amber-600" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>
+                        <span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center flex-shrink-0">
+                          <svg className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>
                         </span>
                         Supports long-form content
                       </li>
                       <li className="flex items-center gap-3 text-stone-600 dark:text-stone-400">
-                        <span className="w-6 h-6 rounded-full bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center flex-shrink-0">
-                          <svg className="w-3.5 h-3.5 text-amber-600" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>
+                        <span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center flex-shrink-0">
+                          <svg className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>
                         </span>
                         Instant AI processing
                       </li>
                     </ul>
                   </div>
                   {/* Image side - RIGHT */}
-                  <div className="order-1 lg:order-2 relative overflow-hidden bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 min-h-[280px] sm:min-h-[360px] lg:min-h-[400px] flex items-center justify-center p-4">
+                  <div className="order-1 lg:order-2 relative overflow-hidden bg-gradient-to-br from-indigo-50 to-violet-50 dark:from-indigo-900/20 dark:to-violet-900/20 min-h-[200px] sm:min-h-[360px] lg:min-h-[400px] flex items-center justify-center p-3 sm:p-4">
                     <img 
                       src="/notes pic.png" 
                       alt="Paste your notes or study material into WriteScholar"
@@ -1971,22 +2110,24 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
           </div>
 
           {/* Bridge: Make it come alive */}
-          <div className="text-center mb-10 sm:mb-12">
+          <div className="relative text-center mb-10 sm:mb-12 animate-notes-fade-in-up opacity-0" style={{ animationDelay: '0.5s', animationFillMode: 'forwards' }}>
+            <div className="absolute -left-8 top-1/2 -translate-y-1/2 hidden lg:block text-4xl opacity-50 animate-float">✨</div>
+            <div className="absolute -right-8 top-1/2 -translate-y-1/2 hidden lg:block text-4xl opacity-50 animate-float-delayed">⚡</div>
             <h3 className="text-xl sm:text-2xl font-bold text-stone-800 dark:text-stone-100 mb-2">
               Make it come alive
             </h3>
             <p className="text-stone-600 dark:text-stone-400 text-base sm:text-lg max-w-xl mx-auto">
-              Your notes transform into interactive study tools in seconds
+              Your notes → quizzes, flashcards, crosswords. Literally in seconds. No stress.
             </p>
           </div>
 
-          {/* Three tool cards */}
+          {/* Three tool cards - staggered entrance */}
           <div className="grid md:grid-cols-3 gap-6 lg:gap-8">
             {/* Quiz Card */}
-            <div className="group relative">
-              <div className="absolute -inset-1 bg-gradient-to-r from-violet-400 to-purple-400 rounded-3xl blur-lg opacity-0 group-hover:opacity-20 transition-opacity duration-500"></div>
-              <div className="relative bg-white dark:bg-stone-800 rounded-3xl overflow-hidden shadow-xl border border-stone-200/50 dark:border-stone-700 h-full hover:-translate-y-2 transition-all duration-300">
-                <div className="relative h-48 sm:h-56 overflow-hidden bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20">
+            <div className="group relative animate-notes-fade-in-up opacity-0" style={{ animationDelay: '0.6s', animationFillMode: 'forwards' }}>
+              <div className="absolute -inset-1 bg-gradient-to-r from-violet-400 to-purple-400 rounded-3xl blur-lg opacity-0 group-hover:opacity-25 transition-opacity duration-500"></div>
+              <div className="relative bg-white dark:bg-stone-800 rounded-3xl overflow-hidden shadow-xl border border-stone-200/50 dark:border-stone-700 h-full hover:-translate-y-3 hover:shadow-2xl transition-all duration-500">
+                <div className="relative h-40 sm:h-56 overflow-hidden bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20">
                   <img 
                     src="/quiz pic.png" 
                     alt="AI-generated quiz with multiple choice and true/false questions"
@@ -2006,10 +2147,10 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
             </div>
 
             {/* Flashcard Card */}
-            <div className="group relative">
-              <div className="absolute -inset-1 bg-gradient-to-r from-emerald-400 to-teal-400 rounded-3xl blur-lg opacity-0 group-hover:opacity-20 transition-opacity duration-500"></div>
-              <div className="relative bg-white dark:bg-stone-800 rounded-3xl overflow-hidden shadow-xl border border-stone-200/50 dark:border-stone-700 h-full hover:-translate-y-2 transition-all duration-300">
-                <div className="relative h-48 sm:h-56 overflow-hidden bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20">
+            <div className="group relative animate-notes-fade-in-up opacity-0" style={{ animationDelay: '0.7s', animationFillMode: 'forwards' }}>
+              <div className="absolute -inset-1 bg-gradient-to-r from-emerald-400 to-teal-400 rounded-3xl blur-lg opacity-0 group-hover:opacity-25 transition-opacity duration-500"></div>
+              <div className="relative bg-white dark:bg-stone-800 rounded-3xl overflow-hidden shadow-xl border border-stone-200/50 dark:border-stone-700 h-full hover:-translate-y-3 hover:shadow-2xl transition-all duration-500">
+                <div className="relative h-40 sm:h-56 overflow-hidden bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20">
                   <img 
                     src="/flashcard pic.png" 
                     alt="Interactive flashcards for memorization and quick review"
@@ -2029,10 +2170,10 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
             </div>
 
             {/* Crossword Card */}
-            <div className="group relative">
-              <div className="absolute -inset-1 bg-gradient-to-r from-rose-400 to-pink-400 rounded-3xl blur-lg opacity-0 group-hover:opacity-20 transition-opacity duration-500"></div>
-              <div className="relative bg-white dark:bg-stone-800 rounded-3xl overflow-hidden shadow-xl border border-stone-200/50 dark:border-stone-700 h-full hover:-translate-y-2 transition-all duration-300">
-                <div className="relative h-48 sm:h-56 overflow-hidden bg-gradient-to-br from-rose-50 to-pink-50 dark:from-rose-900/20 dark:to-pink-900/20">
+            <div className="group relative animate-notes-fade-in-up opacity-0" style={{ animationDelay: '0.8s', animationFillMode: 'forwards' }}>
+              <div className="absolute -inset-1 bg-gradient-to-r from-rose-400 to-pink-400 rounded-3xl blur-lg opacity-0 group-hover:opacity-25 transition-opacity duration-500"></div>
+              <div className="relative bg-white dark:bg-stone-800 rounded-3xl overflow-hidden shadow-xl border border-stone-200/50 dark:border-stone-700 h-full hover:-translate-y-3 hover:shadow-2xl transition-all duration-500">
+                <div className="relative h-40 sm:h-56 overflow-hidden bg-gradient-to-br from-rose-50 to-pink-50 dark:from-rose-900/20 dark:to-pink-900/20">
                   <img 
                     src="/crosssword pic.png" 
                     alt="Interactive crossword puzzle generated from study material"
@@ -2053,10 +2194,10 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
           </div>
 
           {/* CTA */}
-          <div className="text-center mt-14 sm:mt-16">
+          <div className="text-center mt-14 sm:mt-16 animate-notes-fade-in-up opacity-0" style={{ animationDelay: '0.9s', animationFillMode: 'forwards' }}>
             <button
               onClick={() => onNavigate('signup')}
-              className="group inline-flex items-center px-8 py-4 text-white font-bold rounded-2xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 hover:scale-105 active:scale-95 shadow-xl shadow-amber-500/25 transition-all duration-200 text-lg"
+              className="group inline-flex items-center px-8 py-4 text-white font-bold rounded-2xl bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 hover:scale-105 active:scale-95 shadow-xl shadow-indigo-500/30 hover:shadow-indigo-500/40 transition-all duration-300 text-lg"
             >
               Try Study Tools Free
               <svg className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2068,387 +2209,12 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
         </div>
       </section>
 
-      {/* Features Grid - bigger */}
-      <section className="py-20 sm:py-24 bg-gradient-to-b from-stone-50 to-white dark:from-stone-900 dark:to-stone-900">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="relative text-center mb-14">
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-stone-800 dark:text-stone-100 text-center mb-5">
-              Everything You Need for Better Writing
-            </h2>
-            <p className="text-lg text-stone-600 dark:text-stone-400 text-center max-w-2xl mx-auto">
-              WriteScholar combines multiple tools to help you write better academic papers
-            </p>
-            {/* Character - waving hello */}
-            <div className="hidden lg:block absolute -left-16 xl:-left-8 top-1/2 -translate-y-1/2 w-28 h-36">
-              <svg viewBox="0 0 140 180" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
-                <path d="M50 100 Q45 130 50 160 L90 160 Q95 130 90 100" fill="#10B981" />
-                <rect x="62" y="75" width="16" height="28" fill="#D4A574" />
-                <ellipse cx="70" cy="48" rx="32" ry="35" fill="#D4A574" />
-                <path d="M38 40 Q35 18 52 12 Q70 4 90 12 Q107 18 104 40 Q100 28 85 20 Q70 12 55 20 Q42 28 38 40" fill="#2C1810" />
-                <ellipse cx="40" cy="45" rx="5" ry="8" fill="#2C1810" />
-                <ellipse cx="100" cy="45" rx="5" ry="8" fill="#2C1810" />
-                <ellipse cx="48" cy="28" rx="5" ry="6" fill="#2C1810" />
-                <ellipse cx="92" cy="28" rx="5" ry="6" fill="#2C1810" />
-                <ellipse cx="70" cy="15" rx="10" ry="6" fill="#2C1810" />
-                <path d="M55 48 Q60 44 65 48" stroke="#1F2937" strokeWidth="3" fill="none" strokeLinecap="round" />
-                <path d="M75 48 Q80 44 85 48" stroke="#1F2937" strokeWidth="3" fill="none" strokeLinecap="round" />
-                <path d="M52 38 Q60 33 68 38" stroke="#2C1810" strokeWidth="2.5" fill="none" strokeLinecap="round" />
-                <path d="M72 38 Q80 33 88 38" stroke="#2C1810" strokeWidth="2.5" fill="none" strokeLinecap="round" />
-                <path d="M55 62 Q70 76 85 62" stroke="#1F2937" strokeWidth="2.5" fill="none" strokeLinecap="round" />
-                <path d="M60 64 L80 64" stroke="white" strokeWidth="4" strokeLinecap="round" />
-                <ellipse cx="42" cy="58" rx="7" ry="4" fill="#FECACA" opacity="0.5" />
-                <ellipse cx="98" cy="58" rx="7" ry="4" fill="#FECACA" opacity="0.5" />
-                <path d="M95 105 Q115 85 120 60" stroke="#D4A574" strokeWidth="14" fill="none" strokeLinecap="round" />
-                <ellipse cx="122" cy="55" rx="10" ry="12" fill="#D4A574" />
-                <ellipse cx="115" cy="42" rx="4" ry="8" fill="#D4A574" />
-                <ellipse cx="122" cy="38" rx="4" ry="9" fill="#D4A574" />
-                <ellipse cx="129" cy="40" rx="4" ry="8" fill="#D4A574" />
-                <ellipse cx="135" cy="46" rx="3" ry="6" fill="#D4A574" />
-                <path d="M45 105 Q30 115 25 135" stroke="#D4A574" strokeWidth="12" fill="none" strokeLinecap="round" />
-                <ellipse cx="23" cy="138" rx="8" ry="9" fill="#D4A574" />
-                <path d="M58 95 L70 108 L82 95" stroke="#059669" strokeWidth="2" fill="none" />
-              </svg>
-            </div>
-          </div>
-           
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-            {/* Structure Analysis */}
-            <div className="bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-600 rounded-2xl p-6 hover:shadow-lg hover:border-stone-300 dark:hover:border-stone-500 hover:-translate-y-1 transition-all duration-200">
-              <div className="w-14 h-14 rounded-full bg-lime-50 flex items-center justify-center mb-4 overflow-hidden">
-                <svg viewBox="0 0 56 56" fill="none" className="w-14 h-14">
-                  <circle cx="28" cy="28" r="28" fill="#DBEAFE"/>
-                  <ellipse cx="28" cy="30" rx="14" ry="15" fill="#E8C4A0"/>
-                  <path d="M14 26 Q12 16 20 12 Q28 8 36 12 Q44 16 42 26 Q40 20 34 16 Q28 12 22 16 Q16 20 14 26" fill="#1F2937"/>
-                  <path d="M14 26 Q10 30 14 36" fill="#1F2937"/>
-                  <path d="M42 26 Q46 30 42 36" fill="#1F2937"/>
-                  <ellipse cx="22" cy="30" rx="3" ry="3.5" fill="#1F2937"/>
-                  <ellipse cx="34" cy="30" rx="3" ry="3.5" fill="#1F2937"/>
-                  <circle cx="23" cy="29" r="1" fill="white"/>
-                  <circle cx="35" cy="29" r="1" fill="white"/>
-                  <path d="M24 40 Q28 45 32 40" stroke="#1F2937" strokeWidth="2" fill="none" strokeLinecap="round"/>
-                  <ellipse cx="18" cy="35" rx="3" ry="2" fill="#FECACA" opacity="0.4"/>
-                  <ellipse cx="38" cy="35" rx="3" ry="2" fill="#FECACA" opacity="0.4"/>
-                    </svg>
-                  </div>
-              <h3 className="font-semibold text-stone-800 dark:text-stone-100 text-lg mb-2">Structure Analysis</h3>
-              <p className="text-base text-stone-600 dark:text-stone-400 leading-relaxed">Get feedback on your essay organization, thesis clarity, and paragraph flow.</p>
-            </div>
-
-            {/* Grammar Check */}
-            <div className="bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-600 rounded-2xl p-6 hover:shadow-lg hover:border-stone-300 dark:hover:border-stone-500 hover:-translate-y-1 transition-all duration-200">
-              <div className="w-14 h-14 rounded-full bg-green-50 flex items-center justify-center mb-4 overflow-hidden">
-                <svg viewBox="0 0 56 56" fill="none" className="w-14 h-14">
-                  <circle cx="28" cy="28" r="28" fill="#D1FAE5"/>
-                  <ellipse cx="28" cy="30" rx="14" ry="15" fill="#8B5A2B"/>
-                  {/* Hair - curly afro style, closer to head */}
-                  <path d="M14 28 Q12 18 20 14 Q28 10 36 14 Q44 18 42 28 Q40 22 34 18 Q28 14 22 18 Q16 22 14 28" fill="#1F2937"/>
-                  <ellipse cx="16" cy="30" rx="5" ry="7" fill="#1F2937"/>
-                  <ellipse cx="40" cy="30" rx="5" ry="7" fill="#1F2937"/>
-                  <ellipse cx="20" cy="18" rx="4" ry="5" fill="#1F2937"/>
-                  <ellipse cx="28" cy="14" rx="5" ry="4" fill="#1F2937"/>
-                  <ellipse cx="36" cy="18" rx="4" ry="5" fill="#1F2937"/>
-                  <ellipse cx="22" cy="30" rx="3" ry="3.5" fill="#1F2937"/>
-                  <ellipse cx="34" cy="30" rx="3" ry="3.5" fill="#1F2937"/>
-                  <circle cx="23" cy="29" r="1" fill="white"/>
-                  <circle cx="35" cy="29" r="1" fill="white"/>
-                  <path d="M24 40 Q28 46 32 40" stroke="#1F2937" strokeWidth="2" fill="none" strokeLinecap="round"/>
-                  <ellipse cx="18" cy="35" rx="3" ry="2" fill="#C9958A" opacity="0.4"/>
-                  <ellipse cx="38" cy="35" rx="3" ry="2" fill="#C9958A" opacity="0.4"/>
-                </svg>
-                        </div>
-              <h3 className="font-semibold text-stone-800 dark:text-stone-100 text-lg mb-2">Grammar Check</h3>
-              <p className="text-base text-stone-600 dark:text-stone-400 leading-relaxed">Catch grammar, spelling, and punctuation errors with AI-powered suggestions.</p>
-            </div>
-
-            {/* Citation Checker */}
-            <div className="bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-600 rounded-2xl p-6 hover:shadow-lg hover:border-stone-300 dark:hover:border-stone-500 hover:-translate-y-1 transition-all duration-200">
-              <div className="w-14 h-14 rounded-full bg-purple-50 flex items-center justify-center mb-4 overflow-hidden">
-                <svg viewBox="0 0 56 56" fill="none" className="w-14 h-14">
-                  <circle cx="28" cy="28" r="28" fill="#F3E8FF"/>
-                  <ellipse cx="28" cy="30" rx="14" ry="15" fill="#FCD9B6"/>
-                  <path d="M14 24 Q12 12 22 10 Q28 8 34 10 Q44 12 42 24 Q40 18 34 14 Q28 10 22 14 Q16 18 14 24" fill="#8B6914"/>
-                  <path d="M14 24 Q10 28 14 34" fill="#8B6914"/>
-                  <path d="M42 24 Q46 28 42 34" fill="#8B6914"/>
-                  <ellipse cx="21" cy="30" rx="6" ry="5" fill="none" stroke="#374151" strokeWidth="2"/>
-                  <ellipse cx="35" cy="30" rx="6" ry="5" fill="none" stroke="#374151" strokeWidth="2"/>
-                  <path d="M27 30 L29 30" stroke="#374151" strokeWidth="2"/>
-                  <path d="M15 28 L12 26" stroke="#374151" strokeWidth="2"/>
-                  <path d="M41 28 L44 26" stroke="#374151" strokeWidth="2"/>
-                  <ellipse cx="21" cy="31" rx="2.5" ry="3" fill="#1F2937"/>
-                  <ellipse cx="35" cy="31" rx="2.5" ry="3" fill="#1F2937"/>
-                  <circle cx="22" cy="30" r="0.8" fill="white"/>
-                  <circle cx="36" cy="30" r="0.8" fill="white"/>
-                  <path d="M24 42 Q28 47 32 42" stroke="#1F2937" strokeWidth="2" fill="none" strokeLinecap="round"/>
-                  <ellipse cx="17" cy="36" rx="3" ry="2" fill="#FECACA" opacity="0.4"/>
-                  <ellipse cx="39" cy="36" rx="3" ry="2" fill="#FECACA" opacity="0.4"/>
-                </svg>
-                              </div>
-              <h3 className="font-semibold text-stone-800 text-lg mb-2">Citation Checker</h3>
-              <p className="text-base text-stone-600 leading-relaxed">Validate APA, MLA, Chicago, and Harvard citations. Fix formatting errors.</p>
-                              </div>
-
-            {/* Academic Tone - Hispanic woman */}
-            <div className="bg-white border border-stone-200 rounded-2xl p-6 hover:shadow-lg hover:border-stone-300 hover:-translate-y-1 transition-all duration-200">
-              <div className="w-14 h-14 rounded-full bg-orange-50 flex items-center justify-center mb-4 overflow-hidden">
-                <svg viewBox="0 0 56 56" fill="none" className="w-14 h-14">
-                  <circle cx="28" cy="28" r="28" fill="#FFEDD5"/>
-                  <ellipse cx="28" cy="30" rx="14" ry="15" fill="#D4A574"/>
-                  <path d="M12 26 Q10 14 20 10 Q28 6 36 10 Q46 14 44 26 Q42 18 34 14 Q28 10 22 14 Q16 18 12 26" fill="#3D2314"/>
-                  <path d="M12 26 Q6 40 16 48" fill="#3D2314"/>
-                  <path d="M44 26 Q50 40 40 48" fill="#3D2314"/>
-                  <ellipse cx="22" cy="30" rx="3" ry="3.5" fill="#1F2937"/>
-                  <ellipse cx="34" cy="30" rx="3" ry="3.5" fill="#1F2937"/>
-                  <circle cx="23" cy="29" r="1" fill="white"/>
-                  <circle cx="35" cy="29" r="1" fill="white"/>
-                  <path d="M17 24 Q22 20 27 24" stroke="#3D2314" strokeWidth="2" fill="none" strokeLinecap="round"/>
-                  <path d="M29 24 Q34 20 39 24" stroke="#3D2314" strokeWidth="2" fill="none" strokeLinecap="round"/>
-                  <path d="M24 41 Q28 46 32 41" stroke="#1F2937" strokeWidth="2" fill="none" strokeLinecap="round"/>
-                  <ellipse cx="17" cy="35" rx="3" ry="2" fill="#E8A090" opacity="0.5"/>
-                  <ellipse cx="39" cy="35" rx="3" ry="2" fill="#E8A090" opacity="0.5"/>
-                </svg>
-                              </div>
-              <h3 className="font-semibold text-stone-800 dark:text-stone-100 text-lg mb-2">Academic Tone</h3>
-              <p className="text-base text-stone-600 dark:text-stone-400 leading-relaxed">Ensure your writing maintains appropriate formality and discipline conventions.</p>
-            </div>
-
-            {/* Clarity Feedback */}
-            <div className="bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-600 rounded-2xl p-6 hover:shadow-lg hover:border-stone-300 dark:hover:border-stone-500 hover:-translate-y-1 transition-all duration-200">
-              <div className="w-14 h-14 rounded-full bg-pink-50 flex items-center justify-center mb-4 overflow-hidden">
-                <svg viewBox="0 0 56 56" fill="none" className="w-14 h-14">
-                  <circle cx="28" cy="28" r="28" fill="#FCE7F3"/>
-                  <ellipse cx="28" cy="30" rx="14" ry="15" fill="#C68642"/>
-                  <path d="M14 24 Q12 12 22 10 Q28 8 34 10 Q44 12 42 24 Q40 18 34 14 Q28 10 22 14 Q16 18 14 24" fill="#1A1A1A"/>
-                  <path d="M14 24 Q10 28 14 34" fill="#1A1A1A"/>
-                  <path d="M42 24 Q46 28 42 34" fill="#1A1A1A"/>
-                  <ellipse cx="22" cy="30" rx="3" ry="3.5" fill="#1F2937"/>
-                  <ellipse cx="34" cy="30" rx="3" ry="3.5" fill="#1F2937"/>
-                  <circle cx="23" cy="29" r="1" fill="white"/>
-                  <circle cx="35" cy="29" r="1" fill="white"/>
-                  <path d="M16 24 Q22 20 28 24" stroke="#1A1A1A" strokeWidth="2.5" fill="none" strokeLinecap="round"/>
-                  <path d="M28 24 Q34 20 40 24" stroke="#1A1A1A" strokeWidth="2.5" fill="none" strokeLinecap="round"/>
-                  <path d="M24 41 Q28 46 32 41" stroke="#1F2937" strokeWidth="2" fill="none" strokeLinecap="round"/>
-                  <ellipse cx="17" cy="35" rx="3" ry="2" fill="#D4A07A" opacity="0.5"/>
-                  <ellipse cx="39" cy="35" rx="3" ry="2" fill="#D4A07A" opacity="0.5"/>
-                      </svg>
-                          </div>
-              <h3 className="font-semibold text-stone-800 text-lg mb-2">Clarity Feedback</h3>
-              <p className="text-base text-stone-600 leading-relaxed">Identify unclear sentences and get suggestions for clearer expression.</p>
-                    </div>
-            
-            {/* Source Finder - East Asian woman */}
-            <div className="bg-white border border-stone-200 rounded-2xl p-6 hover:shadow-lg hover:border-stone-300 hover:-translate-y-1 transition-all duration-200">
-              <div className="w-14 h-14 rounded-full bg-stone-100 flex items-center justify-center mb-4 overflow-hidden">
-                <svg viewBox="0 0 56 56" fill="none" className="w-14 h-14">
-                  <circle cx="28" cy="28" r="28" fill="#E0E7FF"/>
-                  <ellipse cx="28" cy="30" rx="14" ry="15" fill="#F5DEB3"/>
-                  <path d="M12 26 Q10 14 20 10 Q28 6 36 10 Q46 14 44 26 Q42 18 34 14 Q28 10 22 14 Q16 18 12 26" fill="#1A1A1A"/>
-                  <path d="M12 26 Q6 40 16 50" fill="#1A1A1A"/>
-                  <path d="M44 26 Q50 40 40 50" fill="#1A1A1A"/>
-                  <ellipse cx="22" cy="30" rx="3" ry="3.5" fill="#1F2937"/>
-                  <ellipse cx="34" cy="30" rx="3" ry="3.5" fill="#1F2937"/>
-                  <circle cx="23" cy="29" r="1" fill="white"/>
-                  <circle cx="35" cy="29" r="1" fill="white"/>
-                  <path d="M24 41 Q28 46 32 41" stroke="#1F2937" strokeWidth="2" fill="none" strokeLinecap="round"/>
-                  <ellipse cx="17" cy="35" rx="3" ry="2" fill="#FECACA" opacity="0.4"/>
-                  <ellipse cx="39" cy="35" rx="3" ry="2" fill="#FECACA" opacity="0.4"/>
-                </svg>
-                  </div>
-              <h3 className="font-semibold text-stone-800 dark:text-stone-100 text-lg mb-2">Source Finder</h3>
-              <p className="text-base text-stone-600 dark:text-stone-400 leading-relaxed">Search millions of academic papers to find relevant citations for your topic.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Free Tools Showcase */}
-      <section className="py-20 sm:py-24 bg-[#faf8f5] dark:bg-stone-900">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="relative text-center mb-12">
-            <span className="inline-block px-4 py-1.5 bg-lime-100 dark:bg-lime-900/50 text-lime-700 dark:text-lime-400 rounded-full text-sm font-semibold mb-4">100% Free</span>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-stone-800 dark:text-stone-100 mb-5">
-              Try Our Free Writing Tools
-            </h2>
-            <p className="text-lg text-stone-600 dark:text-stone-400 max-w-2xl mx-auto">
-              No signup required. Use these tools instantly to improve your writing.
-            </p>
-            {/* Character holding toolbox */}
-            <div className="hidden lg:block absolute -right-4 xl:right-8 top-1/2 -translate-y-1/2 w-28 h-36">
-              <svg viewBox="0 0 140 180" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
-                <path d="M50 100 Q45 130 50 160 L90 160 Q95 130 90 100" fill="#8B5CF6" />
-                <rect x="62" y="75" width="16" height="28" fill="#D4A574" />
-                <ellipse cx="70" cy="48" rx="32" ry="35" fill="#D4A574" />
-                <path d="M38 40 Q35 18 52 12 Q70 4 90 12 Q107 18 104 40 Q100 28 85 20 Q70 12 55 20 Q42 28 38 40" fill="#5D3A1A" />
-                <ellipse cx="105" cy="30" rx="10" ry="14" fill="#5D3A1A" />
-                <path d="M38 40 Q32 55 38 70" fill="#5D3A1A" />
-                <path d="M102 40 Q108 55 102 70" fill="#5D3A1A" />
-                <path d="M55 48 Q60 44 65 48" stroke="#1F2937" strokeWidth="3" fill="none" strokeLinecap="round" />
-                <path d="M75 48 Q80 44 85 48" stroke="#1F2937" strokeWidth="3" fill="none" strokeLinecap="round" />
-                <path d="M52 40 Q60 36 68 40" stroke="#5D3A1A" strokeWidth="2" fill="none" strokeLinecap="round" />
-                <path d="M72 40 Q80 36 88 40" stroke="#5D3A1A" strokeWidth="2" fill="none" strokeLinecap="round" />
-                <path d="M55 62 Q70 76 85 62" stroke="#1F2937" strokeWidth="2.5" fill="none" strokeLinecap="round" />
-                <path d="M60 64 L80 64" stroke="white" strokeWidth="4" strokeLinecap="round" />
-                <ellipse cx="42" cy="55" rx="6" ry="4" fill="#FECACA" opacity="0.5" />
-                <ellipse cx="98" cy="55" rx="6" ry="4" fill="#FECACA" opacity="0.5" />
-                <path d="M45 105 Q25 120 20 140" stroke="#D4A574" strokeWidth="12" fill="none" strokeLinecap="round" />
-                <path d="M95 105 Q115 120 120 140" stroke="#D4A574" strokeWidth="12" fill="none" strokeLinecap="round" />
-                <ellipse cx="18" cy="143" rx="8" ry="9" fill="#D4A574" />
-                <ellipse cx="122" cy="143" rx="8" ry="9" fill="#D4A574" />
-                <rect x="15" y="140" width="110" height="30" rx="4" fill="#10B981" />
-                <rect x="15" y="135" width="110" height="8" rx="2" fill="#059669" />
-                <rect x="55" y="130" width="30" height="8" rx="2" fill="#047857" />
-                <rect x="30" y="118" width="5" height="20" rx="1" fill="#FCD34D" />
-                <rect x="50" y="115" width="6" height="23" rx="1" fill="#60A5FA" />
-                <rect x="85" y="120" width="5" height="18" rx="1" fill="#F472B6" />
-                <rect x="105" y="117" width="5" height="21" rx="1" fill="#34D399" />
-                <path d="M58 95 L70 108 L82 95" stroke="#7C3AED" strokeWidth="2" fill="none" />
-              </svg>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-            {/* Word Counter */}
-            <button
-              onClick={() => onNavigate('word-counter')}
-              className="group bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-600 rounded-2xl p-5 sm:p-6 hover:shadow-lg hover:border-stone-300 dark:hover:border-stone-500 hover:-translate-y-1 transition-all duration-200 text-left"
-            >
-              <div className="w-12 h-12 bg-lime-50 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                <svg className="w-6 h-6 text-lime-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" />
-                    </svg>
-                  </div>
-              <h3 className="font-semibold text-stone-800 dark:text-stone-100 mb-1">Word Counter</h3>
-              <p className="text-sm text-stone-500 dark:text-stone-400">Count words, characters & reading time</p>
-            </button>
-
-            {/* Citation Generator */}
-            <button
-              onClick={() => onNavigate('citation-generator-tool')}
-              className="group bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-600 rounded-2xl p-5 sm:p-6 hover:shadow-lg hover:border-stone-300 dark:hover:border-stone-500 hover:-translate-y-1 transition-all duration-200 text-left"
-            >
-              <div className="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                </div>
-              <h3 className="font-semibold text-stone-800 dark:text-stone-100 mb-1">Citation Generator</h3>
-              <p className="text-sm text-stone-500 dark:text-stone-400">APA, MLA, Chicago & more</p>
-            </button>
-
-            {/* Grammar Checker */}
-            <button
-              onClick={() => onNavigate('grammar-checker')}
-              className="group bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-600 rounded-2xl p-5 sm:p-6 hover:shadow-lg hover:border-stone-300 dark:hover:border-stone-500 hover:-translate-y-1 transition-all duration-200 text-left"
-            >
-              <div className="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <h3 className="font-semibold text-stone-800 dark:text-stone-100 mb-1">Grammar Checker</h3>
-              <p className="text-sm text-stone-500 dark:text-stone-400">Fix spelling & punctuation</p>
-            </button>
-
-            {/* Readability Score */}
-            <button
-              onClick={() => onNavigate('readability-score')}
-              className="group bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-600 rounded-2xl p-5 sm:p-6 hover:shadow-lg hover:border-stone-300 dark:hover:border-stone-500 hover:-translate-y-1 transition-all duration-200 text-left"
-            >
-              <div className="w-12 h-12 bg-orange-50 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                <svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                </svg>
-            </div>
-              <h3 className="font-semibold text-stone-800 dark:text-stone-100 mb-1">Readability Score</h3>
-              <p className="text-sm text-stone-500 dark:text-stone-400">Flesch-Kincaid & grade level</p>
-            </button>
-
-            {/* Thesis Generator */}
-            <button
-              onClick={() => onNavigate('thesis-generator')}
-              className="group bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-600 rounded-2xl p-5 sm:p-6 hover:shadow-lg hover:border-stone-300 dark:hover:border-stone-500 hover:-translate-y-1 transition-all duration-200 text-left"
-            >
-              <div className="w-12 h-12 bg-teal-50 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                <svg className="w-6 h-6 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-          </div>
-              <h3 className="font-semibold text-stone-800 dark:text-stone-100 mb-1">Thesis Generator</h3>
-              <p className="text-sm text-stone-500 dark:text-stone-400">Create strong thesis statements</p>
-            </button>
-
-            {/* Essay Outline */}
-            <button
-              onClick={() => onNavigate('essay-outline')}
-              className="group bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-600 rounded-2xl p-5 sm:p-6 hover:shadow-lg hover:border-stone-300 dark:hover:border-stone-500 hover:-translate-y-1 transition-all duration-200 text-left"
-            >
-              <div className="w-12 h-12 bg-stone-100 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                <svg className="w-6 h-6 text-lime-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
-                </svg>
-        </div>
-              <h3 className="font-semibold text-stone-800 dark:text-stone-100 mb-1">Essay Outline</h3>
-              <p className="text-sm text-stone-500 dark:text-stone-400">Structure your essay properly</p>
-            </button>
-
-            {/* Text Case Converter */}
-            <button
-              onClick={() => onNavigate('text-case-converter')}
-              className="group bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-600 rounded-2xl p-5 sm:p-6 hover:shadow-lg hover:border-stone-300 dark:hover:border-stone-500 hover:-translate-y-1 transition-all duration-200 text-left"
-            >
-              <div className="w-12 h-12 bg-pink-50 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                <svg className="w-6 h-6 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
-                </svg>
-          </div>
-              <h3 className="font-semibold text-stone-800 dark:text-stone-100 mb-1">Case Converter</h3>
-              <p className="text-sm text-stone-500 dark:text-stone-400">Uppercase, lowercase & more</p>
-            </button>
-
-            {/* Paraphrasing Tips */}
-            <button
-              onClick={() => onNavigate('paraphrasing-tips')}
-              className="group bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-600 rounded-2xl p-5 sm:p-6 hover:shadow-lg hover:border-stone-300 dark:hover:border-stone-500 hover:-translate-y-1 transition-all duration-200 text-left"
-            >
-              <div className="w-12 h-12 bg-amber-50 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                <svg className="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                      </svg>
-                    </div>
-              <h3 className="font-semibold text-stone-800 dark:text-stone-100 mb-1">Paraphrasing Tips</h3>
-              <p className="text-sm text-stone-500 dark:text-stone-400">Improve vocabulary & style</p>
-            </button>
-                      </div>
-
-          {/* Premium Humanizer Card */}
-          <div className="mt-6">
-            <button
-              onClick={() => onNavigate('humanizer')}
-              className="group w-full bg-gradient-to-r from-lime-50 to-emerald-50 dark:from-lime-900/30 dark:to-emerald-900/30 border-2 border-lime-200 dark:border-lime-700 rounded-2xl p-6 sm:p-8 hover:shadow-lg hover:border-lime-400 dark:hover:border-lime-500 transition-all duration-200 text-left relative overflow-hidden"
-            >
-              <div className="absolute top-3 right-3 px-3 py-1 bg-lime-500 text-stone-900 text-xs font-bold rounded-full">PREMIUM</div>
-              <div className="flex items-center gap-6">
-                <div className="w-14 h-14 bg-lime-100 dark:bg-lime-900/50 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
-                  <span className="text-2xl">✨</span>
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-stone-800 dark:text-stone-100 mb-1">AI Text Humanizer</h3>
-                  <p className="text-sm text-stone-600 dark:text-stone-400">Humanize ChatGPT, GPT-4, Gemini, Claude &amp; LLaMA text. Bypass AI detectors with natural, human-sounding writing.</p>
-                </div>
-                <svg className="w-6 h-6 text-lime-600 flex-shrink-0 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </div>
-            </button>
-          </div>
-        </div>
-      </section>
-
       {/* FAQ Section - Clean modern style */}
-      <section className="py-20 sm:py-24 bg-white dark:bg-stone-900">
+      <section className="py-12 sm:py-24 bg-white dark:bg-stone-900">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-center gap-6 mb-12">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-center gap-4 sm:gap-6 mb-8 sm:mb-12">
             <div className="text-center lg:text-left flex-1">
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-stone-800 dark:text-stone-100 mb-5">
+              <h2 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-stone-800 dark:text-stone-100 mb-3 sm:mb-5">
                 Frequently Asked Questions
               </h2>
               <p className="text-lg text-stone-600 dark:text-stone-400">
@@ -2488,12 +2254,12 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
 
           <div className="max-w-3xl mx-auto space-y-4">
             {faqs.map((faq, idx) => (
-              <div key={idx} className="bg-stone-50 dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-600 overflow-hidden hover:border-lime-300 dark:hover:border-lime-600 hover:shadow-lg hover:shadow-lime-500/10 transition-all duration-200">
+              <div key={idx} className="bg-stone-50 dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-600 overflow-hidden hover:border-indigo-300 dark:hover:border-indigo-600 hover:shadow-lg hover:shadow-indigo-500/10 transition-all duration-200">
                 <button
                   onClick={() => setOpenFAQ(openFAQ === idx ? null : idx)}
                   className="w-full px-6 py-5 text-left flex items-center justify-between hover:bg-stone-100 dark:hover:bg-stone-700 transition-all duration-200"
                 >
-                  <span className="font-bold text-stone-800 dark:text-stone-100 text-lg pr-4">{faq.question}</span>
+                  <span className="font-bold text-stone-800 dark:text-stone-100 text-base sm:text-lg pr-4">{faq.question}</span>
                   <svg className={`w-5 h-5 text-stone-400 flex-shrink-0 transition-transform ${openFAQ === idx ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
@@ -2507,20 +2273,20 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
         </div>
       </section>
 
-      {/* Final CTA - Lime theme */}
-      <section className="py-20 sm:py-24 bg-gradient-to-b from-lime-50/50 to-white dark:from-stone-900 dark:to-stone-900 border-t border-stone-200 dark:border-stone-700">
+      {/* Final CTA */}
+      <section className="py-12 sm:py-24 bg-gradient-to-b from-indigo-50/50 to-white dark:from-stone-900 dark:to-stone-900 border-t border-stone-200 dark:border-stone-700">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-stone-800 dark:text-stone-100 mb-5">
+            <h2 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-stone-800 dark:text-stone-100 mb-4 sm:mb-5">
               Ready to ace your classes?
             </h2>
-            <p className="text-lg text-stone-600 dark:text-stone-400 mb-10 max-w-xl mx-auto">
+            <p className="text-base sm:text-lg text-stone-600 dark:text-stone-400 mb-8 sm:mb-10 max-w-xl mx-auto px-2">
               Join 50,000+ students using WriteScholar to study smarter. Start for free today.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
               <button
                 onClick={() => onNavigate('signup')}
-                className="inline-flex items-center justify-center px-8 py-4 bg-gradient-to-r from-lime-500 to-emerald-600 text-stone-900 font-bold rounded-2xl hover:from-lime-400 hover:to-emerald-500 hover:scale-105 active:scale-95 transition-all shadow-xl shadow-lime-500/30 text-lg"
+                className="inline-flex items-center justify-center px-8 py-4 bg-gradient-to-r from-indigo-500 to-violet-600 text-white font-bold rounded-2xl hover:from-indigo-400 hover:to-violet-500 hover:scale-105 active:scale-95 transition-all shadow-xl shadow-indigo-500/30 text-lg"
               >
                 Get Started Free
                 <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
