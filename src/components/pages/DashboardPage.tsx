@@ -5,10 +5,12 @@ import AnalysisAnimation from '../common/AnalysisAnimation';
 import StreakWidget from '../common/StreakWidget';
 import BadgeWidget from '../common/BadgeWidget';
 import FlashcardViewer from '../common/FlashcardViewer';
+import WelcomeTutorial from '../common/WelcomeTutorial';
+import QuickReviewModal from '../common/QuickReviewModal';
 import { jsPDF } from 'jspdf';
 import { Document, Packer, Paragraph, TextRun, HeadingLevel } from 'docx';
 import { saveAs } from 'file-saver';
-import { trackAction, syncFromAPIData, trackExport, trackCopy, BADGES } from '../../data/achievements';
+import { trackAction, syncFromAPIData, trackExport, trackCopy } from '../../data/achievements';
 
 interface DashboardProps {
   onNavigate: (page: string) => void;
@@ -133,16 +135,7 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
   // Upgrade modal state (for locked features like export)
   const [showExportUpgradeModal, setShowExportUpgradeModal] = useState(false);
 
-  // Badge unlock notification
-  const [badgeNotification, setBadgeNotification] = useState<{ id: string; name: string; xp: number } | null>(null);
-  const showBadgeNotification = (badgeIds: string[]) => {
-    if (badgeIds.length === 0) return;
-    const badge = BADGES.find(b => b.id === badgeIds[0]);
-    if (badge) {
-      setBadgeNotification({ id: badge.id, name: badge.name, xp: badge.xp });
-      setTimeout(() => setBadgeNotification(null), 4000);
-    }
-  };
+  // Badge notifications now shown globally via BadgeNotificationToast (event from achievements.ts)
 
   // Ebook banner: show for 24 hours after first dashboard visit, or until user dismisses
   const EBOOK_BANNER_KEY = 'writescholar_ebook_banner_first_seen';
@@ -174,6 +167,38 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
     wordsUsed: 0,
     wordLimit: 15000,
     plan: 'free'
+  });
+
+  // Welcome tutorial state - show after onboarding completion
+  const [showWelcomeTutorial, setShowWelcomeTutorial] = useState(() => {
+    if (!user?.id) return false;
+    const tutorialCompleted = localStorage.getItem(`writescholar_welcome_tutorial_completed_${user.id}`);
+    const onboardingCompleted = localStorage.getItem(`writescholar_onboarding_completed_${user.id}`);
+    // Show tutorial if onboarding is completed but tutorial hasn't been shown yet
+    return onboardingCompleted === 'true' && tutorialCompleted !== 'true';
+  });
+
+  // Quick Review state - show to returning users who haven't reviewed today
+  const [showQuickReview, setShowQuickReview] = useState(() => {
+    if (!user?.id) return false;
+    // Don't show if welcome tutorial is showing
+    const tutorialCompleted = localStorage.getItem(`writescholar_welcome_tutorial_completed_${user.id}`);
+    const onboardingCompleted = localStorage.getItem(`writescholar_onboarding_completed_${user.id}`);
+    if (onboardingCompleted === 'true' && tutorialCompleted !== 'true') return false;
+    
+    // Check if already shown today
+    const lastShown = localStorage.getItem(`writescholar_quick_review_last_shown_${user.id}`);
+    const today = new Date().toDateString();
+    if (lastShown === today) return false;
+    
+    // Only show for returning users (not first day)
+    const firstLoginDate = localStorage.getItem(`writescholar_first_login_${user.id}`);
+    if (!firstLoginDate) {
+      localStorage.setItem(`writescholar_first_login_${user.id}`, today);
+      return false;
+    }
+    
+    return firstLoginDate !== today;
   });
 
   // Calendar / Study Events state
@@ -765,7 +790,7 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
 
       if (data.success && data.data) {
         localStorage.setItem('citationSearchResults', JSON.stringify(data.data));
-        showBadgeNotification(trackAction('citations_count'));
+        trackAction('citations_count');
         onNavigate('citation-results');
       } else {
         throw new Error('No citation results received');
@@ -792,7 +817,7 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
     setShowAnalysisPopup(true);
     setAnalysisComplete(false);
     localStorage.setItem('textAnalysisContent', inputText);
-    showBadgeNotification(trackAction('analyses_count'));
+    trackAction('analyses_count');
     
     setTimeout(() => setAnalysisComplete(true), 2000);
     setTimeout(() => {
@@ -865,7 +890,7 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
 
       setHumanizedResult(data.data.humanizedText);
       setShowHumanizeResult(true);
-      showBadgeNotification(trackAction('humanize_count'));
+      trackAction('humanize_count');
       if (data.data.wordsUsed !== undefined) {
         setHumanizeWordsUsed(data.data.wordsUsed);
         setHumanizeWordLimit(data.data.wordLimit);
@@ -891,7 +916,7 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || 'Summarization failed');
       setSummaryResult(data.data);
-      showBadgeNotification(trackAction('summaries_count'));
+      trackAction('summaries_count');
     } catch (error: any) {
       setSummaryError(error.message || 'Summarization failed. Please try again.');
     } finally {
@@ -916,7 +941,7 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || 'Quiz generation failed');
       setQuizResult(data.data);
-      showBadgeNotification(trackAction('quizzes_count'));
+      trackAction('quizzes_count');
       setIsQuizMode(true);
       setCurrentQuestion(0);
       setUserAnswers([]);
@@ -949,7 +974,7 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || 'Flashcard generation failed');
       setFlashcardResult(data.data);
-      showBadgeNotification(trackAction('flashcards_count'));
+      trackAction('flashcards_count');
       fetchQuizUsage();
     } catch (error: any) {
       setQuizError(error.message || 'Flashcard generation failed. Please try again.');
@@ -975,7 +1000,7 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || 'Crossword generation failed');
       setCrosswordResult(data.data);
-      showBadgeNotification(trackAction('crosswords_count'));
+      trackAction('crosswords_count');
       setCrosswordAnswers({});
       setCrosswordChecked(false);
       setSelectedClue(null);
@@ -1591,6 +1616,25 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
       
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="dashboard" />
 
+      {/* Welcome Tutorial - shows after onboarding completion */}
+      {showWelcomeTutorial && (
+        <WelcomeTutorial
+          userName={user?.name?.split(' ')[0] || user?.name || ''}
+          userId={user?.id}
+          onComplete={() => setShowWelcomeTutorial(false)}
+        />
+      )}
+
+      {/* Quick Review - shows to returning users once per day */}
+      {showQuickReview && !showWelcomeTutorial && (
+        <QuickReviewModal
+          userName={user?.name?.split(' ')[0] || user?.name || ''}
+          userId={user?.id}
+          onComplete={() => setShowQuickReview(false)}
+          onSkip={() => setShowQuickReview(false)}
+        />
+      )}
+
       {/* Minimal top accent line */}
       <div className="h-1 bg-gradient-to-r from-blue-500 via-violet-500 to-purple-500" />
 
@@ -1603,6 +1647,25 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
             <div className="min-w-0">
               <StreakWidget />
             </div>
+
+            {/* Quick Review Button */}
+            <button
+              onClick={() => setShowQuickReview(true)}
+              className="w-full group bg-gradient-to-br from-violet-500 to-purple-600 hover:from-violet-400 hover:to-purple-500 rounded-2xl p-4 shadow-lg shadow-violet-500/25 hover:shadow-xl hover:shadow-violet-500/30 transition-all hover:scale-[1.02]"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+                  <span className="text-xl">🧠</span>
+                </div>
+                <div className="text-left">
+                  <div className="text-white font-bold text-sm">Quick Review</div>
+                  <div className="text-violet-200 text-xs">Test your memory</div>
+                </div>
+                <svg className="w-5 h-5 text-white/70 ml-auto group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
+            </button>
 
             {/* Schedule Section */}
             <div className="bg-white dark:bg-stone-800 rounded-3xl shadow-lg shadow-stone-200/50 dark:shadow-stone-900/50 border border-stone-200/60 dark:border-stone-600/40 p-5 hover:shadow-xl transition-shadow">
@@ -1724,12 +1787,20 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
 
           {/* RIGHT MAIN CONTENT */}
           <div className="order-1 lg:order-2 min-w-0 pt-4 sm:pt-10 overflow-visible">
-            {/* Mobile Header: Compact streak + Badge widget in a row */}
-            <div className="flex items-stretch gap-3 mb-4 lg:hidden">
+            {/* Mobile Header: Compact streak + Badge widget + Quick Review in a row */}
+            <div className="flex items-stretch gap-2 mb-4 lg:hidden">
               <StreakWidget compact />
               <div className="flex-1 min-w-0">
                 <BadgeWidget onNavigate={onNavigate} mobileExpanded />
               </div>
+              {/* Mobile Quick Review Button */}
+              <button
+                onClick={() => setShowQuickReview(true)}
+                className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-violet-500 to-purple-600 rounded-xl shadow-md shadow-violet-500/20 text-white font-semibold text-xs whitespace-nowrap"
+              >
+                <span>🧠</span>
+                <span className="hidden sm:inline">Review</span>
+              </button>
             </div>
 
             {/* Search Bar - Optimized for mobile touch */}
@@ -1892,7 +1963,7 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                     if (tool.id !== 'quiz' && tool.id !== 'flashcards' && tool.id !== 'crater_blast') { setQuizResult(null); setFlashcardResult(null); setCrosswordResult(null); }
                   }}
                   className={`relative p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl border bg-white dark:bg-stone-800 text-left transition-all duration-200 group active:scale-[0.98] sm:hover:shadow-2xl sm:hover:-translate-y-1 overflow-hidden ${
-                    (mode === tool.id) || 
+                    (mode === tool.id && !['quiz', 'flashcards', 'crater_blast'].includes(tool.id)) ||
                     (tool.id === 'flashcards' && mode === 'quiz' && studyToolMode === 'flashcards') ||
                     (tool.id === 'crater_blast' && mode === 'quiz' && studyToolMode === 'crater_blast') ||
                     (tool.id === 'quiz' && mode === 'quiz' && studyToolMode === 'quiz') ||
@@ -2956,6 +3027,8 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                       onExportDOCX={isPaidUser ? exportFlashcardsToDOCX : undefined}
                       onNewDeck={() => setFlashcardResult(null)}
                       canExport={isPaidUser}
+                      onLoadPrevious={() => onNavigate('quiz-history')}
+                      isCreateFromScratch={!flashcardResult.cards || flashcardResult.cards.length === 0}
                     />
                   </div>
                 ) : (
@@ -3796,38 +3869,6 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
 
       <Footer onNavigate={onNavigate} />
 
-      {/* Badge unlock notification toast - Mobile optimized */}
-      {badgeNotification && (
-        <div className="fixed bottom-20 sm:bottom-6 left-3 right-3 sm:left-auto sm:right-6 z-[9999] animate-[badge-toast-in_0.5s_ease-out]">
-          <button
-            onClick={() => { setBadgeNotification(null); onNavigate('badges'); }}
-            className="w-full sm:w-auto flex items-center gap-3 px-4 sm:px-5 py-3 sm:py-4 bg-white dark:bg-stone-800 rounded-xl sm:rounded-2xl shadow-2xl shadow-violet-500/20 border-2 border-violet-300 dark:border-violet-600 active:scale-[0.98] sm:hover:shadow-violet-500/30 sm:hover:scale-[1.02] transition-all"
-          >
-            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-lg sm:rounded-xl flex items-center justify-center shadow-lg shadow-amber-500/30 animate-[badge-icon-pop_0.6s_ease-out] flex-shrink-0">
-              <span className="text-xl sm:text-2xl">🏆</span>
-            </div>
-            <div className="text-left flex-1 min-w-0">
-              <div className="text-[10px] sm:text-xs font-bold text-violet-500 dark:text-violet-400 uppercase tracking-wider">Badge Unlocked!</div>
-              <div className="font-bold text-stone-800 dark:text-stone-100 text-sm truncate">{badgeNotification.name}</div>
-              <div className="text-xs text-amber-600 dark:text-amber-400 font-semibold">+{badgeNotification.xp} XP</div>
-            </div>
-            <svg className="w-4 h-4 text-stone-400 ml-1 sm:ml-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
-          </button>
-        </div>
-      )}
-
-      <style>{`
-        @keyframes badge-toast-in {
-          0% { opacity: 0; transform: translateY(20px) scale(0.9); }
-          60% { transform: translateY(-4px) scale(1.02); }
-          100% { opacity: 1; transform: translateY(0) scale(1); }
-        }
-        @keyframes badge-icon-pop {
-          0% { transform: scale(0) rotate(-20deg); }
-          60% { transform: scale(1.2) rotate(5deg); }
-          100% { transform: scale(1) rotate(0deg); }
-        }
-      `}</style>
     </div>
   );
 };

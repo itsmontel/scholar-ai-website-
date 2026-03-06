@@ -274,7 +274,7 @@ const createStripeCustomer = async (email, name) => {
 };
 
 // Create checkout session
-const createCheckoutSession = async (customerId, planType, billingCycle, userId, promoCode = null, userEmail = null) => {
+const createCheckoutSession = async (customerId, planType, billingCycle, userId, promoCode = null, userEmail = null, successUrl = null, cancelUrl = null) => {
   try {
     // Get price ID based on plan and billing cycle
     const priceId = getPriceId(planType, billingCycle);
@@ -294,6 +294,10 @@ const createCheckoutSession = async (customerId, planType, billingCycle, userId,
       }
     }
     
+    // Use provided URLs or fallback to defaults
+    const finalSuccessUrl = successUrl || `${process.env.FRONTEND_URL || 'http://localhost:5173'}/dashboard?payment=success`;
+    const finalCancelUrl = cancelUrl || `${process.env.FRONTEND_URL || 'http://localhost:5173'}/dashboard?payment=cancelled`;
+    
     const sessionConfig = {
       customer: customerId,
       payment_method_types: ['card'],
@@ -304,8 +308,8 @@ const createCheckoutSession = async (customerId, planType, billingCycle, userId,
         },
       ],
       mode: 'subscription',
-      success_url: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/dashboard?payment=success`,
-      cancel_url: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/pricing?payment=cancelled`,
+      success_url: finalSuccessUrl,
+      cancel_url: finalCancelUrl,
       subscription_data: {
         metadata: {
           userId,

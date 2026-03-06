@@ -226,6 +226,10 @@ function checkAndUnlockBadges(stats: AchievementStats): string[] {
 
   if (newlyUnlocked.length > 0) {
     saveUnlockedBadges(unlocked);
+    // Dispatch global event so badge popup can show from any page
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('writescholar-badge-unlocked', { detail: newlyUnlocked }));
+    }
   }
 
   return newlyUnlocked;

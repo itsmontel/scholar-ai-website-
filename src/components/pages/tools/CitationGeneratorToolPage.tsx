@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import Header from '../../common/Header';
 import Footer from '../../common/Footer';
+import { trackCopy } from '../../../data/achievements';
 
 interface CitationGeneratorToolPageProps {
   onNavigate: (page: string) => void;
@@ -404,6 +405,7 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
     navigator.clipboard.writeText(citation.replace(/\*/g, ''));
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+    trackCopy();
   };
 
   const sourceTypes = [

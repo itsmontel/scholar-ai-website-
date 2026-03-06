@@ -14,6 +14,8 @@ interface FlashcardViewerProps {
   onNewDeck?: () => void;
   canExport?: boolean;
   onCardsChange?: (cards: FlashCard[]) => void;
+  onLoadPrevious?: () => void;
+  isCreateFromScratch?: boolean;
 }
 
 type ThemeId = 'classic' | 'ocean' | 'forest' | 'sunset' | 'violet' | 'monochrome';
@@ -129,6 +131,8 @@ const FlashcardViewer = ({
   onNewDeck,
   canExport = false,
   onCardsChange,
+  onLoadPrevious,
+  isCreateFromScratch = false,
 }: FlashcardViewerProps) => {
   const [cards, setCards] = useState<FlashCard[]>(() =>
     initialCards.map((c, i) => ({ id: `card-${i}-${Date.now()}`, front: c.front, back: c.back }))
@@ -276,61 +280,155 @@ const FlashcardViewer = ({
 
   if (cards.length === 0) {
     return (
-      <div className="relative bg-white dark:bg-stone-800 rounded-2xl sm:rounded-3xl p-6 sm:p-10 text-center border border-stone-200 dark:border-stone-700 shadow-lg">
-        {onNewDeck && (
-          <button
-            onClick={onNewDeck}
-            className="absolute top-4 left-4 sm:top-6 sm:left-6 flex items-center gap-2 px-3 py-2 text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 font-medium rounded-lg hover:bg-stone-100 dark:hover:bg-stone-700/50 transition-colors"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
-            Go Back
-          </button>
-        )}
-        <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/30 dark:to-orange-900/30 rounded-2xl flex items-center justify-center">
-          <span className="text-3xl">🃏</span>
+      <div className="relative overflow-hidden">
+        {/* Background decorations */}
+        <div className="absolute inset-0 bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50 dark:from-violet-950/30 dark:via-purple-950/30 dark:to-fuchsia-950/30 rounded-2xl sm:rounded-3xl" />
+        <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-violet-200/40 to-purple-300/40 dark:from-violet-800/20 dark:to-purple-700/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4" />
+        <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-fuchsia-200/40 to-pink-300/40 dark:from-fuchsia-800/20 dark:to-pink-700/20 rounded-full blur-3xl translate-y-1/2 -translate-x-1/4" />
+        
+        {/* Floating card decorations */}
+        <div className="absolute top-12 right-8 sm:right-16 w-16 h-20 bg-white/60 dark:bg-stone-700/60 rounded-xl shadow-lg rotate-12 border border-violet-200/50 dark:border-violet-700/50 hidden sm:block" />
+        <div className="absolute top-20 right-4 sm:right-8 w-14 h-18 bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/40 dark:to-orange-900/40 rounded-xl shadow-lg -rotate-6 border border-amber-200/50 dark:border-amber-700/50 hidden sm:block" />
+        <div className="absolute bottom-16 left-8 sm:left-12 w-12 h-16 bg-gradient-to-br from-emerald-100 to-teal-100 dark:from-emerald-900/40 dark:to-teal-900/40 rounded-lg shadow-md rotate-6 border border-emerald-200/50 dark:border-emerald-700/50 hidden sm:block" />
+        
+        <div className="relative bg-white/80 dark:bg-stone-800/80 backdrop-blur-sm rounded-2xl sm:rounded-3xl p-6 sm:p-10 border border-violet-200/60 dark:border-violet-700/40 shadow-xl">
+          {/* Header with Go Back */}
+          {onNewDeck && (
+            <button
+              onClick={onNewDeck}
+              className="absolute top-4 left-4 sm:top-6 sm:left-6 flex items-center gap-2 px-3 py-2 text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 font-medium rounded-xl hover:bg-violet-100/80 dark:hover:bg-violet-900/30 transition-all"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+              Go Back
+            </button>
+          )}
+          
+          <div className="text-center pt-8 sm:pt-4">
+            {/* Icon */}
+            <div className="relative w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-6">
+              <div className="absolute inset-0 bg-gradient-to-br from-violet-500 to-purple-600 rounded-2xl rotate-6 opacity-20" />
+              <div className="absolute inset-0 bg-gradient-to-br from-violet-400 to-purple-500 rounded-2xl -rotate-3 opacity-30" />
+              <div className="relative w-full h-full bg-gradient-to-br from-violet-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg shadow-violet-500/30">
+                <span className="text-4xl sm:text-5xl">✏️</span>
+              </div>
+            </div>
+            
+            {/* Title & Description */}
+            <h3 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-violet-700 to-purple-700 dark:from-violet-400 dark:to-purple-400 bg-clip-text text-transparent mb-3">
+              Create Your Deck
+            </h3>
+            <p className="text-stone-500 dark:text-stone-400 text-sm sm:text-base max-w-md mx-auto mb-8">
+              Build custom flashcards from scratch or load one of your previously saved decks to continue studying
+            </p>
+            
+            {/* Action Buttons */}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mb-8">
+              <button
+                onClick={() => setShowAddCard(true)}
+                className="w-full sm:w-auto px-6 py-3.5 bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-400 hover:to-purple-500 text-white font-semibold rounded-xl transition-all shadow-lg shadow-violet-500/30 hover:shadow-violet-500/40 hover:scale-[1.02] flex items-center justify-center gap-2"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+                Create First Card
+              </button>
+              
+              {onLoadPrevious && (
+                <button
+                  onClick={onLoadPrevious}
+                  className="w-full sm:w-auto px-6 py-3.5 bg-white dark:bg-stone-700 border-2 border-violet-200 dark:border-violet-700 text-violet-700 dark:text-violet-300 font-semibold rounded-xl transition-all hover:border-violet-300 dark:hover:border-violet-600 hover:bg-violet-50 dark:hover:bg-violet-900/20 flex items-center justify-center gap-2"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
+                  Load Previous Deck
+                </button>
+              )}
+            </div>
+            
+            {/* Tips section */}
+            <div className="bg-gradient-to-r from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20 rounded-xl p-4 sm:p-5 border border-violet-100 dark:border-violet-800/50">
+              <h4 className="text-sm font-semibold text-violet-800 dark:text-violet-300 mb-3 flex items-center justify-center gap-2">
+                <span>💡</span> Quick Tips
+              </h4>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 text-xs sm:text-sm">
+                <div className="flex items-start gap-2">
+                  <span className="text-violet-500 font-bold mt-0.5">1</span>
+                  <span className="text-stone-600 dark:text-stone-400 text-left">Keep questions concise and focused on one concept</span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-violet-500 font-bold mt-0.5">2</span>
+                  <span className="text-stone-600 dark:text-stone-400 text-left">Include examples in answers when helpful</span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-violet-500 font-bold mt-0.5">3</span>
+                  <span className="text-stone-600 dark:text-stone-400 text-left">Review and shuffle for better retention</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-        <h3 className="text-xl font-bold text-stone-800 dark:text-stone-100 mb-2">No Cards Yet</h3>
-        <p className="text-stone-500 dark:text-stone-400 mb-6">Create your first flashcard to get started</p>
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-          <button
-            onClick={() => setShowAddCard(true)}
-            className="px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white font-semibold rounded-xl transition-all shadow-lg shadow-amber-500/25"
-          >
-            + Create First Card
-          </button>
-        </div>
-
+        
+        {/* Add Card Modal - Enhanced */}
         {showAddCard && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" onClick={() => setShowAddCard(false)}>
-            <div className="bg-white dark:bg-stone-800 rounded-2xl p-6 w-full max-w-md shadow-2xl" onClick={e => e.stopPropagation()}>
-              <h3 className="text-lg font-bold text-stone-800 dark:text-stone-100 mb-4">Add New Card</h3>
-              <div className="space-y-4">
+            <div className="bg-white dark:bg-stone-800 rounded-2xl sm:rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden" onClick={e => e.stopPropagation()}>
+              {/* Modal Header */}
+              <div className="bg-gradient-to-r from-violet-500 to-purple-600 px-6 py-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+                      <span className="text-xl">🃏</span>
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-white">New Flashcard</h3>
+                      <p className="text-violet-200 text-xs">Card #{cards.length + 1}</p>
+                    </div>
+                  </div>
+                  <button onClick={() => setShowAddCard(false)} className="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-colors">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                  </button>
+                </div>
+              </div>
+              
+              {/* Modal Body */}
+              <div className="p-6 space-y-5">
                 <div>
-                  <label className="block text-sm font-medium text-stone-600 dark:text-stone-400 mb-1">Front (Question/Term)</label>
+                  <label className="flex items-center gap-2 text-sm font-semibold text-stone-700 dark:text-stone-300 mb-2">
+                    <span className="w-6 h-6 bg-amber-100 dark:bg-amber-900/40 rounded-lg flex items-center justify-center text-amber-600 dark:text-amber-400 text-xs font-bold">Q</span>
+                    Front Side (Question/Term)
+                  </label>
                   <textarea
                     value={newFront}
                     onChange={e => setNewFront(e.target.value)}
-                    placeholder="Enter the question or term..."
-                    className="w-full p-3 border border-stone-200 dark:border-stone-600 rounded-xl bg-white dark:bg-stone-900 text-stone-800 dark:text-stone-100 resize-none focus:outline-none focus:ring-2 focus:ring-amber-500/50"
+                    placeholder="What do you want to remember?"
+                    className="w-full p-4 border-2 border-stone-200 dark:border-stone-600 rounded-xl bg-stone-50 dark:bg-stone-900 text-stone-800 dark:text-stone-100 resize-none focus:outline-none focus:border-violet-400 dark:focus:border-violet-500 focus:bg-white dark:focus:bg-stone-800 transition-all"
                     rows={3}
+                    autoFocus
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-stone-600 dark:text-stone-400 mb-1">Back (Answer/Definition)</label>
+                  <label className="flex items-center gap-2 text-sm font-semibold text-stone-700 dark:text-stone-300 mb-2">
+                    <span className="w-6 h-6 bg-blue-100 dark:bg-blue-900/40 rounded-lg flex items-center justify-center text-blue-600 dark:text-blue-400 text-xs font-bold">A</span>
+                    Back Side (Answer/Definition)
+                  </label>
                   <textarea
                     value={newBack}
                     onChange={e => setNewBack(e.target.value)}
-                    placeholder="Enter the answer or definition..."
-                    className="w-full p-3 border border-stone-200 dark:border-stone-600 rounded-xl bg-white dark:bg-stone-900 text-stone-800 dark:text-stone-100 resize-none focus:outline-none focus:ring-2 focus:ring-amber-500/50"
+                    placeholder="The answer or explanation..."
+                    className="w-full p-4 border-2 border-stone-200 dark:border-stone-600 rounded-xl bg-stone-50 dark:bg-stone-900 text-stone-800 dark:text-stone-100 resize-none focus:outline-none focus:border-violet-400 dark:focus:border-violet-500 focus:bg-white dark:focus:bg-stone-800 transition-all"
                     rows={3}
                   />
                 </div>
               </div>
-              <div className="flex gap-3 mt-6">
-                <button onClick={() => setShowAddCard(false)} className="flex-1 px-4 py-2.5 bg-stone-100 dark:bg-stone-700 text-stone-600 dark:text-stone-300 font-medium rounded-xl hover:bg-stone-200 dark:hover:bg-stone-600 transition-colors">
+              
+              {/* Modal Footer */}
+              <div className="flex gap-3 px-6 pb-6">
+                <button onClick={() => setShowAddCard(false)} className="flex-1 px-4 py-3 bg-stone-100 dark:bg-stone-700 text-stone-600 dark:text-stone-300 font-semibold rounded-xl hover:bg-stone-200 dark:hover:bg-stone-600 transition-colors">
                   Cancel
                 </button>
-                <button onClick={handleAddCard} disabled={!newFront.trim() || !newBack.trim()} className="flex-1 px-4 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold rounded-xl disabled:opacity-50 transition-all">
+                <button 
+                  onClick={handleAddCard} 
+                  disabled={!newFront.trim() || !newBack.trim()} 
+                  className="flex-1 px-4 py-3 bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-400 hover:to-purple-500 text-white font-semibold rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md disabled:shadow-none flex items-center justify-center gap-2"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
                   Add Card
                 </button>
               </div>
@@ -505,18 +603,21 @@ const FlashcardViewer = ({
 
       {/* Card List Panel */}
       {showCardList && (
-        <div className="bg-stone-50 dark:bg-stone-800/50 rounded-2xl p-4 border border-stone-200 dark:border-stone-700 animate-in slide-in-from-top-2 duration-200">
+        <div className="bg-gradient-to-br from-violet-50/50 to-purple-50/50 dark:from-violet-900/10 dark:to-purple-900/10 rounded-2xl p-4 border border-violet-200/60 dark:border-violet-700/40 animate-in slide-in-from-top-2 duration-200">
           <div className="flex items-center justify-between mb-3">
-            <h4 className="font-semibold text-stone-800 dark:text-stone-100 text-sm">All Cards ({cards.length})</h4>
+            <h4 className="font-semibold text-stone-800 dark:text-stone-100 text-sm flex items-center gap-2">
+              <span className="w-6 h-6 bg-violet-100 dark:bg-violet-900/40 rounded-lg flex items-center justify-center text-violet-600 dark:text-violet-400 text-xs">📚</span>
+              All Cards ({cards.length})
+            </h4>
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setShowAddCard(true)}
-                className="px-3 py-1.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white text-xs font-semibold rounded-lg transition-all shadow-md flex items-center gap-1"
+                className="px-3 py-1.5 bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-400 hover:to-purple-500 text-white text-xs font-semibold rounded-lg transition-all shadow-md shadow-violet-500/20 flex items-center gap-1"
               >
                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
                 Add Card
               </button>
-              <button onClick={() => setShowCardList(false)} className="p-1 text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 transition-colors">
+              <button onClick={() => setShowCardList(false)} className="p-1.5 text-stone-400 hover:text-violet-600 dark:hover:text-violet-400 hover:bg-violet-100 dark:hover:bg-violet-900/30 rounded-lg transition-colors">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
               </button>
             </div>
@@ -671,39 +772,70 @@ const FlashcardViewer = ({
         </div>
       )}
 
-      {/* Add Card Modal */}
+      {/* Add Card Modal - Enhanced */}
       {showAddCard && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" onClick={() => setShowAddCard(false)}>
-          <div className="bg-white dark:bg-stone-800 rounded-2xl p-6 w-full max-w-md shadow-2xl" onClick={e => e.stopPropagation()}>
-            <h3 className="text-lg font-bold text-stone-800 dark:text-stone-100 mb-4">Add New Card</h3>
-            <div className="space-y-4">
+          <div className="bg-white dark:bg-stone-800 rounded-2xl sm:rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden" onClick={e => e.stopPropagation()}>
+            {/* Modal Header */}
+            <div className="bg-gradient-to-r from-violet-500 to-purple-600 px-6 py-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+                    <span className="text-xl">🃏</span>
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-white">New Flashcard</h3>
+                    <p className="text-violet-200 text-xs">Card #{cards.length + 1}</p>
+                  </div>
+                </div>
+                <button onClick={() => setShowAddCard(false)} className="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-colors">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+              </div>
+            </div>
+            
+            {/* Modal Body */}
+            <div className="p-6 space-y-5">
               <div>
-                <label className="block text-sm font-medium text-stone-600 dark:text-stone-400 mb-1">Front (Question/Term)</label>
+                <label className="flex items-center gap-2 text-sm font-semibold text-stone-700 dark:text-stone-300 mb-2">
+                  <span className="w-6 h-6 bg-amber-100 dark:bg-amber-900/40 rounded-lg flex items-center justify-center text-amber-600 dark:text-amber-400 text-xs font-bold">Q</span>
+                  Front Side (Question/Term)
+                </label>
                 <textarea
                   value={newFront}
                   onChange={e => setNewFront(e.target.value)}
-                  placeholder="Enter the question or term..."
-                  className="w-full p-3 border border-stone-200 dark:border-stone-600 rounded-xl bg-white dark:bg-stone-900 text-stone-800 dark:text-stone-100 resize-none focus:outline-none focus:ring-2 focus:ring-amber-500/50"
+                  placeholder="What do you want to remember?"
+                  className="w-full p-4 border-2 border-stone-200 dark:border-stone-600 rounded-xl bg-stone-50 dark:bg-stone-900 text-stone-800 dark:text-stone-100 resize-none focus:outline-none focus:border-violet-400 dark:focus:border-violet-500 focus:bg-white dark:focus:bg-stone-800 transition-all"
                   rows={3}
                   autoFocus
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-stone-600 dark:text-stone-400 mb-1">Back (Answer/Definition)</label>
+                <label className="flex items-center gap-2 text-sm font-semibold text-stone-700 dark:text-stone-300 mb-2">
+                  <span className="w-6 h-6 bg-blue-100 dark:bg-blue-900/40 rounded-lg flex items-center justify-center text-blue-600 dark:text-blue-400 text-xs font-bold">A</span>
+                  Back Side (Answer/Definition)
+                </label>
                 <textarea
                   value={newBack}
                   onChange={e => setNewBack(e.target.value)}
-                  placeholder="Enter the answer or definition..."
-                  className="w-full p-3 border border-stone-200 dark:border-stone-600 rounded-xl bg-white dark:bg-stone-900 text-stone-800 dark:text-stone-100 resize-none focus:outline-none focus:ring-2 focus:ring-amber-500/50"
+                  placeholder="The answer or explanation..."
+                  className="w-full p-4 border-2 border-stone-200 dark:border-stone-600 rounded-xl bg-stone-50 dark:bg-stone-900 text-stone-800 dark:text-stone-100 resize-none focus:outline-none focus:border-violet-400 dark:focus:border-violet-500 focus:bg-white dark:focus:bg-stone-800 transition-all"
                   rows={3}
                 />
               </div>
             </div>
-            <div className="flex gap-3 mt-6">
-              <button onClick={() => setShowAddCard(false)} className="flex-1 px-4 py-2.5 bg-stone-100 dark:bg-stone-700 text-stone-600 dark:text-stone-300 font-medium rounded-xl hover:bg-stone-200 dark:hover:bg-stone-600 transition-colors">
+            
+            {/* Modal Footer */}
+            <div className="flex gap-3 px-6 pb-6">
+              <button onClick={() => setShowAddCard(false)} className="flex-1 px-4 py-3 bg-stone-100 dark:bg-stone-700 text-stone-600 dark:text-stone-300 font-semibold rounded-xl hover:bg-stone-200 dark:hover:bg-stone-600 transition-colors">
                 Cancel
               </button>
-              <button onClick={handleAddCard} disabled={!newFront.trim() || !newBack.trim()} className="flex-1 px-4 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold rounded-xl disabled:opacity-50 transition-all">
+              <button 
+                onClick={handleAddCard} 
+                disabled={!newFront.trim() || !newBack.trim()} 
+                className="flex-1 px-4 py-3 bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-400 hover:to-purple-500 text-white font-semibold rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md disabled:shadow-none flex items-center justify-center gap-2"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
                 Add Card
               </button>
             </div>

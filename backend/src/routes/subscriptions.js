@@ -53,14 +53,16 @@ router.post('/create-checkout-session', authenticateToken, async (req, res) => {
     }
 
     // Create checkout session with optional promo code
-    // Pass user email to check trial eligibility
+    // Pass user email to check trial eligibility and custom redirect URLs
     const sessionResult = await subscriptionService.createCheckoutSession(
       customerId,
       planType,
       billingCycle,
       userId,
       promoCode || null,
-      user.email  // Pass email for trial eligibility check
+      user.email,  // Pass email for trial eligibility check
+      successUrl,  // Use URL from request (e.g., from onboarding)
+      cancelUrl    // Use URL from request (redirects to dashboard on cancel)
     );
 
     if (!sessionResult.success) {

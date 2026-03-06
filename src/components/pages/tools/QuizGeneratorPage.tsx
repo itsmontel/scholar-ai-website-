@@ -3,6 +3,7 @@ import Header from '../../common/Header';
 import Footer from '../../common/Footer';
 import AnalysisAnimation from '../../common/AnalysisAnimation';
 import FlashcardViewer from '../../common/FlashcardViewer';
+import { trackAction, trackExport } from '../../../data/achievements';
 import { jsPDF } from 'jspdf';
 import { Document, Packer, Paragraph, TextRun, HeadingLevel } from 'docx';
 import { saveAs } from 'file-saver';
@@ -283,6 +284,7 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
       setQuizCompleted(false);
       setSelectedAnswer('');
       setShowResult(false);
+      trackAction('quizzes_count');
       
       // Refresh quiz usage after successful generation
       if (isFreeUser) {
@@ -315,6 +317,7 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || 'Flashcard generation failed');
       setFlashcardResult(data.data);
+      trackAction('flashcards_count');
       if (isFreeUser) setQuizUsage(prev => ({ ...prev, generationsUsed: prev.generationsUsed + 1, generationsRemaining: Math.max(0, prev.generationsRemaining - 1) }));
     } catch (err: any) {
       setError(err.message || 'Flashcard generation failed.');
@@ -337,6 +340,7 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || 'Crossword generation failed');
       setCrosswordResult(data.data);
+      trackAction('crosswords_count');
       setCrosswordAnswers({});
       setCrosswordChecked(false);
       setSelectedClue(null);
@@ -680,6 +684,7 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
       }
     });
 
+    trackExport();
     doc.save(`quiz-${Date.now()}.pdf`);
   };
 
@@ -713,6 +718,7 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
 
     const docFile = new Document({ sections: [{ children }] });
     const blob = await Packer.toBlob(docFile);
+    trackExport();
     saveAs(blob, `quiz-${Date.now()}.docx`);
   };
 
@@ -827,6 +833,7 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
       }
     });
 
+    trackExport();
     doc.save(`flashcards-${Date.now()}.pdf`);
   };
 
@@ -844,6 +851,7 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
     });
     const docFile = new Document({ sections: [{ children }] });
     const blob = await Packer.toBlob(docFile);
+    trackExport();
     saveAs(blob, `flashcards-${Date.now()}.docx`);
   };
 
@@ -927,6 +935,7 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
       yPos += 6;
     });
 
+    trackExport();
     doc.save(`crossword-${Date.now()}.pdf`);
   };
 
@@ -951,6 +960,7 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
     });
     const docFile = new Document({ sections: [{ children }] });
     const blob = await Packer.toBlob(docFile);
+    trackExport();
     saveAs(blob, `crossword-${Date.now()}.docx`);
   };
 

@@ -57,6 +57,7 @@ import LightningReflexQuizPage from './pages/tools/LightningReflexQuizPage';
 // Import common components
 import ErrorBoundary from './common/ErrorBoundary';
 import PromoBanner from './common/PromoBanner';
+import BadgeNotificationToast from './common/BadgeNotificationToast';
 
 // Type definitions
 interface User {
@@ -829,6 +830,8 @@ const AcademicAIApp = () => {
     <div className="min-h-screen bg-stone-50 dark:bg-stone-900 transition-colors">
       {user && <PromoBanner />}
       {renderCurrentPage()}
+      {/* Global achievement popup - shows on any page when badge is unlocked */}
+      {user && <BadgeNotificationToast onNavigate={navigateTo} />}
     </div>
     </ErrorBoundary>
   );

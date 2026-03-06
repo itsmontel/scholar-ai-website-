@@ -4,6 +4,7 @@ import Footer from '../common/Footer';
 import LoadingSpinner from '../common/LoadingSpinner';
 import AnalysisAnimation from '../common/AnalysisAnimation';
 import { ExportService, AnalysisData } from '../../services/exportService';
+import { trackAction } from '../../data/achievements';
 
 interface AnalysisPageProps {
   onNavigate?: (page: string) => void;
@@ -837,6 +838,8 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
         finalAnnotations = aiAnnotations;
         setAnnotations(aiAnnotations);
       }
+
+      trackAction('analyses_count');
 
       // Automatically save the analysis
       try {

@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, useRef } from 'react';
 import Header from '../../common/Header';
 import Footer from '../../common/Footer';
 import AnalysisAnimation from '../../common/AnalysisAnimation';
+import { trackAction, trackCopy } from '../../../data/achievements';
 
 interface HumanizerPageProps {
   onNavigate: (page: string) => void;
@@ -166,6 +167,7 @@ const HumanizerPage = ({ onNavigate, user, onLogout }: HumanizerPageProps) => {
       setShowResult(true);
       if (result.wordsUsed !== undefined) setWordsUsed(result.wordsUsed);
       if (result.wordLimit !== undefined) setWordLimit(result.wordLimit);
+      trackAction('humanize_count');
     } catch (error) {
       console.error('Humanize error:', error);
       setError('An error occurred. Please try again.');
@@ -448,6 +450,7 @@ const HumanizerPage = ({ onNavigate, user, onLogout }: HumanizerPageProps) => {
                             navigator.clipboard.writeText(humanizedResult);
                             setCopied(true);
                             setTimeout(() => setCopied(false), 2000);
+                            trackCopy();
                           }}
                           className={`flex items-center gap-1 text-xs font-medium transition-all ${
                             copied ? 'text-violet-600 dark:text-violet-400' : 'text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300'

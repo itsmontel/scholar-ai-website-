@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import Header from '../../common/Header';
 import Footer from '../../common/Footer';
 import AnalysisAnimation from '../../common/AnalysisAnimation';
+import { trackAction, trackCopy } from '../../../data/achievements';
 
 interface SummarizerPageProps {
   onNavigate: (page: string) => void;
@@ -80,6 +81,7 @@ const SummarizerPage = ({ onNavigate, user }: SummarizerPageProps) => {
       }
 
       setSummaryResult(data.data);
+      trackAction('summaries_count');
     } catch (err: any) {
       setError(err.message || 'Something went wrong. Please try again.');
     } finally {
@@ -92,6 +94,7 @@ const SummarizerPage = ({ onNavigate, user }: SummarizerPageProps) => {
       await navigator.clipboard.writeText(summaryResult.summary);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
+      trackCopy();
     }
   };
 

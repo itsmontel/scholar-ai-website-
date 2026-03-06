@@ -2,7 +2,7 @@ interface ScholarMascotProps {
   size?: number;
   className?: string;
   animated?: boolean;
-  pose?: 'default' | 'waving' | 'pointing' | 'celebrating';
+  pose?: 'default' | 'waving' | 'pointing' | 'celebrating' | 'studying' | 'thinking';
 }
 
 const ScholarMascot = ({ size = 200, className = '', animated = true, pose = 'default' }: ScholarMascotProps) => {
@@ -129,6 +129,103 @@ const ScholarMascot = ({ size = 200, className = '', animated = true, pose = 'de
           </>
         );
       
+      case 'studying':
+        return (
+          <>
+            {/* Left arm (holding book from below) */}
+            <g transform="translate(25, 85)">
+              <ellipse cx="18" cy="28" rx="12" ry="15" fill="#8B5CF6" />
+              <ellipse cx="18" cy="25" rx="9" ry="11" fill="#A78BFA" />
+              {/* Hand supporting book */}
+              <circle cx="30" cy="15" r="10" fill="#A78BFA" />
+              <circle cx="30" cy="15" r="7" fill="#C4B5FD" opacity="0.5" />
+            </g>
+            
+            {/* Right arm (holding book from side) */}
+            <g transform="translate(130, 85)">
+              <ellipse cx="8" cy="28" rx="12" ry="15" fill="#8B5CF6" />
+              <ellipse cx="8" cy="25" rx="9" ry="11" fill="#A78BFA" />
+              {/* Hand on book */}
+              <circle cx="-5" cy="15" r="10" fill="#A78BFA" />
+              <circle cx="-5" cy="15" r="7" fill="#C4B5FD" opacity="0.5" />
+            </g>
+            
+            {/* Open book in front */}
+            <g transform="translate(55, 95)">
+              {/* Book spine */}
+              <rect x="42" y="0" width="6" height="35" fill="#8B5CF6" />
+              {/* Left page */}
+              <path d="M0 5 Q20 0 42 5 L42 35 Q20 30 0 35 Z" fill="#FAFAF9" stroke="#E7E5E4" strokeWidth="1" />
+              {/* Right page */}
+              <path d="M48 5 Q68 0 90 5 L90 35 Q68 30 48 35 Z" fill="#FAFAF9" stroke="#E7E5E4" strokeWidth="1" />
+              {/* Text lines left */}
+              <g opacity="0.4">
+                <rect x="6" y="10" width="30" height="2" rx="1" fill="#A78BFA" />
+                <rect x="6" y="15" width="25" height="2" rx="1" fill="#A78BFA" />
+                <rect x="6" y="20" width="28" height="2" rx="1" fill="#A78BFA" />
+                <rect x="6" y="25" width="20" height="2" rx="1" fill="#A78BFA" />
+              </g>
+              {/* Text lines right */}
+              <g opacity="0.4">
+                <rect x="54" y="10" width="30" height="2" rx="1" fill="#A78BFA" />
+                <rect x="54" y="15" width="25" height="2" rx="1" fill="#A78BFA" />
+                <rect x="54" y="20" width="28" height="2" rx="1" fill="#A78BFA" />
+                <rect x="54" y="25" width="22" height="2" rx="1" fill="#A78BFA" />
+              </g>
+              {/* Sparkles around book */}
+              <g filter={`url(#sparkleGlow-${uniqueId})`}>
+                <path d="M-5 -5 L-3 0 L2 0 L-1 3 L0 8 L-5 5 L-10 8 L-9 3 L-12 0 L-7 0 Z" fill="#FDE68A" opacity="0.8" />
+                <path d="M95 -5 L97 0 L102 0 L99 3 L100 8 L95 5 L90 8 L91 3 L88 0 L93 0 Z" fill="#FDE68A" opacity="0.8" />
+              </g>
+            </g>
+          </>
+        );
+      
+      case 'thinking':
+        return (
+          <>
+            {/* Left arm (resting at side) */}
+            <g transform="translate(35, 100)">
+              <ellipse cx="15" cy="25" rx="12" ry="15" fill="#8B5CF6" />
+              <ellipse cx="15" cy="22" rx="9" ry="11" fill="#A78BFA" />
+              <circle cx="12" cy="40" r="9" fill="#A78BFA" />
+              <circle cx="12" cy="40" r="6" fill="#C4B5FD" opacity="0.5" />
+            </g>
+            
+            {/* Right arm (hand on chin, thinking pose) */}
+            <g transform="translate(135, 80)">
+              <ellipse cx="15" cy="35" rx="12" ry="15" fill="#8B5CF6" />
+              <ellipse cx="15" cy="32" rx="9" ry="11" fill="#A78BFA" />
+              {/* Arm bent up */}
+              <ellipse cx="5" cy="15" rx="10" ry="13" fill="#A78BFA" transform="rotate(25 5 15)" />
+              <ellipse cx="5" cy="15" rx="7" ry="9" fill="#C4B5FD" opacity="0.5" transform="rotate(25 5 15)" />
+              {/* Hand on chin */}
+              <circle cx="-8" cy="0" r="10" fill="#A78BFA" />
+              <circle cx="-8" cy="0" r="7" fill="#C4B5FD" opacity="0.5" />
+            </g>
+            
+            {/* Thought bubbles */}
+            <g opacity="0.7">
+              <circle cx="165" cy="50" r="5" fill="#DDD6FE" />
+              <circle cx="172" cy="38" r="7" fill="#EDE9FE" />
+              <ellipse cx="178" cy="22" rx="12" ry="10" fill="#F5F3FF" stroke="#DDD6FE" strokeWidth="1" />
+              {/* Light bulb in thought */}
+              <g transform="translate(170, 14)">
+                <ellipse cx="8" cy="8" rx="6" ry="7" fill="#FDE68A" />
+                <rect x="6" y="14" width="4" height="3" fill="#9CA3AF" />
+                <path d="M5 11 Q8 13 11 11" stroke="#F59E0B" strokeWidth="1" fill="none" />
+              </g>
+            </g>
+            
+            {/* Magic sparkles around */}
+            <g filter={`url(#sparkleGlow-${uniqueId})`} opacity="0.8">
+              <path d="M35 60 L37 65 L42 65 L38 68 L40 73 L35 70 L30 73 L32 68 L28 65 L33 65 Z" fill="#C4B5FD" />
+              <circle cx="25" cy="85" r="3" fill="#DDD6FE" />
+              <circle cx="175" cy="75" r="2.5" fill="#FDE68A" />
+            </g>
+          </>
+        );
+      
       default:
         return (
           <>
@@ -197,6 +294,34 @@ const ScholarMascot = ({ size = 200, className = '', animated = true, pose = 'de
             {/* Both eyes - happy closed */}
             <path d="M72 108 Q82 100 92 108" stroke="#1F2937" strokeWidth="4" strokeLinecap="round" fill="none" />
             <path d="M108 108 Q118 100 128 108" stroke="#1F2937" strokeWidth="4" strokeLinecap="round" fill="none" />
+          </g>
+        );
+      
+      case 'studying':
+        return (
+          <g>
+            {baseEyes}
+            {/* Both eyes looking down at book */}
+            <ellipse cx="84" cy="112" rx="8" ry="10" fill="#1F2937" />
+            <circle cx="79" cy="108" r="5" fill="white" opacity="0.9" />
+            <circle cx="87" cy="116" r="2.5" fill="white" opacity="0.5" />
+            <ellipse cx="120" cy="112" rx="8" ry="10" fill="#1F2937" />
+            <circle cx="115" cy="108" r="5" fill="white" opacity="0.9" />
+            <circle cx="123" cy="116" r="2.5" fill="white" opacity="0.5" />
+          </g>
+        );
+      
+      case 'thinking':
+        return (
+          <g>
+            {baseEyes}
+            {/* Eyes looking up and to the side (thinking) */}
+            <ellipse cx="86" cy="105" rx="8" ry="10" fill="#1F2937" />
+            <circle cx="82" cy="100" r="5" fill="white" opacity="0.9" />
+            <circle cx="89" cy="109" r="2.5" fill="white" opacity="0.5" />
+            <ellipse cx="122" cy="105" rx="8" ry="10" fill="#1F2937" />
+            <circle cx="118" cy="100" r="5" fill="white" opacity="0.9" />
+            <circle cx="125" cy="109" r="2.5" fill="white" opacity="0.5" />
           </g>
         );
       

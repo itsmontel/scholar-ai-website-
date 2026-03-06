@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import Header from '../common/Header';
 import Footer from '../common/Footer';
+import { trackCopy } from '../../data/achievements';
 
 interface Citation {
   citation: string;
@@ -70,12 +71,14 @@ const CitationResultsPage = ({
     navigator.clipboard.writeText(citation);
     setCopiedIndex(index);
     setTimeout(() => setCopiedIndex(null), 2000);
+    trackCopy();
   };
 
   const copyReadyToUseSentence = (sentence: string, index: number) => {
     navigator.clipboard.writeText(sentence);
     setCopiedIndex(`ready-${index}`);
     setTimeout(() => setCopiedIndex(null), 2000);
+    trackCopy();
   };
 
   const copyAllCitations = () => {
@@ -91,6 +94,7 @@ const CitationResultsPage = ({
     navigator.clipboard.writeText(allContent);
     setCopiedIndex(-1);
     setTimeout(() => setCopiedIndex(null), 2000);
+    trackCopy();
   };
 
   return (
