@@ -340,7 +340,7 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
     exam: { bg: 'bg-red-50', border: 'border-red-100', text: 'text-red-600', dot: 'bg-red-400' },
     midterm: { bg: 'bg-red-50', border: 'border-red-100', text: 'text-red-600', dot: 'bg-red-400' },
     test: { bg: 'bg-orange-50', border: 'border-orange-100', text: 'text-orange-600', dot: 'bg-orange-400' },
-    quiz: { bg: 'bg-amber-50', border: 'border-amber-100', text: 'text-amber-600', dot: 'bg-lime-500' },
+    quiz: { bg: 'bg-amber-50', border: 'border-amber-100', text: 'text-amber-600', dot: 'bg-amber-500' },
     assignment: { bg: 'bg-blue-50', border: 'border-blue-100', text: 'text-blue-600', dot: 'bg-blue-400' },
     other: { bg: 'bg-stone-50', border: 'border-stone-200', text: 'text-stone-600', dot: 'bg-stone-400' }
   };
@@ -2503,7 +2503,7 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                     onClick={() => { setStudyToolMode(tool.key); setQuizResult(null); setFlashcardResult(null); setCrosswordResult(null); setQuizError(''); setIsQuizMode(false); }}
                     className={`px-4 sm:px-5 py-2 rounded-xl text-sm font-medium transition-all flex items-center gap-1.5 ${
                       studyToolMode === tool.key
-                        ? 'bg-white dark:bg-stone-700 text-lime-700 dark:text-lime-400 shadow-sm border border-lime-200 dark:border-lime-700'
+                        ? 'bg-white dark:bg-stone-700 text-amber-700 dark:text-amber-400 shadow-sm border border-amber-200 dark:border-amber-700'
                         : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-700'
                     }`}
                   >
@@ -2516,13 +2516,13 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
 
             {/* Exhausted generations banner for free users */}
             {quizExhausted && (
-              <div className="mb-6 bg-gradient-to-r from-lime-600 to-emerald-600 dark:from-lime-700 dark:to-emerald-700 rounded-2xl p-6 text-stone-900 text-center">
+              <div className="mb-6 bg-gradient-to-r from-amber-600 to-orange-600 dark:from-amber-700 dark:to-orange-700 rounded-2xl p-6 text-stone-900 text-center">
                 <span className="text-4xl mb-3 block">🔒</span>
                 <h3 className="text-xl font-bold mb-2">Monthly Limit Reached</h3>
-                <p className="text-lime-100 dark:text-stone-200 mb-4">You've used all 3 study tool generations this month. Upgrade for unlimited access!</p>
+                <p className="text-amber-100 dark:text-stone-200 mb-4">You've used all 3 study tool generations this month. Upgrade for unlimited access!</p>
                 <button
                   onClick={() => onNavigate('pricing')}
-                  className="px-6 py-2.5 bg-white dark:bg-stone-800 text-lime-700 dark:text-lime-400 font-semibold rounded-xl hover:bg-stone-50 dark:hover:bg-stone-700 transition-all inline-flex items-center gap-2"
+                  className="px-6 py-2.5 bg-white dark:bg-stone-800 text-amber-700 dark:text-amber-400 font-semibold rounded-xl hover:bg-stone-50 dark:hover:bg-stone-700 transition-all inline-flex items-center gap-2"
                 >
                   👑 Upgrade Now
                 </button>
@@ -2531,26 +2531,26 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
 
             {/* Plan info banner for free and starter users */}
             {!isPremiumUser && !quizExhausted && (
-              <div className="mb-6 bg-gradient-to-r from-lime-50 to-emerald-50 dark:from-lime-900/20 dark:to-emerald-900/20 border border-lime-200 dark:border-lime-800/50 rounded-2xl p-4 flex items-center justify-between flex-wrap gap-3">
+              <div className="mb-6 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border border-amber-200 dark:border-amber-800/50 rounded-2xl p-4 flex items-center justify-between flex-wrap gap-3">
                 <div className="flex items-center gap-3">
                   <span className="text-2xl">🧠</span>
                   <div>
                     {isFreeUser ? (
                       <>
-                        <p className="text-lime-800 dark:text-lime-200 font-medium text-sm">
+                        <p className="text-amber-800 dark:text-amber-200 font-medium text-sm">
                           Free plan: {quizUsage.generationsRemaining} of {quizUsage.generationLimit} generations remaining • Max {(quizUsage.maxWordsPerGeneration || 5000).toLocaleString()} words
                         </p>
-                        <p className="text-lime-600 dark:text-lime-400 text-xs mt-0.5">Upgrade for unlimited quizzes, flashcards, crosswords, and up to 15,000 words</p>
+                        <p className="text-amber-600 dark:text-amber-400 text-xs mt-0.5">Upgrade for unlimited quizzes, flashcards, crosswords, and up to 15,000 words</p>
                       </>
                     ) : (
                       <>
-                        <p className="text-lime-800 dark:text-lime-200 font-medium text-sm">Starter plan: Quiz limited to Mixed type + Medium difficulty</p>
-                        <p className="text-lime-600 dark:text-lime-400 text-xs mt-0.5">Upgrade to Premium for all quiz types, difficulties, and our premium AI model</p>
+                        <p className="text-amber-800 dark:text-amber-200 font-medium text-sm">Starter plan: Quiz limited to Mixed type + Medium difficulty</p>
+                        <p className="text-amber-600 dark:text-amber-400 text-xs mt-0.5">Upgrade to Premium for all quiz types, difficulties, and our premium AI model</p>
                       </>
                     )}
                   </div>
                 </div>
-                <button onClick={() => onNavigate('pricing')} className="px-4 py-1.5 bg-lime-600 text-stone-900 text-xs font-semibold rounded-xl hover:bg-lime-500 transition-all">
+                <button onClick={() => onNavigate('pricing')} className="px-4 py-1.5 bg-amber-600 text-stone-900 text-xs font-semibold rounded-xl hover:bg-amber-500 transition-all">
                   Upgrade
                 </button>
               </div>
@@ -2564,9 +2564,9 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                   <div className={`bg-white rounded-2xl sm:rounded-3xl shadow-xl border border-gray-100 overflow-hidden mb-6 ${!canUseQuiz ? 'opacity-50 pointer-events-none' : ''}`}>
                     {quizCompleted ? (
                       <div className="p-8 text-center">
-                        <div className={`w-24 h-24 mx-auto rounded-full flex items-center justify-center mb-4 text-4xl ${userAnswers.filter(a => a.isCorrect).length / userAnswers.length >= 0.7 ? 'bg-gradient-to-br from-green-500 to-emerald-600' : 'bg-gradient-to-br from-lime-500 to-emerald-600'}`}>🏆</div>
+                        <div className={`w-24 h-24 mx-auto rounded-full flex items-center justify-center mb-4 text-4xl ${userAnswers.filter(a => a.isCorrect).length / userAnswers.length >= 0.7 ? 'bg-gradient-to-br from-green-500 to-emerald-600' : 'bg-gradient-to-br from-amber-500 to-orange-600'}`}>🏆</div>
                         <h2 className="text-3xl font-bold text-stone-900 dark:text-stone-100 mb-2">Quiz Complete!</h2>
-                        <div className="text-5xl font-bold bg-gradient-to-r from-lime-600 to-emerald-600 bg-clip-text text-transparent my-4">
+                        <div className="text-5xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent my-4">
                           {Math.round((userAnswers.filter(a => a.isCorrect).length / userAnswers.length) * 100)}%
                         </div>
                         <p className="text-gray-600">{userAnswers.filter(a => a.isCorrect).length} out of {userAnswers.length} correct</p>
@@ -2604,7 +2604,7 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                       </div>
                     ) : (
                       <>
-                        <div className="h-2 bg-stone-200 dark:bg-stone-600"><div className="h-full bg-gradient-to-r from-lime-500 to-emerald-500" style={{ width: `${((currentQuestion + 1) / quizResult.questions.length) * 100}%` }}></div></div>
+                        <div className="h-2 bg-stone-200 dark:bg-stone-600"><div className="h-full bg-gradient-to-r from-amber-500 to-orange-500" style={{ width: `${((currentQuestion + 1) / quizResult.questions.length) * 100}%` }}></div></div>
                         <div className="p-6">
                           <div className="flex justify-between mb-4">
                             <span className="text-sm text-gray-500">Question {currentQuestion + 1} of {quizResult.questions.length}</span>
@@ -2623,7 +2623,7 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                                 <button key={idx} onClick={() => !showQuizResult && setSelectedAnswer(letter)} disabled={showQuizResult}
                                   className={`w-full p-4 rounded-xl border-2 text-left flex items-center gap-3 ${isCorrect ? 'border-green-500 bg-green-50' : isWrong ? 'border-red-500 bg-red-50' : isSelected ? 'border-amber-500 bg-amber-50' : 'border-gray-200 hover:border-amber-300'}`}
                                 >
-                                  <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${isCorrect ? 'bg-green-500 text-white' : isWrong ? 'bg-red-500 text-white' : isSelected ? 'bg-lime-500 text-stone-900' : 'bg-stone-100 dark:bg-stone-700'}`}>{letter}</span>
+                                  <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${isCorrect ? 'bg-green-500 text-white' : isWrong ? 'bg-red-500 text-white' : isSelected ? 'bg-amber-500 text-stone-900' : 'bg-stone-100 dark:bg-stone-700'}`}>{letter}</span>
                                   <span>{opt.substring(3)}</span>
                                 </button>
                               );
@@ -2636,7 +2636,7 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                                 <button key={opt} onClick={() => !showQuizResult && setSelectedAnswer(opt)} disabled={showQuizResult}
                                   className={`w-full p-4 rounded-xl border-2 text-left flex items-center gap-3 ${isCorrect ? 'border-green-500 bg-green-50' : isWrong ? 'border-red-500 bg-red-50' : isSelected ? 'border-amber-500 bg-amber-50' : 'border-gray-200 hover:border-amber-300'}`}
                                 >
-                                  <span className={`w-8 h-8 rounded-full flex items-center justify-center ${isCorrect ? 'bg-green-500 text-white' : isWrong ? 'bg-red-500 text-white' : isSelected ? 'bg-lime-500 text-stone-900' : 'bg-stone-100 dark:bg-stone-700'}`}>{opt === 'true' ? '✓' : '✗'}</span>
+                                  <span className={`w-8 h-8 rounded-full flex items-center justify-center ${isCorrect ? 'bg-green-500 text-white' : isWrong ? 'bg-red-500 text-white' : isSelected ? 'bg-amber-500 text-stone-900' : 'bg-stone-100 dark:bg-stone-700'}`}>{opt === 'true' ? '✓' : '✗'}</span>
                                   <span className="capitalize font-medium">{opt}</span>
                                 </button>
                               );
@@ -2650,7 +2650,7 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                                 <button key={idx} onClick={() => !showQuizResult && setSelectedAnswer(letter)} disabled={showQuizResult}
                                   className={`w-full p-4 rounded-xl border-2 text-left flex items-center gap-3 ${isCorrect ? 'border-green-500 bg-green-50' : isWrong ? 'border-red-500 bg-red-50' : isSelected ? 'border-amber-500 bg-amber-50' : 'border-gray-200 hover:border-amber-300'}`}
                                 >
-                                  <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${isCorrect ? 'bg-green-500 text-white' : isWrong ? 'bg-red-500 text-white' : isSelected ? 'bg-lime-500 text-stone-900' : 'bg-stone-100 dark:bg-stone-700'}`}>{letter}</span>
+                                  <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${isCorrect ? 'bg-green-500 text-white' : isWrong ? 'bg-red-500 text-white' : isSelected ? 'bg-amber-500 text-stone-900' : 'bg-stone-100 dark:bg-stone-700'}`}>{letter}</span>
                                   <span>{opt.substring(3)}</span>
                                 </button>
                               );
@@ -2689,7 +2689,7 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                 {/* Quiz Input Form */}
                 {!quizResult && (
                   <div className={`bg-white rounded-2xl sm:rounded-3xl shadow-xl shadow-stone-100/50 dark:shadow-none border border-gray-100 overflow-hidden mb-6 min-w-0 ${!canUseQuiz ? 'opacity-50 pointer-events-none' : ''}`}>
-                    <div className="bg-gradient-to-r from-lime-50 to-emerald-50 dark:from-lime-900/20 dark:to-emerald-900/20 border-b border-stone-200 dark:border-stone-600 px-3 sm:px-5 py-3 sm:py-4">
+                    <div className="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border-b border-stone-200 dark:border-stone-600 px-3 sm:px-5 py-3 sm:py-4">
                       <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center justify-between gap-3 sm:gap-4">
                         <div className="flex flex-wrap items-center gap-2 sm:gap-3 min-w-0 overflow-x-auto sm:overflow-visible">
                           <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
@@ -2720,7 +2720,7 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                                   <button key={d} onClick={() => !locked && setQuizDifficulty(d)} disabled={locked} title={locked ? 'Premium only' : ''}
                                     className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all whitespace-nowrap ${
                                       locked ? 'text-gray-300 cursor-not-allowed' :
-                                      quizDifficulty === d ? 'bg-lime-600 text-stone-900 shadow-sm' : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-600'
+                                      quizDifficulty === d ? 'bg-amber-600 text-stone-900 shadow-sm' : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-600'
                                     }`}
                                   >
                                     {d.charAt(0).toUpperCase() + d.slice(1)}
@@ -2774,7 +2774,7 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                     <div className="flex flex-col min-w-0">
                       <div className="flex items-center justify-between px-3 sm:px-5 py-2.5 sm:py-3 bg-gray-50/50 border-b border-stone-200 dark:border-stone-600">
                         <div className="flex items-center gap-2">
-                          <div className="w-2 h-2 rounded-full bg-lime-500"></div>
+                          <div className="w-2 h-2 rounded-full bg-amber-500"></div>
                           <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Source Material</span>
                         </div>
                         <div className="flex items-center gap-2">
@@ -2877,7 +2877,7 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                         style={{ transformStyle: 'preserve-3d', transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)' }}
                       >
                         {/* Front */}
-                        <div className="w-full min-h-[280px] sm:min-h-[320px] bg-gradient-to-br from-lime-50 to-emerald-50 dark:from-lime-900/20 dark:to-emerald-900/20 border-2 border-lime-200 dark:border-lime-700 rounded-3xl p-8 flex flex-col items-center justify-center text-center shadow-lg"
+                        <div className="w-full min-h-[280px] sm:min-h-[320px] bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border-2 border-amber-200 dark:border-amber-700 rounded-3xl p-8 flex flex-col items-center justify-center text-center shadow-lg"
                           style={{ backfaceVisibility: 'hidden' }}>
                           <span className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-4">Front</span>
                           <p className="text-xl sm:text-2xl font-semibold text-gray-900 leading-relaxed">{flashcardResult.cards[currentCard]?.front}</p>
@@ -2927,7 +2927,7 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                 ) : (
                   /* Flashcard Input Form */
                   <div className={`bg-white rounded-2xl sm:rounded-3xl shadow-xl shadow-stone-100/50 dark:shadow-none border border-gray-100 overflow-hidden mb-6 min-w-0 ${!canUseQuiz ? 'opacity-50 pointer-events-none' : ''}`}>
-                    <div className="bg-gradient-to-r from-lime-50 to-emerald-50 dark:from-lime-900/20 dark:to-emerald-900/20 border-b border-stone-200 dark:border-stone-600 px-3 sm:px-5 py-3 sm:py-4">
+                    <div className="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border-b border-stone-200 dark:border-stone-600 px-3 sm:px-5 py-3 sm:py-4">
                       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4">
                         <div className="flex items-center gap-3">
                           <div className="flex items-center gap-1.5">
@@ -2966,7 +2966,7 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                     <div className="flex flex-col min-w-0">
                       <div className="flex items-center justify-between px-3 sm:px-5 py-2.5 sm:py-3 bg-gray-50/50 border-b border-stone-200 dark:border-stone-600">
                         <div className="flex items-center gap-2">
-                          <div className="w-2 h-2 rounded-full bg-lime-500"></div>
+                          <div className="w-2 h-2 rounded-full bg-amber-500"></div>
                           <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Source Material</span>
                         </div>
                         <div className="flex items-center gap-2">
@@ -3257,7 +3257,7 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                 ) : (
                   /* Crossword Input Form */
                   <div className={`bg-white rounded-2xl sm:rounded-3xl shadow-xl shadow-stone-100/50 dark:shadow-none border border-gray-100 overflow-hidden mb-6 min-w-0 ${!canUseQuiz ? 'opacity-50 pointer-events-none' : ''}`}>
-                    <div className="bg-gradient-to-r from-lime-50 to-emerald-50 dark:from-lime-900/20 dark:to-emerald-900/20 border-b border-stone-200 dark:border-stone-600 px-3 sm:px-5 py-3 sm:py-4">
+                    <div className="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border-b border-stone-200 dark:border-stone-600 px-3 sm:px-5 py-3 sm:py-4">
                       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4">
                         <div className="flex items-center gap-3">
                           <div className="flex items-center gap-1.5">
@@ -3296,7 +3296,7 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                     <div className="flex flex-col min-w-0">
                       <div className="flex items-center justify-between px-3 sm:px-5 py-2.5 sm:py-3 bg-gray-50/50 border-b border-stone-200 dark:border-stone-600">
                         <div className="flex items-center gap-2">
-                          <div className="w-2 h-2 rounded-full bg-lime-500"></div>
+                          <div className="w-2 h-2 rounded-full bg-amber-500"></div>
                           <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Source Material</span>
                         </div>
                         <div className="flex items-center gap-2">
