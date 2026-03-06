@@ -166,7 +166,8 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
 
             {/* Right side - theme, auth, mobile menu */}
             <div className="flex items-center space-x-2 sm:space-x-3">
-              <button
+{/* Dark mode toggle - hidden until implemented */}
+              {/*<button
                 onClick={toggleTheme}
                 className="p-2 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors text-stone-600 dark:text-stone-400"
                 aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
@@ -180,7 +181,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
                   </svg>
                 )}
-              </button>
+              </button>*/}
               <button 
                 onClick={() => onNavigate?.('login')} 
                 className="hidden sm:inline-flex px-4 py-2.5 text-sm text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 font-medium rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 transition-all"
@@ -328,19 +329,19 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
             {/* Pro button - separate from pill group */}
             <button 
               onClick={() => onNavigate?.('quiz-history')}
-              className={`ml-2 px-4 py-2 text-sm font-bold rounded-full transition-all duration-200 flex items-center gap-1.5 bg-gradient-to-r from-stone-800 to-stone-900 dark:from-stone-700 dark:to-stone-800 text-lime-400 hover:from-stone-700 hover:to-stone-800 shadow-lg shadow-stone-900/20 ${
-                currentPage === 'quiz-history' ? 'ring-2 ring-lime-400/50' : ''
+              className={`ml-2 px-4 py-2 text-sm font-bold rounded-full transition-all duration-200 flex items-center gap-1.5 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white shadow-lg shadow-violet-500/25 ${
+                currentPage === 'quiz-history' ? 'ring-2 ring-violet-400 ring-offset-2' : ''
               }`}
             >
               <span>Saved Tools</span>
-              <span className="px-1.5 py-0.5 text-[10px] font-bold bg-lime-400 text-stone-900 rounded-full">PRO</span>
+              <span className="px-1.5 py-0.5 text-[10px] font-bold bg-white/25 text-white rounded-full">PRO</span>
             </button>
           </nav>
 
           {/* Right side */}
           <div className="flex items-center gap-2">
-            {/* Theme toggle */}
-            <button
+            {/* Theme toggle - hidden until implemented */}
+            {/*<button
               onClick={toggleTheme}
               className="p-2.5 rounded-xl bg-stone-100/80 dark:bg-stone-800/80 hover:bg-stone-200/80 dark:hover:bg-stone-700/80 transition-colors text-stone-600 dark:text-stone-400"
               aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
@@ -354,7 +355,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
                 </svg>
               )}
-            </button>
+            </button>*/}
 
             {/* Mobile menu button */}
             <button
@@ -569,12 +570,12 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
             {/* Pro button */}
             <button
               onClick={() => { onNavigate?.('quiz-history'); setIsMobileMenuOpen(false); }}
-              className={`w-full text-left px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200 flex items-center justify-between bg-gradient-to-r from-stone-800 to-stone-900 text-lime-400 ${
-                currentPage === 'quiz-history' ? 'ring-2 ring-lime-400/50' : ''
+              className={`w-full text-left px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200 flex items-center justify-between bg-gradient-to-r from-violet-600 to-purple-600 text-white ${
+                currentPage === 'quiz-history' ? 'ring-2 ring-violet-400 ring-offset-2' : ''
               }`}
             >
               <span>Saved Tools</span>
-              <span className="px-2 py-0.5 text-[10px] font-bold bg-lime-400 text-stone-900 rounded-full">PRO</span>
+              <span className="px-2 py-0.5 text-[10px] font-bold bg-white/25 text-white rounded-full">PRO</span>
             </button>
 
             <button

@@ -587,7 +587,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
             <p className="text-sm text-stone-500 mb-6">{error}</p>
             <button
               onClick={fetchStudyToolHistory}
-              className="px-5 py-2.5 rounded-xl font-medium text-white bg-stone-900 hover:bg-stone-800 text-sm transition-colors"
+              className="px-5 py-2.5 rounded-xl font-medium text-white bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-sm transition-all"
             >
               Try Again
             </button>
@@ -614,7 +614,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 mb-10">
           <div>
             <div className="flex items-center gap-3 mb-2">
-              <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl bg-stone-900 shadow-lg shadow-stone-900/30">
+              <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl bg-gradient-to-br from-violet-500 to-purple-600 shadow-lg shadow-violet-500/30">
                 🧠
               </div>
               <div>
@@ -629,7 +629,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
           </div>
           <button
             onClick={startNewStudyTool}
-            className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold text-white bg-stone-900 hover:bg-stone-800 transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 shrink-0"
+            className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold text-white bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 transition-all duration-200 hover:shadow-lg hover:shadow-violet-500/25 hover:-translate-y-0.5 shrink-0"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -669,13 +669,13 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
               onClick={() => setFilter(tab.key)}
               className={`px-4 py-2.5 rounded-xl text-sm font-medium transition-all flex items-center gap-2 ${
                 filter === tab.key
-                  ? 'bg-stone-900 text-white shadow-md ring-2 ring-violet-500/30'
+                  ? 'bg-gradient-to-r from-violet-600 to-purple-600 text-white shadow-md shadow-violet-500/25'
                   : 'bg-white/80 text-stone-600 hover:bg-white hover:text-stone-900 border border-stone-200/80'
               }`}
             >
               <span>{tab.icon}</span>
               <span>{tab.label}</span>
-              <span className={`text-xs px-1.5 py-0.5 rounded-md ${filter === tab.key ? 'bg-stone-900/20' : 'bg-stone-100'}`}>
+              <span className={`text-xs px-1.5 py-0.5 rounded-md ${filter === tab.key ? 'bg-white/20' : 'bg-stone-100'}`}>
                 {tab.count}
               </span>
             </button>
@@ -729,7 +729,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
             </p>
             <button
               onClick={startNewStudyTool}
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-white bg-stone-900 hover:bg-stone-800 transition-all hover:shadow-lg"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-white bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 transition-all hover:shadow-lg hover:shadow-violet-500/25"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -805,7 +805,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
                       <div className="flex items-center gap-2 flex-wrap sm:justify-end">
                         <button
                           onClick={() => startStudyTool(tool)}
-                          className="px-4 py-2.5 rounded-xl font-medium text-sm text-white bg-stone-900 hover:bg-stone-800 transition-all flex items-center gap-2"
+                          className="px-4 py-2.5 rounded-xl font-medium text-sm text-white bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 transition-all flex items-center gap-2"
                         >
                           {tool.quiz_type === 'flashcards' ? 'Study' : tool.quiz_type === 'crossword' || tool.quiz_type === 'crater_blast' ? 'Play' : 'Take Quiz'}
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -995,7 +995,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
               </button>
               <button
                 onClick={() => { setShowUpgradeModal(false); onNavigate('pricing'); }}
-                className="flex-1 px-4 py-2.5 text-white bg-stone-900 hover:bg-stone-800 rounded-xl font-medium text-sm transition-all"
+                className="flex-1 px-4 py-2.5 text-white bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 rounded-xl font-medium text-sm transition-all"
               >
                 View Plans
               </button>

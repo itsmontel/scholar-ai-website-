@@ -97,7 +97,7 @@ const StreakWidget = ({ compact = false }: StreakWidgetProps) => {
       <button
         onClick={() => setShowInfoModal(true)}
         className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-all hover:scale-105"
-        style={{ backgroundColor: 'rgba(163, 230, 53, 0.15)' }}
+        style={{ backgroundColor: 'rgba(139, 92, 246, 0.15)' }}
         title="View your streak"
       >
         <span className="text-lg">🔥</span>
@@ -130,20 +130,23 @@ const StreakWidget = ({ compact = false }: StreakWidgetProps) => {
   return (
     <>
       <div 
-        className="rounded-2xl p-4 border-2 shadow-sm min-w-0"
+        className="rounded-2xl p-4 border-2 shadow-lg min-w-0 relative overflow-hidden"
         style={{ 
-          background: 'linear-gradient(135deg, rgba(163, 230, 53, 0.18) 0%, rgba(163, 230, 53, 0.08) 100%)',
-          borderColor: 'rgba(163, 230, 53, 0.55)'
+          background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.12) 0%, rgba(168, 85, 247, 0.06) 100%)',
+          borderColor: 'rgba(139, 92, 246, 0.4)'
         }}
       >
+        {/* Decorative elements */}
+        <div className="absolute -top-6 -right-6 w-16 h-16 bg-violet-400/20 rounded-full blur-xl" />
+        <div className="absolute -bottom-4 -left-4 w-12 h-12 bg-purple-400/20 rounded-full blur-lg" />
         {/* Header with streak count */}
-        <div className="flex items-center justify-center gap-2 mb-3">
+        <div className="flex items-center justify-center gap-2 mb-3 relative z-10">
           <span className="text-4xl">🔥</span>
-          <span className="text-4xl font-bold text-stone-800">{data.currentStreak}</span>
+          <span className="text-4xl font-bold bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">{data.currentStreak}</span>
         </div>
 
         {/* Message */}
-        <p className="text-center text-stone-600 font-medium mb-5">
+        <p className="text-center text-stone-600 font-medium mb-5 relative z-10">
           {data.currentStreak === 0 
             ? "Start your streak today!" 
             : data.hasActivityToday
@@ -152,7 +155,7 @@ const StreakWidget = ({ compact = false }: StreakWidgetProps) => {
         </p>
 
         {/* Weekly calendar - compact for sidebar fit */}
-        <div className="bg-white rounded-xl border border-stone-200 p-3 mb-4 min-w-0">
+        <div className="bg-white/80 backdrop-blur-sm rounded-xl border border-violet-200/50 p-3 mb-4 min-w-0 relative z-10">
           <div className="grid grid-cols-7 gap-0.5">
             {getWeekDays().map((day, index) => (
               <div key={index} className="flex flex-col items-center gap-1 min-w-0">
@@ -161,12 +164,12 @@ const StreakWidget = ({ compact = false }: StreakWidgetProps) => {
                     day.hasActivity 
                       ? '' 
                       : 'bg-stone-100'
-                  } ${day.isToday && !day.hasActivity ? 'ring-2 ring-lime-400 ring-offset-0' : ''}`}
-                  style={day.hasActivity ? { backgroundColor: 'rgba(163, 230, 53, 0.2)' } : undefined}
+                  } ${day.isToday && !day.hasActivity ? 'ring-2 ring-violet-400 ring-offset-0' : ''}`}
+                  style={day.hasActivity ? { backgroundColor: 'rgba(139, 92, 246, 0.2)' } : undefined}
                 >
                   {day.hasActivity ? '🔥' : ''}
                 </div>
-                <span className={`text-[10px] font-semibold truncate w-full text-center ${day.isToday ? 'text-lime-600' : 'text-stone-500'}`}>
+                <span className={`text-[10px] font-semibold truncate w-full text-center ${day.isToday ? 'text-violet-600' : 'text-stone-500'}`}>
                   {day.label}
                 </span>
               </div>
@@ -177,21 +180,21 @@ const StreakWidget = ({ compact = false }: StreakWidgetProps) => {
         {/* Action button */}
         <button
           onClick={() => setShowInfoModal(true)}
-          className="w-full py-2.5 px-4 rounded-full border border-stone-200 bg-white text-stone-700 font-medium text-sm hover:bg-stone-50 transition-colors"
+          className="w-full py-2.5 px-4 rounded-full border border-violet-200 bg-white/80 text-stone-700 font-medium text-sm hover:bg-violet-50 hover:border-violet-300 transition-all relative z-10"
         >
           How to earn a streak
         </button>
 
         {/* Stats row */}
         {data.longestStreak > 0 && (
-          <div className="flex items-center justify-center gap-4 mt-4 pt-4 border-t border-stone-200">
+          <div className="flex items-center justify-center gap-4 mt-4 pt-4 border-t border-violet-200/50 relative z-10">
             <div className="text-center">
-              <div className="text-lg font-bold text-stone-800">{data.longestStreak}</div>
+              <div className="text-lg font-bold text-violet-700">{data.longestStreak}</div>
               <div className="text-xs text-stone-500">Longest streak</div>
             </div>
-            <div className="w-px h-8 bg-stone-200"></div>
+            <div className="w-px h-8 bg-violet-200"></div>
             <div className="text-center">
-              <div className="text-lg font-bold text-stone-800">{data.totalActivityDays}</div>
+              <div className="text-lg font-bold text-violet-700">{data.totalActivityDays}</div>
               <div className="text-xs text-stone-500">Total days</div>
             </div>
           </div>
@@ -230,8 +233,7 @@ const StreakWidget = ({ compact = false }: StreakWidgetProps) => {
 
             <button
               onClick={() => setShowInfoModal(false)}
-              className="w-full mt-6 py-3 rounded-full font-semibold text-white transition-colors"
-              style={{ backgroundColor: '#262626' }}
+              className="w-full mt-6 py-3 rounded-full font-semibold text-white transition-all bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 shadow-lg shadow-violet-500/25"
             >
               Got it!
             </button>

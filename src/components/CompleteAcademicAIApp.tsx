@@ -33,6 +33,8 @@ import ResetPasswordPage from './pages/ResetPasswordPage';
 import UnsubscribePage from './pages/UnsubscribePage';
 import BlogPage from './pages/BlogPage';
 import BlogPostPage from './pages/BlogPostPage';
+import MoreToolsPage from './pages/MoreToolsPage';
+import BadgesPage from './pages/BadgesPage';
 
 // Import free tool pages
 import WordCounterPage from './pages/tools/WordCounterPage';
@@ -103,7 +105,7 @@ const AcademicAIApp = () => {
   }, []);
 
   // Route protection for authenticated pages
-  const protectedRoutes = ['dashboard', 'analysis', 'analysis-history', 'citation-results', 'citation-history', 'quiz-history', 'upload', 'settings', 'profile', 'library', 'account', 'billing'];
+  const protectedRoutes = ['dashboard', 'analysis', 'analysis-history', 'citation-results', 'citation-history', 'quiz-history', 'upload', 'settings', 'profile', 'library', 'account', 'billing', 'badges'];
 
   // SEO: dynamic document title and meta description per page (SPA)
   const pageMeta: Record<string, { title: string; description: string }> = {
@@ -136,7 +138,9 @@ const AcademicAIApp = () => {
     'quiz-history': { title: 'My Study Tools | WriteScholar', description: 'View and retake your saved quizzes, flashcards, and crosswords. Study materials are stored for 7 days.' },
     'gpa-calculator': { title: 'Free GPA Calculator – Calculate Your Grade Point Average | WriteScholar', description: 'Free GPA calculator for college and high school students. Calculate semester or cumulative GPA instantly. Add courses, credits, and grades. No signup required.' },
     'pomodoro-timer': { title: 'Free Pomodoro Timer – Study Timer & Focus Tool | WriteScholar', description: 'Free Pomodoro timer for focused studying. Boost productivity with timed work sessions and breaks. Customizable focus and break intervals. No signup required.' },
-    'crater-blast': { title: 'Crater Blast – AI Quiz Shooter Game | WriteScholar', description: 'Blast the correct falling crater before it lands! AI generates quiz questions as craters. Aim your cannon, build streaks, and beat your high score.' }
+    'crater-blast': { title: 'Crater Blast – AI Quiz Shooter Game | WriteScholar', description: 'Blast the correct falling crater before it lands! AI generates quiz questions as craters. Aim your cannon, build streaks, and beat your high score.' },
+    'more-tools': { title: 'More Free Tools – Word Counter, Essay Outline, GPA Calculator | WriteScholar', description: 'Free student tools: word counter, citation generator, essay outline, thesis generator, grammar checker, readability score, paraphrasing tips, text case converter, GPA calculator, Pomodoro timer.' },
+    'badges': { title: 'Achievements & Badges | WriteScholar', description: 'Collect badges, earn XP, and level up your scholar journey. Unlock cute monster companions by using WriteScholar tools.' }
   };
   useEffect(() => {
     const meta = pageMeta[currentPage];
@@ -323,6 +327,8 @@ const AcademicAIApp = () => {
       if (pathname === '/tools/gpa-calculator' || pathname === '/gpa-calculator') return 'gpa-calculator';
       if (pathname === '/tools/pomodoro-timer' || pathname === '/pomodoro-timer') return 'pomodoro-timer';
       if (pathname === '/tools/crater-blast' || pathname === '/crater-blast' || pathname === '/tools/lightning-reflex-quiz' || pathname === '/lightning-reflex-quiz') return 'crater-blast';
+      if (pathname === '/tools/more' || pathname === '/more-tools' || pathname === '/view-more-tools') return 'more-tools';
+      if (pathname === '/badges' || pathname === '/achievements') return 'badges';
       // Dashboard modes
       if (pathname === '/tools/analyze' || pathname === '/analyze') return 'analyze';
       if (pathname === '/tools/citations' || pathname === '/citations') return 'citations';
@@ -497,6 +503,8 @@ const AcademicAIApp = () => {
     'crater-blast': '/tools/crater-blast',
     'analyze': '/tools/analyze',
     'citations': '/tools/citations',
+    'more-tools': '/more-tools',
+    'badges': '/badges',
     'why-students-choose': '/why-students-choose',
     'study-tools-comparison': '/vs-quizlet-knowt',
   };
@@ -713,6 +721,10 @@ const AcademicAIApp = () => {
         );
       case 'billing':
         return <BillingPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
+      case 'more-tools':
+        return <MoreToolsPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
+      case 'badges':
+        return <BadgesPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       // Free Tools
       case 'word-counter':
         return <WordCounterPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;

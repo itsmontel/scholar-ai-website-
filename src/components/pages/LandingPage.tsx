@@ -10,7 +10,8 @@ interface LandingPageProps {
 }
 
 const LandingPage = ({ onNavigate }: LandingPageProps) => {
-  const { theme, toggleTheme } = useTheme();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { theme: _theme, toggleTheme: _toggleTheme } = useTheme();
   const [inputText, setInputText] = useState('');
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
   const [isFocused, setIsFocused] = useState(false);
@@ -410,7 +411,8 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
             </div>
             
             <div className="flex items-center space-x-2 sm:space-x-3">
-              <button
+              {/* Dark mode toggle - hidden until implemented */}
+              {/*<button
                 onClick={toggleTheme}
                 className="p-2 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors text-stone-600 dark:text-stone-400"
                 aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
@@ -418,7 +420,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
                 </svg>
-              </button>
+              </button>*/}
               <a href="/login" onClick={(e) => { e.preventDefault(); onNavigate('login'); }} className="hidden sm:inline-flex px-4 py-2.5 text-sm text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 font-medium rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 transition-all">Log in</a>
               <a href="/signup" onClick={(e) => { e.preventDefault(); onNavigate('signup'); }} className="hidden sm:inline-flex items-center px-5 py-2.5 text-white text-sm font-bold rounded-xl bg-gradient-to-r from-blue-500 to-violet-500 hover:from-blue-400 hover:to-violet-400 hover:scale-105 active:scale-95 transition-all shadow-lg shadow-violet-500/25">
                 Sign up free
@@ -2222,8 +2224,8 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
               </p>
             </div>
             {/* Cute character - thoughtful pose with question mark */}
-            <div className="hidden lg:flex flex-shrink-0 w-32 h-40 items-center justify-center">
-              <svg viewBox="0 0 140 180" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+            <div className="hidden lg:flex flex-shrink-0 w-32 h-44 items-center justify-center overflow-visible pt-2">
+              <svg viewBox="0 -20 140 200" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
                 <path d="M50 100 Q45 130 50 160 L90 160 Q95 130 90 100" fill="#60A5FA" />
                 <rect x="62" y="75" width="16" height="28" fill="#E8B796" />
                 <ellipse cx="70" cy="48" rx="32" ry="35" fill="#E8B796" />
