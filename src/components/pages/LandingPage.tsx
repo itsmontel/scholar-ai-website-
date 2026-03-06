@@ -373,19 +373,19 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
   }) => (
     <button
       onClick={onClick}
-      className={`group relative bg-gradient-to-br ${gradient} rounded-3xl p-4 sm:p-6 text-left hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 ease-out overflow-hidden border ${borderColor} h-[280px] sm:h-[310px] flex flex-col w-full min-w-0`}
+      className={`group relative bg-gradient-to-br ${gradient} rounded-3xl p-4 sm:p-6 text-left hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 ease-out overflow-hidden border ${borderColor} h-[280px] sm:h-[310px] flex flex-col w-full`}
     >
       <div className={`absolute top-0 right-0 w-32 h-32 rounded-full -translate-y-1/2 translate-x-1/2 ${accentClasses.orb}`} />
       <h3 className={`text-lg sm:text-xl font-bold mb-2 sm:mb-3 relative z-10 flex-shrink-0 ${accentClasses.title}`}>{title}</h3>
-      <div className="relative z-10 bg-white dark:bg-stone-800 rounded-2xl p-3 sm:p-5 shadow-lg mb-3 sm:mb-4 flex-1 flex flex-col overflow-hidden min-h-0">
+      <div className="relative z-10 bg-white dark:bg-stone-800 rounded-2xl p-3 sm:p-5 shadow-lg mb-3 sm:mb-4 flex-1 flex flex-col overflow-hidden">
         <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center mb-2 sm:mb-3 text-base sm:text-lg flex-shrink-0 ${accentClasses.iconBg}`}>
           {icon}
         </div>
-        <div className="flex-1 w-full min-w-0 flex flex-col justify-center overflow-hidden">
+        <div className="flex-1 w-full flex flex-col justify-center">
           {innerContent}
         </div>
       </div>
-      <p className="text-stone-600 dark:text-stone-400 text-sm relative z-10 line-clamp-2 flex-shrink-0">{desc}</p>
+      <p className="text-stone-600 dark:text-stone-400 text-sm relative z-10">{desc}</p>
     </button>
   );
 
@@ -551,14 +551,14 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
               <path d="M58 95 L70 108 L82 95" stroke="#4F46E5" strokeWidth="2" fill="none" />
             </svg>
           </div>
-          <div className="max-w-4xl mx-auto w-full text-center">
+          <div className="max-w-4xl mx-auto text-center">
             {/* Hero headline */}
             <h1 className="text-3xl sm:text-5xl lg:text-6xl xl:text-7xl font-extrabold text-stone-800 dark:text-stone-100 leading-[1.1] mb-4 sm:mb-6 tracking-tight" style={{ letterSpacing: '-0.03em' }}>
               Everything you need to<br />
               <span className="bg-gradient-to-r from-blue-500 to-violet-500 bg-clip-text text-transparent">survive school</span>
             </h1>
             
-            <p className="text-base sm:text-xl text-stone-600 dark:text-stone-400 mb-8 sm:mb-10 max-w-2xl mx-auto leading-relaxed px-4 sm:px-2 text-center">
+            <p className="text-base sm:text-xl text-stone-600 dark:text-stone-400 mb-8 sm:mb-10 max-w-2xl mx-auto leading-relaxed px-2">
               #1 alternative to Quizlet. Paste your notes. Get quizzes, flashcards & crosswords in seconds. Essay feedback, humanizer, we got you covered. 🙌
             </p>
             
@@ -577,7 +577,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
             </p>
             
             {/* Hero cards carousel - scrollable on mobile, arrow-nav on desktop */}
-            <div className="w-full sm:w-screen sm:max-w-[100vw] sm:relative sm:left-1/2 sm:-translate-x-1/2 mt-8 sm:mt-12 sm:pl-20 sm:pr-20 lg:pl-24 lg:pr-24">
+            <div className="w-[calc(100vw-2rem)] sm:w-screen sm:max-w-[100vw] relative left-1/2 -translate-x-1/2 mt-8 sm:mt-12 px-0 sm:pl-20 sm:pr-20 lg:pl-24 lg:pr-24">
               <button
                 onClick={() => setStudyCardsCarouselIndex((i) => Math.max(0, i - 1))}
                 disabled={studyCardsCarouselIndex === 0}
@@ -594,14 +594,14 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
               >
                 <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
               </button>
-              <div className="overflow-x-auto sm:overflow-hidden scrollbar-hide pb-4 sm:pb-0 snap-x snap-mandatory sm:snap-none px-4 sm:px-0">
+              <div className="overflow-x-auto sm:overflow-hidden scrollbar-hide pb-4 sm:pb-0 sm:mx-0 sm:px-0 snap-x snap-mandatory sm:snap-none px-4 scroll-pl-4">
                 <div className="flex gap-4 sm:gap-4 sm:transition-transform sm:duration-500 sm:ease-out w-max sm:w-[160%]" style={{ transform: `translateX(-${studyCardsCarouselIndex * 12.5}%)` }}>
                   {[
                     { title: 'Analyze', desc: 'Get professor-style feedback on your essays', onClick: () => setMode('analyze'), gradient: 'from-lime-50 to-emerald-50 dark:from-lime-900/20 dark:to-emerald-900/20', accentClasses: { title: 'text-lime-700 dark:text-lime-400', orb: 'bg-lime-400/20', iconBg: 'bg-lime-100 dark:bg-lime-900/50' }, borderColor: 'border-lime-100 dark:border-lime-800/50', icon: '📝', inner: (
-                      <div className="w-full space-y-1.5 sm:space-y-2">
-                        <div className="h-1.5 sm:h-2 bg-stone-200 dark:bg-stone-600 rounded-full overflow-hidden"><div className="h-full w-full bg-lime-400 dark:bg-lime-500 rounded-full animate-line-grow origin-left" style={{ animationDelay: '0.2s' }} /></div>
-                        <div className="h-1.5 sm:h-2 bg-stone-200 dark:bg-stone-600 rounded-full overflow-hidden"><div className="h-full w-full bg-lime-400 dark:bg-lime-500 rounded-full animate-line-grow origin-left" style={{ animationDelay: '0.6s' }} /></div>
-                        <div className="h-1.5 sm:h-2 bg-stone-200 dark:bg-stone-600 rounded-full overflow-hidden"><div className="h-full w-full bg-lime-500 dark:bg-lime-400 rounded-full animate-line-grow origin-left" style={{ animationDelay: '1s' }} /></div>
+                      <div className="w-full flex flex-col justify-between h-full gap-2">
+                        <div className="h-2.5 sm:h-3 bg-stone-200 dark:bg-stone-600 rounded-full overflow-hidden"><div className="h-full w-full bg-lime-400 dark:bg-lime-500 rounded-full animate-line-grow origin-left" style={{ animationDelay: '0.2s' }} /></div>
+                        <div className="h-2.5 sm:h-3 bg-stone-200 dark:bg-stone-600 rounded-full overflow-hidden"><div className="h-full w-full bg-lime-400 dark:bg-lime-500 rounded-full animate-line-grow origin-left" style={{ animationDelay: '0.6s' }} /></div>
+                        <div className="h-2.5 sm:h-3 bg-stone-200 dark:bg-stone-600 rounded-full overflow-hidden"><div className="h-full w-full bg-lime-500 dark:bg-lime-400 rounded-full animate-line-grow origin-left" style={{ animationDelay: '1s' }} /></div>
                       </div>
                     )},
                     { title: 'Citations', desc: 'Find and format academic sources instantly', onClick: () => setMode('citations'), gradient: 'from-cyan-50 to-teal-50 dark:from-cyan-900/20 dark:to-teal-900/20', accentClasses: { title: 'text-teal-700 dark:text-teal-400', orb: 'bg-teal-400/20', iconBg: 'bg-teal-100 dark:bg-teal-900/50' }, borderColor: 'border-cyan-100 dark:border-cyan-800/50', icon: '🔍', inner: (
@@ -615,15 +615,15 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                       </div>
                     )},
                     { title: 'Flashcards', desc: 'Generate flashcards from any content', onClick: () => { setMode('quiz'); setStudyToolMode('flashcards'); }, gradient: 'from-pink-50 to-rose-50 dark:from-pink-900/20 dark:to-rose-900/20', accentClasses: { title: 'text-rose-700 dark:text-rose-400', orb: 'bg-rose-400/20', iconBg: 'bg-rose-100 dark:bg-rose-900/50' }, borderColor: 'border-pink-100 dark:border-pink-800/50', icon: '🃏', inner: (
-                      <div className="w-full h-14 sm:h-16" style={{ perspective: '120px' }}>
+                      <div className="w-full h-full flex-1" style={{ perspective: '150px', minHeight: '50px' }}>
                         <div className="relative w-full h-full animate-flashcard-flip" style={{ transformStyle: 'preserve-3d' }}>
-                          <div className="absolute inset-0 bg-gradient-to-br from-rose-400 to-pink-500 rounded-xl p-2 sm:p-2.5 flex flex-col justify-center" style={{ backfaceVisibility: 'hidden' }}>
-                            <div className="text-white/80 text-[8px] sm:text-[9px]">Term</div>
-                            <div className="text-white font-semibold text-[11px] sm:text-xs">Photosynthesis</div>
+                          <div className="absolute inset-0 bg-gradient-to-br from-rose-400 to-pink-500 rounded-xl p-3 flex flex-col justify-center" style={{ backfaceVisibility: 'hidden' }}>
+                            <div className="text-white/80 text-[10px] sm:text-[11px]">Term</div>
+                            <div className="text-white font-semibold text-sm sm:text-base">Photosynthesis</div>
                           </div>
-                          <div className="absolute inset-0 bg-gradient-to-br from-pink-500 to-rose-600 rounded-xl p-2 sm:p-2.5 flex flex-col justify-center items-center" style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}>
-                            <div className="text-white/90 text-[8px] sm:text-[9px]">Definition</div>
-                            <div className="text-white font-medium text-[11px] sm:text-xs text-center">Process plants use...</div>
+                          <div className="absolute inset-0 bg-gradient-to-br from-pink-500 to-rose-600 rounded-xl p-3 flex flex-col justify-center items-center" style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}>
+                            <div className="text-white/90 text-[10px] sm:text-[11px]">Definition</div>
+                            <div className="text-white font-medium text-sm sm:text-base text-center">Process plants use...</div>
                           </div>
                         </div>
                       </div>
@@ -687,7 +687,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                       </div>
                     )},
                   ].map((card) => (
-                    <div key={card.title} className="flex-shrink-0 w-[min(260px,calc(100vw-3rem))] sm:w-auto sm:flex-[0_0_12.5%] snap-start">
+                    <div key={card.title} className="flex-shrink-0 w-[calc(50vw-24px)] sm:w-auto sm:flex-[0_0_12.5%] snap-start">
                       <StudyCard
                         title={card.title}
                         desc={card.desc}
