@@ -137,6 +137,7 @@ class FriendsService {
         created_at,
         friend:friend_id (
           id,
+          username,
           first_name,
           last_name,
           email,
@@ -159,6 +160,7 @@ class FriendsService {
         created_at,
         friend:user_id (
           id,
+          username,
           first_name,
           last_name,
           email,
@@ -193,6 +195,7 @@ class FriendsService {
         created_at,
         sender:user_id (
           id,
+          username,
           first_name,
           last_name,
           email,
@@ -227,6 +230,7 @@ class FriendsService {
         created_at,
         recipient:friend_id (
           id,
+          username,
           first_name,
           last_name,
           email,
@@ -444,6 +448,7 @@ class FriendsService {
         created_at,
         blocked:blocked_id (
           id,
+          username,
           first_name,
           last_name,
           email,
@@ -552,6 +557,7 @@ class FriendsService {
         created_at,
         sender:sender_id (
           id,
+          username,
           first_name,
           last_name,
           email
@@ -589,6 +595,7 @@ class FriendsService {
         created_at,
         receiver:receiver_id (
           id,
+          username,
           first_name,
           last_name,
           email

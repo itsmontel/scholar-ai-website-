@@ -10,6 +10,7 @@ interface FriendsPageProps {
 
 interface Friend {
   id: string;
+  username?: string;
   first_name: string;
   last_name: string;
   email: string;
@@ -22,6 +23,7 @@ interface FriendRequest {
   id: string;
   sender?: {
     id: string;
+    username?: string;
     first_name: string;
     last_name: string;
     email: string;
@@ -29,6 +31,7 @@ interface FriendRequest {
   };
   recipient?: {
     id: string;
+    username?: string;
     first_name: string;
     last_name: string;
     email: string;
@@ -44,12 +47,14 @@ interface ShareRequest {
   created_at: string;
   sender?: {
     id: string;
+    username?: string;
     first_name: string;
     last_name: string;
     email: string;
   };
   receiver?: {
     id: string;
+    username?: string;
     first_name: string;
     last_name: string;
     email: string;
@@ -68,6 +73,7 @@ interface BlockedUser {
   blockedAt: string;
   user: {
     id: string;
+    username?: string;
     first_name: string;
     last_name: string;
     email: string;
@@ -453,10 +459,11 @@ const FriendsPage = ({ onNavigate, user, onLogout }: FriendsPageProps) => {
     });
   };
 
-  const getName = (person: { first_name?: string; last_name?: string; email?: string } | undefined) => {
+  const getName = (person: { username?: string; first_name?: string; last_name?: string; email?: string } | undefined) => {
     if (!person) return 'Unknown';
+    if (person.username) return `@${person.username}`;
     const name = `${person.first_name || ''} ${person.last_name || ''}`.trim();
-    return name || person.email || 'Unknown';
+    return name || 'Unknown';
   };
 
   const pendingCount = pendingRequests.length + incomingShares.length;
@@ -747,15 +754,15 @@ const FriendsPage = ({ onNavigate, user, onLogout }: FriendsPageProps) => {
                       ) : (
                         <div className="space-y-3">
                           {pendingRequests.map((request) => (
-                            <div key={request.id} className="flex items-center justify-between p-4 bg-purple-50 rounded-xl border border-purple-100">
-                              <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 bg-purple-200 rounded-full flex items-center justify-center">
-                                  <span className="text-purple-700 font-semibold text-lg">
-                                    {(request.sender?.first_name?.[0] || request.sender?.email?.[0] || '?').toUpperCase()}
+                            <div key={request.id} className="p-4 bg-purple-50 rounded-xl border border-purple-100">
+                              <div className="flex items-center gap-3 mb-3">
+                                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-purple-200 rounded-full flex items-center justify-center flex-shrink-0">
+                                  <span className="text-purple-700 font-semibold text-base sm:text-lg">
+                                    {(request.sender?.username?.[0] || request.sender?.first_name?.[0] || '?').toUpperCase()}
                                   </span>
                                 </div>
-                                <div>
-                                  <h4 className="font-medium text-gray-900">{getName(request.sender)}</h4>
+                                <div className="min-w-0 flex-1">
+                                  <h4 className="font-medium text-gray-900 truncate">{getName(request.sender)}</h4>
                                   <p className="text-sm text-gray-500">Wants to be your friend</p>
                                 </div>
                               </div>
@@ -763,14 +770,14 @@ const FriendsPage = ({ onNavigate, user, onLogout }: FriendsPageProps) => {
                                 <button
                                   onClick={() => handleAcceptFriendRequest(request.id)}
                                   disabled={actionLoading === request.id}
-                                  className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
+                                  className="flex-1 px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
                                 >
                                   Accept
                                 </button>
                                 <button
                                   onClick={() => handleDeclineFriendRequest(request.id)}
                                   disabled={actionLoading === request.id}
-                                  className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
+                                  className="flex-1 px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
                                 >
                                   Decline
                                 </button>

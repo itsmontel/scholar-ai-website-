@@ -17,6 +17,15 @@ const SettingsPage = ({ onNavigate, user, onLogout }: SettingsPageProps) => {
     subscriptionStatus: 'active'
   });
   const [loading, setLoading] = useState(true);
+  const [currentUsername, setCurrentUsername] = useState('');
+  const [editingUsername, setEditingUsername] = useState(false);
+  const [newUsername, setNewUsername] = useState('');
+  const [usernameError, setUsernameError] = useState('');
+  const [usernameSuccess, setUsernameSuccess] = useState('');
+  const [checkingUsername, setCheckingUsername] = useState(false);
+  const [savingUsername, setSavingUsername] = useState(false);
+
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
   // Fetch user stats
   const fetchUserStats = async () => {
@@ -38,6 +47,9 @@ const SettingsPage = ({ onNavigate, user, onLogout }: SettingsPageProps) => {
         const profileData = await profileResponse.json();
         const userData = profileData.data.user;
         const createdDate = new Date(userData.createdAt);
+        
+        setCurrentUsername(userData.username || '');
+        setNewUsername(userData.username || '');
         
         setUserStats(prev => ({
           ...prev,
@@ -83,6 +95,83 @@ const SettingsPage = ({ onNavigate, user, onLogout }: SettingsPageProps) => {
     fetchUserStats();
   }, []);
 
+  const checkUsernameAvailability = async (username: string) => {
+    if (username.length < 3) {
+      setUsernameError('Username must be at least 3 characters');
+      return false;
+    }
+    if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+      setUsernameError('Username can only contain letters, numbers, and underscores');
+      return false;
+    }
+    if (username.toLowerCase() === currentUsername.toLowerCase()) {
+      setUsernameError('');
+      return true;
+    }
+
+    setCheckingUsername(true);
+    try {
+      const token = localStorage.getItem('authToken');
+      const response = await fetch(`${API_URL}/users/username/check/${username}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await response.json();
+      
+      if (!data.available) {
+        setUsernameError('Username is already taken');
+        return false;
+      }
+      setUsernameError('');
+      return true;
+    } catch {
+      setUsernameError('Error checking username');
+      return false;
+    } finally {
+      setCheckingUsername(false);
+    }
+  };
+
+  const handleSaveUsername = async () => {
+    const isValid = await checkUsernameAvailability(newUsername);
+    if (!isValid) return;
+
+    setSavingUsername(true);
+    setUsernameError('');
+    setUsernameSuccess('');
+
+    try {
+      const token = localStorage.getItem('authToken');
+      const response = await fetch(`${API_URL}/users/username`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ username: newUsername })
+      });
+      const data = await response.json();
+
+      if (data.success) {
+        setCurrentUsername(data.data.username);
+        setUsernameSuccess('Username updated successfully!');
+        setEditingUsername(false);
+        setTimeout(() => setUsernameSuccess(''), 3000);
+      } else {
+        setUsernameError(data.message || 'Failed to update username');
+      }
+    } catch {
+      setUsernameError('Failed to update username');
+    } finally {
+      setSavingUsername(false);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setNewUsername(currentUsername);
+    setUsernameError('');
+    setEditingUsername(false);
+  };
+
   return (
     <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%)' }}>
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="account" />
@@ -116,16 +205,72 @@ const SettingsPage = ({ onNavigate, user, onLogout }: SettingsPageProps) => {
                 <div>
                   <div className="font-semibold text-stone-800">Email</div>
                   <div className="text-stone-600">{user?.email || 'Loading...'}</div>
-      </div>
-    </div>
-              <div className="flex items-center justify-between py-3 border-b border-stone-200">
-      <div>
-                  <div className="font-semibold text-stone-800">Username</div>
-                  <div className="text-stone-600">{user?.name || 'Loading...'}</div>
+                </div>
+              </div>
+              <div className="py-3 border-b border-stone-200">
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <div className="font-semibold text-stone-800">Username</div>
+                    {editingUsername ? (
+                      <div className="mt-2">
+                        <div className="flex items-center gap-2">
+                          <span className="text-stone-400">@</span>
+                          <input
+                            type="text"
+                            value={newUsername}
+                            onChange={(e) => {
+                              setNewUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''));
+                              setUsernameError('');
+                            }}
+                            onBlur={() => newUsername && checkUsernameAvailability(newUsername)}
+                            className="flex-1 px-3 py-2 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-lime-500 focus:border-transparent"
+                            placeholder="username"
+                            maxLength={30}
+                          />
+                        </div>
+                        {usernameError && (
+                          <p className="text-red-500 text-sm mt-1">{usernameError}</p>
+                        )}
+                        {checkingUsername && (
+                          <p className="text-stone-500 text-sm mt-1">Checking availability...</p>
+                        )}
+                        <div className="flex gap-2 mt-3">
+                          <button
+                            onClick={handleSaveUsername}
+                            disabled={savingUsername || checkingUsername || !!usernameError}
+                            className="bg-lime-500 hover:bg-lime-600 text-white px-4 py-2 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            {savingUsername ? 'Saving...' : 'Save'}
+                          </button>
+                          <button
+                            onClick={handleCancelEdit}
+                            className="bg-stone-200 hover:bg-stone-300 text-stone-700 px-4 py-2 rounded-lg font-medium transition-colors"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="text-stone-600">
+                        {loading ? 'Loading...' : currentUsername ? `@${currentUsername}` : 'Not set'}
+                      </div>
+                    )}
+                    {usernameSuccess && (
+                      <p className="text-lime-600 text-sm mt-1">{usernameSuccess}</p>
+                    )}
+                  </div>
+                  {!editingUsername && (
+                    <button
+                      onClick={() => setEditingUsername(true)}
+                      className="text-lime-600 hover:text-lime-700 font-medium"
+                    >
+                      Edit
+                    </button>
+                  )}
                 </div>
               </div>
               <div className="flex items-center justify-between py-3">
-              <div>
+                <div>
                   <div className="font-semibold text-stone-800">Member Since</div>
                   <div className="text-stone-600">{loading ? 'Loading...' : userStats.memberSince}</div>
                 </div>

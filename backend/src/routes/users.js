@@ -4,6 +4,7 @@ const { createClient } = require('@supabase/supabase-js');
 
 const { authenticateToken } = require('../middleware/auth');
 const { validateUpdateProfile, validateChangePassword } = require('../middleware/validation');
+const userService = require('../services/userService');
 
 const router = express.Router();
 
@@ -21,7 +22,7 @@ router.get('/profile', authenticateToken, async (req, res) => {
 
     const { data, error } = await supabase
       .from('users')
-      .select('id, email, name, first_name, last_name, institution, research_field, subscription_plan, subscription_status, created_at, last_login, email_verified')
+      .select('id, email, username, name, first_name, last_name, institution, research_field, subscription_plan, subscription_status, created_at, last_login, email_verified')
       .eq('id', userId)
       .single();
 
@@ -38,6 +39,7 @@ router.get('/profile', authenticateToken, async (req, res) => {
         user: {
           id: data.id,
           email: data.email,
+          username: data.username,
           name: data.name,
           firstName: data.first_name,
           lastName: data.last_name,
@@ -414,6 +416,78 @@ router.delete('/account', authenticateToken, async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to delete account'
+    });
+  }
+});
+
+// @route   GET /api/users/username/check/:username
+// @desc    Check if username is available
+// @access  Private
+router.get('/username/check/:username', authenticateToken, async (req, res) => {
+  try {
+    const { username } = req.params;
+    const userId = req.user.id;
+
+    if (!username || username.length < 3) {
+      return res.status(400).json({
+        success: false,
+        message: 'Username must be at least 3 characters'
+      });
+    }
+
+    if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+      return res.status(400).json({
+        success: false,
+        available: false,
+        message: 'Username can only contain letters, numbers, and underscores'
+      });
+    }
+
+    const isAvailable = await userService.isUsernameAvailable(username.toLowerCase(), userId);
+
+    res.json({
+      success: true,
+      available: isAvailable,
+      message: isAvailable ? 'Username is available' : 'Username is already taken'
+    });
+  } catch (error) {
+    console.error('Check username error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to check username availability'
+    });
+  }
+});
+
+// @route   PUT /api/users/username
+// @desc    Update username
+// @access  Private
+router.put('/username', authenticateToken, async (req, res) => {
+  try {
+    const { username } = req.body;
+    const userId = req.user.id;
+
+    if (!username) {
+      return res.status(400).json({
+        success: false,
+        message: 'Username is required'
+      });
+    }
+
+    const updatedUser = await userService.updateUsername(userId, username);
+
+    res.json({
+      success: true,
+      message: 'Username updated successfully',
+      data: {
+        username: updatedUser.username
+      }
+    });
+  } catch (error) {
+    console.error('Update username error:', error);
+    res.status(400).json({
+      success: false,
+      message: error.message || 'Failed to update username'
     });
   }
 });

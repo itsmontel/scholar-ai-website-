@@ -233,6 +233,64 @@ class UserService {
       throw error;
     }
   }
+
+  async findUserByUsername(username) {
+    try {
+      const { data, error } = await this.getSupabaseClient()
+        .from('users')
+        .select('*')
+        .eq('username', username.toLowerCase())
+        .single();
+
+      if (error && error.code !== 'PGRST116') {
+        throw error;
+      }
+
+      return data || null;
+    } catch (error) {
+      console.error('Error finding user by username:', error);
+      throw error;
+    }
+  }
+
+  async isUsernameAvailable(username, excludeUserId = null) {
+    try {
+      let query = this.getSupabaseClient()
+        .from('users')
+        .select('id')
+        .eq('username', username.toLowerCase());
+      
+      if (excludeUserId) {
+        query = query.neq('id', excludeUserId);
+      }
+      
+      const { data, error } = await query.single();
+
+      if (error && error.code !== 'PGRST116') {
+        throw error;
+      }
+
+      return !data;
+    } catch (error) {
+      console.error('Error checking username availability:', error);
+      throw error;
+    }
+  }
+
+  async updateUsername(userId, username) {
+    const normalizedUsername = username.toLowerCase().trim();
+    
+    if (!/^[a-z0-9_]{3,30}$/.test(normalizedUsername)) {
+      throw new Error('Username must be 3-30 characters and contain only letters, numbers, and underscores');
+    }
+
+    const isAvailable = await this.isUsernameAvailable(normalizedUsername, userId);
+    if (!isAvailable) {
+      throw new Error('Username is already taken');
+    }
+
+    return this.updateUser(userId, { username: normalizedUsername });
+  }
 }
 
 module.exports = new UserService();
