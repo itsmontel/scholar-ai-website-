@@ -582,10 +582,10 @@ const FriendsPage = ({ onNavigate, user, onLogout }: FriendsPageProps) => {
 
         {/* Tabs */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-          <div className="flex border-b border-gray-100">
+          <div className="flex border-b border-gray-100 overflow-x-auto scrollbar-hide [-webkit-overflow-scrolling:touch]">
             <button
               onClick={() => setActiveTab('friends')}
-              className={`flex-1 px-4 py-4 text-sm font-medium transition-colors ${
+              className={`flex-shrink-0 flex-1 min-w-[72px] px-3 sm:px-4 py-4 text-sm font-medium transition-colors whitespace-nowrap ${
                 activeTab === 'friends'
                   ? 'text-purple-700 bg-purple-50 border-b-2 border-purple-600'
                   : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
@@ -600,7 +600,7 @@ const FriendsPage = ({ onNavigate, user, onLogout }: FriendsPageProps) => {
             </button>
             <button
               onClick={() => setActiveTab('requests')}
-              className={`flex-1 px-4 py-4 text-sm font-medium transition-colors ${
+              className={`flex-shrink-0 flex-1 min-w-[72px] px-3 sm:px-4 py-4 text-sm font-medium transition-colors whitespace-nowrap ${
                 activeTab === 'requests'
                   ? 'text-purple-700 bg-purple-50 border-b-2 border-purple-600'
                   : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
@@ -620,7 +620,7 @@ const FriendsPage = ({ onNavigate, user, onLogout }: FriendsPageProps) => {
             </button>
             <button
               onClick={() => setActiveTab('shares')}
-              className={`flex-1 px-4 py-4 text-sm font-medium transition-colors ${
+              className={`flex-shrink-0 flex-1 min-w-[72px] px-3 sm:px-4 py-4 text-sm font-medium transition-colors whitespace-nowrap ${
                 activeTab === 'shares'
                   ? 'text-purple-700 bg-purple-50 border-b-2 border-purple-600'
                   : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
@@ -640,7 +640,7 @@ const FriendsPage = ({ onNavigate, user, onLogout }: FriendsPageProps) => {
             </button>
             <button
               onClick={() => setActiveTab('blocked')}
-              className={`flex-1 px-4 py-4 text-sm font-medium transition-colors ${
+              className={`flex-shrink-0 flex-1 min-w-[72px] px-3 sm:px-4 py-4 text-sm font-medium transition-colors whitespace-nowrap ${
                 activeTab === 'blocked'
                   ? 'text-purple-700 bg-purple-50 border-b-2 border-purple-600'
                   : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'

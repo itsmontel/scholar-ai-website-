@@ -138,6 +138,46 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
   // Upgrade modal state (for locked features like export)
   const [showExportUpgradeModal, setShowExportUpgradeModal] = useState(false);
 
+  // Friends notification count (pending requests + incoming shares)
+  const [friendNotificationCount, setFriendNotificationCount] = useState(0);
+
+  // Fetch friend notifications count
+  useEffect(() => {
+    const fetchFriendNotifications = async () => {
+      const token = localStorage.getItem('authToken');
+      if (!token) return;
+      
+      try {
+        const [requestsRes, sharesRes] = await Promise.all([
+          fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/friends/requests/pending`, {
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+          }),
+          fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/friends/share-requests/incoming`, {
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+          })
+        ]);
+        
+        let count = 0;
+        if (requestsRes.ok) {
+          const requestsData = await requestsRes.json();
+          count += (requestsData.data || []).length;
+        }
+        if (sharesRes.ok) {
+          const sharesData = await sharesRes.json();
+          count += (sharesData.data || []).length;
+        }
+        setFriendNotificationCount(count);
+      } catch (err) {
+        console.error('Error fetching friend notifications:', err);
+      }
+    };
+    
+    fetchFriendNotifications();
+    // Refresh every 60 seconds
+    const interval = setInterval(fetchFriendNotifications, 60000);
+    return () => clearInterval(interval);
+  }, []);
+
   // Badge notifications now shown globally via BadgeNotificationToast (event from achievements.ts)
 
   // Ebook banner: show for 24 hours after first dashboard visit, or until user dismisses
@@ -1902,17 +1942,43 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                   <p className="text-stone-500 dark:text-stone-400 mt-1 sm:mt-2 text-sm sm:text-base">
                     Everything you need to <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-600 to-purple-600 font-semibold">survive school</span>
                   </p>
-                  {/* Mobile Quick Review Button - full width below survive school */}
-                  <button
-                    onClick={() => setShowQuickReview(true)}
-                    className="mt-4 lg:hidden w-full flex items-center justify-center gap-2 px-4 py-3.5 bg-gradient-to-r from-violet-500 to-purple-600 rounded-xl shadow-md shadow-violet-500/20 text-white font-semibold text-sm active:scale-[0.98] transition-all"
-                  >
-                    <span className="text-lg">🧠</span>
-                    <span>Quick Review</span>
-                    <span className="text-violet-200/90 text-xs">— Test your memory</span>
-                  </button>
+                  {/* Mobile Quick Review + Friends Buttons */}
+                  <div className="mt-4 lg:hidden flex gap-2">
+                    <button
+                      onClick={() => setShowQuickReview(true)}
+                      className="flex-1 flex items-center justify-center gap-2 px-3 py-3 bg-gradient-to-r from-violet-500 to-purple-600 rounded-xl shadow-md shadow-violet-500/20 text-white font-semibold text-sm active:scale-[0.98] transition-all"
+                    >
+                      <span className="text-lg">🧠</span>
+                      <span>Quick Review</span>
+                    </button>
+                    <button
+                      onClick={() => onNavigate('friends')}
+                      className="relative flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-xl shadow-md shadow-emerald-500/20 text-white font-semibold text-sm active:scale-[0.98] transition-all"
+                    >
+                      <span className="text-lg">👥</span>
+                      <span>Friends</span>
+                      {friendNotificationCount > 0 && (
+                        <span className="absolute -top-1.5 -right-1.5 min-w-[20px] h-5 px-1.5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center shadow-lg">
+                          {friendNotificationCount > 9 ? '9+' : friendNotificationCount}
+                        </span>
+                      )}
+                    </button>
+                  </div>
                 </div>
                 <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+                  {/* Desktop Friends Button */}
+                  <button
+                    onClick={() => onNavigate('friends')}
+                    className="hidden lg:flex relative items-center gap-2 px-3 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white text-sm font-bold rounded-full transition-all shadow-md shadow-emerald-500/30 hover:shadow-lg hover:scale-105"
+                  >
+                    <span>👥</span>
+                    <span>Friends</span>
+                    {friendNotificationCount > 0 && (
+                      <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow-lg">
+                        {friendNotificationCount > 9 ? '9+' : friendNotificationCount}
+                      </span>
+                    )}
+                  </button>
                   <div className="hidden lg:block"><BadgeWidget onNavigate={onNavigate} /></div>
                   {usageStats.plan === 'free' && !loadingStats && (
                     <button

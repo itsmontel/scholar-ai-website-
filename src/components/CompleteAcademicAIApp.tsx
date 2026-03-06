@@ -319,6 +319,7 @@ const AcademicAIApp = () => {
       if (pathname === '/citation-results') return 'citation-results';
       if (pathname === '/citation-history') return 'citation-history';
       if (pathname === '/quiz-history') return 'quiz-history';
+      if (pathname === '/friends') return 'friends';
       if (pathname === '/upload') return 'upload';
       if (pathname === '/settings') return 'settings';
       if (pathname === '/profile') return 'profile';
