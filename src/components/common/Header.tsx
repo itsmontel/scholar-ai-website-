@@ -131,32 +131,37 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
       { id: 'about', label: 'About' },
     ];
     return (
-      <header className="sticky top-0 z-50 border-b border-stone-200/50 dark:border-stone-700/50 bg-white/95 dark:bg-stone-900/95 backdrop-blur-xl shadow-sm">
+      <header className={`fixed top-0 left-0 right-0 z-50 border-b transition-all duration-300 ${
+        isScrolled 
+          ? 'bg-white/80 dark:bg-stone-900/80 backdrop-blur-xl border-stone-200/50 dark:border-stone-700/50 shadow-sm' 
+          : 'bg-transparent border-transparent'
+      }`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 py-3">
-            {/* Logo - same as landing page */}
+          <div className="flex items-center justify-between h-16 sm:h-20">
+            {/* Logo */}
             <button
               onClick={() => onNavigate?.('landing')}
-              className="flex items-center space-x-2.5 group"
+              className="flex items-center gap-2.5 group"
             >
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/30 group-hover:scale-105 transition-transform">
-                <span className="font-black text-lg text-white">W</span>
+              <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-500/30 group-hover:shadow-indigo-500/40 group-hover:scale-105 transition-all duration-300">
+                <span className="font-black text-xl text-white">W</span>
+                <div className="absolute inset-0 rounded-xl bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               </div>
-              <span className="text-xl font-extrabold tracking-tight text-indigo-600 dark:text-indigo-400">
+              <span className="text-xl font-extrabold tracking-tight text-stone-800 dark:text-stone-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors duration-300">
                 WriteScholar
               </span>
             </button>
 
-            {/* Desktop Navigation - simple links like landing page */}
-            <nav className="hidden md:flex items-center space-x-1">
+            {/* Desktop Navigation */}
+            <nav className="hidden md:flex items-center space-x-1 bg-stone-100/50 dark:bg-stone-800/50 backdrop-blur-sm p-1 rounded-full border border-stone-200/50 dark:border-stone-700/50">
               {publicNavItems.map(({ id, label }) => (
                 <button
                   key={id}
                   onClick={() => onNavigate?.(id)}
-                  className={`px-4 py-2.5 text-sm rounded-xl transition-all font-medium ${
+                  className={`px-4 py-2 text-sm rounded-full transition-all duration-300 font-medium ${
                     currentPage === id 
-                      ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30' 
-                      : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800'
+                      ? 'text-indigo-600 dark:text-indigo-400 bg-white dark:bg-stone-700 shadow-sm' 
+                      : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-200/50 dark:hover:bg-stone-700/50'
                   }`}
                 >
                   {label}
@@ -164,39 +169,23 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
               ))}
             </nav>
 
-            {/* Right side - theme, auth, mobile menu */}
-            <div className="flex items-center space-x-2 sm:space-x-3">
-{/* Dark mode toggle - hidden until implemented */}
-              {/*<button
-                onClick={toggleTheme}
-                className="p-2 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors text-stone-600 dark:text-stone-400"
-                aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-              >
-                {theme === 'dark' ? (
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-                  </svg>
-                ) : (
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                  </svg>
-                )}
-              </button>*/}
+            {/* Right side */}
+            <div className="flex items-center space-x-3">
               <button 
                 onClick={() => onNavigate?.('login')} 
-                className="hidden sm:inline-flex px-4 py-2.5 text-sm text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 font-medium rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 transition-all"
+                className="hidden sm:inline-flex px-5 py-2.5 text-sm font-semibold text-stone-600 dark:text-stone-300 hover:text-stone-900 dark:hover:text-white rounded-full hover:bg-stone-100 dark:hover:bg-stone-800 transition-all duration-300"
               >
                 Log in
               </button>
               <button 
                 onClick={() => onNavigate?.('signup')} 
-                className="inline-flex items-center px-5 py-2.5 text-white text-sm font-bold rounded-xl bg-gradient-to-r from-blue-500 to-violet-500 hover:from-blue-400 hover:to-violet-400 hover:scale-105 active:scale-95 transition-all shadow-lg shadow-violet-500/25"
+                className="inline-flex items-center px-6 py-2.5 text-white text-sm font-bold rounded-full bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 hover:scale-105 active:scale-95 transition-all duration-300 shadow-lg shadow-violet-500/25"
               >
                 Sign up free
               </button>
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="md:hidden p-2 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors text-stone-600 dark:text-stone-400"
+                className="md:hidden p-2 rounded-full hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors text-stone-600 dark:text-stone-400"
                 aria-label="Toggle menu"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -210,7 +199,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
             </div>
           </div>
         </div>
-        {/* Mobile menu - same as landing page */}
+        {/* Mobile menu */}
         {isMobileMenuOpen && (
           <div className="md:hidden border-t border-stone-200/50 dark:border-stone-700/50 bg-white/95 dark:bg-stone-900/95 backdrop-blur-xl">
             <div className="px-4 py-3 space-y-1">
@@ -250,76 +239,76 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
 
   // ── Logged-in header ───────────────────────────────────────────────────────
   return (
-    <header className={`sticky top-0 z-50 border-b border-stone-200/50 dark:border-stone-700/50 transition-all duration-300 ${
+    <header className={`sticky top-0 z-50 transition-all duration-300 border-b ${
       isScrolled 
-        ? 'bg-white/95 dark:bg-stone-900/95 backdrop-blur-xl shadow-lg shadow-stone-900/5 dark:shadow-black/20' 
-        : 'bg-white/80 dark:bg-stone-900/80 backdrop-blur-md'
+        ? 'bg-white/80 dark:bg-stone-900/80 backdrop-blur-xl shadow-sm border-stone-200/50 dark:border-stone-700/50' 
+        : 'bg-transparent border-transparent'
     }`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 sm:h-18">
+        <div className="flex items-center justify-between h-16 sm:h-20">
           {/* Logo */}
           <button 
             onClick={() => onNavigate?.('dashboard')}
             className="flex items-center gap-2.5 group"
           >
-            <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-500/30 group-hover:shadow-indigo-500/40 group-hover:scale-105 transition-all duration-200">
+            <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-500/30 group-hover:shadow-indigo-500/40 group-hover:scale-105 transition-all duration-300">
               <span className="font-black text-xl text-white">W</span>
-              <div className="absolute inset-0 rounded-xl bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="absolute inset-0 rounded-xl bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             </div>
-            <span className="text-base sm:text-xl font-extrabold tracking-tight text-indigo-600 dark:text-indigo-400 truncate max-w-[140px] sm:max-w-none">
+            <span className="text-base sm:text-xl font-extrabold tracking-tight text-stone-800 dark:text-stone-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors duration-300 truncate max-w-[140px] sm:max-w-none">
               WriteScholar
             </span>
           </button>
 
           {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center">
-            <div className="flex items-center bg-stone-100/80 dark:bg-stone-800/80 rounded-full p-1">
+            <div className="flex items-center bg-stone-100/50 dark:bg-stone-800/50 backdrop-blur-sm p-1 rounded-full border border-stone-200/50 dark:border-stone-700/50">
               <button 
                 onClick={() => onNavigate?.('dashboard')}
-                className={`px-4 py-2 text-sm font-medium rounded-full transition-all duration-200 ${
+                className={`px-4 py-2 text-sm font-medium rounded-full transition-all duration-300 ${
                   currentPage === 'dashboard' 
-                    ? 'bg-white dark:bg-stone-700 text-stone-900 dark:text-stone-100 shadow-sm' 
-                    : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100'
+                    ? 'bg-white dark:bg-stone-700 text-indigo-600 dark:text-indigo-400 shadow-sm' 
+                    : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-200/50 dark:hover:bg-stone-700/50'
                 }`}
               >
                 Dashboard
               </button>
               <button 
                 onClick={() => onNavigate?.('library')}
-                className={`px-4 py-2 text-sm font-medium rounded-full transition-all duration-200 ${
+                className={`px-4 py-2 text-sm font-medium rounded-full transition-all duration-300 ${
                   currentPage === 'library' 
-                    ? 'bg-white dark:bg-stone-700 text-stone-900 dark:text-stone-100 shadow-sm' 
-                    : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100'
+                    ? 'bg-white dark:bg-stone-700 text-indigo-600 dark:text-indigo-400 shadow-sm' 
+                    : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-200/50 dark:hover:bg-stone-700/50'
                 }`}
               >
                 Library
               </button>
               <button 
                 onClick={() => onNavigate?.('upload')}
-                className={`px-4 py-2 text-sm font-medium rounded-full transition-all duration-200 ${
+                className={`px-4 py-2 text-sm font-medium rounded-full transition-all duration-300 ${
                   currentPage === 'upload' 
-                    ? 'bg-white dark:bg-stone-700 text-stone-900 dark:text-stone-100 shadow-sm' 
-                    : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100'
+                    ? 'bg-white dark:bg-stone-700 text-indigo-600 dark:text-indigo-400 shadow-sm' 
+                    : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-200/50 dark:hover:bg-stone-700/50'
                 }`}
               >
                 Upload
               </button>
               <button 
                 onClick={() => onNavigate?.('analysis')}
-                className={`px-4 py-2 text-sm font-medium rounded-full transition-all duration-200 ${
+                className={`px-4 py-2 text-sm font-medium rounded-full transition-all duration-300 ${
                   currentPage === 'analysis' 
-                    ? 'bg-white dark:bg-stone-700 text-stone-900 dark:text-stone-100 shadow-sm' 
-                    : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100'
+                    ? 'bg-white dark:bg-stone-700 text-indigo-600 dark:text-indigo-400 shadow-sm' 
+                    : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-200/50 dark:hover:bg-stone-700/50'
                 }`}
               >
                 AI Analysis
               </button>
               <button 
                 onClick={() => onNavigate?.('citation-history')}
-                className={`px-4 py-2 text-sm font-medium rounded-full transition-all duration-200 ${
+                className={`px-4 py-2 text-sm font-medium rounded-full transition-all duration-300 ${
                   currentPage === 'citations' 
-                    ? 'bg-white dark:bg-stone-700 text-stone-900 dark:text-stone-100 shadow-sm' 
-                    : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100'
+                    ? 'bg-white dark:bg-stone-700 text-indigo-600 dark:text-indigo-400 shadow-sm' 
+                    : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-200/50 dark:hover:bg-stone-700/50'
                 }`}
               >
                 Citations
@@ -329,11 +318,11 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
             {/* Pro button - separate from pill group */}
             <button 
               onClick={() => onNavigate?.('quiz-history')}
-              className={`ml-2 px-4 py-2 text-sm font-bold rounded-full transition-all duration-200 flex items-center gap-1.5 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white shadow-lg shadow-violet-500/25 ${
+              className={`ml-3 px-4 py-2 text-sm font-bold rounded-full transition-all duration-300 flex items-center gap-1.5 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white shadow-lg shadow-violet-500/25 hover:scale-105 active:scale-95 ${
                 currentPage === 'quiz-history' ? 'ring-2 ring-violet-400 ring-offset-2' : ''
               }`}
             >
-              <span>Saved Tools</span>
+              <span>Study Tools</span>
               <span className="px-1.5 py-0.5 text-[10px] font-bold bg-white/25 text-white rounded-full">PRO</span>
             </button>
           </nav>

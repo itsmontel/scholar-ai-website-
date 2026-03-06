@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
+import Header from '../common/Header';
 import Footer from '../common/Footer';
 import { useTheme } from '../../contexts/ThemeContext';
 import AnalysisAnimation from '../common/AnalysisAnimation';
+import ScholarMascot from '../common/ScholarMascot';
 // customersImg placeholder - section is hidden
 const customersImg = '';
 
@@ -38,7 +40,6 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
   const [activeHelpCategory, setActiveHelpCategory] = useState('essays');
   const [activeStudyTab, setActiveStudyTab] = useState('analyse');
   const [studyCardsCarouselIndex, setStudyCardsCarouselIndex] = useState(0);
-  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
 
   const helpCategories = [
     {
@@ -427,77 +428,10 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
 
   return (
     <main className="min-h-screen relative transition-colors font-sans overflow-x-hidden" role="main">
-      {/* Sticky Header - Outside hero so it stays visible on scroll */}
-      <nav className="sticky top-0 z-50 border-b border-stone-200/50 dark:border-stone-700/50 bg-white/95 dark:bg-stone-900/95 backdrop-blur-xl shadow-sm" aria-label="Main navigation">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 py-3">
-            <a href="/" onClick={(e) => { e.preventDefault(); onNavigate('landing'); }} className="flex items-center space-x-2.5 group">
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/30 group-hover:scale-105 transition-transform">
-                <span className="font-black text-lg text-white">W</span>
-              </div>
-              <span className="text-xl font-extrabold tracking-tight text-indigo-600 dark:text-indigo-400">
-                WriteScholar
-              </span>
-            </a>
-            
-            <div className="hidden md:flex items-center space-x-1">
-              <a href="/features" onClick={(e) => { e.preventDefault(); onNavigate('features'); }} className="px-4 py-2.5 text-sm text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 transition-all font-medium">Features</a>
-              <a href="/why-students-choose" onClick={(e) => { e.preventDefault(); onNavigate('why-students-choose'); }} className="px-4 py-2.5 text-sm text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 transition-all font-medium">Why Students Choose</a>
-              <a href="/pricing" onClick={(e) => { e.preventDefault(); onNavigate('pricing'); }} className="px-4 py-2.5 text-sm text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 transition-all font-medium">Pricing</a>
-              <a href="/blog" onClick={(e) => { e.preventDefault(); onNavigate('blog'); }} className="px-4 py-2.5 text-sm text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 transition-all font-medium">Blog</a>
-              <a href="/about" onClick={(e) => { e.preventDefault(); onNavigate('about'); }} className="px-4 py-2.5 text-sm text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 transition-all font-medium">About</a>
-            </div>
-            
-            <div className="flex items-center space-x-2 sm:space-x-3">
-              {/* Dark mode toggle - hidden until implemented */}
-              {/*<button
-                onClick={toggleTheme}
-                className="p-2 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors text-stone-600 dark:text-stone-400"
-                aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-                </svg>
-              </button>*/}
-              <a href="/login" onClick={(e) => { e.preventDefault(); onNavigate('login'); }} className="hidden sm:inline-flex px-4 py-2.5 text-sm text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 font-medium rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 transition-all">Log in</a>
-              <a href="/signup" onClick={(e) => { e.preventDefault(); onNavigate('signup'); }} className="hidden sm:inline-flex items-center px-5 py-2.5 text-white text-sm font-bold rounded-xl bg-gradient-to-r from-blue-500 to-violet-500 hover:from-blue-400 hover:to-violet-400 hover:scale-105 active:scale-95 transition-all shadow-lg shadow-violet-500/25">
-                Sign up free
-              </a>
-              <button
-                onClick={() => setIsMobileNavOpen(!isMobileNavOpen)}
-                className="md:hidden p-2 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors text-stone-600 dark:text-stone-400"
-                aria-label="Toggle menu"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  {isMobileNavOpen ? (
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  ) : (
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                  )}
-                </svg>
-              </button>
-            </div>
-          </div>
-        </div>
-        {isMobileNavOpen && (
-          <div className="md:hidden border-t border-stone-200/50 dark:border-stone-700/50 bg-white/95 dark:bg-stone-900/95 backdrop-blur-xl">
-            <div className="px-4 py-3 space-y-1">
-              <a href="/features" onClick={(e) => { e.preventDefault(); setIsMobileNavOpen(false); onNavigate('features'); }} className="block px-4 py-3 text-sm font-medium text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 transition-all">Features</a>
-              <a href="/why-students-choose" onClick={(e) => { e.preventDefault(); setIsMobileNavOpen(false); onNavigate('why-students-choose'); }} className="block px-4 py-3 text-sm font-medium text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 transition-all">Why Students Choose</a>
-              <a href="/pricing" onClick={(e) => { e.preventDefault(); setIsMobileNavOpen(false); onNavigate('pricing'); }} className="block px-4 py-3 text-sm font-medium text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 transition-all">Pricing</a>
-              <a href="/blog" onClick={(e) => { e.preventDefault(); setIsMobileNavOpen(false); onNavigate('blog'); }} className="block px-4 py-3 text-sm font-medium text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 transition-all">Blog</a>
-              <a href="/about" onClick={(e) => { e.preventDefault(); setIsMobileNavOpen(false); onNavigate('about'); }} className="block px-4 py-3 text-sm font-medium text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 transition-all">About</a>
-              <div className="pt-2 pb-1 flex flex-col gap-2">
-                <a href="/login" onClick={(e) => { e.preventDefault(); setIsMobileNavOpen(false); onNavigate('login'); }} className="block text-center px-4 py-3 text-sm font-medium text-stone-600 dark:text-stone-400 rounded-xl border border-stone-200 dark:border-stone-700 hover:bg-stone-100 dark:hover:bg-stone-800 transition-all">Log in</a>
-                <a href="/signup" onClick={(e) => { e.preventDefault(); setIsMobileNavOpen(false); onNavigate('signup'); }} className="block text-center px-4 py-3 text-white text-sm font-bold rounded-xl bg-gradient-to-r from-blue-500 to-violet-500 shadow-lg shadow-violet-500/25">Sign up free</a>
-              </div>
-            </div>
-          </div>
-        )}
-      </nav>
+      <Header onNavigate={onNavigate} />
 
       {/* HERO SECTION - Fun, Gen Z, full of energy */}
-      <section className="relative min-h-[70vh] sm:min-h-[85vh] flex flex-col overflow-hidden">
+      <section className="relative min-h-[70vh] sm:min-h-[85vh] flex flex-col overflow-hidden pt-24">
         {/* Background */}
         <div className="absolute inset-0 bg-gradient-to-b from-blue-50/60 via-stone-50 to-white dark:from-stone-950 dark:via-stone-900 dark:to-stone-900" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(99,102,241,0.18),transparent)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(139,92,246,0.14),transparent)]" />
@@ -548,25 +482,9 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
 
         {/* Hero Content - Centered, flows into page */}
         <div className="relative flex-1 flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8 py-10 sm:py-16 lg:py-24">
-          {/* Left character - celebrating */}
-          <div className="hidden lg:block absolute left-2 xl:left-6 top-[22%] -translate-y-1/2 w-20 h-24 xl:w-24 xl:h-28 animate-float z-10 opacity-90">
-            <svg viewBox="0 0 120 140" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
-              <path d="M40 85 Q38 115 42 140 L78 140 Q82 115 80 85" fill="#F59E0B" />
-              <rect x="50" y="65" width="18" height="24" fill="#FCD9B6" />
-              <ellipse cx="59" cy="40" rx="28" ry="30" fill="#FCD9B6" />
-              <path d="M32 35 Q30 18 48 14 Q65 10 85 14 Q100 18 98 35" fill="#1F2937" />
-              <ellipse cx="48" cy="40" rx="4" ry="5" fill="#1F2937" />
-              <ellipse cx="70" cy="40" rx="4" ry="5" fill="#1F2937" />
-              <circle cx="49" cy="38" r="1.5" fill="white" />
-              <circle cx="71" cy="38" r="1.5" fill="white" />
-              <path d="M45 52 Q58 58 72 52" stroke="#1F2937" strokeWidth="2" fill="none" strokeLinecap="round" />
-              <path d="M35 90 Q15 95 5 110" stroke="#FCD9B6" strokeWidth="12" fill="none" strokeLinecap="round" />
-              <path d="M85 90 Q105 92 115 105" stroke="#FCD9B6" strokeWidth="12" fill="none" strokeLinecap="round" />
-              <ellipse cx="3" cy="112" rx="8" ry="9" fill="#FCD9B6" />
-              <ellipse cx="118" cy="108" rx="8" ry="9" fill="#FCD9B6" />
-              <path d="M55 80 L58 88 L66 91 L58 94 L55 102 L52 94 L44 91 L52 88 Z" fill="#F59E0B" />
-              <path d="M68 85 L70 90 L75 92 L70 94 L68 99 L66 94 L61 92 L66 90 Z" fill="#FBBF24" />
-            </svg>
+          {/* Left mascot - ScholarMascot */}
+          <div className="hidden lg:block absolute left-0 xl:left-4 top-[25%] -translate-y-1/2 z-10">
+            <ScholarMascot size={140} animated={true} />
           </div>
           {/* Right character - studying with book */}
           <div className="hidden lg:block absolute right-2 xl:right-6 top-[22%] -translate-y-1/2 w-20 h-24 xl:w-24 xl:h-28 z-10 opacity-90">
@@ -2262,18 +2180,27 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
             </div>
           </div>
 
-          {/* Bridge: Make it come alive */}
-          <div className="relative text-center mb-10 sm:mb-12 animate-notes-fade-in-up opacity-0" style={{ animationDelay: '0.5s', animationFillMode: 'forwards' }}>
-            <div className="absolute -left-8 top-1/2 -translate-y-1/2 hidden lg:block text-4xl opacity-50 animate-float">✨</div>
-            <div className="absolute -right-8 top-1/2 -translate-y-1/2 hidden lg:block text-4xl opacity-50 animate-float-delayed">⚡</div>
-            <div className="lg:hidden absolute left-4 top-1/2 -translate-y-1/2 text-2xl opacity-60 animate-float">✨</div>
-            <div className="lg:hidden absolute right-4 top-1/2 -translate-y-1/2 text-2xl opacity-60 animate-float-delayed">⚡</div>
-            <h3 className="text-xl sm:text-2xl font-bold text-stone-800 dark:text-stone-100 mb-2 max-lg:bg-gradient-to-r max-lg:from-violet-700 max-lg:to-purple-700 max-lg:dark:from-violet-300 max-lg:dark:to-purple-300 max-lg:bg-clip-text max-lg:text-transparent">
-              Make it come alive
-            </h3>
-            <p className="text-stone-600 dark:text-stone-400 text-base sm:text-lg max-w-xl mx-auto max-lg:text-stone-700 max-lg:dark:text-stone-300 max-lg:font-medium">
-              Your notes → quizzes, flashcards, crosswords. Literally in seconds. No stress.
-            </p>
+          {/* Bridge: Make it come alive + arrows to tools */}
+          <div className="relative animate-notes-fade-in-up opacity-0" style={{ animationDelay: '0.5s', animationFillMode: 'forwards' }}>
+            <div className="relative text-center">
+              {/* Make it come alive - refined card */}
+              <div className="inline-flex flex-col items-center gap-4 mb-10 sm:mb-12">
+                <div className="relative">
+                  <div className="relative px-10 sm:px-14 py-6 sm:py-7 rounded-2xl bg-white dark:bg-stone-800 shadow-lg border border-stone-200/80 dark:border-stone-700">
+                    <div className="flex items-center justify-center gap-2 mb-2">
+                      <span className="text-2xl">✨</span>
+                      <h3 className="text-xl sm:text-2xl font-extrabold bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 dark:from-violet-400 dark:to-fuchsia-400 bg-clip-text text-transparent">
+                        Make it come alive
+                      </h3>
+                      <span className="text-2xl">⚡</span>
+                    </div>
+                    <p className="text-stone-500 dark:text-stone-400 text-sm sm:text-base">
+                      Your notes → quizzes, flashcards, crosswords. In seconds.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Three tool cards - staggered entrance */}
@@ -2467,75 +2394,9 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                 View Pricing
               </button>
             </div>
-            {/* Three cute characters - same as sign up page */}
-            <div className="flex justify-center items-end">
-              <svg viewBox="0 0 320 160" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-72 h-36">
-                {/* Person 1 - Woman with red hair (left) */}
-                <g transform="translate(0, 0)">
-                  <path d="M35 80 Q30 102 35 130 L65 130 Q70 102 65 80" fill="#8B5CF6" />
-                  <rect x="43" y="62" width="14" height="20" fill="#FCD9B6" />
-                  <ellipse cx="50" cy="40" rx="22" ry="25" fill="#FCD9B6" />
-                  <path d="M28 34 Q24 16 38 10 Q50 3 66 10 Q78 16 74 34 Q71 25 60 20 Q50 15 40 20 Q30 25 28 34" fill="#B45309" />
-                  <path d="M28 34 Q20 58 28 85" fill="#B45309" />
-                  <path d="M72 34 Q80 58 72 85" fill="#B45309" />
-                  <ellipse cx="40" cy="40" rx="4" ry="5" fill="#1F2937" />
-                  <ellipse cx="60" cy="40" rx="4" ry="5" fill="#1F2937" />
-                  <circle cx="41" cy="38" r="1.5" fill="white" />
-                  <circle cx="61" cy="38" r="1.5" fill="white" />
-                  <path d="M40 52 Q50 62 60 52" stroke="#1F2937" strokeWidth="2" fill="none" strokeLinecap="round" />
-                  <ellipse cx="30" cy="47" rx="5" ry="3" fill="#FECACA" opacity="0.5" />
-                  <ellipse cx="70" cy="47" rx="5" ry="3" fill="#FECACA" opacity="0.5" />
-                  <path d="M70 85 Q82 72 86 55" stroke="#FCD9B6" strokeWidth="9" fill="none" strokeLinecap="round" />
-                  <ellipse cx="88" cy="53" rx="6" ry="7" fill="#FCD9B6" />
-                </g>
-                {/* Person 2 - Man with glasses (center) */}
-                <g transform="translate(110, -8)">
-                  <path d="M35 95 Q30 120 35 150 L75 150 Q80 120 75 95" fill="#3B82F6" />
-                  <rect x="47" y="74" width="16" height="24" fill="#E8B796" />
-                  <ellipse cx="55" cy="48" rx="26" ry="30" fill="#E8B796" />
-                  <path d="M29 40 Q26 20 40 14 Q55 6 70 14 Q84 20 81 40 Q78 28 66 21 Q55 15 44 21 Q32 28 29 40" fill="#5D4037" />
-                  <path d="M29 40 Q22 50 29 60" fill="#5D4037" />
-                  <path d="M81 40 Q88 50 81 60" fill="#5D4037" />
-                  <ellipse cx="42" cy="46" rx="12" ry="10" fill="none" stroke="#374151" strokeWidth="2.5" />
-                  <ellipse cx="68" cy="46" rx="12" ry="10" fill="none" stroke="#374151" strokeWidth="2.5" />
-                  <path d="M54 46 L56 46" stroke="#374151" strokeWidth="2.5" />
-                  <path d="M30 43 L24 40" stroke="#374151" strokeWidth="2.5" />
-                  <path d="M80 43 L86 40" stroke="#374151" strokeWidth="2.5" />
-                  <ellipse cx="42" cy="48" rx="4" ry="5" fill="#1F2937" />
-                  <ellipse cx="68" cy="48" rx="4" ry="5" fill="#1F2937" />
-                  <circle cx="43" cy="46" r="1.5" fill="white" />
-                  <circle cx="69" cy="46" r="1.5" fill="white" />
-                  <path d="M30 34 Q42 28 54 34" stroke="#5D4037" strokeWidth="2" fill="none" strokeLinecap="round" />
-                  <path d="M56 34 Q68 28 80 34" stroke="#5D4037" strokeWidth="2" fill="none" strokeLinecap="round" />
-                  <path d="M42 64 Q55 76 68 64" stroke="#1F2937" strokeWidth="2.5" fill="none" strokeLinecap="round" />
-                  <ellipse cx="28" cy="56" rx="5" ry="3" fill="#FECACA" opacity="0.4" />
-                  <ellipse cx="82" cy="56" rx="5" ry="3" fill="#FECACA" opacity="0.4" />
-                  <path d="M80 100 Q92 88 96 68" stroke="#E8B796" strokeWidth="11" fill="none" strokeLinecap="round" />
-                  <ellipse cx="98" cy="66" rx="7" ry="8" fill="#E8B796" />
-                  <path d="M45 90 L55 102 L65 90" stroke="#2563EB" strokeWidth="2" fill="none" />
-                </g>
-                {/* Person 3 - Woman with bun (right) */}
-                <g transform="translate(220, 2)">
-                  <path d="M30 78 Q25 100 30 128 L60 128 Q65 100 60 78" fill="#10B981" />
-                  <rect x="38" y="60" width="14" height="20" fill="#D4A574" />
-                  <ellipse cx="45" cy="38" rx="22" ry="24" fill="#D4A574" />
-                  <path d="M23 32 Q20 15 33 10 Q45 4 60 10 Q72 15 69 32 Q65 23 54 18 Q45 14 36 18 Q26 23 23 32" fill="#1F2937" />
-                  <ellipse cx="45" cy="6" rx="10" ry="8" fill="#1F2937" />
-                  <path d="M23 32 Q16 42 23 52" fill="#1F2937" />
-                  <path d="M67 32 Q74 42 67 52" fill="#1F2937" />
-                  <ellipse cx="36" cy="38" rx="4" ry="5" fill="#1F2937" />
-                  <ellipse cx="54" cy="38" rx="4" ry="5" fill="#1F2937" />
-                  <circle cx="37" cy="36" r="1.5" fill="white" />
-                  <circle cx="55" cy="36" r="1.5" fill="white" />
-                  <path d="M28 30 Q36 26 44 30" stroke="#1F2937" strokeWidth="2" fill="none" strokeLinecap="round" />
-                  <path d="M46 30 Q54 26 62 30" stroke="#1F2937" strokeWidth="2" fill="none" strokeLinecap="round" />
-                  <path d="M35 50 Q45 60 55 50" stroke="#1F2937" strokeWidth="2" fill="none" strokeLinecap="round" />
-                  <ellipse cx="25" cy="44" rx="5" ry="3" fill="#FECACA" opacity="0.5" />
-                  <ellipse cx="65" cy="44" rx="5" ry="3" fill="#FECACA" opacity="0.5" />
-                  <path d="M25 82 Q12 70 8 52" stroke="#D4A574" strokeWidth="9" fill="none" strokeLinecap="round" />
-                  <ellipse cx="7" cy="50" rx="6" ry="7" fill="#D4A574" />
-                </g>
-              </svg>
+            {/* ScholarMascot */}
+            <div className="flex justify-center items-center">
+              <ScholarMascot size={180} animated={true} />
             </div>
           </div>
         </div>

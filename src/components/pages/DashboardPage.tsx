@@ -4,6 +4,7 @@ import Footer from '../common/Footer';
 import AnalysisAnimation from '../common/AnalysisAnimation';
 import StreakWidget from '../common/StreakWidget';
 import BadgeWidget from '../common/BadgeWidget';
+import FlashcardViewer from '../common/FlashcardViewer';
 import { jsPDF } from 'jspdf';
 import { Document, Packer, Paragraph, TextRun, HeadingLevel } from 'docx';
 import { saveAs } from 'file-saver';
@@ -117,9 +118,6 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
   const [flashcardResult, setFlashcardResult] = useState<any>(null);
   const [flashcardCount, setFlashcardCount] = useState(15);
   const [isGeneratingFlashcards, setIsGeneratingFlashcards] = useState(false);
-  const [currentCard, setCurrentCard] = useState(0);
-  const [isFlipped, setIsFlipped] = useState(false);
-  const [knownCards, setKnownCards] = useState<Set<number>>(new Set());
   
   // Crossword state
   const [crosswordResult, setCrosswordResult] = useState<any>(null);
@@ -952,9 +950,6 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
       if (!response.ok) throw new Error(data.message || 'Flashcard generation failed');
       setFlashcardResult(data.data);
       showBadgeNotification(trackAction('flashcards_count'));
-      setCurrentCard(0);
-      setIsFlipped(false);
-      setKnownCards(new Set());
       fetchQuizUsage();
     } catch (error: any) {
       setQuizError(error.message || 'Flashcard generation failed. Please try again.');
@@ -2951,106 +2946,17 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
             {/* ============ FLASHCARD SUB-MODE ============ */}
             {studyToolMode === 'flashcards' && (
               <>
-                {/* Flashcard Interactive View - Mobile optimized */}
-                {flashcardResult && flashcardResult.cards?.length > 0 ? (
+                {/* Flashcard Interactive View with Customization */}
+                {flashcardResult ? (
                   <div className="mb-4 sm:mb-6">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-3 sm:mb-4 gap-2">
-                      <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-gray-100 truncate">{flashcardResult.title}</h3>
-                      <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-1 sm:pb-0 scrollbar-hide">
-                        {isPaidUser ? (
-                          <>
-                            <button onClick={exportFlashcardsToPDF} className="px-2 sm:px-3 py-1 sm:py-1.5 bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 font-medium rounded-lg active:bg-red-100 sm:hover:bg-red-100 dark:sm:hover:bg-red-900/50 transition-colors flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs flex-shrink-0">
-                              <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd"/></svg>
-                              PDF
-                            </button>
-                            <button onClick={exportFlashcardsToDOCX} className="px-2 sm:px-3 py-1 sm:py-1.5 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium rounded-lg active:bg-blue-100 sm:hover:bg-blue-100 dark:sm:hover:bg-blue-900/50 transition-colors flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs flex-shrink-0">
-                              <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd"/></svg>
-                              DOCX
-                            </button>
-                          </>
-                        ) : (
-                          <>
-                            <button onClick={() => setShowExportUpgradeModal(true)} className="px-2 sm:px-3 py-1 sm:py-1.5 bg-gray-100 dark:bg-stone-700 text-gray-400 dark:text-stone-500 font-medium rounded-lg flex items-center gap-1 text-[10px] sm:text-xs cursor-pointer flex-shrink-0">
-                              <svg className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-amber-500" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd"/></svg>
-                              PDF
-                            </button>
-                            <button onClick={() => setShowExportUpgradeModal(true)} className="px-2 sm:px-3 py-1 sm:py-1.5 bg-gray-100 dark:bg-stone-700 text-gray-400 dark:text-stone-500 font-medium rounded-lg flex items-center gap-1 text-[10px] sm:text-xs cursor-pointer flex-shrink-0">
-                              <svg className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-amber-500" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd"/></svg>
-                              DOCX
-                            </button>
-                          </>
-                        )}
-                        <button onClick={() => { setFlashcardResult(null); setCurrentCard(0); setIsFlipped(false); setKnownCards(new Set()); }}
-                          className="px-2.5 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/30 rounded-lg active:bg-amber-100 sm:hover:bg-lime-100 dark:sm:hover:bg-lime-800/50 font-medium flex-shrink-0">
-                          New Deck
-                        </button>
-                      </div>
-                    </div>
-                    {/* Progress bar */}
-                    <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-5">
-                      <div className="flex-1 h-1.5 sm:h-2 bg-gray-100 dark:bg-stone-700 rounded-full overflow-hidden">
-                        <div className="h-full bg-gradient-to-r from-emerald-400 to-teal-500 transition-all duration-300" style={{ width: `${((currentCard + 1) / flashcardResult.cards.length) * 100}%` }}></div>
-                      </div>
-                      <span className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 font-medium flex-shrink-0">{currentCard + 1}/{flashcardResult.cards.length}</span>
-                      {knownCards.size > 0 && <span className="text-[10px] sm:text-xs text-green-600 dark:text-green-400 font-medium flex-shrink-0">{knownCards.size} ✓</span>}
-                    </div>
-                    {/* The flip card - Mobile optimized */}
-                    <div
-                      onClick={() => setIsFlipped(!isFlipped)}
-                      className="relative cursor-pointer select-none select-touch-none mx-auto max-w-2xl mb-4 sm:mb-6"
-                      style={{ perspective: '1000px' }}
-                    >
-                      <div
-                        className="relative w-full transition-transform duration-500"
-                        style={{ transformStyle: 'preserve-3d', transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)' }}
-                      >
-                        {/* Front */}
-                        <div className="w-full min-h-[200px] sm:min-h-[320px] bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border-2 border-amber-200 dark:border-amber-700 rounded-2xl sm:rounded-3xl p-5 sm:p-8 flex flex-col items-center justify-center text-center shadow-lg"
-                          style={{ backfaceVisibility: 'hidden' }}>
-                          <span className="text-[10px] sm:text-xs font-bold text-amber-500 uppercase tracking-widest mb-3 sm:mb-4">Front</span>
-                          <p className="text-lg sm:text-2xl font-semibold text-gray-900 dark:text-gray-100 leading-relaxed">{flashcardResult.cards[currentCard]?.front}</p>
-                          <p className="text-[10px] sm:text-xs text-emerald-400 dark:text-emerald-500 mt-4 sm:mt-6">Tap to flip</p>
-                        </div>
-                        {/* Back */}
-                        <div className="absolute inset-0 w-full min-h-[200px] sm:min-h-[320px] bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-2 border-blue-200 dark:border-blue-700 rounded-2xl sm:rounded-3xl p-5 sm:p-8 flex flex-col items-center justify-center text-center shadow-lg"
-                          style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}>
-                          <span className="text-[10px] sm:text-xs font-bold text-blue-500 uppercase tracking-widest mb-3 sm:mb-4">Back</span>
-                          <p className="text-base sm:text-xl text-gray-800 dark:text-gray-200 leading-relaxed">{flashcardResult.cards[currentCard]?.back}</p>
-                          <p className="text-[10px] sm:text-xs text-blue-400 mt-4 sm:mt-6">Tap to flip back</p>
-                        </div>
-                      </div>
-                    </div>
-                    {/* Navigation + Know/Don't Know - Mobile optimized */}
-                    <div className="flex items-center justify-center gap-2 sm:gap-3">
-                      <button onClick={() => { setCurrentCard(Math.max(0, currentCard - 1)); setIsFlipped(false); }}
-                        disabled={currentCard === 0}
-                        className="px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-medium bg-gray-100 dark:bg-stone-700 text-gray-600 dark:text-gray-300 active:bg-gray-200 sm:hover:bg-gray-200 dark:sm:hover:bg-stone-600 disabled:opacity-30 transition-all">
-                        ← <span className="hidden sm:inline">Previous</span>
-                      </button>
-                      <button onClick={() => {
-                          const newKnown = new Set(knownCards);
-                          if (newKnown.has(currentCard)) newKnown.delete(currentCard); else newKnown.add(currentCard);
-                          setKnownCards(newKnown);
-                        }}
-                        className={`px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all active:scale-95 ${
-                          knownCards.has(currentCard) ? 'bg-green-500 text-white shadow-md' : 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-700 active:bg-green-100 sm:hover:bg-green-100 dark:sm:hover:bg-green-900/50'
-                        }`}>
-                        {knownCards.has(currentCard) ? '✓' : <span className="hidden sm:inline">Mark as</span>} <span className="sm:hidden">{knownCards.has(currentCard) ? '' : '✓'}</span><span className="hidden sm:inline">{knownCards.has(currentCard) ? ' Mastered' : ' Known'}</span>
-                      </button>
-                      <button onClick={() => { setCurrentCard(Math.min(flashcardResult.cards.length - 1, currentCard + 1)); setIsFlipped(false); }}
-                        disabled={currentCard >= flashcardResult.cards.length - 1}
-                        className="px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-medium bg-gradient-to-r from-amber-600 to-orange-600 text-white active:from-amber-700 active:to-orange-700 sm:hover:from-amber-700 sm:hover:to-orange-700 disabled:opacity-30 transition-all active:scale-95">
-                        <span className="hidden sm:inline">Next </span>→
-                      </button>
-                    </div>
-                    {/* Summary when all reviewed */}
-                    {knownCards.size === flashcardResult.cards.length && (
-                      <div className="mt-4 sm:mt-6 p-4 sm:p-6 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200 dark:border-green-700 rounded-xl sm:rounded-2xl text-center">
-                        <span className="text-3xl sm:text-4xl mb-1 sm:mb-2 block">🎉</span>
-                        <h3 className="text-lg sm:text-xl font-bold text-green-800 dark:text-green-300">All cards mastered!</h3>
-                        <p className="text-green-600 dark:text-green-400 text-xs sm:text-sm mt-1">You've marked all {flashcardResult.cards.length} cards as known. Great job!</p>
-                      </div>
-                    )}
+                    <FlashcardViewer
+                      initialCards={flashcardResult.cards ?? []}
+                      title={flashcardResult.title || 'Flashcards'}
+                      onExportPDF={isPaidUser ? exportFlashcardsToPDF : undefined}
+                      onExportDOCX={isPaidUser ? exportFlashcardsToDOCX : undefined}
+                      onNewDeck={() => setFlashcardResult(null)}
+                      canExport={isPaidUser}
+                    />
                   </div>
                 ) : (
                   /* Flashcard Input Form */
@@ -3071,27 +2977,35 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                             </select>
                           </div>
                         </div>
-                        <button
-                          onClick={handleSubmit}
-                          disabled={!isTextValid() || isGeneratingFlashcards || !canUseQuiz}
-                          className={`w-full sm:w-auto px-6 py-2.5 rounded-xl flex items-center justify-center transition-all font-semibold text-sm flex-shrink-0 ${
-                            isTextValid() && !isGeneratingFlashcards && canUseQuiz
-                              ? 'bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white shadow-lg shadow-emerald-500/25 cursor-pointer'
-                              : 'bg-stone-200 dark:bg-stone-600 text-stone-400 dark:text-stone-500 cursor-not-allowed'
-                          }`}
-                        >
-                          {isGeneratingFlashcards ? (
-                            <>
-                              <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                              </svg>
-                              Generating...
-                            </>
-                          ) : (
-                            <>🃏 Generate Flashcards</>
-                          )}
-                        </button>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => setFlashcardResult({ title: 'My Flashcards', cards: [] })}
+                            className="px-4 py-2.5 rounded-xl flex items-center justify-center transition-all font-semibold text-sm bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-400 hover:bg-violet-200 dark:hover:bg-violet-900/50"
+                          >
+                            ✏️ Create from Scratch
+                          </button>
+                          <button
+                            onClick={handleSubmit}
+                            disabled={!isTextValid() || isGeneratingFlashcards || !canUseQuiz}
+                            className={`w-full sm:w-auto px-6 py-2.5 rounded-xl flex items-center justify-center transition-all font-semibold text-sm flex-shrink-0 ${
+                              isTextValid() && !isGeneratingFlashcards && canUseQuiz
+                                ? 'bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white shadow-lg shadow-emerald-500/25 cursor-pointer'
+                                : 'bg-stone-200 dark:bg-stone-600 text-stone-400 dark:text-stone-500 cursor-not-allowed'
+                            }`}
+                          >
+                            {isGeneratingFlashcards ? (
+                              <>
+                                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                Generating...
+                              </>
+                            ) : (
+                              <>🃏 Generate with AI</>
+                            )}
+                          </button>
+                        </div>
                       </div>
                     </div>
                     <div className="flex flex-col min-w-0">

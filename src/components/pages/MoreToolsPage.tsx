@@ -46,7 +46,7 @@ const MoreToolsPage = ({ onNavigate, user, onLogout }: MoreToolsPageProps) => {
             More Free Tools
           </h1>
           <p className="text-stone-500 dark:text-stone-400 text-lg max-w-2xl">
-            Handy utilities for students — no signup required. All free.
+            Handy utilities for students, All free.
           </p>
         </div>
 

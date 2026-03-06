@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import Header from '../../common/Header';
 import Footer from '../../common/Footer';
 import AnalysisAnimation from '../../common/AnalysisAnimation';
+import FlashcardViewer from '../../common/FlashcardViewer';
 import { jsPDF } from 'jspdf';
 import { Document, Packer, Paragraph, TextRun, HeadingLevel } from 'docx';
 import { saveAs } from 'file-saver';
@@ -64,9 +65,6 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
   // Flashcard state
   const [flashcardResult, setFlashcardResult] = useState<any>(null);
   const [flashcardCount, setFlashcardCount] = useState(15);
-  const [currentCard, setCurrentCard] = useState(0);
-  const [isFlipped, setIsFlipped] = useState(false);
-  const [knownCards, setKnownCards] = useState<Set<number>>(new Set());
   
   // Crossword state
   const [crosswordResult, setCrosswordResult] = useState<any>(null);
@@ -157,8 +155,6 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
           sourceWordCount: parsed.source_word_count ?? 0
         });
         setStudyToolMode('flashcards');
-        setCurrentCard(0);
-        setIsFlipped(false);
         setError(null);
       }
     } catch (e) {
@@ -319,9 +315,6 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || 'Flashcard generation failed');
       setFlashcardResult(data.data);
-      setCurrentCard(0);
-      setIsFlipped(false);
-      setKnownCards(new Set());
       if (isFreeUser) setQuizUsage(prev => ({ ...prev, generationsUsed: prev.generationsUsed + 1, generationsRemaining: Math.max(0, prev.generationsRemaining - 1) }));
     } catch (err: any) {
       setError(err.message || 'Flashcard generation failed.');
@@ -1270,42 +1263,52 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
     if (!quiz || isQuizMode) return null;
 
     return (
-      <div className="bg-white dark:bg-stone-800 rounded-2xl sm:rounded-3xl shadow-xl shadow-stone-100/50 dark:shadow-none border border-stone-200 dark:border-stone-600 overflow-hidden">
-        <div className="p-4 sm:p-6 border-b border-stone-200 dark:border-stone-600 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <h2 className="text-xl sm:text-2xl font-bold text-stone-800 dark:text-stone-100">{quiz.title}</h2>
-              <p className="text-stone-600 dark:text-stone-400 text-sm mt-1">
-                {quiz.questions.length} questions • {quiz.difficulty} difficulty • {quiz.quizType} format
-              </p>
-            </div>
-            <div className="flex gap-2 flex-wrap">
-              <button
-                onClick={startQuiz}
-                className="px-5 py-2.5 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-semibold rounded-xl transition-all flex items-center gap-2"
-              >
-                🧠 Start Quiz
-              </button>
-              {isPaidUser ? (
-                <>
-                  <button
-                    onClick={exportQuizToPDF}
-                    className="px-4 py-2.5 bg-red-50 text-red-700 rounded-xl hover:bg-red-100 transition-all font-medium text-sm flex items-center gap-1.5"
-                    title="Download as PDF"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                    PDF
-                  </button>
-                  <button
-                    onClick={exportQuizToDOCX}
-                    className="px-4 py-2.5 bg-blue-50 text-blue-700 rounded-xl hover:bg-blue-100 transition-all font-medium text-sm flex items-center gap-1.5"
-                    title="Download as Word"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                    DOCX
-                  </button>
-                </>
-              ) : (
+      <div className="mt-4 mx-3 sm:mx-0">
+        <button onClick={() => setQuiz(null)} className="mb-4 px-4 py-2 text-stone-600 dark:text-stone-400 hover:text-stone-800 dark:text-stone-100 flex items-center gap-2">← Create New Quiz</button>
+        <div className="bg-white dark:bg-stone-800 rounded-2xl sm:rounded-3xl shadow-xl shadow-stone-100/50 dark:shadow-none border border-stone-200 dark:border-stone-600 overflow-hidden">
+          <div className="p-4 sm:p-6 border-b border-stone-200 dark:border-stone-600 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <h2 className="text-xl sm:text-2xl font-bold text-stone-800 dark:text-stone-100">{quiz.title}</h2>
+                <p className="text-stone-600 dark:text-stone-400 text-sm mt-1">
+                  {quiz.questions.length} questions • {quiz.difficulty} difficulty • {quiz.quizType} format
+                </p>
+              </div>
+              <div className="flex gap-2 flex-wrap">
+                <button
+                  onClick={startQuiz}
+                  className="px-5 py-2.5 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-semibold rounded-xl transition-all flex items-center gap-2"
+                >
+                  🧠 Start Quiz
+                </button>
+                <button
+                  onClick={downloadQuiz}
+                  className="px-4 py-2.5 bg-stone-100 dark:bg-stone-700 text-stone-700 dark:text-stone-300 rounded-xl hover:bg-stone-200 dark:hover:bg-stone-600 transition-all font-medium text-sm flex items-center gap-1.5"
+                  title="Download as TXT"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                  TXT
+                </button>
+                {isPaidUser ? (
+                  <>
+                    <button
+                      onClick={exportQuizToPDF}
+                      className="px-4 py-2.5 bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-400 rounded-xl hover:bg-red-100 dark:hover:bg-red-900/50 transition-all font-medium text-sm flex items-center gap-1.5"
+                      title="Download as PDF"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                      PDF
+                    </button>
+                    <button
+                      onClick={exportQuizToDOCX}
+                      className="px-4 py-2.5 bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 rounded-xl hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-all font-medium text-sm flex items-center gap-1.5"
+                      title="Download as Word"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                      DOCX
+                    </button>
+                  </>
+                ) : (
                 <>
                   <button
                     onClick={() => setShowExportUpgradeModal(true)}
@@ -1361,6 +1364,7 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
               </div>
             ))}
           </div>
+        </div>
         </div>
       </div>
     );
@@ -1502,82 +1506,23 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
                     </div>
                   </div>
                 )}
-                {quiz && !isQuizMode && (
-                  <div className="mt-4 mx-3 sm:mx-0">
-                    <button onClick={() => setQuiz(null)} className="px-4 py-2 text-stone-600 dark:text-stone-400 hover:text-stone-800 dark:text-stone-100 flex items-center gap-2">← Create New Quiz</button>
-                  </div>
-                )}
+                {quiz && !isQuizMode && renderQuizPreview()}
               </>
             )}
 
             {/* === FLASHCARD MODE === */}
             {studyToolMode === 'flashcards' && (
               <>
-                {flashcardResult && flashcardResult.cards?.length > 0 ? (
+                {flashcardResult ? (
                   <div className="mx-3 sm:mx-0">
-                    <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
-                      <h3 className="text-lg font-bold text-stone-800 dark:text-stone-100">{flashcardResult.title}</h3>
-                      <div className="flex items-center gap-2 flex-wrap">
-                        {isPaidUser ? (
-                          <>
-                            <button onClick={exportFlashcardsToPDF} className="px-3 py-1.5 bg-red-50 text-red-700 font-medium rounded-lg hover:bg-red-100 transition-colors flex items-center gap-1.5 text-xs">
-                              <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd"/></svg>
-                              PDF
-                            </button>
-                            <button onClick={exportFlashcardsToDOCX} className="px-3 py-1.5 bg-blue-50 text-blue-700 font-medium rounded-lg hover:bg-blue-100 transition-colors flex items-center gap-1.5 text-xs">
-                              <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd"/></svg>
-                              DOCX
-                            </button>
-                          </>
-                        ) : (
-                          <>
-                            <button onClick={() => setShowExportUpgradeModal(true)} className="px-3 py-1.5 bg-stone-100 dark:bg-stone-700 text-stone-500 dark:text-stone-400 font-medium rounded-lg flex items-center gap-1.5 text-xs cursor-pointer">
-                              <svg className="w-3 h-3 text-amber-500 dark:text-amber-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd"/></svg>
-                              PDF
-                            </button>
-                            <button onClick={() => setShowExportUpgradeModal(true)} className="px-3 py-1.5 bg-stone-100 dark:bg-stone-700 text-stone-500 dark:text-stone-400 font-medium rounded-lg flex items-center gap-1.5 text-xs cursor-pointer">
-                              <svg className="w-3 h-3 text-amber-500 dark:text-amber-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd"/></svg>
-                              DOCX
-                            </button>
-                          </>
-                        )}
-                        <button onClick={() => { setFlashcardResult(null); setCurrentCard(0); setIsFlipped(false); setKnownCards(new Set()); }} className="px-4 py-2 text-sm text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-900/30 rounded-lg hover:bg-amber-100 dark:hover:bg-amber-800/50 font-medium">New Deck</button>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3 mb-5">
-                      <div className="flex-1 h-2 bg-stone-200 dark:bg-stone-600 rounded-full overflow-hidden"><div className="h-full bg-gradient-to-r from-amber-500 to-orange-500 transition-all duration-300" style={{ width: `${((currentCard + 1) / flashcardResult.cards.length) * 100}%` }}></div></div>
-                      <span className="text-xs text-stone-500 dark:text-stone-400 font-medium">{currentCard + 1} / {flashcardResult.cards.length}</span>
-                      {knownCards.size > 0 && <span className="text-xs text-green-600 font-medium">{knownCards.size} mastered</span>}
-                    </div>
-                    <div onClick={() => setIsFlipped(!isFlipped)} className="relative cursor-pointer select-none mx-auto max-w-2xl mb-6" style={{ perspective: '1000px' }}>
-                      <div className="relative w-full transition-transform duration-500" style={{ transformStyle: 'preserve-3d', transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)' }}>
-                        <div className="w-full min-h-[280px] sm:min-h-[320px] bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border-2 border-amber-200 dark:border-amber-700 rounded-3xl p-8 flex flex-col items-center justify-center text-center shadow-lg" style={{ backfaceVisibility: 'hidden' }}>
-                          <span className="text-xs font-bold text-amber-500 dark:text-amber-400 uppercase tracking-widest mb-4">Front</span>
-                          <p className="text-xl sm:text-2xl font-semibold text-stone-800 dark:text-stone-100 leading-relaxed">{flashcardResult.cards[currentCard]?.front}</p>
-                          <p className="text-xs text-amber-500 dark:text-amber-400 mt-6">Click to flip</p>
-                        </div>
-                        <div className="absolute inset-0 w-full min-h-[280px] sm:min-h-[320px] bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border-2 border-amber-200 dark:border-amber-700 rounded-3xl p-8 flex flex-col items-center justify-center text-center shadow-lg" style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}>
-                          <span className="text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-widest mb-4">Back</span>
-                          <p className="text-lg sm:text-xl text-stone-800 dark:text-stone-100 leading-relaxed">{flashcardResult.cards[currentCard]?.back}</p>
-                          <p className="text-xs text-amber-500 dark:text-amber-400 mt-6">Click to flip back</p>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-center gap-3 flex-wrap">
-                      <button onClick={() => { setCurrentCard(Math.max(0, currentCard - 1)); setIsFlipped(false); }} disabled={currentCard === 0} className="px-4 py-2.5 rounded-xl text-sm font-medium bg-stone-100 dark:bg-stone-700 text-stone-600 dark:text-stone-400 hover:bg-stone-200 dark:hover:bg-stone-600 disabled:opacity-30 transition-all">← Previous</button>
-                      <button onClick={() => { const newKnown = new Set(knownCards); if (newKnown.has(currentCard)) newKnown.delete(currentCard); else newKnown.add(currentCard); setKnownCards(newKnown); }}
-                        className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition-all ${knownCards.has(currentCard) ? 'bg-green-500 text-white shadow-md' : 'bg-green-50 text-green-700 border border-green-200 hover:bg-green-100'}`}>
-                        {knownCards.has(currentCard) ? '✓ Mastered' : 'Mark as Known'}
-                      </button>
-                      <button onClick={() => { setCurrentCard(Math.min(flashcardResult.cards.length - 1, currentCard + 1)); setIsFlipped(false); }} disabled={currentCard >= flashcardResult.cards.length - 1} className="px-4 py-2.5 rounded-xl text-sm font-medium bg-gradient-to-r from-amber-600 to-orange-600 text-white hover:from-amber-500 hover:to-orange-500 disabled:opacity-30 transition-all">Next →</button>
-                    </div>
-                    {knownCards.size === flashcardResult.cards.length && (
-                      <div className="mt-6 p-6 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-2xl text-center">
-                        <span className="text-4xl mb-2 block">🎉</span>
-                        <h3 className="text-xl font-bold text-green-800">All cards mastered!</h3>
-                        <p className="text-green-600 text-sm mt-1">You've marked all {flashcardResult.cards.length} cards as known.</p>
-                      </div>
-                    )}
+                    <FlashcardViewer
+                      initialCards={flashcardResult.cards ?? []}
+                      title={flashcardResult.title || 'Flashcards'}
+                      onExportPDF={isPaidUser ? exportFlashcardsToPDF : undefined}
+                      onExportDOCX={isPaidUser ? exportFlashcardsToDOCX : undefined}
+                      onNewDeck={() => setFlashcardResult(null)}
+                      canExport={isPaidUser}
+                    />
                   </div>
                 ) : (
                   <div className="bg-white dark:bg-stone-800 rounded-2xl sm:rounded-3xl shadow-xl shadow-stone-100/50 dark:shadow-none border border-stone-200 dark:border-stone-600 overflow-hidden min-w-0">
@@ -1591,10 +1536,18 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
                           </select>
                           {user != null && isFreeUser && <span className="text-[9px]">🔒</span>}
                         </div>
-                        <button onClick={handleGenerate} disabled={isLoading || !inputText.trim() || wordCount < 50 || wordCount > quizUsage.maxWordsPerGeneration || quizExhausted}
-                          className="w-full sm:w-auto sm:ml-auto px-4 sm:px-6 py-2 sm:py-2.5 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-semibold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-amber-200/50 dark:shadow-amber-900/30 text-sm">
-                          {isLoading ? (<><svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><span>Generating...</span></>) : (<>🃏 Generate Flashcards →</>)}
-                        </button>
+                        <div className="flex items-center gap-2 w-full sm:w-auto sm:ml-auto">
+                          <button
+                            onClick={() => setFlashcardResult({ title: 'My Flashcards', cards: [] })}
+                            className="flex-1 sm:flex-none px-4 py-2 sm:py-2.5 bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-400 font-semibold rounded-xl transition-all hover:bg-violet-200 dark:hover:bg-violet-900/50 flex items-center justify-center gap-2 text-sm"
+                          >
+                            ✏️ Create from Scratch
+                          </button>
+                          <button onClick={handleGenerate} disabled={isLoading || !inputText.trim() || wordCount < 50 || wordCount > quizUsage.maxWordsPerGeneration || quizExhausted}
+                            className="flex-1 sm:flex-none px-4 sm:px-6 py-2 sm:py-2.5 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-semibold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-amber-200/50 dark:shadow-amber-900/30 text-sm">
+                            {isLoading ? (<><svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><span>Generating...</span></>) : (<>🃏 Generate with AI →</>)}
+                          </button>
+                        </div>
                       </div>
                     </div>
                     <div className="flex flex-col">
