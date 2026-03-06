@@ -377,11 +377,13 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
     >
       <div className={`absolute top-0 right-0 w-32 h-32 rounded-full -translate-y-1/2 translate-x-1/2 ${accentClasses.orb}`} />
       <h3 className={`text-lg sm:text-xl font-bold mb-2 sm:mb-3 relative z-10 flex-shrink-0 ${accentClasses.title}`}>{title}</h3>
-      <div className="relative z-10 bg-white dark:bg-stone-800 rounded-2xl p-4 sm:p-5 shadow-lg mb-3 sm:mb-4 h-[120px] sm:h-[140px] flex flex-col justify-center overflow-hidden">
-        <div className={`w-8 h-8 rounded-lg flex items-center justify-center mb-3 text-lg flex-shrink-0 ${accentClasses.iconBg}`}>
+      <div className="relative z-10 bg-white dark:bg-stone-800 rounded-2xl p-3 sm:p-5 shadow-lg mb-3 sm:mb-4 flex-1 flex flex-col overflow-hidden">
+        <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center mb-2 sm:mb-3 text-base sm:text-lg flex-shrink-0 ${accentClasses.iconBg}`}>
           {icon}
         </div>
-        {innerContent}
+        <div className="flex-1 w-full flex flex-col justify-center">
+          {innerContent}
+        </div>
       </div>
       <p className="text-stone-600 dark:text-stone-400 text-sm relative z-10">{desc}</p>
     </button>
@@ -596,91 +598,91 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                 <div className="flex gap-4 sm:gap-4 sm:transition-transform sm:duration-500 sm:ease-out w-max sm:w-[160%]" style={{ transform: `translateX(-${studyCardsCarouselIndex * 12.5}%)` }}>
                   {[
                     { title: 'Analyze', desc: 'Get professor-style feedback on your essays', onClick: () => setMode('analyze'), gradient: 'from-lime-50 to-emerald-50 dark:from-lime-900/20 dark:to-emerald-900/20', accentClasses: { title: 'text-lime-700 dark:text-lime-400', orb: 'bg-lime-400/20', iconBg: 'bg-lime-100 dark:bg-lime-900/50' }, borderColor: 'border-lime-100 dark:border-lime-800/50', icon: '📝', inner: (
-                      <div className="space-y-2">
-                        <div className="h-2 bg-stone-200 dark:bg-stone-600 rounded-full overflow-hidden"><div className="h-full w-full bg-lime-400 dark:bg-lime-500 rounded-full animate-line-grow origin-left" style={{ animationDelay: '0.2s' }} /></div>
-                        <div className="h-2 bg-stone-200 dark:bg-stone-600 rounded-full overflow-hidden"><div className="h-full w-full bg-lime-400 dark:bg-lime-500 rounded-full animate-line-grow origin-left" style={{ animationDelay: '0.6s' }} /></div>
-                        <div className="h-2 bg-stone-200 dark:bg-stone-600 rounded-full overflow-hidden"><div className="h-full w-full bg-lime-500 dark:bg-lime-400 rounded-full animate-line-grow origin-left" style={{ animationDelay: '1s' }} /></div>
+                      <div className="w-full space-y-1.5 sm:space-y-2">
+                        <div className="h-1.5 sm:h-2 bg-stone-200 dark:bg-stone-600 rounded-full overflow-hidden"><div className="h-full w-full bg-lime-400 dark:bg-lime-500 rounded-full animate-line-grow origin-left" style={{ animationDelay: '0.2s' }} /></div>
+                        <div className="h-1.5 sm:h-2 bg-stone-200 dark:bg-stone-600 rounded-full overflow-hidden"><div className="h-full w-full bg-lime-400 dark:bg-lime-500 rounded-full animate-line-grow origin-left" style={{ animationDelay: '0.6s' }} /></div>
+                        <div className="h-1.5 sm:h-2 bg-stone-200 dark:bg-stone-600 rounded-full overflow-hidden"><div className="h-full w-full bg-lime-500 dark:bg-lime-400 rounded-full animate-line-grow origin-left" style={{ animationDelay: '1s' }} /></div>
                       </div>
                     )},
                     { title: 'Citations', desc: 'Find and format academic sources instantly', onClick: () => setMode('citations'), gradient: 'from-cyan-50 to-teal-50 dark:from-cyan-900/20 dark:to-teal-900/20', accentClasses: { title: 'text-teal-700 dark:text-teal-400', orb: 'bg-teal-400/20', iconBg: 'bg-teal-100 dark:bg-teal-900/50' }, borderColor: 'border-cyan-100 dark:border-cyan-800/50', icon: '🔍', inner: (
-                      <div className="space-y-1.5">
-                        <div className="text-[9px] text-teal-600 dark:text-teal-400 font-mono opacity-0 animate-fade-slide-in" style={{ animationDelay: '0.1s', animationFillMode: 'forwards' }}>Smith, J. (2024). Title...</div>
-                        <div className="text-[9px] text-teal-600 dark:text-teal-400 font-mono opacity-0 animate-fade-slide-in" style={{ animationDelay: '0.4s', animationFillMode: 'forwards' }}>Jones, M. (2023). Study...</div>
-                        <div className="flex gap-1 mt-2">
-                          <span className="px-1.5 py-0.5 bg-teal-100 dark:bg-teal-900/50 text-teal-700 dark:text-teal-300 text-[9px] rounded font-medium">APA</span>
-                          <span className="px-1.5 py-0.5 bg-stone-100 dark:bg-stone-700 text-stone-500 text-[9px] rounded">MLA</span>
+                      <div className="w-full space-y-1 sm:space-y-1.5">
+                        <div className="text-[8px] sm:text-[9px] text-teal-600 dark:text-teal-400 font-mono opacity-0 animate-fade-slide-in truncate" style={{ animationDelay: '0.1s', animationFillMode: 'forwards' }}>Smith, J. (2024). Title...</div>
+                        <div className="text-[8px] sm:text-[9px] text-teal-600 dark:text-teal-400 font-mono opacity-0 animate-fade-slide-in truncate" style={{ animationDelay: '0.4s', animationFillMode: 'forwards' }}>Jones, M. (2023). Study...</div>
+                        <div className="flex gap-1 mt-1.5 sm:mt-2">
+                          <span className="px-1 sm:px-1.5 py-0.5 bg-teal-100 dark:bg-teal-900/50 text-teal-700 dark:text-teal-300 text-[8px] sm:text-[9px] rounded font-medium">APA</span>
+                          <span className="px-1 sm:px-1.5 py-0.5 bg-stone-100 dark:bg-stone-700 text-stone-500 text-[8px] sm:text-[9px] rounded">MLA</span>
                         </div>
                       </div>
                     )},
                     { title: 'Flashcards', desc: 'Generate flashcards from any content', onClick: () => { setMode('quiz'); setStudyToolMode('flashcards'); }, gradient: 'from-pink-50 to-rose-50 dark:from-pink-900/20 dark:to-rose-900/20', accentClasses: { title: 'text-rose-700 dark:text-rose-400', orb: 'bg-rose-400/20', iconBg: 'bg-rose-100 dark:bg-rose-900/50' }, borderColor: 'border-pink-100 dark:border-pink-800/50', icon: '🃏', inner: (
-                      <div className="h-16" style={{ perspective: '120px' }}>
-                        <div className="relative h-full animate-flashcard-flip" style={{ transformStyle: 'preserve-3d' }}>
-                          <div className="absolute inset-0 bg-gradient-to-br from-rose-400 to-pink-500 rounded-xl p-2.5 flex flex-col justify-center" style={{ backfaceVisibility: 'hidden' }}>
-                            <div className="text-white/80 text-[9px]">Term</div>
-                            <div className="text-white font-semibold text-xs">Photosynthesis</div>
+                      <div className="w-full h-14 sm:h-16" style={{ perspective: '120px' }}>
+                        <div className="relative w-full h-full animate-flashcard-flip" style={{ transformStyle: 'preserve-3d' }}>
+                          <div className="absolute inset-0 bg-gradient-to-br from-rose-400 to-pink-500 rounded-xl p-2 sm:p-2.5 flex flex-col justify-center" style={{ backfaceVisibility: 'hidden' }}>
+                            <div className="text-white/80 text-[8px] sm:text-[9px]">Term</div>
+                            <div className="text-white font-semibold text-[11px] sm:text-xs">Photosynthesis</div>
                           </div>
-                          <div className="absolute inset-0 bg-gradient-to-br from-pink-500 to-rose-600 rounded-xl p-2.5 flex flex-col justify-center items-center" style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}>
-                            <div className="text-white/90 text-[9px]">Definition</div>
-                            <div className="text-white font-medium text-xs text-center">Process plants use...</div>
+                          <div className="absolute inset-0 bg-gradient-to-br from-pink-500 to-rose-600 rounded-xl p-2 sm:p-2.5 flex flex-col justify-center items-center" style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}>
+                            <div className="text-white/90 text-[8px] sm:text-[9px]">Definition</div>
+                            <div className="text-white font-medium text-[11px] sm:text-xs text-center">Process plants use...</div>
                           </div>
                         </div>
                       </div>
                     )},
                     { title: 'Practice Tests', desc: 'Create quizzes from your study material', onClick: () => { setMode('quiz'); setStudyToolMode('quiz'); }, gradient: 'from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20', accentClasses: { title: 'text-orange-700 dark:text-orange-400', orb: 'bg-orange-400/20', iconBg: 'bg-amber-100 dark:bg-amber-900/50' }, borderColor: 'border-amber-100 dark:border-amber-800/50', icon: '📋', inner: (
-                      <div className="relative h-14">
+                      <div className="relative w-full h-12 sm:h-14">
                         <div className="absolute inset-0 animate-quiz-show">
-                          <div className="text-[10px] text-stone-500 mb-1">Q: What is 2 + 2?</div>
-                          <div className="flex gap-2">
-                            <span className="px-2 py-1 bg-amber-100 dark:bg-amber-900/50 text-amber-700 text-[9px] rounded font-medium">A</span>
-                            <span className="px-2 py-1 bg-stone-100 dark:bg-stone-700 text-stone-500 text-[9px] rounded">B</span>
-                            <span className="px-2 py-1 bg-stone-100 dark:bg-stone-700 text-stone-500 text-[9px] rounded">C</span>
+                          <div className="text-[9px] sm:text-[10px] text-stone-500 mb-1">Q: What is 2 + 2?</div>
+                          <div className="flex gap-1.5 sm:gap-2 flex-wrap">
+                            <span className="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-amber-100 dark:bg-amber-900/50 text-amber-700 text-[8px] sm:text-[9px] rounded font-medium">A</span>
+                            <span className="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-stone-100 dark:bg-stone-700 text-stone-500 text-[8px] sm:text-[9px] rounded">B</span>
+                            <span className="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-stone-100 dark:bg-stone-700 text-stone-500 text-[8px] sm:text-[9px] rounded">C</span>
                           </div>
                         </div>
                         <div className="absolute inset-0 animate-quiz-hide flex flex-col justify-center">
-                          <div className="text-[10px] text-stone-500 mb-1">Correct!</div>
-                          <div className="text-orange-600 font-bold text-sm">✓ 4</div>
+                          <div className="text-[9px] sm:text-[10px] text-stone-500 mb-1">Correct!</div>
+                          <div className="text-orange-600 font-bold text-xs sm:text-sm">✓ 4</div>
                         </div>
                       </div>
                     )},
                     { title: 'Humanize', desc: 'Transform AI text into natural human writing', onClick: () => setMode('humanize'), gradient: 'from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20', accentClasses: { title: 'text-violet-700 dark:text-violet-400', orb: 'bg-violet-400/20', iconBg: 'bg-violet-100 dark:bg-violet-900/50' }, borderColor: 'border-violet-100 dark:border-violet-800/50', icon: '✨', inner: (
-                      <div className="relative h-12">
+                      <div className="relative w-full h-10 sm:h-12">
                         <div className="absolute inset-0 animate-humanize-before">
-                          <div className="text-[10px] text-stone-500 mb-1">Before</div>
-                          <div className="text-stone-600 dark:text-stone-400 text-xs">Utilize the methodology...</div>
+                          <div className="text-[9px] sm:text-[10px] text-stone-500 mb-0.5 sm:mb-1">Before</div>
+                          <div className="text-stone-600 dark:text-stone-400 text-[11px] sm:text-xs">Utilize the methodology...</div>
                         </div>
                         <div className="absolute inset-0 animate-humanize-after">
-                          <div className="text-[10px] text-violet-600 mb-1">After</div>
-                          <div className="text-violet-700 dark:text-violet-300 text-xs">Use the method...</div>
+                          <div className="text-[9px] sm:text-[10px] text-violet-600 mb-0.5 sm:mb-1">After</div>
+                          <div className="text-violet-700 dark:text-violet-300 text-[11px] sm:text-xs">Use the method...</div>
                         </div>
                       </div>
                     )},
                     { title: 'Summarize', desc: 'Turn long papers into concise bullet points', onClick: () => setMode('summarize'), gradient: 'from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20', accentClasses: { title: 'text-emerald-700 dark:text-emerald-400', orb: 'bg-emerald-400/20', iconBg: 'bg-emerald-100 dark:bg-emerald-900/50' }, borderColor: 'border-emerald-100 dark:border-emerald-800/50', icon: '📝', inner: (
-                      <div className="space-y-2">
+                      <div className="w-full space-y-1.5 sm:space-y-2">
                         <div className="flex gap-1.5 items-center">
                           <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 flex-shrink-0" />
-                          <div className="h-2 bg-stone-200 dark:bg-stone-600 rounded-full flex-1 overflow-hidden origin-left"><div className="h-full bg-emerald-400 dark:bg-emerald-500 rounded-full animate-summarize-shrink" /></div>
+                          <div className="h-1.5 sm:h-2 bg-stone-200 dark:bg-stone-600 rounded-full flex-1 overflow-hidden origin-left"><div className="h-full bg-emerald-400 dark:bg-emerald-500 rounded-full animate-summarize-shrink" /></div>
                         </div>
                         <div className="flex gap-1.5 items-center">
                           <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 flex-shrink-0" />
-                          <div className="h-2 bg-stone-200 dark:bg-stone-600 rounded-full flex-1 overflow-hidden origin-left"><div className="h-full w-full bg-emerald-400 dark:bg-emerald-500 rounded-full animate-summarize-shrink" style={{ animationDelay: '0.3s' }} /></div>
+                          <div className="h-1.5 sm:h-2 bg-stone-200 dark:bg-stone-600 rounded-full flex-1 overflow-hidden origin-left"><div className="h-full w-full bg-emerald-400 dark:bg-emerald-500 rounded-full animate-summarize-shrink" style={{ animationDelay: '0.3s' }} /></div>
                         </div>
                         <div className="flex gap-1.5 items-center">
                           <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 flex-shrink-0" />
-                          <div className="h-2 bg-stone-200 dark:bg-stone-600 rounded-full flex-1 overflow-hidden origin-left"><div className="h-full w-full bg-emerald-500 dark:bg-emerald-400 rounded-full animate-summarize-shrink" style={{ animationDelay: '0.6s' }} /></div>
+                          <div className="h-1.5 sm:h-2 bg-stone-200 dark:bg-stone-600 rounded-full flex-1 overflow-hidden origin-left"><div className="h-full w-full bg-emerald-500 dark:bg-emerald-400 rounded-full animate-summarize-shrink" style={{ animationDelay: '0.6s' }} /></div>
                         </div>
                       </div>
                     )},
                     { title: 'Study Tools', desc: 'Quizzes, flashcards & crosswords', onClick: () => setMode('quiz'), gradient: 'from-lime-50 to-green-50 dark:from-lime-900/20 dark:to-green-900/20', accentClasses: { title: 'text-lime-700 dark:text-lime-400', orb: 'bg-lime-400/20', iconBg: 'bg-lime-100 dark:bg-lime-900/50' }, borderColor: 'border-lime-100 dark:border-lime-800/50', icon: '🎯', inner: (
-                      <div className="flex gap-2">
-                        <div className="flex-1 text-center py-2 px-2 bg-lime-100 dark:bg-lime-900/50 rounded-lg text-lime-700 dark:text-lime-300 text-xs font-medium animate-tool-show-1">📝 Quiz</div>
-                        <div className="flex-1 text-center py-2 px-2 bg-lime-100 dark:bg-lime-900/50 rounded-lg text-lime-700 dark:text-lime-300 text-xs font-medium animate-tool-show-2">🃏 Cards</div>
-                        <div className="flex-1 text-center py-2 px-2 bg-lime-100 dark:bg-lime-900/50 rounded-lg text-lime-700 dark:text-lime-300 text-xs font-medium animate-tool-show-3">🧩 Puzzle</div>
+                      <div className="w-full flex gap-1.5 sm:gap-2">
+                        <div className="flex-1 text-center py-1.5 sm:py-2 px-1 sm:px-2 bg-lime-100 dark:bg-lime-900/50 rounded-lg text-lime-700 dark:text-lime-300 text-[10px] sm:text-xs font-medium animate-tool-show-1">📝 Quiz</div>
+                        <div className="flex-1 text-center py-1.5 sm:py-2 px-1 sm:px-2 bg-lime-100 dark:bg-lime-900/50 rounded-lg text-lime-700 dark:text-lime-300 text-[10px] sm:text-xs font-medium animate-tool-show-2">🃏 Cards</div>
+                        <div className="flex-1 text-center py-1.5 sm:py-2 px-1 sm:px-2 bg-lime-100 dark:bg-lime-900/50 rounded-lg text-lime-700 dark:text-lime-300 text-[10px] sm:text-xs font-medium animate-tool-show-3">🧩 Puzzle</div>
                       </div>
                     )},
                     { title: 'Crossword', desc: 'Generate crosswords from your notes', onClick: () => { setMode('quiz'); setStudyToolMode('crossword'); }, gradient: 'from-amber-50 to-yellow-50 dark:from-amber-900/20 dark:to-yellow-900/20', accentClasses: { title: 'text-amber-700 dark:text-amber-400', orb: 'bg-amber-400/20', iconBg: 'bg-amber-100 dark:bg-amber-900/50' }, borderColor: 'border-amber-100 dark:border-amber-800/50', icon: '🧩', inner: (
-                      <div className="grid grid-cols-5 gap-0.5">
+                      <div className="w-full max-w-[140px] sm:max-w-none mx-auto grid grid-cols-5 gap-0.5">
                         {[['C','A','T','#','#'],['O','#','#','#','#'],['D','O','G','#','#'],['#','#','#','#','#'],['#','#','#','#','#']].map((row, ri) => row.map((cell, ci) => (
-                          <div key={`${ri}-${ci}`} className={`aspect-square flex items-center justify-center rounded-sm text-[10px] font-bold transition-all duration-300 ${cell === '#' ? 'bg-stone-700 dark:bg-stone-800' : 'bg-amber-50 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 border border-amber-200/60 dark:border-amber-700/50 animate-cell-pop'}`} style={cell !== '#' ? { animationDelay: `${(ri * 5 + ci) * 50}ms` } : undefined}>{cell !== '#' ? cell : ''}</div>
+                          <div key={`${ri}-${ci}`} className={`aspect-square flex items-center justify-center rounded-sm text-[9px] sm:text-[10px] font-bold transition-all duration-300 ${cell === '#' ? 'bg-stone-700 dark:bg-stone-800' : 'bg-amber-50 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 border border-amber-200/60 dark:border-amber-700/50 animate-cell-pop'}`} style={cell !== '#' ? { animationDelay: `${(ri * 5 + ci) * 50}ms` } : undefined}>{cell !== '#' ? cell : ''}</div>
                         )))}
                       </div>
                     )},
@@ -2068,8 +2070,8 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
               <div className="absolute -inset-1 bg-gradient-to-r from-indigo-400 to-violet-400 rounded-3xl blur-xl opacity-15 group-hover:opacity-25 transition-opacity duration-500"></div>
               <div className="relative bg-white dark:bg-stone-800 rounded-3xl overflow-hidden shadow-xl border border-stone-200/50 dark:border-stone-700 group-hover:shadow-indigo-500/10 dark:group-hover:shadow-indigo-900/20 transition-shadow duration-500">
                 <div className="grid lg:grid-cols-[1fr_1.15fr] gap-0">
-                  {/* Content side - LEFT */}
-                  <div className="order-2 lg:order-1 p-5 sm:p-12 lg:p-16 flex flex-col justify-center">
+                  {/* Content side - LEFT (above image on mobile) */}
+                  <div className="order-1 lg:order-1 p-5 sm:p-12 lg:p-16 flex flex-col justify-center">
                     <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center mb-6 shadow-lg shadow-indigo-500/30 group-hover:scale-110 transition-transform duration-300">
                       <span className="text-2xl">📝</span>
                     </div>
@@ -2098,8 +2100,8 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                       </li>
                     </ul>
                   </div>
-                  {/* Image side - RIGHT */}
-                  <div className="order-1 lg:order-2 relative overflow-hidden bg-gradient-to-br from-indigo-50 to-violet-50 dark:from-indigo-900/20 dark:to-violet-900/20 min-h-[200px] sm:min-h-[360px] lg:min-h-[400px] flex items-center justify-center p-3 sm:p-4">
+                  {/* Image side - RIGHT (below content on mobile) */}
+                  <div className="order-2 lg:order-2 relative overflow-hidden bg-gradient-to-br from-indigo-50 to-violet-50 dark:from-indigo-900/20 dark:to-violet-900/20 min-h-[200px] sm:min-h-[360px] lg:min-h-[400px] flex items-center justify-center p-3 sm:p-4">
                     <img 
                       src="/notes pic.png" 
                       alt="Paste your notes or study material into WriteScholar"
@@ -2130,11 +2132,15 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
               <div className="absolute -inset-1 bg-gradient-to-r from-violet-400 to-purple-400 rounded-3xl blur-lg opacity-0 group-hover:opacity-25 transition-opacity duration-500"></div>
               <div className="relative bg-white dark:bg-stone-800 rounded-3xl overflow-hidden shadow-xl border border-stone-200/50 dark:border-stone-700 h-full hover:-translate-y-3 hover:shadow-2xl transition-all duration-500">
                 <div className="relative h-40 sm:h-56 overflow-hidden bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20">
-                  <img 
-                    src="/quiz pic.png" 
-                    alt="AI-generated quiz with multiple choice and true/false questions"
+                  <video
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
                     className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
-                  />
+                  >
+                    <source src="/quizvid.mp4" type="video/mp4" />
+                  </video>
                 </div>
                 <div className="p-6">
                   <div className="flex items-center gap-3 mb-3">
@@ -2153,11 +2159,15 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
               <div className="absolute -inset-1 bg-gradient-to-r from-emerald-400 to-teal-400 rounded-3xl blur-lg opacity-0 group-hover:opacity-25 transition-opacity duration-500"></div>
               <div className="relative bg-white dark:bg-stone-800 rounded-3xl overflow-hidden shadow-xl border border-stone-200/50 dark:border-stone-700 h-full hover:-translate-y-3 hover:shadow-2xl transition-all duration-500">
                 <div className="relative h-40 sm:h-56 overflow-hidden bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20">
-                  <img 
-                    src="/flashcard pic.png" 
-                    alt="Interactive flashcards for memorization and quick review"
+                  <video
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
                     className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
-                  />
+                  >
+                    <source src="/flashcardsvid.mp4" type="video/mp4" />
+                  </video>
                 </div>
                 <div className="p-6">
                   <div className="flex items-center gap-3 mb-3">
@@ -2176,11 +2186,15 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
               <div className="absolute -inset-1 bg-gradient-to-r from-rose-400 to-pink-400 rounded-3xl blur-lg opacity-0 group-hover:opacity-25 transition-opacity duration-500"></div>
               <div className="relative bg-white dark:bg-stone-800 rounded-3xl overflow-hidden shadow-xl border border-stone-200/50 dark:border-stone-700 h-full hover:-translate-y-3 hover:shadow-2xl transition-all duration-500">
                 <div className="relative h-40 sm:h-56 overflow-hidden bg-gradient-to-br from-rose-50 to-pink-50 dark:from-rose-900/20 dark:to-pink-900/20">
-                  <img 
-                    src="/crosssword pic.png" 
-                    alt="Interactive crossword puzzle generated from study material"
+                  <video
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
                     className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
-                  />
+                  >
+                    <source src="/crosswordvid.mp4" type="video/mp4" />
+                  </video>
                 </div>
                 <div className="p-6">
                   <div className="flex items-center gap-3 mb-3">

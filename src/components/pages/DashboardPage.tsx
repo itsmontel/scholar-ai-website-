@@ -1730,7 +1730,7 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
           {/* RIGHT MAIN CONTENT */}
           <div className="order-1 lg:order-2 min-w-0 pt-4 sm:pt-10 overflow-visible">
             {/* Mobile Header: Compact streak + Badge widget in a row */}
-            <div className="flex items-center gap-3 mb-4 lg:hidden">
+            <div className="flex items-stretch gap-3 mb-4 lg:hidden">
               <StreakWidget compact />
               <div className="flex-1 min-w-0">
                 <BadgeWidget onNavigate={onNavigate} mobileExpanded />
@@ -1820,8 +1820,8 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                       className="flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-400 hover:to-purple-500 text-white text-xs sm:text-sm font-bold rounded-full transition-all shadow-md shadow-violet-500/30 active:scale-95 sm:hover:shadow-lg sm:hover:scale-105 flex-1 sm:flex-none"
                     >
                       <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
-                      <span className="hidden xs:inline">Upgrade</span>
-                      <span className="xs:hidden">Pro</span>
+                      <span className="hidden xs:inline">Upgrade Plan</span>
+                      <span className="xs:hidden">Upgrade</span>
                     </button>
                   )}
                 </div>
@@ -1918,7 +1918,7 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                     <span className="sm:hidden">{tool.mobileDesc}</span>
                   </p>
                   {tool.pro && usageStats.plan === 'free' && (
-                    <span className="absolute top-2 right-2 sm:top-3 sm:right-3 px-1.5 sm:px-2 py-0.5 sm:py-1 text-[8px] sm:text-[10px] font-bold rounded-md sm:rounded-lg bg-gradient-to-r from-violet-500 to-purple-600 text-white leading-none shadow-md z-20">PRO</span>
+                    <span className="absolute top-2 right-2 sm:top-3 sm:right-3 px-1.5 sm:px-2 py-0.5 sm:py-1 text-[8px] sm:text-[10px] font-bold rounded-md sm:rounded-lg bg-gradient-to-r from-violet-500 to-purple-600 text-white leading-none shadow-md z-20">Upgrade</span>
                   )}
                 </button>
               ))}

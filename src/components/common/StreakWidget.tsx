@@ -96,7 +96,7 @@ const StreakWidget = ({ compact = false }: StreakWidgetProps) => {
     return (
       <button
         onClick={() => setShowInfoModal(true)}
-        className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full transition-all hover:scale-105 flex-shrink-0"
+        className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full transition-all hover:scale-105 flex-shrink-0 self-stretch"
         style={{ backgroundColor: 'rgba(139, 92, 246, 0.15)' }}
         title="View your streak"
       >

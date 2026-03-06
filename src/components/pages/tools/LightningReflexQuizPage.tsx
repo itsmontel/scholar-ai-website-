@@ -441,7 +441,7 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
       return;
     }
     if (!canUseStudyTools) {
-      onNavigate('signup');
+      onNavigate('pricing');
       return;
     }
 
@@ -581,7 +581,7 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
                     key={mode}
                     onClick={() => {
                       if (isLocked) {
-                        onNavigate('signup');
+                        onNavigate(user ? 'pricing' : 'signup');
                         return;
                       }
                       setInputMode(mode);
@@ -593,7 +593,7 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
                           ? 'text-stone-400 hover:text-stone-600 hover:bg-stone-100/50'
                           : 'text-stone-500 hover:text-stone-700 hover:bg-stone-100/50'
                     }`}
-                    title={isLocked ? 'Sign up for Starter or Premium to use Study Notes and Topic' : undefined}
+                    title={isLocked ? (user ? 'Upgrade to Starter or Premium to use Study Notes and Topic' : 'Sign up for Starter or Premium to use Study Notes and Topic') : undefined}
                   >
                     {isLocked && <span className="text-xs">🔒</span>}
                     {mode === 'topic' ? '📝 Topic' : mode === 'notes' ? '📄 Study Notes' : '🎮 Play for Fun'}
