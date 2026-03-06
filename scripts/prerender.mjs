@@ -46,6 +46,8 @@ const staticRoutes = [
   '/tools/paraphrasing-tips',
   '/tools/gpa-calculator',
   '/tools/pomodoro-timer',
+  '/tools/calculator',
+  '/tools/converter',
   '/tools/crater-blast',
 ];
 

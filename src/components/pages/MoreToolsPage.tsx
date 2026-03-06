@@ -18,6 +18,8 @@ const freeTools = [
   { id: 'text-case-converter', icon: 'Aa', title: 'Text Case Converter', desc: 'UPPERCASE, lowercase, Title Case & more', gradient: 'from-indigo-400 to-violet-500', page: 'text-case-converter' },
   { id: 'gpa-calculator', icon: '📚', title: 'GPA Calculator', desc: 'Calculate semester or cumulative GPA', gradient: 'from-cyan-400 to-sky-500', page: 'gpa-calculator' },
   { id: 'pomodoro-timer', icon: '⏱️', title: 'Pomodoro Timer', desc: 'Focus timer with work & break intervals', gradient: 'from-orange-400 to-amber-500', page: 'pomodoro-timer' },
+  { id: 'calculator', icon: '🧮', title: 'Scientific Calculator', desc: 'Trig, log, powers & more for math & science', gradient: 'from-violet-400 to-fuchsia-500', page: 'calculator' },
+  { id: 'converter', icon: '📐', title: 'Unit Converter', desc: 'Length, weight, temp, volume & more', gradient: 'from-amber-400 to-orange-500', page: 'converter' },
 ];
 
 const MoreToolsPage = ({ onNavigate, user, onLogout }: MoreToolsPageProps) => {

@@ -110,6 +110,16 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
                   Pomodoro Timer
                 </a>
               </li>
+              <li>
+                <a href="/tools/calculator" onClick={(e) => { e.preventDefault(); onNavigate?.('calculator'); }} className="text-stone-400 hover:text-white text-sm transition-colors">
+                  Scientific Calculator
+                </a>
+              </li>
+              <li>
+                <a href="/tools/converter" onClick={(e) => { e.preventDefault(); onNavigate?.('converter'); }} className="text-stone-400 hover:text-white text-sm transition-colors">
+                  Unit Converter
+                </a>
+              </li>
             </ul>
           </div>
 

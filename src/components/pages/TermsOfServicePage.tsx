@@ -1,5 +1,6 @@
 import React from 'react';
 import Header from '../common/Header';
+import Footer from '../common/Footer';
 
 interface TermsOfServicePageProps {
   onNavigate: (page: string) => void;
@@ -18,24 +19,24 @@ interface TermsOfServicePageProps {
 
 const TermsOfServicePage: React.FC<TermsOfServicePageProps> = ({ onNavigate, user, onLogout }) => {
   return (
-    <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%)' }}>
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-stone-900 dark:to-stone-800">
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="terms" />
       
-      <main className="max-w-4xl mx-auto px-6 py-16">
-        <div className="bg-white/90 backdrop-blur-xl rounded-2xl shadow-xl border border-stone-200/50 p-8 md:p-12">
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
+        <div className="bg-white dark:bg-stone-800 rounded-3xl shadow-xl border border-stone-200 dark:border-stone-700 p-6 sm:p-8 md:p-12">
           <div className="text-center mb-12">
-            <h1 className="text-4xl md:text-5xl text-stone-800 mb-6" style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 400 }}>
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-stone-800 dark:text-stone-100 mb-4">
               Terms of Service
             </h1>
-            <p className="text-lg text-stone-600">
+            <p className="text-stone-500 dark:text-stone-400">
               Last updated: {new Date().toLocaleDateString()}
             </p>
           </div>
 
-          <div className="prose prose-lg max-w-none">
+          <div className="prose prose-lg max-w-none prose-stone dark:prose-invert">
             <section className="mb-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">1. Acceptance of Terms</h2>
-              <div className="space-y-4 text-gray-700">
+              <h2 className="text-xl sm:text-2xl font-bold text-stone-800 dark:text-stone-100 mb-4">1. Acceptance of Terms</h2>
+              <div className="space-y-4 text-stone-600 dark:text-stone-400">
                 <p>
                   By accessing and using WriteScholar ("the Service"), you accept and agree to be bound by
                   these Terms of Service. If you do not agree, please do not use this service. These terms
@@ -45,8 +46,8 @@ const TermsOfServicePage: React.FC<TermsOfServicePageProps> = ({ onNavigate, use
             </section>
 
             <section className="mb-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">2. Description of Service</h2>
-              <div className="space-y-4 text-gray-700">
+              <h2 className="text-xl sm:text-2xl font-bold text-stone-800 dark:text-stone-100 mb-4">2. Description of Service</h2>
+              <div className="space-y-4 text-stone-600 dark:text-stone-400">
                 <p>
                   WriteScholar is an AI-powered academic toolkit for students. Our service includes the
                   following features, some of which are subject to plan-based usage limits:
@@ -56,10 +57,12 @@ const TermsOfServicePage: React.FC<TermsOfServicePageProps> = ({ onNavigate, use
                   <li><strong>AI Humanizer</strong> — rewrites AI-generated text into natural human-sounding writing</li>
                   <li><strong>Paper Summarizer</strong> — condenses documents into bullet points or paragraph summaries</li>
                   <li><strong>Quiz Generator</strong> — creates multiple choice, true/false, and fill-in-the-blank questions from any text</li>
+                  <li><strong>Flashcard Generator</strong> — creates flashcards from your notes and study materials</li>
+                  <li><strong>Crossword Generator</strong> — turns your content into crossword puzzles for study</li>
                   <li><strong>Citation Finder</strong> — discovers and formats academic sources in APA, MLA, Chicago, Harvard, and other styles</li>
                   <li><strong>Document Upload &amp; Library</strong> — upload and manage PDF, DOCX, and TXT files</li>
                   <li><strong>PDF &amp; DOCX Export</strong> — download quizzes and analyses as formatted documents</li>
-                  <li><strong>Free Tools</strong> — word counter, grammar checker, thesis generator, essay outline generator, readability score, citation generator, text case converter, and paraphrasing tips</li>
+                  <li><strong>Free Tools</strong> — word counter, grammar checker, thesis generator, essay outline generator, readability score, citation generator, text case converter, paraphrasing tips, GPA calculator, Pomodoro timer, scientific calculator, and unit converter</li>
                 </ul>
                 <p>
                   Features and limits vary by plan. We reserve the right to modify, add, or remove features
@@ -69,11 +72,11 @@ const TermsOfServicePage: React.FC<TermsOfServicePageProps> = ({ onNavigate, use
             </section>
 
             <section className="mb-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">3. Subscription Plans and Usage Limits</h2>
-              <div className="space-y-4 text-gray-700">
+              <h2 className="text-xl sm:text-2xl font-bold text-stone-800 dark:text-stone-100 mb-4">3. Subscription Plans and Usage Limits</h2>
+              <div className="space-y-4 text-stone-600 dark:text-stone-400">
                 <p>WriteScholar offers the following plans:</p>
                 <ul className="list-disc list-inside space-y-2 ml-4">
-                  <li><strong>Free</strong> — limited monthly usage: 1,000 words for Humanizer, 1,000 words for Summarizer, 3 quiz generations, essay analysis and citation searches included</li>
+                  <li><strong>Free</strong> — limited monthly usage: 1,000 words for Humanizer, 1,000 words for Summarizer, 3 study tool generations (quiz/flashcards/crossword), essay analysis and citation searches included</li>
                   <li><strong>Starter ($19.99/month)</strong> — unlimited quiz generations and 999,999 words/month for Humanizer and Summarizer; mixed quiz type and medium difficulty</li>
                   <li><strong>Premium ($39.99/month)</strong> — all Starter features plus our top-tier premium AI model, all quiz types and difficulty levels, all summarizer styles and lengths, advanced essay analysis, and priority support</li>
                 </ul>
@@ -86,8 +89,8 @@ const TermsOfServicePage: React.FC<TermsOfServicePageProps> = ({ onNavigate, use
             </section>
 
             <section className="mb-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">4. User Accounts</h2>
-              <div className="space-y-4 text-gray-700">
+              <h2 className="text-xl sm:text-2xl font-bold text-stone-800 dark:text-stone-100 mb-4">4. User Accounts</h2>
+              <div className="space-y-4 text-stone-600 dark:text-stone-400">
                 <p>To use the service, you must:</p>
                 <ul className="list-disc list-inside space-y-2 ml-4">
                   <li>Provide accurate and complete registration information</li>
@@ -104,8 +107,8 @@ const TermsOfServicePage: React.FC<TermsOfServicePageProps> = ({ onNavigate, use
             </section>
 
             <section className="mb-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">5. Acceptable Use</h2>
-              <div className="space-y-4 text-gray-700">
+              <h2 className="text-xl sm:text-2xl font-bold text-stone-800 dark:text-stone-100 mb-4">5. Acceptable Use</h2>
+              <div className="space-y-4 text-stone-600 dark:text-stone-400">
                 <p>You agree to use the service only for lawful purposes. You agree not to:</p>
                 <ul className="list-disc list-inside space-y-2 ml-4">
                   <li>Upload content that violates any laws or infringes third-party rights</li>
@@ -119,7 +122,7 @@ const TermsOfServicePage: React.FC<TermsOfServicePageProps> = ({ onNavigate, use
                 <p>
                   <strong>Academic Integrity:</strong> WriteScholar's tools are designed to help you learn,
                   improve, and understand your work. You are solely responsible for ensuring that your use of
-                  our service — including the AI Humanizer, Quiz Generator, and Essay Analyzer — complies with
+                  our service — including the AI Humanizer, Quiz Generator, Flashcard Generator, Crossword Generator, and Essay Analyzer — complies with
                   your institution's academic integrity policies. WriteScholar does not encourage or condone
                   academic dishonesty.
                 </p>
@@ -127,15 +130,15 @@ const TermsOfServicePage: React.FC<TermsOfServicePageProps> = ({ onNavigate, use
             </section>
 
             <section className="mb-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">6. Content and Intellectual Property</h2>
-              <div className="space-y-4 text-gray-700">
+              <h2 className="text-xl sm:text-2xl font-bold text-stone-800 dark:text-stone-100 mb-4">6. Content and Intellectual Property</h2>
+              <div className="space-y-4 text-stone-600 dark:text-stone-400">
                 <p>
                   You retain ownership of all content you upload to WriteScholar. By using the service,
                   you grant us a limited, non-exclusive license to process, analyze, and temporarily store
                   your content solely to provide the service to you.
                 </p>
                 <p>
-                  <strong>AI-generated outputs</strong> (humanized text, summaries, quiz questions, essay
+                  <strong>AI-generated outputs</strong> (humanized text, summaries, quiz questions, flashcards, crossword puzzles, essay
                   feedback, citations) are provided for your personal use. We do not claim ownership of
                   these outputs, but make no representations about their accuracy, originality, or
                   fitness for any particular purpose.
@@ -149,8 +152,8 @@ const TermsOfServicePage: React.FC<TermsOfServicePageProps> = ({ onNavigate, use
             </section>
 
             <section className="mb-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">7. Payment and Billing</h2>
-              <div className="space-y-4 text-gray-700">
+              <h2 className="text-xl sm:text-2xl font-bold text-stone-800 dark:text-stone-100 mb-4">7. Payment and Billing</h2>
+              <div className="space-y-4 text-stone-600 dark:text-stone-400">
                 <p>
                   Paid subscriptions are billed in advance on a monthly or annual basis via Stripe, our
                   third-party payment processor. By subscribing, you authorize us to charge your payment
@@ -169,10 +172,10 @@ const TermsOfServicePage: React.FC<TermsOfServicePageProps> = ({ onNavigate, use
             </section>
 
             <section className="mb-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">8. AI Processing Disclosure</h2>
-              <div className="space-y-4 text-gray-700">
+              <h2 className="text-xl sm:text-2xl font-bold text-stone-800 dark:text-stone-100 mb-4">8. AI Processing Disclosure</h2>
+              <div className="space-y-4 text-stone-600 dark:text-stone-400">
                 <p>
-                  Our AI features (Humanizer, Summarizer, Quiz Generator, Citation Finder, Essay Analyzer)
+                  Our AI features (Humanizer, Summarizer, Quiz Generator, Flashcard Generator, Crossword Generator, Citation Finder, Essay Analyzer)
                   are powered by large language models provided by OpenAI. When you use these features,
                   your submitted text is sent to OpenAI's API for processing. OpenAI's use of this data is
                   governed by their own Privacy Policy and API usage policies.
@@ -189,8 +192,8 @@ const TermsOfServicePage: React.FC<TermsOfServicePageProps> = ({ onNavigate, use
             </section>
 
             <section className="mb-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">9. Service Availability</h2>
-              <div className="space-y-4 text-gray-700">
+              <h2 className="text-xl sm:text-2xl font-bold text-stone-800 dark:text-stone-100 mb-4">9. Service Availability</h2>
+              <div className="space-y-4 text-stone-600 dark:text-stone-400">
                 <p>
                   We strive to maintain high service availability but cannot guarantee uninterrupted access.
                   We may temporarily suspend service for maintenance, updates, or technical issues without
@@ -200,11 +203,11 @@ const TermsOfServicePage: React.FC<TermsOfServicePageProps> = ({ onNavigate, use
             </section>
 
             <section className="mb-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">10. Privacy and Data Protection</h2>
-              <div className="space-y-4 text-gray-700">
+              <h2 className="text-xl sm:text-2xl font-bold text-stone-800 dark:text-stone-100 mb-4">10. Privacy and Data Protection</h2>
+              <div className="space-y-4 text-stone-600 dark:text-stone-400">
                 <p>
                   Your privacy is important to us. Please review our{' '}
-                  <button onClick={() => {}} className="text-blue-600 underline">Privacy Policy</button>{' '}
+                  <button onClick={() => onNavigate('privacy')} className="text-violet-600 dark:text-violet-400 hover:underline font-medium">Privacy Policy</button>{' '}
                   to understand how we collect, use, and protect your information, including how your
                   content is processed by third-party AI providers.
                 </p>
@@ -212,12 +215,12 @@ const TermsOfServicePage: React.FC<TermsOfServicePageProps> = ({ onNavigate, use
             </section>
 
             <section className="mb-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">11. Disclaimers and Limitations of Liability</h2>
-              <div className="space-y-4 text-gray-700">
+              <h2 className="text-xl sm:text-2xl font-bold text-stone-800 dark:text-stone-100 mb-4">11. Disclaimers and Limitations of Liability</h2>
+              <div className="space-y-4 text-stone-600 dark:text-stone-400">
                 <p>
                   The service is provided "as is" without warranties of any kind, express or implied. We do
                   not guarantee the accuracy, completeness, or reliability of AI-generated outputs including
-                  essay feedback, citations, quiz questions, humanized text, or summaries. You use the service
+                  essay feedback, citations, quiz questions, flashcards, crossword puzzles, humanized text, or summaries. You use the service
                   at your own risk.
                 </p>
                 <p>
@@ -229,22 +232,22 @@ const TermsOfServicePage: React.FC<TermsOfServicePageProps> = ({ onNavigate, use
             </section>
 
             <section className="mb-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">12. Termination</h2>
-              <div className="space-y-4 text-gray-700">
+              <h2 className="text-xl sm:text-2xl font-bold text-stone-800 dark:text-stone-100 mb-4">12. Termination</h2>
+              <div className="space-y-4 text-stone-600 dark:text-stone-400">
                 <p>
                   We may terminate or suspend your account at any time for violation of these terms, abuse
                   of the service, or non-payment. You may delete your account at any time via Account Settings.
                 </p>
                 <p>
                   Upon termination, your right to use the service ceases immediately. We may delete your
-                  account and associated data, including uploaded documents, quiz history, and analysis history.
+                  account and associated data, including uploaded documents, quiz/flashcard/crossword history, and analysis history.
                 </p>
               </div>
             </section>
 
             <section className="mb-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">13. Changes to Terms</h2>
-              <div className="space-y-4 text-gray-700">
+              <h2 className="text-xl sm:text-2xl font-bold text-stone-800 dark:text-stone-100 mb-4">13. Changes to Terms</h2>
+              <div className="space-y-4 text-stone-600 dark:text-stone-400">
                 <p>
                   We reserve the right to modify these terms at any time. We will notify users of material
                   changes via email or in-app notice. Continued use of the service after changes take effect
@@ -254,8 +257,8 @@ const TermsOfServicePage: React.FC<TermsOfServicePageProps> = ({ onNavigate, use
             </section>
 
             <section className="mb-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">14. Governing Law</h2>
-              <div className="space-y-4 text-gray-700">
+              <h2 className="text-xl sm:text-2xl font-bold text-stone-800 dark:text-stone-100 mb-4">14. Governing Law</h2>
+              <div className="space-y-4 text-stone-600 dark:text-stone-400">
                 <p>
                   These terms shall be governed by and construed in accordance with applicable laws.
                   Any disputes arising from these terms or your use of the service shall be resolved
@@ -265,10 +268,10 @@ const TermsOfServicePage: React.FC<TermsOfServicePageProps> = ({ onNavigate, use
             </section>
 
             <section className="mb-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">15. Contact Information</h2>
-              <div className="space-y-4 text-gray-700">
+              <h2 className="text-xl sm:text-2xl font-bold text-stone-800 dark:text-stone-100 mb-4">15. Contact Information</h2>
+              <div className="space-y-4 text-stone-600 dark:text-stone-400">
                 <p>If you have any questions about these terms, please contact us at:</p>
-                <div className="bg-gray-50 p-4 rounded-lg">
+                <div className="bg-stone-100 dark:bg-stone-700/50 p-4 rounded-xl">
                   <p><strong>Email:</strong> legal@writescholar.com</p>
                   <p><strong>Support:</strong> support@writescholar.com</p>
                 </div>
@@ -276,17 +279,17 @@ const TermsOfServicePage: React.FC<TermsOfServicePageProps> = ({ onNavigate, use
             </section>
           </div>
 
-          <div className="mt-12 pt-8 border-t border-stone-200">
+          <div className="mt-12 pt-8 border-t border-stone-200 dark:border-stone-700">
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button
                 onClick={() => onNavigate('dashboard')}
-                className="bg-lime-400 hover:bg-lime-300 text-stone-900 px-8 py-3 rounded-full font-semibold transition-all duration-200 shadow-lg hover:shadow-xl"
+                className="px-8 py-3 rounded-xl font-semibold text-white bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 shadow-lg shadow-violet-500/25 transition-all duration-200"
               >
                 Back to Dashboard
               </button>
               <button
                 onClick={() => onNavigate('privacy')}
-                className="border-2 border-stone-300 hover:border-stone-400 text-stone-700 hover:text-stone-900 px-8 py-3 rounded-full font-semibold transition-all duration-200"
+                className="px-8 py-3 rounded-xl font-semibold border-2 border-stone-300 dark:border-stone-600 text-stone-700 dark:text-stone-300 hover:border-stone-400 dark:hover:border-stone-500 transition-all duration-200"
               >
                 View Privacy Policy
               </button>
@@ -294,6 +297,7 @@ const TermsOfServicePage: React.FC<TermsOfServicePageProps> = ({ onNavigate, use
           </div>
         </div>
       </main>
+      <Footer onNavigate={onNavigate} />
     </div>
   );
 };

@@ -50,6 +50,8 @@ import SummarizerPage from './pages/tools/SummarizerPage';
 import QuizGeneratorPage from './pages/tools/QuizGeneratorPage';
 import GPACalculatorPage from './pages/tools/GPACalculatorPage';
 import PomodoroTimerPage from './pages/tools/PomodoroTimerPage';
+import CalculatorPage from './pages/tools/CalculatorPage';
+import ConverterPage from './pages/tools/ConverterPage';
 import LightningReflexQuizPage from './pages/tools/LightningReflexQuizPage';
 
 // Import common components
@@ -138,8 +140,10 @@ const AcademicAIApp = () => {
     'quiz-history': { title: 'My Study Tools | WriteScholar', description: 'View and retake your saved quizzes, flashcards, and crosswords. Study materials are stored for 7 days.' },
     'gpa-calculator': { title: 'Free GPA Calculator – Calculate Your Grade Point Average | WriteScholar', description: 'Free GPA calculator for college and high school students. Calculate semester or cumulative GPA instantly. Add courses, credits, and grades. No signup required.' },
     'pomodoro-timer': { title: 'Free Pomodoro Timer – Study Timer & Focus Tool | WriteScholar', description: 'Free Pomodoro timer for focused studying. Boost productivity with timed work sessions and breaks. Customizable focus and break intervals. No signup required.' },
+    'calculator': { title: 'Free Scientific Calculator – Trig, Log, Powers | WriteScholar', description: 'Free online scientific calculator for students. Trigonometry (sin, cos, tan), logarithms, square root, powers, and more. Works in degrees or radians. No signup required.' },
+    'converter': { title: 'Free Unit Converter – Length, Weight, Temperature & More | WriteScholar', description: 'Free online unit converter for students. Convert meters to feet, inches to cm, kg to lbs, Celsius to Fahrenheit, and more. Length, weight, temperature, volume, area, time. No signup required.' },
     'crater-blast': { title: 'Crater Blast – AI Quiz Shooter Game | WriteScholar', description: 'Blast the correct falling crater before it lands! AI generates quiz questions as craters. Aim your cannon, build streaks, and beat your high score.' },
-    'more-tools': { title: 'More Free Tools – Word Counter, Essay Outline, GPA Calculator | WriteScholar', description: 'Free student tools: word counter, citation generator, essay outline, thesis generator, grammar checker, readability score, paraphrasing tips, text case converter, GPA calculator, Pomodoro timer.' },
+    'more-tools': { title: 'More Free Tools – Word Counter, Calculator, Converter | WriteScholar', description: 'Free student tools: word counter, citation generator, scientific calculator, unit converter, essay outline, thesis generator, grammar checker, readability score, paraphrasing tips, text case converter, GPA calculator, Pomodoro timer.' },
     'badges': { title: 'Achievements & Badges | WriteScholar', description: 'Collect badges, earn XP, and level up your scholar journey. Unlock cute monster companions by using WriteScholar tools.' }
   };
   useEffect(() => {
@@ -344,6 +348,8 @@ const AcademicAIApp = () => {
       if (pathname === '/tools/crossword-generator' || pathname === '/crossword-generator') return 'crossword-generator';
       if (pathname === '/tools/gpa-calculator' || pathname === '/gpa-calculator') return 'gpa-calculator';
       if (pathname === '/tools/pomodoro-timer' || pathname === '/pomodoro-timer') return 'pomodoro-timer';
+      if (pathname === '/tools/calculator' || pathname === '/calculator') return 'calculator';
+      if (pathname === '/tools/converter' || pathname === '/converter') return 'converter';
       if (pathname === '/tools/crater-blast' || pathname === '/crater-blast' || pathname === '/tools/lightning-reflex-quiz' || pathname === '/lightning-reflex-quiz') return 'crater-blast';
       if (pathname === '/tools/more' || pathname === '/more-tools' || pathname === '/view-more-tools') return 'more-tools';
       if (pathname === '/badges' || pathname === '/achievements') return 'badges';
@@ -774,6 +780,10 @@ const AcademicAIApp = () => {
         return <GPACalculatorPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'pomodoro-timer':
         return <PomodoroTimerPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
+      case 'calculator':
+        return <CalculatorPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
+      case 'converter':
+        return <ConverterPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'crater-blast':
         return <LightningReflexQuizPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'admin':
