@@ -842,7 +842,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
       </section>
 
       {/* STUDY YOUR WAY - Tabbed video showcase */}
-      <section className="relative py-10 sm:py-20 bg-gradient-to-b from-stone-50 to-white dark:from-stone-900 dark:to-stone-900 overflow-hidden">
+      <section className="relative py-10 sm:py-20 bg-gradient-to-b from-stone-50 to-white dark:from-stone-900 dark:to-stone-900 max-lg:bg-gradient-to-b max-lg:from-indigo-50/40 max-lg:via-stone-50 max-lg:to-white dark:max-lg:from-indigo-950/20 dark:max-lg:via-stone-900 dark:max-lg:to-stone-900 overflow-hidden">
         {/* Floating illustrations */}
         <div className="absolute top-16 left-[6%] hidden lg:flex items-center gap-2 bg-white/90 dark:bg-stone-800/90 backdrop-blur rounded-2xl px-3 py-2 shadow-lg border border-lime-200/60 animate-float z-10">
           <span className="text-2xl">📝</span><span className="text-xs font-bold text-lime-600 dark:text-lime-400">Analyse</span>
@@ -860,6 +860,13 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
         <div className="absolute top-2/5 right-[4%] hidden xl:block text-3xl opacity-35 animate-float-delayed">✏️</div>
         <div className="absolute bottom-1/3 left-[4%] hidden xl:block text-3xl opacity-35 animate-float" style={{ animationDelay: '0.7s' }}>🎯</div>
         <div className="absolute bottom-1/4 right-[3%] hidden xl:block text-4xl opacity-40 animate-float-delayed" style={{ animationDelay: '0.4s' }}>🚀</div>
+        {/* Mobile floating elements */}
+        <div className="lg:hidden absolute top-20 left-4 text-3xl opacity-50 animate-float">📚</div>
+        <div className="lg:hidden absolute top-32 right-4 text-2xl opacity-45 animate-float-delayed">✏️</div>
+        <div className="lg:hidden absolute bottom-64 left-6 text-2xl opacity-45 animate-float" style={{ animationDelay: '0.5s' }}>🎯</div>
+        <div className="lg:hidden absolute bottom-48 right-6 text-3xl opacity-50 animate-float-delayed" style={{ animationDelay: '0.3s' }}>🚀</div>
+        <div className="lg:hidden absolute top-1/3 right-8 w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-400/25 to-violet-400/15 animate-float" />
+        <div className="lg:hidden absolute bottom-1/3 left-6 w-10 h-10 rounded-full bg-gradient-to-br from-violet-400/20 to-indigo-400/15 animate-float-delayed" style={{ animationDelay: '0.6s' }} />
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="relative flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-8 mb-10 sm:mb-14">
             {/* Illustration - studying with book */}
@@ -935,8 +942,8 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
 
           {/* Video container */}
           <div className="relative">
-            <div className="absolute -inset-2 bg-gradient-to-r from-blue-400/20 via-violet-400/20 to-purple-400/20 rounded-3xl blur-2xl animate-notes-glow-pulse"></div>
-            <div className="relative bg-white dark:bg-stone-800 rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl border border-stone-200/50 dark:border-stone-700">
+            <div className="absolute -inset-2 max-lg:-inset-3 max-lg:opacity-100 bg-gradient-to-r from-blue-400/20 via-violet-400/20 to-purple-400/20 rounded-3xl blur-2xl animate-notes-glow-pulse"></div>
+            <div className="relative bg-white dark:bg-stone-800 rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl border border-stone-200/50 dark:border-stone-700 max-lg:border-indigo-200/50 max-lg:dark:border-indigo-800/40 max-lg:shadow-indigo-500/10">
               {[
                 { id: 'analyse', src: '/analysevid.mp4', gradient: 'from-lime-500/10 to-emerald-500/10' },
                 { id: 'flashcards', src: '/flashcardsvid.mp4', gradient: 'from-rose-500/10 to-pink-500/10' },
@@ -1813,10 +1820,16 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
       </section>
 
       {/* What WriteScholar Can Help You With */}
-      <section className="relative py-12 sm:py-24 bg-white dark:bg-stone-900 overflow-hidden">
+      <section className="relative py-12 sm:py-24 bg-white dark:bg-stone-900 max-lg:bg-gradient-to-b max-lg:from-indigo-50/30 max-lg:via-white max-lg:to-stone-50 dark:max-lg:from-indigo-950/15 dark:max-lg:via-stone-900 dark:max-lg:to-stone-900 overflow-hidden">
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="absolute top-0 left-[3%] hidden xl:block text-4xl opacity-20 animate-float">📖</div>
           <div className="absolute top-8 right-[3%] hidden xl:block text-4xl opacity-20 animate-float-delayed">✍️</div>
+          {/* Mobile floating elements */}
+          <div className="xl:hidden absolute top-20 left-4 text-3xl opacity-50 animate-float">📖</div>
+          <div className="xl:hidden absolute top-32 right-4 text-2xl opacity-45 animate-float-delayed">✍️</div>
+          <div className="xl:hidden absolute bottom-64 left-6 text-2xl opacity-45 animate-float" style={{ animationDelay: '0.5s' }}>✨</div>
+          <div className="lg:hidden absolute top-1/3 right-8 w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-400/25 to-violet-400/15 animate-float" />
+          <div className="lg:hidden absolute bottom-1/3 left-6 w-10 h-10 rounded-full bg-gradient-to-br from-violet-400/20 to-indigo-400/15 animate-float-delayed" style={{ animationDelay: '0.6s' }} />
           <div className="relative text-center mb-12">
             <span className="inline-block px-4 py-1.5 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-400 rounded-full text-sm font-semibold mb-4">Your Academic Toolkit</span>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-stone-800 dark:text-stone-100">
@@ -1852,7 +1865,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                   className={`px-5 sm:px-6 py-2.5 rounded-2xl text-sm sm:text-base font-bold transition-all duration-200 hover:scale-105 active:scale-95 flex-shrink-0 snap-start whitespace-nowrap ${
                     isActive
                       ? `bg-gradient-to-r ${gradients[category.id] || 'from-indigo-500 to-violet-600'} text-white shadow-lg ${shadowColors[category.id] || 'shadow-indigo-500/30'}`
-                      : 'bg-white dark:bg-stone-800 text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-700 border-2 border-stone-200 dark:border-stone-600'
+                      : 'bg-white dark:bg-stone-800 text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-700 border-2 border-stone-200 dark:border-stone-600 max-lg:border-stone-300 max-lg:dark:border-stone-500'
                   }`}
                 >
                   {category.label}
@@ -1862,8 +1875,8 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
           </div>
                   
           {/* Content Area - Gradient card style */}
-          <div className="relative bg-gradient-to-br from-stone-50 to-white dark:from-stone-800/50 dark:to-stone-900 rounded-2xl sm:rounded-3xl p-5 sm:p-12 lg:p-16 border border-stone-200 dark:border-stone-700 shadow-xl overflow-hidden">
-            <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-br from-indigo-400/10 to-violet-400/10 rounded-full -translate-y-1/2 translate-x-1/2" aria-hidden />
+          <div className="relative bg-gradient-to-br from-stone-50 to-white dark:from-stone-800/50 dark:to-stone-900 rounded-2xl sm:rounded-3xl p-5 sm:p-12 lg:p-16 border border-stone-200 dark:border-stone-700 shadow-xl overflow-hidden max-lg:border-indigo-200/40 max-lg:dark:border-indigo-800/30 max-lg:shadow-indigo-500/10">
+            <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-br from-indigo-400/10 to-violet-400/10 rounded-full -translate-y-1/2 translate-x-1/2 max-lg:from-indigo-400/20 max-lg:to-violet-400/15" aria-hidden />
             <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center relative z-10">
               {/* Text Content */}
               <div className="order-2 lg:order-1">
