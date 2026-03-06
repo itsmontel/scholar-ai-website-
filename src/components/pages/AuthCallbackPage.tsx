@@ -32,7 +32,9 @@ const AuthCallbackPage: React.FC<AuthCallbackPageProps> = ({ onNavigate, onLogin
 
           window.history.replaceState(null, '', '/auth/callback');
           // New users go to onboarding; returning users go to dashboard
-          const hasCompletedOnboarding = localStorage.getItem('writescholar_onboarding_completed');
+          // Use user-specific key to avoid conflicts between different accounts in same browser
+          const onboardingKey = `writescholar_onboarding_completed_${userData.id}`;
+          const hasCompletedOnboarding = localStorage.getItem(onboardingKey);
           const nextPage = hasCompletedOnboarding ? 'dashboard' : 'onboarding';
           setTimeout(() => onNavigate(nextPage), 800);
           return;
@@ -43,8 +45,18 @@ const AuthCallbackPage: React.FC<AuthCallbackPageProps> = ({ onNavigate, onLogin
         if (!token && !userParam && localStorage.getItem('authToken')) {
           processedRef.current = true;
           setStatus('success');
-          const hasCompletedOnboarding = localStorage.getItem('writescholar_onboarding_completed');
-          const nextPage = hasCompletedOnboarding ? 'dashboard' : 'onboarding';
+          const storedUser = localStorage.getItem('user');
+          let nextPage = 'dashboard';
+          if (storedUser) {
+            try {
+              const parsedUser = JSON.parse(storedUser);
+              const onboardingKey = `writescholar_onboarding_completed_${parsedUser.id}`;
+              const hasCompletedOnboarding = localStorage.getItem(onboardingKey);
+              nextPage = hasCompletedOnboarding ? 'dashboard' : 'onboarding';
+            } catch (e) {
+              // fallback to dashboard if user data is invalid
+            }
+          }
           setTimeout(() => onNavigate(nextPage), 300);
           return;
         }

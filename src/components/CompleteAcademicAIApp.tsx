@@ -615,7 +615,9 @@ const AcademicAIApp = () => {
               }
             }}
             onComplete={() => {
-              localStorage.setItem('writescholar_onboarding_completed', 'true');
+              if (user?.id) {
+                localStorage.setItem(`writescholar_onboarding_completed_${user.id}`, 'true');
+              }
               navigateTo('dashboard');
             }}
           />
@@ -648,7 +650,8 @@ const AcademicAIApp = () => {
         return <UnsubscribePage onNavigate={navigateTo} />;
       case 'dashboard':
         // First-time users see onboarding before dashboard
-        if (isLoggedIn && !localStorage.getItem('writescholar_onboarding_completed')) {
+        // Use user-specific key to avoid conflicts between different accounts in same browser
+        if (isLoggedIn && user?.id && !localStorage.getItem(`writescholar_onboarding_completed_${user.id}`)) {
           return (
             <OnboardingPage
               onNavigate={navigateTo}
@@ -661,7 +664,9 @@ const AcademicAIApp = () => {
                 }
               }}
               onComplete={() => {
-                localStorage.setItem('writescholar_onboarding_completed', 'true');
+                if (user?.id) {
+                  localStorage.setItem(`writescholar_onboarding_completed_${user.id}`, 'true');
+                }
                 navigateTo('dashboard');
               }}
             />
@@ -669,7 +674,7 @@ const AcademicAIApp = () => {
         }
         return <DashboardPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'analyze':
-        if (isLoggedIn && !localStorage.getItem('writescholar_onboarding_completed')) {
+        if (isLoggedIn && user?.id && !localStorage.getItem(`writescholar_onboarding_completed_${user.id}`)) {
           return (
             <OnboardingPage
               onNavigate={navigateTo}
@@ -682,7 +687,9 @@ const AcademicAIApp = () => {
                 }
               }}
               onComplete={() => {
-                localStorage.setItem('writescholar_onboarding_completed', 'true');
+                if (user?.id) {
+                  localStorage.setItem(`writescholar_onboarding_completed_${user.id}`, 'true');
+                }
                 navigateTo('analyze');
               }}
             />
@@ -690,7 +697,7 @@ const AcademicAIApp = () => {
         }
         return isLoggedIn ? <DashboardPage onNavigate={navigateTo} user={user} onLogout={handleLogout} initialMode="analyze" /> : <LandingPage onNavigate={navigateTo} />;
       case 'citations':
-        if (isLoggedIn && !localStorage.getItem('writescholar_onboarding_completed')) {
+        if (isLoggedIn && user?.id && !localStorage.getItem(`writescholar_onboarding_completed_${user.id}`)) {
           return (
             <OnboardingPage
               onNavigate={navigateTo}
@@ -703,7 +710,9 @@ const AcademicAIApp = () => {
                 }
               }}
               onComplete={() => {
-                localStorage.setItem('writescholar_onboarding_completed', 'true');
+                if (user?.id) {
+                  localStorage.setItem(`writescholar_onboarding_completed_${user.id}`, 'true');
+                }
                 navigateTo('citations');
               }}
             />

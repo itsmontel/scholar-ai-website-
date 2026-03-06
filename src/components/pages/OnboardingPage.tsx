@@ -361,7 +361,8 @@ const OnboardingPage = ({ onNavigate, user, onComplete, onUserUpdate }: Onboardi
       return;
     }
 
-    localStorage.setItem('writescholar_onboarding_completed', 'true');
+    // Use user-specific key to avoid conflicts between different accounts in same browser
+    localStorage.setItem(`writescholar_onboarding_completed_${user.id}`, 'true');
 
     if (username.trim() && user.id) {
       await saveUsername();
@@ -407,8 +408,10 @@ const OnboardingPage = ({ onNavigate, user, onComplete, onUserUpdate }: Onboardi
     }
     if (user && onComplete) {
       onComplete();
+    } else if (user?.id) {
+      localStorage.setItem(`writescholar_onboarding_completed_${user.id}`, 'true');
+      onNavigate('dashboard');
     } else {
-      localStorage.setItem('writescholar_onboarding_completed', 'true');
       onNavigate('login');
     }
   };
