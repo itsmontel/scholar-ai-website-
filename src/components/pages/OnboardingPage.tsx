@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import ScholarMascot from '../common/ScholarMascot';
 
 interface OnboardingPageProps {
   onNavigate: (page: string) => void;
@@ -457,11 +458,9 @@ const OnboardingPage = ({ onNavigate, user, onComplete, onUserUpdate }: Onboardi
     <div className="min-h-screen flex flex-col" style={{ background: 'linear-gradient(180deg, #FAFAF9 0%, #F5F5F4 50%, #EDE9FE 100%)' }}>
       {/* Top bar */}
       <div className="px-6 pt-6 pb-2 flex items-center">
-        <div className="flex items-center space-x-2.5">
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: '#262626' }}>
-            <span className="font-bold text-sm" style={{ color: '#8b5cf6' }}>W</span>
-          </div>
-          <span className="text-lg font-semibold text-stone-800">WriteScholar</span>
+        <div className="flex items-center gap-2.5">
+          <ScholarMascot size={40} animated={false} />
+          <span className="text-xl font-extrabold tracking-tight text-indigo-600 dark:text-indigo-400">WriteScholar</span>
         </div>
       </div>
 

@@ -135,14 +135,14 @@ const SignUpPage = ({ onNavigate, onSignUp }: SignUpPageProps) => {
             )}
 
             {success && (
-              <div className="mb-6 p-4 bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-200 dark:border-indigo-700 rounded-xl">
+              <div className="mb-6 p-4 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-700 rounded-xl">
                 <div className="flex items-start">
-                  <svg className="w-5 h-5 text-indigo-600 dark:text-indigo-400 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 text-green-600 dark:text-green-400 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
                   <div>
-                    <p className="text-stone-800 dark:text-stone-100 font-medium text-sm">Account created successfully!</p>
-                    <p className="text-stone-600 dark:text-stone-400 text-sm mt-1">
+                    <p className="text-green-800 dark:text-green-100 font-medium text-sm">Account created successfully!</p>
+                    <p className="text-green-700 dark:text-green-300 text-sm mt-1">
                       Please check your email (including spam folder) to verify your account.
                     </p>
                   </div>
