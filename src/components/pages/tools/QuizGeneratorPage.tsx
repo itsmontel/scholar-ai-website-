@@ -977,31 +977,31 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
     if (quizCompleted) {
       const score = getScore();
       return (
-        <div className="bg-white rounded-2xl sm:rounded-3xl shadow-xl border border-gray-100 overflow-hidden p-6 sm:p-10 text-center">
+        <div className="bg-white dark:bg-stone-800 rounded-2xl sm:rounded-3xl shadow-xl shadow-stone-100/50 dark:shadow-none border border-stone-200 dark:border-stone-600 overflow-hidden p-6 sm:p-10 text-center">
           <div className="mb-8">
             <div className={`w-24 h-24 mx-auto rounded-full flex items-center justify-center mb-4 text-4xl ${
               score.percentage >= 70 ? 'bg-gradient-to-br from-green-500 to-emerald-600' :
-              score.percentage >= 50 ? 'bg-gradient-to-br from-amber-500 to-orange-600' :
+              score.percentage >= 50 ? 'bg-gradient-to-br from-lime-500 to-emerald-600' :
               'bg-gradient-to-br from-red-500 to-rose-600'
             }`}>
               🏆
             </div>
-            <h2 className="text-3xl font-bold text-gray-900 mb-2">Quiz Complete!</h2>
-            <p className="text-gray-600">Here's how you did</p>
+            <h2 className="text-3xl font-extrabold text-stone-800 dark:text-stone-100 mb-2">Quiz Complete!</h2>
+            <p className="text-stone-600 dark:text-stone-400">Here's how you did</p>
           </div>
 
-          <div className="bg-gradient-to-br from-gray-50 to-white rounded-2xl p-6 mb-8 max-w-md mx-auto">
-            <div className="text-6xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent mb-2">
+          <div className="bg-gradient-to-br from-stone-50 to-white dark:from-stone-800 dark:to-stone-700 rounded-2xl p-6 mb-8 max-w-md mx-auto border border-stone-200 dark:border-stone-600">
+            <div className="text-6xl font-bold bg-gradient-to-r from-lime-600 to-emerald-600 bg-clip-text text-transparent mb-2">
               {score.percentage}%
             </div>
-            <p className="text-gray-600 text-lg">
+            <p className="text-stone-600 dark:text-stone-400 text-lg">
               {score.correct} out of {score.total} correct
             </p>
-            <div className="w-full bg-gray-200 rounded-full h-3 mt-4">
+            <div className="w-full bg-stone-200 dark:bg-stone-600 rounded-full h-3 mt-4">
               <div 
                 className={`h-3 rounded-full transition-all duration-500 ${
                   score.percentage >= 70 ? 'bg-gradient-to-r from-green-500 to-emerald-600' :
-                  score.percentage >= 50 ? 'bg-gradient-to-r from-amber-500 to-orange-600' :
+                  score.percentage >= 50 ? 'bg-gradient-to-r from-lime-500 to-emerald-600' :
                   'bg-gradient-to-r from-red-500 to-rose-600'
                 }`}
                 style={{ width: `${score.percentage}%` }}
@@ -1031,31 +1031,31 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
               <>
                 <button
                   onClick={() => setShowExportUpgradeModal(true)}
-                  className="px-4 py-2.5 bg-gray-100 text-gray-400 font-medium rounded-xl transition-all flex items-center justify-center gap-2 text-sm cursor-pointer"
+                  className="px-4 py-2.5 bg-stone-100 dark:bg-stone-700 text-stone-500 dark:text-stone-400 font-medium rounded-xl transition-all flex items-center justify-center gap-2 text-sm cursor-pointer"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                   PDF
-                  <svg className="w-3.5 h-3.5 text-amber-500" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" /></svg>
+                  <svg className="w-3.5 h-3.5 text-lime-500 dark:text-lime-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" /></svg>
                 </button>
                 <button
                   onClick={() => setShowExportUpgradeModal(true)}
-                  className="px-4 py-2.5 bg-gray-100 text-gray-400 font-medium rounded-xl transition-all flex items-center justify-center gap-2 text-sm cursor-pointer"
+                  className="px-4 py-2.5 bg-stone-100 dark:bg-stone-700 text-stone-500 dark:text-stone-400 font-medium rounded-xl transition-all flex items-center justify-center gap-2 text-sm cursor-pointer"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                   DOCX
-                  <svg className="w-3.5 h-3.5 text-amber-500" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" /></svg>
+                  <svg className="w-3.5 h-3.5 text-lime-500 dark:text-lime-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" /></svg>
                 </button>
               </>
             )}
             <button
               onClick={resetQuiz}
-              className="px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl transition-all flex items-center justify-center gap-2"
+              className="px-6 py-3 bg-stone-100 dark:bg-stone-700 hover:bg-stone-200 dark:hover:bg-stone-600 text-stone-700 dark:text-stone-300 font-semibold rounded-xl transition-all flex items-center justify-center gap-2"
             >
               🔄 Try Again
             </button>
             <button
               onClick={() => { setQuiz(null); setIsQuizMode(false); }}
-              className="px-6 py-3 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white font-semibold rounded-xl transition-all flex items-center justify-center gap-2"
+              className="px-6 py-3 bg-gradient-to-r from-lime-600 to-emerald-600 hover:from-lime-500 hover:to-emerald-500 text-white font-semibold rounded-xl transition-all flex items-center justify-center gap-2"
             >
               ✨ New Quiz
             </button>
@@ -1067,11 +1067,11 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
     const question = quiz.questions[currentQuestion];
 
     return (
-      <div className="bg-white rounded-2xl sm:rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
+      <div className="bg-white dark:bg-stone-800 rounded-2xl sm:rounded-3xl shadow-xl shadow-stone-100/50 dark:shadow-none border border-stone-200 dark:border-stone-600 overflow-hidden">
         {/* Progress bar */}
-        <div className="h-2 bg-gray-100">
+        <div className="h-2 bg-stone-200 dark:bg-stone-600">
           <div 
-            className="h-full bg-gradient-to-r from-amber-500 to-orange-500 transition-all duration-300"
+            className="h-full bg-gradient-to-r from-lime-500 to-emerald-500 transition-all duration-300"
             style={{ width: `${((currentQuestion + 1) / quiz.questions.length) * 100}%` }}
           ></div>
         </div>
@@ -1079,7 +1079,7 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
         <div className="p-4 sm:p-8">
           {/* Question header */}
           <div className="flex items-center justify-between mb-6">
-            <span className="text-sm font-medium text-gray-500">
+            <span className="text-sm font-medium text-stone-500 dark:text-stone-400">
               Question {currentQuestion + 1} of {quiz.questions.length}
             </span>
             <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
@@ -1093,7 +1093,7 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
           </div>
 
           {/* Question */}
-          <h3 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-6 leading-relaxed">
+          <h3 className="text-xl sm:text-2xl font-semibold text-stone-800 dark:text-stone-100 mb-6 leading-relaxed">
             {question.question}
           </h3>
 
@@ -1113,15 +1113,15 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
                   className={`w-full p-4 rounded-xl border-2 text-left transition-all flex items-center gap-3 ${
                     isCorrect ? 'border-green-500 bg-green-50' :
                     isWrong ? 'border-red-500 bg-red-50' :
-                    isSelected ? 'border-amber-500 bg-amber-50' :
-                    'border-gray-200 hover:border-amber-300 hover:bg-amber-50/50'
+                    isSelected ? 'border-lime-500 dark:border-lime-600 bg-lime-50 dark:bg-lime-900/30' :
+                    'border-stone-200 dark:border-stone-600 hover:border-lime-300 dark:hover:border-lime-600 hover:bg-lime-50/50 dark:hover:bg-lime-900/20'
                   } ${showResult ? 'cursor-default' : 'cursor-pointer'}`}
                 >
                   <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${
                     isCorrect ? 'bg-green-500 text-white' :
                     isWrong ? 'bg-red-500 text-white' :
-                    isSelected ? 'bg-amber-500 text-white' :
-                    'bg-gray-100 text-gray-600'
+                    isSelected ? 'bg-lime-500 text-white' :
+                    'bg-stone-100 dark:bg-stone-700 text-stone-600 dark:text-stone-400'
                   }`}>
                     {letter}
                   </span>
@@ -1147,15 +1147,15 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
                       className={`w-full p-4 rounded-xl border-2 text-left transition-all flex items-center gap-3 ${
                         isCorrect ? 'border-green-500 bg-green-50' :
                         isWrong ? 'border-red-500 bg-red-50' :
-                        isSelected ? 'border-amber-500 bg-amber-50' :
-                        'border-gray-200 hover:border-amber-300 hover:bg-amber-50/50'
+                        isSelected ? 'border-lime-500 dark:border-lime-600 bg-lime-50 dark:bg-lime-900/30' :
+                        'border-stone-200 dark:border-stone-600 hover:border-lime-300 dark:hover:border-lime-600 hover:bg-lime-50/50 dark:hover:bg-lime-900/20'
                       } ${showResult ? 'cursor-default' : 'cursor-pointer'}`}
                     >
                       <span className={`w-8 h-8 rounded-full flex items-center justify-center ${
                         isCorrect ? 'bg-green-500 text-white' :
                         isWrong ? 'bg-red-500 text-white' :
-                        isSelected ? 'bg-amber-500 text-white' :
-                        'bg-gray-100 text-gray-600'
+                        isSelected ? 'bg-lime-500 text-white' :
+                        'bg-stone-100 dark:bg-stone-700 text-stone-600 dark:text-stone-400'
                       }`}>
                         {opt === 'true' ? '✓' : '✗'}
                       </span>
@@ -1184,15 +1184,15 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
                       className={`w-full p-4 rounded-xl border-2 text-left flex items-center gap-4 transition-all ${
                         isCorrect ? 'border-green-500 bg-green-50' :
                         isWrong ? 'border-red-500 bg-red-50' :
-                        isSelected ? 'border-amber-500 bg-amber-50' :
-                        'border-gray-200 hover:border-amber-300 hover:bg-amber-50/50'
+                        isSelected ? 'border-lime-500 dark:border-lime-600 bg-lime-50 dark:bg-lime-900/30' :
+                        'border-stone-200 dark:border-stone-600 hover:border-lime-300 dark:hover:border-lime-600 hover:bg-lime-50/50 dark:hover:bg-lime-900/20'
                       }`}
                     >
                       <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${
                         isCorrect ? 'bg-green-500 text-white' :
                         isWrong ? 'bg-red-500 text-white' :
-                        isSelected ? 'bg-amber-500 text-white' :
-                        'bg-gray-100 text-gray-600'
+                        isSelected ? 'bg-lime-500 text-white' :
+                        'bg-stone-100 dark:bg-stone-700 text-stone-600 dark:text-stone-400'
                       }`}>
                         {letter}
                       </span>
@@ -1230,7 +1230,7 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
                 }
               }}
               disabled={currentQuestion === 0}
-              className="px-4 py-2 text-gray-600 hover:text-gray-900 disabled:opacity-30 disabled:cursor-not-allowed flex items-center gap-2"
+              className="px-4 py-2 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 disabled:opacity-30 disabled:cursor-not-allowed flex items-center gap-2"
             >
               ← Previous
             </button>
@@ -1239,14 +1239,14 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
               <button
                 onClick={submitAnswer}
                 disabled={!selectedAnswer}
-                className="px-6 py-3 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white font-semibold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                className="px-6 py-3 bg-gradient-to-r from-lime-600 to-emerald-600 hover:from-lime-500 hover:to-emerald-500 text-white font-semibold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
                 🎯 Submit Answer
               </button>
             ) : (
               <button
                 onClick={nextQuestion}
-                className="px-6 py-3 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white font-semibold rounded-xl transition-all flex items-center gap-2"
+                className="px-6 py-3 bg-gradient-to-r from-lime-600 to-emerald-600 hover:from-lime-500 hover:to-emerald-500 text-white font-semibold rounded-xl transition-all flex items-center gap-2"
               >
                 {currentQuestion + 1 >= quiz.questions.length ? (
                   <>🏆 See Results</>
@@ -1265,19 +1265,19 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
     if (!quiz || isQuizMode) return null;
 
     return (
-      <div className="bg-white rounded-2xl sm:rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
-        <div className="p-4 sm:p-6 border-b border-gray-100 bg-gradient-to-r from-amber-50 to-orange-50">
+      <div className="bg-white dark:bg-stone-800 rounded-2xl sm:rounded-3xl shadow-xl shadow-stone-100/50 dark:shadow-none border border-stone-200 dark:border-stone-600 overflow-hidden">
+        <div className="p-4 sm:p-6 border-b border-stone-200 dark:border-stone-600 bg-gradient-to-r from-lime-50 to-emerald-50 dark:from-lime-900/20 dark:to-emerald-900/20">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <h2 className="text-xl sm:text-2xl font-bold text-gray-900">{quiz.title}</h2>
-              <p className="text-gray-600 text-sm mt-1">
+              <h2 className="text-xl sm:text-2xl font-bold text-stone-800 dark:text-stone-100">{quiz.title}</h2>
+              <p className="text-stone-600 dark:text-stone-400 text-sm mt-1">
                 {quiz.questions.length} questions • {quiz.difficulty} difficulty • {quiz.quizType} format
               </p>
             </div>
             <div className="flex gap-2 flex-wrap">
               <button
                 onClick={startQuiz}
-                className="px-5 py-2.5 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white font-semibold rounded-xl transition-all flex items-center gap-2"
+                className="px-5 py-2.5 bg-gradient-to-r from-lime-600 to-emerald-600 hover:from-lime-500 hover:to-emerald-500 text-white font-semibold rounded-xl transition-all flex items-center gap-2"
               >
                 🧠 Start Quiz
               </button>
@@ -1304,21 +1304,21 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
                 <>
                   <button
                     onClick={() => setShowExportUpgradeModal(true)}
-                    className="px-4 py-2.5 bg-gray-100 text-gray-400 rounded-xl transition-all font-medium text-sm flex items-center gap-1.5 cursor-pointer"
+                    className="px-4 py-2.5 bg-stone-100 dark:bg-stone-700 text-stone-500 dark:text-stone-400 rounded-xl transition-all font-medium text-sm flex items-center gap-1.5 cursor-pointer"
                     title="Upgrade to export as PDF"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                     PDF
-                    <svg className="w-3.5 h-3.5 text-amber-500" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" /></svg>
+                    <svg className="w-3.5 h-3.5 text-lime-500 dark:text-lime-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" /></svg>
                   </button>
                   <button
                     onClick={() => setShowExportUpgradeModal(true)}
-                    className="px-4 py-2.5 bg-gray-100 text-gray-400 rounded-xl transition-all font-medium text-sm flex items-center gap-1.5 cursor-pointer"
+                    className="px-4 py-2.5 bg-stone-100 dark:bg-stone-700 text-stone-500 dark:text-stone-400 rounded-xl transition-all font-medium text-sm flex items-center gap-1.5 cursor-pointer"
                     title="Upgrade to export as Word"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                     DOCX
-                    <svg className="w-3.5 h-3.5 text-amber-500" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" /></svg>
+                    <svg className="w-3.5 h-3.5 text-lime-500 dark:text-lime-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" /></svg>
                   </button>
                 </>
               )}
@@ -1329,9 +1329,9 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
         <div className="p-4 sm:p-6 max-h-[500px] overflow-y-auto">
           <div className="space-y-4">
             {quiz.questions.map((q, idx) => (
-              <div key={q.id} className="p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
+              <div key={q.id} className="p-4 bg-stone-50 dark:bg-stone-800/50 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-700/50 transition-colors">
                 <div className="flex items-start gap-3">
-                  <span className="flex-shrink-0 w-8 h-8 rounded-lg bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center text-white font-semibold text-sm">
+                  <span className="flex-shrink-0 w-8 h-8 rounded-lg bg-gradient-to-br from-lime-500 to-emerald-500 flex items-center justify-center text-white font-semibold text-sm">
                     {idx + 1}
                   </span>
                   <div className="flex-1 min-w-0">
@@ -1342,11 +1342,11 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
                     }`}>
                       {q.type.replace('_', ' ')}
                     </span>
-                    <p className="text-gray-800 font-medium">{q.question}</p>
+                    <p className="text-stone-800 dark:text-stone-100 font-medium">{q.question}</p>
                     {q.options && (
                       <div className="mt-2 space-y-1">
                         {q.options.map((opt, optIdx) => (
-                          <p key={optIdx} className="text-sm text-gray-600 pl-2">{opt}</p>
+                          <p key={optIdx} className="text-sm text-stone-600 dark:text-stone-400 pl-2">{opt}</p>
                         ))}
                       </div>
                     )}
@@ -1362,7 +1362,7 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
   };
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%)' }}>
+    <div className="min-h-screen flex flex-col bg-gradient-to-b from-stone-50 to-white dark:bg-stone-900 dark:from-stone-900 dark:to-stone-800">
       <Header onNavigate={onNavigate} user={user} />
       
       <main className="flex-1 w-full min-w-0 overflow-x-hidden">
@@ -1370,21 +1370,21 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
         <div className="pt-6 sm:pt-10 pb-4 sm:pb-8 px-3 sm:px-6 lg:px-8">
           <div className="max-w-5xl mx-auto text-center">
             <div className="flex items-center justify-center gap-2 sm:gap-3 mb-3 sm:mb-4 flex-wrap">
-              <span className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-semibold shadow-lg shadow-amber-200/50">
+              <span className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full bg-gradient-to-r from-lime-500 to-emerald-500 text-white text-xs font-semibold shadow-lg shadow-lime-200/50 dark:shadow-lime-900/30">
                 👑 Premium Tool
               </span>
-              <span className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full bg-orange-100 text-orange-700 text-xs font-semibold">
+              <span className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full bg-lime-100 dark:bg-lime-900/30 text-lime-700 dark:text-lime-300 text-xs font-semibold">
                 🧠 AI-Powered
               </span>
             </div>
             
-            <h1 className="text-2xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-3 sm:mb-4 leading-tight">
-              AI <span className="bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
+            <h1 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-stone-800 dark:text-stone-100 mb-3 sm:mb-4 leading-tight">
+              AI <span className="bg-gradient-to-r from-lime-600 to-emerald-600 bg-clip-text text-transparent">
                 {studyToolMode === 'flashcards' ? 'Flashcard Generator' : studyToolMode === 'crossword' ? 'Crossword Generator' : 'Quiz Generator'}
               </span>
             </h1>
             
-            <p className="text-sm sm:text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed px-2">
+            <p className="text-sm sm:text-lg text-stone-600 dark:text-stone-400 max-w-2xl mx-auto leading-relaxed px-2">
               {studyToolMode === 'flashcards'
                 ? 'Turn your notes into interactive flip-card study sets for effective memorization.'
                 : studyToolMode === 'crossword'
@@ -1394,7 +1394,7 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
 
             {/* Study Tool Sub-Mode Tabs */}
             <div className="flex items-center justify-center gap-2 mt-6">
-              <div className="inline-flex items-center bg-amber-50 border border-amber-200 rounded-2xl p-1.5">
+              <div className="inline-flex items-center bg-stone-100 dark:bg-stone-800 border border-stone-200 dark:border-stone-600 rounded-2xl p-1.5">
                 {([
                   { key: 'quiz' as const, label: 'Quiz', icon: '📝' },
                   { key: 'flashcards' as const, label: 'Flashcards', icon: '🃏' },
@@ -1405,8 +1405,8 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
                     onClick={() => { setStudyToolMode(tool.key); setQuiz(null); setFlashcardResult(null); setCrosswordResult(null); setError(null); setIsQuizMode(false); }}
                     className={`px-4 sm:px-5 py-2 rounded-xl text-sm font-medium transition-all flex items-center gap-1.5 ${
                       studyToolMode === tool.key
-                        ? 'bg-white text-amber-700 shadow-sm border border-amber-200'
-                        : 'text-amber-600 hover:text-amber-800 hover:bg-amber-100/50'
+                        ? 'bg-white dark:bg-stone-600 text-lime-700 dark:text-lime-300 shadow-sm border border-stone-200 dark:border-stone-600'
+                        : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-700'
                     }`}
                   >
                     <span className="text-base">{tool.icon}</span>
@@ -1427,17 +1427,17 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
                 {quiz && isQuizMode ? (
                   renderQuizTaking()
                 ) : !quiz && (
-                  <div className="bg-white rounded-2xl sm:rounded-3xl shadow-xl border border-gray-100 overflow-hidden min-w-0">
-                    <div className="border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white px-3 sm:px-5 py-3 sm:py-4">
+                  <div className="bg-white dark:bg-stone-800 rounded-2xl sm:rounded-3xl shadow-xl shadow-stone-100/50 dark:shadow-none border border-stone-200 dark:border-stone-600 overflow-hidden min-w-0">
+                    <div className="border-b border-stone-200 dark:border-stone-600 bg-gradient-to-r from-lime-50 to-emerald-50 dark:from-lime-900/20 dark:to-emerald-900/20 px-3 sm:px-5 py-3 sm:py-4">
                       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
                         <div className="flex items-center gap-2 min-w-0 overflow-x-auto w-full sm:w-auto">
-                          <span className="text-xs font-medium text-gray-500 whitespace-nowrap">Type:</span>
-                          <div className="flex gap-1 p-1 bg-gray-100 rounded-lg">
+                          <span className="text-xs font-medium text-stone-500 dark:text-stone-400 whitespace-nowrap">Type:</span>
+                          <div className="flex gap-1 p-1 bg-stone-100 dark:bg-stone-700 rounded-xl">
                             {typeOptions.map((opt) => {
                               const locked = user != null && !isPremiumUser && opt.value !== 'mixed';
                               return (
                                 <button key={opt.value} onClick={() => !locked && setQuizType(opt.value as any)} disabled={locked} title={locked ? 'Premium only' : opt.description}
-                                  className={`px-2 sm:px-3 py-1.5 rounded-md text-xs font-medium transition-all whitespace-nowrap ${locked ? 'text-gray-300 cursor-not-allowed' : quizType === opt.value ? 'bg-white text-amber-700 shadow-sm' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'}`}>
+                                  className={`px-2 sm:px-3 py-1.5 rounded-md text-xs font-medium transition-all whitespace-nowrap ${locked ? 'text-stone-400 dark:text-stone-500 cursor-not-allowed' : quizType === opt.value ? 'bg-white dark:bg-stone-600 text-lime-700 dark:text-lime-300 shadow-sm' : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-600'}`}>
                                   {opt.label}{locked && <span className="ml-1 text-[9px]">🔒</span>}
                                 </button>
                               );
@@ -1445,13 +1445,13 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
                           </div>
                         </div>
                         <div className="flex items-center gap-2 min-w-0">
-                          <span className="text-xs font-medium text-gray-500 whitespace-nowrap">Difficulty:</span>
-                          <div className="flex gap-1 p-1 bg-gray-100 rounded-lg">
+                          <span className="text-xs font-medium text-stone-500 dark:text-stone-400 whitespace-nowrap">Difficulty:</span>
+                          <div className="flex gap-1 p-1 bg-stone-100 dark:bg-stone-700 rounded-xl">
                             {difficultyOptions.map((opt) => {
                               const locked = user != null && !isPremiumUser && opt.value !== 'medium';
                               return (
                                 <button key={opt.value} onClick={() => !locked && setDifficulty(opt.value as any)} disabled={locked} title={locked ? 'Premium only' : opt.description}
-                                  className={`px-2 sm:px-3 py-1.5 rounded-md text-xs font-medium transition-all whitespace-nowrap ${locked ? 'text-gray-300 cursor-not-allowed' : difficulty === opt.value ? 'bg-white text-amber-700 shadow-sm' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'}`}>
+                                  className={`px-2 sm:px-3 py-1.5 rounded-md text-xs font-medium transition-all whitespace-nowrap ${locked ? 'text-stone-400 dark:text-stone-500 cursor-not-allowed' : difficulty === opt.value ? 'bg-white dark:bg-stone-600 text-lime-700 dark:text-lime-300 shadow-sm' : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-600'}`}>
                                   {opt.label}{locked && <span className="ml-1 text-[9px]">🔒</span>}
                                 </button>
                               );
@@ -1459,38 +1459,38 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="text-xs font-medium text-gray-500 whitespace-nowrap">Questions:</span>
+                          <span className="text-xs font-medium text-stone-500 dark:text-stone-400 whitespace-nowrap">Questions:</span>
                           <select value={user != null && isFreeUser ? 10 : questionCount} onChange={(e) => setQuestionCount(Number(e.target.value))} disabled={user != null && isFreeUser}
-                            className={`px-2 py-1.5 bg-gray-100 border-0 rounded-lg text-xs font-medium text-gray-700 focus:ring-2 focus:ring-amber-200 ${user != null && isFreeUser ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                            className={`px-2 py-1.5 bg-stone-100 dark:bg-stone-700 border-0 rounded-lg text-xs font-medium text-stone-700 dark:text-stone-300 focus:ring-2 focus:ring-lime-200 dark:focus:ring-lime-800 ${user != null && isFreeUser ? 'opacity-50 cursor-not-allowed' : ''}`}>
                             {user != null && isFreeUser ? <option value={10}>10</option> : [5, 10, 15, 20, 25].map(n => <option key={n} value={n}>{n}</option>)}
                           </select>
                           {user != null && isFreeUser && <span className="text-[9px]">🔒</span>}
                         </div>
                         <button onClick={handleGenerate} disabled={isLoading || !inputText.trim() || wordCount < 100 || wordCount > quizUsage.maxWordsPerGeneration || quizExhausted}
-                          className="w-full sm:w-auto sm:ml-auto px-4 sm:px-6 py-2 sm:py-2.5 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white font-semibold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-amber-200/50 text-sm">
+                          className="w-full sm:w-auto sm:ml-auto px-4 sm:px-6 py-2 sm:py-2.5 bg-gradient-to-r from-lime-600 to-emerald-600 hover:from-lime-500 hover:to-emerald-500 text-white font-semibold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-lime-200/50 dark:shadow-lime-900/30 text-sm">
                           {isLoading ? (<><svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><span>Generating...</span></>) : (<><span>✨</span><span>Generate Quiz</span><span>→</span></>)}
                         </button>
                       </div>
                     </div>
                     <div className="flex flex-col">
-                      <div className="px-3 sm:px-5 py-2.5 sm:py-3 border-b border-gray-100 bg-gradient-to-r from-gray-50/50 to-transparent flex items-center justify-between">
-                        <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-amber-500"></div><span className="text-sm font-semibold text-gray-700">Source Material</span></div>
+                      <div className="px-3 sm:px-5 py-2.5 sm:py-3 border-b border-stone-200 dark:border-stone-600 bg-gradient-to-r from-stone-50 dark:from-stone-800/50 to-transparent flex items-center justify-between">
+                        <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-lime-500"></div><span className="text-sm font-semibold text-stone-700 dark:text-stone-300">Source Material</span></div>
                         <div className="flex items-center gap-1">
-                          <button onClick={handlePaste} className="p-1.5 text-gray-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors" title="Paste from clipboard"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg></button>
-                          <button onClick={handleClear} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Clear text"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
+                          <button onClick={handlePaste} className="p-1.5 text-stone-400 dark:text-stone-500 hover:text-lime-600 dark:hover:text-lime-400 hover:bg-lime-50 dark:hover:bg-lime-900/30 rounded-lg transition-colors" title="Paste from clipboard"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg></button>
+                          <button onClick={handleClear} className="p-1.5 text-stone-400 dark:text-stone-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors" title="Clear text"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
                         </div>
                       </div>
                       <div className="relative flex-1">
                         {isLoading ? (<div className="min-h-[350px] flex items-center justify-center"><AnalysisAnimation text="Creating your quiz questions..." /></div>) : (
-                          <textarea value={inputText} onChange={(e) => setInputText(e.target.value)} placeholder="Paste your article, textbook chapter, or research paper here... (minimum 100 words)" className="w-full h-full min-h-[300px] sm:min-h-[350px] p-3 sm:p-5 text-gray-800 placeholder-gray-400 resize-none focus:outline-none text-sm sm:text-base leading-relaxed break-words" />
+                          <textarea value={inputText} onChange={(e) => setInputText(e.target.value)} placeholder="Paste your article, textbook chapter, or research paper here... (minimum 100 words)" className="w-full h-full min-h-[300px] sm:min-h-[350px] p-3 sm:p-5 text-stone-800 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500 resize-none focus:outline-none text-sm sm:text-base leading-relaxed break-words" />
                         )}
                       </div>
-                      <div className="px-3 sm:px-5 py-2.5 sm:py-3 border-t border-gray-100 bg-gray-50/50">
-                        <div className="flex items-center justify-between text-xs sm:text-sm text-gray-500">
-                          <span className={`${wordCount < 100 ? 'text-amber-600' : wordCount > quizUsage.maxWordsPerGeneration ? 'text-red-600' : ''}`}>
+                      <div className="px-3 sm:px-5 py-2.5 sm:py-3 border-t border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-800/50">
+                        <div className="flex items-center justify-between text-xs sm:text-sm text-stone-500 dark:text-stone-400">
+                          <span className={`${wordCount < 100 ? 'text-lime-600 dark:text-lime-400' : wordCount > quizUsage.maxWordsPerGeneration ? 'text-red-600' : ''}`}>
                             {wordCount.toLocaleString()} words{wordCount >= 100 && wordCount <= quizUsage.maxWordsPerGeneration && ` / ${quizUsage.maxWordsPerGeneration.toLocaleString()} max`}
                           </span>
-                          {wordCount < 100 && <span className="text-amber-600">Minimum 100 words</span>}
+                          {wordCount < 100 && <span className="text-lime-600 dark:text-lime-400">Minimum 100 words</span>}
                           {wordCount > quizUsage.maxWordsPerGeneration && <span className="text-red-600">Exceeds {quizUsage.maxWordsPerGeneration.toLocaleString()} word limit{isFreeUser && ' (upgrade for 15,000)'}</span>}
                         </div>
                       </div>
@@ -1499,7 +1499,7 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
                 )}
                 {quiz && !isQuizMode && (
                   <div className="mt-4 mx-3 sm:mx-0">
-                    <button onClick={() => setQuiz(null)} className="px-4 py-2 text-gray-600 hover:text-gray-900 flex items-center gap-2">← Create New Quiz</button>
+                    <button onClick={() => setQuiz(null)} className="px-4 py-2 text-stone-600 dark:text-stone-400 hover:text-stone-800 dark:text-stone-100 flex items-center gap-2">← Create New Quiz</button>
                   </div>
                 )}
               </>
@@ -1511,7 +1511,7 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
                 {flashcardResult && flashcardResult.cards?.length > 0 ? (
                   <div className="mx-3 sm:mx-0">
                     <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
-                      <h3 className="text-lg font-bold text-gray-900">{flashcardResult.title}</h3>
+                      <h3 className="text-lg font-bold text-stone-800 dark:text-stone-100">{flashcardResult.title}</h3>
                       <div className="flex items-center gap-2 flex-wrap">
                         {isPaidUser ? (
                           <>
@@ -1526,45 +1526,45 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
                           </>
                         ) : (
                           <>
-                            <button onClick={() => setShowExportUpgradeModal(true)} className="px-3 py-1.5 bg-gray-100 text-gray-400 font-medium rounded-lg flex items-center gap-1.5 text-xs cursor-pointer">
-                              <svg className="w-3 h-3 text-amber-500" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd"/></svg>
+                            <button onClick={() => setShowExportUpgradeModal(true)} className="px-3 py-1.5 bg-stone-100 dark:bg-stone-700 text-stone-500 dark:text-stone-400 font-medium rounded-lg flex items-center gap-1.5 text-xs cursor-pointer">
+                              <svg className="w-3 h-3 text-lime-500 dark:text-lime-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd"/></svg>
                               PDF
                             </button>
-                            <button onClick={() => setShowExportUpgradeModal(true)} className="px-3 py-1.5 bg-gray-100 text-gray-400 font-medium rounded-lg flex items-center gap-1.5 text-xs cursor-pointer">
-                              <svg className="w-3 h-3 text-amber-500" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd"/></svg>
+                            <button onClick={() => setShowExportUpgradeModal(true)} className="px-3 py-1.5 bg-stone-100 dark:bg-stone-700 text-stone-500 dark:text-stone-400 font-medium rounded-lg flex items-center gap-1.5 text-xs cursor-pointer">
+                              <svg className="w-3 h-3 text-lime-500 dark:text-lime-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd"/></svg>
                               DOCX
                             </button>
                           </>
                         )}
-                        <button onClick={() => { setFlashcardResult(null); setCurrentCard(0); setIsFlipped(false); setKnownCards(new Set()); }} className="px-4 py-2 text-sm text-amber-700 bg-amber-50 rounded-lg hover:bg-amber-100 font-medium">New Deck</button>
+                        <button onClick={() => { setFlashcardResult(null); setCurrentCard(0); setIsFlipped(false); setKnownCards(new Set()); }} className="px-4 py-2 text-sm text-lime-700 dark:text-lime-300 bg-lime-50 dark:bg-lime-900/30 rounded-lg hover:bg-lime-100 dark:hover:bg-lime-800/50 font-medium">New Deck</button>
                       </div>
                     </div>
                     <div className="flex items-center gap-3 mb-5">
-                      <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden"><div className="h-full bg-gradient-to-r from-amber-500 to-orange-500 transition-all duration-300" style={{ width: `${((currentCard + 1) / flashcardResult.cards.length) * 100}%` }}></div></div>
-                      <span className="text-xs text-gray-500 font-medium">{currentCard + 1} / {flashcardResult.cards.length}</span>
+                      <div className="flex-1 h-2 bg-stone-200 dark:bg-stone-600 rounded-full overflow-hidden"><div className="h-full bg-gradient-to-r from-lime-500 to-emerald-500 transition-all duration-300" style={{ width: `${((currentCard + 1) / flashcardResult.cards.length) * 100}%` }}></div></div>
+                      <span className="text-xs text-stone-500 dark:text-stone-400 font-medium">{currentCard + 1} / {flashcardResult.cards.length}</span>
                       {knownCards.size > 0 && <span className="text-xs text-green-600 font-medium">{knownCards.size} mastered</span>}
                     </div>
                     <div onClick={() => setIsFlipped(!isFlipped)} className="relative cursor-pointer select-none mx-auto max-w-2xl mb-6" style={{ perspective: '1000px' }}>
                       <div className="relative w-full transition-transform duration-500" style={{ transformStyle: 'preserve-3d', transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)' }}>
-                        <div className="w-full min-h-[280px] sm:min-h-[320px] bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-200 rounded-3xl p-8 flex flex-col items-center justify-center text-center shadow-lg" style={{ backfaceVisibility: 'hidden' }}>
-                          <span className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-4">Front</span>
-                          <p className="text-xl sm:text-2xl font-semibold text-gray-900 leading-relaxed">{flashcardResult.cards[currentCard]?.front}</p>
-                          <p className="text-xs text-amber-400 mt-6">Click to flip</p>
+                        <div className="w-full min-h-[280px] sm:min-h-[320px] bg-gradient-to-br from-lime-50 to-emerald-50 dark:from-lime-900/20 dark:to-emerald-900/20 border-2 border-lime-200 dark:border-lime-700 rounded-3xl p-8 flex flex-col items-center justify-center text-center shadow-lg" style={{ backfaceVisibility: 'hidden' }}>
+                          <span className="text-xs font-bold text-lime-500 dark:text-lime-400 uppercase tracking-widest mb-4">Front</span>
+                          <p className="text-xl sm:text-2xl font-semibold text-stone-800 dark:text-stone-100 leading-relaxed">{flashcardResult.cards[currentCard]?.front}</p>
+                          <p className="text-xs text-lime-500 dark:text-lime-400 mt-6">Click to flip</p>
                         </div>
-                        <div className="absolute inset-0 w-full min-h-[280px] sm:min-h-[320px] bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-3xl p-8 flex flex-col items-center justify-center text-center shadow-lg" style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}>
-                          <span className="text-xs font-bold text-blue-500 uppercase tracking-widest mb-4">Back</span>
-                          <p className="text-lg sm:text-xl text-gray-800 leading-relaxed">{flashcardResult.cards[currentCard]?.back}</p>
-                          <p className="text-xs text-blue-400 mt-6">Click to flip back</p>
+                        <div className="absolute inset-0 w-full min-h-[280px] sm:min-h-[320px] bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 border-2 border-emerald-200 dark:border-emerald-700 rounded-3xl p-8 flex flex-col items-center justify-center text-center shadow-lg" style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}>
+                          <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-4">Back</span>
+                          <p className="text-lg sm:text-xl text-stone-800 dark:text-stone-100 leading-relaxed">{flashcardResult.cards[currentCard]?.back}</p>
+                          <p className="text-xs text-emerald-500 dark:text-emerald-400 mt-6">Click to flip back</p>
                         </div>
                       </div>
                     </div>
                     <div className="flex items-center justify-center gap-3 flex-wrap">
-                      <button onClick={() => { setCurrentCard(Math.max(0, currentCard - 1)); setIsFlipped(false); }} disabled={currentCard === 0} className="px-4 py-2.5 rounded-xl text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 disabled:opacity-30 transition-all">← Previous</button>
+                      <button onClick={() => { setCurrentCard(Math.max(0, currentCard - 1)); setIsFlipped(false); }} disabled={currentCard === 0} className="px-4 py-2.5 rounded-xl text-sm font-medium bg-stone-100 dark:bg-stone-700 text-stone-600 dark:text-stone-400 hover:bg-stone-200 dark:hover:bg-stone-600 disabled:opacity-30 transition-all">← Previous</button>
                       <button onClick={() => { const newKnown = new Set(knownCards); if (newKnown.has(currentCard)) newKnown.delete(currentCard); else newKnown.add(currentCard); setKnownCards(newKnown); }}
                         className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition-all ${knownCards.has(currentCard) ? 'bg-green-500 text-white shadow-md' : 'bg-green-50 text-green-700 border border-green-200 hover:bg-green-100'}`}>
                         {knownCards.has(currentCard) ? '✓ Mastered' : 'Mark as Known'}
                       </button>
-                      <button onClick={() => { setCurrentCard(Math.min(flashcardResult.cards.length - 1, currentCard + 1)); setIsFlipped(false); }} disabled={currentCard >= flashcardResult.cards.length - 1} className="px-4 py-2.5 rounded-xl text-sm font-medium bg-gradient-to-r from-amber-600 to-orange-600 text-white hover:from-amber-700 hover:to-orange-700 disabled:opacity-30 transition-all">Next →</button>
+                      <button onClick={() => { setCurrentCard(Math.min(flashcardResult.cards.length - 1, currentCard + 1)); setIsFlipped(false); }} disabled={currentCard >= flashcardResult.cards.length - 1} className="px-4 py-2.5 rounded-xl text-sm font-medium bg-gradient-to-r from-lime-600 to-emerald-600 text-white hover:from-lime-500 hover:to-emerald-500 disabled:opacity-30 transition-all">Next →</button>
                     </div>
                     {knownCards.size === flashcardResult.cards.length && (
                       <div className="mt-6 p-6 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-2xl text-center">
@@ -1575,40 +1575,40 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
                     )}
                   </div>
                 ) : (
-                  <div className="bg-white rounded-2xl sm:rounded-3xl shadow-xl border border-gray-100 overflow-hidden min-w-0">
-                    <div className="border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white px-3 sm:px-5 py-3 sm:py-4">
+                  <div className="bg-white dark:bg-stone-800 rounded-2xl sm:rounded-3xl shadow-xl shadow-stone-100/50 dark:shadow-none border border-stone-200 dark:border-stone-600 overflow-hidden min-w-0">
+                    <div className="border-b border-stone-200 dark:border-stone-600 bg-gradient-to-r from-lime-50 to-emerald-50 dark:from-lime-900/20 dark:to-emerald-900/20 px-3 sm:px-5 py-3 sm:py-4">
                       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
                         <div className="flex items-center gap-2">
-                          <span className="text-xs font-medium text-gray-500">Cards:</span>
+                          <span className="text-xs font-medium text-stone-500 dark:text-stone-400">Cards:</span>
                           <select value={user != null && isFreeUser ? 15 : flashcardCount} onChange={(e) => setFlashcardCount(Number(e.target.value))} disabled={user != null && isFreeUser}
-                            className={`px-2 py-1.5 bg-gray-100 border-0 rounded-lg text-xs font-medium text-gray-700 ${user != null && isFreeUser ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                            className={`px-2 py-1.5 bg-stone-100 dark:bg-stone-700 border-0 rounded-lg text-xs font-medium text-stone-700 dark:text-stone-300 ${user != null && isFreeUser ? 'opacity-50 cursor-not-allowed' : ''}`}>
                             {user != null && isFreeUser ? <option value={15}>15</option> : [5, 10, 15, 20, 25, 30].map(n => <option key={n} value={n}>{n}</option>)}
                           </select>
                           {user != null && isFreeUser && <span className="text-[9px]">🔒</span>}
                         </div>
                         <button onClick={handleGenerate} disabled={isLoading || !inputText.trim() || wordCount < 50 || wordCount > quizUsage.maxWordsPerGeneration || quizExhausted}
-                          className="w-full sm:w-auto sm:ml-auto px-4 sm:px-6 py-2 sm:py-2.5 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white font-semibold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-amber-200/50 text-sm">
+                          className="w-full sm:w-auto sm:ml-auto px-4 sm:px-6 py-2 sm:py-2.5 bg-gradient-to-r from-lime-600 to-emerald-600 hover:from-lime-500 hover:to-emerald-500 text-white font-semibold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-lime-200/50 dark:shadow-lime-900/30 text-sm">
                           {isLoading ? (<><svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><span>Generating...</span></>) : (<>🃏 Generate Flashcards →</>)}
                         </button>
                       </div>
                     </div>
                     <div className="flex flex-col">
-                      <div className="px-3 sm:px-5 py-2.5 sm:py-3 border-b border-gray-100 bg-gradient-to-r from-gray-50/50 to-transparent flex items-center justify-between">
-                        <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-amber-500"></div><span className="text-sm font-semibold text-gray-700">Source Material</span></div>
+                      <div className="px-3 sm:px-5 py-2.5 sm:py-3 border-b border-stone-200 dark:border-stone-600 bg-gradient-to-r from-stone-50 dark:from-stone-800/50 to-transparent flex items-center justify-between">
+                        <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-lime-500"></div><span className="text-sm font-semibold text-stone-700 dark:text-stone-300">Source Material</span></div>
                         <div className="flex items-center gap-1">
-                          <button onClick={handlePaste} className="p-1.5 text-gray-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors" title="Paste"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg></button>
-                          <button onClick={handleClear} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Clear"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
+                          <button onClick={handlePaste} className="p-1.5 text-stone-400 dark:text-stone-500 hover:text-lime-600 dark:hover:text-lime-400 hover:bg-lime-50 dark:hover:bg-lime-900/30 rounded-lg transition-colors" title="Paste"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg></button>
+                          <button onClick={handleClear} className="p-1.5 text-stone-400 dark:text-stone-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors" title="Clear"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
                         </div>
                       </div>
                       <div className="relative flex-1">
                         {isLoading ? (<div className="min-h-[350px] flex items-center justify-center"><AnalysisAnimation text="Creating your flashcard deck..." /></div>) : (
-                          <textarea value={inputText} onChange={(e) => setInputText(e.target.value)} placeholder="Paste your study notes, textbook content, or any material to turn into flashcards... (minimum 50 words)" className="w-full h-full min-h-[300px] sm:min-h-[350px] p-3 sm:p-5 text-gray-800 placeholder-gray-400 resize-none focus:outline-none text-sm sm:text-base leading-relaxed break-words" />
+                          <textarea value={inputText} onChange={(e) => setInputText(e.target.value)} placeholder="Paste your study notes, textbook content, or any material to turn into flashcards... (minimum 50 words)" className="w-full h-full min-h-[300px] sm:min-h-[350px] p-3 sm:p-5 text-stone-800 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500 resize-none focus:outline-none text-sm sm:text-base leading-relaxed break-words" />
                         )}
                       </div>
-                      <div className="px-3 sm:px-5 py-2.5 sm:py-3 border-t border-gray-100 bg-gray-50/50">
-                        <div className="flex items-center justify-between text-xs sm:text-sm text-gray-500">
-                          <span className={`${wordCount < 50 ? 'text-amber-600' : wordCount > quizUsage.maxWordsPerGeneration ? 'text-red-600' : ''}`}>{wordCount.toLocaleString()} words</span>
-                          {wordCount < 50 && <span className="text-amber-600">Minimum 50 words</span>}
+                      <div className="px-3 sm:px-5 py-2.5 sm:py-3 border-t border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-800/50">
+                        <div className="flex items-center justify-between text-xs sm:text-sm text-stone-500 dark:text-stone-400">
+                          <span className={`${wordCount < 50 ? 'text-lime-600 dark:text-lime-400' : wordCount > quizUsage.maxWordsPerGeneration ? 'text-red-600' : ''}`}>{wordCount.toLocaleString()} words</span>
+                          {wordCount < 50 && <span className="text-lime-600 dark:text-lime-400">Minimum 50 words</span>}
                         </div>
                       </div>
                     </div>
@@ -1623,7 +1623,7 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
                 {crosswordResult && crosswordResult.placedWords?.length > 0 ? (
                   <div className="mx-3 sm:mx-0">
                     <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
-                      <h3 className="text-lg font-bold text-gray-900">{crosswordResult.title}</h3>
+                      <h3 className="text-lg font-bold text-stone-800 dark:text-stone-100">{crosswordResult.title}</h3>
                       <div className="flex items-center gap-2 flex-wrap">
                         {isPaidUser ? (
                           <>
@@ -1638,12 +1638,12 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
                           </>
                         ) : (
                           <>
-                            <button onClick={() => setShowExportUpgradeModal(true)} className="px-3 py-1.5 bg-gray-100 text-gray-400 font-medium rounded-lg flex items-center gap-1.5 text-xs cursor-pointer">
-                              <svg className="w-3 h-3 text-amber-500" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd"/></svg>
+                            <button onClick={() => setShowExportUpgradeModal(true)} className="px-3 py-1.5 bg-stone-100 dark:bg-stone-700 text-stone-500 dark:text-stone-400 font-medium rounded-lg flex items-center gap-1.5 text-xs cursor-pointer">
+                              <svg className="w-3 h-3 text-lime-500 dark:text-lime-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd"/></svg>
                               PDF
                             </button>
-                            <button onClick={() => setShowExportUpgradeModal(true)} className="px-3 py-1.5 bg-gray-100 text-gray-400 font-medium rounded-lg flex items-center gap-1.5 text-xs cursor-pointer">
-                              <svg className="w-3 h-3 text-amber-500" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd"/></svg>
+                            <button onClick={() => setShowExportUpgradeModal(true)} className="px-3 py-1.5 bg-stone-100 dark:bg-stone-700 text-stone-500 dark:text-stone-400 font-medium rounded-lg flex items-center gap-1.5 text-xs cursor-pointer">
+                              <svg className="w-3 h-3 text-lime-500 dark:text-lime-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd"/></svg>
                               DOCX
                             </button>
                           </>
@@ -1658,10 +1658,10 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
                               Hint {hintsUsed > 0 && <span className="text-xs bg-purple-200 text-purple-800 rounded-full px-1.5 py-0.5 font-bold">{hintsUsed}</span>}
                             </button>
-                            <button onClick={() => setCrosswordChecked(true)} className="px-4 py-2 text-sm font-semibold bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-lg hover:from-amber-700 hover:to-orange-700">Check Answers</button>
+                            <button onClick={() => setCrosswordChecked(true)} className="px-4 py-2 text-sm font-semibold bg-gradient-to-r from-lime-600 to-emerald-600 text-white rounded-lg hover:from-lime-500 hover:to-emerald-500">Check Answers</button>
                           </>
                         )}
-                        <button onClick={() => { setCrosswordResult(null); setCrosswordAnswers({}); setCrosswordChecked(false); setSelectedClue(null); setSelectedCell(null); setSelectedDirection('across'); setHintsUsed(0); }} className="px-4 py-2 text-sm text-amber-700 bg-amber-50 rounded-lg hover:bg-amber-100 font-medium">New Puzzle</button>
+                        <button onClick={() => { setCrosswordResult(null); setCrosswordAnswers({}); setCrosswordChecked(false); setSelectedClue(null); setSelectedCell(null); setSelectedDirection('across'); setHintsUsed(0); }} className="px-4 py-2 text-sm text-lime-700 dark:text-lime-300 bg-lime-50 dark:bg-lime-900/30 rounded-lg hover:bg-lime-100 dark:hover:bg-lime-800/50 font-medium">New Puzzle</button>
                       </div>
                     </div>
                     {crosswordChecked && (() => {
@@ -1670,17 +1670,17 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
                       const correct = attemptedWords.filter((pw: any) => (crosswordAnswers[`word-${pw.number}`] || '').toUpperCase() === pw.word).length;
                       const notAttempted = crosswordResult.placedWords.length - total;
                       return (
-                        <div className={`mb-4 p-4 rounded-2xl text-center ${total === 0 ? 'bg-gray-50 border border-gray-200' : correct === total ? 'bg-green-50 border border-green-200' : 'bg-amber-50 border border-amber-200'}`}>
+                        <div className={`mb-4 p-4 rounded-2xl text-center ${total === 0 ? 'bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-600' : correct === total ? 'bg-green-50 border border-green-200' : 'bg-lime-50 dark:bg-lime-900/20 border border-lime-200 dark:border-lime-800'}`}>
                           <span className="text-3xl mb-1 block">{total === 0 ? '✏️' : correct === total ? '🎉' : '📊'}</span>
                           {total === 0 ? (
                             <>
                               <p className="font-bold text-lg">No answers submitted</p>
-                              <p className="text-sm text-gray-600">Type in some answers and try again!</p>
+                              <p className="text-sm text-stone-600 dark:text-stone-400">Type in some answers and try again!</p>
                             </>
                           ) : (
                             <>
                               <p className="font-bold text-lg">{correct} / {total} correct</p>
-                              <p className="text-sm text-gray-600">
+                              <p className="text-sm text-stone-600 dark:text-stone-400">
                                 {correct === total ? 'Perfect score on attempted words!' : 'Check the highlighted answers below.'}
                                 {notAttempted > 0 && ` (${notAttempted} word${notAttempted > 1 ? 's' : ''} not attempted)`}
                               </p>
@@ -1692,11 +1692,11 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                       {/* Crossword Grid - Interactive */}
                       <div 
-                        className="bg-white rounded-2xl border border-gray-200 p-4 overflow-x-auto focus:outline-none focus:ring-2 focus:ring-amber-400"
+                        className="bg-white dark:bg-stone-600 rounded-2xl border border-stone-200 dark:border-stone-600 p-4 overflow-x-auto focus:outline-none focus:ring-2 focus:ring-lime-400 dark:focus:ring-lime-600"
                         tabIndex={0}
                         onKeyDown={handleCrosswordKeyDown}
                       >
-                        <p className="text-xs text-gray-500 mb-3">Click a cell to type, or use the clue inputs below. Arrow keys to navigate.</p>
+                        <p className="text-xs text-stone-500 dark:text-stone-400 mb-3">Click a cell to type, or use the clue inputs below. Arrow keys to navigate.</p>
                         <div className="inline-block">
                           {crosswordResult.grid?.map((row: string[], rowIdx: number) => (
                             <div key={rowIdx} className="flex">
@@ -1716,9 +1716,9 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
                                   }
                                 }
                                 
-                                let cellColor = 'bg-white border-gray-300 hover:border-amber-300';
-                                if (isSelectedCell) cellColor = 'bg-amber-200 border-amber-500 ring-2 ring-amber-400';
-                                else if (isHighlighted) cellColor = 'bg-amber-50 border-amber-400';
+                                let cellColor = 'bg-white dark:bg-stone-600 border-stone-300 dark:border-stone-600 hover:border-lime-300 dark:hover:border-lime-600';
+                                if (isSelectedCell) cellColor = 'bg-lime-200 dark:bg-lime-800/50 border-lime-500 ring-2 ring-lime-400 dark:ring-lime-600';
+                                else if (isHighlighted) cellColor = 'bg-lime-50 dark:bg-lime-900/30 border-lime-400 dark:border-lime-600';
                                 
                                 if (crosswordChecked) {
                                   const wordsThrough = crosswordResult.placedWords.filter((pw: any) => {
@@ -1739,8 +1739,8 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
                                     onClick={() => handleCellClick(rowIdx, colIdx)}
                                     className={`w-8 h-8 sm:w-9 sm:h-9 border ${cellColor} flex items-center justify-center relative cursor-pointer transition-colors`}
                                   >
-                                    {cellNumber && <span className="absolute top-0 left-0.5 text-[8px] font-bold text-gray-500 leading-none">{cellNumber}</span>}
-                                    <span className="text-xs sm:text-sm font-bold text-gray-700">{crosswordChecked ? cell : typedLetter}</span>
+                                    {cellNumber && <span className="absolute top-0 left-0.5 text-[8px] font-bold text-stone-500 dark:text-stone-400 leading-none">{cellNumber}</span>}
+                                    <span className="text-xs sm:text-sm font-bold text-stone-700 dark:text-stone-200">{crosswordChecked ? cell : typedLetter}</span>
                                   </div>
                                 );
                               })}
@@ -1755,7 +1755,7 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
                           if (words.length === 0) return null;
                           return (
                             <div key={dir}>
-                              <h4 className="text-sm font-bold text-gray-700 uppercase tracking-wider mb-2">{dir === 'across' ? 'Across →' : 'Down ↓'}</h4>
+                              <h4 className="text-sm font-bold text-stone-700 dark:text-stone-300 uppercase tracking-wider mb-2">{dir === 'across' ? 'Across →' : 'Down ↓'}</h4>
                               <div className="space-y-2">
                                 {words.map((pw: any) => {
                                   const answerKey = `word-${pw.number}`;
@@ -1776,15 +1776,15 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
                                         }
                                       }}
                                       className={`p-3 rounded-xl border cursor-pointer transition-all ${
-                                        selectedClue === pw.number ? 'border-amber-400 bg-amber-50 shadow-sm' : 
+                                        selectedClue === pw.number ? 'border-lime-400 dark:border-lime-600 bg-lime-50 dark:bg-lime-900/30 shadow-sm' : 
                                         isCorrectCW ? 'border-green-300 bg-green-50' : 
                                         isWrongCW ? 'border-red-300 bg-red-50' : 
-                                        isNotAttempted ? 'border-gray-200 bg-gray-50 opacity-60' :
-                                        'border-gray-200 hover:border-gray-300 bg-white'
+                                        isNotAttempted ? 'border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-800 opacity-60' :
+                                        'border-stone-200 dark:border-stone-600 hover:border-stone-300 dark:hover:border-stone-500 bg-white dark:bg-stone-700'
                                       }`}>
                                       <div className="flex items-start gap-2 mb-2">
-                                        <span className="text-xs font-bold text-amber-600 bg-amber-100 rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0">{pw.number}</span>
-                                        <p className="text-sm text-gray-700">{pw.clue} <span className="text-gray-400">({pw.word.length} letters)</span></p>
+                                        <span className="text-xs font-bold text-lime-600 dark:text-lime-400 bg-lime-100 dark:bg-lime-900/50 rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0">{pw.number}</span>
+                                        <p className="text-sm text-stone-700 dark:text-stone-300">{pw.clue} <span className="text-stone-400 dark:text-stone-500">({pw.word.length} letters)</span></p>
                                       </div>
                                       <input 
                                         type="text" 
@@ -1813,11 +1813,11 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
                                         className={`w-full px-3 py-2 border rounded-lg text-sm font-mono tracking-[0.3em] uppercase ${
                                           isCorrectCW ? 'border-green-400 bg-green-50 text-green-700' : 
                                           isWrongCW ? 'border-red-400 bg-red-50 text-red-700' : 
-                                          'border-gray-200 bg-gray-50 text-gray-800'
+                                          'border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-800 text-stone-800 dark:text-stone-100'
                                         } ${crosswordChecked ? 'cursor-not-allowed' : ''}`} 
                                       />
                                       {isWrongCW && crosswordChecked && <p className="text-xs text-red-500 mt-1">Answer: <span className="font-mono font-bold">{pw.word}</span></p>}
-                                      {isNotAttempted && <p className="text-xs text-gray-400 mt-1 italic">Not attempted</p>}
+                                      {isNotAttempted && <p className="text-xs text-stone-400 dark:text-stone-500 mt-1 italic">Not attempted</p>}
                                     </div>
                                   );
                                 })}
@@ -1829,40 +1829,40 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
                     </div>
                   </div>
                 ) : (
-                  <div className="bg-white rounded-2xl sm:rounded-3xl shadow-xl border border-gray-100 overflow-hidden min-w-0">
-                    <div className="border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white px-3 sm:px-5 py-3 sm:py-4">
+                  <div className="bg-white dark:bg-stone-800 rounded-2xl sm:rounded-3xl shadow-xl shadow-stone-100/50 dark:shadow-none border border-stone-200 dark:border-stone-600 overflow-hidden min-w-0">
+                    <div className="border-b border-stone-200 dark:border-stone-600 bg-gradient-to-r from-lime-50 to-emerald-50 dark:from-lime-900/20 dark:to-emerald-900/20 px-3 sm:px-5 py-3 sm:py-4">
                       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
                         <div className="flex items-center gap-2">
-                          <span className="text-xs font-medium text-gray-500">Words:</span>
+                          <span className="text-xs font-medium text-stone-500 dark:text-stone-400">Words:</span>
                           <select value={user != null && isFreeUser ? 10 : crosswordWordCount} onChange={(e) => setCrosswordWordCount(Number(e.target.value))} disabled={user != null && isFreeUser}
-                            className={`px-2 py-1.5 bg-gray-100 border-0 rounded-lg text-xs font-medium text-gray-700 ${user != null && isFreeUser ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                            className={`px-2 py-1.5 bg-stone-100 dark:bg-stone-700 border-0 rounded-lg text-xs font-medium text-stone-700 dark:text-stone-300 ${user != null && isFreeUser ? 'opacity-50 cursor-not-allowed' : ''}`}>
                             {user != null && isFreeUser ? <option value={10}>10</option> : [6, 8, 10, 12, 15].map(n => <option key={n} value={n}>{n}</option>)}
                           </select>
                           {user != null && isFreeUser && <span className="text-[9px]">🔒</span>}
                         </div>
                         <button onClick={handleGenerate} disabled={isLoading || !inputText.trim() || wordCount < 50 || wordCount > quizUsage.maxWordsPerGeneration || quizExhausted}
-                          className="w-full sm:w-auto sm:ml-auto px-4 sm:px-6 py-2 sm:py-2.5 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white font-semibold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-amber-200/50 text-sm">
+                          className="w-full sm:w-auto sm:ml-auto px-4 sm:px-6 py-2 sm:py-2.5 bg-gradient-to-r from-lime-600 to-emerald-600 hover:from-lime-500 hover:to-emerald-500 text-white font-semibold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-lime-200/50 dark:shadow-lime-900/30 text-sm">
                           {isLoading ? (<><svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><span>Generating...</span></>) : (<>🧩 Generate Crossword →</>)}
                         </button>
                       </div>
                     </div>
                     <div className="flex flex-col">
-                      <div className="px-3 sm:px-5 py-2.5 sm:py-3 border-b border-gray-100 bg-gradient-to-r from-gray-50/50 to-transparent flex items-center justify-between">
-                        <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-amber-500"></div><span className="text-sm font-semibold text-gray-700">Source Material</span></div>
+                      <div className="px-3 sm:px-5 py-2.5 sm:py-3 border-b border-stone-200 dark:border-stone-600 bg-gradient-to-r from-stone-50 dark:from-stone-800/50 to-transparent flex items-center justify-between">
+                        <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-lime-500"></div><span className="text-sm font-semibold text-stone-700 dark:text-stone-300">Source Material</span></div>
                         <div className="flex items-center gap-1">
-                          <button onClick={handlePaste} className="p-1.5 text-gray-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors" title="Paste"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg></button>
-                          <button onClick={handleClear} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Clear"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
+                          <button onClick={handlePaste} className="p-1.5 text-stone-400 dark:text-stone-500 hover:text-lime-600 dark:hover:text-lime-400 hover:bg-lime-50 dark:hover:bg-lime-900/30 rounded-lg transition-colors" title="Paste"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg></button>
+                          <button onClick={handleClear} className="p-1.5 text-stone-400 dark:text-stone-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors" title="Clear"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
                         </div>
                       </div>
                       <div className="relative flex-1">
                         {isLoading ? (<div className="min-h-[350px] flex items-center justify-center"><AnalysisAnimation text="Building your crossword puzzle..." /></div>) : (
-                          <textarea value={inputText} onChange={(e) => setInputText(e.target.value)} placeholder="Paste your study notes or textbook content — key terms will be extracted for the crossword... (minimum 50 words)" className="w-full h-full min-h-[300px] sm:min-h-[350px] p-3 sm:p-5 text-gray-800 placeholder-gray-400 resize-none focus:outline-none text-sm sm:text-base leading-relaxed break-words" />
+                          <textarea value={inputText} onChange={(e) => setInputText(e.target.value)} placeholder="Paste your study notes or textbook content — key terms will be extracted for the crossword... (minimum 50 words)" className="w-full h-full min-h-[300px] sm:min-h-[350px] p-3 sm:p-5 text-stone-800 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500 resize-none focus:outline-none text-sm sm:text-base leading-relaxed break-words" />
                         )}
                       </div>
-                      <div className="px-3 sm:px-5 py-2.5 sm:py-3 border-t border-gray-100 bg-gray-50/50">
-                        <div className="flex items-center justify-between text-xs sm:text-sm text-gray-500">
-                          <span className={`${wordCount < 50 ? 'text-amber-600' : wordCount > quizUsage.maxWordsPerGeneration ? 'text-red-600' : ''}`}>{wordCount.toLocaleString()} words</span>
-                          {wordCount < 50 && <span className="text-amber-600">Minimum 50 words</span>}
+                      <div className="px-3 sm:px-5 py-2.5 sm:py-3 border-t border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-800/50">
+                        <div className="flex items-center justify-between text-xs sm:text-sm text-stone-500 dark:text-stone-400">
+                          <span className={`${wordCount < 50 ? 'text-lime-600 dark:text-lime-400' : wordCount > quizUsage.maxWordsPerGeneration ? 'text-red-600' : ''}`}>{wordCount.toLocaleString()} words</span>
+                          {wordCount < 50 && <span className="text-lime-600 dark:text-lime-400">Minimum 50 words</span>}
                         </div>
                       </div>
                     </div>
@@ -1882,7 +1882,7 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
                   {(quizExhausted || (error && error.includes('Upgrade'))) && user && (
                     <button
                       onClick={() => onNavigate('pricing')}
-                      className="mt-2 px-4 py-1.5 bg-gradient-to-r from-amber-600 to-orange-600 text-white text-sm font-medium rounded-lg hover:from-amber-700 hover:to-orange-700 transition-all inline-flex items-center gap-2"
+                      className="mt-2 px-4 py-1.5 bg-gradient-to-r from-lime-600 to-emerald-600 text-white text-sm font-medium rounded-lg hover:from-lime-500 hover:to-emerald-500 transition-all inline-flex items-center gap-2"
                     >
                       👑 View Plans
                     </button>
@@ -1894,13 +1894,13 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
             {/* Lock Overlay for Free Users who exhausted their limit */}
             {user && quizExhausted && !quiz && !flashcardResult && !crosswordResult && (
               <div className="mt-6 mx-3 sm:mx-0">
-                <div className="bg-gradient-to-r from-amber-600 to-orange-600 rounded-2xl p-6 text-white text-center">
+                <div className="bg-gradient-to-r from-lime-600 to-emerald-600 rounded-2xl p-6 text-white text-center">
                   <span className="text-4xl mb-3 block">🔒</span>
                   <h3 className="text-xl font-bold mb-2">Monthly Limit Reached</h3>
-                  <p className="text-amber-100 mb-4">You've used all 3 quiz generations this month. Upgrade for unlimited quizzes!</p>
+                  <p className="text-lime-100 mb-4">You've used all 3 quiz generations this month. Upgrade for unlimited quizzes!</p>
                   <button
                     onClick={() => onNavigate('pricing')}
-                    className="px-6 py-2.5 bg-white text-amber-700 font-semibold rounded-xl hover:bg-amber-50 transition-all inline-flex items-center gap-2"
+                    className="px-6 py-2.5 bg-white dark:bg-stone-600 text-lime-700 dark:text-lime-800 font-semibold rounded-xl hover:bg-lime-50 dark:hover:bg-lime-900/30 transition-all inline-flex items-center gap-2"
                   >
                     👑 Upgrade Now
                   </button>
@@ -1911,26 +1911,26 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
             {/* Plan Info for free and starter users */}
             {user && !isPremiumUser && !quizExhausted && !quiz && !flashcardResult && !crosswordResult && (
               <div className="mt-6 mx-3 sm:mx-0">
-                <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-5 flex items-center justify-between flex-wrap gap-3">
-                  <div className="flex items-center gap-3">
+<div className="bg-gradient-to-r from-lime-50 to-emerald-50 dark:from-lime-900/20 dark:to-emerald-900/20 border border-lime-200 dark:border-lime-800 rounded-2xl p-5 flex items-center justify-between flex-wrap gap-3">
+                    <div className="flex items-center gap-3">
                     <span className="text-2xl">🧠</span>
                     <div>
                       {isFreeUser ? (
                         <>
-                          <p className="text-amber-800 font-medium text-sm">
+                          <p className="text-lime-800 dark:text-lime-200 font-medium text-sm">
                             Free plan: {quizUsage.generationsRemaining} of {quizUsage.generationLimit} quizzes remaining • Mixed type • Medium difficulty • 10 questions • Max {(quizUsage.maxWordsPerGeneration || 5000).toLocaleString()} words
                           </p>
-                          <p className="text-amber-600 text-xs mt-0.5">Upgrade for unlimited quizzes, all options, and up to 15,000 words</p>
+                          <p className="text-lime-600 dark:text-lime-400 text-xs mt-0.5">Upgrade for unlimited quizzes, all options, and up to 15,000 words</p>
                         </>
                       ) : (
                         <>
-                          <p className="text-amber-800 font-medium text-sm">Starter plan: Mixed type + Medium difficulty only</p>
-                          <p className="text-amber-600 text-xs mt-0.5">Upgrade to Premium for all quiz types, difficulties, and our premium AI model</p>
+                          <p className="text-lime-800 dark:text-lime-200 font-medium text-sm">Starter plan: Mixed type + Medium difficulty only</p>
+                          <p className="text-lime-600 dark:text-lime-400 text-xs mt-0.5">Upgrade to Premium for all quiz types, difficulties, and our premium AI model</p>
                         </>
                       )}
                     </div>
                   </div>
-                  <button onClick={() => onNavigate('pricing')} className="px-4 py-1.5 bg-amber-600 text-white text-xs font-semibold rounded-lg hover:bg-amber-700 transition-all">
+                  <button onClick={() => onNavigate('pricing')} className="px-4 py-1.5 bg-lime-600 text-white text-xs font-semibold rounded-lg hover:bg-lime-500 transition-all">
                     Upgrade
                   </button>
                 </div>
@@ -1940,10 +1940,10 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
         </div>
 
         {/* Features Section */}
-        <div className="py-12 sm:py-16 px-4 sm:px-6 lg:px-8 bg-white border-t border-gray-100">
+        <div className="py-12 sm:py-16 px-4 sm:px-6 lg:px-8 bg-white dark:bg-stone-800 border-t border-stone-200 dark:border-stone-600">
           <div className="max-w-5xl mx-auto">
-            <h2 className="text-2xl sm:text-3xl font-bold text-center text-gray-900 mb-8 sm:mb-12">
-              Why Use Our <span className="text-amber-600">Study Tools</span>?
+            <h2 className="text-2xl sm:text-3xl font-bold text-center text-stone-800 dark:text-stone-100 mb-8 sm:mb-12">
+              Why Use Our <span className="text-lime-600 dark:text-lime-400">Study Tools</span>?
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
               {[
@@ -1963,12 +1963,12 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
                   description: 'Fun vocabulary-building puzzles generated from your study material.'
                 }
               ].map((feature, idx) => (
-                <div key={idx} className="bg-gradient-to-br from-gray-50 to-white p-6 rounded-2xl border border-gray-100 hover:shadow-lg transition-shadow">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center mb-4 shadow-lg shadow-amber-200/50 text-2xl">
+                <div key={idx} className="bg-gradient-to-br from-stone-50 to-white dark:from-stone-800 dark:to-stone-700 p-6 rounded-2xl border border-stone-200 dark:border-stone-600 hover:shadow-lg transition-shadow">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-lime-500 to-emerald-600 flex items-center justify-center mb-4 shadow-lg shadow-lime-200/50 dark:shadow-lime-900/30 text-2xl">
                     {feature.icon}
                   </div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">{feature.title}</h3>
-                  <p className="text-gray-600 text-sm leading-relaxed">{feature.description}</p>
+                  <h3 className="text-lg font-semibold text-stone-800 dark:text-stone-100 mb-2">{feature.title}</h3>
+                  <p className="text-stone-600 dark:text-stone-400 text-sm leading-relaxed">{feature.description}</p>
                 </div>
               ))}
             </div>
@@ -1979,22 +1979,22 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
       {/* Export Upgrade Modal */}
       {showExportUpgradeModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
+          <div className="bg-white dark:bg-stone-600 rounded-2xl shadow-2xl max-w-md w-full p-6">
             <div className="text-center mb-6">
-              <div className="w-16 h-16 bg-gradient-to-br from-amber-100 to-orange-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-amber-600" fill="currentColor" viewBox="0 0 20 20">
+              <div className="w-16 h-16 bg-gradient-to-br from-lime-100 to-emerald-100 dark:from-lime-900/30 dark:to-emerald-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-lime-600 dark:text-lime-400" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
                 </svg>
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Unlock Export Feature</h3>
-              <p className="text-gray-600">
+              <h3 className="text-xl font-bold text-stone-800 dark:text-stone-100 mb-2">Unlock Export Feature</h3>
+              <p className="text-stone-600 dark:text-stone-400">
                 Export your quizzes, flashcards, and crosswords to PDF or Word documents with a paid plan.
               </p>
             </div>
             
-            <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl p-4 mb-6">
-              <h4 className="font-semibold text-amber-900 mb-3">Paid Plan Benefits:</h4>
-              <ul className="space-y-2 text-sm text-amber-800">
+            <div className="bg-gradient-to-br from-lime-50 to-emerald-50 dark:from-lime-900/20 dark:to-emerald-900/20 rounded-xl p-4 mb-6 border border-lime-200 dark:border-lime-800">
+              <h4 className="font-semibold text-lime-900 dark:text-lime-200 mb-3">Paid Plan Benefits:</h4>
+              <ul className="space-y-2 text-sm text-lime-800 dark:text-lime-300">
                 <li className="flex items-center gap-2">
                   <svg className="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
@@ -2025,13 +2025,13 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
             <div className="flex gap-3">
               <button
                 onClick={() => setShowExportUpgradeModal(false)}
-                className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors font-medium"
+                className="flex-1 px-4 py-3 border border-stone-300 dark:border-stone-600 text-stone-700 dark:text-stone-300 rounded-xl hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors font-medium"
               >
                 Maybe Later
               </button>
               <button
                 onClick={() => { setShowExportUpgradeModal(false); onNavigate('pricing'); }}
-                className="flex-1 px-4 py-3 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-xl hover:from-amber-700 hover:to-orange-700 transition-all font-medium"
+                className="flex-1 px-4 py-3 bg-gradient-to-r from-lime-600 to-emerald-600 text-white rounded-xl hover:from-lime-500 hover:to-emerald-500 transition-all font-medium"
               >
                 View Plans
               </button>
@@ -2048,59 +2048,59 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
       {/* Logged-out: sign-up modal (same as landing page Study Tools modal) */}
       {showSignupPrompt && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 backdrop-blur-sm p-4">
-          <div className="relative bg-white rounded-2xl p-6 sm:p-8 max-w-md w-full mx-4 shadow-2xl animate-fade-in">
-            <button type="button" onClick={() => setShowSignupPrompt(false)} className="absolute top-4 right-4 p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors" aria-label="Close">
+          <div className="relative bg-white dark:bg-stone-600 rounded-2xl p-6 sm:p-8 max-w-md w-full mx-4 shadow-2xl animate-fade-in">
+            <button type="button" onClick={() => setShowSignupPrompt(false)} className="absolute top-4 right-4 p-1.5 text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-700 rounded-xl transition-colors" aria-label="Close">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
             <div className="flex justify-center mb-4">
-              <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center">
+              <div className="w-16 h-16 bg-lime-100 dark:bg-lime-900/50 rounded-full flex items-center justify-center">
                 <span className="text-3xl">{studyToolMode === 'flashcards' ? '🃏' : studyToolMode === 'crossword' ? '🧩' : '📝'}</span>
               </div>
             </div>
-            <h3 className="text-xl font-bold text-gray-900 text-center mb-2">
+            <h3 className="text-xl font-bold text-stone-800 dark:text-stone-100 text-center mb-2">
               {studyToolMode === 'flashcards' ? 'Flashcards Generated' : studyToolMode === 'crossword' ? 'Crossword Generated' : 'Quiz Generated'}
             </h3>
-            <p className="text-gray-500 text-center text-sm mb-5">
+            <p className="text-stone-500 dark:text-stone-400 text-center text-sm mb-5">
               {studyToolMode === 'flashcards' ? 'We\'ve created flip cards from your content' : studyToolMode === 'crossword' ? 'We\'ve created a puzzle from your content' : 'We\'ve created questions from your content'}
             </p>
             <div className="space-y-3 mb-5">
-              <div className="flex items-start p-3.5 bg-amber-50 rounded-xl border border-amber-100">
-                <span className="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center mr-3 flex-shrink-0 mt-0.5">
-                  <svg className="w-4 h-4 text-amber-600" fill="currentColor" viewBox="0 0 20 20">
+              <div className="flex items-start p-3.5 bg-lime-50 dark:bg-lime-900/20 rounded-xl border border-lime-200 dark:border-lime-800">
+                <span className="w-8 h-8 bg-lime-100 dark:bg-lime-900/50 rounded-lg flex items-center justify-center mr-3 flex-shrink-0 mt-0.5">
+                  <svg className="w-4 h-4 text-lime-600 dark:text-lime-400" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
                 </span>
                 <div>
-                  <p className="text-amber-800 font-semibold text-sm">
+                  <p className="text-lime-800 dark:text-lime-200 font-semibold text-sm">
                     {studyToolMode === 'flashcards' ? 'Interactive flip cards' : studyToolMode === 'crossword' ? 'Interactive crossword puzzle' : 'Multiple choice & true/false'}
                   </p>
-                  <p className="text-amber-600 text-xs mt-0.5">
+                  <p className="text-lime-600 dark:text-lime-400 text-xs mt-0.5">
                     {studyToolMode === 'flashcards' ? 'Perfect for memorization and quick review' : studyToolMode === 'crossword' ? 'Fun way to learn key vocabulary' : 'Mix question types for better retention'}
                   </p>
                 </div>
               </div>
-              <div className="flex items-start p-3.5 bg-amber-50 rounded-xl border border-amber-100">
-                <span className="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center mr-3 flex-shrink-0 mt-0.5">
-                  <svg className="w-4 h-4 text-amber-600" fill="currentColor" viewBox="0 0 20 20">
+              <div className="flex items-start p-3.5 bg-lime-50 dark:bg-lime-900/20 rounded-xl border border-lime-200 dark:border-lime-800">
+                <span className="w-8 h-8 bg-lime-100 dark:bg-lime-900/50 rounded-lg flex items-center justify-center mr-3 flex-shrink-0 mt-0.5">
+                  <svg className="w-4 h-4 text-lime-600 dark:text-lime-400" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
                 </span>
                 <div>
-                  <p className="text-amber-800 font-semibold text-sm">3 free generations per month</p>
-                  <p className="text-amber-600 text-xs mt-0.5">Sign up to unlock Study Tools — upgrade for unlimited</p>
+                  <p className="text-lime-800 dark:text-lime-200 font-semibold text-sm">3 free generations per month</p>
+                  <p className="text-lime-600 dark:text-lime-400 text-xs mt-0.5">Sign up to unlock Study Tools — upgrade for unlimited</p>
                 </div>
               </div>
             </div>
-            <div className="bg-gray-50 rounded-xl p-3.5 mb-6">
-              <p className="text-gray-600 text-sm text-center leading-relaxed">
-                <span className="font-semibold text-gray-800">
+            <div className="bg-stone-50 dark:bg-stone-800 rounded-xl p-3.5 mb-6">
+              <p className="text-stone-600 dark:text-stone-400 text-sm text-center leading-relaxed">
+                <span className="font-semibold text-stone-800 dark:text-stone-100">
                   {studyToolMode === 'flashcards' ? 'Turn any notes into flashcards.' : studyToolMode === 'crossword' ? 'Turn key terms into puzzles.' : 'Turn any notes into a quiz.'}
                 </span> Great for exam prep and study sessions.
               </p>
             </div>
             <button
               onClick={() => { setShowSignupPrompt(false); onNavigate('signup'); }}
-              className="w-full py-3.5 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-xl transition-all duration-200 hover:shadow-lg flex items-center justify-center"
+              className="w-full py-3.5 bg-lime-600 hover:bg-lime-500 text-white font-semibold rounded-xl transition-all duration-200 hover:shadow-lg flex items-center justify-center"
             >
               Sign up to unlock Study Tools — it&apos;s free
               <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

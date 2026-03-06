@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTheme } from '../../contexts/ThemeContext';
 
 interface HeaderProps {
   onNavigate?: (page: string) => void;
@@ -33,6 +34,7 @@ interface UsageStats {
 }
 
 const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage }) => {
+  const { theme, toggleTheme } = useTheme();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [usageStats, setUsageStats] = useState<UsageStats | null>(null);
@@ -120,17 +122,17 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
       { id: 'about', label: 'About' },
     ];
     return (
-      <header className="backdrop-blur-md border-b border-stone-200/60 sticky top-0 z-50" style={{ background: 'rgba(250, 248, 245, 0.95)' }}>
+      <header className="backdrop-blur-md border-b border-stone-200/60 dark:border-stone-700/60 sticky top-0 z-50 bg-[rgba(250,248,245,0.95)] dark:bg-stone-900/95">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
           <div className="flex items-center justify-between">
             <button
               onClick={() => onNavigate?.('landing')}
               className="flex items-center space-x-2.5 hover:opacity-80 transition-opacity duration-200"
             >
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: '#262626' }}>
-                <span className="font-bold text-xl" style={{ color: '#a3e635' }}>W</span>
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-stone-800 dark:bg-stone-700">
+                <span className="font-bold text-xl text-lime-400">W</span>
               </div>
-              <span className="text-2xl font-bold text-stone-800">WriteScholar</span>
+              <span className="text-2xl font-bold text-stone-800 dark:text-stone-100">WriteScholar</span>
             </button>
 
             <nav className="hidden md:flex items-center space-x-2">
@@ -138,8 +140,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
                 <button
                   key={id}
                   onClick={() => onNavigate?.(id)}
-                  className={`px-4 py-2.5 text-base font-medium rounded-lg hover:bg-stone-100/50 transition-colors ${currentPage === id ? '' : 'text-stone-600 hover:text-stone-900'}`}
-                  style={currentPage === id ? { color: '#a3e635' } : undefined}
+                  className={`px-4 py-2.5 text-base font-medium rounded-lg transition-colors ${currentPage === id ? 'text-lime-600 dark:text-lime-400' : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100/50 dark:hover:bg-stone-800/50'}`}
                 >
                   {label}
                 </button>
@@ -148,14 +149,29 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
 
             <div className="flex items-center space-x-2 sm:space-x-3">
               <button
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="md:hidden p-2 rounded-lg hover:bg-stone-100/50 transition-colors"
+                onClick={toggleTheme}
+                className="p-2 rounded-lg hover:bg-stone-100/50 dark:hover:bg-stone-800/50 transition-colors text-stone-600 dark:text-stone-400"
+                aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
               >
-                <svg className="w-6 h-6 text-stone-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                {theme === 'dark' ? (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                  </svg>
+                ) : (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                  </svg>
+                )}
+              </button>
+              <button
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className="md:hidden p-2 rounded-lg hover:bg-stone-100/50 dark:hover:bg-stone-800/50 transition-colors"
+              >
+                <svg className="w-6 h-6 text-stone-600 dark:text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
               </button>
-              <button onClick={() => onNavigate?.('login')} className="hidden sm:inline-flex px-4 py-2.5 text-base text-stone-600 hover:text-stone-900 font-medium rounded-lg hover:bg-stone-100/50 transition-colors">Log in</button>
+              <button onClick={() => onNavigate?.('login')} className="hidden sm:inline-flex px-4 py-2.5 text-base text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 font-medium rounded-lg hover:bg-stone-100/50 dark:hover:bg-stone-800/50 transition-colors">Log in</button>
               <button onClick={() => onNavigate?.('signup')} className="inline-flex items-center px-5 py-2.5 bg-lime-400 text-stone-900 text-base font-semibold rounded-full hover:bg-lime-300 hover:shadow-md transition-all duration-200">Try Free</button>
             </div>
           </div>
@@ -163,21 +179,20 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
 
         {/* Logged-out mobile menu */}
         {isMobileMenuOpen && (
-          <div className="md:hidden border-t border-stone-200/60 bg-white/95 backdrop-blur-sm mobile-menu-container">
+          <div className="md:hidden border-t border-stone-200/60 dark:border-stone-700/60 bg-white/95 dark:bg-stone-900/95 backdrop-blur-sm mobile-menu-container">
             <div className="px-4 py-4 space-y-1">
               {publicNavItems.map(({ id, label }) => (
                 <button
                   key={id}
                   onClick={() => { onNavigate?.(id); setIsMobileMenuOpen(false); }}
-                  className={`w-full text-left px-4 py-3 text-base rounded-xl font-medium transition-colors ${currentPage === id ? 'bg-stone-100' : 'text-stone-600 hover:text-stone-900 hover:bg-stone-50'}`}
-                  style={currentPage === id ? { color: '#a3e635' } : undefined}
+                  className={`w-full text-left px-4 py-3 text-base rounded-xl font-medium transition-colors ${currentPage === id ? 'bg-stone-100 dark:bg-stone-800 text-lime-600 dark:text-lime-400' : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-50 dark:hover:bg-stone-800/50'}`}
                 >
                   {label}
                 </button>
               ))}
-              <div className="border-t border-stone-100 mt-3 pt-3">
-                <button onClick={() => { onNavigate?.('login'); setIsMobileMenuOpen(false); }} className="w-full text-left px-4 py-3 rounded-xl font-medium text-stone-600 hover:text-stone-900 hover:bg-stone-50">Log in</button>
-                <button onClick={() => { onNavigate?.('signup'); setIsMobileMenuOpen(false); }} className="w-full text-left px-4 py-3 rounded-xl font-medium text-stone-900 hover:opacity-90" style={{ backgroundColor: '#a3e635' }}>Try Free</button>
+              <div className="border-t border-stone-100 dark:border-stone-700 mt-3 pt-3">
+                <button onClick={() => { onNavigate?.('login'); setIsMobileMenuOpen(false); }} className="w-full text-left px-4 py-3 rounded-xl font-medium text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-50 dark:hover:bg-stone-800/50">Log in</button>
+                <button onClick={() => { onNavigate?.('signup'); setIsMobileMenuOpen(false); }} className="w-full text-left px-4 py-3 rounded-xl font-medium text-stone-900 bg-lime-400 hover:bg-lime-300">Try Free</button>
               </div>
             </div>
           </div>
@@ -188,7 +203,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
 
   // ── Logged-in header ───────────────────────────────────────────────────────
   return (
-    <header className="backdrop-blur-md border-b border-stone-200/60 sticky top-0 z-50" style={{ background: 'rgba(250, 248, 245, 0.95)' }}>
+    <header className="backdrop-blur-md border-b border-stone-200/60 dark:border-stone-700/60 sticky top-0 z-50 bg-[rgba(250,248,245,0.95)] dark:bg-stone-900/95">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
@@ -196,10 +211,10 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
             onClick={() => onNavigate?.('dashboard')}
             className="flex items-center space-x-2.5 hover:opacity-80 transition-opacity duration-200"
           >
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: '#262626' }}>
-              <span className="font-bold text-xl" style={{ color: '#a3e635' }}>W</span>
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-stone-800 dark:bg-stone-700">
+              <span className="font-bold text-xl text-lime-400">W</span>
             </div>
-            <span className="text-2xl font-bold text-stone-800">WriteScholar</span>
+            <span className="text-2xl font-bold text-stone-800 dark:text-stone-100">WriteScholar</span>
           </button>
 
           {/* Navigation */}
@@ -207,45 +222,40 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
             <button 
               onClick={() => onNavigate?.('dashboard')}
               className={`px-4 py-2.5 text-base font-medium rounded-xl transition-all duration-200 ${
-                currentPage === 'dashboard' ? 'bg-stone-100' : 'text-stone-600 hover:text-stone-900 hover:bg-stone-50'
+                currentPage === 'dashboard' ? 'bg-stone-100 dark:bg-stone-800 text-lime-600 dark:text-lime-400' : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-50 dark:hover:bg-stone-800/50'
               }`}
-              style={currentPage === 'dashboard' ? { color: '#a3e635' } : undefined}
             >
               Dashboard
             </button>
             <button 
               onClick={() => onNavigate?.('library')}
               className={`px-4 py-2.5 text-base font-medium rounded-xl transition-all duration-200 ${
-                currentPage === 'library' ? 'bg-stone-100' : 'text-stone-600 hover:text-stone-900 hover:bg-stone-50'
+                currentPage === 'library' ? 'bg-stone-100 dark:bg-stone-800 text-lime-600 dark:text-lime-400' : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-50 dark:hover:bg-stone-800/50'
               }`}
-              style={currentPage === 'library' ? { color: '#a3e635' } : undefined}
             >
               Library
             </button>
             <button 
               onClick={() => onNavigate?.('upload')}
               className={`px-4 py-2.5 text-base font-medium rounded-xl transition-all duration-200 ${
-                currentPage === 'upload' ? 'bg-stone-100' : 'text-stone-600 hover:text-stone-900 hover:bg-stone-50'
+                currentPage === 'upload' ? 'bg-stone-100 dark:bg-stone-800 text-lime-600 dark:text-lime-400' : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-50 dark:hover:bg-stone-800/50'
               }`}
-              style={currentPage === 'upload' ? { color: '#a3e635' } : undefined}
             >
               Upload
             </button>
             <button 
               onClick={() => onNavigate?.('analysis')}
               className={`px-4 py-2.5 text-base font-medium rounded-xl transition-all duration-200 ${
-                currentPage === 'analysis' ? 'bg-stone-100' : 'text-stone-600 hover:text-stone-900 hover:bg-stone-50'
+                currentPage === 'analysis' ? 'bg-stone-100 dark:bg-stone-800 text-lime-600 dark:text-lime-400' : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-50 dark:hover:bg-stone-800/50'
               }`}
-              style={currentPage === 'analysis' ? { color: '#a3e635' } : undefined}
             >
               AI Analysis
             </button>
             <button 
               onClick={() => onNavigate?.('citation-history')}
               className={`px-4 py-2.5 text-base font-medium rounded-xl transition-all duration-200 ${
-                currentPage === 'citations' ? 'bg-stone-100' : 'text-stone-600 hover:text-stone-900 hover:bg-stone-50'
+                currentPage === 'citations' ? 'bg-stone-100 dark:bg-stone-800 text-lime-600 dark:text-lime-400' : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-50 dark:hover:bg-stone-800/50'
               }`}
-              style={currentPage === 'citations' ? { color: '#a3e635' } : undefined}
             >
               Citations
             </button>
@@ -264,22 +274,39 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
             </button>
           </nav>
 
-          {/* Mobile Menu Button */}
-          <button
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="lg:hidden p-2 rounded-xl hover:bg-stone-50 transition-colors duration-200"
-          >
-            <svg className="w-6 h-6 text-stone-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
+          {/* Theme toggle + Mobile Menu Button */}
+          <div className="flex items-center gap-1">
+            <button
+              onClick={toggleTheme}
+              className="p-2 rounded-xl hover:bg-stone-100/50 dark:hover:bg-stone-800/50 transition-colors text-stone-600 dark:text-stone-400"
+              aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+            >
+              {theme === 'dark' ? (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+              ) : (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                </svg>
+              )}
+            </button>
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="lg:hidden p-2 rounded-xl hover:bg-stone-50 dark:hover:bg-stone-800/50 transition-colors duration-200"
+            >
+              <svg className="w-6 h-6 text-stone-600 dark:text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+          </div>
 
           {/* User Dropdown */}
           {user && onLogout && (
             <div className="relative dropdown-container">
               <button
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="flex items-center space-x-3 p-2 rounded-xl hover:bg-stone-50 transition-colors duration-200"
+                className="flex items-center space-x-3 p-2 rounded-xl hover:bg-stone-50 dark:hover:bg-stone-800/50 transition-colors duration-200"
               >
                 <div className="w-9 h-9 rounded-xl flex items-center justify-center text-white" style={{ background: '#262626' }}>
                   <span className="text-sm font-semibold">
@@ -287,8 +314,8 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
                   </span>
                 </div>
                 <div className="hidden md:block text-left">
-                  <div className="text-sm font-semibold text-stone-800">{user.name || user.email || 'Loading...'}</div>
-                  <div className="text-xs text-stone-500 capitalize">{usageStats?.plan || 'Free'} Plan</div>
+                  <div className="text-sm font-semibold text-stone-800 dark:text-stone-100">{user.name || user.email || 'Loading...'}</div>
+                  <div className="text-xs text-stone-500 dark:text-stone-400 capitalize">{usageStats?.plan || 'Free'} Plan</div>
                 </div>
                 <svg 
                   className={`w-4 h-4 text-stone-400 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`} 
@@ -302,32 +329,32 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
 
               {/* Dropdown Menu */}
               {isDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-xl border border-stone-200 z-[60]">
+                <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-stone-800 rounded-2xl shadow-xl border border-stone-200 dark:border-stone-700 z-[60]">
                   {/* User Info Section */}
-                  <div className="px-4 py-4 border-b border-stone-100 bg-stone-50/50 rounded-t-2xl">
-                    <div className="text-sm font-semibold text-stone-800">
+                  <div className="px-4 py-4 border-b border-stone-100 dark:border-stone-700 bg-stone-50/50 dark:bg-stone-800/50 rounded-t-2xl">
+                    <div className="text-sm font-semibold text-stone-800 dark:text-stone-100">
                       {user?.name || user?.email || (user ? 'Email not available' : 'Loading...')}
                     </div>
-                    <div className="text-xs text-stone-500 capitalize mt-0.5">{usageStats?.plan || 'Free'} Plan</div>
+                    <div className="text-xs text-stone-500 dark:text-stone-400 capitalize mt-0.5">{usageStats?.plan || 'Free'} Plan</div>
                     
                     {/* Usage Statistics */}
                     {loadingUsage ? (
                       <div className="mt-3 flex items-center justify-center">
                         <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
-                        <span className="ml-2 text-xs text-gray-500">Loading usage...</span>
+                        <span className="ml-2 text-xs text-stone-500 dark:text-stone-400">Loading usage...</span>
                       </div>
                     ) : usageStats ? (
                       <div className="mt-3 space-y-2">
                         {/* Storage Usage */}
                         <div className="space-y-1">
                           <div className="flex justify-between items-center">
-                            <span className="text-xs text-gray-600">Storage</span>
+                            <span className="text-xs text-stone-600 dark:text-stone-400">Storage</span>
                             <span className={`text-xs font-medium ${getUsageColor(getUsagePercentage(usageStats.storageUsed, usageStats.storageLimit))}`}>
                               {formatBytes(usageStats.storageUsed)} / {usageStats.storageLimit === -1 ? '∞' : formatBytes(usageStats.storageLimit)}
                             </span>
                           </div>
                           {usageStats.storageLimit !== -1 && (
-                            <div className="w-full bg-gray-200 rounded-full h-1.5">
+                            <div className="w-full bg-stone-200 dark:bg-stone-600 rounded-full h-1.5">
                               <div 
                                 className={`h-1.5 rounded-full transition-all duration-300 ${
                                   getUsagePercentage(usageStats.storageUsed, usageStats.storageLimit) >= 90 ? 'bg-red-500' :
@@ -341,7 +368,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
 
                         {/* Uploads Remaining */}
                         <div className="flex justify-between items-center">
-                          <span className="text-xs text-gray-600">Uploads</span>
+                          <span className="text-xs text-stone-600 dark:text-stone-400">Uploads</span>
                           <span className={`text-xs font-medium ${getUsageColor(getUsagePercentage(usageStats.documentsUploaded, usageStats.planLimits.documentsPerMonth))}`}>
                             {usageStats.uploadsRemaining === -1 ? '∞' : usageStats.uploadsRemaining} left
                           </span>
@@ -349,14 +376,14 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
 
                         {/* Analyses Remaining */}
                         <div className="flex justify-between items-center">
-                          <span className="text-xs text-gray-600">Analyses</span>
+                          <span className="text-xs text-stone-600 dark:text-stone-400">Analyses</span>
                           <span className={`text-xs font-medium ${getUsageColor(getUsagePercentage(usageStats.documentsAnalyzed, usageStats.planLimits.analysesPerMonth))}`}>
                             {usageStats.analysesRemaining === -1 ? '∞' : usageStats.analysesRemaining} left
                           </span>
                         </div>
                       </div>
                     ) : (
-                      <div className="mt-2 text-xs text-gray-500">Unable to load usage data</div>
+                      <div className="mt-2 text-xs text-stone-500 dark:text-stone-400">Unable to load usage data</div>
                     )}
                   </div>
 
@@ -364,7 +391,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
                   <div className="py-2">
                     <button 
                       onClick={() => { onNavigate?.('dashboard'); setIsDropdownOpen(false); }}
-                      className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-stone-700 hover:bg-stone-50 transition-colors duration-200"
+                      className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700/50 transition-colors duration-200"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z" />
@@ -374,7 +401,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
                     </button>
                     <button 
                       onClick={() => { onNavigate?.('library'); setIsDropdownOpen(false); }}
-                      className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-stone-700 hover:bg-stone-50 transition-colors duration-200"
+                      className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700/50 transition-colors duration-200"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
@@ -383,7 +410,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
                     </button>
                     <button 
                       onClick={() => { onNavigate?.('upload'); setIsDropdownOpen(false); }}
-                      className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-stone-700 hover:bg-stone-50 transition-colors duration-200"
+                      className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700/50 transition-colors duration-200"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
@@ -392,7 +419,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
                     </button>
                     <button 
                       onClick={() => { onNavigate?.('analysis'); setIsDropdownOpen(false); }}
-                      className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-stone-700 hover:bg-stone-50 transition-colors duration-200"
+                      className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700/50 transition-colors duration-200"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
@@ -401,7 +428,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
                     </button>
                     <button 
                       onClick={() => { onNavigate?.('analysis-history'); setIsDropdownOpen(false); }}
-                      className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-stone-700 hover:bg-stone-50 transition-colors duration-200"
+                      className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700/50 transition-colors duration-200"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
@@ -410,7 +437,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
                     </button>
                     <button 
                       onClick={() => { onNavigate?.('citation-history'); setIsDropdownOpen(false); }}
-                      className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-stone-700 hover:bg-stone-50 transition-colors duration-200"
+                      className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700/50 transition-colors duration-200"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -419,7 +446,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
                     </button>
                     <button 
                       onClick={() => { onNavigate?.('blog'); setIsDropdownOpen(false); }}
-                      className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-stone-700 hover:bg-stone-50 transition-colors duration-200"
+                      className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700/50 transition-colors duration-200"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
@@ -428,7 +455,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
                     </button>
                     <button 
                       onClick={() => { onNavigate?.('account'); setIsDropdownOpen(false); }}
-                      className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-stone-700 hover:bg-stone-50 transition-colors duration-200"
+                      className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700/50 transition-colors duration-200"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -437,7 +464,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
                     </button>
                     <button 
                       onClick={() => { onNavigate?.('billing'); setIsDropdownOpen(false); }}
-                      className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-stone-700 hover:bg-stone-50 transition-colors duration-200"
+                      className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700/50 transition-colors duration-200"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
@@ -447,13 +474,13 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
                   </div>
 
                   {/* Divider */}
-                  <div className="border-t border-stone-100"></div>
+                  <div className="border-t border-stone-100 dark:border-stone-700"></div>
 
                   {/* Additional Links */}
                   <div className="py-2">
                     <button 
                       onClick={() => { onNavigate?.('pricing'); setIsDropdownOpen(false); }}
-                      className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-lime-600 hover:bg-lime-50 transition-colors duration-200"
+                      className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-lime-600 dark:text-lime-400 hover:bg-lime-50 dark:hover:bg-lime-900/30 transition-colors duration-200"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -462,7 +489,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
                     </button>
                     <button 
                       onClick={() => { onNavigate?.('help'); setIsDropdownOpen(false); }}
-                      className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-stone-700 hover:bg-stone-50 transition-colors duration-200"
+                      className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700/50 transition-colors duration-200"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -472,13 +499,13 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
                   </div>
 
                   {/* Divider */}
-                  <div className="border-t border-stone-100"></div>
+                  <div className="border-t border-stone-100 dark:border-stone-700"></div>
 
                   {/* Logout */}
                   <div className="py-2">
                     <button 
                       onClick={handleLogout}
-                      className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors duration-200"
+                      className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors duration-200"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -495,14 +522,14 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
 
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
-        <div className="lg:hidden bg-white border-t border-stone-100 mobile-menu-container z-[60]">
+        <div className="lg:hidden bg-white dark:bg-stone-900 border-t border-stone-100 dark:border-stone-800 mobile-menu-container z-[60]">
           <div className="px-4 sm:px-6 py-4 space-y-1">
             <button 
               onClick={() => { onNavigate?.('dashboard'); setIsMobileMenuOpen(false); }}
               className={`w-full text-left px-4 py-3 rounded-xl font-medium transition-all duration-200 ${
                 currentPage === 'dashboard' 
-                  ? 'text-lime-600 bg-lime-50' 
-                  : 'text-stone-600 hover:text-stone-900 hover:bg-stone-50'
+                  ? 'text-lime-600 dark:text-lime-400 bg-lime-50 dark:bg-lime-900/20' 
+                  : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-50 dark:hover:bg-stone-800/50'
               }`}
             >
               Dashboard
@@ -511,8 +538,8 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
               onClick={() => { onNavigate?.('library'); setIsMobileMenuOpen(false); }}
               className={`w-full text-left px-4 py-3 rounded-xl font-medium transition-all duration-200 ${
                 currentPage === 'library' 
-                  ? 'text-lime-600 bg-lime-50' 
-                  : 'text-stone-600 hover:text-stone-900 hover:bg-stone-50'
+                  ? 'text-lime-600 dark:text-lime-400 bg-lime-50 dark:bg-lime-900/20' 
+                  : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-50 dark:hover:bg-stone-800/50'
               }`}
             >
               Library
@@ -521,8 +548,8 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
               onClick={() => { onNavigate?.('upload'); setIsMobileMenuOpen(false); }}
               className={`w-full text-left px-4 py-3 rounded-xl font-medium transition-all duration-200 ${
                 currentPage === 'upload' 
-                  ? 'text-lime-600 bg-lime-50' 
-                  : 'text-stone-600 hover:text-stone-900 hover:bg-stone-50'
+                  ? 'text-lime-600 dark:text-lime-400 bg-lime-50 dark:bg-lime-900/20' 
+                  : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-50 dark:hover:bg-stone-800/50'
               }`}
             >
               Upload
@@ -531,8 +558,8 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
               onClick={() => { onNavigate?.('analysis'); setIsMobileMenuOpen(false); }}
               className={`w-full text-left px-4 py-3 rounded-xl font-medium transition-all duration-200 ${
                 currentPage === 'analysis' 
-                  ? 'text-lime-600 bg-lime-50' 
-                  : 'text-stone-600 hover:text-stone-900 hover:bg-stone-50'
+                  ? 'text-lime-600 dark:text-lime-400 bg-lime-50 dark:bg-lime-900/20' 
+                  : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-50 dark:hover:bg-stone-800/50'
               }`}
             >
               AI Analysis
@@ -541,8 +568,8 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
               onClick={() => { onNavigate?.('citation-history'); setIsMobileMenuOpen(false); }}
               className={`w-full text-left px-4 py-3 rounded-xl font-medium transition-all duration-200 ${
                 currentPage === 'citations'
-                  ? 'text-lime-600 bg-lime-50'
-                  : 'text-stone-600 hover:text-stone-900 hover:bg-stone-50'
+                  ? 'text-lime-600 dark:text-lime-400 bg-lime-50 dark:bg-lime-900/20'
+                  : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-50 dark:hover:bg-stone-800/50'
               }`}
             >
               Citations
@@ -561,8 +588,8 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
               onClick={() => { onNavigate?.('blog'); setIsMobileMenuOpen(false); }}
               className={`w-full text-left px-4 py-3 rounded-xl font-medium transition-all duration-200 ${
                 currentPage === 'blog' 
-                  ? 'text-lime-600 bg-lime-50' 
-                  : 'text-stone-600 hover:text-stone-900 hover:bg-stone-50'
+                  ? 'text-lime-600 dark:text-lime-400 bg-lime-50 dark:bg-lime-900/20' 
+                  : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-50 dark:hover:bg-stone-800/50'
               }`}
             >
               Blog

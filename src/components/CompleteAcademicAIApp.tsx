@@ -757,7 +757,7 @@ const AcademicAIApp = () => {
 
   return (
     <ErrorBoundary>
-    <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%)' }}>
+    <div className="min-h-screen bg-stone-50 dark:bg-stone-900 transition-colors">
       <PromoBanner />
       {renderCurrentPage()}
     </div>

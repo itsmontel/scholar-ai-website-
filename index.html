@@ -1,6 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <script>
+      (function() {
+        const stored = localStorage.getItem('writescholar-theme');
+        const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const isDark = stored === 'dark' || (!stored && prefersDark);
+        if (isDark) document.documentElement.classList.add('dark');
+        else document.documentElement.classList.remove('dark');
+      })();
+    </script>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="/favicon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -107,10 +116,10 @@
     }
     </script>
 
-    <!-- University Fonts -->
+    <!-- University Fonts + Gen Z friendly font -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:wght@600;700&family=Baskervville:ital@0;1&family=EB+Garamond:wght@600;700&family=Source+Sans+Pro:wght@600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Crimson+Text:wght@600;700&family=Baskervville:ital@0;1&family=EB+Garamond:wght@600;700&family=Source+Sans+Pro:wght@600;700&display=swap" rel="stylesheet">
   </head>
   <body>
     <div id="root"></div>

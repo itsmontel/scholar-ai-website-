@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import Header from '../common/Header';
 import Footer from '../common/Footer';
-import { DocumentCardSkeleton } from '../common/LoadingSpinner';
 import AnalysisAnimation from '../common/AnalysisAnimation';
 import StreakWidget from '../common/StreakWidget';
 import { jsPDF } from 'jspdf';
@@ -15,12 +14,59 @@ interface DashboardProps {
   initialMode?: 'analyze' | 'citations' | 'humanize' | 'summarize' | 'quiz';
 }
 
+const getTimeGreeting = (): { greeting: string; emoji: string } => {
+  const hour = new Date().getHours();
+  const rand = Math.random();
+  if (rand < 0.15) return { greeting: 'Welcome back', emoji: '👋' };
+  if (hour < 12) return { greeting: 'Good morning', emoji: '☀️' };
+  if (hour < 17) return { greeting: 'Good afternoon', emoji: '👋' };
+  return { greeting: 'Good evening', emoji: '🌙' };
+};
+
+const relativeTime = (date: Date): string => {
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const mins = Math.floor(diffMs / 60000);
+  if (mins < 1) return 'Just now';
+  if (mins < 60) return `${mins}m ago`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  if (days === 1) return 'Yesterday';
+  if (days < 7) return `${days}d ago`;
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+};
+
+interface ActivityItem {
+  id: string;
+  type: 'document' | 'analysis' | 'quiz' | 'flashcard' | 'crossword' | 'humanize' | 'summary' | 'citation';
+  title: string;
+  subtitle: string;
+  date: Date;
+  navigateTo: string;
+}
+
+const activityMeta: Record<ActivityItem['type'], { emoji: string; bg: string; label: string }> = {
+  document: { emoji: '📄', bg: 'bg-blue-50 dark:bg-blue-900/20', label: 'Uploaded' },
+  analysis: { emoji: '🔍', bg: 'bg-lime-50 dark:bg-lime-900/20', label: 'Analyzed' },
+  quiz: { emoji: '🎯', bg: 'bg-amber-50 dark:bg-amber-900/20', label: 'Quiz' },
+  flashcard: { emoji: '🃏', bg: 'bg-violet-50 dark:bg-violet-900/20', label: 'Flashcards' },
+  crossword: { emoji: '🧩', bg: 'bg-orange-50 dark:bg-orange-900/20', label: 'Crossword' },
+  humanize: { emoji: '✨', bg: 'bg-purple-50 dark:bg-purple-900/20', label: 'Humanized' },
+  summary: { emoji: '📋', bg: 'bg-emerald-50 dark:bg-emerald-900/20', label: 'Summary' },
+  citation: { emoji: '📚', bg: 'bg-sky-50 dark:bg-sky-900/20', label: 'Citations' },
+};
+
 const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: DashboardProps) => {
   const [inputText, setInputText] = useState('');
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
   const [showWordWarning, setShowWordWarning] = useState(false);
   const [documents, setDocuments] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [greeting] = useState(getTimeGreeting);
+  const [recentActivity, setRecentActivity] = useState<ActivityItem[]>([]);
+  const [isActivityLoading, setIsActivityLoading] = useState(true);
   const [showAnalysisPopup, setShowAnalysisPopup] = useState(false);
   const [analysisComplete, setAnalysisComplete] = useState(false);
   const [mode, setMode] = useState<'analyze' | 'citations' | 'humanize' | 'summarize' | 'quiz'>(initialMode);
@@ -294,7 +340,7 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
     exam: { bg: 'bg-red-50', border: 'border-red-100', text: 'text-red-600', dot: 'bg-red-400' },
     midterm: { bg: 'bg-red-50', border: 'border-red-100', text: 'text-red-600', dot: 'bg-red-400' },
     test: { bg: 'bg-orange-50', border: 'border-orange-100', text: 'text-orange-600', dot: 'bg-orange-400' },
-    quiz: { bg: 'bg-amber-50', border: 'border-amber-100', text: 'text-amber-600', dot: 'bg-amber-400' },
+    quiz: { bg: 'bg-amber-50', border: 'border-amber-100', text: 'text-amber-600', dot: 'bg-lime-500' },
     assignment: { bg: 'bg-blue-50', border: 'border-blue-100', text: 'text-blue-600', dot: 'bg-blue-400' },
     other: { bg: 'bg-stone-50', border: 'border-stone-200', text: 'text-stone-600', dot: 'bg-stone-400' }
   };
@@ -363,74 +409,6 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
     "AI in healthcare applications",
     "Remote work productivity research"
   ];
-
-  // Character illustration component - same as landing page (man with hands gripping the box)
-  const CharacterIllustration = () => (
-    <>
-      {/* Mobile version - small head peeking over top-right corner */}
-      <div className="absolute -right-2 -top-9 w-14 h-14 sm:hidden pointer-events-none z-20">
-        <svg viewBox="0 0 70 70" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="35" cy="28" r="20" fill="#E8B796" />
-          <path d="M15 24 Q14 8 28 4 Q35 1 42 4 Q56 8 55 24 Q52 16 42 12 Q35 8 28 12 Q18 16 15 24" fill="#4A3728" />
-          <path d="M15 24 Q10 30 15 36" fill="#4A3728" />
-          <path d="M55 24 Q60 30 55 36" fill="#4A3728" />
-          <ellipse cx="28" cy="28" rx="3" ry="3.5" fill="#1F2937" />
-          <ellipse cx="42" cy="28" rx="3" ry="3.5" fill="#1F2937" />
-          <circle cx="29" cy="26.5" r="1.2" fill="white" />
-          <circle cx="43" cy="26.5" r="1.2" fill="white" />
-          <path d="M28 40 Q35 46 42 40" stroke="#1F2937" strokeWidth="2" fill="none" strokeLinecap="round" />
-          <circle cx="20" cy="34" r="3" fill="#FECACA" opacity="0.5" />
-          <circle cx="50" cy="34" r="3" fill="#FECACA" opacity="0.5" />
-          <ellipse cx="26" cy="55" rx="6" ry="5" fill="#E8B796" />
-          <ellipse cx="44" cy="55" rx="6" ry="5" fill="#E8B796" />
-        </svg>
-      </div>
-
-      {/* Desktop - man peeking from behind right edge, hands gripping the top */}
-      <div className="absolute hidden sm:block -right-4 xl:-right-10 pointer-events-none z-20" style={{ top: '-110px', width: '120px', height: '160px' }}>
-        <svg viewBox="0 0 120 160" fill="none" xmlns="http://www.w3.org/2000/svg">
-          {/* Body - light blue shirt, cut off at bottom (behind the box) */}
-          <path d="M35 105 Q35 130 60 138 Q85 130 85 105" fill="#60A5FA" />
-          <path d="M48 101 L60 112 L72 101" stroke="#3B82F6" strokeWidth="2" fill="none" />
-          {/* Neck */}
-          <rect x="52" y="88" width="16" height="18" rx="2" fill="#E8B796" />
-          {/* Head */}
-          <ellipse cx="60" cy="52" rx="30" ry="34" fill="#E8B796" />
-          {/* Hair - short neat brown male hair */}
-          <path d="M30 44 Q28 18 44 10 Q60 2 76 10 Q92 18 90 44 Q88 30 76 22 Q60 12 44 22 Q32 30 30 44" fill="#4A3728" />
-          <path d="M30 44 Q24 52 30 62" fill="#4A3728" />
-          <path d="M90 44 Q96 52 90 62" fill="#4A3728" />
-          {/* Eyes - looking left toward the text box */}
-          <ellipse cx="48" cy="50" rx="4.5" ry="5.5" fill="#1F2937" />
-          <ellipse cx="72" cy="50" rx="4.5" ry="5.5" fill="#1F2937" />
-          <circle cx="46" cy="48" r="2" fill="white" />
-          <circle cx="70" cy="48" r="2" fill="white" />
-          {/* Eyebrows - friendly */}
-          <path d="M38 38 Q48 33 58 38" stroke="#4A3728" strokeWidth="2.5" fill="none" strokeLinecap="round" />
-          <path d="M62 38 Q72 33 82 38" stroke="#4A3728" strokeWidth="2.5" fill="none" strokeLinecap="round" />
-          {/* Warm smile */}
-          <path d="M47 70 Q60 82 73 70" stroke="#1F2937" strokeWidth="2.5" fill="none" strokeLinecap="round" />
-          {/* Cheeks */}
-          <ellipse cx="34" cy="62" rx="5" ry="3.5" fill="#FECACA" opacity="0.5" />
-          <ellipse cx="86" cy="62" rx="5" ry="3.5" fill="#FECACA" opacity="0.5" />
-          {/* Left arm reaching down to grip the edge of the box */}
-          <path d="M34 110 Q18 125 12 145" stroke="#E8B796" strokeWidth="11" fill="none" strokeLinecap="round" />
-          {/* Left hand - fingers curled over edge */}
-          <ellipse cx="10" cy="148" rx="8" ry="6" fill="#E8B796" />
-          <path d="M4 144 Q3 148 5 152" stroke="#D4A574" strokeWidth="1.2" fill="none" />
-          <path d="M9 143 Q8 148 10 153" stroke="#D4A574" strokeWidth="1.2" fill="none" />
-          <path d="M14 144 Q13 148 15 152" stroke="#D4A574" strokeWidth="1.2" fill="none" />
-          {/* Right arm reaching down */}
-          <path d="M86 110 Q100 125 106 145" stroke="#E8B796" strokeWidth="11" fill="none" strokeLinecap="round" />
-          {/* Right hand */}
-          <ellipse cx="108" cy="148" rx="8" ry="6" fill="#E8B796" />
-          <path d="M102 144 Q101 148 103 152" stroke="#D4A574" strokeWidth="1.2" fill="none" />
-          <path d="M107 143 Q106 148 108 153" stroke="#D4A574" strokeWidth="1.2" fill="none" />
-          <path d="M112 144 Q111 148 113 152" stroke="#D4A574" strokeWidth="1.2" fill="none" />
-        </svg>
-      </div>
-    </>
-  );
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -576,16 +554,104 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
     }
   };
 
+  // Build recent activity feed from documents + study tools + citations
+  useEffect(() => {
+    const buildActivity = async () => {
+      try {
+        setIsActivityLoading(true);
+        const activities: ActivityItem[] = [];
+        const token = localStorage.getItem('authToken');
+
+        // Documents & analyses
+        documents.forEach((doc: any) => {
+          activities.push({
+            id: `doc-${doc.id}`,
+            type: 'document',
+            title: doc.title,
+            subtitle: `${(doc.fileType || 'doc').toUpperCase()} · ${doc.wordCount || 0} words`,
+            date: new Date(doc.createdAt),
+            navigateTo: 'library',
+          });
+          if (doc.hasAnalysis) {
+            activities.push({
+              id: `analysis-${doc.id}`,
+              type: 'analysis',
+              title: doc.title,
+              subtitle: 'Essay feedback completed',
+              date: new Date(new Date(doc.createdAt).getTime() + 60000),
+              navigateTo: 'library',
+            });
+          }
+        });
+
+        if (token) {
+          try {
+            const quizRes = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/analysis/quiz-history`, {
+              headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (quizRes.ok) {
+              const quizData = await quizRes.json();
+              (quizData.data || []).forEach((tool: any) => {
+                const typeMap: Record<string, ActivityItem['type']> = {
+                  flashcards: 'flashcard',
+                  crossword: 'crossword',
+                };
+                const activityType: ActivityItem['type'] = typeMap[tool.quiz_type] || 'quiz';
+                const countLabel = tool.question_count ? `${tool.question_count} questions` : '';
+                const diffLabel = tool.difficulty ? ` · ${tool.difficulty}` : '';
+                activities.push({
+                  id: `tool-${tool.id}`,
+                  type: activityType,
+                  title: tool.title || 'Study Tool',
+                  subtitle: `${countLabel}${diffLabel}`.trim() || activityMeta[activityType].label,
+                  date: new Date(tool.created_at),
+                  navigateTo: 'quiz-history',
+                });
+              });
+            }
+          } catch { /* silently skip */ }
+
+          try {
+            const citeRes = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/analysis/citation-history`, {
+              headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (citeRes.ok) {
+              const citeData = await citeRes.json();
+              (citeData.data || []).forEach((search: any) => {
+                const citationCount = search.search_results?.citations?.length;
+                activities.push({
+                  id: `cite-${search.id}`,
+                  type: 'citation',
+                  title: search.research_topic,
+                  subtitle: `${search.citation_style}${citationCount ? ` · ${citationCount} sources` : ''}`,
+                  date: new Date(search.created_at),
+                  navigateTo: 'citation-history',
+                });
+              });
+            }
+          } catch { /* silently skip */ }
+        }
+
+        activities.sort((a, b) => b.date.getTime() - a.date.getTime());
+        setRecentActivity(activities);
+      } finally {
+        setIsActivityLoading(false);
+      }
+    };
+
+    buildActivity();
+  }, [documents]);
+
+  const filteredActivity = searchQuery.trim()
+    ? recentActivity.filter(a =>
+        a.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        a.subtitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        activityMeta[a.type].label.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : recentActivity;
+
   const getWordCount = (text: string) => {
     return text.trim().split(/\s+/).filter(word => word.length > 0).length;
-  };
-
-  const formatBytes = (bytes: number): string => {
-    if (bytes === 0) return '0 B';
-    const k = 1024;
-    const sizes = ['B', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
   };
 
   const isPremiumUser = usageStats.plan === 'premium';
@@ -1468,48 +1534,15 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
   };
 
   return (
-    <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%)' }}>
+    <div className="min-h-screen relative transition-colors font-sans bg-[#faf8f5] dark:bg-stone-900">
+      <div className="absolute inset-0 bg-gradient-to-br from-lime-50/30 via-transparent to-emerald-50/20 dark:from-stone-900/50 dark:to-stone-900 pointer-events-none" aria-hidden />
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="dashboard" />
 
-      {/* Usage Stats Bar */}
-      <div className="border-b border-stone-200/60" style={{ background: 'rgba(250, 248, 245, 0.8)' }}>
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3">
-          <div className="flex items-center justify-center flex-wrap gap-4 sm:gap-8 text-sm">
-              <div className="flex items-center space-x-2">
-              <div className="w-2 h-2 bg-lime-500 rounded-full"></div>
-              <span className="text-stone-500">Documents:</span>
-              <span className="font-medium text-stone-800">
-                    {loadingStats ? '...' : `${usageStats.documentsUploaded}/${usageStats.planLimits.documentsPerMonth === -1 ? '∞' : usageStats.planLimits.documentsPerMonth}`}
-              </span>
-              </div>
-              <div className="flex items-center space-x-2">
-              <div className="w-2 h-2 bg-lime-500 rounded-full"></div>
-              <span className="text-stone-500">Analyses:</span>
-              <span className="font-medium text-stone-800">
-                    {loadingStats ? '...' : `${usageStats.documentsAnalyzed}/${usageStats.planLimits.analysesPerMonth === -1 ? '∞' : usageStats.planLimits.analysesPerMonth}`}
-              </span>
-              </div>
-              <div className="flex items-center space-x-2">
-              <div className="w-2 h-2 bg-lime-500 rounded-full"></div>
-              <span className="text-stone-500">Storage:</span>
-              <span className="font-medium text-stone-800">
-                {loadingStats ? '...' : formatBytes(usageStats.storageUsed)}
-              </span>
-              </div>
-              {usageStats.plan === 'free' && !loadingStats && (
-                  <button
-                    onClick={() => onNavigate('pricing')}
-                className="px-3 py-1 bg-lime-400 hover:bg-lime-300 text-stone-900 text-xs font-medium rounded-full transition-colors"
-                  >
-                Upgrade
-                  </button>
-              )}
-          </div>
-        </div>
-      </div>
+      {/* Minimal top accent line */}
+      <div className="h-1 bg-gradient-to-r from-lime-400 via-emerald-400 to-teal-400" />
 
       {/* Main Content */}
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-1 sm:pt-2 pb-8 sm:pb-14 w-full min-w-0 overflow-x-hidden lg:ml-24 lg:mr-auto">
+      <main className="relative max-w-6xl mx-auto px-4 sm:px-6 pt-4 sm:pt-6 pb-8 sm:pb-14 w-full min-w-0 overflow-x-hidden lg:ml-24 lg:mr-auto">
         <div className="grid grid-cols-1 lg:grid-cols-[240px_1fr] gap-6 items-start">
           {/* LEFT SIDEBAR: Streak + Calendar / Schedule */}
           <aside className="order-2 lg:order-1 space-y-4 sticky top-16 min-w-0">
@@ -1519,14 +1552,14 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
             </div>
 
             {/* Schedule Section */}
-            <div className="bg-white rounded-2xl shadow-sm border border-stone-100 p-4">
+            <div className="bg-white dark:bg-stone-800 rounded-3xl shadow-lg shadow-stone-200/50 dark:shadow-stone-900/50 border border-stone-200/60 dark:border-stone-600/40 p-5 hover:shadow-xl transition-shadow">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="font-semibold text-stone-800 flex items-center gap-2 text-sm">
+              <h3 className="font-bold text-stone-800 dark:text-stone-100 flex items-center gap-2 text-sm">
                 <span className="text-lg">📅</span> Schedule
               </h3>
               <button 
                 onClick={openAddModal}
-                className="text-stone-400 hover:text-lime-600 transition-colors"
+                className="text-stone-400 hover:text-lime-600 dark:hover:text-lime-400 transition-colors p-1 rounded-lg hover:bg-lime-50 dark:hover:bg-lime-900/30"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -1536,22 +1569,22 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
             
             {/* Mini Calendar View */}
             <div className="mb-4">
-              <div className="flex items-center justify-between mb-2 text-xs font-medium text-stone-600">
+              <div className="flex items-center justify-between mb-2 text-xs font-medium text-stone-600 dark:text-stone-400">
                 <button 
                   onClick={() => setCalendarMonth(new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() - 1))}
-                  className="p-1 hover:bg-stone-100 rounded"
+                  className="p-1.5 hover:bg-stone-100 dark:hover:bg-stone-700 rounded-lg transition-colors"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
                 </button>
-                <span className="font-semibold">{calendarMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</span>
+                <span className="font-semibold text-stone-800 dark:text-stone-100">{calendarMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</span>
                 <button 
                   onClick={() => setCalendarMonth(new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + 1))}
-                  className="p-1 hover:bg-stone-100 rounded"
+                  className="p-1.5 hover:bg-stone-100 dark:hover:bg-stone-700 rounded-lg transition-colors"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
                 </button>
               </div>
-              <div className="grid grid-cols-7 gap-0.5 text-center text-[10px] mb-1 text-stone-400 font-medium">
+              <div className="grid grid-cols-7 gap-0.5 text-center text-[10px] mb-1 text-stone-400 dark:text-stone-500 font-medium">
                 <div>S</div><div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div>
               </div>
               <div className="grid grid-cols-7 gap-0.5 text-center text-xs">
@@ -1561,10 +1594,10 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                   return (
                     <div 
                       key={i} 
-                      className={`p-1 relative cursor-pointer rounded transition-colors ${
-                        !d.isCurrentMonth ? 'text-stone-300' : 
-                        today ? 'bg-lime-500 text-white font-bold' : 
-                        'text-stone-700 hover:bg-stone-100'
+                      className={`p-1 relative cursor-pointer rounded-lg transition-colors ${
+                        !d.isCurrentMonth ? 'text-stone-300 dark:text-stone-600' : 
+                        today ? 'bg-gradient-to-br from-lime-400 to-emerald-500 text-white font-bold shadow-lg shadow-lime-500/30' : 
+                        'text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-700'
                       }`}
                     >
                       {d.day}
@@ -1590,7 +1623,7 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                   const colors = eventTypeColors[event.event_type] || eventTypeColors.other;
                   const eventDate = new Date(toDateStr(event.event_date) + 'T00:00:00');
                   return (
-                    <div key={event.id} className={`flex gap-2 p-2 rounded-lg ${colors.bg} border ${colors.border} group relative`}>
+                    <div key={event.id} className={`flex gap-2 p-2.5 rounded-xl ${colors.bg} dark:bg-opacity-50 border ${colors.border} group relative hover:shadow-md transition-shadow`}>
                       <div className={`flex flex-col items-center justify-center w-9 h-9 bg-white rounded-lg shadow-sm ${colors.text} flex-shrink-0`}>
                         <span className="text-[8px] font-bold uppercase leading-none">{eventDate.toLocaleDateString('en-US', { month: 'short' })}</span>
                         <span className="text-sm font-bold leading-none">{eventDate.getDate()}</span>
@@ -1599,7 +1632,7 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                         className="min-w-0 flex-1 cursor-pointer"
                         onClick={() => openEditModal(event)}
                       >
-                        <p className="text-xs font-semibold text-stone-800 truncate">{event.title}</p>
+                        <p className="text-xs font-semibold text-stone-800 dark:text-stone-100 truncate">{event.title}</p>
                         <p className="text-[10px] text-stone-500 truncate">
                           {event.course && `${event.course} • `}{event.event_time || 'All day'}
                         </p>
@@ -1628,7 +1661,7 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
             
             <button 
               onClick={openAddModal}
-              className="w-full mt-3 py-2 text-xs font-medium text-stone-500 bg-stone-50 hover:bg-lime-50 hover:text-lime-700 rounded-lg transition-colors border border-stone-200 border-dashed"
+              className="w-full mt-3 py-2.5 text-sm font-medium text-stone-500 dark:text-stone-400 bg-stone-50 dark:bg-stone-700/50 hover:bg-lime-50 dark:hover:bg-lime-900/30 hover:text-lime-700 dark:hover:text-lime-400 rounded-xl transition-all border-2 border-dashed border-stone-200 dark:border-stone-600 hover:border-lime-300 dark:hover:border-lime-700"
             >
               + Add Event
             </button>
@@ -1642,139 +1675,207 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
               <StreakWidget />
             </div>
 
-            {/* Welcome */}
-            {/* Free ebook for new users (hidden after 24 hours or when dismissed) */}
-            {showEbookBanner && !ebookBannerDismissed && (
-              <div className="mb-8 relative">
-                <a
-                  href="/downloads/writescholar-ultimate-study-tips-guide.pdf"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-4 rounded-2xl border border-lime-200 bg-gradient-to-r from-lime-50 to-green-50 p-4 pr-12 transition-shadow hover:shadow-md"
-                >
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-lime-100">
-                    <svg className="h-6 w-6 text-lime-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                    </svg>
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="font-semibold text-stone-800">Your free ebook</p>
-                    <p className="text-sm text-stone-500">WriteScholar Ultimate Study Tips Guide (PDF)</p>
-                  </div>
-                  <span className="shrink-0 text-sm font-medium text-lime-600">Download →</span>
-                </a>
-                <button
-                  onClick={(e) => { e.preventDefault(); dismissEbookBanner(); }}
-                  className="absolute top-3 right-3 p-1.5 rounded-lg text-stone-400 hover:text-stone-600 hover:bg-stone-100 transition-colors"
-                  aria-label="Dismiss"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
+            {/* Search Bar */}
+            <div className="mb-6">
+              <div className="relative">
+                <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-stone-400 dark:text-stone-500 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search your documents, quizzes, activities..."
+                  className="w-full pl-12 pr-4 py-3.5 bg-white dark:bg-stone-800 border border-stone-200/80 dark:border-stone-700/50 rounded-2xl text-sm text-stone-800 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500 outline-none focus:border-lime-400 dark:focus:border-lime-500 focus:ring-2 focus:ring-lime-300/30 dark:focus:ring-lime-600/30 transition-all shadow-sm hover:shadow-md"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 rounded-md hover:bg-stone-100 dark:hover:bg-stone-700 transition-colors"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                  </button>
+                )}
               </div>
-            )}
 
-            {/* Mode Toggle - topic colors: Analyze #2E6FEA, Citations #22A7AB, Humanize #9B59B6, Summarize #28B463, Study Tools #D35400 */}
-          <div className="flex justify-center mb-7">
-          <div className="inline-flex flex-wrap justify-center bg-stone-100 rounded-full p-1.5 gap-1">
-              <button
-              onClick={() => { setMode('analyze'); setInputText(''); setShowWordWarning(false); setShowHumanizeResult(false); setSummaryResult(null); setQuizResult(null); }}
-              className={`px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-sm sm:text-base font-medium transition-all ${
-                mode === 'analyze' ? 'bg-white shadow-sm border' : ''
-              }`}
-              style={mode === 'analyze' ? { color: '#7ab308', borderColor: '#a3e635' } : { color: '#7ab308' }}
-            >
-              Analyze Essay
-              </button>
-              <button
-              onClick={() => { setMode('citations'); setInputText(''); setShowWordWarning(false); setShowHumanizeResult(false); setSummaryResult(null); setQuizResult(null); }}
-              className={`px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-sm sm:text-base font-medium transition-all ${
-                mode === 'citations' ? 'bg-white shadow-sm border' : ''
-              }`}
-              style={mode === 'citations' ? { color: '#22A7AB', borderColor: '#A7F3F5' } : { color: '#22A7AB' }}
-            >
-              Find Citations
-              </button>
-              <button
-              onClick={() => { setMode('humanize'); setInputText(''); setShowWordWarning(false); setSummaryResult(null); setQuizResult(null); }}
-              className={`px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-sm sm:text-base font-medium transition-all relative ${
-                mode === 'humanize' ? 'bg-white shadow-sm border' : ''
-              }`}
-              style={mode === 'humanize' ? { color: '#9B59B6', borderColor: '#E8DAEF' } : { color: '#9B59B6' }}
-            >
-              Humanize
-              {usageStats.plan === 'free' && <span className="absolute -top-2 -right-1 px-1.5 py-0.5 text-white text-[10px] font-bold rounded-full leading-none" style={{ backgroundColor: '#9B59B6' }}>PRO</span>}
-              </button>
-              <button
-              onClick={() => { setMode('summarize'); setInputText(''); setShowWordWarning(false); setShowHumanizeResult(false); setQuizResult(null); }}
-              className={`px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-sm sm:text-base font-medium transition-all relative ${
-                mode === 'summarize' ? 'bg-white shadow-sm border' : ''
-              }`}
-              style={mode === 'summarize' ? { color: '#28B463', borderColor: '#ABEBC6' } : { color: '#28B463' }}
-            >
-              Summarize
-              </button>
-              <button
-              onClick={() => { setMode('quiz'); setInputText(''); setShowWordWarning(false); setShowHumanizeResult(false); setSummaryResult(null); setFlashcardResult(null); setCrosswordResult(null); }}
-              className={`px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-sm sm:text-base font-semibold transition-all relative ${
-                mode === 'quiz' ? 'bg-white shadow-md border-2 ring-2 ring-orange-200/50' : 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-lg hover:shadow-xl hover:from-orange-600 hover:to-amber-600'
-              }`}
-              style={mode === 'quiz' ? { color: '#D35400', borderColor: '#FADBD8' } : {}}
-            >
-              Study Tools
-              {usageStats.plan === 'free' && <span className="absolute -top-2 -right-1 px-1.5 py-0.5 text-white text-[10px] font-bold rounded-full leading-none bg-stone-900">PRO</span>}
-              </button>
+              {/* Inline search results — shown immediately below the bar while typing */}
+              {searchQuery.trim() && (
+                <div className="mt-2 bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-2xl shadow-xl overflow-hidden">
+                  {filteredActivity.length > 0 ? (
+                    <>
+                      <div className="px-4 pt-3 pb-1">
+                        <p className="text-[11px] font-semibold text-stone-400 uppercase tracking-wider">{filteredActivity.length} result{filteredActivity.length !== 1 ? 's' : ''}</p>
+                      </div>
+                      {filteredActivity.slice(0, 6).map((activity) => {
+                        const meta = activityMeta[activity.type];
+                        return (
+                          <button
+                            key={activity.id}
+                            onClick={() => { onNavigate(activity.navigateTo); setSearchQuery(''); }}
+                            className="w-full flex items-center gap-3 px-4 py-3 hover:bg-stone-50 dark:hover:bg-stone-700/50 transition-colors text-left group"
+                          >
+                            <div className={`w-9 h-9 ${meta.bg} rounded-xl flex items-center justify-center flex-shrink-0`}>
+                              <span className="text-base">{meta.emoji}</span>
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <p className="font-semibold text-stone-800 dark:text-stone-100 text-sm truncate group-hover:text-lime-700 dark:group-hover:text-lime-400">{activity.title}</p>
+                              <p className="text-xs text-stone-400 dark:text-stone-500 truncate">{activity.subtitle}</p>
+                            </div>
+                            <div className="flex items-center gap-2 flex-shrink-0">
+                              <span className="text-[10px] text-stone-400 dark:text-stone-500">{relativeTime(activity.date)}</span>
+                              <span className={`px-2 py-0.5 ${meta.bg} text-[10px] font-bold rounded-md uppercase tracking-wide text-stone-600 dark:text-stone-300`}>{meta.label}</span>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </>
+                  ) : (
+                    <div className="px-4 py-6 text-center">
+                      <p className="text-sm font-medium text-stone-500 dark:text-stone-400">No results for <span className="font-semibold text-stone-700 dark:text-stone-200">"{searchQuery}"</span></p>
+                      <p className="text-xs text-stone-400 dark:text-stone-500 mt-1">Try searching by document name or activity type</p>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
-          </div>
+
+            {/* Warm Welcome Section */}
+            <div className="mb-8">
+              <div className="flex items-start sm:items-center justify-between flex-col sm:flex-row gap-4">
+                <div>
+                  <h1 className="text-2xl sm:text-3xl font-bold text-stone-800 dark:text-stone-100 leading-tight">
+                    {greeting.greeting}{user?.name ? `, ${user.name}` : ''}! <span className="inline-block animate-[wave_1.8s_ease-in-out_infinite]">{greeting.emoji}</span>
+                  </h1>
+                  <p className="text-stone-500 dark:text-stone-400 mt-1 text-base">
+                    What would you like to work on today?
+                  </p>
+                </div>
+                {usageStats.plan === 'free' && !loadingStats && (
+                  <button
+                    onClick={() => onNavigate('pricing')}
+                    className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-400 to-orange-400 hover:from-amber-300 hover:to-orange-300 text-stone-900 text-sm font-bold rounded-full transition-all shadow-md shadow-amber-500/20 hover:shadow-lg hover:scale-105"
+                  >
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
+                    Upgrade Plan
+                  </button>
+                )}
+              </div>
+
+              {/* Ebook banner - subtle inline */}
+              {showEbookBanner && !ebookBannerDismissed && (
+                <div className="mt-4 relative">
+                  <a
+                    href="/downloads/writescholar-ultimate-study-tips-guide.pdf"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3 rounded-xl bg-amber-50/80 dark:bg-amber-900/20 border border-amber-200/60 dark:border-amber-700/40 px-4 py-3 pr-10 transition-all hover:bg-amber-50 dark:hover:bg-amber-900/30 hover:shadow-sm group"
+                  >
+                    <span className="text-xl">📖</span>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-semibold text-stone-700 dark:text-stone-200 text-sm">Free Study Tips Guide</p>
+                      <p className="text-xs text-stone-500 dark:text-stone-400">Download our ultimate study tips ebook (PDF)</p>
+                    </div>
+                    <span className="text-xs font-medium text-amber-600 dark:text-amber-400 group-hover:underline">Get it free →</span>
+                  </a>
+                  <button
+                    onClick={(e) => { e.preventDefault(); dismissEbookBanner(); }}
+                    className="absolute top-2 right-2 p-1 rounded-md text-stone-400 hover:text-stone-600 hover:bg-stone-100 dark:hover:bg-stone-700 transition-colors"
+                    aria-label="Dismiss"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Quick Action Cards */}
+            {loadingStats ? (
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-8">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <div key={i} className="p-4 rounded-2xl border border-stone-200/50 dark:border-stone-700/30 bg-stone-50 dark:bg-stone-800/50 animate-pulse">
+                    <div className="w-10 h-10 bg-stone-200 dark:bg-stone-700 rounded-xl mb-3" />
+                    <div className="h-4 bg-stone-200 dark:bg-stone-700 rounded-lg w-3/4 mb-2" />
+                    <div className="h-3 bg-stone-100 dark:bg-stone-700/60 rounded-lg w-full hidden sm:block" />
+                  </div>
+                ))}
+              </div>
+            ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-8">
+              {([
+                { id: 'analyze' as const, icon: '📝', title: 'Analyze Essay', desc: 'Get AI feedback on your writing', gradient: 'from-lime-50 to-emerald-50 dark:from-lime-900/20 dark:to-emerald-900/15', border: 'border-lime-200/70 dark:border-lime-700/40', activeBorder: 'border-lime-400 dark:border-lime-500 ring-2 ring-lime-300/50 dark:ring-lime-600/40', iconBg: 'bg-lime-100 dark:bg-lime-800/40', pro: false },
+                { id: 'citations' as const, icon: '📚', title: 'Find Citations', desc: 'Discover academic sources', gradient: 'from-sky-50 to-cyan-50 dark:from-sky-900/20 dark:to-cyan-900/15', border: 'border-sky-200/70 dark:border-sky-700/40', activeBorder: 'border-sky-400 dark:border-sky-500 ring-2 ring-sky-300/50 dark:ring-sky-600/40', iconBg: 'bg-sky-100 dark:bg-sky-800/40', pro: false },
+                { id: 'humanize' as const, icon: '✨', title: 'Humanize', desc: 'Make AI text sound natural', gradient: 'from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/15', border: 'border-violet-200/70 dark:border-violet-700/40', activeBorder: 'border-violet-400 dark:border-violet-500 ring-2 ring-violet-300/50 dark:ring-violet-600/40', iconBg: 'bg-violet-100 dark:bg-violet-800/40', pro: true },
+                { id: 'summarize' as const, icon: '📋', title: 'Summarize', desc: 'Condense papers instantly', gradient: 'from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/15', border: 'border-emerald-200/70 dark:border-emerald-700/40', activeBorder: 'border-emerald-400 dark:border-emerald-500 ring-2 ring-emerald-300/50 dark:ring-emerald-600/40', iconBg: 'bg-emerald-100 dark:bg-emerald-800/40', pro: false },
+                { id: 'quiz' as const, icon: '🎯', title: 'Study Tools', desc: 'Quizzes, flashcards & more', gradient: 'from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/15', border: 'border-amber-200/70 dark:border-amber-700/40', activeBorder: 'border-amber-400 dark:border-amber-500 ring-2 ring-amber-300/50 dark:ring-amber-600/40', iconBg: 'bg-amber-100 dark:bg-amber-800/40', pro: true },
+              ] as const).map(tool => (
+                <button
+                  key={tool.id}
+                  onClick={() => {
+                    setMode(tool.id);
+                    setInputText('');
+                    setShowWordWarning(false);
+                    if (tool.id !== 'humanize') setShowHumanizeResult(false);
+                    if (tool.id !== 'summarize') setSummaryResult(null);
+                    if (tool.id !== 'quiz') { setQuizResult(null); setFlashcardResult(null); setCrosswordResult(null); }
+                  }}
+                  className={`relative p-4 rounded-2xl border bg-gradient-to-br ${tool.gradient} text-left transition-all duration-200 group hover:shadow-lg hover:-translate-y-0.5 ${
+                    mode === tool.id ? `shadow-md ${tool.activeBorder}` : `${tool.border} hover:shadow-md`
+                  }`}
+                >
+                  <div className={`w-10 h-10 ${tool.iconBg} rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform`}>
+                    <span className="text-xl">{tool.icon}</span>
+                  </div>
+                  <h3 className="font-bold text-stone-800 dark:text-stone-100 text-sm leading-tight">{tool.title}</h3>
+                  <p className="text-stone-500 dark:text-stone-400 text-xs mt-1 leading-snug hidden sm:block">{tool.desc}</p>
+                  {tool.pro && usageStats.plan === 'free' && (
+                    <span className="absolute top-2 right-2 px-1.5 py-0.5 text-[9px] font-bold rounded-md bg-gradient-to-r from-amber-400 to-orange-400 text-white leading-none shadow-sm">PRO</span>
+                  )}
+                </button>
+              ))}
+            </div>
+            )}
 
         {/* ANALYZE MODE - Upload First Design */}
         {mode === 'analyze' && (
           <>
             {/* Primary: Upload Section */}
             <div className="relative mb-8 overflow-visible">
-              {/* Character illustration */}
-              <CharacterIllustration />
-              
               <div 
                 onClick={() => onNavigate('upload')}
-                className="bg-gradient-to-br from-lime-50 to-green-50 rounded-3xl p-10 sm:p-14 text-center border-2 border-dashed border-lime-200 hover:border-lime-400 cursor-pointer transition-all hover:shadow-lg group"
+                className="bg-white dark:bg-stone-800 rounded-2xl p-8 sm:p-12 text-center border border-stone-200/80 dark:border-stone-700/50 hover:border-lime-300 dark:hover:border-lime-600 cursor-pointer transition-all hover:shadow-xl hover:-translate-y-0.5 group shadow-sm"
               >
-                <div className="w-20 h-20 bg-lime-500 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform shadow-lg">
-                  <svg className="w-10 h-10 text-stone-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                  </svg>
+                <div className="w-16 h-16 bg-lime-50 dark:bg-lime-900/30 rounded-2xl flex items-center justify-center mx-auto mb-5 group-hover:scale-110 transition-transform">
+                  <span className="text-3xl">📄</span>
                 </div>
-                <h2 className="text-2xl sm:text-3xl font-semibold text-stone-800 mb-3">Upload Your Document</h2>
-                <p className="text-stone-500 text-lg mb-6 max-w-md mx-auto">
-                  Drop your essay, thesis, or research paper here for comprehensive AI analysis
+                <h2 className="text-xl sm:text-2xl font-bold text-stone-800 dark:text-stone-100 mb-2">Upload a file</h2>
+                <p className="text-stone-500 dark:text-stone-400 text-sm mb-6 max-w-sm mx-auto">
+                  Get AI-powered feedback on your essays, thesis, or research papers
                 </p>
                 <button 
-                  className="inline-flex items-center px-8 py-4 bg-lime-400 hover:bg-lime-300 text-stone-900 font-semibold rounded-full transition-colors text-lg shadow-lg group-hover:shadow-xl"
+                  className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-lime-500 to-emerald-500 hover:from-lime-400 hover:to-emerald-400 text-white font-bold rounded-xl transition-all text-sm shadow-lg shadow-lime-500/20 hover:scale-105 active:scale-95"
                 >
-                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                  </svg>
-                  Choose File
+                  Upload
                 </button>
-                <div className="flex justify-center gap-3 mt-6">
-                  <span className="px-4 py-1.5 bg-white text-stone-600 text-sm font-medium rounded-lg border border-stone-200">PDF</span>
-                  <span className="px-4 py-1.5 bg-white text-stone-600 text-sm font-medium rounded-lg border border-stone-200">DOCX</span>
-                  <span className="px-4 py-1.5 bg-white text-stone-600 text-sm font-medium rounded-lg border border-stone-200">TXT</span>
+                <div className="flex justify-center gap-2 mt-5">
+                  <span className="px-3 py-1 bg-stone-50 dark:bg-stone-700/50 text-stone-500 dark:text-stone-400 text-xs font-medium rounded-lg">PDF</span>
+                  <span className="px-3 py-1 bg-stone-50 dark:bg-stone-700/50 text-stone-500 dark:text-stone-400 text-xs font-medium rounded-lg">DOCX</span>
+                  <span className="px-3 py-1 bg-stone-50 dark:bg-stone-700/50 text-stone-500 dark:text-stone-400 text-xs font-medium rounded-lg">TXT</span>
                 </div>
               </div>
             </div>
 
             {/* Divider */}
             <div className="flex items-center justify-center mb-8">
-              <div className="flex-1 h-px bg-stone-200"></div>
-              <span className="px-4 text-stone-400 text-sm font-medium">or paste your text directly</span>
-              <div className="flex-1 h-px bg-stone-200"></div>
+              <div className="flex-1 h-px bg-stone-200 dark:bg-stone-600"></div>
+              <span className="px-4 text-stone-400 dark:text-stone-500 text-sm font-medium">or paste your text directly</span>
+              <div className="flex-1 h-px bg-stone-200 dark:bg-stone-600"></div>
             </div>
 
             {/* Secondary: Text Input (smaller) */}
             <div className="mb-12">
-              <div className="relative bg-white rounded-3xl border border-stone-200/80 shadow-sm hover:border-stone-300 hover:shadow-md focus-within:border-[#2E6FEA]/40 focus-within:shadow-xl focus-within:shadow-[#2E6FEA]/5 focus-within:ring-2 focus-within:ring-[#2E6FEA]/20 transition-all duration-300">
+              <div className="relative bg-white dark:bg-stone-800 rounded-3xl border border-stone-200/80 dark:border-stone-600/50 shadow-sm hover:border-stone-300 dark:hover:border-stone-500 hover:shadow-md focus-within:border-lime-400 dark:focus-within:border-lime-500 focus-within:shadow-xl focus-within:shadow-lime-500/10 focus-within:ring-2 focus-within:ring-lime-400/20 transition-all duration-300">
                 <textarea
                   value={inputText}
                   onChange={(e) => { setInputText(e.target.value); setShowWordWarning(false); }}
@@ -1806,10 +1907,10 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                 <button
                   onClick={handleSubmit}
                   disabled={!isTextValid()}
-                  className={`px-6 py-3 rounded-full flex items-center justify-center transition-all font-semibold text-base ${
+                  className={`px-6 py-3 rounded-2xl flex items-center justify-center transition-all font-bold text-base ${
                     isTextValid()
-                      ? 'bg-lime-400 hover:bg-lime-300 text-stone-900 shadow-md cursor-pointer'
-                      : 'bg-stone-100 text-stone-400 cursor-not-allowed'
+                      ? 'bg-gradient-to-r from-lime-500 to-emerald-600 hover:from-lime-400 hover:to-emerald-500 text-stone-900 shadow-lg shadow-lime-500/30 hover:scale-105 cursor-pointer'
+                      : 'bg-stone-100 dark:bg-stone-700 text-stone-400 cursor-not-allowed'
                   }`}
                 >
                   Analyze Text
@@ -1861,8 +1962,6 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
 
             {/* Input Area */}
             <div className="mb-8 relative overflow-visible">
-              <CharacterIllustration />
-              
               <div className="relative bg-white rounded-3xl border border-stone-200/80 shadow-sm hover:border-stone-300 hover:shadow-md focus-within:border-[#22A7AB]/40 focus-within:shadow-xl focus-within:shadow-[#22A7AB]/5 focus-within:ring-2 focus-within:ring-[#22A7AB]/20 transition-all duration-300">
                 <textarea
                   value={inputText}
@@ -1893,10 +1992,10 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                 <button
                   onClick={handleSubmit}
                   disabled={!isTextValid() || isSearchingCitations}
-                  className={`px-8 py-3.5 rounded-full flex items-center justify-center transition-all font-semibold text-base ${
+                  className={`px-8 py-3.5 rounded-2xl flex items-center justify-center transition-all font-bold text-base ${
                     isTextValid() && !isSearchingCitations
-                      ? 'bg-lime-400 hover:bg-lime-300 text-stone-900 shadow-lg cursor-pointer'
-                      : 'bg-stone-200 text-stone-400 cursor-not-allowed'
+                      ? 'bg-gradient-to-r from-lime-500 to-emerald-600 hover:from-lime-400 hover:to-emerald-500 text-stone-900 shadow-lg shadow-lime-500/30 hover:scale-105 cursor-pointer'
+                      : 'bg-stone-200 dark:bg-stone-700 text-stone-400 cursor-not-allowed'
                   }`}
                 >
                   {isSearchingCitations ? (
@@ -1913,13 +2012,13 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
 
             {/* Suggested Topics */}
             <div className="mb-12">
-              <p className="text-sm text-stone-500 text-center mb-4">Suggestions</p>
+              <p className="text-sm text-stone-500 dark:text-stone-400 text-center mb-4 font-medium">Suggestions</p>
               <div className="flex flex-wrap justify-center gap-2.5">
                 {suggestedTopics.map((topic, idx) => (
                   <button 
                     key={idx}
                     onClick={() => setInputText(topic)}
-                    className="px-4 py-2 bg-white hover:bg-stone-50 text-stone-700 text-sm sm:text-base rounded-lg border border-stone-200 hover:border-stone-300 transition-colors"
+                    className="px-4 py-2.5 bg-white dark:bg-stone-800 hover:bg-lime-50 dark:hover:bg-lime-900/20 text-stone-700 dark:text-stone-200 text-sm sm:text-base rounded-xl border border-stone-200 dark:border-stone-600 hover:border-lime-300 dark:hover:border-lime-600 transition-all font-medium"
                   >
                     {topic}
                   </button>
@@ -1929,17 +2028,17 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
           </>
         )}
 
-        {/* HUMANIZE MODE - matches HumanizerPage design */}
+        {/* HUMANIZE MODE - new website style */}
         {mode === 'humanize' && (
           <>
-            <div className="bg-white rounded-2xl sm:rounded-3xl shadow-xl shadow-stone-100/50 border border-stone-200 overflow-hidden mb-6 min-w-0">
+            <div className="bg-white dark:bg-stone-800 rounded-2xl sm:rounded-3xl shadow-xl shadow-stone-100/50 dark:shadow-none border border-stone-200 dark:border-stone-600 overflow-hidden mb-6 min-w-0">
               {/* Toolbar */}
-              <div className="bg-gradient-to-r from-lime-50 to-green-50 border-b border-stone-100 px-3 sm:px-5 py-3 sm:py-4">
+              <div className="bg-gradient-to-r from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20 border-b border-stone-200 dark:border-stone-600 px-3 sm:px-5 py-3 sm:py-4">
                 <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center justify-between gap-3 sm:gap-4">
                   <div className="flex flex-wrap items-center gap-2 sm:gap-3 min-w-0 overflow-x-auto sm:overflow-visible">
                     <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
-                      <span className="text-xs font-medium text-gray-500 flex-shrink-0">Mode:</span>
-                      <div className="flex items-center bg-white rounded-xl px-0.5 sm:px-1 py-1 shadow-sm border border-gray-200">
+                      <span className="text-xs font-medium text-stone-500 dark:text-stone-400 flex-shrink-0">Mode:</span>
+                      <div className="flex items-center bg-white dark:bg-stone-700 rounded-xl px-0.5 sm:px-1 py-1 shadow-sm border border-stone-200 dark:border-stone-600">
                       {([
                         { id: 'standard', label: 'Standard', tooltip: 'Natural college-student writing, clear and slightly informal' },
                         { id: 'academic', label: 'Academic', tooltip: 'Formal academic tone with technical terms, keeps citations' },
@@ -1951,7 +2050,7 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                           onClick={() => setHumanizeMode(m.id)}
                           title={m.tooltip}
                           className={`px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all whitespace-nowrap ${
-                            humanizeMode === m.id ? 'bg-violet-600 text-white shadow-sm' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                            humanizeMode === m.id ? 'bg-violet-600 text-white shadow-sm' : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-600'
                           }`}
                         >
                           {m.label}
@@ -1960,8 +2059,8 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                       </div>
                     </div>
                     <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
-                      <span className="text-xs font-medium text-gray-500 flex-shrink-0">Intensity:</span>
-                      <div className="flex items-center bg-white rounded-xl px-0.5 sm:px-1 py-1 shadow-sm border border-gray-200">
+                      <span className="text-xs font-medium text-stone-500 dark:text-stone-400 flex-shrink-0">Intensity:</span>
+                      <div className="flex items-center bg-white dark:bg-stone-700 rounded-xl px-0.5 sm:px-1 py-1 shadow-sm border border-stone-200 dark:border-stone-600">
                       {([
                         { id: 'light', label: 'Light', tooltip: 'Minimal changes (~15-20%), fixes obvious AI phrases' },
                         { id: 'medium', label: 'Medium', tooltip: 'Balanced rewrite (~40-50%), adds natural variation' },
@@ -1972,7 +2071,7 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                           onClick={() => setHumanizeIntensity(intensity.id)}
                           title={intensity.tooltip}
                           className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all whitespace-nowrap ${
-                            humanizeIntensity === intensity.id ? 'bg-violet-600 text-white shadow-sm' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                            humanizeIntensity === intensity.id ? 'bg-violet-600 text-white shadow-sm' : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-600'
                           }`}
                         >
                           {intensity.label}
@@ -1986,8 +2085,8 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                     disabled={!isTextValid() || isHumanizing}
                     className={`w-full sm:w-auto px-6 py-2.5 rounded-xl flex items-center justify-center transition-all font-semibold text-sm flex-shrink-0 ${
                       isTextValid() && !isHumanizing
-                        ? 'bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white shadow-lg shadow-violet-200 hover:shadow-xl hover:shadow-violet-300 cursor-pointer transform hover:-translate-y-0.5'
-                        : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                        ? 'bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white shadow-lg shadow-violet-200/50 dark:shadow-violet-900/30 cursor-pointer transform hover:-translate-y-0.5'
+                        : 'bg-stone-200 dark:bg-stone-600 text-stone-400 dark:text-stone-500 cursor-not-allowed'
                     }`}
                   >
                     {isHumanizing ? (
@@ -2011,25 +2110,25 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
               </div>
 
               {/* Editor Panels */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-gray-100 min-w-0">
+              <div className="grid grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-stone-200 dark:divide-stone-600 min-w-0">
                 {/* Left Panel */}
                 <div className="flex flex-col min-w-0">
-                  <div className="flex items-center justify-between px-3 sm:px-5 py-2.5 sm:py-3 bg-gray-50/50 border-b border-gray-100 gap-2 min-w-0">
+                  <div className="flex items-center justify-between px-3 sm:px-5 py-2.5 sm:py-3 bg-stone-50 dark:bg-stone-800/50 border-b border-stone-200 dark:border-stone-600 gap-2 min-w-0">
                     <div className="flex items-center gap-2 min-w-0">
-                      <div className="w-2 h-2 rounded-full bg-gray-300 flex-shrink-0"></div>
-                      <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider truncate">Original</span>
+                      <div className="w-2 h-2 rounded-full bg-stone-400 dark:bg-stone-500 flex-shrink-0"></div>
+                      <span className="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider truncate">Original</span>
                     </div>
                     <div className="flex items-center gap-2 flex-shrink-0">
                       <input ref={parseFileInputRef} type="file" accept=".pdf,.doc,.docx,.txt,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain" onChange={handleParseDocument} className="hidden" />
-                      <button onClick={() => parseFileInputRef.current?.click()} disabled={isParsingDoc} className="flex items-center gap-2 px-3 py-2 rounded-lg bg-violet-100 text-violet-700 hover:bg-violet-200 font-semibold text-sm transition-colors disabled:opacity-50 border border-violet-200">
+                      <button onClick={() => parseFileInputRef.current?.click()} disabled={isParsingDoc} className="flex items-center gap-2 px-3 py-2 rounded-xl bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300 hover:bg-violet-200 dark:hover:bg-violet-800/50 font-semibold text-sm transition-colors disabled:opacity-50 border border-violet-200 dark:border-violet-700">
                         {isParsingDoc ? <span className="w-4 h-4 border-2 border-violet-400 border-t-transparent rounded-full animate-spin" /> : <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>}
                         {isParsingDoc ? 'Parsing...' : 'Upload Document'}
                       </button>
-                      <button onClick={() => navigator.clipboard.readText().then(text => setInputText(text))} className="flex items-center gap-1.5 px-2 py-1.5 text-xs text-gray-600 hover:text-violet-600 hover:bg-violet-50 rounded-lg transition-colors">
+                      <button onClick={() => navigator.clipboard.readText().then(text => setInputText(text))} className="flex items-center gap-1.5 px-2 py-1.5 text-xs text-stone-600 dark:text-stone-400 hover:text-violet-600 dark:hover:text-violet-400 hover:bg-violet-50 dark:hover:bg-violet-900/30 rounded-lg transition-colors">
                         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
                         Paste
                       </button>
-                      <button onClick={() => setInputText('')} className={`flex items-center gap-1.5 px-2 py-1.5 text-xs text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors ${!inputText ? 'invisible' : ''}`}>Clear</button>
+                      <button onClick={() => setInputText('')} className={`flex items-center gap-1.5 px-2 py-1.5 text-xs text-stone-600 dark:text-stone-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors ${!inputText ? 'invisible' : ''}`}>Clear</button>
                     </div>
                   </div>
                   <textarea
@@ -2038,10 +2137,10 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                     onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey && isTextValid()) { e.preventDefault(); handleSubmit(); }}}
                     placeholder={placeholders[placeholderIndex]}
                     disabled={isHumanizing}
-                    className="w-full min-w-0 min-h-[240px] sm:min-h-[280px] md:min-h-[350px] p-3 sm:p-5 text-gray-800 text-[15px] border-none outline-none resize-none bg-transparent placeholder-gray-400 leading-relaxed"
+                    className="w-full min-w-0 min-h-[240px] sm:min-h-[280px] md:min-h-[350px] p-3 sm:p-5 text-stone-800 dark:text-stone-100 text-[15px] border-none outline-none resize-none bg-transparent placeholder-stone-400 dark:placeholder-stone-500 leading-relaxed"
                   />
-                  <div className="flex items-center justify-between px-3 sm:px-5 py-2.5 sm:py-3 bg-gray-50/30 border-t border-gray-100">
-                    <span className={`text-xs font-medium ${getWordCount(inputText) > humanizeSummarizeMaxWords ? 'text-red-600' : 'text-gray-400'}`}>
+                  <div className="flex items-center justify-between px-3 sm:px-5 py-2.5 sm:py-3 bg-stone-50/50 dark:bg-stone-800/30 border-t border-stone-200 dark:border-stone-600">
+                    <span className={`text-xs font-medium ${getWordCount(inputText) > humanizeSummarizeMaxWords ? 'text-red-600' : 'text-stone-500 dark:text-stone-400'}`}>
                       {getWordCount(inputText)} words / {humanizeSummarizeMaxWords.toLocaleString()} max
                       {getWordCount(inputText) > humanizeSummarizeMaxWords && isFreeUser && ' — Upgrade for 5,000'}
                     </span>
@@ -2049,11 +2148,11 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                 </div>
 
                 {/* Right Panel */}
-                <div className="flex flex-col bg-gradient-to-br from-violet-50/30 to-purple-50/30 min-w-0">
-                  <div className="flex flex-wrap items-center justify-between gap-2 px-3 sm:px-5 py-2.5 sm:py-3 bg-violet-50/50 border-b border-violet-100/50 min-w-0">
+                <div className="flex flex-col bg-gradient-to-br from-violet-50/30 to-purple-50/30 dark:from-violet-900/10 dark:to-purple-900/10 min-w-0">
+                  <div className="flex flex-wrap items-center justify-between gap-2 px-3 sm:px-5 py-2.5 sm:py-3 bg-violet-50/50 dark:bg-violet-900/20 border-b border-violet-100/50 dark:border-violet-800/30 min-w-0">
                     <div className="flex items-center gap-2 min-w-0">
-                      <div className="w-2 h-2 rounded-full bg-violet-400 flex-shrink-0"></div>
-                      <span className="text-xs font-semibold text-violet-600 uppercase tracking-wider">Humanized</span>
+                      <div className="w-2 h-2 rounded-full bg-violet-500 flex-shrink-0"></div>
+                      <span className="text-xs font-semibold text-violet-700 dark:text-violet-400 uppercase tracking-wider">Humanized</span>
                     </div>
                     <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
                       {showHumanizeResult && humanizedResult && (
@@ -2061,7 +2160,7 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                           <button
                             onClick={() => setShowHighlights(!showHighlights)}
                             className={`flex items-center gap-1 sm:gap-1.5 text-xs font-medium transition-all px-1.5 sm:px-2 py-1 rounded-lg ${
-                              showHighlights ? 'bg-violet-100 text-violet-700' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+                              showHighlights ? 'bg-violet-100 dark:bg-violet-800/50 text-violet-700 dark:text-violet-300' : 'text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-700'
                             }`}
                           >
                             <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2081,7 +2180,7 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                   </div>
                   <div className="flex-1 min-h-[240px] sm:min-h-[280px] md:min-h-[350px] max-h-[260px] sm:max-h-[280px] md:max-h-[350px] overflow-y-auto overflow-x-hidden min-w-0">
                     {showHumanizeResult && humanizedResult ? (
-                      <div className="p-3 sm:p-5 text-gray-800 text-[15px] leading-relaxed break-words">
+                      <div className="p-3 sm:p-5 text-stone-800 dark:text-stone-100 text-[15px] leading-relaxed break-words">
                         {showHighlights ? (
                           (() => {
                             // Build a Set of normalized original words for O(1) lookup
@@ -2095,7 +2194,7 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                               }
                               const existsInOriginal = originalWordSet.has(normalize(token));
                               if (!existsInOriginal) {
-                                return <span key={idx} className="bg-violet-100/80 text-violet-900 underline decoration-violet-400/60 decoration-2 underline-offset-2 rounded-sm px-0.5">{token}</span>;
+                                return <span key={idx} className="bg-violet-100/80 dark:bg-violet-800/50 text-violet-900 dark:text-violet-200 underline decoration-violet-400/60 decoration-2 underline-offset-2 rounded-sm px-0.5">{token}</span>;
                               }
                               return <span key={idx}>{token}</span>;
                             });
@@ -2105,65 +2204,65 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                         )}
                       </div>
                     ) : (
-                      <div className="flex items-center justify-center h-full text-gray-400 p-5">
+                      <div className="flex items-center justify-center h-full text-stone-400 dark:text-stone-500 p-5">
                         {isHumanizing ? (
                           <div className="flex flex-col items-center gap-4">
                             <div className="relative">
-                              <div className="w-12 h-12 border-4 border-violet-200 rounded-full"></div>
+                              <div className="w-12 h-12 border-4 border-violet-200 dark:border-violet-800 rounded-full"></div>
                               <div className="absolute top-0 left-0 w-12 h-12 border-4 border-violet-600 rounded-full border-t-transparent animate-spin"></div>
                             </div>
                             <div className="text-center">
-                              <p className="text-sm font-medium text-gray-600">Humanizing your text...</p>
-                              <p className="text-xs text-gray-400 mt-1">This usually takes 5-10 seconds</p>
+                              <p className="text-sm font-medium text-stone-600 dark:text-stone-400">Humanizing your text...</p>
+                              <p className="text-xs text-stone-500 dark:text-stone-500 mt-1">This usually takes 5-10 seconds</p>
                             </div>
                           </div>
                         ) : (
                           <div className="text-center">
-                            <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-violet-100/50 flex items-center justify-center">
-                              <svg className="w-8 h-8 text-violet-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-violet-100/50 dark:bg-violet-900/30 flex items-center justify-center">
+                              <svg className="w-8 h-8 text-violet-300 dark:text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                               </svg>
                             </div>
-                            <p className="text-sm text-gray-500">Your humanized text will appear here</p>
-                            <p className="text-xs text-gray-400 mt-1">Paste text on the left and click Humanize</p>
+                            <p className="text-sm text-stone-500 dark:text-stone-400">Your humanized text will appear here</p>
+                            <p className="text-xs text-stone-400 dark:text-stone-500 mt-1">Paste text on the left and click Humanize</p>
                           </div>
                         )}
                       </div>
                     )}
                   </div>
-                  <div className="flex items-center justify-between px-3 sm:px-5 py-2.5 sm:py-3 bg-violet-50/30 border-t border-violet-100/50">
-                    <span className="text-xs text-gray-400 font-medium">{showHumanizeResult ? `${humanizedResult.split(/\s+/).filter(Boolean).length} words` : ''}</span>
+                  <div className="flex items-center justify-between px-3 sm:px-5 py-2.5 sm:py-3 bg-violet-50/30 dark:bg-violet-900/10 border-t border-violet-100/50 dark:border-violet-800/30">
+                    <span className="text-xs text-stone-500 dark:text-stone-400 font-medium">{showHumanizeResult ? `${humanizedResult.split(/\s+/).filter(Boolean).length} words` : ''}</span>
                     {showHumanizeResult && humanizedResult && (
-                      <button onClick={() => { setShowHumanizeResult(false); setHumanizedResult(''); }} className="text-xs text-gray-400 hover:text-gray-600 transition-colors">Clear result</button>
+                      <button onClick={() => { setShowHumanizeResult(false); setHumanizedResult(''); }} className="text-xs text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 transition-colors">Clear result</button>
                     )}
                   </div>
                 </div>
               </div>
 
               {/* Usage Bar */}
-              <div className="px-3 sm:px-5 py-3 sm:py-4 bg-gray-50 border-t border-gray-100">
+              <div className="px-3 sm:px-5 py-3 sm:py-4 bg-stone-50 dark:bg-stone-800/50 border-t border-stone-200 dark:border-stone-600">
                 <div className="flex flex-wrap items-center justify-center gap-x-4 sm:gap-x-6 gap-y-2">
                   <div className="flex items-center gap-3">
-                    <span className="text-xs text-gray-500">Monthly usage:</span>
+                    <span className="text-xs text-stone-500 dark:text-stone-400">Monthly usage:</span>
                     {humanizeWordLimit >= 999999 ? (
                       <div className="flex items-center gap-2">
-                        <span className="text-xs font-semibold text-gray-700">{humanizeWordsUsed.toLocaleString()} words used</span>
-                        <span className="px-2 py-0.5 bg-gradient-to-r from-violet-100 to-purple-100 text-violet-700 text-[10px] font-bold rounded-full">UNLIMITED</span>
+                        <span className="text-xs font-semibold text-stone-700 dark:text-stone-300">{humanizeWordsUsed.toLocaleString()} words used</span>
+                        <span className="px-2 py-0.5 bg-gradient-to-r from-violet-100 to-purple-100 dark:from-violet-900/50 dark:to-purple-900/50 text-violet-700 dark:text-violet-300 text-[10px] font-bold rounded-full">UNLIMITED</span>
                       </div>
                     ) : (
                       <div className="flex items-center gap-2">
-                        <div className="w-32 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                        <div className="w-32 h-1.5 bg-stone-200 dark:bg-stone-600 rounded-full overflow-hidden">
                           <div
                             className={`h-full rounded-full transition-all ${humanizeWordsUsed / humanizeWordLimit > 0.9 ? 'bg-red-500' : 'bg-gradient-to-r from-violet-500 to-purple-500'}`}
                             style={{ width: `${Math.min(100, (humanizeWordsUsed / humanizeWordLimit) * 100)}%` }}
                           />
                         </div>
-                        <span className="text-xs font-semibold text-gray-700">{humanizeWordsUsed.toLocaleString()} / {humanizeWordLimit.toLocaleString()}</span>
+                        <span className="text-xs font-semibold text-stone-700 dark:text-stone-300">{humanizeWordsUsed.toLocaleString()} / {humanizeWordLimit.toLocaleString()}</span>
                       </div>
                     )}
                   </div>
                   {humanizeWordLimit < 999999 && (
-                    <button onClick={() => onNavigate('pricing')} className="text-xs text-violet-600 hover:text-violet-700 font-semibold flex items-center gap-1 transition-colors">
+                    <button onClick={() => onNavigate('pricing')} className="text-xs text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 font-semibold flex items-center gap-1 transition-colors">
                       Upgrade for unlimited
                       <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
                     </button>
@@ -2173,8 +2272,8 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
             </div>
 
             {humanizeError && (
-              <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-red-50 border border-red-200 rounded-2xl text-center">
-                <p className="text-red-700 text-sm font-medium">{humanizeError}</p>
+              <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl text-center">
+                <p className="text-red-700 dark:text-red-400 text-sm font-medium">{humanizeError}</p>
                 {humanizeWordLimit < 999999 && (
                   <button onClick={() => onNavigate('pricing')} className="mt-2 px-4 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold rounded-lg transition-colors">
                     Upgrade for unlimited words/month
@@ -2190,31 +2289,31 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
           <>
             {/* Plan info banner */}
             {!isPremiumUser && (
-              <div className="mb-6 bg-gradient-to-r from-teal-50 to-emerald-50 border border-teal-200 rounded-2xl p-4 flex items-center justify-between flex-wrap gap-3">
+              <div className="mb-6 bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 border border-emerald-200 dark:border-emerald-800 rounded-2xl p-4 flex items-center justify-between flex-wrap gap-3">
                 <div className="flex items-center gap-3">
                   <span className="text-2xl">📝</span>
                   <div>
-                    <p className="text-teal-800 font-medium text-sm">
+                    <p className="text-emerald-800 dark:text-emerald-200 font-medium text-sm">
                       {usageStats.plan === 'free' ? 'Free plan: 1,000 words/month' : 'Starter plan: 999,999 words/month'}
                       {!isPremiumUser && ' • Bullet + Medium only'}
                     </p>
-                    <p className="text-teal-600 text-xs mt-0.5">Upgrade to Premium for all styles, lengths, and our premium AI model</p>
+                    <p className="text-emerald-600 dark:text-emerald-400 text-xs mt-0.5">Upgrade to Premium for all styles, lengths, and our premium AI model</p>
                   </div>
                 </div>
-                <button onClick={() => onNavigate('pricing')} className="px-4 py-1.5 bg-teal-600 text-white text-xs font-semibold rounded-lg hover:bg-teal-700 transition-all">
+                <button onClick={() => onNavigate('pricing')} className="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold rounded-xl transition-all">
                   Upgrade
                 </button>
               </div>
             )}
             
-            <div className="bg-white rounded-2xl sm:rounded-3xl shadow-xl shadow-teal-100/50 border border-gray-100 overflow-hidden mb-6 min-w-0">
+            <div className="bg-white dark:bg-stone-800 rounded-2xl sm:rounded-3xl shadow-xl shadow-stone-100/50 dark:shadow-none border border-stone-200 dark:border-stone-600 overflow-hidden mb-6 min-w-0">
               {/* Toolbar */}
-              <div className="bg-gradient-to-r from-teal-50 to-emerald-50 border-b border-gray-100 px-3 sm:px-5 py-3 sm:py-4">
+              <div className="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 border-b border-stone-200 dark:border-stone-600 px-3 sm:px-5 py-3 sm:py-4">
                 <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center justify-between gap-3 sm:gap-4">
                   <div className="flex flex-wrap items-center gap-2 sm:gap-3 min-w-0 overflow-x-auto sm:overflow-visible">
                     <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
-                      <span className="text-xs font-medium text-gray-500 flex-shrink-0">Style:</span>
-                      <div className="flex items-center bg-white rounded-xl px-0.5 sm:px-1 py-1 shadow-sm border border-gray-200">
+                      <span className="text-xs font-medium text-stone-500 dark:text-stone-400 flex-shrink-0">Style:</span>
+                      <div className="flex items-center bg-white dark:bg-stone-700 rounded-xl px-0.5 sm:px-1 py-1 shadow-sm border border-stone-200 dark:border-stone-600">
                         {(['bullet', 'paragraph', 'tldr', 'detailed'] as const).map((s) => {
                           const locked = !isPremiumUser && s !== 'bullet';
                           return (
@@ -2224,8 +2323,8 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                               disabled={locked}
                               title={locked ? 'Premium only' : ''}
                               className={`px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all whitespace-nowrap relative ${
-                                locked ? 'text-gray-300 cursor-not-allowed' :
-                                summaryStyle === s ? 'bg-teal-600 text-white shadow-sm' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                                locked ? 'text-stone-400 dark:text-stone-500 cursor-not-allowed' :
+                                summaryStyle === s ? 'bg-emerald-600 text-white shadow-sm' : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-600'
                               }`}
                             >
                               {s === 'bullet' ? 'Bullet' : s === 'paragraph' ? 'Paragraph' : s === 'tldr' ? 'TL;DR' : 'Detailed'}
@@ -2236,8 +2335,8 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                       </div>
                     </div>
                     <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
-                      <span className="text-xs font-medium text-gray-500 flex-shrink-0">Length:</span>
-                      <div className="flex items-center bg-white rounded-xl px-0.5 sm:px-1 py-1 shadow-sm border border-gray-200">
+                      <span className="text-xs font-medium text-stone-500 dark:text-stone-400 flex-shrink-0">Length:</span>
+                      <div className="flex items-center bg-white dark:bg-stone-700 rounded-xl px-0.5 sm:px-1 py-1 shadow-sm border border-stone-200 dark:border-stone-600">
                         {(['short', 'medium', 'long'] as const).map((l) => {
                           const locked = !isPremiumUser && l !== 'medium';
                           return (
@@ -2247,8 +2346,8 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                               disabled={locked}
                               title={locked ? 'Premium only' : ''}
                               className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all whitespace-nowrap ${
-                                locked ? 'text-gray-300 cursor-not-allowed' :
-                                summaryLength === l ? 'bg-teal-600 text-white shadow-sm' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                                locked ? 'text-stone-400 dark:text-stone-500 cursor-not-allowed' :
+                                summaryLength === l ? 'bg-emerald-600 text-white shadow-sm' : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-600'
                               }`}
                             >
                               {l.charAt(0).toUpperCase() + l.slice(1)}
@@ -2264,8 +2363,8 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                     disabled={!isTextValid() || isSummarizing}
                     className={`w-full sm:w-auto px-6 py-2.5 rounded-xl flex items-center justify-center transition-all font-semibold text-sm flex-shrink-0 ${
                       isTextValid() && !isSummarizing
-                        ? 'bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white shadow-lg shadow-teal-200 cursor-pointer'
-                        : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                        ? 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-lg shadow-emerald-200/50 dark:shadow-emerald-900/30 cursor-pointer'
+                        : 'bg-stone-200 dark:bg-stone-600 text-stone-400 dark:text-stone-500 cursor-not-allowed'
                     }`}
                   >
                     {isSummarizing ? (
@@ -2284,22 +2383,22 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
               </div>
 
               {/* Editor Panels */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-gray-100 min-w-0">
+              <div className="grid grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-stone-200 dark:divide-stone-600 min-w-0">
                 {/* Left Panel */}
                 <div className="flex flex-col min-w-0">
-                  <div className="flex items-center justify-between px-3 sm:px-5 py-2.5 sm:py-3 bg-gray-50/50 border-b border-gray-100">
+                  <div className="flex items-center justify-between px-3 sm:px-5 py-2.5 sm:py-3 bg-stone-50 dark:bg-stone-800/50 border-b border-stone-200 dark:border-stone-600">
                     <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full bg-gray-300"></div>
-                      <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Original</span>
+                      <div className="w-2 h-2 rounded-full bg-stone-400 dark:bg-stone-500"></div>
+                      <span className="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider">Original</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <input ref={parseFileInputRef} type="file" accept=".pdf,.doc,.docx,.txt,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain" onChange={handleParseDocument} className="hidden" />
-                      <button onClick={() => parseFileInputRef.current?.click()} disabled={isParsingDoc} className="flex items-center gap-2 px-3 py-2 rounded-lg bg-teal-100 text-teal-700 hover:bg-teal-200 font-semibold text-sm transition-colors disabled:opacity-50 border border-teal-200">
-                        {isParsingDoc ? <span className="w-4 h-4 border-2 border-teal-500 border-t-transparent rounded-full animate-spin" /> : <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>}
+                      <button onClick={() => parseFileInputRef.current?.click()} disabled={isParsingDoc} className="flex items-center gap-2 px-3 py-2 rounded-xl bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-200 dark:hover:bg-emerald-800/50 font-semibold text-sm transition-colors disabled:opacity-50 border border-emerald-200 dark:border-emerald-700">
+                        {isParsingDoc ? <span className="w-4 h-4 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" /> : <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>}
                         {isParsingDoc ? 'Parsing...' : 'Upload Document'}
                       </button>
-                      <button onClick={() => navigator.clipboard.readText().then(text => setInputText(text))} className="flex items-center gap-1.5 px-2 py-1.5 text-xs text-gray-600 hover:text-teal-600 hover:bg-teal-50 rounded-lg transition-colors">Paste</button>
-                      <button onClick={() => setInputText('')} className={`flex items-center gap-1.5 px-2 py-1.5 text-xs text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors ${!inputText ? 'invisible' : ''}`}>Clear</button>
+                      <button onClick={() => navigator.clipboard.readText().then(text => setInputText(text))} className="flex items-center gap-1.5 px-2 py-1.5 text-xs text-stone-600 dark:text-stone-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 rounded-lg transition-colors">Paste</button>
+                      <button onClick={() => setInputText('')} className={`flex items-center gap-1.5 px-2 py-1.5 text-xs text-stone-600 dark:text-stone-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors ${!inputText ? 'invisible' : ''}`}>Clear</button>
                     </div>
                   </div>
                   <textarea
@@ -2307,10 +2406,10 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                     onChange={(e) => setInputText(e.target.value)}
                     placeholder={placeholders[placeholderIndex]}
                     disabled={isSummarizing}
-                    className="w-full min-h-[280px] sm:min-h-[350px] p-3 sm:p-5 text-gray-800 text-[15px] border-none outline-none resize-none bg-transparent placeholder-gray-400 leading-relaxed"
+                    className="w-full min-h-[280px] sm:min-h-[350px] p-3 sm:p-5 text-stone-800 dark:text-stone-100 text-[15px] border-none outline-none resize-none bg-transparent placeholder-stone-400 dark:placeholder-stone-500 leading-relaxed"
                   />
-                  <div className="flex items-center justify-between px-3 sm:px-5 py-2.5 sm:py-3 bg-gray-50/30 border-t border-gray-100">
-                    <span className={`text-xs font-medium ${getWordCount(inputText) < 50 ? 'text-amber-600' : getWordCount(inputText) > humanizeSummarizeMaxWords ? 'text-red-600' : 'text-gray-400'}`}>
+                  <div className="flex items-center justify-between px-3 sm:px-5 py-2.5 sm:py-3 bg-stone-50/50 dark:bg-stone-800/30 border-t border-stone-200 dark:border-stone-600">
+                    <span className={`text-xs font-medium ${getWordCount(inputText) < 50 ? 'text-amber-600' : getWordCount(inputText) > humanizeSummarizeMaxWords ? 'text-red-600' : 'text-stone-500 dark:text-stone-400'}`}>
                       {getWordCount(inputText)} words / {humanizeSummarizeMaxWords.toLocaleString()} max
                       {getWordCount(inputText) < 50 && ' (min 50)'}
                       {getWordCount(inputText) > humanizeSummarizeMaxWords && isFreeUser && ' — Upgrade for 5,000'}
@@ -2319,13 +2418,13 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                 </div>
 
                 {/* Right Panel */}
-                <div className="flex flex-col bg-gradient-to-br from-teal-50/30 to-emerald-50/30 min-w-0">
-                  <div className="flex items-center justify-between px-3 sm:px-5 py-2.5 sm:py-3 bg-teal-50/50 border-b border-teal-100/50">
+                <div className="flex flex-col bg-gradient-to-br from-emerald-50/30 to-teal-50/30 dark:from-emerald-900/10 dark:to-teal-900/10 min-w-0">
+                  <div className="flex items-center justify-between px-3 sm:px-5 py-2.5 sm:py-3 bg-emerald-50/50 dark:bg-emerald-900/20 border-b border-emerald-100/50 dark:border-emerald-800/30">
                     <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full bg-teal-400"></div>
-                      <span className="text-xs font-semibold text-teal-600 uppercase tracking-wider">Summary</span>
+                      <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
+                      <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider">Summary</span>
                       {summaryResult && (
-                        <span className="px-2 py-0.5 bg-teal-100 text-teal-700 text-[10px] font-bold rounded-full">
+                        <span className="px-2 py-0.5 bg-emerald-100 dark:bg-emerald-800/50 text-emerald-700 dark:text-emerald-300 text-[10px] font-bold rounded-full">
                           {Math.round((1 - summaryResult.summaryWordCount / summaryResult.originalWordCount) * 100)}% shorter
                         </span>
                       )}
@@ -2333,7 +2432,7 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                     {summaryResult && (
                       <button
                         onClick={() => { navigator.clipboard.writeText(summaryResult.summary); setSummaryCopied(true); setTimeout(() => setSummaryCopied(false), 2000); }}
-                        className={`text-xs font-medium ${summaryCopied ? 'text-green-600' : 'text-teal-600 hover:text-teal-700'}`}
+                        className={`text-xs font-medium ${summaryCopied ? 'text-green-600' : 'text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300'}`}
                       >
                         {summaryCopied ? '✓ Copied!' : 'Copy'}
                       </button>
@@ -2341,33 +2440,33 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                   </div>
                   <div className="flex-1 min-h-[280px] sm:min-h-[350px] max-h-[350px] overflow-y-auto">
                     {summaryResult ? (
-                      <div className="p-3 sm:p-5 text-gray-800 text-[15px] leading-relaxed whitespace-pre-wrap break-words">
+                      <div className="p-3 sm:p-5 text-stone-800 dark:text-stone-100 text-[15px] leading-relaxed whitespace-pre-wrap break-words">
                         {summaryResult.summary}
                       </div>
                     ) : (
-                      <div className="flex items-center justify-center h-full text-gray-400 p-5">
+                      <div className="flex items-center justify-center h-full text-stone-400 dark:text-stone-500 p-5">
                         {isSummarizing ? (
                           <div className="flex flex-col items-center gap-4">
                             <div className="relative">
-                              <div className="w-12 h-12 border-4 border-teal-200 rounded-full"></div>
-                              <div className="absolute top-0 left-0 w-12 h-12 border-4 border-teal-600 rounded-full border-t-transparent animate-spin"></div>
+                              <div className="w-12 h-12 border-4 border-emerald-200 dark:border-emerald-800 rounded-full"></div>
+                              <div className="absolute top-0 left-0 w-12 h-12 border-4 border-emerald-600 rounded-full border-t-transparent animate-spin"></div>
                             </div>
-                            <p className="text-sm font-medium text-gray-600">Creating your summary...</p>
+                            <p className="text-sm font-medium text-stone-600 dark:text-stone-400">Creating your summary...</p>
                           </div>
                         ) : (
                           <div className="text-center">
-                            <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-teal-100/50 flex items-center justify-center text-3xl">📝</div>
-                            <p className="text-sm text-gray-500">Your summary will appear here</p>
-                            <p className="text-xs text-gray-400 mt-1">Paste text on the left and click Summarize</p>
+                            <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-emerald-100/50 dark:bg-emerald-900/30 flex items-center justify-center text-3xl">📝</div>
+                            <p className="text-sm text-stone-500 dark:text-stone-400">Your summary will appear here</p>
+                            <p className="text-xs text-stone-400 dark:text-stone-500 mt-1">Paste text on the left and click Summarize</p>
                           </div>
                         )}
                       </div>
                     )}
                   </div>
-                  <div className="flex items-center justify-between px-3 sm:px-5 py-2.5 sm:py-3 bg-teal-50/30 border-t border-teal-100/50">
-                    <span className="text-xs text-gray-400 font-medium">{summaryResult ? `${summaryResult.summaryWordCount} words` : ''}</span>
+                  <div className="flex items-center justify-between px-3 sm:px-5 py-2.5 sm:py-3 bg-emerald-50/30 dark:bg-emerald-900/10 border-t border-emerald-100/50 dark:border-emerald-800/30">
+                    <span className="text-xs text-stone-500 dark:text-stone-400 font-medium">{summaryResult ? `${summaryResult.summaryWordCount} words` : ''}</span>
                     {summaryResult && (
-                      <button onClick={() => setSummaryResult(null)} className="text-xs text-gray-400 hover:text-gray-600">Clear</button>
+                      <button onClick={() => setSummaryResult(null)} className="text-xs text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200">Clear</button>
                     )}
                   </div>
                 </div>
@@ -2375,8 +2474,8 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
             </div>
 
             {summaryError && (
-              <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-2xl text-center">
-                <p className="text-red-700 text-sm font-medium">{summaryError}</p>
+              <div className="mb-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl text-center">
+                <p className="text-red-700 dark:text-red-400 text-sm font-medium">{summaryError}</p>
                 {usageStats.plan === 'free' && (
                   <button onClick={() => onNavigate('pricing')} className="mt-2 px-4 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold rounded-lg">
                     Upgrade Plan
@@ -2392,7 +2491,7 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
           <>
             {/* Study Tool Sub-Mode Tabs */}
             <div className="flex items-center justify-center gap-2 mb-6">
-              <div className="inline-flex items-center bg-amber-50 border border-amber-200 rounded-2xl p-1.5">
+              <div className="inline-flex items-center bg-stone-100 dark:bg-stone-800 border border-stone-200 dark:border-stone-600 rounded-2xl p-1.5">
                 {([
                   { key: 'quiz' as const, label: 'Quiz', icon: '📝' },
                   { key: 'flashcards' as const, label: 'Flashcards', icon: '🃏' },
@@ -2404,8 +2503,8 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                     onClick={() => { setStudyToolMode(tool.key); setQuizResult(null); setFlashcardResult(null); setCrosswordResult(null); setQuizError(''); setIsQuizMode(false); }}
                     className={`px-4 sm:px-5 py-2 rounded-xl text-sm font-medium transition-all flex items-center gap-1.5 ${
                       studyToolMode === tool.key
-                        ? 'bg-white text-amber-700 shadow-sm border border-amber-200'
-                        : 'text-amber-600 hover:text-amber-800 hover:bg-amber-100/50'
+                        ? 'bg-white dark:bg-stone-700 text-lime-700 dark:text-lime-400 shadow-sm border border-lime-200 dark:border-lime-700'
+                        : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-700'
                     }`}
                   >
                     <span className="text-base">{tool.icon}</span>
@@ -2417,13 +2516,13 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
 
             {/* Exhausted generations banner for free users */}
             {quizExhausted && (
-              <div className="mb-6 bg-gradient-to-r from-amber-600 to-orange-600 rounded-2xl p-6 text-white text-center">
+              <div className="mb-6 bg-gradient-to-r from-lime-600 to-emerald-600 dark:from-lime-700 dark:to-emerald-700 rounded-2xl p-6 text-stone-900 text-center">
                 <span className="text-4xl mb-3 block">🔒</span>
                 <h3 className="text-xl font-bold mb-2">Monthly Limit Reached</h3>
-                <p className="text-amber-100 mb-4">You've used all 3 study tool generations this month. Upgrade for unlimited access!</p>
+                <p className="text-lime-100 dark:text-stone-200 mb-4">You've used all 3 study tool generations this month. Upgrade for unlimited access!</p>
                 <button
                   onClick={() => onNavigate('pricing')}
-                  className="px-6 py-2.5 bg-white text-amber-700 font-semibold rounded-xl hover:bg-amber-50 transition-all inline-flex items-center gap-2"
+                  className="px-6 py-2.5 bg-white dark:bg-stone-800 text-lime-700 dark:text-lime-400 font-semibold rounded-xl hover:bg-stone-50 dark:hover:bg-stone-700 transition-all inline-flex items-center gap-2"
                 >
                   👑 Upgrade Now
                 </button>
@@ -2432,26 +2531,26 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
 
             {/* Plan info banner for free and starter users */}
             {!isPremiumUser && !quizExhausted && (
-              <div className="mb-6 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-4 flex items-center justify-between flex-wrap gap-3">
+              <div className="mb-6 bg-gradient-to-r from-lime-50 to-emerald-50 dark:from-lime-900/20 dark:to-emerald-900/20 border border-lime-200 dark:border-lime-800/50 rounded-2xl p-4 flex items-center justify-between flex-wrap gap-3">
                 <div className="flex items-center gap-3">
                   <span className="text-2xl">🧠</span>
                   <div>
                     {isFreeUser ? (
                       <>
-                        <p className="text-amber-800 font-medium text-sm">
+                        <p className="text-lime-800 dark:text-lime-200 font-medium text-sm">
                           Free plan: {quizUsage.generationsRemaining} of {quizUsage.generationLimit} generations remaining • Max {(quizUsage.maxWordsPerGeneration || 5000).toLocaleString()} words
                         </p>
-                        <p className="text-amber-600 text-xs mt-0.5">Upgrade for unlimited quizzes, flashcards, crosswords, and up to 15,000 words</p>
+                        <p className="text-lime-600 dark:text-lime-400 text-xs mt-0.5">Upgrade for unlimited quizzes, flashcards, crosswords, and up to 15,000 words</p>
                       </>
                     ) : (
                       <>
-                        <p className="text-amber-800 font-medium text-sm">Starter plan: Quiz limited to Mixed type + Medium difficulty</p>
-                        <p className="text-amber-600 text-xs mt-0.5">Upgrade to Premium for all quiz types, difficulties, and our premium AI model</p>
+                        <p className="text-lime-800 dark:text-lime-200 font-medium text-sm">Starter plan: Quiz limited to Mixed type + Medium difficulty</p>
+                        <p className="text-lime-600 dark:text-lime-400 text-xs mt-0.5">Upgrade to Premium for all quiz types, difficulties, and our premium AI model</p>
                       </>
                     )}
                   </div>
                 </div>
-                <button onClick={() => onNavigate('pricing')} className="px-4 py-1.5 bg-amber-600 text-white text-xs font-semibold rounded-lg hover:bg-amber-700 transition-all">
+                <button onClick={() => onNavigate('pricing')} className="px-4 py-1.5 bg-lime-600 text-stone-900 text-xs font-semibold rounded-xl hover:bg-lime-500 transition-all">
                   Upgrade
                 </button>
               </div>
@@ -2465,9 +2564,9 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                   <div className={`bg-white rounded-2xl sm:rounded-3xl shadow-xl border border-gray-100 overflow-hidden mb-6 ${!canUseQuiz ? 'opacity-50 pointer-events-none' : ''}`}>
                     {quizCompleted ? (
                       <div className="p-8 text-center">
-                        <div className={`w-24 h-24 mx-auto rounded-full flex items-center justify-center mb-4 text-4xl ${userAnswers.filter(a => a.isCorrect).length / userAnswers.length >= 0.7 ? 'bg-gradient-to-br from-green-500 to-emerald-600' : 'bg-gradient-to-br from-amber-500 to-orange-600'}`}>🏆</div>
-                        <h2 className="text-3xl font-bold text-gray-900 mb-2">Quiz Complete!</h2>
-                        <div className="text-5xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent my-4">
+                        <div className={`w-24 h-24 mx-auto rounded-full flex items-center justify-center mb-4 text-4xl ${userAnswers.filter(a => a.isCorrect).length / userAnswers.length >= 0.7 ? 'bg-gradient-to-br from-green-500 to-emerald-600' : 'bg-gradient-to-br from-lime-500 to-emerald-600'}`}>🏆</div>
+                        <h2 className="text-3xl font-bold text-stone-900 dark:text-stone-100 mb-2">Quiz Complete!</h2>
+                        <div className="text-5xl font-bold bg-gradient-to-r from-lime-600 to-emerald-600 bg-clip-text text-transparent my-4">
                           {Math.round((userAnswers.filter(a => a.isCorrect).length / userAnswers.length) * 100)}%
                         </div>
                         <p className="text-gray-600">{userAnswers.filter(a => a.isCorrect).length} out of {userAnswers.length} correct</p>
@@ -2505,7 +2604,7 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                       </div>
                     ) : (
                       <>
-                        <div className="h-2 bg-gray-100"><div className="h-full bg-gradient-to-r from-amber-500 to-orange-500" style={{ width: `${((currentQuestion + 1) / quizResult.questions.length) * 100}%` }}></div></div>
+                        <div className="h-2 bg-stone-200 dark:bg-stone-600"><div className="h-full bg-gradient-to-r from-lime-500 to-emerald-500" style={{ width: `${((currentQuestion + 1) / quizResult.questions.length) * 100}%` }}></div></div>
                         <div className="p-6">
                           <div className="flex justify-between mb-4">
                             <span className="text-sm text-gray-500">Question {currentQuestion + 1} of {quizResult.questions.length}</span>
@@ -2524,7 +2623,7 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                                 <button key={idx} onClick={() => !showQuizResult && setSelectedAnswer(letter)} disabled={showQuizResult}
                                   className={`w-full p-4 rounded-xl border-2 text-left flex items-center gap-3 ${isCorrect ? 'border-green-500 bg-green-50' : isWrong ? 'border-red-500 bg-red-50' : isSelected ? 'border-amber-500 bg-amber-50' : 'border-gray-200 hover:border-amber-300'}`}
                                 >
-                                  <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${isCorrect ? 'bg-green-500 text-white' : isWrong ? 'bg-red-500 text-white' : isSelected ? 'bg-amber-500 text-white' : 'bg-gray-100'}`}>{letter}</span>
+                                  <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${isCorrect ? 'bg-green-500 text-white' : isWrong ? 'bg-red-500 text-white' : isSelected ? 'bg-lime-500 text-stone-900' : 'bg-stone-100 dark:bg-stone-700'}`}>{letter}</span>
                                   <span>{opt.substring(3)}</span>
                                 </button>
                               );
@@ -2537,7 +2636,7 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                                 <button key={opt} onClick={() => !showQuizResult && setSelectedAnswer(opt)} disabled={showQuizResult}
                                   className={`w-full p-4 rounded-xl border-2 text-left flex items-center gap-3 ${isCorrect ? 'border-green-500 bg-green-50' : isWrong ? 'border-red-500 bg-red-50' : isSelected ? 'border-amber-500 bg-amber-50' : 'border-gray-200 hover:border-amber-300'}`}
                                 >
-                                  <span className={`w-8 h-8 rounded-full flex items-center justify-center ${isCorrect ? 'bg-green-500 text-white' : isWrong ? 'bg-red-500 text-white' : isSelected ? 'bg-amber-500 text-white' : 'bg-gray-100'}`}>{opt === 'true' ? '✓' : '✗'}</span>
+                                  <span className={`w-8 h-8 rounded-full flex items-center justify-center ${isCorrect ? 'bg-green-500 text-white' : isWrong ? 'bg-red-500 text-white' : isSelected ? 'bg-lime-500 text-stone-900' : 'bg-stone-100 dark:bg-stone-700'}`}>{opt === 'true' ? '✓' : '✗'}</span>
                                   <span className="capitalize font-medium">{opt}</span>
                                 </button>
                               );
@@ -2551,7 +2650,7 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                                 <button key={idx} onClick={() => !showQuizResult && setSelectedAnswer(letter)} disabled={showQuizResult}
                                   className={`w-full p-4 rounded-xl border-2 text-left flex items-center gap-3 ${isCorrect ? 'border-green-500 bg-green-50' : isWrong ? 'border-red-500 bg-red-50' : isSelected ? 'border-amber-500 bg-amber-50' : 'border-gray-200 hover:border-amber-300'}`}
                                 >
-                                  <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${isCorrect ? 'bg-green-500 text-white' : isWrong ? 'bg-red-500 text-white' : isSelected ? 'bg-amber-500 text-white' : 'bg-gray-100'}`}>{letter}</span>
+                                  <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${isCorrect ? 'bg-green-500 text-white' : isWrong ? 'bg-red-500 text-white' : isSelected ? 'bg-lime-500 text-stone-900' : 'bg-stone-100 dark:bg-stone-700'}`}>{letter}</span>
                                   <span>{opt.substring(3)}</span>
                                 </button>
                               );
@@ -2589,8 +2688,8 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
 
                 {/* Quiz Input Form */}
                 {!quizResult && (
-                  <div className={`bg-white rounded-2xl sm:rounded-3xl shadow-xl shadow-amber-100/50 border border-gray-100 overflow-hidden mb-6 min-w-0 ${!canUseQuiz ? 'opacity-50 pointer-events-none' : ''}`}>
-                    <div className="bg-gradient-to-r from-amber-50 to-orange-50 border-b border-gray-100 px-3 sm:px-5 py-3 sm:py-4">
+                  <div className={`bg-white rounded-2xl sm:rounded-3xl shadow-xl shadow-stone-100/50 dark:shadow-none border border-gray-100 overflow-hidden mb-6 min-w-0 ${!canUseQuiz ? 'opacity-50 pointer-events-none' : ''}`}>
+                    <div className="bg-gradient-to-r from-lime-50 to-emerald-50 dark:from-lime-900/20 dark:to-emerald-900/20 border-b border-stone-200 dark:border-stone-600 px-3 sm:px-5 py-3 sm:py-4">
                       <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center justify-between gap-3 sm:gap-4">
                         <div className="flex flex-wrap items-center gap-2 sm:gap-3 min-w-0 overflow-x-auto sm:overflow-visible">
                           <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
@@ -2621,7 +2720,7 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                                   <button key={d} onClick={() => !locked && setQuizDifficulty(d)} disabled={locked} title={locked ? 'Premium only' : ''}
                                     className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all whitespace-nowrap ${
                                       locked ? 'text-gray-300 cursor-not-allowed' :
-                                      quizDifficulty === d ? 'bg-amber-600 text-white shadow-sm' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                                      quizDifficulty === d ? 'bg-lime-600 text-stone-900 shadow-sm' : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-600'
                                     }`}
                                   >
                                     {d.charAt(0).toUpperCase() + d.slice(1)}
@@ -2673,9 +2772,9 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                       </div>
                     </div>
                     <div className="flex flex-col min-w-0">
-                      <div className="flex items-center justify-between px-3 sm:px-5 py-2.5 sm:py-3 bg-gray-50/50 border-b border-gray-100">
+                      <div className="flex items-center justify-between px-3 sm:px-5 py-2.5 sm:py-3 bg-gray-50/50 border-b border-stone-200 dark:border-stone-600">
                         <div className="flex items-center gap-2">
-                          <div className="w-2 h-2 rounded-full bg-amber-400"></div>
+                          <div className="w-2 h-2 rounded-full bg-lime-500"></div>
                           <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Source Material</span>
                         </div>
                         <div className="flex items-center gap-2">
@@ -2688,7 +2787,7 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                           <div className="min-h-[350px] flex items-center justify-center">
                             <div className="flex flex-col items-center gap-4">
                               <div className="relative">
-                                <div className="w-12 h-12 border-4 border-amber-200 rounded-full"></div>
+                                <div className="w-12 h-12 border-4 border-lime-200 dark:border-lime-700 rounded-full"></div>
                                 <div className="absolute top-0 left-0 w-12 h-12 border-4 border-amber-600 rounded-full border-t-transparent animate-spin"></div>
                               </div>
                               <p className="text-sm font-medium text-gray-600">Creating quiz questions...</p>
@@ -2754,7 +2853,7 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                           </>
                         )}
                         <button onClick={() => { setFlashcardResult(null); setCurrentCard(0); setIsFlipped(false); setKnownCards(new Set()); }}
-                          className="px-4 py-2 text-sm text-amber-700 bg-amber-50 rounded-lg hover:bg-amber-100 font-medium">
+                          className="px-4 py-2 text-sm text-amber-700 bg-amber-50 rounded-lg hover:bg-lime-100 dark:hover:bg-lime-800/50 font-medium">
                           New Deck
                         </button>
                       </div>
@@ -2762,7 +2861,7 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                     {/* Progress bar */}
                     <div className="flex items-center gap-3 mb-5">
                       <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
-                        <div className="h-full bg-gradient-to-r from-amber-500 to-orange-500 transition-all duration-300" style={{ width: `${((currentCard + 1) / flashcardResult.cards.length) * 100}%` }}></div>
+                        <div className="h-full bg-gradient-to-r from-lime-500 to-emerald-500 transition-all duration-300" style={{ width: `${((currentCard + 1) / flashcardResult.cards.length) * 100}%` }}></div>
                       </div>
                       <span className="text-xs text-gray-500 font-medium">{currentCard + 1} / {flashcardResult.cards.length}</span>
                       {knownCards.size > 0 && <span className="text-xs text-green-600 font-medium">{knownCards.size} mastered</span>}
@@ -2778,11 +2877,11 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                         style={{ transformStyle: 'preserve-3d', transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)' }}
                       >
                         {/* Front */}
-                        <div className="w-full min-h-[280px] sm:min-h-[320px] bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-200 rounded-3xl p-8 flex flex-col items-center justify-center text-center shadow-lg"
+                        <div className="w-full min-h-[280px] sm:min-h-[320px] bg-gradient-to-br from-lime-50 to-emerald-50 dark:from-lime-900/20 dark:to-emerald-900/20 border-2 border-lime-200 dark:border-lime-700 rounded-3xl p-8 flex flex-col items-center justify-center text-center shadow-lg"
                           style={{ backfaceVisibility: 'hidden' }}>
                           <span className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-4">Front</span>
                           <p className="text-xl sm:text-2xl font-semibold text-gray-900 leading-relaxed">{flashcardResult.cards[currentCard]?.front}</p>
-                          <p className="text-xs text-amber-400 mt-6">Click to flip</p>
+                          <p className="text-xs text-lime-400 dark:text-lime-500 mt-6">Click to flip</p>
                         </div>
                         {/* Back */}
                         <div className="absolute inset-0 w-full min-h-[280px] sm:min-h-[320px] bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-3xl p-8 flex flex-col items-center justify-center text-center shadow-lg"
@@ -2827,8 +2926,8 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                   </div>
                 ) : (
                   /* Flashcard Input Form */
-                  <div className={`bg-white rounded-2xl sm:rounded-3xl shadow-xl shadow-amber-100/50 border border-gray-100 overflow-hidden mb-6 min-w-0 ${!canUseQuiz ? 'opacity-50 pointer-events-none' : ''}`}>
-                    <div className="bg-gradient-to-r from-amber-50 to-orange-50 border-b border-gray-100 px-3 sm:px-5 py-3 sm:py-4">
+                  <div className={`bg-white rounded-2xl sm:rounded-3xl shadow-xl shadow-stone-100/50 dark:shadow-none border border-gray-100 overflow-hidden mb-6 min-w-0 ${!canUseQuiz ? 'opacity-50 pointer-events-none' : ''}`}>
+                    <div className="bg-gradient-to-r from-lime-50 to-emerald-50 dark:from-lime-900/20 dark:to-emerald-900/20 border-b border-stone-200 dark:border-stone-600 px-3 sm:px-5 py-3 sm:py-4">
                       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4">
                         <div className="flex items-center gap-3">
                           <div className="flex items-center gap-1.5">
@@ -2865,9 +2964,9 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                       </div>
                     </div>
                     <div className="flex flex-col min-w-0">
-                      <div className="flex items-center justify-between px-3 sm:px-5 py-2.5 sm:py-3 bg-gray-50/50 border-b border-gray-100">
+                      <div className="flex items-center justify-between px-3 sm:px-5 py-2.5 sm:py-3 bg-gray-50/50 border-b border-stone-200 dark:border-stone-600">
                         <div className="flex items-center gap-2">
-                          <div className="w-2 h-2 rounded-full bg-amber-400"></div>
+                          <div className="w-2 h-2 rounded-full bg-lime-500"></div>
                           <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Source Material</span>
                         </div>
                         <div className="flex items-center gap-2">
@@ -2880,7 +2979,7 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                           <div className="min-h-[350px] flex items-center justify-center">
                             <div className="flex flex-col items-center gap-4">
                               <div className="relative">
-                                <div className="w-12 h-12 border-4 border-amber-200 rounded-full"></div>
+                                <div className="w-12 h-12 border-4 border-lime-200 dark:border-lime-700 rounded-full"></div>
                                 <div className="absolute top-0 left-0 w-12 h-12 border-4 border-amber-600 rounded-full border-t-transparent animate-spin"></div>
                               </div>
                               <p className="text-sm font-medium text-gray-600">Creating your flashcard deck...</p>
@@ -2961,7 +3060,7 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                           </>
                         )}
                         <button onClick={() => { setCrosswordResult(null); setCrosswordAnswers({}); setCrosswordChecked(false); setSelectedClue(null); setSelectedCell(null); setSelectedDirection('across'); setHintsUsed(0); }}
-                          className="px-4 py-2 text-sm text-amber-700 bg-amber-50 rounded-lg hover:bg-amber-100 font-medium">
+                          className="px-4 py-2 text-sm text-amber-700 bg-amber-50 rounded-lg hover:bg-lime-100 dark:hover:bg-lime-800/50 font-medium">
                           New Puzzle
                         </button>
                       </div>
@@ -2980,7 +3079,7 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                       const notAttempted = crosswordResult.placedWords.length - total;
                       
                       return (
-                        <div className={`mb-4 p-4 rounded-2xl text-center ${total === 0 ? 'bg-gray-50 border border-gray-200' : correct === total ? 'bg-green-50 border border-green-200' : 'bg-amber-50 border border-amber-200'}`}>
+                        <div className={`mb-4 p-4 rounded-2xl text-center ${total === 0 ? 'bg-gray-50 border border-gray-200' : correct === total ? 'bg-green-50 border border-green-200' : 'bg-amber-50 border border-lime-200 dark:border-lime-700'}`}>
                           <span className="text-3xl mb-1 block">{total === 0 ? '✏️' : correct === total ? '🎉' : '📊'}</span>
                           {total === 0 ? (
                             <>
@@ -3003,7 +3102,7 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                       {/* Crossword Grid - Now Interactive */}
                       <div 
-                        className="bg-white rounded-2xl border border-gray-200 p-4 overflow-x-auto focus:outline-none focus:ring-2 focus:ring-amber-400"
+                        className="bg-white rounded-2xl border border-gray-200 p-4 overflow-x-auto focus:outline-none focus:ring-2 focus:ring-lime-400"
                         tabIndex={0}
                         onKeyDown={handleCrosswordKeyDown}
                       >
@@ -3097,14 +3196,14 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                                         }
                                       }}
                                       className={`p-3 rounded-xl border cursor-pointer transition-all ${
-                                        selectedClue === pw.number ? 'border-amber-400 bg-amber-50 shadow-sm' :
+                                        selectedClue === pw.number ? 'border-lime-400 dark:border-lime-600 bg-lime-50 dark:bg-lime-900/30 shadow-sm' :
                                         isCorrect ? 'border-green-300 bg-green-50' :
                                         isWrong ? 'border-red-300 bg-red-50' :
                                         isNotAttempted ? 'border-gray-200 bg-gray-50 opacity-60' :
                                         'border-gray-200 hover:border-gray-300 bg-white'
                                       }`}>
                                       <div className="flex items-start gap-2 mb-2">
-                                        <span className="text-xs font-bold text-amber-600 bg-amber-100 rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0">{pw.number}</span>
+                                        <span className="text-xs font-bold text-lime-600 dark:text-lime-400 bg-lime-100 dark:bg-lime-900/50 rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0">{pw.number}</span>
                                         <p className="text-sm text-gray-700">{pw.clue} <span className="text-gray-400">({pw.word.length} letters)</span></p>
                                       </div>
                                       <input
@@ -3157,8 +3256,8 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                   </div>
                 ) : (
                   /* Crossword Input Form */
-                  <div className={`bg-white rounded-2xl sm:rounded-3xl shadow-xl shadow-amber-100/50 border border-gray-100 overflow-hidden mb-6 min-w-0 ${!canUseQuiz ? 'opacity-50 pointer-events-none' : ''}`}>
-                    <div className="bg-gradient-to-r from-amber-50 to-orange-50 border-b border-gray-100 px-3 sm:px-5 py-3 sm:py-4">
+                  <div className={`bg-white rounded-2xl sm:rounded-3xl shadow-xl shadow-stone-100/50 dark:shadow-none border border-gray-100 overflow-hidden mb-6 min-w-0 ${!canUseQuiz ? 'opacity-50 pointer-events-none' : ''}`}>
+                    <div className="bg-gradient-to-r from-lime-50 to-emerald-50 dark:from-lime-900/20 dark:to-emerald-900/20 border-b border-stone-200 dark:border-stone-600 px-3 sm:px-5 py-3 sm:py-4">
                       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4">
                         <div className="flex items-center gap-3">
                           <div className="flex items-center gap-1.5">
@@ -3195,9 +3294,9 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                       </div>
                     </div>
                     <div className="flex flex-col min-w-0">
-                      <div className="flex items-center justify-between px-3 sm:px-5 py-2.5 sm:py-3 bg-gray-50/50 border-b border-gray-100">
+                      <div className="flex items-center justify-between px-3 sm:px-5 py-2.5 sm:py-3 bg-gray-50/50 border-b border-stone-200 dark:border-stone-600">
                         <div className="flex items-center gap-2">
-                          <div className="w-2 h-2 rounded-full bg-amber-400"></div>
+                          <div className="w-2 h-2 rounded-full bg-lime-500"></div>
                           <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Source Material</span>
                         </div>
                         <div className="flex items-center gap-2">
@@ -3210,7 +3309,7 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                           <div className="min-h-[350px] flex items-center justify-center">
                             <div className="flex flex-col items-center gap-4">
                               <div className="relative">
-                                <div className="w-12 h-12 border-4 border-amber-200 rounded-full"></div>
+                                <div className="w-12 h-12 border-4 border-lime-200 dark:border-lime-700 rounded-full"></div>
                                 <div className="absolute top-0 left-0 w-12 h-12 border-4 border-amber-600 rounded-full border-t-transparent animate-spin"></div>
                               </div>
                               <p className="text-sm font-medium text-gray-600">Building your crossword puzzle...</p>
@@ -3277,56 +3376,127 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
           </>
         )}
 
-        {/* Recent Documents */}
-        <div>
-          <div className="flex items-center justify-between mb-5">
-            <h2 className="text-xl font-bold text-gray-900">Recent Documents</h2>
-            {documents.length > 0 && (
-              <button onClick={() => onNavigate('library')} className="text-base text-blue-600 hover:text-blue-700 font-medium">
-                View all →
-              </button>
-            )}
+        {/* Recent Activity */}
+        <div className="mt-10">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-bold text-stone-800 dark:text-stone-100 flex items-center gap-2">
+              <span className="text-xl">📂</span> Recents
+            </h2>
+            {recentActivity.length > 0 && (
+              <div className="flex items-center gap-3">
+                {recentActivity.some(a => a.type === 'document' || a.type === 'analysis') && (
+                  <button onClick={() => onNavigate('library')} className="text-sm text-lime-600 dark:text-lime-400 hover:text-lime-700 dark:hover:text-lime-300 font-semibold transition-colors">
+                    Library
+                  </button>
+                )}
+                {recentActivity.some(a => a.type === 'quiz' || a.type === 'flashcard' || a.type === 'crossword') && (
+                  <button onClick={() => onNavigate('quiz-history')} className="text-sm text-lime-600 dark:text-lime-400 hover:text-lime-700 dark:hover:text-lime-300 font-semibold transition-colors">
+                    Quiz history
+                  </button>
+                )}
+                {recentActivity.some(a => a.type === 'citation') && (
+                  <button onClick={() => onNavigate('citation-history')} className="text-sm text-lime-600 dark:text-lime-400 hover:text-lime-700 dark:hover:text-lime-300 font-semibold transition-colors">
+                    Citations
+                  </button>
+                )}
               </div>
+            )}
+          </div>
           
-            {isLoading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-              {Array.from({ length: 3 }).map((_, i) => <DocumentCardSkeleton key={i} />)}
-            </div>
-            ) : documents.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-              {documents.slice(0, 6).map((doc) => (
-                <div 
-                  key={doc.id}
-                  className="bg-white border border-gray-200 rounded-xl p-5 hover:border-gray-300 hover:shadow-md transition-all cursor-pointer"
-                  onClick={() => onNavigate('library')}
-              >
-                <div className="flex items-start justify-between mb-4">
-                    <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
-                      <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                    </div>
-                    {doc.hasAnalysis && (
-                      <span className="px-2.5 py-1 bg-green-50 text-green-700 text-xs font-medium rounded">Analyzed</span>
-                    )}
+          {(isLoading || isActivityLoading) ? (
+            <div className="space-y-2.5">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="flex items-center gap-3 bg-white dark:bg-stone-800 border border-stone-200/50 dark:border-stone-700/30 rounded-xl p-3.5 animate-pulse">
+                  <div className="w-11 h-11 bg-stone-200 dark:bg-stone-700 rounded-xl flex-shrink-0" />
+                  <div className="flex-1 min-w-0 space-y-2">
+                    <div className="h-4 bg-stone-200 dark:bg-stone-700 rounded-lg w-2/3" />
+                    <div className="h-3 bg-stone-100 dark:bg-stone-700/60 rounded-lg w-1/2" />
                   </div>
-                  <h3 className="font-medium text-gray-900 text-base mb-2 truncate">{doc.title}</h3>
-                  <p className="text-sm text-gray-500">
-                    {doc.fileType?.toUpperCase() || 'DOC'} • {doc.wordCount || 0} words • {new Date(doc.createdAt).toLocaleDateString()}
-                  </p>
+                  <div className="h-3 bg-stone-100 dark:bg-stone-700/60 rounded w-12 flex-shrink-0 hidden sm:block" />
                 </div>
               ))}
             </div>
-            ) : (
-            <div className="text-center py-12 bg-gray-50 rounded-xl border border-gray-100">
-            <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-              <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
+          ) : filteredActivity.length > 0 ? (
+            <div className="space-y-2.5">
+              {filteredActivity.slice(0, 8).map((activity) => {
+                const meta = activityMeta[activity.type];
+                return (
+                  <div 
+                    key={activity.id}
+                    className="flex items-center gap-3 bg-white dark:bg-stone-800 border border-stone-200/80 dark:border-stone-700/50 rounded-xl p-3.5 hover:border-stone-300 dark:hover:border-stone-600 hover:shadow-md transition-all cursor-pointer group"
+                    onClick={() => onNavigate(activity.navigateTo)}
+                  >
+                    <div className={`w-11 h-11 ${meta.bg} rounded-xl flex items-center justify-center flex-shrink-0`}>
+                      <span className="text-lg">{meta.emoji}</span>
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <h3 className="font-semibold text-stone-800 dark:text-stone-100 text-sm truncate group-hover:text-lime-700 dark:group-hover:text-lime-400 transition-colors">{activity.title}</h3>
+                      <p className="text-xs text-stone-400 dark:text-stone-500 mt-0.5">{activity.subtitle}</p>
+                    </div>
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <span className="text-[10px] font-medium text-stone-400 dark:text-stone-500 hidden sm:block">{relativeTime(activity.date)}</span>
+                      <span className={`px-2 py-0.5 ${meta.bg} text-[10px] font-bold rounded-md uppercase tracking-wide text-stone-600 dark:text-stone-300`}>{meta.label}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : searchQuery.trim() ? (
+            <div className="text-center py-10 bg-white dark:bg-stone-800 rounded-2xl border border-stone-200/60 dark:border-stone-700/40">
+              <div className="w-14 h-14 bg-stone-100 dark:bg-stone-700 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                <svg className="w-7 h-7 text-stone-400 dark:text-stone-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
               </div>
-              <p className="text-gray-500 text-base">No documents yet</p>
-              <button onClick={() => onNavigate('upload')} className="mt-4 text-base text-blue-600 hover:text-blue-700 font-medium">
-                Upload your first document →
+              <p className="text-stone-600 dark:text-stone-300 font-semibold mb-1">No results for "{searchQuery}"</p>
+              <p className="text-stone-400 dark:text-stone-500 text-sm">Try a different search term</p>
+            </div>
+          ) : (
+            <div className="text-center py-12 bg-white dark:bg-stone-800 rounded-2xl border border-stone-200/60 dark:border-stone-700/40">
+              {/* Warm empty state illustration */}
+              <svg className="w-40 h-32 mx-auto mb-5" viewBox="0 0 200 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+                {/* Desk */}
+                <rect x="30" y="95" width="140" height="6" rx="3" fill="#E7E5E4" className="dark:fill-stone-700" />
+                <rect x="55" y="101" width="6" height="30" rx="2" fill="#D6D3D1" className="dark:fill-stone-600" />
+                <rect x="139" y="101" width="6" height="30" rx="2" fill="#D6D3D1" className="dark:fill-stone-600" />
+                {/* Open book */}
+                <path d="M65 88 Q100 78 100 88 L100 55 Q100 48 65 55 Z" fill="#A3E635" className="dark:fill-lime-600" opacity="0.3" />
+                <path d="M135 88 Q100 78 100 88 L100 55 Q100 48 135 55 Z" fill="#34D399" className="dark:fill-emerald-600" opacity="0.3" />
+                <path d="M65 88 Q100 78 100 88 L100 55 Q100 48 65 55 Z" stroke="#84CC16" className="dark:stroke-lime-500" strokeWidth="1.5" fill="none" />
+                <path d="M135 88 Q100 78 100 88 L100 55 Q100 48 135 55 Z" stroke="#10B981" className="dark:stroke-emerald-500" strokeWidth="1.5" fill="none" />
+                <line x1="100" y1="55" x2="100" y2="88" stroke="#A3E635" className="dark:stroke-lime-500" strokeWidth="1" />
+                {/* Lines on left page */}
+                <line x1="74" y1="63" x2="95" y2="60" stroke="#BEF264" className="dark:stroke-lime-500" strokeWidth="1.5" strokeLinecap="round" opacity="0.6" />
+                <line x1="72" y1="70" x2="96" y2="67" stroke="#BEF264" className="dark:stroke-lime-500" strokeWidth="1.5" strokeLinecap="round" opacity="0.6" />
+                <line x1="70" y1="77" x2="97" y2="74" stroke="#BEF264" className="dark:stroke-lime-500" strokeWidth="1.5" strokeLinecap="round" opacity="0.6" />
+                {/* Coffee cup */}
+                <rect x="145" y="76" width="16" height="19" rx="3" fill="#FED7AA" className="dark:fill-amber-800" />
+                <path d="M161 80 Q168 80 168 86 Q168 92 161 92" stroke="#FDBA74" className="dark:stroke-amber-600" strokeWidth="1.5" fill="none" />
+                <ellipse cx="153" cy="76" rx="8" ry="2" fill="#FED7AA" className="dark:fill-amber-800" />
+                {/* Steam */}
+                <path d="M150 72 Q148 66 150 62" stroke="#D6D3D1" className="dark:stroke-stone-500" strokeWidth="1" strokeLinecap="round" opacity="0.5" />
+                <path d="M155 70 Q157 64 155 60" stroke="#D6D3D1" className="dark:stroke-stone-500" strokeWidth="1" strokeLinecap="round" opacity="0.5" />
+                {/* Pencil */}
+                <rect x="38" y="70" width="22" height="5" rx="1" fill="#FDE68A" className="dark:fill-amber-700" transform="rotate(-15 38 70)" />
+                <polygon points="36,77 33,82 38,80" fill="#F59E0B" className="dark:fill-amber-500" transform="rotate(-15 36 80)" />
+                {/* Small plant */}
+                <rect x="28" y="82" width="10" height="13" rx="2" fill="#FB923C" className="dark:fill-orange-700" opacity="0.6" />
+                <circle cx="33" cy="78" r="6" fill="#86EFAC" className="dark:fill-emerald-600" opacity="0.5" />
+                <circle cx="29" cy="76" r="4" fill="#4ADE80" className="dark:fill-emerald-500" opacity="0.5" />
+                <circle cx="37" cy="77" r="4.5" fill="#4ADE80" className="dark:fill-emerald-500" opacity="0.5" />
+                {/* Stars / sparkles */}
+                <circle cx="50" cy="35" r="2" fill="#FDE68A" className="dark:fill-amber-400" opacity="0.7" />
+                <circle cx="155" cy="40" r="1.5" fill="#A78BFA" className="dark:fill-violet-400" opacity="0.7" />
+                <circle cx="130" cy="28" r="2.5" fill="#67E8F9" className="dark:fill-cyan-400" opacity="0.6" />
+                <path d="M170 50 l2-5 2 5-5-2 5 0z" fill="#FDE68A" className="dark:fill-amber-400" opacity="0.6" />
+                <path d="M40 45 l1.5-4 1.5 4-4-1.5 4 0z" fill="#86EFAC" className="dark:fill-emerald-400" opacity="0.6" />
+              </svg>
+              <p className="text-stone-800 dark:text-stone-200 font-semibold text-lg mb-1">Start creating or explore resources</p>
+              <p className="text-stone-400 dark:text-stone-500 text-sm mb-6 max-w-xs mx-auto">Recent files will appear here for quick access</p>
+              <button 
+                onClick={() => onNavigate('upload')} 
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-lime-500 to-emerald-500 hover:from-lime-400 hover:to-emerald-400 text-white font-semibold rounded-xl transition-all shadow-md shadow-lime-500/20 hover:shadow-lg hover:scale-105 text-sm"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
+                Upload your first document
               </button>
             </div>
           )}
@@ -3374,8 +3544,8 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
               </p>
             </div>
             
-            <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl p-4 mb-6">
-              <h4 className="font-semibold text-amber-900 mb-3">Paid Plan Benefits:</h4>
+            <div className="bg-gradient-to-br from-lime-50 to-emerald-50 dark:from-lime-900/20 dark:to-emerald-900/20 rounded-xl p-4 mb-6">
+              <h4 className="font-semibold text-lime-900 dark:text-lime-100 mb-3">Paid Plan Benefits:</h4>
               <ul className="space-y-2 text-sm text-amber-800">
                 <li className="flex items-center gap-2">
                   <svg className="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">

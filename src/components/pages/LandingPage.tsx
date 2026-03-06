@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import Footer from '../common/Footer';
+import { useTheme } from '../../contexts/ThemeContext';
 import AnalysisAnimation from '../common/AnalysisAnimation';
 import customersImg from '../../assets/images/CustomersWriteScholar.png';
 
@@ -8,6 +9,7 @@ interface LandingPageProps {
 }
 
 const LandingPage = ({ onNavigate }: LandingPageProps) => {
+  const { theme, toggleTheme } = useTheme();
   const [inputText, setInputText] = useState('');
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
   const [isFocused, setIsFocused] = useState(false);
@@ -31,8 +33,8 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
   const [quizQuestionCount, setQuizQuestionCount] = useState(10);
   const [flashcardCount, setFlashcardCount] = useState(15);
   const [crosswordWordCount, setCrosswordWordCount] = useState(10);
-  const [activeToolHover, setActiveToolHover] = useState<string | null>(null);
   const [activeHelpCategory, setActiveHelpCategory] = useState('essays');
+  const [studyCardsCarouselIndex, setStudyCardsCarouselIndex] = useState(0);
 
   const helpCategories = [
     {
@@ -135,15 +137,6 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
     "Sustainable urban development",
     "Remote work and productivity",
     "Blockchain in supply chain"
-  ];
-
-  const sidebarTools = [
-    { id: 'grammar', name: 'Grammar Checker', icon: 'A', color: 'text-red-500', bg: 'bg-red-50' },
-    { id: 'structure', name: 'Structure Analysis', icon: '◎', color: 'text-lime-600', bg: 'bg-lime-50' },
-    { id: 'citations', name: 'Citation Checker', icon: '99', color: 'text-purple-500', bg: 'bg-purple-50' },
-    { id: 'tone', name: 'Academic Tone', icon: '≡', color: 'text-green-500', bg: 'bg-green-50' },
-    { id: 'clarity', name: 'Clarity Feedback', icon: '◇', color: 'text-orange-500', bg: 'bg-orange-50' },
-    { id: 'sources', name: 'Source Finder', icon: '⌕', color: 'text-lime-600', bg: 'bg-lime-50' }
   ];
 
   const faqs = [
@@ -355,168 +348,552 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                 </>
   );
 
-
-  // Mode-specific hero headlines with topic colors
-  const getHeroHeadline = () => {
-    if (mode === 'analyze') return <>Your essay — improved with <span style={{ color: '#7ab308' }}>AI assistance</span></>;
-    if (mode === 'citations') return <>Find <span style={{ color: '#22A7AB' }}>academic citations</span> instantly</>;
-    if (mode === 'humanize') return <>Make AI text <span style={{ color: '#9B59B6' }}>undetectable</span></>;
-    if (mode === 'summarize') return <>Summarize <span style={{ color: '#28B463' }}>any document</span></>;
-    if (mode === 'quiz') {
-      if (studyToolMode === 'flashcards') return <>Generate <span style={{ color: '#D35400' }}>flashcards</span></>;
-      if (studyToolMode === 'crossword') return <>Generate a <span style={{ color: '#D35400' }}>crossword puzzle</span></>;
-      return <>Generate <span style={{ color: '#D35400' }}>quiz questions</span></>;
-    }
-    return <>Your essay — improved with <span style={{ color: '#7ab308' }}>AI assistance</span></>;
-  };
+  const StudyCard = ({
+    title,
+    desc,
+    onClick,
+    gradient,
+    accentClasses,
+    borderColor,
+    icon,
+    innerContent,
+  }: {
+    title: string;
+    desc: string;
+    onClick: () => void;
+    gradient: string;
+    accentClasses: { title: string; orb: string; iconBg: string };
+    borderColor: string;
+    icon: string;
+    innerContent: React.ReactNode;
+  }) => (
+    <button
+      onClick={onClick}
+      className={`group relative bg-gradient-to-br ${gradient} rounded-3xl p-6 text-left hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 ease-out overflow-hidden border ${borderColor} h-[310px] flex flex-col`}
+    >
+      <div className={`absolute top-0 right-0 w-32 h-32 rounded-full -translate-y-1/2 translate-x-1/2 ${accentClasses.orb}`} />
+      <h3 className={`text-xl font-bold mb-3 relative z-10 flex-shrink-0 ${accentClasses.title}`}>{title}</h3>
+      <div className="relative z-10 bg-white dark:bg-stone-800 rounded-2xl p-5 shadow-lg mb-4 h-[140px] flex flex-col justify-center overflow-hidden">
+        <div className={`w-8 h-8 rounded-lg flex items-center justify-center mb-3 text-lg flex-shrink-0 ${accentClasses.iconBg}`}>
+          {icon}
+        </div>
+        {innerContent}
+      </div>
+      <p className="text-stone-600 dark:text-stone-400 text-sm relative z-10">{desc}</p>
+    </button>
+  );
 
   return (
-    <main className="min-h-screen" style={{ background: '#FAF8F5' }} role="main">
-      {/* Navigation */}
-      <nav className="sticky top-0 z-50 backdrop-blur-md border-b border-stone-200/60" style={{ background: 'rgba(250, 248, 245, 0.95)' }} aria-label="Main navigation">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-18 py-4">
-            <a href="/" onClick={(e) => { e.preventDefault(); onNavigate('landing'); }} className="flex items-center space-x-2.5">
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: '#262626' }}>
-                <span className="font-bold text-xl" style={{ color: '#a3e635' }}>W</span>
-              </div>
-              <span className="text-2xl font-bold text-stone-800">WriteScholar</span>
-            </a>
-            
-            <div className="hidden md:flex items-center space-x-2">
-              <a href="/features" onClick={(e) => { e.preventDefault(); onNavigate('features'); }} className="px-4 py-2.5 text-base text-stone-600 hover:text-stone-900 rounded-lg hover:bg-stone-100/50 transition-colors font-medium">Features</a>
-              <a href="/pricing" onClick={(e) => { e.preventDefault(); onNavigate('pricing'); }} className="px-4 py-2.5 text-base text-stone-600 hover:text-stone-900 rounded-lg hover:bg-stone-100/50 transition-colors font-medium">Pricing</a>
-              <a href="/why-students-choose" onClick={(e) => { e.preventDefault(); onNavigate('why-students-choose'); }} className="px-4 py-2.5 text-base text-stone-600 hover:text-stone-900 rounded-lg hover:bg-stone-100/50 transition-colors font-medium">Why Students Choose</a>
-              <a href="/blog" onClick={(e) => { e.preventDefault(); onNavigate('blog'); }} className="px-4 py-2.5 text-base text-stone-600 hover:text-stone-900 rounded-lg hover:bg-stone-100/50 transition-colors font-medium">Blog</a>
-              <a href="/about" onClick={(e) => { e.preventDefault(); onNavigate('about'); }} className="px-4 py-2.5 text-base text-stone-600 hover:text-stone-900 rounded-lg hover:bg-stone-100/50 transition-colors font-medium">About</a>
-                    </div>
-            
-            <div className="flex items-center space-x-3">
-              <a href="/login" onClick={(e) => { e.preventDefault(); onNavigate('login'); }} className="hidden sm:inline-flex px-4 py-2.5 text-base text-stone-600 hover:text-stone-900 font-medium rounded-lg hover:bg-stone-100/50 transition-colors">Log in</a>
-              <a href="/signup" onClick={(e) => { e.preventDefault(); onNavigate('signup'); }} className="inline-flex items-center px-5 py-2.5 text-stone-900 text-base font-semibold rounded-full hover:opacity-90 hover:shadow-md transition-all duration-200" style={{ background: '#a3e635' }}>
-                Try Free
+    <main className="min-h-screen relative transition-colors font-sans" role="main">
+      {/* HERO SECTION - Old app lime/stone theme */}
+      <section className="relative bg-[#faf8f5] dark:bg-stone-900 overflow-hidden">
+        {/* Subtle gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-br from-lime-50/30 via-transparent to-emerald-50/20 dark:from-stone-900/50 dark:to-stone-900" />
+        
+        {/* Navigation */}
+        <nav className="relative z-50 border-b border-stone-200/60 dark:border-stone-700/40" aria-label="Main navigation">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between h-18 py-4">
+              <a href="/" onClick={(e) => { e.preventDefault(); onNavigate('landing'); }} className="flex items-center space-x-2.5 group">
+                <div className="w-10 h-10 rounded-2xl flex items-center justify-center bg-gradient-to-br from-lime-400 to-emerald-500 shadow-lg shadow-lime-500/30 group-hover:scale-105 transition-transform">
+                  <span className="font-extrabold text-xl text-white">W</span>
+                </div>
+                <span className="text-2xl font-extrabold text-stone-800 dark:text-stone-100 tracking-tight">WriteScholar</span>
               </a>
+              
+              <div className="hidden md:flex items-center space-x-1">
+                <a href="/features" onClick={(e) => { e.preventDefault(); onNavigate('features'); }} className="px-4 py-2.5 text-sm text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 transition-all font-medium">Features</a>
+                <a href="/pricing" onClick={(e) => { e.preventDefault(); onNavigate('pricing'); }} className="px-4 py-2.5 text-sm text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 transition-all font-medium">Pricing</a>
+                <a href="/blog" onClick={(e) => { e.preventDefault(); onNavigate('blog'); }} className="px-4 py-2.5 text-sm text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 transition-all font-medium">Blog</a>
+                <a href="/about" onClick={(e) => { e.preventDefault(); onNavigate('about'); }} className="px-4 py-2.5 text-sm text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 transition-all font-medium">About</a>
+              </div>
+              
+              <div className="flex items-center space-x-3">
+                <button
+                  onClick={toggleTheme}
+                  className="p-2 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors text-stone-600 dark:text-stone-400"
+                  aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                  </svg>
+                </button>
+                <a href="/login" onClick={(e) => { e.preventDefault(); onNavigate('login'); }} className="hidden sm:inline-flex px-4 py-2.5 text-sm text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 font-medium rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 transition-all">Log in</a>
+                <a href="/signup" onClick={(e) => { e.preventDefault(); onNavigate('signup'); }} className="inline-flex items-center px-5 py-2.5 text-stone-900 text-sm font-bold rounded-2xl hover:scale-105 active:scale-95 transition-all duration-200 bg-gradient-to-r from-lime-400 to-emerald-500 hover:from-lime-300 hover:to-emerald-400 shadow-lg shadow-lime-500/30">
+                  Sign up free
+                </a>
+              </div>
+            </div>
+          </div>
+        </nav>
+
+        {/* Hero Content */}
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 lg:py-24">
+          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+            {/* Left: Text Content */}
+            <div className="text-center lg:text-left">
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-stone-800 dark:text-stone-100 leading-tight mb-6" style={{ letterSpacing: '-0.02em' }}>
+                The ultimate<br />
+                <span className="bg-gradient-to-r from-lime-500 via-emerald-500 to-teal-500 bg-clip-text text-transparent">study weapon.</span>
+              </h1>
+              <p className="text-lg sm:text-xl text-stone-600 dark:text-stone-400 mb-8 max-w-lg mx-auto lg:mx-0">
+                Use <span className="text-stone-800 dark:text-stone-100 font-semibold">AI</span> to analyze essays, find citations, create quizzes, and study smarter. Learn faster with intelligent tools.
+              </p>
+              
+              {/* CTA Buttons */}
+              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                <button
+                  onClick={() => onNavigate('signup')}
+                  className="px-8 py-4 bg-gradient-to-r from-lime-500 to-emerald-600 text-stone-900 font-bold rounded-2xl hover:from-lime-400 hover:to-emerald-500 hover:scale-105 active:scale-95 transition-all shadow-xl shadow-lime-500/30 text-lg"
+                >
+                  Get Started Free
+                </button>
+                <button
+                  onClick={() => onNavigate('features')}
+                  className="px-8 py-4 bg-white dark:bg-stone-800 border-2 border-stone-200 dark:border-stone-600 text-stone-800 dark:text-stone-100 font-bold rounded-2xl hover:bg-stone-50 dark:hover:bg-stone-700 hover:scale-105 active:scale-95 transition-all text-lg"
+                >
+                  See Features
+                </button>
+              </div>
+              
+              {/* Trust badge */}
+              <div className="mt-8 flex items-center justify-center lg:justify-start gap-3">
+                <div className="flex -space-x-2">
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-lime-400 to-emerald-500 border-2 border-[#faf8f5] dark:border-stone-900" />
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 border-2 border-[#faf8f5] dark:border-stone-900" />
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 border-2 border-[#faf8f5] dark:border-stone-900" />
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-teal-400 to-cyan-500 border-2 border-[#faf8f5] dark:border-stone-900" />
+                </div>
+                <span className="text-stone-600 dark:text-stone-400 text-sm">Trusted by <span className="text-stone-800 dark:text-stone-100 font-semibold">50,000+</span> students</span>
+              </div>
+            </div>
+            
+            {/* Right: Device Mockups - Brainscape style */}
+            <div className="relative hidden lg:block">
+              {/* Floating mastery badge */}
+              <div className="absolute -top-4 right-8 bg-gradient-to-br from-lime-400 to-emerald-500 rounded-full w-20 h-20 flex flex-col items-center justify-center shadow-xl shadow-lime-500/30 animate-float z-20">
+                <span className="text-stone-900 font-extrabold text-2xl">97%</span>
+                <span className="text-stone-800/80 text-[10px] font-medium">Mastery</span>
+              </div>
+              
+              {/* Laptop mockup */}
+              <div className="relative bg-stone-200 dark:bg-stone-700 rounded-2xl p-2 shadow-2xl transform rotate-1 hover:rotate-0 transition-transform duration-500">
+                <div className="bg-white dark:bg-stone-800 rounded-xl overflow-hidden">
+                  {/* Browser bar */}
+                  <div className="bg-stone-100 dark:bg-stone-700 px-4 py-2 flex items-center gap-2">
+                    <div className="flex gap-1.5">
+                      <div className="w-3 h-3 rounded-full bg-red-400" />
+                      <div className="w-3 h-3 rounded-full bg-amber-400" />
+                      <div className="w-3 h-3 rounded-full bg-lime-400" />
+                    </div>
+                    <div className="flex-1 bg-stone-200 dark:bg-stone-600 rounded-lg px-3 py-1 text-stone-500 text-xs ml-4">writescholar.com</div>
+                  </div>
+                  {/* App content preview */}
+                  <div className="p-4 bg-white dark:bg-stone-800 h-64">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-lime-400 to-emerald-500 flex items-center justify-center">
+                        <span className="text-white font-bold">W</span>
+                      </div>
+                      <div>
+                        <div className="text-stone-800 dark:text-stone-100 font-semibold text-sm">Biology: Cells</div>
+                        <div className="text-stone-500 text-xs">12 flashcards</div>
+                      </div>
+                    </div>
+                    {/* Flashcard preview */}
+                    <div className="bg-gradient-to-br from-lime-400 to-emerald-500 rounded-xl p-4 mb-3 shadow-lg">
+                      <div className="text-stone-800/70 text-xs mb-1">Term</div>
+                      <div className="text-stone-900 font-semibold">Mitochondria</div>
+                    </div>
+                    {/* Progress bars */}
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <div className="flex-1 h-2 bg-stone-200 dark:bg-stone-600 rounded-full overflow-hidden">
+                          <div className="h-full w-3/4 bg-gradient-to-r from-lime-400 to-emerald-500 rounded-full" />
+                        </div>
+                        <span className="text-stone-500 text-xs">75%</span>
                       </div>
                     </div>
                   </div>
-      </nav>
-
-      {/* Hero Section with Sidebar */}
-      <section className="pt-6 sm:pt-10 lg:pt-12 pb-8 sm:pb-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-start">
-            {/* Desktop Sidebar - aligned with H1, positioned far left with border */}
-            <div className="hidden lg:flex flex-col space-y-1 mr-8 xl:mr-12 -ml-8 xl:-ml-16">
-              <div className="bg-white border border-stone-200 rounded-2xl p-3 shadow-sm">
-                {sidebarTools.map((tool) => (
-                  <button 
-                    key={tool.id}
-                    onMouseEnter={() => setActiveToolHover(tool.id)}
-                    onMouseLeave={() => setActiveToolHover(null)}
-                    onClick={() => onNavigate('signup')}
-                    className={`relative flex flex-col items-center p-3 rounded-xl transition-all w-full ${
-                      activeToolHover === tool.id ? 'bg-stone-50 scale-105' : ''
-                    }`}
-                  >
-                    <div className={`w-12 h-12 ${tool.bg} rounded-xl flex items-center justify-center mb-1.5`}>
-                      {tool.id === 'sources' ? (
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={`w-6 h-6 ${tool.color}`}>
-                          <circle cx="11" cy="11" r="8" />
-                          <path d="M21 21l-4.35-4.35" />
-                      </svg>
-                      ) : (
-                        <span className={`${tool.color} font-bold ${tool.id === 'tone' || tool.id === 'clarity' ? 'text-lg' : 'text-base'}`}>{tool.icon}</span>
-                      )}
-                    </div>
-                    <span className="text-[11px] text-stone-600 text-center leading-tight max-w-[70px]">{tool.name}</span>
-                    
-                    {activeToolHover === tool.id && (
-                      <div className="absolute left-full ml-3 px-3 py-2 text-white text-sm rounded-lg whitespace-nowrap z-10" style={{ background: '#262626' }}>
-                        {tool.name}
-                        <div className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent" style={{ borderRightColor: '#262626' }} />
-                  </div>
-                    )}
-                  </button>
-                ))}
-                    </div>
-                  </div>
-
-            {/* Main Content */}
-            <div className="flex-1 text-center max-w-4xl mx-auto">
-              {/* H1 - mode-specific hero */}
-              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-stone-800 tracking-tight leading-tight mb-4 sm:mb-6 font-sans font-normal" style={{ letterSpacing: '-0.01em' }}>
-                {getHeroHeadline()}
-              </h1>
-              
-              {/* Subtitle */}
-              <p className="text-lg sm:text-xl text-stone-500 mb-6 max-w-2xl mx-auto font-sans">
-                Learn, create, and edit with ease — save time for what matters
-              </p>
-
-              {/* Mode Toggle - topic colors: Analyze #2E6FEA, Citations #22A7AB, Humanize #9B59B6, Summarize #28B463, Study Tools #D35400 */}
-              <div className="flex justify-center mb-5">
-                <div className="inline-flex flex-wrap justify-center bg-stone-100 rounded-full p-1.5 shadow-sm gap-1">
-                  <button
-                    onClick={() => { setMode('analyze'); setInputText(''); }}
-                    className={`px-5 sm:px-6 py-2.5 rounded-full text-base font-medium transition-all ${
-                      mode === 'analyze' ? 'bg-white shadow-sm border' : ''
-                    }`}
-                    style={mode === 'analyze' ? { color: '#7ab308', borderColor: '#a3e635' } : { color: '#7ab308' }}
-                  >
-                    Analyze Essay
-                  </button>
-                  <button
-                    onClick={() => { setMode('citations'); setInputText(''); }}
-                    className={`px-5 sm:px-6 py-2.5 rounded-full text-base font-medium transition-all ${
-                      mode === 'citations' ? 'bg-white shadow-sm border' : ''
-                    }`}
-                    style={mode === 'citations' ? { color: '#22A7AB', borderColor: '#A7F3F5' } : { color: '#22A7AB' }}
-                  >
-                    Find Citations
-                  </button>
-                  <button
-                    onClick={() => { setMode('humanize'); setInputText(''); }}
-                    className={`px-5 sm:px-6 py-2.5 rounded-full text-base font-medium transition-all relative ${
-                      mode === 'humanize' ? 'bg-white shadow-sm border' : ''
-                    }`}
-                    style={mode === 'humanize' ? { color: '#9B59B6', borderColor: '#E8DAEF' } : { color: '#9B59B6' }}
-                  >
-                    Humanize
-                    <span className="absolute -top-2 -right-1 px-1.5 py-0.5 text-white text-[10px] font-bold rounded-full leading-none" style={{ backgroundColor: '#9B59B6' }}>PRO</span>
-                  </button>
-                  <button
-                    onClick={() => { setMode('summarize'); setInputText(''); }}
-                    className={`px-5 sm:px-6 py-2.5 rounded-full text-base font-medium transition-all ${
-                      mode === 'summarize' ? 'bg-white shadow-sm border' : ''
-                    }`}
-                    style={mode === 'summarize' ? { color: '#28B463', borderColor: '#ABEBC6' } : { color: '#28B463' }}
-                  >
-                    Summarize
-                  </button>
-                  <button
-                    onClick={() => { setMode('quiz'); setInputText(''); }}
-                    className={`px-5 sm:px-6 py-2.5 rounded-full text-base font-semibold transition-all relative ${
-                      mode === 'quiz' ? 'bg-white shadow-md border-2 ring-2 ring-orange-200/50' : 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-lg hover:shadow-xl hover:from-orange-600 hover:to-amber-600'
-                    }`}
-                    style={mode === 'quiz' ? { color: '#D35400', borderColor: '#FADBD8' } : {}}
-                  >
-                    Study Tools
-                    <span className="absolute -top-2 -right-1 px-1.5 py-0.5 text-white text-[10px] font-bold rounded-full leading-none" style={{ backgroundColor: '#D35400' }}>PRO</span>
-                  </button>
                 </div>
               </div>
+              
+              {/* Phone mockup - floating to the right */}
+              <div className="absolute -right-8 bottom-0 w-40 bg-stone-200 dark:bg-stone-700 rounded-3xl p-1.5 shadow-2xl transform -rotate-6 hover:rotate-0 transition-transform duration-500 z-10">
+                <div className="bg-white dark:bg-stone-800 rounded-2xl overflow-hidden">
+                  <div className="p-3 h-56">
+                    <div className="text-stone-800 dark:text-stone-100 text-xs font-semibold mb-2">Quiz Results</div>
+                    <div className="bg-gradient-to-br from-lime-400 to-emerald-500 rounded-xl p-3 mb-2">
+                      <div className="text-stone-800/70 text-[10px]">Score</div>
+                      <div className="text-stone-900 font-bold text-xl">84%</div>
+                    </div>
+                    <div className="space-y-1.5">
+                      <div className="flex justify-between text-[10px]">
+                        <span className="text-stone-500">Correct</span>
+                        <span className="text-lime-600 font-medium">21/25</span>
+                      </div>
+                      <div className="flex justify-between text-[10px]">
+                        <span className="text-stone-500">Time</span>
+                        <span className="text-stone-600 font-medium">12:34</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Floating card - contributors style */}
+              <div className="absolute -left-4 bottom-16 bg-white dark:bg-stone-800 rounded-2xl p-3 shadow-xl transform rotate-3 hover:rotate-0 transition-transform duration-500 w-36 border border-stone-200 dark:border-stone-600">
+                <div className="text-stone-600 text-[10px] font-medium mb-2">Study Streak 🔥</div>
+                <div className="flex items-center gap-2">
+                  <div className="text-2xl font-extrabold text-stone-800 dark:text-stone-100">14</div>
+                  <div className="text-stone-500 text-xs">days</div>
+                </div>
+                <div className="flex gap-1 mt-2">
+                  {[...Array(7)].map((_, i) => (
+                    <div key={i} className={`w-3 h-3 rounded-full ${i < 5 ? 'bg-gradient-to-br from-lime-400 to-emerald-500' : 'bg-stone-200 dark:bg-stone-600'}`} />
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* FEATURE CARDS - "How do you want to study?" - Carousel */}
+      <section className="py-16 sm:py-20 bg-gradient-to-b from-stone-50 to-white dark:from-stone-900 dark:to-stone-900">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="relative text-center mb-12">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-stone-800 dark:text-stone-100 mb-4">
+              How do you want to study?
+            </h2>
+            <p className="text-lg text-stone-600 dark:text-stone-400 max-w-2xl mx-auto">
+              Master whatever you're learning with WriteScholar's AI-powered tools and study activities.
+            </p>
+            {/* Cute character - studying with book */}
+            <div className="hidden lg:block absolute -right-4 xl:right-8 top-1/2 -translate-y-1/2 w-32 h-36">
+              <svg viewBox="0 0 140 160" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+                <path d="M50 95 Q45 125 50 155 L90 155 Q95 125 90 95" fill="#6366F1" />
+                <rect x="62" y="72" width="16" height="26" fill="#E8B796" />
+                <ellipse cx="70" cy="45" rx="30" ry="33" fill="#E8B796" />
+                <path d="M40 38 Q38 18 55 12 Q70 6 88 12 Q105 18 100 38 Q98 28 85 20 Q70 12 55 20 Q42 28 40 38" fill="#4A3728" />
+                <path d="M40 38 Q34 50 40 62" fill="#4A3728" />
+                <path d="M100 38 Q106 50 100 62" fill="#4A3728" />
+                <ellipse cx="58" cy="45" rx="4" ry="5" fill="#1F2937" />
+                <ellipse cx="82" cy="45" rx="4" ry="5" fill="#1F2937" />
+                <circle cx="59" cy="43" r="1.5" fill="white" />
+                <circle cx="83" cy="43" r="1.5" fill="white" />
+                <path d="M55 58 Q70 68 85 58" stroke="#1F2937" strokeWidth="2" fill="none" strokeLinecap="round" />
+                <ellipse cx="42" cy="52" rx="5" ry="3" fill="#FECACA" opacity="0.5" />
+                <ellipse cx="98" cy="52" rx="5" ry="3" fill="#FECACA" opacity="0.5" />
+                {/* Arms holding book */}
+                <path d="M45 98 Q20 100 5 115" stroke="#E8B796" strokeWidth="12" fill="none" strokeLinecap="round" />
+                <path d="M95 98 Q120 100 135 115" stroke="#E8B796" strokeWidth="12" fill="none" strokeLinecap="round" />
+                <ellipse cx="3" cy="118" rx="8" ry="9" fill="#E8B796" />
+                <ellipse cx="137" cy="118" rx="8" ry="9" fill="#E8B796" />
+                {/* Book */}
+                <rect x="25" y="95" width="90" height="55" rx="4" fill="#FEF3C7" stroke="#F59E0B" strokeWidth="2" />
+                <line x1="70" y1="95" x2="70" y2="150" stroke="#F59E0B" strokeWidth="1.5" />
+                <path d="M35 110 Q65 108 95 110" stroke="#92400E" strokeWidth="2" fill="none" />
+                <path d="M35 125 Q65 123 95 125" stroke="#92400E" strokeWidth="1.5" fill="none" />
+                <path d="M58 95 L70 108 L82 95" stroke="#4F46E5" strokeWidth="2" fill="none" />
+              </svg>
+            </div>
+          </div>
+          
+          {/* Carousel wrapper with arrows */}
+          <div className="relative">
+            {/* Left arrow */}
+            <button
+              onClick={() => setStudyCardsCarouselIndex((i) => Math.max(0, i - 1))}
+              disabled={studyCardsCarouselIndex === 0}
+              className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 sm:-translate-x-4 z-20 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white dark:bg-stone-800 shadow-lg border border-stone-200 dark:border-stone-600 flex items-center justify-center text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-700 hover:text-stone-900 dark:hover:text-stone-100 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-white dark:disabled:hover:bg-stone-800 transition-all duration-300"
+              aria-label="Previous slide"
+            >
+              <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+            
+            {/* Right arrow */}
+            <button
+              onClick={() => setStudyCardsCarouselIndex((i) => Math.min(1, i + 1))}
+              disabled={studyCardsCarouselIndex === 1}
+              className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-2 sm:translate-x-4 z-20 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white dark:bg-stone-800 shadow-lg border border-stone-200 dark:border-stone-600 flex items-center justify-center text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-700 hover:text-stone-900 dark:hover:text-stone-100 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-white dark:disabled:hover:bg-stone-800 transition-all duration-300"
+              aria-label="Next slide"
+            >
+              <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+            
+            {/* Cards container - overflow hidden for slide effect */}
+            <div className="overflow-hidden px-2 sm:px-4">
+              <div 
+                className="flex transition-transform duration-500 ease-out"
+                style={{ transform: `translateX(-${studyCardsCarouselIndex * 100}%)` }}
+              >
+                {/* Slide 0: Analyze, Citations, Flashcards, Practice Tests */}
+                <div className="w-full flex-shrink-0">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <StudyCard
+                      title="Analyze"
+                      desc="Get professor-style feedback on your essays"
+                      onClick={() => setMode('analyze')}
+                      gradient="from-lime-50 to-emerald-50 dark:from-lime-900/20 dark:to-emerald-900/20"
+                      accentClasses={{ title: 'text-lime-700 dark:text-lime-400', orb: 'bg-lime-400/20', iconBg: 'bg-lime-100 dark:bg-lime-900/50' }}
+                      borderColor="border-lime-100 dark:border-lime-800/50"
+                      icon="📝"
+                      innerContent={
+                        <div className="space-y-1.5">
+                          <div className="h-2 bg-stone-100 dark:bg-stone-700 rounded-full w-full" />
+                          <div className="h-2 bg-stone-100 dark:bg-stone-700 rounded-full w-4/5" />
+                          <div className="h-2 bg-lime-200 dark:bg-lime-800/50 rounded-full w-3/5" />
+                        </div>
+                      }
+                    />
+                    <StudyCard
+                      title="Citations"
+                      desc="Find and format academic sources instantly"
+                      onClick={() => setMode('citations')}
+                      gradient="from-cyan-50 to-teal-50 dark:from-cyan-900/20 dark:to-teal-900/20"
+                      accentClasses={{ title: 'text-teal-700 dark:text-teal-400', orb: 'bg-teal-400/20', iconBg: 'bg-teal-100 dark:bg-teal-900/50' }}
+                      borderColor="border-cyan-100 dark:border-cyan-800/50"
+                      icon="🔍"
+                      innerContent={
+                        <div className="flex gap-1 flex-wrap">
+                          <span className="px-2 py-1 bg-teal-100 dark:bg-teal-900/50 text-teal-700 dark:text-teal-300 text-xs rounded-lg font-medium">APA</span>
+                          <span className="px-2 py-1 bg-stone-100 dark:bg-stone-700 text-stone-600 dark:text-stone-400 text-xs rounded-lg">MLA</span>
+                          <span className="px-2 py-1 bg-stone-100 dark:bg-stone-700 text-stone-600 dark:text-stone-400 text-xs rounded-lg">Chicago</span>
+                        </div>
+                      }
+                    />
+                    <StudyCard
+                      title="Flashcards"
+                      desc="Generate flashcards from any content"
+                      onClick={() => { setMode('quiz'); setStudyToolMode('flashcards'); }}
+                      gradient="from-pink-50 to-rose-50 dark:from-pink-900/20 dark:to-rose-900/20"
+                      accentClasses={{ title: 'text-rose-700 dark:text-rose-400', orb: 'bg-rose-400/20', iconBg: 'bg-rose-100 dark:bg-rose-900/50' }}
+                      borderColor="border-pink-100 dark:border-pink-800/50"
+                      icon="🃏"
+                      innerContent={
+                        <div className="relative">
+                          <div className="bg-gradient-to-br from-rose-400 to-pink-500 rounded-xl p-3 transform -rotate-2">
+                            <div className="text-white/80 text-[10px]">Term</div>
+                            <div className="text-white font-semibold text-sm">Photosynthesis</div>
+                          </div>
+                          <div className="absolute top-1.5 left-1.5 w-full h-full bg-rose-200 dark:bg-rose-800/50 rounded-xl -z-10 transform rotate-2" />
+                        </div>
+                      }
+                    />
+                    <StudyCard
+                      title="Practice Tests"
+                      desc="Create quizzes from your study material"
+                      onClick={() => { setMode('quiz'); setStudyToolMode('quiz'); }}
+                      gradient="from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20"
+                      accentClasses={{ title: 'text-orange-700 dark:text-orange-400', orb: 'bg-orange-400/20', iconBg: 'bg-amber-100 dark:bg-amber-900/50' }}
+                      borderColor="border-amber-100 dark:border-amber-800/50"
+                      icon="📋"
+                      innerContent={
+                        <div className="space-y-5">
+                          <div className="flex justify-between text-xs gap-4">
+                            <span className="text-stone-500">Score</span>
+                            <span className="text-stone-500">Results</span>
+                            <span className="text-stone-500">Time</span>
+                          </div>
+                          <div className="flex justify-between text-sm gap-4">
+                            <span className="text-orange-600 font-bold">84%</span>
+                            <span className="text-stone-800 dark:text-stone-100 font-medium">76/90</span>
+                            <span className="text-stone-600 dark:text-stone-400">70m</span>
+                          </div>
+                        </div>
+                      }
+                    />
+                  </div>
+                </div>
+                
+                {/* Slide 1: Humanize, Summarize, Study Tools, Crossword */}
+                <div className="w-full flex-shrink-0">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <StudyCard
+                      title="Humanize"
+                      desc="Transform AI text into natural human writing"
+                      onClick={() => setMode('humanize')}
+                      gradient="from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20"
+                      accentClasses={{ title: 'text-violet-700 dark:text-violet-400', orb: 'bg-violet-400/20', iconBg: 'bg-violet-100 dark:bg-violet-900/50' }}
+                      borderColor="border-violet-100 dark:border-violet-800/50"
+                      icon="✨"
+                      innerContent={
+                        <div className="space-y-4">
+                          <div className="h-2.5 bg-stone-100 dark:bg-stone-700 rounded-full w-full" />
+                          <div className="h-2.5 bg-violet-200 dark:bg-violet-800/50 rounded-full w-4/5" />
+                          <div className="h-2.5 bg-stone-100 dark:bg-stone-700 rounded-full w-2/3" />
+                        </div>
+                      }
+                    />
+                    <StudyCard
+                      title="Summarize"
+                      desc="Turn long papers into concise bullet points"
+                      onClick={() => setMode('summarize')}
+                      gradient="from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20"
+                      accentClasses={{ title: 'text-emerald-700 dark:text-emerald-400', orb: 'bg-emerald-400/20', iconBg: 'bg-emerald-100 dark:bg-emerald-900/50' }}
+                      borderColor="border-emerald-100 dark:border-emerald-800/50"
+                      icon="📝"
+                      innerContent={
+                        <div className="space-y-1.5">
+                          <div className="flex gap-1.5">
+                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                            <div className="h-2 bg-stone-100 dark:bg-stone-700 rounded-full flex-1" />
+                          </div>
+                          <div className="flex gap-1.5">
+                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                            <div className="h-2 bg-stone-100 dark:bg-stone-700 rounded-full flex-1" />
+                          </div>
+                          <div className="flex gap-1.5">
+                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                            <div className="h-2 bg-stone-100 dark:bg-stone-700 rounded-full flex-1 w-3/4" />
+                          </div>
+                        </div>
+                      }
+                    />
+                    <StudyCard
+                      title="Study Tools"
+                      desc="Quizzes, flashcards & crosswords"
+                      onClick={() => setMode('quiz')}
+                      gradient="from-lime-50 to-green-50 dark:from-lime-900/20 dark:to-green-900/20"
+                      accentClasses={{ title: 'text-lime-700 dark:text-lime-400', orb: 'bg-lime-400/20', iconBg: 'bg-lime-100 dark:bg-lime-900/50' }}
+                      borderColor="border-lime-100 dark:border-lime-800/50"
+                      icon="🎯"
+                      innerContent={
+                        <div className="flex gap-2">
+                          <div className="flex-1 text-center py-1.5 px-2 bg-lime-100 dark:bg-lime-900/50 rounded-lg text-lime-700 dark:text-lime-300 text-xs font-medium">Quiz</div>
+                          <div className="flex-1 text-center py-1.5 px-2 bg-lime-100 dark:bg-lime-900/50 rounded-lg text-lime-700 dark:text-lime-300 text-xs font-medium">Cards</div>
+                          <div className="flex-1 text-center py-1.5 px-2 bg-lime-100 dark:bg-lime-900/50 rounded-lg text-lime-700 dark:text-lime-300 text-xs font-medium">Puzzle</div>
+                        </div>
+                      }
+                    />
+                    <StudyCard
+                      title="Crossword"
+                      desc="Generate crosswords from your notes"
+                      onClick={() => { setMode('quiz'); setStudyToolMode('crossword'); }}
+                      gradient="from-amber-50 to-yellow-50 dark:from-amber-900/20 dark:to-yellow-900/20"
+                      accentClasses={{ title: 'text-amber-700 dark:text-amber-400', orb: 'bg-amber-400/20', iconBg: 'bg-amber-100 dark:bg-amber-900/50' }}
+                      borderColor="border-amber-100 dark:border-amber-800/50"
+                      icon="📐"
+                      innerContent={
+                        <div className="grid grid-cols-3 gap-0.5">
+                          {[...Array(9)].map((_, i) => (
+                            <div key={i} className={`aspect-square rounded-sm ${i % 2 === 0 ? 'bg-amber-200 dark:bg-amber-800/50' : 'bg-stone-200 dark:bg-stone-600'}`} />
+                          ))}
+                        </div>
+                      }
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Carousel dots */}
+            <div className="flex justify-center gap-2 mt-6">
+              <button
+                onClick={() => setStudyCardsCarouselIndex(0)}
+                className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${studyCardsCarouselIndex === 0 ? 'bg-lime-500 w-8' : 'bg-stone-300 dark:bg-stone-600 hover:bg-stone-400'}`}
+                aria-label="Go to slide 1"
+              />
+              <button
+                onClick={() => setStudyCardsCarouselIndex(1)}
+                className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${studyCardsCarouselIndex === 1 ? 'bg-lime-500 w-8' : 'bg-stone-300 dark:bg-stone-600 hover:bg-stone-400'}`}
+                aria-label="Go to slide 2"
+              />
+            </div>
+          </div>
+          
+          {/* CTA */}
+          <div className="text-center mt-12">
+            <button
+              onClick={() => onNavigate('signup')}
+              className="px-8 py-4 bg-gradient-to-r from-lime-500 to-emerald-600 text-stone-900 font-bold rounded-2xl hover:from-lime-400 hover:to-emerald-500 hover:scale-105 active:scale-95 transition-all shadow-xl shadow-lime-500/30 text-lg"
+            >
+              Sign up for free
+            </button>
+            <p className="mt-4 text-slate-500 text-sm">I'm a teacher</p>
+          </div>
+        </div>
+      </section>
+
+      {/* MAIN TOOL SECTION - Below the fold */}
+      <section className="py-16 bg-white dark:bg-stone-900">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-8">
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-800 mb-2">Try it now</h2>
+            <p className="text-slate-600">Paste your content and see the magic happen</p>
+          </div>
+          
+          {/* Mode Toggle - vibrant pills */}
+          <div className="flex justify-center mb-6">
+            <div className="inline-flex flex-wrap justify-center gap-2 p-2 rounded-3xl bg-slate-100 shadow-inner">
+              <button
+                onClick={() => { setMode('analyze'); setInputText(''); }}
+                className={`px-4 sm:px-5 py-2.5 rounded-2xl text-sm font-bold transition-all duration-200 hover:scale-105 active:scale-95 ${
+                  mode === 'analyze' 
+                    ? 'bg-gradient-to-r from-lime-500 to-emerald-600 text-stone-900 shadow-lg shadow-lime-500/30' 
+                    : 'text-stone-600 hover:bg-white hover:shadow-md'
+                }`}
+              >
+                Analyze Essay
+              </button>
+              <button
+                onClick={() => { setMode('citations'); setInputText(''); }}
+                className={`px-4 sm:px-5 py-2.5 rounded-2xl text-sm font-bold transition-all duration-200 hover:scale-105 active:scale-95 ${
+                  mode === 'citations' 
+                    ? 'bg-gradient-to-r from-cyan-500 to-teal-600 text-white shadow-lg shadow-cyan-500/30' 
+                    : 'text-stone-600 hover:bg-white hover:shadow-md'
+                }`}
+              >
+                Find Citations
+              </button>
+              <button
+                onClick={() => { setMode('humanize'); setInputText(''); }}
+                className={`px-4 sm:px-5 py-2.5 rounded-2xl text-sm font-bold transition-all duration-200 hover:scale-105 active:scale-95 relative ${
+                  mode === 'humanize' 
+                    ? 'bg-gradient-to-r from-violet-500 to-purple-600 text-white shadow-lg shadow-violet-500/30' 
+                    : 'text-stone-600 hover:bg-white hover:shadow-md'
+                }`}
+              >
+                Humanize
+              </button>
+              <button
+                onClick={() => { setMode('summarize'); setInputText(''); }}
+                className={`px-4 sm:px-5 py-2.5 rounded-2xl text-sm font-bold transition-all duration-200 hover:scale-105 active:scale-95 ${
+                  mode === 'summarize' 
+                    ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/30' 
+                    : 'text-stone-600 hover:bg-white hover:shadow-md'
+                }`}
+              >
+                Summarize
+              </button>
+              <button
+                onClick={() => { setMode('quiz'); setInputText(''); }}
+                className={`px-4 sm:px-5 py-2.5 rounded-2xl text-sm font-bold transition-all duration-200 hover:scale-105 active:scale-95 ${
+                  mode === 'quiz' 
+                    ? 'bg-gradient-to-r from-orange-500 to-amber-600 text-white shadow-lg shadow-orange-500/30' 
+                    : 'text-stone-600 hover:bg-white hover:shadow-md'
+                }`}
+              >
+                Study Tools
+              </button>
+            </div>
+          </div>
 
               {/* Citation Options (citations mode only) */}
             {mode === 'citations' && (
               <div className="flex justify-center mb-4">
                   <div className="inline-flex items-center gap-3 flex-wrap justify-center">
                     {/* Citation Style */}
-                    <div className="inline-flex items-center bg-white rounded-xl px-4 py-2.5 border border-stone-200">
-                      <span className="text-stone-500 mr-2 text-sm">Style:</span>
+                    <div className="inline-flex items-center bg-white dark:bg-stone-800 rounded-2xl px-4 py-2.5 border-2 border-stone-200 dark:border-stone-600 shadow-sm">
+                      <span className="text-stone-500 mr-2 text-sm font-medium">Style:</span>
                   <select
                     value={citationStyle}
                     onChange={(e) => setCitationStyle(e.target.value)}
-                        className="bg-transparent font-medium text-stone-800 outline-none cursor-pointer text-sm"
+                        className="bg-transparent font-bold text-slate-800 outline-none cursor-pointer text-sm"
                   >
                         <option value="APA">APA 7th</option>
                         <option value="MLA">MLA 9th</option>
@@ -528,12 +905,12 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                     </div>
                     
                     {/* Year Range */}
-                    <div className="inline-flex items-center bg-white rounded-xl px-4 py-2.5 border border-stone-200">
-                      <span className="text-stone-500 mr-2 text-sm">Year:</span>
+                    <div className="inline-flex items-center bg-white dark:bg-stone-800 rounded-2xl px-4 py-2.5 border-2 border-stone-200 dark:border-stone-600 shadow-sm">
+                      <span className="text-stone-500 mr-2 text-sm font-medium">Year:</span>
                       <select
                         value={citationYearRange}
                         onChange={(e) => setCitationYearRange(e.target.value)}
-                        className="bg-transparent font-medium text-stone-800 outline-none cursor-pointer text-sm"
+                        className="bg-transparent font-bold text-slate-800 outline-none cursor-pointer text-sm"
                       >
                         <option value="all">All Time</option>
                         <option value="3">Last 3 Years</option>
@@ -547,9 +924,9 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
               </div>
             )}
 
-              {/* HUMANIZE MODE - Split Panel Design */}
+              {/* HUMANIZE MODE - Split Panel Design - Gen Z violet gradient */}
             {mode === 'humanize' && (
-              <div className="bg-white rounded-2xl sm:rounded-3xl shadow-xl shadow-violet-100/50 border border-violet-100 overflow-hidden mb-6">
+              <div className="bg-white dark:bg-stone-800 rounded-2xl sm:rounded-3xl shadow-xl shadow-violet-200/50 dark:shadow-violet-900/20 border-2 border-violet-200 dark:border-violet-800 overflow-hidden mb-6">
                 {/* Toolbar */}
                 <div className="bg-gradient-to-r from-violet-50 to-purple-50 border-b border-violet-100 px-3 sm:px-5 py-3 sm:py-4">
                   <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center justify-between gap-3 sm:gap-4">
@@ -895,12 +1272,18 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                 {/* Character illustration - positioned outside to the right */}
                 <CharacterIllustration />
                 
-                <div className={`relative bg-white rounded-3xl border shadow-sm transition-all duration-300 ${
+                <div className={`relative bg-white dark:bg-stone-800 rounded-3xl border-2 shadow-lg transition-all duration-300 ${
                   isFocused
                     ? mode === 'citations' 
-                      ? 'border-[#22A7AB]/40 shadow-xl shadow-[#22A7AB]/5 ring-2 ring-[#22A7AB]/20'
-                      : 'border-[#2E6FEA]/40 shadow-xl shadow-[#2E6FEA]/5 ring-2 ring-[#2E6FEA]/20'
-                    : 'border-stone-200/80 hover:border-stone-300 hover:shadow-md'
+                      ? 'border-cyan-400 shadow-xl shadow-cyan-500/20 ring-4 ring-cyan-400/20'
+                      : mode === 'analyze'
+                      ? 'border-lime-400 shadow-xl shadow-lime-500/20 ring-4 ring-lime-400/20'
+                      : mode === 'humanize'
+                      ? 'border-violet-400 shadow-xl shadow-violet-500/20 ring-4 ring-violet-400/20'
+                      : mode === 'summarize'
+                      ? 'border-emerald-400 shadow-xl shadow-emerald-500/20 ring-4 ring-emerald-400/20'
+                      : 'border-orange-400 shadow-xl shadow-orange-500/20 ring-4 ring-orange-400/20'
+                    : 'border-stone-200 dark:border-stone-600 hover:border-stone-300 dark:hover:border-stone-500 hover:shadow-xl'
                 }`}>
                   <textarea
                     value={inputText}
@@ -908,7 +1291,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                     onFocus={() => setIsFocused(true)}
                     onBlur={() => setIsFocused(false)}
                     placeholder={placeholders[placeholderIndex]}
-                    className="w-full min-h-[120px] sm:min-h-[140px] p-5 sm:p-6 text-stone-800 text-lg border-none outline-none resize-none bg-transparent placeholder-stone-400 leading-relaxed"
+                    className="w-full min-h-[120px] sm:min-h-[140px] p-5 sm:p-6 text-stone-800 dark:text-stone-100 text-lg border-none outline-none resize-none bg-transparent placeholder-stone-400 dark:placeholder-stone-500 leading-relaxed"
                     style={{ fontSize: '18px' }}
                     onInput={(e) => {
                       const target = e.target as HTMLTextAreaElement;
@@ -923,13 +1306,13 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                   <button
                     onClick={handleSubmit}
                     disabled={!inputText.trim()}
-                    className={`px-8 py-3.5 rounded-full flex items-center justify-center transition-all duration-200 font-semibold text-base ${
+                    className={`px-8 py-3.5 rounded-2xl flex items-center justify-center transition-all duration-200 font-bold text-base ${
                       inputText.trim()
-                        ? 'bg-lime-400 hover:bg-lime-300 text-stone-900 shadow-lg hover:shadow-xl cursor-pointer'
-                        : 'bg-stone-200 text-stone-400 cursor-not-allowed'
+                        ? 'bg-gradient-to-r from-lime-400 to-emerald-500 hover:from-lime-300 hover:to-emerald-400 text-stone-900 shadow-lg shadow-lime-500/30 hover:scale-105 active:scale-95 cursor-pointer'
+                        : 'bg-stone-200 dark:bg-stone-700 text-stone-400 dark:text-stone-500 cursor-not-allowed'
                     }`}
                   >
-                    {mode === 'analyze' ? 'Get free feedback' : 'Find sources for free'}
+                    {mode === 'analyze' ? 'Get free feedback ✨' : mode === 'citations' ? 'Find sources for free 🔍' : mode === 'humanize' ? 'Humanize it ✨' : mode === 'summarize' ? 'Summarize 📝' : 'Generate study tools 🎯'}
                   </button>
                   
                   {/* Upload file option - only for analyze mode */}
@@ -948,206 +1331,243 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                       >
                         <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                    </svg>
+                        </svg>
                         or upload a file
                       </label>
-                </div>
+                    </div>
                   )}
+                </div>
               </div>
-            </div>
             )}
             
-              {/* Suggested Topics - only for citations mode */}
-              {mode === 'citations' && (
-                <div className="mb-10">
-                  <p className="text-sm text-stone-500 mb-4">Suggested topics</p>
-                  <div className="flex flex-wrap justify-center gap-2.5">
-                    {suggestedTopics.map((topic, idx) => (
-                      <button
-                        key={idx}
-                        onClick={() => handleTopicClick(topic)}
-                        className="px-4 py-2 bg-white hover:bg-stone-50 text-stone-700 text-sm sm:text-base rounded-lg border border-stone-200 hover:border-stone-300 transition-all duration-200 hover:shadow-sm text-left"
-                      >
-                        {topic}
+            {/* Suggested Topics - Gen Z colorful pills */}
+            {mode === 'citations' && (
+              <div className="mb-10">
+                <p className="text-sm font-bold text-slate-600 mb-4">Suggested topics</p>
+                <div className="flex flex-wrap justify-center gap-2.5">
+                  {suggestedTopics.map((topic, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => handleTopicClick(topic)}
+                      className="px-4 py-2.5 bg-white text-slate-700 text-sm sm:text-base font-medium rounded-2xl border-2 border-slate-200 hover:border-cyan-400 hover:bg-cyan-50 hover:shadow-lg hover:scale-105 active:scale-95 transition-all duration-200 text-left"
+                    >
+                      {topic}
                     </button>
-                    ))}
+                  ))}
+                </div>
               </div>
-            </div>
-              )}
+            )}
           </div>
-        </div>
-            </div>
       </section>
 
-      {/* Trusted by Universities - Animated Carousel */}
-      <section className="py-16 sm:py-20 border-y border-stone-200/60 overflow-hidden" style={{ background: '#F7F5F2' }}>
+      {/* Trusted by Universities */}
+      <section className="py-16 sm:py-20 bg-stone-50 dark:bg-stone-900/50 border-y border-stone-200 dark:border-stone-700">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-wrap items-center justify-center gap-6 mb-12">
             <img src={customersImg} alt="WriteScholar customers" className="h-14 sm:h-20 object-contain" />
-            <p className="text-stone-500 text-base sm:text-lg font-medium">Trusted by students around the world</p>
+            <p className="text-stone-600 dark:text-stone-400 text-base sm:text-lg font-bold">Trusted by students at top universities worldwide</p>
           </div>
-          <div className="relative">
+          <div className="relative overflow-hidden">
             <div className="flex w-max animate-scroll-slow">
-                {/* Three sets of universities for seamless loop and faster-feeling scroll */}
               {universities.map((uni, idx) => (
                 <div key={`first-${idx}`} className="flex-shrink-0 mx-10 sm:mx-16">
-                  <span className={`text-xl sm:text-2xl md:text-3xl ${uni.className}`}>{uni.name}</span>
-                  </div>
+                  <span className={`text-xl sm:text-2xl md:text-3xl font-bold text-stone-400 dark:text-stone-500 ${uni.className}`}>{uni.name}</span>
+                </div>
               ))}
               {universities.map((uni, idx) => (
                 <div key={`second-${idx}`} className="flex-shrink-0 mx-10 sm:mx-16">
-                  <span className={`text-xl sm:text-2xl md:text-3xl ${uni.className}`}>{uni.name}</span>
-                  </div>
+                  <span className={`text-xl sm:text-2xl md:text-3xl font-bold text-stone-400 dark:text-stone-500 ${uni.className}`}>{uni.name}</span>
+                </div>
               ))}
               {universities.map((uni, idx) => (
                 <div key={`third-${idx}`} className="flex-shrink-0 mx-10 sm:mx-16">
-                  <span className={`text-xl sm:text-2xl md:text-3xl ${uni.className}`}>{uni.name}</span>
-                  </div>
+                  <span className={`text-xl sm:text-2xl md:text-3xl font-bold text-stone-400 dark:text-stone-500 ${uni.className}`}>{uni.name}</span>
+                </div>
               ))}
-                  </div>
-                  </div>
-                  </div>
+            </div>
+          </div>
+        </div>
       </section>
 
-      {/* Your uniqueness in each step - Aithor style feature section */}
-      <section className="py-20" style={{ background: '#FAF8F5' }}>
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl sm:text-4xl text-stone-800 text-center mb-14 font-sans font-normal">
-            Your toolkit in each step
-          </h2>
+      {/* Feature Grid */}
+      <section className="py-20 bg-white dark:bg-stone-900">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="relative text-center mb-14">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-stone-800 dark:text-stone-100 mb-4">
+              Your complete study toolkit
+            </h2>
+            <p className="text-lg text-stone-600 dark:text-stone-400 max-w-2xl mx-auto">
+              Everything you need to ace your classes, all in one place.
+            </p>
+            {/* Cute character - excited with tools */}
+            <div className="hidden lg:block absolute -left-16 xl:-left-8 top-1/2 -translate-y-1/2 w-28 h-36">
+              <svg viewBox="0 0 140 180" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+                <path d="M50 100 Q45 130 50 160 L90 160 Q95 130 90 100" fill="#10B981" />
+                <rect x="62" y="75" width="16" height="28" fill="#D4A574" />
+                <ellipse cx="70" cy="48" rx="32" ry="35" fill="#D4A574" />
+                <path d="M38 40 Q35 18 52 12 Q70 4 90 12 Q107 18 104 40 Q100 28 85 20 Q70 12 55 20 Q42 28 38 40" fill="#2C1810" />
+                <path d="M38 40 Q32 55 38 70" fill="#2C1810" />
+                <path d="M102 40 Q108 55 102 70" fill="#2C1810" />
+                <ellipse cx="56" cy="46" rx="5" ry="6" fill="#1F2937" />
+                <ellipse cx="84" cy="46" rx="5" ry="6" fill="#1F2937" />
+                <circle cx="57" cy="44" r="2" fill="white" />
+                <circle cx="85" cy="44" r="2" fill="white" />
+                <path d="M52 38 Q60 32 68 38" stroke="#2C1810" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+                <path d="M72 38 Q80 32 88 38" stroke="#2C1810" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+                <path d="M55 62 Q70 76 85 62" stroke="#1F2937" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+                <ellipse cx="42" cy="56" rx="6" ry="4" fill="#FECACA" opacity="0.5" />
+                <ellipse cx="98" cy="56" rx="6" ry="4" fill="#FECACA" opacity="0.5" />
+                {/* Arms raised excited */}
+                <path d="M45 100 Q25 75 15 50" stroke="#D4A574" strokeWidth="12" fill="none" strokeLinecap="round" />
+                <path d="M95 100 Q115 75 125 50" stroke="#D4A574" strokeWidth="12" fill="none" strokeLinecap="round" />
+                <ellipse cx="12" cy="45" rx="9" ry="10" fill="#D4A574" />
+                <ellipse cx="128" cy="45" rx="9" ry="10" fill="#D4A574" />
+                {/* Pencil in left hand */}
+                <rect x="5" y="35" width="6" height="25" rx="1" fill="#FCD34D" transform="rotate(-20 8 47)" />
+                <path d="M4 32 L10 32 L10 38 L4 38 Z" fill="#F59E0B" transform="rotate(-20 7 35)" />
+                {/* Star in right hand */}
+                <path d="M122 35 L124 42 L131 42 L125 47 L127 54 L122 49 L117 54 L119 47 L113 42 L120 42 Z" fill="#FBBF24" />
+                <path d="M58 95 L70 108 L82 95" stroke="#059669" strokeWidth="2" fill="none" />
+              </svg>
+            </div>
+          </div>
           
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {/* Essay Analyzer */}
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* Essay Analyzer - Lime */}
             <button 
               onClick={() => onNavigate('signup')}
-              className="group bg-white rounded-2xl p-6 text-left border border-stone-200 hover:border-stone-300 hover:shadow-md transition-all duration-200"
+              className="group relative bg-gradient-to-br from-lime-50 to-emerald-50 dark:from-lime-900/20 dark:to-emerald-900/20 rounded-3xl p-6 text-left hover:shadow-2xl hover:shadow-lime-500/20 hover:-translate-y-2 transition-all duration-300 overflow-hidden border border-lime-100 dark:border-lime-800/50"
             >
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="font-semibold text-stone-800 text-lg">Essay Analyzer</h3>
-                <svg className="w-5 h-5 text-stone-400 group-hover:text-stone-600 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-lime-400/20 to-emerald-400/20 rounded-full -translate-y-1/2 translate-x-1/2" />
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-lime-500 to-emerald-600 flex items-center justify-center mb-4 shadow-lg shadow-lime-500/30">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
               </div>
-              <p className="text-stone-500 text-sm leading-relaxed">Get professor-style feedback on structure, clarity, and citations.</p>
+              <h3 className="font-bold text-stone-800 dark:text-stone-100 text-lg mb-2 relative z-10">Essay Analyzer</h3>
+              <p className="text-stone-600 dark:text-stone-400 text-sm leading-relaxed relative z-10">Get professor-style feedback on structure, clarity, and citations.</p>
             </button>
             
-            {/* Citation Finder */}
+            {/* Citation Finder - Teal */}
             <button 
               onClick={() => onNavigate('signup')}
-              className="group bg-white rounded-2xl p-6 text-left border border-stone-200 hover:border-stone-300 hover:shadow-md transition-all duration-200"
+              className="group relative bg-gradient-to-br from-cyan-50 to-teal-50 rounded-3xl p-6 text-left hover:shadow-2xl hover:shadow-cyan-500/20 hover:-translate-y-2 transition-all duration-300 overflow-hidden border border-cyan-100"
             >
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="font-semibold text-stone-800 text-lg">Citation Finder</h3>
-                <svg className="w-5 h-5 text-stone-400 group-hover:text-stone-600 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-cyan-400/20 to-teal-400/20 rounded-full -translate-y-1/2 translate-x-1/2" />
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-cyan-500 to-teal-600 flex items-center justify-center mb-4 shadow-lg shadow-cyan-500/30">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
               </div>
-              <p className="text-stone-500 text-sm leading-relaxed">Search millions of sources with auto-formatted citations.</p>
+              <h3 className="font-bold text-stone-800 dark:text-stone-100 text-lg mb-2 relative z-10">Citation Finder</h3>
+              <p className="text-stone-600 dark:text-stone-400 text-sm leading-relaxed relative z-10">Search millions of sources with auto-formatted citations.</p>
             </button>
             
-            {/* AI Humanizer */}
+            {/* AI Humanizer - Violet */}
             <button 
               onClick={() => onNavigate('signup')}
-              className="group bg-white rounded-2xl p-6 text-left border border-violet-200 hover:border-violet-300 hover:shadow-md transition-all duration-200"
+              className="group relative bg-gradient-to-br from-violet-50 to-purple-50 rounded-3xl p-6 text-left hover:shadow-2xl hover:shadow-violet-500/20 hover:-translate-y-2 transition-all duration-300 overflow-hidden border border-violet-100"
             >
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="font-semibold text-violet-700 text-lg flex items-center gap-2">✨ AI Humanizer</h3>
-                <svg className="w-5 h-5 text-violet-400 group-hover:text-violet-600 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-violet-400/20 to-purple-400/20 rounded-full -translate-y-1/2 translate-x-1/2" />
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center mb-4 shadow-lg shadow-violet-500/30">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
               </div>
-              <p className="text-stone-500 text-sm leading-relaxed">Transform AI text into natural, human-sounding writing.</p>
+              <h3 className="font-bold text-stone-800 dark:text-stone-100 text-lg mb-2 relative z-10">AI Humanizer</h3>
+              <p className="text-stone-600 dark:text-stone-400 text-sm leading-relaxed relative z-10">Transform AI text into natural, human-sounding writing.</p>
             </button>
             
-            {/* Summarizer */}
+            {/* Summarizer - Emerald */}
             <button 
               onClick={() => onNavigate('signup')}
-              className="group bg-white rounded-2xl p-6 text-left border border-teal-200 hover:border-teal-300 hover:shadow-md transition-all duration-200"
+              className="group relative bg-gradient-to-br from-emerald-50 to-teal-50 rounded-3xl p-6 text-left hover:shadow-2xl hover:shadow-emerald-500/20 hover:-translate-y-2 transition-all duration-300 overflow-hidden border border-emerald-100"
             >
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="font-semibold text-teal-700 text-lg flex items-center gap-2">📝 AI Summarizer</h3>
-                <svg className="w-5 h-5 text-teal-400 group-hover:text-teal-600 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-emerald-400/20 to-teal-400/20 rounded-full -translate-y-1/2 translate-x-1/2" />
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center mb-4 shadow-lg shadow-emerald-500/30">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16m-7 6h7" />
                 </svg>
               </div>
-              <p className="text-stone-500 text-sm leading-relaxed">Turn long papers into concise bullet points or paragraphs.</p>
+              <h3 className="font-bold text-stone-800 dark:text-stone-100 text-lg mb-2 relative z-10">AI Summarizer</h3>
+              <p className="text-stone-600 dark:text-stone-400 text-sm leading-relaxed relative z-10">Turn long papers into concise bullet points or paragraphs.</p>
             </button>
             
-            {/* Quiz Generator */}
+            {/* Quiz Generator - Orange */}
             <button 
               onClick={() => onNavigate('signup')}
-              className="group bg-white rounded-2xl p-6 text-left border border-amber-200 hover:border-amber-300 hover:shadow-md transition-all duration-200"
+              className="group relative bg-gradient-to-br from-amber-50 to-orange-50 rounded-3xl p-6 text-left hover:shadow-2xl hover:shadow-amber-500/20 hover:-translate-y-2 transition-all duration-300 overflow-hidden border border-amber-100"
             >
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="font-semibold text-amber-700 text-lg flex items-center gap-2">📝 Quiz Generator</h3>
-                <svg className="w-5 h-5 text-amber-400 group-hover:text-amber-600 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-amber-400/20 to-orange-400/20 rounded-full -translate-y-1/2 translate-x-1/2" />
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center mb-4 shadow-lg shadow-amber-500/30">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
                 </svg>
               </div>
-              <p className="text-stone-500 text-sm leading-relaxed">Create quizzes, flashcards, and crosswords from your notes.</p>
+              <h3 className="font-bold text-stone-800 dark:text-stone-100 text-lg mb-2 relative z-10">Quiz Generator</h3>
+              <p className="text-stone-600 dark:text-stone-400 text-sm leading-relaxed relative z-10">Create quizzes, flashcards, and crosswords from your notes.</p>
             </button>
             
-            {/* Pomodoro Timer */}
+            {/* Flashcards - Rose */}
             <button 
               onClick={() => onNavigate('signup')}
-              className="group bg-white rounded-2xl p-6 text-left border border-stone-200 hover:border-stone-300 hover:shadow-md transition-all duration-200"
+              className="group relative bg-gradient-to-br from-pink-50 to-rose-50 rounded-3xl p-6 text-left hover:shadow-2xl hover:shadow-pink-500/20 hover:-translate-y-2 transition-all duration-300 overflow-hidden border border-pink-100"
             >
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="font-semibold text-stone-800 text-lg">Pomodoro Timer</h3>
-                <svg className="w-5 h-5 text-stone-400 group-hover:text-stone-600 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-pink-400/20 to-rose-400/20 rounded-full -translate-y-1/2 translate-x-1/2" />
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-pink-500 to-rose-600 flex items-center justify-center mb-4 shadow-lg shadow-pink-500/30">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                 </svg>
               </div>
-              <p className="text-stone-500 text-sm leading-relaxed">Stay focused with timed study sessions and breaks.</p>
+              <h3 className="font-bold text-stone-800 dark:text-stone-100 text-lg mb-2 relative z-10">Flashcards</h3>
+              <p className="text-stone-600 dark:text-stone-400 text-sm leading-relaxed relative z-10">Generate study flashcards from any content instantly.</p>
             </button>
           </div>
         </div>
       </section>
 
       {/* WriteScholar Can Help You With */}
-      <section className="py-20 sm:py-24" style={{ background: '#F0EDE8' }}>
+      <section className="py-20 sm:py-24 bg-gradient-to-b from-slate-50 to-white">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl text-stone-800 text-center mb-10 font-sans font-normal">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-800 text-center mb-10">
             WriteScholar can help you with
           </h2>
           
-          {/* Category Tabs */}
+          {/* Category Tabs - Modern pills */}
           <div className="flex flex-wrap justify-center gap-2 sm:gap-3 mb-12">
             {helpCategories.map((category) => (
               <button
                 key={category.id}
                 onClick={() => setActiveHelpCategory(category.id)}
-                className={`px-4 sm:px-6 py-2.5 rounded-full text-sm sm:text-base font-medium transition-all ${
+                className={`px-4 sm:px-6 py-2.5 rounded-2xl text-sm sm:text-base font-bold transition-all duration-200 hover:scale-105 active:scale-95 ${
                   activeHelpCategory === category.id
-                    ? 'text-white'
-                    : 'bg-white text-stone-600 hover:bg-stone-50 border border-stone-200'
+                    ? 'bg-gradient-to-r from-lime-500 to-emerald-600 text-stone-900 shadow-lg shadow-lime-500/30'
+                    : 'bg-white dark:bg-stone-800 text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-700 border-2 border-stone-200 dark:border-stone-600'
                 }`}
-                style={activeHelpCategory === category.id ? { background: '#262626' } : undefined}
               >
                 {category.label}
               </button>
             ))}
-                  </div>
+          </div>
                   
           {/* Content Area */}
-          <div className="bg-white rounded-3xl p-8 sm:p-12 lg:p-16 border border-stone-200">
+          <div className="bg-white rounded-3xl p-8 sm:p-12 lg:p-16 border border-slate-200 shadow-xl">
             <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
               {/* Text Content */}
               <div className="order-2 lg:order-1">
-                <h3 className="text-2xl sm:text-3xl font-semibold text-stone-800 mb-4">
+                <h3 className="text-2xl sm:text-3xl font-bold text-slate-800 mb-4">
                   {helpCategories.find(c => c.id === activeHelpCategory)?.title}
                 </h3>
-                <p className="text-stone-600 text-lg leading-relaxed mb-8">
+                <p className="text-slate-600 text-lg leading-relaxed mb-8">
                   {helpCategories.find(c => c.id === activeHelpCategory)?.description}
                 </p>
                 <button
                   onClick={() => onNavigate('signup')}
-                  className="inline-flex items-center px-6 py-3 text-stone-900 font-semibold rounded-full hover:opacity-90 hover:-translate-y-0.5 hover:shadow-lg transition-all duration-200"
-                  style={{ background: '#a3e635' }}
+                  className="inline-flex items-center px-6 py-3 text-white font-bold rounded-2xl bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 hover:scale-105 active:scale-95 hover:shadow-xl shadow-indigo-500/30 transition-all duration-200"
                 >
                   Start for free
                 </button>
-                  </div>
+              </div>
                   
               {/* Woman Character Illustration - Different poses for each category */}
               <div className="order-1 lg:order-2 flex justify-center">
@@ -1439,171 +1859,147 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
       </section>
 
       {/* See WriteScholar in Action */}
-      <section className="py-20 sm:py-24">
+      <section className="py-20 sm:py-24 bg-gradient-to-b from-white to-stone-50 dark:from-stone-900 dark:to-stone-900">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="relative mb-16">
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl text-stone-800 text-center mb-5" style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 400 }}>
+          <div className="relative text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-stone-800 dark:text-stone-100 mb-5">
               See WriteScholar in Action
             </h2>
-            <p className="text-lg text-stone-500 text-center max-w-2xl mx-auto">
+            <p className="text-lg text-stone-600 dark:text-stone-400 text-center max-w-2xl mx-auto">
               Real examples of how our AI analyzes and improves academic writing
             </p>
-            {/* Man character - presenting the screenshots */}
+            {/* Character - presenting gesture */}
             <div className="hidden lg:block absolute -right-4 xl:right-8 top-1/2 -translate-y-1/2 w-36 h-40">
               <svg viewBox="-10 0 160 180" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
-                {/* Body - blue shirt */}
                 <path d="M50 95 Q45 130 50 160 L90 160 Q95 130 90 95" fill="#3B82F6" />
-                {/* Neck */}
                 <rect x="62" y="70" width="16" height="28" fill="#E8B796" />
-                {/* Head */}
                 <ellipse cx="70" cy="45" rx="32" ry="35" fill="#E8B796" />
-                {/* Hair - short dark hair */}
                 <path d="M38 35 Q35 15 50 10 Q70 2 90 10 Q105 15 102 35 Q100 25 85 18 Q70 12 55 18 Q40 25 38 35" fill="#4A3728" />
                 <path d="M38 35 Q32 45 38 55" fill="#4A3728" />
                 <path d="M102 35 Q108 45 102 55" fill="#4A3728" />
-                {/* Eyes */}
                 <ellipse cx="56" cy="45" rx="5" ry="6" fill="#1F2937" />
                 <ellipse cx="84" cy="45" rx="5" ry="6" fill="#1F2937" />
                 <circle cx="57" cy="43" r="2" fill="white" />
                 <circle cx="85" cy="43" r="2" fill="white" />
-                {/* Eyebrows */}
                 <path d="M46 35 Q56 30 66 35" stroke="#4A3728" strokeWidth="2.5" fill="none" strokeLinecap="round" />
                 <path d="M74 35 Q84 30 94 35" stroke="#4A3728" strokeWidth="2.5" fill="none" strokeLinecap="round" />
-                {/* Friendly smile */}
                 <path d="M55 62 Q70 75 85 62" stroke="#1F2937" strokeWidth="2.5" fill="none" strokeLinecap="round" />
-                {/* Cheeks */}
                 <ellipse cx="42" cy="55" rx="6" ry="4" fill="#FECACA" opacity="0.5" />
                 <ellipse cx="98" cy="55" rx="6" ry="4" fill="#FECACA" opacity="0.5" />
-                {/* Arms - presenting gesture */}
                 <path d="M45 100 Q25 90 10 75" stroke="#E8B796" strokeWidth="14" fill="none" strokeLinecap="round" />
                 <path d="M95 100 Q115 95 125 85" stroke="#E8B796" strokeWidth="14" fill="none" strokeLinecap="round" />
-                {/* Hands */}
                 <ellipse cx="8" cy="73" rx="9" ry="10" fill="#E8B796" />
                 <ellipse cx="128" cy="83" rx="9" ry="10" fill="#E8B796" />
-                {/* Collar */}
                 <path d="M58 90 L70 105 L82 90" stroke="#2563EB" strokeWidth="2" fill="none" />
               </svg>
-                  </div>
-                  </div>
+            </div>
+          </div>
                   
           {/* Screenshot Showcase */}
           <div className="space-y-16">
             {/* Philosophy Essay Example */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
               <div className="order-2 lg:order-1">
-                <div className="inline-flex items-center px-3 py-1.5 bg-purple-100 text-purple-700 rounded-full text-sm font-medium mb-4">
+                <div className="inline-flex items-center px-3 py-1.5 bg-lime-100 dark:bg-lime-900/50 text-lime-700 dark:text-lime-400 rounded-full text-sm font-semibold mb-4">
                   Philosophy Essay
-                        </div>
-                <h3 className="text-2xl font-bold text-stone-800 mb-3">Philosophy Essay Analysis</h3>
-                <p className="text-stone-600 text-lg leading-relaxed mb-4">
+                </div>
+                <h3 className="text-2xl font-bold text-stone-800 dark:text-stone-100 mb-3">Philosophy Essay Analysis</h3>
+                <p className="text-stone-600 dark:text-stone-400 text-lg leading-relaxed mb-4">
                   See how WriteScholar analyzes a philosophy paper on justice and ethics, providing detailed feedback on argument structure, citation formatting, and academic tone.
                 </p>
-                <ul className="space-y-2 text-stone-600">
-                  <li className="flex items-center"><svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Strong thesis identification</li>
-                  <li className="flex items-center"><svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>APA citation validation</li>
-                  <li className="flex items-center"><svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Areas for improvement highlighted</li>
+                <ul className="space-y-2 text-stone-600 dark:text-stone-400">
+                  <li className="flex items-center"><svg className="w-5 h-5 text-lime-500 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Strong thesis identification</li>
+                  <li className="flex items-center"><svg className="w-5 h-5 text-lime-500 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>APA citation validation</li>
+                  <li className="flex items-center"><svg className="w-5 h-5 text-lime-500 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Areas for improvement highlighted</li>
                 </ul>
-                           </div>
+              </div>
               <div className="order-1 lg:order-2">
-                <div className="rounded-2xl overflow-hidden shadow-2xl border border-stone-200">
+                <div className="rounded-2xl overflow-hidden shadow-xl border border-stone-200 dark:border-stone-600">
                   <img 
                     src="/Philosophy.png" 
                     alt="Philosophy essay analysis showing document feedback with structure analysis, citation checking, and improvement suggestions"
                     className="w-full h-auto"
                   />
-                              </div>
-                              </div>
-                  </div>
+                </div>
+              </div>
+            </div>
                   
             {/* Multicultural Film Paper Example */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
               <div className="order-1 lg:order-1">
-                <div className="rounded-2xl overflow-hidden shadow-2xl border border-stone-200">
+                <div className="rounded-2xl overflow-hidden shadow-xl border border-stone-200 dark:border-stone-600">
                   <img 
                     src="/Multiculturalfilmpaper.png" 
                     alt="Multicultural film paper analysis showing comprehensive AI feedback on academic writing"
                     className="w-full h-auto"
-                          />
-                  </div>
+                  />
                 </div>
-              <div className="order-2 lg:order-2">
-                <div className="inline-flex items-center px-3 py-1.5 bg-blue-100 text-blue-700 rounded-full text-sm font-medium mb-4">
-                  Film Studies
               </div>
-                <h3 className="text-2xl font-bold text-stone-800 mb-3">Film Studies Paper Analysis</h3>
-                <p className="text-stone-600 text-lg leading-relaxed mb-4">
+              <div className="order-2 lg:order-2">
+                <div className="inline-flex items-center px-3 py-1.5 bg-cyan-100 dark:bg-cyan-900/50 text-cyan-700 dark:text-cyan-400 rounded-full text-sm font-semibold mb-4">
+                  Film Studies
+                </div>
+                <h3 className="text-2xl font-bold text-stone-800 dark:text-stone-100 mb-3">Film Studies Paper Analysis</h3>
+                <p className="text-stone-600 dark:text-stone-400 text-lg leading-relaxed mb-4">
                   Watch WriteScholar analyze a multicultural film studies paper, identifying areas for clarity improvement and ensuring proper academic formatting.
                 </p>
-                <ul className="space-y-2 text-stone-600">
-                  <li className="flex items-center"><svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Paragraph flow analysis</li>
-                  <li className="flex items-center"><svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Grammar improvements</li>
-                  <li className="flex items-center"><svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Detailed suggestions</li>
+                <ul className="space-y-2 text-stone-600 dark:text-stone-400">
+                  <li className="flex items-center"><svg className="w-5 h-5 text-lime-500 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Paragraph flow analysis</li>
+                  <li className="flex items-center"><svg className="w-5 h-5 text-lime-500 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Grammar improvements</li>
+                  <li className="flex items-center"><svg className="w-5 h-5 text-lime-500 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>Detailed suggestions</li>
                 </ul>
+              </div>
             </div>
           </div>
         </div>
-           </div>
       </section>
 
       {/* Features Grid - bigger */}
-      <section className="py-20 sm:py-24" style={{ background: '#F7F5F2' }}>
+      <section className="py-20 sm:py-24 bg-gradient-to-b from-stone-50 to-white dark:from-stone-900 dark:to-stone-900">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="relative mb-14">
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl text-stone-800 text-center mb-5" style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 400 }}>
+          <div className="relative text-center mb-14">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-stone-800 dark:text-stone-100 text-center mb-5">
               Everything You Need for Better Writing
             </h2>
-            <p className="text-lg text-stone-500 text-center max-w-2xl mx-auto">
+            <p className="text-lg text-stone-600 dark:text-stone-400 text-center max-w-2xl mx-auto">
               WriteScholar combines multiple tools to help you write better academic papers
             </p>
-            {/* Man character - waving hello */}
+            {/* Character - waving hello */}
             <div className="hidden lg:block absolute -left-16 xl:-left-8 top-1/2 -translate-y-1/2 w-28 h-36">
               <svg viewBox="0 0 140 180" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
-                {/* Body - green shirt */}
                 <path d="M50 100 Q45 130 50 160 L90 160 Q95 130 90 100" fill="#10B981" />
-                {/* Neck */}
                 <rect x="62" y="75" width="16" height="28" fill="#D4A574" />
-                {/* Head */}
                 <ellipse cx="70" cy="48" rx="32" ry="35" fill="#D4A574" />
-                {/* Hair - curly dark hair */}
                 <path d="M38 40 Q35 18 52 12 Q70 4 90 12 Q107 18 104 40 Q100 28 85 20 Q70 12 55 20 Q42 28 38 40" fill="#2C1810" />
                 <ellipse cx="40" cy="45" rx="5" ry="8" fill="#2C1810" />
                 <ellipse cx="100" cy="45" rx="5" ry="8" fill="#2C1810" />
                 <ellipse cx="48" cy="28" rx="5" ry="6" fill="#2C1810" />
                 <ellipse cx="92" cy="28" rx="5" ry="6" fill="#2C1810" />
                 <ellipse cx="70" cy="15" rx="10" ry="6" fill="#2C1810" />
-                {/* Eyes - happy/squinting */}
                 <path d="M55 48 Q60 44 65 48" stroke="#1F2937" strokeWidth="3" fill="none" strokeLinecap="round" />
                 <path d="M75 48 Q80 44 85 48" stroke="#1F2937" strokeWidth="3" fill="none" strokeLinecap="round" />
-                {/* Eyebrows - raised happy */}
                 <path d="M52 38 Q60 33 68 38" stroke="#2C1810" strokeWidth="2.5" fill="none" strokeLinecap="round" />
                 <path d="M72 38 Q80 33 88 38" stroke="#2C1810" strokeWidth="2.5" fill="none" strokeLinecap="round" />
-                {/* Big smile */}
                 <path d="M55 62 Q70 76 85 62" stroke="#1F2937" strokeWidth="2.5" fill="none" strokeLinecap="round" />
-                {/* Teeth */}
                 <path d="M60 64 L80 64" stroke="white" strokeWidth="4" strokeLinecap="round" />
-                {/* Cheeks */}
                 <ellipse cx="42" cy="58" rx="7" ry="4" fill="#FECACA" opacity="0.5" />
                 <ellipse cx="98" cy="58" rx="7" ry="4" fill="#FECACA" opacity="0.5" />
-                {/* Waving arm */}
                 <path d="M95 105 Q115 85 120 60" stroke="#D4A574" strokeWidth="14" fill="none" strokeLinecap="round" />
-                {/* Open waving hand */}
                 <ellipse cx="122" cy="55" rx="10" ry="12" fill="#D4A574" />
                 <ellipse cx="115" cy="42" rx="4" ry="8" fill="#D4A574" />
                 <ellipse cx="122" cy="38" rx="4" ry="9" fill="#D4A574" />
                 <ellipse cx="129" cy="40" rx="4" ry="8" fill="#D4A574" />
                 <ellipse cx="135" cy="46" rx="3" ry="6" fill="#D4A574" />
-                {/* Other arm at side */}
                 <path d="M45 105 Q30 115 25 135" stroke="#D4A574" strokeWidth="12" fill="none" strokeLinecap="round" />
                 <ellipse cx="23" cy="138" rx="8" ry="9" fill="#D4A574" />
-                {/* Collar */}
                 <path d="M58 95 L70 108 L82 95" stroke="#059669" strokeWidth="2" fill="none" />
               </svg>
             </div>
-             </div>
+          </div>
            
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-            {/* Structure Analysis - Asian man */}
-            <div className="bg-white border border-stone-200 rounded-2xl p-6 hover:shadow-lg hover:border-stone-300 hover:-translate-y-1 transition-all duration-200">
+            {/* Structure Analysis */}
+            <div className="bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-600 rounded-2xl p-6 hover:shadow-lg hover:border-stone-300 dark:hover:border-stone-500 hover:-translate-y-1 transition-all duration-200">
               <div className="w-14 h-14 rounded-full bg-lime-50 flex items-center justify-center mb-4 overflow-hidden">
                 <svg viewBox="0 0 56 56" fill="none" className="w-14 h-14">
                   <circle cx="28" cy="28" r="28" fill="#DBEAFE"/>
@@ -1620,12 +2016,12 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                   <ellipse cx="38" cy="35" rx="3" ry="2" fill="#FECACA" opacity="0.4"/>
                     </svg>
                   </div>
-              <h3 className="font-semibold text-stone-800 text-lg mb-2">Structure Analysis</h3>
-              <p className="text-base text-stone-600 leading-relaxed">Get feedback on your essay organization, thesis clarity, and paragraph flow.</p>
-                     </div>
-                     
-            {/* Grammar Check - Black woman */}
-            <div className="bg-white border border-stone-200 rounded-2xl p-6 hover:shadow-lg hover:border-stone-300 hover:-translate-y-1 transition-all duration-200">
+              <h3 className="font-semibold text-stone-800 dark:text-stone-100 text-lg mb-2">Structure Analysis</h3>
+              <p className="text-base text-stone-600 dark:text-stone-400 leading-relaxed">Get feedback on your essay organization, thesis clarity, and paragraph flow.</p>
+            </div>
+
+            {/* Grammar Check */}
+            <div className="bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-600 rounded-2xl p-6 hover:shadow-lg hover:border-stone-300 dark:hover:border-stone-500 hover:-translate-y-1 transition-all duration-200">
               <div className="w-14 h-14 rounded-full bg-green-50 flex items-center justify-center mb-4 overflow-hidden">
                 <svg viewBox="0 0 56 56" fill="none" className="w-14 h-14">
                   <circle cx="28" cy="28" r="28" fill="#D1FAE5"/>
@@ -1646,12 +2042,12 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                   <ellipse cx="38" cy="35" rx="3" ry="2" fill="#C9958A" opacity="0.4"/>
                 </svg>
                         </div>
-              <h3 className="font-semibold text-stone-800 text-lg mb-2">Grammar Check</h3>
-              <p className="text-base text-stone-600 leading-relaxed">Catch grammar, spelling, and punctuation errors with AI-powered suggestions.</p>
-                           </div>
-                          
-            {/* Citation Checker - White man with glasses */}
-            <div className="bg-white border border-stone-200 rounded-2xl p-6 hover:shadow-lg hover:border-stone-300 hover:-translate-y-1 transition-all duration-200">
+              <h3 className="font-semibold text-stone-800 dark:text-stone-100 text-lg mb-2">Grammar Check</h3>
+              <p className="text-base text-stone-600 dark:text-stone-400 leading-relaxed">Catch grammar, spelling, and punctuation errors with AI-powered suggestions.</p>
+            </div>
+
+            {/* Citation Checker */}
+            <div className="bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-600 rounded-2xl p-6 hover:shadow-lg hover:border-stone-300 dark:hover:border-stone-500 hover:-translate-y-1 transition-all duration-200">
               <div className="w-14 h-14 rounded-full bg-purple-50 flex items-center justify-center mb-4 overflow-hidden">
                 <svg viewBox="0 0 56 56" fill="none" className="w-14 h-14">
                   <circle cx="28" cy="28" r="28" fill="#F3E8FF"/>
@@ -1697,12 +2093,12 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                   <ellipse cx="39" cy="35" rx="3" ry="2" fill="#E8A090" opacity="0.5"/>
                 </svg>
                               </div>
-              <h3 className="font-semibold text-stone-800 text-lg mb-2">Academic Tone</h3>
-              <p className="text-base text-stone-600 leading-relaxed">Ensure your writing maintains appropriate formality and discipline conventions.</p>
-                            </div>
-          
-            {/* Clarity Feedback - South Asian man */}
-            <div className="bg-white border border-stone-200 rounded-2xl p-6 hover:shadow-lg hover:border-stone-300 hover:-translate-y-1 transition-all duration-200">
+              <h3 className="font-semibold text-stone-800 dark:text-stone-100 text-lg mb-2">Academic Tone</h3>
+              <p className="text-base text-stone-600 dark:text-stone-400 leading-relaxed">Ensure your writing maintains appropriate formality and discipline conventions.</p>
+            </div>
+
+            {/* Clarity Feedback */}
+            <div className="bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-600 rounded-2xl p-6 hover:shadow-lg hover:border-stone-300 dark:hover:border-stone-500 hover:-translate-y-1 transition-all duration-200">
               <div className="w-14 h-14 rounded-full bg-pink-50 flex items-center justify-center mb-4 overflow-hidden">
                 <svg viewBox="0 0 56 56" fill="none" className="w-14 h-14">
                   <circle cx="28" cy="28" r="28" fill="#FCE7F3"/>
@@ -1743,200 +2139,186 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                   <ellipse cx="39" cy="35" rx="3" ry="2" fill="#FECACA" opacity="0.4"/>
                 </svg>
                   </div>
-              <h3 className="font-semibold text-stone-800 text-lg mb-2">Source Finder</h3>
-              <p className="text-base text-stone-600 leading-relaxed">Search millions of academic papers to find relevant citations for your topic.</p>
-                </div>
-              </div>
-           </div>
+              <h3 className="font-semibold text-stone-800 dark:text-stone-100 text-lg mb-2">Source Finder</h3>
+              <p className="text-base text-stone-600 dark:text-stone-400 leading-relaxed">Search millions of academic papers to find relevant citations for your topic.</p>
+            </div>
+          </div>
+        </div>
       </section>
 
       {/* Free Tools Showcase */}
-      <section className="py-20 sm:py-24" style={{ background: '#FAF8F5' }}>
+      <section className="py-20 sm:py-24 bg-[#faf8f5] dark:bg-stone-900">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="relative text-center mb-12">
-            <span className="inline-block px-4 py-1.5 bg-lime-100 text-lime-700 rounded-full text-sm font-semibold mb-4">100% Free</span>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl text-stone-800 mb-5 font-sans font-normal">
+            <span className="inline-block px-4 py-1.5 bg-lime-100 dark:bg-lime-900/50 text-lime-700 dark:text-lime-400 rounded-full text-sm font-semibold mb-4">100% Free</span>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-stone-800 dark:text-stone-100 mb-5">
               Try Our Free Writing Tools
             </h2>
-            <p className="text-lg text-stone-500 max-w-2xl mx-auto">
+            <p className="text-lg text-stone-600 dark:text-stone-400 max-w-2xl mx-auto">
               No signup required. Use these tools instantly to improve your writing.
             </p>
-            {/* Character holding toolbox - positioned right */}
+            {/* Character holding toolbox */}
             <div className="hidden lg:block absolute -right-4 xl:right-8 top-1/2 -translate-y-1/2 w-28 h-36">
               <svg viewBox="0 0 140 180" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
-                {/* Body - purple shirt */}
                 <path d="M50 100 Q45 130 50 160 L90 160 Q95 130 90 100" fill="#8B5CF6" />
-                {/* Neck */}
                 <rect x="62" y="75" width="16" height="28" fill="#D4A574" />
-                {/* Head */}
                 <ellipse cx="70" cy="48" rx="32" ry="35" fill="#D4A574" />
-                {/* Hair - ponytail style */}
                 <path d="M38 40 Q35 18 52 12 Q70 4 90 12 Q107 18 104 40 Q100 28 85 20 Q70 12 55 20 Q42 28 38 40" fill="#5D3A1A" />
                 <ellipse cx="105" cy="30" rx="10" ry="14" fill="#5D3A1A" />
                 <path d="M38 40 Q32 55 38 70" fill="#5D3A1A" />
                 <path d="M102 40 Q108 55 102 70" fill="#5D3A1A" />
-                {/* Eyes - happy */}
                 <path d="M55 48 Q60 44 65 48" stroke="#1F2937" strokeWidth="3" fill="none" strokeLinecap="round" />
                 <path d="M75 48 Q80 44 85 48" stroke="#1F2937" strokeWidth="3" fill="none" strokeLinecap="round" />
-                {/* Eyebrows */}
                 <path d="M52 40 Q60 36 68 40" stroke="#5D3A1A" strokeWidth="2" fill="none" strokeLinecap="round" />
                 <path d="M72 40 Q80 36 88 40" stroke="#5D3A1A" strokeWidth="2" fill="none" strokeLinecap="round" />
-                {/* Big smile */}
                 <path d="M55 62 Q70 76 85 62" stroke="#1F2937" strokeWidth="2.5" fill="none" strokeLinecap="round" />
-                {/* Teeth */}
                 <path d="M60 64 L80 64" stroke="white" strokeWidth="4" strokeLinecap="round" />
-                {/* Cheeks */}
                 <ellipse cx="42" cy="55" rx="6" ry="4" fill="#FECACA" opacity="0.5" />
                 <ellipse cx="98" cy="55" rx="6" ry="4" fill="#FECACA" opacity="0.5" />
-                {/* Arms holding toolbox */}
                 <path d="M45 105 Q25 120 20 140" stroke="#D4A574" strokeWidth="12" fill="none" strokeLinecap="round" />
                 <path d="M95 105 Q115 120 120 140" stroke="#D4A574" strokeWidth="12" fill="none" strokeLinecap="round" />
-                {/* Hands */}
                 <ellipse cx="18" cy="143" rx="8" ry="9" fill="#D4A574" />
                 <ellipse cx="122" cy="143" rx="8" ry="9" fill="#D4A574" />
-                {/* Toolbox */}
                 <rect x="15" y="140" width="110" height="30" rx="4" fill="#10B981" />
                 <rect x="15" y="135" width="110" height="8" rx="2" fill="#059669" />
                 <rect x="55" y="130" width="30" height="8" rx="2" fill="#047857" />
-                {/* Tools poking out */}
                 <rect x="30" y="118" width="5" height="20" rx="1" fill="#FCD34D" />
                 <rect x="50" y="115" width="6" height="23" rx="1" fill="#60A5FA" />
                 <rect x="85" y="120" width="5" height="18" rx="1" fill="#F472B6" />
                 <rect x="105" y="117" width="5" height="21" rx="1" fill="#34D399" />
-                {/* Collar */}
                 <path d="M58 95 L70 108 L82 95" stroke="#7C3AED" strokeWidth="2" fill="none" />
               </svg>
             </div>
-                </div>
+          </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
             {/* Word Counter */}
             <button
               onClick={() => onNavigate('word-counter')}
-              className="group bg-white border border-stone-200 rounded-2xl p-5 sm:p-6 hover:shadow-md hover:border-stone-300 transition-all duration-200 text-left"
+              className="group bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-600 rounded-2xl p-5 sm:p-6 hover:shadow-lg hover:border-stone-300 dark:hover:border-stone-500 hover:-translate-y-1 transition-all duration-200 text-left"
             >
               <div className="w-12 h-12 bg-lime-50 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                 <svg className="w-6 h-6 text-lime-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" />
                     </svg>
                   </div>
-              <h3 className="font-semibold text-stone-800 mb-1">Word Counter</h3>
-              <p className="text-sm text-stone-500">Count words, characters & reading time</p>
+              <h3 className="font-semibold text-stone-800 dark:text-stone-100 mb-1">Word Counter</h3>
+              <p className="text-sm text-stone-500 dark:text-stone-400">Count words, characters & reading time</p>
             </button>
 
             {/* Citation Generator */}
             <button
               onClick={() => onNavigate('citation-generator-tool')}
-              className="group bg-white border border-stone-200 rounded-2xl p-5 sm:p-6 hover:shadow-md hover:border-stone-300 transition-all duration-200 text-left"
+              className="group bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-600 rounded-2xl p-5 sm:p-6 hover:shadow-lg hover:border-stone-300 dark:hover:border-stone-500 hover:-translate-y-1 transition-all duration-200 text-left"
             >
               <div className="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                 <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
                 </div>
-              <h3 className="font-semibold text-stone-800 mb-1">Citation Generator</h3>
-              <p className="text-sm text-stone-500">APA, MLA, Chicago & more</p>
+              <h3 className="font-semibold text-stone-800 dark:text-stone-100 mb-1">Citation Generator</h3>
+              <p className="text-sm text-stone-500 dark:text-stone-400">APA, MLA, Chicago & more</p>
             </button>
 
             {/* Grammar Checker */}
             <button
               onClick={() => onNavigate('grammar-checker')}
-              className="group bg-white border border-stone-200 rounded-2xl p-5 sm:p-6 hover:shadow-md hover:border-stone-300 transition-all duration-200 text-left"
+              className="group bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-600 rounded-2xl p-5 sm:p-6 hover:shadow-lg hover:border-stone-300 dark:hover:border-stone-500 hover:-translate-y-1 transition-all duration-200 text-left"
             >
               <div className="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                 <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <h3 className="font-semibold text-stone-800 mb-1">Grammar Checker</h3>
-              <p className="text-sm text-stone-500">Fix spelling & punctuation</p>
+              <h3 className="font-semibold text-stone-800 dark:text-stone-100 mb-1">Grammar Checker</h3>
+              <p className="text-sm text-stone-500 dark:text-stone-400">Fix spelling & punctuation</p>
             </button>
 
             {/* Readability Score */}
             <button
               onClick={() => onNavigate('readability-score')}
-              className="group bg-white border border-stone-200 rounded-2xl p-5 sm:p-6 hover:shadow-md hover:border-stone-300 transition-all duration-200 text-left"
+              className="group bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-600 rounded-2xl p-5 sm:p-6 hover:shadow-lg hover:border-stone-300 dark:hover:border-stone-500 hover:-translate-y-1 transition-all duration-200 text-left"
             >
               <div className="w-12 h-12 bg-orange-50 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                 <svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                 </svg>
             </div>
-              <h3 className="font-semibold text-stone-800 mb-1">Readability Score</h3>
-              <p className="text-sm text-stone-500">Flesch-Kincaid & grade level</p>
+              <h3 className="font-semibold text-stone-800 dark:text-stone-100 mb-1">Readability Score</h3>
+              <p className="text-sm text-stone-500 dark:text-stone-400">Flesch-Kincaid & grade level</p>
             </button>
 
             {/* Thesis Generator */}
             <button
               onClick={() => onNavigate('thesis-generator')}
-              className="group bg-white border border-stone-200 rounded-2xl p-5 sm:p-6 hover:shadow-md hover:border-stone-300 transition-all duration-200 text-left"
+              className="group bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-600 rounded-2xl p-5 sm:p-6 hover:shadow-lg hover:border-stone-300 dark:hover:border-stone-500 hover:-translate-y-1 transition-all duration-200 text-left"
             >
               <div className="w-12 h-12 bg-teal-50 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                 <svg className="w-6 h-6 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
           </div>
-              <h3 className="font-semibold text-stone-800 mb-1">Thesis Generator</h3>
-              <p className="text-sm text-stone-500">Create strong thesis statements</p>
+              <h3 className="font-semibold text-stone-800 dark:text-stone-100 mb-1">Thesis Generator</h3>
+              <p className="text-sm text-stone-500 dark:text-stone-400">Create strong thesis statements</p>
             </button>
 
             {/* Essay Outline */}
             <button
               onClick={() => onNavigate('essay-outline')}
-              className="group bg-white border border-stone-200 rounded-2xl p-5 sm:p-6 hover:shadow-md hover:border-stone-300 transition-all duration-200 text-left"
+              className="group bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-600 rounded-2xl p-5 sm:p-6 hover:shadow-lg hover:border-stone-300 dark:hover:border-stone-500 hover:-translate-y-1 transition-all duration-200 text-left"
             >
               <div className="w-12 h-12 bg-stone-100 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                 <svg className="w-6 h-6 text-lime-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
                 </svg>
         </div>
-              <h3 className="font-semibold text-stone-800 mb-1">Essay Outline</h3>
-              <p className="text-sm text-stone-500">Structure your essay properly</p>
+              <h3 className="font-semibold text-stone-800 dark:text-stone-100 mb-1">Essay Outline</h3>
+              <p className="text-sm text-stone-500 dark:text-stone-400">Structure your essay properly</p>
             </button>
 
             {/* Text Case Converter */}
             <button
               onClick={() => onNavigate('text-case-converter')}
-              className="group bg-white border border-stone-200 rounded-2xl p-5 sm:p-6 hover:shadow-md hover:border-stone-300 transition-all duration-200 text-left"
+              className="group bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-600 rounded-2xl p-5 sm:p-6 hover:shadow-lg hover:border-stone-300 dark:hover:border-stone-500 hover:-translate-y-1 transition-all duration-200 text-left"
             >
               <div className="w-12 h-12 bg-pink-50 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                 <svg className="w-6 h-6 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
                 </svg>
           </div>
-              <h3 className="font-semibold text-stone-800 mb-1">Case Converter</h3>
-              <p className="text-sm text-stone-500">Uppercase, lowercase & more</p>
+              <h3 className="font-semibold text-stone-800 dark:text-stone-100 mb-1">Case Converter</h3>
+              <p className="text-sm text-stone-500 dark:text-stone-400">Uppercase, lowercase & more</p>
             </button>
 
             {/* Paraphrasing Tips */}
-                  <button
+            <button
               onClick={() => onNavigate('paraphrasing-tips')}
-              className="group bg-white border border-stone-200 rounded-2xl p-5 sm:p-6 hover:shadow-md hover:border-stone-300 transition-all duration-200 text-left"
+              className="group bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-600 rounded-2xl p-5 sm:p-6 hover:shadow-lg hover:border-stone-300 dark:hover:border-stone-500 hover:-translate-y-1 transition-all duration-200 text-left"
             >
               <div className="w-12 h-12 bg-amber-50 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                 <svg className="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                       </svg>
                     </div>
-              <h3 className="font-semibold text-stone-800 mb-1">Paraphrasing Tips</h3>
-              <p className="text-sm text-stone-500">Improve vocabulary & style</p>
-                  </button>
+              <h3 className="font-semibold text-stone-800 dark:text-stone-100 mb-1">Paraphrasing Tips</h3>
+              <p className="text-sm text-stone-500 dark:text-stone-400">Improve vocabulary & style</p>
+            </button>
                       </div>
 
           {/* Premium Humanizer Card */}
           <div className="mt-6">
             <button
               onClick={() => onNavigate('humanizer')}
-              className="group w-full bg-gradient-to-r from-lime-50 to-green-50 border-2 border-lime-200 rounded-2xl p-6 sm:p-8 hover:shadow-lg hover:border-lime-400 transition-all duration-200 text-left relative overflow-hidden"
+              className="group w-full bg-gradient-to-r from-lime-50 to-emerald-50 dark:from-lime-900/30 dark:to-emerald-900/30 border-2 border-lime-200 dark:border-lime-700 rounded-2xl p-6 sm:p-8 hover:shadow-lg hover:border-lime-400 dark:hover:border-lime-500 transition-all duration-200 text-left relative overflow-hidden"
             >
               <div className="absolute top-3 right-3 px-3 py-1 bg-lime-500 text-stone-900 text-xs font-bold rounded-full">PREMIUM</div>
               <div className="flex items-center gap-6">
-                <div className="w-14 h-14 bg-lime-100 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                <div className="w-14 h-14 bg-lime-100 dark:bg-lime-900/50 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
                   <span className="text-2xl">✨</span>
-                    </div>
+                </div>
                 <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-stone-800 mb-1">AI Text Humanizer</h3>
-                  <p className="text-sm text-stone-600">Humanize ChatGPT, GPT-4, Gemini, Claude &amp; LLaMA text. Bypass AI detectors with natural, human-sounding writing.</p>
+                  <h3 className="text-lg font-semibold text-stone-800 dark:text-stone-100 mb-1">AI Text Humanizer</h3>
+                  <p className="text-sm text-stone-600 dark:text-stone-400">Humanize ChatGPT, GPT-4, Gemini, Claude &amp; LLaMA text. Bypass AI detectors with natural, human-sounding writing.</p>
                 </div>
                 <svg className="w-6 h-6 text-lime-600 flex-shrink-0 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -1948,20 +2330,20 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
       </section>
 
       {/* Blog Preview Section */}
-      <section className="py-20 sm:py-24" style={{ background: '#F0EDE8' }}>
+      <section className="py-20 sm:py-24 bg-gradient-to-b from-stone-50 to-white dark:from-stone-900 dark:to-stone-900">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-12">
             <div>
-              <h2 className="text-3xl sm:text-4xl text-stone-800 mb-3" style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 400 }}>
+              <h2 className="text-3xl sm:text-4xl font-extrabold text-stone-800 dark:text-stone-100 mb-3">
                 From Our Blog
               </h2>
-              <p className="text-lg text-stone-600">
+              <p className="text-lg text-stone-600 dark:text-stone-400">
                 Tips and guides to improve your academic writing
               </p>
             </div>
             <button
               onClick={() => onNavigate('blog')}
-              className="mt-4 sm:mt-0 inline-flex items-center text-lime-600 hover:text-lime-700 font-semibold transition-colors"
+              className="mt-4 sm:mt-0 inline-flex items-center text-lime-600 dark:text-lime-400 hover:text-lime-700 dark:hover:text-lime-300 font-semibold transition-colors"
             >
               View all posts
               <svg className="w-5 h-5 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1987,11 +2369,11 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                       </svg>
               </div>
               <div className="p-5">
-                <span className="text-xs text-stone-500 font-medium">Mar 1, 2026</span>
-                <h3 className="font-semibold text-stone-800 mt-2 mb-2 group-hover:text-lime-600 transition-colors line-clamp-2">
+                <span className="text-xs text-stone-500 dark:text-stone-400 font-medium">Mar 1, 2026</span>
+                <h3 className="font-semibold text-stone-800 dark:text-stone-100 mt-2 mb-2 group-hover:text-lime-600 dark:group-hover:text-lime-400 transition-colors line-clamp-2">
                   8 Free Writing Tools Every Student Needs in 2026
                 </h3>
-                <p className="text-sm text-stone-600 line-clamp-2">
+                <p className="text-sm text-stone-600 dark:text-stone-400 line-clamp-2">
                   Discover the best free writing tools including word counters, grammar checkers, and citation generators.
                 </p>
               </div>
@@ -2000,7 +2382,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
             {/* Blog Post 2 */}
             <button
               onClick={() => onNavigate('blog-post', 'how-to-write-a-thesis-statement')}
-              className="group bg-white border border-stone-200 rounded-2xl overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-200 text-left"
+              className="group bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-600 rounded-2xl overflow-hidden hover:shadow-xl hover:border-stone-300 dark:hover:border-stone-500 hover:-translate-y-1 transition-all duration-200 text-left"
             >
               <div className="h-40 bg-gradient-to-br from-lime-100 to-stone-100 flex items-center justify-center">
                 <svg viewBox="0 0 120 80" fill="none" className="w-24 h-16">
@@ -2013,11 +2395,11 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                       </svg>
               </div>
               <div className="p-5">
-                <span className="text-xs text-stone-500 font-medium">Feb 28, 2026</span>
-                <h3 className="font-semibold text-stone-800 mt-2 mb-2 group-hover:text-lime-600 transition-colors line-clamp-2">
+                <span className="text-xs text-stone-500 dark:text-stone-400 font-medium">Feb 28, 2026</span>
+                <h3 className="font-semibold text-stone-800 dark:text-stone-100 mt-2 mb-2 group-hover:text-lime-600 dark:group-hover:text-lime-400 transition-colors line-clamp-2">
                   How to Write a Thesis Statement: Examples for Any Essay
                 </h3>
-                <p className="text-sm text-stone-600 line-clamp-2">
+                <p className="text-sm text-stone-600 dark:text-stone-400 line-clamp-2">
                   Learn how to write clear, arguable thesis statements with examples for argumentative and analytical essays.
                 </p>
               </div>
@@ -2026,7 +2408,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
             {/* Blog Post 3 */}
             <button
               onClick={() => onNavigate('blog-post', 'how-to-write-apa-research-paper')}
-              className="group bg-white border border-stone-200 rounded-2xl overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-200 text-left"
+              className="group bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-600 rounded-2xl overflow-hidden hover:shadow-xl hover:border-stone-300 dark:hover:border-stone-500 hover:-translate-y-1 transition-all duration-200 text-left"
             >
               <div className="h-40 bg-gradient-to-br from-purple-100 to-violet-100 flex items-center justify-center">
                 <svg viewBox="0 0 120 80" fill="none" className="w-24 h-16">
@@ -2042,11 +2424,11 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                       </svg>
               </div>
               <div className="p-5">
-                <span className="text-xs text-stone-500 font-medium">Feb 1, 2026</span>
-                <h3 className="font-semibold text-stone-800 mt-2 mb-2 group-hover:text-lime-600 transition-colors line-clamp-2">
+                <span className="text-xs text-stone-500 dark:text-stone-400 font-medium">Feb 1, 2026</span>
+                <h3 className="font-semibold text-stone-800 dark:text-stone-100 mt-2 mb-2 group-hover:text-lime-600 dark:group-hover:text-lime-400 transition-colors line-clamp-2">
                   How to Write an APA Research Paper: Complete Guide
                 </h3>
-                <p className="text-sm text-stone-600 line-clamp-2">
+                <p className="text-sm text-stone-600 dark:text-stone-400 line-clamp-2">
                   Step-by-step guide to formatting an APA research paper, from title page to references.
                 </p>
               </div>
@@ -2055,198 +2437,169 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
         </div>
       </section>
 
-      {/* FAQ Section - bigger */}
-      <section className="py-20 sm:py-24" style={{ background: '#F7F5F2' }}>
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="relative mb-12">
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl text-stone-800 text-center mb-5" style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 400 }}>
-              Frequently Asked Questions
-            </h2>
-            <p className="text-lg text-stone-600 text-center">
-              Everything you need to know about WriteScholar
-            </p>
-            {/* Cute person - thinking pose */}
-            <div className="hidden lg:block absolute -right-20 xl:-right-32 top-1/2 -translate-y-1/2 w-24 h-28">
-              <svg viewBox="0 0 100 120" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
-                {/* Body */}
-                <path d="M35 70 Q30 95 35 115 L65 115 Q70 95 65 70" fill="#6366F1" />
-                {/* Neck */}
-                <rect x="44" y="52" width="12" height="20" fill="#E8B796" />
-                {/* Head */}
-                <ellipse cx="50" cy="32" rx="24" ry="26" fill="#E8B796" />
-                {/* Hair - short brown */}
-                <path d="M26 26 Q24 10 36 6 Q50 0 64 6 Q76 10 74 26 Q72 18 60 12 Q50 8 40 12 Q30 18 26 26" fill="#5D4037" />
-                <path d="M26 26 Q20 34 26 42" fill="#5D4037" />
-                <path d="M74 26 Q80 34 74 42" fill="#5D4037" />
-                {/* Eyes - looking up thinking */}
-                <ellipse cx="40" cy="30" rx="3" ry="4" fill="#1F2937" />
-                <ellipse cx="60" cy="30" rx="3" ry="4" fill="#1F2937" />
-                <circle cx="41" cy="28" r="1" fill="white" />
-                <circle cx="61" cy="28" r="1" fill="white" />
-                {/* Eyebrows - raised */}
-                <path d="M34 22 Q40 18 46 22" stroke="#5D4037" strokeWidth="2" fill="none" strokeLinecap="round" />
-                <path d="M54 22 Q60 18 66 22" stroke="#5D4037" strokeWidth="2" fill="none" strokeLinecap="round" />
-                {/* Slight smile */}
-                <path d="M42 44 Q50 50 58 44" stroke="#1F2937" strokeWidth="2" fill="none" strokeLinecap="round" />
-                {/* Cheeks */}
-                <ellipse cx="32" cy="38" rx="4" ry="3" fill="#FECACA" opacity="0.5" />
-                <ellipse cx="68" cy="38" rx="4" ry="3" fill="#FECACA" opacity="0.5" />
-                {/* Thinking arm - hand on chin */}
-                <path d="M70 75 Q85 60 78 45" stroke="#E8B796" strokeWidth="10" fill="none" strokeLinecap="round" />
-                <ellipse cx="77" cy="43" rx="7" ry="8" fill="#E8B796" />
-                {/* Question mark bubble */}
-                <circle cx="88" cy="15" r="10" fill="#F3F4F6" stroke="#E5E7EB" strokeWidth="1" />
-                <text x="88" y="20" textAnchor="middle" fontSize="14" fill="#6366F1" fontWeight="bold">?</text>
-                      </svg>
-                  </div>
-                </div>
+      {/* FAQ Section - Clean modern style */}
+      <section className="py-20 sm:py-24 bg-white dark:bg-stone-900">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-center gap-6 mb-12">
+            <div className="text-center lg:text-left flex-1">
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-stone-800 dark:text-stone-100 mb-5">
+                Frequently Asked Questions
+              </h2>
+              <p className="text-lg text-stone-600 dark:text-stone-400">
+                Everything you need to know about WriteScholar
+              </p>
+            </div>
+            {/* Cute character - thoughtful pose with question mark */}
+            <div className="hidden lg:flex flex-shrink-0 w-32 h-40 items-center justify-center">
+              <svg viewBox="0 0 140 180" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+                <path d="M50 100 Q45 130 50 160 L90 160 Q95 130 90 100" fill="#60A5FA" />
+                <rect x="62" y="75" width="16" height="28" fill="#E8B796" />
+                <ellipse cx="70" cy="48" rx="32" ry="35" fill="#E8B796" />
+                <path d="M38 40 Q35 18 52 12 Q70 4 90 12 Q107 18 104 40 Q100 28 85 20 Q70 12 55 20 Q42 28 38 40" fill="#4A3728" />
+                <path d="M38 40 Q32 55 38 70" fill="#4A3728" />
+                <path d="M102 40 Q108 55 102 70" fill="#4A3728" />
+                <ellipse cx="56" cy="46" rx="5" ry="6" fill="#1F2937" />
+                <ellipse cx="84" cy="46" rx="5" ry="6" fill="#1F2937" />
+                <circle cx="57" cy="44" r="2" fill="white" />
+                <circle cx="85" cy="44" r="2" fill="white" />
+                <path d="M52 38 Q60 32 68 38" stroke="#4A3728" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+                <path d="M72 38 Q80 32 88 38" stroke="#4A3728" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+                <path d="M55 62 Q70 76 85 62" stroke="#1F2937" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+                <ellipse cx="42" cy="56" rx="6" ry="4" fill="#FECACA" opacity="0.5" />
+                <ellipse cx="98" cy="56" rx="6" ry="4" fill="#FECACA" opacity="0.5" />
+                {/* Hand to chin - thoughtful pose */}
+                <path d="M95 100 Q115 95 125 75 Q130 60 120 45" stroke="#E8B796" strokeWidth="14" fill="none" strokeLinecap="round" />
+                <ellipse cx="118" cy="42" rx="10" ry="11" fill="#E8B796" />
+                <path d="M45 100 Q30 110 25 130" stroke="#E8B796" strokeWidth="12" fill="none" strokeLinecap="round" />
+                <ellipse cx="22" cy="133" rx="8" ry="9" fill="#E8B796" />
+                {/* Question mark above head */}
+                <circle cx="70" cy="5" r="18" fill="#93C5FD" stroke="#3B82F6" strokeWidth="2" />
+                <text x="70" y="12" textAnchor="middle" fontSize="24" fill="#1E40AF" fontWeight="bold">?</text>
+                <path d="M58 95 L70 108 L82 95" stroke="#2563EB" strokeWidth="2" fill="none" />
+              </svg>
+            </div>
+          </div>
 
-          <div className="space-y-4">
+          <div className="max-w-3xl mx-auto space-y-4">
             {faqs.map((faq, idx) => (
-              <div key={idx} className="bg-white rounded-xl border border-stone-200 overflow-hidden hover:border-stone-300 hover:shadow-sm transition-all duration-200">
+              <div key={idx} className="bg-stone-50 dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-600 overflow-hidden hover:border-lime-300 dark:hover:border-lime-600 hover:shadow-lg hover:shadow-lime-500/10 transition-all duration-200">
                 <button
                   onClick={() => setOpenFAQ(openFAQ === idx ? null : idx)}
-                  className="w-full px-6 py-5 text-left flex items-center justify-between hover:bg-stone-50 transition-all duration-200"
+                  className="w-full px-6 py-5 text-left flex items-center justify-between hover:bg-stone-100 dark:hover:bg-stone-700 transition-all duration-200"
                 >
-                  <span className="font-medium text-stone-800 text-lg pr-4">{faq.question}</span>
+                  <span className="font-bold text-stone-800 dark:text-stone-100 text-lg pr-4">{faq.question}</span>
                   <svg className={`w-5 h-5 text-stone-400 flex-shrink-0 transition-transform ${openFAQ === idx ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                      </svg>
+                  </svg>
                 </button>
                 <div className={`overflow-hidden transition-all duration-300 ${openFAQ === idx ? 'max-h-56' : 'max-h-0'}`}>
-                  <div className="px-6 pb-5 text-stone-600 text-base leading-relaxed">{faq.answer}</div>
-              </div>
-            </div>
-            ))}
+                  <div className="px-6 pb-5 text-stone-600 dark:text-stone-400 text-base leading-relaxed">{faq.answer}</div>
                 </div>
               </div>
+            ))}
+          </div>
+        </div>
       </section>
 
-      {/* Final CTA - bigger */}
-      <section className="py-20 sm:py-24" style={{ background: '#FAF8F5' }}>
+      {/* Final CTA - Lime theme */}
+      <section className="py-20 sm:py-24 bg-gradient-to-b from-lime-50/50 to-white dark:from-stone-900 dark:to-stone-900 border-t border-stone-200 dark:border-stone-700">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-gradient-to-br from-lime-50 to-stone-50 rounded-3xl p-8 sm:p-12 lg:p-16 relative overflow-hidden">
-            {/* Text content - always centered */}
-            <div className="text-center relative z-10">
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-stone-800 mb-5">
-                Ready to improve your writing?
-              </h2>
-              <p className="text-lg text-stone-600 mb-10 max-w-xl mx-auto">
-                Start analyzing your essays and finding citations for free. No credit card required.
-              </p>
-                <button
-                  onClick={() => onNavigate('signup')}
-                className="inline-flex items-center px-8 py-4 bg-lime-500 hover:bg-lime-600 text-white font-semibold rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl hover:-translate-y-0.5 text-lg"
-                >
-                Start Writing Better
+          <div className="text-center">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-stone-800 dark:text-stone-100 mb-5">
+              Ready to ace your classes?
+            </h2>
+            <p className="text-lg text-stone-600 dark:text-stone-400 mb-10 max-w-xl mx-auto">
+              Join 50,000+ students using WriteScholar to study smarter. Start for free today.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+              <button
+                onClick={() => onNavigate('signup')}
+                className="inline-flex items-center justify-center px-8 py-4 bg-gradient-to-r from-lime-500 to-emerald-600 text-stone-900 font-bold rounded-2xl hover:from-lime-400 hover:to-emerald-500 hover:scale-105 active:scale-95 transition-all shadow-xl shadow-lime-500/30 text-lg"
+              >
+                Get Started Free
                 <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                 </svg>
-                </button>
-              </div>
-
-            {/* Group of characters - positioned at bottom, hidden on mobile */}
-            <div className="hidden lg:flex justify-center mt-10">
-              <svg viewBox="0 0 320 180" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-80 h-44">
+              </button>
+              <button
+                onClick={() => onNavigate('pricing')}
+                className="inline-flex items-center justify-center px-8 py-4 bg-white dark:bg-stone-800 border-2 border-stone-200 dark:border-stone-600 text-stone-800 dark:text-stone-100 font-bold rounded-2xl hover:bg-stone-50 dark:hover:bg-stone-700 hover:scale-105 active:scale-95 transition-all text-lg"
+              >
+                View Pricing
+              </button>
+            </div>
+            {/* Three cute characters - same as sign up page */}
+            <div className="flex justify-center items-end">
+              <svg viewBox="0 0 320 160" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-72 h-36">
                 {/* Person 1 - Woman with red hair (left) */}
                 <g transform="translate(0, 0)">
-                  {/* Body */}
-                  <path d="M35 90 Q30 115 35 145 L65 145 Q70 115 65 90" fill="#8B5CF6" />
-                  {/* Neck */}
-                  <rect x="43" y="70" width="14" height="22" fill="#FCD9B6" />
-                  {/* Head */}
-                  <ellipse cx="50" cy="45" rx="24" ry="28" fill="#FCD9B6" />
-                  {/* Hair - long red */}
-                  <path d="M26 38 Q22 18 36 12 Q50 4 68 12 Q82 18 78 38 Q75 28 62 22 Q50 16 38 22 Q28 28 26 38" fill="#B45309" />
-                  <path d="M26 38 Q18 65 26 95" fill="#B45309" />
-                  <path d="M74 38 Q82 65 74 95" fill="#B45309" />
-                  {/* Eyes */}
-                  <ellipse cx="40" cy="45" rx="4" ry="5" fill="#1F2937" />
-                  <ellipse cx="60" cy="45" rx="4" ry="5" fill="#1F2937" />
-                  <circle cx="41" cy="43" r="1.5" fill="white" />
-                  <circle cx="61" cy="43" r="1.5" fill="white" />
-                  {/* Smile */}
-                  <path d="M40 58 Q50 68 60 58" stroke="#1F2937" strokeWidth="2" fill="none" strokeLinecap="round" />
-                  {/* Cheeks */}
-                  <ellipse cx="30" cy="52" rx="5" ry="3" fill="#FECACA" opacity="0.5" />
-                  <ellipse cx="70" cy="52" rx="5" ry="3" fill="#FECACA" opacity="0.5" />
-                  {/* Wave arm */}
-                  <path d="M70 95 Q85 80 90 60" stroke="#FCD9B6" strokeWidth="10" fill="none" strokeLinecap="round" />
-                  <ellipse cx="92" cy="58" rx="7" ry="8" fill="#FCD9B6" />
+                  <path d="M35 80 Q30 102 35 130 L65 130 Q70 102 65 80" fill="#8B5CF6" />
+                  <rect x="43" y="62" width="14" height="20" fill="#FCD9B6" />
+                  <ellipse cx="50" cy="40" rx="22" ry="25" fill="#FCD9B6" />
+                  <path d="M28 34 Q24 16 38 10 Q50 3 66 10 Q78 16 74 34 Q71 25 60 20 Q50 15 40 20 Q30 25 28 34" fill="#B45309" />
+                  <path d="M28 34 Q20 58 28 85" fill="#B45309" />
+                  <path d="M72 34 Q80 58 72 85" fill="#B45309" />
+                  <ellipse cx="40" cy="40" rx="4" ry="5" fill="#1F2937" />
+                  <ellipse cx="60" cy="40" rx="4" ry="5" fill="#1F2937" />
+                  <circle cx="41" cy="38" r="1.5" fill="white" />
+                  <circle cx="61" cy="38" r="1.5" fill="white" />
+                  <path d="M40 52 Q50 62 60 52" stroke="#1F2937" strokeWidth="2" fill="none" strokeLinecap="round" />
+                  <ellipse cx="30" cy="47" rx="5" ry="3" fill="#FECACA" opacity="0.5" />
+                  <ellipse cx="70" cy="47" rx="5" ry="3" fill="#FECACA" opacity="0.5" />
+                  <path d="M70 85 Q82 72 86 55" stroke="#FCD9B6" strokeWidth="9" fill="none" strokeLinecap="round" />
+                  <ellipse cx="88" cy="53" rx="6" ry="7" fill="#FCD9B6" />
                 </g>
-                
-                {/* Person 2 - Man with glasses (center, slightly forward) */}
-                <g transform="translate(110, -10)">
-                  {/* Body */}
-                  <path d="M35 105 Q30 135 35 165 L75 165 Q80 135 75 105" fill="#3B82F6" />
-                  {/* Neck */}
-                  <rect x="47" y="82" width="16" height="26" fill="#E8B796" />
-                  {/* Head */}
-                  <ellipse cx="55" cy="52" rx="28" ry="32" fill="#E8B796" />
-                  {/* Hair - short brown */}
-                  <path d="M27 42 Q24 20 40 14 Q55 6 72 14 Q88 20 85 42 Q82 30 68 22 Q55 16 42 22 Q30 30 27 42" fill="#5D4037" />
-                  <path d="M27 42 Q20 52 27 62" fill="#5D4037" />
-                  <path d="M83 42 Q90 52 83 62" fill="#5D4037" />
-                  {/* Glasses */}
-                  <ellipse cx="42" cy="50" rx="13" ry="11" fill="none" stroke="#374151" strokeWidth="2.5" />
-                  <ellipse cx="68" cy="50" rx="13" ry="11" fill="none" stroke="#374151" strokeWidth="2.5" />
-                  <path d="M55 50 L57 50" stroke="#374151" strokeWidth="2.5" />
-                  <path d="M29 46 L22 43" stroke="#374151" strokeWidth="2.5" />
-                  <path d="M81 46 L88 43" stroke="#374151" strokeWidth="2.5" />
-                  {/* Eyes behind glasses */}
-                  <ellipse cx="42" cy="52" rx="4" ry="5" fill="#1F2937" />
-                  <ellipse cx="68" cy="52" rx="4" ry="5" fill="#1F2937" />
-                  <circle cx="43" cy="50" r="1.5" fill="white" />
-                  <circle cx="69" cy="50" r="1.5" fill="white" />
-                  {/* Eyebrows */}
-                  <path d="M30 38 Q42 32 54 38" stroke="#5D4037" strokeWidth="2" fill="none" strokeLinecap="round" />
-                  <path d="M56 38 Q68 32 80 38" stroke="#5D4037" strokeWidth="2" fill="none" strokeLinecap="round" />
-                  {/* Smile */}
-                  <path d="M42 70 Q55 82 68 70" stroke="#1F2937" strokeWidth="2.5" fill="none" strokeLinecap="round" />
-                  {/* Cheeks */}
-                  <ellipse cx="28" cy="62" rx="5" ry="3" fill="#FECACA" opacity="0.4" />
-                  <ellipse cx="82" cy="62" rx="5" ry="3" fill="#FECACA" opacity="0.4" />
-                  {/* Waving arm */}
-                  <path d="M80 110 Q95 95 100 70" stroke="#E8B796" strokeWidth="12" fill="none" strokeLinecap="round" />
-                  <ellipse cx="102" cy="68" rx="8" ry="9" fill="#E8B796" />
-                  {/* Collar */}
-                  <path d="M45 100 L55 112 L65 100" stroke="#2563EB" strokeWidth="2" fill="none" />
+                {/* Person 2 - Man with glasses (center) */}
+                <g transform="translate(110, -8)">
+                  <path d="M35 95 Q30 120 35 150 L75 150 Q80 120 75 95" fill="#3B82F6" />
+                  <rect x="47" y="74" width="16" height="24" fill="#E8B796" />
+                  <ellipse cx="55" cy="48" rx="26" ry="30" fill="#E8B796" />
+                  <path d="M29 40 Q26 20 40 14 Q55 6 70 14 Q84 20 81 40 Q78 28 66 21 Q55 15 44 21 Q32 28 29 40" fill="#5D4037" />
+                  <path d="M29 40 Q22 50 29 60" fill="#5D4037" />
+                  <path d="M81 40 Q88 50 81 60" fill="#5D4037" />
+                  <ellipse cx="42" cy="46" rx="12" ry="10" fill="none" stroke="#374151" strokeWidth="2.5" />
+                  <ellipse cx="68" cy="46" rx="12" ry="10" fill="none" stroke="#374151" strokeWidth="2.5" />
+                  <path d="M54 46 L56 46" stroke="#374151" strokeWidth="2.5" />
+                  <path d="M30 43 L24 40" stroke="#374151" strokeWidth="2.5" />
+                  <path d="M80 43 L86 40" stroke="#374151" strokeWidth="2.5" />
+                  <ellipse cx="42" cy="48" rx="4" ry="5" fill="#1F2937" />
+                  <ellipse cx="68" cy="48" rx="4" ry="5" fill="#1F2937" />
+                  <circle cx="43" cy="46" r="1.5" fill="white" />
+                  <circle cx="69" cy="46" r="1.5" fill="white" />
+                  <path d="M30 34 Q42 28 54 34" stroke="#5D4037" strokeWidth="2" fill="none" strokeLinecap="round" />
+                  <path d="M56 34 Q68 28 80 34" stroke="#5D4037" strokeWidth="2" fill="none" strokeLinecap="round" />
+                  <path d="M42 64 Q55 76 68 64" stroke="#1F2937" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+                  <ellipse cx="28" cy="56" rx="5" ry="3" fill="#FECACA" opacity="0.4" />
+                  <ellipse cx="82" cy="56" rx="5" ry="3" fill="#FECACA" opacity="0.4" />
+                  <path d="M80 100 Q92 88 96 68" stroke="#E8B796" strokeWidth="11" fill="none" strokeLinecap="round" />
+                  <ellipse cx="98" cy="66" rx="7" ry="8" fill="#E8B796" />
+                  <path d="M45 90 L55 102 L65 90" stroke="#2563EB" strokeWidth="2" fill="none" />
                 </g>
-                
                 {/* Person 3 - Woman with bun (right) */}
-                <g transform="translate(220, 5)">
-                  {/* Body */}
-                  <path d="M30 88 Q25 112 30 140 L60 140 Q65 112 60 88" fill="#10B981" />
-                  {/* Neck */}
-                  <rect x="38" y="68" width="14" height="22" fill="#D4A574" />
-                  {/* Head */}
-                  <ellipse cx="45" cy="44" rx="24" ry="26" fill="#D4A574" />
-                  {/* Hair - bun style */}
-                  <path d="M21 36 Q18 18 32 12 Q45 5 62 12 Q75 18 72 36 Q68 26 55 20 Q45 15 35 20 Q24 26 21 36" fill="#1F2937" />
-                  <ellipse cx="45" cy="6" rx="11" ry="9" fill="#1F2937" />
-                  <path d="M21 36 Q14 46 21 58" fill="#1F2937" />
-                  <path d="M69 36 Q76 46 69 58" fill="#1F2937" />
-                  {/* Eyes */}
-                  <ellipse cx="36" cy="44" rx="4" ry="5" fill="#1F2937" />
-                  <ellipse cx="54" cy="44" rx="4" ry="5" fill="#1F2937" />
-                  <circle cx="37" cy="42" r="1.5" fill="white" />
-                  <circle cx="55" cy="42" r="1.5" fill="white" />
-                  {/* Eyebrows */}
-                  <path d="M28 34 Q36 30 44 34" stroke="#1F2937" strokeWidth="2" fill="none" strokeLinecap="round" />
-                  <path d="M46 34 Q54 30 62 34" stroke="#1F2937" strokeWidth="2" fill="none" strokeLinecap="round" />
-                  {/* Smile */}
-                  <path d="M35 56 Q45 66 55 56" stroke="#1F2937" strokeWidth="2" fill="none" strokeLinecap="round" />
-                  {/* Cheeks */}
-                  <ellipse cx="25" cy="50" rx="5" ry="3" fill="#FECACA" opacity="0.5" />
-                  <ellipse cx="65" cy="50" rx="5" ry="3" fill="#FECACA" opacity="0.5" />
-                  {/* Waving arm */}
-                  <path d="M25 92 Q10 78 5 55" stroke="#D4A574" strokeWidth="10" fill="none" strokeLinecap="round" />
-                  <ellipse cx="4" cy="52" rx="7" ry="8" fill="#D4A574" />
+                <g transform="translate(220, 2)">
+                  <path d="M30 78 Q25 100 30 128 L60 128 Q65 100 60 78" fill="#10B981" />
+                  <rect x="38" y="60" width="14" height="20" fill="#D4A574" />
+                  <ellipse cx="45" cy="38" rx="22" ry="24" fill="#D4A574" />
+                  <path d="M23 32 Q20 15 33 10 Q45 4 60 10 Q72 15 69 32 Q65 23 54 18 Q45 14 36 18 Q26 23 23 32" fill="#1F2937" />
+                  <ellipse cx="45" cy="6" rx="10" ry="8" fill="#1F2937" />
+                  <path d="M23 32 Q16 42 23 52" fill="#1F2937" />
+                  <path d="M67 32 Q74 42 67 52" fill="#1F2937" />
+                  <ellipse cx="36" cy="38" rx="4" ry="5" fill="#1F2937" />
+                  <ellipse cx="54" cy="38" rx="4" ry="5" fill="#1F2937" />
+                  <circle cx="37" cy="36" r="1.5" fill="white" />
+                  <circle cx="55" cy="36" r="1.5" fill="white" />
+                  <path d="M28 30 Q36 26 44 30" stroke="#1F2937" strokeWidth="2" fill="none" strokeLinecap="round" />
+                  <path d="M46 30 Q54 26 62 30" stroke="#1F2937" strokeWidth="2" fill="none" strokeLinecap="round" />
+                  <path d="M35 50 Q45 60 55 50" stroke="#1F2937" strokeWidth="2" fill="none" strokeLinecap="round" />
+                  <ellipse cx="25" cy="44" rx="5" ry="3" fill="#FECACA" opacity="0.5" />
+                  <ellipse cx="65" cy="44" rx="5" ry="3" fill="#FECACA" opacity="0.5" />
+                  <path d="M25 82 Q12 70 8 52" stroke="#D4A574" strokeWidth="9" fill="none" strokeLinecap="round" />
+                  <ellipse cx="7" cy="50" rx="6" ry="7" fill="#D4A574" />
                 </g>
               </svg>
             </div>
-                  </div>
-                </div>
+          </div>
+        </div>
       </section>
 
       <Footer onNavigate={onNavigate} />

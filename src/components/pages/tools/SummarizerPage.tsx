@@ -180,12 +180,12 @@ const SummarizerPage = ({ onNavigate, user }: SummarizerPageProps) => {
 
   if (showFakeAnimation) {
     return (
-      <div className="min-h-screen flex flex-col" style={{ background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%)' }}>
+      <div className="min-h-screen flex flex-col bg-gradient-to-b from-stone-50 to-white dark:bg-stone-900 dark:from-stone-900 dark:to-stone-800">
         <Header onNavigate={onNavigate} user={user} />
         <main className="flex-1 flex items-center justify-center">
           <div className="text-center">
             <AnalysisAnimation message="Preparing your summary..." />
-            <p className="text-gray-500 mt-4">Please wait...</p>
+            <p className="text-stone-500 dark:text-stone-400 mt-4">Please wait...</p>
           </div>
         </main>
         <Footer onNavigate={onNavigate} />
@@ -195,15 +195,15 @@ const SummarizerPage = ({ onNavigate, user }: SummarizerPageProps) => {
 
   if (showSignupPrompt) {
     return (
-      <div className="min-h-screen flex flex-col" style={{ background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%)' }}>
+      <div className="min-h-screen flex flex-col bg-gradient-to-b from-stone-50 to-white dark:bg-stone-900 dark:from-stone-900 dark:to-stone-800">
         <Header onNavigate={onNavigate} user={user} />
         <main className="flex-1 flex items-center justify-center px-4">
-          <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center">
+          <div className="max-w-md w-full bg-white dark:bg-stone-800 rounded-2xl shadow-xl border border-stone-200 dark:border-stone-600 p-8 text-center">
             <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-teal-500 to-emerald-600 rounded-2xl flex items-center justify-center">
               <span className="text-3xl">📝</span>
             </div>
-            <h2 className="text-2xl font-bold text-stone-800 mb-2">Sign Up to Continue</h2>
-            <p className="text-stone-600 mb-6">Create a free account to access the AI Summarizer and other premium tools.</p>
+            <h2 className="text-2xl font-extrabold text-stone-800 dark:text-stone-100 mb-2">Sign Up to Continue</h2>
+            <p className="text-stone-600 dark:text-stone-400 mb-6">Create a free account to access the AI Summarizer and other premium tools.</p>
             <div className="space-y-3">
               <button
                 onClick={() => onNavigate('signup')}
@@ -232,7 +232,7 @@ const SummarizerPage = ({ onNavigate, user }: SummarizerPageProps) => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%)' }}>
+    <div className="min-h-screen flex flex-col bg-gradient-to-b from-stone-50 to-white dark:bg-stone-900 dark:from-stone-900 dark:to-stone-800">
       <Header onNavigate={onNavigate} user={user} />
       
       <main className="flex-1 w-full min-w-0 overflow-x-hidden">
@@ -262,14 +262,14 @@ const SummarizerPage = ({ onNavigate, user }: SummarizerPageProps) => {
         {/* Main Editor */}
         <div className="pb-8 sm:pb-16 px-0 sm:px-6 lg:px-8">
           <div className="max-w-6xl mx-auto">
-            <div className="bg-white rounded-2xl sm:rounded-3xl shadow-xl border border-gray-100 overflow-hidden min-w-0">
+            <div className="bg-white dark:bg-stone-800 rounded-2xl sm:rounded-3xl shadow-xl shadow-stone-100/50 dark:shadow-none border border-stone-200 dark:border-stone-600 overflow-hidden min-w-0">
               {/* Toolbar */}
-              <div className="border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white px-3 sm:px-5 py-3 sm:py-4">
+              <div className="border-b border-stone-200 dark:border-stone-600 bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 px-3 sm:px-5 py-3 sm:py-4">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
                   {/* Style Selector */}
                   <div className="flex items-center gap-2 min-w-0 overflow-x-auto w-full sm:w-auto">
-                    <span className="text-xs font-medium text-gray-500 whitespace-nowrap">Style:</span>
-                    <div className="flex gap-1 p-1 bg-gray-100 rounded-lg">
+                    <span className="text-xs font-medium text-stone-500 dark:text-stone-400 whitespace-nowrap">Style:</span>
+                    <div className="flex gap-1 p-1 bg-stone-100 dark:bg-stone-700 rounded-xl">
                       {styleOptions.map((opt) => {
                         const locked = user != null && !isPremiumUser && opt.value !== 'bullet';
                         return (
@@ -279,10 +279,10 @@ const SummarizerPage = ({ onNavigate, user }: SummarizerPageProps) => {
                             disabled={locked}
                             title={locked ? 'Premium only' : opt.description}
                             className={`px-2 sm:px-3 py-1.5 rounded-md text-xs font-medium transition-all whitespace-nowrap ${
-                              locked ? 'text-gray-300 cursor-not-allowed' :
+                              locked ? 'text-stone-400 dark:text-stone-500 cursor-not-allowed' :
                               style === opt.value
-                                ? 'bg-white text-teal-700 shadow-sm'
-                                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                                ? 'bg-white dark:bg-stone-600 text-emerald-700 dark:text-emerald-300 shadow-sm'
+                                : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-600'
                             }`}
                           >
                             {opt.label}
@@ -295,8 +295,8 @@ const SummarizerPage = ({ onNavigate, user }: SummarizerPageProps) => {
 
                   {/* Length Selector */}
                   <div className="flex items-center gap-2 min-w-0">
-                    <span className="text-xs font-medium text-gray-500 whitespace-nowrap">Length:</span>
-                    <div className="flex gap-1 p-1 bg-gray-100 rounded-lg">
+                    <span className="text-xs font-medium text-stone-500 dark:text-stone-400 whitespace-nowrap">Length:</span>
+                    <div className="flex gap-1 p-1 bg-stone-100 dark:bg-stone-700 rounded-xl">
                       {lengthOptions.map((opt) => {
                         const locked = user != null && !isPremiumUser && opt.value !== 'medium';
                         return (
@@ -306,10 +306,10 @@ const SummarizerPage = ({ onNavigate, user }: SummarizerPageProps) => {
                             disabled={locked}
                             title={locked ? 'Premium only' : opt.description}
                             className={`px-2 sm:px-3 py-1.5 rounded-md text-xs font-medium transition-all whitespace-nowrap ${
-                              locked ? 'text-gray-300 cursor-not-allowed' :
+                              locked ? 'text-stone-400 dark:text-stone-500 cursor-not-allowed' :
                               length === opt.value
-                                ? 'bg-white text-teal-700 shadow-sm'
-                                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                                ? 'bg-white dark:bg-stone-600 text-emerald-700 dark:text-emerald-300 shadow-sm'
+                                : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-600'
                             }`}
                           >
                             {opt.label}
@@ -324,7 +324,7 @@ const SummarizerPage = ({ onNavigate, user }: SummarizerPageProps) => {
                   <button
                     onClick={handleSummarize}
                     disabled={isLoading || !inputText.trim() || wordCount < 50 || wordCount > maxWords}
-                    className="w-full sm:w-auto sm:ml-auto px-4 sm:px-6 py-2 sm:py-2.5 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white font-semibold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-teal-200/50 text-sm"
+                    className="w-full sm:w-auto sm:ml-auto px-4 sm:px-6 py-2 sm:py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-emerald-200/50 dark:shadow-emerald-900/30 text-sm"
                   >
                     {isLoading ? (
                       <>
@@ -346,7 +346,7 @@ const SummarizerPage = ({ onNavigate, user }: SummarizerPageProps) => {
               </div>
 
               {/* Two-panel layout */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-gray-100">
+              <div className="grid grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-stone-200 dark:divide-stone-600">
                 {/* Left Panel: Input */}
                 <div className="flex flex-col">
                   <div className="px-3 sm:px-5 py-2.5 sm:py-3 border-b border-gray-100 bg-gradient-to-r from-gray-50/50 to-transparent flex items-center justify-between flex-wrap gap-2">
@@ -379,7 +379,7 @@ const SummarizerPage = ({ onNavigate, user }: SummarizerPageProps) => {
                       </button>
                       <button
                         onClick={handlePaste}
-                        className="flex items-center gap-1.5 px-2 py-1.5 text-xs text-gray-600 hover:text-teal-600 hover:bg-teal-50 rounded-lg transition-colors"
+                        className="flex items-center gap-1.5 px-2 py-1.5 text-xs text-stone-600 dark:text-stone-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 rounded-lg transition-colors"
                         title="Paste from clipboard"
                       >
                         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -404,7 +404,7 @@ const SummarizerPage = ({ onNavigate, user }: SummarizerPageProps) => {
                       value={inputText}
                       onChange={(e) => setInputText(e.target.value)}
                       placeholder="Paste your article, paper, or document here... (minimum 50 words)"
-                      className="w-full h-full min-h-[240px] sm:min-h-[350px] p-3 sm:p-5 text-gray-800 placeholder-gray-400 resize-none focus:outline-none text-sm sm:text-base leading-relaxed break-words"
+                      className="w-full h-full min-h-[240px] sm:min-h-[350px] p-3 sm:p-5 text-stone-800 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500 resize-none focus:outline-none text-sm sm:text-base leading-relaxed break-words"
                     />
                   </div>
                   <div className="px-3 sm:px-5 py-2.5 sm:py-3 border-t border-gray-100 bg-gray-50/50">
@@ -434,7 +434,7 @@ const SummarizerPage = ({ onNavigate, user }: SummarizerPageProps) => {
                       <div className="flex items-center gap-1">
                         <button
                           onClick={handleCopy}
-                          className="p-1.5 text-gray-400 hover:text-teal-600 hover:bg-teal-50 rounded-lg transition-colors"
+                          className="p-1.5 text-stone-400 dark:text-stone-500 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 rounded-lg transition-colors"
                           title="Copy to clipboard"
                         >
                           {copied ? (
@@ -449,7 +449,7 @@ const SummarizerPage = ({ onNavigate, user }: SummarizerPageProps) => {
                         </button>
                         <button
                           onClick={handleDownload}
-                          className="p-1.5 text-gray-400 hover:text-teal-600 hover:bg-teal-50 rounded-lg transition-colors"
+                          className="p-1.5 text-stone-400 dark:text-stone-500 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 rounded-lg transition-colors"
                           title="Download summary"
                         >
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -469,15 +469,15 @@ const SummarizerPage = ({ onNavigate, user }: SummarizerPageProps) => {
                         {summaryResult.summary}
                       </div>
                     ) : (
-                      <div className="h-full flex flex-col items-center justify-center text-gray-400">
+                      <div className="h-full flex flex-col items-center justify-center text-stone-400 dark:text-stone-500">
                         <span className="text-4xl mb-3 opacity-30">📄</span>
                         <p className="text-sm">Your summary will appear here</p>
                       </div>
                     )}
                   </div>
                   {summaryResult && (
-                    <div className="px-3 sm:px-5 py-2.5 sm:py-3 border-t border-gray-100 bg-white/50">
-                      <div className="flex items-center justify-between text-xs sm:text-sm text-gray-500">
+                    <div className="px-3 sm:px-5 py-2.5 sm:py-3 border-t border-stone-200 dark:border-stone-600 bg-white/50 dark:bg-stone-800/50">
+                      <div className="flex items-center justify-between text-xs sm:text-sm text-stone-500 dark:text-stone-400">
                         <span>{summaryResult.summaryWordCount.toLocaleString()} words</span>
                         <span className="capitalize">{summaryResult.style} • {summaryResult.length}</span>
                       </div>
@@ -498,7 +498,7 @@ const SummarizerPage = ({ onNavigate, user }: SummarizerPageProps) => {
                   {!isPremiumUser && user && (
                     <button
                       onClick={() => onNavigate('pricing')}
-                      className="mt-2 px-4 py-1.5 bg-gradient-to-r from-teal-600 to-emerald-600 text-white text-sm font-medium rounded-lg hover:from-teal-700 hover:to-emerald-700 transition-all inline-flex items-center gap-2"
+                      className="mt-2 px-4 py-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-sm font-medium rounded-lg hover:from-emerald-500 hover:to-teal-500 transition-all inline-flex items-center gap-2"
                     >
                       👑 Upgrade Now
                     </button>
@@ -514,7 +514,7 @@ const SummarizerPage = ({ onNavigate, user }: SummarizerPageProps) => {
                   <div className="flex items-center gap-3">
                     <span className="text-2xl">📝</span>
                     <div>
-                      <p className="text-teal-800 font-medium text-sm">
+                      <p className="text-emerald-800 dark:text-emerald-200 font-medium text-sm">
                         {userPlan === 'free' ? 'Free plan: 1,000 words/month • Bullet + Medium only' : 'Starter plan: 999,999 words/month • Bullet + Medium only'}
                       </p>
                       <p className="text-teal-600 text-xs mt-0.5">Upgrade to Premium for all styles, lengths, and our premium AI model</p>
@@ -522,7 +522,7 @@ const SummarizerPage = ({ onNavigate, user }: SummarizerPageProps) => {
                   </div>
                   <button
                     onClick={() => onNavigate('pricing')}
-                    className="px-4 py-1.5 bg-teal-600 text-white text-xs font-semibold rounded-lg hover:bg-teal-700 transition-all"
+                    className="px-4 py-1.5 bg-emerald-600 text-white text-xs font-semibold rounded-lg hover:bg-emerald-500 transition-all"
                   >
                     👑 View Plans
                   </button>
@@ -535,8 +535,8 @@ const SummarizerPage = ({ onNavigate, user }: SummarizerPageProps) => {
         {/* Features Section */}
         <div className="py-12 sm:py-16 px-4 sm:px-6 lg:px-8 bg-white border-t border-stone-100">
           <div className="max-w-5xl mx-auto">
-            <h2 className="text-2xl sm:text-3xl text-center text-stone-800 mb-8 sm:mb-12" style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 400 }}>
-              Why Use Our <span className="text-lime-600 italic">AI Summarizer</span>?
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-center text-stone-800 dark:text-stone-100 mb-8 sm:mb-12">
+              Why Use Our <span className="text-emerald-600 dark:text-emerald-400 italic">AI Summarizer</span>?
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
               {[
@@ -560,8 +560,8 @@ const SummarizerPage = ({ onNavigate, user }: SummarizerPageProps) => {
                   <div className="w-12 h-12 rounded-xl bg-lime-400 flex items-center justify-center mb-4 shadow-lg shadow-lime-200/50 text-2xl">
                     {feature.icon}
                   </div>
-                  <h3 className="text-lg font-semibold text-stone-800 mb-2">{feature.title}</h3>
-                  <p className="text-stone-600 text-sm leading-relaxed">{feature.description}</p>
+                  <h3 className="text-lg font-semibold text-stone-800 dark:text-stone-100 mb-2">{feature.title}</h3>
+                  <p className="text-stone-600 dark:text-stone-400 text-sm leading-relaxed">{feature.description}</p>
                 </div>
               ))}
             </div>

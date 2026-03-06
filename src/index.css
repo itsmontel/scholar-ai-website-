@@ -2,6 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  html {
+    @apply antialiased;
+  }
+  html.dark {
+    @apply bg-stone-900;
+  }
+  html:not(.dark) {
+    @apply bg-stone-50;
+  }
+}
+
 /* University Carousel Animation - 3 sets; w-max makes track width = content so -33.33% = one set; 8s = fast scroll */
 @keyframes scroll-slow {
   0% {
@@ -77,6 +89,16 @@
   letter-spacing: 0.08em;
   color: #6b7280;
   text-transform: uppercase;
+}
+
+/* Wave emoji animation */
+@keyframes wave {
+  0%, 100% { transform: rotate(0deg); }
+  15% { transform: rotate(14deg); }
+  30% { transform: rotate(-8deg); }
+  45% { transform: rotate(14deg); }
+  60% { transform: rotate(-4deg); }
+  75% { transform: rotate(10deg); }
 }
 
 /* Crater Blast animations */

@@ -6,7 +6,7 @@ interface FooterProps {
 
 const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
   return (
-    <footer className="border-t border-stone-300" style={{ background: '#262626' }}>
+    <footer className="border-t border-stone-300 dark:border-stone-700 bg-stone-800 dark:bg-stone-950">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
         <div className="grid grid-cols-2 md:grid-cols-6 gap-8 mb-12">
           {/* Logo and Description */}
