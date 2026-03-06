@@ -695,7 +695,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                       </div>
                     )},
                   ].map((card) => (
-                    <div key={card.title} className="flex-shrink-0 w-[280px] sm:w-auto sm:flex-[0_0_12.5%] snap-start">
+                    <div key={card.title} className="flex-shrink-0 w-[calc(100vw-2rem)] sm:w-auto sm:flex-[0_0_12.5%] snap-start min-w-[280px]">
                       <StudyCard
                         title={card.title}
                         desc={card.desc}
