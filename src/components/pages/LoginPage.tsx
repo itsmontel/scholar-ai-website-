@@ -20,10 +20,10 @@ const LoginPage = ({ onNavigate, onLogin }: LoginPageProps) => {
   const [forgotPasswordError, setForgotPasswordError] = useState('');
 
   const animatedTexts = [
-    "Turn good writing into great",
-    "Enhance your academic papers",
-    "Get instant AI feedback",
-    "Improve your research quality"
+    "Summarise, humanise & analyse",
+    "Powerful study tools for students",
+    "Paper analysis & so much more",
+    "Your all-in-one academic AI"
   ];
 
   React.useEffect(() => {
@@ -180,8 +180,8 @@ const LoginPage = ({ onNavigate, onLogin }: LoginPageProps) => {
             </div>
 
             {error && (
-              <div className="mb-6 p-3 bg-red-50 border border-red-200 rounded-xl">
-                <p className="text-red-600 text-sm">{error}</p>
+              <div className="mb-6 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl">
+                <p className="text-red-600 dark:text-red-400 text-sm">{error}</p>
               </div>
             )}
 
@@ -194,13 +194,13 @@ const LoginPage = ({ onNavigate, onLogin }: LoginPageProps) => {
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   onKeyDown={handleKeyDown}
                   placeholder="you@example.com"
-                  className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl focus:ring-2 focus:ring-lime-500 focus:border-transparent focus:bg-white transition-all text-sm"
+                  className="w-full px-4 py-3 bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent focus:bg-white dark:focus:bg-stone-800 transition-all text-sm text-stone-800 dark:text-stone-100"
                 />
               </div>
               
               <div>
                 <div className="flex justify-between items-center mb-1.5">
-                  <label className="block text-sm font-medium text-stone-700">Password</label>
+                  <label className="block text-sm font-medium text-stone-700 dark:text-stone-300">Password</label>
                   <button
                     type="button"
                     onClick={() => {
@@ -414,8 +414,8 @@ const LoginPage = ({ onNavigate, onLogin }: LoginPageProps) => {
             </p>
 
             {forgotPasswordError && (
-              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl">
-                <p className="text-red-600 text-sm">{forgotPasswordError}</p>
+              <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl">
+                <p className="text-red-600 dark:text-red-400 text-sm">{forgotPasswordError}</p>
               </div>
             )}
 

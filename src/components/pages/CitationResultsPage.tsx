@@ -59,7 +59,7 @@ const CitationResultsPage = ({
 
   const getAccessibilityColor = (accessibility: string) => {
     const colors: { [key: string]: string } = {
-      'Open Access': 'bg-green-50 text-green-700 border-green-200',
+      'Open Access': 'bg-violet-50 text-violet-700 border-violet-200',
       'Subscription Required': 'bg-amber-50 text-amber-700 border-amber-200',
       'Library Access': 'bg-blue-50 text-blue-700 border-blue-200'
     };
@@ -137,7 +137,7 @@ const CitationResultsPage = ({
         <div className="mb-10">
           <button
             onClick={onNewSearch}
-            className="flex items-center text-blue-600 hover:text-blue-700 mb-5 font-medium transition-colors"
+            className="flex items-center text-violet-600 hover:text-violet-700 mb-5 font-medium transition-colors"
           >
             <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -153,7 +153,7 @@ const CitationResultsPage = ({
               Topic: <span className="font-semibold text-gray-900">{searchResults.researchTopic}</span>
             </span>
             <span className="text-gray-300">•</span>
-            <span className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm font-medium">
+            <span className="px-3 py-1 bg-violet-50 text-violet-700 rounded-full text-sm font-medium">
               {searchResults.citationStyle}
             </span>
             {searchResults.yearRange && searchResults.yearRange !== 'all' && (
@@ -180,7 +180,7 @@ const CitationResultsPage = ({
               {searchResults.keywords.map((keyword, index) => (
                 <span
                   key={index}
-                  className="px-3 py-1.5 bg-purple-50 text-purple-700 rounded-lg text-sm font-medium border border-purple-200"
+                  className="px-3 py-1.5 bg-violet-50 text-violet-700 rounded-lg text-sm font-medium border border-violet-200"
                 >
                   {keyword}
                 </span>
@@ -193,7 +193,7 @@ const CitationResultsPage = ({
         {searchResults.searchStrategies && searchResults.searchStrategies.length > 0 && (
           <div className="bg-gray-50 border border-gray-200 rounded-2xl p-6 mb-6">
             <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
-              <svg className="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 mr-2 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
               Search Strategies
@@ -201,7 +201,7 @@ const CitationResultsPage = ({
             <ul className="space-y-3">
               {searchResults.searchStrategies.map((strategy, index) => (
                 <li key={index} className="flex items-start">
-                  <span className="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-bold mr-3">
+                  <span className="flex-shrink-0 w-6 h-6 bg-violet-600 text-white rounded-full flex items-center justify-center text-xs font-bold mr-3">
                     {index + 1}
                   </span>
                   <span className="text-gray-700">{strategy}</span>
@@ -215,7 +215,7 @@ const CitationResultsPage = ({
         <div className="flex justify-end mb-6">
           <button
             onClick={copyAllCitations}
-            className="flex items-center px-5 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors font-medium"
+            className="flex items-center px-5 py-2.5 bg-gradient-to-r from-indigo-500 to-violet-600 text-white rounded-xl hover:from-indigo-600 hover:to-violet-700 transition-colors font-medium"
           >
             {copiedIndex === -1 ? (
               <>
@@ -318,7 +318,7 @@ const CitationResultsPage = ({
                       title="Copy ready-to-use sentence"
                     >
                       {copiedIndex === `ready-${index}` ? (
-                        <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-4 h-4 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                         </svg>
                       ) : (
@@ -334,7 +334,7 @@ const CitationResultsPage = ({
               {/* Relevance */}
               <div className="mb-5">
                 <h3 className="font-semibold text-gray-900 mb-2 flex items-center">
-                  <svg className="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 mr-2 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   Why This Source Is Relevant

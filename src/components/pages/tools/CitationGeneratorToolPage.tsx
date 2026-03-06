@@ -431,7 +431,7 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
             value={formData.authors}
             onChange={(e) => handleInputChange('authors', e.target.value)}
             placeholder="John Smith, Jane Doe"
-            className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition-all"
+            className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
           />
           <p className="text-xs text-gray-500 mt-1">Separate multiple authors with commas</p>
         </div>
@@ -442,7 +442,7 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
             value={formData.title}
             onChange={(e) => handleInputChange('title', e.target.value)}
             placeholder="Enter the title"
-            className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition-all"
+            className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
           />
         </div>
         <div className="grid grid-cols-2 gap-3">
@@ -453,7 +453,7 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
               value={formData.year}
               onChange={(e) => handleInputChange('year', e.target.value)}
               placeholder="2024"
-              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition-all"
+              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
             />
           </div>
           <div>
@@ -463,7 +463,7 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
               value={formData.month}
               onChange={(e) => handleInputChange('month', e.target.value)}
               placeholder="January"
-              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition-all"
+              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
             />
           </div>
         </div>
@@ -481,7 +481,7 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
               value={formData.publisher}
               onChange={(e) => handleInputChange('publisher', e.target.value)}
               placeholder="Publisher name"
-              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition-all"
+              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
             />
           </div>
           <div className="grid grid-cols-2 gap-3">
@@ -492,7 +492,7 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
                 value={formData.city}
                 onChange={(e) => handleInputChange('city', e.target.value)}
                 placeholder="New York"
-                className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition-all"
+                className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
               />
             </div>
             <div>
@@ -502,7 +502,7 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
                 value={formData.edition}
                 onChange={(e) => handleInputChange('edition', e.target.value)}
                 placeholder="2nd"
-                className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition-all"
+                className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
               />
             </div>
           </div>
@@ -514,7 +514,7 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
                 value={formData.url}
                 onChange={(e) => handleInputChange('url', e.target.value)}
                 placeholder="https://... or Kindle"
-                className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition-all"
+                className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
               />
             </div>
           )}
@@ -525,7 +525,7 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
               value={formData.doi}
               onChange={(e) => handleInputChange('doi', e.target.value)}
               placeholder="10.1234/example"
-              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition-all"
+              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
             />
           </div>
         </>
@@ -543,7 +543,7 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
               value={formData.journalName}
               onChange={(e) => handleInputChange('journalName', e.target.value)}
               placeholder="Journal of Academic Research"
-              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition-all"
+              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
             />
           </div>
           <div className="grid grid-cols-3 gap-3">
@@ -554,7 +554,7 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
                 value={formData.volume}
                 onChange={(e) => handleInputChange('volume', e.target.value)}
                 placeholder="12"
-                className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition-all"
+                className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
               />
             </div>
             <div>
@@ -564,7 +564,7 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
                 value={formData.issue}
                 onChange={(e) => handleInputChange('issue', e.target.value)}
                 placeholder="3"
-                className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition-all"
+                className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
               />
             </div>
             <div>
@@ -574,7 +574,7 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
                 value={formData.pages}
                 onChange={(e) => handleInputChange('pages', e.target.value)}
                 placeholder="45-67"
-                className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition-all"
+                className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
               />
             </div>
           </div>
@@ -585,7 +585,7 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
               value={formData.doi}
               onChange={(e) => handleInputChange('doi', e.target.value)}
               placeholder="10.1234/example"
-              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition-all"
+              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
             />
           </div>
         </>
@@ -603,7 +603,7 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
               value={formData.day}
               onChange={(e) => handleInputChange('day', e.target.value)}
               placeholder="15"
-              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition-all"
+              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
             />
           </div>
           <div>
@@ -613,7 +613,7 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
               value={formData.websiteName}
               onChange={(e) => handleInputChange('websiteName', e.target.value)}
               placeholder="Website or organization name"
-              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition-all"
+              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
             />
           </div>
           <div>
@@ -623,7 +623,7 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
               value={formData.url}
               onChange={(e) => handleInputChange('url', e.target.value)}
               placeholder="https://example.com/article"
-              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition-all"
+              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
             />
           </div>
           <div>
@@ -633,7 +633,7 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
               value={formData.accessDate}
               onChange={(e) => handleInputChange('accessDate', e.target.value)}
               placeholder="January 15, 2024"
-              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition-all"
+              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
             />
           </div>
         </>
@@ -651,7 +651,7 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
               value={formData.day}
               onChange={(e) => handleInputChange('day', e.target.value)}
               placeholder="15"
-              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition-all"
+              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
             />
           </div>
           <div>
@@ -661,7 +661,7 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
               value={sourceType === 'newspaper' ? formData.newspaperName : formData.magazineName}
               onChange={(e) => handleInputChange(sourceType === 'newspaper' ? 'newspaperName' : 'magazineName', e.target.value)}
               placeholder={sourceType === 'newspaper' ? 'The New York Times' : 'Time Magazine'}
-              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition-all"
+              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
             />
           </div>
           {sourceType === 'magazine' && (
@@ -673,7 +673,7 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
                   value={formData.volume}
                   onChange={(e) => handleInputChange('volume', e.target.value)}
                   placeholder="12"
-                  className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition-all"
+                  className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
                 />
               </div>
               <div>
@@ -683,7 +683,7 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
                   value={formData.issue}
                   onChange={(e) => handleInputChange('issue', e.target.value)}
                   placeholder="3"
-                  className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition-all"
+                  className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
                 />
               </div>
             </div>
@@ -695,7 +695,7 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
               value={formData.pages}
               onChange={(e) => handleInputChange('pages', e.target.value)}
               placeholder="A1, B3"
-              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition-all"
+              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
             />
           </div>
           <div>
@@ -705,7 +705,7 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
               value={formData.url}
               onChange={(e) => handleInputChange('url', e.target.value)}
               placeholder="https://..."
-              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition-all"
+              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
             />
           </div>
         </>
@@ -723,7 +723,7 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
               value={formData.conferenceName}
               onChange={(e) => handleInputChange('conferenceName', e.target.value)}
               placeholder="International Conference on..."
-              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition-all"
+              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
             />
           </div>
           <div>
@@ -733,7 +733,7 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
               value={formData.conferenceLocation}
               onChange={(e) => handleInputChange('conferenceLocation', e.target.value)}
               placeholder="New York, USA"
-              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition-all"
+              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
             />
           </div>
           <div>
@@ -743,7 +743,7 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
               value={formData.pages}
               onChange={(e) => handleInputChange('pages', e.target.value)}
               placeholder="45-52"
-              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition-all"
+              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
             />
           </div>
           <div>
@@ -753,7 +753,7 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
               value={formData.doi}
               onChange={(e) => handleInputChange('doi', e.target.value)}
               placeholder="10.1234/example"
-              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition-all"
+              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
             />
           </div>
         </>
@@ -771,7 +771,7 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
               value={formData.university}
               onChange={(e) => handleInputChange('university', e.target.value)}
               placeholder="Harvard University"
-              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition-all"
+              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
             />
           </div>
           <div className="grid grid-cols-2 gap-3">
@@ -780,7 +780,7 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
               <select
                 value={formData.degree}
                 onChange={(e) => handleInputChange('degree', e.target.value)}
-                className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition-all"
+                className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
               >
                 <option value="">Select degree</option>
                 <option value="Doctoral dissertation">PhD Dissertation</option>
@@ -795,7 +795,7 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
                 value={formData.city}
                 onChange={(e) => handleInputChange('city', e.target.value)}
                 placeholder="Cambridge, MA"
-                className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition-all"
+                className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
               />
             </div>
           </div>
@@ -806,7 +806,7 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
               value={formData.url}
               onChange={(e) => handleInputChange('url', e.target.value)}
               placeholder="https://..."
-              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition-all"
+              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
             />
           </div>
         </>
@@ -823,7 +823,7 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
               value={formData.title}
               onChange={(e) => handleInputChange('title', e.target.value)}
               placeholder="Video title"
-              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition-all"
+              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
             />
           </div>
           <div>
@@ -833,7 +833,7 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
               value={formData.director}
               onChange={(e) => handleInputChange('director', e.target.value)}
               placeholder="Christopher Nolan"
-              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition-all"
+              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
             />
           </div>
           <div className="grid grid-cols-2 gap-3">
@@ -844,7 +844,7 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
                 value={formData.year}
                 onChange={(e) => handleInputChange('year', e.target.value)}
                 placeholder="2024"
-                className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition-all"
+                className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
               />
             </div>
             <div>
@@ -854,7 +854,7 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
                 value={formData.platform}
                 onChange={(e) => handleInputChange('platform', e.target.value)}
                 placeholder="YouTube, Netflix, etc."
-                className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition-all"
+                className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
               />
             </div>
           </div>
@@ -865,7 +865,7 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
               value={formData.url}
               onChange={(e) => handleInputChange('url', e.target.value)}
               placeholder="https://..."
-              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition-all"
+              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
             />
           </div>
         </>
@@ -882,7 +882,7 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
               value={formData.title}
               onChange={(e) => handleInputChange('title', e.target.value)}
               placeholder="The Daily"
-              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition-all"
+              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
             />
           </div>
           <div>
@@ -892,7 +892,7 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
               value={formData.episodeTitle}
               onChange={(e) => handleInputChange('episodeTitle', e.target.value)}
               placeholder="Episode title"
-              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition-all"
+              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
             />
           </div>
           <div>
@@ -902,7 +902,7 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
               value={formData.hostName}
               onChange={(e) => handleInputChange('hostName', e.target.value)}
               placeholder="Host name"
-              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition-all"
+              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
             />
           </div>
           <div className="grid grid-cols-3 gap-3">
@@ -913,7 +913,7 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
                 value={formData.year}
                 onChange={(e) => handleInputChange('year', e.target.value)}
                 placeholder="2024"
-                className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition-all"
+                className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
               />
             </div>
             <div>
@@ -923,7 +923,7 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
                 value={formData.month}
                 onChange={(e) => handleInputChange('month', e.target.value)}
                 placeholder="January"
-                className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition-all"
+                className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
               />
             </div>
             <div>
@@ -933,7 +933,7 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
                 value={formData.day}
                 onChange={(e) => handleInputChange('day', e.target.value)}
                 placeholder="15"
-                className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition-all"
+                className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
               />
             </div>
           </div>
@@ -944,7 +944,7 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
               value={formData.platform}
               onChange={(e) => handleInputChange('platform', e.target.value)}
               placeholder="Spotify, Apple Podcasts, etc."
-              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition-all"
+              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
             />
           </div>
           <div>
@@ -954,7 +954,7 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
               value={formData.url}
               onChange={(e) => handleInputChange('url', e.target.value)}
               placeholder="https://..."
-              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition-all"
+              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
             />
           </div>
         </>
@@ -972,7 +972,7 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
               value={formData.organization}
               onChange={(e) => handleInputChange('organization', e.target.value)}
               placeholder="World Health Organization"
-              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition-all"
+              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
             />
           </div>
           <div className="grid grid-cols-2 gap-3">
@@ -983,7 +983,7 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
                 value={formData.reportNumber}
                 onChange={(e) => handleInputChange('reportNumber', e.target.value)}
                 placeholder="Report No. 123"
-                className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition-all"
+                className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
               />
             </div>
             <div>
@@ -993,7 +993,7 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
                 value={formData.city}
                 onChange={(e) => handleInputChange('city', e.target.value)}
                 placeholder="Geneva"
-                className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition-all"
+                className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
               />
             </div>
           </div>
@@ -1004,7 +1004,7 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
               value={formData.publisher}
               onChange={(e) => handleInputChange('publisher', e.target.value)}
               placeholder="Publisher name"
-              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition-all"
+              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
             />
           </div>
           <div>
@@ -1014,7 +1014,7 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
               value={formData.url}
               onChange={(e) => handleInputChange('url', e.target.value)}
               placeholder="https://..."
-              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition-all"
+              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
             />
           </div>
         </>
@@ -1031,7 +1031,7 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
               value={formData.title}
               onChange={(e) => handleInputChange('title', e.target.value)}
               placeholder="Climate Change"
-              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition-all"
+              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
             />
           </div>
           <div>
@@ -1041,7 +1041,7 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
               value={formData.authors}
               onChange={(e) => handleInputChange('authors', e.target.value)}
               placeholder="John Smith (leave blank if none)"
-              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition-all"
+              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
             />
           </div>
           <div>
@@ -1051,7 +1051,7 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
               value={formData.encyclopediaName}
               onChange={(e) => handleInputChange('encyclopediaName', e.target.value)}
               placeholder="Encyclopedia Britannica"
-              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition-all"
+              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
             />
           </div>
           <div className="grid grid-cols-2 gap-3">
@@ -1062,7 +1062,7 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
                 value={formData.editorName}
                 onChange={(e) => handleInputChange('editorName', e.target.value)}
                 placeholder="Editor name"
-                className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition-all"
+                className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
               />
             </div>
             <div>
@@ -1072,7 +1072,7 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
                 value={formData.edition}
                 onChange={(e) => handleInputChange('edition', e.target.value)}
                 placeholder="15th"
-                className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition-all"
+                className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
               />
             </div>
           </div>
@@ -1084,7 +1084,7 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
                 value={formData.year}
                 onChange={(e) => handleInputChange('year', e.target.value)}
                 placeholder="2024"
-                className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition-all"
+                className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
               />
             </div>
             <div>
@@ -1094,7 +1094,7 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
                 value={formData.pages}
                 onChange={(e) => handleInputChange('pages', e.target.value)}
                 placeholder="123-130"
-                className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition-all"
+                className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
               />
             </div>
           </div>
@@ -1105,7 +1105,7 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
               value={formData.publisher}
               onChange={(e) => handleInputChange('publisher', e.target.value)}
               placeholder="Publisher name"
-              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition-all"
+              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
             />
           </div>
           <div>
@@ -1115,7 +1115,7 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
               value={formData.url}
               onChange={(e) => handleInputChange('url', e.target.value)}
               placeholder="https://..."
-              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition-all"
+              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
             />
           </div>
         </>
@@ -1130,10 +1130,10 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="citation-generator-tool" />
 
       {/* Hero Section */}
-      <section className="py-16 sm:py-20 bg-gradient-to-b from-green-50/50 to-white">
+      <section className="py-16 sm:py-20 bg-gradient-to-b from-violet-50/50 to-white">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center max-w-3xl mx-auto">
-            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-green-100 mb-6 shadow-lg shadow-green-100">
+            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-violet-100 mb-6 shadow-lg shadow-violet-100">
               <svg viewBox="0 0 56 56" fill="none" className="w-16 h-16">
                 <circle cx="28" cy="28" r="28" fill="#D1FAE5"/>
                 <ellipse cx="28" cy="30" rx="14" ry="15" fill="#8B5A2B"/>
@@ -1152,7 +1152,7 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
                 <ellipse cx="38" cy="35" rx="3" ry="2" fill="#C9958A" opacity="0.4"/>
               </svg>
             </div>
-            <span className="inline-flex items-center px-4 py-1.5 bg-green-100 text-green-700 rounded-full text-sm font-semibold mb-5">
+            <span className="inline-flex items-center px-4 py-1.5 bg-violet-100 text-violet-700 rounded-full text-sm font-semibold mb-5">
               Free Tool
             </span>
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-5 leading-tight">
@@ -1183,7 +1183,7 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
                       onClick={() => setStyle(s)}
                       className={`px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
                         style === s
-                          ? 'bg-green-600 text-white'
+                          ? 'bg-violet-600 text-white'
                           : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                       }`}
                     >
@@ -1203,7 +1203,7 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
                       onClick={() => setSourceType(type.value as SourceType)}
                       className={`px-3 py-2 rounded-xl text-xs font-medium transition-all flex flex-col items-center justify-center space-y-1 ${
                         sourceType === type.value
-                          ? 'bg-green-600 text-white'
+                          ? 'bg-violet-600 text-white'
                           : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                       }`}
                     >
@@ -1221,7 +1221,7 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
 
               <button
                 onClick={generateCitation}
-                className="w-full mt-6 px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-semibold rounded-xl hover:shadow-lg transition-all"
+                className="w-full mt-6 px-6 py-3 bg-gradient-to-r from-indigo-500 to-violet-600 text-white font-semibold rounded-xl hover:from-indigo-600 hover:to-violet-700 transition-all"
               >
                 Generate Citation
               </button>
@@ -1238,7 +1238,7 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
                       onClick={handleCopy}
                       className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                         copied
-                          ? 'bg-green-100 text-green-700'
+                          ? 'bg-violet-100 text-violet-700'
                           : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                       }`}
                     >
@@ -1258,7 +1258,7 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
               </div>
 
               {/* Style Guide */}
-              <div className="bg-gradient-to-br from-green-600 to-emerald-600 rounded-2xl p-6 text-white">
+              <div className="bg-gradient-to-br from-indigo-600 to-violet-600 rounded-2xl p-6 text-white">
                 <h3 className="text-lg font-semibold mb-4">About {style.toUpperCase()} Style</h3>
                 <div className="text-sm opacity-90 space-y-2">
                   {style === 'apa' && (
@@ -1305,19 +1305,19 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Citation Tips</h3>
                 <ul className="space-y-2 text-sm text-gray-600">
                   <li className="flex items-start space-x-2">
-                    <span className="text-green-500 mt-0.5">✓</span>
+                    <span className="text-violet-300 mt-0.5">✓</span>
                     <span>Always verify citations against official style guides</span>
                   </li>
                   <li className="flex items-start space-x-2">
-                    <span className="text-green-500 mt-0.5">✓</span>
+                    <span className="text-violet-300 mt-0.5">✓</span>
                     <span>Include DOIs for journal articles when available</span>
                   </li>
                   <li className="flex items-start space-x-2">
-                    <span className="text-green-500 mt-0.5">✓</span>
+                    <span className="text-violet-300 mt-0.5">✓</span>
                     <span>Check your institution's specific formatting requirements</span>
                   </li>
                   <li className="flex items-start space-x-2">
-                    <span className="text-green-500 mt-0.5">✓</span>
+                    <span className="text-violet-300 mt-0.5">✓</span>
                     <span>Keep track of all sources as you research</span>
                   </li>
                 </ul>

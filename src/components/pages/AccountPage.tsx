@@ -315,7 +315,7 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
                   <div className="text-stone-600 flex items-center">
                     {displayUser?.email ? displayUser.email : (displayUser ? 'Email not available' : 'Loading...')}
                     {userStats.emailVerified && (
-                      <span className="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-lime-100 text-lime-800">
+                      <span className="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-violet-100 text-violet-800">
                         <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                         </svg>
@@ -333,15 +333,15 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     placeholder="Enter username"
-                    className="w-full sm:max-w-xs px-4 py-2.5 border border-stone-200 rounded-xl focus:ring-2 focus:ring-lime-500 focus:border-lime-500 transition-all text-stone-800"
+                    className="w-full sm:max-w-xs px-4 py-2.5 border border-stone-200 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-all text-stone-800"
                   />
                   {usernameError && <p className="text-red-600 text-sm mt-1">{usernameError}</p>}
-                  {usernameSuccess && <p className="text-lime-600 text-sm mt-1">{usernameSuccess}</p>}
+                  {usernameSuccess && <p className="text-violet-600 text-sm mt-1">{usernameSuccess}</p>}
                 </div>
                 <button
                   onClick={handleSaveUsername}
                   disabled={usernameLoading || !username.trim()}
-                  className="bg-lime-400 hover:bg-lime-300 disabled:bg-stone-300 text-stone-900 px-5 py-2.5 rounded-full font-medium transition-colors shrink-0"
+                  className="bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 disabled:bg-stone-300 text-white px-5 py-2.5 rounded-full font-medium transition-colors shrink-0"
                 >
                   {usernameLoading ? 'Saving...' : 'Save'}
                 </button>
@@ -367,7 +367,7 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
                     <span className="capitalize">{userStats.subscriptionPlan}</span>
                     <span className={`ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
                       userStats.subscriptionStatus === 'active'
-                        ? 'bg-lime-100 text-lime-800'
+                        ? 'bg-violet-100 text-violet-800'
                         : 'bg-yellow-100 text-yellow-800'
                     }`}>
                       {userStats.subscriptionStatus}
@@ -377,7 +377,7 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
                 {userStats.subscriptionPlan === 'free' && (
                   <button 
                     onClick={() => onNavigate('pricing')}
-                    className="bg-lime-400 hover:bg-lime-300 text-stone-900 px-5 py-2.5 rounded-full font-medium transition-colors"
+                    className="bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white px-5 py-2.5 rounded-full font-medium transition-colors"
                   >
                     Upgrade
                   </button>
@@ -484,7 +484,7 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
                   type="password"
                   value={passwordData.currentPassword}
                   onChange={(e) => setPasswordData(prev => ({ ...prev, currentPassword: e.target.value }))}
-                  className="w-full px-4 py-3 border border-stone-200 rounded-xl focus:ring-2 focus:ring-lime-500 focus:border-lime-500 transition-all"
+                  className="w-full px-4 py-3 border border-stone-200 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-all"
                   placeholder="Enter current password"
                 />
               </div>
@@ -497,7 +497,7 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
                   type="password"
                   value={passwordData.newPassword}
                   onChange={(e) => setPasswordData(prev => ({ ...prev, newPassword: e.target.value }))}
-                  className="w-full px-4 py-3 border border-stone-200 rounded-xl focus:ring-2 focus:ring-lime-500 focus:border-lime-500 transition-all"
+                  className="w-full px-4 py-3 border border-stone-200 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-all"
                   placeholder="Enter new password"
                 />
               </div>
@@ -510,7 +510,7 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
                   type="password"
                   value={passwordData.confirmPassword}
                   onChange={(e) => setPasswordData(prev => ({ ...prev, confirmPassword: e.target.value }))}
-                  className="w-full px-4 py-3 border border-stone-200 rounded-xl focus:ring-2 focus:ring-lime-500 focus:border-lime-500 transition-all"
+                  className="w-full px-4 py-3 border border-stone-200 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-all"
                   placeholder="Confirm new password"
                 />
               </div>
@@ -523,7 +523,7 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
             )}
 
             {passwordSuccess && (
-              <div className="mt-4 p-4 bg-green-50 border border-green-200 text-green-700 rounded-xl text-sm">
+              <div className="mt-4 p-4 bg-violet-50 border border-violet-200 text-violet-700 rounded-xl text-sm">
                 {passwordSuccess}
               </div>
             )}
@@ -543,7 +543,7 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
               <button
                 onClick={handlePasswordChange}
                 disabled={passwordLoading || !passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword}
-                className="bg-lime-400 hover:bg-lime-300 disabled:bg-stone-300 text-stone-900 px-5 py-2.5 rounded-full font-medium transition-colors"
+                className="bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 disabled:bg-stone-300 text-white px-5 py-2.5 rounded-full font-medium transition-colors"
               >
                 {passwordLoading ? 'Changing...' : 'Change Password'}
               </button>

@@ -289,28 +289,65 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
   };
 
   return (
-    <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%)' }}>
+    <div className="min-h-screen bg-gradient-to-b from-blue-50/80 via-stone-50 to-white dark:from-stone-950 dark:via-stone-900 dark:to-stone-900">
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="pricing" />
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
-        {/* Header */}
-        <div className="text-center mb-10">
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl text-stone-800 mb-4" style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 400 }}>
-            Simple, <span className="text-lime-600 italic">transparent</span> pricing
-          </h1>
-          <p className="text-lg text-stone-500 mb-8 max-w-2xl mx-auto">
-            Choose the plan that fits your needs. Upgrade anytime.
-          </p>
+      {/* Hero Section - with illustration like landing page */}
+      <section className="relative py-12 sm:py-16 border-b border-stone-200/60 dark:border-stone-700/60 overflow-hidden">
+        <div className="absolute top-[30%] left-[5%] hidden xl:block text-4xl opacity-50 animate-float">💰</div>
+        <div className="absolute top-[35%] right-[6%] hidden xl:block text-3xl opacity-45 animate-float-delayed">✨</div>
+        <div className="absolute bottom-[40%] left-[6%] hidden xl:block text-3xl opacity-45 animate-float">📋</div>
+        <div className="absolute bottom-[35%] right-[5%] hidden xl:block text-4xl opacity-50 animate-float-delayed">🎯</div>
+        {/* Right illustration - pricing/checklist character */}
+        <div className="hidden lg:block absolute right-4 xl:right-12 top-1/2 -translate-y-1/2 w-24 h-28 xl:w-28 xl:h-32 z-10 opacity-90 animate-float">
+          <svg viewBox="0 0 140 160" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+            <path d="M50 95 Q45 125 50 155 L90 155 Q95 125 90 95" fill="#8B5CF6" />
+            <rect x="62" y="72" width="16" height="26" fill="#E8B796" />
+            <ellipse cx="70" cy="45" rx="30" ry="33" fill="#E8B796" />
+            <path d="M40 38 Q38 18 55 12 Q70 6 88 12 Q105 18 100 38 Q98 28 85 20 Q70 12 55 20 Q42 28 40 38" fill="#4A3728" />
+            <ellipse cx="58" cy="45" rx="4" ry="5" fill="#1F2937" />
+            <ellipse cx="82" cy="45" rx="4" ry="5" fill="#1F2937" />
+            <circle cx="59" cy="43" r="1.5" fill="white" />
+            <circle cx="83" cy="43" r="1.5" fill="white" />
+            <path d="M55 58 Q70 68 85 58" stroke="#1F2937" strokeWidth="2" fill="none" strokeLinecap="round" />
+            <path d="M45 98 Q20 100 5 115" stroke="#E8B796" strokeWidth="12" fill="none" strokeLinecap="round" />
+            <path d="M95 98 Q120 100 135 115" stroke="#E8B796" strokeWidth="12" fill="none" strokeLinecap="round" />
+            <ellipse cx="3" cy="118" rx="8" ry="9" fill="#E8B796" />
+            <ellipse cx="137" cy="118" rx="8" ry="9" fill="#E8B796" />
+            <rect x="20" y="88" width="100" height="62" rx="6" fill="#FEF3C7" stroke="#F59E0B" strokeWidth="2" />
+            <rect x="28" y="98" width="84" height="8" rx="2" fill="#FDE68A" />
+            <rect x="28" y="112" width="60" height="8" rx="2" fill="#FDE68A" />
+            <rect x="28" y="126" width="70" height="8" rx="2" fill="#FDE68A" />
+            <circle cx="100" cy="116" r="6" fill="#22C55E" stroke="white" strokeWidth="2" />
+            <path d="M97 116 L99 118 L103 114" stroke="white" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </div>
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8 lg:gap-12">
+            <div className="flex-1 text-center lg:text-left max-w-3xl mx-auto lg:mx-0">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-stone-800 dark:text-stone-100 mb-4">
+                Simple, <span className="bg-gradient-to-r from-indigo-500 to-violet-600 bg-clip-text text-transparent">transparent</span> pricing
+              </h1>
+              <p className="text-lg text-stone-500 dark:text-stone-400 max-w-2xl mx-auto lg:mx-0">
+                Choose the plan that fits your needs. Upgrade anytime.
+              </p>
+            </div>
+            <div className="hidden lg:block flex-shrink-0 w-24 h-28 xl:w-28 xl:h-32" />
+          </div>
+        </div>
+      </section>
 
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
+        <div className="text-center mb-10">
           {/* Billing Toggle */}
           <div className="flex items-center justify-center mb-12">
-            <div className="bg-stone-100 rounded-full p-1.5 flex">
+            <div className="bg-stone-100 dark:bg-stone-800 rounded-full p-1.5 flex">
               <button
                 onClick={() => setBillingCycle('monthly')}
                 className={`px-6 py-2.5 rounded-full text-base font-semibold transition-all ${
                   billingCycle === 'monthly'
-                    ? 'bg-white text-stone-800 shadow-sm'
-                    : 'text-stone-600 hover:text-stone-800'
+                    ? 'bg-white dark:bg-stone-700 text-stone-800 dark:text-stone-100 shadow-sm'
+                    : 'text-stone-600 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-100'
                 }`}
               >
                 Bill Monthly
@@ -319,12 +356,12 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
                 onClick={() => setBillingCycle('yearly')}
                 className={`px-6 py-2.5 rounded-full text-base font-semibold transition-all ${
                   billingCycle === 'yearly'
-                    ? 'bg-white text-stone-800 shadow-sm'
-                    : 'text-stone-600 hover:text-stone-800'
+                    ? 'bg-white dark:bg-stone-700 text-stone-800 dark:text-stone-100 shadow-sm'
+                    : 'text-stone-600 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-100'
                 }`}
               >
                 Bill Yearly
-                <span className="ml-2 px-2 py-1 bg-lime-100 text-lime-700 text-xs rounded-full">
+                <span className="ml-2 px-2 py-1 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-400 text-xs font-semibold rounded-full">
                   Save 17%
                 </span>
               </button>
@@ -337,15 +374,15 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
           {plans.map((plan) => (
             <div
               key={plan.id}
-              className={`relative bg-white border rounded-2xl p-8 hover:shadow-lg transition-all ${
+              className={`relative bg-white dark:bg-stone-800 border rounded-2xl p-8 hover:shadow-lg transition-all ${
                 plan.popular 
-                  ? 'border-lime-500 ring-2 ring-lime-200'
-                  : 'border-stone-200'
+                  ? 'border-indigo-500 ring-2 ring-indigo-200 dark:ring-indigo-800'
+                  : 'border-stone-200 dark:border-stone-700'
               }`}
             >
               {plan.popular && (
                 <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                  <span className="bg-lime-500 text-stone-900 px-4 py-1 rounded-full text-sm font-semibold">
+                  <span className="bg-gradient-to-r from-indigo-500 to-violet-600 text-white px-4 py-1 rounded-full text-sm font-bold shadow-lg shadow-indigo-500/25">
                     Most Popular
                   </span>
                 </div>
@@ -362,19 +399,19 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
 
               <div className="text-center mb-8">
                 <h3 className="text-2xl text-stone-800 mb-2" style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 400 }}>{plan.name}</h3>
-                <p className="text-stone-500 mb-6">{plan.description}</p>
+                <p className="text-stone-500 dark:text-stone-400 mb-6">{plan.description}</p>
                 
                 <div className="mb-4">
-                  <span className="text-4xl font-bold text-stone-800">
+                  <span className="text-4xl font-bold text-stone-800 dark:text-stone-100">
                     ${getPrice(plan)}
                   </span>
-                  <span className="text-stone-500 ml-2">
+                  <span className="text-stone-500 dark:text-stone-400 ml-2">
                     /{billingCycle === 'yearly' ? 'year' : 'month'}
                   </span>
                 </div>
 
                 {getSavings(plan) > 0 && (
-                  <div className="text-lime-600 text-sm font-medium mb-4">
+                  <div className="text-indigo-600 dark:text-indigo-400 text-sm font-medium mb-4">
                     Save {getSavings(plan)}% with yearly billing
                   </div>
                 )}
@@ -384,10 +421,10 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
                 <ul className="space-y-3">
                   {plan.features.map((feature, index) => (
                     <li key={index} className="flex items-start">
-                      <svg className="w-5 h-5 text-lime-500 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-5 h-5 text-indigo-500 dark:text-indigo-400 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
-                      <span className="text-stone-600">{feature}</span>
+                      <span className="text-stone-600 dark:text-stone-400">{feature}</span>
                     </li>
                   ))}
                 </ul>
@@ -396,12 +433,12 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
               <button
                 onClick={plan.id === currentPlan ? undefined : plan.buttonAction}
                 disabled={plan.id === currentPlan}
-                className={`w-full py-3 px-6 rounded-full font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
-                  plan.id === currentPlan
-                    ? 'bg-stone-100 text-stone-500 cursor-not-allowed'
+                className={`w-full py-3 px-6 rounded-2xl font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
+                    plan.id === currentPlan
+                    ? 'bg-stone-100 dark:bg-stone-700 text-stone-500 cursor-not-allowed'
                     : plan.popular
-                    ? 'bg-lime-400 hover:bg-lime-300 text-stone-900'
-                    : 'bg-stone-100 hover:bg-stone-200 text-stone-800'
+                    ? 'bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white shadow-lg shadow-indigo-500/25'
+                    : 'bg-stone-100 dark:bg-stone-700 hover:bg-stone-200 dark:hover:bg-stone-600 text-stone-800 dark:text-stone-100'
                 }`}
               >
                 {plan.id === currentPlan ? 'Current Plan' : plan.buttonText}
@@ -411,21 +448,21 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
         </div>
 
         {/* FAQ Section */}
-        <div className="bg-white border border-stone-200 rounded-2xl p-6 sm:p-8 mb-10">
-          <h2 className="text-xl text-stone-800 mb-6 text-center" style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 400 }}>Frequently Asked Questions</h2>
+        <div className="bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-2xl p-6 sm:p-8 mb-10">
+          <h2 className="text-xl font-extrabold text-stone-800 dark:text-stone-100 mb-6 text-center">Frequently Asked Questions</h2>
           <div className="grid md:grid-cols-2 gap-6">
             {faqs.map((faq, index) => (
               <div key={index} className="space-y-2">
-                <h3 className="font-semibold text-stone-800 text-sm">{faq.question}</h3>
-                <p className="text-stone-500 text-sm leading-relaxed">{faq.answer}</p>
+                <h3 className="font-semibold text-stone-800 dark:text-stone-100 text-sm">{faq.question}</h3>
+                <p className="text-stone-500 dark:text-stone-400 text-sm leading-relaxed">{faq.answer}</p>
               </div>
             ))}
           </div>
         </div>
 
         {/* CTA Section - Different for logged-in users */}
-        <div className="text-center bg-stone-800 rounded-2xl p-8 sm:p-10">
-          <h2 className="text-2xl text-white mb-3" style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 400 }}>
+        <div className="text-center bg-stone-800 dark:bg-stone-900 rounded-2xl p-8 sm:p-10">
+          <h2 className="text-2xl font-extrabold text-white mb-3">
             {user ? 'Start writing with AI today' : 'Ready to improve your academic writing?'}
           </h2>
           <p className="text-stone-300 mb-6 max-w-xl mx-auto">
@@ -439,13 +476,13 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
               <>
                 <button 
                   onClick={() => onNavigate('dashboard')}
-                  className="bg-lime-400 hover:bg-lime-300 text-stone-900 px-6 py-3 rounded-full font-semibold transition-colors"
+                  className="bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white px-6 py-3 rounded-2xl font-bold shadow-lg shadow-indigo-500/25 transition-all"
                 >
                   Go to Dashboard
                 </button>
                 <button 
                   onClick={() => onNavigate('contact')}
-                  className="border border-stone-500 hover:border-stone-400 text-white px-6 py-3 rounded-full font-semibold transition-colors"
+                  className="border-2 border-stone-500 hover:border-stone-400 text-white px-6 py-3 rounded-2xl font-semibold transition-colors"
                 >
                   Contact Support
                 </button>
@@ -454,13 +491,13 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
               <>
                 <button 
                   onClick={() => onNavigate('signup')}
-                  className="bg-lime-400 hover:bg-lime-300 text-stone-900 px-6 py-3 rounded-full font-semibold transition-colors"
+                  className="bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white px-6 py-3 rounded-2xl font-bold shadow-lg shadow-indigo-500/25 transition-all"
                 >
                   Start Free Trial
                 </button>
                 <button 
                   onClick={() => onNavigate('contact')}
-                  className="border border-stone-500 hover:border-stone-400 text-white px-6 py-3 rounded-full font-semibold transition-colors"
+                  className="border-2 border-stone-500 hover:border-stone-400 text-white px-6 py-3 rounded-2xl font-semibold transition-colors"
                 >
                   Contact Sales
                 </button>

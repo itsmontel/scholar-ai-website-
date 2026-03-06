@@ -237,7 +237,7 @@ const HumanizerPage = ({ onNavigate, user, onLogout }: HumanizerPageProps) => {
                 Unlimited words
               </span>
             ) : (
-              <span className="inline-flex items-center px-2.5 sm:px-3 py-1 bg-green-100 text-green-700 rounded-full text-[10px] sm:text-xs font-semibold">
+              <span className="inline-flex items-center px-2.5 sm:px-3 py-1 bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300 rounded-full text-[10px] sm:text-xs font-semibold">
                 1,000 words/month free
               </span>
             )}
@@ -450,7 +450,7 @@ const HumanizerPage = ({ onNavigate, user, onLogout }: HumanizerPageProps) => {
                             setTimeout(() => setCopied(false), 2000);
                           }}
                           className={`flex items-center gap-1 text-xs font-medium transition-all ${
-                            copied ? 'text-green-600' : 'text-violet-600 hover:text-violet-700'
+                            copied ? 'text-violet-600 dark:text-violet-400' : 'text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300'
                           }`}
                         >
                           {copied ? (
@@ -597,36 +597,36 @@ const HumanizerPage = ({ onNavigate, user, onLogout }: HumanizerPageProps) => {
             </p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            <div className="group bg-gradient-to-br from-lime-50 to-green-50 rounded-2xl p-6 border border-lime-200 hover:shadow-lg hover:shadow-lime-100/50 transition-all">
-              <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center mb-4 shadow-sm group-hover:scale-110 transition-transform">
-                <svg className="w-6 h-6 text-lime-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="group bg-gradient-to-br from-indigo-50 to-violet-50 dark:from-indigo-900/20 dark:to-violet-900/20 rounded-2xl p-6 border border-indigo-200/70 dark:border-indigo-700/40 hover:shadow-lg hover:shadow-indigo-100/50 dark:hover:shadow-indigo-900/20 transition-all">
+              <div className="w-12 h-12 bg-white dark:bg-stone-700 rounded-xl flex items-center justify-center mb-4 shadow-sm group-hover:scale-110 transition-transform">
+                <svg className="w-6 h-6 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                 </svg>
               </div>
               <h3 className="font-bold text-stone-800 dark:text-stone-100 text-base mb-2">Smart Rewriting</h3>
               <p className="text-stone-600 dark:text-stone-400 text-sm leading-relaxed">Advanced sentence restructuring and natural tone adjustments.</p>
             </div>
-            <div className="group bg-gradient-to-br from-stone-50 to-stone-100 dark:from-stone-800 dark:to-stone-700 rounded-2xl p-6 border border-stone-200 dark:border-stone-600 hover:shadow-lg hover:shadow-stone-100/50 dark:hover:shadow-stone-900/30 transition-all">
+            <div className="group bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20 rounded-2xl p-6 border border-violet-200/70 dark:border-violet-700/40 hover:shadow-lg hover:shadow-violet-100/50 dark:hover:shadow-violet-900/20 transition-all">
               <div className="w-12 h-12 bg-white dark:bg-stone-700 rounded-xl flex items-center justify-center mb-4 shadow-sm group-hover:scale-110 transition-transform">
-                <svg className="w-6 h-6 text-stone-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-6 h-6 text-violet-600 dark:text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
                 </svg>
               </div>
               <h3 className="font-bold text-stone-800 dark:text-stone-100 text-base mb-2">4 Writing Modes</h3>
               <p className="text-stone-600 dark:text-stone-400 text-sm leading-relaxed">Standard, Academic, Casual, or Creative writing styles.</p>
             </div>
-            <div className="group bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-2xl p-6 border border-green-200 dark:border-green-800/50 hover:shadow-lg hover:shadow-green-100/50 dark:hover:shadow-green-900/20 transition-all">
+            <div className="group bg-gradient-to-br from-indigo-50 to-violet-50 dark:from-indigo-900/20 dark:to-violet-900/20 rounded-2xl p-6 border border-indigo-200/70 dark:border-indigo-700/40 hover:shadow-lg hover:shadow-indigo-100/50 dark:hover:shadow-indigo-900/20 transition-all">
               <div className="w-12 h-12 bg-white dark:bg-stone-700 rounded-xl flex items-center justify-center mb-4 shadow-sm group-hover:scale-110 transition-transform">
-                <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-6 h-6 text-violet-600 dark:text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                 </svg>
               </div>
               <h3 className="font-bold text-stone-800 dark:text-stone-100 text-base mb-2">Bypasses Detectors</h3>
               <p className="text-stone-600 dark:text-stone-400 text-sm leading-relaxed">Passes GPTZero, Turnitin AI, ZeroGPT, Originality.ai.</p>
             </div>
-            <div className="group bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20 rounded-2xl p-6 border border-violet-200 dark:border-violet-800/50 hover:shadow-lg hover:shadow-violet-100/50 dark:hover:shadow-violet-900/20 transition-all">
+            <div className="group bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20 rounded-2xl p-6 border border-violet-200/70 dark:border-violet-700/40 hover:shadow-lg hover:shadow-violet-100/50 dark:hover:shadow-violet-900/20 transition-all">
               <div className="w-12 h-12 bg-white dark:bg-stone-700 rounded-xl flex items-center justify-center mb-4 shadow-sm group-hover:scale-110 transition-transform">
-                <svg className="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-6 h-6 text-violet-600 dark:text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
               </div>
@@ -684,22 +684,22 @@ const HumanizerPage = ({ onNavigate, user, onLogout }: HumanizerPageProps) => {
             </div>
             
             <h3 className="text-2xl font-bold text-stone-800 mb-2">Almost There!</h3>
-            <p className="text-stone-500 mb-6">
-              Sign up for free to humanize your text. Get <span className="font-semibold text-lime-600">1,000 words/month</span> completely free!
+            <p className="text-stone-500 dark:text-stone-400 mb-6">
+              Sign up for free to humanize your text. Get <span className="font-semibold text-violet-600 dark:text-violet-400">1,000 words/month</span> completely free!
             </p>
             
             <div className="space-y-3">
               <button
                 onClick={() => onNavigate('signup')}
-                className="w-full px-6 py-3.5 bg-lime-400 hover:bg-lime-300 text-stone-900 font-semibold rounded-full transition-all shadow-lg shadow-lime-200"
+                className="w-full px-6 py-3.5 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white font-semibold rounded-2xl transition-all shadow-lg shadow-indigo-500/25"
               >
                 Sign Up Free
               </button>
               <button
                 onClick={() => { setShowSignupPrompt(false); onNavigate('login'); }}
-                className="w-full px-6 py-3 text-stone-600 hover:text-stone-900 font-medium rounded-xl transition-colors"
+                className="w-full px-6 py-3 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 font-medium rounded-xl transition-colors"
               >
-                Already have an account? <span className="text-lime-600">Log in</span>
+                Already have an account? <span className="text-violet-600 dark:text-violet-400">Log in</span>
               </button>
             </div>
           </div>

@@ -199,7 +199,7 @@ const SummarizerPage = ({ onNavigate, user }: SummarizerPageProps) => {
         <Header onNavigate={onNavigate} user={user} />
         <main className="flex-1 flex items-center justify-center px-4">
           <div className="max-w-md w-full bg-white dark:bg-stone-800 rounded-2xl shadow-xl border border-stone-200 dark:border-stone-600 p-8 text-center">
-            <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-teal-500 to-emerald-600 rounded-2xl flex items-center justify-center">
+            <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-500/30">
               <span className="text-3xl">📝</span>
             </div>
             <h2 className="text-2xl font-extrabold text-stone-800 dark:text-stone-100 mb-2">Sign Up to Continue</h2>
@@ -207,7 +207,7 @@ const SummarizerPage = ({ onNavigate, user }: SummarizerPageProps) => {
             <div className="space-y-3">
               <button
                 onClick={() => onNavigate('signup')}
-                className="w-full py-3 px-4 bg-lime-400 text-stone-900 font-semibold rounded-full hover:bg-lime-300 transition-all"
+                className="w-full py-3 px-4 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-semibold rounded-2xl hover:from-emerald-500 hover:to-teal-500 transition-all shadow-lg shadow-emerald-500/25"
               >
                 Sign Up Free
               </button>
@@ -240,16 +240,16 @@ const SummarizerPage = ({ onNavigate, user }: SummarizerPageProps) => {
         <div className="pt-6 sm:pt-10 pb-4 sm:pb-8 px-3 sm:px-6 lg:px-8">
           <div className="max-w-5xl mx-auto text-center">
             <div className="flex items-center justify-center gap-2 sm:gap-3 mb-3 sm:mb-4 flex-wrap">
-              <span className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full bg-gradient-to-r from-teal-500 to-emerald-500 text-white text-xs font-semibold shadow-lg shadow-teal-200/50">
+              <span className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full bg-gradient-to-r from-emerald-500 to-teal-600 text-white text-xs font-semibold shadow-lg shadow-emerald-500/30">
                 👑 Premium Tool
               </span>
-              <span className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full bg-emerald-100 text-emerald-700 text-xs font-semibold">
+              <span className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 text-xs font-semibold">
                 ✨ AI-Powered
               </span>
             </div>
             
-            <h1 className="text-2xl sm:text-4xl lg:text-5xl text-stone-800 mb-3 sm:mb-4 leading-tight" style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 400 }}>
-              AI <span className="text-lime-600 italic">Summarizer</span>
+            <h1 className="text-2xl sm:text-4xl lg:text-5xl text-stone-800 dark:text-stone-100 mb-3 sm:mb-4 leading-tight" style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 400 }}>
+              AI <span className="text-emerald-600 dark:text-emerald-400 italic">Summarizer</span>
             </h1>
             
             <p className="text-sm sm:text-lg text-stone-600 max-w-2xl mx-auto leading-relaxed px-2">
@@ -265,66 +265,63 @@ const SummarizerPage = ({ onNavigate, user }: SummarizerPageProps) => {
             <div className="bg-white dark:bg-stone-800 rounded-2xl sm:rounded-3xl shadow-xl shadow-stone-100/50 dark:shadow-none border border-stone-200 dark:border-stone-600 overflow-hidden min-w-0">
               {/* Toolbar */}
               <div className="border-b border-stone-200 dark:border-stone-600 bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 px-3 sm:px-5 py-3 sm:py-4">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
-                  {/* Style Selector */}
-                  <div className="flex items-center gap-2 min-w-0 overflow-x-auto w-full sm:w-auto">
-                    <span className="text-xs font-medium text-stone-500 dark:text-stone-400 whitespace-nowrap">Style:</span>
-                    <div className="flex gap-1 p-1 bg-stone-100 dark:bg-stone-700 rounded-xl">
-                      {styleOptions.map((opt) => {
-                        const locked = user != null && !isPremiumUser && opt.value !== 'bullet';
-                        return (
-                          <button
-                            key={opt.value}
-                            onClick={() => !locked && setStyle(opt.value as any)}
-                            disabled={locked}
-                            title={locked ? 'Premium only' : opt.description}
-                            className={`px-2 sm:px-3 py-1.5 rounded-md text-xs font-medium transition-all whitespace-nowrap ${
-                              locked ? 'text-stone-400 dark:text-stone-500 cursor-not-allowed' :
-                              style === opt.value
-                                ? 'bg-white dark:bg-stone-600 text-emerald-700 dark:text-emerald-300 shadow-sm'
-                                : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-600'
-                            }`}
-                          >
-                            {opt.label}
-                            {locked && <span className="ml-1 text-[9px]">🔒</span>}
-                          </button>
-                        );
-                      })}
+                <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center justify-between gap-3 sm:gap-4">
+                  <div className="flex flex-wrap items-center gap-2 sm:gap-3 min-w-0 overflow-x-auto sm:overflow-visible">
+                    <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+                      <span className="text-xs font-medium text-stone-500 dark:text-stone-400 flex-shrink-0">Style:</span>
+                      <div className="flex items-center bg-white dark:bg-stone-700 rounded-xl px-0.5 sm:px-1 py-1 shadow-sm border border-stone-200 dark:border-stone-600">
+                        {styleOptions.map((opt) => {
+                          const locked = user != null && !isPremiumUser && opt.value !== 'bullet';
+                          return (
+                            <button
+                              key={opt.value}
+                              onClick={() => !locked && setStyle(opt.value as any)}
+                              disabled={locked}
+                              title={locked ? 'Premium only' : opt.description}
+                              className={`px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all whitespace-nowrap ${
+                                locked ? 'text-stone-400 dark:text-stone-500 cursor-not-allowed' :
+                                style === opt.value ? 'bg-emerald-600 text-white shadow-sm' : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-600'
+                              }`}
+                            >
+                              {opt.label}
+                              {locked && <span className="ml-1 text-[9px]">🔒</span>}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+                      <span className="text-xs font-medium text-stone-500 dark:text-stone-400 flex-shrink-0">Length:</span>
+                      <div className="flex items-center bg-white dark:bg-stone-700 rounded-xl px-0.5 sm:px-1 py-1 shadow-sm border border-stone-200 dark:border-stone-600">
+                        {lengthOptions.map((opt) => {
+                          const locked = user != null && !isPremiumUser && opt.value !== 'medium';
+                          return (
+                            <button
+                              key={opt.value}
+                              onClick={() => !locked && setLength(opt.value as any)}
+                              disabled={locked}
+                              title={locked ? 'Premium only' : opt.description}
+                              className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all whitespace-nowrap ${
+                                locked ? 'text-stone-400 dark:text-stone-500 cursor-not-allowed' :
+                                length === opt.value ? 'bg-emerald-600 text-white shadow-sm' : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-600'
+                              }`}
+                            >
+                              {opt.label}
+                              {locked && <span className="ml-1 text-[9px]">🔒</span>}
+                            </button>
+                          );
+                        })}
+                      </div>
                     </div>
                   </div>
-
-                  {/* Length Selector */}
-                  <div className="flex items-center gap-2 min-w-0">
-                    <span className="text-xs font-medium text-stone-500 dark:text-stone-400 whitespace-nowrap">Length:</span>
-                    <div className="flex gap-1 p-1 bg-stone-100 dark:bg-stone-700 rounded-xl">
-                      {lengthOptions.map((opt) => {
-                        const locked = user != null && !isPremiumUser && opt.value !== 'medium';
-                        return (
-                          <button
-                            key={opt.value}
-                            onClick={() => !locked && setLength(opt.value as any)}
-                            disabled={locked}
-                            title={locked ? 'Premium only' : opt.description}
-                            className={`px-2 sm:px-3 py-1.5 rounded-md text-xs font-medium transition-all whitespace-nowrap ${
-                              locked ? 'text-stone-400 dark:text-stone-500 cursor-not-allowed' :
-                              length === opt.value
-                                ? 'bg-white dark:bg-stone-600 text-emerald-700 dark:text-emerald-300 shadow-sm'
-                                : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-600'
-                            }`}
-                          >
-                            {opt.label}
-                            {locked && <span className="ml-1 text-[9px]">🔒</span>}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  {/* Summarize Button */}
                   <button
                     onClick={handleSummarize}
                     disabled={isLoading || !inputText.trim() || wordCount < 50 || wordCount > maxWords}
-                    className="w-full sm:w-auto sm:ml-auto px-4 sm:px-6 py-2 sm:py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-emerald-200/50 dark:shadow-emerald-900/30 text-sm"
+                    className={`w-full sm:w-auto px-6 py-2.5 rounded-xl flex items-center justify-center transition-all font-semibold text-sm flex-shrink-0 ${
+                      !isLoading && inputText.trim() && wordCount >= 50 && wordCount <= maxWords
+                        ? 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-lg shadow-emerald-200/50 dark:shadow-emerald-900/30 cursor-pointer'
+                        : 'bg-stone-200 dark:bg-stone-600 text-stone-400 dark:text-stone-500 cursor-not-allowed'
+                    }`}
                   >
                     {isLoading ? (
                       <>
@@ -348,11 +345,11 @@ const SummarizerPage = ({ onNavigate, user }: SummarizerPageProps) => {
               {/* Two-panel layout */}
               <div className="grid grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-stone-200 dark:divide-stone-600">
                 {/* Left Panel: Input */}
-                <div className="flex flex-col">
-                  <div className="px-3 sm:px-5 py-2.5 sm:py-3 border-b border-gray-100 bg-gradient-to-r from-gray-50/50 to-transparent flex items-center justify-between flex-wrap gap-2">
+                <div className="flex flex-col min-w-0">
+                  <div className="flex items-center justify-between px-3 sm:px-5 py-2.5 sm:py-3 bg-stone-50 dark:bg-stone-800/50 border-b border-stone-200 dark:border-stone-600">
                     <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full bg-teal-500"></div>
-                      <span className="text-sm font-semibold text-gray-700">Original Text</span>
+                      <div className="w-2 h-2 rounded-full bg-stone-400 dark:bg-stone-500"></div>
+                      <span className="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider">Original</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <input
@@ -365,11 +362,11 @@ const SummarizerPage = ({ onNavigate, user }: SummarizerPageProps) => {
                       <button
                         onClick={() => fileInputRef.current?.click()}
                         disabled={isParsing}
-                        className="flex items-center gap-2 px-3 py-2 rounded-lg bg-teal-100 text-teal-700 hover:bg-teal-200 font-semibold text-sm transition-colors disabled:opacity-50 border border-teal-200"
+                        className="flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-200 dark:hover:bg-emerald-800/50 font-semibold text-sm transition-colors disabled:opacity-50 border border-emerald-200 dark:border-emerald-700"
                         title="Upload PDF, Word, or TXT"
                       >
                         {isParsing ? (
-                          <span className="w-4 h-4 border-2 border-teal-500 border-t-transparent rounded-full animate-spin" />
+                          <span className="w-4 h-4 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
                         ) : (
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
@@ -389,7 +386,7 @@ const SummarizerPage = ({ onNavigate, user }: SummarizerPageProps) => {
                       </button>
                       <button
                         onClick={handleClear}
-                        className="flex items-center gap-1.5 px-2 py-1.5 text-xs text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                        className={`flex items-center gap-1.5 px-2 py-1.5 text-xs text-stone-600 dark:text-stone-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors ${!inputText ? 'invisible' : ''}`}
                         title="Clear text"
                       >
                         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -407,25 +404,23 @@ const SummarizerPage = ({ onNavigate, user }: SummarizerPageProps) => {
                       className="w-full h-full min-h-[240px] sm:min-h-[350px] p-3 sm:p-5 text-stone-800 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500 resize-none focus:outline-none text-sm sm:text-base leading-relaxed break-words"
                     />
                   </div>
-                  <div className="px-3 sm:px-5 py-2.5 sm:py-3 border-t border-gray-100 bg-gray-50/50">
-                    <div className="flex items-center justify-between text-xs sm:text-sm text-gray-500">
-                      <span className={wordCount < 50 || wordCount > maxWords ? 'text-amber-600' : ''}>
-                        {wordCount.toLocaleString()} words{wordCount > 0 && ` / ${maxWords.toLocaleString()} max`}
-                        {wordCount > maxWords && isFreeUser && ' — Upgrade for 5,000 words'}
-                      </span>
-                      {wordCount < 50 && <span className="text-amber-600">Minimum 50 words</span>}
-                    </div>
+                  <div className="flex items-center justify-between px-3 sm:px-5 py-2.5 sm:py-3 bg-stone-50/50 dark:bg-stone-800/30 border-t border-stone-200 dark:border-stone-600">
+                    <span className={`text-xs font-medium ${wordCount < 50 ? 'text-amber-600' : wordCount > maxWords ? 'text-red-600' : 'text-stone-500 dark:text-stone-400'}`}>
+                      {wordCount.toLocaleString()} words / {maxWords.toLocaleString()} max
+                      {wordCount < 50 && ' (min 50)'}
+                      {wordCount > maxWords && isFreeUser && ' — Upgrade for 5,000'}
+                    </span>
                   </div>
                 </div>
 
                 {/* Right Panel: Summary */}
-                <div className="flex flex-col bg-gradient-to-br from-teal-50/30 to-emerald-50/30">
-                  <div className="px-3 sm:px-5 py-2.5 sm:py-3 border-b border-gray-100 bg-gradient-to-r from-teal-50/50 to-transparent flex items-center justify-between">
+                <div className="flex flex-col bg-gradient-to-br from-emerald-50/30 to-teal-50/30 dark:from-emerald-900/10 dark:to-teal-900/10">
+                  <div className="flex items-center justify-between px-3 sm:px-5 py-2.5 sm:py-3 bg-emerald-50/50 dark:bg-emerald-900/20 border-b border-emerald-100/50 dark:border-emerald-800/30">
                     <div className="flex items-center gap-2">
                       <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
-                      <span className="text-sm font-semibold text-gray-700">Summary</span>
+                      <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider">Summary</span>
                       {summaryResult && (
-                        <span className="px-2 py-0.5 bg-emerald-100 text-emerald-700 text-xs rounded-full">
+                        <span className="px-2 py-0.5 bg-emerald-100 dark:bg-emerald-800/50 text-emerald-700 dark:text-emerald-300 text-[10px] font-bold rounded-full">
                           {Math.round((1 - summaryResult.summaryWordCount / summaryResult.originalWordCount) * 100)}% shorter
                         </span>
                       )}
@@ -438,7 +433,7 @@ const SummarizerPage = ({ onNavigate, user }: SummarizerPageProps) => {
                           title="Copy to clipboard"
                         >
                           {copied ? (
-                            <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-4 h-4 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                             </svg>
                           ) : (
@@ -510,19 +505,19 @@ const SummarizerPage = ({ onNavigate, user }: SummarizerPageProps) => {
             {/* Plan Info for non-premium users */}
             {user && !isPremiumUser && (
               <div className="mt-6 mx-3 sm:mx-0">
-                <div className="bg-gradient-to-r from-teal-50 to-emerald-50 border border-teal-200 rounded-2xl p-5 flex items-center justify-between flex-wrap gap-3">
+                <div className="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 border border-emerald-200 dark:border-emerald-700/50 rounded-2xl p-5 flex items-center justify-between flex-wrap gap-3">
                   <div className="flex items-center gap-3">
                     <span className="text-2xl">📝</span>
                     <div>
                       <p className="text-emerald-800 dark:text-emerald-200 font-medium text-sm">
                         {userPlan === 'free' ? 'Free plan: 1,000 words/month • Bullet + Medium only' : 'Starter plan: 999,999 words/month • Bullet + Medium only'}
                       </p>
-                      <p className="text-teal-600 text-xs mt-0.5">Upgrade to Premium for all styles, lengths, and our premium AI model</p>
+                      <p className="text-emerald-600 dark:text-emerald-400 text-xs mt-0.5">Upgrade to Premium for all styles, lengths, and our premium AI model</p>
                     </div>
                   </div>
                   <button
                     onClick={() => onNavigate('pricing')}
-                    className="px-4 py-1.5 bg-emerald-600 text-white text-xs font-semibold rounded-lg hover:bg-emerald-500 transition-all"
+                    className="px-4 py-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-xs font-semibold rounded-lg hover:from-emerald-500 hover:to-teal-500 transition-all"
                   >
                     👑 View Plans
                   </button>
@@ -556,8 +551,8 @@ const SummarizerPage = ({ onNavigate, user }: SummarizerPageProps) => {
                   description: 'Reduce a 20-page paper to key insights in under a minute. Focus on what matters most.'
                 }
               ].map((feature, idx) => (
-                <div key={idx} className="bg-gradient-to-br from-stone-50 to-white p-6 rounded-2xl border border-stone-200 hover:shadow-lg transition-shadow">
-                  <div className="w-12 h-12 rounded-xl bg-lime-400 flex items-center justify-center mb-4 shadow-lg shadow-lime-200/50 text-2xl">
+                <div key={idx} className="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 p-6 rounded-2xl border border-emerald-200/70 dark:border-emerald-700/40 hover:shadow-lg hover:shadow-emerald-100/50 dark:hover:shadow-emerald-900/20 transition-all">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center mb-4 shadow-lg shadow-emerald-500/30 text-2xl">
                     {feature.icon}
                   </div>
                   <h3 className="text-lg font-semibold text-stone-800 dark:text-stone-100 mb-2">{feature.title}</h3>

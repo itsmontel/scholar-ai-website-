@@ -10,23 +10,23 @@ interface WhyStudentsChoosePageProps {
 
 const WhyStudentsChoosePage: React.FC<WhyStudentsChoosePageProps> = ({ onNavigate, user, onLogout }) => {
   return (
-    <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%)' }}>
+    <div className="min-h-screen bg-gradient-to-b from-blue-50/80 via-stone-50 to-white dark:from-stone-950 dark:via-stone-900 dark:to-stone-900">
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="why-students-choose" />
 
       {/* Hero */}
-      <section className="py-16 sm:py-20 border-b border-stone-200/60">
+      <section className="py-16 sm:py-20 border-b border-stone-200/60 dark:border-stone-700/60">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center max-w-3xl mx-auto">
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl text-stone-800 mb-4 leading-tight" style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 400 }}>
-              Why Students Choose <span className="text-lime-600 italic">WriteScholar</span>
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-stone-800 dark:text-stone-100 mb-4 leading-tight">
+              Why Students Choose <span className="bg-gradient-to-r from-indigo-500 to-violet-600 bg-clip-text text-transparent">WriteScholar</span>
             </h1>
-            <p className="text-lg text-stone-500">
+            <p className="text-lg text-stone-500 dark:text-stone-400">
               See how WriteScholar compares to other popular writing tools
             </p>
-            <p className="mt-3 text-sm text-stone-500">
+            <p className="mt-3 text-sm text-stone-500 dark:text-stone-400">
               <button
                 onClick={() => onNavigate('study-tools-comparison')}
-                className="text-lime-600 hover:text-lime-700 font-medium underline underline-offset-2"
+                className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-semibold underline underline-offset-2"
               >
                 Compare study tools: WriteScholar vs Quizlet vs Knowt →
               </button>
@@ -36,7 +36,7 @@ const WhyStudentsChoosePage: React.FC<WhyStudentsChoosePageProps> = ({ onNavigat
       </section>
 
       {/* Comparison Table */}
-      <section className="py-20 sm:py-24" style={{ background: 'linear-gradient(180deg, #F5F3F0 0%, #FAF8F5 100%)' }}>
+      <section className="py-20 sm:py-24 bg-white dark:bg-stone-900/50">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="relative text-center mb-12">
             {/* Character pointing at chart */}
@@ -68,12 +68,12 @@ const WhyStudentsChoosePage: React.FC<WhyStudentsChoosePageProps> = ({ onNavigat
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-lg border border-stone-200 overflow-hidden">
+          <div className="bg-white dark:bg-stone-800 rounded-2xl shadow-lg border border-stone-200 dark:border-stone-700 overflow-hidden">
             <div className="grid grid-cols-4 bg-stone-50 border-b border-stone-200">
               <div className="p-4 sm:p-6 font-semibold text-stone-700">Feature</div>
               <div className="p-4 sm:p-6 text-center">
                 <div className="flex flex-col items-center">
-                  <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center mb-1">
+                  <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-lg flex items-center justify-center mb-1 shadow-lg shadow-indigo-500/30">
                     <span className="text-white font-bold text-sm">W</span>
                   </div>
                   <span className="font-semibold text-stone-900 text-sm sm:text-base">WriteScholar</span>
@@ -98,51 +98,51 @@ const WhyStudentsChoosePage: React.FC<WhyStudentsChoosePageProps> = ({ onNavigat
                 { feature: 'Free Tools Available', ws: '8 Tools', grammarly: 'Limited', quillbot: 'Several', alt: true },
                 { feature: 'Starting Price', ws: 'Free / $19.99', grammarly: '$12/mo', quillbot: '$9.95/mo' },
               ].map((row, i) => (
-                <div key={i} className={`grid grid-cols-4 items-center ${row.alt ? 'bg-lime-50/30' : ''}`}>
+                <div key={i} className={`grid grid-cols-4 items-center ${row.alt ? 'bg-indigo-50/30 dark:bg-indigo-900/20' : ''}`}>
                   <div className="p-4 sm:p-6">
-                    <span className="font-medium text-stone-800 text-sm sm:text-base">{row.feature}</span>
+                    <span className="font-medium text-stone-800 dark:text-stone-100 text-sm sm:text-base">{row.feature}</span>
                   </div>
                   <div className="p-4 sm:p-6 text-center">
                     {typeof row.ws === 'boolean' ? (
-                      <span className={`inline-flex items-center justify-center w-8 h-8 rounded-full ${row.ws ? 'bg-green-100' : 'bg-stone-100'}`}>
+                      <span className={`inline-flex items-center justify-center w-8 h-8 rounded-full ${row.ws ? 'bg-violet-100 dark:bg-violet-900/40' : 'bg-stone-100 dark:bg-stone-700/50'}`}>
                         {row.ws ? (
-                          <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>
+                          <svg className="w-5 h-5 text-violet-600 dark:text-violet-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>
                         ) : (
                           <svg className="w-5 h-5 text-stone-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd"/></svg>
                         )}
                       </span>
                     ) : (
-                      <span className={`inline-flex items-center justify-center px-3 py-1 rounded-full text-xs font-semibold ${row.ws === '8 Tools' ? 'bg-green-100 text-green-700' : 'font-bold text-green-600 text-sm sm:text-base'}`}>{row.ws}</span>
+                      <span className={`inline-flex items-center justify-center px-3 py-1 rounded-full text-xs font-semibold ${row.ws === '8 Tools' ? 'bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300' : 'font-bold text-violet-600 dark:text-violet-400 text-sm sm:text-base'}`}>{row.ws}</span>
                     )}
                   </div>
                   <div className="p-4 sm:p-6 text-center">
                     {typeof row.grammarly === 'boolean' ? (
-                      <span className={`inline-flex items-center justify-center w-8 h-8 rounded-full ${row.grammarly ? 'bg-green-100' : 'bg-stone-100'}`}>
+                      <span className={`inline-flex items-center justify-center w-8 h-8 rounded-full ${row.grammarly ? 'bg-violet-100 dark:bg-violet-900/40' : 'bg-stone-100 dark:bg-stone-700/50'}`}>
                         {row.grammarly ? (
-                          <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>
+                          <svg className="w-5 h-5 text-violet-600 dark:text-violet-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>
                         ) : (
                           <svg className="w-5 h-5 text-stone-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd"/></svg>
                         )}
                       </span>
                     ) : row.grammarly === 'partial' ? (
-                      <span className="inline-flex items-center justify-center w-8 h-8 bg-yellow-100 rounded-full">
-                        <span className="text-yellow-600 text-xs font-bold">~</span>
+                      <span className="inline-flex items-center justify-center w-8 h-8 bg-amber-100 dark:bg-amber-900/40 rounded-full">
+                        <span className="text-amber-600 dark:text-amber-400 text-xs font-bold">~</span>
                       </span>
                     ) : (
-                      <span className={`font-medium text-stone-600 text-sm sm:text-base ${row.grammarly === 'Limited' ? 'inline-flex items-center justify-center px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-semibold' : ''}`}>{String(row.grammarly)}</span>
+                      <span className={`font-medium text-stone-600 dark:text-stone-400 text-sm sm:text-base ${row.grammarly === 'Limited' ? 'inline-flex items-center justify-center px-3 py-1 bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 rounded-full text-xs font-semibold' : ''}`}>{String(row.grammarly)}</span>
                     )}
                   </div>
                   <div className="p-4 sm:p-6 text-center">
                     {typeof row.quillbot === 'boolean' ? (
-                      <span className={`inline-flex items-center justify-center w-8 h-8 rounded-full ${row.quillbot ? 'bg-green-100' : 'bg-stone-100'}`}>
+                      <span className={`inline-flex items-center justify-center w-8 h-8 rounded-full ${row.quillbot ? 'bg-violet-100 dark:bg-violet-900/40' : 'bg-stone-100 dark:bg-stone-700/50'}`}>
                         {row.quillbot ? (
-                          <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>
+                          <svg className="w-5 h-5 text-violet-600 dark:text-violet-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>
                         ) : (
                           <svg className="w-5 h-5 text-stone-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd"/></svg>
                         )}
                       </span>
                     ) : (
-                      <span className={`font-medium text-stone-600 text-sm sm:text-base ${row.quillbot === 'Several' ? 'inline-flex items-center justify-center px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold' : ''}`}>{String(row.quillbot)}</span>
+                      <span className={`font-medium text-stone-600 dark:text-stone-400 text-sm sm:text-base ${row.quillbot === 'Several' ? 'inline-flex items-center justify-center px-3 py-1 bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300 rounded-full text-xs font-semibold' : ''}`}>{String(row.quillbot)}</span>
                     )}
                   </div>
                 </div>
@@ -150,7 +150,7 @@ const WhyStudentsChoosePage: React.FC<WhyStudentsChoosePageProps> = ({ onNavigat
             </div>
           </div>
 
-          <p className="text-center text-stone-500 text-sm mt-6">
+          <p className="text-center text-stone-500 dark:text-stone-400 text-sm mt-6">
             * Comparison based on publicly available feature information as of 2026
           </p>
         </div>
@@ -159,11 +159,11 @@ const WhyStudentsChoosePage: React.FC<WhyStudentsChoosePageProps> = ({ onNavigat
       {/* CTA */}
       <section className="py-16 sm:py-20">
         <div className="max-w-2xl mx-auto px-4 text-center">
-          <h2 className="text-2xl sm:text-3xl text-stone-800 mb-4">Ready to try WriteScholar?</h2>
-          <p className="text-stone-500 mb-6">Join thousands of students improving their academic writing.</p>
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-stone-800 dark:text-stone-100 mb-4">Ready to try WriteScholar?</h2>
+          <p className="text-stone-500 dark:text-stone-400 mb-6">Join thousands of students improving their academic writing.</p>
           <button
             onClick={() => onNavigate('signup')}
-            className="px-8 py-4 bg-lime-400 hover:bg-lime-300 text-stone-900 font-semibold rounded-full transition-colors text-lg shadow-lg hover:shadow-xl"
+            className="px-8 py-4 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white font-bold rounded-2xl transition-all text-lg shadow-lg shadow-indigo-500/25 hover:shadow-xl"
           >
             Try Free
           </button>

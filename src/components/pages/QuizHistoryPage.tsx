@@ -216,7 +216,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
-      case 'easy': return 'bg-green-50 text-green-700';
+      case 'easy': return 'bg-violet-50 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300';
       case 'medium': return 'bg-amber-50 text-amber-700';
       case 'hard': return 'bg-red-50 text-red-700';
       default: return 'bg-stone-50 text-stone-700';
@@ -563,7 +563,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
         <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
           <div className="flex items-center justify-center min-h-64">
             <div className="text-center">
-              <div className="animate-spin w-10 h-10 border-2 border-stone-300 border-t-lime-500 rounded-full mx-auto mb-4"></div>
+              <div className="animate-spin w-10 h-10 border-2 border-stone-300 border-t-violet-500 rounded-full mx-auto mb-4"></div>
               <p className="text-sm text-stone-500">Loading study tools...</p>
             </div>
           </div>
@@ -587,7 +587,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
             <p className="text-sm text-stone-500 mb-6">{error}</p>
             <button
               onClick={fetchStudyToolHistory}
-              className="px-5 py-2.5 rounded-xl font-medium text-stone-900 bg-lime-400 hover:bg-lime-300 text-sm transition-colors"
+              className="px-5 py-2.5 rounded-xl font-medium text-white bg-stone-900 hover:bg-stone-800 text-sm transition-colors"
             >
               Try Again
             </button>
@@ -614,7 +614,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 mb-10">
           <div>
             <div className="flex items-center gap-3 mb-2">
-              <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl bg-lime-400 shadow-lg shadow-lime-400/30">
+              <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl bg-stone-900 shadow-lg shadow-stone-900/30">
                 🧠
               </div>
               <div>
@@ -629,7 +629,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
           </div>
           <button
             onClick={startNewStudyTool}
-            className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold text-stone-900 bg-lime-400 hover:bg-lime-300 transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 shrink-0"
+            className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold text-white bg-stone-900 hover:bg-stone-800 transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 shrink-0"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -669,7 +669,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
               onClick={() => setFilter(tab.key)}
               className={`px-4 py-2.5 rounded-xl text-sm font-medium transition-all flex items-center gap-2 ${
                 filter === tab.key
-                  ? 'bg-lime-400 text-stone-900 shadow-md'
+                  ? 'bg-stone-900 text-white shadow-md ring-2 ring-violet-500/30'
                   : 'bg-white/80 text-stone-600 hover:bg-white hover:text-stone-900 border border-stone-200/80'
               }`}
             >
@@ -683,15 +683,15 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
         </div>
 
         {/* Storage notice - compact inline */}
-        <div className={`mb-8 px-4 py-3 rounded-xl flex items-center gap-4 ${isPaidUser ? 'bg-emerald-50/80 border border-emerald-200/60' : 'bg-amber-50/80 border border-amber-200/60'}`}>
+        <div className={`mb-8 px-4 py-3 rounded-xl flex items-center gap-4 ${isPaidUser ? 'bg-violet-50/80 border border-violet-200/60 dark:bg-violet-900/20 dark:border-violet-700/40' : 'bg-amber-50/80 border border-amber-200/60'}`}>
           {isPaidUser ? (
             <>
-              <div className="w-9 h-9 rounded-lg bg-emerald-500/20 flex items-center justify-center shrink-0">
-                <svg className="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-9 h-9 rounded-lg bg-violet-500/20 flex items-center justify-center shrink-0">
+                <svg className="w-5 h-5 text-violet-600 dark:text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
               </div>
-              <p className="text-sm text-emerald-800">
+              <p className="text-sm text-violet-800 dark:text-violet-200">
                 <strong>Permanent storage</strong> — Your study tools never expire. Export to PDF or Word anytime.
               </p>
             </>
@@ -716,7 +716,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
         {/* Study Tool Grid */}
         {filteredTools.length === 0 ? (
           <div className="bg-white rounded-2xl border border-stone-200/80 shadow-sm p-12 sm:p-16 text-center">
-            <div className="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 text-4xl bg-lime-100">
+            <div className="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 text-4xl bg-violet-100 dark:bg-violet-900/30">
               🧠
             </div>
             <h2 className="text-xl font-bold text-stone-900 mb-2">
@@ -729,7 +729,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
             </p>
             <button
               onClick={startNewStudyTool}
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-stone-900 bg-lime-400 hover:bg-lime-300 transition-all hover:shadow-lg"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-white bg-stone-900 hover:bg-stone-800 transition-all hover:shadow-lg"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -805,7 +805,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
                       <div className="flex items-center gap-2 flex-wrap sm:justify-end">
                         <button
                           onClick={() => startStudyTool(tool)}
-                          className="px-4 py-2.5 rounded-xl font-medium text-sm text-stone-900 bg-lime-400 hover:bg-lime-300 transition-all flex items-center gap-2"
+                          className="px-4 py-2.5 rounded-xl font-medium text-sm text-white bg-stone-900 hover:bg-stone-800 transition-all flex items-center gap-2"
                         >
                           {tool.quiz_type === 'flashcards' ? 'Study' : tool.quiz_type === 'crossword' || tool.quiz_type === 'crater_blast' ? 'Play' : 'Take Quiz'}
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -966,8 +966,8 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
         <div className="fixed inset-0 bg-stone-900/40 backdrop-blur-sm flex items-center justify-center z-50 px-4">
           <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 border border-stone-200/80">
             <div className="text-center mb-6">
-              <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4 bg-lime-100">
-                <svg className="w-7 h-7 text-lime-600" fill="currentColor" viewBox="0 0 20 20">
+              <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4 bg-violet-100 dark:bg-violet-900/30">
+                <svg className="w-7 h-7 text-violet-600 dark:text-violet-400" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
                 </svg>
               </div>
@@ -995,7 +995,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
               </button>
               <button
                 onClick={() => { setShowUpgradeModal(false); onNavigate('pricing'); }}
-                className="flex-1 px-4 py-2.5 text-stone-900 bg-lime-400 hover:bg-lime-300 rounded-xl font-medium text-sm transition-all"
+                className="flex-1 px-4 py-2.5 text-white bg-stone-900 hover:bg-stone-800 rounded-xl font-medium text-sm transition-all"
               >
                 View Plans
               </button>

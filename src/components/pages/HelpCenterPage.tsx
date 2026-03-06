@@ -312,10 +312,10 @@ const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="help" />
 
       {/* Hero Section */}
-      <section className="py-16 sm:py-20 border-b border-stone-100 bg-gradient-to-br from-lime-50/50 via-white to-stone-50">
+      <section className="py-16 sm:py-20 border-b border-stone-100 bg-gradient-to-br from-violet-50/50 via-white to-stone-50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center max-w-3xl mx-auto">
-            <span className="inline-flex items-center px-3 py-1 bg-lime-100 text-lime-700 rounded-full text-sm font-medium mb-6">
+            <span className="inline-flex items-center px-3 py-1 bg-violet-100 text-violet-700 rounded-full text-sm font-medium mb-6">
               Help Center
             </span>
             <h1 className="text-3xl sm:text-4xl lg:text-5xl text-stone-800 mb-6 leading-tight" style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 400 }}>
@@ -336,7 +336,7 @@ const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
                   placeholder="Search help topics..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-12 pr-6 py-4 text-base border border-stone-200 rounded-2xl focus:ring-2 focus:ring-lime-500 focus:border-lime-500 bg-white shadow-sm transition-all"
+                  className="w-full pl-12 pr-6 py-4 text-base border border-stone-200 rounded-2xl focus:ring-2 focus:ring-violet-500 focus:border-violet-500 bg-white shadow-sm transition-all"
                 />
               </div>
             </div>
@@ -358,7 +358,7 @@ const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
                 <div className="w-14 h-14 rounded-full mb-4 overflow-hidden">
                   {action.icon}
                 </div>
-                <h4 className="font-semibold text-stone-800 mb-1 group-hover:text-lime-600 transition-colors">{action.title}</h4>
+                <h4 className="font-semibold text-stone-800 mb-1 group-hover:text-violet-600 transition-colors">{action.title}</h4>
                 <p className="text-stone-500 text-sm">{action.description}</p>
               </button>
             ))}
@@ -381,7 +381,7 @@ const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
                       onClick={() => setSelectedCategory(category.id)}
                       className={`w-full flex items-center justify-between p-3 rounded-xl text-left transition-all ${
                         selectedCategory === category.id
-                          ? 'bg-lime-50 text-lime-600'
+                          ? 'bg-violet-50 text-violet-600'
                           : 'hover:bg-stone-50 text-stone-600'
                       }`}
                     >
@@ -391,7 +391,7 @@ const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
                       </div>
                       <span className={`text-xs px-2 py-0.5 rounded-full ${
                         selectedCategory === category.id
-                          ? 'bg-lime-100 text-lime-600'
+                          ? 'bg-violet-100 text-violet-600'
                           : 'bg-stone-100 text-stone-400'
                       }`}>
                         {category.count}
@@ -401,17 +401,17 @@ const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
                 </div>
 
                 {/* Contact Support Card */}
-                <div className="mt-6 p-5 bg-lime-400 rounded-xl">
-                  <div className="w-12 h-12 bg-stone-900/20 rounded-xl flex items-center justify-center mb-3">
-                    <svg className="w-6 h-6 text-stone-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="mt-6 p-5 bg-gradient-to-r from-indigo-500 to-violet-600 rounded-xl">
+                  <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mb-3">
+                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                     </svg>
                   </div>
-                  <h4 className="font-semibold mb-1 text-stone-900">Still need help?</h4>
-                  <p className="text-stone-700 text-sm mb-4">Our support team is here to assist you.</p>
+                  <h4 className="font-semibold mb-1 text-white">Still need help?</h4>
+                  <p className="text-white/90 text-sm mb-4">Our support team is here to assist you.</p>
                   <button 
                     onClick={() => onNavigate?.('contact')}
-                    className="w-full bg-stone-900 text-lime-400 py-2.5 rounded-xl text-sm font-medium hover:bg-stone-800 transition-colors"
+                    className="w-full bg-white text-violet-600 py-2.5 rounded-xl text-sm font-medium hover:bg-stone-100 transition-colors"
                   >
                     Contact Support
                   </button>
@@ -435,8 +435,8 @@ const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
               {/* FAQ List */}
               {filteredFAQs.length === 0 ? (
                 <div className="bg-white border border-stone-200 rounded-2xl p-12 text-center">
-                  <div className="w-16 h-16 bg-lime-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <svg className="w-8 h-8 text-lime-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="w-16 h-16 bg-violet-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <svg className="w-8 h-8 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
                   </div>
@@ -444,7 +444,7 @@ const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
                   <p className="text-stone-500 mb-6">Try adjusting your search terms or browse a different category</p>
                   <button 
                     onClick={() => { setSearchQuery(''); setSelectedCategory('all'); }}
-                    className="bg-lime-400 text-stone-900 px-6 py-3 rounded-xl font-medium hover:bg-lime-300 transition-colors"
+                    className="bg-gradient-to-r from-indigo-500 to-violet-600 text-white px-6 py-3 rounded-xl font-medium hover:from-indigo-400 hover:to-violet-500 transition-colors"
                   >
                     Clear Filters
                   </button>
@@ -470,7 +470,7 @@ const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
                             </div>
                           </div>
                           <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 transition-all ${
-                            openFAQ === faq.id ? 'bg-lime-100 text-lime-600' : 'bg-stone-100 text-stone-400'
+                            openFAQ === faq.id ? 'bg-violet-100 text-violet-600' : 'bg-stone-100 text-stone-400'
                           }`}>
                             <svg 
                               className={`w-4 h-4 transform transition-transform ${
@@ -515,7 +515,7 @@ const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
             {user ? (
               <button 
                 onClick={() => onNavigate?.('dashboard')}
-                className="px-6 py-3 bg-lime-400 text-stone-900 font-semibold rounded-full hover:bg-lime-300 transition-colors"
+                className="px-6 py-3 bg-gradient-to-r from-indigo-500 to-violet-600 text-white font-semibold rounded-full hover:from-indigo-400 hover:to-violet-500 transition-colors"
               >
                 Go to Dashboard
               </button>
@@ -523,7 +523,7 @@ const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
               <>
                 <button 
                   onClick={() => onNavigate?.('signup')}
-                  className="px-6 py-3 bg-lime-400 text-stone-900 font-semibold rounded-full hover:bg-lime-300 transition-colors"
+                  className="px-6 py-3 bg-gradient-to-r from-indigo-500 to-violet-600 text-white font-semibold rounded-full hover:from-indigo-400 hover:to-violet-500 transition-colors"
                 >
                   Try Free
                 </button>

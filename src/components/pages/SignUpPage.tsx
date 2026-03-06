@@ -17,10 +17,10 @@ const SignUpPage = ({ onNavigate, onSignUp }: SignUpPageProps) => {
   const [success, setSuccess] = useState(false);
 
   const animatedTexts = [
-    "Turn good writing into great",
-    "Enhance your academic papers",
-    "Get instant AI feedback",
-    "Improve your research quality"
+    "Summarise, humanise & analyse",
+    "Powerful study tools for students",
+    "Paper analysis & so much more",
+    "Your all-in-one academic AI"
   ];
 
   React.useEffect(() => {
@@ -83,13 +83,13 @@ const SignUpPage = ({ onNavigate, onSignUp }: SignUpPageProps) => {
   };
 
   return (
-    <div className="min-h-screen flex" style={{ background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%)' }}>
+    <div className="min-h-screen flex bg-gradient-to-b from-blue-50/80 via-stone-50 to-white dark:from-stone-950 dark:via-stone-900 dark:to-stone-900">
       {/* Back Button */}
       <button
         onClick={() => onNavigate('landing')}
-        className="fixed top-4 left-4 sm:top-6 sm:left-6 z-50 text-stone-600 hover:text-stone-900 transition-colors group"
+        className="fixed top-4 left-4 sm:top-6 sm:left-6 z-50 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 transition-colors group"
       >
-        <div className="w-10 h-10 bg-white rounded-full shadow-md flex items-center justify-center group-hover:shadow-lg transition-all border border-stone-200">
+        <div className="w-10 h-10 bg-white dark:bg-stone-800 rounded-full shadow-md flex items-center justify-center group-hover:shadow-lg transition-all border border-stone-200 dark:border-stone-700">
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
           </svg>
@@ -101,10 +101,10 @@ const SignUpPage = ({ onNavigate, onSignUp }: SignUpPageProps) => {
         {/* Header */}
         <div className="p-6 pt-20 sm:pt-6">
           <div className="flex items-center space-x-2.5">
-            <div className="w-9 h-9 bg-lime-400 rounded-xl flex items-center justify-center shadow-md">
-              <span className="text-stone-900 font-bold text-lg">W</span>
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/30">
+              <span className="text-white font-black text-lg">W</span>
             </div>
-            <span className="text-xl font-bold text-stone-800">WriteScholar</span>
+            <span className="text-xl font-extrabold tracking-tight text-indigo-600 dark:text-indigo-400">WriteScholar</span>
           </div>
         </div>
 
@@ -112,37 +112,37 @@ const SignUpPage = ({ onNavigate, onSignUp }: SignUpPageProps) => {
         <div className="flex-1 flex items-center justify-center px-6 pb-12">
           <div className="w-full max-w-sm">
             <div className="mb-6">
-              <h1 className="text-2xl text-stone-800 mb-2" style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 400 }}>Create your account</h1>
-              <p className="text-stone-500">Start writing better academic papers today</p>
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-stone-800 dark:text-stone-100 mb-2">Create your account</h1>
+              <p className="text-stone-500 dark:text-stone-400">Unlock your full academic toolkit</p>
             </div>
 
-            <div className="mb-6 p-3 bg-gradient-to-r from-lime-50 to-green-50 border border-lime-200 rounded-xl flex items-center gap-3">
-              <div className="w-9 h-9 bg-lime-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                <svg className="w-5 h-5 text-lime-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="mb-6 p-3 bg-gradient-to-r from-indigo-50 to-violet-50 dark:from-indigo-900/20 dark:to-violet-900/20 border border-indigo-100 dark:border-indigo-800/50 rounded-xl flex items-center gap-3">
+              <div className="w-9 h-9 bg-indigo-100 dark:bg-indigo-900/50 rounded-lg flex items-center justify-center flex-shrink-0">
+                <svg className="w-5 h-5 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                 </svg>
               </div>
               <div>
-                <p className="text-sm font-semibold text-stone-800">Free study tips guide</p>
-                <p className="text-xs text-lime-600">Get our 10-page PDF guide on signup</p>
+                <p className="text-sm font-semibold text-stone-800 dark:text-stone-100">Free study tips guide</p>
+                <p className="text-xs text-indigo-600 dark:text-indigo-400">Get our 10-page PDF guide on signup</p>
               </div>
             </div>
 
             {error && (
-              <div className="mb-6 p-3 bg-red-50 border border-red-200 rounded-xl">
-                <p className="text-red-600 text-sm">{error}</p>
+              <div className="mb-6 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl">
+                <p className="text-red-600 dark:text-red-400 text-sm">{error}</p>
               </div>
             )}
 
             {success && (
-              <div className="mb-6 p-4 bg-lime-50 border border-lime-200 rounded-xl">
+              <div className="mb-6 p-4 bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-200 dark:border-indigo-700 rounded-xl">
                 <div className="flex items-start">
-                  <svg className="w-5 h-5 text-lime-600 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 text-indigo-600 dark:text-indigo-400 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
                   <div>
-                    <p className="text-stone-800 font-medium text-sm">Account created successfully!</p>
-                    <p className="text-stone-600 text-sm mt-1">
+                    <p className="text-stone-800 dark:text-stone-100 font-medium text-sm">Account created successfully!</p>
+                    <p className="text-stone-600 dark:text-stone-400 text-sm mt-1">
                       Please check your email (including spam folder) to verify your account.
                     </p>
                   </div>
@@ -159,41 +159,41 @@ const SignUpPage = ({ onNavigate, onSignUp }: SignUpPageProps) => {
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   onKeyDown={handleKeyDown}
                   placeholder="you@example.com"
-                  className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl focus:ring-2 focus:ring-lime-500 focus:border-transparent focus:bg-white transition-all text-sm"
+                  className="w-full px-4 py-3 bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent focus:bg-white dark:focus:bg-stone-800 transition-all text-sm text-stone-800 dark:text-stone-100"
                 />
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1.5">Password</label>
+                <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1.5">Password</label>
                 <input
                   type="password"
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                   onKeyDown={handleKeyDown}
                   placeholder="••••••••"
-                  className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl focus:ring-2 focus:ring-lime-500 focus:border-transparent focus:bg-white transition-all text-sm"
+                  className="w-full px-4 py-3 bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent focus:bg-white dark:focus:bg-stone-800 transition-all text-sm text-stone-800 dark:text-stone-100"
                 />
-                <p className="mt-1.5 text-xs text-stone-400">
+                <p className="mt-1.5 text-xs text-stone-400 dark:text-stone-500">
                   At least 8 characters with uppercase, lowercase, number, and special character
                 </p>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1.5">Confirm password</label>
+                <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1.5">Confirm password</label>
                 <input
                   type="password"
                   value={formData.confirmPassword}
                   onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
                   onKeyDown={handleKeyDown}
                   placeholder="••••••••"
-                  className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl focus:ring-2 focus:ring-lime-500 focus:border-transparent focus:bg-white transition-all text-sm"
+                  className="w-full px-4 py-3 bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent focus:bg-white dark:focus:bg-stone-800 transition-all text-sm text-stone-800 dark:text-stone-100"
                 />
               </div>
 
               <button
                 onClick={handleSubmit}
                 disabled={isLoading || success}
-                className="w-full bg-lime-400 hover:bg-lime-300 text-stone-900 py-3 rounded-full font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white py-3.5 rounded-2xl font-bold shadow-lg shadow-indigo-500/25 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isLoading ? (
                   <div className="flex items-center justify-center">
@@ -214,7 +214,7 @@ const SignUpPage = ({ onNavigate, onSignUp }: SignUpPageProps) => {
                   <div className="w-full border-t border-stone-200"></div>
                 </div>
                 <div className="relative flex justify-center text-sm">
-                  <span className="px-3 text-stone-400" style={{ background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%)' }}>or</span>
+                  <span className="px-3 bg-gradient-to-b from-blue-50/80 via-stone-50 to-white dark:from-stone-950 dark:via-stone-900 dark:to-stone-900 text-stone-400">or</span>
                 </div>
               </div>
             </div>
@@ -224,7 +224,7 @@ const SignUpPage = ({ onNavigate, onSignUp }: SignUpPageProps) => {
                 const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
                 window.location.href = `${apiUrl}/auth/google`;
               }}
-              className="w-full flex items-center justify-center px-4 py-3 bg-white border border-stone-200 rounded-xl hover:bg-stone-50 transition-colors"
+              className="w-full flex items-center justify-center px-4 py-3 bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-600 rounded-xl hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors"
             >
               <svg className="w-5 h-5 mr-3" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -232,26 +232,26 @@ const SignUpPage = ({ onNavigate, onSignUp }: SignUpPageProps) => {
                 <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
                 <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
               </svg>
-              <span className="text-sm font-medium text-stone-700">Continue with Google</span>
+              <span className="text-sm font-medium text-stone-700 dark:text-stone-300">Continue with Google</span>
             </button>
 
-            <p className="text-center text-sm text-stone-500 mt-6">
+            <p className="text-center text-sm text-stone-500 dark:text-stone-400 mt-6">
               Already have an account?{' '}
               <button
                 onClick={() => onNavigate('login')}
-                className="text-lime-600 hover:text-lime-700 font-medium"
+                className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-semibold"
               >
                 Sign in
               </button>
             </p>
 
-            <p className="text-center text-xs text-stone-400 mt-4">
+            <p className="text-center text-xs text-stone-400 dark:text-stone-500 mt-4">
               By creating an account, you agree to our{' '}
-              <button onClick={() => onNavigate('terms')} className="text-stone-500 hover:text-stone-700 underline">
+              <button onClick={() => onNavigate('terms')} className="text-indigo-600 dark:text-indigo-400 hover:underline">
                 Terms
               </button>{' '}
               and{' '}
-              <button onClick={() => onNavigate('privacy')} className="text-stone-500 hover:text-stone-700 underline">
+              <button onClick={() => onNavigate('privacy')} className="text-indigo-600 dark:text-indigo-400 hover:underline">
                 Privacy Policy
               </button>
             </p>
@@ -260,25 +260,25 @@ const SignUpPage = ({ onNavigate, onSignUp }: SignUpPageProps) => {
       </div>
 
       {/* Right Side - Animated Design */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-stone-100 via-lime-50 to-stone-100 flex-col items-center justify-center p-8 relative overflow-hidden rounded-l-3xl">
+      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-indigo-50/80 via-violet-50/50 to-stone-100 dark:from-stone-900 dark:via-indigo-950/30 dark:to-stone-900 flex-col items-center justify-center p-8 relative overflow-hidden rounded-l-3xl">
         {/* Background blur effect */}
-        <div className="absolute inset-0 bg-gradient-to-br from-stone-200/40 via-lime-100/30 to-stone-200/40 backdrop-blur-sm rounded-l-3xl"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-indigo-200/20 via-violet-100/20 to-stone-200/30 dark:from-indigo-900/20 dark:via-violet-900/10 dark:to-transparent backdrop-blur-sm rounded-l-3xl"></div>
         
         {/* Central input container */}
         <div className="relative z-10 max-w-lg w-full">
-          <div className="bg-gradient-to-r from-white/50 to-white/30 backdrop-blur-xl rounded-3xl p-10 border border-white/60 shadow-2xl">
+          <div className="bg-gradient-to-r from-white/70 to-white/40 dark:from-stone-800/70 dark:to-stone-800/40 backdrop-blur-xl rounded-3xl p-10 border border-indigo-100/50 dark:border-stone-700 shadow-2xl shadow-indigo-500/10">
             <div className="flex items-center space-x-5">
               {/* Animated text */}
-              <span className="text-2xl font-light text-stone-600 flex-1 transition-all duration-700 ease-in-out" style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}>
+              <span className="text-2xl font-semibold text-stone-700 dark:text-stone-200 flex-1 transition-all duration-700 ease-in-out">
                 {animatedTexts[textIndex]}
               </span>
               
               {/* Cursor pipe */}
-              <div className="w-0.5 h-8 bg-lime-500 animate-pulse"></div>
+              <div className="w-0.5 h-8 bg-indigo-500 animate-pulse rounded-full"></div>
               
               {/* Arrow button */}
-              <button className="w-10 h-10 bg-lime-400 hover:bg-lime-300 rounded-xl flex items-center justify-center transition-all duration-300 hover:scale-110 shadow-xl hover:shadow-2xl">
-                <svg className="w-5 h-5 text-stone-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <button className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 rounded-xl flex items-center justify-center transition-all duration-300 hover:scale-110 shadow-xl shadow-indigo-500/30">
+                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M7 17L17 7M17 7H7M17 7V17" />
                 </svg>
               </button>
@@ -360,13 +360,13 @@ const SignUpPage = ({ onNavigate, onSignUp }: SignUpPageProps) => {
         </div>
         
         {/* Enhanced floating elements */}
-        <div className="absolute top-16 left-16 w-32 h-32 bg-gradient-to-br from-lime-300/20 to-stone-300/15 rounded-full animate-bounce" style={{animationDuration: '6s'}}></div>
-        <div className="absolute bottom-20 right-20 w-24 h-24 bg-gradient-to-br from-stone-300/20 to-lime-300/15 rounded-full animate-bounce" style={{animationDuration: '8s', animationDelay: '2s'}}></div>
-        <div className="absolute top-1/3 right-12 w-20 h-20 bg-gradient-to-br from-lime-200/20 to-stone-300/15 rounded-full animate-bounce" style={{animationDuration: '7s', animationDelay: '1s'}}></div>
+        <div className="absolute top-16 left-16 w-32 h-32 bg-gradient-to-br from-indigo-300/25 to-violet-300/20 rounded-full animate-bounce" style={{animationDuration: '6s'}}></div>
+        <div className="absolute bottom-20 right-20 w-24 h-24 bg-gradient-to-br from-violet-300/25 to-indigo-300/20 rounded-full animate-bounce" style={{animationDuration: '8s', animationDelay: '2s'}}></div>
+        <div className="absolute top-1/3 right-12 w-20 h-20 bg-gradient-to-br from-indigo-200/20 to-violet-200/15 rounded-full animate-bounce" style={{animationDuration: '7s', animationDelay: '1s'}}></div>
         
         {/* Additional subtle elements */}
-        <div className="absolute top-1/4 left-1/4 w-16 h-16 bg-gradient-to-br from-stone-200/10 to-lime-200/5 rounded-full animate-bounce" style={{animationDuration: '5s', animationDelay: '0.5s'}}></div>
-        <div className="absolute bottom-1/3 left-1/3 w-12 h-12 bg-gradient-to-br from-lime-200/10 to-stone-200/5 rounded-full animate-bounce" style={{animationDuration: '4s', animationDelay: '1.5s'}}></div>
+        <div className="absolute top-1/4 left-1/4 w-16 h-16 bg-gradient-to-br from-indigo-200/15 to-violet-200/10 rounded-full animate-bounce" style={{animationDuration: '5s', animationDelay: '0.5s'}}></div>
+        <div className="absolute bottom-1/3 left-1/3 w-12 h-12 bg-gradient-to-br from-violet-200/15 to-indigo-200/10 rounded-full animate-bounce" style={{animationDuration: '4s', animationDelay: '1.5s'}}></div>
       </div>
     </div>
   );

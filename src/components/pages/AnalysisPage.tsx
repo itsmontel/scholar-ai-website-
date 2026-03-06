@@ -1079,9 +1079,9 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
             </p>
           ))}
           {currentPlan === 'free' && (
-            <div className="mt-8 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg">
+            <div className="mt-8 p-6 bg-gradient-to-r from-violet-50 to-indigo-50 border border-violet-200 rounded-lg">
               <div className="flex items-center space-x-3 mb-3">
-                <div className="p-2 bg-lime-500 rounded-full">
+                <div className="p-2 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-full">
                   <svg className="w-5 h-5 text-stone-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m0 0v2m0-2h2m-2 0H9m12-9V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-9z" />
                   </svg>
@@ -1093,7 +1093,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
               </div>
               <button
                 onClick={() => onNavigate?.('billing')}
-                className="px-6 py-2 bg-lime-400 text-stone-900 rounded-lg hover:bg-lime-300 transition-colors"
+                className="px-6 py-2 bg-gradient-to-r from-indigo-500 to-violet-600 text-white rounded-lg hover:from-indigo-400 hover:to-violet-500 transition-colors"
               >
                 Upgrade Now
               </button>
@@ -1187,7 +1187,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
             console.log(`Annotation ${annotation.id} (${annotation.type}): "${actualText.substring(0, 50)}..." (${relativeStart}-${relativeEnd} in paragraph ${paragraphIndex})`);
 
             const highlightClasses = {
-              strong: 'bg-green-100 text-green-900 border-b-2 border-green-400 hover:bg-green-200',
+              strong: 'bg-violet-100 text-violet-900 border-b-2 border-violet-400 hover:bg-violet-200',
               improve: 'bg-amber-100 text-amber-900 border-b-2 border-amber-400 hover:bg-amber-200',
               concern: 'bg-red-100 text-red-900 border-b-2 border-red-400 hover:bg-red-200'
             };
@@ -1232,7 +1232,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
         
         {/* Upgrade prompt for hidden annotations */}
         {hiddenAnnotationsCount > 0 && (
-          <div className="mt-8 p-6 bg-gradient-to-r from-lime-50 to-green-50 border border-lime-200 rounded-lg">
+            <div className="mt-8 p-6 bg-gradient-to-r from-violet-50 to-indigo-50 border border-violet-200 rounded-lg">
             <div className="flex items-center space-x-3 mb-3">
               <div className="p-2 bg-lime-500 rounded-full">
                 <svg className="w-5 h-5 text-stone-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1264,7 +1264,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
     switch (type) {
       case 'strong':
         return (
-          <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+          <svg className="w-5 h-5 text-violet-600" fill="currentColor" viewBox="0 0 20 20">
             <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
           </svg>
         );
@@ -1340,18 +1340,18 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
         )}
 
         {successMessage && (
-          <div className="mb-8 p-5 bg-green-50 border border-green-200 rounded-2xl">
+          <div className="mb-8 p-5 bg-violet-50 border border-violet-200 rounded-2xl">
             <div className="flex items-start">
-              <div className="w-10 h-10 bg-green-500 rounded-xl flex items-center justify-center flex-shrink-0">
+              <div className="w-10 h-10 bg-violet-500 rounded-xl flex items-center justify-center flex-shrink-0">
                 <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
               </div>
               <div className="ml-4">
-                <p className="text-green-700 font-medium">{successMessage}</p>
+                <p className="text-violet-700 font-medium">{successMessage}</p>
                 <button
                   onClick={() => onNavigate?.('library')}
-                  className="mt-3 px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors"
+                  className="mt-3 px-4 py-2 bg-gradient-to-r from-indigo-500 to-violet-600 text-white text-sm font-medium rounded-lg hover:from-indigo-600 hover:to-violet-700 transition-colors"
                 >
                   View in Library
                 </button>
@@ -1390,14 +1390,14 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
               
               {/* Text Content Notice */}
               {documentContent && !selectedDocument && (
-                <div className="mb-6 p-4 bg-lime-50 border border-lime-200 rounded-xl">
+                <div className="mb-6 p-4 bg-violet-50 border border-violet-200 rounded-xl">
                   <div className="flex items-center space-x-2">
-                    <svg className="w-5 h-5 text-lime-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    <span className="font-medium text-lime-800">Text Analysis Mode</span>
+                    <span className="font-medium text-violet-800">Text Analysis Mode</span>
                   </div>
-                  <p className="text-sm text-lime-700 mt-2">
+                  <p className="text-sm text-violet-700 mt-2">
                     Analyzing text content from dashboard. Select citation style and run analysis.
                   </p>
                 </div>
@@ -1414,7 +1414,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                       key={type.id}
                       className={`p-4 border-2 rounded-xl cursor-pointer transition-all ${
                         selectedAnalysisType === type.id
-                          ? 'border-lime-500 bg-lime-50'
+                          ? 'border-violet-500 bg-violet-50'
                           : 'border-stone-200 hover:border-stone-300'
                       }`}
                       onClick={() => setSelectedAnalysisType(type.id)}
@@ -1428,7 +1428,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                         </div>
                         <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
                           selectedAnalysisType === type.id
-                            ? 'border-lime-500 bg-lime-500'
+                            ? 'border-violet-500 bg-violet-500'
                             : 'border-stone-300'
                         }`}>
                           {selectedAnalysisType === type.id && (
@@ -1471,7 +1471,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
               <button
                 onClick={handleAnalyze}
                 disabled={(!selectedDocument && !documentContent) || !selectedAnalysisType || isAnalyzing}
-                className="w-full bg-lime-400 hover:bg-lime-300 text-stone-900 py-3.5 px-4 rounded-xl font-semibold text-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="w-full bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white py-3.5 px-4 rounded-xl font-semibold text-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 {isAnalyzing ? (
                   <LoadingSpinner 
@@ -1607,7 +1607,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
             <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
               <div className="flex flex-wrap items-center gap-6 text-sm">
                 <div className="flex items-center space-x-2">
-                  <div className="w-3 h-3 bg-green-400 rounded-full"></div>
+                  <div className="w-3 h-3 bg-violet-400 rounded-full"></div>
                   <span className="text-gray-600">Strong sections</span>
                 </div>
                 <div className="flex items-center space-x-2">
@@ -1691,16 +1691,16 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                     {/* Strong Points */}
                     <div>
                       <div className="flex items-center space-x-2 mb-3">
-                        <div className="flex items-center justify-center w-8 h-8 bg-green-100 rounded-xl">
-                          {getAnnotationIcon('strong')}
-                        </div>
-                        <h4 className="font-semibold text-green-800">Strong Points ({getFilteredAnnotations('strong').length})</h4>
+                      <div className="flex items-center justify-center w-8 h-8 bg-violet-100 rounded-xl">
+                        {getAnnotationIcon('strong')}
+                      </div>
+                      <h4 className="font-semibold text-violet-800">Strong Points ({getFilteredAnnotations('strong').length})</h4>
                       </div>
                       <div className="space-y-2">
                         {getFilteredAnnotations('strong').map((annotation) => (
                           <div
                             key={annotation.id}
-                            className={`bg-white rounded-xl p-4 border-l-4 border-green-400 shadow-sm hover:shadow-md transition-all cursor-pointer ${
+                            className={`bg-white rounded-xl p-4 border-l-4 border-violet-400 shadow-sm hover:shadow-md transition-all cursor-pointer ${
                               selectedAnnotation === annotation.id ? 'ring-2 ring-blue-500' : ''
                             }`}
                             onClick={() => scrollToAnnotation(annotation.id)}
@@ -1774,9 +1774,9 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                 
                     {/* Upgrade prompt for hidden annotations */}
                     {currentPlan === 'free' && annotations.length > getFilteredAnnotations().length && (
-                      <div className="p-5 bg-blue-50 border border-blue-200 rounded-xl">
+                      <div className="p-5 bg-violet-50 border border-violet-200 rounded-xl">
                         <div className="text-center">
-                          <div className="w-10 h-10 bg-blue-500 rounded-xl flex items-center justify-center mx-auto mb-3">
+                          <div className="w-10 h-10 bg-violet-500 rounded-xl flex items-center justify-center mx-auto mb-3">
                             <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m0 0v2m0-2h2m-2 0H9m12-9V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002-2v-9z" />
                             </svg>
@@ -1789,7 +1789,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                           </p>
                           <button
                             onClick={() => onNavigate?.('billing')}
-                            className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                            className="px-4 py-2 text-sm bg-gradient-to-r from-indigo-500 to-violet-600 text-white rounded-lg hover:from-indigo-600 hover:to-violet-700 transition-colors font-medium"
                           >
                             Upgrade
                           </button>

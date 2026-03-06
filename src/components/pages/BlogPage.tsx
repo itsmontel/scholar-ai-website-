@@ -180,7 +180,7 @@ const BlogPage = ({ onNavigate, user, onLogout }: BlogPageProps) => {
         <button
           onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
           disabled={currentPage === 1}
-          className="w-10 h-10 flex items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="w-10 h-10 flex items-center justify-center rounded-lg text-stone-500 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           aria-label="Previous page"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -190,15 +190,15 @@ const BlogPage = ({ onNavigate, user, onLogout }: BlogPageProps) => {
         
         {pages.map((page, idx) => (
           page === '...' ? (
-            <span key={`ellipsis-${idx}`} className="w-10 h-10 flex items-center justify-center text-gray-400">...</span>
+            <span key={`ellipsis-${idx}`} className="w-10 h-10 flex items-center justify-center text-stone-400">...</span>
           ) : (
             <button
               key={page}
               onClick={() => handlePageChange(page as number)}
               className={`w-10 h-10 flex items-center justify-center rounded-lg text-sm font-medium transition-colors ${
                 currentPage === page
-                  ? 'bg-lime-500 text-stone-900'
-                  : 'text-stone-700 hover:bg-stone-100'
+                  ? 'bg-gradient-to-r from-indigo-500 to-violet-600 text-white shadow-lg shadow-indigo-500/25'
+                  : 'text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800'
               }`}
             >
               {page}
@@ -209,7 +209,7 @@ const BlogPage = ({ onNavigate, user, onLogout }: BlogPageProps) => {
         <button
           onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
           disabled={currentPage === totalPages}
-          className="w-10 h-10 flex items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="w-10 h-10 flex items-center justify-center rounded-lg text-stone-500 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           aria-label="Next page"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -221,35 +221,35 @@ const BlogPage = ({ onNavigate, user, onLogout }: BlogPageProps) => {
   };
 
   return (
-    <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%)' }}>
+    <div className="min-h-screen bg-gradient-to-b from-blue-50/80 via-stone-50 to-white dark:from-stone-950 dark:via-stone-900 dark:to-stone-900">
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="blog" />
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
         {/* Breadcrumbs */}
-        <nav className="flex items-center text-sm text-gray-500 mb-8" aria-label="Breadcrumb">
+        <nav className="flex items-center text-sm text-stone-500 dark:text-stone-400 mb-8" aria-label="Breadcrumb">
           <a 
             href="/" 
             onClick={(e) => { e.preventDefault(); onNavigate('landing'); }}
-            className="hover:text-gray-900 transition-colors"
+            className="hover:text-stone-900 dark:hover:text-stone-100 transition-colors"
           >
             Home
           </a>
-          <svg className="w-4 h-4 mx-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-4 h-4 mx-2 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
-          <span className="text-gray-900 font-medium">Blog</span>
+          <span className="text-stone-900 dark:text-stone-100 font-semibold">Blog</span>
         </nav>
 
         {/* Page Header */}
         <header className="mb-12">
           <div className="flex items-center gap-3 mb-3">
-            <span className="text-3xl sm:text-4xl">🧊</span>
-            <h1 className="text-4xl sm:text-5xl text-stone-800" style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 400 }}>
+            <span className="text-3xl sm:text-4xl">📚</span>
+            <h1 className="text-4xl sm:text-5xl font-extrabold text-stone-800 dark:text-stone-100">
               Blog
             </h1>
             <span className="text-3xl sm:text-4xl">🧊</span>
           </div>
-          <p className="text-lg text-stone-500">
+          <p className="text-lg text-stone-500 dark:text-stone-400">
             Tips, guides, and insights for better academic writing
           </p>
         </header>
@@ -263,21 +263,21 @@ const BlogPage = ({ onNavigate, user, onLogout }: BlogPageProps) => {
               onClick={() => handlePostClick(post.slug)}
             >
               {/* Image Container */}
-              <div className="aspect-[4/3] rounded-2xl overflow-hidden mb-5 bg-gray-100">
+              <div className="aspect-[4/3] rounded-2xl overflow-hidden mb-5 bg-stone-100 dark:bg-stone-800">
                 {getIllustration(post, startIndex + idx)}
               </div>
               
               {/* Content */}
               <div>
-                <h2 className="text-xl font-semibold text-stone-800 mb-3 group-hover:text-lime-600 transition-colors leading-snug line-clamp-2">
+                <h2 className="text-xl font-semibold text-stone-800 dark:text-stone-100 mb-3 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors leading-snug line-clamp-2">
                   {post.title}
                 </h2>
-                <p className="text-stone-500 text-base leading-relaxed mb-4 line-clamp-2">
+                <p className="text-stone-500 dark:text-stone-400 text-base leading-relaxed mb-4 line-clamp-2">
                   {post.description}
                 </p>
                 
                 {/* Read time badge */}
-                <span className="inline-block px-3 py-1.5 bg-stone-100 text-stone-600 text-sm font-medium rounded-lg">
+                <span className="inline-block px-3 py-1.5 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-400 text-sm font-medium rounded-lg">
                   {getReadTimeMinutes(post.readTime)} minutes
                 </span>
               </div>
@@ -294,8 +294,8 @@ const BlogPage = ({ onNavigate, user, onLogout }: BlogPageProps) => {
         </div>
 
         {/* CTA Section - Different for logged-in users */}
-        <section className="mt-16 sm:mt-20 bg-stone-800 rounded-2xl p-8 sm:p-12 text-center">
-          <h2 className="text-2xl sm:text-3xl text-white mb-3" style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 400 }}>
+        <section className="mt-16 sm:mt-20 bg-stone-800 dark:bg-stone-900 rounded-2xl p-8 sm:p-12 text-center">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-white mb-3">
             {user ? 'Put these tips into practice' : 'Ready to improve your academic writing?'}
           </h2>
           <p className="text-stone-300 mb-6 max-w-lg mx-auto">
@@ -309,14 +309,14 @@ const BlogPage = ({ onNavigate, user, onLogout }: BlogPageProps) => {
               <>
                 <button 
                   onClick={() => onNavigate('dashboard')}
-                  className="w-full sm:w-auto px-6 py-3 bg-lime-400 hover:bg-lime-300 text-stone-900 font-semibold rounded-full transition-colors"
+                  className="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white font-bold rounded-2xl shadow-lg shadow-indigo-500/25 transition-all"
                 >
                   Go to Dashboard
                 </button>
                 {user.plan === 'Free' && (
                   <button 
                     onClick={() => onNavigate('billing')}
-                    className="w-full sm:w-auto px-6 py-3 border border-stone-500 hover:border-stone-400 text-white font-medium rounded-full transition-colors"
+                    className="w-full sm:w-auto px-6 py-3 border-2 border-stone-500 hover:border-stone-400 text-white font-semibold rounded-2xl transition-colors"
                   >
                     Upgrade Plan
                   </button>
@@ -326,13 +326,13 @@ const BlogPage = ({ onNavigate, user, onLogout }: BlogPageProps) => {
               <>
                 <button 
                   onClick={() => onNavigate('signup')}
-                  className="w-full sm:w-auto px-6 py-3 bg-lime-400 hover:bg-lime-300 text-stone-900 font-semibold rounded-full transition-colors"
+                  className="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white font-bold rounded-2xl shadow-lg shadow-indigo-500/25 transition-all"
                 >
                   Try Free
                 </button>
                 <button 
                   onClick={() => onNavigate('features')}
-                  className="w-full sm:w-auto px-6 py-3 border border-stone-500 hover:border-stone-400 text-white font-medium rounded-full transition-colors"
+                  className="w-full sm:w-auto px-6 py-3 border-2 border-stone-500 hover:border-stone-400 text-white font-semibold rounded-2xl transition-colors"
                 >
                   Learn More
                 </button>

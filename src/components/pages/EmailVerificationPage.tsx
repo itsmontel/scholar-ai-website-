@@ -105,9 +105,9 @@ const EmailVerificationPage = ({ onNavigate }: EmailVerificationPageProps) => {
       <div className="max-w-md w-full">
         <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100 text-center">
           {/* Success Icon */}
-          <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-6">
+          <div className="mx-auto w-16 h-16 bg-violet-100 rounded-full flex items-center justify-center mb-6">
             <svg
-              className="w-8 h-8 text-green-600"
+              className="w-8 h-8 text-violet-600"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -134,8 +134,8 @@ const EmailVerificationPage = ({ onNavigate }: EmailVerificationPageProps) => {
           </p>
 
           {/* Countdown */}
-          <div className="bg-lime-50 border border-lime-200 rounded-lg p-4 mb-6">
-            <p className="text-lime-800 text-sm">
+          <div className="bg-violet-50 border border-violet-200 rounded-lg p-4 mb-6">
+            <p className="text-violet-800 text-sm">
               Getting things ready in {countdown} seconds...
             </p>
           </div>

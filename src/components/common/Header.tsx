@@ -121,62 +121,54 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
     return 'text-green-600';
   };
 
-  // ── Logged-out (public) header ────────────────────────────────────────────
+  // ── Logged-out (public) header - matches landing page nav ───────────────────
   if (!user) {
     const publicNavItems = [
       { id: 'features', label: 'Features' },
+      { id: 'why-students-choose', label: 'Why Students Choose' },
       { id: 'pricing', label: 'Pricing' },
-      { id: 'why-students-choose', label: 'Why Students' },
       { id: 'blog', label: 'Blog' },
       { id: 'about', label: 'About' },
     ];
     return (
-      <header className={`sticky top-0 z-50 transition-all duration-300 ${
-        isScrolled 
-          ? 'bg-white/95 dark:bg-stone-900/95 backdrop-blur-xl shadow-lg shadow-stone-900/5 dark:shadow-black/20' 
-          : 'bg-white/80 dark:bg-stone-900/80 backdrop-blur-md'
-      }`}>
+      <header className="sticky top-0 z-50 border-b border-stone-200/50 dark:border-stone-700/50 bg-white/95 dark:bg-stone-900/95 backdrop-blur-xl shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 sm:h-18">
-            {/* Logo */}
+          <div className="flex items-center justify-between h-16 py-3">
+            {/* Logo - same as landing page */}
             <button
               onClick={() => onNavigate?.('landing')}
-              className="flex items-center gap-2.5 group"
+              className="flex items-center space-x-2.5 group"
             >
-              <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-500/30 group-hover:shadow-indigo-500/40 group-hover:scale-105 transition-all duration-200">
-                <span className="font-black text-xl text-white">W</span>
-                <div className="absolute inset-0 rounded-xl bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/30 group-hover:scale-105 transition-transform">
+                <span className="font-black text-lg text-white">W</span>
               </div>
-              <span className="text-xl sm:text-2xl font-extrabold tracking-tight text-indigo-600 dark:text-indigo-400">
+              <span className="text-xl font-extrabold tracking-tight text-indigo-600 dark:text-indigo-400">
                 WriteScholar
               </span>
             </button>
 
-            {/* Desktop Navigation */}
-            <nav className="hidden lg:flex items-center">
-              <div className="flex items-center bg-stone-100/80 dark:bg-stone-800/80 rounded-full p-1">
-                {publicNavItems.map(({ id, label }) => (
-                  <button
-                    key={id}
-                    onClick={() => onNavigate?.(id)}
-                    className={`px-4 py-2 text-sm font-medium rounded-full transition-all duration-200 ${
-                      currentPage === id 
-                        ? 'bg-white dark:bg-stone-700 text-stone-900 dark:text-stone-100 shadow-sm' 
-                        : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100'
-                    }`}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
+            {/* Desktop Navigation - simple links like landing page */}
+            <nav className="hidden md:flex items-center space-x-1">
+              {publicNavItems.map(({ id, label }) => (
+                <button
+                  key={id}
+                  onClick={() => onNavigate?.(id)}
+                  className={`px-4 py-2.5 text-sm rounded-xl transition-all font-medium ${
+                    currentPage === id 
+                      ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30' 
+                      : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800'
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
             </nav>
 
-            {/* Right side actions */}
-            <div className="flex items-center gap-2">
-              {/* Theme toggle */}
+            {/* Right side - theme, auth, mobile menu */}
+            <div className="flex items-center space-x-2 sm:space-x-3">
               <button
                 onClick={toggleTheme}
-                className="p-2.5 rounded-xl bg-stone-100/80 dark:bg-stone-800/80 hover:bg-stone-200/80 dark:hover:bg-stone-700/80 transition-colors text-stone-600 dark:text-stone-400"
+                className="p-2 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors text-stone-600 dark:text-stone-400"
                 aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
               >
                 {theme === 'dark' ? (
@@ -189,14 +181,24 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
                   </svg>
                 )}
               </button>
-
-              {/* Mobile menu button */}
+              <button 
+                onClick={() => onNavigate?.('login')} 
+                className="hidden sm:inline-flex px-4 py-2.5 text-sm text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 font-medium rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 transition-all"
+              >
+                Log in
+              </button>
+              <button 
+                onClick={() => onNavigate?.('signup')} 
+                className="inline-flex items-center px-5 py-2.5 text-white text-sm font-bold rounded-xl bg-gradient-to-r from-blue-500 to-violet-500 hover:from-blue-400 hover:to-violet-400 hover:scale-105 active:scale-95 transition-all shadow-lg shadow-violet-500/25"
+              >
+                Sign up free
+              </button>
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="mobile-menu-button lg:hidden p-2.5 rounded-xl bg-stone-100/80 dark:bg-stone-800/80 hover:bg-stone-200/80 dark:hover:bg-stone-700/80 transition-colors"
+                className="md:hidden p-2 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors text-stone-600 dark:text-stone-400"
                 aria-label="Toggle menu"
               >
-                <svg className={`w-5 h-5 text-stone-600 dark:text-stone-400 transition-transform duration-200 ${isMobileMenuOpen ? 'rotate-90' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   {isMobileMenuOpen ? (
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   ) : (
@@ -204,63 +206,43 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
                   )}
                 </svg>
               </button>
-
-              {/* Auth buttons */}
-              <button 
-                onClick={() => onNavigate?.('login')} 
-                className="hidden sm:inline-flex px-4 py-2.5 text-sm font-medium text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 transition-colors"
-              >
-                Log in
-              </button>
-              <button 
-                onClick={() => onNavigate?.('signup')} 
-                className="inline-flex items-center gap-1.5 px-5 py-2.5 bg-gradient-to-r from-lime-400 to-emerald-500 text-stone-900 text-sm font-bold rounded-full hover:from-lime-300 hover:to-emerald-400 shadow-lg shadow-lime-500/25 hover:shadow-lime-500/40 hover:scale-105 active:scale-95 transition-all duration-200"
-              >
-                Try Free
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                </svg>
-              </button>
             </div>
           </div>
         </div>
-
-        {/* Mobile menu */}
-        <div className={`lg:hidden mobile-menu-container overflow-hidden transition-all duration-300 ease-out ${
-          isMobileMenuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
-        }`}>
-          <div className="px-4 py-4 bg-white/95 dark:bg-stone-900/95 backdrop-blur-xl border-t border-stone-200/60 dark:border-stone-700/60">
-            <div className="space-y-1">
+        {/* Mobile menu - same as landing page */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden border-t border-stone-200/50 dark:border-stone-700/50 bg-white/95 dark:bg-stone-900/95 backdrop-blur-xl">
+            <div className="px-4 py-3 space-y-1">
               {publicNavItems.map(({ id, label }) => (
                 <button
                   key={id}
                   onClick={() => { onNavigate?.(id); setIsMobileMenuOpen(false); }}
-                  className={`w-full text-left px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${
+                  className={`block w-full text-left px-4 py-3 text-sm font-medium rounded-xl transition-all ${
                     currentPage === id 
-                      ? 'bg-lime-100 dark:bg-lime-900/30 text-lime-700 dark:text-lime-400' 
-                      : 'text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800'
+                      ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30' 
+                      : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800'
                   }`}
                 >
                   {label}
                 </button>
               ))}
-              <div className="pt-3 mt-3 border-t border-stone-200/60 dark:border-stone-700/60 flex gap-2">
+              <div className="pt-2 pb-1 flex flex-col gap-2">
                 <button 
                   onClick={() => { onNavigate?.('login'); setIsMobileMenuOpen(false); }} 
-                  className="flex-1 px-4 py-3 rounded-xl text-sm font-medium text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
+                  className="block text-center px-4 py-3 text-sm font-medium text-stone-600 dark:text-stone-400 rounded-xl border border-stone-200 dark:border-stone-700 hover:bg-stone-100 dark:hover:bg-stone-800 transition-all"
                 >
                   Log in
                 </button>
                 <button 
                   onClick={() => { onNavigate?.('signup'); setIsMobileMenuOpen(false); }} 
-                  className="flex-1 px-4 py-3 rounded-xl text-sm font-bold bg-gradient-to-r from-lime-400 to-emerald-500 text-stone-900 transition-colors"
+                  className="block text-center px-4 py-3 text-white text-sm font-bold rounded-xl bg-gradient-to-r from-blue-500 to-violet-500 shadow-lg shadow-violet-500/25"
                 >
-                  Try Free
+                  Sign up free
                 </button>
               </div>
             </div>
           </div>
-        </div>
+        )}
       </header>
     );
   }

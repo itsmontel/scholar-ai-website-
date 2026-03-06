@@ -14,7 +14,7 @@ const ProfileIllustration = () => (
     {/* Person with clipboard */}
     <g transform="translate(60, 10)">
       {/* Body */}
-      <path d="M30 70 Q25 95 30 130 L70 130 Q75 95 70 70" fill="#84CC16" />
+      <path d="M30 70 Q25 95 30 130 L70 130 Q75 95 70 70" fill="#8B5CF6" />
       {/* Neck */}
       <rect x="42" y="52" width="16" height="20" fill="#FCD9B6" />
       {/* Head */}
@@ -42,9 +42,9 @@ const ProfileIllustration = () => (
       <rect x="8" y="45" width="18" height="4" rx="1" fill="#A8A29E" />
     </g>
     {/* Floating elements */}
-    <circle cx="30" cy="40" r="8" fill="#ECFCCB" opacity="0.8" />
-    <circle cx="175" cy="30" r="6" fill="#D9F99D" opacity="0.8" />
-    <circle cx="20" cy="120" r="10" fill="#BEF264" opacity="0.6" />
+    <circle cx="30" cy="40" r="8" fill="#EDE9FE" opacity="0.8" />
+    <circle cx="175" cy="30" r="6" fill="#DDD6FE" opacity="0.8" />
+    <circle cx="20" cy="120" r="10" fill="#C4B5FD" opacity="0.6" />
   </svg>
 );
 
@@ -124,7 +124,7 @@ const ReferralIllustration = () => (
     <g transform="translate(60, 10)">
       <ellipse cx="20" cy="15" rx="25" ry="18" fill="white" stroke="#D6D3D1" strokeWidth="2" />
       <path d="M10 30 Q5 40 15 35" fill="white" stroke="#D6D3D1" strokeWidth="2" />
-      <text x="10" y="18" fontSize="12" fill="#84CC16" fontWeight="bold">Hi!</text>
+      <text x="10" y="18" fontSize="12" fill="#8B5CF6" fontWeight="bold">Hi!</text>
     </g>
     <g transform="translate(100, 25)">
       <ellipse cx="20" cy="15" rx="25" ry="18" fill="white" stroke="#D6D3D1" strokeWidth="2" />
@@ -166,8 +166,8 @@ const GoalsIllustration = () => (
     </g>
     {/* Checklist items floating */}
     <g transform="translate(10, 40)">
-      <rect x="0" y="0" width="35" height="12" rx="3" fill="#ECFCCB" />
-      <circle cx="8" cy="6" r="3" fill="#84CC16" />
+      <rect x="0" y="0" width="35" height="12" rx="3" fill="#EDE9FE" />
+      <circle cx="8" cy="6" r="3" fill="#8B5CF6" />
       <path d="M6 6 L7.5 7.5 L10 5" stroke="white" strokeWidth="1.5" fill="none" />
     </g>
     <g transform="translate(15, 60)">
@@ -196,19 +196,19 @@ const FeaturesIllustration = () => (
       <rect x="10" y="0" width="120" height="75" rx="4" fill="#1F2937" />
       <rect x="15" y="5" width="110" height="60" rx="2" fill="#F5F5F4" />
       {/* Screen content - feature cards */}
-      <rect x="20" y="10" width="45" height="25" rx="2" fill="#ECFCCB" />
+      <rect x="20" y="10" width="45" height="25" rx="2" fill="#EDE9FE" />
       <rect x="70" y="10" width="50" height="25" rx="2" fill="#DBEAFE" />
       <rect x="20" y="38" width="50" height="22" rx="2" fill="#FCE7F3" />
       <rect x="75" y="38" width="45" height="22" rx="2" fill="#FEF3C7" />
       {/* Icons on cards */}
-      <circle cx="32" cy="22" r="6" fill="#84CC16" />
+      <circle cx="32" cy="22" r="6" fill="#8B5CF6" />
       <circle cx="85" cy="22" r="6" fill="#3B82F6" />
       <circle cx="35" cy="49" r="6" fill="#EC4899" />
       <circle cx="90" cy="49" r="6" fill="#F59E0B" />
     </g>
     {/* Floating checkmarks */}
     <g transform="translate(10, 20)">
-      <circle cx="15" cy="15" r="12" fill="#84CC16" />
+      <circle cx="15" cy="15" r="12" fill="#8B5CF6" />
       <path d="M10 15 L13 18 L20 11" stroke="white" strokeWidth="2.5" fill="none" strokeLinecap="round" />
     </g>
     <g transform="translate(165, 30)">
@@ -229,7 +229,7 @@ const TrialIllustration = () => (
     {/* Person celebrating */}
     <g transform="translate(60, 25)">
       {/* Body */}
-      <path d="M30 65 Q25 90 30 120 L60 120 Q65 90 60 65" fill="#84CC16" />
+      <path d="M30 65 Q25 90 30 120 L60 120 Q65 90 60 65" fill="#8B5CF6" />
       {/* Arms up celebrating */}
       <path d="M30 70 Q10 50 5 30" stroke="#FCD9B6" strokeWidth="10" fill="none" strokeLinecap="round" />
       <path d="M60 70 Q80 50 85 30" stroke="#FCD9B6" strokeWidth="10" fill="none" strokeLinecap="round" />
@@ -254,7 +254,7 @@ const TrialIllustration = () => (
     <rect x="20" y="20" width="8" height="8" rx="1" fill="#F472B6" transform="rotate(15 24 24)" />
     <rect x="170" y="30" width="8" height="8" rx="1" fill="#3B82F6" transform="rotate(-20 174 34)" />
     <rect x="30" y="100" width="6" height="6" rx="1" fill="#FCD34D" transform="rotate(30 33 103)" />
-    <rect x="160" y="90" width="7" height="7" rx="1" fill="#84CC16" transform="rotate(-15 163 93)" />
+    <rect x="160" y="90" width="7" height="7" rx="1" fill="#8B5CF6" transform="rotate(-15 163 93)" />
     <circle cx="40" cy="50" r="4" fill="#8B5CF6" />
     <circle cx="155" cy="60" r="5" fill="#F59E0B" />
     <circle cx="180" cy="120" r="4" fill="#EC4899" />
@@ -454,12 +454,12 @@ const OnboardingPage = ({ onNavigate, user, onComplete, onUserUpdate }: Onboardi
   ];
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: 'linear-gradient(180deg, #FAFAF9 0%, #F5F5F4 50%, #ECFCCB 100%)' }}>
+    <div className="min-h-screen flex flex-col" style={{ background: 'linear-gradient(180deg, #FAFAF9 0%, #F5F5F4 50%, #EDE9FE 100%)' }}>
       {/* Top bar */}
       <div className="px-6 pt-6 pb-2 flex items-center">
         <div className="flex items-center space-x-2.5">
           <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: '#262626' }}>
-            <span className="font-bold text-sm" style={{ color: '#a3e635' }}>W</span>
+            <span className="font-bold text-sm" style={{ color: '#8b5cf6' }}>W</span>
           </div>
           <span className="text-lg font-semibold text-stone-800">WriteScholar</span>
         </div>
@@ -469,7 +469,7 @@ const OnboardingPage = ({ onNavigate, user, onComplete, onUserUpdate }: Onboardi
       <div className="px-6 pt-3 pb-1">
         <div className="h-1.5 bg-stone-200/60 rounded-full overflow-hidden">
           <div
-            className="h-full bg-lime-400 rounded-full transition-all duration-500 ease-out"
+            className="h-full bg-violet-500 rounded-full transition-all duration-500 ease-out"
             style={{ width: `${progress}%` }}
           />
         </div>
@@ -498,7 +498,7 @@ const OnboardingPage = ({ onNavigate, user, onComplete, onUserUpdate }: Onboardi
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     placeholder="e.g. student123"
-                    className="w-full px-5 py-4 rounded-2xl border-2 border-stone-200 bg-white focus:border-lime-400 focus:ring-0 transition-all text-base text-stone-700 placeholder-stone-400"
+                    className="w-full px-5 py-4 rounded-2xl border-2 border-stone-200 bg-white focus:border-violet-500 focus:ring-0 transition-all text-base text-stone-700 placeholder-stone-400"
                   />
                 </div>
                 <div>
@@ -507,7 +507,7 @@ const OnboardingPage = ({ onNavigate, user, onComplete, onUserUpdate }: Onboardi
                     type="date"
                     value={dob}
                     onChange={(e) => setDob(e.target.value)}
-                    className="w-full px-5 py-4 rounded-2xl border-2 border-stone-200 bg-white focus:border-lime-400 focus:ring-0 transition-all text-base text-stone-700"
+                    className="w-full px-5 py-4 rounded-2xl border-2 border-stone-200 bg-white focus:border-violet-500 focus:ring-0 transition-all text-base text-stone-700"
                   />
                 </div>
               </div>
@@ -542,14 +542,14 @@ const OnboardingPage = ({ onNavigate, user, onComplete, onUserUpdate }: Onboardi
                     onClick={() => setSelectedGrade(option.id)}
                     className={`w-full flex items-center px-5 py-4 rounded-2xl border-2 transition-all ${
                       selectedGrade === option.id
-                        ? 'border-lime-400 bg-lime-50 shadow-sm'
+                        ? 'border-violet-500 bg-violet-50 shadow-sm'
                         : 'border-stone-200 bg-white hover:border-stone-300 hover:shadow-sm'
                     }`}
                   >
                     <span className="text-2xl mr-4">{option.icon}</span>
                     <span className="text-base font-medium text-stone-700">{option.label}</span>
                     {selectedGrade === option.id && (
-                      <svg className="w-5 h-5 text-lime-500 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-5 h-5 text-violet-500 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
                       </svg>
                     )}
@@ -593,14 +593,14 @@ const OnboardingPage = ({ onNavigate, user, onComplete, onUserUpdate }: Onboardi
                     onClick={() => setSelectedReferral(option.id)}
                     className={`w-full flex items-center px-5 py-4 rounded-2xl border-2 transition-all ${
                       selectedReferral === option.id
-                        ? 'border-lime-400 bg-lime-50 shadow-sm'
+                        ? 'border-violet-500 bg-violet-50 shadow-sm'
                         : 'border-stone-200 bg-white hover:border-stone-300 hover:shadow-sm'
                     }`}
                   >
                     <span className="text-2xl mr-4">{option.icon}</span>
                     <span className="text-base font-medium text-stone-700">{option.label}</span>
                     {selectedReferral === option.id && (
-                      <svg className="w-5 h-5 text-lime-500 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-5 h-5 text-violet-500 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
                       </svg>
                     )}
@@ -643,14 +643,14 @@ const OnboardingPage = ({ onNavigate, user, onComplete, onUserUpdate }: Onboardi
                     onClick={() => toggleGoal(option.id)}
                     className={`w-full flex items-center px-5 py-4 rounded-2xl border-2 transition-all ${
                       selectedGoals.includes(option.id)
-                        ? 'border-lime-400 bg-lime-50 shadow-sm'
+                        ? 'border-violet-500 bg-violet-50 shadow-sm'
                         : 'border-stone-200 bg-white hover:border-stone-300 hover:shadow-sm'
                     }`}
                   >
                     <span className="text-2xl mr-4">{option.icon}</span>
                     <span className="text-base font-medium text-stone-700">{option.label}</span>
                     {selectedGoals.includes(option.id) && (
-                      <svg className="w-5 h-5 text-lime-500 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-5 h-5 text-violet-500 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
                       </svg>
                     )}
@@ -681,7 +681,7 @@ const OnboardingPage = ({ onNavigate, user, onComplete, onUserUpdate }: Onboardi
               <FeaturesIllustration />
               <div className="text-center mb-6">
                 <h1 className="text-3xl text-stone-800 mb-2" style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 400 }}>
-                  Unlock <span className="text-lime-600">everything</span>
+                  Unlock <span className="text-violet-600">everything</span>
                 </h1>
                 <p className="text-stone-500 text-lg">See what you get with a free trial</p>
               </div>
@@ -693,8 +693,8 @@ const OnboardingPage = ({ onNavigate, user, onComplete, onUserUpdate }: Onboardi
                   <div className="p-4 text-center">
                     <span className="text-sm font-semibold text-stone-500">Free</span>
                   </div>
-                  <div className="p-4 text-center rounded-t-xl" style={{ background: 'linear-gradient(180deg, #ECFCCB 0%, #F7FEE7 100%)' }}>
-                    <span className="text-sm font-bold text-lime-700">Trial</span>
+                  <div className="p-4 text-center rounded-t-xl" style={{ background: 'linear-gradient(180deg, #EDE9FE 0%, #F5F3FF 100%)' }}>
+                    <span className="text-sm font-bold text-violet-700">Trial</span>
                   </div>
                 </div>
                 {/* Feature rows */}
@@ -720,8 +720,8 @@ const OnboardingPage = ({ onNavigate, user, onComplete, onUserUpdate }: Onboardi
                         </svg>
                       )}
                     </div>
-                    <div className="px-4 py-3 flex justify-center items-center" style={{ background: i % 2 === 0 ? 'rgba(236, 252, 203, 0.15)' : 'transparent' }}>
-                      <div className="w-6 h-6 rounded-full bg-lime-400 flex items-center justify-center">
+                    <div className="px-4 py-3 flex justify-center items-center" style={{ background: i % 2 === 0 ? 'rgba(237, 233, 254, 0.3)' : 'transparent' }}>
+                      <div className="w-6 h-6 rounded-full bg-violet-500 flex items-center justify-center">
                         <svg className="w-3.5 h-3.5 text-stone-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                         </svg>
@@ -753,12 +753,12 @@ const OnboardingPage = ({ onNavigate, user, onComplete, onUserUpdate }: Onboardi
             <div className="animate-fadeIn">
               <TrialIllustration />
               <div className="text-center mb-6">
-                <div className="inline-flex items-center gap-2 px-3 py-1 bg-lime-100 rounded-full mb-4">
-                  <span className="w-2 h-2 bg-lime-500 rounded-full animate-pulse"></span>
-                  <span className="text-xs font-semibold text-lime-700 uppercase tracking-wide">Limited time offer</span>
+                <div className="inline-flex items-center gap-2 px-3 py-1 bg-violet-100 rounded-full mb-4">
+                  <span className="w-2 h-2 bg-violet-500 rounded-full animate-pulse"></span>
+                  <span className="text-xs font-semibold text-violet-700 uppercase tracking-wide">Limited time offer</span>
                 </div>
                 <h1 className="text-3xl text-stone-800 mb-2" style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 400 }}>
-                  Try everything <span className="text-lime-600 italic">free</span> for 7 days
+                  Try everything <span className="text-violet-600 italic">free</span> for 7 days
                 </h1>
                 <p className="text-stone-500">Cancel anytime. No charge until the trial ends.</p>
               </div>
@@ -767,7 +767,7 @@ const OnboardingPage = ({ onNavigate, user, onComplete, onUserUpdate }: Onboardi
               <div className="bg-white rounded-2xl border border-stone-200 p-5 mb-6 shadow-sm">
                 <div className="flex items-start gap-4">
                   <div className="flex flex-col items-center">
-                    <div className="w-8 h-8 rounded-full bg-lime-400 flex items-center justify-center">
+                    <div className="w-8 h-8 rounded-full bg-violet-500 flex items-center justify-center">
                       <svg className="w-4 h-4 text-stone-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 15v-3m0 0V9m0 3h3m-3 0H9" />
                       </svg>
@@ -824,8 +824,8 @@ const OnboardingPage = ({ onNavigate, user, onComplete, onUserUpdate }: Onboardi
                 <div className="space-y-2.5">
                   {trialFeatures.map(f => (
                     <div key={f} className="flex items-center gap-3">
-                      <div className="w-5 h-5 rounded-full bg-lime-100 flex items-center justify-center flex-shrink-0">
-                        <svg className="w-3 h-3 text-lime-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <div className="w-5 h-5 rounded-full bg-violet-100 flex items-center justify-center flex-shrink-0">
+                        <svg className="w-3 h-3 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                         </svg>
                       </div>
@@ -846,7 +846,7 @@ const OnboardingPage = ({ onNavigate, user, onComplete, onUserUpdate }: Onboardi
               </div>
 
               {/* Free PDF bonus */}
-              <div className="flex items-center gap-3 bg-lime-50 border border-lime-200 rounded-xl p-4 mb-6">
+              <div className="flex items-center gap-3 bg-violet-50 border border-violet-200 rounded-xl p-4 mb-6">
                 <span className="text-2xl">🎁</span>
                 <div>
                   <p className="text-sm font-semibold text-stone-800">Bonus: Free Study Tips Guide</p>
@@ -870,12 +870,12 @@ const OnboardingPage = ({ onNavigate, user, onComplete, onUserUpdate }: Onboardi
               <button
                 onClick={handleStartTrial}
                 disabled={isLoadingCheckout}
-                className="w-full py-4 rounded-full font-bold text-base transition-all text-stone-900 shadow-lg hover:shadow-xl hover:scale-[1.01] disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:scale-100"
-                style={{ background: 'linear-gradient(135deg, #a3e635 0%, #84cc16 100%)' }}
+                className="w-full py-4 rounded-full font-bold text-base transition-all text-white shadow-lg hover:shadow-xl hover:scale-[1.01] disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:scale-100"
+                style={{ background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)' }}
               >
                 {isLoadingCheckout ? (
                   <span className="flex items-center justify-center">
-                    <svg className="animate-spin -ml-1 mr-2 h-5 w-5 text-stone-800" fill="none" viewBox="0 0 24 24">
+                    <svg className="animate-spin -ml-1 mr-2 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>

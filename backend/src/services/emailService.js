@@ -99,7 +99,7 @@ class EmailService {
                     <!-- Header -->
                     <tr>
                       <td style="background: #262626; padding: 32px 40px; text-align: center;">
-                        <h1 style="margin: 0; font-size: 28px; font-weight: 600; color: #a3e635; letter-spacing: -0.5px;">WriteScholar</h1>
+                        <h1 style="margin: 0; font-size: 28px; font-weight: 600; color: #8b5cf6; letter-spacing: -0.5px;">WriteScholar</h1>
                       </td>
                     </tr>
                     
@@ -238,7 +238,7 @@ class EmailService {
                     <!-- Header -->
                     <tr>
                       <td style="background: #262626; padding: 32px 40px; text-align: center;">
-                        <h1 style="margin: 0; font-size: 28px; font-weight: 600; color: #a3e635; letter-spacing: -0.5px;">WriteScholar</h1>
+                        <h1 style="margin: 0; font-size: 28px; font-weight: 600; color: #8b5cf6; letter-spacing: -0.5px;">WriteScholar</h1>
                       </td>
                     </tr>
                     
@@ -364,7 +364,7 @@ class EmailService {
                     <!-- Header -->
                     <tr>
                       <td style="background: #262626; padding: 32px 40px; text-align: center;">
-                        <h1 style="margin: 0; font-size: 28px; font-weight: 600; color: #a3e635; letter-spacing: -0.5px;">WriteScholar</h1>
+                        <h1 style="margin: 0; font-size: 28px; font-weight: 600; color: #8b5cf6; letter-spacing: -0.5px;">WriteScholar</h1>
                       </td>
                     </tr>
                     
@@ -373,7 +373,7 @@ class EmailService {
                       <td style="padding: 40px;">
                         <!-- Checkmark Icon -->
                         <div style="text-align: center; margin-bottom: 24px;">
-                          <div style="display: inline-block; width: 56px; height: 56px; background-color: #ecfccb; border-radius: 50%; line-height: 56px; font-size: 24px;">
+                          <div style="display: inline-block; width: 56px; height: 56px; background-color: #ede9fe; border-radius: 50%; line-height: 56px; font-size: 24px;">
                             ✓
                           </div>
                         </div>
@@ -391,27 +391,27 @@ class EmailService {
                               <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
                                 <tr>
                                   <td style="padding: 6px 0; font-size: 14px; color: #57534e;">
-                                    <span style="color: #84cc16; margin-right: 8px;">✓</span> Essay feedback & analysis
+                                    <span style="color: #8b5cf6; margin-right: 8px;">✓</span> Essay feedback & analysis
                                   </td>
                                 </tr>
                                 <tr>
                                   <td style="padding: 6px 0; font-size: 14px; color: #57534e;">
-                                    <span style="color: #84cc16; margin-right: 8px;">✓</span> Citation finder (APA, MLA, Chicago)
+                                    <span style="color: #8b5cf6; margin-right: 8px;">✓</span> Citation finder (APA, MLA, Chicago)
                                   </td>
                                 </tr>
                                 <tr>
                                   <td style="padding: 6px 0; font-size: 14px; color: #57534e;">
-                                    <span style="color: #84cc16; margin-right: 8px;">✓</span> Summarize papers & articles
+                                    <span style="color: #8b5cf6; margin-right: 8px;">✓</span> Summarize papers & articles
                                   </td>
                                 </tr>
                                 <tr>
                                   <td style="padding: 6px 0; font-size: 14px; color: #57534e;">
-                                    <span style="color: #84cc16; margin-right: 8px;">✓</span> Quiz & flashcard generator
+                                    <span style="color: #8b5cf6; margin-right: 8px;">✓</span> Quiz & flashcard generator
                                   </td>
                                 </tr>
                                 <tr>
                                   <td style="padding: 6px 0; font-size: 14px; color: #57534e;">
-                                    <span style="color: #84cc16; margin-right: 8px;">✓</span> Humanize AI-written text
+                                    <span style="color: #8b5cf6; margin-right: 8px;">✓</span> Humanize AI-written text
                                   </td>
                                 </tr>
                               </table>
@@ -441,16 +441,16 @@ class EmailService {
                         <!-- Gift Section -->
                         <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
                           <tr>
-                            <td style="border: 2px dashed #d9f99d; border-radius: 12px; padding: 20px; text-align: center;">
-                              <p style="margin: 0 0 4px 0; font-size: 12px; font-weight: 600; color: #65a30d; text-transform: uppercase; letter-spacing: 0.5px;">Free Gift</p>
+                            <td style="border: 2px dashed #ddd6fe; border-radius: 12px; padding: 20px; text-align: center;">
+                              <p style="margin: 0 0 4px 0; font-size: 12px; font-weight: 600; color: #7c3aed; text-transform: uppercase; letter-spacing: 0.5px;">Free Gift</p>
                               <p style="margin: 0 0 12px 0; font-size: 16px; font-weight: 600; color: #262626;">Ultimate Study Tips Guide</p>
                               <p style="margin: 0 0 16px 0; font-size: 13px; color: #78716c; line-height: 1.5;">
                                 A 10-page PDF with active recall, spaced repetition, and tips to boost your grades.
                               </p>
-                              <a href="${pdfUrl}" 
-                                 style="display: inline-block; 
-                                        background-color: #a3e635; 
-                                        color: #262626; 
+<a href="${pdfUrl}"
+                                 style="display: inline-block;
+                                        background-color: #8b5cf6;
+                                        color: #ffffff;
                                         font-size: 14px; 
                                         font-weight: 600; 
                                         text-decoration: none; 

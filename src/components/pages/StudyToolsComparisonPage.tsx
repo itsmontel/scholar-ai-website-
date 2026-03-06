@@ -39,9 +39,9 @@ const StudyToolsComparisonPage: React.FC<StudyToolsComparisonPageProps> = ({ onN
   const renderCell = (value: CellValue, isWs = false) => {
     if (typeof value === 'boolean') {
       return (
-        <span className={`inline-flex items-center justify-center w-8 h-8 rounded-full ${value ? 'bg-green-100' : 'bg-stone-100'}`}>
+        <span className={`inline-flex items-center justify-center w-8 h-8 rounded-full ${value ? 'bg-violet-100 dark:bg-violet-900/40' : 'bg-stone-100 dark:bg-stone-700/50'}`}>
           {value ? (
-            <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>
+            <svg className="w-5 h-5 text-violet-600 dark:text-violet-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>
           ) : (
             <svg className="w-5 h-5 text-stone-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd"/></svg>
           )}
@@ -50,15 +50,15 @@ const StudyToolsComparisonPage: React.FC<StudyToolsComparisonPageProps> = ({ onN
     }
     if (value === 'partial') {
       return (
-        <span className="inline-flex items-center justify-center w-8 h-8 bg-yellow-100 rounded-full">
-          <span className="text-yellow-600 text-xs font-bold">~</span>
+        <span className="inline-flex items-center justify-center w-8 h-8 bg-amber-100 dark:bg-amber-900/40 rounded-full">
+          <span className="text-amber-600 dark:text-amber-400 text-xs font-bold">~</span>
         </span>
       );
     }
-    const badgeClass = isWs && (value.includes('Free') || value.includes('3/mo')) ? 'bg-green-100 text-green-700' : 'bg-stone-100 text-stone-700';
+    const badgeClass = isWs && (value.includes('Free') || value.includes('3/mo')) ? 'bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300' : 'bg-stone-100 dark:bg-stone-700/50 text-stone-700 dark:text-stone-300';
     const isLimited = value.includes('Limited') || value.includes('ads');
     return (
-      <span className={`font-medium text-stone-600 text-sm sm:text-base inline-flex items-center justify-center px-3 py-1 rounded-full text-xs font-semibold ${isLimited ? 'bg-yellow-100 text-yellow-700' : badgeClass}`}>
+      <span className={`text-sm sm:text-base inline-flex items-center justify-center px-3 py-1 rounded-full text-xs font-semibold ${isLimited ? 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300' : badgeClass}`}>
         {value}
       </span>
     );
@@ -81,7 +81,7 @@ const StudyToolsComparisonPage: React.FC<StudyToolsComparisonPageProps> = ({ onN
             <p className="mt-3 text-sm text-stone-500">
               <button
                 onClick={() => onNavigate('why-students-choose')}
-                className="text-lime-600 hover:text-lime-700 font-medium underline underline-offset-2"
+                className="text-indigo-600 dark:text-indigo-400 hover:text-violet-600 dark:hover:text-violet-400 font-medium underline underline-offset-2"
               >
                 Compare writing tools: vs Grammarly & QuillBot ←
               </button>
@@ -124,30 +124,30 @@ const StudyToolsComparisonPage: React.FC<StudyToolsComparisonPageProps> = ({ onN
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-lg border border-stone-200 overflow-hidden">
-            <div className="grid grid-cols-4 bg-stone-50 border-b border-stone-200">
-              <div className="p-4 sm:p-6 font-semibold text-stone-700">Feature</div>
+          <div className="bg-white dark:bg-stone-800 rounded-2xl shadow-lg border border-stone-200 dark:border-stone-700 overflow-hidden">
+            <div className="grid grid-cols-4 bg-stone-50 dark:bg-stone-800/50 border-b border-stone-200 dark:border-stone-700">
+              <div className="p-4 sm:p-6 font-semibold text-stone-700 dark:text-stone-300">Feature</div>
               <div className="p-4 sm:p-6 text-center">
                 <div className="flex flex-col items-center">
-                  <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center mb-1">
+                  <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-lg flex items-center justify-center mb-1 shadow-lg shadow-indigo-500/30">
                     <span className="text-white font-bold text-sm">W</span>
                   </div>
-                  <span className="font-semibold text-stone-900 text-sm sm:text-base">WriteScholar</span>
+                  <span className="font-semibold text-stone-900 dark:text-stone-100 text-sm sm:text-base">WriteScholar</span>
                 </div>
               </div>
               <div className="p-4 sm:p-6 text-center">
-                <span className="font-medium text-stone-600 text-sm sm:text-base">Quizlet</span>
+                <span className="font-medium text-stone-600 dark:text-stone-400 text-sm sm:text-base">Quizlet</span>
               </div>
               <div className="p-4 sm:p-6 text-center">
-                <span className="font-medium text-stone-600 text-sm sm:text-base">Knowt</span>
+                <span className="font-medium text-stone-600 dark:text-stone-400 text-sm sm:text-base">Knowt</span>
               </div>
             </div>
 
-            <div className="divide-y divide-stone-100">
+            <div className="divide-y divide-stone-100 dark:divide-stone-700">
               {comparisonRows.map((row, i) => (
-                <div key={i} className={`grid grid-cols-4 items-center ${row.highlight ? 'bg-lime-50/30' : ''}`}>
+                <div key={i} className={`grid grid-cols-4 items-center ${row.highlight ? 'bg-violet-50/50 dark:bg-violet-900/20' : ''}`}>
                   <div className="p-4 sm:p-6">
-                    <span className="font-medium text-stone-800 text-sm sm:text-base">{row.feature}</span>
+                    <span className="font-medium text-stone-800 dark:text-stone-200 text-sm sm:text-base">{row.feature}</span>
                   </div>
                   <div className="p-4 sm:p-6 flex justify-center">
                     {renderCell(row.ws, true)}
@@ -163,27 +163,27 @@ const StudyToolsComparisonPage: React.FC<StudyToolsComparisonPageProps> = ({ onN
             </div>
           </div>
 
-          <p className="text-center text-stone-500 text-sm mt-6">
+          <p className="text-center text-stone-500 dark:text-stone-400 text-sm mt-6">
             * Comparison based on publicly available feature information as of 2026. Quizlet Plus: $7.99/mo. Knowt Plus: $4.99/mo. Knowt Premium: $8.99/mo.
           </p>
 
           {/* Summary */}
           <div className="mt-12 grid sm:grid-cols-3 gap-6">
-            <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
-              <h3 className="font-semibold text-stone-900 mb-2">WriteScholar</h3>
-              <p className="text-stone-600 text-sm">
+            <div className="bg-gradient-to-br from-indigo-50 to-violet-50 dark:from-indigo-900/20 dark:to-violet-900/20 rounded-2xl border border-indigo-200/70 dark:border-indigo-700/40 p-6 shadow-sm">
+              <h3 className="font-semibold text-stone-900 dark:text-stone-100 mb-2">WriteScholar</h3>
+              <p className="text-stone-600 dark:text-stone-400 text-sm">
                 The only AI study tool that combines quizzes, flashcards, and crosswords with academic writing: essay analysis, citation finder, and AI humanizer. Best for students who need both study and writing support.
               </p>
             </div>
-            <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
-              <h3 className="font-semibold text-stone-900 mb-2">Quizlet</h3>
-              <p className="text-stone-600 text-sm">
+            <div className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-2xl border border-amber-200/70 dark:border-amber-700/40 p-6 shadow-sm">
+              <h3 className="font-semibold text-stone-900 dark:text-stone-100 mb-2">Quizlet</h3>
+              <p className="text-stone-600 dark:text-stone-400 text-sm">
                 The classic study platform with Magic Notes (AI from notes), Brain Beats, and millions of community sets. Strong for memorization and shared content. Free tier is limited; Learn mode largely requires Plus.
               </p>
             </div>
-            <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
-              <h3 className="font-semibold text-stone-900 mb-2">Knowt</h3>
-              <p className="text-stone-600 text-sm">
+            <div className="bg-gradient-to-br from-sky-50 to-cyan-50 dark:from-sky-900/20 dark:to-cyan-900/20 rounded-2xl border border-sky-200/70 dark:border-sky-700/40 p-6 shadow-sm">
+              <h3 className="font-semibold text-stone-900 dark:text-stone-100 mb-2">Knowt</h3>
+              <p className="text-stone-600 dark:text-stone-400 text-sm">
                 The top Quizlet alternative with free Learn mode, AI lecture notetaker, PDF summarizer, and voice tutoring. Great for students who want to import Quizlet sets and study without paying. No writing tools.
               </p>
             </div>
@@ -198,7 +198,7 @@ const StudyToolsComparisonPage: React.FC<StudyToolsComparisonPageProps> = ({ onN
           <p className="text-stone-500 mb-6">Quizzes, flashcards, crosswords—plus essay analysis, citations, and AI humanizer. All in one place.</p>
           <button
             onClick={() => onNavigate('signup')}
-            className="px-8 py-4 bg-lime-400 hover:bg-lime-300 text-stone-900 font-semibold rounded-full transition-colors text-lg shadow-lg hover:shadow-xl"
+            className="px-8 py-4 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white font-bold rounded-2xl transition-all text-lg shadow-lg shadow-indigo-500/25 hover:shadow-xl"
           >
             Try Free
           </button>
