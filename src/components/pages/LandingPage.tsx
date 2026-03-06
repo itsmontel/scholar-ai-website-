@@ -373,15 +373,15 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
   }) => (
     <button
       onClick={onClick}
-      className={`group relative bg-gradient-to-br ${gradient} rounded-3xl p-4 sm:p-6 text-left hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 ease-out overflow-hidden border ${borderColor} h-[280px] sm:h-[310px] flex flex-col w-full`}
+      className={`group relative bg-gradient-to-br ${gradient} rounded-3xl p-5 sm:p-6 text-left hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 ease-out overflow-hidden border ${borderColor} h-[310px] flex flex-col w-full`}
     >
       <div className={`absolute top-0 right-0 w-32 h-32 rounded-full -translate-y-1/2 translate-x-1/2 ${accentClasses.orb}`} />
-      <h3 className={`text-lg sm:text-xl font-bold mb-2 sm:mb-3 relative z-10 flex-shrink-0 ${accentClasses.title}`}>{title}</h3>
-      <div className="relative z-10 bg-white dark:bg-stone-800 rounded-2xl p-3 sm:p-5 shadow-lg mb-3 sm:mb-4 flex-1 flex flex-col overflow-hidden">
-        <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center mb-2 sm:mb-3 text-base sm:text-lg flex-shrink-0 ${accentClasses.iconBg}`}>
+      <h3 className={`text-xl font-bold mb-3 relative z-10 flex-shrink-0 ${accentClasses.title}`}>{title}</h3>
+      <div className="relative z-10 bg-white dark:bg-stone-800 rounded-2xl p-4 sm:p-5 shadow-lg mb-4 flex-1 flex flex-col overflow-hidden">
+        <div className={`w-8 h-8 rounded-lg flex items-center justify-center mb-3 text-lg flex-shrink-0 ${accentClasses.iconBg}`}>
           {icon}
         </div>
-        <div className="flex-1 w-full flex flex-col justify-center">
+        <div className="flex-1 w-full flex flex-col justify-center min-w-0">
           {innerContent}
         </div>
       </div>
@@ -607,95 +607,95 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                   {[
                     { title: 'Analyze', desc: 'Get professor-style feedback on your essays', onClick: () => setMode('analyze'), gradient: 'from-lime-50 to-emerald-50 dark:from-lime-900/20 dark:to-emerald-900/20', accentClasses: { title: 'text-lime-700 dark:text-lime-400', orb: 'bg-lime-400/20', iconBg: 'bg-lime-100 dark:bg-lime-900/50' }, borderColor: 'border-lime-100 dark:border-lime-800/50', icon: '📝', inner: (
                       <div className="w-full min-w-0 flex flex-col justify-between h-full gap-2">
-                        <div className="h-2.5 sm:h-3 bg-stone-200 dark:bg-stone-600 rounded-full overflow-hidden flex-shrink-0"><div className="h-full w-full bg-lime-400 dark:bg-lime-500 rounded-full animate-line-grow origin-left" style={{ animationDelay: '0.2s' }} /></div>
-                        <div className="h-2.5 sm:h-3 bg-stone-200 dark:bg-stone-600 rounded-full overflow-hidden flex-shrink-0"><div className="h-full w-full bg-lime-400 dark:bg-lime-500 rounded-full animate-line-grow origin-left" style={{ animationDelay: '0.6s' }} /></div>
-                        <div className="h-2.5 sm:h-3 bg-stone-200 dark:bg-stone-600 rounded-full overflow-hidden flex-shrink-0"><div className="h-full w-full bg-lime-500 dark:bg-lime-400 rounded-full animate-line-grow origin-left" style={{ animationDelay: '1s' }} /></div>
+                        <div className="h-3 bg-stone-200 dark:bg-stone-600 rounded-full overflow-hidden flex-shrink-0"><div className="h-full w-full bg-lime-400 dark:bg-lime-500 rounded-full animate-line-grow origin-left" style={{ animationDelay: '0.2s' }} /></div>
+                        <div className="h-3 bg-stone-200 dark:bg-stone-600 rounded-full overflow-hidden flex-shrink-0"><div className="h-full w-full bg-lime-400 dark:bg-lime-500 rounded-full animate-line-grow origin-left" style={{ animationDelay: '0.6s' }} /></div>
+                        <div className="h-3 bg-stone-200 dark:bg-stone-600 rounded-full overflow-hidden flex-shrink-0"><div className="h-full w-full bg-lime-500 dark:bg-lime-400 rounded-full animate-line-grow origin-left" style={{ animationDelay: '1s' }} /></div>
                       </div>
                     )},
                     { title: 'Citations', desc: 'Find and format academic sources instantly', onClick: () => setMode('citations'), gradient: 'from-cyan-50 to-teal-50 dark:from-cyan-900/20 dark:to-teal-900/20', accentClasses: { title: 'text-teal-700 dark:text-teal-400', orb: 'bg-teal-400/20', iconBg: 'bg-teal-100 dark:bg-teal-900/50' }, borderColor: 'border-cyan-100 dark:border-cyan-800/50', icon: '🔍', inner: (
-                      <div className="w-full min-w-0 space-y-1 sm:space-y-1.5 overflow-hidden">
-                        <div className="text-[8px] sm:text-[9px] text-teal-600 dark:text-teal-400 font-mono opacity-0 animate-fade-slide-in truncate" style={{ animationDelay: '0.1s', animationFillMode: 'forwards' }}>Smith, J. (2024). Title...</div>
-                        <div className="text-[8px] sm:text-[9px] text-teal-600 dark:text-teal-400 font-mono opacity-0 animate-fade-slide-in truncate" style={{ animationDelay: '0.4s', animationFillMode: 'forwards' }}>Jones, M. (2023). Study...</div>
-                        <div className="flex gap-1 mt-1.5 sm:mt-2 flex-wrap">
-                          <span className="px-1 sm:px-1.5 py-0.5 bg-teal-100 dark:bg-teal-900/50 text-teal-700 dark:text-teal-300 text-[8px] sm:text-[9px] rounded font-medium flex-shrink-0">APA</span>
-                          <span className="px-1 sm:px-1.5 py-0.5 bg-stone-100 dark:bg-stone-700 text-stone-500 text-[8px] sm:text-[9px] rounded flex-shrink-0">MLA</span>
+                      <div className="w-full min-w-0 space-y-1.5 overflow-hidden">
+                        <div className="text-[9px] text-teal-600 dark:text-teal-400 font-mono opacity-0 animate-fade-slide-in truncate" style={{ animationDelay: '0.1s', animationFillMode: 'forwards' }}>Smith, J. (2024). Title...</div>
+                        <div className="text-[9px] text-teal-600 dark:text-teal-400 font-mono opacity-0 animate-fade-slide-in truncate" style={{ animationDelay: '0.4s', animationFillMode: 'forwards' }}>Jones, M. (2023). Study...</div>
+                        <div className="flex gap-1 mt-2 flex-wrap">
+                          <span className="px-1.5 py-0.5 bg-teal-100 dark:bg-teal-900/50 text-teal-700 dark:text-teal-300 text-[9px] rounded font-medium flex-shrink-0">APA</span>
+                          <span className="px-1.5 py-0.5 bg-stone-100 dark:bg-stone-700 text-stone-500 text-[9px] rounded flex-shrink-0">MLA</span>
                         </div>
                       </div>
                     )},
                     { title: 'Flashcards', desc: 'Generate flashcards from any content', onClick: () => { setMode('quiz'); setStudyToolMode('flashcards'); }, gradient: 'from-pink-50 to-rose-50 dark:from-pink-900/20 dark:to-rose-900/20', accentClasses: { title: 'text-rose-700 dark:text-rose-400', orb: 'bg-rose-400/20', iconBg: 'bg-rose-100 dark:bg-rose-900/50' }, borderColor: 'border-pink-100 dark:border-pink-800/50', icon: '🃏', inner: (
-                      <div className="w-full flex-1 min-h-[72px] flex flex-col self-stretch" style={{ perspective: '200px' }}>
+                      <div className="w-full flex-1 min-h-[72px] flex flex-col" style={{ perspective: '200px' }}>
                         <div className="relative w-full flex-1 min-h-[60px] animate-flashcard-flip" style={{ transformStyle: 'preserve-3d' }}>
-                          <div className="absolute inset-0 bg-gradient-to-br from-rose-400 to-pink-500 rounded-xl p-2.5 sm:p-4 flex flex-col justify-center overflow-hidden" style={{ backfaceVisibility: 'hidden' }}>
-                            <div className="text-white/80 text-[10px] sm:text-[11px]">Term</div>
-                            <div className="text-white font-semibold text-sm sm:text-base">Photosynthesis</div>
+                          <div className="absolute inset-0 bg-gradient-to-br from-rose-400 to-pink-500 rounded-xl p-4 flex flex-col justify-center overflow-hidden" style={{ backfaceVisibility: 'hidden' }}>
+                            <div className="text-white/80 text-[11px]">Term</div>
+                            <div className="text-white font-semibold text-base">Photosynthesis</div>
                           </div>
-                          <div className="absolute inset-0 bg-gradient-to-br from-pink-500 to-rose-600 rounded-xl p-2.5 sm:p-4 flex flex-col justify-center items-center overflow-hidden" style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}>
-                            <div className="text-white/90 text-[10px] sm:text-[11px]">Definition</div>
-                            <div className="text-white font-medium text-sm sm:text-base text-center line-clamp-2 w-full px-1">Process plants use...</div>
+                          <div className="absolute inset-0 bg-gradient-to-br from-pink-500 to-rose-600 rounded-xl p-4 flex flex-col justify-center items-center overflow-hidden" style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}>
+                            <div className="text-white/90 text-[11px]">Definition</div>
+                            <div className="text-white font-medium text-base text-center">Process plants use...</div>
                           </div>
                         </div>
                       </div>
                     )},
                     { title: 'Practice Tests', desc: 'Create quizzes from your study material', onClick: () => { setMode('quiz'); setStudyToolMode('quiz'); }, gradient: 'from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20', accentClasses: { title: 'text-orange-700 dark:text-orange-400', orb: 'bg-orange-400/20', iconBg: 'bg-amber-100 dark:bg-amber-900/50' }, borderColor: 'border-amber-100 dark:border-amber-800/50', icon: '📋', inner: (
-                      <div className="relative w-full min-w-0 h-12 sm:h-14 overflow-hidden">
+                      <div className="relative w-full min-w-0 h-14 overflow-hidden">
                         <div className="absolute inset-0 animate-quiz-show min-w-0">
-                          <div className="text-[9px] sm:text-[10px] text-stone-500 mb-1 truncate">Q: What is 2 + 2?</div>
-                          <div className="flex gap-1.5 sm:gap-2 flex-wrap">
-                            <span className="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-amber-100 dark:bg-amber-900/50 text-amber-700 text-[8px] sm:text-[9px] rounded font-medium">A</span>
-                            <span className="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-stone-100 dark:bg-stone-700 text-stone-500 text-[8px] sm:text-[9px] rounded">B</span>
-                            <span className="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-stone-100 dark:bg-stone-700 text-stone-500 text-[8px] sm:text-[9px] rounded">C</span>
+                          <div className="text-[10px] text-stone-500 mb-1 truncate">Q: What is 2 + 2?</div>
+                          <div className="flex gap-2 flex-wrap">
+                            <span className="px-2 py-1 bg-amber-100 dark:bg-amber-900/50 text-amber-700 text-[9px] rounded font-medium">A</span>
+                            <span className="px-2 py-1 bg-stone-100 dark:bg-stone-700 text-stone-500 text-[9px] rounded">B</span>
+                            <span className="px-2 py-1 bg-stone-100 dark:bg-stone-700 text-stone-500 text-[9px] rounded">C</span>
                           </div>
                         </div>
                         <div className="absolute inset-0 animate-quiz-hide flex flex-col justify-center min-w-0">
-                          <div className="text-[9px] sm:text-[10px] text-stone-500 mb-1">Correct!</div>
-                          <div className="text-orange-600 font-bold text-xs sm:text-sm">✓ 4</div>
+                          <div className="text-[10px] text-stone-500 mb-1">Correct!</div>
+                          <div className="text-orange-600 font-bold text-sm">✓ 4</div>
                         </div>
                       </div>
                     )},
                     { title: 'Humanize', desc: 'Transform AI text into natural human writing', onClick: () => setMode('humanize'), gradient: 'from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20', accentClasses: { title: 'text-violet-700 dark:text-violet-400', orb: 'bg-violet-400/20', iconBg: 'bg-violet-100 dark:bg-violet-900/50' }, borderColor: 'border-violet-100 dark:border-violet-800/50', icon: '✨', inner: (
-                      <div className="relative w-full min-w-0 h-10 sm:h-12 overflow-hidden">
+                      <div className="relative w-full min-w-0 h-12 overflow-hidden">
                         <div className="absolute inset-0 animate-humanize-before min-w-0">
-                          <div className="text-[9px] sm:text-[10px] text-stone-500 mb-0.5 sm:mb-1">Before</div>
-                          <div className="text-stone-600 dark:text-stone-400 text-[11px] sm:text-xs truncate">Utilize the methodology...</div>
+                          <div className="text-[10px] text-stone-500 mb-1">Before</div>
+                          <div className="text-stone-600 dark:text-stone-400 text-xs truncate">Utilize the methodology...</div>
                         </div>
                         <div className="absolute inset-0 animate-humanize-after min-w-0">
-                          <div className="text-[9px] sm:text-[10px] text-violet-600 mb-0.5 sm:mb-1">After</div>
-                          <div className="text-violet-700 dark:text-violet-300 text-[11px] sm:text-xs truncate">Use the method...</div>
+                          <div className="text-[10px] text-violet-600 mb-1">After</div>
+                          <div className="text-violet-700 dark:text-violet-300 text-xs truncate">Use the method...</div>
                         </div>
                       </div>
                     )},
                     { title: 'Summarize', desc: 'Turn long papers into concise bullet points', onClick: () => setMode('summarize'), gradient: 'from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20', accentClasses: { title: 'text-emerald-700 dark:text-emerald-400', orb: 'bg-emerald-400/20', iconBg: 'bg-emerald-100 dark:bg-emerald-900/50' }, borderColor: 'border-emerald-100 dark:border-emerald-800/50', icon: '📝', inner: (
-                      <div className="w-full min-w-0 space-y-1.5 sm:space-y-2 overflow-hidden">
+                      <div className="w-full min-w-0 space-y-2 overflow-hidden">
                         <div className="flex gap-1.5 items-center min-w-0">
                           <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 flex-shrink-0" />
-                          <div className="h-1.5 sm:h-2 bg-stone-200 dark:bg-stone-600 rounded-full flex-1 min-w-0 overflow-hidden origin-left"><div className="h-full bg-emerald-400 dark:bg-emerald-500 rounded-full animate-summarize-shrink" /></div>
+                          <div className="h-2 bg-stone-200 dark:bg-stone-600 rounded-full flex-1 min-w-0 overflow-hidden origin-left"><div className="h-full bg-emerald-400 dark:bg-emerald-500 rounded-full animate-summarize-shrink" /></div>
                         </div>
                         <div className="flex gap-1.5 items-center min-w-0">
                           <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 flex-shrink-0" />
-                          <div className="h-1.5 sm:h-2 bg-stone-200 dark:bg-stone-600 rounded-full flex-1 min-w-0 overflow-hidden origin-left"><div className="h-full w-full bg-emerald-400 dark:bg-emerald-500 rounded-full animate-summarize-shrink" style={{ animationDelay: '0.3s' }} /></div>
+                          <div className="h-2 bg-stone-200 dark:bg-stone-600 rounded-full flex-1 min-w-0 overflow-hidden origin-left"><div className="h-full w-full bg-emerald-400 dark:bg-emerald-500 rounded-full animate-summarize-shrink" style={{ animationDelay: '0.3s' }} /></div>
                         </div>
                         <div className="flex gap-1.5 items-center min-w-0">
                           <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 flex-shrink-0" />
-                          <div className="h-1.5 sm:h-2 bg-stone-200 dark:bg-stone-600 rounded-full flex-1 min-w-0 overflow-hidden origin-left"><div className="h-full w-full bg-emerald-500 dark:bg-emerald-400 rounded-full animate-summarize-shrink" style={{ animationDelay: '0.6s' }} /></div>
+                          <div className="h-2 bg-stone-200 dark:bg-stone-600 rounded-full flex-1 min-w-0 overflow-hidden origin-left"><div className="h-full w-full bg-emerald-500 dark:bg-emerald-400 rounded-full animate-summarize-shrink" style={{ animationDelay: '0.6s' }} /></div>
                         </div>
                       </div>
                     )},
                     { title: 'Study Tools', desc: 'Quizzes, flashcards & crosswords', onClick: () => setMode('quiz'), gradient: 'from-lime-50 to-green-50 dark:from-lime-900/20 dark:to-green-900/20', accentClasses: { title: 'text-lime-700 dark:text-lime-400', orb: 'bg-lime-400/20', iconBg: 'bg-lime-100 dark:bg-lime-900/50' }, borderColor: 'border-lime-100 dark:border-lime-800/50', icon: '🎯', inner: (
-                      <div className="w-full min-w-0 flex gap-1.5 sm:gap-2 overflow-hidden">
-                        <div className="flex-1 min-w-0 text-center py-1.5 sm:py-2 px-1 sm:px-2 bg-lime-100 dark:bg-lime-900/50 rounded-lg text-lime-700 dark:text-lime-300 text-[10px] sm:text-xs font-medium animate-tool-show-1 truncate">📝 Quiz</div>
-                        <div className="flex-1 min-w-0 text-center py-1.5 sm:py-2 px-1 sm:px-2 bg-lime-100 dark:bg-lime-900/50 rounded-lg text-lime-700 dark:text-lime-300 text-[10px] sm:text-xs font-medium animate-tool-show-2 truncate">🃏 Cards</div>
-                        <div className="flex-1 min-w-0 text-center py-1.5 sm:py-2 px-1 sm:px-2 bg-lime-100 dark:bg-lime-900/50 rounded-lg text-lime-700 dark:text-lime-300 text-[10px] sm:text-xs font-medium animate-tool-show-3 truncate">🧩 Puzzle</div>
+                      <div className="w-full min-w-0 flex gap-2 overflow-hidden">
+                        <div className="flex-1 min-w-0 text-center py-2 px-2 bg-lime-100 dark:bg-lime-900/50 rounded-lg text-lime-700 dark:text-lime-300 text-xs font-medium animate-tool-show-1 truncate">📝 Quiz</div>
+                        <div className="flex-1 min-w-0 text-center py-2 px-2 bg-lime-100 dark:bg-lime-900/50 rounded-lg text-lime-700 dark:text-lime-300 text-xs font-medium animate-tool-show-2 truncate">🃏 Cards</div>
+                        <div className="flex-1 min-w-0 text-center py-2 px-2 bg-lime-100 dark:bg-lime-900/50 rounded-lg text-lime-700 dark:text-lime-300 text-xs font-medium animate-tool-show-3 truncate">🧩 Puzzle</div>
                       </div>
                     )},
                     { title: 'Crossword', desc: 'Generate crosswords from your notes', onClick: () => { setMode('quiz'); setStudyToolMode('crossword'); }, gradient: 'from-amber-50 to-yellow-50 dark:from-amber-900/20 dark:to-yellow-900/20', accentClasses: { title: 'text-amber-700 dark:text-amber-400', orb: 'bg-amber-400/20', iconBg: 'bg-amber-100 dark:bg-amber-900/50' }, borderColor: 'border-amber-100 dark:border-amber-800/50', icon: '🧩', inner: (
-                      <div className="w-full min-w-0 max-w-[140px] sm:max-w-none mx-auto grid grid-cols-5 gap-0.5 overflow-hidden">
+                      <div className="w-full min-w-0 mx-auto grid grid-cols-5 gap-0.5 overflow-hidden">
                         {[['C','A','T','#','#'],['O','#','#','#','#'],['D','O','G','#','#'],['#','#','#','#','#'],['#','#','#','#','#']].map((row, ri) => row.map((cell, ci) => (
-                          <div key={`${ri}-${ci}`} className={`aspect-square flex items-center justify-center rounded-sm text-[9px] sm:text-[10px] font-bold transition-all duration-300 flex-shrink-0 ${cell === '#' ? 'bg-stone-700 dark:bg-stone-800' : 'bg-amber-50 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 border border-amber-200/60 dark:border-amber-700/50 animate-cell-pop'}`} style={cell !== '#' ? { animationDelay: `${(ri * 5 + ci) * 50}ms` } : undefined}>{cell !== '#' ? cell : ''}</div>
+                          <div key={`${ri}-${ci}`} className={`aspect-square flex items-center justify-center rounded-sm text-[10px] font-bold transition-all duration-300 flex-shrink-0 ${cell === '#' ? 'bg-stone-700 dark:bg-stone-800' : 'bg-amber-50 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 border border-amber-200/60 dark:border-amber-700/50 animate-cell-pop'}`} style={cell !== '#' ? { animationDelay: `${(ri * 5 + ci) * 50}ms` } : undefined}>{cell !== '#' ? cell : ''}</div>
                         )))}
                       </div>
                     )},
                   ].map((card) => (
-                    <div key={card.title} className="flex-shrink-0 w-[260px] sm:w-auto sm:flex-[0_0_12.5%] snap-start">
+                    <div key={card.title} className="flex-shrink-0 w-[280px] sm:w-auto sm:flex-[0_0_12.5%] snap-start">
                       <StudyCard
                         title={card.title}
                         desc={card.desc}
