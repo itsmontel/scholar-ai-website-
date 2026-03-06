@@ -842,24 +842,28 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
       </section>
 
       {/* STUDY YOUR WAY - Tabbed video showcase */}
-      <section className="relative py-10 sm:py-20 bg-gradient-to-b from-stone-50 to-white dark:from-stone-900 dark:to-stone-900 overflow-hidden">
-        {/* Floating illustrations */}
-        <div className="absolute top-16 left-[6%] hidden lg:flex items-center gap-2 bg-white/90 dark:bg-stone-800/90 backdrop-blur rounded-2xl px-3 py-2 shadow-lg border border-lime-200/60 animate-float z-10">
-          <span className="text-2xl">📝</span><span className="text-xs font-bold text-lime-600 dark:text-lime-400">Analyse</span>
+      <section className="relative py-10 sm:py-20 overflow-hidden max-lg:bg-gradient-to-b max-lg:from-violet-50/80 max-lg:via-stone-50 max-lg:to-white dark:max-lg:from-violet-950/30 dark:max-lg:via-stone-900 dark:max-lg:to-stone-900 bg-gradient-to-b from-stone-50 to-white dark:from-stone-900 dark:to-stone-900">
+        {/* Floating illustrations - show on mobile too */}
+        <div className="absolute top-16 left-[6%] flex items-center gap-2 bg-white/90 dark:bg-stone-800/90 backdrop-blur rounded-2xl px-3 py-2 shadow-lg border border-violet-200/60 animate-float z-10 max-lg:left-4 max-lg:top-12 max-lg:px-2.5 max-lg:py-1.5 max-lg:text-sm">
+          <span className="text-2xl max-lg:text-lg">📝</span><span className="text-xs font-bold text-violet-600 dark:text-violet-400">Analyse</span>
         </div>
-        <div className="absolute top-28 right-[5%] hidden lg:flex items-center gap-2 bg-white/90 dark:bg-stone-800/90 backdrop-blur rounded-2xl px-3 py-2 shadow-lg border border-rose-200/60 animate-float-delayed z-10">
-          <span className="text-2xl">🃏</span><span className="text-xs font-bold text-rose-600 dark:text-rose-400">Flashcards</span>
+        <div className="absolute top-28 right-[5%] flex items-center gap-2 bg-white/90 dark:bg-stone-800/90 backdrop-blur rounded-2xl px-3 py-2 shadow-lg border border-violet-200/60 animate-float-delayed z-10 max-lg:right-4 max-lg:top-24 max-lg:px-2.5 max-lg:py-1.5">
+          <span className="text-2xl max-lg:text-lg">🃏</span><span className="text-xs font-bold text-violet-600 dark:text-violet-400">Flashcards</span>
         </div>
-        <div className="absolute bottom-32 left-[8%] hidden lg:flex items-center gap-2 bg-white/90 dark:bg-stone-800/90 backdrop-blur rounded-2xl px-3 py-2 shadow-lg border border-violet-200/60 animate-float z-10" style={{ animationDelay: '0.5s' }}>
-          <span className="text-2xl">✨</span><span className="text-xs font-bold text-violet-600 dark:text-violet-400">Humanise</span>
+        <div className="absolute bottom-32 left-[8%] flex items-center gap-2 bg-white/90 dark:bg-stone-800/90 backdrop-blur rounded-2xl px-3 py-2 shadow-lg border border-violet-200/60 animate-float z-10 max-lg:left-4 max-lg:bottom-40 max-lg:px-2.5 max-lg:py-1.5" style={{ animationDelay: '0.5s' }}>
+          <span className="text-2xl max-lg:text-lg">✨</span><span className="text-xs font-bold text-violet-600 dark:text-violet-400">Humanise</span>
         </div>
-        <div className="absolute bottom-24 right-[7%] hidden lg:flex items-center gap-2 bg-white/90 dark:bg-stone-800/90 backdrop-blur rounded-2xl px-3 py-2 shadow-lg border border-amber-200/60 animate-float-delayed z-10" style={{ animationDelay: '0.3s' }}>
-          <span className="text-2xl">🧩</span><span className="text-xs font-bold text-amber-600 dark:text-amber-400">Crossword</span>
+        <div className="absolute bottom-24 right-[7%] flex items-center gap-2 bg-white/90 dark:bg-stone-800/90 backdrop-blur rounded-2xl px-3 py-2 shadow-lg border border-violet-200/60 animate-float-delayed z-10 max-lg:right-4 max-lg:bottom-32 max-lg:px-2.5 max-lg:py-1.5" style={{ animationDelay: '0.3s' }}>
+          <span className="text-2xl max-lg:text-lg">🧩</span><span className="text-xs font-bold text-violet-600 dark:text-violet-400">Crossword</span>
         </div>
         <div className="absolute top-1/3 left-[3%] hidden xl:block text-4xl opacity-40 animate-float">📚</div>
         <div className="absolute top-2/5 right-[4%] hidden xl:block text-3xl opacity-35 animate-float-delayed">✏️</div>
         <div className="absolute bottom-1/3 left-[4%] hidden xl:block text-3xl opacity-35 animate-float" style={{ animationDelay: '0.7s' }}>🎯</div>
         <div className="absolute bottom-1/4 right-[3%] hidden xl:block text-4xl opacity-40 animate-float-delayed" style={{ animationDelay: '0.4s' }}>🚀</div>
+        {/* Mobile-only floating shapes for depth */}
+        <div className="lg:hidden absolute top-20 right-8 w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-400/30 to-purple-400/20 animate-float" />
+        <div className="lg:hidden absolute bottom-48 left-6 w-12 h-12 rounded-full bg-gradient-to-br from-indigo-400/25 to-violet-400/15 animate-float-delayed" style={{ animationDelay: '0.4s' }} />
+        <div className="lg:hidden absolute top-1/2 right-6 w-10 h-10 rounded-xl bg-gradient-to-br from-purple-400/20 to-violet-400/15 animate-float" style={{ animationDelay: '0.6s' }} />
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="relative flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-8 mb-10 sm:mb-14">
             {/* Illustration - studying with book */}
@@ -890,10 +894,10 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
               </svg>
             </div>
             <div className="text-center sm:text-left">
-              <h2 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-stone-800 dark:text-stone-100 mb-3 sm:mb-4">
+              <h2 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-stone-800 dark:text-stone-100 mb-3 sm:mb-4 max-lg:bg-gradient-to-r max-lg:from-violet-700 max-lg:to-purple-700 max-lg:dark:from-violet-300 max-lg:dark:to-purple-300 max-lg:bg-clip-text max-lg:text-transparent">
                 Study your way
               </h2>
-              <p className="text-lg text-stone-600 dark:text-stone-400 max-w-2xl mx-auto sm:mx-0">
+              <p className="text-lg text-stone-600 dark:text-stone-400 max-w-2xl mx-auto sm:mx-0 max-lg:text-stone-700 max-lg:dark:text-stone-300 max-lg:font-medium">
                 Pick a tool. Watch it work. It's really that easy.
               </p>
             </div>
@@ -935,8 +939,8 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
 
           {/* Video container */}
           <div className="relative">
-            <div className="absolute -inset-2 bg-gradient-to-r from-blue-400/20 via-violet-400/20 to-purple-400/20 rounded-3xl blur-2xl animate-notes-glow-pulse"></div>
-            <div className="relative bg-white dark:bg-stone-800 rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl border border-stone-200/50 dark:border-stone-700">
+            <div className="absolute -inset-2 bg-gradient-to-r from-blue-400/20 via-violet-400/20 to-purple-400/20 rounded-3xl blur-2xl animate-notes-glow-pulse max-lg:from-violet-400/30 max-lg:via-purple-400/25 max-lg:to-indigo-400/30 max-lg:-inset-3"></div>
+            <div className="relative bg-white dark:bg-stone-800 rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl border border-stone-200/50 dark:border-stone-700 max-lg:border-violet-200/50 max-lg:dark:border-violet-900/30 max-lg:shadow-violet-500/10 max-lg:shadow-2xl">
               {[
                 { id: 'analyse', src: '/analysevid.mp4', gradient: 'from-lime-500/10 to-emerald-500/10' },
                 { id: 'flashcards', src: '/flashcardsvid.mp4', gradient: 'from-rose-500/10 to-pink-500/10' },
@@ -967,7 +971,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
           <div className="text-center mt-10 sm:mt-12">
             <button
               onClick={() => onNavigate('signup')}
-              className="px-8 py-4 bg-gradient-to-r from-blue-500 to-violet-500 text-white font-bold rounded-2xl hover:from-blue-400 hover:to-violet-400 hover:scale-105 active:scale-95 transition-all shadow-xl shadow-violet-500/25 text-lg"
+              className="px-8 py-4 bg-gradient-to-r from-violet-600 to-purple-600 text-white font-bold rounded-2xl hover:from-violet-500 hover:to-purple-500 hover:scale-105 active:scale-95 transition-all shadow-xl shadow-violet-500/30 text-lg max-lg:px-10 max-lg:py-4 max-lg:shadow-violet-500/40"
             >
               Try it free
             </button>
@@ -1813,16 +1817,19 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
       </section>
 
       {/* What WriteScholar Can Help You With */}
-      <section className="relative py-12 sm:py-24 bg-white dark:bg-stone-900 overflow-hidden">
+      <section className="relative py-12 sm:py-24 overflow-hidden max-lg:bg-gradient-to-b max-lg:from-white max-lg:via-violet-50/50 max-lg:to-stone-50 dark:max-lg:from-stone-900 dark:max-lg:via-violet-950/20 dark:max-lg:to-stone-900 bg-white dark:bg-stone-900">
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="absolute top-0 left-[3%] hidden xl:block text-4xl opacity-20 animate-float">📖</div>
           <div className="absolute top-8 right-[3%] hidden xl:block text-4xl opacity-20 animate-float-delayed">✍️</div>
+          {/* Mobile floating shapes */}
+          <div className="lg:hidden absolute top-16 right-6 w-14 h-14 rounded-2xl bg-gradient-to-br from-violet-400/25 to-purple-400/15 animate-float" />
+          <div className="lg:hidden absolute bottom-1/4 left-4 w-10 h-10 rounded-full bg-gradient-to-br from-indigo-400/20 to-violet-400/15 animate-float-delayed" style={{ animationDelay: '0.3s' }} />
           <div className="relative text-center mb-12">
-            <span className="inline-block px-4 py-1.5 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-400 rounded-full text-sm font-semibold mb-4">Your Academic Toolkit</span>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-stone-800 dark:text-stone-100">
+            <span className="inline-block px-4 py-1.5 bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-400 rounded-full text-sm font-semibold mb-4 max-lg:bg-violet-200/80 max-lg:dark:bg-violet-800/60">Your Academic Toolkit</span>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-stone-800 dark:text-stone-100 max-lg:bg-gradient-to-r max-lg:from-violet-800 max-lg:to-purple-800 max-lg:dark:from-violet-200 max-lg:dark:to-purple-200 max-lg:bg-clip-text max-lg:text-transparent">
               What WriteScholar Can Help You With
             </h2>
-            <p className="mt-4 text-lg text-stone-600 dark:text-stone-400 max-w-2xl mx-auto">
+            <p className="mt-4 text-lg text-stone-600 dark:text-stone-400 max-w-2xl mx-auto max-lg:text-stone-700 max-lg:dark:text-stone-300 max-lg:font-medium">
               Essays, exams, citations, and more — all in one place.
             </p>
           </div>
@@ -1862,8 +1869,8 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
           </div>
                   
           {/* Content Area - Gradient card style */}
-          <div className="relative bg-gradient-to-br from-stone-50 to-white dark:from-stone-800/50 dark:to-stone-900 rounded-2xl sm:rounded-3xl p-5 sm:p-12 lg:p-16 border border-stone-200 dark:border-stone-700 shadow-xl overflow-hidden">
-            <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-br from-indigo-400/10 to-violet-400/10 rounded-full -translate-y-1/2 translate-x-1/2" aria-hidden />
+          <div className="relative bg-gradient-to-br from-stone-50 to-white dark:from-stone-800/50 dark:to-stone-900 rounded-2xl sm:rounded-3xl p-5 sm:p-12 lg:p-16 border border-stone-200 dark:border-stone-700 shadow-xl overflow-hidden max-lg:from-white max-lg:to-violet-50/30 max-lg:dark:from-stone-800 max-lg:dark:to-violet-950/20 max-lg:border-violet-200/60 max-lg:dark:border-violet-900/30 max-lg:shadow-violet-500/10">
+            <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-br from-indigo-400/10 to-violet-400/10 rounded-full -translate-y-1/2 translate-x-1/2 max-lg:from-violet-400/20 max-lg:to-purple-400/15" aria-hidden />
             <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center relative z-10">
               {/* Text Content */}
               <div className="order-2 lg:order-1">
@@ -1875,7 +1882,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                 </p>
                 <button
                   onClick={() => onNavigate('signup')}
-                  className="inline-flex items-center px-6 py-3 text-white font-bold rounded-2xl bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 hover:scale-105 active:scale-95 hover:shadow-xl shadow-indigo-500/30 transition-all duration-200"
+                  className="inline-flex items-center px-6 py-3 text-white font-bold rounded-2xl bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 hover:scale-105 active:scale-95 hover:shadow-xl shadow-violet-500/30 transition-all duration-200 max-lg:px-8 max-lg:py-3.5 max-lg:shadow-violet-500/40"
                 >
                   Start for free
                 </button>
@@ -2171,24 +2178,31 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
       </section>
 
       {/* See WriteScholar in Action - Study Tools Showcase */}
-      <section className="relative py-12 sm:py-28 bg-white dark:bg-stone-900 overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-10%,rgba(99,102,241,0.08),transparent)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-10%,rgba(139,92,246,0.06),transparent)]" />
-        {/* Floating doodles */}
+      <section className="relative py-12 sm:py-28 overflow-hidden max-lg:bg-gradient-to-b max-lg:from-violet-50/60 max-lg:via-white max-lg:to-stone-50 dark:max-lg:from-violet-950/25 dark:max-lg:via-stone-900 dark:max-lg:to-stone-900 bg-white dark:bg-stone-900">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-10%,rgba(99,102,241,0.08),transparent)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-10%,rgba(139,92,246,0.06),transparent)] max-lg:bg-[radial-gradient(ellipse_100%_60%_at_50%_0%,rgba(139,92,246,0.12),transparent_70%)] max-lg:dark:bg-[radial-gradient(ellipse_100%_60%_at_50%_0%,rgba(139,92,246,0.08),transparent_70%)]" />
+        {/* Floating doodles - show on mobile too */}
         <div className="absolute top-24 left-[5%] hidden xl:block text-5xl opacity-40 animate-float">📚</div>
         <div className="absolute top-40 right-[8%] hidden xl:block text-4xl opacity-35 animate-float-delayed">✏️</div>
         <div className="absolute bottom-40 left-[7%] hidden xl:block text-4xl opacity-35 animate-float" style={{ animationDelay: '0.7s' }}>🎯</div>
         <div className="absolute bottom-32 right-[5%] hidden xl:block text-5xl opacity-40 animate-float-delayed" style={{ animationDelay: '0.4s' }}>🚀</div>
+        {/* Mobile floating shapes */}
+        <div className="xl:hidden absolute top-20 left-4 text-3xl opacity-50 animate-float">📚</div>
+        <div className="xl:hidden absolute top-32 right-4 text-2xl opacity-45 animate-float-delayed">✏️</div>
+        <div className="xl:hidden absolute bottom-64 left-6 text-2xl opacity-45 animate-float" style={{ animationDelay: '0.5s' }}>🎯</div>
+        <div className="xl:hidden absolute bottom-48 right-6 text-3xl opacity-50 animate-float-delayed" style={{ animationDelay: '0.3s' }}>🚀</div>
+        <div className="lg:hidden absolute top-1/3 right-8 w-12 h-12 rounded-xl bg-gradient-to-br from-violet-400/25 to-purple-400/15 animate-float" />
+        <div className="lg:hidden absolute bottom-1/3 left-6 w-10 h-10 rounded-full bg-gradient-to-br from-indigo-400/20 to-violet-400/15 animate-float-delayed" style={{ animationDelay: '0.6s' }} />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           {/* Header - matches Free Writing Tools / landing theme */}
           <div className="relative text-center mb-10 sm:mb-20">
-            <span className="inline-block px-4 py-1.5 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-400 rounded-full text-sm font-semibold mb-4 animate-notes-fade-in-up opacity-0" style={{ animationDelay: '0.1s', animationFillMode: 'forwards' }}>
+            <span className="inline-block px-4 py-1.5 bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-400 rounded-full text-sm font-semibold mb-4 animate-notes-fade-in-up opacity-0 max-lg:bg-violet-200/80 max-lg:dark:bg-violet-800/60" style={{ animationDelay: '0.1s', animationFillMode: 'forwards' }}>
               Study Smarter, Not Harder
             </span>
             <h2 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-stone-800 dark:text-stone-100 mb-4 sm:mb-5 animate-notes-fade-in-up opacity-0" style={{ animationDelay: '0.2s', animationFillMode: 'forwards' }}>
               Turn Your Notes Into<br className="hidden sm:block" />
-              <span className="bg-gradient-to-r from-indigo-500 to-violet-600 bg-clip-text text-transparent inline-block">Interactive Study Tools</span>
+              <span className="bg-gradient-to-r from-violet-600 to-purple-600 dark:from-violet-400 dark:to-purple-400 bg-clip-text text-transparent inline-block max-lg:from-violet-700 max-lg:to-purple-700 max-lg:dark:from-violet-300 max-lg:dark:to-purple-300">Interactive Study Tools</span>
             </h2>
-            <p className="text-base sm:text-xl text-stone-600 dark:text-stone-400 text-center max-w-2xl mx-auto px-2 animate-notes-fade-in-up opacity-0" style={{ animationDelay: '0.3s', animationFillMode: 'forwards' }}>
+            <p className="text-base sm:text-xl text-stone-600 dark:text-stone-400 text-center max-w-2xl mx-auto px-2 animate-notes-fade-in-up opacity-0 max-lg:text-stone-700 max-lg:dark:text-stone-300 max-lg:font-medium" style={{ animationDelay: '0.3s', animationFillMode: 'forwards' }}>
               Paste your notes. Get quizzes, flashcards & crosswords in seconds. It's that easy.
             </p>
           </div>
@@ -2196,8 +2210,8 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
           {/* Notes - Full width hero: content left, image right - indigo/violet theme */}
           <div className="mb-12 sm:mb-16 animate-notes-fade-in-up opacity-0" style={{ animationDelay: '0.4s', animationFillMode: 'forwards' }}>
             <div className="relative group">
-              <div className="absolute -inset-1 bg-gradient-to-r from-indigo-400 to-violet-400 rounded-3xl blur-xl opacity-15 group-hover:opacity-25 transition-opacity duration-500"></div>
-              <div className="relative bg-white dark:bg-stone-800 rounded-3xl overflow-hidden shadow-xl border border-stone-200/50 dark:border-stone-700 group-hover:shadow-indigo-500/10 dark:group-hover:shadow-indigo-900/20 transition-shadow duration-500">
+              <div className="absolute -inset-1 bg-gradient-to-r from-indigo-400 to-violet-400 rounded-3xl blur-xl opacity-15 group-hover:opacity-25 transition-opacity duration-500 max-lg:from-violet-400 max-lg:to-purple-400 max-lg:opacity-25 max-lg:-inset-2"></div>
+              <div className="relative bg-white dark:bg-stone-800 rounded-3xl overflow-hidden shadow-xl border border-stone-200/50 dark:border-stone-700 group-hover:shadow-indigo-500/10 dark:group-hover:shadow-indigo-900/20 transition-shadow duration-500 max-lg:border-violet-200/60 max-lg:dark:border-violet-900/40 max-lg:shadow-violet-500/15">
                 <div className="grid lg:grid-cols-[1fr_1.15fr] gap-0">
                   {/* Content side - LEFT (above image on mobile) */}
                   <div className="order-1 lg:order-1 p-5 sm:p-12 lg:p-16 flex flex-col justify-center">
@@ -2246,20 +2260,22 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
           <div className="relative text-center mb-10 sm:mb-12 animate-notes-fade-in-up opacity-0" style={{ animationDelay: '0.5s', animationFillMode: 'forwards' }}>
             <div className="absolute -left-8 top-1/2 -translate-y-1/2 hidden lg:block text-4xl opacity-50 animate-float">✨</div>
             <div className="absolute -right-8 top-1/2 -translate-y-1/2 hidden lg:block text-4xl opacity-50 animate-float-delayed">⚡</div>
-            <h3 className="text-xl sm:text-2xl font-bold text-stone-800 dark:text-stone-100 mb-2">
+            <div className="lg:hidden absolute left-4 top-1/2 -translate-y-1/2 text-2xl opacity-60 animate-float">✨</div>
+            <div className="lg:hidden absolute right-4 top-1/2 -translate-y-1/2 text-2xl opacity-60 animate-float-delayed">⚡</div>
+            <h3 className="text-xl sm:text-2xl font-bold text-stone-800 dark:text-stone-100 mb-2 max-lg:bg-gradient-to-r max-lg:from-violet-700 max-lg:to-purple-700 max-lg:dark:from-violet-300 max-lg:dark:to-purple-300 max-lg:bg-clip-text max-lg:text-transparent">
               Make it come alive
             </h3>
-            <p className="text-stone-600 dark:text-stone-400 text-base sm:text-lg max-w-xl mx-auto">
+            <p className="text-stone-600 dark:text-stone-400 text-base sm:text-lg max-w-xl mx-auto max-lg:text-stone-700 max-lg:dark:text-stone-300 max-lg:font-medium">
               Your notes → quizzes, flashcards, crosswords. Literally in seconds. No stress.
             </p>
           </div>
 
           {/* Three tool cards - staggered entrance */}
-          <div className="grid md:grid-cols-3 gap-6 lg:gap-8">
+          <div className="grid md:grid-cols-3 gap-6 lg:gap-8 max-md:gap-5">
             {/* Quiz Card */}
             <div className="group relative animate-notes-fade-in-up opacity-0" style={{ animationDelay: '0.6s', animationFillMode: 'forwards' }}>
-              <div className="absolute -inset-1 bg-gradient-to-r from-violet-400 to-purple-400 rounded-3xl blur-lg opacity-0 group-hover:opacity-25 transition-opacity duration-500"></div>
-              <div className="relative bg-white dark:bg-stone-800 rounded-3xl overflow-hidden shadow-xl border border-stone-200/50 dark:border-stone-700 h-full hover:-translate-y-3 hover:shadow-2xl transition-all duration-500">
+              <div className="absolute -inset-1 bg-gradient-to-r from-violet-400 to-purple-400 rounded-3xl blur-lg opacity-0 group-hover:opacity-25 transition-opacity duration-500 max-lg:opacity-20 max-lg:-inset-1.5"></div>
+              <div className="relative bg-white dark:bg-stone-800 rounded-3xl overflow-hidden shadow-xl border border-stone-200/50 dark:border-stone-700 h-full hover:-translate-y-3 hover:shadow-2xl transition-all duration-500 max-lg:border-violet-200/50 max-lg:dark:border-violet-900/30 max-lg:shadow-violet-500/10">
                 <div className="relative h-40 sm:h-56 overflow-hidden bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20">
                   <video
                     autoPlay
@@ -2285,8 +2301,8 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
 
             {/* Flashcard Card */}
             <div className="group relative animate-notes-fade-in-up opacity-0" style={{ animationDelay: '0.7s', animationFillMode: 'forwards' }}>
-              <div className="absolute -inset-1 bg-gradient-to-r from-emerald-400 to-teal-400 rounded-3xl blur-lg opacity-0 group-hover:opacity-25 transition-opacity duration-500"></div>
-              <div className="relative bg-white dark:bg-stone-800 rounded-3xl overflow-hidden shadow-xl border border-stone-200/50 dark:border-stone-700 h-full hover:-translate-y-3 hover:shadow-2xl transition-all duration-500">
+              <div className="absolute -inset-1 bg-gradient-to-r from-emerald-400 to-teal-400 rounded-3xl blur-lg opacity-0 group-hover:opacity-25 transition-opacity duration-500 max-lg:opacity-20 max-lg:-inset-1.5"></div>
+              <div className="relative bg-white dark:bg-stone-800 rounded-3xl overflow-hidden shadow-xl border border-stone-200/50 dark:border-stone-700 h-full hover:-translate-y-3 hover:shadow-2xl transition-all duration-500 max-lg:border-emerald-200/50 max-lg:dark:border-emerald-900/30 max-lg:shadow-emerald-500/10">
                 <div className="relative h-40 sm:h-56 overflow-hidden bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20">
                   <video
                     autoPlay
@@ -2312,8 +2328,8 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
 
             {/* Crossword Card */}
             <div className="group relative animate-notes-fade-in-up opacity-0" style={{ animationDelay: '0.8s', animationFillMode: 'forwards' }}>
-              <div className="absolute -inset-1 bg-gradient-to-r from-rose-400 to-pink-400 rounded-3xl blur-lg opacity-0 group-hover:opacity-25 transition-opacity duration-500"></div>
-              <div className="relative bg-white dark:bg-stone-800 rounded-3xl overflow-hidden shadow-xl border border-stone-200/50 dark:border-stone-700 h-full hover:-translate-y-3 hover:shadow-2xl transition-all duration-500">
+              <div className="absolute -inset-1 bg-gradient-to-r from-rose-400 to-pink-400 rounded-3xl blur-lg opacity-0 group-hover:opacity-25 transition-opacity duration-500 max-lg:opacity-20 max-lg:-inset-1.5"></div>
+              <div className="relative bg-white dark:bg-stone-800 rounded-3xl overflow-hidden shadow-xl border border-stone-200/50 dark:border-stone-700 h-full hover:-translate-y-3 hover:shadow-2xl transition-all duration-500 max-lg:border-rose-200/50 max-lg:dark:border-rose-900/30 max-lg:shadow-rose-500/10">
                 <div className="relative h-40 sm:h-56 overflow-hidden bg-gradient-to-br from-rose-50 to-pink-50 dark:from-rose-900/20 dark:to-pink-900/20">
                   <video
                     autoPlay
@@ -2342,7 +2358,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
           <div className="text-center mt-14 sm:mt-16 animate-notes-fade-in-up opacity-0" style={{ animationDelay: '0.9s', animationFillMode: 'forwards' }}>
             <button
               onClick={() => onNavigate('signup')}
-              className="group inline-flex items-center px-8 py-4 text-white font-bold rounded-2xl bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 hover:scale-105 active:scale-95 shadow-xl shadow-indigo-500/30 hover:shadow-indigo-500/40 transition-all duration-300 text-lg"
+              className="group inline-flex items-center px-8 py-4 text-white font-bold rounded-2xl bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 hover:scale-105 active:scale-95 shadow-xl shadow-violet-500/30 hover:shadow-violet-500/40 transition-all duration-300 text-lg max-lg:px-10 max-lg:py-4 max-lg:shadow-violet-500/40"
             >
               Try Study Tools Free
               <svg className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
