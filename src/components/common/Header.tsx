@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
+import PromoBanner from './PromoBanner';
+import ScholarMascot from './ScholarMascot';
 
 interface HeaderProps {
   onNavigate?: (page: string) => void;
+  showPromoBanner?: boolean;
+  sticky?: boolean;
   user?: { 
     id: string;
     name: string; 
@@ -33,7 +37,7 @@ interface UsageStats {
   };
 }
 
-const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage }) => {
+const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage, showPromoBanner = true, sticky = true }) => {
   const { theme, toggleTheme } = useTheme();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -131,21 +135,20 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
       { id: 'about', label: 'About' },
     ];
     return (
-      <header className={`fixed top-0 left-0 right-0 z-50 border-b transition-all duration-300 ${
+      <header className={`${sticky ? 'sticky top-0' : ''} left-0 right-0 z-50 transition-all duration-300 ${
         isScrolled 
-          ? 'bg-white/80 dark:bg-stone-900/80 backdrop-blur-xl border-stone-200/50 dark:border-stone-700/50 shadow-sm' 
-          : 'bg-transparent border-transparent'
+          ? 'bg-white/90 dark:bg-stone-900/90 backdrop-blur-xl border-b border-stone-200/50 dark:border-stone-700/50 shadow-sm' 
+          : 'bg-gradient-to-b from-blue-50/90 via-stone-50/95 to-transparent dark:from-stone-950/95 dark:via-stone-900/90 dark:to-transparent backdrop-blur-sm border-b border-stone-200/30 dark:border-stone-700/30'
       }`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 sm:h-20">
+          <div className="flex items-center justify-between h-16 sm:h-[4.5rem]">
             {/* Logo */}
             <button
               onClick={() => onNavigate?.('landing')}
               className="flex items-center gap-2.5 group"
             >
-              <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-500/30 group-hover:shadow-indigo-500/40 group-hover:scale-105 transition-all duration-300">
-                <span className="font-black text-xl text-white">W</span>
-                <div className="absolute inset-0 rounded-xl bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <div className="relative w-12 h-12 flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
+                <ScholarMascot size={48} animated={false} className="drop-shadow-lg" />
               </div>
               <span className="text-xl font-extrabold tracking-tight text-stone-800 dark:text-stone-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors duration-300">
                 WriteScholar
@@ -199,6 +202,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
             </div>
           </div>
         </div>
+        {showPromoBanner && <PromoBanner embedded />}
         {/* Mobile menu */}
         {isMobileMenuOpen && (
           <div className="md:hidden border-t border-stone-200/50 dark:border-stone-700/50 bg-white/95 dark:bg-stone-900/95 backdrop-blur-xl">
@@ -251,9 +255,8 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
             onClick={() => onNavigate?.('dashboard')}
             className="flex items-center gap-2.5 group"
           >
-            <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-500/30 group-hover:shadow-indigo-500/40 group-hover:scale-105 transition-all duration-300">
-              <span className="font-black text-xl text-white">W</span>
-              <div className="absolute inset-0 rounded-xl bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <div className="relative w-12 h-12 flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
+              <ScholarMascot size={48} animated={false} className="drop-shadow-lg" />
             </div>
             <span className="text-base sm:text-xl font-extrabold tracking-tight text-stone-800 dark:text-stone-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors duration-300 truncate max-w-[140px] sm:max-w-none">
               WriteScholar

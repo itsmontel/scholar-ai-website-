@@ -1,10 +1,79 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <rect width="32" height="32" rx="8" fill="url(#g)"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="45 35 110 130">
   <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#6366f1"/>
-      <stop offset="1" stop-color="#8b5cf6"/>
+    <linearGradient id="bodyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#A78BFA"/>
+      <stop offset="50%" stop-color="#8B5CF6"/>
+      <stop offset="100%" stop-color="#6D28D9"/>
+    </linearGradient>
+    <linearGradient id="bodyHighlight" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#C4B5FD" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#8B5CF6" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="capGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#374151"/>
+      <stop offset="100%" stop-color="#1F2937"/>
+    </linearGradient>
+    <linearGradient id="pencilGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FDE68A"/>
+      <stop offset="100%" stop-color="#F59E0B"/>
     </linearGradient>
   </defs>
-  <text x="16" y="23" font-family="system-ui,-apple-system,sans-serif" font-size="18" font-weight="800" fill="white" text-anchor="middle">W</text>
+  <!-- Body -->
+  <rect x="55" y="65" width="90" height="95" rx="24" fill="url(#bodyGrad)"/>
+  <rect x="55" y="65" width="90" height="95" rx="24" fill="url(#bodyHighlight)"/>
+  <!-- Horns -->
+  <ellipse cx="68" cy="62" rx="12" ry="18" fill="#8B5CF6" transform="rotate(-20 68 62)"/>
+  <ellipse cx="68" cy="58" rx="8" ry="12" fill="#A78BFA" transform="rotate(-20 68 58)"/>
+  <ellipse cx="132" cy="62" rx="12" ry="18" fill="#8B5CF6" transform="rotate(20 132 62)"/>
+  <ellipse cx="132" cy="58" rx="8" ry="12" fill="#A78BFA" transform="rotate(20 132 58)"/>
+  <!-- Graduation cap -->
+  <g transform="translate(95, 30) rotate(12)">
+    <polygon points="0,8 25,0 50,8 25,16" fill="url(#capGrad)"/>
+    <rect x="15" y="8" width="20" height="12" rx="2" fill="#1F2937"/>
+    <circle cx="25" cy="8" r="3" fill="#374151"/>
+    <line x1="50" y1="8" x2="58" y2="20" stroke="#F59E0B" stroke-width="2" stroke-linecap="round"/>
+    <circle cx="58" cy="22" r="3" fill="#F59E0B"/>
+  </g>
+  <!-- Eyebrows -->
+  <path d="M72 92 Q80 88 88 92" stroke="#5B21B6" stroke-width="3" stroke-linecap="round" fill="none"/>
+  <path d="M112 92 Q120 88 128 92" stroke="#5B21B6" stroke-width="3" stroke-linecap="round" fill="none"/>
+  <!-- Eyes -->
+  <ellipse cx="82" cy="108" rx="16" ry="18" fill="white"/>
+  <ellipse cx="118" cy="108" rx="16" ry="18" fill="white"/>
+  <ellipse cx="84" cy="110" rx="8" ry="10" fill="#1F2937"/>
+  <ellipse cx="120" cy="110" rx="8" ry="10" fill="#1F2937"/>
+  <circle cx="79" cy="104" r="5" fill="white" opacity="0.9"/>
+  <circle cx="115" cy="104" r="5" fill="white" opacity="0.9"/>
+  <!-- Mouth -->
+  <path d="M80 132 Q100 150 120 132" fill="#5B21B6"/>
+  <ellipse cx="100" cy="140" rx="10" ry="6" fill="#F472B6"/>
+  <path d="M85 132 L88 140 L91 132" fill="white"/>
+  <path d="M109 132 L112 140 L115 132" fill="white"/>
+  <!-- Left arm (thumbs up) -->
+  <g transform="translate(35, 100)">
+    <ellipse cx="15" cy="25" rx="12" ry="15" fill="#8B5CF6"/>
+    <ellipse cx="15" cy="22" rx="9" ry="11" fill="#A78BFA"/>
+    <circle cx="12" cy="10" r="10" fill="#A78BFA"/>
+    <ellipse cx="5" cy="2" rx="5" ry="8" fill="#A78BFA" transform="rotate(-30 5 2)"/>
+  </g>
+  <!-- Right arm (holding pencil) -->
+  <g transform="translate(140, 95)">
+    <ellipse cx="10" cy="28" rx="12" ry="15" fill="#8B5CF6"/>
+    <ellipse cx="10" cy="25" rx="9" ry="11" fill="#A78BFA"/>
+    <circle cx="15" cy="12" r="10" fill="#A78BFA"/>
+    <g transform="translate(20, -15) rotate(35)">
+      <rect x="0" y="0" width="8" height="45" rx="2" fill="url(#pencilGrad)"/>
+      <rect x="0" y="5" width="8" height="35" fill="#F59E0B"/>
+      <rect x="2" y="5" width="4" height="35" fill="#FBBF24"/>
+      <polygon points="0,45 4,55 8,45" fill="#FDE68A"/>
+      <rect x="0" y="0" width="8" height="6" rx="1" fill="#F472B6"/>
+      <rect x="0" y="5" width="8" height="4" fill="#9CA3AF"/>
+    </g>
+  </g>
+  <!-- Legs/feet -->
+  <ellipse cx="78" cy="165" rx="14" ry="10" fill="#7C3AED"/>
+  <ellipse cx="122" cy="165" rx="14" ry="10" fill="#7C3AED"/>
+  <!-- Cheek blush -->
+  <ellipse cx="65" cy="122" rx="8" ry="5" fill="#F9A8D4" opacity="0.4"/>
+  <ellipse cx="135" cy="122" rx="8" ry="5" fill="#F9A8D4" opacity="0.4"/>
 </svg>

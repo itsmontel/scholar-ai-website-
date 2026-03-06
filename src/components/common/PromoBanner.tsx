@@ -1,12 +1,16 @@
 import React, { useState } from 'react';
 
-const PromoBanner: React.FC = () => {
+interface PromoBannerProps {
+  embedded?: boolean;
+}
+
+const PromoBanner: React.FC<PromoBannerProps> = ({ embedded = false }) => {
   const [isDismissed, setIsDismissed] = useState(false);
 
   if (isDismissed) return null;
 
   return (
-    <div className="sticky sm:relative top-0 left-0 right-0 text-white py-2 sm:py-2.5 px-2 sm:px-4 z-30 bg-gradient-to-r from-indigo-600 to-violet-600">
+    <div className={`sticky top-0 left-0 right-0 text-white py-2 sm:py-2.5 px-2 sm:px-4 z-30 bg-gradient-to-r from-indigo-600 to-violet-600`}>
       <div className="max-w-7xl mx-auto flex items-center justify-center gap-2 sm:gap-4">
         <div className="flex items-center justify-center gap-2 sm:gap-3 text-center">
           <span className="text-xs sm:text-sm font-medium">

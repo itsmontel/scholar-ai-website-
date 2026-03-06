@@ -276,3 +276,21 @@
 .animate-float-delayed {
   animation: float-delayed 5s ease-in-out infinite;
 }
+
+/* Make it come alive - subtle glow pulse */
+@keyframes aliveGlow {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.7; }
+}
+.animate-alive-glow {
+  animation: aliveGlow 3s ease-in-out infinite;
+}
+
+/* Card breathe - subtle scale */
+@keyframes cardBreathe {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.01); }
+}
+.animate-card-breathe {
+  animation: cardBreathe 4s ease-in-out infinite;
+}

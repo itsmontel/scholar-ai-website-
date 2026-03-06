@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import Header from '../common/Header';
 import Footer from '../common/Footer';
+import PromoBanner from '../common/PromoBanner';
 import { useTheme } from '../../contexts/ThemeContext';
 import AnalysisAnimation from '../common/AnalysisAnimation';
 import ScholarMascot from '../common/ScholarMascot';
@@ -427,11 +428,15 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
   );
 
   return (
-    <main className="min-h-screen relative transition-colors font-sans overflow-x-hidden" role="main">
-      <Header onNavigate={onNavigate} />
+    <>
+      <div className="sticky top-0 left-0 right-0 z-50">
+        <PromoBanner />
+      </div>
+      <main className="min-h-screen relative transition-colors font-sans overflow-x-hidden" role="main">
+      <Header onNavigate={onNavigate} showPromoBanner={false} sticky={false} />
 
       {/* HERO SECTION - Fun, Gen Z, full of energy */}
-      <section className="relative min-h-[70vh] sm:min-h-[85vh] flex flex-col overflow-hidden pt-24">
+      <section className="relative min-h-[70vh] sm:min-h-[85vh] flex flex-col overflow-hidden">
         {/* Background */}
         <div className="absolute inset-0 bg-gradient-to-b from-blue-50/60 via-stone-50 to-white dark:from-stone-950 dark:via-stone-900 dark:to-stone-900" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(99,102,241,0.18),transparent)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(139,92,246,0.14),transparent)]" />
@@ -445,7 +450,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
         <div className="absolute bottom-[25%] right-[12%] w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-400/20 to-violet-500/20 -rotate-6 lg:hidden animate-float-delayed pointer-events-none" style={{ animationDelay: '0.8s' }} />
         
         {/* Floating tool mockups - scattered around hero */}
-        <div className="absolute top-[18%] left-[8%] hidden lg:block animate-float">
+        <div className="absolute top-[18%] left-[10%] xl:left-[12%] hidden lg:block animate-float">
           <div className="bg-white dark:bg-stone-800 rounded-2xl p-3 shadow-xl border border-violet-200/60 dark:border-violet-800/40 rotate-[-6deg] hover:rotate-0 transition-transform">
             <span className="text-2xl block mb-1">📝</span>
             <span className="text-xs font-bold text-violet-600 dark:text-violet-400">Quiz</span>
@@ -481,10 +486,10 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
         <div className="absolute bottom-[30%] right-[5%] hidden xl:block text-4xl opacity-60 animate-float-delayed">🎯</div>
 
         {/* Hero Content - Centered, flows into page */}
-        <div className="relative flex-1 flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8 py-10 sm:py-16 lg:py-24">
-          {/* Left mascot - ScholarMascot */}
+        <div className="relative flex-1 flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8 pt-12 sm:pt-14 lg:pt-12 pb-10 sm:pb-16 lg:pb-24">
+          {/* Left mascot - ScholarMascot (waving pose) */}
           <div className="hidden lg:block absolute left-0 xl:left-4 top-[25%] -translate-y-1/2 z-10">
-            <ScholarMascot size={140} animated={true} />
+            <ScholarMascot size={140} animated={true} pose="waving" />
           </div>
           {/* Right character - studying with book */}
           <div className="hidden lg:block absolute right-2 xl:right-6 top-[22%] -translate-y-1/2 w-20 h-24 xl:w-24 xl:h-28 z-10 opacity-90">
@@ -2182,23 +2187,31 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
 
           {/* Bridge: Make it come alive + arrows to tools */}
           <div className="relative animate-notes-fade-in-up opacity-0" style={{ animationDelay: '0.5s', animationFillMode: 'forwards' }}>
-            <div className="relative text-center">
-              {/* Make it come alive - refined card */}
-              <div className="inline-flex flex-col items-center gap-4 mb-10 sm:mb-12">
+            <div className="relative text-center mb-10 sm:mb-12">
+              {/* Make it come alive - refined card with glow */}
+              <div className="inline-flex flex-col items-center">
                 <div className="relative">
-                  <div className="relative px-10 sm:px-14 py-6 sm:py-7 rounded-2xl bg-white dark:bg-stone-800 shadow-lg border border-stone-200/80 dark:border-stone-700">
-                    <div className="flex items-center justify-center gap-2 mb-2">
-                      <span className="text-2xl">✨</span>
+                  {/* Glow behind card */}
+                  <div className="absolute -inset-3 bg-gradient-to-r from-violet-400/30 via-purple-400/30 to-fuchsia-400/30 dark:from-violet-500/20 dark:via-purple-500/20 dark:to-fuchsia-500/20 rounded-3xl blur-2xl animate-alive-glow" />
+                  <div className="relative px-10 sm:px-14 py-6 sm:py-7 rounded-2xl bg-white dark:bg-stone-800 shadow-xl border-2 border-violet-200/60 dark:border-violet-700/40 hover:border-violet-300/80 dark:hover:border-violet-600/60 transition-all duration-300">
+                    <div className="flex items-center justify-center gap-3 mb-2">
+                      <span className="text-2xl sm:text-3xl animate-float">✨</span>
                       <h3 className="text-xl sm:text-2xl font-extrabold bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 dark:from-violet-400 dark:to-fuchsia-400 bg-clip-text text-transparent">
                         Make it come alive
                       </h3>
-                      <span className="text-2xl">⚡</span>
+                      <span className="text-2xl sm:text-3xl animate-float-delayed" style={{ animationDelay: '0.5s' }}>⚡</span>
                     </div>
                     <p className="text-stone-500 dark:text-stone-400 text-sm sm:text-base">
                       Your notes → quizzes, flashcards, crosswords. In seconds.
                     </p>
                   </div>
                 </div>
+              </div>
+              {/* Connecting lines to cards - decorative */}
+              <div className="hidden md:flex absolute left-0 right-0 top-full pt-4 pointer-events-none justify-between max-w-4xl mx-auto px-12">
+                <div className="w-px h-8 bg-gradient-to-b from-violet-300/70 to-transparent dark:from-violet-500/50" />
+                <div className="w-px h-8 bg-gradient-to-b from-emerald-300/70 to-transparent dark:from-emerald-500/50" />
+                <div className="w-px h-8 bg-gradient-to-b from-rose-300/70 to-transparent dark:from-rose-500/50" />
               </div>
             </div>
           </div>
@@ -2207,8 +2220,8 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
           <div className="grid md:grid-cols-3 gap-6 lg:gap-8 max-md:gap-5">
             {/* Quiz Card */}
             <div className="group relative animate-notes-fade-in-up opacity-0" style={{ animationDelay: '0.6s', animationFillMode: 'forwards' }}>
-              <div className="absolute -inset-1 bg-gradient-to-r from-violet-400 to-purple-400 rounded-3xl blur-lg opacity-0 group-hover:opacity-25 transition-opacity duration-500 max-lg:opacity-20 max-lg:-inset-1.5"></div>
-              <div className="relative bg-white dark:bg-stone-800 rounded-3xl overflow-hidden shadow-xl border border-stone-200/50 dark:border-stone-700 h-full hover:-translate-y-3 hover:shadow-2xl transition-all duration-500 max-lg:border-violet-200/50 max-lg:dark:border-violet-900/30 max-lg:shadow-violet-500/10">
+              <div className="absolute -inset-1 bg-gradient-to-r from-violet-400 to-purple-400 rounded-3xl blur-xl opacity-0 group-hover:opacity-40 transition-all duration-500 max-lg:opacity-25 max-lg:-inset-1.5"></div>
+              <div className="relative bg-white dark:bg-stone-800 rounded-3xl overflow-hidden shadow-xl border-2 border-stone-200/50 dark:border-stone-700 h-full hover:-translate-y-3 hover:scale-[1.02] hover:shadow-2xl hover:border-violet-200/80 dark:hover:border-violet-700/50 transition-all duration-500 max-lg:border-violet-200/50 max-lg:dark:border-violet-900/30 max-lg:shadow-violet-500/10">
                 <div className="relative h-40 sm:h-56 overflow-hidden bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20">
                   <video
                     autoPlay
@@ -2234,8 +2247,8 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
 
             {/* Flashcard Card */}
             <div className="group relative animate-notes-fade-in-up opacity-0" style={{ animationDelay: '0.7s', animationFillMode: 'forwards' }}>
-              <div className="absolute -inset-1 bg-gradient-to-r from-emerald-400 to-teal-400 rounded-3xl blur-lg opacity-0 group-hover:opacity-25 transition-opacity duration-500 max-lg:opacity-20 max-lg:-inset-1.5"></div>
-              <div className="relative bg-white dark:bg-stone-800 rounded-3xl overflow-hidden shadow-xl border border-stone-200/50 dark:border-stone-700 h-full hover:-translate-y-3 hover:shadow-2xl transition-all duration-500 max-lg:border-emerald-200/50 max-lg:dark:border-emerald-900/30 max-lg:shadow-emerald-500/10">
+              <div className="absolute -inset-1 bg-gradient-to-r from-emerald-400 to-teal-400 rounded-3xl blur-xl opacity-0 group-hover:opacity-40 transition-all duration-500 max-lg:opacity-25 max-lg:-inset-1.5"></div>
+              <div className="relative bg-white dark:bg-stone-800 rounded-3xl overflow-hidden shadow-xl border-2 border-stone-200/50 dark:border-stone-700 h-full hover:-translate-y-3 hover:scale-[1.02] hover:shadow-2xl hover:border-emerald-200/80 dark:hover:border-emerald-700/50 transition-all duration-500 max-lg:border-emerald-200/50 max-lg:dark:border-emerald-900/30 max-lg:shadow-emerald-500/10">
                 <div className="relative h-40 sm:h-56 overflow-hidden bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20">
                   <video
                     autoPlay
@@ -2261,8 +2274,8 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
 
             {/* Crossword Card */}
             <div className="group relative animate-notes-fade-in-up opacity-0" style={{ animationDelay: '0.8s', animationFillMode: 'forwards' }}>
-              <div className="absolute -inset-1 bg-gradient-to-r from-rose-400 to-pink-400 rounded-3xl blur-lg opacity-0 group-hover:opacity-25 transition-opacity duration-500 max-lg:opacity-20 max-lg:-inset-1.5"></div>
-              <div className="relative bg-white dark:bg-stone-800 rounded-3xl overflow-hidden shadow-xl border border-stone-200/50 dark:border-stone-700 h-full hover:-translate-y-3 hover:shadow-2xl transition-all duration-500 max-lg:border-rose-200/50 max-lg:dark:border-rose-900/30 max-lg:shadow-rose-500/10">
+              <div className="absolute -inset-1 bg-gradient-to-r from-rose-400 to-pink-400 rounded-3xl blur-xl opacity-0 group-hover:opacity-40 transition-all duration-500 max-lg:opacity-25 max-lg:-inset-1.5"></div>
+              <div className="relative bg-white dark:bg-stone-800 rounded-3xl overflow-hidden shadow-xl border-2 border-stone-200/50 dark:border-stone-700 h-full hover:-translate-y-3 hover:scale-[1.02] hover:shadow-2xl hover:border-rose-200/80 dark:hover:border-rose-700/50 transition-all duration-500 max-lg:border-rose-200/50 max-lg:dark:border-rose-900/30 max-lg:shadow-rose-500/10">
                 <div className="relative h-40 sm:h-56 overflow-hidden bg-gradient-to-br from-rose-50 to-pink-50 dark:from-rose-900/20 dark:to-pink-900/20">
                   <video
                     autoPlay
@@ -2303,12 +2316,14 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
         </div>
       </section>
 
-      {/* FAQ Section - Clean modern style */}
-      <section className="py-12 sm:py-24 bg-white dark:bg-stone-900">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* FAQ Section - Purple tint */}
+      <section className="relative py-12 sm:py-24 bg-gradient-to-b from-violet-50/60 via-purple-50/30 to-white dark:from-violet-950/30 dark:via-stone-900 dark:to-stone-900 overflow-hidden">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-violet-200/20 dark:bg-violet-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+        <div className="absolute bottom-0 left-0 w-72 h-72 bg-purple-200/20 dark:bg-purple-500/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
+        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-center gap-4 sm:gap-6 mb-8 sm:mb-12">
             <div className="text-center lg:text-left flex-1">
-              <h2 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-stone-800 dark:text-stone-100 mb-3 sm:mb-5">
+              <h2 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-stone-900 dark:text-stone-100 mb-3 sm:mb-5">
                 Frequently Asked Questions
               </h2>
               <p className="text-lg text-stone-600 dark:text-stone-400">
@@ -2339,19 +2354,19 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                 <path d="M45 100 Q30 110 25 130" stroke="#E8B796" strokeWidth="12" fill="none" strokeLinecap="round" />
                 <ellipse cx="22" cy="133" rx="8" ry="9" fill="#E8B796" />
                 {/* Question mark above head */}
-                <circle cx="70" cy="5" r="18" fill="#93C5FD" stroke="#3B82F6" strokeWidth="2" />
-                <text x="70" y="12" textAnchor="middle" fontSize="24" fill="#1E40AF" fontWeight="bold">?</text>
-                <path d="M58 95 L70 108 L82 95" stroke="#2563EB" strokeWidth="2" fill="none" />
+                <circle cx="70" cy="5" r="18" fill="#C4B5FD" stroke="#7C3AED" strokeWidth="2" />
+                <text x="70" y="12" textAnchor="middle" fontSize="24" fill="#5B21B6" fontWeight="bold">?</text>
+                <path d="M58 95 L70 108 L82 95" stroke="#7C3AED" strokeWidth="2" fill="none" />
               </svg>
             </div>
           </div>
 
           <div className="max-w-3xl mx-auto space-y-4">
             {faqs.map((faq, idx) => (
-              <div key={idx} className="bg-stone-50 dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-600 overflow-hidden hover:border-indigo-300 dark:hover:border-indigo-600 hover:shadow-lg hover:shadow-indigo-500/10 transition-all duration-200">
+              <div key={idx} className="bg-white/70 dark:bg-stone-800/80 rounded-2xl border border-violet-200/60 dark:border-violet-800/40 overflow-hidden hover:border-violet-300 dark:hover:border-violet-600 hover:shadow-lg hover:shadow-violet-500/15 transition-all duration-200 backdrop-blur-sm">
                 <button
                   onClick={() => setOpenFAQ(openFAQ === idx ? null : idx)}
-                  className="w-full px-6 py-5 text-left flex items-center justify-between hover:bg-stone-100 dark:hover:bg-stone-700 transition-all duration-200"
+                  className="w-full px-6 py-5 text-left flex items-center justify-between hover:bg-violet-50/50 dark:hover:bg-violet-900/20 transition-all duration-200"
                 >
                   <span className="font-bold text-stone-800 dark:text-stone-100 text-base sm:text-lg pr-4">{faq.question}</span>
                   <svg className={`w-5 h-5 text-stone-400 flex-shrink-0 transition-transform ${openFAQ === idx ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2394,9 +2409,9 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                 View Pricing
               </button>
             </div>
-            {/* ScholarMascot */}
+            {/* ScholarMascot (celebrating pose) */}
             <div className="flex justify-center items-center">
-              <ScholarMascot size={180} animated={true} />
+              <ScholarMascot size={180} animated={true} pose="celebrating" />
             </div>
           </div>
         </div>
@@ -2792,6 +2807,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
         </div>
       )}
     </main>
+    </>
   );
 };
 

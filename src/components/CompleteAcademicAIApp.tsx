@@ -798,7 +798,7 @@ const AcademicAIApp = () => {
   return (
     <ErrorBoundary>
     <div className="min-h-screen bg-stone-50 dark:bg-stone-900 transition-colors">
-      <PromoBanner />
+      {user && <PromoBanner />}
       {renderCurrentPage()}
     </div>
     </ErrorBoundary>
