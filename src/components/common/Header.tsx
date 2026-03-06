@@ -250,7 +250,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
 
   // ── Logged-in header ───────────────────────────────────────────────────────
   return (
-    <header className={`sticky top-0 z-50 transition-all duration-300 ${
+    <header className={`sticky top-0 z-50 border-b border-stone-200/50 dark:border-stone-700/50 transition-all duration-300 ${
       isScrolled 
         ? 'bg-white/95 dark:bg-stone-900/95 backdrop-blur-xl shadow-lg shadow-stone-900/5 dark:shadow-black/20' 
         : 'bg-white/80 dark:bg-stone-900/80 backdrop-blur-md'

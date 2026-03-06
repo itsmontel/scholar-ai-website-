@@ -49,7 +49,7 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
                 </a>
               </li>
               <li>
-                <a href="/blog" onClick={(e) => { e.preventDefault(); onNavigate?.('blog'); }} className="text-sm font-medium transition-colors hover:opacity-90" style={{ color: '#a3e635' }}>
+                <a href="/blog" onClick={(e) => { e.preventDefault(); onNavigate?.('blog'); }} className="text-stone-400 hover:text-white text-sm transition-colors">
                   Blog
                 </a>
               </li>
