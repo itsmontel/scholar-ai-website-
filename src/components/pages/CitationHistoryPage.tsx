@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import Header from '../common/Header';
 import Footer from '../common/Footer';
+import { isEndOfMonthUrgency, getEndOfMonthUrgencyText, getDaysUntilReset } from '../../utils/usageReset';
 
 interface CitationSearch {
   id: string;
@@ -30,6 +31,9 @@ const CitationHistoryPage = ({ onNavigate, user, onLogout }: CitationHistoryProp
   const [error, setError] = useState<string | null>(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  const userPlan = user?.plan || user?.subscription_plan || 'free';
+  const isPaidUser = userPlan === 'starter' || userPlan === 'premium';
 
   useEffect(() => {
     fetchCitationHistory();
@@ -198,22 +202,44 @@ const CitationHistoryPage = ({ onNavigate, user, onLogout }: CitationHistoryProp
           </button>
         </div>
 
-        {/* Storage Notice */}
-        <div className="mb-8 p-5 bg-violet-50 border border-violet-200 rounded-2xl">
-          <div className="flex items-start">
-            <div className="w-10 h-10 bg-violet-500 rounded-xl flex items-center justify-center flex-shrink-0">
-              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-            <div className="ml-4">
-              <h3 className="font-semibold text-violet-800 mb-1">Storage Notice</h3>
-              <p className="text-sm text-violet-700">
-                Citation searches are automatically removed 30 days after being saved. Be sure to copy any citations you need before they expire.
-              </p>
+        {/* End of month urgency warning for free users */}
+        {!isPaidUser && isEndOfMonthUrgency() && searches.length > 0 && (
+          <div className={`mb-6 p-4 rounded-xl border ${getDaysUntilReset() <= 3 ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800' : 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800'}`}>
+            <div className="flex items-start sm:items-center gap-3">
+              <span className="text-xl flex-shrink-0">{getDaysUntilReset() <= 3 ? '⚠️' : '⏰'}</span>
+              <div className="flex-1 min-w-0">
+                <p className={`text-sm font-medium ${getDaysUntilReset() <= 3 ? 'text-red-800 dark:text-red-200' : 'text-amber-800 dark:text-amber-200'}`}>
+                  {getEndOfMonthUrgencyText()}
+                </p>
+              </div>
+              <button
+                onClick={() => onNavigate('pricing')}
+                className={`flex-shrink-0 px-4 py-1.5 text-xs font-semibold rounded-lg transition-colors ${getDaysUntilReset() <= 3 ? 'bg-red-600 hover:bg-red-700 text-white' : 'bg-amber-600 hover:bg-amber-700 text-white'}`}
+              >
+                Upgrade Now
+              </button>
             </div>
           </div>
-        </div>
+        )}
+
+        {/* Storage Notice */}
+        {!isPaidUser && (
+          <div className="mb-8 p-5 bg-violet-50 border border-violet-200 rounded-2xl">
+            <div className="flex items-start">
+              <div className="w-10 h-10 bg-violet-500 rounded-xl flex items-center justify-center flex-shrink-0">
+                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div className="ml-4">
+                <h3 className="font-semibold text-violet-800 mb-1">Free Plan Storage</h3>
+                <p className="text-sm text-violet-700">
+                  Citation searches are cleared on the 1st of each month. Upgrade to keep your citations forever!
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Search History */}
         {searches.length === 0 ? (

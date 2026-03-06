@@ -11,6 +11,7 @@ import { jsPDF } from 'jspdf';
 import { Document, Packer, Paragraph, TextRun, HeadingLevel } from 'docx';
 import { saveAs } from 'file-saver';
 import { trackAction, syncFromAPIData, trackExport, trackCopy } from '../../data/achievements';
+import { getResetsInText, isEndOfMonthUrgency, getEndOfMonthUrgencyText, getDaysUntilReset } from '../../utils/usageReset';
 
 interface DashboardProps {
   onNavigate: (page: string) => void;
@@ -2496,9 +2497,12 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
               <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl text-center">
                 <p className="text-red-700 dark:text-red-400 text-sm font-medium">{humanizeError}</p>
                 {humanizeWordLimit < 999999 && (
-                  <button onClick={() => onNavigate('pricing')} className="mt-2 px-4 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold rounded-lg transition-colors">
-                    Upgrade for unlimited words/month
-                  </button>
+                  <>
+                    <p className="text-red-600 dark:text-red-500 text-xs mt-1">{getResetsInText()}</p>
+                    <button onClick={() => onNavigate('pricing')} className="mt-2 px-4 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold rounded-lg transition-colors">
+                      Upgrade for unlimited words/month
+                    </button>
+                  </>
                 )}
               </div>
             )}
@@ -2515,7 +2519,7 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                   <span className="text-xl sm:text-2xl">📝</span>
                   <div className="min-w-0">
                     <p className="text-teal-800 dark:text-teal-200 font-medium text-xs sm:text-sm">
-                      {usageStats.plan === 'free' ? 'Free: 1,000 words/mo' : 'Starter: 999,999 words/mo'}
+                      {usageStats.plan === 'free' ? `Free: 1,000 words/mo • ${getResetsInText()}` : 'Starter: 999,999 words/mo'}
                       {!isPremiumUser && ' • Bullet + Medium'}
                     </p>
                     <p className="text-teal-600 dark:text-teal-400 text-[10px] sm:text-xs mt-0.5 line-clamp-2">Upgrade for all styles, lengths & premium AI</p>
@@ -2698,9 +2702,12 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
               <div className="mb-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl text-center">
                 <p className="text-red-700 dark:text-red-400 text-sm font-medium">{summaryError}</p>
                 {usageStats.plan === 'free' && (
-                  <button onClick={() => onNavigate('pricing')} className="mt-2 px-4 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold rounded-lg">
-                    Upgrade Plan
-                  </button>
+                  <>
+                    <p className="text-red-600 dark:text-red-500 text-xs mt-1">{getResetsInText()}</p>
+                    <button onClick={() => onNavigate('pricing')} className="mt-2 px-4 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold rounded-lg">
+                      Upgrade Plan
+                    </button>
+                  </>
                 )}
               </div>
             )}
@@ -2740,7 +2747,8 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
               <div className="mb-4 sm:mb-6 bg-gradient-to-r from-violet-600 to-purple-600 dark:from-violet-700 dark:to-purple-700 rounded-xl sm:rounded-2xl p-4 sm:p-6 text-white text-center">
                 <span className="text-3xl sm:text-4xl mb-2 sm:mb-3 block">🔒</span>
                 <h3 className="text-lg sm:text-xl font-bold mb-1 sm:mb-2">Monthly Limit Reached</h3>
-                <p className="text-violet-100 dark:text-stone-200 mb-3 sm:mb-4 text-sm sm:text-base">You've used all 3 study tool generations this month. Upgrade for unlimited access!</p>
+                <p className="text-violet-100 dark:text-stone-200 mb-1 text-sm sm:text-base">You've used all 3 study tool generations this month. Upgrade for unlimited access!</p>
+                <p className="text-violet-200/90 text-xs sm:text-sm mb-3 sm:mb-4">{getResetsInText()}</p>
                 <button
                   onClick={() => onNavigate('pricing')}
                   className="w-full sm:w-auto px-5 sm:px-6 py-2 sm:py-2.5 bg-white dark:bg-stone-800 text-amber-700 dark:text-amber-400 font-semibold rounded-xl active:bg-stone-50 sm:hover:bg-stone-50 dark:sm:hover:bg-stone-700 transition-all inline-flex items-center justify-center gap-2 text-sm sm:text-base"
@@ -2759,7 +2767,7 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                     {isFreeUser ? (
                       <>
                         <p className="text-violet-800 dark:text-violet-200 font-medium text-xs sm:text-sm">
-                          Free: {quizUsage.generationsRemaining}/{quizUsage.generationLimit} generations • {(quizUsage.maxWordsPerGeneration || 5000).toLocaleString()} words max
+                          Free: {quizUsage.generationsRemaining}/{quizUsage.generationLimit} generations • {(quizUsage.maxWordsPerGeneration || 5000).toLocaleString()} words max • {getResetsInText()}
                         </p>
                         <p className="text-violet-600 dark:text-violet-400 text-[10px] sm:text-xs mt-0.5 line-clamp-2">Upgrade for unlimited quizzes, flashcards, crosswords</p>
                       </>
@@ -3521,20 +3529,43 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
             )}
 
             {quizError && (
-              <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-2xl text-center">
-                <p className="text-red-700 text-sm font-medium">{quizError}</p>
+              <div className="mb-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl text-center">
+                <p className="text-red-700 dark:text-red-400 text-sm font-medium">{quizError}</p>
                 {(quizExhausted || quizError.includes('Upgrade')) && (
-                  <button onClick={() => onNavigate('pricing')} className="mt-2 px-4 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold rounded-lg">
-                    View Plans
-                  </button>
+                  <>
+                    <p className="text-red-600 dark:text-red-500 text-xs mt-1">{getResetsInText()}</p>
+                    <button onClick={() => onNavigate('pricing')} className="mt-2 px-4 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold rounded-lg">
+                      View Plans
+                    </button>
+                  </>
                 )}
               </div>
             )}
           </>
         )}
 
+        {/* End of month urgency warning for free users */}
+        {isFreeUser && isEndOfMonthUrgency() && recentActivity.length > 0 && (
+          <div className={`mt-8 sm:mt-10 p-4 rounded-xl border ${getDaysUntilReset() <= 3 ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800' : 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800'}`}>
+            <div className="flex items-start sm:items-center gap-3">
+              <span className="text-xl flex-shrink-0">{getDaysUntilReset() <= 3 ? '⚠️' : '⏰'}</span>
+              <div className="flex-1 min-w-0">
+                <p className={`text-sm font-medium ${getDaysUntilReset() <= 3 ? 'text-red-800 dark:text-red-200' : 'text-amber-800 dark:text-amber-200'}`}>
+                  {getEndOfMonthUrgencyText()}
+                </p>
+              </div>
+              <button
+                onClick={() => onNavigate('pricing')}
+                className={`flex-shrink-0 px-4 py-1.5 text-xs font-semibold rounded-lg transition-colors ${getDaysUntilReset() <= 3 ? 'bg-red-600 hover:bg-red-700 text-white' : 'bg-amber-600 hover:bg-amber-700 text-white'}`}
+              >
+                Upgrade Now
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Recent Activity - Mobile optimized with horizontal scroll */}
-        <div className="mt-8 sm:mt-10">
+        <div className={isFreeUser && isEndOfMonthUrgency() && recentActivity.length > 0 ? 'mt-4' : 'mt-8 sm:mt-10'}>
           <div className="flex items-center justify-between mb-3 sm:mb-4">
             <h2 className="text-base sm:text-lg font-bold text-stone-800 dark:text-stone-100 flex items-center gap-2">
               <span className="text-lg sm:text-xl">📂</span> Recents

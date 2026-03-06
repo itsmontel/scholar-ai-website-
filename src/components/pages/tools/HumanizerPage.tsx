@@ -3,6 +3,7 @@ import Header from '../../common/Header';
 import Footer from '../../common/Footer';
 import AnalysisAnimation from '../../common/AnalysisAnimation';
 import { trackAction, trackCopy } from '../../../data/achievements';
+import { getResetsInText } from '../../../utils/usageReset';
 
 interface HumanizerPageProps {
   onNavigate: (page: string) => void;
@@ -559,15 +560,18 @@ const HumanizerPage = ({ onNavigate, user, onLogout }: HumanizerPageProps) => {
                     )}
                   </div>
                   {wordLimit < 999999 && (
-                    <button
-                      onClick={() => onNavigate('pricing')}
-                      className="text-xs text-violet-600 hover:text-violet-700 font-semibold flex items-center gap-1 transition-colors"
-                    >
-                      Upgrade for unlimited
-                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
-                    </button>
+                    <>
+                      <span className="text-[10px] text-stone-500 dark:text-stone-400">{getResetsInText()}</span>
+                      <button
+                        onClick={() => onNavigate('pricing')}
+                        className="text-xs text-violet-600 hover:text-violet-700 font-semibold flex items-center gap-1 transition-colors"
+                      >
+                        Upgrade for unlimited
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </button>
+                    </>
                   )}
                 </div>
               </div>
@@ -576,12 +580,15 @@ const HumanizerPage = ({ onNavigate, user, onLogout }: HumanizerPageProps) => {
 
           {/* Error Message */}
           {error && (
-            <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-red-50 border border-red-200 rounded-2xl text-center max-w-xl mx-auto">
-              <p className="text-red-700 text-sm font-medium">{error}</p>
+            <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl text-center max-w-xl mx-auto">
+              <p className="text-red-700 dark:text-red-300 text-sm font-medium">{error}</p>
               {wordLimit < 999999 && (
-                <button onClick={() => onNavigate('pricing')} className="mt-2 px-4 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold rounded-lg transition-colors">
-                  Upgrade for unlimited words/month
-                </button>
+                <>
+                  <p className="text-red-600 dark:text-red-400 text-xs mt-1">{getResetsInText()}</p>
+                  <button onClick={() => onNavigate('pricing')} className="mt-2 px-4 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold rounded-lg transition-colors">
+                    Upgrade for unlimited words/month
+                  </button>
+                </>
               )}
             </div>
           )}

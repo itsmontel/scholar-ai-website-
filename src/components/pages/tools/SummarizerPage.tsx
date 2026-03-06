@@ -3,6 +3,7 @@ import Header from '../../common/Header';
 import Footer from '../../common/Footer';
 import AnalysisAnimation from '../../common/AnalysisAnimation';
 import { trackAction, trackCopy } from '../../../data/achievements';
+import { getResetsInText } from '../../../utils/usageReset';
 
 interface SummarizerPageProps {
   onNavigate: (page: string) => void;
@@ -487,19 +488,22 @@ const SummarizerPage = ({ onNavigate, user }: SummarizerPageProps) => {
 
             {/* Error Message */}
             {error && (
-              <div className="mt-4 mx-3 sm:mx-0 p-3 sm:p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3">
-                <div className="w-5 h-5 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
-                  <span className="text-red-600 text-xs">!</span>
+              <div className="mt-4 mx-3 sm:mx-0 p-3 sm:p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl flex items-start gap-3">
+                <div className="w-5 h-5 rounded-full bg-red-100 dark:bg-red-900/50 flex items-center justify-center flex-shrink-0">
+                  <span className="text-red-600 dark:text-red-400 text-xs">!</span>
                 </div>
                 <div className="flex-1">
-                  <p className="text-red-800 text-sm">{error}</p>
+                  <p className="text-red-800 dark:text-red-200 text-sm">{error}</p>
                   {!isPremiumUser && user && (
-                    <button
-                      onClick={() => onNavigate('pricing')}
-                      className="mt-2 px-4 py-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-sm font-medium rounded-lg hover:from-emerald-500 hover:to-teal-500 transition-all inline-flex items-center gap-2"
-                    >
-                      👑 Upgrade Now
-                    </button>
+                    <>
+                      <p className="text-red-600 dark:text-red-400 text-xs mt-1">{getResetsInText()}</p>
+                      <button
+                        onClick={() => onNavigate('pricing')}
+                        className="mt-2 px-4 py-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-sm font-medium rounded-lg hover:from-emerald-500 hover:to-teal-500 transition-all inline-flex items-center gap-2"
+                      >
+                        👑 Upgrade Now
+                      </button>
+                    </>
                   )}
                 </div>
               </div>
@@ -513,7 +517,7 @@ const SummarizerPage = ({ onNavigate, user }: SummarizerPageProps) => {
                     <span className="text-2xl">📝</span>
                     <div>
                       <p className="text-emerald-800 dark:text-emerald-200 font-medium text-sm">
-                        {userPlan === 'free' ? 'Free plan: 1,000 words/month • Bullet + Medium only' : 'Starter plan: 999,999 words/month • Bullet + Medium only'}
+                        {userPlan === 'free' ? `Free plan: 1,000 words/month • Bullet + Medium only • ${getResetsInText()}` : 'Starter plan: 999,999 words/month • Bullet + Medium only'}
                       </p>
                       <p className="text-emerald-600 dark:text-emerald-400 text-xs mt-0.5">Upgrade to Premium for all styles, lengths, and our premium AI model</p>
                     </div>

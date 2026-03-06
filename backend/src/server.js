@@ -15,6 +15,7 @@ const subscriptionRoutes = require('./routes/subscriptions');
 const webhookRoutes = require('./routes/webhooks');
 const emailSubscriptionRoutes = require('./routes/emailSubscriptions');
 const streakRoutes = require('./routes/streaks');
+const friendsRoutes = require('./routes/friends');
 
 const { errorHandler } = require('./middleware/errorHandler');
 const { connectDB } = require('./database/connection');
@@ -87,6 +88,7 @@ app.get('/', (req, res) => {
       subscriptions: '/api/subscriptions',
       emailSubscriptions: '/api/email-subscriptions',
       streaks: '/api/streaks',
+      friends: '/api/friends',
       webhooks: '/api/webhooks'
     },
     health: '/health',
@@ -127,6 +129,7 @@ app.use('/api/analysis', analysisLimiter, analysisRoutes);
 app.use('/api/subscriptions', subscriptionRoutes);
 app.use('/api/email-subscriptions', emailSubscriptionRoutes);
 app.use('/api/streaks', streakRoutes);
+app.use('/api/friends', friendsRoutes);
 // Webhooks already registered before body parser (line 45)
 
 // 404 handler

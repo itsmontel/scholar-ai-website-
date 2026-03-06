@@ -1,6 +1,16 @@
 const OpenAI = require('openai');
 const subscriptionService = require('./subscriptionService');
 
+/**
+ * Get the first day of next month at midnight UTC
+ * Used for free user data expiration - all free user data expires on the 1st of each month
+ */
+function getFirstOfNextMonth() {
+  const now = new Date();
+  const nextMonth = new Date(Date.UTC(now.getFullYear(), now.getMonth() + 1, 1, 0, 0, 0, 0));
+  return nextMonth.toISOString();
+}
+
 class AIAnalysisService {
   constructor() {
     this.openai = new OpenAI({
@@ -2404,9 +2414,9 @@ IMPORTANT REQUIREMENTS:
         process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
       );
 
-      // Free users: 7 days expiration; Paid users (starter/premium): no expiration (null)
+      // Free users: expires on 1st of next month; Paid users (starter/premium): no expiration (null)
       const isPaidUser = userPlan === 'starter' || userPlan === 'premium';
-      const expiresAt = isPaidUser ? null : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+      const expiresAt = isPaidUser ? null : getFirstOfNextMonth();
 
       // Note: yearRange is already included in searchResults.yearRange
       // so we don't need a separate column - it's stored in the JSONB field
@@ -2525,9 +2535,9 @@ IMPORTANT REQUIREMENTS:
         process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
       );
 
-      // Free users: 7 days expiration; Paid users (starter/premium): no expiration (null)
+      // Free users: expires on 1st of next month; Paid users (starter/premium): no expiration (null)
       const isPaidUser = userPlan === 'starter' || userPlan === 'premium';
-      const expiresAt = isPaidUser ? null : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+      const expiresAt = isPaidUser ? null : getFirstOfNextMonth();
 
       const quizData = {
         user_id: userId,
@@ -2573,9 +2583,9 @@ IMPORTANT REQUIREMENTS:
         process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
       );
 
-      // Free users: 7 days expiration; Paid users (starter/premium): no expiration (null)
+      // Free users: expires on 1st of next month; Paid users (starter/premium): no expiration (null)
       const isPaidUser = userPlan === 'starter' || userPlan === 'premium';
-      const expiresAt = isPaidUser ? null : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+      const expiresAt = isPaidUser ? null : getFirstOfNextMonth();
 
       const flashcardData = {
         user_id: userId,
@@ -2621,9 +2631,9 @@ IMPORTANT REQUIREMENTS:
         process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
       );
 
-      // Free users: 7 days expiration; Paid users (starter/premium): no expiration (null)
+      // Free users: expires on 1st of next month; Paid users (starter/premium): no expiration (null)
       const isPaidUser = userPlan === 'starter' || userPlan === 'premium';
-      const expiresAt = isPaidUser ? null : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+      const expiresAt = isPaidUser ? null : getFirstOfNextMonth();
 
       // Build clues object from placedWords for display in history
       const cluesFromPlacedWords = {
@@ -2685,7 +2695,7 @@ IMPORTANT REQUIREMENTS:
       );
 
       const isPaidUser = userPlan === 'starter' || userPlan === 'premium';
-      const expiresAt = isPaidUser ? null : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+      const expiresAt = isPaidUser ? null : getFirstOfNextMonth();
 
       const title = (payload.title || payload.sourceText || 'Crater Blast Game').toString().slice(0, 200);
       const wordCount = (payload.sourceText || '').toString().trim().split(/\s+/).length;

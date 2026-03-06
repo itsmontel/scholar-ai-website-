@@ -14,6 +14,7 @@ import AnalysisHistoryPage from './pages/AnalysisHistoryPage';
 import CitationResultsPage from './pages/CitationResultsPage';
 import CitationHistoryPage from './pages/CitationHistoryPage';
 import QuizHistoryPage from './pages/QuizHistoryPage';
+import FriendsPage from './pages/FriendsPage';
 import UploadPage from './pages/UploadPage';
 import SettingsPage from './pages/SettingsPage';
 import AccountPage from './pages/AccountPage';
@@ -108,7 +109,7 @@ const AcademicAIApp = () => {
   }, []);
 
   // Route protection for authenticated pages
-  const protectedRoutes = ['dashboard', 'analysis', 'analysis-history', 'citation-results', 'citation-history', 'quiz-history', 'upload', 'settings', 'profile', 'library', 'account', 'billing', 'badges'];
+  const protectedRoutes = ['dashboard', 'analysis', 'analysis-history', 'citation-results', 'citation-history', 'quiz-history', 'friends', 'upload', 'settings', 'profile', 'library', 'account', 'billing', 'badges'];
 
   // SEO: dynamic document title and meta description per page (SPA)
   const pageMeta: Record<string, { title: string; description: string }> = {
@@ -145,7 +146,8 @@ const AcademicAIApp = () => {
     'converter': { title: 'Free Unit Converter – Length, Weight, Temperature & More | WriteScholar', description: 'Free online unit converter for students. Convert meters to feet, inches to cm, kg to lbs, Celsius to Fahrenheit, and more. Length, weight, temperature, volume, area, time. No signup required.' },
     'crater-blast': { title: 'Crater Blast – AI Quiz Shooter Game | WriteScholar', description: 'Blast the correct falling crater before it lands! AI generates quiz questions as craters. Aim your cannon, build streaks, and beat your high score.' },
     'more-tools': { title: 'More Free Tools – Word Counter, Calculator, Converter | WriteScholar', description: 'Free student tools: word counter, citation generator, scientific calculator, unit converter, essay outline, thesis generator, grammar checker, readability score, paraphrasing tips, text case converter, GPA calculator, Pomodoro timer.' },
-    'badges': { title: 'Achievements & Badges | WriteScholar', description: 'Collect badges, earn XP, and level up your scholar journey. Unlock cute monster companions by using WriteScholar tools.' }
+    'badges': { title: 'Achievements & Badges | WriteScholar', description: 'Collect badges, earn XP, and level up your scholar journey. Unlock cute monster companions by using WriteScholar tools.' },
+    'friends': { title: 'Friends | WriteScholar', description: 'Connect with friends to share quizzes, flashcards, and crosswords. Add friends by code and collaborate on studying.' }
   };
   useEffect(() => {
     const meta = pageMeta[currentPage];
@@ -744,6 +746,8 @@ const AcademicAIApp = () => {
         return <CitationHistoryPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'quiz-history':
         return <QuizHistoryPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
+      case 'friends':
+        return <FriendsPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'upload':
         return <UploadPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'settings':

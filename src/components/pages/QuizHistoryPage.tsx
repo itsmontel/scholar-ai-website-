@@ -4,6 +4,7 @@ import Footer from '../common/Footer';
 import { jsPDF } from 'jspdf';
 import { Document, Packer, Paragraph, TextRun, HeadingLevel } from 'docx';
 import { saveAs } from 'file-saver';
+import { isEndOfMonthUrgency, getEndOfMonthUrgencyText, getDaysUntilReset } from '../../utils/usageReset';
 
 interface QuizQuestion {
   id: number;
@@ -59,6 +60,14 @@ interface QuizHistoryProps {
   onLogout: () => void;
 }
 
+interface Friend {
+  id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  friend_code: string;
+}
+
 type FilterType = 'all' | 'quiz' | 'flashcards' | 'crossword' | 'crater_blast';
 
 const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
@@ -69,6 +78,17 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [filter, setFilter] = useState<FilterType>('all');
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  
+  // Share functionality state
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [shareToolId, setShareToolId] = useState<string | null>(null);
+  const [friends, setFriends] = useState<Friend[]>([]);
+  const [selectedFriendId, setSelectedFriendId] = useState<string | null>(null);
+  const [shareMessage, setShareMessage] = useState('');
+  const [isSharing, setIsSharing] = useState(false);
+  const [shareSuccess, setShareSuccess] = useState<string | null>(null);
+  const [shareError, setShareError] = useState<string | null>(null);
+  const [loadingFriends, setLoadingFriends] = useState(false);
 
   const userPlan = user?.plan || user?.subscription_plan || 'free';
   const isPaidUser = userPlan === 'starter' || userPlan === 'premium';
@@ -178,6 +198,99 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
 
   const cancelDelete = () => {
     setDeleteConfirmId(null);
+  };
+
+  // Share functionality
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+
+  const fetchFriends = async () => {
+    setLoadingFriends(true);
+    try {
+      const token = localStorage.getItem('authToken');
+      if (!token) return;
+
+      const response = await fetch(`${API_URL}/friends`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      const data = await response.json();
+      if (data.success) {
+        setFriends(data.data || []);
+      }
+    } catch (err) {
+      console.error('Error fetching friends:', err);
+    } finally {
+      setLoadingFriends(false);
+    }
+  };
+
+  const openShareModal = (toolId: string) => {
+    setShareToolId(toolId);
+    setShowShareModal(true);
+    setSelectedFriendId(null);
+    setShareMessage('');
+    setShareError(null);
+    setShareSuccess(null);
+    fetchFriends();
+  };
+
+  const closeShareModal = () => {
+    setShowShareModal(false);
+    setShareToolId(null);
+    setSelectedFriendId(null);
+    setShareMessage('');
+    setShareError(null);
+    setShareSuccess(null);
+  };
+
+  const handleShare = async () => {
+    if (!selectedFriendId || !shareToolId) return;
+
+    setIsSharing(true);
+    setShareError(null);
+
+    try {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        onNavigate('login');
+        return;
+      }
+
+      const response = await fetch(`${API_URL}/friends/share`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          friendId: selectedFriendId,
+          quizId: shareToolId,
+          message: shareMessage || null
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setShareSuccess('Shared successfully!');
+        setTimeout(() => {
+          closeShareModal();
+        }, 1500);
+      } else {
+        setShareError(data.message || 'Failed to share');
+      }
+    } catch (err) {
+      setShareError('Failed to share. Please try again.');
+    } finally {
+      setIsSharing(false);
+    }
+  };
+
+  const getFriendName = (friend: Friend) => {
+    const name = `${friend.first_name || ''} ${friend.last_name || ''}`.trim();
+    return name || friend.email || 'Unknown';
   };
 
   const confirmDelete = async (quizId: string) => {
@@ -627,6 +740,26 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
               </div>
             </div>
           </div>
+
+          {/* End of month urgency warning for free users */}
+          {!isPaidUser && isEndOfMonthUrgency() && studyTools.length > 0 && (
+            <div className={`mb-6 p-4 rounded-xl border ${getDaysUntilReset() <= 3 ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800' : 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800'}`}>
+              <div className="flex items-start sm:items-center gap-3">
+                <span className="text-xl flex-shrink-0">{getDaysUntilReset() <= 3 ? '⚠️' : '⏰'}</span>
+                <div className="flex-1 min-w-0">
+                  <p className={`text-sm font-medium ${getDaysUntilReset() <= 3 ? 'text-red-800 dark:text-red-200' : 'text-amber-800 dark:text-amber-200'}`}>
+                    {getEndOfMonthUrgencyText()}
+                  </p>
+                </div>
+                <button
+                  onClick={() => onNavigate('pricing')}
+                  className={`flex-shrink-0 px-4 py-1.5 text-xs font-semibold rounded-lg transition-colors ${getDaysUntilReset() <= 3 ? 'bg-red-600 hover:bg-red-700 text-white' : 'bg-amber-600 hover:bg-amber-700 text-white'}`}
+                >
+                  Upgrade Now
+                </button>
+              </div>
+            </div>
+          )}
           <button
             onClick={startNewStudyTool}
             className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold text-white bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 transition-all duration-200 hover:shadow-lg hover:shadow-violet-500/25 hover:-translate-y-0.5 shrink-0"
@@ -850,6 +983,16 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
                         )}
 
                         <button
+                          onClick={() => openShareModal(tool.id)}
+                          className="p-2.5 rounded-xl bg-purple-50 text-purple-600 hover:bg-purple-100 hover:text-purple-700 transition-colors"
+                          title="Share with friends"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
+                          </svg>
+                        </button>
+
+                        <button
                           onClick={() => handleDeleteClick(tool.id)}
                           className="p-2.5 rounded-xl text-stone-400 hover:text-red-600 hover:bg-red-50 transition-colors"
                           title="Delete"
@@ -1000,6 +1143,154 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
                 View Plans
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Share Modal */}
+      {showShareModal && (
+        <div className="fixed inset-0 bg-stone-900/40 backdrop-blur-sm flex items-center justify-center z-50 px-4">
+          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 border border-stone-200/80">
+            <div className="flex items-start justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="w-11 h-11 bg-purple-100 rounded-xl flex items-center justify-center">
+                  <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-stone-900">Share with a Friend</h3>
+                  <p className="text-sm text-stone-500">Send this study tool to a friend</p>
+                </div>
+              </div>
+              <button
+                onClick={closeShareModal}
+                className="p-2 text-stone-400 hover:text-stone-600 hover:bg-stone-100 rounded-lg transition-colors"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {shareSuccess ? (
+              <div className="text-center py-8">
+                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <p className="text-lg font-medium text-stone-900">{shareSuccess}</p>
+              </div>
+            ) : (
+              <>
+                {shareError && (
+                  <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-xl text-sm">
+                    {shareError}
+                  </div>
+                )}
+
+                {loadingFriends ? (
+                  <div className="flex items-center justify-center py-8">
+                    <div className="animate-spin w-8 h-8 border-2 border-stone-300 border-t-purple-600 rounded-full"></div>
+                  </div>
+                ) : friends.length === 0 ? (
+                  <div className="text-center py-8">
+                    <div className="w-14 h-14 bg-stone-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <svg className="w-7 h-7 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                    </div>
+                    <h4 className="font-medium text-stone-900 mb-2">No friends yet</h4>
+                    <p className="text-sm text-stone-500 mb-4">Add friends to share study tools with them</p>
+                    <button
+                      onClick={() => { closeShareModal(); onNavigate('friends'); }}
+                      className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-lg transition-colors"
+                    >
+                      Add Friends
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-stone-700 mb-2">Select a friend</label>
+                      <div className="space-y-2 max-h-48 overflow-y-auto">
+                        {friends.map((friend) => (
+                          <button
+                            key={friend.id}
+                            onClick={() => setSelectedFriendId(friend.id)}
+                            className={`w-full flex items-center gap-3 p-3 rounded-xl border transition-all ${
+                              selectedFriendId === friend.id
+                                ? 'border-purple-500 bg-purple-50'
+                                : 'border-stone-200 hover:border-stone-300 hover:bg-stone-50'
+                            }`}
+                          >
+                            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                              selectedFriendId === friend.id ? 'bg-purple-200' : 'bg-stone-200'
+                            }`}>
+                              <span className={`font-semibold ${
+                                selectedFriendId === friend.id ? 'text-purple-700' : 'text-stone-600'
+                              }`}>
+                                {(friend.first_name?.[0] || friend.email?.[0] || '?').toUpperCase()}
+                              </span>
+                            </div>
+                            <div className="flex-1 text-left">
+                              <p className="font-medium text-stone-900">{getFriendName(friend)}</p>
+                              <p className="text-xs text-stone-500">{friend.friend_code}</p>
+                            </div>
+                            {selectedFriendId === friend.id && (
+                              <svg className="w-5 h-5 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                              </svg>
+                            )}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="mb-6">
+                      <label className="block text-sm font-medium text-stone-700 mb-2">Add a message (optional)</label>
+                      <input
+                        type="text"
+                        value={shareMessage}
+                        onChange={(e) => setShareMessage(e.target.value)}
+                        placeholder="e.g. Check out these flashcards!"
+                        className="w-full px-4 py-3 border border-stone-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
+                        maxLength={200}
+                      />
+                    </div>
+
+                    <div className="flex gap-3">
+                      <button
+                        onClick={closeShareModal}
+                        className="flex-1 px-4 py-2.5 border border-stone-200 text-stone-700 rounded-xl hover:bg-stone-50 transition-colors font-medium text-sm"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={handleShare}
+                        disabled={!selectedFriendId || isSharing}
+                        className="flex-1 px-4 py-2.5 text-white bg-purple-600 hover:bg-purple-700 disabled:bg-stone-300 rounded-xl font-medium text-sm transition-all flex items-center justify-center gap-2"
+                      >
+                        {isSharing ? (
+                          <>
+                            <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>
+                            Sharing...
+                          </>
+                        ) : (
+                          <>
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                            </svg>
+                            Share
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  </>
+                )}
+              </>
+            )}
           </div>
         </div>
       )}

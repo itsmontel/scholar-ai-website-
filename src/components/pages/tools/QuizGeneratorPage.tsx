@@ -4,6 +4,7 @@ import Footer from '../../common/Footer';
 import AnalysisAnimation from '../../common/AnalysisAnimation';
 import FlashcardViewer from '../../common/FlashcardViewer';
 import { trackAction, trackExport } from '../../../data/achievements';
+import { getResetsInText } from '../../../utils/usageReset';
 import { jsPDF } from 'jspdf';
 import { Document, Packer, Paragraph, TextRun, HeadingLevel } from 'docx';
 import { saveAs } from 'file-saver';
@@ -1873,14 +1874,17 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
                   <span className="text-red-600 text-xs">!</span>
                 </div>
                 <div className="flex-1">
-                  <p className="text-red-800 text-sm">{error}</p>
+                  <p className="text-red-800 dark:text-red-200 text-sm">{error}</p>
                   {(quizExhausted || (error && error.includes('Upgrade'))) && user && (
-                    <button
-                      onClick={() => onNavigate('pricing')}
-                      className="mt-2 px-4 py-1.5 bg-gradient-to-r from-amber-600 to-orange-600 text-white text-sm font-medium rounded-lg hover:from-amber-500 hover:to-orange-500 transition-all inline-flex items-center gap-2"
-                    >
-                      👑 View Plans
-                    </button>
+                    <>
+                      <p className="text-red-600 dark:text-red-400 text-xs mt-1">{getResetsInText()}</p>
+                      <button
+                        onClick={() => onNavigate('pricing')}
+                        className="mt-2 px-4 py-1.5 bg-gradient-to-r from-amber-600 to-orange-600 text-white text-sm font-medium rounded-lg hover:from-amber-500 hover:to-orange-500 transition-all inline-flex items-center gap-2"
+                      >
+                        👑 View Plans
+                      </button>
+                    </>
                   )}
                 </div>
               </div>
@@ -1892,7 +1896,8 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
                 <div className="bg-gradient-to-r from-amber-600 to-orange-600 rounded-2xl p-6 text-white text-center">
                   <span className="text-4xl mb-3 block">🔒</span>
                   <h3 className="text-xl font-bold mb-2">Monthly Limit Reached</h3>
-                  <p className="text-amber-100 mb-4">You've used all 3 quiz generations this month. Upgrade for unlimited quizzes!</p>
+                  <p className="text-amber-100 mb-1">You've used all 3 quiz generations this month. Upgrade for unlimited quizzes!</p>
+                  <p className="text-amber-200/90 text-sm mb-4">{getResetsInText()}</p>
                   <button
                     onClick={() => onNavigate('pricing')}
                     className="px-6 py-2.5 bg-white dark:bg-stone-600 text-amber-700 dark:text-amber-800 font-semibold rounded-xl hover:bg-amber-50 dark:hover:bg-amber-900/30 transition-all inline-flex items-center gap-2"
@@ -1915,7 +1920,7 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
                           <p className="text-amber-800 dark:text-amber-200 font-medium text-sm">
                             Free plan: {quizUsage.generationsRemaining} of {quizUsage.generationLimit} quizzes remaining • Mixed type • Medium difficulty • 10 questions • Max {(quizUsage.maxWordsPerGeneration || 5000).toLocaleString()} words
                           </p>
-                          <p className="text-amber-600 dark:text-amber-400 text-xs mt-0.5">Upgrade for unlimited quizzes, all options, and up to 15,000 words</p>
+                          <p className="text-amber-600 dark:text-amber-400 text-xs mt-0.5">Upgrade for unlimited quizzes, all options, and up to 15,000 words • {getResetsInText()}</p>
                         </>
                       ) : (
                         <>

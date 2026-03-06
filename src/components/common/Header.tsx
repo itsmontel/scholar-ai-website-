@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
 import PromoBanner from './PromoBanner';
 import ScholarMascot from './ScholarMascot';
+import { getResetsInText } from '../../utils/usageReset';
 
 interface HeaderProps {
   onNavigate?: (page: string) => void;
@@ -328,6 +329,21 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
               <span>Study Tools</span>
               <span className="px-1.5 py-0.5 text-[10px] font-bold bg-white/25 text-white rounded-full">PRO</span>
             </button>
+
+            {/* Friends button */}
+            <button 
+              onClick={() => onNavigate?.('friends')}
+              className={`ml-2 px-4 py-2 text-sm font-medium rounded-full transition-all duration-300 flex items-center gap-1.5 ${
+                currentPage === 'friends' 
+                  ? 'bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 ring-2 ring-purple-400 ring-offset-2' 
+                  : 'bg-stone-100/80 dark:bg-stone-800/80 text-stone-600 dark:text-stone-400 hover:bg-purple-50 dark:hover:bg-purple-900/30 hover:text-purple-700 dark:hover:text-purple-300'
+              }`}
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              <span>Friends</span>
+            </button>
           </nav>
 
           {/* Right side */}
@@ -459,6 +475,11 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
                               </div>
                             </div>
                           </div>
+                          {(usageStats.uploadsRemaining !== -1 || usageStats.analysesRemaining !== -1) && (
+                            <p className="text-[10px] text-stone-500 dark:text-stone-400 mt-1.5">
+                              {getResetsInText()}
+                            </p>
+                          )}
                         </div>
                       ) : null}
                     </div>
@@ -568,6 +589,21 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
             >
               <span>Saved Tools</span>
               <span className="px-2 py-0.5 text-[10px] font-bold bg-white/25 text-white rounded-full">PRO</span>
+            </button>
+
+            {/* Friends button */}
+            <button
+              onClick={() => { onNavigate?.('friends'); setIsMobileMenuOpen(false); }}
+              className={`w-full text-left px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 flex items-center gap-2 ${
+                currentPage === 'friends' 
+                  ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400' 
+                  : 'text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800'
+              }`}
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              Friends
             </button>
 
             <button
