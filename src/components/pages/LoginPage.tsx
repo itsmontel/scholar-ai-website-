@@ -75,7 +75,8 @@ const LoginPage = ({ onNavigate, onLogin }: LoginPageProps) => {
         lastName: data.data.user.lastName,
         plan: data.data.user.subscriptionPlan || 'free',
         subscription_status: data.data.user.subscriptionStatus,
-        email_verified: data.data.user.emailVerified
+        email_verified: data.data.user.emailVerified,
+        onboardingCompleted: data.data.user.onboardingCompleted || false
       };
 
       localStorage.setItem('authToken', data.data.token);

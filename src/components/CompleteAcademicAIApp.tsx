@@ -71,6 +71,7 @@ interface User {
   plan: string;
   subscription_status?: string;
   email_verified?: boolean;
+  onboardingCompleted?: boolean;
 }
 
 interface NavigationProps {
@@ -225,14 +226,15 @@ const AcademicAIApp = () => {
                 id: userData.data.user.id,
                 email: userData.data.user.email,
                 username: userData.data.user.username,
-                name: userData.data.user.name || (userData.data.user.firstName && userData.data.user.lastName 
-                  ? `${userData.data.user.firstName} ${userData.data.user.lastName}` 
+                name: userData.data.user.name || (userData.data.user.firstName && userData.data.user.lastName
+                  ? `${userData.data.user.firstName} ${userData.data.user.lastName}`
                   : null) || userData.data.user.email,
                 firstName: userData.data.user.firstName,
                 lastName: userData.data.user.lastName,
                 plan: userData.data.user.subscriptionPlan || 'free',
                 subscription_status: userData.data.user.subscriptionStatus,
-                email_verified: userData.data.user.emailVerified
+                email_verified: userData.data.user.emailVerified,
+                onboardingCompleted: userData.data.user.onboardingCompleted || false
               };
               setUser(updatedUser);
               localStorage.setItem('user', JSON.stringify(updatedUser));
@@ -273,14 +275,15 @@ const AcademicAIApp = () => {
             id: userData.data.user.id,
             email: userData.data.user.email,
             username: userData.data.user.username,
-            name: userData.data.user.firstName && userData.data.user.lastName 
-              ? `${userData.data.user.firstName} ${userData.data.user.lastName}` 
+            name: userData.data.user.firstName && userData.data.user.lastName
+              ? `${userData.data.user.firstName} ${userData.data.user.lastName}`
               : userData.data.user.name || userData.data.user.email,
             firstName: userData.data.user.firstName,
             lastName: userData.data.user.lastName,
             plan: userData.data.user.subscriptionPlan || 'free',
             subscription_status: userData.data.user.subscriptionStatus,
-            email_verified: userData.data.user.emailVerified
+            email_verified: userData.data.user.emailVerified,
+            onboardingCompleted: userData.data.user.onboardingCompleted || false
           };
           setUser(updatedUser);
           localStorage.setItem('user', JSON.stringify(updatedUser));
@@ -672,8 +675,8 @@ const AcademicAIApp = () => {
         return <UnsubscribePage onNavigate={navigateTo} />;
       case 'dashboard':
         // First-time users see onboarding before dashboard
-        // Use user-specific key to avoid conflicts between different accounts in same browser
-        if (isLoggedIn && user?.id && !localStorage.getItem(`writescholar_onboarding_completed_${user.id}`)) {
+        // Check both server-side flag (user.onboardingCompleted) and localStorage for compatibility
+        if (isLoggedIn && user?.id && !user.onboardingCompleted && !localStorage.getItem(`writescholar_onboarding_completed_${user.id}`)) {
           return (
             <OnboardingPage
               onNavigate={navigateTo}
@@ -688,6 +691,9 @@ const AcademicAIApp = () => {
               onComplete={() => {
                 if (user?.id) {
                   localStorage.setItem(`writescholar_onboarding_completed_${user.id}`, 'true');
+                  const updatedUser = { ...user, onboardingCompleted: true };
+                  setUser(updatedUser);
+                  localStorage.setItem('user', JSON.stringify(updatedUser));
                 }
                 navigateTo('dashboard');
               }}
@@ -696,7 +702,7 @@ const AcademicAIApp = () => {
         }
         return <DashboardPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'analyze':
-        if (isLoggedIn && user?.id && !localStorage.getItem(`writescholar_onboarding_completed_${user.id}`)) {
+        if (isLoggedIn && user?.id && !user.onboardingCompleted && !localStorage.getItem(`writescholar_onboarding_completed_${user.id}`)) {
           return (
             <OnboardingPage
               onNavigate={navigateTo}
@@ -711,6 +717,9 @@ const AcademicAIApp = () => {
               onComplete={() => {
                 if (user?.id) {
                   localStorage.setItem(`writescholar_onboarding_completed_${user.id}`, 'true');
+                  const updatedUser = { ...user, onboardingCompleted: true };
+                  setUser(updatedUser);
+                  localStorage.setItem('user', JSON.stringify(updatedUser));
                 }
                 navigateTo('analyze');
               }}
@@ -719,7 +728,7 @@ const AcademicAIApp = () => {
         }
         return isLoggedIn ? <DashboardPage onNavigate={navigateTo} user={user} onLogout={handleLogout} initialMode="analyze" /> : <LandingPage onNavigate={navigateTo} />;
       case 'citations':
-        if (isLoggedIn && user?.id && !localStorage.getItem(`writescholar_onboarding_completed_${user.id}`)) {
+        if (isLoggedIn && user?.id && !user.onboardingCompleted && !localStorage.getItem(`writescholar_onboarding_completed_${user.id}`)) {
           return (
             <OnboardingPage
               onNavigate={navigateTo}
@@ -734,6 +743,9 @@ const AcademicAIApp = () => {
               onComplete={() => {
                 if (user?.id) {
                   localStorage.setItem(`writescholar_onboarding_completed_${user.id}`, 'true');
+                  const updatedUser = { ...user, onboardingCompleted: true };
+                  setUser(updatedUser);
+                  localStorage.setItem('user', JSON.stringify(updatedUser));
                 }
                 navigateTo('citations');
               }}

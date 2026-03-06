@@ -216,9 +216,10 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
   const [showWelcomeTutorial, setShowWelcomeTutorial] = useState(() => {
     if (!user?.id) return false;
     const tutorialCompleted = localStorage.getItem(`writescholar_welcome_tutorial_completed_${user.id}`);
-    const onboardingCompleted = localStorage.getItem(`writescholar_onboarding_completed_${user.id}`);
+    const onboardingCompletedLocal = localStorage.getItem(`writescholar_onboarding_completed_${user.id}`);
+    const onboardingCompleted = (user as any).onboardingCompleted || onboardingCompletedLocal === 'true';
     // Show tutorial if onboarding is completed but tutorial hasn't been shown yet
-    return onboardingCompleted === 'true' && tutorialCompleted !== 'true';
+    return onboardingCompleted && tutorialCompleted !== 'true';
   });
 
   // Quick Review state - show to returning users who haven't reviewed today
@@ -226,8 +227,9 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
     if (!user?.id) return false;
     // Don't show if welcome tutorial is showing
     const tutorialCompleted = localStorage.getItem(`writescholar_welcome_tutorial_completed_${user.id}`);
-    const onboardingCompleted = localStorage.getItem(`writescholar_onboarding_completed_${user.id}`);
-    if (onboardingCompleted === 'true' && tutorialCompleted !== 'true') return false;
+    const onboardingCompletedLocal = localStorage.getItem(`writescholar_onboarding_completed_${user.id}`);
+    const onboardingCompleted = (user as any).onboardingCompleted || onboardingCompletedLocal === 'true';
+    if (onboardingCompleted && tutorialCompleted !== 'true') return false;
     
     // Check if already shown today
     const lastShown = localStorage.getItem(`writescholar_quick_review_last_shown_${user.id}`);
