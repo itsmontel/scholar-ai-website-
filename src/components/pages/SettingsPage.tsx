@@ -5,9 +5,10 @@ interface SettingsPageProps {
   onNavigate: (page: string) => void;
   user: any;
   onLogout: () => void;
+  onUserUpdate?: (updates: { username?: string }) => void;
 }
 
-const SettingsPage = ({ onNavigate, user, onLogout }: SettingsPageProps) => {
+const SettingsPage = ({ onNavigate, user, onLogout, onUserUpdate }: SettingsPageProps) => {
   const [userStats, setUserStats] = useState({
     memberSince: '',
     totalDocuments: 0,
@@ -152,10 +153,12 @@ const SettingsPage = ({ onNavigate, user, onLogout }: SettingsPageProps) => {
       const data = await response.json();
 
       if (data.success) {
-        setCurrentUsername(data.data.username);
+        const newUsernameValue = data.data.username;
+        setCurrentUsername(newUsernameValue);
         setUsernameSuccess('Username updated successfully!');
         setEditingUsername(false);
         setTimeout(() => setUsernameSuccess(''), 3000);
+        onUserUpdate?.({ username: newUsernameValue });
       } else {
         setUsernameError(data.message || 'Failed to update username');
       }

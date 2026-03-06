@@ -752,7 +752,26 @@ const AcademicAIApp = () => {
       case 'upload':
         return <UploadPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'settings':
-        return <SettingsPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
+        return (
+          <SettingsPage
+            onNavigate={navigateTo}
+            user={user}
+            onLogout={handleLogout}
+            onUserUpdate={(updates: { username?: string }) => {
+              if (user && updates.username !== undefined) {
+                const updatedUser = { ...user, username: updates.username };
+                setUser(updatedUser);
+                try {
+                  const stored = localStorage.getItem('user');
+                  if (stored) {
+                    const parsed = JSON.parse(stored);
+                    localStorage.setItem('user', JSON.stringify({ ...parsed, username: updates.username }));
+                  }
+                } catch (_) {}
+              }
+            }}
+          />
+        );
       case 'profile':
         return <ProfilePage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'library':
