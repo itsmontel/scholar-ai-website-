@@ -466,6 +466,14 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
         <div className="absolute inset-0 bg-gradient-to-b from-blue-50/60 via-stone-50 to-white dark:from-stone-950 dark:via-stone-900 dark:to-stone-900" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(99,102,241,0.18),transparent)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(139,92,246,0.14),transparent)]" />
         
+        {/* Floating shapes for mobile - adds depth like dashboard */}
+        <div className="absolute top-[12%] left-[8%] w-12 h-12 rounded-2xl bg-gradient-to-br from-rose-400/20 to-pink-500/20 rotate-12 lg:hidden animate-float pointer-events-none" />
+        <div className="absolute top-[22%] right-[10%] w-10 h-10 rounded-full bg-gradient-to-br from-violet-400/20 to-purple-500/20 lg:hidden animate-float-delayed pointer-events-none" />
+        <div className="absolute top-[45%] left-[6%] w-8 h-8 rounded-lg bg-gradient-to-br from-sky-400/20 to-blue-500/20 -rotate-12 lg:hidden animate-float pointer-events-none" style={{ animationDelay: '1s' }} />
+        <div className="absolute top-[55%] right-[8%] w-11 h-11 rounded-2xl bg-gradient-to-br from-emerald-400/20 to-teal-500/20 rotate-6 lg:hidden animate-float-delayed pointer-events-none" />
+        <div className="absolute bottom-[35%] left-[10%] w-9 h-9 rounded-full bg-gradient-to-br from-amber-400/20 to-orange-500/20 lg:hidden animate-float pointer-events-none" style={{ animationDelay: '0.5s' }} />
+        <div className="absolute bottom-[25%] right-[12%] w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-400/20 to-violet-500/20 -rotate-6 lg:hidden animate-float-delayed pointer-events-none" style={{ animationDelay: '0.8s' }} />
+        
         {/* Floating tool mockups - scattered around hero */}
         <div className="absolute top-[18%] left-[8%] hidden lg:block animate-float">
           <div className="bg-white dark:bg-stone-800 rounded-2xl p-3 shadow-xl border border-violet-200/60 dark:border-violet-800/40 rotate-[-6deg] hover:rotate-0 transition-transform">
@@ -565,7 +573,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
             {/* Primary CTA - pill */}
             <div className="flex justify-center mb-4">
               <button
-                onClick={() => document.getElementById('try-it-now')?.scrollIntoView({ behavior: 'smooth' })}
+                onClick={() => onNavigate('login')}
                 className="px-8 py-4 bg-gradient-to-r from-blue-500 to-violet-500 text-white font-bold rounded-full hover:from-blue-400 hover:to-violet-400 hover:scale-105 active:scale-95 transition-all shadow-xl shadow-violet-500/25 text-lg"
               >
                 I'm ready to level up
@@ -594,7 +602,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
               >
                 <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
               </button>
-              <div className="overflow-x-auto sm:overflow-hidden scrollbar-hide pb-4 sm:pb-0 sm:mx-0 sm:px-0 snap-x snap-mandatory sm:snap-none px-4 scroll-pl-4">
+              <div className="overflow-x-auto sm:overflow-hidden scrollbar-hide pb-4 sm:pb-0 sm:mx-0 sm:px-0 snap-x snap-mandatory sm:snap-none px-2">
                 <div className="flex gap-4 sm:gap-4 sm:transition-transform sm:duration-500 sm:ease-out w-max sm:w-[160%]" style={{ transform: `translateX(-${studyCardsCarouselIndex * 12.5}%)` }}>
                   {[
                     { title: 'Analyze', desc: 'Get professor-style feedback on your essays', onClick: () => setMode('analyze'), gradient: 'from-lime-50 to-emerald-50 dark:from-lime-900/20 dark:to-emerald-900/20', accentClasses: { title: 'text-lime-700 dark:text-lime-400', orb: 'bg-lime-400/20', iconBg: 'bg-lime-100 dark:bg-lime-900/50' }, borderColor: 'border-lime-100 dark:border-lime-800/50', icon: '📝', inner: (
@@ -687,7 +695,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                       </div>
                     )},
                   ].map((card) => (
-                    <div key={card.title} className="flex-shrink-0 w-[calc(50vw-24px)] sm:w-auto sm:flex-[0_0_12.5%] snap-start">
+                    <div key={card.title} className="flex-shrink-0 w-[220px] sm:w-auto sm:flex-[0_0_12.5%] snap-start">
                       <StudyCard
                         title={card.title}
                         desc={card.desc}
