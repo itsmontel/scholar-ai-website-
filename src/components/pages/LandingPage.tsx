@@ -534,14 +534,49 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
               #1 Quizlet alternative. Paste notes. Get quizzes, flashcards & crosswords in seconds. Essay feedback, humanizer, we got you covered. 🙌
             </p>
             
-            {/* Primary CTA - pill */}
+            {/* Primary CTA - mascot holding button on mobile */}
             <div className="flex justify-center mb-4">
+              {/* Desktop: plain button */}
               <button
                 onClick={() => onNavigate('login')}
-                className="px-8 py-4 bg-gradient-to-r from-blue-500 to-violet-500 text-white font-bold rounded-full hover:from-blue-400 hover:to-violet-400 hover:scale-105 active:scale-95 transition-all shadow-xl shadow-violet-500/25 text-lg"
+                className="hidden lg:block px-8 py-4 bg-gradient-to-r from-blue-500 to-violet-500 text-white font-bold rounded-full hover:from-blue-400 hover:to-violet-400 hover:scale-105 active:scale-95 transition-all shadow-xl shadow-violet-500/25 text-lg"
               >
                 I'm ready to level up
               </button>
+              {/* Mobile: mascot holding the button */}
+              <div className="lg:hidden relative flex flex-col items-center">
+                {/* Mascot sitting above the button, overlapping its top edge */}
+                <div className="relative z-20 mb-[-28px] pointer-events-none animate-[mascot-float_3s_ease-in-out_infinite]">
+                  <ScholarMascot size={80} animated={false} pose="celebrating" />
+                </div>
+                {/* Button with purple grip hands on each side */}
+                <div className="relative inline-flex items-center">
+                  {/* Left hand gripping the button edge */}
+                  <svg className="absolute -left-2.5 top-1/2 -translate-y-1/2 z-20 pointer-events-none w-[22px] h-[30px]" viewBox="0 0 22 30">
+                    <ellipse cx="12" cy="16" rx="10" ry="13" fill="#7C3AED" />
+                    <ellipse cx="12" cy="14" rx="7" ry="9" fill="#8B5CF6" />
+                    <ellipse cx="7" cy="5" rx="3" ry="5.5" fill="#A78BFA" transform="rotate(-15 7 5)" />
+                    <ellipse cx="12" cy="3" rx="2.8" ry="5" fill="#A78BFA" />
+                    <ellipse cx="17" cy="5" rx="2.8" ry="5" fill="#A78BFA" transform="rotate(12 17 5)" />
+                    <ellipse cx="12" cy="14" rx="4" ry="5" fill="#C4B5FD" opacity="0.3" />
+                  </svg>
+                  {/* Right hand gripping the button edge (mirrored) */}
+                  <svg className="absolute -right-2.5 top-1/2 z-20 pointer-events-none w-[22px] h-[30px]" viewBox="0 0 22 30" style={{ transform: 'translateY(-50%) scaleX(-1)' }}>
+                    <ellipse cx="12" cy="16" rx="10" ry="13" fill="#7C3AED" />
+                    <ellipse cx="12" cy="14" rx="7" ry="9" fill="#8B5CF6" />
+                    <ellipse cx="7" cy="5" rx="3" ry="5.5" fill="#A78BFA" transform="rotate(-15 7 5)" />
+                    <ellipse cx="12" cy="3" rx="2.8" ry="5" fill="#A78BFA" />
+                    <ellipse cx="17" cy="5" rx="2.8" ry="5" fill="#A78BFA" transform="rotate(12 17 5)" />
+                    <ellipse cx="12" cy="14" rx="4" ry="5" fill="#C4B5FD" opacity="0.3" />
+                  </svg>
+                  <button
+                    onClick={() => onNavigate('login')}
+                    className="relative z-10 px-10 py-4 bg-gradient-to-r from-blue-500 to-violet-500 text-white font-bold rounded-full active:scale-95 transition-all shadow-xl shadow-violet-500/25 text-lg"
+                  >
+                    I'm ready to level up
+                  </button>
+                </div>
+              </div>
             </div>
             
             <p className="text-sm text-stone-500 dark:text-stone-400 mb-12">
