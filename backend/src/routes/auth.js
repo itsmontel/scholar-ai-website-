@@ -217,7 +217,7 @@ router.get('/me', authenticateToken, async (req, res) => {
     const achievementsService = require('../services/achievementsService');
     const supabase = createClient(
       process.env.SUPABASE_URL,
-      process.env.SUPABASE_ANON_KEY
+      process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
     );
 
     const { data: user, error } = await supabase

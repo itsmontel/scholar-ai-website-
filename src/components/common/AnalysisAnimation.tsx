@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import ScholarMascot from './ScholarMascot';
 
 interface AnalysisAnimationProps {
   size?: 'sm' | 'md' | 'lg';
@@ -110,57 +111,13 @@ const AnalysisAnimation: React.FC<AnalysisAnimationProps> = ({
       <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
         <div className="bg-white rounded-3xl shadow-xl border border-gray-100 p-8 sm:p-10 max-w-md w-full mx-4">
           <div className="flex flex-col items-center justify-center">
-            {/* Cute character analyzing */}
-            <div className="relative mb-6">
-              <div className="w-24 h-24 relative">
-                <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
-                  {/* Background circle */}
-                  <circle cx="50" cy="50" r="48" fill="#EEF2FF" stroke="#E0E7FF" strokeWidth="2"/>
-                  
-                  {/* Character body */}
-                  <path d="M35 75 Q30 90 35 98 L65 98 Q70 90 65 75" fill="#3B82F6" />
-                  
-                  {/* Neck */}
-                  <rect x="44" y="62" width="12" height="15" fill="#FCD9B6" />
-                  
-                  {/* Head */}
-                  <ellipse cx="50" cy="42" rx="22" ry="24" fill="#FCD9B6" />
-                  
-                  {/* Hair */}
-                  <path d="M28 36 Q26 20 38 14 Q50 8 62 14 Q74 20 72 36 Q70 26 58 20 Q50 16 42 20 Q32 26 28 36" fill="#4A3728" />
-                  <path d="M28 36 Q22 44 28 52" fill="#4A3728" />
-                  <path d="M72 36 Q78 44 72 52" fill="#4A3728" />
-                  
-                  {/* Glasses */}
-                  <ellipse cx="40" cy="42" rx="10" ry="9" fill="none" stroke="#374151" strokeWidth="2.5" />
-                  <ellipse cx="60" cy="42" rx="10" ry="9" fill="none" stroke="#374151" strokeWidth="2.5" />
-                  <path d="M50 42 L52 42" stroke="#374151" strokeWidth="2.5" />
-                  <path d="M30 40 L24 38" stroke="#374151" strokeWidth="2.5" />
-                  <path d="M70 40 L76 38" stroke="#374151" strokeWidth="2.5" />
-                  
-                  {/* Eyes - looking at document */}
-                  <ellipse cx="40" cy="43" rx="3" ry="4" fill="#1F2937" />
-                  <ellipse cx="60" cy="43" rx="3" ry="4" fill="#1F2937" />
-                  <circle cx="41" cy="42" r="1" fill="white" />
-                  <circle cx="61" cy="42" r="1" fill="white" />
-                  
-                  {/* Eyebrows - focused */}
-                  <path d="M32 34 Q40 30 48 34" stroke="#4A3728" strokeWidth="2" fill="none" strokeLinecap="round" />
-                  <path d="M52 34 Q60 30 68 34" stroke="#4A3728" strokeWidth="2" fill="none" strokeLinecap="round" />
-                  
-                  {/* Smile */}
-                  <path d="M42 54 Q50 60 58 54" stroke="#1F2937" strokeWidth="2" fill="none" strokeLinecap="round" />
-                  
-                  {/* Cheeks */}
-                  <ellipse cx="30" cy="48" rx="4" ry="3" fill="#FECACA" opacity="0.5" />
-                  <ellipse cx="70" cy="48" rx="4" ry="3" fill="#FECACA" opacity="0.5" />
-                </svg>
-                
-                {/* Animated sparkles around character */}
-                <div className="absolute -top-1 -right-1 w-4 h-4 text-yellow-400 animate-pulse" style={{ animationDelay: '0s' }}>✨</div>
-                <div className="absolute -top-2 left-2 w-3 h-3 text-blue-400 animate-pulse" style={{ animationDelay: '0.3s' }}>✨</div>
-                <div className="absolute top-4 -right-3 w-3 h-3 text-purple-400 animate-pulse" style={{ animationDelay: '0.6s' }}>✨</div>
-              </div>
+            {/* Scholar mascot — analyzing pose for paper analysis, studying pose for citations */}
+            <div className="relative mb-6 flex justify-center">
+              <ScholarMascot
+                size={140}
+                animated={true}
+                pose={variant === 'citations' ? 'studying' : 'analyzing'}
+              />
             </div>
 
             {/* Title */}

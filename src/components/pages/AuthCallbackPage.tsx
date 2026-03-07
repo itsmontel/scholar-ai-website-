@@ -26,14 +26,17 @@ const AuthCallbackPage: React.FC<AuthCallbackPageProps> = ({ onNavigate, onLogin
           const userData = JSON.parse(decodeURIComponent(userParam));
 
           localStorage.setItem('authToken', token);
-          localStorage.setItem('user', JSON.stringify(userData));
-          onLogin(userData);
           setStatus('success');
 
           window.history.replaceState(null, '', '/auth/callback');
 
           // Fetch onboarding status from the server so it works across all browsers/devices
-          let onboardingCompleted = userData.onboardingCompleted || false;
+          // CRITICAL: localStorage persists across logout - returning users who completed onboarding must not see it again
+          let onboardingCompleted =
+            userData.onboardingCompleted === true ||
+            localStorage.getItem(`writescholar_onboarding_completed_${userData.id}`) === 'true';
+          let welcomeTutorialCompleted = userData.welcomeTutorialCompleted || false;
+
           try {
             const meRes = await fetch(
               `${(import.meta as any).env?.VITE_API_URL || 'http://localhost:3001/api'}/auth/me`,
@@ -41,9 +44,10 @@ const AuthCallbackPage: React.FC<AuthCallbackPageProps> = ({ onNavigate, onLogin
             );
             if (meRes.ok) {
               const meData = await meRes.json();
-              onboardingCompleted = meData.data?.user?.onboardingCompleted || false;
-              const welcomeTutorialCompleted = meData.data?.user?.welcomeTutorialCompleted || false;
-              // Sync achievements from server (cross-device)
+              const serverOnboarding = meData.data?.user?.onboardingCompleted === true;
+              const serverTutorial = meData.data?.user?.welcomeTutorialCompleted || false;
+              onboardingCompleted = onboardingCompleted || serverOnboarding;
+              welcomeTutorialCompleted = welcomeTutorialCompleted || serverTutorial;
               if (meData.data?.achievements) {
                 const { mergeFromServer } = await import('../../data/achievements');
                 mergeFromServer(
@@ -51,19 +55,20 @@ const AuthCallbackPage: React.FC<AuthCallbackPageProps> = ({ onNavigate, onLogin
                   meData.data.achievements.unlockedBadges || {}
                 );
               }
-              // Update stored user with server data
-              const updatedUser = { ...userData, onboardingCompleted, welcomeTutorialCompleted };
-              localStorage.setItem('user', JSON.stringify(updatedUser));
-              onLogin(updatedUser);
             }
           } catch (_e) {
-            // Network error – fall back to the value from the OAuth redirect
+            // Network error – trust localStorage and OAuth payload
           }
 
-          // Also sync localStorage key for components that still check it
+          // Always persist localStorage key when we know they've completed (ensures logout→login works)
           if (onboardingCompleted) {
             localStorage.setItem(`writescholar_onboarding_completed_${userData.id}`, 'true');
           }
+
+          // CRITICAL: Always pass user with correct onboardingCompleted so dashboard doesn't show onboarding
+          const finalUser = { ...userData, onboardingCompleted, welcomeTutorialCompleted };
+          localStorage.setItem('user', JSON.stringify(finalUser));
+          onLogin(finalUser);
 
           const nextPage = onboardingCompleted ? 'dashboard' : 'onboarding';
           setTimeout(() => onNavigate(nextPage), 800);

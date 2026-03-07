@@ -100,9 +100,13 @@ const AcademicAIApp = () => {
         const userData = localStorage.getItem('user');
         if (token && userData) {
           const parsedUser = JSON.parse(userData);
-          logger.log('Initializing user state from localStorage:', parsedUser);
+          const uid = parsedUser?.id;
+          const localOnboarding = uid && localStorage.getItem(`writescholar_onboarding_completed_${uid}`) === 'true';
+          const onboardingCompleted = parsedUser.onboardingCompleted === true || localOnboarding;
+          const user = uid ? { ...parsedUser, onboardingCompleted } : parsedUser;
+          logger.log('Initializing user state from localStorage:', user);
           setIsLoggedIn(true);
-          setUser(parsedUser);
+          setUser(user);
         }
       } catch (error) {
         logger.error('Error parsing initial user data:', error);
@@ -225,8 +229,12 @@ const AcademicAIApp = () => {
               );
             }
             if (userData.data && userData.data.user && userData.data.user.email) {
+              const uid = userData.data.user.id;
+              const serverOnboarding = userData.data.user.onboardingCompleted === true;
+              const localOnboarding = localStorage.getItem(`writescholar_onboarding_completed_${uid}`) === 'true';
+              const onboardingCompleted = serverOnboarding || localOnboarding;
               const updatedUser = {
-                id: userData.data.user.id,
+                id: uid,
                 email: userData.data.user.email,
                 username: userData.data.user.username,
                 name: userData.data.user.name || (userData.data.user.firstName && userData.data.user.lastName
@@ -237,11 +245,14 @@ const AcademicAIApp = () => {
                 plan: userData.data.user.subscriptionPlan || 'free',
                 subscription_status: userData.data.user.subscriptionStatus,
                 email_verified: userData.data.user.emailVerified,
-                onboardingCompleted: userData.data.user.onboardingCompleted || false,
+                onboardingCompleted,
                 welcomeTutorialCompleted: userData.data.user.welcomeTutorialCompleted || false
               };
               setUser(updatedUser);
               localStorage.setItem('user', JSON.stringify(updatedUser));
+              if (localOnboarding && !serverOnboarding) {
+                localStorage.setItem(`writescholar_onboarding_completed_${uid}`, 'true');
+              }
               logger.log('User data updated after token refresh:', updatedUser);
             } else {
               logger.log('Invalid user data after token refresh, keeping existing user data');
@@ -275,8 +286,12 @@ const AcademicAIApp = () => {
         }
         // Update user data from server
         if (userData.data && userData.data.user && userData.data.user.email) {
+          const uid = userData.data.user.id;
+          const serverOnboarding = userData.data.user.onboardingCompleted === true;
+          const localOnboarding = localStorage.getItem(`writescholar_onboarding_completed_${uid}`) === 'true';
+          const onboardingCompleted = serverOnboarding || localOnboarding;
           const updatedUser = {
-            id: userData.data.user.id,
+            id: uid,
             email: userData.data.user.email,
             username: userData.data.user.username,
             name: userData.data.user.firstName && userData.data.user.lastName
@@ -287,11 +302,14 @@ const AcademicAIApp = () => {
             plan: userData.data.user.subscriptionPlan || 'free',
             subscription_status: userData.data.user.subscriptionStatus,
             email_verified: userData.data.user.emailVerified,
-            onboardingCompleted: userData.data.user.onboardingCompleted || false,
+            onboardingCompleted,
             welcomeTutorialCompleted: userData.data.user.welcomeTutorialCompleted || false
           };
           setUser(updatedUser);
           localStorage.setItem('user', JSON.stringify(updatedUser));
+          if (localOnboarding && !serverOnboarding) {
+            localStorage.setItem(`writescholar_onboarding_completed_${uid}`, 'true');
+          }
           logger.log('User data updated from /auth/me:', updatedUser);
         } else {
           logger.log('Invalid user data from /auth/me, keeping existing user data');
