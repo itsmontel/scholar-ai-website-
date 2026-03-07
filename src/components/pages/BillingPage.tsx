@@ -57,7 +57,7 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
         '3 documents per month',
         '3 AI essay analyses per month',
         '3 study tool generations/month',
-        '1,000 words/month Humanizer & Summarizer',
+        '5,000 words/month Humanizer & Summarizer',
         '2 citation searches per month',
         'Basic grammar check'
       ],
@@ -75,6 +75,7 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
         '999 AI essay analyses per month',
         'Unlimited quiz, flashcard & crossword generation',
         '999,999 words/month Humanizer & Summarizer',
+        '99 citation searches per month',
         'All citation styles',
         'Export to PDF & Word',
         'Study tools history'
@@ -93,6 +94,7 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
         'Everything in Starter',
         'Our top-tier premium AI model',
         'All quiz types & difficulty levels unlocked',
+        '199 citation searches per month',
         'All summarizer styles & lengths unlocked',
         'Advanced AI essay analysis',
         'Advanced grammar and style checking',

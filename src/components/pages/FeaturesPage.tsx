@@ -236,7 +236,7 @@ const FeaturesPage = ({ onNavigate, user, onLogout }: FeaturesPageProps) => {
                 <span className="text-2xl">✨</span>
               </div>
               <h3 className="font-semibold text-violet-700 text-lg mb-2">AI Humanizer</h3>
-              <p className="text-base text-stone-500 dark:text-stone-400 leading-relaxed">Transform ChatGPT, Claude, Gemini text into natural human writing. Bypass AI detectors. 1,000 free words/month.</p>
+              <p className="text-base text-stone-500 dark:text-stone-400 leading-relaxed">Transform ChatGPT, Claude, Gemini text into natural human writing. Bypass AI detectors. 5,000 free words/month.</p>
             </button>
 
             {/* Text Summarizer */}
@@ -246,7 +246,7 @@ const FeaturesPage = ({ onNavigate, user, onLogout }: FeaturesPageProps) => {
                 <span className="text-2xl">📝</span>
               </div>
               <h3 className="font-semibold text-teal-700 text-lg mb-2">Paper Summarizer</h3>
-              <p className="text-base text-stone-500 dark:text-stone-400 leading-relaxed">Condense research papers, articles, and textbooks into key points. Bullet points or paragraphs. 1,000 free words/month.</p>
+              <p className="text-base text-stone-500 dark:text-stone-400 leading-relaxed">Condense research papers, articles, and textbooks into key points. Bullet points or paragraphs. 5,000 free words/month.</p>
             </button>
 
             {/* Quiz Generator */}

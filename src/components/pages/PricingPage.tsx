@@ -165,7 +165,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
         '3 documents per month',
         '3 AI essay analyses per month',
         '3 study tool generations/month (quiz, flashcards, crossword)',
-        '1,000 words/month for Humanizer & Summarizer',
+        '5,000 words/month for Humanizer & Summarizer',
         '2 citation searches per month',
         'Basic grammar check',
         'Standard citation styles'
@@ -190,7 +190,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
         '999 AI essay analyses per month',
         'Unlimited quiz, flashcard & crossword generation',
         '999,999 words/month for Humanizer & Summarizer',
-        '999 citation searches per month',
+        '99 citation searches per month',
         'All citation styles (APA, MLA, Chicago, Harvard…)',
         'Grammar and style checks',
         'Export to PDF & Word',
@@ -213,6 +213,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
       yearlyPrice: 399.99,
       features: [
         'Everything in Starter',
+        '199 citation searches per month',
         'Our top-tier premium AI model',
         'All quiz types & difficulty levels unlocked',
         'All summarizer styles & lengths unlocked',
@@ -238,11 +239,11 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
     },
     {
       question: "What's included in the free plan?",
-      answer: "The free plan includes 3 documents per month, 3 AI essay analyses, 3 study tool generations (quiz, flashcards, or crossword), 1,000 words for the Humanizer and Summarizer, and 2 citation searches. It's perfect for students just getting started."
+      answer: "The free plan includes 3 documents per month, 3 AI essay analyses, 3 study tool generations (quiz, flashcards, or crossword), 5,000 words for the Humanizer and Summarizer, and 2 citation searches. It's perfect for students just getting started."
     },
     {
       question: "What's the difference between Starter and Premium?",
-      answer: "Starter gives you unlimited documents, 999 AI analyses, unlimited study tool generations (quizzes, flashcards, crosswords), 999,999 Humanizer/Summarizer words, all citation styles, and PDF/Word export. Premium upgrades you to our top-tier premium AI model, unlocks all quiz types and difficulty levels, all summarizer styles and lengths, advanced essay analysis, advanced grammar checking, and priority support."
+      answer: "Starter gives you unlimited documents, 999 AI analyses, unlimited study tool generations (quizzes, flashcards, crosswords), 999,999 Humanizer/Summarizer words, 99 citation searches per month, all citation styles, and PDF/Word export. Premium upgrades you to 199 citation searches per month, our top-tier premium AI model, all quiz types and difficulty levels, all summarizer styles and lengths, advanced essay analysis, advanced grammar checking, and priority support."
     },
     {
       question: "Can I change my plan after subscribing?",

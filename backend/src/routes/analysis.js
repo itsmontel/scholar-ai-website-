@@ -150,10 +150,10 @@ router.post('/humanize', authenticateToken, async (req, res) => {
       });
     }
 
-    if (userPlan === 'free' && wordCount > 1000) {
+    if (userPlan === 'free' && wordCount > 5000) {
       return res.status(400).json({
         success: false,
-        message: 'Free plan allows up to 1,000 words per document. Upgrade for up to 5,000 words.'
+        message: 'Free plan allows up to 5,000 words per document. Upgrade for more.'
       });
     }
 
@@ -303,10 +303,10 @@ router.post('/summarize', authenticateToken, async (req, res) => {
       });
     }
 
-    if (userPlan === 'free' && wordCount > 1000) {
+    if (userPlan === 'free' && wordCount > 5000) {
       return res.status(400).json({
         success: false,
-        message: 'Free plan allows up to 1,000 words per document. Upgrade for up to 5,000 words.'
+        message: 'Free plan allows up to 5,000 words per document. Upgrade for more.'
       });
     }
 

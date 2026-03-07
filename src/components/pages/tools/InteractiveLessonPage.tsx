@@ -97,6 +97,13 @@ const InteractiveLessonPage = ({ onNavigate, user, onLogout }: InteractiveLesson
     }
   }, [user]);
 
+  // Scroll to top when slide changes (Next/Previous/dots)
+  useEffect(() => {
+    if (lessonResult) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [currentSlide, lessonResult]);
+
   // Load saved lesson from localStorage (when coming from quiz-history)
   useEffect(() => {
     const savedLesson = localStorage.getItem('savedLesson');
@@ -480,7 +487,7 @@ const InteractiveLessonPage = ({ onNavigate, user, onLogout }: InteractiveLesson
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-b from-stone-50 to-white dark:bg-stone-900 dark:from-stone-900 dark:to-stone-800">
+    <div className="min-h-screen flex flex-col bg-gradient-to-b from-stone-50 to-white dark:bg-stone-900 dark:from-stone-900 dark:to-stone-800 overflow-x-hidden">
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="interactive-lesson" />
       
       <main className="flex-1 w-full min-w-0 overflow-x-hidden">
@@ -531,13 +538,13 @@ const InteractiveLessonPage = ({ onNavigate, user, onLogout }: InteractiveLesson
                       <h2 className="text-xl sm:text-2xl font-bold text-stone-800 dark:text-stone-100">
                         Test Your Knowledge
                       </h2>
-                      <p className="text-stone-500 dark:text-stone-400 text-sm mt-1">
+                      <p className="text-stone-500 dark:text-stone-400 text-sm mt-1 truncate max-w-[200px] sm:max-w-none" title={lessonResult.title}>
                         Based on: {lessonResult.title}
                       </p>
                     </div>
                     <button
                       onClick={backToLesson}
-                      className="px-4 py-2 rounded-xl bg-stone-100 dark:bg-stone-700 text-stone-600 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-stone-600 font-medium text-sm transition-colors flex items-center gap-2"
+                      className="w-full sm:w-auto px-4 py-2 rounded-xl bg-stone-100 dark:bg-stone-700 text-stone-600 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-stone-600 font-medium text-sm transition-colors flex items-center justify-center gap-2 shrink-0"
                     >
                       <span>←</span>
                       <span>Back to Lesson</span>
@@ -566,12 +573,12 @@ const InteractiveLessonPage = ({ onNavigate, user, onLogout }: InteractiveLesson
 
                   {/* Question Card */}
                   {quizQuestions[currentQuizQuestion] && (
-                    <div className="bg-white dark:bg-stone-800 rounded-3xl border border-stone-200 dark:border-stone-600 shadow-xl p-6 sm:p-8">
-                      <div className="flex items-start gap-4 mb-6">
+                    <div className="bg-white dark:bg-stone-800 rounded-3xl border border-stone-200 dark:border-stone-600 shadow-xl p-4 sm:p-8 min-w-0">
+                      <div className="flex items-start gap-3 sm:gap-4 mb-6 min-w-0">
                         <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg text-xl font-black text-white flex-shrink-0">
                           {currentQuizQuestion + 1}
                         </div>
-                        <p className="text-lg sm:text-xl font-semibold text-stone-800 dark:text-stone-100 leading-relaxed">
+                        <p className="text-lg sm:text-xl font-semibold text-stone-800 dark:text-stone-100 leading-relaxed min-w-0 break-words">
                           {quizQuestions[currentQuizQuestion].question}
                         </p>
                       </div>
@@ -614,7 +621,7 @@ const InteractiveLessonPage = ({ onNavigate, user, onLogout }: InteractiveLesson
                                 }`}>
                                   {showResult && isCorrect ? '✓' : showResult && isSelected && !isCorrect ? '✗' : String.fromCharCode(65 + idx)}
                                 </div>
-                                <span className={`text-base ${
+                                <span className={`text-base min-w-0 break-words ${
                                   showResult && isCorrect ? 'text-emerald-700 dark:text-emerald-300 font-medium' :
                                   showResult && isSelected && !isCorrect ? 'text-red-700 dark:text-red-300' :
                                   'text-stone-700 dark:text-stone-300'
@@ -653,7 +660,7 @@ const InteractiveLessonPage = ({ onNavigate, user, onLogout }: InteractiveLesson
                       )}
 
                       {/* Action Buttons */}
-                      <div className="flex justify-end gap-3">
+                      <div className="flex flex-wrap justify-end gap-3">
                         {!showExplanation ? (
                           <button
                             onClick={submitAnswer}
@@ -681,7 +688,7 @@ const InteractiveLessonPage = ({ onNavigate, user, onLogout }: InteractiveLesson
                 </>
               ) : (
                 /* Quiz Complete */
-                <div className="bg-white dark:bg-stone-800 rounded-3xl border border-stone-200 dark:border-stone-600 shadow-xl p-8 sm:p-12 text-center">
+                <div className="bg-white dark:bg-stone-800 rounded-3xl border border-stone-200 dark:border-stone-600 shadow-xl p-6 sm:p-12 text-center min-w-0">
                   <div className={`w-20 h-20 mx-auto mb-6 rounded-3xl flex items-center justify-center text-4xl ${
                     quizScore >= quizQuestions.length * 0.8
                       ? 'bg-gradient-to-br from-emerald-400 to-teal-500'
@@ -704,24 +711,24 @@ const InteractiveLessonPage = ({ onNavigate, user, onLogout }: InteractiveLesson
                     You scored <span className="font-bold text-stone-700 dark:text-stone-200">{quizScore}</span> out of <span className="font-bold text-stone-700 dark:text-stone-200">{quizQuestions.length}</span> ({Math.round((quizScore / quizQuestions.length) * 100)}%)
                   </p>
                   
-                  <div className="flex flex-col sm:flex-row justify-center gap-3">
+                  <div className="flex flex-col sm:flex-row flex-wrap justify-center gap-3">
                     <button
                       onClick={retakeQuiz}
-                      className="px-6 py-3 rounded-xl font-semibold text-sm bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white shadow-lg shadow-emerald-500/30 transition-all flex items-center justify-center gap-2"
+                      className="px-4 sm:px-6 py-3 rounded-xl font-semibold text-sm bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white shadow-lg shadow-emerald-500/30 transition-all flex items-center justify-center gap-2 shrink-0"
                     >
                       <span>🔄</span>
                       <span>Try Different Questions</span>
                     </button>
                     <button
                       onClick={backToLesson}
-                      className="px-6 py-3 rounded-xl font-semibold text-sm bg-stone-100 dark:bg-stone-700 text-stone-700 dark:text-stone-200 hover:bg-stone-200 dark:hover:bg-stone-600 transition-all flex items-center justify-center gap-2"
+                      className="px-4 sm:px-6 py-3 rounded-xl font-semibold text-sm bg-stone-100 dark:bg-stone-700 text-stone-700 dark:text-stone-200 hover:bg-stone-200 dark:hover:bg-stone-600 transition-all flex items-center justify-center gap-2 shrink-0"
                     >
                       <span>📖</span>
                       <span>Review Lesson</span>
                     </button>
                     <button
                       onClick={handleClear}
-                      className="px-6 py-3 rounded-xl font-semibold text-sm border border-stone-200 dark:border-stone-600 text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-700/50 transition-all flex items-center justify-center gap-2"
+                      className="px-4 sm:px-6 py-3 rounded-xl font-semibold text-sm border border-stone-200 dark:border-stone-600 text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-700/50 transition-all flex items-center justify-center gap-2 shrink-0"
                     >
                       <span>✨</span>
                       <span>New Lesson</span>
@@ -739,13 +746,13 @@ const InteractiveLessonPage = ({ onNavigate, user, onLogout }: InteractiveLesson
           </div>
         ) : !lessonResult ? (
           /* Input Section */
-          <div className="pb-8 sm:pb-16 px-0 sm:px-6 lg:px-8">
+          <div className="pb-8 sm:pb-16 px-3 sm:px-6 lg:px-8">
             <div className="max-w-4xl mx-auto">
               <div className="bg-white dark:bg-stone-800 rounded-2xl sm:rounded-3xl shadow-xl shadow-stone-100/50 dark:shadow-none border border-stone-200 dark:border-stone-600 overflow-hidden">
                 {/* Toolbar */}
                 <div className="border-b border-stone-200 dark:border-stone-600 bg-gradient-to-r from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20 px-3 sm:px-5 py-3 sm:py-4">
                   <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center justify-between gap-3 sm:gap-4">
-                    <div className="flex flex-wrap items-center gap-2 sm:gap-3 min-w-0">
+                    <div className="flex flex-wrap items-center gap-2 sm:gap-3 min-w-0 overflow-x-auto sm:overflow-visible">
                       <span className="text-xs font-medium text-stone-500 dark:text-stone-400 flex-shrink-0">Style:</span>
                       <div className="flex items-center bg-white dark:bg-stone-700 rounded-xl px-0.5 sm:px-1 py-1 shadow-sm border border-stone-200 dark:border-stone-600">
                         {styleOptions.map((opt) => (
@@ -794,13 +801,13 @@ const InteractiveLessonPage = ({ onNavigate, user, onLogout }: InteractiveLesson
                 </div>
 
                 {/* Input Area */}
-                <div className="flex flex-col">
-                  <div className="flex items-center justify-between px-3 sm:px-5 py-2.5 sm:py-3 bg-stone-50 dark:bg-stone-800/50 border-b border-stone-200 dark:border-stone-600">
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full bg-violet-500"></div>
-                      <span className="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider">Paste Your Study Material</span>
+                <div className="flex flex-col min-w-0">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 px-3 sm:px-5 py-2.5 sm:py-3 bg-stone-50 dark:bg-stone-800/50 border-b border-stone-200 dark:border-stone-600">
+                    <div className="flex items-center gap-2 min-w-0 shrink-0">
+                      <div className="w-2 h-2 rounded-full bg-violet-500 flex-shrink-0"></div>
+                      <span className="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider truncate">Paste Your Study Material</span>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2 shrink-0">
                       <input
                         ref={fileInputRef}
                         type="file"
@@ -861,12 +868,12 @@ The AI will transform it into an engaging, interactive lesson with:
                       className="w-full min-h-[300px] sm:min-h-[400px] p-3 sm:p-5 text-stone-800 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500 resize-none focus:outline-none text-sm sm:text-base leading-relaxed bg-transparent"
                     />
                   </div>
-                  <div className="flex items-center justify-between px-3 sm:px-5 py-2.5 sm:py-3 bg-stone-50/50 dark:bg-stone-800/30 border-t border-stone-200 dark:border-stone-600">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-0 px-3 sm:px-5 py-2.5 sm:py-3 bg-stone-50/50 dark:bg-stone-800/30 border-t border-stone-200 dark:border-stone-600">
                     <span className={`text-xs font-medium ${wordCount < 50 ? 'text-amber-600' : wordCount > maxWords ? 'text-red-600' : 'text-stone-500 dark:text-stone-400'}`}>
                       {wordCount.toLocaleString()} words / {maxWords.toLocaleString()} max
                       {wordCount < 50 && ' (min 50)'}
                     </span>
-                    <span className="text-xs text-stone-400 dark:text-stone-500">
+                    <span className="text-xs text-stone-400 dark:text-stone-500 truncate">
                       Tip: More detailed content = better lessons!
                     </span>
                   </div>
@@ -875,7 +882,7 @@ The AI will transform it into an engaging, interactive lesson with:
 
               {/* Error Message */}
               {error && (
-                <div className="mt-4 mx-3 sm:mx-0 p-3 sm:p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl flex items-start gap-3">
+                <div className="mt-4 p-3 sm:p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl flex items-start gap-3 min-w-0">
                   <div className="w-5 h-5 rounded-full bg-red-100 dark:bg-red-900/50 flex items-center justify-center flex-shrink-0">
                     <span className="text-red-600 dark:text-red-400 text-xs">!</span>
                   </div>
@@ -898,8 +905,8 @@ The AI will transform it into an engaging, interactive lesson with:
 
               {/* Usage Info for logged-in users */}
               {user && usage && (
-                <div className="mt-6 mx-3 sm:mx-0">
-                  <div className="bg-gradient-to-r from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20 border border-violet-200 dark:border-violet-700/50 rounded-2xl p-5 flex items-center justify-between flex-wrap gap-3">
+                <div className="mt-6">
+                  <div className="bg-gradient-to-r from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20 border border-violet-200 dark:border-violet-700/50 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
                       <span className="text-2xl">🎓</span>
                       <div>
@@ -930,13 +937,13 @@ The AI will transform it into an engaging, interactive lesson with:
               )}
 
               {/* Info Card */}
-              <div className="mt-6 mx-3 sm:mx-0">
-                <div className="bg-gradient-to-r from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20 border border-violet-200 dark:border-violet-700/50 rounded-2xl p-5">
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-lg shadow-violet-500/30 text-2xl flex-shrink-0">
+              <div className="mt-6">
+                <div className="bg-gradient-to-r from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20 border border-violet-200 dark:border-violet-700/50 rounded-2xl p-4 sm:p-5">
+                  <div className="flex items-start gap-3 sm:gap-4 min-w-0">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-lg shadow-violet-500/30 text-xl sm:text-2xl flex-shrink-0">
                       💡
                     </div>
-                    <div>
+                    <div className="min-w-0 flex-1">
                       <h3 className="text-violet-800 dark:text-violet-200 font-semibold mb-1">Learn First, Then Test</h3>
                       <p className="text-violet-600 dark:text-violet-400 text-sm leading-relaxed">
                         This tool is perfect for when you need to <span className="font-semibold">understand material before taking quizzes</span>.
@@ -954,9 +961,9 @@ The AI will transform it into an engaging, interactive lesson with:
             <div className="max-w-4xl mx-auto">
               {/* Lesson Header */}
               <div className="mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <div>
+                <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2 mb-1">
-                    <h2 className="text-xl sm:text-2xl font-bold text-stone-800 dark:text-stone-100">
+                    <h2 className="text-xl sm:text-2xl font-bold text-stone-800 dark:text-stone-100 truncate" title={lessonResult.title}>
                       {lessonResult.title}
                     </h2>
                     <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${
@@ -971,11 +978,11 @@ The AI will transform it into an engaging, interactive lesson with:
                     {lessonResult.totalSlides} {lessonStyle === 'stepByStep' ? 'steps' : 'slides'} • ~{lessonResult.estimatedReadTime} min read
                   </p>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
                   {lessonResult.quizBank && lessonResult.quizBank.length > 0 && (
                     <button
                       onClick={startQuiz}
-                      className="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-medium text-sm shadow-md shadow-emerald-500/20 transition-all flex items-center gap-2"
+                      className="px-3 sm:px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-medium text-sm shadow-md shadow-emerald-500/20 transition-all flex items-center gap-2 shrink-0"
                     >
                       <span>🎯</span>
                       <span>Take Quiz</span>
@@ -983,7 +990,7 @@ The AI will transform it into an engaging, interactive lesson with:
                   )}
                   <button
                     onClick={handleClear}
-                    className="px-4 py-2 rounded-xl bg-stone-100 dark:bg-stone-700 text-stone-600 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-stone-600 font-medium text-sm transition-colors flex items-center gap-2"
+                    className="px-3 sm:px-4 py-2 rounded-xl bg-stone-100 dark:bg-stone-700 text-stone-600 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-stone-600 font-medium text-sm transition-colors flex items-center gap-2 shrink-0"
                   >
                     <span>←</span>
                     <span>New Lesson</span>
@@ -1049,7 +1056,7 @@ The AI will transform it into an engaging, interactive lesson with:
 
               {/* Current Slide */}
               {lessonResult.slides[currentSlide] && (
-                <div className={`rounded-3xl p-6 sm:p-8 shadow-xl transition-all duration-300 border ${
+                <div className={`rounded-3xl p-4 sm:p-8 shadow-xl transition-all duration-300 border min-w-0 overflow-hidden ${
                   lessonStyle === 'stepByStep' 
                     ? 'bg-white dark:bg-stone-800 border-l-4 border-l-blue-500 dark:border-l-blue-400' 
                     : lessonStyle === 'story'
@@ -1093,10 +1100,10 @@ The AI will transform it into an engaging, interactive lesson with:
                   </div>
 
                   {/* Slide Content */}
-                  <div className={`prose prose-stone dark:prose-invert max-w-none mb-6 ${
+                  <div className={`prose prose-stone dark:prose-invert max-w-none mb-6 min-w-0 ${
                     lessonStyle === 'story' ? 'prose-lg' : ''
                   }`}>
-                    <p className={`text-stone-700 dark:text-stone-300 leading-relaxed whitespace-pre-wrap ${
+                    <p className={`text-stone-700 dark:text-stone-300 leading-relaxed whitespace-pre-wrap break-words ${
                       lessonStyle === 'story' 
                         ? 'text-base sm:text-lg md:text-xl' 
                         : 'text-base sm:text-lg'
@@ -1159,11 +1166,11 @@ The AI will transform it into an engaging, interactive lesson with:
               )}
 
               {/* Navigation Buttons */}
-              <div className="flex items-center justify-between mt-6">
+              <div className="flex flex-wrap items-center justify-between gap-3 mt-6">
                 <button
                   onClick={prevSlide}
                   disabled={currentSlide === 0}
-                  className={`px-6 py-3 rounded-xl font-semibold text-sm transition-all flex items-center gap-2 ${
+                  className={`px-4 sm:px-6 py-3 rounded-xl font-semibold text-sm transition-all flex items-center gap-2 shrink-0 ${
                     currentSlide === 0
                       ? 'bg-stone-100 dark:bg-stone-800 text-stone-400 dark:text-stone-600 cursor-not-allowed'
                       : 'bg-white dark:bg-stone-700 text-stone-700 dark:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-600 border border-stone-200 dark:border-stone-600 shadow-sm'
@@ -1177,7 +1184,7 @@ The AI will transform it into an engaging, interactive lesson with:
                   lessonResult.quizBank && lessonResult.quizBank.length > 0 ? (
                     <button
                       onClick={startQuiz}
-                      className="px-6 py-3 rounded-xl font-semibold text-sm bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white shadow-lg shadow-emerald-500/30 transition-all flex items-center gap-2"
+                      className="px-4 sm:px-6 py-3 rounded-xl font-semibold text-sm bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white shadow-lg shadow-emerald-500/30 transition-all flex items-center gap-2 shrink-0"
                     >
                       <span>Take the Quiz!</span>
                       <span>🎯</span>
@@ -1185,7 +1192,7 @@ The AI will transform it into an engaging, interactive lesson with:
                   ) : (
                     <button
                       onClick={() => onNavigate('quiz-generator')}
-                      className="px-6 py-3 rounded-xl font-semibold text-sm bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white shadow-lg shadow-emerald-500/30 transition-all flex items-center gap-2"
+                      className="px-4 sm:px-6 py-3 rounded-xl font-semibold text-sm bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white shadow-lg shadow-emerald-500/30 transition-all flex items-center gap-2 shrink-0"
                     >
                       <span>Create a Quiz</span>
                       <span>🎯</span>
@@ -1194,7 +1201,7 @@ The AI will transform it into an engaging, interactive lesson with:
                 ) : (
                   <button
                     onClick={nextSlide}
-                    className="px-6 py-3 rounded-xl font-semibold text-sm bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white shadow-lg shadow-violet-500/30 transition-all flex items-center gap-2"
+                    className="px-4 sm:px-6 py-3 rounded-xl font-semibold text-sm bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white shadow-lg shadow-violet-500/30 transition-all flex items-center gap-2 shrink-0"
                   >
                     <span>Next</span>
                     <span>→</span>

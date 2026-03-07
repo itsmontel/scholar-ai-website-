@@ -247,7 +247,7 @@ const HumanizerPage = ({ onNavigate, user, onLogout }: HumanizerPageProps) => {
                   </span>
                 ) : (
                   <span className="inline-flex items-center px-2.5 sm:px-3 py-1 bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300 rounded-full text-[10px] sm:text-xs font-semibold">
-                    1,000 words/month free
+                    5,000 words/month free
                   </span>
                 )}
               </div>
@@ -703,7 +703,7 @@ const HumanizerPage = ({ onNavigate, user, onLogout }: HumanizerPageProps) => {
             
             <h3 className="text-2xl font-bold text-stone-800 mb-2">Almost There!</h3>
             <p className="text-stone-500 dark:text-stone-400 mb-6">
-              Sign up for free to humanize your text. Get <span className="font-semibold text-violet-600 dark:text-violet-400">1,000 words/month</span> completely free!
+              Sign up for free to humanize your text. Get <span className="font-semibold text-violet-600 dark:text-violet-400">5,000 words/month</span> completely free!
             </p>
             
             <div className="space-y-3">

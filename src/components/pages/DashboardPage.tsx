@@ -829,7 +829,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
   const canUseQuiz = isPaidUser || (isFreeUser && (quizUsage.generationLimit === -1 || quizUsage.generationsRemaining > 0));
   const quizExhausted = isFreeUser && quizUsage.generationLimit !== -1 && quizUsage.generationsRemaining <= 0;
   
-  const humanizeSummarizeMaxWords = isFreeUser ? 1000 : 5000;
+  const humanizeSummarizeMaxWords = isFreeUser ? 5000 : 5000;
 
   const isTextValid = () => {
     if (mode === 'citations') return inputText.trim().length > 0;
@@ -1999,7 +1999,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
             <div className="mb-6 sm:mb-8">
               <div className="flex items-start sm:items-center justify-between flex-col sm:flex-row gap-3 sm:gap-4">
                 <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-5 flex-1 min-w-0">
-                  <div className="flex-shrink-0">
+                  <div className="hidden sm:block flex-shrink-0">
                     <ScholarMascot size={100} animated={false} pose="default" />
                   </div>
                   <div className="flex-1 min-w-0 text-center sm:text-left">
@@ -2665,7 +2665,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                   <span className="text-xl sm:text-2xl">📝</span>
                   <div className="min-w-0">
                     <p className="text-teal-800 dark:text-teal-200 font-medium text-xs sm:text-sm">
-                      {usageStats.plan === 'free' ? `Free: 1,000 words/mo • ${getResetsInText()}` : 'Starter: 999,999 words/mo'}
+                      {usageStats.plan === 'free' ? `Free: 5,000 words/mo • ${getResetsInText()}` : 'Starter: 999,999 words/mo'}
                       {!isPremiumUser && ' • Bullet + Medium'}
                     </p>
                     <p className="text-teal-600 dark:text-teal-400 text-[10px] sm:text-xs mt-0.5 line-clamp-2">Upgrade for all styles, lengths & premium AI</p>

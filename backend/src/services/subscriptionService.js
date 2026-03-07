@@ -13,8 +13,8 @@ const PLAN_LIMITS = {
     documentsPerMonth: 3,
     analysesPerMonth: 3,
     citationSearchesPerMonth: 2,
-    humanizeWordsPerMonth: 1000,
-    summarizeWordsPerMonth: 1000,
+    humanizeWordsPerMonth: 5000,
+    summarizeWordsPerMonth: 5000,
     quizWordsPerMonth: 15000,
     quizGenerationsPerMonth: 3,
     quizMaxWordsPerGeneration: 5000,
@@ -31,7 +31,7 @@ const PLAN_LIMITS = {
   starter: {
     documentsPerMonth: -1,
     analysesPerMonth: 999,
-    citationSearchesPerMonth: 999,
+    citationSearchesPerMonth: 99,
     humanizeWordsPerMonth: 999999,
     summarizeWordsPerMonth: 999999,
     quizWordsPerMonth: 999999,
@@ -51,7 +51,7 @@ const PLAN_LIMITS = {
   premium: {
     documentsPerMonth: -1,
     analysesPerMonth: 999,
-    citationSearchesPerMonth: 999,
+    citationSearchesPerMonth: 199,
     humanizeWordsPerMonth: 999999,
     summarizeWordsPerMonth: 999999,
     quizWordsPerMonth: 999999,

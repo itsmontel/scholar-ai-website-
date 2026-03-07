@@ -35,7 +35,7 @@ const SummarizerPage = ({ onNavigate, user, onLogout }: SummarizerPageProps) => 
 
   const isPremiumUser = user && (user.subscription_plan === 'premium' || user.plan === 'premium');
   const isFreeUser = !user || (user?.subscription_plan !== 'starter' && user?.subscription_plan !== 'premium' && user?.plan !== 'starter' && user?.plan !== 'premium');
-  const maxWords = isFreeUser ? 1000 : 5000;
+  const maxWords = isFreeUser ? 5000 : 5000;
   const userPlan = user?.subscription_plan || user?.plan || 'free';
   const wordCount = inputText.trim().split(/\s+/).filter(Boolean).length;
 
@@ -524,7 +524,7 @@ const SummarizerPage = ({ onNavigate, user, onLogout }: SummarizerPageProps) => 
                     <span className="text-2xl">📝</span>
                     <div>
                       <p className="text-emerald-800 dark:text-emerald-200 font-medium text-sm">
-                        {userPlan === 'free' ? `Free plan: 1,000 words/month • Bullet + Medium only • ${getResetsInText()}` : 'Starter plan: 999,999 words/month • Bullet + Medium only'}
+                        {userPlan === 'free' ? `Free plan: 5,000 words/month • Bullet + Medium only • ${getResetsInText()}` : 'Starter plan: 999,999 words/month • Bullet + Medium only'}
                       </p>
                       <p className="text-emerald-600 dark:text-emerald-400 text-xs mt-0.5">Upgrade to Premium for all styles, lengths, and our premium AI model</p>
                     </div>

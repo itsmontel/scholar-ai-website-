@@ -148,7 +148,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
   const faqs = [
     {
       question: "What is the AI Humanizer and how does it work?",
-      answer: "The AI Humanizer transforms text from ChatGPT, Claude, Gemini, and other AI models into natural human-sounding writing. It bypasses AI detection tools like Turnitin and GPTZero while preserving your original meaning. Free users get 1,000 words/month."
+      answer: "The AI Humanizer transforms text from ChatGPT, Claude, Gemini, and other AI models into natural human-sounding writing. It bypasses AI detection tools like Turnitin and GPTZero while preserving your original meaning. Free users get 5,000 words/month."
     },
     {
       question: "Can I create study quizzes from my notes?",
@@ -168,7 +168,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
     },
     {
       question: "What's the difference between Free, Starter, and Premium?",
-      answer: "Free includes 3 documents, 3 essay analyses, 3 study tool generations (quiz/flashcards/crossword), and 1,000 Humanizer/Summarizer words per month. Starter unlocks unlimited study tools, 999 essay analyses, 999,999 Humanizer/Summarizer words, all citation styles, and PDF/Word export. Premium adds our top-tier premium AI model, all quiz types and difficulty levels, all summarizer styles and lengths, advanced essay analysis, and priority support."
+      answer: "Free includes 3 documents, 3 essay analyses, 3 study tool generations (quiz/flashcards/crossword), 5,000 Humanizer/Summarizer words per month, and 2 citation searches. Starter unlocks unlimited study tools, 999 essay analyses, 999,999 Humanizer/Summarizer words, 99 citation searches per month, all citation styles, and PDF/Word export. Premium adds 199 citation searches per month, our top-tier premium AI model, all quiz types and difficulty levels, all summarizer styles and lengths, advanced essay analysis, and priority support."
     },
     {
       question: "How do I add friends and share my study materials?",
@@ -2824,7 +2824,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                 <svg className="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                 </svg>
-                <span className="text-green-700 text-sm font-medium">1,000 words free/month</span>
+                <span className="text-green-700 text-sm font-medium">5,000 words free/month</span>
               </div>
             </div>
 

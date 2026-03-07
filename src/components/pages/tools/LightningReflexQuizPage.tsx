@@ -77,11 +77,6 @@ const ROUND_DELAY_MS = 0;
 const CRATER_SIZE = 96;
 const LANE_CENTERS = [14, 37, 63, 86];
 
-const TOPIC_SUGGESTIONS = [
-  'Capital Cities', 'The Solar System', 'Human Body', 'World History',
-  'Famous Scientists', 'English Vocabulary', 'Math Basics', 'Geography',
-];
-
 /* ────────────────────── Helpers ────────────────────── */
 
 function shuffle<T>(arr: T[]): T[] {
@@ -514,7 +509,7 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
     setLoadedFromSavedGame(false);
     try {
       const qs = await fetchQuestions();
-      if (!qs || qs.length === 0) throw new Error('No questions generated. Try a different topic.');
+      if (!qs || qs.length === 0) throw new Error('No questions generated. Try different notes.');
       questionsRef.current = qs;
       setQuestions(qs);
       resetGameState();
@@ -703,12 +698,9 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
         <div className="bg-white rounded-3xl shadow-lg shadow-stone-200/50 border border-stone-200/60 overflow-hidden">
           <div className="p-6 sm:p-8 space-y-6">
             <div className="flex flex-wrap gap-2">
-              {(['notes', 'topic', 'play-for-fun', 'mental-math', 'capital-cities', 'flags'] as const).map(mode => {
-                const isLocked = (mode === 'notes' || mode === 'topic') && !canUseStudyTools;
-                const labels: Record<InputMode, string> = {
-                  'topic': '📝 Topic', 'notes': '📄 Study Notes', 'play-for-fun': '🎮 Play for Fun',
-                  'mental-math': '🔢 Mental Math', 'capital-cities': '🏛️ Capitals', 'flags': '🏳️ Flags',
-                };
+              {(['notes', 'play-for-fun'] as const).map(mode => {
+                const isLocked = mode === 'notes' && !canUseStudyTools;
+                const labels = { 'notes': '📄 Study Notes', 'play-for-fun': '🎮 Play for Fun' };
                 return (
                   <button
                     key={mode}
@@ -719,14 +711,14 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
                       }
                       setInputMode(mode);
                     }}
-                    className={`flex-1 min-w-[100px] py-3 rounded-lg text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-1 ${
+                    className={`flex-1 min-w-[120px] py-3 rounded-lg text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-1 ${
                       inputMode === mode
                         ? 'bg-white text-stone-900 shadow-md border border-stone-200/80'
                         : isLocked
                           ? 'text-stone-400 hover:text-stone-600 hover:bg-stone-100/50'
                           : 'text-stone-500 hover:text-stone-700 hover:bg-stone-100/50'
                     }`}
-                    title={isLocked ? (user ? 'Upgrade to Starter or Premium to use Study Notes and Topic' : 'Sign up for Starter or Premium to use Study Notes and Topic') : undefined}
+                    title={isLocked ? (user ? 'Upgrade to Starter or Premium to use Study Notes' : 'Sign up for Starter or Premium to use Study Notes') : undefined}
                   >
                     {isLocked && <span className="text-xs">🔒</span>}
                     {labels[mode]}
@@ -735,81 +727,42 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
               })}
             </div>
 
-            {inputMode === 'mental-math' ? (
+            {inputMode === 'play-for-fun' ? (
               <div>
-                <p className="text-stone-600 text-sm mb-4">Free mental math: add, subtract, multiply, divide. Up to 12×12. No login needed!</p>
-                <button
-                  onClick={handleStartMentalMath}
-                  className="w-full py-4 rounded-xl text-white font-bold text-base shadow-lg active:scale-[0.99] transition-all duration-200"
-                  style={{
-                    background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                    boxShadow: '0 10px 30px -5px rgba(5, 150, 105, 0.4)',
-                  }}
-                >
-                  🔢 Start Mental Math
-                </button>
-              </div>
-            ) : inputMode === 'capital-cities' ? (
-              <div>
-                <p className="text-stone-600 text-sm mb-4">Match countries to their capital cities. No login needed!</p>
-                <button
-                  onClick={handleStartCapitalCities}
-                  className="w-full py-4 rounded-xl text-white font-bold text-base shadow-lg active:scale-[0.99] transition-all duration-200"
-                  style={{
-                    background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
-                    boxShadow: '0 10px 30px -5px rgba(124, 58, 237, 0.4)',
-                  }}
-                >
-                  🏛️ Start Capital Cities
-                </button>
-              </div>
-            ) : inputMode === 'flags' ? (
-              <div>
-                <p className="text-stone-600 text-sm mb-4">Identify countries by their flags. No login needed!</p>
-                <button
-                  onClick={handleStartFlags}
-                  className="w-full py-4 rounded-xl text-white font-bold text-base shadow-lg active:scale-[0.99] transition-all duration-200"
-                  style={{
-                    background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
-                    boxShadow: '0 10px 30px -5px rgba(217, 119, 6, 0.4)',
-                  }}
-                >
-                  🏳️ Start Flags
-                </button>
-              </div>
-            ) : inputMode === 'play-for-fun' ? (
-              <div>
-                <p className="text-stone-600 text-sm mb-4">Blast craters with trivia questions. No setup needed, just play!</p>
-                <button
-                  onClick={handleStartPlayForFun}
-                  className="w-full py-4 rounded-xl text-white font-bold text-base shadow-lg active:scale-[0.99] transition-all duration-200"
-                  style={{
-                    background: 'linear-gradient(135deg, #3b82f6 0%, #6366f1 100%)',
-                    boxShadow: '0 10px 30px -5px rgba(99, 102, 241, 0.4)',
-                  }}
-                >
-                  🎮 Play for Fun
-                </button>
-              </div>
-            ) : inputMode === 'topic' ? (
-              <div>
-                <label className="block text-sm font-medium text-stone-600 mb-2">What do you want to study?</label>
-                <input
-                  type="text"
-                  value={inputText}
-                  onChange={e => setInputText(e.target.value)}
-                  onKeyDown={e => e.key === 'Enter' && handleStartGame()}
-                  placeholder="e.g. Capital Cities, WW2, Biology..."
-                  className="w-full px-4 py-3.5 rounded-xl border border-stone-200 bg-stone-50/80 text-stone-800 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-blue-500/25 focus:border-blue-400 focus:bg-white transition-all text-base"
-                />
-                <p className="mt-2 text-xs text-stone-400 mb-3">Quick picks:</p>
-                <div className="flex flex-wrap gap-2">
-                  {TOPIC_SUGGESTIONS.map(t => (
-                    <button key={t} onClick={() => setInputText(t)}
-                      className="px-3.5 py-2 text-xs font-medium rounded-lg border border-stone-200 text-stone-600 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-colors">
-                      {t}
-                    </button>
-                  ))}
+                <p className="text-stone-600 text-sm mb-4">Pick a game mode. No setup needed, just play!</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <button
+                    onClick={handleStartPlayForFun}
+                    className="p-4 rounded-xl text-left border border-stone-200/80 hover:border-blue-300 hover:bg-blue-50/50 transition-all duration-200 group"
+                  >
+                    <span className="text-2xl mb-2 block">📚</span>
+                    <span className="font-bold text-stone-800 group-hover:text-blue-700">General Knowledge</span>
+                    <span className="text-xs text-stone-500 block mt-1">Trivia questions across many topics</span>
+                  </button>
+                  <button
+                    onClick={handleStartMentalMath}
+                    className="p-4 rounded-xl text-left border border-stone-200/80 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all duration-200 group"
+                  >
+                    <span className="text-2xl mb-2 block">🔢</span>
+                    <span className="font-bold text-stone-800 group-hover:text-emerald-700">Mental Math</span>
+                    <span className="text-xs text-stone-500 block mt-1">Add, subtract, multiply, divide</span>
+                  </button>
+                  <button
+                    onClick={handleStartCapitalCities}
+                    className="p-4 rounded-xl text-left border border-stone-200/80 hover:border-violet-300 hover:bg-violet-50/50 transition-all duration-200 group"
+                  >
+                    <span className="text-2xl mb-2 block">🏛️</span>
+                    <span className="font-bold text-stone-800 group-hover:text-violet-700">Capitals</span>
+                    <span className="text-xs text-stone-500 block mt-1">Match countries to capital cities</span>
+                  </button>
+                  <button
+                    onClick={handleStartFlags}
+                    className="p-4 rounded-xl text-left border border-stone-200/80 hover:border-amber-300 hover:bg-amber-50/50 transition-all duration-200 group"
+                  >
+                    <span className="text-2xl mb-2 block">🏳️</span>
+                    <span className="font-bold text-stone-800 group-hover:text-amber-700">Flags</span>
+                    <span className="text-xs text-stone-500 block mt-1">Identify countries by their flags</span>
+                  </button>
                 </div>
               </div>
             ) : (
@@ -835,7 +788,7 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
               </div>
             )}
 
-            {inputMode !== 'play-for-fun' && inputMode !== 'mental-math' && inputMode !== 'capital-cities' && inputMode !== 'flags' && (
+            {inputMode === 'notes' && (
               <>
                 <button
                   onClick={handleStartGame}
@@ -941,7 +894,7 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
           onClick={() => { setGameState('menu'); setInputText(''); setQuestions([]); questionsRef.current = []; setLoadedFromSavedGame(false); }}
           className="mt-4 text-sm text-stone-500 hover:text-stone-700 font-medium"
         >
-          ← Choose different topic
+          ← Back to menu
         </button>
       </div>
     </div>

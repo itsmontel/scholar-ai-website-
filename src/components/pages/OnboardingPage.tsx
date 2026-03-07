@@ -231,7 +231,7 @@ const OnboardingPage = ({ onNavigate, user, onComplete, onUserUpdate }: Onboardi
     'Unlimited essay analyses',
     'Unlimited quizzes, flashcards & crosswords',
     '999,999 words for Humanizer & Summarizer',
-    '999 citation searches',
+    '99 citation searches per month',
     'All citation styles (APA, MLA, Chicago, Harvard...)',
     'Export to PDF & Word',
     'Study tools history',

@@ -138,6 +138,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
   const [shareError, setShareError] = useState<string | null>(null);
   const [loadingFriends, setLoadingFriends] = useState(false);
   const [exportDropdownToolId, setExportDropdownToolId] = useState<string | null>(null);
+  const [createDropdownOpen, setCreateDropdownOpen] = useState(false);
 
   const userPlan = user?.plan || user?.subscription_plan || 'free';
   const isPaidUser = userPlan === 'starter' || userPlan === 'premium';
@@ -162,6 +163,14 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
     document.addEventListener('click', handleClick);
     return () => document.removeEventListener('click', handleClick);
   }, [exportDropdownToolId]);
+
+  // Close create dropdown when clicking outside
+  useEffect(() => {
+    if (!createDropdownOpen) return;
+    const handleClick = () => setCreateDropdownOpen(false);
+    document.addEventListener('click', handleClick);
+    return () => document.removeEventListener('click', handleClick);
+  }, [createDropdownOpen]);
 
   const fetchStudyToolHistory = async () => {
     try {
@@ -283,9 +292,13 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
     }
   };
 
-  const startNewStudyTool = () => {
-    onNavigate('quiz-generator');
-  };
+  const createOptions = [
+    { id: 'quiz', label: 'Quiz', icon: '📝', page: 'quiz-generator' as const },
+    { id: 'flashcards', label: 'Flashcards', icon: '🃏', page: 'flashcard-generator' as const },
+    { id: 'crossword', label: 'Crosswords', icon: '🧩', page: 'crossword-generator' as const },
+    { id: 'blast', label: 'Blast', icon: '💥', page: 'crater-blast' as const },
+    { id: 'lessons', label: 'Lessons', icon: '🎓', page: 'interactive-lesson' as const },
+  ];
 
   const handleDeleteClick = (quizId: string) => {
     setDeleteConfirmId(quizId);
@@ -965,12 +978,12 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
   };
 
   return (
-    <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%)' }}>
+    <div className="min-h-screen overflow-x-hidden" style={{ background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%)' }}>
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="quiz-history" />
 
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12 w-full min-w-0">
         {/* Hero - compact and sleek */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 mb-10">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-6 mb-10">
           <div>
             <div className="flex items-center gap-3 mb-2">
               <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl bg-gradient-to-br from-violet-500 to-purple-600 shadow-lg shadow-violet-500/30">
@@ -1010,15 +1023,32 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
               </div>
             );
           })()}
-          <button
-            onClick={startNewStudyTool}
-            className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold text-white bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 transition-all duration-200 hover:shadow-lg hover:shadow-violet-500/25 hover:-translate-y-0.5 shrink-0"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
-            Create New
-          </button>
+          <div className="relative w-full sm:w-auto sm:shrink-0" onClick={(e) => e.stopPropagation()}>
+            <button
+              onClick={() => setCreateDropdownOpen(!createDropdownOpen)}
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold text-white bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 transition-all duration-200 hover:shadow-lg hover:shadow-violet-500/25 hover:-translate-y-0.5"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              Create New
+              <svg className={`w-4 h-4 transition-transform ${createDropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+            </button>
+            {createDropdownOpen && (
+              <div className="absolute right-0 top-full mt-1.5 w-48 py-1 bg-white dark:bg-stone-800 rounded-xl shadow-xl border border-stone-200 dark:border-stone-600 z-[100]">
+                {createOptions.map((opt) => (
+                  <button
+                    key={opt.id}
+                    onClick={() => { setCreateDropdownOpen(false); onNavigate(opt.page); }}
+                    className="w-full px-4 py-2.5 text-left text-sm text-stone-700 dark:text-stone-200 hover:bg-stone-50 dark:hover:bg-stone-700 flex items-center gap-2 rounded-lg transition-colors"
+                  >
+                    <span>{opt.icon}</span>
+                    <span>{opt.label}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Crater Blast Banner */}
@@ -1027,18 +1057,19 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
           className="w-full mb-8 group relative overflow-hidden rounded-2xl border border-indigo-200/60 transition-all hover:shadow-lg hover:-translate-y-0.5"
           style={{ background: 'linear-gradient(135deg, #4f46e5 0%, #6366f1 40%, #818cf8 100%)' }}
         >
+          <span className="absolute top-1.5 right-2 sm:top-2 sm:right-2 px-1.5 py-0.5 text-[9px] sm:text-[10px] font-bold rounded-md bg-white/90 text-indigo-600 shadow-md z-10">NEW</span>
           <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 80% 30%, rgba(255,255,255,0.3) 0%, transparent 60%)' }} />
-          <div className="relative px-5 py-4 flex items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <div className="w-11 h-11 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center text-2xl shrink-0">
+          <div className="relative px-4 sm:px-5 py-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4">
+            <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+              <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center text-xl sm:text-2xl shrink-0">
                 💥
               </div>
-              <div className="text-left">
+              <div className="text-left min-w-0">
                 <div className="text-white font-bold text-base">Crater Blast</div>
-                <div className="text-indigo-200 text-sm">AI quiz shooter — blast the correct crater before it lands</div>
+                <div className="text-indigo-200 text-xs sm:text-sm truncate">AI quiz shooter — blast the correct crater before it lands</div>
               </div>
             </div>
-            <div className="shrink-0 px-4 py-2 rounded-xl bg-white/20 text-white text-sm font-semibold group-hover:bg-white/30 transition-colors">
+            <div className="shrink-0 px-4 py-2 rounded-xl bg-white/20 text-white text-sm font-semibold group-hover:bg-white/30 transition-colors text-center">
               Play Now →
             </div>
           </div>
@@ -1158,15 +1189,32 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                 ? 'Create quizzes, flashcards, or crosswords from your notes to get started.'
                 : `Create your first ${filter === 'quiz' ? 'quiz' : filter} to see it here.`}
             </p>
-            <button
-              onClick={startNewStudyTool}
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-white bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 transition-all hover:shadow-lg hover:shadow-violet-500/25"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
-              Create Study Tool
-            </button>
+            <div className="relative inline-block" onClick={(e) => e.stopPropagation()}>
+              <button
+                onClick={() => setCreateDropdownOpen(!createDropdownOpen)}
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-white bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 transition-all hover:shadow-lg hover:shadow-violet-500/25"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+                Create New
+                <svg className={`w-4 h-4 transition-transform ${createDropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+              </button>
+              {createDropdownOpen && (
+                <div className="absolute left-1/2 -translate-x-1/2 top-full mt-1.5 w-48 py-1 bg-white dark:bg-stone-800 rounded-xl shadow-xl border border-stone-200 dark:border-stone-600 z-[100]">
+                  {createOptions.map((opt) => (
+                    <button
+                      key={opt.id}
+                      onClick={() => { setCreateDropdownOpen(false); onNavigate(opt.page); }}
+                      className="w-full px-4 py-2.5 text-left text-sm text-stone-700 dark:text-stone-200 hover:bg-stone-50 dark:hover:bg-stone-700 flex items-center gap-2 rounded-lg transition-colors"
+                    >
+                      <span>{opt.icon}</span>
+                      <span>{opt.label}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         ) : (
           <>
@@ -1323,13 +1371,13 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                         </div>
                       </div>
                       
-                      <div className="flex items-center gap-2 flex-wrap sm:justify-end">
+                      <div className="flex flex-wrap items-center gap-2 sm:justify-end">
                         <button
                           onClick={() => startStudyTool(tool)}
-                          className={`px-4 py-2.5 rounded-xl font-medium text-sm text-white bg-gradient-to-r ${styles.button} hover:opacity-90 transition-all flex items-center gap-2 shadow-md`}
+                          className={`px-3 sm:px-4 py-2.5 rounded-xl font-medium text-sm text-white bg-gradient-to-r ${styles.button} hover:opacity-90 transition-all flex items-center gap-1.5 sm:gap-2 shadow-md shrink-0`}
                         >
                           {tool.quiz_type === 'flashcards' ? 'Study' : tool.quiz_type === 'crossword' || tool.quiz_type === 'crater_blast' ? 'Play' : tool.quiz_type === 'lesson' ? 'Review' : 'Take Quiz'}
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                           </svg>
                         </button>
@@ -1338,7 +1386,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                           <div className="relative" onClick={(e) => e.stopPropagation()}>
                             <button
                               onClick={() => setExportDropdownToolId(exportDropdownToolId === tool.id ? null : tool.id)}
-                              className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-stone-100 text-stone-600 hover:bg-stone-200 hover:text-stone-800 transition-colors text-sm font-medium"
+                              className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-2.5 rounded-xl bg-stone-100 text-stone-600 hover:bg-stone-200 hover:text-stone-800 transition-colors text-sm font-medium shrink-0"
                               title="Export"
                             >
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
@@ -1389,13 +1437,13 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
 
                         <button
                           onClick={() => openShareModal(tool.id)}
-                          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-purple-500 text-white hover:bg-purple-600 font-medium text-sm shadow-sm hover:shadow transition-all"
+                          className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 rounded-xl bg-purple-500 text-white hover:bg-purple-600 font-medium text-sm shadow-sm hover:shadow transition-all shrink-0"
                           title="Share with friends"
                         >
                           <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
                           </svg>
-                          <span>Share with Friends</span>
+                          <span><span className="hidden sm:inline">Share with Friends</span><span className="sm:hidden">Share</span></span>
                         </button>
 
                         <button
