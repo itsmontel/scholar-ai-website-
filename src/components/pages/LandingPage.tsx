@@ -990,8 +990,11 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                   Together
                 </span>
               </h2>
-              <p className="text-base sm:text-lg text-stone-600 dark:text-stone-300 leading-relaxed mb-8 max-w-lg mx-auto lg:mx-0">
+              <p className="text-base sm:text-lg text-stone-600 dark:text-stone-300 leading-relaxed mb-4 max-w-lg mx-auto lg:mx-0">
                 Add friends with your unique code and share flashcards, quizzes, crosswords & notes in one tap. It delivers straight to their device — all they have to do is accept.
+              </p>
+              <p className="text-sm text-stone-500 dark:text-stone-400 leading-relaxed mb-8 max-w-lg mx-auto lg:mx-0">
+                To share: go to <strong>Study Tools</strong> in the dashboard or header → tap the <strong>Share</strong> button on any quiz, flashcard, or crossword → select your friend.
               </p>
               <div className="flex flex-wrap justify-center lg:justify-start gap-4 sm:gap-6 mb-8">
                 {[

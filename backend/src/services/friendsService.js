@@ -772,11 +772,13 @@ class FriendsService {
   async createShareNotification(recipientId, senderId, quiz, shareRequestId) {
     const { data: sender } = await this.supabase
       .from('users')
-      .select('first_name, last_name')
+      .select('username, first_name, last_name, name')
       .eq('id', senderId)
       .single();
 
-    const senderName = sender ? `${sender.first_name || ''} ${sender.last_name || ''}`.trim() || 'Someone' : 'Someone';
+    const senderName = sender
+      ? (sender.username ? `@${sender.username}` : `${sender.first_name || ''} ${sender.last_name || ''}`.trim() || sender.name || 'Someone')
+      : 'Someone';
     const itemType = this.getItemTypeName(quiz.quiz_type);
 
     await this.supabase
@@ -801,11 +803,13 @@ class FriendsService {
   async createShareAcceptedNotification(recipientId, accepterId, quiz) {
     const { data: accepter } = await this.supabase
       .from('users')
-      .select('first_name, last_name')
+      .select('username, first_name, last_name, name')
       .eq('id', accepterId)
       .single();
 
-    const accepterName = accepter ? `${accepter.first_name || ''} ${accepter.last_name || ''}`.trim() || 'Someone' : 'Someone';
+    const accepterName = accepter
+      ? (accepter.username ? `@${accepter.username}` : `${accepter.first_name || ''} ${accepter.last_name || ''}`.trim() || accepter.name || 'Someone')
+      : 'Someone';
     const itemType = this.getItemTypeName(quiz.quiz_type);
 
     await this.supabase

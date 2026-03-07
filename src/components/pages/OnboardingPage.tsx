@@ -4,9 +4,9 @@ import { setOnboardingDone, persistOnboardingToServer } from '../../utils/onboar
 
 interface OnboardingPageProps {
   onNavigate: (page: string) => void;
-  user?: { id: string; email: string; name?: string } | null;
+  user?: { id: string; email: string; name?: string; username?: string } | null;
   onComplete?: () => void;
-  onUserUpdate?: (updates: { name: string }) => void;
+  onUserUpdate?: (updates: { name?: string; username?: string }) => void;
 }
 
 type Step = 'profile' | 'grade' | 'referral' | 'goals' | 'features' | 'trial';
@@ -22,7 +22,9 @@ const STEP_MASCOT_POSES: Record<Step, 'default' | 'waving' | 'pointing' | 'celeb
 
 const OnboardingPage = ({ onNavigate, user, onComplete, onUserUpdate }: OnboardingPageProps) => {
   const [currentStep, setCurrentStep] = useState<Step>('profile');
-  const [username, setUsername] = useState(user?.name && !user.name.includes('@') ? user.name : '');
+  const [displayName, setDisplayName] = useState(user?.name || '');
+  const [username, setUsername] = useState(user?.username || '');
+  const [usernameError, setUsernameError] = useState<string | null>(null);
   const [dob, setDob] = useState('');
   const [selectedGrade, setSelectedGrade] = useState<string | null>(null);
   const [selectedReferral, setSelectedReferral] = useState<string | null>(null);
@@ -56,29 +58,57 @@ const OnboardingPage = ({ onNavigate, user, onComplete, onUserUpdate }: Onboardi
   const stepIndex = steps.indexOf(currentStep);
   const progress = ((stepIndex + 1) / steps.length) * 100;
 
-  const saveUsername = async () => {
-    if (!username.trim() || !user?.id) return;
+  const saveProfile = async (): Promise<boolean> => {
+    if (!user?.id) return false;
+    const token = localStorage.getItem('authToken');
     try {
-      const token = localStorage.getItem('authToken');
-      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/users/profile`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ name: username.trim() })
-      });
-      if (res.ok) {
-        onUserUpdate?.({ name: username.trim() });
+      if (displayName.trim()) {
+        const profileRes = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/users/profile`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ name: displayName.trim() })
+        });
+        if (profileRes.ok) {
+          onUserUpdate?.({ name: displayName.trim() });
+        }
       }
+      if (username.trim()) {
+        const normalized = username.trim().toLowerCase().replace(/\s/g, '_');
+        if (!/^[a-z0-9_]{3,30}$/.test(normalized)) {
+          setUsernameError('Username must be 3-30 characters, letters, numbers, and underscores only');
+          return false;
+        }
+        setUsernameError(null);
+        const usernameRes = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/users/username`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ username: normalized })
+        });
+        const usernameData = await usernameRes.json();
+        if (usernameRes.ok) {
+          onUserUpdate?.({ username: normalized });
+        } else {
+          setUsernameError(usernameData.message || 'Username is already taken');
+          return false;
+        }
+      }
+      return true;
     } catch (e) {
-      console.error('Failed to save username:', e);
+      console.error('Failed to save profile:', e);
+      return false;
     }
   };
 
   const goNext = async () => {
-    if (currentStep === 'profile' && username.trim() && user?.id) {
-      await saveUsername();
+    if (currentStep === 'profile' && user?.id) {
+      const ok = await saveProfile();
+      if (!ok) return;
     }
     const nextIndex = stepIndex + 1;
     if (nextIndex < steps.length) {
@@ -121,8 +151,8 @@ const OnboardingPage = ({ onNavigate, user, onComplete, onUserUpdate }: Onboardi
 
     await markOnboardingComplete(user.id);
 
-    if (username.trim() && user.id) {
-      await saveUsername();
+    if (user.id) {
+      await saveProfile();
     }
 
     setIsLoadingCheckout(true);
@@ -160,8 +190,8 @@ const OnboardingPage = ({ onNavigate, user, onComplete, onUserUpdate }: Onboardi
   };
 
   const handleSkip = async () => {
-    if (username.trim() && user?.id) {
-      await saveUsername();
+    if (user?.id) {
+      await saveProfile();
     }
     if (user && onComplete) {
       await markOnboardingComplete(user.id);
@@ -239,7 +269,7 @@ const OnboardingPage = ({ onNavigate, user, onComplete, onUserUpdate }: Onboardi
       <div className="flex-1 flex items-center justify-center px-6 py-8">
         <div className="w-full max-w-lg">
 
-          {/* Step 1: Username & DOB */}
+          {/* Step 1: Name & DOB */}
           {currentStep === 'profile' && (
             <div className="animate-fadeIn">
               <div className="flex justify-center mb-6">
@@ -249,19 +279,35 @@ const OnboardingPage = ({ onNavigate, user, onComplete, onUserUpdate }: Onboardi
                 <h1 className="text-3xl text-stone-800 mb-2" style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 400 }}>
                   Set up your profile
                 </h1>
-                <p className="text-stone-500 text-lg">Choose a username and add your date of birth</p>
+                <p className="text-stone-500 text-lg">Your name, username, and date of birth</p>
               </div>
 
               <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-stone-600 mb-2">Your name</label>
+                  <input
+                    type="text"
+                    value={displayName}
+                    onChange={(e) => setDisplayName(e.target.value)}
+                    placeholder="e.g. Alex or Jordan"
+                    className="w-full px-5 py-4 rounded-2xl border-2 border-stone-200 bg-white focus:border-violet-500 focus:ring-0 transition-all text-base text-stone-700 placeholder-stone-400"
+                  />
+                </div>
                 <div>
                   <label className="block text-sm font-medium text-stone-600 mb-2">Username</label>
                   <input
                     type="text"
                     value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    placeholder="e.g. student123"
-                    className="w-full px-5 py-4 rounded-2xl border-2 border-stone-200 bg-white focus:border-violet-500 focus:ring-0 transition-all text-base text-stone-700 placeholder-stone-400"
+                    onChange={(e) => { setUsername(e.target.value); setUsernameError(null); }}
+                    placeholder="e.g. alex_student (letters, numbers, underscores)"
+                    className={`w-full px-5 py-4 rounded-2xl border-2 bg-white focus:ring-0 transition-all text-base text-stone-700 placeholder-stone-400 ${
+                      usernameError ? 'border-red-400 focus:border-red-500' : 'border-stone-200 focus:border-violet-500'
+                    }`}
                   />
+                  {usernameError && (
+                    <p className="mt-1.5 text-sm text-red-600">{usernameError}</p>
+                  )}
+                  <p className="mt-1 text-xs text-stone-400">Used in Settings, when sharing notes, and shown to friends</p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-stone-600 mb-2">Date of birth</label>
@@ -277,7 +323,7 @@ const OnboardingPage = ({ onNavigate, user, onComplete, onUserUpdate }: Onboardi
               <div className="mt-8 flex justify-center">
                 <button
                   onClick={goNext}
-                  disabled={!username.trim() || !dob}
+                  disabled={!displayName.trim() || !username.trim() || !dob || !!usernameError}
                   className="px-10 py-3 bg-stone-900 text-white rounded-full font-semibold text-base transition-all hover:bg-stone-800 disabled:opacity-30 disabled:cursor-not-allowed"
                 >
                   Next

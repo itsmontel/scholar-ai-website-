@@ -631,8 +631,12 @@ const AcademicAIApp = () => {
       onNavigate={navigateTo}
       user={user}
       onUserUpdate={(updates) => {
-        if (user && updates.name) {
-          const updatedUser = { ...user, name: updates.name };
+        if (user && (updates.name !== undefined || updates.username !== undefined)) {
+          const updatedUser = {
+            ...user,
+            ...(updates.name !== undefined && { name: updates.name }),
+            ...(updates.username !== undefined && { username: updates.username })
+          };
           setUser(updatedUser);
           localStorage.setItem('user', JSON.stringify(updatedUser));
         }

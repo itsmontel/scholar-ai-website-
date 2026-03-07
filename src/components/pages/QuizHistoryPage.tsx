@@ -67,6 +67,7 @@ interface Friend {
   last_name: string;
   email: string;
   friend_code: string;
+  username?: string;
 }
 
 type FilterType = 'all' | 'quiz' | 'flashcards' | 'crossword' | 'crater_blast';
@@ -368,6 +369,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
   };
 
   const getFriendName = (friend: Friend) => {
+    if (friend.username) return `@${friend.username}`;
     const name = `${friend.first_name || ''} ${friend.last_name || ''}`.trim();
     return name || friend.email || 'Unknown';
   };
@@ -1216,12 +1218,13 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
 
                         <button
                           onClick={() => openShareModal(tool.id)}
-                          className="p-2.5 rounded-xl bg-purple-50 text-purple-600 hover:bg-purple-100 hover:text-purple-700 transition-colors"
+                          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-purple-500 text-white hover:bg-purple-600 font-medium text-sm shadow-sm hover:shadow transition-all"
                           title="Share with friends"
                         >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
                           </svg>
+                          <span>Share with Friends</span>
                         </button>
 
                         <button
@@ -1505,7 +1508,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                               <span className={`font-semibold ${
                                 selectedFriendId === friend.id ? 'text-purple-700' : 'text-stone-600'
                               }`}>
-                                {(friend.first_name?.[0] || friend.email?.[0] || '?').toUpperCase()}
+                                {(friend.username?.[0] || friend.first_name?.[0] || friend.email?.[0] || '?').toUpperCase()}
                               </span>
                             </div>
                             <div className="flex-1 text-left">
