@@ -533,11 +533,11 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
             {/* Hero headline */}
             <h1 className="text-3xl sm:text-5xl lg:text-6xl xl:text-7xl font-extrabold text-stone-800 dark:text-stone-100 leading-[1.1] mb-4 sm:mb-6 tracking-tight" style={{ letterSpacing: '-0.03em' }}>
               Everything you need to<br />
-              <span className="bg-gradient-to-r from-blue-500 to-violet-500 bg-clip-text text-transparent">survive school</span>
+              <span className="bg-gradient-to-r from-blue-500 to-violet-500 bg-clip-text text-transparent">ace school</span>
             </h1>
             
             <p className="text-base sm:text-xl text-stone-600 dark:text-stone-400 mb-8 sm:mb-10 max-w-2xl mx-auto leading-relaxed px-2">
-              #1 alternative to Quizlet. Paste your notes. Get quizzes, flashcards & crosswords in seconds. Essay feedback, humanizer, we got you covered. 🙌
+              #1 Quizlet alternative. Paste notes. Get quizzes, flashcards & crosswords in seconds. Essay feedback, humanizer, we got you covered. 🙌
             </p>
             
             {/* Primary CTA - pill */}
