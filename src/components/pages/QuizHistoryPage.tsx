@@ -99,6 +99,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
   const [shareSuccess, setShareSuccess] = useState<string | null>(null);
   const [shareError, setShareError] = useState<string | null>(null);
   const [loadingFriends, setLoadingFriends] = useState(false);
+  const [exportDropdownToolId, setExportDropdownToolId] = useState<string | null>(null);
 
   const userPlan = user?.plan || user?.subscription_plan || 'free';
   const isPaidUser = userPlan === 'starter' || userPlan === 'premium';
@@ -115,6 +116,14 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
       setFilter(f as FilterType);
     }
   }, []);
+
+  // Close export dropdown when clicking outside
+  useEffect(() => {
+    if (!exportDropdownToolId) return;
+    const handleClick = () => setExportDropdownToolId(null);
+    document.addEventListener('click', handleClick);
+    return () => document.removeEventListener('click', handleClick);
+  }, [exportDropdownToolId]);
 
   const fetchStudyToolHistory = async () => {
     try {
@@ -1181,34 +1190,49 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                         </button>
 
                         {isPaidUser && tool.quiz_type !== 'crater_blast' ? (
-                          <>
+                          <div className="relative" onClick={(e) => e.stopPropagation()}>
                             <button
-                              onClick={() => {
-                                if (tool.quiz_type === 'flashcards') exportFlashcardsToPDF(tool);
-                                else if (tool.quiz_type === 'crossword') exportCrosswordToPDF(tool);
-                                else exportQuizToPDF(tool);
-                              }}
-                              className="p-2.5 rounded-xl bg-stone-100 text-stone-600 hover:bg-stone-200 hover:text-stone-800 transition-colors"
-                              title="Export PDF"
+                              onClick={() => setExportDropdownToolId(exportDropdownToolId === tool.id ? null : tool.id)}
+                              className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-stone-100 text-stone-600 hover:bg-stone-200 hover:text-stone-800 transition-colors text-sm font-medium"
+                              title="Export"
                             >
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                              Export
+                              <svg className={`w-4 h-4 transition-transform ${exportDropdownToolId === tool.id ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
                             </button>
-                            <button
-                              onClick={() => {
-                                if (tool.quiz_type === 'flashcards') exportFlashcardsToDOCX(tool);
-                                else if (tool.quiz_type === 'crossword') exportCrosswordToDOCX(tool);
-                                else exportQuizToDOCX(tool);
-                              }}
-                              className="p-2.5 rounded-xl bg-stone-100 text-stone-600 hover:bg-stone-200 hover:text-stone-800 transition-colors"
-                              title="Export Word"
-                            >
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                            </button>
-                          </>
+                            {exportDropdownToolId === tool.id && (
+                              <div className="absolute left-0 mt-1.5 w-40 py-1 bg-white rounded-xl shadow-lg border border-stone-200 z-50">
+                                <button
+                                  onClick={() => {
+                                    if (tool.quiz_type === 'flashcards') exportFlashcardsToPDF(tool);
+                                    else if (tool.quiz_type === 'crossword') exportCrosswordToPDF(tool);
+                                    else exportQuizToPDF(tool);
+                                    setExportDropdownToolId(null);
+                                  }}
+                                  className="w-full px-4 py-2.5 text-left text-sm text-stone-700 hover:bg-stone-50 flex items-center gap-2 rounded-t-xl"
+                                >
+                                  <svg className="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
+                                  PDF
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    if (tool.quiz_type === 'flashcards') exportFlashcardsToDOCX(tool);
+                                    else if (tool.quiz_type === 'crossword') exportCrosswordToDOCX(tool);
+                                    else exportQuizToDOCX(tool);
+                                    setExportDropdownToolId(null);
+                                  }}
+                                  className="w-full px-4 py-2.5 text-left text-sm text-stone-700 hover:bg-stone-50 flex items-center gap-2 rounded-b-xl"
+                                >
+                                  <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                                  Word
+                                </button>
+                              </div>
+                            )}
+                          </div>
                         ) : (
                           <button
                             onClick={() => setShowUpgradeModal(true)}
-                            className="p-2.5 rounded-xl bg-stone-100 text-stone-400 hover:bg-stone-200 transition-colors flex items-center gap-1.5 text-xs font-medium"
+                            className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-stone-100 text-stone-400 hover:bg-stone-200 transition-colors text-sm font-medium"
                             title="Upgrade to export"
                           >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>

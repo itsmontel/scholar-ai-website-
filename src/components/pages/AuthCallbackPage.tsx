@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { resolveOnboarding, setOnboardingDone } from '../../utils/onboarding';
+import { resolveOnboarding, setOnboardingDone, resolveTutorial, setTutorialDone } from '../../utils/onboarding';
 
 interface AuthCallbackPageProps {
   onNavigate: (page: string) => void;
@@ -30,7 +30,7 @@ const AuthCallbackPage: React.FC<AuthCallbackPageProps> = ({ onNavigate, onLogin
           window.history.replaceState(null, '', '/auth/callback');
 
           let onboardingCompleted = resolveOnboarding(userData.id, userData.onboardingCompleted);
-          let welcomeTutorialCompleted = userData.welcomeTutorialCompleted || false;
+          let welcomeTutorialCompleted = resolveTutorial(userData.id, userData.welcomeTutorialCompleted);
 
           try {
             const meRes = await fetch(
@@ -40,7 +40,7 @@ const AuthCallbackPage: React.FC<AuthCallbackPageProps> = ({ onNavigate, onLogin
             if (meRes.ok) {
               const meData = await meRes.json();
               onboardingCompleted = resolveOnboarding(userData.id, onboardingCompleted || meData.data?.user?.onboardingCompleted);
-              welcomeTutorialCompleted = welcomeTutorialCompleted || meData.data?.user?.welcomeTutorialCompleted || false;
+              welcomeTutorialCompleted = resolveTutorial(userData.id, welcomeTutorialCompleted || meData.data?.user?.welcomeTutorialCompleted);
               if (meData.data?.achievements) {
                 const { mergeFromServer } = await import('../../data/achievements');
                 mergeFromServer(
@@ -54,6 +54,7 @@ const AuthCallbackPage: React.FC<AuthCallbackPageProps> = ({ onNavigate, onLogin
           }
 
           if (onboardingCompleted) setOnboardingDone(userData.id);
+          if (welcomeTutorialCompleted) setTutorialDone(userData.id);
 
           const finalUser = { ...userData, onboardingCompleted, welcomeTutorialCompleted };
           localStorage.setItem('user', JSON.stringify(finalUser));

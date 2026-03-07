@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import ScholarMascot from './ScholarMascot';
+import { setTutorialDone, persistTutorialToServer, resolveTutorial } from '../../utils/onboarding';
 
 interface WelcomeTutorialProps {
   userName?: string;
@@ -92,24 +93,23 @@ const WelcomeTutorial = ({ userName, userId, tutorialCompletedFromServer, onComp
     }
   };
 
-  const handleComplete = () => {
+  const handleComplete = async () => {
     if (userId) {
-      localStorage.setItem(`writescholar_welcome_tutorial_completed_${userId}`, 'true');
-      // Persist to server for incognito/cross-device
-      const token = typeof localStorage !== 'undefined' ? localStorage.getItem('authToken') : null;
-      if (token) {
-        fetch(`${(import.meta as any).env?.VITE_API_URL || 'http://localhost:3001/api'}/users/complete-tutorial`, {
-          method: 'POST',
-          headers: { 'Authorization': `Bearer ${token}` },
-        }).catch(() => {});
+      setTutorialDone(userId);
+      const stored = localStorage.getItem('user');
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          localStorage.setItem('user', JSON.stringify({ ...parsed, welcomeTutorialCompleted: true }));
+        } catch (_) {}
       }
+      await persistTutorialToServer();
     }
-    // Start dissolve animation
     setIsDissolving(true);
     setTimeout(() => {
       setIsVisible(false);
       onComplete();
-    }, 1000); // Match animation duration
+    }, 1000);
   };
 
   const handleSkip = () => {
@@ -117,7 +117,7 @@ const WelcomeTutorial = ({ userName, userId, tutorialCompletedFromServer, onComp
   };
 
   useEffect(() => {
-    if (userId && (tutorialCompletedFromServer || localStorage.getItem(`writescholar_welcome_tutorial_completed_${userId}`) === 'true')) {
+    if (userId && resolveTutorial(userId, tutorialCompletedFromServer)) {
       setIsVisible(false);
       onComplete();
     }

@@ -657,8 +657,8 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                     </div>
                   ))}
                 </div>
-                {/* Desktop cards - unchanged */}
-                <div className="hidden sm:flex gap-4 sm:transition-transform sm:duration-500 sm:ease-out w-[160%]" style={{ transform: `translateX(-${studyCardsCarouselIndex * 12.5}%)` }}>
+                {/* Desktop cards - extra padding-right so last card (Crossword) isn't cut off */}
+                <div className="hidden sm:flex gap-4 sm:transition-transform sm:duration-500 sm:ease-out w-[160%] pr-8 sm:pr-12" style={{ transform: `translateX(-${studyCardsCarouselIndex * 12.5}%)` }}>
                   {[
                     { title: 'Analyze', desc: 'Get professor-style feedback on your essays', onClick: () => setMode('analyze'), gradient: 'from-lime-50 to-emerald-50 dark:from-lime-900/20 dark:to-emerald-900/20', accentClasses: { title: 'text-lime-700 dark:text-lime-400', orb: 'bg-lime-400/20', iconBg: 'bg-lime-100 dark:bg-lime-900/50' }, borderColor: 'border-lime-100 dark:border-lime-800/50', icon: '📝', inner: (
                       <div className="w-full flex flex-col justify-between flex-1 gap-2">
@@ -924,7 +924,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
       <section className="relative py-12 sm:py-20 overflow-hidden bg-white dark:bg-stone-900">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_60%_at_50%_50%,rgba(99,102,241,0.07),transparent)] dark:bg-[radial-gradient(ellipse_70%_60%_at_50%_50%,rgba(139,92,246,0.06),transparent)]" />
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Mobile layout — badge above mascots, title/subtitle, share instructions */}
+          {/* Mobile layout — badge, title, video, share instructions */}
           <div className="lg:hidden flex flex-col items-center text-center">
             <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 rounded-full text-sm font-semibold mb-4">
               <span>👫</span>
@@ -939,25 +939,25 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
             <p className="text-sm text-stone-600 dark:text-stone-300 leading-relaxed mb-5 max-w-sm">
               Add friends with your unique code and share flashcards, quizzes, crosswords & notes in one tap.
             </p>
-            <div className="relative flex items-center justify-center mb-6 w-full max-w-[280px]">
+            <div className="relative flex items-center justify-center mb-4 w-full max-w-[280px]">
               <div className="absolute inset-0 bg-gradient-to-r from-indigo-400/10 to-violet-400/10 rounded-3xl blur-3xl" />
-              <DualMascot size={240} />
+              <DualMascot size={200} />
             </div>
-            <p className="text-xs text-stone-500 dark:text-stone-400 mb-5 px-2 leading-relaxed">
+            <div className="relative w-full max-w-[320px] rounded-2xl overflow-hidden border-2 border-stone-200/80 dark:border-stone-700/60 shadow-xl mb-6 bg-stone-900">
+              <video
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="w-full aspect-video object-cover"
+                aria-label="How to share study tools with friends"
+              >
+                <source src="/friendsvid.mp4" type="video/mp4" />
+              </video>
+            </div>
+            <p className="text-xs text-stone-500 dark:text-stone-400 mb-6 px-2 leading-relaxed">
               To share: go to <strong>Study Tools</strong> in the dashboard or header → tap the <strong>Share</strong> button on any quiz, flashcard, or crossword → select your friend.
             </p>
-            <div className="flex flex-wrap justify-center gap-6 mb-6">
-              {[
-                { value: '1 tap', label: 'to share anything' },
-                { value: 'Instant', label: 'delivery to friends' },
-                { value: 'Free', label: 'forever for core sharing' },
-              ].map((s) => (
-                <div key={s.label} className="text-center">
-                  <div className="text-lg font-extrabold bg-gradient-to-r from-indigo-600 to-violet-600 dark:from-indigo-400 dark:to-violet-400 bg-clip-text text-transparent">{s.value}</div>
-                  <div className="text-xs text-stone-500 dark:text-stone-400 font-medium">{s.label}</div>
-                </div>
-              ))}
-            </div>
             <div className="flex flex-col gap-3 w-full max-w-xs">
               <button
                 onClick={() => onNavigate('signup')}
@@ -977,7 +977,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
             </div>
           </div>
 
-          {/* Desktop layout — unchanged */}
+          {/* Desktop layout — text left, video right */}
           <div className="hidden lg:grid lg:grid-cols-2 gap-8 items-center">
             <div className="text-center lg:text-left order-2 lg:order-1 pb-8 lg:pb-0">
               <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 rounded-full text-sm font-semibold mb-5">
@@ -993,21 +993,9 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
               <p className="text-base sm:text-lg text-stone-600 dark:text-stone-300 leading-relaxed mb-4 max-w-lg mx-auto lg:mx-0">
                 Add friends with your unique code and share flashcards, quizzes, crosswords & notes in one tap. It delivers straight to their device — all they have to do is accept.
               </p>
-              <p className="text-sm text-stone-500 dark:text-stone-400 leading-relaxed mb-8 max-w-lg mx-auto lg:mx-0">
+              <p className="text-sm text-stone-500 dark:text-stone-400 leading-relaxed mb-6 max-w-lg mx-auto lg:mx-0">
                 To share: go to <strong>Study Tools</strong> in the dashboard or header → tap the <strong>Share</strong> button on any quiz, flashcard, or crossword → select your friend.
               </p>
-              <div className="flex flex-wrap justify-center lg:justify-start gap-4 sm:gap-6 mb-8">
-                {[
-                  { value: '1 tap', label: 'to share anything' },
-                  { value: 'Instant', label: 'delivery to friends' },
-                  { value: 'Free', label: 'forever for core sharing' },
-                ].map((s) => (
-                  <div key={s.label} className="text-center">
-                    <div className="text-xl sm:text-2xl font-extrabold bg-gradient-to-r from-indigo-600 to-violet-600 dark:from-indigo-400 dark:to-violet-400 bg-clip-text text-transparent">{s.value}</div>
-                    <div className="text-xs sm:text-sm text-stone-500 dark:text-stone-400 font-medium">{s.label}</div>
-                  </div>
-                ))}
-              </div>
               <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
                 <button
                   onClick={() => onNavigate('signup')}
@@ -1026,9 +1014,23 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                 </button>
               </div>
             </div>
-            <div className="relative flex items-center justify-center order-1 lg:order-2">
-              <div className="absolute inset-0 bg-gradient-to-r from-indigo-400/10 to-violet-400/10 rounded-3xl blur-3xl" />
-              <DualMascot size={380} />
+            <div className="relative flex flex-col items-center justify-center order-1 lg:order-2 gap-6">
+              <div className="relative flex items-center justify-center">
+                <div className="absolute inset-0 bg-gradient-to-r from-indigo-400/10 to-violet-400/10 rounded-3xl blur-3xl" />
+                <DualMascot size={280} />
+              </div>
+              <div className="relative w-full max-w-lg rounded-2xl overflow-hidden border-2 border-stone-200/80 dark:border-stone-700/60 shadow-xl bg-stone-900">
+                <video
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  className="w-full aspect-video object-cover"
+                  aria-label="How to share study tools with friends"
+                >
+                  <source src="/friendsvid.mp4" type="video/mp4" />
+                </video>
+              </div>
             </div>
           </div>
         </div>
@@ -1081,7 +1083,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
       </section>
 
       {/* STUDY YOUR WAY - Tabbed video showcase */}
-      <section className="relative py-10 sm:py-20 bg-gradient-to-b from-stone-50 to-white dark:from-stone-900 dark:to-stone-900 max-lg:bg-gradient-to-b max-lg:from-indigo-50/40 max-lg:via-stone-50 max-lg:to-white dark:max-lg:from-indigo-950/20 dark:max-lg:via-stone-900 dark:max-lg:to-stone-900 overflow-hidden">
+      <section className="relative py-10 sm:py-20 bg-gradient-to-b from-indigo-50/30 via-stone-50 to-white dark:from-stone-900 dark:via-stone-900 dark:to-stone-900 overflow-hidden">
         {/* Floating illustrations */}
         <div className="absolute top-16 left-[6%] hidden lg:flex items-center gap-2 bg-white/90 dark:bg-stone-800/90 backdrop-blur rounded-2xl px-3 py-2 shadow-lg border border-lime-200/60 animate-float z-10">
           <span className="text-2xl">📝</span><span className="text-xs font-bold text-lime-600 dark:text-lime-400">Analyse</span>
@@ -1106,34 +1108,11 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
         <div className="lg:hidden absolute bottom-48 right-6 text-3xl opacity-50 animate-float-delayed" style={{ animationDelay: '0.3s' }}>🚀</div>
         <div className="lg:hidden absolute top-1/3 right-8 w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-400/25 to-violet-400/15 animate-float" />
         <div className="lg:hidden absolute bottom-1/3 left-6 w-10 h-10 rounded-full bg-gradient-to-br from-violet-400/20 to-indigo-400/15 animate-float-delayed" style={{ animationDelay: '0.6s' }} />
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="relative flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-8 mb-10 sm:mb-14">
-            {/* Illustration - studying with book */}
-            <div className="hidden lg:block flex-shrink-0 w-24 h-28 xl:w-28 xl:h-32 animate-float">
-              <svg viewBox="0 0 140 160" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
-                <path d="M50 95 Q45 125 50 155 L90 155 Q95 125 90 95" fill="#6366F1" />
-                <rect x="62" y="72" width="16" height="26" fill="#E8B796" />
-                <ellipse cx="70" cy="45" rx="30" ry="33" fill="#E8B796" />
-                <path d="M40 38 Q38 18 55 12 Q70 6 88 12 Q105 18 100 38 Q98 28 85 20 Q70 12 55 20 Q42 28 40 38" fill="#4A3728" />
-                <path d="M40 38 Q34 50 40 62" fill="#4A3728" />
-                <path d="M100 38 Q106 50 100 62" fill="#4A3728" />
-                <ellipse cx="58" cy="45" rx="4" ry="5" fill="#1F2937" />
-                <ellipse cx="82" cy="45" rx="4" ry="5" fill="#1F2937" />
-                <circle cx="59" cy="43" r="1.5" fill="white" />
-                <circle cx="83" cy="43" r="1.5" fill="white" />
-                <path d="M55 58 Q70 68 85 58" stroke="#1F2937" strokeWidth="2" fill="none" strokeLinecap="round" />
-                <ellipse cx="42" cy="52" rx="5" ry="3" fill="#FECACA" opacity="0.5" />
-                <ellipse cx="98" cy="52" rx="5" ry="3" fill="#FECACA" opacity="0.5" />
-                <path d="M45 98 Q20 100 5 115" stroke="#E8B796" strokeWidth="12" fill="none" strokeLinecap="round" />
-                <path d="M95 98 Q120 100 135 115" stroke="#E8B796" strokeWidth="12" fill="none" strokeLinecap="round" />
-                <ellipse cx="3" cy="118" rx="8" ry="9" fill="#E8B796" />
-                <ellipse cx="137" cy="118" rx="8" ry="9" fill="#E8B796" />
-                <rect x="25" y="95" width="90" height="55" rx="4" fill="#FEF3C7" stroke="#F59E0B" strokeWidth="2" />
-                <line x1="70" y1="95" x2="70" y2="150" stroke="#F59E0B" strokeWidth="1.5" />
-                <path d="M35 110 Q65 108 95 110" stroke="#92400E" strokeWidth="2" fill="none" />
-                <path d="M35 125 Q65 123 95 125" stroke="#92400E" strokeWidth="1.5" fill="none" />
-                <path d="M58 95 L70 108 L82 95" stroke="#4F46E5" strokeWidth="2" fill="none" />
-              </svg>
+            {/* Mascot - studying pose */}
+            <div className="hidden lg:block flex-shrink-0">
+              <ScholarMascot size={140} animated={true} pose="studying" />
             </div>
             <div className="text-center sm:text-left">
               <h2 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-stone-800 dark:text-stone-100 mb-3 sm:mb-4">
@@ -1182,7 +1161,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
           {/* Video container */}
           <div className="relative">
             <div className="absolute -inset-2 max-lg:-inset-3 max-lg:opacity-100 bg-gradient-to-r from-blue-400/20 via-violet-400/20 to-purple-400/20 rounded-3xl blur-2xl animate-notes-glow-pulse"></div>
-            <div className="relative bg-white dark:bg-stone-800 rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl border border-stone-200/50 dark:border-stone-700 max-lg:border-indigo-200/50 max-lg:dark:border-indigo-800/40 max-lg:shadow-indigo-500/10">
+            <div className="relative bg-white dark:bg-stone-800 rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl border border-stone-200/50 dark:border-stone-700">
               {[
                 { id: 'analyse', src: '/analysevid.mp4', gradient: 'from-lime-500/10 to-emerald-500/10' },
                 { id: 'flashcards', src: '/flashcardsvid.mp4', gradient: 'from-rose-500/10 to-pink-500/10' },
@@ -1802,30 +1781,6 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
             <p className="text-lg text-stone-600 dark:text-stone-400 max-w-2xl mx-auto">
               No signup required. Use these tools instantly to improve your writing.
             </p>
-            <div className="hidden lg:block absolute -right-4 xl:right-8 top-1/2 -translate-y-1/2 w-28 h-36">
-              <svg viewBox="0 0 140 180" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
-                <path d="M50 100 Q45 130 50 160 L90 160 Q95 130 90 100" fill="#8B5CF6" />
-                <rect x="62" y="75" width="16" height="28" fill="#D4A574" />
-                <ellipse cx="70" cy="48" rx="32" ry="35" fill="#D4A574" />
-                <path d="M38 40 Q35 18 52 12 Q70 4 90 12 Q107 18 104 40 Q100 28 85 20 Q70 12 55 20 Q42 28 38 40" fill="#5D3A1A" />
-                <path d="M38 40 Q32 55 38 70" fill="#5D3A1A" />
-                <path d="M102 40 Q108 55 102 70" fill="#5D3A1A" />
-                <ellipse cx="56" cy="46" rx="5" ry="6" fill="#1F2937" />
-                <ellipse cx="84" cy="46" rx="5" ry="6" fill="#1F2937" />
-                <circle cx="57" cy="44" r="2" fill="white" />
-                <circle cx="85" cy="44" r="2" fill="white" />
-                <path d="M55 62 Q70 76 85 62" stroke="#1F2937" strokeWidth="2.5" fill="none" strokeLinecap="round" />
-                <path d="M45 105 Q25 120 20 140" stroke="#D4A574" strokeWidth="12" fill="none" strokeLinecap="round" />
-                <path d="M95 105 Q115 120 120 140" stroke="#D4A574" strokeWidth="12" fill="none" strokeLinecap="round" />
-                <ellipse cx="18" cy="143" rx="8" ry="9" fill="#D4A574" />
-                <ellipse cx="122" cy="143" rx="8" ry="9" fill="#D4A574" />
-                <rect x="30" y="118" width="5" height="20" rx="1" fill="#FCD34D" />
-                <rect x="50" y="115" width="6" height="23" rx="1" fill="#60A5FA" />
-                <rect x="85" y="120" width="5" height="18" rx="1" fill="#F472B6" />
-                <rect x="105" y="117" width="5" height="21" rx="1" fill="#34D399" />
-                <path d="M58 95 L70 108 L82 95" stroke="#7C3AED" strokeWidth="2" fill="none" />
-              </svg>
-            </div>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
@@ -2436,34 +2391,9 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                 Everything you need to know about WriteScholar
               </p>
             </div>
-            {/* Cute character - thoughtful pose with question mark */}
-            <div className="hidden lg:flex flex-shrink-0 w-32 h-44 items-center justify-center overflow-visible pt-2">
-              <svg viewBox="0 -20 140 200" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
-                <path d="M50 100 Q45 130 50 160 L90 160 Q95 130 90 100" fill="#60A5FA" />
-                <rect x="62" y="75" width="16" height="28" fill="#E8B796" />
-                <ellipse cx="70" cy="48" rx="32" ry="35" fill="#E8B796" />
-                <path d="M38 40 Q35 18 52 12 Q70 4 90 12 Q107 18 104 40 Q100 28 85 20 Q70 12 55 20 Q42 28 38 40" fill="#4A3728" />
-                <path d="M38 40 Q32 55 38 70" fill="#4A3728" />
-                <path d="M102 40 Q108 55 102 70" fill="#4A3728" />
-                <ellipse cx="56" cy="46" rx="5" ry="6" fill="#1F2937" />
-                <ellipse cx="84" cy="46" rx="5" ry="6" fill="#1F2937" />
-                <circle cx="57" cy="44" r="2" fill="white" />
-                <circle cx="85" cy="44" r="2" fill="white" />
-                <path d="M52 38 Q60 32 68 38" stroke="#4A3728" strokeWidth="2.5" fill="none" strokeLinecap="round" />
-                <path d="M72 38 Q80 32 88 38" stroke="#4A3728" strokeWidth="2.5" fill="none" strokeLinecap="round" />
-                <path d="M55 62 Q70 76 85 62" stroke="#1F2937" strokeWidth="2.5" fill="none" strokeLinecap="round" />
-                <ellipse cx="42" cy="56" rx="6" ry="4" fill="#FECACA" opacity="0.5" />
-                <ellipse cx="98" cy="56" rx="6" ry="4" fill="#FECACA" opacity="0.5" />
-                {/* Hand to chin - thoughtful pose */}
-                <path d="M95 100 Q115 95 125 75 Q130 60 120 45" stroke="#E8B796" strokeWidth="14" fill="none" strokeLinecap="round" />
-                <ellipse cx="118" cy="42" rx="10" ry="11" fill="#E8B796" />
-                <path d="M45 100 Q30 110 25 130" stroke="#E8B796" strokeWidth="12" fill="none" strokeLinecap="round" />
-                <ellipse cx="22" cy="133" rx="8" ry="9" fill="#E8B796" />
-                {/* Question mark above head */}
-                <circle cx="70" cy="5" r="18" fill="#C4B5FD" stroke="#7C3AED" strokeWidth="2" />
-                <text x="70" y="12" textAnchor="middle" fontSize="24" fill="#5B21B6" fontWeight="bold">?</text>
-                <path d="M58 95 L70 108 L82 95" stroke="#7C3AED" strokeWidth="2" fill="none" />
-              </svg>
+            {/* Mascot - thinking pose */}
+            <div className="hidden lg:flex flex-shrink-0 items-center justify-center">
+              <ScholarMascot size={160} animated={true} pose="thinking" />
             </div>
           </div>
 

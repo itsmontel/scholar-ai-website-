@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { logger } from '../utils/logger';
-import { resolveOnboarding, setOnboardingDone } from '../utils/onboarding';
+import { resolveOnboarding, setOnboardingDone, resolveTutorial, setTutorialDone } from '../utils/onboarding';
 
 // Import all page components
 import LandingPage from './pages/LandingPage';
@@ -102,7 +102,8 @@ const AcademicAIApp = () => {
         if (token && userData) {
           const parsedUser = JSON.parse(userData);
           const onboardingCompleted = resolveOnboarding(parsedUser?.id, parsedUser.onboardingCompleted);
-          const restoredUser = { ...parsedUser, onboardingCompleted };
+          const welcomeTutorialCompleted = resolveTutorial(parsedUser?.id, parsedUser.welcomeTutorialCompleted);
+          const restoredUser = { ...parsedUser, onboardingCompleted, welcomeTutorialCompleted };
           logger.log('Initializing user state from localStorage:', restoredUser);
           setIsLoggedIn(true);
           setUser(restoredUser);
@@ -230,6 +231,7 @@ const AcademicAIApp = () => {
             if (userData.data && userData.data.user && userData.data.user.email) {
               const u = userData.data.user;
               const onboardingCompleted = resolveOnboarding(u.id, u.onboardingCompleted);
+              const welcomeTutorialCompleted = resolveTutorial(u.id, u.welcomeTutorialCompleted);
               const updatedUser = {
                 id: u.id,
                 email: u.email,
@@ -241,7 +243,7 @@ const AcademicAIApp = () => {
                 subscription_status: u.subscriptionStatus,
                 email_verified: u.emailVerified,
                 onboardingCompleted,
-                welcomeTutorialCompleted: u.welcomeTutorialCompleted || false
+                welcomeTutorialCompleted
               };
               setUser(updatedUser);
               localStorage.setItem('user', JSON.stringify(updatedUser));
@@ -280,6 +282,7 @@ const AcademicAIApp = () => {
         if (userData.data && userData.data.user && userData.data.user.email) {
           const u = userData.data.user;
           const onboardingCompleted = resolveOnboarding(u.id, u.onboardingCompleted);
+          const welcomeTutorialCompleted = resolveTutorial(u.id, u.welcomeTutorialCompleted);
           const updatedUser = {
             id: u.id,
             email: u.email,
@@ -291,7 +294,7 @@ const AcademicAIApp = () => {
             subscription_status: u.subscriptionStatus,
             email_verified: u.emailVerified,
             onboardingCompleted,
-            welcomeTutorialCompleted: u.welcomeTutorialCompleted || false
+            welcomeTutorialCompleted
           };
           setUser(updatedUser);
           localStorage.setItem('user', JSON.stringify(updatedUser));
@@ -697,13 +700,13 @@ const AcademicAIApp = () => {
         return <UnsubscribePage onNavigate={navigateTo} />;
       case 'dashboard':
         if (needsOnboarding) return renderOnboarding('dashboard');
-        return <DashboardPage onNavigate={navigateTo} user={user} onLogout={handleLogout} onUserUpdate={(u) => { if (user && u.welcomeTutorialCompleted) { const updated = { ...user, welcomeTutorialCompleted: true }; setUser(updated); localStorage.setItem('user', JSON.stringify(updated)); } }} />;
+        return <DashboardPage onNavigate={navigateTo} user={user} onLogout={handleLogout} onUserUpdate={(u) => { if (user && u.welcomeTutorialCompleted) { setTutorialDone(user.id); const updated = { ...user, welcomeTutorialCompleted: true }; setUser(updated); localStorage.setItem('user', JSON.stringify(updated)); } }} />;
       case 'analyze':
         if (needsOnboarding) return renderOnboarding('analyze');
-        return isLoggedIn ? <DashboardPage onNavigate={navigateTo} user={user} onLogout={handleLogout} onUserUpdate={(u) => { if (user && u.welcomeTutorialCompleted) { const updated = { ...user, welcomeTutorialCompleted: true }; setUser(updated); localStorage.setItem('user', JSON.stringify(updated)); } }} initialMode="analyze" /> : <LandingPage onNavigate={navigateTo} />;
+        return isLoggedIn ? <DashboardPage onNavigate={navigateTo} user={user} onLogout={handleLogout} onUserUpdate={(u) => { if (user && u.welcomeTutorialCompleted) { setTutorialDone(user.id); const updated = { ...user, welcomeTutorialCompleted: true }; setUser(updated); localStorage.setItem('user', JSON.stringify(updated)); } }} initialMode="analyze" /> : <LandingPage onNavigate={navigateTo} />;
       case 'citations':
         if (needsOnboarding) return renderOnboarding('citations');
-        return isLoggedIn ? <DashboardPage onNavigate={navigateTo} user={user} onLogout={handleLogout} onUserUpdate={(u) => { if (user && u.welcomeTutorialCompleted) { const updated = { ...user, welcomeTutorialCompleted: true }; setUser(updated); localStorage.setItem('user', JSON.stringify(updated)); } }} initialMode="citations" /> : <LandingPage onNavigate={navigateTo} />;
+        return isLoggedIn ? <DashboardPage onNavigate={navigateTo} user={user} onLogout={handleLogout} onUserUpdate={(u) => { if (user && u.welcomeTutorialCompleted) { setTutorialDone(user.id); const updated = { ...user, welcomeTutorialCompleted: true }; setUser(updated); localStorage.setItem('user', JSON.stringify(updated)); } }} initialMode="citations" /> : <LandingPage onNavigate={navigateTo} />;
       case 'analysis':
         return <AnalysisPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'analysis-history':
@@ -722,7 +725,7 @@ const AcademicAIApp = () => {
           );
         } else {
           navigateTo('dashboard');
-          return <DashboardPage onNavigate={navigateTo} user={user} onLogout={handleLogout} onUserUpdate={(u) => { if (user && u.welcomeTutorialCompleted) { const updated = { ...user, welcomeTutorialCompleted: true }; setUser(updated); localStorage.setItem('user', JSON.stringify(updated)); } }} />;
+          return <DashboardPage onNavigate={navigateTo} user={user} onLogout={handleLogout} onUserUpdate={(u) => { if (user && u.welcomeTutorialCompleted) { setTutorialDone(user.id); const updated = { ...user, welcomeTutorialCompleted: true }; setUser(updated); localStorage.setItem('user', JSON.stringify(updated)); } }} />;
         }
       case 'citation-history':
         return <CitationHistoryPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;

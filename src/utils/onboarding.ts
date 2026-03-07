@@ -1,4 +1,5 @@
 const KEY_PREFIX = 'writescholar_onboarding_completed_';
+const TUTORIAL_KEY_PREFIX = 'writescholar_welcome_tutorial_completed_';
 
 /**
  * Check if onboarding is done according to localStorage.
@@ -46,5 +47,41 @@ export async function persistOnboardingToServer(maxRetries = 3): Promise<boolean
     if (attempt < maxRetries) await new Promise(r => setTimeout(r, 500 * attempt));
   }
   console.error('Failed to persist onboarding to server after retries');
+  return false;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Welcome Tutorial — same one-truth pattern as onboarding
+// ═══════════════════════════════════════════════════════════════════════════
+
+export function isTutorialDone(userId: string | undefined | null): boolean {
+  if (!userId) return false;
+  return localStorage.getItem(`${TUTORIAL_KEY_PREFIX}${userId}`) === 'true';
+}
+
+export function setTutorialDone(userId: string): void {
+  localStorage.setItem(`${TUTORIAL_KEY_PREFIX}${userId}`, 'true');
+}
+
+export function resolveTutorial(userId: string | undefined | null, serverFlag: boolean | undefined): boolean {
+  return serverFlag === true || isTutorialDone(userId);
+}
+
+export async function persistTutorialToServer(maxRetries = 3): Promise<boolean> {
+  const apiUrl = (import.meta as any).env?.VITE_API_URL || 'http://localhost:3001/api';
+  const token = localStorage.getItem('authToken');
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const res = await fetch(`${apiUrl}/users/complete-tutorial`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) return true;
+    } catch (_e) {
+      // retry
+    }
+    if (attempt < maxRetries) await new Promise(r => setTimeout(r, 500 * attempt));
+  }
+  console.error('Failed to persist tutorial completion to server after retries');
   return false;
 }

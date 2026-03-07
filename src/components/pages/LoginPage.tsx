@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { resolveOnboarding } from '../../utils/onboarding';
+import { resolveOnboarding, resolveTutorial } from '../../utils/onboarding';
 
 interface LoginPageProps {
   onNavigate: (page: string) => void;
@@ -77,7 +77,7 @@ const LoginPage = ({ onNavigate, onLogin }: LoginPageProps) => {
         subscription_status: u.subscriptionStatus,
         email_verified: u.emailVerified,
         onboardingCompleted: resolveOnboarding(u.id, u.onboardingCompleted),
-        welcomeTutorialCompleted: u.welcomeTutorialCompleted || false
+        welcomeTutorialCompleted: resolveTutorial(u.id, u.welcomeTutorialCompleted)
       };
 
       localStorage.setItem('authToken', data.data.token);

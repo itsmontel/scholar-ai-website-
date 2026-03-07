@@ -17,6 +17,7 @@ import { Document, Packer, Paragraph, TextRun, HeadingLevel } from 'docx';
 import { saveAs } from 'file-saver';
 import { trackAction, syncFromAPIData, trackExport, trackCopy } from '../../data/achievements';
 import { getResetsInText, getExpiringSoonCount, getExpiringSoonUrgencyText, getDaysUntilExpiration } from '../../utils/usageReset';
+import { resolveTutorial } from '../../utils/onboarding';
 
 interface DashboardProps {
   onNavigate: (page: string) => void;
@@ -234,18 +235,16 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
     plan: 'free'
   });
 
-  // Welcome tutorial state - show after onboarding completion
+  // Welcome tutorial state - show after onboarding completion (one-truth: resolveTutorial)
   const [showWelcomeTutorial, setShowWelcomeTutorial] = useState(() => {
     if (!user?.id) return false;
-    const tutorialCompletedLocal = localStorage.getItem(`writescholar_welcome_tutorial_completed_${user.id}`);
-    const tutorialCompleted = (user as any).welcomeTutorialCompleted || tutorialCompletedLocal === 'true';
-    if (tutorialCompleted) return false;
+    const tutorialDone = resolveTutorial(user.id, (user as any).welcomeTutorialCompleted);
+    if (tutorialDone) return false;
     return (user as any).onboardingCompleted === true;
   });
 
-  // Hide tutorial when user loads with welcomeTutorialCompleted from server (e.g. incognito)
   useEffect(() => {
-    if (user?.id && (user as any).welcomeTutorialCompleted) {
+    if (user?.id && resolveTutorial(user.id, (user as any).welcomeTutorialCompleted)) {
       setShowWelcomeTutorial(false);
     }
   }, [user?.id, (user as any)?.welcomeTutorialCompleted]);
@@ -253,9 +252,8 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
   // Quick Review state - show to returning users who haven't reviewed today
   const [showQuickReview, setShowQuickReview] = useState(() => {
     if (!user?.id) return false;
-    const tutorialCompletedLocal = localStorage.getItem(`writescholar_welcome_tutorial_completed_${user.id}`);
-    const tutorialCompleted = (user as any).welcomeTutorialCompleted || tutorialCompletedLocal === 'true';
-    if ((user as any).onboardingCompleted && !tutorialCompleted) return false;
+    const tutorialDone = resolveTutorial(user.id, (user as any).welcomeTutorialCompleted);
+    if ((user as any).onboardingCompleted && !tutorialDone) return false;
     
     // Check if already shown today
     const lastShown = localStorage.getItem(`writescholar_quick_review_last_shown_${user.id}`);
