@@ -42,6 +42,7 @@ const AuthCallbackPage: React.FC<AuthCallbackPageProps> = ({ onNavigate, onLogin
             if (meRes.ok) {
               const meData = await meRes.json();
               onboardingCompleted = meData.data?.user?.onboardingCompleted || false;
+              const welcomeTutorialCompleted = meData.data?.user?.welcomeTutorialCompleted || false;
               // Sync achievements from server (cross-device)
               if (meData.data?.achievements) {
                 const { mergeFromServer } = await import('../../data/achievements');
@@ -51,7 +52,7 @@ const AuthCallbackPage: React.FC<AuthCallbackPageProps> = ({ onNavigate, onLogin
                 );
               }
               // Update stored user with server data
-              const updatedUser = { ...userData, onboardingCompleted };
+              const updatedUser = { ...userData, onboardingCompleted, welcomeTutorialCompleted };
               localStorage.setItem('user', JSON.stringify(updatedUser));
               onLogin(updatedUser);
             }

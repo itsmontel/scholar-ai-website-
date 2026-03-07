@@ -148,6 +148,32 @@ router.post('/complete-onboarding', authenticateToken, async (req, res) => {
   }
 });
 
+// @route   POST /api/users/complete-tutorial
+// @desc    Mark welcome tutorial as completed for the current user
+// @access  Private
+router.post('/complete-tutorial', authenticateToken, async (req, res) => {
+  try {
+    const supabase = createClient(
+      process.env.SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY
+    );
+
+    const { error } = await supabase
+      .from('users')
+      .update({ welcome_tutorial_completed: true, updated_at: new Date().toISOString() })
+      .eq('id', req.user.id);
+
+    if (error) {
+      return res.status(500).json({ success: false, message: 'Failed to save tutorial status' });
+    }
+
+    res.json({ success: true, message: 'Tutorial marked as completed' });
+  } catch (error) {
+    console.error('Complete tutorial error:', error);
+    res.status(500).json({ success: false, message: 'Failed to save tutorial status' });
+  }
+});
+
 // @route   POST /api/users/change-password
 // @desc    Change user password
 // @access  Private

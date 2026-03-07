@@ -4,10 +4,11 @@ import ScholarMascot from './ScholarMascot';
 interface WelcomeTutorialProps {
   userName?: string;
   userId?: string;
+  tutorialCompletedFromServer?: boolean;
   onComplete: () => void;
 }
 
-const WelcomeTutorial = ({ userName, userId, onComplete }: WelcomeTutorialProps) => {
+const WelcomeTutorial = ({ userName, userId, tutorialCompletedFromServer, onComplete }: WelcomeTutorialProps) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [isVisible, setIsVisible] = useState(true);
   const [isAnimating, setIsAnimating] = useState(false);
@@ -94,6 +95,14 @@ const WelcomeTutorial = ({ userName, userId, onComplete }: WelcomeTutorialProps)
   const handleComplete = () => {
     if (userId) {
       localStorage.setItem(`writescholar_welcome_tutorial_completed_${userId}`, 'true');
+      // Persist to server for incognito/cross-device
+      const token = typeof localStorage !== 'undefined' ? localStorage.getItem('authToken') : null;
+      if (token) {
+        fetch(`${(import.meta as any).env?.VITE_API_URL || 'http://localhost:3001/api'}/users/complete-tutorial`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}` },
+        }).catch(() => {});
+      }
     }
     // Start dissolve animation
     setIsDissolving(true);
@@ -108,14 +117,11 @@ const WelcomeTutorial = ({ userName, userId, onComplete }: WelcomeTutorialProps)
   };
 
   useEffect(() => {
-    if (userId) {
-      const completed = localStorage.getItem(`writescholar_welcome_tutorial_completed_${userId}`);
-      if (completed === 'true') {
-        setIsVisible(false);
-        onComplete();
-      }
+    if (userId && (tutorialCompletedFromServer || localStorage.getItem(`writescholar_welcome_tutorial_completed_${userId}`) === 'true')) {
+      setIsVisible(false);
+      onComplete();
     }
-  }, [userId, onComplete]);
+  }, [userId, tutorialCompletedFromServer, onComplete]);
 
   if (!isVisible) return null;
 

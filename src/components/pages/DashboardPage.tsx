@@ -17,6 +17,7 @@ interface DashboardProps {
   onNavigate: (page: string) => void;
   user: any;
   onLogout: () => void;
+  onUserUpdate?: (updates: { welcomeTutorialCompleted?: boolean }) => void;
   initialMode?: 'analyze' | 'citations' | 'humanize' | 'summarize' | 'quiz';
 }
 
@@ -65,7 +66,7 @@ const activityMeta: Record<ActivityItem['type'], { emoji: string; bg: string; la
   citation: { emoji: '📚', bg: 'bg-sky-100 dark:bg-sky-900/30', label: 'Citations', cardBg: 'from-sky-50 to-blue-50 dark:from-sky-900/20 dark:to-blue-900/20', border: 'border-sky-200/70 dark:border-sky-700/40', accent: 'text-sky-700 dark:text-sky-300', shape: 'diamond' },
 };
 
-const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: DashboardProps) => {
+const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'analyze' }: DashboardProps) => {
   const [inputText, setInputText] = useState('');
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
   const [showWordWarning, setShowWordWarning] = useState(false);
@@ -213,23 +214,33 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
   });
 
   // Welcome tutorial state - show after onboarding completion
+  // Check both server (user.welcomeTutorialCompleted) and localStorage for cross-device/incognito
   const [showWelcomeTutorial, setShowWelcomeTutorial] = useState(() => {
     if (!user?.id) return false;
-    const tutorialCompleted = localStorage.getItem(`writescholar_welcome_tutorial_completed_${user.id}`);
+    const tutorialCompletedLocal = localStorage.getItem(`writescholar_welcome_tutorial_completed_${user.id}`);
+    const tutorialCompleted = (user as any).welcomeTutorialCompleted || tutorialCompletedLocal === 'true';
+    if (tutorialCompleted) return false;
     const onboardingCompletedLocal = localStorage.getItem(`writescholar_onboarding_completed_${user.id}`);
     const onboardingCompleted = (user as any).onboardingCompleted || onboardingCompletedLocal === 'true';
-    // Show tutorial if onboarding is completed but tutorial hasn't been shown yet
-    return onboardingCompleted && tutorialCompleted !== 'true';
+    return onboardingCompleted;
   });
+
+  // Hide tutorial when user loads with welcomeTutorialCompleted from server (e.g. incognito)
+  useEffect(() => {
+    if (user?.id && (user as any).welcomeTutorialCompleted) {
+      setShowWelcomeTutorial(false);
+    }
+  }, [user?.id, (user as any)?.welcomeTutorialCompleted]);
 
   // Quick Review state - show to returning users who haven't reviewed today
   const [showQuickReview, setShowQuickReview] = useState(() => {
     if (!user?.id) return false;
     // Don't show if welcome tutorial is showing
-    const tutorialCompleted = localStorage.getItem(`writescholar_welcome_tutorial_completed_${user.id}`);
+    const tutorialCompletedLocal = localStorage.getItem(`writescholar_welcome_tutorial_completed_${user.id}`);
+    const tutorialCompleted = (user as any).welcomeTutorialCompleted || tutorialCompletedLocal === 'true';
     const onboardingCompletedLocal = localStorage.getItem(`writescholar_onboarding_completed_${user.id}`);
     const onboardingCompleted = (user as any).onboardingCompleted || onboardingCompletedLocal === 'true';
-    if (onboardingCompleted && tutorialCompleted !== 'true') return false;
+    if (onboardingCompleted && !tutorialCompleted) return false;
     
     // Check if already shown today
     const lastShown = localStorage.getItem(`writescholar_quick_review_last_shown_${user.id}`);
@@ -1696,7 +1707,11 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
         <WelcomeTutorial
           userName={user?.name?.split(' ')[0] || user?.name || ''}
           userId={user?.id}
-          onComplete={() => setShowWelcomeTutorial(false)}
+          tutorialCompletedFromServer={(user as any)?.welcomeTutorialCompleted}
+          onComplete={() => {
+            setShowWelcomeTutorial(false);
+            onUserUpdate?.({ welcomeTutorialCompleted: true });
+          }}
         />
       )}
 

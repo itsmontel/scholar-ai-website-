@@ -193,7 +193,8 @@ router.post('/login', validateLogin, async (req, res) => {
           subscriptionPlan: user.subscription_plan,
           subscriptionStatus: user.subscription_status,
           emailVerified: user.email_verified,
-          onboardingCompleted: user.onboarding_completed || false
+          onboardingCompleted: user.onboarding_completed || false,
+          welcomeTutorialCompleted: user.welcome_tutorial_completed || false
         },
         token
       }
@@ -221,7 +222,7 @@ router.get('/me', authenticateToken, async (req, res) => {
 
     const { data: user, error } = await supabase
       .from('users')
-      .select('id, email, username, first_name, last_name, name, institution, research_field, subscription_plan, subscription_status, created_at, last_login, email_verified, onboarding_completed')
+      .select('id, email, username, first_name, last_name, name, institution, research_field, subscription_plan, subscription_status, created_at, last_login, email_verified, onboarding_completed, welcome_tutorial_completed')
       .eq('id', req.user.id)
       .single();
 
@@ -256,7 +257,8 @@ router.get('/me', authenticateToken, async (req, res) => {
           createdAt: user.created_at,
           lastLogin: user.last_login,
           emailVerified: user.email_verified,
-          onboardingCompleted: user.onboarding_completed || false
+          onboardingCompleted: user.onboarding_completed || false,
+          welcomeTutorialCompleted: user.welcome_tutorial_completed || false
         },
         achievements: {
           stats: achievements.stats,
