@@ -981,7 +981,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
     <div className="min-h-screen overflow-x-hidden" style={{ background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%)' }}>
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="quiz-history" />
 
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12 w-full min-w-0">
+      <main className="max-w-6xl mx-auto px-3 sm:px-6 py-8 sm:py-12 w-full min-w-0 overflow-x-hidden">
         {/* Hero - compact and sleek */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-6 mb-10">
           <div>
@@ -1076,21 +1076,21 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
         </button>
 
         {/* Filter Controls - Type + Time Period */}
-        <div className="bg-white/60 backdrop-blur-sm rounded-2xl border border-stone-200/60 p-4 mb-8">
+        <div className="bg-white/60 backdrop-blur-sm rounded-2xl border border-stone-200/60 p-3 sm:p-4 mb-8 overflow-hidden">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             {/* Type Filter */}
-            <div className="flex-1">
-              <div className="text-xs font-medium text-stone-500 uppercase tracking-wider mb-2">Filter by Type</div>
-              <div className="flex flex-wrap gap-2">
+            <div className="flex-1 min-w-0">
+              <div className="text-[10px] sm:text-xs font-medium text-stone-500 uppercase tracking-wider mb-2">Filter by Type</div>
+              <div className="flex flex-wrap gap-1.5 sm:gap-2">
                 {filterTabs.map((tab) => (
                   <button
                     key={tab.key}
                     onClick={() => setFilter(tab.key)}
-                    className={`px-4 py-2.5 rounded-xl text-sm font-medium transition-all flex items-center gap-2 ${getFilterTabStyle(tab, filter === tab.key)}`}
+                    className={`px-2 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-medium transition-all flex items-center gap-1 sm:gap-2 ${getFilterTabStyle(tab, filter === tab.key)}`}
                   >
                     <span>{tab.icon}</span>
-                    <span>{tab.label}</span>
-                    <span className={`text-xs px-1.5 py-0.5 rounded-md ${filter === tab.key ? 'bg-white/20' : 'bg-stone-100'}`}>
+                    <span className="hidden sm:inline">{tab.label}</span>
+                    <span className={`text-[10px] sm:text-xs px-1 sm:px-1.5 py-0.5 rounded-md ${filter === tab.key ? 'bg-white/20' : 'bg-stone-100'}`}>
                       {tab.count}
                     </span>
                   </button>
@@ -1099,14 +1099,14 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
             </div>
 
             {/* Time Period Filter */}
-            <div className="lg:border-l lg:border-stone-200 lg:pl-4">
-              <div className="text-xs font-medium text-stone-500 uppercase tracking-wider mb-2">Time Period</div>
-              <div className="flex flex-wrap gap-1.5">
+            <div className="lg:border-l lg:border-stone-200 lg:pl-4 min-w-0">
+              <div className="text-[10px] sm:text-xs font-medium text-stone-500 uppercase tracking-wider mb-2">Time Period</div>
+              <div className="flex flex-wrap gap-1 sm:gap-1.5">
                 {timePeriodOptions.map((option) => (
                   <button
                     key={option.key}
                     onClick={() => setTimePeriod(option.key)}
-                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                    className={`px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all ${
                       timePeriod === option.key
                         ? 'bg-stone-900 text-white'
                         : 'bg-stone-100 text-stone-600 hover:bg-stone-200 hover:text-stone-800'
@@ -1145,31 +1145,31 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
         )}
 
         {/* Storage notice - compact inline */}
-        <div className={`mb-8 px-4 py-3 rounded-xl flex items-center gap-4 ${isPaidUser ? 'bg-violet-50/80 border border-violet-200/60 dark:bg-violet-900/20 dark:border-violet-700/40' : 'bg-amber-50/80 border border-amber-200/60'}`}>
+        <div className={`mb-8 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl flex items-center gap-3 sm:gap-4 min-w-0 ${isPaidUser ? 'bg-violet-50/80 border border-violet-200/60 dark:bg-violet-900/20 dark:border-violet-700/40' : 'bg-amber-50/80 border border-amber-200/60'}`}>
           {isPaidUser ? (
             <>
-              <div className="w-9 h-9 rounded-lg bg-violet-500/20 flex items-center justify-center shrink-0">
-                <svg className="w-5 h-5 text-violet-600 dark:text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-violet-500/20 flex items-center justify-center shrink-0">
+                <svg className="w-4 h-4 sm:w-5 sm:h-5 text-violet-600 dark:text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
               </div>
-              <p className="text-sm text-violet-800 dark:text-violet-200">
-                <strong>Permanent storage</strong> — Your study tools never expire. Export to PDF or Word anytime.
+              <p className="text-xs sm:text-sm text-violet-800 dark:text-violet-200 min-w-0">
+                <strong>Permanent storage</strong> — <span className="hidden sm:inline">Your study tools never expire.</span> Export to PDF or Word anytime.
               </p>
             </>
           ) : (
             <>
-              <div className="w-9 h-9 rounded-lg bg-amber-500/20 flex items-center justify-center shrink-0">
-                <svg className="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-amber-500/20 flex items-center justify-center shrink-0">
+                <svg className="w-4 h-4 sm:w-5 sm:h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <p className="text-sm text-amber-800 flex-1">
+              <p className="text-xs sm:text-sm text-amber-800 flex-1 min-w-0">
                 Free plan: tools expire in 30 days.{' '}
                 <button onClick={() => onNavigate('pricing')} className="font-semibold underline underline-offset-2 hover:text-amber-900">
                   Upgrade
                 </button>{' '}
-                for permanent storage & export.
+                <span className="hidden sm:inline">for permanent storage & export.</span>
               </p>
             </>
           )}
@@ -1218,7 +1218,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
           </div>
         ) : (
           <>
-          <div className="grid gap-4 sm:gap-5">
+          <div className="grid gap-4 sm:gap-5 w-full min-w-0">
             {paginatedTools.map((tool) => {
               const daysRemaining = getDaysRemaining(tool.expires_at);
               const isQuiz = !['flashcards', 'crossword', 'crater_blast', 'lesson'].includes(tool.quiz_type);
@@ -1279,13 +1279,13 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
               return (
                 <div
                   key={tool.id}
-                  className={`bg-white rounded-2xl border border-stone-200/80 shadow-sm hover:shadow-lg hover:border-stone-300/80 transition-all overflow-visible ${styles.border} ${exportDropdownToolId === tool.id ? 'relative z-20' : ''}`}
+                  className={`bg-white rounded-2xl border border-stone-200/80 shadow-sm hover:shadow-lg hover:border-stone-300/80 transition-all ${styles.border} ${exportDropdownToolId === tool.id ? 'relative z-20 overflow-visible' : 'overflow-hidden'}`}
                 >
-                  <div className="p-5 sm:p-6">
-                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-start gap-4">
-                          <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-xl shrink-0 ${styles.iconBg} ${styles.iconText}`}>
+                  <div className="p-4 sm:p-6 min-w-0">
+                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 min-w-0">
+                      <div className="flex-1 min-w-0 overflow-hidden">
+                        <div className="flex items-start gap-3 sm:gap-4 min-w-0">
+                          <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center text-lg sm:text-xl shrink-0 ${styles.iconBg} ${styles.iconText}`}>
                             {toolIcon}
                           </div>
                           <div className="min-w-0 flex-1">
@@ -1320,49 +1320,49 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                                 </button>
                               </div>
                             ) : (
-                              <div className="flex items-center gap-2 group/title">
-                                <h3 className="text-lg font-semibold text-stone-900 dark:text-stone-100 truncate">
+                              <div className="flex items-center gap-2 group/title min-w-0">
+                                <h3 className="text-base sm:text-lg font-semibold text-stone-900 dark:text-stone-100 truncate min-w-0 flex-1">
                                   {tool.title}
                                 </h3>
                                 <button
                                   onClick={() => startRename(tool)}
-                                  className="opacity-70 group-hover/title:opacity-100 flex items-center gap-1.5 px-2 py-1 rounded-lg text-stone-500 hover:text-violet-600 hover:bg-violet-50 dark:hover:bg-violet-900/30 dark:text-stone-400 dark:hover:text-violet-400 transition-all shrink-0 text-sm font-medium"
+                                  className="opacity-70 group-hover/title:opacity-100 flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-2 py-1 rounded-lg text-stone-500 hover:text-violet-600 hover:bg-violet-50 dark:hover:bg-violet-900/30 dark:text-stone-400 dark:hover:text-violet-400 transition-all shrink-0 text-xs sm:text-sm font-medium"
                                   title="Rename"
                                 >
-                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
-                                  Rename
+                                  <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                                  <span className="hidden sm:inline">Rename</span>
                                 </button>
                               </div>
                             )}
-                            <div className="flex flex-wrap items-center gap-2 mt-2">
-                              <span className="text-xs text-stone-500 flex items-center gap-1">
-                                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mt-2">
+                              <span className="text-[10px] sm:text-xs text-stone-500 flex items-center gap-1">
+                                <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                 </svg>
                                 {formatDate(tool.created_at)}
                               </span>
                               {isQuiz && (
-                                <span className={`px-2 py-0.5 rounded-md text-xs font-medium ${getDifficultyColor(tool.difficulty)}`}>
+                                <span className={`px-1.5 sm:px-2 py-0.5 rounded-md text-[10px] sm:text-xs font-medium ${getDifficultyColor(tool.difficulty)}`}>
                                   {tool.difficulty}
                                 </span>
                               )}
-                              <span className={`px-2 py-0.5 rounded-md text-xs font-medium ${styles.badge}`}>
+                              <span className={`px-1.5 sm:px-2 py-0.5 rounded-md text-[10px] sm:text-xs font-medium ${styles.badge}`}>
                                 {getTypeLabel(tool.quiz_type)}
                               </span>
-                              <span className="px-2 py-0.5 rounded-md text-xs font-medium bg-stone-100 text-stone-600">
+                              <span className="px-1.5 sm:px-2 py-0.5 rounded-md text-[10px] sm:text-xs font-medium bg-stone-100 text-stone-600">
                                 {tool.question_count} {tool.quiz_type === 'flashcards' ? 'cards' : tool.quiz_type === 'crossword' ? 'words' : tool.quiz_type === 'crater_blast' ? 'questions' : tool.quiz_type === 'lesson' ? 'slides' : 'questions'}
                               </span>
                               {tool.quiz_type === 'lesson' && tool.quiz_bank && tool.quiz_bank.length > 0 && (
-                                <span className="px-2 py-0.5 rounded-md text-xs font-medium bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300">
-                                  🎯 Quiz Included
+                                <span className="px-1.5 sm:px-2 py-0.5 rounded-md text-[10px] sm:text-xs font-medium bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300">
+                                  🎯 Quiz
                                 </span>
                               )}
                               {daysRemaining === null ? (
-                                <span className="px-2 py-0.5 rounded-md text-xs font-medium bg-emerald-50 text-emerald-700">
+                                <span className="px-1.5 sm:px-2 py-0.5 rounded-md text-[10px] sm:text-xs font-medium bg-emerald-50 text-emerald-700">
                                   Permanent
                                 </span>
                               ) : (
-                                <span className={`px-2 py-0.5 rounded-md text-xs font-medium ${daysRemaining <= 2 ? 'bg-red-50 text-red-700' : 'bg-amber-50 text-amber-700'}`}>
+                                <span className={`px-1.5 sm:px-2 py-0.5 rounded-md text-[10px] sm:text-xs font-medium ${daysRemaining <= 2 ? 'bg-red-50 text-red-700' : 'bg-amber-50 text-amber-700'}`}>
                                   {daysRemaining <= 0 ? 'Expires today' : `${daysRemaining}d left`}
                                 </span>
                               )}
@@ -1371,13 +1371,13 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                         </div>
                       </div>
                       
-                      <div className="flex flex-wrap items-center gap-2 sm:justify-end">
+                      <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 sm:justify-end">
                         <button
                           onClick={() => startStudyTool(tool)}
-                          className={`px-3 sm:px-4 py-2.5 rounded-xl font-medium text-sm text-white bg-gradient-to-r ${styles.button} hover:opacity-90 transition-all flex items-center gap-1.5 sm:gap-2 shadow-md shrink-0`}
+                          className={`px-2.5 sm:px-4 py-2 sm:py-2.5 rounded-xl font-medium text-xs sm:text-sm text-white bg-gradient-to-r ${styles.button} hover:opacity-90 transition-all flex items-center gap-1 sm:gap-2 shadow-md shrink-0`}
                         >
                           {tool.quiz_type === 'flashcards' ? 'Study' : tool.quiz_type === 'crossword' || tool.quiz_type === 'crater_blast' ? 'Play' : tool.quiz_type === 'lesson' ? 'Review' : 'Take Quiz'}
-                          <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                           </svg>
                         </button>
@@ -1386,12 +1386,12 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                           <div className="relative" onClick={(e) => e.stopPropagation()}>
                             <button
                               onClick={() => setExportDropdownToolId(exportDropdownToolId === tool.id ? null : tool.id)}
-                              className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-2.5 rounded-xl bg-stone-100 text-stone-600 hover:bg-stone-200 hover:text-stone-800 transition-colors text-sm font-medium shrink-0"
+                              className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 sm:py-2.5 rounded-xl bg-stone-100 text-stone-600 hover:bg-stone-200 hover:text-stone-800 transition-colors text-xs sm:text-sm font-medium shrink-0"
                               title="Export"
                             >
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                              <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                               Export
-                              <svg className={`w-4 h-4 transition-transform ${exportDropdownToolId === tool.id ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                              <svg className={`w-3.5 h-3.5 sm:w-4 sm:h-4 transition-transform ${exportDropdownToolId === tool.id ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
                             </button>
                             {exportDropdownToolId === tool.id && (
                               <div className="absolute left-0 top-full mt-1.5 w-40 py-1 bg-white dark:bg-stone-800 rounded-xl shadow-xl border border-stone-200 dark:border-stone-600 z-[100]">
@@ -1427,31 +1427,31 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                         ) : (
                           <button
                             onClick={() => setShowUpgradeModal(true)}
-                            className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-stone-100 text-stone-400 hover:bg-stone-200 transition-colors text-sm font-medium"
+                            className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 sm:py-2.5 rounded-xl bg-stone-100 text-stone-400 hover:bg-stone-200 transition-colors text-xs sm:text-sm font-medium shrink-0"
                             title="Upgrade to export"
                           >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                            <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                             Export
                           </button>
                         )}
 
                         <button
                           onClick={() => openShareModal(tool.id)}
-                          className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 rounded-xl bg-purple-500 text-white hover:bg-purple-600 font-medium text-sm shadow-sm hover:shadow transition-all shrink-0"
+                          className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 sm:py-2.5 rounded-xl bg-purple-500 text-white hover:bg-purple-600 font-medium text-xs sm:text-sm shadow-sm hover:shadow transition-all shrink-0"
                           title="Share with friends"
                         >
-                          <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
                           </svg>
-                          <span><span className="hidden sm:inline">Share with Friends</span><span className="sm:hidden">Share</span></span>
+                          <span className="hidden sm:inline">Share</span>
                         </button>
 
                         <button
                           onClick={() => handleDeleteClick(tool.id)}
-                          className="p-2.5 rounded-xl text-stone-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                          className="p-2 sm:p-2.5 rounded-xl text-stone-400 hover:text-red-600 hover:bg-red-50 transition-colors shrink-0"
                           title="Delete"
                         >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                           </svg>
                         </button>
@@ -1460,40 +1460,40 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
 
                     {/* Preview strip */}
                     {(isQuiz && Array.isArray(tool.questions) && tool.questions.length > 0) || (tool.quiz_type === 'flashcards' && Array.isArray(tool.questions) && tool.questions.length > 0) || tool.quiz_type === 'crossword' || (tool.quiz_type === 'crater_blast' && (tool.questions as any)?.questions?.length > 0) ? (
-                      <div className="mt-4 pt-4 border-t border-stone-100 flex flex-wrap items-center gap-2">
+                      <div className="mt-4 pt-4 border-t border-stone-100 flex flex-wrap items-center gap-1.5 sm:gap-2 overflow-hidden">
                         {isQuiz && (
                           <>
-                            <span className="text-xs text-stone-500 font-medium">Preview:</span>
+                            <span className="text-[10px] sm:text-xs text-stone-500 font-medium shrink-0">Preview:</span>
                             {(tool.questions as QuizQuestion[]).slice(0, 2).map((q, i) => (
-                              <span key={i} className={`px-2 py-1 ${styles.preview} rounded-lg text-xs max-w-[200px] truncate`}>
-                                {q.question.length > 45 ? q.question.substring(0, 45) + '…' : q.question}
+                              <span key={i} className={`px-1.5 sm:px-2 py-0.5 sm:py-1 ${styles.preview} rounded-lg text-[10px] sm:text-xs max-w-[120px] sm:max-w-[200px] truncate`}>
+                                {q.question.length > 30 ? q.question.substring(0, 30) + '…' : q.question}
                               </span>
                             ))}
                             {(tool.questions as QuizQuestion[]).length > 2 && (
-                              <span className="text-xs text-stone-400">+{(tool.questions as QuizQuestion[]).length - 2} more</span>
+                              <span className="text-[10px] sm:text-xs text-stone-400 shrink-0">+{(tool.questions as QuizQuestion[]).length - 2} more</span>
                             )}
                           </>
                         )}
                         {tool.quiz_type === 'flashcards' && (
                           <>
-                            <span className="text-xs text-stone-500 font-medium">Preview:</span>
+                            <span className="text-[10px] sm:text-xs text-stone-500 font-medium shrink-0">Preview:</span>
                             {(tool.questions as FlashCard[]).slice(0, 2).map((card, i) => (
-                              <span key={i} className={`px-2 py-1 ${styles.preview} rounded-lg text-xs max-w-[200px] truncate`}>
-                                {card.front.length > 40 ? card.front.substring(0, 40) + '…' : card.front}
+                              <span key={i} className={`px-1.5 sm:px-2 py-0.5 sm:py-1 ${styles.preview} rounded-lg text-[10px] sm:text-xs max-w-[120px] sm:max-w-[200px] truncate`}>
+                                {card.front.length > 25 ? card.front.substring(0, 25) + '…' : card.front}
                               </span>
                             ))}
                             {(tool.questions as FlashCard[]).length > 2 && (
-                              <span className="text-xs text-stone-400">+{(tool.questions as FlashCard[]).length - 2} more</span>
+                              <span className="text-[10px] sm:text-xs text-stone-400 shrink-0">+{(tool.questions as FlashCard[]).length - 2} more</span>
                             )}
                           </>
                         )}
                         {tool.quiz_type === 'crossword' && (
                           <>
-                            <span className="text-xs text-stone-500 font-medium">Puzzle:</span>
-                            <span className={`px-2 py-1 ${styles.preview} rounded-lg text-xs`}>
+                            <span className="text-[10px] sm:text-xs text-stone-500 font-medium shrink-0">Puzzle:</span>
+                            <span className={`px-1.5 sm:px-2 py-0.5 sm:py-1 ${styles.preview} rounded-lg text-[10px] sm:text-xs`}>
                               {((tool.questions as CrosswordData)?.clues?.across?.length || 0)} across
                             </span>
-                            <span className={`px-2 py-1 ${styles.preview} rounded-lg text-xs`}>
+                            <span className={`px-1.5 sm:px-2 py-0.5 sm:py-1 ${styles.preview} rounded-lg text-[10px] sm:text-xs`}>
                               {((tool.questions as CrosswordData)?.clues?.down?.length || 0)} down
                             </span>
                           </>

@@ -525,12 +525,12 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
           </div>
           <div className="max-w-4xl mx-auto text-center">
             {/* Hero headline */}
-            <h1 className="text-3xl sm:text-5xl lg:text-6xl xl:text-7xl font-extrabold text-stone-800 dark:text-stone-100 leading-[1.1] mb-4 sm:mb-6 tracking-tight" style={{ letterSpacing: '-0.03em' }}>
+            <h1 className="text-3xl sm:text-5xl lg:text-6xl xl:text-7xl font-extrabold text-stone-800 dark:text-stone-100 leading-[1.1] mb-6 sm:mb-6 tracking-tight" style={{ letterSpacing: '-0.03em' }}>
               Everything you need to<br />
               <span className="text-violet-500">ace school</span>
             </h1>
 
-            <p className="text-base sm:text-xl text-stone-600 dark:text-stone-400 mb-12 sm:mb-14 max-w-2xl mx-auto leading-relaxed px-2">
+            <p className="text-base sm:text-xl text-stone-600 dark:text-stone-400 mb-16 sm:mb-14 max-w-2xl mx-auto leading-relaxed px-2">
               #1 Quizlet alternative. Paste <span className="font-semibold text-lime-500">notes</span>. Get <span className="font-semibold text-orange-500">quizzes</span>, <span className="font-semibold text-pink-500">flashcards</span> & <span className="font-semibold text-amber-500">crosswords</span> in seconds. Essay <span className="font-semibold text-blue-500">feedback</span>, <span className="font-semibold text-violet-500">humanizer</span>, we got you covered. 🙌
             </p>
             
