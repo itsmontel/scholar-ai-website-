@@ -943,7 +943,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
               <div className="absolute inset-0 bg-gradient-to-r from-indigo-400/10 to-violet-400/10 rounded-3xl blur-3xl" />
               <DualMascot size={200} />
             </div>
-            <div className="relative w-full max-w-[320px] rounded-2xl overflow-hidden border-2 border-stone-200/80 dark:border-stone-700/60 shadow-xl mb-6 bg-stone-900">
+            <div className="relative w-full max-w-[360px] rounded-2xl overflow-hidden border-2 border-stone-200/80 dark:border-stone-700/60 shadow-xl mb-6 bg-stone-900">
               <video
                 autoPlay
                 loop
@@ -1132,6 +1132,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
               { id: 'quiz', label: 'Practice Tests', icon: '📋', desc: 'Paste your study material and get instant quizzes — multiple choice, true/false, and more.', activeClasses: 'bg-amber-500 text-white shadow-lg shadow-amber-500/30', inactiveClasses: 'bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800/50 hover:bg-amber-100 dark:hover:bg-amber-900/40' },
               { id: 'summarise', label: 'Summarise', icon: '📋', desc: 'Upload documents or copy and paste text to get concise bullet points or summaries in seconds.', activeClasses: 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30', inactiveClasses: 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/50 hover:bg-emerald-100 dark:hover:bg-emerald-900/40' },
               { id: 'crossword', label: 'Crossword', icon: '🧩', desc: 'Paste key terms or notes to create an interactive crossword puzzle and test your vocabulary.', activeClasses: 'bg-violet-500 text-white shadow-lg shadow-violet-500/30', inactiveClasses: 'bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-400 border border-violet-200 dark:border-violet-800/50 hover:bg-violet-100 dark:hover:bg-violet-900/40' },
+              { id: 'games', label: 'Games', icon: '🎮', desc: 'Play Crater Blast — blast the correct falling answer before it lands. Turn your study material into an addictive quiz shooter game.', activeClasses: 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/30', inactiveClasses: 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800/50 hover:bg-indigo-100 dark:hover:bg-indigo-900/40' },
               { id: 'humanise', label: 'Humanise', icon: '✨', desc: 'Paste AI-generated text to transform it into natural, human-sounding writing that bypasses detectors.', activeClasses: 'bg-purple-500 text-white shadow-lg shadow-purple-500/30', inactiveClasses: 'bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400 border border-purple-200 dark:border-purple-800/50 hover:bg-purple-100 dark:hover:bg-purple-900/40' },
             ];
             const activeTab = tabs.find(t => t.id === activeStudyTab);
@@ -1168,6 +1169,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                 { id: 'quiz', src: '/quizvid.mp4', gradient: 'from-amber-500/10 to-orange-500/10' },
                 { id: 'summarise', src: '/summarisevid.mp4', gradient: 'from-emerald-500/10 to-teal-500/10' },
                 { id: 'crossword', src: '/crosswordvid.mp4', gradient: 'from-violet-500/10 to-purple-500/10' },
+                { id: 'games', src: '/craterblast.mp4', gradient: 'from-indigo-500/10 to-violet-500/10' },
                 { id: 'humanise', src: '/humanisevid.mp4', gradient: 'from-purple-500/10 to-fuchsia-500/10' },
               ].map((vid) => (
                 activeStudyTab === vid.id && (

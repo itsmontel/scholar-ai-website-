@@ -197,6 +197,20 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
     };
   }, []);
 
+  // Scroll to top when game starts (loading/ready/playing) so content isn't at footer
+  useEffect(() => {
+    if (gameState === 'loading' || gameState === 'ready' || gameState === 'playing') {
+      const scrollToTop = () => {
+        window.scrollTo(0, 0);
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+      };
+      requestAnimationFrame(scrollToTop);
+      const t = setTimeout(scrollToTop, 50);
+      return () => clearTimeout(t);
+    }
+  }, [gameState]);
+
   const sync = useCallback((field: string, v: number) => {
     switch (field) {
       case 'lives': livesRef.current = v; setLives(v); break;

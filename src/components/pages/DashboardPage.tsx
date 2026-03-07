@@ -235,19 +235,14 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
     plan: 'free'
   });
 
-  // Welcome tutorial state - show after onboarding completion (one-truth: resolveTutorial)
+  // Welcome tutorial state — parent is the sole guard.
+  // resolveTutorial checks both user.welcomeTutorialCompleted (set by parent on every user build)
+  // and the durable localStorage key, so this is correct even on first render after login.
   const [showWelcomeTutorial, setShowWelcomeTutorial] = useState(() => {
     if (!user?.id) return false;
-    const tutorialDone = resolveTutorial(user.id, (user as any).welcomeTutorialCompleted);
-    if (tutorialDone) return false;
+    if (resolveTutorial(user.id, (user as any).welcomeTutorialCompleted)) return false;
     return (user as any).onboardingCompleted === true;
   });
-
-  useEffect(() => {
-    if (user?.id && resolveTutorial(user.id, (user as any).welcomeTutorialCompleted)) {
-      setShowWelcomeTutorial(false);
-    }
-  }, [user?.id, (user as any)?.welcomeTutorialCompleted]);
 
   // Quick Review state - show to returning users who haven't reviewed today
   const [showQuickReview, setShowQuickReview] = useState(() => {
@@ -1759,7 +1754,6 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
         <WelcomeTutorial
           userName={user?.name?.split(' ')[0] || user?.name || ''}
           userId={user?.id}
-          tutorialCompletedFromServer={(user as any)?.welcomeTutorialCompleted}
           onComplete={() => {
             setShowWelcomeTutorial(false);
             onUserUpdate?.({ welcomeTutorialCompleted: true });

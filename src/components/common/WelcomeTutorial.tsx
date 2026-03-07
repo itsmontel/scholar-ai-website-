@@ -1,15 +1,14 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import ScholarMascot from './ScholarMascot';
-import { setTutorialDone, persistTutorialToServer, resolveTutorial } from '../../utils/onboarding';
+import { setTutorialDone, persistTutorialToServer } from '../../utils/onboarding';
 
 interface WelcomeTutorialProps {
   userName?: string;
   userId?: string;
-  tutorialCompletedFromServer?: boolean;
   onComplete: () => void;
 }
 
-const WelcomeTutorial = ({ userName, userId, tutorialCompletedFromServer, onComplete }: WelcomeTutorialProps) => {
+const WelcomeTutorial = ({ userName, userId, onComplete }: WelcomeTutorialProps) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [isVisible, setIsVisible] = useState(true);
   const [isAnimating, setIsAnimating] = useState(false);
@@ -115,13 +114,6 @@ const WelcomeTutorial = ({ userName, userId, tutorialCompletedFromServer, onComp
   const handleSkip = () => {
     handleComplete();
   };
-
-  useEffect(() => {
-    if (userId && resolveTutorial(userId, tutorialCompletedFromServer)) {
-      setIsVisible(false);
-      onComplete();
-    }
-  }, [userId, tutorialCompletedFromServer, onComplete]);
 
   if (!isVisible) return null;
 

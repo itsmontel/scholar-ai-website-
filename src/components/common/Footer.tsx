@@ -1,4 +1,5 @@
 import React from 'react';
+import ScholarMascot from './ScholarMascot';
 
 interface FooterProps {
   onNavigate?: (page: string) => void;
@@ -12,8 +13,8 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
           {/* Logo and Description */}
           <div className="col-span-2 md:col-span-1">
             <div className="flex items-center space-x-2.5 mb-4">
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-gradient-to-br from-indigo-500 to-violet-600">
-                <span className="font-black text-lg text-white">W</span>
+              <div className="flex-shrink-0">
+                <ScholarMascot size={36} animated={false} pose="default" />
               </div>
               <span className="text-xl font-extrabold tracking-tight text-white">
                 WriteScholar
