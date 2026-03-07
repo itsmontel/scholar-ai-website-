@@ -275,7 +275,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
               </button>
               <button 
                 onClick={() => onNavigate?.('signup')} 
-                className="inline-flex items-center justify-center px-4 py-2 sm:px-6 sm:py-2.5 text-white text-xs sm:text-sm font-bold rounded-full bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 hover:scale-105 active:scale-95 transition-all duration-300 shadow-lg shadow-violet-500/25 whitespace-nowrap shrink-0"
+                className="inline-flex items-center justify-center px-4 py-2 sm:px-6 sm:py-2.5 text-white text-xs sm:text-sm font-bold rounded-full bg-violet-500 hover:bg-violet-600 hover:scale-105 active:scale-95 transition-all duration-300 shadow-lg shadow-violet-500/25 whitespace-nowrap shrink-0"
               >
                 Sign up free
               </button>
@@ -365,7 +365,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
                 </button>
                 <button 
                   onClick={() => { onNavigate?.('signup'); setIsMobileMenuOpen(false); }} 
-                  className="block text-center px-4 py-3 text-white text-sm font-bold rounded-xl bg-gradient-to-r from-blue-500 to-violet-500 shadow-lg shadow-violet-500/25"
+                  className="block text-center px-4 py-3 text-white text-sm font-bold rounded-xl bg-violet-500 hover:bg-violet-600 shadow-lg shadow-violet-500/25 transition-colors"
                 >
                   Sign up free
                 </button>

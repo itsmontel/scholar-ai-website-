@@ -701,7 +701,7 @@ const HumanizerPage = ({ onNavigate, user, onLogout }: HumanizerPageProps) => {
             <div className="space-y-3">
               <button
                 onClick={() => onNavigate('signup')}
-                className="w-full px-6 py-3.5 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white font-semibold rounded-2xl transition-all shadow-lg shadow-indigo-500/25"
+                className="w-full px-6 py-3.5 bg-violet-500 hover:bg-violet-600 text-white font-semibold rounded-2xl transition-all shadow-lg shadow-violet-500/25"
               >
                 Sign Up Free
               </button>

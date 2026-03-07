@@ -2002,7 +2002,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                     {greeting.greeting}{user?.name ? `, ${user.name.split(' ')[0]}` : ''}! <span className="inline-block animate-[wave_1.8s_ease-in-out_infinite]">{greeting.emoji}</span>
                   </h1>
                   <p className="text-stone-500 dark:text-stone-400 mt-1 sm:mt-2 text-sm sm:text-base">
-                    Everything you need to <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-600 to-purple-600 font-semibold">ace school</span>
+                    Everything you need to <span className="text-violet-500 font-semibold">ace school</span>
                   </p>
                   {/* Mobile Quick Review + Friends Buttons */}
                   <div className="mt-4 lg:hidden flex gap-2">

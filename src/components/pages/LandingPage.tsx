@@ -527,7 +527,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
             {/* Hero headline */}
             <h1 className="text-3xl sm:text-5xl lg:text-6xl xl:text-7xl font-extrabold text-stone-800 dark:text-stone-100 leading-[1.1] mb-4 sm:mb-6 tracking-tight" style={{ letterSpacing: '-0.03em' }}>
               Everything you need to<br />
-              <span className="bg-gradient-to-r from-blue-500 to-violet-500 bg-clip-text text-transparent">ace school</span>
+              <span className="text-violet-500">ace school</span>
             </h1>
 
             <p className="text-base sm:text-xl text-stone-600 dark:text-stone-400 mb-12 sm:mb-14 max-w-2xl mx-auto leading-relaxed px-2">
@@ -979,7 +979,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
             </div>
           </div>
           <div className="text-center mt-14 sm:mt-16 animate-notes-fade-in-up opacity-0" style={{ animationDelay: '0.9s', animationFillMode: 'forwards' }}>
-            <button onClick={() => onNavigate('signup')} className="group inline-flex items-center px-8 py-4 text-white font-bold rounded-2xl bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 hover:scale-105 active:scale-95 shadow-xl shadow-violet-500/30 hover:shadow-violet-500/40 transition-all duration-300 text-lg max-lg:px-10 max-lg:py-4 max-lg:shadow-violet-500/40">
+            <button onClick={() => onNavigate('signup')} className="group inline-flex items-center px-8 py-4 text-white font-bold rounded-2xl bg-violet-500 hover:bg-violet-600 hover:scale-105 active:scale-95 shadow-xl shadow-violet-500/30 hover:shadow-violet-500/40 transition-all duration-300 text-lg max-lg:px-10 max-lg:py-4 max-lg:shadow-violet-500/40">
               Try Study Tools Free
               <svg className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
             </button>
@@ -1000,7 +1000,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
             </div>
             <h2 className="text-2xl font-extrabold text-stone-900 dark:text-stone-50 leading-tight mb-2">
               Study Better,{' '}
-              <span className="bg-gradient-to-r from-indigo-500 via-violet-500 to-purple-600 dark:from-indigo-400 dark:via-violet-400 dark:to-purple-400 bg-clip-text text-transparent">
+              <span className="text-violet-500">
                 Together
               </span>
             </h2>
@@ -1029,7 +1029,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
             <div className="flex flex-col gap-3 w-full max-w-xs">
               <button
                 onClick={() => onNavigate('signup')}
-                className="w-full px-6 py-3.5 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 text-white font-bold rounded-2xl shadow-lg shadow-indigo-500/30 active:scale-[0.98] text-sm flex items-center justify-center gap-2"
+                className="w-full px-6 py-3.5 bg-violet-500 hover:bg-violet-600 text-white font-bold rounded-2xl shadow-lg shadow-violet-500/25 active:scale-[0.98] text-sm flex items-center justify-center gap-2"
               >
                 <span>Start sharing free</span>
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1054,7 +1054,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
               </div>
               <h2 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-stone-900 dark:text-stone-50 leading-tight mb-5">
                 Study Better,{' '}
-                <span className="bg-gradient-to-r from-indigo-500 via-violet-500 to-purple-600 dark:from-indigo-400 dark:via-violet-400 dark:to-purple-400 bg-clip-text text-transparent">
+                <span className="text-violet-500">
                   Together
                 </span>
               </h2>
@@ -1067,7 +1067,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
               <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
                 <button
                   onClick={() => onNavigate('signup')}
-                  className="px-7 py-3.5 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 text-white font-bold rounded-2xl shadow-lg shadow-indigo-500/30 hover:shadow-xl hover:shadow-indigo-500/40 transition-all duration-200 hover:-translate-y-0.5 text-base flex items-center justify-center gap-2"
+                  className="px-7 py-3.5 bg-violet-500 hover:bg-violet-600 text-white font-bold rounded-2xl shadow-lg shadow-violet-500/25 hover:shadow-xl hover:shadow-violet-500/40 transition-all duration-200 hover:-translate-y-0.5 text-base flex items-center justify-center gap-2"
                 >
                   <span>Start sharing free</span>
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1113,7 +1113,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
           </span>
           <h2 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-stone-800 dark:text-stone-100 mb-4">
             One Code.{' '}
-            <span className="bg-gradient-to-r from-indigo-500 to-violet-600 dark:from-indigo-400 dark:to-violet-400 bg-clip-text text-transparent">
+            <span className="text-violet-500">
               Endless Friends.
             </span>
           </h2>
@@ -1262,7 +1262,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
           <div className="text-center mt-10 sm:mt-12">
             <button
               onClick={() => onNavigate('signup')}
-              className="px-8 py-4 bg-gradient-to-r from-blue-500 to-violet-500 text-white font-bold rounded-2xl hover:from-blue-400 hover:to-violet-400 hover:scale-105 active:scale-95 transition-all shadow-xl shadow-violet-500/25 text-lg"
+              className="px-8 py-4 bg-violet-500 hover:bg-violet-600 text-white font-bold rounded-2xl hover:scale-105 active:scale-95 transition-all shadow-xl shadow-violet-500/25 text-lg"
             >
               Try it free
             </button>
@@ -2750,7 +2750,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
 
             <button 
               onClick={handleContinueToSignup}
-              className="w-full py-3.5 bg-violet-600 hover:bg-violet-700 text-white font-semibold rounded-xl transition-all duration-200 hover:shadow-lg flex items-center justify-center"
+              className="w-full py-3.5 bg-violet-500 hover:bg-violet-600 text-white font-semibold rounded-xl transition-all duration-200 hover:shadow-lg flex items-center justify-center"
             >
               Get my humanized text — sign up free
               <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
