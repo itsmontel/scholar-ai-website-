@@ -4,11 +4,12 @@ import ScholarMascot from './ScholarMascot';
 interface AnalysisAnimationProps {
   size?: 'sm' | 'md' | 'lg';
   text?: string;
+  message?: string; // alias for text (backwards compat)
   className?: string;
   isPopup?: boolean;
   onComplete?: () => void;
   isComplete?: boolean;
-  variant?: 'analyze' | 'citations';
+  variant?: 'analyze' | 'citations' | 'lesson';
 }
 
 const analysisSteps = [
@@ -35,9 +36,22 @@ const citationSteps = [
   { text: 'Almost ready...', icon: '💡' }
 ];
 
+const lessonSteps = [
+  { text: 'Reading your material...', icon: '📖' },
+  { text: 'Creating visual cards...', icon: '🎨' },
+  { text: 'Building step-by-step guide...', icon: '📋' },
+  { text: 'Writing story mode...', icon: '📚' },
+  { text: 'Extracting key concepts...', icon: '💡' },
+  { text: 'Adding interactive elements...', icon: '✨' },
+  { text: 'Generating quiz questions...', icon: '🎯' },
+  { text: 'Finalizing lessons...', icon: '✅' },
+  { text: 'Almost ready...', icon: '🚀' }
+];
+
 const AnalysisAnimation: React.FC<AnalysisAnimationProps> = ({
   size = 'md',
-  text = 'Analyzing...',
+  text,
+  message,
   className = '',
   isPopup = false,
   onComplete,
@@ -49,13 +63,15 @@ const AnalysisAnimation: React.FC<AnalysisAnimationProps> = ({
   const [progress, setProgress] = useState(0);
   const [isCycling, setIsCycling] = useState(false);
 
+  const displayText = text ?? message ?? 'Analyzing...';
+
   const sizeClasses = {
     sm: 'w-6 h-6',
     md: 'w-8 h-8',
     lg: 'w-16 h-16'
   };
 
-  const steps = variant === 'citations' ? citationSteps : analysisSteps;
+  const steps = variant === 'citations' ? citationSteps : variant === 'lesson' ? lessonSteps : analysisSteps;
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -111,7 +127,7 @@ const AnalysisAnimation: React.FC<AnalysisAnimationProps> = ({
       <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
         <div className="bg-white rounded-3xl shadow-xl border border-gray-100 p-8 sm:p-10 max-w-md w-full mx-4">
           <div className="flex flex-col items-center justify-center">
-            {/* Scholar mascot — analyzing pose for paper analysis, studying pose for citations */}
+            {/* Scholar mascot — analyzing pose for paper/lesson, studying pose for citations */}
             <div className="relative mb-6 flex justify-center">
               <ScholarMascot
                 size={140}
@@ -122,7 +138,7 @@ const AnalysisAnimation: React.FC<AnalysisAnimationProps> = ({
 
             {/* Title */}
             <h3 className="text-xl font-bold text-gray-900 mb-2">
-              {variant === 'citations' ? 'Finding Citations' : 'AI Analysis in Progress'}
+              {variant === 'citations' ? 'Finding Citations' : variant === 'lesson' ? 'Creating Your Lessons' : 'AI Analysis in Progress'}
             </h3>
             
             {/* Current step with icon */}
@@ -145,7 +161,7 @@ const AnalysisAnimation: React.FC<AnalysisAnimationProps> = ({
             
             {/* Progress percentage */}
             <div className="flex items-center justify-between w-full text-sm">
-              <span className="text-gray-400">{text}{dots}</span>
+              <span className="text-gray-400">{displayText}{dots}</span>
               <span className="font-semibold text-gray-900">
                 {isComplete ? '100%' : `${Math.round(Math.min(progress, 100))}%`}
               </span>
@@ -156,7 +172,9 @@ const AnalysisAnimation: React.FC<AnalysisAnimationProps> = ({
               <p className="text-sm text-blue-700 text-center">
                 {variant === 'citations'
                   ? '💡 Tip: We search millions of peer-reviewed sources in your citation style.'
-                  : '💡 Tip: Our AI analyzes structure, grammar, citations, and more!'}
+                  : variant === 'lesson'
+                    ? '💡 Tip: One click = 3 unique lessons! Visual Cards, Step-by-Step, and Story Mode.'
+                    : '💡 Tip: Our AI analyzes structure, grammar, citations, and more!'}
               </p>
             </div>
           </div>
@@ -182,7 +200,7 @@ const AnalysisAnimation: React.FC<AnalysisAnimationProps> = ({
           {steps[currentStep].text}
         </p>
         <p className="text-xs text-white/80">
-          {text}{dots}
+          {displayText}{dots}
         </p>
       </div>
 

@@ -475,19 +475,20 @@ router.post('/generate-lesson', authenticateToken, async (req, res) => {
       });
     }
 
-    const result = await aiAnalysisService.generateLesson(text, style || 'visual', userPlan);
+    // Generate all 3 lesson styles in parallel (1 generation = 3 unique lessons)
+    const allLessons = await aiAnalysisService.generateAllLessonStyles(text, userPlan);
 
-    // Record usage in lesson_usage table
+    // Record usage in lesson_usage table (counts as 1 generation)
     supabase.from('lesson_usage').insert({
       user_id: userId,
       words_count: wordCount,
-      lesson_style: style || 'visual'
+      lesson_style: 'all' // Generated all 3 styles
     }).then(() => {}).catch(err => console.error('Failed to record lesson usage:', err));
 
     res.json({
       success: true,
-      message: 'Lesson generated successfully',
-      data: result
+      message: 'Lessons generated successfully (3 styles)',
+      data: allLessons
     });
 
   } catch (error) {

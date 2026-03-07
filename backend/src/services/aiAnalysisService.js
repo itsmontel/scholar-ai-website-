@@ -3901,7 +3901,8 @@ DO NOT include any text outside the JSON object.`;
     }
   }
 
-  async generateLesson(text, style = 'visual', userPlan = 'free') {
+  // Generate all 3 lesson styles in parallel - completely different content for each
+  async generateAllLessonStyles(text, userPlan = 'free') {
     if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY === 'your_openai_api_key_here') {
       console.log('OpenAI API key not configured');
       throw new Error('OpenAI API key not configured');
@@ -3909,134 +3910,218 @@ DO NOT include any text outside the JSON object.`;
 
     const selectedModel = userPlan === 'premium' ? 'gpt-4.1-mini' : 'gpt-4.1-nano';
 
-    const styleInstructions = {
-      visual: `Create visually-oriented lesson slides with:
-- Colorful, engaging titles for each slide
-- Clear, bite-sized content (2-4 sentences per main content area)
-- Interesting emojis that match the content
-- 3-5 clickable bullet points per concept slide for interactive reveals
-- Fun facts and "Did you know?" elements
-- Highlight key terms that should be remembered`,
-      stepByStep: `Create a numbered learning path with:
-- Clear progression from basic to advanced concepts
-- Each slide builds on the previous one
-- Step numbers in titles (Step 1, Step 2, etc.)
-- Practical examples at each step
-- Clear "checkpoint" summaries`,
-      story: `Create a narrative-driven lesson with:
-- Engaging storytelling approach
-- Connect concepts through a flowing narrative
-- Use analogies and real-world examples
-- Make abstract concepts relatable
-- Build toward a satisfying conclusion`
-    };
+    // Use only the first 10,000 words for AI processing
+    const words = text.trim().split(/\s+/);
+    const first10kWords = words.slice(0, 10000).join(' ');
+    const wordCount = Math.min(words.length, 10000);
 
-    const systemPrompt = `You are an expert educational content designer who transforms boring text into engaging, interactive lessons. Your lessons are:
-- Engaging: You make learning fun and interesting
-- Bite-sized: Complex topics are broken into digestible chunks
-- Visual: You suggest emojis and visual elements to make content memorable
-- Interactive: You include elements that encourage active learning
-- Memorable: You highlight key terms and create "sticky" learning moments
+    // Scale slides by word count
+    const slideCount = Math.min(25, Math.max(6, Math.ceil(wordCount / 400)));
 
-${styleInstructions[style] || styleInstructions.visual}
+    // Three completely different prompts for three unique lessons
+    const prompts = {
+      visual: `You are a FUN, energetic educational content creator who makes learning feel like scrolling through social media. Create a VISUAL CARDS lesson that's colorful, emoji-heavy, and super engaging.
 
-Create a lesson with 5-8 slides covering the main concepts. Each slide should have:
+Your style:
+- Use LOTS of emojis (2-3 per slide title) 🎯🔥✨
+- Write like you're excited to share cool facts
+- Use phrases like "Did you know?", "Fun fact!", "Mind-blown moment:", "Pro tip:"
+- Make each card feel like a quick, satisfying social media post
+- Include "clickable" bullet points that reveal surprising details
+- Highlight vocabulary with 🔑 Key Term callouts
+
+Create ${slideCount} slides. Each slide needs:
 - type: one of "intro", "concept", "example", "keypoint", "funfact", "summary"
-- title: engaging slide title
-- content: main explanation (2-4 sentences, clear and simple)
-- emoji: a relevant emoji for the slide
-- bulletPoints: array of 3-5 interactive reveal items (for concept/keypoint types)
-- highlightedTerm: optional key vocabulary term to remember
+- title: emoji-rich, catchy title (like a TikTok caption)
+- content: 2-3 punchy sentences with personality
+- emoji: the MAIN emoji for this card
+- bulletPoints: 3-5 reveal items for concept/keypoint types (make them interesting facts!)
+- highlightedTerm: optional vocabulary word
 
-IMPORTANT: Return your response as valid JSON in this exact format:
+JSON format:
 {
-  "title": "Lesson title that captures the topic",
+  "title": "🎯 Catchy Lesson Title Here! 🚀",
   "slides": [
-    {
-      "id": 1,
-      "type": "intro",
-      "title": "Welcome slide title",
-      "content": "Introduction content...",
-      "emoji": "📖"
-    },
-    {
-      "id": 2,
-      "type": "concept",
-      "title": "First concept title",
-      "content": "Explanation of the concept...",
-      "emoji": "💡",
-      "bulletPoints": ["Point 1", "Point 2", "Point 3"],
-      "highlightedTerm": "Key term"
-    }
+    {"id": 1, "type": "intro", "title": "📖 Welcome! Let's Learn Something Cool", "content": "Get ready...", "emoji": "🎉"},
+    {"id": 2, "type": "concept", "title": "💡 Mind = Blown", "content": "Here's the thing...", "emoji": "💡", "bulletPoints": ["Fact 1", "Fact 2", "Fact 3"], "highlightedTerm": "Key word"}
   ],
-  "estimatedReadTime": 5
+  "estimatedReadTime": ${Math.ceil(slideCount * 1.2)}
 }
 
 Rules:
-- Start with an "intro" slide that sets context
-- End with a "summary" slide that reinforces key takeaways
-- Include at least one "funfact" or "example" slide to make it interesting
-- Keep language simple and accessible
-- Make bullet points reveal meaningful details, not just repetition
-- Return ONLY valid JSON, no other text`;
+- Be enthusiastic and fun, not boring or academic
+- Each card should feel complete on its own
+- Use emojis strategically to highlight key points
+- Never use em dashes (—). Use commas, periods, or colons instead.
+- Return ONLY valid JSON`,
+
+      stepByStep: `You are a patient, methodical instructor who builds knowledge step by step. Create a STEP-BY-STEP lesson that feels like a guided tutorial with clear checkpoints.
+
+Your style:
+- Number everything: "Step 1:", "Step 2:", etc.
+- Use phrases like "First, let's understand...", "Now that you know X, let's move to...", "Checkpoint: Can you explain...?"
+- Build each step on the previous one
+- Include "🔍 Let's verify" checkpoints
+- Use simple, clear language - no jargon without explanation
+- Progress from basic → intermediate → advanced
+
+Create ${slideCount} steps. Each step needs:
+- type: one of "intro", "concept", "example", "keypoint", "checkpoint", "summary"
+- title: numbered step title ("Step 1: Understanding the Basics")
+- content: clear explanation that builds on previous steps (2-4 sentences)
+- emoji: simple, professional emoji
+- bulletPoints: 3-5 checklist items for concept/keypoint types
+- highlightedTerm: optional key term being introduced
+
+JSON format:
+{
+  "title": "Step-by-Step Guide: [Topic]",
+  "slides": [
+    {"id": 1, "type": "intro", "title": "Step 1: Getting Started", "content": "Before we dive in, let's establish...", "emoji": "🎯"},
+    {"id": 2, "type": "concept", "title": "Step 2: The Foundation", "content": "Building on step 1...", "emoji": "🔧", "bulletPoints": ["First, understand...", "Then, notice...", "Finally, connect..."], "highlightedTerm": "Foundation term"}
+  ],
+  "estimatedReadTime": ${Math.ceil(slideCount * 1.5)}
+}
+
+Rules:
+- Each step MUST reference or build on previous steps
+- Use "Now that you understand X..." transitions
+- Include checkpoint questions to verify understanding
+- Keep language simple and instructional
+- Never use em dashes (—). Use commas, periods, or colons instead.
+- Return ONLY valid JSON`,
+
+      story: `You are a clear, engaging writer who teaches through narrative and analogies. Create a STORY MODE lesson that explains concepts by connecting them to real-world examples and relatable scenarios.
+
+Your style:
+- Use analogies and metaphors to explain abstract ideas (e.g., "Think of it like...")
+- Connect concepts to everyday situations and examples
+- Write in a flowing, readable way that builds understanding
+- Use "you" to address the reader directly
+- Avoid theatrical or fairy-tale language. No "Once upon a time", "The plot thickens", "Our hero discovers", or similar phrases.
+- Keep tone grounded and informative, not dramatic or cheesy
+
+Create ${slideCount} chapters. Each chapter needs:
+- type: one of "intro", "concept", "example", "keypoint", "aside", "summary"
+- title: clear chapter title ("Understanding X" or "How Y Works in Practice")
+- content: narrative explanation with analogies (3-5 sentences, clear and engaging)
+- emoji: subtle, thematic emoji
+- bulletPoints: 3-5 key takeaways for concept/keypoint types
+- highlightedTerm: optional concept being introduced
+
+JSON format:
+{
+  "title": "[Topic]: Explained Through Examples",
+  "slides": [
+    {"id": 1, "type": "intro", "title": "Setting the Stage", "content": "To understand this topic, we need to look at...", "emoji": "📖"},
+    {"id": 2, "type": "concept", "title": "The Core Idea", "content": "At its heart, this works like...", "emoji": "💡", "bulletPoints": ["Key point one", "Key point two", "Key point three"], "highlightedTerm": "Term"}
+  ],
+  "estimatedReadTime": ${Math.ceil(slideCount * 2)}
+}
+
+Rules:
+- Explain through analogies and real-world connections, not drama
+- Use "you" naturally. Avoid clichéd story phrases.
+- Create vivid analogies (e.g., "Think of DNA like a recipe book")
+- Never use em dashes (—). Use commas, periods, or colons instead.
+- Return ONLY valid JSON`
+    };
+
+    const userMessages = {
+      visual: `Transform this study material into a FUN, emoji-rich visual cards lesson. Make it feel like scrolling through engaging social media content. Material:\n\n${first10kWords}`,
+      stepByStep: `Transform this study material into a clear, numbered step-by-step guide. Each step should build on the previous one. Material:\n\n${first10kWords}`,
+      story: `Transform this study material into an engaging story. Use analogies, narrative, and make the reader the protagonist. Material:\n\n${first10kWords}`
+    };
 
     try {
-      // Use only the first 10,000 words for AI processing
-      const words = text.trim().split(/\s+/);
-      const first10kWords = words.slice(0, 10000).join(' ');
-      const wordCount = Math.min(words.length, 10000);
+      // Generate all 3 lessons in parallel
+      console.log('Generating 3 lesson styles in parallel...');
+      const [visualResult, stepByStepResult, storyResult] = await Promise.all([
+        this.generateSingleLesson(prompts.visual, userMessages.visual, selectedModel, 'visual'),
+        this.generateSingleLesson(prompts.stepByStep, userMessages.stepByStep, selectedModel, 'stepByStep'),
+        this.generateSingleLesson(prompts.story, userMessages.story, selectedModel, 'story')
+      ]);
 
-      // Scale slides by word count: ~1 slide per 400 words, min 6, max 25
-      const slideCount = Math.min(25, Math.max(6, Math.ceil(wordCount / 400)));
+      // Generate quiz bank once (shared across all styles)
+      const quizBank = await this.generateLessonQuizBank(first10kWords, visualResult.title, selectedModel, wordCount);
 
-      const systemPromptWithCount = systemPrompt.replace(
-        'Create a lesson with 5-8 slides covering the main concepts.',
-        `Create a lesson with ${slideCount} slides covering the main concepts (the material is ~${wordCount.toLocaleString()} words, so cover it thoroughly).`
-      );
+      // Attach quiz bank to all lessons
+      visualResult.quizBank = quizBank.questions || [];
+      visualResult.quizDisplayCount = quizBank.displayCount || 6;
+      stepByStepResult.quizBank = quizBank.questions || [];
+      stepByStepResult.quizDisplayCount = quizBank.displayCount || 6;
+      storyResult.quizBank = quizBank.questions || [];
+      storyResult.quizDisplayCount = quizBank.displayCount || 6;
 
-      // Generate lesson slides
+      return {
+        visual: visualResult,
+        stepByStep: stepByStepResult,
+        story: storyResult
+      };
+    } catch (error) {
+      console.error('OpenAI lesson generation error:', error);
+      throw new Error('Failed to generate lessons: ' + error.message);
+    }
+  }
+
+  // Helper: generate a single lesson with specific style prompt
+  async generateSingleLesson(systemPrompt, userMessage, model, style) {
+    try {
       const completion = await this.openai.chat.completions.create({
-        model: selectedModel,
+        model: model,
         messages: [
-          { role: 'system', content: systemPromptWithCount },
-          { role: 'user', content: `Transform this study material into an engaging interactive lesson. Use only the content below (first 10,000 words):\n\n${first10kWords}` }
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userMessage }
         ],
         max_tokens: 8000,
-        temperature: 0.7,
+        temperature: 0.8, // Slightly higher for more variety
       });
 
       const responseText = completion.choices[0]?.message?.content;
-      if (!responseText) throw new Error('No response from AI');
+      if (!responseText) throw new Error(`No response for ${style} lesson`);
 
       let parsed;
       try {
         const jsonMatch = responseText.match(/\{[\s\S]*\}/);
         parsed = jsonMatch ? JSON.parse(jsonMatch[0]) : JSON.parse(responseText);
       } catch (parseError) {
-        console.error('Failed to parse lesson JSON:', parseError);
-        throw new Error('Failed to parse lesson response');
+        console.error(`Failed to parse ${style} lesson JSON:`, parseError);
+        throw new Error(`Failed to parse ${style} lesson response`);
       }
 
       if (!parsed.slides || !Array.isArray(parsed.slides) || parsed.slides.length === 0) {
-        throw new Error('No slides generated');
+        throw new Error(`No slides generated for ${style}`);
       }
 
-      // Generate quiz question bank (scaled by word count)
-      const quizBank = await this.generateLessonQuizBank(first10kWords, parsed.title, selectedModel, wordCount);
+      // Strip em dashes from all text content
+      const stripEmDashes = (s) => (typeof s === 'string' ? s.replace(/—/g, ', ') : s);
+      parsed.title = stripEmDashes(parsed.title);
+      parsed.slides = parsed.slides.map(s => ({
+        ...s,
+        title: stripEmDashes(s.title),
+        content: stripEmDashes(s.content),
+        bulletPoints: Array.isArray(s.bulletPoints) ? s.bulletPoints.map(stripEmDashes) : s.bulletPoints,
+        highlightedTerm: stripEmDashes(s.highlightedTerm)
+      }));
 
       return {
-        title: parsed.title || 'Your Interactive Lesson',
+        title: parsed.title || `Your ${style} Lesson`,
         slides: parsed.slides,
         totalSlides: parsed.slides.length,
         estimatedReadTime: parsed.estimatedReadTime || Math.ceil(parsed.slides.length * 1.5),
-        style: style,
-        quizBank: quizBank.questions || [],
-        quizDisplayCount: quizBank.displayCount || 6
+        style: style
       };
     } catch (error) {
-      console.error('OpenAI lesson generation error:', error);
-      throw new Error('Failed to generate lesson: ' + error.message);
+      console.error(`Error generating ${style} lesson:`, error);
+      throw error;
     }
+  }
+
+  // Legacy single-style generation (kept for backwards compatibility)
+  async generateLesson(text, style = 'visual', userPlan = 'free') {
+    // Redirect to new multi-style generation and return requested style
+    const allStyles = await this.generateAllLessonStyles(text, userPlan);
+    return allStyles[style] || allStyles.visual;
   }
 
   async generateLessonQuizBank(text, lessonTitle, model, wordCount = 3000) {
@@ -4072,6 +4157,7 @@ Rules:
 - Each question must have exactly 4 options
 - correctAnswer must exactly match one of the options
 - Keep questions focused on the material
+- Never use em dashes (—). Use commas, periods, or colons instead.
 - Return ONLY valid JSON`;
 
     try {

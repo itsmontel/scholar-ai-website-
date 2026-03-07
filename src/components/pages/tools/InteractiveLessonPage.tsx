@@ -41,6 +41,12 @@ interface LessonResult {
   quizDisplayCount?: number;
 }
 
+interface AllLessons {
+  visual: LessonResult;
+  stepByStep: LessonResult;
+  story: LessonResult;
+}
+
 interface UsageData {
   wordsUsed: number;
   wordLimit: number;
@@ -53,7 +59,7 @@ interface UsageData {
 
 const InteractiveLessonPage = ({ onNavigate, user, onLogout }: InteractiveLessonPageProps) => {
   const [inputText, setInputText] = useState('');
-  const [lessonResult, setLessonResult] = useState<LessonResult | null>(null);
+  const [allLessons, setAllLessons] = useState<AllLessons | null>(null);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -66,6 +72,9 @@ const InteractiveLessonPage = ({ onNavigate, user, onLogout }: InteractiveLesson
   const [savedLessonId, setSavedLessonId] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  // Derived: current lesson based on selected style
+  const lessonResult = allLessons ? allLessons[lessonStyle] : null;
   
   // Quiz state
   const [showQuiz, setShowQuiz] = useState(false);
@@ -97,14 +106,9 @@ const InteractiveLessonPage = ({ onNavigate, user, onLogout }: InteractiveLesson
     }
   }, [user]);
 
-  // Scroll to top when slide changes (Next/Previous/dots)
-  useEffect(() => {
-    if (lessonResult) {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-  }, [currentSlide, lessonResult]);
 
   // Load saved lesson from localStorage (when coming from quiz-history)
+  // Note: Old saved lessons only have 1 style, so we put it in all 3 slots
   useEffect(() => {
     const savedLesson = localStorage.getItem('savedLesson');
     if (savedLesson) {
@@ -112,9 +116,9 @@ const InteractiveLessonPage = ({ onNavigate, user, onLogout }: InteractiveLesson
         const parsed = JSON.parse(savedLesson);
         if (parsed.questions && Array.isArray(parsed.questions)) {
           const style = (parsed.difficulty === 'visual' || parsed.difficulty === 'stepByStep' || parsed.difficulty === 'story')
-            ? parsed.difficulty
+            ? parsed.difficulty as 'visual' | 'stepByStep' | 'story'
             : 'visual';
-          setLessonResult({
+          const lessonData: LessonResult = {
             title: parsed.title || 'Saved Lesson',
             slides: parsed.questions,
             totalSlides: parsed.question_count || parsed.questions.length,
@@ -122,6 +126,12 @@ const InteractiveLessonPage = ({ onNavigate, user, onLogout }: InteractiveLesson
             style,
             quizBank: parsed.quiz_bank || [],
             quizDisplayCount: parsed.quiz_display_count || 6
+          };
+          // Put the saved lesson in all 3 slots (legacy single-style lessons)
+          setAllLessons({
+            visual: lessonData,
+            stepByStep: lessonData,
+            story: lessonData
           });
           setLessonStyle(style);
           setSavedLessonId(parsed.id);
@@ -203,6 +213,7 @@ const InteractiveLessonPage = ({ onNavigate, user, onLogout }: InteractiveLesson
     setCurrentSlide(0);
     setRevealedItems(new Set());
     setSavedLessonId(null);
+    setLessonStyle('visual'); // Start with visual
 
     try {
       const token = localStorage.getItem('authToken') || localStorage.getItem('token');
@@ -213,8 +224,7 @@ const InteractiveLessonPage = ({ onNavigate, user, onLogout }: InteractiveLesson
           'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
-          text: inputText,
-          style: lessonStyle
+          text: inputText
         })
       });
 
@@ -224,15 +234,13 @@ const InteractiveLessonPage = ({ onNavigate, user, onLogout }: InteractiveLesson
         throw new Error(data.message || 'Failed to generate lesson');
       }
 
-      const lesson = data.data;
-      if (lesson.style && ['visual', 'stepByStep', 'story'].includes(lesson.style)) {
-        setLessonStyle(lesson.style);
-      }
-      setLessonResult(lesson);
+      // API now returns all 3 lessons: { visual, stepByStep, story }
+      const lessons = data.data as AllLessons;
+      setAllLessons(lessons);
       trackAction('lessons_count');
       
-      // Auto-save the lesson
-      saveLesson(lesson);
+      // Auto-save the visual lesson (primary)
+      saveLesson(lessons.visual);
       
       // Refresh usage
       fetchUsage();
@@ -254,10 +262,11 @@ const InteractiveLessonPage = ({ onNavigate, user, onLogout }: InteractiveLesson
 
   const handleClear = () => {
     setInputText('');
-    setLessonResult(null);
+    setAllLessons(null);
     setError(null);
     setCurrentSlide(0);
     setRevealedItems(new Set());
+    setLessonStyle('visual');
     // Reset quiz state
     setShowQuiz(false);
     setQuizQuestions([]);
@@ -433,21 +442,6 @@ const InteractiveLessonPage = ({ onNavigate, user, onLogout }: InteractiveLesson
     { value: 'story', label: 'Story Mode', description: 'Narrative-driven lessons', emoji: '📚' }
   ];
 
-  if (showFakeAnimation) {
-    return (
-      <div className="min-h-screen flex flex-col bg-gradient-to-b from-stone-50 to-white dark:bg-stone-900 dark:from-stone-900 dark:to-stone-800">
-        <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="interactive-lesson" />
-        <main className="flex-1 flex items-center justify-center">
-          <div className="text-center">
-            <AnalysisAnimation message="Creating your interactive lesson..." />
-            <p className="text-stone-500 dark:text-stone-400 mt-4">Please wait...</p>
-          </div>
-        </main>
-        <Footer onNavigate={onNavigate} />
-      </div>
-    );
-  }
-
   if (showSignupPrompt) {
     return (
       <div className="min-h-screen flex flex-col bg-gradient-to-b from-stone-50 to-white dark:bg-stone-900 dark:from-stone-900 dark:to-stone-800">
@@ -486,11 +480,29 @@ const InteractiveLessonPage = ({ onNavigate, user, onLogout }: InteractiveLesson
     );
   }
 
+  const isLessonFullScreen = !!lessonResult || showQuiz;
+
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-stone-50 to-white dark:bg-stone-900 dark:from-stone-900 dark:to-stone-800 overflow-x-hidden">
-      <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="interactive-lesson" />
+      {!isLessonFullScreen && <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="interactive-lesson" />}
+
+      {/* Minimal top bar when in lesson/quiz full screen mode */}
+      {isLessonFullScreen && (
+        <div className="sticky top-0 z-20 flex items-center gap-3 px-4 sm:px-6 py-3 sm:py-4 bg-white/95 dark:bg-stone-800/95 backdrop-blur border-b border-stone-200 dark:border-stone-700">
+          <button
+            onClick={showQuiz ? backToLesson : () => onNavigate('quiz-history')}
+            className="p-2.5 -ml-2 text-stone-500 hover:text-stone-700 dark:text-stone-400 dark:hover:text-stone-200 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-700 transition-colors"
+            aria-label="Back to study tools"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+          </button>
+          <span className="text-sm font-medium text-stone-600 dark:text-stone-400 truncate flex-1 min-w-0">
+            {showQuiz ? 'Lesson Quiz' : lessonResult ? lessonResult.title : 'Lesson'}
+          </span>
+        </div>
+      )}
       
-      <main className="flex-1 w-full min-w-0 overflow-x-hidden">
+      <main className={`flex-1 w-full min-w-0 overflow-x-hidden ${isLessonFullScreen ? 'min-h-[calc(100vh-56px)]' : ''}`}>
         {/* Hero Section - only when no lesson loaded */}
         {!lessonResult && !showQuiz && (
           <div className="pt-6 sm:pt-10 pb-4 sm:pb-8 px-3 sm:px-6 lg:px-8">
@@ -511,10 +523,30 @@ const InteractiveLessonPage = ({ onNavigate, user, onLogout }: InteractiveLesson
                   <h1 className="text-2xl sm:text-4xl lg:text-5xl text-stone-800 dark:text-stone-100 mb-3 sm:mb-4 leading-tight" style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 400 }}>
                     Interactive <span className="text-violet-600 dark:text-violet-400 italic">Lesson Generator</span>
                   </h1>
-                  <p className="text-sm sm:text-lg text-stone-600 dark:text-stone-400 max-w-2xl leading-relaxed">
+                  <p className="text-sm sm:text-lg text-stone-600 dark:text-stone-400 max-w-2xl leading-relaxed mb-6">
                     Transform boring text into engaging, slide-based lessons. 
                     Perfect for <span className="font-semibold text-violet-600 dark:text-violet-400">learning new material</span> before taking quizzes!
                   </p>
+                  {/* Style preview - show 3 styles before generating */}
+                  <div className="flex flex-wrap gap-2">
+                    <p className="text-xs font-medium text-stone-500 dark:text-stone-400 uppercase tracking-wider w-full mb-2">You'll get 3 unique lessons</p>
+                    {styleOptions.map((opt) => (
+                      <div
+                        key={opt.value}
+                        title={opt.description}
+                        className={`px-4 py-2.5 rounded-xl text-sm font-medium flex items-center gap-2 cursor-default opacity-90 ${
+                          opt.value === 'visual' 
+                            ? 'bg-gradient-to-r from-violet-100 to-purple-100 dark:from-violet-900/30 dark:to-purple-900/30 text-violet-700 dark:text-violet-300 border border-violet-200 dark:border-violet-700/50' 
+                            : opt.value === 'stepByStep'
+                              ? 'bg-gradient-to-r from-blue-100 to-cyan-100 dark:from-blue-900/30 dark:to-cyan-900/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-700/50'
+                              : 'bg-gradient-to-r from-amber-100 to-orange-100 dark:from-amber-900/30 dark:to-orange-900/30 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-700/50'
+                        }`}
+                      >
+                        <span>{opt.emoji}</span>
+                        <span>{opt.label}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
@@ -726,13 +758,6 @@ const InteractiveLessonPage = ({ onNavigate, user, onLogout }: InteractiveLesson
                       <span>📖</span>
                       <span>Review Lesson</span>
                     </button>
-                    <button
-                      onClick={handleClear}
-                      className="px-4 sm:px-6 py-3 rounded-xl font-semibold text-sm border border-stone-200 dark:border-stone-600 text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-700/50 transition-all flex items-center justify-center gap-2 shrink-0"
-                    >
-                      <span>✨</span>
-                      <span>New Lesson</span>
-                    </button>
                   </div>
                   
                   {quizScore < quizQuestions.length * 0.8 && (
@@ -751,27 +776,7 @@ const InteractiveLessonPage = ({ onNavigate, user, onLogout }: InteractiveLesson
               <div className="bg-white dark:bg-stone-800 rounded-2xl sm:rounded-3xl shadow-xl shadow-stone-100/50 dark:shadow-none border border-stone-200 dark:border-stone-600 overflow-hidden">
                 {/* Toolbar */}
                 <div className="border-b border-stone-200 dark:border-stone-600 bg-gradient-to-r from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20 px-3 sm:px-5 py-3 sm:py-4">
-                  <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center justify-between gap-3 sm:gap-4">
-                    <div className="flex flex-wrap items-center gap-2 sm:gap-3 min-w-0 overflow-x-auto sm:overflow-visible">
-                      <span className="text-xs font-medium text-stone-500 dark:text-stone-400 flex-shrink-0">Style:</span>
-                      <div className="flex items-center bg-white dark:bg-stone-700 rounded-xl px-0.5 sm:px-1 py-1 shadow-sm border border-stone-200 dark:border-stone-600">
-                        {styleOptions.map((opt) => (
-                          <button
-                            key={opt.value}
-                            onClick={() => setLessonStyle(opt.value as any)}
-                            title={opt.description}
-                            className={`px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all whitespace-nowrap flex items-center gap-1 ${
-                              lessonStyle === opt.value 
-                                ? 'bg-violet-600 text-white shadow-sm' 
-                                : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-600'
-                            }`}
-                          >
-                            <span>{opt.emoji}</span>
-                            <span className="hidden sm:inline">{opt.label}</span>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
+                  <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center sm:justify-end gap-3 sm:gap-4">
                     <button
                       onClick={handleGenerateLesson}
                       disabled={isLoading || !inputText.trim() || wordCount < 50 || wordCount > maxWords}
@@ -860,11 +865,10 @@ const InteractiveLessonPage = ({ onNavigate, user, onLogout }: InteractiveLesson
                       onChange={(e) => setInputText(e.target.value)}
                       placeholder="Paste your textbook chapter, article, lecture notes, or any study material here... (minimum 50 words)
 
-The AI will transform it into an engaging, interactive lesson with:
-• Key concepts broken into digestible slides
-• Visual highlights and fun facts
-• Step-by-step learning progression
-• Easy-to-remember summaries"
+One click = 3 unique lessons!
+• Visual Cards — fun, emoji-rich social media style
+• Step-by-Step — numbered tutorial with checkpoints
+• Story Mode — learn through narrative & analogies"
                       className="w-full min-h-[300px] sm:min-h-[400px] p-3 sm:p-5 text-stone-800 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500 resize-none focus:outline-none text-sm sm:text-base leading-relaxed bg-transparent"
                     />
                   </div>
@@ -946,8 +950,7 @@ The AI will transform it into an engaging, interactive lesson with:
                     <div className="min-w-0 flex-1">
                       <h3 className="text-violet-800 dark:text-violet-200 font-semibold mb-1">Learn First, Then Test</h3>
                       <p className="text-violet-600 dark:text-violet-400 text-sm leading-relaxed">
-                        This tool is perfect for when you need to <span className="font-semibold">understand material before taking quizzes</span>.
-                        It breaks down complex text into bite-sized, memorable slides with key concepts, examples, and fun facts.
+                        One click generates <span className="font-semibold">3 completely unique lessons</span> — Visual Cards (fun & emoji-rich), Step-by-Step (tutorial style), and Story Mode (narrative learning). Each has different words and layouts!
                       </p>
                     </div>
                   </div>
@@ -960,42 +963,55 @@ The AI will transform it into an engaging, interactive lesson with:
           <div className="pt-6 sm:pt-10 pb-8 sm:pb-16 px-3 sm:px-6 lg:px-8">
             <div className="max-w-4xl mx-auto">
               {/* Lesson Header */}
-              <div className="mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <h2 className="text-xl sm:text-2xl font-bold text-stone-800 dark:text-stone-100 truncate" title={lessonResult.title}>
-                      {lessonResult.title}
-                    </h2>
-                    <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${
-                      lessonStyle === 'stepByStep' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300' :
-                      lessonStyle === 'story' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300' :
-                      'bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300'
-                    }`}>
-                      {lessonStyle === 'stepByStep' ? '📋 Step-by-Step' : lessonStyle === 'story' ? '📚 Story Mode' : '🎨 Visual Cards'}
-                    </span>
-                  </div>
-                  <p className="text-stone-500 dark:text-stone-400 text-sm">
-                    {lessonResult.totalSlides} {lessonStyle === 'stepByStep' ? 'steps' : 'slides'} • ~{lessonResult.estimatedReadTime} min read
-                  </p>
-                </div>
-                <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+              <div className="mb-6">
+                <h2 className="text-xl sm:text-2xl font-bold text-stone-800 dark:text-stone-100 truncate" title={lessonResult.title}>
+                  {lessonResult.title}
+                </h2>
+                <p className="text-stone-500 dark:text-stone-400 text-sm mt-1">
+                  {lessonResult.totalSlides} slides • ~{lessonResult.estimatedReadTime} min read
+                </p>
+              </div>
+
+              {/* Style Switcher + Take Quiz - same row */}
+              <div className="mb-6">
+                <p className="text-xs font-medium text-stone-500 dark:text-stone-400 uppercase tracking-wider mb-2">Switch Style</p>
+                <div className="flex flex-wrap gap-2 items-center">
+                  {styleOptions.map((opt) => (
+                    <button
+                      key={opt.value}
+                      onClick={() => {
+                        if (opt.value !== lessonStyle) {
+                          setLessonStyle(opt.value as any);
+                          setCurrentSlide(0);
+                          setRevealedItems(new Set());
+                        }
+                      }}
+                      title={opt.description}
+                      className={`px-4 py-2.5 rounded-xl text-sm font-medium transition-all flex items-center gap-2 ${
+                        lessonStyle === opt.value 
+                          ? opt.value === 'visual' 
+                            ? 'bg-gradient-to-r from-violet-600 to-purple-600 text-white shadow-lg shadow-violet-500/25' 
+                            : opt.value === 'stepByStep'
+                              ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-500/25'
+                              : 'bg-gradient-to-r from-amber-600 to-orange-600 text-white shadow-lg shadow-amber-500/25'
+                          : 'bg-white dark:bg-stone-700 text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-600 border border-stone-200 dark:border-stone-600'
+                      }`}
+                    >
+                      <span>{opt.emoji}</span>
+                      <span>{opt.label}</span>
+                    </button>
+                  ))}
                   {lessonResult.quizBank && lessonResult.quizBank.length > 0 && (
                     <button
                       onClick={startQuiz}
-                      className="px-3 sm:px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-medium text-sm shadow-md shadow-emerald-500/20 transition-all flex items-center gap-2 shrink-0"
+                      className="ml-auto px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-medium text-sm shadow-md shadow-emerald-500/20 transition-all flex items-center gap-2 shrink-0"
                     >
                       <span>🎯</span>
                       <span>Take Quiz</span>
                     </button>
                   )}
-                  <button
-                    onClick={handleClear}
-                    className="px-3 sm:px-4 py-2 rounded-xl bg-stone-100 dark:bg-stone-700 text-stone-600 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-stone-600 font-medium text-sm transition-colors flex items-center gap-2 shrink-0"
-                  >
-                    <span>←</span>
-                    <span>New Lesson</span>
-                  </button>
                 </div>
+                <p className="text-xs text-stone-400 dark:text-stone-500 mt-1.5">3 unique lessons — each with different words, layout & style!</p>
               </div>
 
               {/* Progress Bar */}
@@ -1114,10 +1130,20 @@ The AI will transform it into an engaging, interactive lesson with:
 
                   {/* Highlighted Term */}
                   {lessonResult.slides[currentSlide].highlightedTerm && (
-                    <div className="mb-6 p-4 bg-white/50 dark:bg-stone-800/50 rounded-xl border border-stone-200 dark:border-stone-600">
+                    <div className={`mb-6 p-4 rounded-xl border ${
+                      lessonStyle === 'stepByStep'
+                        ? 'bg-blue-50/80 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700/50'
+                        : lessonStyle === 'story'
+                          ? 'bg-amber-50/80 dark:bg-amber-900/20 border-amber-200 dark:border-amber-700/50'
+                          : 'bg-white/50 dark:bg-stone-800/50 border-stone-200 dark:border-stone-600'
+                    }`}>
                       <div className="flex items-center gap-2 mb-2">
                         <span className="text-lg">🔑</span>
-                        <span className="text-xs font-bold text-stone-500 dark:text-stone-400 uppercase tracking-wider">Key Term</span>
+                        <span className={`text-xs font-bold uppercase tracking-wider ${
+                          lessonStyle === 'stepByStep' ? 'text-blue-600 dark:text-blue-400' :
+                          lessonStyle === 'story' ? 'text-amber-700 dark:text-amber-400' :
+                          'text-stone-500 dark:text-stone-400'
+                        }`}>Key Term</span>
                       </div>
                       <p className="text-stone-800 dark:text-stone-200 font-semibold">
                         {lessonResult.slides[currentSlide].highlightedTerm}
@@ -1137,14 +1163,26 @@ The AI will transform it into an engaging, interactive lesson with:
                             onClick={() => toggleReveal(itemId)}
                             className={`w-full text-left p-4 rounded-xl border transition-all ${
                               isRevealed 
-                                ? 'bg-white dark:bg-stone-800 border-violet-300 dark:border-violet-600 shadow-md' 
-                                : 'bg-stone-100/50 dark:bg-stone-700/50 border-stone-200 dark:border-stone-600 hover:bg-white dark:hover:bg-stone-700 hover:border-violet-200 dark:hover:border-violet-700'
+                                ? lessonStyle === 'stepByStep'
+                                  ? 'bg-white dark:bg-stone-800 border-blue-300 dark:border-blue-600 shadow-md'
+                                  : lessonStyle === 'story'
+                                    ? 'bg-amber-50/80 dark:bg-amber-900/20 border-amber-300 dark:border-amber-600 shadow-md'
+                                    : 'bg-white dark:bg-stone-800 border-violet-300 dark:border-violet-600 shadow-md'
+                                : lessonStyle === 'stepByStep'
+                                  ? 'bg-stone-100/50 dark:bg-stone-700/50 border-stone-200 dark:border-stone-600 hover:bg-white dark:hover:bg-stone-700 hover:border-blue-200 dark:hover:border-blue-700'
+                                  : lessonStyle === 'story'
+                                    ? 'bg-stone-100/50 dark:bg-stone-700/50 border-stone-200 dark:border-stone-600 hover:bg-amber-50/50 dark:hover:bg-amber-900/10 hover:border-amber-200 dark:hover:border-amber-700'
+                                    : 'bg-stone-100/50 dark:bg-stone-700/50 border-stone-200 dark:border-stone-600 hover:bg-white dark:hover:bg-stone-700 hover:border-violet-200 dark:hover:border-violet-700'
                             }`}
                           >
                             <div className="flex items-start gap-3">
                               <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 ${
                                 isRevealed 
-                                  ? 'bg-violet-500 text-white' 
+                                  ? lessonStyle === 'stepByStep'
+                                    ? 'bg-blue-500 text-white'
+                                    : lessonStyle === 'story'
+                                      ? 'bg-amber-500 text-white'
+                                      : 'bg-violet-500 text-white'
                                   : 'bg-stone-300 dark:bg-stone-600 text-stone-600 dark:text-stone-300'
                               }`}>
                                 {isRevealed ? '✓' : idx + 1}
@@ -1256,7 +1294,7 @@ The AI will transform it into an engaging, interactive lesson with:
                   {[
                     { step: '1', title: 'Paste Text', desc: 'Copy your study material', emoji: '📋' },
                     { step: '2', title: 'AI Analyzes', desc: 'Extracts key concepts', emoji: '🤖' },
-                    { step: '3', title: 'Learn Slides', desc: 'Go through interactive lesson', emoji: '🎓' },
+                    { step: '3', title: 'Learn Slides', desc: '3 unique lessons to explore', emoji: '🎓' },
                     { step: '4', title: 'Take Quiz', desc: 'Test your knowledge!', emoji: '✅' }
                   ].map((item, idx) => (
                     <div key={idx} className="text-center">
@@ -1275,7 +1313,16 @@ The AI will transform it into an engaging, interactive lesson with:
         )}
       </main>
 
-      <Footer onNavigate={onNavigate} />
+      {!isLessonFullScreen && <Footer onNavigate={onNavigate} />}
+
+      {/* Same popup style as citation search / essay analysis */}
+      {(isLoading || showFakeAnimation) && (
+        <AnalysisAnimation
+          isPopup={true}
+          text="Creating your lessons"
+          variant="lesson"
+        />
+      )}
     </div>
   );
 };
