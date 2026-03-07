@@ -397,7 +397,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
             {innerContent}
           </div>
         </div>
-        <p className="text-stone-600 dark:text-stone-400 text-sm relative z-10 w-full">{desc}</p>
+        <p className="text-white/90 text-sm relative z-10 w-full">{desc}</p>
       </div>
     </button>
   );
@@ -434,7 +434,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
       <div className="bg-white dark:bg-stone-800 rounded-xl p-3 shadow-sm mb-3 h-[100px] flex items-center justify-center overflow-hidden w-full">
         {children}
       </div>
-      <p className="text-stone-600 dark:text-stone-400 text-xs leading-snug text-center">{desc}</p>
+      <p className="text-white/90 text-xs leading-snug text-center">{desc}</p>
     </button>
   );
 
@@ -576,21 +576,21 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                 {/* Mobile cards - clean redesign, horizontal scroll */}
                 <div className="flex gap-4 sm:hidden w-max">
                   {[
-                    { title: 'Analyze', desc: 'Get professor-style feedback on your essays', onClick: () => setMode('analyze'), gradient: 'from-lime-50 to-emerald-50 dark:from-lime-900/20 dark:to-emerald-900/20', accentClasses: { title: 'text-lime-700 dark:text-lime-400', orb: 'bg-lime-400/20', iconBg: 'bg-lime-100 dark:bg-lime-900/50' }, borderColor: 'border-lime-100 dark:border-lime-800/50', icon: '📝', mobileContent: (
+                    { title: 'Analyze', desc: 'Get professor-style feedback on your essays', onClick: () => setMode('analyze'), gradient: 'from-lime-500 to-emerald-600', accentClasses: { title: 'text-white', orb: 'bg-white/20', iconBg: 'bg-white/90' }, borderColor: 'border-lime-600/50', icon: '📝', mobileContent: (
                       <div className="w-full space-y-2">
                         <div className="h-2.5 bg-stone-200 dark:bg-stone-600 rounded-full overflow-hidden origin-left"><div className="h-full w-full bg-lime-400 dark:bg-lime-500 rounded-full animate-line-grow" style={{ animationDelay: '0.2s' }} /></div>
                         <div className="h-2.5 bg-stone-200 dark:bg-stone-600 rounded-full overflow-hidden origin-left"><div className="h-full w-full bg-lime-400 dark:bg-lime-500 rounded-full animate-line-grow" style={{ animationDelay: '0.6s' }} /></div>
                         <div className="h-2.5 bg-stone-200 dark:bg-stone-600 rounded-full overflow-hidden origin-left"><div className="h-full w-full bg-lime-500 dark:bg-lime-400 rounded-full animate-line-grow" style={{ animationDelay: '1s' }} /></div>
                       </div>
                     )},
-                    { title: 'Citations', desc: 'Find and format academic sources instantly', onClick: () => setMode('citations'), gradient: 'from-cyan-50 to-teal-50 dark:from-cyan-900/20 dark:to-teal-900/20', accentClasses: { title: 'text-teal-700 dark:text-teal-400', orb: 'bg-teal-400/20', iconBg: 'bg-teal-100 dark:bg-teal-900/50' }, borderColor: 'border-cyan-100 dark:border-cyan-800/50', icon: '🔍', mobileContent: (
+                    { title: 'Citations', desc: 'Find and format academic sources instantly', onClick: () => setMode('citations'), gradient: 'from-cyan-500 to-teal-600', accentClasses: { title: 'text-white', orb: 'bg-white/20', iconBg: 'bg-white/90' }, borderColor: 'border-teal-600/50', icon: '🔍', mobileContent: (
                       <div className="w-full space-y-2 text-left">
                         <div className="text-[10px] text-teal-600 dark:text-teal-400 font-mono truncate opacity-0 animate-fade-slide-in" style={{ animationDelay: '0.1s', animationFillMode: 'forwards' }}>Smith, J. (2024). Title...</div>
                         <div className="text-[10px] text-teal-600 dark:text-teal-400 font-mono truncate opacity-0 animate-fade-slide-in" style={{ animationDelay: '0.4s', animationFillMode: 'forwards' }}>Jones, M. (2023). Study...</div>
                         <div className="flex gap-1.5 mt-1"><span className="px-2 py-0.5 bg-teal-100 dark:bg-teal-900/50 text-teal-700 text-[10px] rounded font-medium">APA</span><span className="px-2 py-0.5 bg-stone-100 text-stone-500 text-[10px] rounded">MLA</span></div>
                       </div>
                     )},
-                    { title: 'Flashcards', desc: 'Generate flashcards from any content', onClick: () => { setMode('quiz'); setStudyToolMode('flashcards'); }, gradient: 'from-pink-50 to-rose-50 dark:from-pink-900/20 dark:to-rose-900/20', accentClasses: { title: 'text-rose-700 dark:text-rose-400', orb: 'bg-rose-400/20', iconBg: 'bg-rose-100 dark:bg-rose-900/50' }, borderColor: 'border-pink-100 dark:border-pink-800/50', icon: '🃏', mobileContent: (
+                    { title: 'Flashcards', desc: 'Generate flashcards from any content', onClick: () => { setMode('quiz'); setStudyToolMode('flashcards'); }, gradient: 'from-rose-500 to-pink-600', accentClasses: { title: 'text-white', orb: 'bg-white/20', iconBg: 'bg-white/90' }, borderColor: 'border-rose-600/50', icon: '🃏', mobileContent: (
                       <div className="relative w-full h-full min-h-[80px]" style={{ perspective: '120px' }}>
                         <div className="absolute inset-0 animate-flashcard-flip" style={{ transformStyle: 'preserve-3d' }}>
                           <div className="absolute inset-0 flex flex-col justify-center items-center bg-gradient-to-br from-rose-400 to-pink-500 rounded-lg p-2" style={{ backfaceVisibility: 'hidden' }}>
@@ -604,7 +604,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                         </div>
                       </div>
                     )},
-                    { title: 'Practice Tests', desc: 'Create quizzes from your study material', onClick: () => { setMode('quiz'); setStudyToolMode('quiz'); }, gradient: 'from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20', accentClasses: { title: 'text-orange-700 dark:text-orange-400', orb: 'bg-orange-400/20', iconBg: 'bg-amber-100 dark:bg-amber-900/50' }, borderColor: 'border-amber-100 dark:border-amber-800/50', icon: '📋', mobileContent: (
+                    { title: 'Practice Tests', desc: 'Create quizzes from your study material', onClick: () => { setMode('quiz'); setStudyToolMode('quiz'); }, gradient: 'from-amber-500 to-orange-600', accentClasses: { title: 'text-white', orb: 'bg-white/20', iconBg: 'bg-white/90' }, borderColor: 'border-orange-600/50', icon: '📋', mobileContent: (
                       <div className="relative w-full h-full min-h-[80px]">
                         <div className="absolute inset-0 animate-quiz-show">
                           <div className="text-[10px] text-stone-500 dark:text-stone-400 mb-1">Q: What is 2 + 2?</div>
@@ -616,7 +616,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                         </div>
                       </div>
                     )},
-                    { title: 'Humanize', desc: 'Transform AI text into natural human writing', onClick: () => setMode('humanize'), gradient: 'from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20', accentClasses: { title: 'text-violet-700 dark:text-violet-400', orb: 'bg-violet-400/20', iconBg: 'bg-violet-100 dark:bg-violet-900/50' }, borderColor: 'border-violet-100 dark:border-violet-800/50', icon: '✨', mobileContent: (
+                    { title: 'Humanize', desc: 'Transform AI text into natural human writing', onClick: () => setMode('humanize'), gradient: 'from-violet-500 to-purple-600', accentClasses: { title: 'text-white', orb: 'bg-white/20', iconBg: 'bg-white/90' }, borderColor: 'border-violet-600/50', icon: '✨', mobileContent: (
                       <div className="relative w-full h-full min-h-[80px] text-left">
                         <div className="absolute inset-0 animate-humanize-before">
                           <div className="text-[10px] text-stone-500 dark:text-stone-400">Before</div>
@@ -628,21 +628,21 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                         </div>
                       </div>
                     )},
-                    { title: 'Summarize', desc: 'Turn long papers into concise bullet points', onClick: () => setMode('summarize'), gradient: 'from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20', accentClasses: { title: 'text-emerald-700 dark:text-emerald-400', orb: 'bg-emerald-400/20', iconBg: 'bg-emerald-100 dark:bg-emerald-900/50' }, borderColor: 'border-emerald-100 dark:border-emerald-800/50', icon: '📝', mobileContent: (
+                    { title: 'Summarize', desc: 'Turn long papers into concise bullet points', onClick: () => setMode('summarize'), gradient: 'from-emerald-500 to-teal-600', accentClasses: { title: 'text-white', orb: 'bg-white/20', iconBg: 'bg-white/90' }, borderColor: 'border-emerald-600/50', icon: '📝', mobileContent: (
                       <div className="w-full space-y-2">
                         <div className="flex gap-2 items-center"><div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" /><div className="h-2 flex-1 bg-stone-200 dark:bg-stone-600 rounded-full overflow-hidden origin-left"><div className="h-full w-full bg-emerald-400 dark:bg-emerald-500 rounded-full animate-summarize-shrink" /></div></div>
                         <div className="flex gap-2 items-center"><div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" /><div className="h-2 flex-1 bg-stone-200 dark:bg-stone-600 rounded-full overflow-hidden origin-left"><div className="h-full w-full bg-emerald-400 dark:bg-emerald-500 rounded-full animate-summarize-shrink" style={{ animationDelay: '0.3s' }} /></div></div>
                         <div className="flex gap-2 items-center"><div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" /><div className="h-2 flex-1 bg-stone-200 dark:bg-stone-600 rounded-full overflow-hidden origin-left"><div className="h-full w-full bg-emerald-500 dark:bg-emerald-400 rounded-full animate-summarize-shrink" style={{ animationDelay: '0.6s' }} /></div></div>
                       </div>
                     )},
-                    { title: 'Study Tools', desc: 'Quizzes, flashcards & crosswords', onClick: () => setMode('quiz'), gradient: 'from-lime-50 to-green-50 dark:from-lime-900/20 dark:to-green-900/20', accentClasses: { title: 'text-lime-700 dark:text-lime-400', orb: 'bg-lime-400/20', iconBg: 'bg-lime-100 dark:bg-lime-900/50' }, borderColor: 'border-lime-100 dark:border-lime-800/50', icon: '🎯', mobileContent: (
+                    { title: 'Study Tools', desc: 'Quizzes, flashcards & crosswords', onClick: () => setMode('quiz'), gradient: 'from-lime-500 to-green-600', accentClasses: { title: 'text-white', orb: 'bg-white/20', iconBg: 'bg-white/90' }, borderColor: 'border-lime-600/50', icon: '🎯', mobileContent: (
                       <div className="w-full flex gap-2">
                         <div className="flex-1 py-2 px-2 bg-lime-100 dark:bg-lime-900/50 rounded-lg text-lime-700 dark:text-lime-300 text-xs font-medium text-center animate-tool-show-1">📝 Quiz</div>
                         <div className="flex-1 py-2 px-2 bg-lime-100 dark:bg-lime-900/50 rounded-lg text-lime-700 dark:text-lime-300 text-xs font-medium text-center animate-tool-show-2">🃏 Cards</div>
                         <div className="flex-1 py-2 px-2 bg-lime-100 dark:bg-lime-900/50 rounded-lg text-lime-700 dark:text-lime-300 text-xs font-medium text-center animate-tool-show-3">🧩 Puzzle</div>
                       </div>
                     )},
-                    { title: 'Crossword', desc: 'Generate crosswords from your notes', onClick: () => { setMode('quiz'); setStudyToolMode('crossword'); }, gradient: 'from-amber-50 to-yellow-50 dark:from-amber-900/20 dark:to-yellow-900/20', accentClasses: { title: 'text-amber-700 dark:text-amber-400', orb: 'bg-amber-400/20', iconBg: 'bg-amber-100 dark:bg-amber-900/50' }, borderColor: 'border-amber-100 dark:border-amber-800/50', icon: '🧩', mobileContent: (
+                    { title: 'Crosswords', desc: 'Generate crosswords from your notes', onClick: () => { setMode('quiz'); setStudyToolMode('crossword'); }, gradient: 'from-amber-500 to-yellow-600', accentClasses: { title: 'text-white', orb: 'bg-white/20', iconBg: 'bg-white/90' }, borderColor: 'border-amber-600/50', icon: '🧩', mobileContent: (
                       <div className="w-full grid grid-cols-3 gap-1 max-w-[80px] mx-auto">
                         {['C','A','T','O','','','D','O','G'].map((l, i) => (
                           <div key={i} className={`aspect-square flex items-center justify-center rounded text-[10px] font-bold animate-cell-pop ${l ? 'bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300' : 'bg-stone-200 dark:bg-stone-700'}`} style={l ? { animationDelay: `${i * 80}ms` } : undefined}>{l}</div>
@@ -660,14 +660,14 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                 {/* Desktop cards - extra padding-right so last card (Crossword) isn't cut off */}
                 <div className="hidden sm:flex gap-4 sm:transition-transform sm:duration-500 sm:ease-out w-[160%] pr-8 sm:pr-12" style={{ transform: `translateX(-${studyCardsCarouselIndex * 12.5}%)` }}>
                   {[
-                    { title: 'Analyze', desc: 'Get professor-style feedback on your essays', onClick: () => setMode('analyze'), gradient: 'from-lime-50 to-emerald-50 dark:from-lime-900/20 dark:to-emerald-900/20', accentClasses: { title: 'text-lime-700 dark:text-lime-400', orb: 'bg-lime-400/20', iconBg: 'bg-lime-100 dark:bg-lime-900/50' }, borderColor: 'border-lime-100 dark:border-lime-800/50', icon: '📝', inner: (
+                    { title: 'Analyze', desc: 'Get professor-style feedback on your essays', onClick: () => setMode('analyze'), gradient: 'from-lime-500 to-emerald-600', accentClasses: { title: 'text-white', orb: 'bg-white/20', iconBg: 'bg-white/90' }, borderColor: 'border-lime-600/50', icon: '📝', inner: (
                       <div className="w-full flex flex-col justify-between flex-1 gap-2">
                         <div className="w-full h-3 bg-stone-200 dark:bg-stone-600 rounded-full overflow-hidden flex-shrink-0"><div className="h-full w-full bg-lime-400 dark:bg-lime-500 rounded-full animate-line-grow origin-left" style={{ animationDelay: '0.2s' }} /></div>
                         <div className="w-full h-3 bg-stone-200 dark:bg-stone-600 rounded-full overflow-hidden flex-shrink-0"><div className="h-full w-full bg-lime-400 dark:bg-lime-500 rounded-full animate-line-grow origin-left" style={{ animationDelay: '0.6s' }} /></div>
                         <div className="w-full h-3 bg-stone-200 dark:bg-stone-600 rounded-full overflow-hidden flex-shrink-0"><div className="h-full w-full bg-lime-500 dark:bg-lime-400 rounded-full animate-line-grow origin-left" style={{ animationDelay: '1s' }} /></div>
                       </div>
                     )},
-                    { title: 'Citations', desc: 'Find and format academic sources instantly', onClick: () => setMode('citations'), gradient: 'from-cyan-50 to-teal-50 dark:from-cyan-900/20 dark:to-teal-900/20', accentClasses: { title: 'text-teal-700 dark:text-teal-400', orb: 'bg-teal-400/20', iconBg: 'bg-teal-100 dark:bg-teal-900/50' }, borderColor: 'border-cyan-100 dark:border-cyan-800/50', icon: '🔍', inner: (
+                    { title: 'Citations', desc: 'Find and format academic sources instantly', onClick: () => setMode('citations'), gradient: 'from-cyan-500 to-teal-600', accentClasses: { title: 'text-white', orb: 'bg-white/20', iconBg: 'bg-white/90' }, borderColor: 'border-teal-600/50', icon: '🔍', inner: (
                       <div className="w-full space-y-1.5 overflow-hidden">
                         <div className="text-[9px] text-teal-600 dark:text-teal-400 font-mono opacity-0 animate-fade-slide-in truncate" style={{ animationDelay: '0.1s', animationFillMode: 'forwards' }}>Smith, J. (2024). Title...</div>
                         <div className="text-[9px] text-teal-600 dark:text-teal-400 font-mono opacity-0 animate-fade-slide-in truncate" style={{ animationDelay: '0.4s', animationFillMode: 'forwards' }}>Jones, M. (2023). Study...</div>
@@ -677,7 +677,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                         </div>
                       </div>
                     )},
-                    { title: 'Flashcards', desc: 'Generate flashcards from any content', onClick: () => { setMode('quiz'); setStudyToolMode('flashcards'); }, gradient: 'from-pink-50 to-rose-50 dark:from-pink-900/20 dark:to-rose-900/20', accentClasses: { title: 'text-rose-700 dark:text-rose-400', orb: 'bg-rose-400/20', iconBg: 'bg-rose-100 dark:bg-rose-900/50' }, borderColor: 'border-pink-100 dark:border-pink-800/50', icon: '🃏', inner: (
+                    { title: 'Flashcards', desc: 'Generate flashcards from any content', onClick: () => { setMode('quiz'); setStudyToolMode('flashcards'); }, gradient: 'from-rose-500 to-pink-600', accentClasses: { title: 'text-white', orb: 'bg-white/20', iconBg: 'bg-white/90' }, borderColor: 'border-rose-600/50', icon: '🃏', inner: (
                       <div className="w-full flex-1 min-h-[72px] flex flex-col min-w-full" style={{ perspective: '200px' }}>
                         <div className="relative w-full flex-1 min-h-[60px] min-w-full animate-flashcard-flip" style={{ transformStyle: 'preserve-3d' }}>
                           <div className="absolute inset-0 bg-gradient-to-br from-rose-400 to-pink-500 rounded-xl p-4 flex flex-col justify-center overflow-hidden" style={{ backfaceVisibility: 'hidden' }}>
@@ -691,7 +691,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                         </div>
                       </div>
                     )},
-                    { title: 'Practice Tests', desc: 'Create quizzes from your study material', onClick: () => { setMode('quiz'); setStudyToolMode('quiz'); }, gradient: 'from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20', accentClasses: { title: 'text-orange-700 dark:text-orange-400', orb: 'bg-orange-400/20', iconBg: 'bg-amber-100 dark:bg-amber-900/50' }, borderColor: 'border-amber-100 dark:border-amber-800/50', icon: '📋', inner: (
+                    { title: 'Practice Tests', desc: 'Create quizzes from your study material', onClick: () => { setMode('quiz'); setStudyToolMode('quiz'); }, gradient: 'from-amber-500 to-orange-600', accentClasses: { title: 'text-white', orb: 'bg-white/20', iconBg: 'bg-white/90' }, borderColor: 'border-orange-600/50', icon: '📋', inner: (
                       <div className="relative w-full h-14 overflow-hidden">
                         <div className="absolute inset-0 animate-quiz-show w-full">
                           <div className="text-[10px] text-stone-500 mb-1 truncate">Q: What is 2 + 2?</div>
@@ -707,7 +707,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                         </div>
                       </div>
                     )},
-                    { title: 'Humanize', desc: 'Transform AI text into natural human writing', onClick: () => setMode('humanize'), gradient: 'from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20', accentClasses: { title: 'text-violet-700 dark:text-violet-400', orb: 'bg-violet-400/20', iconBg: 'bg-violet-100 dark:bg-violet-900/50' }, borderColor: 'border-violet-100 dark:border-violet-800/50', icon: '✨', inner: (
+                    { title: 'Humanize', desc: 'Transform AI text into natural human writing', onClick: () => setMode('humanize'), gradient: 'from-violet-500 to-purple-600', accentClasses: { title: 'text-white', orb: 'bg-white/20', iconBg: 'bg-white/90' }, borderColor: 'border-violet-600/50', icon: '✨', inner: (
                       <div className="relative w-full h-12 overflow-hidden">
                         <div className="absolute inset-0 animate-humanize-before w-full">
                           <div className="text-[10px] text-stone-500 mb-1">Before</div>
@@ -719,7 +719,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                         </div>
                       </div>
                     )},
-                    { title: 'Summarize', desc: 'Turn long papers into concise bullet points', onClick: () => setMode('summarize'), gradient: 'from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20', accentClasses: { title: 'text-emerald-700 dark:text-emerald-400', orb: 'bg-emerald-400/20', iconBg: 'bg-emerald-100 dark:bg-emerald-900/50' }, borderColor: 'border-emerald-100 dark:border-emerald-800/50', icon: '📝', inner: (
+                    { title: 'Summarize', desc: 'Turn long papers into concise bullet points', onClick: () => setMode('summarize'), gradient: 'from-emerald-500 to-teal-600', accentClasses: { title: 'text-white', orb: 'bg-white/20', iconBg: 'bg-white/90' }, borderColor: 'border-emerald-600/50', icon: '📝', inner: (
                       <div className="w-full space-y-2 overflow-hidden">
                         <div className="flex gap-1.5 items-center w-full">
                           <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 flex-shrink-0" />
@@ -735,14 +735,14 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                         </div>
                       </div>
                     )},
-                    { title: 'Study Tools', desc: 'Quizzes, flashcards & crosswords', onClick: () => setMode('quiz'), gradient: 'from-lime-50 to-green-50 dark:from-lime-900/20 dark:to-green-900/20', accentClasses: { title: 'text-lime-700 dark:text-lime-400', orb: 'bg-lime-400/20', iconBg: 'bg-lime-100 dark:bg-lime-900/50' }, borderColor: 'border-lime-100 dark:border-lime-800/50', icon: '🎯', inner: (
+                    { title: 'Study Tools', desc: 'Quizzes, flashcards & crosswords', onClick: () => setMode('quiz'), gradient: 'from-lime-500 to-green-600', accentClasses: { title: 'text-white', orb: 'bg-white/20', iconBg: 'bg-white/90' }, borderColor: 'border-lime-600/50', icon: '🎯', inner: (
                       <div className="w-full flex gap-2 overflow-hidden">
                         <div className="flex-1 min-w-0 text-center py-2 px-2 bg-lime-100 dark:bg-lime-900/50 rounded-lg text-lime-700 dark:text-lime-300 text-xs font-medium animate-tool-show-1 truncate">📝 Quiz</div>
                         <div className="flex-1 min-w-0 text-center py-2 px-2 bg-lime-100 dark:bg-lime-900/50 rounded-lg text-lime-700 dark:text-lime-300 text-xs font-medium animate-tool-show-2 truncate">🃏 Cards</div>
                         <div className="flex-1 min-w-0 text-center py-2 px-2 bg-lime-100 dark:bg-lime-900/50 rounded-lg text-lime-700 dark:text-lime-300 text-xs font-medium animate-tool-show-3 truncate">🧩 Puzzle</div>
                       </div>
                     )},
-                    { title: 'Crossword', desc: 'Generate crosswords from your notes', onClick: () => { setMode('quiz'); setStudyToolMode('crossword'); }, gradient: 'from-amber-50 to-yellow-50 dark:from-amber-900/20 dark:to-yellow-900/20', accentClasses: { title: 'text-amber-700 dark:text-amber-400', orb: 'bg-amber-400/20', iconBg: 'bg-amber-100 dark:bg-amber-900/50' }, borderColor: 'border-amber-100 dark:border-amber-800/50', icon: '🧩', inner: (
+                    { title: 'Crosswords', desc: 'Generate crosswords from your notes', onClick: () => { setMode('quiz'); setStudyToolMode('crossword'); }, gradient: 'from-amber-500 to-yellow-600', accentClasses: { title: 'text-white', orb: 'bg-white/20', iconBg: 'bg-white/90' }, borderColor: 'border-amber-600/50', icon: '🧩', inner: (
                       <div className="w-full mx-auto grid grid-cols-5 gap-0.5 overflow-hidden">
                         {[['C','A','T','#','#'],['O','#','#','#','#'],['D','O','G','#','#'],['#','#','#','#','#'],['#','#','#','#','#']].map((row, ri) => row.map((cell, ci) => (
                           <div key={`${ri}-${ci}`} className={`aspect-square flex items-center justify-center rounded-sm text-[10px] font-bold transition-all duration-300 flex-shrink-0 ${cell === '#' ? 'bg-stone-700 dark:bg-stone-800' : 'bg-amber-50 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 border border-amber-200/60 dark:border-amber-700/50 animate-cell-pop'}`} style={cell !== '#' ? { animationDelay: `${(ri * 5 + ci) * 50}ms` } : undefined}>{cell !== '#' ? cell : ''}</div>
@@ -1095,7 +1095,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
           <span className="text-2xl">✨</span><span className="text-xs font-bold text-violet-600 dark:text-violet-400">Humanise</span>
         </div>
         <div className="absolute bottom-24 right-[7%] hidden lg:flex items-center gap-2 bg-white/90 dark:bg-stone-800/90 backdrop-blur rounded-2xl px-3 py-2 shadow-lg border border-amber-200/60 animate-float-delayed z-10" style={{ animationDelay: '0.3s' }}>
-          <span className="text-2xl">🧩</span><span className="text-xs font-bold text-amber-600 dark:text-amber-400">Crossword</span>
+          <span className="text-2xl">🧩</span><span className="text-xs font-bold text-amber-600 dark:text-amber-400">Crosswords</span>
         </div>
         <div className="absolute top-1/3 left-[3%] hidden xl:block text-4xl opacity-40 animate-float">📚</div>
         <div className="absolute top-2/5 right-[4%] hidden xl:block text-3xl opacity-35 animate-float-delayed">✏️</div>
@@ -1131,7 +1131,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
               { id: 'flashcards', label: 'Flashcards', icon: '🃏', desc: 'Copy and paste your notes or content to generate flip cards for memorization and quick review.', activeClasses: 'bg-rose-500 text-white shadow-lg shadow-rose-500/30', inactiveClasses: 'bg-rose-50 dark:bg-rose-900/20 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-800/50 hover:bg-rose-100 dark:hover:bg-rose-900/40' },
               { id: 'quiz', label: 'Practice Tests', icon: '📋', desc: 'Paste your study material and get instant quizzes — multiple choice, true/false, and more.', activeClasses: 'bg-amber-500 text-white shadow-lg shadow-amber-500/30', inactiveClasses: 'bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800/50 hover:bg-amber-100 dark:hover:bg-amber-900/40' },
               { id: 'summarise', label: 'Summarise', icon: '📋', desc: 'Upload documents or copy and paste text to get concise bullet points or summaries in seconds.', activeClasses: 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30', inactiveClasses: 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/50 hover:bg-emerald-100 dark:hover:bg-emerald-900/40' },
-              { id: 'crossword', label: 'Crossword', icon: '🧩', desc: 'Paste key terms or notes to create an interactive crossword puzzle and test your vocabulary.', activeClasses: 'bg-violet-500 text-white shadow-lg shadow-violet-500/30', inactiveClasses: 'bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-400 border border-violet-200 dark:border-violet-800/50 hover:bg-violet-100 dark:hover:bg-violet-900/40' },
+              { id: 'crossword', label: 'Crosswords', icon: '🧩', desc: 'Paste key terms or notes to create an interactive crossword puzzle and test your vocabulary.', activeClasses: 'bg-violet-500 text-white shadow-lg shadow-violet-500/30', inactiveClasses: 'bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-400 border border-violet-200 dark:border-violet-800/50 hover:bg-violet-100 dark:hover:bg-violet-900/40' },
               { id: 'games', label: 'Games', icon: '🎮', desc: 'Play Crater Blast — blast the correct falling answer before it lands. Turn your study material into an addictive quiz shooter game.', activeClasses: 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/30', inactiveClasses: 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800/50 hover:bg-indigo-100 dark:hover:bg-indigo-900/40' },
               { id: 'humanise', label: 'Humanise', icon: '✨', desc: 'Paste AI-generated text to transform it into natural, human-sounding writing that bypasses detectors.', activeClasses: 'bg-purple-500 text-white shadow-lg shadow-purple-500/30', inactiveClasses: 'bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400 border border-purple-200 dark:border-purple-800/50 hover:bg-purple-100 dark:hover:bg-purple-900/40' },
             ];
@@ -1529,7 +1529,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                     {([
                       { key: 'quiz' as const, label: 'Quiz', icon: '📝' },
                       { key: 'flashcards' as const, label: 'Flashcards', icon: '🃏' },
-                      { key: 'crossword' as const, label: 'Crossword', icon: '🧩' },
+                      { key: 'crossword' as const, label: 'Crosswords', icon: '🧩' },
                     ]).map((tool) => (
                       <button
                         key={tool.key}
