@@ -294,3 +294,63 @@
 .animate-card-breathe {
   animation: cardBreathe 4s ease-in-out infinite;
 }
+
+/* Button glisten shimmer on hover */
+@keyframes button-glisten {
+  0% { transform: translateX(-100%) skewX(-15deg); opacity: 0; }
+  50% { opacity: 0.6; }
+  100% { transform: translateX(200%) skewX(-15deg); opacity: 0; }
+}
+.btn-glisten {
+  position: relative;
+  overflow: hidden;
+}
+.btn-glisten::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.15) 25%,
+    rgba(255, 255, 255, 0.4) 50%,
+    rgba(255, 255, 255, 0.15) 75%,
+    transparent 100%
+  );
+  transform: translateX(-100%) skewX(-15deg);
+  pointer-events: none;
+}
+.btn-glisten:hover::before {
+  animation: button-glisten 0.8s ease-out forwards;
+}
+
+/* Hand glisten shimmer on hover */
+@keyframes hand-glisten {
+  0% { opacity: 0; }
+  30% { opacity: 0.25; }
+  100% { opacity: 0; }
+}
+.hand-glisten .hand-shine {
+  opacity: 0;
+}
+.group:hover .hand-glisten .hand-shine {
+  animation: hand-glisten 0.6s ease-out forwards;
+}
+
+/* Mascot sparkle on hover - continuous loop */
+@keyframes mascot-sparkle {
+  0%, 100% { opacity: 0; transform: scale(0.5); }
+  50% { opacity: 1; transform: scale(1); }
+}
+.mascot-sparkle .sparkle {
+  opacity: 0;
+}
+.group:hover .mascot-sparkle .sparkle-1 {
+  animation: mascot-sparkle 1.2s ease-in-out 0s infinite;
+}
+.group:hover .mascot-sparkle .sparkle-2 {
+  animation: mascot-sparkle 1.2s ease-in-out 0.2s infinite;
+}
+.group:hover .mascot-sparkle .sparkle-3 {
+  animation: mascot-sparkle 1.2s ease-in-out 0.4s infinite;
+}

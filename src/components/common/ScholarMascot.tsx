@@ -3,9 +3,10 @@ interface ScholarMascotProps {
   className?: string;
   animated?: boolean;
   pose?: 'default' | 'waving' | 'pointing' | 'celebrating' | 'studying' | 'thinking' | 'analyzing';
+  peekMode?: boolean;
 }
 
-const ScholarMascot = ({ size = 200, className = '', animated = true, pose = 'default' }: ScholarMascotProps) => {
+const ScholarMascot = ({ size = 200, className = '', animated = true, pose = 'default', peekMode = false }: ScholarMascotProps) => {
   const animationClass = animated ? 'animate-[mascot-float_3s_ease-in-out_infinite]' : '';
   const uniqueId = Math.random().toString(36).substr(2, 9);
   
@@ -614,12 +615,13 @@ const ScholarMascot = ({ size = 200, className = '', animated = true, pose = 'de
         {renderEyes()}
         
         {/* Mouth */}
-        {renderMouth()}
+        {!peekMode && renderMouth()}
         
         {/* Arms */}
-        {renderArms()}
+        {!peekMode && renderArms()}
         
         {/* Legs/feet */}
+        {!peekMode && (
         <g>
           {/* Left foot */}
           <ellipse cx="78" cy="165" rx="14" ry="10" fill="#7C3AED" />
@@ -629,10 +631,15 @@ const ScholarMascot = ({ size = 200, className = '', animated = true, pose = 'de
           <ellipse cx="122" cy="165" rx="14" ry="10" fill="#7C3AED" />
           <ellipse cx="122" cy="163" rx="10" ry="6" fill="#8B5CF6" />
         </g>
+        )}
         
         {/* Cheek blush */}
+        {!peekMode && (
+        <>
         <ellipse cx="65" cy="122" rx="8" ry="5" fill="#F9A8D4" opacity="0.4" />
         <ellipse cx="135" cy="122" rx="8" ry="5" fill="#F9A8D4" opacity="0.4" />
+        </>
+        )}
         
         {/* Body sparkle highlights */}
         <circle cx="70" cy="80" r="3" fill="white" opacity="0.4" />

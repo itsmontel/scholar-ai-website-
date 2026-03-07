@@ -530,48 +530,87 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
               <span className="bg-gradient-to-r from-blue-500 to-violet-500 bg-clip-text text-transparent">ace school</span>
             </h1>
 
-            <p className="text-base sm:text-xl text-stone-600 dark:text-stone-400 mb-8 sm:mb-10 max-w-2xl mx-auto leading-relaxed px-2">
+            <p className="text-base sm:text-xl text-stone-600 dark:text-stone-400 mb-12 sm:mb-14 max-w-2xl mx-auto leading-relaxed px-2">
               #1 Quizlet alternative. Paste notes. Get quizzes, flashcards & crosswords in seconds. Essay feedback, humanizer, we got you covered. 🙌
             </p>
             
-            {/* Primary CTA - mascot holding button on mobile */}
+            {/* Primary CTA - mascot peeking behind button with grip hands */}
             <div className="flex justify-center mb-4">
-              {/* Desktop: plain button */}
-              <button
-                onClick={() => onNavigate('login')}
-                className="hidden lg:block px-8 py-4 bg-gradient-to-r from-blue-500 to-violet-500 text-white font-bold rounded-full hover:from-blue-400 hover:to-violet-400 hover:scale-105 active:scale-95 transition-all shadow-xl shadow-violet-500/25 text-lg"
-              >
-                I'm ready to level up
-              </button>
-              {/* Mobile: mascot holding the button */}
-              <div className="lg:hidden relative flex flex-col items-center">
-                {/* Mascot sitting above the button, overlapping its top edge */}
-                <div className="relative z-20 mb-[-28px] pointer-events-none animate-[mascot-float_3s_ease-in-out_infinite]">
-                  <ScholarMascot size={80} animated={false} pose="celebrating" />
-                </div>
-                {/* Button with purple grip hands on each side */}
-                <div className="relative inline-flex items-center">
+              <div className="relative inline-flex flex-col items-center">
+                <div className="group relative inline-flex items-center">
+                  {/* Mascot peeking from behind - only eyes and above visible */}
+                  <div className="mascot-sparkle absolute left-1/2 -translate-x-1/2 -top-[42px] z-0 pointer-events-none overflow-hidden w-[80px] transition-transform duration-300 ease-out group-hover:scale-105" style={{ height: '42px' }}>
+                    <ScholarMascot size={80} animated={false} pose="celebrating" peekMode />
+                    {/* Sparkles that appear on hover */}
+                    <svg className="absolute inset-0 w-full h-full" viewBox="0 0 80 42" fill="none">
+                      <path className="sparkle sparkle-1" d="M12 8 L14 12 L18 12 L15 15 L16 19 L12 16 L8 19 L9 15 L6 12 L10 12 Z" fill="#FDE68A" />
+                      <path className="sparkle sparkle-2" d="M68 10 L69.5 13 L73 13 L70.5 15 L71.5 18 L68 16 L64.5 18 L65.5 15 L63 13 L66.5 13 Z" fill="#FDE68A" />
+                      <circle className="sparkle sparkle-3" cx="40" cy="5" r="3" fill="#C4B5FD" />
+                    </svg>
+                  </div>
                   {/* Left hand gripping the button edge */}
-                  <svg className="absolute -left-2.5 top-1/2 -translate-y-1/2 z-20 pointer-events-none w-[22px] h-[30px]" viewBox="0 0 22 30">
-                    <ellipse cx="12" cy="16" rx="10" ry="13" fill="#7C3AED" />
-                    <ellipse cx="12" cy="14" rx="7" ry="9" fill="#8B5CF6" />
-                    <ellipse cx="7" cy="5" rx="3" ry="5.5" fill="#A78BFA" transform="rotate(-15 7 5)" />
-                    <ellipse cx="12" cy="3" rx="2.8" ry="5" fill="#A78BFA" />
-                    <ellipse cx="17" cy="5" rx="2.8" ry="5" fill="#A78BFA" transform="rotate(12 17 5)" />
-                    <ellipse cx="12" cy="14" rx="4" ry="5" fill="#C4B5FD" opacity="0.3" />
+                  <svg className="hand-glisten absolute -left-3 top-1/2 -translate-y-1/2 z-20 pointer-events-none w-[28px] h-[44px] transition-transform duration-300 ease-out group-hover:scale-110" viewBox="0 0 28 44">
+                    <defs>
+                      <linearGradient id="handShineL" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="white" stopOpacity="0" />
+                        <stop offset="50%" stopColor="white" stopOpacity="0.25" />
+                        <stop offset="100%" stopColor="white" stopOpacity="0" />
+                      </linearGradient>
+                    </defs>
+                    {/* Palm on the side */}
+                    <ellipse cx="8" cy="24" rx="8" ry="12" fill="#7C3AED" />
+                    <ellipse cx="9" cy="23" rx="6" ry="9" fill="#8B5CF6" />
+                    {/* Thumb pointing down/back */}
+                    <ellipse cx="4" cy="34" rx="4" ry="6" fill="#8B5CF6" transform="rotate(15 4 34)" />
+                    <ellipse cx="4" cy="33" rx="3" ry="4" fill="#A78BFA" transform="rotate(15 4 33)" />
+                    {/* Fingers curling over the top - knuckles visible */}
+                    <ellipse cx="18" cy="14" rx="6" ry="5" fill="#7C3AED" />
+                    <ellipse cx="18" cy="13" rx="5" ry="4" fill="#8B5CF6" />
+                    {/* Finger tips wrapping over */}
+                    <ellipse cx="22" cy="20" rx="4" ry="5" fill="#8B5CF6" transform="rotate(-20 22 20)" />
+                    <ellipse cx="22" cy="19" rx="3" ry="4" fill="#A78BFA" transform="rotate(-20 22 19)" />
+                    <ellipse cx="20" cy="26" rx="3.5" ry="4.5" fill="#8B5CF6" transform="rotate(-10 20 26)" />
+                    <ellipse cx="20" cy="25" rx="2.5" ry="3.5" fill="#A78BFA" transform="rotate(-10 20 25)" />
+                    <ellipse cx="17" cy="31" rx="3" ry="4" fill="#8B5CF6" transform="rotate(5 17 31)" />
+                    <ellipse cx="17" cy="30" rx="2" ry="3" fill="#A78BFA" transform="rotate(5 17 30)" />
+                    {/* Highlight on palm */}
+                    <ellipse cx="10" cy="21" rx="3" ry="4" fill="#C4B5FD" opacity="0.3" />
+                    {/* Glisten shine overlay */}
+                    <ellipse className="hand-shine" cx="12" cy="20" rx="10" ry="16" fill="url(#handShineL)" />
                   </svg>
                   {/* Right hand gripping the button edge (mirrored) */}
-                  <svg className="absolute -right-2.5 top-1/2 z-20 pointer-events-none w-[22px] h-[30px]" viewBox="0 0 22 30" style={{ transform: 'translateY(-50%) scaleX(-1)' }}>
-                    <ellipse cx="12" cy="16" rx="10" ry="13" fill="#7C3AED" />
-                    <ellipse cx="12" cy="14" rx="7" ry="9" fill="#8B5CF6" />
-                    <ellipse cx="7" cy="5" rx="3" ry="5.5" fill="#A78BFA" transform="rotate(-15 7 5)" />
-                    <ellipse cx="12" cy="3" rx="2.8" ry="5" fill="#A78BFA" />
-                    <ellipse cx="17" cy="5" rx="2.8" ry="5" fill="#A78BFA" transform="rotate(12 17 5)" />
-                    <ellipse cx="12" cy="14" rx="4" ry="5" fill="#C4B5FD" opacity="0.3" />
+                  <svg className="hand-glisten absolute -right-3 top-1/2 z-20 pointer-events-none w-[28px] h-[44px] transition-transform duration-300 ease-out group-hover:scale-110" viewBox="0 0 28 44" style={{ transform: 'translateY(-50%) scaleX(-1)' }}>
+                    <defs>
+                      <linearGradient id="handShineR" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="white" stopOpacity="0" />
+                        <stop offset="50%" stopColor="white" stopOpacity="0.25" />
+                        <stop offset="100%" stopColor="white" stopOpacity="0" />
+                      </linearGradient>
+                    </defs>
+                    {/* Palm on the side */}
+                    <ellipse cx="8" cy="24" rx="8" ry="12" fill="#7C3AED" />
+                    <ellipse cx="9" cy="23" rx="6" ry="9" fill="#8B5CF6" />
+                    {/* Thumb pointing down/back */}
+                    <ellipse cx="4" cy="34" rx="4" ry="6" fill="#8B5CF6" transform="rotate(15 4 34)" />
+                    <ellipse cx="4" cy="33" rx="3" ry="4" fill="#A78BFA" transform="rotate(15 4 33)" />
+                    {/* Fingers curling over the top - knuckles visible */}
+                    <ellipse cx="18" cy="14" rx="6" ry="5" fill="#7C3AED" />
+                    <ellipse cx="18" cy="13" rx="5" ry="4" fill="#8B5CF6" />
+                    {/* Finger tips wrapping over */}
+                    <ellipse cx="22" cy="20" rx="4" ry="5" fill="#8B5CF6" transform="rotate(-20 22 20)" />
+                    <ellipse cx="22" cy="19" rx="3" ry="4" fill="#A78BFA" transform="rotate(-20 22 19)" />
+                    <ellipse cx="20" cy="26" rx="3.5" ry="4.5" fill="#8B5CF6" transform="rotate(-10 20 26)" />
+                    <ellipse cx="20" cy="25" rx="2.5" ry="3.5" fill="#A78BFA" transform="rotate(-10 20 25)" />
+                    <ellipse cx="17" cy="31" rx="3" ry="4" fill="#8B5CF6" transform="rotate(5 17 31)" />
+                    <ellipse cx="17" cy="30" rx="2" ry="3" fill="#A78BFA" transform="rotate(5 17 30)" />
+                    {/* Highlight on palm */}
+                    <ellipse cx="10" cy="21" rx="3" ry="4" fill="#C4B5FD" opacity="0.3" />
+                    {/* Glisten shine overlay */}
+                    <ellipse className="hand-shine" cx="12" cy="20" rx="10" ry="16" fill="url(#handShineR)" />
                   </svg>
                   <button
                     onClick={() => onNavigate('login')}
-                    className="relative z-10 px-10 py-4 bg-gradient-to-r from-blue-500 to-violet-500 text-white font-bold rounded-full active:scale-95 transition-all shadow-xl shadow-violet-500/25 text-lg"
+                    className="btn-glisten relative z-10 px-10 py-4 bg-violet-500 text-white font-bold rounded-full hover:bg-violet-600 hover:scale-105 active:scale-95 transition-all duration-300 ease-out shadow-xl shadow-violet-500/25 hover:shadow-2xl hover:shadow-violet-500/40 text-lg"
                   >
                     I'm ready to level up
                   </button>
