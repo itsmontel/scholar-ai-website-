@@ -233,6 +233,9 @@ router.get('/me', authenticateToken, async (req, res) => {
       });
     }
 
+    // Record login for streak when user fetches /me (app load = active today)
+    streakService.recordLogin(req.user.id).catch(() => {});
+
     let achievements = { stats: {}, unlockedBadges: {} };
     try {
       achievements = await achievementsService.getAchievements(req.user.id);

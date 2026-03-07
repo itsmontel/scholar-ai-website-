@@ -67,7 +67,13 @@ function mergeStats(existing, incoming) {
     'uploads_count', 'analyses_count', 'humanize_count', 'summaries_count',
     'quizzes_count', 'flashcards_count', 'crosswords_count', 'citations_count',
     'longest_streak', 'current_streak', 'tools_used_session', 'study_tools_session',
-    'exports_count', 'copies_count'
+    'exports_count', 'copies_count',
+    // New stats
+    'calendar_events_count', 'friend_requests_sent', 'friends_count', 'shares_count',
+    'quick_review_count', 'quick_review_perfect_scores', 'quick_review_current_streak',
+    'quick_review_longest_streak', 'crater_blast_games', 'crater_blast_perfect_games',
+    'crater_blast_high_score', 'total_study_tools_created', 'total_words_analyzed',
+    'documents_in_single_day', 'study_sessions_count'
   ];
 
   const merged = { ...existing };
@@ -86,9 +92,13 @@ function mergeStats(existing, incoming) {
     }
   }
 
-  if (incoming.tools_used_ever && Array.isArray(incoming.tools_used_ever)) {
-    const existingArr = merged.tools_used_ever || [];
-    merged.tools_used_ever = [...new Set([...existingArr, ...incoming.tools_used_ever])];
+  // Merge array fields
+  const arrayKeys = ['tools_used_ever', 'unique_friends_shared_with'];
+  for (const key of arrayKeys) {
+    if (incoming[key] && Array.isArray(incoming[key])) {
+      const existingArr = merged[key] || [];
+      merged[key] = [...new Set([...existingArr, ...incoming[key]])];
+    }
   }
 
   if (incoming.paid_since) {

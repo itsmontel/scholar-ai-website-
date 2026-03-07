@@ -79,6 +79,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [filter, setFilter] = useState<FilterType>('all');
   const [timePeriod, setTimePeriod] = useState<TimePeriod>('all');
+  const [currentPage, setCurrentPage] = useState(1);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   
   // Share functionality state
@@ -159,6 +160,18 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
     if (filter === 'quiz') return !['flashcards', 'crossword', 'crater_blast'].includes(tool.quiz_type);
     return tool.quiz_type === filter;
   });
+
+  const PAGE_SIZE = 10;
+  const totalPages = Math.max(1, Math.ceil(filteredTools.length / PAGE_SIZE));
+  const paginatedTools = filteredTools.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filter, timePeriod]);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [currentPage]);
 
   const getToolIcon = (type: string) => {
     if (type === 'flashcards') return '🃏';
@@ -958,8 +971,9 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
             </button>
           </div>
         ) : (
+          <>
           <div className="grid gap-4 sm:gap-5">
-            {filteredTools.map((tool) => {
+            {paginatedTools.map((tool) => {
               const daysRemaining = getDaysRemaining(tool.expires_at);
               const isQuiz = !['flashcards', 'crossword', 'crater_blast'].includes(tool.quiz_type);
               const toolIcon = getToolIcon(tool.quiz_type);
@@ -1179,6 +1193,48 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
               );
             })}
           </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
+              <button
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl border border-stone-200 bg-white text-stone-700 hover:bg-stone-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+                Previous
+              </button>
+              <div className="flex items-center gap-1">
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                  <button
+                    key={page}
+                    onClick={() => setCurrentPage(page)}
+                    className={`w-10 h-10 rounded-lg font-medium transition-colors ${
+                      currentPage === page
+                        ? 'bg-gradient-to-r from-violet-600 to-purple-600 text-white shadow-md'
+                        : 'bg-white border border-stone-200 text-stone-600 hover:bg-stone-50'
+                    }`}
+                  >
+                    {page}
+                  </button>
+                ))}
+              </div>
+              <button
+                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl border border-stone-200 bg-white text-stone-700 hover:bg-stone-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              >
+                Next
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
+          )}
+          </>
         )}
       </main>
 

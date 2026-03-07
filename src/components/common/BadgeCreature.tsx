@@ -869,22 +869,6 @@ function getCreatureSVG(id: string, alive: boolean) {
         </g>
       );
 
-    // Marathon - endurance creature (study_marathon)
-    case 'study_marathon':
-      return (
-        <g>
-          <circle cx="40" cy="40" r="22" fill="#F97316" opacity="0.1" />
-          <ellipse cx="40" cy="46" rx="16" ry="14" fill="#EA580C" />
-          <circle cx="34" cy="42" r="3" fill="white" /><circle cx="46" cy="42" r="3" fill="white" />
-          <circle cx="34.5" cy="41.5" r="1.5" fill="#7C2D12" /><circle cx="46.5" cy="41.5" r="1.5" fill="#7C2D12" />
-          <path d="M37 50 Q40 53 43 50" stroke="#7C2D12" strokeWidth="1.3" strokeLinecap="round" fill="none" />
-          <path d="M28 30 L24 26 M28 30 L32 26" stroke="#F97316" strokeWidth="2" strokeLinecap="round" />
-          <path d="M52 30 L48 26 M52 30 L56 26" stroke="#F97316" strokeWidth="2" strokeLinecap="round" />
-          <path d="M36 56 L34 64 M40 58 L40 66 M44 56 L46 64" stroke="#C2410C" strokeWidth="2" strokeLinecap="round" />
-          {alive && <path d="M22 36 L18 34 M58 36 L62 34" stroke="#FDBA74" strokeWidth="1.5" strokeLinecap="round" />}
-        </g>
-      );
-
     // Exporto - export creature (export_pro)
     case 'export_pro':
       return (
@@ -927,25 +911,6 @@ function getCreatureSVG(id: string, alive: boolean) {
           <path d="M36 50 Q40 54 44 50" stroke="#164E63" strokeWidth="1.5" strokeLinecap="round" fill="none" />
           <path d="M20 38 L16 34 M20 38 L16 42" stroke="#22D3EE" strokeWidth="2" strokeLinecap="round" />
           {alive && <circle cx="35" cy="39" r="0.7" fill="white" />}
-        </g>
-      );
-
-    // Zippy - speed creature (speed_demon)
-    case 'speed_demon':
-      return (
-        <g>
-          <circle cx="40" cy="40" r="22" fill="#EF4444" opacity="0.1" />
-          <ellipse cx="42" cy="42" rx="20" ry="16" fill="#DC2626" />
-          <path d="M22 42 L14 38 L16 42 L14 46Z" fill="#EF4444" />
-          <circle cx="38" cy="40" r="3" fill="white" /><circle cx="48" cy="40" r="3" fill="white" />
-          <circle cx="38.5" cy="39.5" r="1.5" fill="#7F1D1D" /><circle cx="48.5" cy="39.5" r="1.5" fill="#7F1D1D" />
-          <path d="M40 48 Q43 50 46 48" stroke="#7F1D1D" strokeWidth="1.2" strokeLinecap="round" fill="none" />
-          {alive && <>
-            <line x1="10" y1="34" x2="18" y2="36" stroke="#FCA5A5" strokeWidth="1.5" strokeLinecap="round" />
-            <line x1="8" y1="42" x2="16" y2="42" stroke="#FCA5A5" strokeWidth="1.5" strokeLinecap="round" />
-            <line x1="10" y1="50" x2="18" y2="48" stroke="#FCA5A5" strokeWidth="1.5" strokeLinecap="round" />
-          </>}
-          <path d="M58 34 L64 30 M58 42 L66 42 M58 50 L64 54" stroke="#EF4444" strokeWidth="1.5" strokeLinecap="round" />
         </g>
       );
 

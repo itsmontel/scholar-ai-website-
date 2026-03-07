@@ -203,6 +203,8 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
             </div>
           </div>
         </div>
+        {/* Light purple accent line under header */}
+        <div className="h-0.5 bg-gradient-to-r from-violet-400/50 via-violet-500/60 to-purple-400/50" />
         {showPromoBanner && <PromoBanner embedded />}
         {/* Mobile menu */}
         {isMobileMenuOpen && (
@@ -553,6 +555,9 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
           </div>
         </div>
       </div>
+
+      {/* Light purple accent line under header */}
+      <div className="h-0.5 bg-gradient-to-r from-violet-400/50 via-violet-500/60 to-purple-400/50" />
 
       {/* Mobile Menu */}
       <div className={`lg:hidden mobile-menu-container overflow-hidden transition-all duration-300 ease-out ${

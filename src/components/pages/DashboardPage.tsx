@@ -25,8 +25,11 @@ const getTimeGreeting = (): { greeting: string; emoji: string } => {
   const hour = new Date().getHours();
   const rand = Math.random();
   if (rand < 0.15) return { greeting: 'Welcome back', emoji: '👋' };
-  if (hour < 12) return { greeting: 'Good morning', emoji: '☀️' };
-  if (hour < 17) return { greeting: 'Good afternoon', emoji: '👋' };
+  // 4 AM - 11:59 AM = Good morning
+  if (hour >= 4 && hour < 12) return { greeting: 'Good morning', emoji: '☀️' };
+  // 12 PM - 4:59 PM = Good afternoon
+  if (hour >= 12 && hour < 17) return { greeting: 'Good afternoon', emoji: '👋' };
+  // 5 PM - 3:59 AM = Good evening (late night counts as evening)
   return { greeting: 'Good evening', emoji: '🌙' };
 };
 
@@ -297,9 +300,16 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
   const [addingEvent, setAddingEvent] = useState(false);
   const [editingEvent, setEditingEvent] = useState<StudyEvent | null>(null);
 
-  const openAddModal = () => {
+  const openAddModal = (prefillDate?: string) => {
     setEditingEvent(null);
-    setNewEvent({ title: '', event_date: '', event_time: '', event_type: 'other', course: '', notes: '' });
+    setNewEvent({
+      title: '',
+      event_date: prefillDate || '',
+      event_time: '',
+      event_type: 'other',
+      course: '',
+      notes: ''
+    });
     setAddEventError('');
     setShowAddEventModal(true);
   };
@@ -1725,9 +1735,6 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
         />
       )}
 
-      {/* Minimal top accent line */}
-      <div className="h-1 bg-gradient-to-r from-blue-500 via-violet-500 to-purple-500" />
-
       {/* Main Content */}
       <main className="relative max-w-6xl mx-auto px-3 sm:px-6 pt-3 sm:pt-6 pb-20 sm:pb-14 w-full min-w-0 overflow-x-hidden lg:ml-24 lg:mr-auto">
         <div className="grid grid-cols-1 lg:grid-cols-[240px_1fr] gap-4 lg:gap-6 items-start">
@@ -1764,7 +1771,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                 <span className="text-lg">📅</span> Schedule
               </h3>
               <button 
-                onClick={openAddModal}
+                onClick={() => openAddModal()}
                 className="text-stone-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors p-1 rounded-lg hover:bg-violet-50 dark:hover:bg-violet-900/30"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1798,11 +1805,13 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                   const events = getEventsForDate(d.date);
                   const today = isToday(d.date);
                   return (
-                    <div 
-                      key={i} 
-                      className={`p-1.5 relative cursor-pointer rounded-lg transition-all ${
-                        !d.isCurrentMonth ? 'text-stone-300 dark:text-stone-600' : 
-                        today ? 'bg-gradient-to-br from-violet-500 to-purple-600 text-white font-bold shadow-lg shadow-violet-500/30 scale-110' : 
+                    <button
+                      key={i}
+                      type="button"
+                      onClick={() => openAddModal(d.date)}
+                      className={`w-full p-1.5 relative cursor-pointer rounded-lg transition-all ${
+                        !d.isCurrentMonth ? 'text-stone-300 dark:text-stone-600' :
+                        today ? 'bg-gradient-to-br from-violet-500 to-purple-600 text-white font-bold shadow-lg shadow-violet-500/30 scale-110' :
                         'text-stone-700 dark:text-stone-300 hover:bg-violet-100 dark:hover:bg-violet-900/30 hover:text-violet-700'
                       }`}
                     >
@@ -1810,7 +1819,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                       {events.length > 0 && !today && (
                         <span className={`absolute bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full ${eventTypeColors[events[0].event_type]?.dot || 'bg-violet-400'}`}></span>
                       )}
-                    </div>
+                    </button>
                   );
                 })}
               </div>
@@ -1866,7 +1875,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
             </div>
             
             <button 
-              onClick={openAddModal}
+              onClick={() => openAddModal()}
               className="w-full mt-3 py-3 text-sm font-semibold text-white bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-400 hover:to-purple-500 rounded-xl transition-all shadow-lg shadow-violet-500/25 hover:shadow-violet-500/40 hover:-translate-y-0.5 active:scale-95 flex items-center justify-center gap-2"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
@@ -3762,7 +3771,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
               <h3 className="font-bold text-stone-800 dark:text-stone-100 flex items-center gap-2 text-sm">
                 <span className="text-lg">📅</span> Schedule
               </h3>
-              <button onClick={openAddModal} className="text-stone-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors p-1 rounded-lg hover:bg-violet-50 dark:hover:bg-violet-900/30">
+              <button onClick={() => openAddModal()} className="text-stone-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors p-1 rounded-lg hover:bg-violet-50 dark:hover:bg-violet-900/30">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
               </button>
             </div>
@@ -3811,7 +3820,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                 );
               })}
             </div>
-            <button onClick={openAddModal} className="w-full mt-3 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-400 hover:to-purple-500 rounded-xl transition-all shadow-lg shadow-violet-500/25 flex items-center justify-center gap-2">
+            <button onClick={() => openAddModal()} className="w-full mt-3 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-400 hover:to-purple-500 rounded-xl transition-all shadow-lg shadow-violet-500/25 flex items-center justify-center gap-2">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
               Add Event
             </button>

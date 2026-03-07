@@ -24,6 +24,27 @@ export interface AchievementStats {
   last_active_date: string | null;
   visited_badges: boolean;
   first_login: boolean;
+  // Calendar & scheduling
+  calendar_events_count: number;
+  // Friends & social
+  friend_requests_sent: number;
+  friends_count: number;
+  shares_count: number;
+  unique_friends_shared_with: string[];
+  // Quick review stats
+  quick_review_count: number;
+  quick_review_perfect_scores: number;
+  quick_review_current_streak: number;
+  quick_review_longest_streak: number;
+  // Crater Blast stats
+  crater_blast_games: number;
+  crater_blast_perfect_games: number;
+  crater_blast_high_score: number;
+  // Advanced mastery
+  total_study_tools_created: number;
+  total_words_analyzed: number;
+  documents_in_single_day: number;
+  study_sessions_count: number;
 }
 
 export interface Badge {
@@ -129,8 +150,7 @@ export const BADGES: Badge[] = [
   { id: 'early_bird', name: 'Early Bird', creatureName: 'Sol', description: 'Use WriteScholar before 7 AM', xp: 15, category: 'special', rarity: 'uncommon', condition: (s) => s.used_before_7am, conditionText: 'Use app before 7 AM' },
   { id: 'midnight_scholar', name: 'Midnight Scholar', creatureName: 'Midnight', description: 'Use WriteScholar between midnight and 3 AM', xp: 25, category: 'special', rarity: 'rare', condition: (s) => s.midnight_usage, conditionText: 'Use app midnight–3 AM' },
   { id: 'weekend_warrior', name: 'Weekend Warrior', creatureName: 'Weekender', description: 'Use WriteScholar on a weekend', xp: 10, category: 'special', rarity: 'common', condition: (s) => s.weekend_usage, conditionText: 'Use app on a weekend' },
-  { id: 'all_rounder', name: 'All-Rounder', creatureName: 'Omni', description: 'Use every tool type at least once', xp: 50, category: 'special', rarity: 'epic', condition: (s) => s.tools_used_ever.length >= 7, conditionText: 'Use all 7 tool types' },
-  { id: 'study_marathon', name: 'Study Marathon', creatureName: 'Marathon', description: 'Use 3+ different tools in one session', xp: 20, category: 'special', rarity: 'uncommon', condition: (s) => s.tools_used_session >= 3, conditionText: 'Use 3 tools in one session' },
+  { id: 'all_rounder', name: 'All-Rounder', creatureName: 'Omni', description: 'Use every tool type at least once', xp: 50, category: 'special', rarity: 'epic', condition: (s) => (s.tools_used_ever || []).length >= 7, conditionText: 'Use all 7 tool types' },
   { id: 'export_pro', name: 'Export Pro', creatureName: 'Exporto', description: 'Export a quiz or flashcard set', xp: 15, category: 'special', rarity: 'uncommon', condition: (s) => s.exports_count >= 1, conditionText: 'Export 1 study tool' },
   { id: 'comeback_kid', name: 'Comeback Kid', creatureName: 'Boomerang', description: 'Return after 7+ days away', xp: 20, category: 'special', rarity: 'uncommon', condition: (s) => {
     if (!s.last_active_date) return false;
@@ -140,7 +160,58 @@ export const BADGES: Badge[] = [
     return daysDiff >= 7;
   }, conditionText: 'Return after 7+ days away' },
   { id: 'social_scholar', name: 'Social Scholar', creatureName: 'Sharky', description: 'Copy a result to clipboard', xp: 10, category: 'special', rarity: 'common', condition: (s) => s.copies_count >= 1, conditionText: 'Copy a result' },
-  { id: 'speed_demon', name: 'Speed Demon', creatureName: 'Zippy', description: 'Generate 3 study tools in one session', xp: 25, category: 'special', rarity: 'rare', condition: (s) => s.study_tools_session >= 3, conditionText: '3 study tools in one session' },
+
+  // ═══════════════════════════════════════════════
+  // CALENDAR & PLANNING (5 badges)
+  // ═══════════════════════════════════════════════
+  { id: 'planner', name: 'Planner', creatureName: 'Calendex', description: 'Schedule your first study event', xp: 10, category: 'special', rarity: 'common', condition: (s) => s.calendar_events_count >= 1, conditionText: 'Schedule 1 calendar event' },
+  { id: 'organized_scholar', name: 'Organized Scholar', creatureName: 'Plannerina', description: 'Schedule 5 study events', xp: 25, category: 'special', rarity: 'uncommon', condition: (s) => s.calendar_events_count >= 5, conditionText: 'Schedule 5 calendar events' },
+  { id: 'time_master', name: 'Time Master', creatureName: 'Chronos', description: 'Schedule 15 study events', xp: 40, category: 'special', rarity: 'rare', condition: (s) => s.calendar_events_count >= 15, conditionText: 'Schedule 15 calendar events' },
+  { id: 'schedule_sensei', name: 'Schedule Sensei', creatureName: 'Tempus', description: 'Schedule 30 study events', xp: 60, category: 'special', rarity: 'epic', condition: (s) => s.calendar_events_count >= 30, conditionText: 'Schedule 30 calendar events' },
+  { id: 'calendar_king', name: 'Calendar King', creatureName: 'Agendor', description: 'Schedule 50 study events', xp: 100, category: 'special', rarity: 'legendary', condition: (s) => s.calendar_events_count >= 50, conditionText: 'Schedule 50 calendar events' },
+
+  // ═══════════════════════════════════════════════
+  // FRIENDS & SOCIAL (7 badges)
+  // ═══════════════════════════════════════════════
+  { id: 'friendly_scholar', name: 'Friendly Scholar', creatureName: 'Buddy', description: 'Send your first friend request', xp: 10, category: 'special', rarity: 'common', condition: (s) => s.friend_requests_sent >= 1, conditionText: 'Send 1 friend request' },
+  { id: 'social_butterfly', name: 'Social Butterfly', creatureName: 'Flutter', description: 'Add 5 friends', xp: 30, category: 'special', rarity: 'uncommon', condition: (s) => s.friends_count >= 5, conditionText: 'Have 5 friends' },
+  { id: 'popular_kid', name: 'Popular Kid', creatureName: 'Celeb', description: 'Add 10 friends', xp: 50, category: 'special', rarity: 'rare', condition: (s) => s.friends_count >= 10, conditionText: 'Have 10 friends' },
+  { id: 'generous_genius', name: 'Generous Genius', creatureName: 'Giver', description: 'Share a study tool with a friend', xp: 15, category: 'special', rarity: 'common', condition: (s) => s.shares_count >= 1, conditionText: 'Share 1 study tool' },
+  { id: 'sharing_star', name: 'Sharing Star', creatureName: 'Starshare', description: 'Share with 5 different friends', xp: 40, category: 'special', rarity: 'rare', condition: (s) => (s.unique_friends_shared_with || []).length >= 5, conditionText: 'Share with 5 different friends' },
+  { id: 'knowledge_spreader', name: 'Knowledge Spreader', creatureName: 'Broadcaster', description: 'Share 10 study tools total', xp: 50, category: 'special', rarity: 'epic', condition: (s) => s.shares_count >= 10, conditionText: 'Share 10 study tools' },
+  { id: 'study_influencer', name: 'Study Influencer', creatureName: 'Influex', description: 'Share 25 study tools total', xp: 100, category: 'special', rarity: 'legendary', condition: (s) => s.shares_count >= 25, conditionText: 'Share 25 study tools' },
+
+  // ═══════════════════════════════════════════════
+  // QUICK REVIEW (8 badges)
+  // ═══════════════════════════════════════════════
+  { id: 'quick_starter', name: 'Quick Starter', creatureName: 'Speedy', description: 'Complete your first Quick Review', xp: 10, category: 'mastery', rarity: 'common', condition: (s) => s.quick_review_count >= 1, conditionText: 'Complete 1 Quick Review' },
+  { id: 'perfect_recall', name: 'Perfect Recall', creatureName: 'Memoria', description: 'Score 100% on a Quick Review', xp: 25, category: 'mastery', rarity: 'rare', condition: (s) => s.quick_review_perfect_scores >= 1, conditionText: 'Get 100% on Quick Review' },
+  { id: 'review_regular', name: 'Review Regular', creatureName: 'Reviewer', description: 'Complete 10 Quick Reviews', xp: 30, category: 'mastery', rarity: 'uncommon', condition: (s) => s.quick_review_count >= 10, conditionText: 'Complete 10 Quick Reviews' },
+  { id: 'weekly_reviewer', name: 'Weekly Reviewer', creatureName: 'Weekwise', description: '7-day Quick Review streak', xp: 50, category: 'streak', rarity: 'epic', condition: (s) => s.quick_review_longest_streak >= 7, conditionText: '7-day Quick Review streak' },
+  { id: 'review_warrior', name: 'Review Warrior', creatureName: 'Revisor', description: 'Complete 30 Quick Reviews', xp: 50, category: 'mastery', rarity: 'rare', condition: (s) => s.quick_review_count >= 30, conditionText: 'Complete 30 Quick Reviews' },
+  { id: 'monthly_reviewer', name: 'Monthly Reviewer', creatureName: 'Consistor', description: '30-day Quick Review streak', xp: 150, category: 'streak', rarity: 'legendary', condition: (s) => s.quick_review_longest_streak >= 30, conditionText: '30-day Quick Review streak' },
+  { id: 'review_master', name: 'Review Master', creatureName: 'Recallion', description: 'Complete 50 Quick Reviews', xp: 75, category: 'mastery', rarity: 'epic', condition: (s) => s.quick_review_count >= 50, conditionText: 'Complete 50 Quick Reviews' },
+  { id: 'review_legend', name: 'Review Legend', creatureName: 'Retainex', description: 'Complete 100 Quick Reviews', xp: 150, category: 'mastery', rarity: 'legendary', condition: (s) => s.quick_review_count >= 100, conditionText: 'Complete 100 Quick Reviews' },
+
+  // ═══════════════════════════════════════════════
+  // CRATER BLAST (5 badges)
+  // ═══════════════════════════════════════════════
+  { id: 'crater_rookie', name: 'Crater Rookie', creatureName: 'Blastling', description: 'Play your first Crater Blast game', xp: 10, category: 'mastery', rarity: 'common', condition: (s) => s.crater_blast_games >= 1, conditionText: 'Play 1 Crater Blast game' },
+  { id: 'crater_veteran', name: 'Crater Veteran', creatureName: 'Blastor', description: 'Play 10 Crater Blast games', xp: 30, category: 'mastery', rarity: 'uncommon', condition: (s) => s.crater_blast_games >= 10, conditionText: 'Play 10 Crater Blast games' },
+  { id: 'perfect_blaster', name: 'Perfect Blaster', creatureName: 'Perfecto', description: 'Get a perfect score in Crater Blast', xp: 50, category: 'mastery', rarity: 'epic', condition: (s) => s.crater_blast_perfect_games >= 1, conditionText: 'Perfect Crater Blast game' },
+  { id: 'crater_champion', name: 'Crater Champion', creatureName: 'Boomking', description: 'Play 25 Crater Blast games', xp: 60, category: 'mastery', rarity: 'rare', condition: (s) => s.crater_blast_games >= 25, conditionText: 'Play 25 Crater Blast games' },
+  { id: 'crater_master', name: 'Crater Master', creatureName: 'Craterlord', description: 'Play 50 Crater Blast games', xp: 100, category: 'mastery', rarity: 'legendary', condition: (s) => s.crater_blast_games >= 50, conditionText: 'Play 50 Crater Blast games' },
+
+  // ═══════════════════════════════════════════════
+  // ADVANCED MASTERY (7 badges) — the hard ones!
+  // ═══════════════════════════════════════════════
+  { id: 'study_tool_centurion', name: 'Study Tool Centurion', creatureName: 'Centurion', description: 'Create 100 total study tools', xp: 150, category: 'mastery', rarity: 'legendary', condition: (s) => s.total_study_tools_created >= 100, conditionText: 'Create 100 study tools' },
+  { id: 'wordsmith', name: 'Wordsmith', creatureName: 'Lexicon', description: 'Analyze 50,000 words total', xp: 75, category: 'mastery', rarity: 'epic', condition: (s) => s.total_words_analyzed >= 50000, conditionText: 'Analyze 50,000 words' },
+  { id: 'word_devourer', name: 'Word Devourer', creatureName: 'Devourex', description: 'Analyze 250,000 words total', xp: 200, category: 'mastery', rarity: 'legendary', condition: (s) => s.total_words_analyzed >= 250000, conditionText: 'Analyze 250,000 words' },
+  { id: 'daily_grinder', name: 'Daily Grinder', creatureName: 'Grindox', description: 'Analyze 10 documents in a single day', xp: 75, category: 'special', rarity: 'epic', condition: (s) => s.documents_in_single_day >= 10, conditionText: '10 documents in one day' },
+  { id: 'perfectionist', name: 'Perfectionist', creatureName: 'Flawless', description: 'Get 5 perfect Quick Review scores', xp: 60, category: 'mastery', rarity: 'epic', condition: (s) => s.quick_review_perfect_scores >= 5, conditionText: '5 perfect Quick Reviews' },
+  { id: 'memory_machine', name: 'Memory Machine', creatureName: 'Mnemonic', description: 'Get 25 perfect Quick Review scores', xp: 150, category: 'mastery', rarity: 'legendary', condition: (s) => s.quick_review_perfect_scores >= 25, conditionText: '25 perfect Quick Reviews' },
+  { id: 'export_empire', name: 'Export Empire', creatureName: 'Empirex', description: 'Export 25 study tools', xp: 75, category: 'special', rarity: 'epic', condition: (s) => s.exports_count >= 25, conditionText: 'Export 25 study tools' },
 ];
 
 const STATS_KEY = 'writescholar_achievement_stats';
@@ -175,6 +246,22 @@ function defaultStats(): AchievementStats {
     last_active_date: null,
     visited_badges: false,
     first_login: false,
+    calendar_events_count: 0,
+    friend_requests_sent: 0,
+    friends_count: 0,
+    shares_count: 0,
+    unique_friends_shared_with: [],
+    quick_review_count: 0,
+    quick_review_perfect_scores: 0,
+    quick_review_current_streak: 0,
+    quick_review_longest_streak: 0,
+    crater_blast_games: 0,
+    crater_blast_perfect_games: 0,
+    crater_blast_high_score: 0,
+    total_study_tools_created: 0,
+    total_words_analyzed: 0,
+    documents_in_single_day: 0,
+    study_sessions_count: 0,
   };
 }
 
@@ -233,6 +320,12 @@ export function mergeFromServer(serverStats: Record<string, unknown>, serverBadg
     'quizzes_count', 'flashcards_count', 'crosswords_count', 'citations_count',
     'longest_streak', 'current_streak', 'tools_used_session', 'study_tools_session',
     'exports_count', 'copies_count',
+    // New stats
+    'calendar_events_count', 'friend_requests_sent', 'friends_count', 'shares_count',
+    'quick_review_count', 'quick_review_perfect_scores', 'quick_review_current_streak',
+    'quick_review_longest_streak', 'crater_blast_games', 'crater_blast_perfect_games',
+    'crater_blast_high_score', 'total_study_tools_created', 'total_words_analyzed',
+    'documents_in_single_day', 'study_sessions_count',
   ];
   const merged = { ...local };
   for (const key of numericKeys) {
@@ -245,8 +338,12 @@ export function mergeFromServer(serverStats: Record<string, unknown>, serverBadg
   for (const key of boolKeys) {
     if ((serverStats as any)[key]) merged[key as keyof AchievementStats] = true as any;
   }
+  // Merge array fields
   if (Array.isArray(serverStats.tools_used_ever)) {
     merged.tools_used_ever = [...new Set([...(merged.tools_used_ever || []), ...(serverStats.tools_used_ever as string[])])];
+  }
+  if (Array.isArray(serverStats.unique_friends_shared_with)) {
+    merged.unique_friends_shared_with = [...new Set([...(merged.unique_friends_shared_with || []), ...(serverStats.unique_friends_shared_with as string[])])];
   }
   if (serverStats.paid_since && (!merged.paid_since || new Date(serverStats.paid_since as string) < new Date(merged.paid_since))) {
     merged.paid_since = serverStats.paid_since as string;
@@ -320,11 +417,12 @@ export function trackAction(action: keyof AchievementStats, value?: number | boo
 
   applyTimeChecks(stats);
 
-  // Track tool diversity for all_rounder and study_marathon
+  // Track tool diversity for all_rounder
   const toolType = TOOL_TYPE_MAP[action as string];
   if (toolType) {
-    if (!stats.tools_used_ever.includes(toolType)) {
-      stats.tools_used_ever = [...stats.tools_used_ever, toolType];
+    const toolsEver = stats.tools_used_ever || [];
+    if (!toolsEver.includes(toolType)) {
+      stats.tools_used_ever = [...toolsEver, toolType];
     }
     stats.tools_used_session = (stats.tools_used_session || 0) + 1;
 
@@ -359,6 +457,84 @@ export function trackBadgesVisit(): string[] {
   return checkAndUnlockBadges(stats);
 }
 
+export function trackCalendarEvent(): string[] {
+  const stats = getStats();
+  stats.calendar_events_count = (stats.calendar_events_count || 0) + 1;
+  saveStats(stats);
+  return checkAndUnlockBadges(stats);
+}
+
+export function trackFriendRequest(): string[] {
+  const stats = getStats();
+  stats.friend_requests_sent = (stats.friend_requests_sent || 0) + 1;
+  saveStats(stats);
+  return checkAndUnlockBadges(stats);
+}
+
+export function trackFriendAdded(): string[] {
+  const stats = getStats();
+  stats.friends_count = (stats.friends_count || 0) + 1;
+  saveStats(stats);
+  return checkAndUnlockBadges(stats);
+}
+
+export function trackShare(friendId?: string): string[] {
+  const stats = getStats();
+  stats.shares_count = (stats.shares_count || 0) + 1;
+  if (friendId) {
+    const sharedWith = stats.unique_friends_shared_with || [];
+    if (!sharedWith.includes(friendId)) {
+      stats.unique_friends_shared_with = [...sharedWith, friendId];
+    }
+  }
+  saveStats(stats);
+  return checkAndUnlockBadges(stats);
+}
+
+export function trackQuickReview(isPerfect: boolean = false): string[] {
+  const stats = getStats();
+  stats.quick_review_count = (stats.quick_review_count || 0) + 1;
+  if (isPerfect) {
+    stats.quick_review_perfect_scores = (stats.quick_review_perfect_scores || 0) + 1;
+  }
+  saveStats(stats);
+  return checkAndUnlockBadges(stats);
+}
+
+export function updateQuickReviewStreak(currentStreak: number): string[] {
+  const stats = getStats();
+  stats.quick_review_current_streak = currentStreak;
+  stats.quick_review_longest_streak = Math.max(stats.quick_review_longest_streak || 0, currentStreak);
+  saveStats(stats);
+  return checkAndUnlockBadges(stats);
+}
+
+export function trackCraterBlastGame(isPerfect: boolean = false, score: number = 0): string[] {
+  const stats = getStats();
+  stats.crater_blast_games = (stats.crater_blast_games || 0) + 1;
+  if (isPerfect) {
+    stats.crater_blast_perfect_games = (stats.crater_blast_perfect_games || 0) + 1;
+  }
+  stats.crater_blast_high_score = Math.max(stats.crater_blast_high_score || 0, score);
+  saveStats(stats);
+  return checkAndUnlockBadges(stats);
+}
+
+export function trackStudyToolCreated(wordCount: number = 0): string[] {
+  const stats = getStats();
+  stats.total_study_tools_created = (stats.total_study_tools_created || 0) + 1;
+  stats.total_words_analyzed = (stats.total_words_analyzed || 0) + wordCount;
+  saveStats(stats);
+  return checkAndUnlockBadges(stats);
+}
+
+export function trackDocumentsInDay(count: number): string[] {
+  const stats = getStats();
+  stats.documents_in_single_day = Math.max(stats.documents_in_single_day || 0, count);
+  saveStats(stats);
+  return checkAndUnlockBadges(stats);
+}
+
 export function syncFromAPIData(data: {
   documentsUploaded?: number;
   documentsAnalyzed?: number;
@@ -389,27 +565,18 @@ export function syncFromAPIData(data: {
     stats.is_paid_user = true;
   }
 
-  // Comeback kid: check if last active was 7+ days ago before updating
-  const today = new Date().toISOString().split('T')[0];
-  if (stats.last_active_date && stats.last_active_date !== today) {
-    const last = new Date(stats.last_active_date);
-    const now = new Date();
-    const daysDiff = Math.floor((now.getTime() - last.getTime()) / (1000 * 60 * 60 * 24));
-    if (daysDiff >= 7) {
-      // Will trigger comeback_kid badge
-    }
-  }
-
   // First login
   stats.first_login = true;
 
   applyTimeChecks(stats);
 
-  // Update last active AFTER checking comeback (so we don't overwrite before the check runs)
+  const today = new Date().toISOString().split('T')[0];
+  // Check badges BEFORE updating last_active_date so Comeback Kid can see the 7+ day gap
+  const newlyUnlocked = checkAndUnlockBadges(stats);
   stats.last_active_date = today;
 
   saveStats(stats);
-  return checkAndUnlockBadges(stats);
+  return newlyUnlocked;
 }
 
 export function getTotalXP(): number {

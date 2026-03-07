@@ -36,6 +36,64 @@ interface QuickReviewModalProps {
   onSkip: () => void;
 }
 
+// Bank of varied welcome messages — randomly shown so it doesn't get repetitive
+const WELCOME_MESSAGES: Array<{
+  greeting: string;
+  subtitle: string;
+  detail: string;
+}> = [
+  {
+    greeting: 'Welcome back',
+    subtitle: 'Ready for a quick review session?',
+    detail: "We've prepared {count} questions from your study materials to help keep your knowledge fresh.",
+  },
+  {
+    greeting: "Hey there",
+    subtitle: "Time for a quick brain boost?",
+    detail: "We've pulled {count} questions from your study materials to keep you sharp.",
+  },
+  {
+    greeting: "Let's go",
+    subtitle: "Your brain's ready for a quick workout.",
+    detail: "{count} questions from your materials are waiting — let's fire those neurons!",
+  },
+  {
+    greeting: "Quick review time",
+    subtitle: "Short session, big impact.",
+    detail: "We've got {count} questions ready from your study materials.",
+  },
+  {
+    greeting: "You've got this",
+    subtitle: "A quick review will sharpen your skills.",
+    detail: "{count} questions from your materials are lined up and ready.",
+  },
+  {
+    greeting: "Knowledge check incoming",
+    subtitle: "Let's strengthen your recall.",
+    detail: "We've selected {count} questions from your study materials.",
+  },
+  {
+    greeting: "Your brain's calling",
+    subtitle: "Time to flex those memory muscles.",
+    detail: "We've prepared {count} questions from your study materials for a quick review.",
+  },
+  {
+    greeting: "Time to review",
+    subtitle: "Keep that knowledge fresh.",
+    detail: "{count} questions from your study materials to help you stay sharp.",
+  },
+  {
+    greeting: "Ready to consolidate",
+    subtitle: "A little review goes a long way.",
+    detail: "We've prepared {count} questions from your study materials.",
+  },
+  {
+    greeting: "Good to see you",
+    subtitle: "Let's keep that knowledge fresh.",
+    detail: "{count} questions from your study materials are ready when you are.",
+  },
+];
+
 const QuickReviewModal = ({ userName, userId, onComplete, onSkip }: QuickReviewModalProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [reviewItems, setReviewItems] = useState<ReviewItem[]>([]);
@@ -49,6 +107,8 @@ const QuickReviewModal = ({ userName, userId, onComplete, onSkip }: QuickReviewM
   const [noContent, setNoContent] = useState(false);
   const [streak, setStreak] = useState(0);
   const [maxStreak, setMaxStreak] = useState(0);
+  const [showWelcome, setShowWelcome] = useState(true);
+  const [welcomeMsg] = useState(() => WELCOME_MESSAGES[Math.floor(Math.random() * WELCOME_MESSAGES.length)]);
 
   useEffect(() => {
     fetchAndPrepareReview();
@@ -248,8 +308,8 @@ const QuickReviewModal = ({ userName, userId, onComplete, onSkip }: QuickReviewM
   // Loading state
   if (isLoading) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/60 backdrop-blur-sm animate-fadeIn">
-        <div className="bg-white rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-2xl">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/60 backdrop-blur-sm animate-smoothFadeIn">
+        <div className="bg-white rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-2xl animate-smoothSlideUp">
           <div className="flex flex-col items-center gap-4">
             <div className="w-12 h-12 border-4 border-violet-200 border-t-violet-600 rounded-full animate-spin" />
             <p className="text-stone-600 font-medium">Preparing your review...</p>
@@ -262,8 +322,8 @@ const QuickReviewModal = ({ userName, userId, onComplete, onSkip }: QuickReviewM
   // No content state
   if (noContent) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-stone-900/60 backdrop-blur-sm animate-fadeIn">
-        <div className="relative w-full max-w-md max-h-[90vh] overflow-y-auto bg-white rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-stone-900/60 backdrop-blur-sm animate-smoothFadeIn">
+        <div className="relative w-full max-w-md max-h-[90vh] overflow-y-auto bg-white rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden animate-smoothSlideUp">
           <div className="h-3 bg-gradient-to-r from-violet-500 via-purple-500 to-fuchsia-500" />
           <div className="p-4 sm:p-8 text-center">
             <div className="mb-3 sm:mb-4">
@@ -287,14 +347,60 @@ const QuickReviewModal = ({ userName, userId, onComplete, onSkip }: QuickReviewM
     );
   }
 
+  // Welcome intro screen - shows before quiz starts
+  if (showWelcome) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-stone-900/60 backdrop-blur-sm animate-smoothFadeIn">
+        <div className="relative w-full max-w-md bg-white rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden animate-smoothSlideUp">
+          <div className="h-3 bg-gradient-to-r from-violet-500 via-purple-500 to-fuchsia-500" />
+          <div className="p-6 sm:p-8 text-center">
+            <div className="mb-4 sm:mb-6 flex justify-center">
+              <ScholarMascot size={120} animated={true} pose="waving" />
+            </div>
+            <h2 className="text-2xl sm:text-3xl font-bold text-stone-800 mb-2">
+              {welcomeMsg.greeting}{userName ? `, ${userName}` : ''}! 👋
+            </h2>
+            <p className="text-stone-600 mb-2 text-base sm:text-lg">
+              {welcomeMsg.subtitle}
+            </p>
+            <p className="text-stone-500 mb-6 text-sm">
+              {welcomeMsg.detail.split('{count}').map((part, i) => (
+                i === 0 ? part : (
+                  <span key={i}>
+                    <span className="font-semibold text-violet-600">{reviewItems.length} questions</span>
+                    {part}
+                  </span>
+                )
+              ))}
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <button
+                onClick={() => setShowWelcome(false)}
+                className="px-8 py-3.5 bg-gradient-to-r from-violet-600 to-purple-600 text-white rounded-full font-semibold text-lg shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all"
+              >
+                Let's Go! 🚀
+              </button>
+              <button
+                onClick={handleSkip}
+                className="px-6 py-3 text-stone-500 hover:text-stone-700 font-medium transition-colors"
+              >
+                Maybe later
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // Results screen
   if (showResults) {
     const emoji = scorePercentage >= 80 ? '🎉' : scorePercentage >= 60 ? '👏' : scorePercentage >= 40 ? '💪' : '📚';
     const message = scorePercentage >= 80 ? 'Amazing!' : scorePercentage >= 60 ? 'Great job!' : scorePercentage >= 40 ? 'Good effort!' : 'Keep practicing!';
     
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-stone-900/60 backdrop-blur-sm animate-fadeIn overflow-y-auto">
-        <div className="relative w-full max-w-lg max-h-[min(calc(100vh-1rem),90vh)] sm:max-h-[calc(100vh-2rem)] bg-white rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden overflow-y-auto my-auto">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-stone-900/60 backdrop-blur-sm animate-smoothFadeIn overflow-y-auto">
+        <div className="relative w-full max-w-lg max-h-[min(calc(100vh-1rem),90vh)] sm:max-h-[calc(100vh-2rem)] bg-white rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden overflow-y-auto my-auto animate-smoothSlideUp">
           {/* Confetti-like decorations for good scores */}
           {scorePercentage >= 60 && (
             <>
@@ -369,8 +475,8 @@ const QuickReviewModal = ({ userName, userId, onComplete, onSkip }: QuickReviewM
 
   // Main review interface
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-stone-900/60 backdrop-blur-sm animate-fadeIn overflow-y-auto">
-      <div className="relative w-full max-w-2xl max-h-[min(calc(100vh-1rem),90vh)] sm:max-h-[calc(100vh-2rem)] bg-white rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden flex flex-col my-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-stone-900/60 backdrop-blur-sm animate-smoothFadeIn overflow-y-auto">
+      <div className="relative w-full max-w-2xl max-h-[min(calc(100vh-1rem),90vh)] sm:max-h-[calc(100vh-2rem)] bg-white rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden flex flex-col my-auto animate-smoothSlideUp">
         {/* Header */}
         <div 
           className="relative px-4 py-3 sm:px-6 sm:py-5 flex-shrink-0"
@@ -388,7 +494,7 @@ const QuickReviewModal = ({ userName, userId, onComplete, onSkip }: QuickReviewM
               <div className="min-w-0">
                 <h2 className="text-base sm:text-xl font-bold text-white truncate">Quick Review</h2>
                 <p className="text-violet-200 text-xs sm:text-sm truncate">
-                  {currentIndex === 0 ? `Welcome back${userName ? `, ${userName}` : ''}!` : `Q${currentIndex + 1}/${reviewItems.length}`}
+                  Question {currentIndex + 1} of {reviewItems.length}
                 </p>
               </div>
             </div>
@@ -615,12 +721,25 @@ const QuickReviewModal = ({ userName, userId, onComplete, onSkip }: QuickReviewM
       </div>
 
       <style>{`
-        @keyframes fadeIn {
+        @keyframes smoothFadeIn {
           from { opacity: 0; }
           to { opacity: 1; }
         }
-        .animate-fadeIn {
-          animation: fadeIn 0.3s ease-out;
+        @keyframes smoothSlideUp {
+          from { 
+            opacity: 0; 
+            transform: translateY(20px) scale(0.98);
+          }
+          to { 
+            opacity: 1; 
+            transform: translateY(0) scale(1);
+          }
+        }
+        .animate-smoothFadeIn {
+          animation: smoothFadeIn 0.5s ease-out;
+        }
+        .animate-smoothSlideUp {
+          animation: smoothSlideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
         }
       `}</style>
     </div>
