@@ -123,61 +123,72 @@ const ShareFriendsPage = ({ onNavigate, user, onLogout }: ShareFriendsPageProps)
           <div className="absolute bottom-[20%] left-[6%] hidden lg:block text-3xl opacity-30 animate-float" style={{ animationDelay: '0.9s' }}>🎯</div>
           <div className="absolute bottom-[30%] right-[8%] hidden lg:block text-4xl opacity-35 animate-float-delayed">🚀</div>
 
-          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid lg:grid-cols-2 gap-8 items-center">
-              {/* Left text */}
-              <div className="text-center lg:text-left order-2 lg:order-1 pb-8 lg:pb-16">
-                {/* Badge */}
-                <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 rounded-full text-sm font-semibold mb-5">
-                  <span>👫</span>
-                  <span>Social Study, Levelled Up</span>
-                </div>
-
-                <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-stone-900 dark:text-stone-50 leading-tight mb-5">
-                  Study Better,{' '}
-                  <span className="bg-gradient-to-r from-indigo-500 via-violet-500 to-purple-600 dark:from-indigo-400 dark:via-violet-400 dark:to-purple-400 bg-clip-text text-transparent">
-                    Together
-                  </span>
-                </h1>
-
-                <p className="text-lg sm:text-xl text-stone-600 dark:text-stone-300 leading-relaxed mb-8 max-w-lg mx-auto lg:mx-0">
-                  Add friends with your unique code and share flashcards, quizzes, crosswords & notes in one tap. It delivers straight to their device — all they have to do is accept.
-                </p>
-
-                {/* Stats row */}
-                <div className="flex flex-wrap justify-center lg:justify-start gap-4 sm:gap-6 mb-8">
-                  {stats.map((s) => (
-                    <div key={s.label} className="text-center">
-                      <div className="text-xl sm:text-2xl font-extrabold bg-gradient-to-r from-indigo-600 to-violet-600 dark:from-indigo-400 dark:to-violet-400 bg-clip-text text-transparent">{s.value}</div>
-                      <div className="text-xs sm:text-sm text-stone-500 dark:text-stone-400 font-medium">{s.label}</div>
-                    </div>
-                  ))}
-                </div>
-
-                {/* CTA buttons */}
-                <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
-                  <button
-                    onClick={() => onNavigate('signup')}
-                    className="px-7 py-3.5 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 text-white font-bold rounded-2xl shadow-lg shadow-indigo-500/30 hover:shadow-xl hover:shadow-indigo-500/40 transition-all duration-200 hover:-translate-y-0.5 text-base flex items-center justify-center gap-2"
-                  >
-                    <span>Start sharing free</span>
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                  </button>
-                  <button
-                    onClick={() => onNavigate('features')}
-                    className="px-7 py-3.5 bg-white dark:bg-stone-800 text-stone-700 dark:text-stone-200 font-semibold rounded-2xl border border-stone-200 dark:border-stone-700 hover:border-violet-300 dark:hover:border-violet-700 hover:shadow-md transition-all duration-200 hover:-translate-y-0.5 text-base"
-                  >
-                    See all features
-                  </button>
-                </div>
+          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full min-w-0">
+            <div className="flex flex-col items-center text-center">
+              {/* 1. Badge - Social Study, Levelled Up (above mascots) */}
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 rounded-full text-sm font-semibold mb-5">
+                <span>👫</span>
+                <span>Social Study, Levelled Up</span>
               </div>
 
-              {/* Right mascot illustration */}
-              <div className="relative flex items-center justify-center order-1 lg:order-2">
+              {/* 2. Title */}
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-extrabold text-stone-900 dark:text-stone-50 leading-tight mb-3 w-full max-w-2xl break-words">
+                Study Better,{' '}
+                <span className="bg-gradient-to-r from-indigo-500 via-violet-500 to-purple-600 dark:from-indigo-400 dark:via-violet-400 dark:to-purple-400 bg-clip-text text-transparent">
+                  Together
+                </span>
+              </h1>
+
+              {/* 3. Subtitle */}
+              <p className="text-base sm:text-lg text-stone-600 dark:text-stone-400 mb-6 max-w-xl mx-auto break-words">
+                Add friends with your unique code and share flashcards, quizzes, crosswords & notes in one tap.
+              </p>
+
+              {/* 4. Mascots (below title/subtitle) */}
+              <div className="relative flex items-center justify-center my-4 sm:my-6 w-full max-w-[min(340px,100%)] sm:max-w-[400px] mx-auto">
                 <div className="absolute inset-0 bg-gradient-to-r from-indigo-400/10 to-violet-400/10 rounded-3xl blur-3xl" />
-                <DualMascot size={440} />
+                <DualMascot size={280} />
+              </div>
+
+              {/* 5. Main paragraph */}
+              <p className="text-base sm:text-lg text-stone-600 dark:text-stone-300 leading-relaxed mb-6 max-w-xl mx-auto break-words">
+                It delivers straight to their device — all they have to do is accept.
+              </p>
+
+              {/* 6. Share button instructions */}
+              <div className="mb-6 px-4 py-3 bg-violet-50 dark:bg-violet-950/40 border border-violet-100 dark:border-violet-900/50 rounded-xl max-w-xl w-full">
+                <p className="text-sm text-stone-700 dark:text-stone-300 break-words">
+                  <strong className="text-violet-700 dark:text-violet-400">Where to find the share button:</strong> Go to <strong>Study Tools</strong> in the dashboard or header, then click the share button on any quiz, flashcard, or crossword and select your friend.
+                </p>
+              </div>
+
+              {/* 7. Stats row - responsive grid to prevent overflow */}
+              <div className="grid grid-cols-3 gap-3 sm:gap-6 mb-8 w-full max-w-md mx-auto">
+                {stats.map((s) => (
+                  <div key={s.label} className="text-center min-w-0 px-1">
+                    <div className="text-base sm:text-xl font-extrabold bg-gradient-to-r from-indigo-600 to-violet-600 dark:from-indigo-400 dark:to-violet-400 bg-clip-text text-transparent break-words">{s.value}</div>
+                    <div className="text-[10px] sm:text-sm text-stone-500 dark:text-stone-400 font-medium break-words leading-tight">{s.label}</div>
+                  </div>
+                ))}
+              </div>
+
+              {/* 8. CTA buttons */}
+              <div className="flex flex-col sm:flex-row gap-3 justify-center w-full sm:w-auto">
+                <button
+                  onClick={() => onNavigate('signup')}
+                  className="px-7 py-3.5 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 text-white font-bold rounded-2xl shadow-lg shadow-indigo-500/30 hover:shadow-xl hover:shadow-indigo-500/40 transition-all duration-200 hover:-translate-y-0.5 text-base flex items-center justify-center gap-2"
+                >
+                  <span>Start sharing free</span>
+                  <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                </button>
+                <button
+                  onClick={() => onNavigate('features')}
+                  className="px-7 py-3.5 bg-white dark:bg-stone-800 text-stone-700 dark:text-stone-200 font-semibold rounded-2xl border border-stone-200 dark:border-stone-700 hover:border-violet-300 dark:hover:border-violet-700 hover:shadow-md transition-all duration-200 hover:-translate-y-0.5 text-base"
+                >
+                  See all features
+                </button>
               </div>
             </div>
           </div>

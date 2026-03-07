@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import ScholarMascot from '../common/ScholarMascot';
+import { setOnboardingDone, persistOnboardingToServer } from '../../utils/onboarding';
 
 interface OnboardingPageProps {
   onNavigate: (page: string) => void;
@@ -100,25 +101,16 @@ const OnboardingPage = ({ onNavigate, user, onComplete, onUserUpdate }: Onboardi
     );
   };
 
-  const markOnboardingComplete = async (userId: string): Promise<boolean> => {
-    localStorage.setItem(`writescholar_onboarding_completed_${userId}`, 'true');
-    const apiUrl = (import.meta as any).env?.VITE_API_URL || 'http://localhost:3001/api';
-    const token = localStorage.getItem('authToken');
-    const maxRetries = 3;
-    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+  const markOnboardingComplete = async (userId: string) => {
+    setOnboardingDone(userId);
+    const stored = localStorage.getItem('user');
+    if (stored) {
       try {
-        const res = await fetch(`${apiUrl}/users/complete-onboarding`, {
-          method: 'POST',
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (res.ok) return true;
-      } catch (e) {
-        console.warn(`Onboarding API attempt ${attempt}/${maxRetries} failed:`, e);
-      }
-      if (attempt < maxRetries) await new Promise(r => setTimeout(r, 500 * attempt));
+        const parsed = JSON.parse(stored);
+        localStorage.setItem('user', JSON.stringify({ ...parsed, onboardingCompleted: true }));
+      } catch (_) {}
     }
-    console.error('Failed to persist onboarding completion to server after retries');
-    return false; // localStorage is still set, so UX remains correct
+    await persistOnboardingToServer();
   };
 
   const handleStartTrial = async () => {

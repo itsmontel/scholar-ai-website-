@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { resolveOnboarding, setOnboardingDone } from '../../utils/onboarding';
 
 interface AuthCallbackPageProps {
   onNavigate: (page: string) => void;
@@ -20,21 +21,15 @@ const AuthCallbackPage: React.FC<AuthCallbackPageProps> = ({ onNavigate, onLogin
         const userParam = urlParams.get('user');
         const errorParam = urlParams.get('error');
 
-        // Prioritize successful auth - if we have token and user, process them
         if (token && userParam) {
           processedRef.current = true;
           const userData = JSON.parse(decodeURIComponent(userParam));
 
           localStorage.setItem('authToken', token);
           setStatus('success');
-
           window.history.replaceState(null, '', '/auth/callback');
 
-          // Fetch onboarding status from the server so it works across all browsers/devices
-          // CRITICAL: localStorage persists across logout - returning users who completed onboarding must not see it again
-          let onboardingCompleted =
-            userData.onboardingCompleted === true ||
-            localStorage.getItem(`writescholar_onboarding_completed_${userData.id}`) === 'true';
+          let onboardingCompleted = resolveOnboarding(userData.id, userData.onboardingCompleted);
           let welcomeTutorialCompleted = userData.welcomeTutorialCompleted || false;
 
           try {
@@ -44,10 +39,8 @@ const AuthCallbackPage: React.FC<AuthCallbackPageProps> = ({ onNavigate, onLogin
             );
             if (meRes.ok) {
               const meData = await meRes.json();
-              const serverOnboarding = meData.data?.user?.onboardingCompleted === true;
-              const serverTutorial = meData.data?.user?.welcomeTutorialCompleted || false;
-              onboardingCompleted = onboardingCompleted || serverOnboarding;
-              welcomeTutorialCompleted = welcomeTutorialCompleted || serverTutorial;
+              onboardingCompleted = resolveOnboarding(userData.id, onboardingCompleted || meData.data?.user?.onboardingCompleted);
+              welcomeTutorialCompleted = welcomeTutorialCompleted || meData.data?.user?.welcomeTutorialCompleted || false;
               if (meData.data?.achievements) {
                 const { mergeFromServer } = await import('../../data/achievements');
                 mergeFromServer(
@@ -57,26 +50,20 @@ const AuthCallbackPage: React.FC<AuthCallbackPageProps> = ({ onNavigate, onLogin
               }
             }
           } catch (_e) {
-            // Network error – trust localStorage and OAuth payload
+            // Network error — localStorage + OAuth payload are still checked
           }
 
-          // Always persist localStorage key when we know they've completed (ensures logout→login works)
-          if (onboardingCompleted) {
-            localStorage.setItem(`writescholar_onboarding_completed_${userData.id}`, 'true');
-          }
+          if (onboardingCompleted) setOnboardingDone(userData.id);
 
-          // CRITICAL: Always pass user with correct onboardingCompleted so dashboard doesn't show onboarding
           const finalUser = { ...userData, onboardingCompleted, welcomeTutorialCompleted };
           localStorage.setItem('user', JSON.stringify(finalUser));
           onLogin(finalUser);
 
-          const nextPage = onboardingCompleted ? 'dashboard' : 'onboarding';
-          setTimeout(() => onNavigate(nextPage), 800);
+          setTimeout(() => onNavigate(onboardingCompleted ? 'dashboard' : 'onboarding'), 800);
           return;
         }
 
-        // If URL is empty but we have auth in storage, we likely just processed
-        // (e.g. React Strict Mode re-ran the effect after replaceState)
+        // React Strict Mode re-run after replaceState cleared params
         if (!token && !userParam && localStorage.getItem('authToken')) {
           processedRef.current = true;
           setStatus('success');
@@ -84,15 +71,9 @@ const AuthCallbackPage: React.FC<AuthCallbackPageProps> = ({ onNavigate, onLogin
           let nextPage = 'dashboard';
           if (storedUser) {
             try {
-              const parsedUser = JSON.parse(storedUser);
-              // Trust server value if present, otherwise fall back to localStorage key
-              const onboardingCompleted =
-                parsedUser.onboardingCompleted ||
-                !!localStorage.getItem(`writescholar_onboarding_completed_${parsedUser.id}`);
-              nextPage = onboardingCompleted ? 'dashboard' : 'onboarding';
-            } catch (e) {
-              // fallback to dashboard if user data is invalid
-            }
+              const p = JSON.parse(storedUser);
+              nextPage = resolveOnboarding(p.id, p.onboardingCompleted) ? 'dashboard' : 'onboarding';
+            } catch (_) {}
           }
           setTimeout(() => onNavigate(nextPage), 300);
           return;

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { resolveOnboarding } from '../../utils/onboarding';
 
 interface LoginPageProps {
   onNavigate: (page: string) => void;
@@ -64,20 +65,19 @@ const LoginPage = ({ onNavigate, onLogin }: LoginPageProps) => {
         throw new Error(data.message || 'Login failed');
       }
 
+      const u = data.data.user;
       const transformedUser = {
-        id: data.data.user.id,
-        email: data.data.user.email,
-        username: data.data.user.username,
-        name: data.data.user.name || (data.data.user.firstName && data.data.user.lastName
-          ? `${data.data.user.firstName} ${data.data.user.lastName}`
-          : null) || data.data.user.email,
-        firstName: data.data.user.firstName,
-        lastName: data.data.user.lastName,
-        plan: data.data.user.subscriptionPlan || 'free',
-        subscription_status: data.data.user.subscriptionStatus,
-        email_verified: data.data.user.emailVerified,
-        onboardingCompleted: data.data.user.onboardingCompleted || false,
-        welcomeTutorialCompleted: data.data.user.welcomeTutorialCompleted || false
+        id: u.id,
+        email: u.email,
+        username: u.username,
+        name: u.name || (u.firstName && u.lastName ? `${u.firstName} ${u.lastName}` : null) || u.email,
+        firstName: u.firstName,
+        lastName: u.lastName,
+        plan: u.subscriptionPlan || 'free',
+        subscription_status: u.subscriptionStatus,
+        email_verified: u.emailVerified,
+        onboardingCompleted: resolveOnboarding(u.id, u.onboardingCompleted),
+        welcomeTutorialCompleted: u.welcomeTutorialCompleted || false
       };
 
       localStorage.setItem('authToken', data.data.token);
