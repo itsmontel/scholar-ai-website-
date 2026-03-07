@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import Header from '../common/Header';
 import Footer from '../common/Footer';
-import PromoBanner from '../common/PromoBanner';
 import { useTheme } from '../../contexts/ThemeContext';
 import AnalysisAnimation from '../common/AnalysisAnimation';
 import ScholarMascot from '../common/ScholarMascot';
@@ -440,17 +439,12 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
 
   return (
     <>
-      <div className="sticky top-0 left-0 right-0 z-50">
-        <PromoBanner />
-      </div>
+      <Header onNavigate={onNavigate} showPromoBanner={false} sticky={true} />
       <main className="min-h-screen relative transition-colors font-sans overflow-x-hidden" role="main">
-      <Header onNavigate={onNavigate} showPromoBanner={false} sticky={false} />
-
       {/* HERO SECTION - Fun, Gen Z, full of energy */}
       <section className="relative min-h-[70vh] sm:min-h-[85vh] flex flex-col overflow-hidden">
-        {/* Background */}
-        <div className="absolute inset-0 bg-gradient-to-b from-blue-50/60 via-stone-50 to-white dark:from-stone-950 dark:via-stone-900 dark:to-stone-900" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(99,102,241,0.18),transparent)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(139,92,246,0.14),transparent)]" />
+        {/* Background - soft tint */}
+        <div className="absolute inset-0 bg-gradient-to-b from-violet-50/60 via-violet-50/35 to-white dark:from-stone-950 dark:via-stone-900/95 dark:to-stone-900" />
         
         {/* Floating shapes for mobile - adds depth like dashboard */}
         <div className="absolute top-[12%] left-[8%] w-12 h-12 rounded-2xl bg-gradient-to-br from-rose-400/20 to-pink-500/20 rotate-12 lg:hidden animate-float pointer-events-none" />
@@ -535,7 +529,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
               Everything you need to<br />
               <span className="bg-gradient-to-r from-blue-500 to-violet-500 bg-clip-text text-transparent">ace school</span>
             </h1>
-            
+
             <p className="text-base sm:text-xl text-stone-600 dark:text-stone-400 mb-8 sm:mb-10 max-w-2xl mx-auto leading-relaxed px-2">
               #1 Quizlet alternative. Paste notes. Get quizzes, flashcards & crosswords in seconds. Essay feedback, humanizer, we got you covered. 🙌
             </p>

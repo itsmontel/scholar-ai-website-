@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useTheme } from '../../contexts/ThemeContext';
 import PromoBanner from './PromoBanner';
 import { getResetsInText } from '../../utils/usageReset';
+import { searchSiteMultiple, SearchItem } from '../../data/searchIndex';
 
 interface HeaderProps {
-  onNavigate?: (page: string) => void;
+  onNavigate?: (page: string, slug?: string) => void;
   showPromoBanner?: boolean;
   sticky?: boolean;
   user?: { 
@@ -44,6 +46,12 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
   const [usageStats, setUsageStats] = useState<UsageStats | null>(null);
   const [loadingUsage, setLoadingUsage] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [headerSearchQuery, setHeaderSearchQuery] = useState('');
+  const [headerSearchResults, setHeaderSearchResults] = useState<SearchItem[]>([]);
+  const [headerSearchOpen, setHeaderSearchOpen] = useState(false);
+  const [searchDropdownRect, setSearchDropdownRect] = useState<{ top: number; left: number; width: number } | null>(null);
+  const desktopSearchRef = useRef<HTMLInputElement>(null);
+  const mobileSearchRef = useRef<HTMLInputElement>(null);
 
   // Track scroll for shadow effect
   useEffect(() => {
@@ -63,11 +71,49 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
       if (!target.closest('.mobile-menu-container') && !target.closest('.mobile-menu-button')) {
         setIsMobileMenuOpen(false);
       }
+      if (!target.closest('.header-search-container') && !target.closest('.header-search-dropdown')) {
+        setHeaderSearchOpen(false);
+      }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  // Update search results when query changes
+  useEffect(() => {
+    const q = headerSearchQuery.trim();
+    if (!q) {
+      setHeaderSearchResults([]);
+      setHeaderSearchOpen(false);
+      setSearchDropdownRect(null);
+      return;
+    }
+    setHeaderSearchResults(searchSiteMultiple(headerSearchQuery));
+    setHeaderSearchOpen(true);
+  }, [headerSearchQuery]);
+
+  // Position dropdown via portal - update rect when open
+  useEffect(() => {
+    if (!headerSearchOpen || !headerSearchQuery.trim()) {
+      setSearchDropdownRect(null);
+      return;
+    }
+    const updateRect = () => {
+      const input = isMobileMenuOpen ? mobileSearchRef.current : desktopSearchRef.current;
+      if (input) {
+        const r = input.getBoundingClientRect();
+        setSearchDropdownRect({ top: r.bottom + 4, left: r.left, width: r.width });
+      }
+    };
+    updateRect();
+    window.addEventListener('scroll', updateRect, true);
+    window.addEventListener('resize', updateRect);
+    return () => {
+      window.removeEventListener('scroll', updateRect, true);
+      window.removeEventListener('resize', updateRect);
+    };
+  }, [headerSearchOpen, headerSearchQuery, isMobileMenuOpen]);
 
   // Fetch usage stats when user is available
   useEffect(() => {
@@ -130,22 +176,49 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
     const publicNavItems = [
       { id: 'features', label: 'Features' },
       { id: 'why-students-choose', label: 'Why Students Choose' },
-      { id: 'pricing', label: 'Pricing' },
       { id: 'blog', label: 'Blog' },
       { id: 'about', label: 'About' },
     ];
+    const handleHeaderSearchSubmit = (e: React.FormEvent) => {
+      e.preventDefault();
+      const query = headerSearchQuery.trim();
+      if (!query) return;
+      const match = headerSearchResults[0];
+      if (match) {
+        if (match.slug) {
+          onNavigate?.(match.page, match.slug);
+        } else {
+          onNavigate?.(match.page);
+        }
+      } else {
+        onNavigate?.('features');
+      }
+      setHeaderSearchQuery('');
+      setHeaderSearchOpen(false);
+    };
+
+    const handleHeaderSearchSelect = (item: SearchItem) => {
+      if (item.slug) {
+        onNavigate?.(item.page, item.slug);
+      } else {
+        onNavigate?.(item.page);
+      }
+      setHeaderSearchQuery('');
+      setHeaderSearchOpen(false);
+      setIsMobileMenuOpen(false);
+    };
     return (
-      <header className={`${sticky ? 'sticky top-0' : ''} left-0 right-0 z-50 transition-all duration-300 ${
+      <header className={`${sticky ? 'sticky top-0' : ''} left-0 right-0 z-[100] transition-all duration-300 ${
         isScrolled 
-          ? 'bg-white/90 dark:bg-stone-900/90 backdrop-blur-xl border-b border-stone-200/50 dark:border-stone-700/50 shadow-sm' 
-          : 'bg-gradient-to-b from-blue-50/90 via-stone-50/95 to-transparent dark:from-stone-950/95 dark:via-stone-900/90 dark:to-transparent backdrop-blur-sm border-b border-stone-200/30 dark:border-stone-700/30'
+          ? 'bg-white dark:bg-stone-900 border-b border-stone-200/50 dark:border-stone-700/50 shadow-sm' 
+          : 'bg-white dark:bg-stone-900 border-b border-stone-200/30 dark:border-stone-700/30'
       }`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:pl-4 lg:pr-8">
           <div className="flex items-center justify-between h-16 sm:h-[4.5rem]">
             {/* Logo */}
             <button
               onClick={() => onNavigate?.('landing')}
-              className="flex items-center gap-2 sm:gap-2.5 group min-w-0 shrink"
+              className="flex items-center gap-2 sm:gap-2.5 group min-w-0 shrink lg:-ml-4"
             >
               <div className="relative w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center group-hover:scale-105 transition-transform duration-300 shrink-0 overflow-hidden">
                 <img src="/mascot.png" alt="WriteScholar mascot" className="w-full h-full object-contain drop-shadow-lg" />
@@ -171,6 +244,26 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
                 </button>
               ))}
             </nav>
+
+            {/* Desktop Search - same line */}
+            <form onSubmit={handleHeaderSearchSubmit} className="hidden md:block flex-1 min-w-0 max-w-xs mx-4">
+              <div className="header-search-container relative">
+                <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400 dark:text-stone-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                <input
+                  ref={desktopSearchRef}
+                  type="search"
+                  value={headerSearchQuery}
+                  onChange={(e) => setHeaderSearchQuery(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Escape' && setHeaderSearchOpen(false)}
+                  placeholder="Find tools, features..."
+                  className="w-full pl-9 pr-3 py-2 rounded-lg border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 text-stone-800 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 dark:focus:border-indigo-500 text-sm"
+                  aria-label="Search WriteScholar"
+                  autoComplete="off"
+                />
+              </div>
+            </form>
 
             {/* Right side */}
             <div className="flex items-center gap-2 sm:gap-3 min-w-0 shrink-0">
@@ -203,13 +296,53 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
             </div>
           </div>
         </div>
-        {/* Light purple accent line under header */}
-        <div className="h-0.5 bg-gradient-to-r from-violet-400/50 via-violet-500/60 to-purple-400/50" />
         {showPromoBanner && <PromoBanner embedded />}
+        {/* Search dropdown portal - renders above all content */}
+        {headerSearchOpen && headerSearchQuery.trim() && searchDropdownRect && createPortal(
+          <div
+            className="header-search-dropdown fixed py-1 rounded-lg bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-600 shadow-xl max-h-64 overflow-y-auto z-[99999]"
+            style={{ top: searchDropdownRect.top, left: searchDropdownRect.left, width: searchDropdownRect.width }}
+          >
+            {headerSearchResults.length > 0 ? (
+              headerSearchResults.map((item) => (
+                <button
+                  key={item.page + (item.slug || '')}
+                  type="button"
+                  onClick={() => handleHeaderSearchSelect(item)}
+                  className="w-full text-left px-3 py-2.5 text-sm text-stone-700 dark:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-700/50 transition-colors flex items-center gap-2"
+                >
+                  <span className="font-medium">{item.label}</span>
+                </button>
+              ))
+            ) : (
+              <div className="px-3 py-3 text-sm text-stone-500 dark:text-stone-400">No matches</div>
+            )}
+          </div>,
+          document.body
+        )}
         {/* Mobile menu */}
         {isMobileMenuOpen && (
           <div className="md:hidden border-t border-stone-200/50 dark:border-stone-700/50 bg-white/95 dark:bg-stone-900/95 backdrop-blur-xl">
-            <div className="px-4 py-3 space-y-1">
+            <div className="px-4 py-3">
+              <form onSubmit={handleHeaderSearchSubmit} className="mb-3">
+                <div className="header-search-container relative">
+                  <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                  <input
+                    ref={mobileSearchRef}
+                    type="search"
+                    value={headerSearchQuery}
+                    onChange={(e) => setHeaderSearchQuery(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Escape' && setHeaderSearchOpen(false)}
+                    placeholder="Find tools, features..."
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 text-stone-800 dark:text-stone-100 placeholder-stone-400 text-sm"
+                    aria-label="Search WriteScholar"
+                    autoComplete="off"
+                  />
+                </div>
+              </form>
+              <div className="space-y-1">
               {publicNavItems.map(({ id, label }) => (
                 <button
                   key={id}
@@ -237,9 +370,12 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
                   Sign up free
                 </button>
               </div>
+              </div>
             </div>
           </div>
         )}
+        {/* Soft purple accent line under header */}
+        <div className="h-0.5 bg-gradient-to-r from-violet-400/35 via-violet-500/45 to-purple-400/35" />
       </header>
     );
   }
