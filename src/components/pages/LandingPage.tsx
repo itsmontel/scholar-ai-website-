@@ -375,19 +375,21 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
   }) => (
     <button
       onClick={onClick}
-      className={`group relative bg-gradient-to-br ${gradient} rounded-3xl p-5 sm:p-6 text-left hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 ease-out overflow-hidden border ${borderColor} h-[310px] flex flex-col w-full`}
+      className={`group relative bg-gradient-to-br ${gradient} rounded-3xl p-5 sm:p-6 text-left hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 ease-out overflow-hidden border ${borderColor} h-[310px] block w-full`}
     >
-      <div className={`absolute top-0 right-0 w-32 h-32 rounded-full -translate-y-1/2 translate-x-1/2 ${accentClasses.orb}`} />
-      <h3 className={`text-xl font-bold mb-3 relative z-10 flex-shrink-0 ${accentClasses.title}`}>{title}</h3>
-      <div className="relative z-10 bg-white dark:bg-stone-800 rounded-2xl p-4 sm:p-5 shadow-lg mb-4 flex-1 flex flex-col min-w-0 overflow-hidden">
-        <div className={`w-8 h-8 rounded-lg flex items-center justify-center mb-3 text-lg flex-shrink-0 ${accentClasses.iconBg}`}>
-          {icon}
+      <div className="flex flex-col h-full w-full">
+        <div className={`absolute top-0 right-0 w-32 h-32 rounded-full -translate-y-1/2 translate-x-1/2 ${accentClasses.orb}`} />
+        <h3 className={`text-xl font-bold mb-3 relative z-10 flex-shrink-0 w-full ${accentClasses.title}`}>{title}</h3>
+        <div className="relative z-10 w-full bg-white dark:bg-stone-800 rounded-2xl p-4 sm:p-5 shadow-lg mb-4 flex-1 flex flex-col min-w-0 overflow-hidden">
+          <div className={`w-8 h-8 rounded-lg flex items-center justify-center mb-3 text-lg flex-shrink-0 ${accentClasses.iconBg}`}>
+            {icon}
+          </div>
+          <div className="flex-1 w-full min-w-full flex flex-col justify-center overflow-hidden">
+            {innerContent}
+          </div>
         </div>
-        <div className="flex-1 w-full min-w-full flex flex-col justify-center overflow-hidden">
-          {innerContent}
-        </div>
+        <p className="text-stone-600 dark:text-stone-400 text-sm relative z-10 w-full">{desc}</p>
       </div>
-      <p className="text-stone-600 dark:text-stone-400 text-sm relative z-10">{desc}</p>
     </button>
   );
 
@@ -420,7 +422,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
         </div>
         <h3 className={`font-bold text-base text-center ${accentClasses.title}`}>{title}</h3>
       </div>
-      <div className="bg-white dark:bg-stone-800 rounded-xl p-3 shadow-sm mb-3 h-[100px] flex items-center justify-center overflow-hidden">
+      <div className="bg-white dark:bg-stone-800 rounded-xl p-3 shadow-sm mb-3 h-[100px] flex items-center justify-center overflow-hidden w-full">
         {children}
       </div>
       <p className="text-stone-600 dark:text-stone-400 text-xs leading-snug text-center">{desc}</p>
@@ -561,7 +563,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
               >
                 <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
               </button>
-              <div className="overflow-x-auto sm:overflow-hidden sm:min-w-0 sm:isolation-isolate scrollbar-hide pb-4 sm:pb-0 sm:mx-0 sm:px-0 snap-x snap-mandatory sm:snap-none px-2">
+              <div className="overflow-x-auto sm:overflow-hidden scrollbar-hide pb-4 sm:pb-0 sm:mx-0 sm:px-0 snap-x snap-mandatory sm:snap-none px-2">
                 {/* Mobile cards - clean redesign, horizontal scroll */}
                 <div className="flex gap-4 sm:hidden w-max">
                   {[
@@ -646,14 +648,8 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                     </div>
                   ))}
                 </div>
-                {/* Desktop cards - Safari fix: will-change + translate3d for overflow+transform compatibility */}
-                <div
-                  className="hidden sm:flex gap-4 sm:transition-transform sm:duration-500 sm:ease-out w-[160%] will-change-transform"
-                  style={{
-                    transform: `translate3d(-${studyCardsCarouselIndex * 12.5}%, 0, 0)`,
-                    WebkitTransform: `translate3d(-${studyCardsCarouselIndex * 12.5}%, 0, 0)`,
-                  }}
-                >
+                {/* Desktop cards - unchanged */}
+                <div className="hidden sm:flex gap-4 sm:transition-transform sm:duration-500 sm:ease-out w-[160%]" style={{ transform: `translateX(-${studyCardsCarouselIndex * 12.5}%)` }}>
                   {[
                     { title: 'Analyze', desc: 'Get professor-style feedback on your essays', onClick: () => setMode('analyze'), gradient: 'from-lime-50 to-emerald-50 dark:from-lime-900/20 dark:to-emerald-900/20', accentClasses: { title: 'text-lime-700 dark:text-lime-400', orb: 'bg-lime-400/20', iconBg: 'bg-lime-100 dark:bg-lime-900/50' }, borderColor: 'border-lime-100 dark:border-lime-800/50', icon: '📝', inner: (
                       <div className="w-full flex flex-col justify-between flex-1 gap-2">
@@ -674,12 +670,12 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                     )},
                     { title: 'Flashcards', desc: 'Generate flashcards from any content', onClick: () => { setMode('quiz'); setStudyToolMode('flashcards'); }, gradient: 'from-pink-50 to-rose-50 dark:from-pink-900/20 dark:to-rose-900/20', accentClasses: { title: 'text-rose-700 dark:text-rose-400', orb: 'bg-rose-400/20', iconBg: 'bg-rose-100 dark:bg-rose-900/50' }, borderColor: 'border-pink-100 dark:border-pink-800/50', icon: '🃏', inner: (
                       <div className="w-full flex-1 min-h-[72px] flex flex-col min-w-full" style={{ perspective: '200px' }}>
-                        <div className="relative w-full flex-1 min-h-[60px] min-w-full animate-flashcard-flip" style={{ transformStyle: 'preserve-3d', WebkitTransformStyle: 'preserve-3d' }}>
-                          <div className="absolute inset-0 bg-gradient-to-br from-rose-400 to-pink-500 rounded-xl p-4 flex flex-col justify-center overflow-hidden" style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden' }}>
+                        <div className="relative w-full flex-1 min-h-[60px] min-w-full animate-flashcard-flip" style={{ transformStyle: 'preserve-3d' }}>
+                          <div className="absolute inset-0 bg-gradient-to-br from-rose-400 to-pink-500 rounded-xl p-4 flex flex-col justify-center overflow-hidden" style={{ backfaceVisibility: 'hidden' }}>
                             <div className="text-white/80 text-[11px]">Term</div>
                             <div className="text-white font-semibold text-base">Photosynthesis</div>
                           </div>
-                          <div className="absolute inset-0 bg-gradient-to-br from-pink-500 to-rose-600 rounded-xl p-4 flex flex-col justify-center items-center overflow-hidden" style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden', transform: 'rotateY(180deg)', WebkitTransform: 'rotateY(180deg)' }}>
+                          <div className="absolute inset-0 bg-gradient-to-br from-pink-500 to-rose-600 rounded-xl p-4 flex flex-col justify-center items-center overflow-hidden" style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}>
                             <div className="text-white/90 text-[11px]">Definition</div>
                             <div className="text-white font-medium text-base text-center">Process plants use...</div>
                           </div>
@@ -745,7 +741,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                       </div>
                     )},
                   ].map((card) => (
-                    <div key={card.title} className="flex-shrink-0 flex-[0_0_12.5%]">
+                    <div key={card.title} className="flex-shrink-0 flex-[0_0_12.5%] w-[12.5%] max-w-[12.5%]">
                       <StudyCard
                         title={card.title}
                         desc={card.desc}
