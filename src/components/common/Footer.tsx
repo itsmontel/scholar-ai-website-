@@ -127,25 +127,22 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
           {/* AI Tools Links */}
           <div>
             <h4 className="font-semibold text-white mb-4 text-sm flex items-center gap-2">
+              <ScholarMascot size={24} animated={false} pose="default" />
               AI Tools
             </h4>
             <ul className="space-y-3">
+              {/* Rose/Pink */}
               <li>
-                <a href="/tools/analyze" onClick={(e) => { e.preventDefault(); onNavigate?.('analyze'); }} className="text-sm font-medium transition-colors flex items-center gap-1.5 hover:opacity-90" style={{ color: '#7ab308' }}>
+                <a href="/tools/analyze" onClick={(e) => { e.preventDefault(); onNavigate?.('analyze'); }} className="text-sm font-medium transition-colors flex items-center gap-1.5 text-rose-400 hover:text-rose-300">
                   Analyze Essay
                   <span className="text-xs opacity-75">📊</span>
                 </a>
               </li>
+              {/* Teal/Blues */}
               <li>
                 <a href="/tools/citations" onClick={(e) => { e.preventDefault(); onNavigate?.('citations'); }} className="text-teal-400 hover:text-teal-300 text-sm font-medium transition-colors flex items-center gap-1.5">
                   Citations Finder
                   <span className="text-xs opacity-75">📚</span>
-                </a>
-              </li>
-              <li>
-                <a href="/tools/humanizer" onClick={(e) => { e.preventDefault(); onNavigate?.('humanizer'); }} className="text-violet-400 hover:text-violet-300 text-sm font-medium transition-colors flex items-center gap-1.5">
-                  AI Humanizer
-                  <span className="text-xs opacity-75">✨</span>
                 </a>
               </li>
               <li>
@@ -154,6 +151,26 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
                   <span className="text-xs opacity-75">📝</span>
                 </a>
               </li>
+              <li>
+                <a href="/tools/crater-blast" onClick={(e) => { e.preventDefault(); onNavigate?.('crater-blast'); }} className="text-indigo-400 hover:text-indigo-300 text-sm font-medium transition-colors flex items-center gap-1.5">
+                  Crater Blast
+                  <span className="text-xs opacity-75">💥</span>
+                </a>
+              </li>
+              {/* Violets/Purples */}
+              <li>
+                <a href="/tools/humanizer" onClick={(e) => { e.preventDefault(); onNavigate?.('humanizer'); }} className="text-violet-400 hover:text-violet-300 text-sm font-medium transition-colors flex items-center gap-1.5">
+                  AI Humanizer
+                  <span className="text-xs opacity-75">✨</span>
+                </a>
+              </li>
+              <li>
+                <a href="/tools/interactive-lesson" onClick={(e) => { e.preventDefault(); onNavigate?.('interactive-lesson'); }} className="text-violet-400 hover:text-violet-300 text-sm font-medium transition-colors flex items-center gap-1.5">
+                  Interactive Lesson
+                  <span className="text-xs opacity-75">🎓</span>
+                </a>
+              </li>
+              {/* Ambers/Oranges */}
               <li>
                 <a href="/tools/quiz-generator" onClick={(e) => { e.preventDefault(); onNavigate?.('quiz-generator'); }} className="text-amber-400 hover:text-amber-300 text-sm font-medium transition-colors flex items-center gap-1.5">
                   AI Quiz Generator
@@ -170,12 +187,6 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
                 <a href="/tools/crossword-generator" onClick={(e) => { e.preventDefault(); onNavigate?.('crossword-generator'); }} className="text-amber-400 hover:text-amber-300 text-sm font-medium transition-colors flex items-center gap-1.5">
                   AI Crossword Generator
                   <span className="text-xs opacity-75">🧩</span>
-                </a>
-              </li>
-              <li>
-                <a href="/tools/crater-blast" onClick={(e) => { e.preventDefault(); onNavigate?.('crater-blast'); }} className="text-indigo-400 hover:text-indigo-300 text-sm font-medium transition-colors flex items-center gap-1.5">
-                  Crater Blast
-                  <span className="text-xs opacity-75">💥</span>
                 </a>
               </li>
             </ul>

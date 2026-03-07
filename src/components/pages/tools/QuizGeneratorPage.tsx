@@ -6,6 +6,7 @@ function shuffleAndTake<T>(arr: T[], count: number): T[] {
 }
 import Header from '../../common/Header';
 import Footer from '../../common/Footer';
+import ScholarMascot from '../../common/ScholarMascot';
 import AnalysisAnimation from '../../common/AnalysisAnimation';
 import FlashcardViewer from '../../common/FlashcardViewer';
 import { trackAction, trackExport } from '../../../data/achievements';
@@ -1539,51 +1540,56 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
           </div>
         ) : (
         <div className="pt-6 sm:pt-10 pb-4 sm:pb-8 px-3 sm:px-6 lg:px-8">
-          <div className="max-w-5xl mx-auto text-center">
-            <div className="flex items-center justify-center gap-2 sm:gap-3 mb-3 sm:mb-4 flex-wrap">
-              <span className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-semibold shadow-lg shadow-amber-200/50 dark:shadow-amber-900/30">
-                👑 Premium Tool
-              </span>
-              <span className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 text-xs font-semibold">
-                🧠 AI-Powered
-              </span>
-            </div>
-            
-            <h1 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-stone-800 dark:text-stone-100 mb-3 sm:mb-4 leading-tight">
-              AI <span className="bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
-                {studyToolMode === 'flashcards' ? 'Flashcard Generator' : studyToolMode === 'crossword' ? 'Crossword Generator' : 'Quiz Generator'}
-              </span>
-            </h1>
-            
-            <p className="text-sm sm:text-lg text-stone-600 dark:text-stone-400 max-w-2xl mx-auto leading-relaxed px-2">
-              {studyToolMode === 'flashcards'
-                ? 'Turn your notes into interactive flip-card study sets for effective memorization.'
-                : studyToolMode === 'crossword'
-                ? 'Transform key terms into an interactive crossword puzzle to test your vocabulary.'
-                : 'Transform any article, textbook chapter, or research paper into interactive quizzes. Test your knowledge with multiple choice, true/false, and fill-in-the-blank questions.'}
-            </p>
+          <div className="max-w-5xl mx-auto">
+            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6">
+              <div className="flex-shrink-0">
+                <ScholarMascot size={100} animated={false} pose="default" />
+              </div>
+              <div className="flex-1 text-center sm:text-left">
+                <div className="flex items-center justify-center sm:justify-start gap-2 sm:gap-3 mb-3 sm:mb-4 flex-wrap">
+                  <span className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-semibold shadow-lg shadow-amber-200/50 dark:shadow-amber-900/30">
+                    👑 Premium Tool
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 text-xs font-semibold">
+                    🧠 AI-Powered
+                  </span>
+                </div>
+                <h1 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-stone-800 dark:text-stone-100 mb-3 sm:mb-4 leading-tight">
+                  AI <span className="bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
+                    {studyToolMode === 'flashcards' ? 'Flashcard Generator' : studyToolMode === 'crossword' ? 'Crossword Generator' : 'Quiz Generator'}
+                  </span>
+                </h1>
+                <p className="text-sm sm:text-lg text-stone-600 dark:text-stone-400 max-w-2xl leading-relaxed">
+                  {studyToolMode === 'flashcards'
+                    ? 'Turn your notes into interactive flip-card study sets for effective memorization.'
+                    : studyToolMode === 'crossword'
+                    ? 'Transform key terms into an interactive crossword puzzle to test your vocabulary.'
+                    : 'Transform any article, textbook chapter, or research paper into interactive quizzes. Test your knowledge with multiple choice, true/false, and fill-in-the-blank questions.'}
+                </p>
 
-            {/* Study Tool Sub-Mode Tabs */}
-            <div className="flex items-center justify-center gap-2 mt-6">
-              <div className="inline-flex items-center bg-stone-100 dark:bg-stone-800 border border-stone-200 dark:border-stone-600 rounded-2xl p-1.5">
-                {([
-                  { key: 'quiz' as const, label: 'Quiz', icon: '📝' },
-                  { key: 'flashcards' as const, label: 'Flashcards', icon: '🃏' },
-                  { key: 'crossword' as const, label: 'Crossword', icon: '🧩' },
-                ]).map((tool) => (
-                  <button
-                    key={tool.key}
-                    onClick={() => { setStudyToolMode(tool.key); setQuiz(null); setFlashcardResult(null); setCrosswordResult(null); setError(null); setIsQuizMode(false); }}
-                    className={`px-4 sm:px-5 py-2 rounded-xl text-sm font-medium transition-all flex items-center gap-1.5 ${
-                      studyToolMode === tool.key
-                        ? 'bg-white dark:bg-stone-600 text-amber-700 dark:text-amber-300 shadow-sm border border-stone-200 dark:border-stone-600'
-                        : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-700'
-                    }`}
-                  >
-                    <span className="text-base">{tool.icon}</span>
-                    <span className="hidden sm:inline">{tool.label}</span>
-                  </button>
-                ))}
+                {/* Study Tool Sub-Mode Tabs */}
+                <div className="flex items-center justify-center sm:justify-start gap-2 mt-6">
+                  <div className="inline-flex items-center bg-stone-100 dark:bg-stone-800 border border-stone-200 dark:border-stone-600 rounded-2xl p-1.5">
+                    {([
+                      { key: 'quiz' as const, label: 'Quiz', icon: '📝' },
+                      { key: 'flashcards' as const, label: 'Flashcards', icon: '🃏' },
+                      { key: 'crossword' as const, label: 'Crossword', icon: '🧩' },
+                    ]).map((tool) => (
+                      <button
+                        key={tool.key}
+                        onClick={() => { setStudyToolMode(tool.key); setQuiz(null); setFlashcardResult(null); setCrosswordResult(null); setError(null); setIsQuizMode(false); }}
+                        className={`px-4 sm:px-5 py-2 rounded-xl text-sm font-medium transition-all flex items-center gap-1.5 ${
+                          studyToolMode === tool.key
+                            ? 'bg-white dark:bg-stone-600 text-amber-700 dark:text-amber-300 shadow-sm border border-stone-200 dark:border-stone-600'
+                            : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-700'
+                        }`}
+                      >
+                        <span className="text-base">{tool.icon}</span>
+                        <span className="hidden sm:inline">{tool.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
           </div>

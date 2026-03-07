@@ -7,6 +7,7 @@ function shuffleAndTake<T>(arr: T[], count: number): T[] {
 import Header from '../common/Header';
 import Footer from '../common/Footer';
 import AnalysisAnimation from '../common/AnalysisAnimation';
+import ScholarMascot from '../common/ScholarMascot';
 import StreakWidget from '../common/StreakWidget';
 import BadgeWidget from '../common/BadgeWidget';
 import FlashcardViewer from '../common/FlashcardViewer';
@@ -1997,13 +1998,17 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
             {/* Warm Welcome Section - Mobile Optimized */}
             <div className="mb-6 sm:mb-8">
               <div className="flex items-start sm:items-center justify-between flex-col sm:flex-row gap-3 sm:gap-4">
-                <div className="flex-1 min-w-0">
-                  <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-stone-800 dark:text-stone-100 leading-tight truncate">
-                    {greeting.greeting}{user?.name ? `, ${user.name.split(' ')[0]}` : ''}! <span className="inline-block animate-[wave_1.8s_ease-in-out_infinite]">{greeting.emoji}</span>
-                  </h1>
-                  <p className="text-stone-500 dark:text-stone-400 mt-1 sm:mt-2 text-sm sm:text-base">
-                    Everything you need to <span className="text-violet-500 font-semibold">ace school</span>
-                  </p>
+                <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-5 flex-1 min-w-0">
+                  <div className="flex-shrink-0">
+                    <ScholarMascot size={100} animated={false} pose="default" />
+                  </div>
+                  <div className="flex-1 min-w-0 text-center sm:text-left">
+                    <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-stone-800 dark:text-stone-100 leading-tight truncate">
+                      {greeting.greeting}{user?.name ? `, ${user.name.split(' ')[0]}` : ''}! <span className="inline-block animate-[wave_1.8s_ease-in-out_infinite]">{greeting.emoji}</span>
+                    </h1>
+                    <p className="text-stone-500 dark:text-stone-400 mt-1 sm:mt-2 text-sm sm:text-base">
+                      Everything you need to <span className="text-violet-500 font-semibold">ace school</span>
+                    </p>
                   {/* Mobile Quick Review + Friends Buttons */}
                   <div className="mt-4 lg:hidden flex gap-2">
                     <button
@@ -2025,6 +2030,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                         </span>
                       )}
                     </button>
+                  </div>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
@@ -2153,26 +2159,35 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                   )}
                 </button>
               ))}
-              {/* View more pill */}
+              {/* Interactive Lesson */}
               <button
-                onClick={() => onNavigate('more-tools')}
+                onClick={() => onNavigate('interactive-lesson')}
                 className="relative p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl border border-violet-200/60 dark:border-violet-700/40 bg-gradient-to-br from-violet-50/80 via-white to-purple-50/80 dark:from-violet-900/20 dark:via-stone-800 dark:to-purple-900/20 text-left transition-all duration-200 group active:scale-[0.98] sm:hover:shadow-2xl sm:hover:-translate-y-1 sm:hover:border-violet-400 dark:sm:hover:border-violet-500 sm:hover:shadow-violet-500/20 overflow-hidden"
               >
                 <div className="absolute top-0 right-0 w-16 sm:w-24 h-16 sm:h-24 rounded-full -translate-y-1/2 translate-x-1/2 bg-gradient-to-br from-violet-400 to-purple-500 opacity-40 sm:group-hover:opacity-60 transition-opacity" />
                 <div className="absolute bottom-2 left-2 w-6 sm:w-8 h-6 sm:h-8 rounded-lg bg-violet-300/20 dark:bg-violet-600/20 rotate-12 sm:group-hover:scale-110 transition-transform" />
                 <div className="relative z-10 w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-violet-400 to-purple-500 rounded-xl sm:rounded-2xl flex items-center justify-center mb-2.5 sm:mb-4 group-active:scale-95 sm:group-hover:scale-110 sm:group-hover:rotate-3 transition-all duration-300 shadow-md sm:shadow-lg shadow-violet-500/30">
-                  <span className="text-xl sm:text-2xl">➕</span>
+                  <span className="text-xl sm:text-2xl">🎓</span>
                 </div>
-                <h3 className="font-bold text-sm sm:text-base leading-tight text-violet-700 dark:text-violet-300 sm:group-hover:text-violet-800 dark:sm:group-hover:text-violet-200 transition-colors">More Tools</h3>
+                <h3 className="font-bold text-sm sm:text-base leading-tight text-violet-700 dark:text-violet-300 sm:group-hover:text-violet-800 dark:sm:group-hover:text-violet-200 transition-colors">Lessons</h3>
                 <p className="text-stone-500 dark:text-stone-400 text-[11px] sm:text-xs mt-1 sm:mt-2 leading-relaxed line-clamp-2">
-                  <span className="hidden sm:inline">Word counter, essay outline, GPA calculator & more</span>
-                  <span className="sm:hidden">10+ free tools</span>
+                  <span className="hidden sm:inline">Turn text into engaging interactive lessons</span>
+                  <span className="sm:hidden">Interactive lessons</span>
                 </p>
-                <span className="hidden sm:inline-flex items-center gap-1 text-[10px] font-semibold text-violet-500 dark:text-violet-400 mt-2 opacity-80 group-hover:opacity-100 transition-opacity">
-                  Explore 10+ free tools
-                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
-                </span>
+                <span className="absolute top-2 right-2 sm:top-3 sm:right-3 px-1.5 sm:px-2 py-0.5 sm:py-1 text-[8px] sm:text-[10px] font-bold rounded-md sm:rounded-lg bg-gradient-to-r from-emerald-500 to-teal-500 text-white leading-none shadow-md z-20 animate-pulse">NEW</span>
               </button>
+              </div>
+
+              {/* More Tools Link - Subtle */}
+              <div className="flex justify-center mt-2">
+                <button
+                  onClick={() => onNavigate('more-tools')}
+                  className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-medium text-stone-500 dark:text-stone-400 hover:text-violet-600 dark:hover:text-violet-400 hover:bg-violet-50 dark:hover:bg-violet-900/20 rounded-full transition-colors"
+                >
+                  <span>➕</span>
+                  <span>10+ More Free Tools</span>
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                </button>
               </div>
             </div>
             )}

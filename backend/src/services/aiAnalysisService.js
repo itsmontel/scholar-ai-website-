@@ -142,7 +142,7 @@ class AIAnalysisService {
     }
   }
 
-  async analyzeDocument(documentId, content, analysisType, userId, citationStyle = 'None') {
+  async analyzeDocument(documentId, content, analysisType, userId, citationStyle = 'None', educationLevel = 'college') {
     try {
       // Handle citation review as a special case (temporary, not saved)
       if (analysisType === 'citation_review') {
@@ -181,7 +181,7 @@ class AIAnalysisService {
         console.log('Could not fetch plan, using defaults');
       }
 
-      const analysisPrompt = this.getAnalysisPrompt(analysisType, content, citationStyle, userPlan);
+      const analysisPrompt = this.getAnalysisPrompt(analysisType, content, citationStyle, userPlan, educationLevel);
 
       let completion;
       try {
@@ -190,7 +190,7 @@ class AIAnalysisService {
         messages: [
           {
               role: 'system',
-              content: this.getSystemPrompt(analysisType)
+              content: this.getSystemPrompt(analysisType, educationLevel)
           },
           {
               role: 'user',
@@ -210,7 +210,7 @@ class AIAnalysisService {
             messages: [
               {
                 role: 'system',
-                content: this.getSystemPrompt(analysisType)
+                content: this.getSystemPrompt(analysisType, educationLevel)
               },
               {
                 role: 'user',
@@ -398,7 +398,7 @@ ${citationStyle === 'None'
   /**
    * Get system prompt based on analysis type
    */
-  getSystemPrompt(analysisType) {
+  getSystemPrompt(analysisType, educationLevel = 'college') {
     const prompts = {
       general: `You are an expert academic writing assistant. Analyze the provided document and give comprehensive feedback on:
       - Overall structure and organization
@@ -467,7 +467,29 @@ For each citation issue, you must:
 Focus ONLY on citations, references, and bibliography. Do not comment on writing quality, grammar, or content unless it directly relates to citation practices.`
     };
 
-    return prompts[analysisType] || prompts.general;
+    let basePrompt = prompts[analysisType] || prompts.general;
+
+    if (educationLevel === 'sixth_form') {
+      basePrompt += `\n\nIMPORTANT AUDIENCE CONTEXT: The writer is a high school / sixth form student (ages 16–18). Adjust your analysis accordingly:
+- Use a supportive but honest tone — you can be direct, but frame criticism constructively.
+- Expectations should match A-Level / IB / AP standard, not university-level research.
+- Don't expect PhD-level argumentation or extensive primary research. Focus on clarity of argument, logical structure, use of evidence, and solid essay technique.
+- Use language the student will understand — avoid overly technical academic jargon.
+- Praise genuine effort and good instincts. When something needs work, explain *why* it matters and *how* to improve it.
+- Commentary should feel like guidance from a knowledgeable, encouraging teacher.`;
+    } else if (educationLevel === 'middle_school') {
+      basePrompt += `\n\nIMPORTANT AUDIENCE CONTEXT: The writer is a middle school student (ages 11–15). Adjust your analysis significantly:
+- Use a warm, friendly, and encouraging tone throughout. Think of yourself as a supportive mentor.
+- Keep your language simple and easy to understand — no advanced academic terminology.
+- Expectations should be age-appropriate: focus on basic essay structure (introduction, body, conclusion), clear sentences, staying on topic, and showing their own thinking.
+- Do NOT judge this like a university paper. A middle schooler writing a clear paragraph with a main idea is doing great work.
+- Lead with positivity — always highlight what they did well before suggesting improvements.
+- Frame improvements as helpful tips, not harsh criticism. Use phrases like "Nice work here! One thing that could make this even better is..." or "You've got a great start — try adding..." rather than "This is weak" or "This fails to..."
+- Keep suggestions concrete and actionable — tell them exactly what to do, not abstract concepts.
+- Be generous with encouragement. Building confidence at this age is just as important as the feedback itself.`;
+    }
+
+    return basePrompt;
   }
 
   /**
@@ -569,7 +591,7 @@ CRITICAL REQUIREMENTS:
   /**
    * Get analysis prompt with document content
    */
-  getAnalysisPrompt(analysisType, content, citationStyle = 'None', userPlan = 'free') {
+  getAnalysisPrompt(analysisType, content, citationStyle = 'None', userPlan = 'free', educationLevel = 'college') {
     const citationInstruction = citationStyle === 'None' 
       ? 'This document does not require citations, so focus on content quality, structure, and clarity.'
       : `using ${citationStyle} citation style standards.`;
@@ -579,26 +601,53 @@ CRITICAL REQUIREMENTS:
     let targetAnnotations = 12; // Default for free/short documents
     
     if (userPlan === 'premium') {
-      // Premium: Scale more aggressively
       if (wordCount > 5000) targetAnnotations = 30;
       else if (wordCount > 3000) targetAnnotations = 25;
       else if (wordCount > 1500) targetAnnotations = 20;
       else targetAnnotations = 15;
     } else if (userPlan === 'starter') {
-      // Starter: Moderate scaling
       if (wordCount > 5000) targetAnnotations = 25;
       else if (wordCount > 3000) targetAnnotations = 20;
       else if (wordCount > 1500) targetAnnotations = 15;
       else targetAnnotations = 12;
     } else {
-      // Free: Limited scaling
       if (wordCount > 3000) targetAnnotations = 15;
       else if (wordCount > 1500) targetAnnotations = 12;
       else targetAnnotations = 10;
     }
+
+    const educationLevelLabels = {
+      college: 'College / University level',
+      sixth_form: 'High School / Sixth Form level (ages 16–18)',
+      middle_school: 'Middle School level (ages 11–15)'
+    };
+    const audienceLabel = educationLevelLabels[educationLevel] || educationLevelLabels.college;
+
+    let educationLevelGuidance = '';
+    if (educationLevel === 'sixth_form') {
+      educationLevelGuidance = `
+EDUCATION LEVEL: ${audienceLabel}
+- Judge this paper by high school / sixth form standards, NOT university standards.
+- Look for clear thesis statements, logical paragraph structure, use of supporting evidence, and coherent conclusions.
+- Don't penalise for lacking advanced academic conventions (e.g. extensive literature reviews, sophisticated theoretical frameworks).
+- Feedback should be direct but constructive — like a good teacher marking their work.
+- Use accessible language in your commentary.
+`;
+    } else if (educationLevel === 'middle_school') {
+      educationLevelGuidance = `
+EDUCATION LEVEL: ${audienceLabel}
+- Judge this paper by middle school standards. This is a young student learning to write.
+- Focus on: Does it have a clear topic? Are the ideas organised? Does it make sense? Is it on topic?
+- Be warm, encouraging, and supportive in ALL feedback — even concerns should be phrased gently.
+- Use simple, friendly language. No jargon. Write as if you're talking to a 12–15 year old.
+- Lean heavily toward strengths and encouragement. Only raise concerns for genuine issues, and always pair them with a positive.
+- Example of good feedback: "Great job explaining your main idea clearly! To make this part even stronger, you could add an example to back it up."
+- Example of bad feedback: "The argument lacks sufficient evidence and theoretical grounding." (too harsh / too academic)
+`;
+    }
     
     return `Please perform a comprehensive academic analysis of the following document ${citationInstruction}
-
+${educationLevelGuidance}
 IMPORTANT: For each feedback point, you must include the EXACT text from the document that you're referring to, enclosed in double quotes.
 
 ADAPTIVE ANNOTATION GUIDELINES:
@@ -2895,6 +2944,220 @@ IMPORTANT REQUIREMENTS:
     }
   }
 
+  // =====================
+  // Lesson Plan Methods
+  // =====================
+
+  /**
+   * Save lesson plan to history
+   * @param {string} userPlan - User's subscription plan ('free', 'starter', 'premium')
+   */
+  async saveLesson(userId, lesson, sourceText, userPlan = 'free') {
+    try {
+      console.log('Saving lesson to history:', { userId, lessonTitle: lesson.title, userPlan });
+
+      const { createClient } = require('@supabase/supabase-js');
+      const supabase = createClient(
+        process.env.SUPABASE_URL,
+        process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
+      );
+
+      // Free users: expires 30 days after creation; Paid users (starter/premium): no expiration (null)
+      const isPaidUser = userPlan === 'starter' || userPlan === 'premium';
+      const expiresAt = isPaidUser ? null : getExpiresAt30Days();
+
+      const lessonData = {
+        user_id: userId,
+        title: lesson.title,
+        lesson_style: lesson.style || 'visual',
+        slide_count: lesson.slides?.length || lesson.totalSlides || 0,
+        slides: lesson.slides,
+        quiz_bank: lesson.quizBank || null,
+        quiz_display_count: lesson.quizDisplayCount || 6,
+        estimated_read_time: lesson.estimatedReadTime || 5,
+        source_word_count: sourceText?.trim().split(/\s+/).length || 0,
+        created_at: new Date().toISOString(),
+        expires_at: expiresAt
+      };
+
+      const { data, error } = await supabase
+        .from('lesson_plans')
+        .insert([lessonData])
+        .select();
+
+      if (error) {
+        console.error('Error saving lesson:', error);
+        return null;
+      }
+
+      console.log('Lesson saved successfully:', data[0]?.id);
+      return data[0];
+    } catch (error) {
+      console.error('Database error in saveLesson:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Get lesson history for a user
+   * Returns items that are either permanent (expires_at is null) or not yet expired
+   */
+  async getLessonHistory(userId, limit = 20) {
+    try {
+      const { createClient } = require('@supabase/supabase-js');
+      const supabase = createClient(
+        process.env.SUPABASE_URL,
+        process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
+      );
+
+      // Get items where expires_at is null (permanent) OR expires_at is in the future
+      const { data, error } = await supabase
+        .from('lesson_plans')
+        .select('*')
+        .eq('user_id', userId)
+        .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`)
+        .order('created_at', { ascending: false })
+        .limit(limit);
+
+      if (error) {
+        console.error('Error fetching lesson history:', error);
+        throw error;
+      }
+
+      return data || [];
+    } catch (error) {
+      console.error('Database error in getLessonHistory:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get a specific lesson by ID
+   * Returns item if it's permanent (expires_at is null) or not yet expired
+   */
+  async getLessonById(userId, lessonId) {
+    try {
+      const { createClient } = require('@supabase/supabase-js');
+      const supabase = createClient(
+        process.env.SUPABASE_URL,
+        process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
+      );
+
+      const { data, error } = await supabase
+        .from('lesson_plans')
+        .select('*')
+        .eq('id', lessonId)
+        .eq('user_id', userId)
+        .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`)
+        .single();
+
+      if (error) {
+        console.error('Error fetching lesson:', error);
+        return null;
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Database error in getLessonById:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Delete a specific lesson
+   */
+  async deleteLesson(userId, lessonId) {
+    try {
+      const { createClient } = require('@supabase/supabase-js');
+      const supabase = createClient(
+        process.env.SUPABASE_URL,
+        process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
+      );
+
+      const { data, error } = await supabase
+        .from('lesson_plans')
+        .delete()
+        .eq('id', lessonId)
+        .eq('user_id', userId)
+        .select();
+
+      if (error) {
+        console.error('Error deleting lesson:', error);
+        return false;
+      }
+
+      const rowsDeleted = (data || []).length;
+      console.log(`Delete result: ${rowsDeleted} row(s) removed from lesson_plans table`);
+
+      if (rowsDeleted === 0) {
+        console.warn(`No rows deleted — lesson ${lessonId} not found for user ${userId} or blocked by RLS`);
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Database error in deleteLesson:', error);
+      return false;
+    }
+  }
+
+  async renameLesson(userId, lessonId, newTitle) {
+    try {
+      const { createClient } = require('@supabase/supabase-js');
+      const supabase = createClient(
+        process.env.SUPABASE_URL,
+        process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
+      );
+
+      const { data, error } = await supabase
+        .from('lesson_plans')
+        .update({ title: newTitle })
+        .eq('id', lessonId)
+        .eq('user_id', userId)
+        .select();
+
+      if (error) {
+        console.error('Error renaming lesson:', error);
+        return false;
+      }
+
+      return (data || []).length > 0;
+    } catch (error) {
+      console.error('Database error in renameLesson:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Clean up expired lessons (where expires_at is in the past; free users: 30 days after creation)
+   */
+  async cleanupExpiredLessons() {
+    try {
+      const { createClient } = require('@supabase/supabase-js');
+      const supabase = createClient(
+        process.env.SUPABASE_URL,
+        process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
+      );
+
+      const { data, error } = await supabase
+        .from('lesson_plans')
+        .delete()
+        .lt('expires_at', new Date().toISOString())
+        .select();
+
+      if (error) {
+        console.error('Error cleaning up expired lessons:', error);
+        return { deleted: 0 };
+      }
+
+      console.log(`Cleaned up ${data?.length || 0} expired lessons`);
+      return { deleted: data?.length || 0 };
+    } catch (error) {
+      console.error('Database error in cleanupExpiredLessons:', error);
+      return { deleted: 0 };
+    }
+  }
+
   /**
    * Get available analysis types
    */
@@ -3598,7 +3861,7 @@ DO NOT include any text outside the JSON object.`;
 
     const userPrompt = inputType === 'topic'
       ? `Generate 20 fast-paced quiz questions about: ${content}`
-      : `Generate 20 fast-paced quiz questions from these study notes:\n\n${content.substring(0, 8000)}`;
+      : `Generate 20 fast-paced quiz questions from these study notes. Use only the content below (first 10,000 words):\n\n${content.trim().split(/\s+/).slice(0, 10000).join(' ')}`;
 
     try {
       const completion = await this.openai.chat.completions.create({
@@ -3635,6 +3898,228 @@ DO NOT include any text outside the JSON object.`;
     } catch (error) {
       console.error('OpenAI reflex question generation error:', error);
       throw new Error('Failed to generate questions: ' + error.message);
+    }
+  }
+
+  async generateLesson(text, style = 'visual', userPlan = 'free') {
+    if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY === 'your_openai_api_key_here') {
+      console.log('OpenAI API key not configured');
+      throw new Error('OpenAI API key not configured');
+    }
+
+    const selectedModel = userPlan === 'premium' ? 'gpt-4.1-mini' : 'gpt-4.1-nano';
+
+    const styleInstructions = {
+      visual: `Create visually-oriented lesson slides with:
+- Colorful, engaging titles for each slide
+- Clear, bite-sized content (2-4 sentences per main content area)
+- Interesting emojis that match the content
+- 3-5 clickable bullet points per concept slide for interactive reveals
+- Fun facts and "Did you know?" elements
+- Highlight key terms that should be remembered`,
+      stepByStep: `Create a numbered learning path with:
+- Clear progression from basic to advanced concepts
+- Each slide builds on the previous one
+- Step numbers in titles (Step 1, Step 2, etc.)
+- Practical examples at each step
+- Clear "checkpoint" summaries`,
+      story: `Create a narrative-driven lesson with:
+- Engaging storytelling approach
+- Connect concepts through a flowing narrative
+- Use analogies and real-world examples
+- Make abstract concepts relatable
+- Build toward a satisfying conclusion`
+    };
+
+    const systemPrompt = `You are an expert educational content designer who transforms boring text into engaging, interactive lessons. Your lessons are:
+- Engaging: You make learning fun and interesting
+- Bite-sized: Complex topics are broken into digestible chunks
+- Visual: You suggest emojis and visual elements to make content memorable
+- Interactive: You include elements that encourage active learning
+- Memorable: You highlight key terms and create "sticky" learning moments
+
+${styleInstructions[style] || styleInstructions.visual}
+
+Create a lesson with 5-8 slides covering the main concepts. Each slide should have:
+- type: one of "intro", "concept", "example", "keypoint", "funfact", "summary"
+- title: engaging slide title
+- content: main explanation (2-4 sentences, clear and simple)
+- emoji: a relevant emoji for the slide
+- bulletPoints: array of 3-5 interactive reveal items (for concept/keypoint types)
+- highlightedTerm: optional key vocabulary term to remember
+
+IMPORTANT: Return your response as valid JSON in this exact format:
+{
+  "title": "Lesson title that captures the topic",
+  "slides": [
+    {
+      "id": 1,
+      "type": "intro",
+      "title": "Welcome slide title",
+      "content": "Introduction content...",
+      "emoji": "📖"
+    },
+    {
+      "id": 2,
+      "type": "concept",
+      "title": "First concept title",
+      "content": "Explanation of the concept...",
+      "emoji": "💡",
+      "bulletPoints": ["Point 1", "Point 2", "Point 3"],
+      "highlightedTerm": "Key term"
+    }
+  ],
+  "estimatedReadTime": 5
+}
+
+Rules:
+- Start with an "intro" slide that sets context
+- End with a "summary" slide that reinforces key takeaways
+- Include at least one "funfact" or "example" slide to make it interesting
+- Keep language simple and accessible
+- Make bullet points reveal meaningful details, not just repetition
+- Return ONLY valid JSON, no other text`;
+
+    try {
+      // Use only the first 10,000 words for AI processing
+      const words = text.trim().split(/\s+/);
+      const first10kWords = words.slice(0, 10000).join(' ');
+      const wordCount = Math.min(words.length, 10000);
+
+      // Scale slides by word count: ~1 slide per 400 words, min 6, max 25
+      const slideCount = Math.min(25, Math.max(6, Math.ceil(wordCount / 400)));
+
+      const systemPromptWithCount = systemPrompt.replace(
+        'Create a lesson with 5-8 slides covering the main concepts.',
+        `Create a lesson with ${slideCount} slides covering the main concepts (the material is ~${wordCount.toLocaleString()} words, so cover it thoroughly).`
+      );
+
+      // Generate lesson slides
+      const completion = await this.openai.chat.completions.create({
+        model: selectedModel,
+        messages: [
+          { role: 'system', content: systemPromptWithCount },
+          { role: 'user', content: `Transform this study material into an engaging interactive lesson. Use only the content below (first 10,000 words):\n\n${first10kWords}` }
+        ],
+        max_tokens: 8000,
+        temperature: 0.7,
+      });
+
+      const responseText = completion.choices[0]?.message?.content;
+      if (!responseText) throw new Error('No response from AI');
+
+      let parsed;
+      try {
+        const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+        parsed = jsonMatch ? JSON.parse(jsonMatch[0]) : JSON.parse(responseText);
+      } catch (parseError) {
+        console.error('Failed to parse lesson JSON:', parseError);
+        throw new Error('Failed to parse lesson response');
+      }
+
+      if (!parsed.slides || !Array.isArray(parsed.slides) || parsed.slides.length === 0) {
+        throw new Error('No slides generated');
+      }
+
+      // Generate quiz question bank (scaled by word count)
+      const quizBank = await this.generateLessonQuizBank(first10kWords, parsed.title, selectedModel, wordCount);
+
+      return {
+        title: parsed.title || 'Your Interactive Lesson',
+        slides: parsed.slides,
+        totalSlides: parsed.slides.length,
+        estimatedReadTime: parsed.estimatedReadTime || Math.ceil(parsed.slides.length * 1.5),
+        style: style,
+        quizBank: quizBank.questions || [],
+        quizDisplayCount: quizBank.displayCount || 6
+      };
+    } catch (error) {
+      console.error('OpenAI lesson generation error:', error);
+      throw new Error('Failed to generate lesson: ' + error.message);
+    }
+  }
+
+  async generateLessonQuizBank(text, lessonTitle, model, wordCount = 3000) {
+    // Scale quiz bank by word count: ~1 question per 350 words, min 12, max 30
+    const bankCount = Math.min(30, Math.max(12, Math.ceil(wordCount / 350)));
+    // Show ~40% of bank per attempt, min 6, max 12
+    const displayCount = Math.min(12, Math.max(6, Math.ceil(bankCount * 0.4)));
+
+    const systemPrompt = `You are an expert quiz creator. Create a question bank to test understanding of a lesson.
+
+Generate exactly ${bankCount} multiple choice questions that:
+- Test comprehension of the key concepts
+- Range from easy recall to moderate application
+- Have clear, unambiguous correct answers
+- Include plausible wrong options
+
+IMPORTANT: Return ONLY valid JSON in this exact format:
+{
+  "questions": [
+    {
+      "id": 1,
+      "type": "multiple_choice",
+      "question": "What is the main concept discussed?",
+      "options": ["Option A", "Option B", "Option C", "Option D"],
+      "correctAnswer": "Option A",
+      "explanation": "Brief explanation of why this is correct"
+    }
+  ]
+}
+
+Rules:
+- Generate exactly ${bankCount} questions
+- Each question must have exactly 4 options
+- correctAnswer must exactly match one of the options
+- Keep questions focused on the material
+- Return ONLY valid JSON`;
+
+    try {
+      const completion = await this.openai.chat.completions.create({
+        model: model,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: `Create ${bankCount} quiz questions to test understanding of this lesson titled "${lessonTitle}". Use only the content below:\n\n${text}` }
+        ],
+        max_tokens: bankCount > 20 ? 8000 : 4000,
+        temperature: 0.7,
+      });
+
+      const responseText = completion.choices[0]?.message?.content;
+      if (!responseText) {
+        console.error('No quiz response from AI');
+        return { questions: [], displayCount };
+      }
+
+      let parsed;
+      try {
+        const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+        parsed = jsonMatch ? JSON.parse(jsonMatch[0]) : JSON.parse(responseText);
+      } catch (parseError) {
+        console.error('Failed to parse quiz bank JSON:', parseError);
+        return { questions: [], displayCount };
+      }
+
+      if (!parsed.questions || !Array.isArray(parsed.questions)) {
+        return { questions: [], displayCount };
+      }
+
+      // Validate and clean questions
+      const validQuestions = parsed.questions
+        .filter(q => q.question && q.options && Array.isArray(q.options) && q.options.length === 4 && q.correctAnswer)
+        .map((q, idx) => ({
+          id: idx + 1,
+          type: 'multiple_choice',
+          question: q.question,
+          options: q.options,
+          correctAnswer: q.correctAnswer,
+          explanation: q.explanation || ''
+        }));
+
+      return { questions: validQuestions, displayCount };
+    } catch (error) {
+      console.error('Failed to generate quiz bank:', error);
+      return { questions: [], displayCount };
     }
   }
 }

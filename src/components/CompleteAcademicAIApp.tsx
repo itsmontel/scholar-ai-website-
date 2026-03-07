@@ -56,6 +56,7 @@ import PomodoroTimerPage from './pages/tools/PomodoroTimerPage';
 import CalculatorPage from './pages/tools/CalculatorPage';
 import ConverterPage from './pages/tools/ConverterPage';
 import LightningReflexQuizPage from './pages/tools/LightningReflexQuizPage';
+import InteractiveLessonPage from './pages/tools/InteractiveLessonPage';
 
 // Import common components
 import ErrorBoundary from './common/ErrorBoundary';
@@ -155,6 +156,7 @@ const AcademicAIApp = () => {
     'converter': { title: 'Free Unit Converter – Length, Weight, Temperature & More | WriteScholar', description: 'Free online unit converter for students. Convert meters to feet, inches to cm, kg to lbs, Celsius to Fahrenheit, and more. Length, weight, temperature, volume, area, time. No signup required.' },
     'crater-blast': { title: 'Crater Blast – AI Quiz Shooter Game | WriteScholar', description: 'Blast the correct falling crater before it lands! AI generates quiz questions as craters. Aim your cannon, build streaks, and beat your high score.' },
     'more-tools': { title: 'More Free Tools – Word Counter, Calculator, Converter | WriteScholar', description: 'Free student tools: word counter, citation generator, scientific calculator, unit converter, essay outline, thesis generator, grammar checker, readability score, paraphrasing tips, text case converter, GPA calculator, Pomodoro timer.' },
+    'interactive-lesson': { title: 'Interactive Lesson Generator – Turn Text into Fun Lessons | WriteScholar', description: 'Transform boring study material into engaging, interactive lessons. Break down complex topics into digestible slides with key concepts, examples, and fun facts. Learn before you quiz!' },
     'badges': { title: 'Achievements & Badges | WriteScholar', description: 'Collect badges, earn XP, and level up your scholar journey. Unlock cute monster companions by using WriteScholar tools.' },
     'friends': { title: 'Friends | WriteScholar', description: 'Connect with friends to share quizzes, flashcards, and crosswords. Add friends by code and collaborate on studying.' }
   };
@@ -387,6 +389,7 @@ const AcademicAIApp = () => {
       if (pathname === '/tools/calculator' || pathname === '/calculator') return 'calculator';
       if (pathname === '/tools/converter' || pathname === '/converter') return 'converter';
       if (pathname === '/tools/crater-blast' || pathname === '/crater-blast' || pathname === '/tools/lightning-reflex-quiz' || pathname === '/lightning-reflex-quiz') return 'crater-blast';
+      if (pathname === '/tools/interactive-lesson' || pathname === '/interactive-lesson' || pathname === '/lesson-generator') return 'interactive-lesson';
       if (pathname === '/tools/more' || pathname === '/more-tools' || pathname === '/view-more-tools') return 'more-tools';
       if (pathname === '/badges' || pathname === '/achievements') return 'badges';
       // Dashboard modes
@@ -842,6 +845,8 @@ const AcademicAIApp = () => {
         return <ConverterPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'crater-blast':
         return <LightningReflexQuizPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
+      case 'interactive-lesson':
+        return <InteractiveLessonPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'admin':
         return <AdminDashboard onNavigate={navigateTo} user={user} />;
       case 'collaboration':

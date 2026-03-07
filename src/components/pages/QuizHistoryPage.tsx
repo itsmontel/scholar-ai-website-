@@ -42,6 +42,16 @@ interface CrosswordData {
   placedWords?: PlacedWord[];
 }
 
+interface LessonSlide {
+  id?: number;
+  type?: string;
+  title?: string;
+  content?: string;
+  emoji?: string;
+  bulletPoints?: string[];
+  highlightedTerm?: string;
+}
+
 interface StudyTool {
   id: string;
   title: string;
@@ -49,6 +59,8 @@ interface StudyTool {
   difficulty: string;
   question_count: number;
   questions: QuizQuestion[] | FlashCard[] | CrosswordData;
+  quiz_bank?: QuizQuestion[];
+  quiz_display_count?: number;
   source_word_count: number;
   created_at: string;
   expires_at: string | null;
@@ -70,8 +82,34 @@ interface Friend {
   username?: string;
 }
 
-type FilterType = 'all' | 'quiz' | 'flashcards' | 'crossword' | 'crater_blast';
+type FilterType = 'all' | 'quiz' | 'flashcards' | 'crossword' | 'crater_blast' | 'lesson';
 type TimePeriod = 'all' | '7days' | '30days' | '3months';
+
+/** Sanitize text for jsPDF - replaces Unicode chars that cause garbled output (e.g. smart quotes, em dashes) */
+function sanitizeForPDF(text: string): string {
+  if (!text) return '';
+  return String(text)
+    .replace(/\u2019/g, "'")   // right single quote '
+    .replace(/\u2018/g, "'")   // left single quote '
+    .replace(/\u201C/g, '"')   // left double quote "
+    .replace(/\u201D/g, '"')   // right double quote "
+    .replace(/\u2013/g, '-')   // en dash –
+    .replace(/\u2014/g, '-')   // em dash —
+    .replace(/\u2026/g, '...') // ellipsis …
+    .replace(/\u2022/g, '-')   // bullet •
+    .replace(/[^\x00-\x7F]/g, (c) => {  // any remaining non-ASCII -> safe ASCII
+      const fallback: Record<string, string> = {
+        'á': 'a', 'à': 'a', 'â': 'a', 'ä': 'a', 'ã': 'a', 'å': 'a', 'æ': 'ae', 'ç': 'c',
+        'é': 'e', 'è': 'e', 'ê': 'e', 'ë': 'e', 'í': 'i', 'ì': 'i', 'î': 'i', 'ï': 'i',
+        'ñ': 'n', 'ó': 'o', 'ò': 'o', 'ô': 'o', 'ö': 'o', 'õ': 'o', 'ø': 'o', 'œ': 'oe',
+        'ú': 'u', 'ù': 'u', 'û': 'u', 'ü': 'u', 'ý': 'y', 'ÿ': 'y', 'ß': 'ss',
+        'Á': 'A', 'À': 'A', 'Â': 'A', 'Ä': 'A', 'É': 'E', 'È': 'E', 'Ê': 'E', 'Ë': 'E',
+        'Í': 'I', 'Ì': 'I', 'Î': 'I', 'Ï': 'I', 'Ñ': 'N', 'Ó': 'O', 'Ò': 'O', 'Ô': 'O',
+        'Ö': 'O', 'Ú': 'U', 'Ù': 'U', 'Û': 'U', 'Ü': 'U', 'Ý': 'Y',
+      };
+      return fallback[c] ?? '?';
+    });
+}
 
 const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFilterProp }: QuizHistoryProps) => {
   const [studyTools, setStudyTools] = useState<StudyTool[]>([]);
@@ -180,9 +218,10 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
     if (cutoffDate && new Date(tool.created_at) < cutoffDate) {
       return false;
     }
-    
+
     if (filter === 'all') return true;
-    if (filter === 'quiz') return !['flashcards', 'crossword', 'crater_blast'].includes(tool.quiz_type);
+    if (filter === 'quiz') return !['flashcards', 'crossword', 'crater_blast', 'lesson'].includes(tool.quiz_type);
+    if (filter === 'lesson') return tool.quiz_type === 'lesson';
     return tool.quiz_type === filter;
   });
 
@@ -202,6 +241,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
     if (type === 'flashcards') return '🃏';
     if (type === 'crossword') return '🧩';
     if (type === 'crater_blast') return '💥';
+    if (type === 'lesson') return '🎓';
     return '📝';
   };
 
@@ -234,6 +274,9 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
     } else if (tool.quiz_type === 'crater_blast') {
       localStorage.setItem('savedCraterBlast', JSON.stringify(tool));
       onNavigate('crater-blast');
+    } else if (tool.quiz_type === 'lesson') {
+      localStorage.setItem('savedLesson', JSON.stringify(tool));
+      onNavigate('interactive-lesson');
     } else {
       localStorage.setItem('savedQuiz', JSON.stringify(tool));
       onNavigate('quiz-generator');
@@ -432,6 +475,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
       case 'true_false': return 'True/False';
       case 'fill_blank': return 'Fill in the Blank';
       case 'mixed': return 'Mixed';
+      case 'lesson': return 'Lesson';
       case 'flashcards': return 'Flashcards';
       case 'crossword': return 'Crossword';
       case 'crater_blast': return 'Crater Blast';
@@ -450,20 +494,20 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
 
     doc.setFontSize(18);
     doc.setFont('helvetica', 'bold');
-    const titleText = doc.splitTextToSize(quiz.title || 'Quiz', 170);
+    const titleText = doc.splitTextToSize(sanitizeForPDF(quiz.title || 'Quiz'), 170);
     doc.text(titleText, margin, yPos);
     yPos += titleText.length * 8 + 5;
 
     doc.setFontSize(10);
     doc.setFont('helvetica', 'normal');
-    doc.text(`Type: ${qType} | Difficulty: ${quiz.difficulty} | Questions: ${qs.length}`, margin, yPos);
+    doc.text(sanitizeForPDF(`Type: ${qType} | Difficulty: ${quiz.difficulty} | Questions: ${qs.length}`), margin, yPos);
     yPos += 15;
 
     qs.forEach((q: QuizQuestion, idx: number) => {
       if (yPos > pageHeight - 60) { doc.addPage(); yPos = 20; }
       doc.setFontSize(12);
       doc.setFont('helvetica', 'bold');
-      const questionText = `${idx + 1}. ${q.question}`;
+      const questionText = `${idx + 1}. ${sanitizeForPDF(q.question)}`;
       const splitQuestion = doc.splitTextToSize(questionText, 170);
       doc.text(splitQuestion, margin, yPos);
       yPos += splitQuestion.length * lineHeight + 3;
@@ -476,7 +520,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
       } else if (q.options) {
         q.options.forEach((opt: string) => {
           if (yPos > pageHeight - 30) { doc.addPage(); yPos = 20; }
-          const optText = `   [ ] ${opt}`;
+          const optText = `   [ ] ${sanitizeForPDF(opt)}`;
           const splitOpt = doc.splitTextToSize(optText, 165);
           doc.text(splitOpt, margin, yPos);
           yPos += splitOpt.length * lineHeight;
@@ -495,10 +539,10 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
     doc.setFont('helvetica', 'normal');
     qs.forEach((q: QuizQuestion, idx: number) => {
       if (yPos > pageHeight - 30) { doc.addPage(); yPos = 20; }
-      doc.text(`${idx + 1}. ${q.correctAnswer}`, margin, yPos);
+      doc.text(`${idx + 1}. ${sanitizeForPDF(q.correctAnswer)}`, margin, yPos);
       yPos += lineHeight;
       if (q.explanation) {
-        const expText = doc.splitTextToSize(`   Explanation: ${q.explanation}`, 165);
+        const expText = doc.splitTextToSize(`   Explanation: ${sanitizeForPDF(q.explanation)}`, 165);
         doc.text(expText, margin, yPos);
         yPos += expText.length * lineHeight + 3;
       }
@@ -551,14 +595,14 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
 
     doc.setFontSize(18);
     doc.setFont('helvetica', 'bold');
-    const titleLines = doc.splitTextToSize(tool.title || 'Flashcards', 170);
+    const titleLines = doc.splitTextToSize(sanitizeForPDF(tool.title || 'Flashcards'), 170);
     doc.text(titleLines, margin, yPos);
     yPos += titleLines.length * 8 + 4;
 
     doc.setFontSize(10);
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(100, 100, 100);
-    doc.text(`${cards.length} cards`, margin, yPos);
+    doc.text(sanitizeForPDF(`${cards.length} cards`), margin, yPos);
     doc.setTextColor(0, 0, 0);
     yPos += 12;
 
@@ -579,7 +623,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
       doc.text('Front:', margin, yPos);
       yPos += 6;
       doc.setFont('helvetica', 'normal');
-      const frontLines = doc.splitTextToSize(card.front || '', 165);
+      const frontLines = doc.splitTextToSize(sanitizeForPDF(card.front || ''), 165);
       doc.text(frontLines, margin + 4, yPos);
       yPos += frontLines.length * 6 + 4;
 
@@ -590,7 +634,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
       yPos += 6;
       doc.setFont('helvetica', 'normal');
       doc.setTextColor(60, 100, 60);
-      const backLines = doc.splitTextToSize(card.back || '', 165);
+      const backLines = doc.splitTextToSize(sanitizeForPDF(card.back || ''), 165);
       doc.text(backLines, margin + 4, yPos);
       doc.setTextColor(0, 0, 0);
       yPos += backLines.length * 6 + 10;
@@ -638,14 +682,14 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
 
     doc.setFontSize(18);
     doc.setFont('helvetica', 'bold');
-    const titleLines = doc.splitTextToSize(tool.title || 'Crossword', 170);
+    const titleLines = doc.splitTextToSize(sanitizeForPDF(tool.title || 'Crossword'), 170);
     doc.text(titleLines, margin, yPos);
     yPos += titleLines.length * 8 + 4;
 
     doc.setFontSize(10);
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(100, 100, 100);
-    doc.text(`${placedWords.length} words`, margin, yPos);
+    doc.text(sanitizeForPDF(`${placedWords.length} words`), margin, yPos);
     doc.setTextColor(0, 0, 0);
     yPos += 12;
 
@@ -699,7 +743,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
         if (yPos > pageHeight - 15) { doc.addPage(); yPos = 20; }
         doc.setFontSize(10);
         doc.setFont('helvetica', 'normal');
-        const clueText = doc.splitTextToSize(`${pw.number}. ${pw.clue} (${pw.word.length} letters)`, 165);
+        const clueText = doc.splitTextToSize(`${pw.number}. ${sanitizeForPDF(pw.clue)} (${pw.word.length} letters)`, 165);
         doc.text(clueText, margin + 2, yPos);
         yPos += clueText.length * 6 + 2;
       });
@@ -717,7 +761,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
       if (yPos > pageHeight - 12) { doc.addPage(); yPos = 20; }
       doc.setFontSize(10);
       doc.setFont('helvetica', 'normal');
-      doc.text(`${pw.number}. ${pw.word} (${pw.direction})`, margin + 2, yPos);
+      doc.text(`${pw.number}. ${sanitizeForPDF(pw.word)} (${pw.direction})`, margin + 2, yPos);
       yPos += 6;
     });
 
@@ -757,6 +801,90 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
     const docFile = new Document({ sections: [{ children }] });
     const blob = await Packer.toBlob(docFile);
     saveAs(blob, `crossword-${Date.now()}.docx`);
+  };
+
+  const exportLessonToPDF = (tool: StudyTool) => {
+    const slides = (tool.questions as LessonSlide[]) || [];
+    const doc = new jsPDF();
+    let yPos = 20;
+    const pageHeight = doc.internal.pageSize.height;
+    const margin = 20;
+    const lineHeight = 6;
+
+    doc.setFontSize(18);
+    doc.setFont('helvetica', 'bold');
+    const titleText = doc.splitTextToSize(sanitizeForPDF(tool.title || 'Lesson'), 170);
+    doc.text(titleText, margin, yPos);
+    yPos += titleText.length * 8 + 5;
+
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    const styleLabel = (tool.difficulty === 'stepByStep' ? 'Step-by-Step' : tool.difficulty === 'story' ? 'Story Mode' : 'Visual') || 'Lesson';
+    doc.text(sanitizeForPDF(`Style: ${styleLabel} | Slides: ${slides.length}`), margin, yPos);
+    yPos += 15;
+
+    slides.forEach((slide: LessonSlide, idx: number) => {
+      if (yPos > pageHeight - 40) { doc.addPage(); yPos = 20; }
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
+      const slideTitle = sanitizeForPDF(slide.title || `Slide ${idx + 1}`);
+      const splitTitle = doc.splitTextToSize(`${idx + 1}. ${slideTitle}`, 170);
+      doc.text(splitTitle, margin, yPos);
+      yPos += splitTitle.length * lineHeight + 3;
+
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      const content = sanitizeForPDF(slide.content || '');
+      if (content) {
+        const splitContent = doc.splitTextToSize(content, 170);
+        splitContent.forEach((line: string) => {
+          if (yPos > pageHeight - 15) { doc.addPage(); yPos = 20; }
+          doc.text(line, margin + 2, yPos);
+          yPos += lineHeight;
+        });
+      }
+      if (slide.bulletPoints && slide.bulletPoints.length > 0) {
+        slide.bulletPoints.forEach((bp: string) => {
+          if (yPos > pageHeight - 15) { doc.addPage(); yPos = 20; }
+          const split = doc.splitTextToSize(`  - ${sanitizeForPDF(bp)}`, 165);
+          doc.text(split, margin + 2, yPos);
+          yPos += split.length * lineHeight;
+        });
+      }
+      yPos += 8;
+    });
+
+    const safeTitle = (tool.title || 'lesson').replace(/[^a-zA-Z0-9]/g, '-').slice(0, 50);
+    doc.save(`${safeTitle}-${Date.now()}.pdf`);
+  };
+
+  const exportLessonToDOCX = async (tool: StudyTool) => {
+    const slides = (tool.questions as LessonSlide[]) || [];
+    const children: any[] = [];
+
+    children.push(new Paragraph({ text: tool.title || 'Lesson', heading: HeadingLevel.HEADING_1 }));
+    const styleLabel = (tool.difficulty === 'stepByStep' ? 'Step-by-Step' : tool.difficulty === 'story' ? 'Story Mode' : 'Visual') || 'Lesson';
+    children.push(new Paragraph({ children: [new TextRun({ text: `Style: ${styleLabel} | Slides: ${slides.length}`, size: 20, color: '666666' })] }));
+    children.push(new Paragraph({ text: '' }));
+
+    slides.forEach((slide: LessonSlide, idx: number) => {
+      const slideTitle = slide.title || `Slide ${idx + 1}`;
+      children.push(new Paragraph({ children: [new TextRun({ text: `${idx + 1}. ${slideTitle}`, bold: true })] }));
+      if (slide.content) {
+        children.push(new Paragraph({ text: slide.content }));
+      }
+      if (slide.bulletPoints && slide.bulletPoints.length > 0) {
+        slide.bulletPoints.forEach((bp: string) => {
+          children.push(new Paragraph({ text: `  • ${bp}` }));
+        });
+      }
+      children.push(new Paragraph({ text: '' }));
+    });
+
+    const docFile = new Document({ sections: [{ children }] });
+    const blob = await Packer.toBlob(docFile);
+    const safeTitle = (tool.title || 'lesson').replace(/[^a-zA-Z0-9]/g, '-').slice(0, 50);
+    saveAs(blob, `${safeTitle}-${Date.now()}.docx`);
   };
 
   if (isLoading) {
@@ -802,10 +930,11 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
 
   const filterTabs = [
     { key: 'all' as FilterType, label: 'All', icon: '📚', count: studyTools.length, color: 'stone' },
-    { key: 'quiz' as FilterType, label: 'Quizzes', icon: '📝', count: studyTools.filter(t => !['flashcards', 'crossword', 'crater_blast'].includes(t.quiz_type)).length, color: 'blue' },
+    { key: 'quiz' as FilterType, label: 'Quizzes', icon: '📝', count: studyTools.filter(t => !['flashcards', 'crossword', 'crater_blast', 'lesson'].includes(t.quiz_type)).length, color: 'blue' },
     { key: 'flashcards' as FilterType, label: 'Flashcards', icon: '🃏', count: studyTools.filter(t => t.quiz_type === 'flashcards').length, color: 'fuchsia' },
     { key: 'crossword' as FilterType, label: 'Crosswords', icon: '🧩', count: studyTools.filter(t => t.quiz_type === 'crossword').length, color: 'emerald' },
     { key: 'crater_blast' as FilterType, label: 'Crater Blast', icon: '💥', count: studyTools.filter(t => t.quiz_type === 'crater_blast').length, color: 'orange' },
+    { key: 'lesson' as FilterType, label: 'Lessons', icon: '🎓', count: studyTools.filter(t => t.quiz_type === 'lesson').length, color: 'violet' },
   ];
 
   const timePeriodOptions = [
@@ -828,6 +957,8 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
         return 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-md shadow-emerald-500/25';
       case 'orange':
         return 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md shadow-orange-500/25';
+      case 'violet':
+        return 'bg-gradient-to-r from-violet-500 to-purple-500 text-white shadow-md shadow-violet-500/25';
       default:
         return 'bg-gradient-to-r from-violet-600 to-purple-600 text-white shadow-md shadow-violet-500/25';
     }
@@ -963,7 +1094,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
           <div className="mb-4 flex items-center gap-2 text-sm text-stone-600">
             <span className="font-medium">{filteredTools.length}</span>
             <span>
-              {filter === 'all' ? 'tool' : filter === 'quiz' ? 'quiz' : filter === 'flashcards' ? 'flashcard set' : filter === 'crossword' ? 'crossword' : 'Crater Blast game'}
+              {filter === 'all' ? 'tool' : filter === 'quiz' ? 'quiz' : filter === 'flashcards' ? 'flashcard set' : filter === 'crossword' ? 'crossword' : filter === 'lesson' ? 'lesson' : 'Crater Blast game'}
               {filteredTools.length !== 1 ? (filter === 'flashcards' ? 's' : filter === 'quiz' ? 'zes' : 's') : ''}
             </span>
             {timePeriod !== 'all' && (
@@ -1042,7 +1173,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
           <div className="grid gap-4 sm:gap-5">
             {paginatedTools.map((tool) => {
               const daysRemaining = getDaysRemaining(tool.expires_at);
-              const isQuiz = !['flashcards', 'crossword', 'crater_blast'].includes(tool.quiz_type);
+              const isQuiz = !['flashcards', 'crossword', 'crater_blast', 'lesson'].includes(tool.quiz_type);
               const toolIcon = getToolIcon(tool.quiz_type);
               
               const getToolStyles = (type: string) => {
@@ -1074,6 +1205,15 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                       preview: 'bg-orange-50 text-orange-700',
                       button: 'from-orange-500 to-amber-500 shadow-orange-500/25',
                     };
+                  case 'lesson':
+                    return {
+                      border: 'border-l-4 border-l-violet-500',
+                      iconBg: 'bg-gradient-to-br from-violet-100 to-purple-100',
+                      iconText: 'text-violet-600',
+                      badge: 'bg-violet-100 text-violet-700',
+                      preview: 'bg-violet-50 text-violet-700',
+                      button: 'from-violet-500 to-purple-500 shadow-violet-500/25',
+                    };
                   default:
                     return {
                       border: 'border-l-4 border-l-blue-500',
@@ -1091,7 +1231,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
               return (
                 <div
                   key={tool.id}
-                  className={`bg-white rounded-2xl border border-stone-200/80 shadow-sm hover:shadow-lg hover:border-stone-300/80 transition-all overflow-hidden ${styles.border}`}
+                  className={`bg-white rounded-2xl border border-stone-200/80 shadow-sm hover:shadow-lg hover:border-stone-300/80 transition-all overflow-visible ${styles.border} ${exportDropdownToolId === tool.id ? 'relative z-20' : ''}`}
                 >
                   <div className="p-5 sm:p-6">
                     <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
@@ -1162,8 +1302,13 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                                 {getTypeLabel(tool.quiz_type)}
                               </span>
                               <span className="px-2 py-0.5 rounded-md text-xs font-medium bg-stone-100 text-stone-600">
-                                {tool.question_count} {tool.quiz_type === 'flashcards' ? 'cards' : tool.quiz_type === 'crossword' ? 'words' : tool.quiz_type === 'crater_blast' ? 'questions' : 'questions'}
+                                {tool.question_count} {tool.quiz_type === 'flashcards' ? 'cards' : tool.quiz_type === 'crossword' ? 'words' : tool.quiz_type === 'crater_blast' ? 'questions' : tool.quiz_type === 'lesson' ? 'slides' : 'questions'}
                               </span>
+                              {tool.quiz_type === 'lesson' && tool.quiz_bank && tool.quiz_bank.length > 0 && (
+                                <span className="px-2 py-0.5 rounded-md text-xs font-medium bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300">
+                                  🎯 Quiz Included
+                                </span>
+                              )}
                               {daysRemaining === null ? (
                                 <span className="px-2 py-0.5 rounded-md text-xs font-medium bg-emerald-50 text-emerald-700">
                                   Permanent
@@ -1183,7 +1328,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                           onClick={() => startStudyTool(tool)}
                           className={`px-4 py-2.5 rounded-xl font-medium text-sm text-white bg-gradient-to-r ${styles.button} hover:opacity-90 transition-all flex items-center gap-2 shadow-md`}
                         >
-                          {tool.quiz_type === 'flashcards' ? 'Study' : tool.quiz_type === 'crossword' || tool.quiz_type === 'crater_blast' ? 'Play' : 'Take Quiz'}
+                          {tool.quiz_type === 'flashcards' ? 'Study' : tool.quiz_type === 'crossword' || tool.quiz_type === 'crater_blast' ? 'Play' : tool.quiz_type === 'lesson' ? 'Review' : 'Take Quiz'}
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                           </svg>
@@ -1201,15 +1346,16 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                               <svg className={`w-4 h-4 transition-transform ${exportDropdownToolId === tool.id ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
                             </button>
                             {exportDropdownToolId === tool.id && (
-                              <div className="absolute left-0 mt-1.5 w-40 py-1 bg-white rounded-xl shadow-lg border border-stone-200 z-50">
+                              <div className="absolute left-0 top-full mt-1.5 w-40 py-1 bg-white dark:bg-stone-800 rounded-xl shadow-xl border border-stone-200 dark:border-stone-600 z-[100]">
                                 <button
                                   onClick={() => {
                                     if (tool.quiz_type === 'flashcards') exportFlashcardsToPDF(tool);
                                     else if (tool.quiz_type === 'crossword') exportCrosswordToPDF(tool);
+                                    else if (tool.quiz_type === 'lesson') exportLessonToPDF(tool);
                                     else exportQuizToPDF(tool);
                                     setExportDropdownToolId(null);
                                   }}
-                                  className="w-full px-4 py-2.5 text-left text-sm text-stone-700 hover:bg-stone-50 flex items-center gap-2 rounded-t-xl"
+                                  className="w-full px-4 py-2.5 text-left text-sm text-stone-700 dark:text-stone-200 hover:bg-stone-50 dark:hover:bg-stone-700 flex items-center gap-2 rounded-t-xl"
                                 >
                                   <svg className="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
                                   PDF
@@ -1218,10 +1364,11 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                                   onClick={() => {
                                     if (tool.quiz_type === 'flashcards') exportFlashcardsToDOCX(tool);
                                     else if (tool.quiz_type === 'crossword') exportCrosswordToDOCX(tool);
+                                    else if (tool.quiz_type === 'lesson') exportLessonToDOCX(tool);
                                     else exportQuizToDOCX(tool);
                                     setExportDropdownToolId(null);
                                   }}
-                                  className="w-full px-4 py-2.5 text-left text-sm text-stone-700 hover:bg-stone-50 flex items-center gap-2 rounded-b-xl"
+                                  className="w-full px-4 py-2.5 text-left text-sm text-stone-700 dark:text-stone-200 hover:bg-stone-50 dark:hover:bg-stone-700 flex items-center gap-2 rounded-b-xl"
                                 >
                                   <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                                   Word

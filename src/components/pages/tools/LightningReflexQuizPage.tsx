@@ -2,6 +2,10 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import Header from '../../common/Header';
 import Footer from '../../common/Footer';
 import { CRATER_BLAST_WORD_BANK } from '../../../data/craterBlastWordBank';
+import { CRATER_BLAST_MENTAL_MATH_BANK } from '../../../data/craterBlastMentalMathBank';
+import { buildCapitalQuestions, buildCapitalAnswers } from '../../../data/craterBlastCapitalCitiesBank';
+import { buildFlagQuestions, buildFlagAnswers } from '../../../data/craterBlastFlagsBank';
+import ScholarMascot from '../../common/ScholarMascot';
 
 /* ────────────────────── Types ────────────────────── */
 
@@ -16,6 +20,9 @@ interface Question {
   prompt: string;
   answers: string[];
   correctIndex: number;
+  correctAnswer?: string;
+  region?: string;
+  gameType?: 'capitals' | 'flags';
 }
 
 interface Crater {
@@ -54,7 +61,7 @@ interface Explosion {
 }
 
 type GameState = 'menu' | 'loading' | 'ready' | 'playing' | 'gameover';
-type InputMode = 'topic' | 'notes' | 'play-for-fun';
+type InputMode = 'topic' | 'notes' | 'play-for-fun' | 'mental-math' | 'capital-cities' | 'flags';
 
 /* ────────────────────── Config ────────────────────── */
 
@@ -97,6 +104,7 @@ function computePoints(reactionMs: number, streak: number) {
 const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflexQuizPageProps) => {
   const userPlan = (user?.plan || user?.subscription_plan || 'free').toLowerCase();
   const canUseStudyTools = user && (userPlan === 'starter' || userPlan === 'premium');
+  const maxWords = canUseStudyTools ? 10000 : 5000;
 
   const [gameState, setGameState] = useState<GameState>('menu');
   const [inputMode, setInputMode] = useState<InputMode>('notes');
@@ -128,6 +136,8 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
   const [showMinimalUI, setShowMinimalUI] = useState(false);
   const [questionResults, setQuestionResults] = useState<{question: Question, isCorrect: boolean, userAnswerIndex: number | null}[]>([]);
   const [showResults, setShowResults] = useState(false);
+
+  const wordCount = inputMode === 'notes' ? inputText.trim().split(/\s+/).filter(Boolean).length : 0;
 
   useEffect(() => {
     const minimal = localStorage.getItem('writescholar_minimal_ui') === 'true';
@@ -244,13 +254,27 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
     const qs = questionsRef.current;
     if (qs.length === 0) return;
     const q = qs[qIdx % qs.length];
+    let answers: string[];
+    let correctIndex: number;
+    if (q.gameType === 'capitals' && q.correctAnswer && q.region) {
+      const { answers: a, correctIndex: ci } = buildCapitalAnswers(q.correctAnswer, q.region as any);
+      answers = a;
+      correctIndex = ci;
+    } else if (q.gameType === 'flags' && q.correctAnswer && q.region) {
+      const { answers: a, correctIndex: ci } = buildFlagAnswers(q.correctAnswer, q.region as any);
+      answers = a;
+      correctIndex = ci;
+    } else {
+      answers = q.answers;
+      correctIndex = q.correctIndex;
+    }
     const lanes = shuffle([0, 1, 2, 3]);
 
-    const newCraters: Crater[] = q.answers.map((ans, i) => ({
+    const newCraters: Crater[] = answers.map((ans, i) => ({
       id: `c-${Date.now()}-${i}`,
       text: ans,
       answerIndex: i,
-      isCorrect: i === q.correctIndex,
+      isCorrect: i === correctIndex,
       xPercent: LANE_CENTERS[lanes[i]] + (Math.random() * 4 - 2),
       fallDurationMs: dur + (Math.random() * 400 - 200),
       status: 'falling' as const,
@@ -303,7 +327,11 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
     roundResolvedRef.current = true;
 
     const currentQ = questionsRef.current[currentQIdxRef.current % questionsRef.current.length];
-    setQuestionResults(prev => [...prev, { question: currentQ, isCorrect: crater.isCorrect, userAnswerIndex: crater.answerIndex }]);
+    const craters = cratersRef.current;
+    const answers = [...craters].sort((a, b) => a.answerIndex - b.answerIndex).map(c => c.text);
+    const correctIndex = craters.findIndex(c => c.isCorrect);
+    const questionForResult: Question = { ...currentQ, answers, correctIndex };
+    setQuestionResults(prev => [...prev, { question: questionForResult, isCorrect: crater.isCorrect, userAnswerIndex: crater.answerIndex }]);
 
     const reactionMs = Date.now() - roundStartRef.current;
     const eid = `exp-${Date.now()}`;
@@ -452,7 +480,11 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
     roundResolvedRef.current = true;
     
     const currentQ = questionsRef.current[currentQIdxRef.current % questionsRef.current.length];
-    setQuestionResults(prev => [...prev, { question: currentQ, isCorrect: false, userAnswerIndex: null }]);
+    const craters = cratersRef.current;
+    const answers = [...craters].sort((a, b) => a.answerIndex - b.answerIndex).map(c => c.text);
+    const correctIndex = craters.findIndex(c => c.isCorrect);
+    const questionForResult: Question = { ...currentQ, answers, correctIndex };
+    setQuestionResults(prev => [...prev, { question: questionForResult, isCorrect: false, userAnswerIndex: null }]);
 
     setCraters(prev => prev.map(c => ({ ...c, status: c.status === 'falling' ? 'missed' as const : c.status })));
     loseLife();
@@ -545,6 +577,72 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
     setTimeout(() => spawnRound(0, BASE_FALL_DURATION), 500);
   };
 
+  const handleStartMentalMath = () => {
+    setError(null);
+    const qs = CRATER_BLAST_MENTAL_MATH_BANK.map((q, i) => ({
+      id: `mm-${i}`,
+      prompt: q.prompt,
+      answers: q.answers,
+      correctIndex: q.correctIndex,
+    }));
+    const shuffled = shuffle(qs);
+    questionsRef.current = shuffled;
+    setQuestions(shuffled);
+    setInputText('Mental Math');
+    setIsPlayForFun(true);
+    setLoadedFromSavedGame(false);
+    resetGameState();
+    setGameState('playing');
+    window.scrollTo(0, 0);
+    setTimeout(() => spawnRound(0, BASE_FALL_DURATION), 500);
+  };
+
+  const handleStartCapitalCities = () => {
+    setError(null);
+    const raw = buildCapitalQuestions();
+    const qs = shuffle(raw).map((q, i) => ({
+      id: `cc-${i}`,
+      prompt: q.prompt,
+      answers: [] as string[],
+      correctIndex: 0,
+      correctAnswer: q.correctAnswer,
+      region: q.region,
+      gameType: 'capitals' as const,
+    }));
+    questionsRef.current = qs;
+    setQuestions(qs);
+    setInputText('Capital Cities');
+    setIsPlayForFun(true);
+    setLoadedFromSavedGame(false);
+    resetGameState();
+    setGameState('playing');
+    window.scrollTo(0, 0);
+    setTimeout(() => spawnRound(0, BASE_FALL_DURATION), 500);
+  };
+
+  const handleStartFlags = () => {
+    setError(null);
+    const raw = buildFlagQuestions();
+    const qs = shuffle(raw).map((q, i) => ({
+      id: `fl-${i}`,
+      prompt: q.prompt,
+      answers: [] as string[],
+      correctIndex: 0,
+      correctAnswer: q.correctAnswer,
+      region: q.region,
+      gameType: 'flags' as const,
+    }));
+    questionsRef.current = qs;
+    setQuestions(qs);
+    setInputText('Flags');
+    setIsPlayForFun(true);
+    setLoadedFromSavedGame(false);
+    resetGameState();
+    setGameState('playing');
+    window.scrollTo(0, 0);
+    setTimeout(() => spawnRound(0, BASE_FALL_DURATION), 500);
+  };
+
   const handleSaveGame = async () => {
     if (!user || questions.length === 0 || isSaving || saveSuccess) return;
     setIsSaving(true);
@@ -587,28 +685,30 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
 
       <div className="relative max-w-2xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
         {/* Hero */}
-        <div className="text-center mb-10 sm:mb-12">
-          <div className="inline-flex items-center justify-center w-20 h-20 sm:w-24 sm:h-24 rounded-3xl mb-6 shadow-xl"
-            style={{
-              background: 'linear-gradient(145deg, #3b82f6 0%, #6366f1 50%, #8b5cf6 100%)',
-              boxShadow: '0 20px 40px -12px rgba(99, 102, 241, 0.35), 0 0 0 1px rgba(255,255,255,0.1) inset',
-            }}>
-            <span className="text-4xl sm:text-5xl drop-shadow-sm">⚡</span>
+        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6 mb-10 sm:mb-12">
+          <div className="flex-shrink-0">
+            <ScholarMascot size={100} animated={false} pose="default" />
           </div>
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-stone-900 tracking-tight mb-3">
-            Crater Blast
-          </h1>
-          <p className="text-stone-600 text-base sm:text-lg max-w-md mx-auto leading-relaxed">
-            AI-generated quiz craters fall from the sky. Aim your cannon and blast the correct answer before it lands.
-          </p>
+          <div className="flex-1 text-center sm:text-left">
+            <h1 className="text-3xl sm:text-4xl font-extrabold text-stone-900 tracking-tight mb-3">
+              Crater Blast
+            </h1>
+            <p className="text-stone-600 text-base sm:text-lg max-w-md leading-relaxed">
+              AI-generated quiz craters fall from the sky. Aim your cannon and blast the correct answer before it lands.
+            </p>
+          </div>
         </div>
 
         {/* Main card */}
         <div className="bg-white rounded-3xl shadow-lg shadow-stone-200/50 border border-stone-200/60 overflow-hidden">
           <div className="p-6 sm:p-8 space-y-6">
-            <div className="flex bg-stone-50 rounded-xl p-1.5 border border-stone-100">
-              {(['notes', 'topic', 'play-for-fun'] as const).map(mode => {
+            <div className="flex flex-wrap gap-2">
+              {(['notes', 'topic', 'play-for-fun', 'mental-math', 'capital-cities', 'flags'] as const).map(mode => {
                 const isLocked = (mode === 'notes' || mode === 'topic') && !canUseStudyTools;
+                const labels: Record<InputMode, string> = {
+                  'topic': '📝 Topic', 'notes': '📄 Study Notes', 'play-for-fun': '🎮 Play for Fun',
+                  'mental-math': '🔢 Mental Math', 'capital-cities': '🏛️ Capitals', 'flags': '🏳️ Flags',
+                };
                 return (
                   <button
                     key={mode}
@@ -619,7 +719,7 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
                       }
                       setInputMode(mode);
                     }}
-                    className={`flex-1 py-3 rounded-lg text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-1 ${
+                    className={`flex-1 min-w-[100px] py-3 rounded-lg text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-1 ${
                       inputMode === mode
                         ? 'bg-white text-stone-900 shadow-md border border-stone-200/80'
                         : isLocked
@@ -629,13 +729,55 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
                     title={isLocked ? (user ? 'Upgrade to Starter or Premium to use Study Notes and Topic' : 'Sign up for Starter or Premium to use Study Notes and Topic') : undefined}
                   >
                     {isLocked && <span className="text-xs">🔒</span>}
-                    {mode === 'topic' ? '📝 Topic' : mode === 'notes' ? '📄 Study Notes' : '🎮 Play for Fun'}
+                    {labels[mode]}
                   </button>
                 );
               })}
             </div>
 
-            {inputMode === 'play-for-fun' ? (
+            {inputMode === 'mental-math' ? (
+              <div>
+                <p className="text-stone-600 text-sm mb-4">Free mental math: add, subtract, multiply, divide. Up to 12×12. No login needed!</p>
+                <button
+                  onClick={handleStartMentalMath}
+                  className="w-full py-4 rounded-xl text-white font-bold text-base shadow-lg active:scale-[0.99] transition-all duration-200"
+                  style={{
+                    background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                    boxShadow: '0 10px 30px -5px rgba(5, 150, 105, 0.4)',
+                  }}
+                >
+                  🔢 Start Mental Math
+                </button>
+              </div>
+            ) : inputMode === 'capital-cities' ? (
+              <div>
+                <p className="text-stone-600 text-sm mb-4">Match countries to their capital cities. No login needed!</p>
+                <button
+                  onClick={handleStartCapitalCities}
+                  className="w-full py-4 rounded-xl text-white font-bold text-base shadow-lg active:scale-[0.99] transition-all duration-200"
+                  style={{
+                    background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
+                    boxShadow: '0 10px 30px -5px rgba(124, 58, 237, 0.4)',
+                  }}
+                >
+                  🏛️ Start Capital Cities
+                </button>
+              </div>
+            ) : inputMode === 'flags' ? (
+              <div>
+                <p className="text-stone-600 text-sm mb-4">Identify countries by their flags. No login needed!</p>
+                <button
+                  onClick={handleStartFlags}
+                  className="w-full py-4 rounded-xl text-white font-bold text-base shadow-lg active:scale-[0.99] transition-all duration-200"
+                  style={{
+                    background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+                    boxShadow: '0 10px 30px -5px rgba(217, 119, 6, 0.4)',
+                  }}
+                >
+                  🏳️ Start Flags
+                </button>
+              </div>
+            ) : inputMode === 'play-for-fun' ? (
               <div>
                 <p className="text-stone-600 text-sm mb-4">Blast craters with trivia questions. No setup needed, just play!</p>
                 <button
@@ -680,6 +822,10 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
                   rows={5}
                   className="w-full px-4 py-3.5 rounded-xl border border-stone-200 bg-stone-50/80 text-stone-800 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-blue-500/25 focus:border-blue-400 focus:bg-white transition-all text-sm resize-none"
                 />
+                <p className={`mt-2 text-xs ${wordCount < 20 ? 'text-amber-600' : wordCount > maxWords ? 'text-red-600' : 'text-stone-400'}`}>
+                  {wordCount.toLocaleString()} words / {maxWords.toLocaleString()} max
+                  {wordCount < 20 && wordCount > 0 && ' (min 20)'}
+                </p>
               </div>
             )}
 
@@ -689,11 +835,11 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
               </div>
             )}
 
-            {inputMode !== 'play-for-fun' && (
+            {inputMode !== 'play-for-fun' && inputMode !== 'mental-math' && inputMode !== 'capital-cities' && inputMode !== 'flags' && (
               <>
                 <button
                   onClick={handleStartGame}
-                  disabled={isLoading || !inputText.trim()}
+                  disabled={isLoading || !inputText.trim() || (inputMode === 'notes' && (wordCount < 20 || wordCount > maxWords))}
                   className="w-full py-4 rounded-xl text-white font-bold text-base shadow-lg active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
                   style={{
                     background: inputText.trim()

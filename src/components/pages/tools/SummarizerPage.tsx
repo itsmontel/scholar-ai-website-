@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import Header from '../../common/Header';
 import Footer from '../../common/Footer';
+import ScholarMascot from '../../common/ScholarMascot';
 import AnalysisAnimation from '../../common/AnalysisAnimation';
 import { trackAction, trackCopy } from '../../../data/achievements';
 import { getResetsInText } from '../../../utils/usageReset';
@@ -243,24 +244,29 @@ const SummarizerPage = ({ onNavigate, user, onLogout }: SummarizerPageProps) => 
       <main className="flex-1 w-full min-w-0 overflow-x-hidden">
         {/* Hero Section */}
         <div className="pt-6 sm:pt-10 pb-4 sm:pb-8 px-3 sm:px-6 lg:px-8">
-          <div className="max-w-5xl mx-auto text-center">
-            <div className="flex items-center justify-center gap-2 sm:gap-3 mb-3 sm:mb-4 flex-wrap">
-              <span className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full bg-gradient-to-r from-emerald-500 to-teal-600 text-white text-xs font-semibold shadow-lg shadow-emerald-500/30">
-                👑 Premium Tool
-              </span>
-              <span className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 text-xs font-semibold">
-                ✨ AI-Powered
-              </span>
+          <div className="max-w-5xl mx-auto">
+            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6">
+              <div className="flex-shrink-0">
+                <ScholarMascot size={100} animated={false} pose="default" />
+              </div>
+              <div className="flex-1 text-center sm:text-left">
+                <div className="flex items-center justify-center sm:justify-start gap-2 sm:gap-3 mb-3 sm:mb-4 flex-wrap">
+                  <span className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full bg-gradient-to-r from-emerald-500 to-teal-600 text-white text-xs font-semibold shadow-lg shadow-emerald-500/30">
+                    👑 Premium Tool
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 text-xs font-semibold">
+                    ✨ AI-Powered
+                  </span>
+                </div>
+                <h1 className="text-2xl sm:text-4xl lg:text-5xl text-stone-800 dark:text-stone-100 mb-3 sm:mb-4 leading-tight" style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 400 }}>
+                  AI <span className="text-emerald-600 dark:text-emerald-400 italic">Summarizer</span>
+                </h1>
+                <p className="text-sm sm:text-lg text-stone-600 max-w-2xl leading-relaxed">
+                  Transform lengthy papers, articles, and documents into concise key points. 
+                  Perfect for literature reviews, research synthesis, and quick comprehension.
+                </p>
+              </div>
             </div>
-            
-            <h1 className="text-2xl sm:text-4xl lg:text-5xl text-stone-800 dark:text-stone-100 mb-3 sm:mb-4 leading-tight" style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 400 }}>
-              AI <span className="text-emerald-600 dark:text-emerald-400 italic">Summarizer</span>
-            </h1>
-            
-            <p className="text-sm sm:text-lg text-stone-600 max-w-2xl mx-auto leading-relaxed px-2">
-              Transform lengthy papers, articles, and documents into concise key points. 
-              Perfect for literature reviews, research synthesis, and quick comprehension.
-            </p>
           </div>
         </div>
 

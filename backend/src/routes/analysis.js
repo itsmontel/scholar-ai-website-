@@ -383,6 +383,324 @@ router.post('/summarize', authenticateToken, async (req, res) => {
   }
 });
 
+// @route   POST /api/analysis/generate-lesson
+// @desc    Generate an interactive lesson from study material
+// @access  Private (all users with word limits)
+router.post('/generate-lesson', authenticateToken, async (req, res) => {
+  try {
+    const { text, style } = req.body;
+    const userId = req.user.id;
+    const userPlan = req.user.subscription_plan || 'free';
+    const planLimits = subscriptionService.PLAN_LIMITS[userPlan] || subscriptionService.PLAN_LIMITS.free;
+
+    if (!text || text.trim().length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Text is required'
+      });
+    }
+
+    const wordCount = text.trim().split(/\s+/).length;
+    const maxWordsPerGen = planLimits.lessonMaxWordsPerGeneration || 5000;
+
+    if (wordCount > maxWordsPerGen) {
+      return res.status(400).json({
+        success: false,
+        message: `Text exceeds maximum of ${maxWordsPerGen.toLocaleString()} words per lesson. ${userPlan === 'free' ? 'Upgrade for up to 10,000 words.' : ''}`
+      });
+    }
+
+    if (wordCount < 50) {
+      return res.status(400).json({
+        success: false,
+        message: 'Text must be at least 50 words to create a lesson'
+      });
+    }
+
+    // Check usage limits
+    const { createClient } = require('@supabase/supabase-js');
+    const supabase = createClient(
+      process.env.SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
+    );
+
+    const startOfMonth = new Date();
+    startOfMonth.setDate(1);
+    startOfMonth.setHours(0, 0, 0, 0);
+
+    // Check word usage
+    const { data: wordUsageData, error: wordUsageError } = await supabase
+      .from('lesson_usage')
+      .select('words_count')
+      .eq('user_id', userId)
+      .gte('created_at', startOfMonth.toISOString());
+
+    const wordsUsedThisMonth = wordUsageError ? 0 : (wordUsageData || []).reduce((sum, row) => sum + (row.words_count || 0), 0);
+    const wordLimit = planLimits.lessonWordsPerMonth;
+
+    // Check generation count
+    const { data: genCountData, error: genCountError } = await supabase
+      .from('lesson_usage')
+      .select('id')
+      .eq('user_id', userId)
+      .gte('created_at', startOfMonth.toISOString());
+
+    const generationsUsed = genCountError ? 0 : (genCountData || []).length;
+    const generationLimit = planLimits.lessonGenerationsPerMonth;
+
+    // Check generation limit first
+    if (generationsUsed >= generationLimit) {
+      return res.status(429).json({
+        success: false,
+        message: `You've used all ${generationLimit} lesson generation${generationLimit === 1 ? '' : 's'} this month. ${userPlan === 'free' ? 'Upgrade for 99+ generations/month.' : 'Limit resets next month.'}`,
+        generationsUsed,
+        generationLimit,
+        generationsRemaining: 0,
+        upgrade: userPlan === 'free'
+      });
+    }
+
+    // Check word limit
+    if (wordsUsedThisMonth + wordCount > wordLimit) {
+      const remaining = Math.max(0, wordLimit - wordsUsedThisMonth);
+      return res.status(429).json({
+        success: false,
+        message: remaining === 0
+          ? `You've used all ${wordLimit.toLocaleString()} lesson words this month. ${userPlan === 'free' ? 'Upgrade for 999,999 words/month.' : 'Limit resets next month.'}`
+          : `This text is ${wordCount} words but you only have ${remaining} words remaining this month.`,
+        wordsUsed: wordsUsedThisMonth,
+        wordLimit,
+        wordsRemaining: remaining,
+        upgrade: userPlan === 'free'
+      });
+    }
+
+    const result = await aiAnalysisService.generateLesson(text, style || 'visual', userPlan);
+
+    // Record usage in lesson_usage table
+    supabase.from('lesson_usage').insert({
+      user_id: userId,
+      words_count: wordCount,
+      lesson_style: style || 'visual'
+    }).then(() => {}).catch(err => console.error('Failed to record lesson usage:', err));
+
+    res.json({
+      success: true,
+      message: 'Lesson generated successfully',
+      data: result
+    });
+
+  } catch (error) {
+    console.error('Generate lesson error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Lesson generation failed. Please try again.',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
+// @route   GET /api/analysis/lesson-usage
+// @desc    Get user's lesson generation usage this month
+// @access  Private
+router.get('/lesson-usage', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const userPlan = req.user.subscription_plan || 'free';
+    const planLimits = subscriptionService.PLAN_LIMITS[userPlan] || subscriptionService.PLAN_LIMITS.free;
+
+    const { createClient } = require('@supabase/supabase-js');
+    const supabase = createClient(
+      process.env.SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
+    );
+
+    const startOfMonth = new Date();
+    startOfMonth.setDate(1);
+    startOfMonth.setHours(0, 0, 0, 0);
+
+    // Get word usage
+    const { data: wordData, error: wordError } = await supabase
+      .from('lesson_usage')
+      .select('words_count')
+      .eq('user_id', userId)
+      .gte('created_at', startOfMonth.toISOString());
+
+    // Get generation count
+    const { data: genData, error: genError } = await supabase
+      .from('lesson_usage')
+      .select('id')
+      .eq('user_id', userId)
+      .gte('created_at', startOfMonth.toISOString());
+
+    const wordsUsed = (wordError || !wordData) ? 0 : (wordData || []).reduce((sum, row) => sum + (row.words_count || 0), 0);
+    const generationsUsed = (genError || !genData) ? 0 : (genData || []).length;
+    const wordLimit = planLimits.lessonWordsPerMonth;
+    const generationLimit = planLimits.lessonGenerationsPerMonth;
+
+    res.json({
+      success: true,
+      data: {
+        wordsUsed,
+        wordLimit,
+        wordsRemaining: Math.max(0, wordLimit - wordsUsed),
+        generationsUsed,
+        generationLimit,
+        generationsRemaining: Math.max(0, generationLimit - generationsUsed),
+        plan: userPlan
+      }
+    });
+  } catch (error) {
+    console.error('Lesson usage error:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch lesson usage' });
+  }
+});
+
+// @route   POST /api/analysis/save-lesson
+// @desc    Save a generated lesson to history
+// @access  Private
+router.post('/save-lesson', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const userPlan = req.user.subscription_plan || req.user.plan || 'free';
+    const { lesson, sourceText } = req.body;
+
+    if (!lesson || !lesson.slides || lesson.slides.length === 0) {
+      return res.status(400).json({ success: false, message: 'Lesson data is required' });
+    }
+
+    const saved = await aiAnalysisService.saveLesson(userId, lesson, sourceText, userPlan);
+
+    if (!saved) {
+      return res.status(500).json({ success: false, message: 'Failed to save lesson' });
+    }
+
+    res.json({ success: true, data: saved });
+  } catch (error) {
+    console.error('Save lesson error:', error);
+    res.status(500).json({ success: false, message: error.message || 'Failed to save lesson' });
+  }
+});
+
+// @route   GET /api/analysis/lesson-history
+// @desc    Get user's saved lessons
+// @access  Private
+router.get('/lesson-history', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const limit = parseInt(req.query.limit) || 20;
+
+    console.log('=== LESSON HISTORY REQUEST ===');
+    console.log('User ID:', userId);
+    console.log('Limit:', limit);
+
+    const lessonHistory = await aiAnalysisService.getLessonHistory(userId, limit);
+
+    console.log(`Found ${lessonHistory.length} lessons`);
+
+    res.json({
+      success: true,
+      data: lessonHistory
+    });
+
+  } catch (error) {
+    console.error('Lesson history error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch lesson history',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
+// @route   GET /api/analysis/lesson/:id
+// @desc    Get a specific lesson by ID
+// @access  Private
+router.get('/lesson/:id', authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+
+    console.log('=== GET LESSON REQUEST ===');
+    console.log('Lesson ID:', id);
+    console.log('User ID:', userId);
+
+    const lesson = await aiAnalysisService.getLessonById(userId, id);
+
+    if (!lesson) {
+      return res.status(404).json({
+        success: false,
+        message: 'Lesson not found or has expired'
+      });
+    }
+
+    res.json({
+      success: true,
+      data: lesson
+    });
+
+  } catch (error) {
+    console.error('Get lesson error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch lesson'
+    });
+  }
+});
+
+// @route   DELETE /api/analysis/lesson/:id
+// @desc    Delete a lesson
+// @access  Private
+router.delete('/lesson/:id', authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+
+    const deleted = await aiAnalysisService.deleteLesson(userId, id);
+
+    if (!deleted) {
+      return res.status(404).json({
+        success: false,
+        message: 'Lesson not found or already deleted'
+      });
+    }
+
+    res.json({ success: true, message: 'Lesson deleted successfully' });
+  } catch (error) {
+    console.error('Delete lesson error:', error);
+    res.status(500).json({ success: false, message: 'Failed to delete lesson' });
+  }
+});
+
+// @route   PUT /api/analysis/lesson/:id/rename
+// @desc    Rename a lesson
+// @access  Private
+router.put('/lesson/:id/rename', authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { title } = req.body;
+    const userId = req.user.id;
+
+    if (!title || title.trim().length === 0) {
+      return res.status(400).json({ success: false, message: 'Title is required' });
+    }
+
+    const renamed = await aiAnalysisService.renameLesson(userId, id, title.trim());
+
+    if (!renamed) {
+      return res.status(404).json({
+        success: false,
+        message: 'Lesson not found or rename failed'
+      });
+    }
+
+    res.json({ success: true, message: 'Lesson renamed successfully' });
+  } catch (error) {
+    console.error('Rename lesson error:', error);
+    res.status(500).json({ success: false, message: 'Failed to rename lesson' });
+  }
+});
+
 // @route   GET /api/analysis/quiz-usage
 // @desc    Get user's quiz word usage this month
 // @access  Private
@@ -1063,7 +1381,7 @@ router.post('/simple-analyze', authenticateToken, async (req, res) => {
  */
 router.post('/analyze', authenticateToken, validateCreateAnalysis, async (req, res) => {
   try {
-    const { documentId, content, analysisType, citationStyle } = req.body;
+    const { documentId, content, analysisType, citationStyle, educationLevel } = req.body;
     const userId = req.user.id;
 
     // Additional validation for citation review
@@ -1170,7 +1488,8 @@ router.post('/analyze', authenticateToken, validateCreateAnalysis, async (req, r
       analysisContent,
       analysisType,
       userId,
-      citationStyle
+      citationStyle,
+      educationLevel || 'college'
     );
 
     // Automatically save the analysis to database
@@ -1366,13 +1685,41 @@ router.get('/quiz-history', authenticateToken, async (req, res) => {
     console.log('User ID:', userId);
     console.log('Limit:', limit);
 
+    // Get quizzes
     const quizHistory = await aiAnalysisService.getQuizHistory(userId, limit);
 
-    console.log(`Found ${quizHistory.length} quizzes`);
+    // Get lessons and transform to match quiz format
+    let lessonHistory = [];
+    try {
+      const lessons = await aiAnalysisService.getLessonHistory(userId, limit);
+      lessonHistory = lessons.map(lesson => ({
+        id: lesson.id,
+        title: lesson.title,
+        quiz_type: 'lesson',
+        difficulty: lesson.lesson_style || 'visual',
+        question_count: lesson.slide_count || 0,
+        questions: lesson.slides,
+        quiz_bank: lesson.quiz_bank || [],
+        quiz_display_count: lesson.quiz_display_count || 6,
+        source_word_count: lesson.source_word_count || 0,
+        created_at: lesson.created_at,
+        expires_at: lesson.expires_at,
+        estimated_read_time: lesson.estimated_read_time
+      }));
+    } catch (lessonError) {
+      console.error('Error fetching lesson history:', lessonError);
+    }
+
+    // Combine and sort by created_at
+    const combinedHistory = [...quizHistory, ...lessonHistory].sort((a, b) => 
+      new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    ).slice(0, limit);
+
+    console.log(`Found ${quizHistory.length} quizzes, ${lessonHistory.length} lessons`);
 
     res.json({
       success: true,
-      data: quizHistory
+      data: combinedHistory
     });
 
   } catch (error) {
@@ -1751,7 +2098,8 @@ router.delete('/citation/:id', authenticateToken, async (req, res) => {
 router.post('/generate-reflex-questions', authenticateToken, async (req, res) => {
   try {
     const { inputType, content } = req.body;
-    const userPlan = req.user.subscription_plan || 'free';
+    const userPlan = req.user.subscription_plan || req.user.plan || 'free';
+    const planLimits = subscriptionService.PLAN_LIMITS[userPlan] || subscriptionService.PLAN_LIMITS.free;
 
     if (!content || content.trim().length === 0) {
       return res.status(400).json({ success: false, message: 'Content is required' });
@@ -1765,8 +2113,18 @@ router.post('/generate-reflex-questions', authenticateToken, async (req, res) =>
       return res.status(400).json({ success: false, message: 'Topic must be at least 2 characters' });
     }
 
-    if (inputType === 'notes' && content.trim().split(/\s+/).length < 20) {
-      return res.status(400).json({ success: false, message: 'Notes must be at least 20 words' });
+    if (inputType === 'notes') {
+      const wordCount = content.trim().split(/\s+/).length;
+      if (wordCount < 20) {
+        return res.status(400).json({ success: false, message: 'Notes must be at least 20 words' });
+      }
+      const maxWords = planLimits.craterBlastMaxWordsPerGeneration || 5000;
+      if (wordCount > maxWords) {
+        return res.status(400).json({
+          success: false,
+          message: `Notes exceed maximum of ${maxWords.toLocaleString()} words. ${userPlan === 'free' ? 'Upgrade for up to 10,000 words.' : ''}`
+        });
+      }
     }
 
     const result = await aiAnalysisService.generateReflexQuestions(inputType, content, userPlan);

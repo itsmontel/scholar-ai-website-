@@ -13,7 +13,7 @@
 - Sitemap submitted with 35+ URLs
 - Structured data (FAQ, Review snippets, SoftwareApplication, Organization) in place
 - 9 blog posts already published
-- 15+ tools across free and AI categories
+- 20+ tools across free and AI categories: humanizer, summarizer, quiz/flashcard/crossword generators, AI essay analysis (with education-level tailoring), citation finder, Lightning Reflex Quiz, Crater Blast game, interactive lessons, GPA calculator, Pomodoro, grammar checker, thesis generator, essay outline, and more
 - Prerendering set up (Puppeteer) for static HTML delivery to crawlers
 
 **Opportunities:**
@@ -52,6 +52,8 @@ Focus on expanding the content on these tool pages. Each should have:
 | `/tools/gpa-calculator` | "GPA calculator" |
 | `/tools/pomodoro-timer` | "Pomodoro timer online" |
 | `/tools/grammar-checker` | "grammar checker for essays" |
+| `/analysis` (AI Scholar Analysis) | "AI essay checker" / "essay feedback tool" / "essay analysis for students" |
+| `/tools/interactive-lesson` | "AI lesson generator" / "study lesson from notes" |
 
 ### Blog
 - Publish **2 new posts** targeting keywords not yet covered (see Month 1 topics below)
@@ -65,6 +67,10 @@ Focus on expanding the content on these tool pages. Each should have:
 2. **"How to Study Effectively: The Complete Guide for College Students"**  
    Target: "how to study effectively", "study tips for college students"  
    Link to: `/tools/quiz-generator`, `/tools/pomodoro-timer`, `/tools/flashcard-generator`
+
+3. **"AI Essay Feedback: Get Analysis Tailored to Your Grade Level"**  
+   Target: "AI essay checker", "essay feedback for students", "essay analysis"  
+   Link to: `/analysis`, `/tools/grammar-checker`
 
 ---
 
@@ -89,6 +95,16 @@ WriteScholar covers 3 topic clusters. Each cluster needs enough blog posts to si
 - "How to Summarize an Academic Article (Step-by-Step)"
 - "APA vs MLA: Which Should You Use?"
 - "How to Find Academic Sources for a Research Paper"
+
+**Cluster 4: AI Essay Analysis & Feedback (NEW)**
+- "AI Essay Checker: Get Feedback Tailored to Your Grade Level"
+- "How to Get Better Essay Feedback (College vs High School vs Middle School)"
+- "Best AI Essay Analysis Tools for Students (2026)"
+
+**Cluster 5: Study Games & Interactive Learning (NEW)**
+- "Crater Blast & Lightning Reflex: Gamified Study Tools That Work"
+- "How to Turn Notes Into Interactive Lessons (AI Study Guide)"
+- "Best Study Games for Exam Prep (2026)"
 
 **Target: 2 posts per week = 8 posts this month**  
 Start with the highest search-volume topics first.
@@ -169,6 +185,7 @@ Focus this month on **comparison posts** — these rank well and convert:
 - "WriteScholar vs Grammarly: What's the Difference?"
 - "Best AI Tools for Students in 2026 (Compared)"
 - "Free vs Paid: Which WriteScholar Plan is Right for You?"
+- "Best AI Essay Checkers for Students (2026)" — highlight education-level tailoring (college, high school, middle school)
 
 ---
 
@@ -234,6 +251,7 @@ By the end of Month 6, aim for **35–40 total blog posts**. With 9 already publ
 | April | How to Find Academic Sources for Research | how to find academic sources |
 | April | APA vs MLA: Quick Comparison | APA vs MLA |
 | April | Best Free Citation Generator Tools (2026) | free citation generator |
+| April | AI Essay Checker: Feedback for Every Grade Level | AI essay checker, essay feedback |
 | May | WriteScholar vs Quillbot | writescholar vs quillbot |
 | May | WriteScholar vs Grammarly | writescholar vs grammarly |
 | May | Best AI Tools for Students in 2026 | best AI tools for students |
@@ -242,6 +260,7 @@ By the end of Month 6, aim for **35–40 total blog posts**. With 9 already publ
 | May | How to Calculate Your GPA | how to calculate GPA |
 | May | Best Essay Checkers for Students | best essay checker |
 | May | How to Avoid AI Detection in Essays | avoid AI detection |
+| May | Study Games That Actually Work: Crater Blast & Lightning Reflex | study games, gamified learning |
 | June | APA In-Text Citations: Complete Guide | APA in-text citations |
 | June | APA Reference List Formatting Guide | APA reference list |
 | June | MLA Format: Complete Student Guide | MLA format guide |
@@ -250,16 +269,19 @@ By the end of Month 6, aim for **35–40 total blog posts**. With 9 already publ
 | June | ChatGPT for Students: Tips and Risks | chatgpt for students |
 | June | How to Paraphrase Without Plagiarising | how to paraphrase |
 | June | Chicago Citation Style: Quick Guide | chicago citation style |
+| June | Turn Notes Into Interactive Lessons: AI Study Guide | AI lesson generator, study from notes |
 | July | How to Study for Finals: 10 Strategies | how to study for finals |
 | July | Best Study Apps for College Students (2026) | best study apps |
 | July | How to Write a Research Paper Fast | how to write a research paper |
 | July | Back to School AI Tools 2026 | back to school AI tools |
 | July | How to Use Flashcards for Exam Prep | flashcard study method |
 | July | Word Count Guide: Essay and Paper Lengths | essay word count |
+| July | Essay Feedback for Middle School & High School: Why It Matters | essay feedback for students, age-appropriate feedback |
 | August | How to Get Better Grades with AI Tools | AI tools for better grades |
 | August | Study Smarter Not Harder: AI Guide | study smarter |
 | August | The Ultimate Guide to Academic Writing | academic writing guide |
 | August | How to Use AI for Homework (Ethically) | AI for homework |
+| August | Best AI Essay Analysis Tools Compared (2026) | AI essay analysis, essay checker |
 
 ---
 
@@ -294,6 +316,9 @@ By the end of Month 6, aim for **35–40 total blog posts**. With 9 already publ
 | `/tools/essay-outline` | essay outline generator | how to outline an essay |
 | `/tools/gpa-calculator` | GPA calculator | college GPA calculator, semester GPA |
 | `/tools/pomodoro-timer` | Pomodoro timer | online study timer, focus timer |
+| `/analysis` | AI essay checker | essay feedback, essay analysis, feedback for students |
+| `/tools/interactive-lesson` | AI lesson generator | study lesson from notes, interactive study guide |
+| `/tools/lightning-reflex` | Lightning Reflex quiz | fast quiz, study game, reflex quiz |
 
 ---
 

@@ -73,6 +73,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
   const [selectedDocument, setSelectedDocument] = useState<string>('');
   const [selectedAnalysisType, setSelectedAnalysisType] = useState<string>('comprehensive');
   const [selectedCitationStyle, setSelectedCitationStyle] = useState<string>('None');
+  const [selectedEducationLevel, setSelectedEducationLevel] = useState<string>('college');
   const [isLoading, setIsLoading] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<string>('');
@@ -769,7 +770,8 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
         documentId: selectedDocument || null,
         contentLength: content.length,
         analysisType: selectedAnalysisType,
-        citationStyle: selectedCitationStyle
+        citationStyle: selectedCitationStyle,
+        educationLevel: selectedEducationLevel
       });
 
       const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/analysis/analyze`, {
@@ -783,6 +785,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
           content: content,
           analysisType: selectedAnalysisType,
           citationStyle: selectedCitationStyle,
+          educationLevel: selectedEducationLevel,
         }),
       });
 
@@ -1314,7 +1317,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                 <div className="absolute -top-1 -right-1 w-6 h-6 bg-violet-500 rounded-full flex items-center justify-center">
                   <span className="text-white text-xs">🔍</span>
                 </div>
-                <ScholarMascot size={70} animated={true} pose="analyzing" />
+                <ScholarMascot size={100} animated={true} pose="analyzing" />
               </div>
               <div>
                 <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-stone-900">
@@ -1477,6 +1480,52 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                 </select>
                 <p className="text-sm text-stone-500 mt-2">
                   Select the citation style used in your document
+                </p>
+              </div>
+
+              {/* Education Level Selection */}
+              <div className="mb-6">
+                <label className="block text-base font-medium text-stone-900 mb-2">
+                  Education Level
+                </label>
+                <div className="space-y-2">
+                  {[
+                    { id: 'college', label: 'College / University', description: 'PhD, undergraduate, postgraduate — rigorous academic standard', icon: '🎓' },
+                    { id: 'sixth_form', label: 'High School / Sixth Form', description: 'Ages 16–18 — detailed but approachable feedback', icon: '📚' },
+                    { id: 'middle_school', label: 'Middle School', description: 'Ages 11–15 — encouraging, friendly, and supportive tone', icon: '📝' },
+                  ].map((level) => (
+                    <div
+                      key={level.id}
+                      className={`p-3.5 border-2 rounded-xl cursor-pointer transition-all ${
+                        selectedEducationLevel === level.id
+                          ? 'border-violet-500 bg-violet-50'
+                          : 'border-stone-200 hover:border-stone-300'
+                      }`}
+                      onClick={() => setSelectedEducationLevel(level.id)}
+                    >
+                      <div className="flex items-center space-x-3">
+                        <span className="text-xl">{level.icon}</span>
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-stone-900 text-sm">{level.label}</h3>
+                          <p className="text-xs text-stone-500 mt-0.5">{level.description}</p>
+                        </div>
+                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                          selectedEducationLevel === level.id
+                            ? 'border-violet-500 bg-violet-500'
+                            : 'border-stone-300'
+                        }`}>
+                          {selectedEducationLevel === level.id && (
+                            <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                            </svg>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <p className="text-sm text-stone-500 mt-2">
+                  Tailors the analysis depth and feedback tone to your level
                 </p>
               </div>
 

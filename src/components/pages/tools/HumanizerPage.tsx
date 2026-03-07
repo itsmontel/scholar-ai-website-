@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import Header from '../../common/Header';
 import Footer from '../../common/Footer';
+import ScholarMascot from '../../common/ScholarMascot';
 import AnalysisAnimation from '../../common/AnalysisAnimation';
 import { trackAction, trackCopy } from '../../../data/achievements';
 import { getResetsInText } from '../../../utils/usageReset';
@@ -230,27 +231,34 @@ const HumanizerPage = ({ onNavigate, user, onLogout }: HumanizerPageProps) => {
 
       {/* Hero Section */}
       <section className="pt-6 sm:pt-16 pb-4 sm:pb-6">
-        <div className="max-w-4xl mx-auto px-3 sm:px-6 text-center">
-          <div className="inline-flex flex-wrap items-center justify-center gap-2 mb-4 sm:mb-5">
-            <span className="inline-flex items-center px-2.5 sm:px-3 py-1 bg-violet-100 text-violet-700 rounded-full text-[10px] sm:text-xs font-semibold uppercase tracking-wide">
-              Free Tool
-            </span>
-            {user && wordLimit >= 999999 ? (
-              <span className="inline-flex items-center px-2.5 sm:px-3 py-1 bg-violet-200/80 text-violet-800 rounded-full text-[10px] sm:text-xs font-semibold">
-                Unlimited words
-              </span>
-            ) : (
-              <span className="inline-flex items-center px-2.5 sm:px-3 py-1 bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300 rounded-full text-[10px] sm:text-xs font-semibold">
-                1,000 words/month free
-              </span>
-            )}
+        <div className="max-w-4xl mx-auto px-3 sm:px-6">
+          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6">
+            <div className="flex-shrink-0">
+              <ScholarMascot size={100} animated={false} pose="default" />
+            </div>
+            <div className="flex-1 text-center sm:text-left">
+              <div className="inline-flex flex-wrap items-center justify-center sm:justify-start gap-2 mb-4 sm:mb-5">
+                <span className="inline-flex items-center px-2.5 sm:px-3 py-1 bg-violet-100 text-violet-700 rounded-full text-[10px] sm:text-xs font-semibold uppercase tracking-wide">
+                  Free Tool
+                </span>
+                {user && wordLimit >= 999999 ? (
+                  <span className="inline-flex items-center px-2.5 sm:px-3 py-1 bg-violet-200/80 text-violet-800 rounded-full text-[10px] sm:text-xs font-semibold">
+                    Unlimited words
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center px-2.5 sm:px-3 py-1 bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300 rounded-full text-[10px] sm:text-xs font-semibold">
+                    1,000 words/month free
+                  </span>
+                )}
+              </div>
+              <h1 className="text-xl sm:text-4xl lg:text-5xl font-extrabold text-stone-800 dark:text-stone-100 mb-3 sm:mb-4 leading-tight px-1">
+                AI Humanizer – Free Tool to Humanize Your AI Text
+              </h1>
+              <p className="text-sm sm:text-lg text-stone-600 dark:text-stone-400 leading-relaxed max-w-2xl">
+                Transform AI-generated content from ChatGPT, GPT-5, Gemini, Claude, LLaMA, and other AI models into clear, natural, human-like text
+              </p>
+            </div>
           </div>
-          <h1 className="text-xl sm:text-4xl lg:text-5xl font-extrabold text-stone-800 dark:text-stone-100 mb-3 sm:mb-4 leading-tight px-1">
-            AI Humanizer – Free Tool to Humanize Your AI Text
-          </h1>
-          <p className="text-sm sm:text-lg text-stone-600 dark:text-stone-400 leading-relaxed max-w-2xl mx-auto px-1">
-            Transform AI-generated content from ChatGPT, GPT-5, Gemini, Claude, LLaMA, and other AI models into clear, natural, human-like text
-          </p>
         </div>
       </section>
 
