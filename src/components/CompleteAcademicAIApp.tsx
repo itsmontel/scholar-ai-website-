@@ -36,6 +36,7 @@ import BlogPage from './pages/BlogPage';
 import BlogPostPage from './pages/BlogPostPage';
 import MoreToolsPage from './pages/MoreToolsPage';
 import BadgesPage from './pages/BadgesPage';
+import ShareFriendsPage from './pages/ShareFriendsPage';
 
 // Import free tool pages
 import WordCounterPage from './pages/tools/WordCounterPage';
@@ -122,6 +123,7 @@ const AcademicAIApp = () => {
     about: { title: 'About WriteScholar — The #1 Free Quizlet & Knowt Alternative', description: 'WriteScholar is the #1 free alternative to Quizlet and Knowt. AI quizzes, flashcards, crosswords, humanizer, summarizer, citations — everything students need in one place.' },
     'why-students-choose': { title: 'WriteScholar vs Grammarly vs QuillBot: Honest Comparison 2026', description: 'See how WriteScholar compares to Grammarly and QuillBot. Built for academic writing, citation finder, AI humanizer, essay analysis, and more.' },
     'study-tools-comparison': { title: 'WriteScholar vs Quizlet vs Knowt — #1 Free Alternative 2026', description: 'Why students are switching from Quizlet and Knowt to WriteScholar. AI quizzes, flashcards, crosswords — plus humanizer, citations, and essay analysis. Compare features side by side.' },
+    'share-friends': { title: 'Study Together — Add Friends & Share Study Tools | WriteScholar', description: 'Add friends with your unique code and share flashcards, quizzes, crosswords and notes instantly. Delivers straight to their device — they just tap accept.' },
     help: { title: 'Help & FAQ: AI Humanizer, Quiz Generator & More | WriteScholar', description: 'Get help with AI Humanizer, Quiz Generator, Paper Summarizer, Citation Finder. Supported citation styles: APA, Harvard, MLA, Chicago.' },
     contact: { title: 'Contact WriteScholar Support | Get Help Fast', description: 'Contact WriteScholar support for help with AI tools for students.' },
     privacy: { title: 'Privacy Policy | WriteScholar', description: 'WriteScholar privacy policy and data handling.' },
@@ -142,7 +144,7 @@ const AcademicAIApp = () => {
     'quiz-generator': { title: 'Free AI Quiz Generator — Best Quizlet Alternative | WriteScholar', description: '#1 free Quizlet alternative for quiz generation. Turn notes, articles, and textbooks into interactive quizzes with AI. Multiple choice, true/false, fill-in-the-blank. No manual entry needed.' },
     'flashcard-generator': { title: 'Free AI Flashcard Generator — Best Quizlet & Knowt Alternative | WriteScholar', description: '#1 free alternative to Quizlet flashcards. AI generates flashcards from your notes, articles, and textbooks instantly. No manual typing. Perfect for exam prep.' },
     'crossword-generator': { title: 'Free AI Crossword Generator — Unique Study Tool | WriteScholar', description: 'Turn your notes into fun crossword puzzles with AI. A study mode you won\'t find on Quizlet or Knowt. Memorize key terms the engaging way. Free to try.' },
-    'quiz-history': { title: 'My Study Tools | WriteScholar', description: 'View and retake your saved quizzes, flashcards, and crosswords. Study materials are stored for 7 days.' },
+    'quiz-history': { title: 'My Study Tools | WriteScholar', description: 'View and retake your saved quizzes, flashcards, and crosswords. Study materials are stored for 30 days.' },
     'gpa-calculator': { title: 'Free GPA Calculator – Calculate Your Grade Point Average | WriteScholar', description: 'Free GPA calculator for college and high school students. Calculate semester or cumulative GPA instantly. Add courses, credits, and grades. No signup required.' },
     'pomodoro-timer': { title: 'Free Pomodoro Timer – Study Timer & Focus Tool | WriteScholar', description: 'Free Pomodoro timer for focused studying. Boost productivity with timed work sessions and breaks. Customizable focus and break intervals. No signup required.' },
     'calculator': { title: 'Free Scientific Calculator – Trig, Log, Powers | WriteScholar', description: 'Free online scientific calculator for students. Trigonometry (sin, cos, tan), logarithms, square root, powers, and more. Works in degrees or radians. No signup required.' },
@@ -854,6 +856,8 @@ const AcademicAIApp = () => {
         return <MoreToolsPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'badges':
         return <BadgesPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
+      case 'share-friends':
+        return <ShareFriendsPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       // Free Tools
       case 'word-counter':
         return <WordCounterPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;

@@ -16,7 +16,7 @@ import { jsPDF } from 'jspdf';
 import { Document, Packer, Paragraph, TextRun, HeadingLevel } from 'docx';
 import { saveAs } from 'file-saver';
 import { trackAction, syncFromAPIData, trackExport, trackCopy } from '../../data/achievements';
-import { getResetsInText, isEndOfMonthUrgency, getEndOfMonthUrgencyText, getDaysUntilReset } from '../../utils/usageReset';
+import { getResetsInText, getExpiringSoonCount, getExpiringSoonUrgencyText, getDaysUntilExpiration } from '../../utils/usageReset';
 
 interface DashboardProps {
   onNavigate: (page: string) => void;
@@ -61,6 +61,8 @@ interface ActivityItem {
   navigateTo: string;
   /** For quiz/flashcard/crossword: tool data to open directly */
   toolData?: any;
+  /** For items that expire (study tools, citations) */
+  expires_at?: string | null;
 }
 
 const activityMeta: Record<ActivityItem['type'], { emoji: string; bg: string; label: string; cardBg: string; border: string; accent: string; shape: 'circle' | 'square' | 'diamond' }> = {
@@ -759,6 +761,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                   date: new Date(tool.created_at),
                   navigateTo,
                   toolData: tool,
+                  expires_at: tool.expires_at ?? null,
                 });
               });
             }
@@ -779,6 +782,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                   subtitle: `${search.citation_style}${citationCount ? ` · ${citationCount} sources` : ''}`,
                   date: new Date(search.created_at),
                   navigateTo: 'citation-history',
+                  expires_at: search.expires_at ?? null,
                 });
               });
             }
@@ -3738,28 +3742,32 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
           </>
         )}
 
-        {/* End of month urgency warning for free users */}
-        {isFreeUser && isEndOfMonthUrgency() && recentActivity.length > 0 && (
-          <div className={`mt-8 sm:mt-10 p-4 rounded-xl border ${getDaysUntilReset() <= 3 ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800' : 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800'}`}>
-            <div className="flex items-start sm:items-center gap-3">
-              <span className="text-xl flex-shrink-0">{getDaysUntilReset() <= 3 ? '⚠️' : '⏰'}</span>
-              <div className="flex-1 min-w-0">
-                <p className={`text-sm font-medium ${getDaysUntilReset() <= 3 ? 'text-red-800 dark:text-red-200' : 'text-amber-800 dark:text-amber-200'}`}>
-                  {getEndOfMonthUrgencyText()}
-                </p>
+        {/* Urgency warning when study tools or citations are expiring soon (≤7 days) */}
+        {isFreeUser && (() => {
+          const expiringSoonCount = getExpiringSoonCount(recentActivity, 7);
+          const urgencyText = getExpiringSoonUrgencyText(expiringSoonCount);
+          return expiringSoonCount > 0 && urgencyText && (
+            <div className={`mt-8 sm:mt-10 p-4 rounded-xl border ${expiringSoonCount <= 2 ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800' : 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800'}`}>
+              <div className="flex items-start sm:items-center gap-3">
+                <span className="text-xl flex-shrink-0">{expiringSoonCount <= 2 ? '⚠️' : '⏰'}</span>
+                <div className="flex-1 min-w-0">
+                  <p className={`text-sm font-medium ${expiringSoonCount <= 2 ? 'text-red-800 dark:text-red-200' : 'text-amber-800 dark:text-amber-200'}`}>
+                    {urgencyText}
+                  </p>
+                </div>
+                <button
+                  onClick={() => onNavigate('pricing')}
+                  className={`flex-shrink-0 px-4 py-1.5 text-xs font-semibold rounded-lg transition-colors ${expiringSoonCount <= 2 ? 'bg-red-600 hover:bg-red-700 text-white' : 'bg-amber-600 hover:bg-amber-700 text-white'}`}
+                >
+                  Upgrade Now
+                </button>
               </div>
-              <button
-                onClick={() => onNavigate('pricing')}
-                className={`flex-shrink-0 px-4 py-1.5 text-xs font-semibold rounded-lg transition-colors ${getDaysUntilReset() <= 3 ? 'bg-red-600 hover:bg-red-700 text-white' : 'bg-amber-600 hover:bg-amber-700 text-white'}`}
-              >
-                Upgrade Now
-              </button>
             </div>
-          </div>
-        )}
+          );
+        })()}
 
         {/* Recent Activity - Mobile optimized with horizontal scroll */}
-        <div className={isFreeUser && isEndOfMonthUrgency() && recentActivity.length > 0 ? 'mt-4' : 'mt-8 sm:mt-10'}>
+        <div className={isFreeUser && getExpiringSoonCount(recentActivity, 7) > 0 ? 'mt-4' : 'mt-8 sm:mt-10'}>
           <div className="flex items-center justify-between mb-3 sm:mb-4">
             <h2 className="text-base sm:text-lg font-bold text-stone-800 dark:text-stone-100 flex items-center gap-2">
               <span className="text-lg sm:text-xl">📂</span> Recents
@@ -3832,7 +3840,18 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                     </div>
                     <h3 className="font-semibold text-stone-800 dark:text-stone-100 text-xs sm:text-sm truncate sm:group-hover:opacity-90 transition-opacity mb-0.5 sm:mb-1 relative z-10">{activity.title}</h3>
                     <p className="text-[10px] sm:text-xs text-stone-500 dark:text-stone-400 truncate relative z-10">{activity.subtitle}</p>
-                    <span className="text-[9px] sm:text-[10px] font-medium text-stone-400 dark:text-stone-500 mt-1.5 sm:mt-2 block relative z-10">{relativeTime(activity.date)}</span>
+                    <div className="flex items-center gap-2 mt-1.5 sm:mt-2 relative z-10">
+                      <span className="text-[9px] sm:text-[10px] font-medium text-stone-400 dark:text-stone-500">{relativeTime(activity.date)}</span>
+                      {isFreeUser && activity.expires_at && (() => {
+                        const days = getDaysUntilExpiration(activity.expires_at);
+                        if (days === null || days > 7) return null;
+                        return (
+                          <span className={`text-[9px] sm:text-[10px] font-semibold px-1.5 py-0.5 rounded ${days <= 2 ? 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300' : 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300'}`}>
+                            {days <= 0 ? 'Expires today' : `${days}d left`}
+                          </span>
+                        );
+                      })()}
+                    </div>
                   </div>
                 );
               })}

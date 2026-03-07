@@ -20,29 +20,52 @@ export function getResetsInText(): string {
 }
 
 /**
- * Free user data (citations, quizzes, flashcards, crosswords) expires on the 1st of each month.
- * This checks if we're in the last 7 days of the month to show urgency warnings.
+ * Get days until expiration. Returns null if no expiration (permanent).
  */
-export function isEndOfMonthUrgency(): boolean {
-  return getDaysUntilReset() <= 7;
+export function getDaysUntilExpiration(expiresAt: string | null): number | null {
+  if (!expiresAt) return null;
+  const now = new Date();
+  const expires = new Date(expiresAt);
+  const diffTime = expires.getTime() - now.getTime();
+  return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 }
 
 /**
- * Returns urgency warning text for free users near end of month.
- * Returns null if not in urgency period.
+ * Count items expiring within the given number of days (e.g. 7 = "expiring soon").
+ */
+export function getExpiringSoonCount<T extends { expires_at?: string | null }>(
+  items: T[],
+  thresholdDays: number = 7
+): number {
+  return items.filter((item) => {
+    const days = getDaysUntilExpiration(item.expires_at ?? null);
+    return days !== null && days >= 0 && days <= thresholdDays;
+  }).length;
+}
+
+/**
+ * Returns urgency text when items are expiring soon. Use with getExpiringSoonCount.
+ */
+export function getExpiringSoonUrgencyText(count: number): string | null {
+  if (count <= 0) return null;
+  if (count === 1) {
+    return '1 item will expire in the next few days. Upgrade to keep it forever!';
+  }
+  return `${count} items will expire in the next few days. Upgrade to keep them forever!`;
+}
+
+/**
+ * Free user data (citations, quizzes, flashcards, crosswords) expires 30 days after creation.
+ * Returns true when we should show the expiration warning (when items are expiring soon).
+ */
+export function isEndOfMonthUrgency(): boolean {
+  return true;
+}
+
+/**
+ * Returns generic urgency warning text for free users about 30-day expiration.
+ * For dynamic count-based messaging, use getExpiringSoonUrgencyText(getExpiringSoonCount(items)).
  */
 export function getEndOfMonthUrgencyText(): string | null {
-  const days = getDaysUntilReset();
-  if (days > 7) return null;
-  
-  if (days <= 0) {
-    return 'Your study tools and citations will be cleared today. Upgrade to keep them forever!';
-  }
-  if (days === 1) {
-    return 'Your study tools and citations will be cleared tomorrow. Upgrade to keep them forever!';
-  }
-  if (days <= 3) {
-    return `Only ${days} days left! Your study tools and citations will be cleared on the 1st. Upgrade to keep them forever!`;
-  }
-  return `${days} days until your study tools and citations are cleared. Upgrade to keep them forever!`;
+  return 'Free items expire 30 days after creation. Upgrade to keep them forever!';
 }

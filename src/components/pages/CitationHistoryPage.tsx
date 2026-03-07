@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import Header from '../common/Header';
 import Footer from '../common/Footer';
-import { isEndOfMonthUrgency, getEndOfMonthUrgencyText, getDaysUntilReset } from '../../utils/usageReset';
+import { getExpiringSoonCount, getExpiringSoonUrgencyText, getDaysUntilExpiration } from '../../utils/usageReset';
 
 interface CitationSearch {
   id: string;
@@ -17,6 +17,7 @@ interface CitationSearch {
     yearRange?: string;
   };
   created_at: string;
+  expires_at?: string | null;
 }
 
 interface CitationHistoryProps {
@@ -242,25 +243,29 @@ const CitationHistoryPage = ({ onNavigate, user, onLogout }: CitationHistoryProp
           </button>
         </div>
 
-        {/* End of month urgency warning for free users */}
-        {!isPaidUser && isEndOfMonthUrgency() && searches.length > 0 && (
-          <div className={`mb-6 p-4 rounded-xl border ${getDaysUntilReset() <= 3 ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800' : 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800'}`}>
-            <div className="flex items-start sm:items-center gap-3">
-              <span className="text-xl flex-shrink-0">{getDaysUntilReset() <= 3 ? '⚠️' : '⏰'}</span>
-              <div className="flex-1 min-w-0">
-                <p className={`text-sm font-medium ${getDaysUntilReset() <= 3 ? 'text-red-800 dark:text-red-200' : 'text-amber-800 dark:text-amber-200'}`}>
-                  {getEndOfMonthUrgencyText()}
-                </p>
+        {/* Urgency warning when citations are expiring soon (≤7 days) */}
+        {!isPaidUser && (() => {
+          const expiringSoonCount = getExpiringSoonCount(searches, 7);
+          const urgencyText = getExpiringSoonUrgencyText(expiringSoonCount);
+          return expiringSoonCount > 0 && urgencyText && (
+            <div className={`mb-6 p-4 rounded-xl border ${expiringSoonCount <= 2 ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800' : 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800'}`}>
+              <div className="flex items-start sm:items-center gap-3">
+                <span className="text-xl flex-shrink-0">{expiringSoonCount <= 2 ? '⚠️' : '⏰'}</span>
+                <div className="flex-1 min-w-0">
+                  <p className={`text-sm font-medium ${expiringSoonCount <= 2 ? 'text-red-800 dark:text-red-200' : 'text-amber-800 dark:text-amber-200'}`}>
+                    {urgencyText}
+                  </p>
+                </div>
+                <button
+                  onClick={() => onNavigate('pricing')}
+                  className={`flex-shrink-0 px-4 py-1.5 text-xs font-semibold rounded-lg transition-colors ${expiringSoonCount <= 2 ? 'bg-red-600 hover:bg-red-700 text-white' : 'bg-amber-600 hover:bg-amber-700 text-white'}`}
+                >
+                  Upgrade Now
+                </button>
               </div>
-              <button
-                onClick={() => onNavigate('pricing')}
-                className={`flex-shrink-0 px-4 py-1.5 text-xs font-semibold rounded-lg transition-colors ${getDaysUntilReset() <= 3 ? 'bg-red-600 hover:bg-red-700 text-white' : 'bg-amber-600 hover:bg-amber-700 text-white'}`}
-              >
-                Upgrade Now
-              </button>
             </div>
-          </div>
-        )}
+          );
+        })()}
 
         {/* Time Period Filter + Results count */}
         {searches.length > 0 && (
@@ -320,7 +325,7 @@ const CitationHistoryPage = ({ onNavigate, user, onLogout }: CitationHistoryProp
               <div className="ml-4">
                 <h3 className="font-semibold text-violet-800 mb-1">Free Plan Storage</h3>
                 <p className="text-sm text-violet-700">
-                  Citation searches are cleared on the 1st of each month. Upgrade to keep your citations forever!
+                  Citation searches expire 30 days after creation. Upgrade to keep your citations forever!
                 </p>
               </div>
             </div>
@@ -398,6 +403,15 @@ const CitationHistoryPage = ({ onNavigate, user, onLogout }: CitationHistoryProp
                       <span className="px-2.5 py-1 bg-stone-100 text-stone-700 rounded-lg text-xs font-medium">
                         {search.search_results?.citations?.length || 0} Citations
                       </span>
+                      {!isPaidUser && (() => {
+                        const daysRemaining = getDaysUntilExpiration(search.expires_at ?? null);
+                        if (daysRemaining === null) return null;
+                        return (
+                          <span className={`px-2.5 py-1 rounded-lg text-xs font-medium ${daysRemaining <= 2 ? 'bg-red-50 text-red-700' : 'bg-amber-50 text-amber-700'}`}>
+                            {daysRemaining <= 0 ? 'Expires today' : `${daysRemaining}d left`}
+                          </span>
+                        );
+                      })()}
                     </div>
                   </div>
                   

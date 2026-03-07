@@ -140,7 +140,7 @@ const PrivacyPolicyPage: React.FC<PrivacyPolicyPageProps> = ({ onNavigate, user,
                 <ul className="list-disc list-inside space-y-2 ml-4">
                   <li><strong>Account data:</strong> Retained while your account is active. Deleted upon account deletion.</li>
                   <li><strong>Uploaded documents:</strong> Retained until you delete them or your account.</li>
-                  <li><strong>Quiz, flashcard, and crossword history:</strong> Study materials are automatically deleted after 7 days.</li>
+                  <li><strong>Quiz, flashcard, and crossword history:</strong> Study materials are automatically deleted after 30 days.</li>
                   <li><strong>Citation history and analysis history:</strong> Retained until deleted by you or as part of periodic cleanup.</li>
                   <li><strong>Monthly usage records:</strong> Retained for billing verification and limit enforcement.</li>
                   <li><strong>Email subscription records:</strong> Retained to honour unsubscribe requests; unsubscribing prevents you from being re-added.</li>

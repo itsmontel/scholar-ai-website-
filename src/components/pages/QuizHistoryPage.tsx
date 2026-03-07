@@ -4,7 +4,7 @@ import Footer from '../common/Footer';
 import { jsPDF } from 'jspdf';
 import { Document, Packer, Paragraph, TextRun, HeadingLevel } from 'docx';
 import { saveAs } from 'file-saver';
-import { isEndOfMonthUrgency, getEndOfMonthUrgencyText, getDaysUntilReset } from '../../utils/usageReset';
+import { getExpiringSoonCount, getExpiringSoonUrgencyText } from '../../utils/usageReset';
 
 interface QuizQuestion {
   id: number;
@@ -845,25 +845,29 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
             </div>
           </div>
 
-          {/* End of month urgency warning for free users */}
-          {!isPaidUser && isEndOfMonthUrgency() && studyTools.length > 0 && (
-            <div className={`mb-6 p-4 rounded-xl border ${getDaysUntilReset() <= 3 ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800' : 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800'}`}>
-              <div className="flex items-start sm:items-center gap-3">
-                <span className="text-xl flex-shrink-0">{getDaysUntilReset() <= 3 ? '⚠️' : '⏰'}</span>
-                <div className="flex-1 min-w-0">
-                  <p className={`text-sm font-medium ${getDaysUntilReset() <= 3 ? 'text-red-800 dark:text-red-200' : 'text-amber-800 dark:text-amber-200'}`}>
-                    {getEndOfMonthUrgencyText()}
-                  </p>
+          {/* Urgency warning when items are expiring soon (≤7 days) */}
+          {!isPaidUser && (() => {
+            const expiringSoonCount = getExpiringSoonCount(studyTools, 7);
+            const urgencyText = getExpiringSoonUrgencyText(expiringSoonCount);
+            return expiringSoonCount > 0 && urgencyText && (
+              <div className={`mb-6 p-4 rounded-xl border ${expiringSoonCount <= 2 ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800' : 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800'}`}>
+                <div className="flex items-start sm:items-center gap-3">
+                  <span className="text-xl flex-shrink-0">{expiringSoonCount <= 2 ? '⚠️' : '⏰'}</span>
+                  <div className="flex-1 min-w-0">
+                    <p className={`text-sm font-medium ${expiringSoonCount <= 2 ? 'text-red-800 dark:text-red-200' : 'text-amber-800 dark:text-amber-200'}`}>
+                      {urgencyText}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => onNavigate('pricing')}
+                    className={`flex-shrink-0 px-4 py-1.5 text-xs font-semibold rounded-lg transition-colors ${expiringSoonCount <= 2 ? 'bg-red-600 hover:bg-red-700 text-white' : 'bg-amber-600 hover:bg-amber-700 text-white'}`}
+                  >
+                    Upgrade Now
+                  </button>
                 </div>
-                <button
-                  onClick={() => onNavigate('pricing')}
-                  className={`flex-shrink-0 px-4 py-1.5 text-xs font-semibold rounded-lg transition-colors ${getDaysUntilReset() <= 3 ? 'bg-red-600 hover:bg-red-700 text-white' : 'bg-amber-600 hover:bg-amber-700 text-white'}`}
-                >
-                  Upgrade Now
-                </button>
               </div>
-            </div>
-          )}
+            );
+          })()}
           <button
             onClick={startNewStudyTool}
             className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold text-white bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 transition-all duration-200 hover:shadow-lg hover:shadow-violet-500/25 hover:-translate-y-0.5 shrink-0"
@@ -988,7 +992,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                 </svg>
               </div>
               <p className="text-sm text-amber-800 flex-1">
-                Free plan: tools expire in 7 days.{' '}
+                Free plan: tools expire in 30 days.{' '}
                 <button onClick={() => onNavigate('pricing')} className="font-semibold underline underline-offset-2 hover:text-amber-900">
                   Upgrade
                 </button>{' '}

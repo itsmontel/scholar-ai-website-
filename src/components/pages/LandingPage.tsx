@@ -5,6 +5,7 @@ import PromoBanner from '../common/PromoBanner';
 import { useTheme } from '../../contexts/ThemeContext';
 import AnalysisAnimation from '../common/AnalysisAnimation';
 import ScholarMascot from '../common/ScholarMascot';
+import DualMascot from '../common/DualMascot';
 // customersImg placeholder - section is hidden
 const customersImg = '';
 
@@ -169,6 +170,14 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
     {
       question: "What's the difference between Free, Starter, and Premium?",
       answer: "Free includes 3 documents, 3 essay analyses, 3 study tool generations (quiz/flashcards/crossword), and 1,000 Humanizer/Summarizer words per month. Starter unlocks unlimited study tools, 999 essay analyses, 999,999 Humanizer/Summarizer words, all citation styles, and PDF/Word export. Premium adds our top-tier premium AI model, all quiz types and difficulty levels, all summarizer styles and lengths, advanced essay analysis, and priority support."
+    },
+    {
+      question: "How do I add friends and share my study materials?",
+      answer: "Every account gets a unique friend code (e.g. WS-BUDDY-4872). Share your code with friends so they can add you. Once connected, you can share any flashcards, quizzes, crosswords, or notes with one tap — it delivers straight to their WriteScholar. They just tap Accept and it's in their library. Core sharing is free."
+    },
+    {
+      question: "What can I share with my friends?",
+      answer: "You can share flashcards, quizzes, crossword puzzles, and notes. Anything you create in WriteScholar can be sent to a friend instantly. They receive a notification, tap Accept, and it appears in their library — no links to copy, no files to forward. Perfect for study groups and exam prep."
     }
   ];
 
@@ -908,6 +917,109 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
             </button>
             <p className="mt-4 text-stone-500 dark:text-stone-400 text-sm">Free plan includes 3 generations per month</p>
           </div>
+        </div>
+      </section>
+
+      {/* Study Better Together — from Share Friends page */}
+      <section className="relative py-12 sm:py-20 overflow-hidden bg-white dark:bg-stone-900">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_60%_at_50%_50%,rgba(99,102,241,0.07),transparent)] dark:bg-[radial-gradient(ellipse_70%_60%_at_50%_50%,rgba(139,92,246,0.06),transparent)]" />
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid lg:grid-cols-2 gap-8 items-center">
+            <div className="text-center lg:text-left order-2 lg:order-1 pb-8 lg:pb-0">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 rounded-full text-sm font-semibold mb-5">
+                <span>👫</span>
+                <span>Social Study, Levelled Up</span>
+              </div>
+              <h2 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-stone-900 dark:text-stone-50 leading-tight mb-5">
+                Study Better,{' '}
+                <span className="bg-gradient-to-r from-indigo-500 via-violet-500 to-purple-600 dark:from-indigo-400 dark:via-violet-400 dark:to-purple-400 bg-clip-text text-transparent">
+                  Together
+                </span>
+              </h2>
+              <p className="text-base sm:text-lg text-stone-600 dark:text-stone-300 leading-relaxed mb-8 max-w-lg mx-auto lg:mx-0">
+                Add friends with your unique code and share flashcards, quizzes, crosswords & notes in one tap. It delivers straight to their device — all they have to do is accept.
+              </p>
+              <div className="flex flex-wrap justify-center lg:justify-start gap-4 sm:gap-6 mb-8">
+                {[
+                  { value: '1 tap', label: 'to share anything' },
+                  { value: 'Instant', label: 'delivery to friends' },
+                  { value: 'Free', label: 'forever for core sharing' },
+                ].map((s) => (
+                  <div key={s.label} className="text-center">
+                    <div className="text-xl sm:text-2xl font-extrabold bg-gradient-to-r from-indigo-600 to-violet-600 dark:from-indigo-400 dark:to-violet-400 bg-clip-text text-transparent">{s.value}</div>
+                    <div className="text-xs sm:text-sm text-stone-500 dark:text-stone-400 font-medium">{s.label}</div>
+                  </div>
+                ))}
+              </div>
+              <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
+                <button
+                  onClick={() => onNavigate('signup')}
+                  className="px-7 py-3.5 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 text-white font-bold rounded-2xl shadow-lg shadow-indigo-500/30 hover:shadow-xl hover:shadow-indigo-500/40 transition-all duration-200 hover:-translate-y-0.5 text-base flex items-center justify-center gap-2"
+                >
+                  <span>Start sharing free</span>
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                </button>
+                <button
+                  onClick={() => onNavigate('features')}
+                  className="px-7 py-3.5 bg-white dark:bg-stone-800 text-stone-700 dark:text-stone-200 font-semibold rounded-2xl border border-stone-200 dark:border-stone-700 hover:border-violet-300 dark:hover:border-violet-700 hover:shadow-md transition-all duration-200 hover:-translate-y-0.5 text-base"
+                >
+                  See all features
+                </button>
+              </div>
+            </div>
+            <div className="relative flex items-center justify-center order-1 lg:order-2">
+              <div className="absolute inset-0 bg-gradient-to-r from-indigo-400/10 to-violet-400/10 rounded-3xl blur-3xl" />
+              <DualMascot size={380} />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* One Code. Endless Friends. — from Share Friends page */}
+      <section className="relative py-16 sm:py-24 bg-gradient-to-b from-white via-indigo-50/40 to-violet-50/30 dark:from-stone-900 dark:via-stone-900 dark:to-stone-900 overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_40%_at_50%_50%,rgba(99,102,241,0.08),transparent)] dark:bg-[radial-gradient(ellipse_60%_40%_at_50%_50%,rgba(139,92,246,0.06),transparent)]" />
+        <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <span className="inline-block px-4 py-1.5 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 rounded-full text-sm font-semibold mb-4">
+            Your Identity on WriteScholar
+          </span>
+          <h2 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-stone-800 dark:text-stone-100 mb-4">
+            One Code.{' '}
+            <span className="bg-gradient-to-r from-indigo-500 to-violet-600 dark:from-indigo-400 dark:to-violet-400 bg-clip-text text-transparent">
+              Endless Friends.
+            </span>
+          </h2>
+          <p className="text-base sm:text-lg text-stone-600 dark:text-stone-400 max-w-2xl mx-auto mb-10">
+            Every account gets a permanent, human-readable friend code. No emails, no usernames to remember. Just drop the code, accept the friend request and you're connected.
+          </p>
+          <div className="relative inline-block group mb-10">
+            <div className="absolute -inset-1 bg-gradient-to-r from-indigo-400 to-violet-500 rounded-3xl blur-xl opacity-30 group-hover:opacity-50 transition-opacity duration-500" />
+            <div className="relative bg-white dark:bg-stone-800 rounded-3xl px-8 sm:px-14 py-8 shadow-2xl border border-indigo-200/60 dark:border-indigo-800/40">
+              <p className="text-xs sm:text-sm font-semibold text-stone-400 dark:text-stone-500 uppercase tracking-widest mb-3">Your unique friend code</p>
+              <div className="flex items-center justify-center gap-3 sm:gap-5 flex-wrap">
+                <span className="text-3xl sm:text-5xl font-black tracking-widest bg-gradient-to-r from-indigo-600 to-violet-600 dark:from-indigo-400 dark:to-violet-400 bg-clip-text text-transparent font-mono">
+                  WS-BUDDY-4872
+                </span>
+                <button
+                  type="button"
+                  className="flex items-center gap-2 px-4 py-2 bg-indigo-100 dark:bg-indigo-900/50 hover:bg-indigo-200 dark:hover:bg-indigo-800/60 text-indigo-700 dark:text-indigo-300 font-semibold rounded-xl text-sm transition-colors"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                  Copy code
+                </button>
+              </div>
+              <div className="flex flex-wrap items-center justify-center gap-3 mt-5">
+                {['Easy to remember', 'Shareable anywhere', 'Yours forever'].map((tag) => (
+                  <span key={tag} className="flex items-center gap-1.5 text-xs sm:text-sm font-medium text-stone-500 dark:text-stone-400">
+                    <svg className="w-4 h-4 text-indigo-500 dark:text-indigo-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+          <p className="text-sm text-stone-400 dark:text-stone-500">This is a demo code — sign up to get your own unique code instantly.</p>
         </div>
       </section>
 

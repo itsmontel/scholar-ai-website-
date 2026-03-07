@@ -2,13 +2,13 @@ const OpenAI = require('openai');
 const subscriptionService = require('./subscriptionService');
 
 /**
- * Get the first day of next month at midnight UTC
- * Used for free user data expiration - all free user data expires on the 1st of each month
+ * Get 30 days from now (used for free user data expiration)
+ * Free user data (citations, quizzes, flashcards, crosswords) expires 30 days after creation
  */
-function getFirstOfNextMonth() {
+function getExpiresAt30Days() {
   const now = new Date();
-  const nextMonth = new Date(Date.UTC(now.getFullYear(), now.getMonth() + 1, 1, 0, 0, 0, 0));
-  return nextMonth.toISOString();
+  const expiresAt = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+  return expiresAt.toISOString();
 }
 
 class AIAnalysisService {
@@ -2414,9 +2414,9 @@ IMPORTANT REQUIREMENTS:
         process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
       );
 
-      // Free users: expires on 1st of next month; Paid users (starter/premium): no expiration (null)
+      // Free users: expires 30 days after creation; Paid users (starter/premium): no expiration (null)
       const isPaidUser = userPlan === 'starter' || userPlan === 'premium';
-      const expiresAt = isPaidUser ? null : getFirstOfNextMonth();
+      const expiresAt = isPaidUser ? null : getExpiresAt30Days();
 
       // Note: yearRange is already included in searchResults.yearRange
       // so we don't need a separate column - it's stored in the JSONB field
@@ -2465,7 +2465,7 @@ IMPORTANT REQUIREMENTS:
 
       // Get citations that either:
       // 1. Have no expiration (expires_at is null) - paid users
-      // 2. Haven't expired yet (expires_at > now) - free users within 7 days
+      // 2. Haven't expired yet (expires_at > now) - free users within 30 days
       const { data, error } = await supabase
         .from('citation_searches')
         .select('*')
@@ -2535,9 +2535,9 @@ IMPORTANT REQUIREMENTS:
         process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
       );
 
-      // Free users: expires on 1st of next month; Paid users (starter/premium): no expiration (null)
+      // Free users: expires 30 days after creation; Paid users (starter/premium): no expiration (null)
       const isPaidUser = userPlan === 'starter' || userPlan === 'premium';
-      const expiresAt = isPaidUser ? null : getFirstOfNextMonth();
+      const expiresAt = isPaidUser ? null : getExpiresAt30Days();
 
       const quizData = {
         user_id: userId,
@@ -2583,9 +2583,9 @@ IMPORTANT REQUIREMENTS:
         process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
       );
 
-      // Free users: expires on 1st of next month; Paid users (starter/premium): no expiration (null)
+      // Free users: expires 30 days after creation; Paid users (starter/premium): no expiration (null)
       const isPaidUser = userPlan === 'starter' || userPlan === 'premium';
-      const expiresAt = isPaidUser ? null : getFirstOfNextMonth();
+      const expiresAt = isPaidUser ? null : getExpiresAt30Days();
 
       const flashcardData = {
         user_id: userId,
@@ -2631,9 +2631,9 @@ IMPORTANT REQUIREMENTS:
         process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
       );
 
-      // Free users: expires on 1st of next month; Paid users (starter/premium): no expiration (null)
+      // Free users: expires 30 days after creation; Paid users (starter/premium): no expiration (null)
       const isPaidUser = userPlan === 'starter' || userPlan === 'premium';
-      const expiresAt = isPaidUser ? null : getFirstOfNextMonth();
+      const expiresAt = isPaidUser ? null : getExpiresAt30Days();
 
       // Build clues object from placedWords for display in history
       const cluesFromPlacedWords = {
@@ -2695,7 +2695,7 @@ IMPORTANT REQUIREMENTS:
       );
 
       const isPaidUser = userPlan === 'starter' || userPlan === 'premium';
-      const expiresAt = isPaidUser ? null : getFirstOfNextMonth();
+      const expiresAt = isPaidUser ? null : getExpiresAt30Days();
 
       const title = (payload.title || payload.sourceText || 'Crater Blast Game').toString().slice(0, 200);
       const wordCount = (payload.sourceText || '').toString().trim().split(/\s+/).length;
@@ -2865,7 +2865,7 @@ IMPORTANT REQUIREMENTS:
   }
 
   /**
-   * Clean up expired quizzes (7+ days old)
+   * Clean up expired quizzes (where expires_at is in the past; free users: 30 days after creation)
    * This should be called periodically (e.g., via a cron job)
    */
   async cleanupExpiredQuizzes() {

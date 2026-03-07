@@ -1,4 +1,5 @@
 const { createClient } = require('@supabase/supabase-js');
+const subscriptionService = require('./subscriptionService');
 
 class FriendsService {
   constructor() {
@@ -662,6 +663,14 @@ class FriendsService {
     }
 
     const originalQuiz = request.quiz;
+    const userPlan = await subscriptionService.getUserPlan(userId);
+    const isPaidUser = userPlan === 'starter' || userPlan === 'premium';
+    const expiresAt = isPaidUser ? null : (() => {
+      const now = new Date();
+      const exp = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+      return exp.toISOString();
+    })();
+
     const { data: newQuiz, error: copyError } = await this.supabase
       .from('quizzes')
       .insert({
@@ -672,7 +681,7 @@ class FriendsService {
         question_count: originalQuiz.question_count,
         questions: originalQuiz.questions,
         source_word_count: originalQuiz.source_word_count,
-        expires_at: null
+        expires_at: expiresAt
       })
       .select()
       .single();

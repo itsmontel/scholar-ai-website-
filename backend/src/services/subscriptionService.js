@@ -589,7 +589,7 @@ const cleanupOldCitations = async () => {
 
     // Delete citations that have expired (expires_at is set and is in the past)
     // Citations with expires_at = null (paid users) are never deleted
-    // Free users have 7-day expiration set when citation is created
+    // Free users have 30-day expiration set when citation is created
     const { data, error } = await supabaseServiceRole
       .from('citation_searches')
       .delete()
@@ -603,7 +603,7 @@ const cleanupOldCitations = async () => {
     }
 
     const deletedCount = data?.length || 0;
-    console.log(`✅ Successfully cleaned up ${deletedCount} expired citations (free user 7-day retention)`);
+    console.log(`✅ Successfully cleaned up ${deletedCount} expired citations (free user 30-day retention)`);
     return { success: true, deletedCount };
   } catch (error) {
     console.error('Error in cleanupOldCitations:', error);
