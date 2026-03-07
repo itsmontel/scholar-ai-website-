@@ -58,6 +58,7 @@ interface QuizHistoryProps {
   onNavigate: (page: string) => void;
   user: any;
   onLogout: () => void;
+  initialFilter?: FilterType;
 }
 
 interface Friend {
@@ -71,17 +72,22 @@ interface Friend {
 type FilterType = 'all' | 'quiz' | 'flashcards' | 'crossword' | 'crater_blast';
 type TimePeriod = 'all' | '7days' | '30days' | '3months';
 
-const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
+const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFilterProp }: QuizHistoryProps) => {
   const [studyTools, setStudyTools] = useState<StudyTool[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [filter, setFilter] = useState<FilterType>('all');
+  const [filter, setFilter] = useState<FilterType>(initialFilterProp ?? 'all');
   const [timePeriod, setTimePeriod] = useState<TimePeriod>('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
-  
+
+  // Rename functionality state
+  const [renamingId, setRenamingId] = useState<string | null>(null);
+  const [renameValue, setRenameValue] = useState('');
+  const [isRenaming, setIsRenaming] = useState(false);
+
   // Share functionality state
   const [showShareModal, setShowShareModal] = useState(false);
   const [shareToolId, setShareToolId] = useState<string | null>(null);
@@ -98,6 +104,15 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
 
   useEffect(() => {
     fetchStudyToolHistory();
+  }, []);
+
+  // Sync filter from URL on mount (e.g. when navigating via "Load Previous Deck" with ?filter=flashcards)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const f = params.get('filter');
+    if (f && (['all', 'quiz', 'flashcards', 'crossword', 'crater_blast'] as const).includes(f as any)) {
+      setFilter(f as FilterType);
+    }
   }, []);
 
   const fetchStudyToolHistory = async () => {
@@ -225,6 +240,43 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
 
   const cancelDelete = () => {
     setDeleteConfirmId(null);
+  };
+
+  const startRename = (tool: StudyTool) => {
+    setRenamingId(tool.id);
+    setRenameValue(tool.title);
+  };
+
+  const cancelRename = () => {
+    setRenamingId(null);
+    setRenameValue('');
+  };
+
+  const saveRename = async (toolId: string) => {
+    const trimmed = renameValue.trim();
+    if (!trimmed) return;
+    setIsRenaming(true);
+    try {
+      const token = localStorage.getItem('authToken');
+      const response = await fetch(`${API_URL}/analysis/quiz/${toolId}/rename`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ title: trimmed })
+      });
+      const data = await response.json();
+      if (data.success) {
+        setStudyTools(prev => prev.map(t => t.id === toolId ? { ...t, title: trimmed } : t));
+      }
+    } catch (e) {
+      console.error('Failed to rename:', e);
+    } finally {
+      setIsRenaming(false);
+      setRenamingId(null);
+      setRenameValue('');
+    }
   };
 
   // Share functionality
@@ -1034,9 +1086,51 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout }: QuizHistoryProps) => {
                             {toolIcon}
                           </div>
                           <div className="min-w-0 flex-1">
-                            <h3 className="text-lg font-semibold text-stone-900 truncate">
-                              {tool.title}
-                            </h3>
+                            {renamingId === tool.id ? (
+                              <div className="flex items-center gap-2 mb-1">
+                                <input
+                                  autoFocus
+                                  type="text"
+                                  value={renameValue}
+                                  onChange={e => setRenameValue(e.target.value)}
+                                  onKeyDown={e => {
+                                    if (e.key === 'Enter') saveRename(tool.id);
+                                    if (e.key === 'Escape') cancelRename();
+                                  }}
+                                  className="flex-1 min-w-0 px-3 py-1.5 rounded-lg border border-violet-300 dark:border-violet-600 bg-white dark:bg-stone-700 text-stone-900 dark:text-stone-100 text-base font-semibold focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-transparent"
+                                  maxLength={200}
+                                />
+                                <button
+                                  onClick={() => saveRename(tool.id)}
+                                  disabled={isRenaming || !renameValue.trim()}
+                                  className="p-1.5 rounded-lg bg-violet-600 text-white hover:bg-violet-500 disabled:opacity-50 transition-colors"
+                                  title="Save"
+                                >
+                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                                </button>
+                                <button
+                                  onClick={cancelRename}
+                                  className="p-1.5 rounded-lg bg-stone-200 dark:bg-stone-600 text-stone-600 dark:text-stone-300 hover:bg-stone-300 dark:hover:bg-stone-500 transition-colors"
+                                  title="Cancel"
+                                >
+                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                                </button>
+                              </div>
+                            ) : (
+                              <div className="flex items-center gap-2 group/title">
+                                <h3 className="text-lg font-semibold text-stone-900 dark:text-stone-100 truncate">
+                                  {tool.title}
+                                </h3>
+                                <button
+                                  onClick={() => startRename(tool)}
+                                  className="opacity-70 group-hover/title:opacity-100 flex items-center gap-1.5 px-2 py-1 rounded-lg text-stone-500 hover:text-violet-600 hover:bg-violet-50 dark:hover:bg-violet-900/30 dark:text-stone-400 dark:hover:text-violet-400 transition-all shrink-0 text-sm font-medium"
+                                  title="Rename"
+                                >
+                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                                  Rename
+                                </button>
+                              </div>
+                            )}
                             <div className="flex flex-wrap items-center gap-2 mt-2">
                               <span className="text-xs text-stone-500 flex items-center gap-1">
                                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

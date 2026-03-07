@@ -561,11 +561,13 @@ const AcademicAIApp = () => {
     'study-tools-comparison': '/vs-quizlet-knowt',
   };
 
-  const navigateTo = (page: string, slug?: string) => {
+  const navigateTo = (page: string, slug?: string, options?: { quizHistoryFilter?: 'all' | 'quiz' | 'flashcards' | 'crossword' | 'crater_blast' }) => {
     setCurrentPage(page);
     // Update URL to canonical form
     if (page === 'blog-post' && slug) {
       window.history.pushState({}, '', `/blog/${slug}`);
+    } else if (page === 'quiz-history' && options?.quizHistoryFilter) {
+      window.history.pushState({}, '', `/quiz-history?filter=${options.quizHistoryFilter}`);
     } else if (pageUrlMap[page]) {
       window.history.pushState({}, '', pageUrlMap[page]);
     } else {
@@ -778,8 +780,12 @@ const AcademicAIApp = () => {
         }
       case 'citation-history':
         return <CitationHistoryPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
-      case 'quiz-history':
-        return <QuizHistoryPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
+      case 'quiz-history': {
+        const params = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
+        const urlFilter = params.get('filter');
+        const validFilter = urlFilter && ['all', 'quiz', 'flashcards', 'crossword', 'crater_blast'].includes(urlFilter) ? urlFilter : undefined;
+        return <QuizHistoryPage onNavigate={navigateTo} user={user} onLogout={handleLogout} initialFilter={validFilter} />;
+      }
       case 'friends':
         return <FriendsPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'upload':
@@ -868,13 +874,13 @@ const AcademicAIApp = () => {
       case 'humanizer':
         return <HumanizerPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'summarizer':
-        return <SummarizerPage onNavigate={navigateTo} user={user} />;
+        return <SummarizerPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'quiz-generator':
-        return <QuizGeneratorPage onNavigate={navigateTo} user={user} initialStudyToolMode="quiz" />;
+        return <QuizGeneratorPage onNavigate={navigateTo} user={user} onLogout={handleLogout} initialStudyToolMode="quiz" />;
       case 'flashcard-generator':
-        return <QuizGeneratorPage onNavigate={navigateTo} user={user} initialStudyToolMode="flashcards" />;
+        return <QuizGeneratorPage onNavigate={navigateTo} user={user} onLogout={handleLogout} initialStudyToolMode="flashcards" />;
       case 'crossword-generator':
-        return <QuizGeneratorPage onNavigate={navigateTo} user={user} initialStudyToolMode="crossword" />;
+        return <QuizGeneratorPage onNavigate={navigateTo} user={user} onLogout={handleLogout} initialStudyToolMode="crossword" />;
       case 'gpa-calculator':
         return <GPACalculatorPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'pomodoro-timer':

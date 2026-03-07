@@ -1,4 +1,9 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
+
+function shuffleAndTake<T>(arr: T[], count: number): T[] {
+  const shuffled = [...arr].sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, Math.min(count, shuffled.length));
+}
 import Header from '../common/Header';
 import Footer from '../common/Footer';
 import AnalysisAnimation from '../common/AnalysisAnimation';
@@ -122,12 +127,23 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
   const [selectedAnswer, setSelectedAnswer] = useState('');
   const [showQuizResult, setShowQuizResult] = useState(false);
   const [quizCompleted, setQuizCompleted] = useState(false);
-  
+  const [quizRetakeKey, setQuizRetakeKey] = useState(0);
+
+  const dashboardDisplayedQuestions = useMemo((): Array<{ id: number; type: string; question: string; options?: string[]; correctAnswer: string; explanation?: string }> => {
+    if (!quizResult?.questions?.length) return [];
+    const displayCount = quizResult.questionCount ?? quizResult.displayCount ?? quizResult.questions.length;
+    return shuffleAndTake(quizResult.questions, Math.min(displayCount, quizResult.questions.length));
+  }, [quizResult, quizRetakeKey]);
+
   // Flashcard state
   const [flashcardResult, setFlashcardResult] = useState<any>(null);
   const [flashcardCount, setFlashcardCount] = useState(15);
   const [isGeneratingFlashcards, setIsGeneratingFlashcards] = useState(false);
   
+  // Document upload for study tools (quiz, flashcards, crossword)
+  const studyToolsFileInputRef = useRef<HTMLInputElement>(null);
+  const [isParsingStudyDoc, setIsParsingStudyDoc] = useState(false);
+
   // Crossword state
   const [crosswordResult, setCrosswordResult] = useState<any>(null);
   const [crosswordWordCount, setCrosswordWordCount] = useState(10);
@@ -1110,6 +1126,36 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
     }
   };
 
+  const handleStudyToolsFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    e.target.value = '';
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+      onNavigate?.('signup');
+      return;
+    }
+    setIsParsingStudyDoc(true);
+    setQuizError('');
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+      const formData = new FormData();
+      formData.append('file', file);
+      const res = await fetch(`${apiUrl}/analysis/parse-document`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+        body: formData,
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Failed to parse document');
+      setInputText(data.data.content || '');
+    } catch (err: any) {
+      setQuizError(err.message || 'Failed to parse document');
+    } finally {
+      setIsParsingStudyDoc(false);
+    }
+  };
+
   // Get the letter at a specific cell position based on user's answers
   const getCellLetter = (rowIdx: number, colIdx: number): string => {
     if (!crosswordResult?.placedWords) return '';
@@ -1359,10 +1405,10 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
 
     doc.setFontSize(10);
     doc.setFont('helvetica', 'normal');
-    doc.text(`Type: ${quizResult.quizType} | Difficulty: ${quizResult.difficulty} | Questions: ${quizResult.questions.length}`, margin, yPos);
+    doc.text(`Type: ${quizResult.quizType} | Difficulty: ${quizResult.difficulty} | Questions: ${dashboardDisplayedQuestions.length}`, margin, yPos);
     yPos += 15;
 
-    quizResult.questions.forEach((q: any, idx: number) => {
+    dashboardDisplayedQuestions.forEach((q: any, idx: number) => {
       if (yPos > pageHeight - 60) { doc.addPage(); yPos = 20; }
       doc.setFontSize(12);
       doc.setFont('helvetica', 'bold');
@@ -1396,7 +1442,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
     yPos += 12;
     doc.setFontSize(10);
     doc.setFont('helvetica', 'normal');
-    quizResult.questions.forEach((q: any, idx: number) => {
+    dashboardDisplayedQuestions.forEach((q: any, idx: number) => {
       if (yPos > pageHeight - 30) { doc.addPage(); yPos = 20; }
       doc.text(`${idx + 1}. ${q.correctAnswer}`, margin, yPos);
       yPos += lineHeight;
@@ -1415,10 +1461,10 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
     const children: any[] = [];
 
     children.push(new Paragraph({ text: quizResult.title || 'Quiz', heading: HeadingLevel.HEADING_1 }));
-    children.push(new Paragraph({ children: [new TextRun({ text: `Type: ${quizResult.quizType} | Difficulty: ${quizResult.difficulty} | Questions: ${quizResult.questions.length}`, size: 20, color: '666666' })] }));
+    children.push(new Paragraph({ children: [new TextRun({ text: `Type: ${quizResult.quizType} | Difficulty: ${quizResult.difficulty} | Questions: ${dashboardDisplayedQuestions.length}`, size: 20, color: '666666' })] }));
     children.push(new Paragraph({ text: '' }));
 
-    quizResult.questions.forEach((q: any, idx: number) => {
+    dashboardDisplayedQuestions.forEach((q: any, idx: number) => {
       children.push(new Paragraph({ children: [new TextRun({ text: `${idx + 1}. ${q.question}`, bold: true })] }));
       if (q.type === 'true_false') {
         children.push(new Paragraph({ text: '   ☐ True    ☐ False' }));
@@ -1431,7 +1477,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
     });
 
     children.push(new Paragraph({ text: 'Answer Key', heading: HeadingLevel.HEADING_2 }));
-    quizResult.questions.forEach((q: any, idx: number) => {
+    dashboardDisplayedQuestions.forEach((q: any, idx: number) => {
       children.push(new Paragraph({ children: [new TextRun({ text: `${idx + 1}. `, bold: true }), new TextRun({ text: q.correctAnswer })] }));
       if (q.explanation) {
         children.push(new Paragraph({ children: [new TextRun({ text: `   Explanation: ${q.explanation}`, italics: true, size: 20, color: '666666' })] }));
@@ -2069,7 +2115,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                 { id: 'flashcards' as const, icon: '🃏', title: 'Flashcards', desc: 'Generate flashcards from any content', mobileDesc: 'Study cards', gradient: 'from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/15', border: 'border-emerald-200/70 dark:border-emerald-700/40', activeBorder: 'border-emerald-400 dark:border-emerald-500 ring-2 ring-emerald-300/50 dark:ring-emerald-600/40', iconBg: 'bg-gradient-to-br from-emerald-400 to-teal-500', accentColor: 'text-emerald-600 dark:text-emerald-400', pro: false, setStudyMode: 'flashcards' as const },
                 { id: 'humanize' as const, icon: '✨', title: 'Humanize', desc: 'Transform AI text into natural human writing', mobileDesc: 'Humanize AI text', gradient: 'from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/15', border: 'border-violet-200/70 dark:border-violet-700/40', activeBorder: 'border-violet-400 dark:border-violet-500 ring-2 ring-violet-300/50 dark:ring-violet-600/40', iconBg: 'bg-gradient-to-br from-violet-400 to-purple-500', accentColor: 'text-violet-600 dark:text-violet-400', pro: true, setStudyMode: null },
                 { id: 'summarize_tool' as const, icon: '📋', title: 'Summarize', desc: 'Condense papers and articles instantly', mobileDesc: 'Summarize text', gradient: 'from-teal-50 to-cyan-50 dark:from-teal-900/20 dark:to-cyan-900/15', border: 'border-teal-200/70 dark:border-teal-700/40', activeBorder: 'border-teal-400 dark:border-teal-500 ring-2 ring-teal-300/50 dark:ring-teal-600/40', iconBg: 'bg-gradient-to-br from-teal-400 to-cyan-500', accentColor: 'text-teal-600 dark:text-teal-400', pro: false, setStudyMode: null },
-                { id: 'crater_blast' as const, icon: '🚀', title: 'Crater Blast', desc: 'Play the learning game with your content', mobileDesc: 'Quiz game', gradient: 'from-violet-900/30 to-purple-900/40 dark:from-violet-900/30 dark:to-purple-900/40', border: 'border-violet-200/70 dark:border-violet-700/40', activeBorder: 'border-violet-500 dark:border-violet-500 ring-2 ring-violet-400/50 dark:ring-violet-600/40', iconBg: 'bg-gradient-to-br from-violet-600 to-purple-700', accentColor: 'text-violet-600 dark:text-violet-300', pro: false, setStudyMode: 'crater_blast' as const },
+                { id: 'crater_blast' as const, icon: '🚀', title: 'Crater Blast', desc: 'Play the learning game with your content', mobileDesc: 'Quiz game', gradient: 'from-violet-900/30 to-purple-900/40 dark:from-violet-900/30 dark:to-purple-900/40', border: 'border-violet-200/70 dark:border-violet-700/40', activeBorder: 'border-violet-500 dark:border-violet-500 ring-2 ring-violet-400/50 dark:ring-violet-600/40', iconBg: 'bg-gradient-to-br from-violet-600 to-purple-700', accentColor: 'text-violet-600 dark:text-violet-300', pro: false, setStudyMode: 'crater_blast' as const, badge: 'NEW' },
               ] as const).map(tool => (
                 <button
                   key={tool.id}
@@ -2111,6 +2157,9 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                   </p>
                   {tool.pro && usageStats.plan === 'free' && (
                     <span className="absolute top-2 right-2 sm:top-3 sm:right-3 px-1.5 sm:px-2 py-0.5 sm:py-1 text-[8px] sm:text-[10px] font-bold rounded-md sm:rounded-lg bg-gradient-to-r from-violet-500 to-purple-600 text-white leading-none shadow-md z-20">Upgrade</span>
+                  )}
+                  {('badge' in tool && tool.badge) && (
+                    <span className="absolute top-2 right-2 sm:top-3 sm:right-3 px-1.5 sm:px-2 py-0.5 sm:py-1 text-[8px] sm:text-[10px] font-bold rounded-md sm:rounded-lg bg-gradient-to-r from-emerald-500 to-teal-500 text-white leading-none shadow-md z-20 animate-pulse">{tool.badge}</span>
                   )}
                 </button>
               ))}
@@ -2809,6 +2858,14 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
         {/* STUDY TOOLS MODE (Quiz / Flashcards / Crossword) */}
         {mode === 'quiz' && (
           <>
+            {/* Hidden file input for document upload - shared by quiz, flashcards, crossword */}
+            <input
+              ref={studyToolsFileInputRef}
+              type="file"
+              accept=".pdf,.doc,.docx,.txt,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"
+              onChange={handleStudyToolsFileUpload}
+              className="hidden"
+            />
             {/* Study Tool Sub-Mode Tabs - Horizontally scrollable on mobile */}
             <div className="mb-6 sm:mb-8 -mx-3 sm:mx-0 px-3 sm:px-0">
               <div className="flex sm:flex-wrap sm:justify-center gap-2 sm:gap-3 overflow-x-auto pb-2 sm:pb-0 scrollbar-hide snap-x snap-mandatory">
@@ -2919,27 +2976,27 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                           )}
                         </div>
                         <div className="flex flex-col-reverse sm:flex-row justify-center gap-2 sm:gap-3">
-                          <button onClick={() => { setCurrentQuestion(0); setUserAnswers([]); setQuizCompleted(false); setSelectedAnswer(''); setShowQuizResult(false); }} className="px-5 sm:px-6 py-2.5 sm:py-3 bg-gray-100 dark:bg-stone-700 text-gray-700 dark:text-stone-300 font-semibold rounded-xl text-sm sm:text-base">Try Again</button>
+                          <button onClick={() => { setQuizRetakeKey(k => k + 1); setCurrentQuestion(0); setUserAnswers([]); setQuizCompleted(false); setSelectedAnswer(''); setShowQuizResult(false); }} className="px-5 sm:px-6 py-2.5 sm:py-3 bg-gray-100 dark:bg-stone-700 text-gray-700 dark:text-stone-300 font-semibold rounded-xl text-sm sm:text-base">Try Again</button>
                           <button onClick={() => { setQuizResult(null); setIsQuizMode(false); }} className="px-5 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-amber-600 to-orange-600 text-white font-semibold rounded-xl text-sm sm:text-base">New Quiz</button>
                         </div>
                       </div>
                     ) : (
                       <>
-                        <div className="h-1.5 sm:h-2 bg-stone-200 dark:bg-stone-600"><div className="h-full bg-gradient-to-r from-amber-500 to-orange-500 transition-all duration-300" style={{ width: `${((currentQuestion + 1) / quizResult.questions.length) * 100}%` }}></div></div>
+                        <div className="h-1.5 sm:h-2 bg-stone-200 dark:bg-stone-600"><div className="h-full bg-gradient-to-r from-amber-500 to-orange-500 transition-all duration-300" style={{ width: `${((currentQuestion + 1) / dashboardDisplayedQuestions.length) * 100}%` }}></div></div>
                         <div className="p-4 sm:p-6">
                           <div className="flex justify-between items-center mb-3 sm:mb-4">
-                            <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Q{currentQuestion + 1}/{quizResult.questions.length}</span>
-                            <span className={`px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-semibold ${quizResult.questions[currentQuestion]?.type === 'multiple_choice' ? 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300' : quizResult.questions[currentQuestion]?.type === 'true_false' ? 'bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300' : 'bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300'}`}>
-                              {quizResult.questions[currentQuestion]?.type === 'multiple_choice' ? 'MCQ' : quizResult.questions[currentQuestion]?.type === 'true_false' ? 'T/F' : 'Fill'}
+                            <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Q{currentQuestion + 1}/{dashboardDisplayedQuestions.length}</span>
+                            <span className={`px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-semibold ${dashboardDisplayedQuestions[currentQuestion]?.type === 'multiple_choice' ? 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300' : dashboardDisplayedQuestions[currentQuestion]?.type === 'true_false' ? 'bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300' : 'bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300'}`}>
+                              {dashboardDisplayedQuestions[currentQuestion]?.type === 'multiple_choice' ? 'MCQ' : dashboardDisplayedQuestions[currentQuestion]?.type === 'true_false' ? 'T/F' : 'Fill'}
                             </span>
                           </div>
-                          <h3 className="text-base sm:text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4 sm:mb-6 leading-relaxed">{quizResult.questions[currentQuestion]?.question}</h3>
+                          <h3 className="text-base sm:text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4 sm:mb-6 leading-relaxed">{dashboardDisplayedQuestions[currentQuestion]?.question}</h3>
                           <div className="space-y-2 sm:space-y-3 mb-4 sm:mb-6">
-                            {quizResult.questions[currentQuestion]?.type === 'multiple_choice' && quizResult.questions[currentQuestion]?.options?.map((opt: string, idx: number) => {
+                            {dashboardDisplayedQuestions[currentQuestion]?.type === 'multiple_choice' && dashboardDisplayedQuestions[currentQuestion]?.options?.map((opt: string, idx: number) => {
                               const letter = opt.charAt(0);
                               const isSelected = selectedAnswer === letter;
-                              const isCorrect = showQuizResult && letter === quizResult.questions[currentQuestion].correctAnswer;
-                              const isWrong = showQuizResult && isSelected && letter !== quizResult.questions[currentQuestion].correctAnswer;
+                              const isCorrect = showQuizResult && letter === dashboardDisplayedQuestions[currentQuestion].correctAnswer;
+                              const isWrong = showQuizResult && isSelected && letter !== dashboardDisplayedQuestions[currentQuestion].correctAnswer;
                               return (
                                 <button key={idx} onClick={() => !showQuizResult && setSelectedAnswer(letter)} disabled={showQuizResult}
                                   className={`w-full p-3 sm:p-4 rounded-xl border-2 text-left flex items-center gap-2.5 sm:gap-3 transition-all ${isCorrect ? 'border-green-500 bg-green-50 dark:bg-green-900/30' : isWrong ? 'border-red-500 bg-red-50 dark:bg-red-900/30' : isSelected ? 'border-amber-500 bg-amber-50 dark:bg-amber-900/30' : 'border-gray-200 dark:border-stone-600 active:border-amber-300 sm:hover:border-amber-300 dark:sm:hover:border-amber-600'}`}
@@ -2949,10 +3006,10 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                                 </button>
                               );
                             })}
-                            {quizResult.questions[currentQuestion]?.type === 'true_false' && ['true', 'false'].map((opt) => {
+                            {dashboardDisplayedQuestions[currentQuestion]?.type === 'true_false' && ['true', 'false'].map((opt) => {
                               const isSelected = selectedAnswer === opt;
-                              const isCorrect = showQuizResult && opt === quizResult.questions[currentQuestion].correctAnswer;
-                              const isWrong = showQuizResult && isSelected && opt !== quizResult.questions[currentQuestion].correctAnswer;
+                              const isCorrect = showQuizResult && opt === dashboardDisplayedQuestions[currentQuestion].correctAnswer;
+                              const isWrong = showQuizResult && isSelected && opt !== dashboardDisplayedQuestions[currentQuestion].correctAnswer;
                               return (
                                 <button key={opt} onClick={() => !showQuizResult && setSelectedAnswer(opt)} disabled={showQuizResult}
                                   className={`w-full p-3 sm:p-4 rounded-xl border-2 text-left flex items-center gap-2.5 sm:gap-3 transition-all ${isCorrect ? 'border-green-500 bg-green-50 dark:bg-green-900/30' : isWrong ? 'border-red-500 bg-red-50 dark:bg-red-900/30' : isSelected ? 'border-amber-500 bg-amber-50 dark:bg-amber-900/30' : 'border-gray-200 dark:border-stone-600 active:border-amber-300 sm:hover:border-amber-300 dark:sm:hover:border-amber-600'}`}
@@ -2962,11 +3019,11 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                                 </button>
                               );
                             })}
-                            {quizResult.questions[currentQuestion]?.type === 'fill_blank' && quizResult.questions[currentQuestion]?.options?.map((opt: string, idx: number) => {
+                            {dashboardDisplayedQuestions[currentQuestion]?.type === 'fill_blank' && dashboardDisplayedQuestions[currentQuestion]?.options?.map((opt: string, idx: number) => {
                               const letter = opt.charAt(0);
                               const isSelected = selectedAnswer === letter;
-                              const isCorrect = showQuizResult && letter === quizResult.questions[currentQuestion].correctAnswer;
-                              const isWrong = showQuizResult && isSelected && letter !== quizResult.questions[currentQuestion].correctAnswer;
+                              const isCorrect = showQuizResult && letter === dashboardDisplayedQuestions[currentQuestion].correctAnswer;
+                              const isWrong = showQuizResult && isSelected && letter !== dashboardDisplayedQuestions[currentQuestion].correctAnswer;
                               return (
                                 <button key={idx} onClick={() => !showQuizResult && setSelectedAnswer(letter)} disabled={showQuizResult}
                                   className={`w-full p-3 sm:p-4 rounded-xl border-2 text-left flex items-center gap-2.5 sm:gap-3 transition-all ${isCorrect ? 'border-green-500 bg-green-50 dark:bg-green-900/30' : isWrong ? 'border-red-500 bg-red-50 dark:bg-red-900/30' : isSelected ? 'border-amber-500 bg-amber-50 dark:bg-amber-900/30' : 'border-gray-200 dark:border-stone-600 active:border-amber-300 sm:hover:border-amber-300 dark:sm:hover:border-amber-600'}`}
@@ -2977,16 +3034,16 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                               );
                             })}
                           </div>
-                          {showQuizResult && quizResult.questions[currentQuestion]?.explanation && (
+                          {showQuizResult && dashboardDisplayedQuestions[currentQuestion]?.explanation && (
                             <div className="p-3 sm:p-4 bg-blue-50 dark:bg-blue-900/30 rounded-xl mb-4 sm:mb-6 border border-blue-100 dark:border-blue-800/50">
-                              <p className="text-xs sm:text-sm text-blue-700 dark:text-blue-300">💡 {quizResult.questions[currentQuestion].explanation}</p>
+                              <p className="text-xs sm:text-sm text-blue-700 dark:text-blue-300">💡 {dashboardDisplayedQuestions[currentQuestion].explanation}</p>
                             </div>
                           )}
                           <div className="flex justify-between items-center gap-2">
                             <button onClick={() => { if (currentQuestion > 0) { setCurrentQuestion(currentQuestion - 1); setShowQuizResult(false); setSelectedAnswer(''); } }} disabled={currentQuestion === 0} className="px-3 sm:px-4 py-2 text-gray-600 dark:text-gray-400 disabled:opacity-30 text-sm sm:text-base">← <span className="hidden sm:inline">Previous</span></button>
                             {!showQuizResult ? (
                               <button onClick={() => {
-                                const q = quizResult.questions[currentQuestion];
+                                const q = dashboardDisplayedQuestions[currentQuestion];
                                 const ans = selectedAnswer;
                                 const correct = ans === q.correctAnswer;
                                 setUserAnswers([...userAnswers, { questionId: q.id, answer: ans, isCorrect: correct }]);
@@ -2994,10 +3051,10 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                               }} disabled={!selectedAnswer} className="px-5 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-amber-600 to-orange-600 text-white font-semibold rounded-xl disabled:opacity-50 text-sm sm:text-base active:scale-95 transition-transform">Submit</button>
                             ) : (
                               <button onClick={() => {
-                                if (currentQuestion + 1 >= quizResult.questions.length) { setQuizCompleted(true); }
+                                if (currentQuestion + 1 >= dashboardDisplayedQuestions.length) { setQuizCompleted(true); }
                                 else { setCurrentQuestion(currentQuestion + 1); setSelectedAnswer(''); setShowQuizResult(false); }
                               }} className="px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-amber-600 to-orange-600 text-white font-semibold rounded-xl text-sm sm:text-base active:scale-95 transition-transform">
-                                {currentQuestion + 1 >= quizResult.questions.length ? '🏆 Results' : 'Next →'}
+                                {currentQuestion + 1 >= dashboardDisplayedQuestions.length ? '🏆 Results' : 'Next →'}
                               </button>
                             )}
                           </div>
@@ -3104,6 +3161,21 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                           <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Source Material</span>
                         </div>
                         <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => studyToolsFileInputRef.current?.click()}
+                            disabled={isParsingStudyDoc}
+                            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-800/50 font-semibold text-xs transition-colors disabled:opacity-50 border border-amber-200 dark:border-amber-700"
+                            title="Upload PDF, Word, or TXT"
+                          >
+                            {isParsingStudyDoc ? (
+                              <span className="w-3.5 h-3.5 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
+                            ) : (
+                              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                              </svg>
+                            )}
+                            {isParsingStudyDoc ? 'Parsing...' : 'Upload Document'}
+                          </button>
                           <button onClick={() => setInputText('')} className={`text-xs text-gray-400 hover:text-gray-600 ${!inputText ? 'invisible' : ''}`}>Clear</button>
                           <button onClick={() => navigator.clipboard.readText().then(text => setInputText(text))} className="text-xs text-amber-600 hover:text-amber-700 font-medium">Paste</button>
                         </div>
@@ -3160,7 +3232,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                       onExportDOCX={isPaidUser ? exportFlashcardsToDOCX : undefined}
                       onNewDeck={() => setFlashcardResult(null)}
                       canExport={isPaidUser}
-                      onLoadPrevious={() => onNavigate('quiz-history')}
+                      onLoadPrevious={() => (onNavigate as (p: string, s?: string, o?: { quizHistoryFilter?: string }) => void)('quiz-history', undefined, { quizHistoryFilter: 'flashcards' })}
                       isCreateFromScratch={!flashcardResult.cards || flashcardResult.cards.length === 0}
                     />
                   </div>
@@ -3221,6 +3293,21 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                           <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider">Source Material</span>
                         </div>
                         <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => studyToolsFileInputRef.current?.click()}
+                            disabled={isParsingStudyDoc}
+                            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-200 dark:hover:bg-emerald-800/50 font-semibold text-xs transition-colors disabled:opacity-50 border border-emerald-200 dark:border-emerald-700"
+                            title="Upload PDF, Word, or TXT"
+                          >
+                            {isParsingStudyDoc ? (
+                              <span className="w-3.5 h-3.5 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+                            ) : (
+                              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                              </svg>
+                            )}
+                            {isParsingStudyDoc ? 'Parsing...' : 'Upload Document'}
+                          </button>
                           <button onClick={() => setInputText('')} className={`text-xs text-stone-400 hover:text-emerald-600 dark:hover:text-emerald-400 ${!inputText ? 'invisible' : ''}`}>Clear</button>
                           <button onClick={() => navigator.clipboard.readText().then(text => setInputText(text))} className="text-xs text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 font-medium">Paste</button>
                         </div>
@@ -3555,6 +3642,21 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                           <span className="text-xs font-semibold text-orange-700 dark:text-orange-400 uppercase tracking-wider">Source Material</span>
                         </div>
                         <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => studyToolsFileInputRef.current?.click()}
+                            disabled={isParsingStudyDoc}
+                            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-orange-100 dark:bg-orange-900/50 text-orange-700 dark:text-orange-300 hover:bg-orange-200 dark:hover:bg-orange-800/50 font-semibold text-xs transition-colors disabled:opacity-50 border border-orange-200 dark:border-orange-700"
+                            title="Upload PDF, Word, or TXT"
+                          >
+                            {isParsingStudyDoc ? (
+                              <span className="w-3.5 h-3.5 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
+                            ) : (
+                              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                              </svg>
+                            )}
+                            {isParsingStudyDoc ? 'Parsing...' : 'Upload Document'}
+                          </button>
                           <button onClick={() => setInputText('')} className={`text-xs text-stone-400 hover:text-orange-600 dark:hover:text-orange-400 ${!inputText ? 'invisible' : ''}`}>Clear</button>
                           <button onClick={() => navigator.clipboard.readText().then(text => setInputText(text))} className="text-xs text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 font-medium">Paste</button>
                         </div>

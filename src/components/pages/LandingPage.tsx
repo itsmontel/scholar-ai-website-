@@ -766,6 +766,151 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
         </div>
       </section>
 
+      {/* See WriteScholar in Action - Study Tools Showcase (Turn Your Notes Into) */}
+      <section className="relative py-12 sm:py-28 overflow-hidden max-lg:bg-gradient-to-b max-lg:from-violet-50/60 max-lg:via-white max-lg:to-stone-50 dark:max-lg:from-violet-950/25 dark:max-lg:via-stone-900 dark:max-lg:to-stone-900 bg-white dark:bg-stone-900">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-10%,rgba(99,102,241,0.08),transparent)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-10%,rgba(139,92,246,0.06),transparent)] max-lg:bg-[radial-gradient(ellipse_100%_60%_at_50%_0%,rgba(139,92,246,0.12),transparent_70%)] max-lg:dark:bg-[radial-gradient(ellipse_100%_60%_at_50%_0%,rgba(139,92,246,0.08),transparent_70%)]" />
+        <div className="absolute top-24 left-[5%] hidden xl:block text-5xl opacity-40 animate-float">📚</div>
+        <div className="absolute top-40 right-[8%] hidden xl:block text-4xl opacity-35 animate-float-delayed">✏️</div>
+        <div className="absolute bottom-40 left-[7%] hidden xl:block text-4xl opacity-35 animate-float" style={{ animationDelay: '0.7s' }}>🎯</div>
+        <div className="absolute bottom-32 right-[5%] hidden xl:block text-5xl opacity-40 animate-float-delayed" style={{ animationDelay: '0.4s' }}>🚀</div>
+        <div className="xl:hidden absolute top-20 left-4 text-3xl opacity-50 animate-float">📚</div>
+        <div className="xl:hidden absolute top-32 right-4 text-2xl opacity-45 animate-float-delayed">✏️</div>
+        <div className="xl:hidden absolute bottom-64 left-6 text-2xl opacity-45 animate-float" style={{ animationDelay: '0.5s' }}>🎯</div>
+        <div className="xl:hidden absolute bottom-48 right-6 text-3xl opacity-50 animate-float-delayed" style={{ animationDelay: '0.3s' }}>🚀</div>
+        <div className="lg:hidden absolute top-1/3 right-8 w-12 h-12 rounded-xl bg-gradient-to-br from-violet-400/25 to-purple-400/15 animate-float" />
+        <div className="lg:hidden absolute bottom-1/3 left-6 w-10 h-10 rounded-full bg-gradient-to-br from-indigo-400/20 to-violet-400/15 animate-float-delayed" style={{ animationDelay: '0.6s' }} />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="relative text-center mb-10 sm:mb-20">
+            <span className="inline-block px-4 py-1.5 bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-400 rounded-full text-sm font-semibold mb-4 animate-notes-fade-in-up opacity-0 max-lg:bg-violet-200/80 max-lg:dark:bg-violet-800/60" style={{ animationDelay: '0.1s', animationFillMode: 'forwards' }}>
+              Study Smarter, Not Harder
+            </span>
+            <h2 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-stone-800 dark:text-stone-100 mb-4 sm:mb-5 animate-notes-fade-in-up opacity-0" style={{ animationDelay: '0.2s', animationFillMode: 'forwards' }}>
+              Turn Your Notes Into<br className="hidden sm:block" />
+              <span className="bg-gradient-to-r from-violet-600 to-purple-600 dark:from-violet-400 dark:to-purple-400 bg-clip-text text-transparent inline-block max-lg:from-violet-700 max-lg:to-purple-700 max-lg:dark:from-violet-300 max-lg:dark:to-purple-300">Interactive Study Tools</span>
+            </h2>
+            <p className="text-base sm:text-xl text-stone-600 dark:text-stone-400 text-center max-w-2xl mx-auto px-2 animate-notes-fade-in-up opacity-0 max-lg:text-stone-700 max-lg:dark:text-stone-300 max-lg:font-medium" style={{ animationDelay: '0.3s', animationFillMode: 'forwards' }}>
+              Paste your notes. Get quizzes, flashcards & crosswords in seconds. It's that easy.
+            </p>
+          </div>
+          <div className="mb-12 sm:mb-16 animate-notes-fade-in-up opacity-0" style={{ animationDelay: '0.4s', animationFillMode: 'forwards' }}>
+            <div className="relative group">
+              <div className="absolute -inset-1 bg-gradient-to-r from-indigo-400 to-violet-400 rounded-3xl blur-xl opacity-15 group-hover:opacity-25 transition-opacity duration-500 max-lg:from-violet-400 max-lg:to-purple-400 max-lg:opacity-25 max-lg:-inset-2"></div>
+              <div className="relative bg-white dark:bg-stone-800 rounded-3xl overflow-hidden shadow-xl border border-stone-200/50 dark:border-stone-700 group-hover:shadow-indigo-500/10 dark:group-hover:shadow-indigo-900/20 transition-shadow duration-500 max-lg:border-violet-200/60 max-lg:dark:border-violet-900/40 max-lg:shadow-violet-500/15">
+                <div className="grid lg:grid-cols-[1fr_1.15fr] gap-0">
+                  <div className="order-1 lg:order-1 p-5 sm:p-12 lg:p-16 flex flex-col justify-center">
+                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center mb-6 shadow-lg shadow-indigo-500/30 group-hover:scale-110 transition-transform duration-300">
+                      <span className="text-2xl">📝</span>
+                    </div>
+                    <h3 className="text-xl sm:text-3xl font-bold text-stone-800 dark:text-stone-100 mb-3 sm:mb-4">Paste Your Notes</h3>
+                    <p className="text-stone-600 dark:text-stone-400 text-sm sm:text-lg leading-relaxed mb-4 sm:mb-6">
+                      Drop in any lecture notes, textbook chapters, articles, or study material. Our AI reads and understands your content in seconds.
+                    </p>
+                    <ul className="space-y-3">
+                      <li className="flex items-center gap-3 text-stone-600 dark:text-stone-400">
+                        <span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center flex-shrink-0">
+                          <svg className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>
+                        </span>
+                        Works with any subject or topic
+                      </li>
+                      <li className="flex items-center gap-3 text-stone-600 dark:text-stone-400">
+                        <span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center flex-shrink-0">
+                          <svg className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>
+                        </span>
+                        Supports long-form content
+                      </li>
+                      <li className="flex items-center gap-3 text-stone-600 dark:text-stone-400">
+                        <span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center flex-shrink-0">
+                          <svg className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>
+                        </span>
+                        Instant AI processing
+                      </li>
+                    </ul>
+                  </div>
+                  <div className="order-2 lg:order-2 relative overflow-hidden bg-gradient-to-br from-indigo-50 to-violet-50 dark:from-indigo-900/20 dark:to-violet-900/20 min-h-[200px] sm:min-h-[360px] lg:min-h-[400px] flex items-center justify-center p-3 sm:p-4">
+                    <video autoPlay loop muted playsInline className="w-full h-full object-contain group-hover:scale-[1.02] transition-transform duration-700" aria-label="Paste your notes or study material into WriteScholar">
+                      <source src="/notesvid.mp4" type="video/mp4" />
+                    </video>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="relative animate-notes-fade-in-up opacity-0" style={{ animationDelay: '0.5s', animationFillMode: 'forwards' }}>
+            <div className="relative text-center mb-10 sm:mb-12">
+              <div className="inline-flex flex-col items-center">
+                <div className="relative">
+                  <div className="absolute -inset-3 bg-gradient-to-r from-violet-400/30 via-purple-400/30 to-fuchsia-400/30 dark:from-violet-500/20 dark:via-purple-500/20 dark:to-fuchsia-500/20 rounded-3xl blur-2xl animate-alive-glow" />
+                  <div className="relative px-10 sm:px-14 py-6 sm:py-7 rounded-2xl bg-white dark:bg-stone-800 shadow-xl border-2 border-violet-200/60 dark:border-violet-700/40 hover:border-violet-300/80 dark:hover:border-violet-600/60 transition-all duration-300">
+                    <div className="flex items-center justify-center gap-3 mb-2">
+                      <span className="text-2xl sm:text-3xl animate-float">✨</span>
+                      <h3 className="text-xl sm:text-2xl font-extrabold bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 dark:from-violet-400 dark:to-fuchsia-400 bg-clip-text text-transparent">Make it come alive</h3>
+                      <span className="text-2xl sm:text-3xl animate-float-delayed" style={{ animationDelay: '0.5s' }}>⚡</span>
+                    </div>
+                    <p className="text-stone-500 dark:text-stone-400 text-sm sm:text-base">Your notes → quizzes, flashcards, crosswords. In seconds.</p>
+                  </div>
+                </div>
+              </div>
+              <div className="hidden md:flex absolute left-0 right-0 top-full pt-4 pointer-events-none justify-between max-w-4xl mx-auto px-12">
+                <div className="w-px h-8 bg-gradient-to-b from-violet-300/70 to-transparent dark:from-violet-500/50" />
+                <div className="w-px h-8 bg-gradient-to-b from-emerald-300/70 to-transparent dark:from-emerald-500/50" />
+                <div className="w-px h-8 bg-gradient-to-b from-rose-300/70 to-transparent dark:from-rose-500/50" />
+              </div>
+            </div>
+          </div>
+          <div className="grid md:grid-cols-3 gap-6 lg:gap-8 max-md:gap-5">
+            <div className="group relative animate-notes-fade-in-up opacity-0" style={{ animationDelay: '0.6s', animationFillMode: 'forwards' }}>
+              <div className="absolute -inset-1 bg-gradient-to-r from-violet-400 to-purple-400 rounded-3xl blur-xl opacity-0 group-hover:opacity-40 transition-all duration-500 max-lg:opacity-25 max-lg:-inset-1.5"></div>
+              <div className="relative bg-white dark:bg-stone-800 rounded-3xl overflow-hidden shadow-xl border-2 border-stone-200/50 dark:border-stone-700 h-full hover:-translate-y-3 hover:scale-[1.02] hover:shadow-2xl hover:border-violet-200/80 dark:hover:border-violet-700/50 transition-all duration-500 max-lg:border-violet-200/50 max-lg:dark:border-violet-900/30 max-lg:shadow-violet-500/10">
+                <div className="relative h-40 sm:h-56 overflow-hidden bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20">
+                  <video autoPlay loop muted playsInline className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"><source src="/quizvid.mp4" type="video/mp4" /></video>
+                </div>
+                <div className="p-6">
+                  <div className="flex items-center gap-3">
+                    <span className="w-10 h-10 rounded-xl bg-violet-100 dark:bg-violet-900/50 flex items-center justify-center text-lg">📝</span>
+                    <h3 className="text-xl font-bold text-stone-800 dark:text-stone-100">Generate Quizzes</h3>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="group relative animate-notes-fade-in-up opacity-0" style={{ animationDelay: '0.7s', animationFillMode: 'forwards' }}>
+              <div className="absolute -inset-1 bg-gradient-to-r from-emerald-400 to-teal-400 rounded-3xl blur-xl opacity-0 group-hover:opacity-40 transition-all duration-500 max-lg:opacity-25 max-lg:-inset-1.5"></div>
+              <div className="relative bg-white dark:bg-stone-800 rounded-3xl overflow-hidden shadow-xl border-2 border-stone-200/50 dark:border-stone-700 h-full hover:-translate-y-3 hover:scale-[1.02] hover:shadow-2xl hover:border-emerald-200/80 dark:hover:border-emerald-700/50 transition-all duration-500 max-lg:border-emerald-200/50 max-lg:dark:border-emerald-900/30 max-lg:shadow-emerald-500/10">
+                <div className="relative h-40 sm:h-56 overflow-hidden bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20">
+                  <video autoPlay loop muted playsInline className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"><source src="/flashcardsvid.mp4" type="video/mp4" /></video>
+                </div>
+                <div className="p-6">
+                  <div className="flex items-center gap-3">
+                    <span className="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center text-lg">🃏</span>
+                    <h3 className="text-xl font-bold text-stone-800 dark:text-stone-100">Create Flashcards</h3>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="group relative animate-notes-fade-in-up opacity-0" style={{ animationDelay: '0.8s', animationFillMode: 'forwards' }}>
+              <div className="absolute -inset-1 bg-gradient-to-r from-rose-400 to-pink-400 rounded-3xl blur-xl opacity-0 group-hover:opacity-40 transition-all duration-500 max-lg:opacity-25 max-lg:-inset-1.5"></div>
+              <div className="relative bg-white dark:bg-stone-800 rounded-3xl overflow-hidden shadow-xl border-2 border-stone-200/50 dark:border-stone-700 h-full hover:-translate-y-3 hover:scale-[1.02] hover:shadow-2xl hover:border-rose-200/80 dark:hover:border-rose-700/50 transition-all duration-500 max-lg:border-rose-200/50 max-lg:dark:border-rose-900/30 max-lg:shadow-rose-500/10">
+                <div className="relative h-40 sm:h-56 overflow-hidden bg-gradient-to-br from-rose-50 to-pink-50 dark:from-rose-900/20 dark:to-pink-900/20">
+                  <video autoPlay loop muted playsInline className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"><source src="/crosswordvid.mp4" type="video/mp4" /></video>
+                </div>
+                <div className="p-6">
+                  <div className="flex items-center gap-3">
+                    <span className="w-10 h-10 rounded-xl bg-rose-100 dark:bg-rose-900/50 flex items-center justify-center text-lg">🧩</span>
+                    <h3 className="text-xl font-bold text-stone-800 dark:text-stone-100">Build Crosswords</h3>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="text-center mt-14 sm:mt-16 animate-notes-fade-in-up opacity-0" style={{ animationDelay: '0.9s', animationFillMode: 'forwards' }}>
+            <button onClick={() => onNavigate('signup')} className="group inline-flex items-center px-8 py-4 text-white font-bold rounded-2xl bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 hover:scale-105 active:scale-95 shadow-xl shadow-violet-500/30 hover:shadow-violet-500/40 transition-all duration-300 text-lg max-lg:px-10 max-lg:py-4 max-lg:shadow-violet-500/40">
+              Try Study Tools Free
+              <svg className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+            </button>
+            <p className="mt-4 text-stone-500 dark:text-stone-400 text-sm">Free plan includes 3 generations per month</p>
+          </div>
+        </div>
+      </section>
+
       {/* STUDY YOUR WAY - Tabbed video showcase */}
       <section className="relative py-10 sm:py-20 bg-gradient-to-b from-stone-50 to-white dark:from-stone-900 dark:to-stone-900 max-lg:bg-gradient-to-b max-lg:from-indigo-50/40 max-lg:via-stone-50 max-lg:to-white dark:max-lg:from-indigo-950/20 dark:max-lg:via-stone-900 dark:max-lg:to-stone-900 overflow-hidden">
         {/* Floating illustrations */}
@@ -1744,8 +1889,8 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
         </div>
       </section>
 
-      {/* What WriteScholar Can Help You With */}
-      <section className="relative py-12 sm:py-24 bg-white dark:bg-stone-900 max-lg:bg-gradient-to-b max-lg:from-indigo-50/30 max-lg:via-white max-lg:to-stone-50 dark:max-lg:from-indigo-950/15 dark:max-lg:via-stone-900 dark:max-lg:to-stone-900 overflow-hidden">
+      {/* What WriteScholar Can Help You With - hidden */}
+      <section className="hidden relative py-12 sm:py-24 bg-white dark:bg-stone-900 max-lg:bg-gradient-to-b max-lg:from-indigo-50/30 max-lg:via-white max-lg:to-stone-50 dark:max-lg:from-indigo-950/15 dark:max-lg:via-stone-900 dark:max-lg:to-stone-900 overflow-hidden">
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="absolute top-0 left-[3%] hidden xl:block text-4xl opacity-20 animate-float">📖</div>
           <div className="absolute top-8 right-[3%] hidden xl:block text-4xl opacity-20 animate-float-delayed">✍️</div>
@@ -2106,212 +2251,6 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                   </div>
                   </div>
                   </div>
-      </section>
-
-      {/* See WriteScholar in Action - Study Tools Showcase */}
-      <section className="relative py-12 sm:py-28 overflow-hidden max-lg:bg-gradient-to-b max-lg:from-violet-50/60 max-lg:via-white max-lg:to-stone-50 dark:max-lg:from-violet-950/25 dark:max-lg:via-stone-900 dark:max-lg:to-stone-900 bg-white dark:bg-stone-900">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-10%,rgba(99,102,241,0.08),transparent)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-10%,rgba(139,92,246,0.06),transparent)] max-lg:bg-[radial-gradient(ellipse_100%_60%_at_50%_0%,rgba(139,92,246,0.12),transparent_70%)] max-lg:dark:bg-[radial-gradient(ellipse_100%_60%_at_50%_0%,rgba(139,92,246,0.08),transparent_70%)]" />
-        {/* Floating doodles - show on mobile too */}
-        <div className="absolute top-24 left-[5%] hidden xl:block text-5xl opacity-40 animate-float">📚</div>
-        <div className="absolute top-40 right-[8%] hidden xl:block text-4xl opacity-35 animate-float-delayed">✏️</div>
-        <div className="absolute bottom-40 left-[7%] hidden xl:block text-4xl opacity-35 animate-float" style={{ animationDelay: '0.7s' }}>🎯</div>
-        <div className="absolute bottom-32 right-[5%] hidden xl:block text-5xl opacity-40 animate-float-delayed" style={{ animationDelay: '0.4s' }}>🚀</div>
-        {/* Mobile floating shapes */}
-        <div className="xl:hidden absolute top-20 left-4 text-3xl opacity-50 animate-float">📚</div>
-        <div className="xl:hidden absolute top-32 right-4 text-2xl opacity-45 animate-float-delayed">✏️</div>
-        <div className="xl:hidden absolute bottom-64 left-6 text-2xl opacity-45 animate-float" style={{ animationDelay: '0.5s' }}>🎯</div>
-        <div className="xl:hidden absolute bottom-48 right-6 text-3xl opacity-50 animate-float-delayed" style={{ animationDelay: '0.3s' }}>🚀</div>
-        <div className="lg:hidden absolute top-1/3 right-8 w-12 h-12 rounded-xl bg-gradient-to-br from-violet-400/25 to-purple-400/15 animate-float" />
-        <div className="lg:hidden absolute bottom-1/3 left-6 w-10 h-10 rounded-full bg-gradient-to-br from-indigo-400/20 to-violet-400/15 animate-float-delayed" style={{ animationDelay: '0.6s' }} />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          {/* Header - matches Free Writing Tools / landing theme */}
-          <div className="relative text-center mb-10 sm:mb-20">
-            <span className="inline-block px-4 py-1.5 bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-400 rounded-full text-sm font-semibold mb-4 animate-notes-fade-in-up opacity-0 max-lg:bg-violet-200/80 max-lg:dark:bg-violet-800/60" style={{ animationDelay: '0.1s', animationFillMode: 'forwards' }}>
-              Study Smarter, Not Harder
-            </span>
-            <h2 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-stone-800 dark:text-stone-100 mb-4 sm:mb-5 animate-notes-fade-in-up opacity-0" style={{ animationDelay: '0.2s', animationFillMode: 'forwards' }}>
-              Turn Your Notes Into<br className="hidden sm:block" />
-              <span className="bg-gradient-to-r from-violet-600 to-purple-600 dark:from-violet-400 dark:to-purple-400 bg-clip-text text-transparent inline-block max-lg:from-violet-700 max-lg:to-purple-700 max-lg:dark:from-violet-300 max-lg:dark:to-purple-300">Interactive Study Tools</span>
-            </h2>
-            <p className="text-base sm:text-xl text-stone-600 dark:text-stone-400 text-center max-w-2xl mx-auto px-2 animate-notes-fade-in-up opacity-0 max-lg:text-stone-700 max-lg:dark:text-stone-300 max-lg:font-medium" style={{ animationDelay: '0.3s', animationFillMode: 'forwards' }}>
-              Paste your notes. Get quizzes, flashcards & crosswords in seconds. It's that easy.
-            </p>
-          </div>
-
-          {/* Notes - Full width hero: content left, image right - indigo/violet theme */}
-          <div className="mb-12 sm:mb-16 animate-notes-fade-in-up opacity-0" style={{ animationDelay: '0.4s', animationFillMode: 'forwards' }}>
-            <div className="relative group">
-              <div className="absolute -inset-1 bg-gradient-to-r from-indigo-400 to-violet-400 rounded-3xl blur-xl opacity-15 group-hover:opacity-25 transition-opacity duration-500 max-lg:from-violet-400 max-lg:to-purple-400 max-lg:opacity-25 max-lg:-inset-2"></div>
-              <div className="relative bg-white dark:bg-stone-800 rounded-3xl overflow-hidden shadow-xl border border-stone-200/50 dark:border-stone-700 group-hover:shadow-indigo-500/10 dark:group-hover:shadow-indigo-900/20 transition-shadow duration-500 max-lg:border-violet-200/60 max-lg:dark:border-violet-900/40 max-lg:shadow-violet-500/15">
-                <div className="grid lg:grid-cols-[1fr_1.15fr] gap-0">
-                  {/* Content side - LEFT (above image on mobile) */}
-                  <div className="order-1 lg:order-1 p-5 sm:p-12 lg:p-16 flex flex-col justify-center">
-                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center mb-6 shadow-lg shadow-indigo-500/30 group-hover:scale-110 transition-transform duration-300">
-                      <span className="text-2xl">📝</span>
-                    </div>
-                    <h3 className="text-xl sm:text-3xl font-bold text-stone-800 dark:text-stone-100 mb-3 sm:mb-4">Paste Your Notes</h3>
-                    <p className="text-stone-600 dark:text-stone-400 text-sm sm:text-lg leading-relaxed mb-4 sm:mb-6">
-                      Drop in any lecture notes, textbook chapters, articles, or study material. Our AI reads and understands your content in seconds.
-                    </p>
-                    <ul className="space-y-3">
-                      <li className="flex items-center gap-3 text-stone-600 dark:text-stone-400">
-                        <span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center flex-shrink-0">
-                          <svg className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>
-                        </span>
-                        Works with any subject or topic
-                      </li>
-                      <li className="flex items-center gap-3 text-stone-600 dark:text-stone-400">
-                        <span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center flex-shrink-0">
-                          <svg className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>
-                        </span>
-                        Supports long-form content
-                      </li>
-                      <li className="flex items-center gap-3 text-stone-600 dark:text-stone-400">
-                        <span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center flex-shrink-0">
-                          <svg className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>
-                        </span>
-                        Instant AI processing
-                      </li>
-                    </ul>
-                  </div>
-                  {/* Image side - RIGHT (below content on mobile) */}
-                  <div className="order-2 lg:order-2 relative overflow-hidden bg-gradient-to-br from-indigo-50 to-violet-50 dark:from-indigo-900/20 dark:to-violet-900/20 min-h-[200px] sm:min-h-[360px] lg:min-h-[400px] flex items-center justify-center p-3 sm:p-4">
-                    <video
-                      autoPlay
-                      loop
-                      muted
-                      playsInline
-                      className="w-full h-full object-contain group-hover:scale-[1.02] transition-transform duration-700"
-                      aria-label="Paste your notes or study material into WriteScholar"
-                    >
-                      <source src="/notesvid.mp4" type="video/mp4" />
-                    </video>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Bridge: Make it come alive + arrows to tools */}
-          <div className="relative animate-notes-fade-in-up opacity-0" style={{ animationDelay: '0.5s', animationFillMode: 'forwards' }}>
-            <div className="relative text-center mb-10 sm:mb-12">
-              {/* Make it come alive - refined card with glow */}
-              <div className="inline-flex flex-col items-center">
-                <div className="relative">
-                  {/* Glow behind card */}
-                  <div className="absolute -inset-3 bg-gradient-to-r from-violet-400/30 via-purple-400/30 to-fuchsia-400/30 dark:from-violet-500/20 dark:via-purple-500/20 dark:to-fuchsia-500/20 rounded-3xl blur-2xl animate-alive-glow" />
-                  <div className="relative px-10 sm:px-14 py-6 sm:py-7 rounded-2xl bg-white dark:bg-stone-800 shadow-xl border-2 border-violet-200/60 dark:border-violet-700/40 hover:border-violet-300/80 dark:hover:border-violet-600/60 transition-all duration-300">
-                    <div className="flex items-center justify-center gap-3 mb-2">
-                      <span className="text-2xl sm:text-3xl animate-float">✨</span>
-                      <h3 className="text-xl sm:text-2xl font-extrabold bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 dark:from-violet-400 dark:to-fuchsia-400 bg-clip-text text-transparent">
-                        Make it come alive
-                      </h3>
-                      <span className="text-2xl sm:text-3xl animate-float-delayed" style={{ animationDelay: '0.5s' }}>⚡</span>
-                    </div>
-                    <p className="text-stone-500 dark:text-stone-400 text-sm sm:text-base">
-                      Your notes → quizzes, flashcards, crosswords. In seconds.
-                    </p>
-                  </div>
-                </div>
-              </div>
-              {/* Connecting lines to cards - decorative */}
-              <div className="hidden md:flex absolute left-0 right-0 top-full pt-4 pointer-events-none justify-between max-w-4xl mx-auto px-12">
-                <div className="w-px h-8 bg-gradient-to-b from-violet-300/70 to-transparent dark:from-violet-500/50" />
-                <div className="w-px h-8 bg-gradient-to-b from-emerald-300/70 to-transparent dark:from-emerald-500/50" />
-                <div className="w-px h-8 bg-gradient-to-b from-rose-300/70 to-transparent dark:from-rose-500/50" />
-              </div>
-            </div>
-          </div>
-
-          {/* Three tool cards - staggered entrance */}
-          <div className="grid md:grid-cols-3 gap-6 lg:gap-8 max-md:gap-5">
-            {/* Quiz Card */}
-            <div className="group relative animate-notes-fade-in-up opacity-0" style={{ animationDelay: '0.6s', animationFillMode: 'forwards' }}>
-              <div className="absolute -inset-1 bg-gradient-to-r from-violet-400 to-purple-400 rounded-3xl blur-xl opacity-0 group-hover:opacity-40 transition-all duration-500 max-lg:opacity-25 max-lg:-inset-1.5"></div>
-              <div className="relative bg-white dark:bg-stone-800 rounded-3xl overflow-hidden shadow-xl border-2 border-stone-200/50 dark:border-stone-700 h-full hover:-translate-y-3 hover:scale-[1.02] hover:shadow-2xl hover:border-violet-200/80 dark:hover:border-violet-700/50 transition-all duration-500 max-lg:border-violet-200/50 max-lg:dark:border-violet-900/30 max-lg:shadow-violet-500/10">
-                <div className="relative h-40 sm:h-56 overflow-hidden bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20">
-                  <video
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
-                    className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
-                  >
-                    <source src="/quizvid.mp4" type="video/mp4" />
-                  </video>
-                </div>
-                <div className="p-6">
-                  <div className="flex items-center gap-3">
-                    <span className="w-10 h-10 rounded-xl bg-violet-100 dark:bg-violet-900/50 flex items-center justify-center text-lg">📝</span>
-                    <h3 className="text-xl font-bold text-stone-800 dark:text-stone-100">Generate Quizzes</h3>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Flashcard Card */}
-            <div className="group relative animate-notes-fade-in-up opacity-0" style={{ animationDelay: '0.7s', animationFillMode: 'forwards' }}>
-              <div className="absolute -inset-1 bg-gradient-to-r from-emerald-400 to-teal-400 rounded-3xl blur-xl opacity-0 group-hover:opacity-40 transition-all duration-500 max-lg:opacity-25 max-lg:-inset-1.5"></div>
-              <div className="relative bg-white dark:bg-stone-800 rounded-3xl overflow-hidden shadow-xl border-2 border-stone-200/50 dark:border-stone-700 h-full hover:-translate-y-3 hover:scale-[1.02] hover:shadow-2xl hover:border-emerald-200/80 dark:hover:border-emerald-700/50 transition-all duration-500 max-lg:border-emerald-200/50 max-lg:dark:border-emerald-900/30 max-lg:shadow-emerald-500/10">
-                <div className="relative h-40 sm:h-56 overflow-hidden bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20">
-                  <video
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
-                    className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
-                  >
-                    <source src="/flashcardsvid.mp4" type="video/mp4" />
-                  </video>
-                </div>
-                <div className="p-6">
-                  <div className="flex items-center gap-3">
-                    <span className="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center text-lg">🃏</span>
-                    <h3 className="text-xl font-bold text-stone-800 dark:text-stone-100">Create Flashcards</h3>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Crossword Card */}
-            <div className="group relative animate-notes-fade-in-up opacity-0" style={{ animationDelay: '0.8s', animationFillMode: 'forwards' }}>
-              <div className="absolute -inset-1 bg-gradient-to-r from-rose-400 to-pink-400 rounded-3xl blur-xl opacity-0 group-hover:opacity-40 transition-all duration-500 max-lg:opacity-25 max-lg:-inset-1.5"></div>
-              <div className="relative bg-white dark:bg-stone-800 rounded-3xl overflow-hidden shadow-xl border-2 border-stone-200/50 dark:border-stone-700 h-full hover:-translate-y-3 hover:scale-[1.02] hover:shadow-2xl hover:border-rose-200/80 dark:hover:border-rose-700/50 transition-all duration-500 max-lg:border-rose-200/50 max-lg:dark:border-rose-900/30 max-lg:shadow-rose-500/10">
-                <div className="relative h-40 sm:h-56 overflow-hidden bg-gradient-to-br from-rose-50 to-pink-50 dark:from-rose-900/20 dark:to-pink-900/20">
-                  <video
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
-                    className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
-                  >
-                    <source src="/crosswordvid.mp4" type="video/mp4" />
-                  </video>
-                </div>
-                <div className="p-6">
-                  <div className="flex items-center gap-3">
-                    <span className="w-10 h-10 rounded-xl bg-rose-100 dark:bg-rose-900/50 flex items-center justify-center text-lg">🧩</span>
-                    <h3 className="text-xl font-bold text-stone-800 dark:text-stone-100">Build Crosswords</h3>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* CTA */}
-          <div className="text-center mt-14 sm:mt-16 animate-notes-fade-in-up opacity-0" style={{ animationDelay: '0.9s', animationFillMode: 'forwards' }}>
-            <button
-              onClick={() => onNavigate('signup')}
-              className="group inline-flex items-center px-8 py-4 text-white font-bold rounded-2xl bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 hover:scale-105 active:scale-95 shadow-xl shadow-violet-500/30 hover:shadow-violet-500/40 transition-all duration-300 text-lg max-lg:px-10 max-lg:py-4 max-lg:shadow-violet-500/40"
-            >
-              Try Study Tools Free
-              <svg className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-              </svg>
-            </button>
-            <p className="mt-4 text-stone-500 dark:text-stone-400 text-sm">Free plan includes 3 generations per month</p>
-          </div>
-        </div>
       </section>
 
       {/* FAQ Section - Purple tint */}

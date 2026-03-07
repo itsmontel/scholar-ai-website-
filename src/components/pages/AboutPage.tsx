@@ -18,30 +18,20 @@ const AboutPage = ({ onNavigate, user, onLogout }: AboutPageProps) => {
         <div className="absolute top-[40%] right-[6%] hidden xl:block text-3xl opacity-45 animate-float-delayed">✨</div>
         <div className="absolute bottom-[35%] left-[6%] hidden xl:block text-3xl opacity-45 animate-float">📚</div>
         <div className="absolute bottom-[30%] right-[5%] hidden xl:block text-4xl opacity-50 animate-float-delayed">🎓</div>
-        {/* Left character - celebrating (same as landing hero) */}
-        <div className="hidden lg:block absolute left-4 xl:left-12 top-1/2 -translate-y-1/2 w-20 h-24 xl:w-24 xl:h-28 z-10 opacity-90 animate-float">
-          <svg viewBox="0 0 120 140" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
-            <path d="M40 85 Q38 115 42 140 L78 140 Q82 115 80 85" fill="#F59E0B" />
-            <rect x="50" y="65" width="18" height="24" fill="#FCD9B6" />
-            <ellipse cx="59" cy="40" rx="28" ry="30" fill="#FCD9B6" />
-            <path d="M32 35 Q30 18 48 14 Q65 10 85 14 Q100 18 98 35" fill="#1F2937" />
-            <ellipse cx="48" cy="40" rx="4" ry="5" fill="#1F2937" />
-            <ellipse cx="70" cy="40" rx="4" ry="5" fill="#1F2937" />
-            <circle cx="49" cy="38" r="1.5" fill="white" />
-            <circle cx="71" cy="38" r="1.5" fill="white" />
-            <path d="M45 52 Q58 58 72 52" stroke="#1F2937" strokeWidth="2" fill="none" strokeLinecap="round" />
-            <path d="M35 90 Q15 95 5 110" stroke="#FCD9B6" strokeWidth="12" fill="none" strokeLinecap="round" />
-            <path d="M85 90 Q105 92 115 105" stroke="#FCD9B6" strokeWidth="12" fill="none" strokeLinecap="round" />
-            <ellipse cx="3" cy="112" rx="8" ry="9" fill="#FCD9B6" />
-            <ellipse cx="118" cy="108" rx="8" ry="9" fill="#FCD9B6" />
-            <path d="M55 80 L58 88 L66 91 L58 94 L55 102 L52 94 L44 91 L52 88 Z" fill="#F59E0B" />
-            <path d="M68 85 L70 90 L75 92 L70 94 L68 99 L66 94 L61 92 L66 90 Z" fill="#FBBF24" />
-          </svg>
-        </div>
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-10 lg:gap-12">
-            <div className="hidden lg:block flex-shrink-0 w-20 h-24 xl:w-24 xl:h-28" />
-            <div className="flex-1 text-center lg:text-left max-w-3xl mx-auto lg:mx-0">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-center lg:gap-12 xl:gap-16">
+            {/* Mascot - top on mobile, left on desktop */}
+            <div className="flex lg:hidden flex-shrink-0 justify-center mb-2 order-1">
+              <div className="w-20 h-20 animate-float">
+                <img src="/mascot.png" alt="WriteScholar mascot" className="w-full h-full object-contain drop-shadow-xl" />
+              </div>
+            </div>
+            <div className="hidden lg:flex flex-shrink-0 items-center justify-center order-1">
+              <div className="w-32 h-32 xl:w-40 xl:h-40 animate-float">
+                <img src="/mascot.png" alt="WriteScholar mascot" className="w-full h-full object-contain drop-shadow-xl" />
+              </div>
+            </div>
+            <div className="flex-1 text-center lg:text-left max-w-3xl mx-auto lg:mx-0 order-2">
               <span className="inline-flex items-center px-3 py-1 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-400 rounded-full text-sm font-semibold mb-6">
                 About Us
               </span>

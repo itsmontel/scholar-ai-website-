@@ -225,8 +225,8 @@ const HumanizerPage = ({ onNavigate, user, onLogout }: HumanizerPageProps) => {
   };
 
   return (
-    <div className="min-h-screen w-full min-w-0 overflow-x-hidden bg-gradient-to-b from-stone-50 to-white dark:bg-stone-900 dark:from-stone-900 dark:to-stone-800">
-      <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="humanizer" />
+    <div className="min-h-screen w-full min-w-0 flex flex-col bg-gradient-to-b from-stone-50 to-white dark:bg-stone-900 dark:from-stone-900 dark:to-stone-800">
+      <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="humanizer" sticky={true} />
 
       {/* Hero Section */}
       <section className="pt-6 sm:pt-16 pb-4 sm:pb-6">
@@ -255,7 +255,7 @@ const HumanizerPage = ({ onNavigate, user, onLogout }: HumanizerPageProps) => {
       </section>
 
       {/* Main Editor Section */}
-      <section className="pb-8 sm:pb-16 px-0 sm:px-0">
+      <section className="flex-1 pb-8 sm:pb-16 px-0 sm:px-0 overflow-x-hidden">
         <div className="max-w-6xl mx-auto px-3 sm:px-6 w-full min-w-0">
           {/* Editor Card */}
           <div className="bg-white dark:bg-stone-800 rounded-2xl sm:rounded-3xl shadow-xl shadow-stone-100/50 dark:shadow-none border border-stone-200 dark:border-stone-600 overflow-hidden min-w-0">

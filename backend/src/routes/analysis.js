@@ -533,12 +533,15 @@ router.post('/generate-quiz', authenticateToken, async (req, res) => {
       });
     }
 
-    const count = Math.min(Math.max(effectiveCount, 5), 25);
+    const displayCount = Math.min(Math.max(effectiveCount, 5), 25);
+    // Generate 3x question bank so each retake shows a different random subset
+    const bankCount = Math.min(displayCount * 3, 60);
     const result = await aiAnalysisService.generateQuiz(
       text,
       effectiveType,
       effectiveDifficulty,
-      count,
+      bankCount,
+      displayCount,
       userPlan
     );
 
@@ -1415,6 +1418,33 @@ router.get('/quiz/:id', authenticateToken, async (req, res) => {
       message: 'Failed to fetch quiz',
       error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
+  }
+});
+
+// @route   PATCH /api/analysis/quiz/:id/rename
+// @desc    Rename a specific quiz/study tool
+// @access  Private
+router.patch('/quiz/:id/rename', authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { title } = req.body;
+    const userId = req.user.id;
+
+    if (!title || typeof title !== 'string' || title.trim().length === 0) {
+      return res.status(400).json({ success: false, message: 'Title is required' });
+    }
+
+    const trimmedTitle = title.trim().substring(0, 200);
+    const renamed = await aiAnalysisService.renameQuiz(userId, id, trimmedTitle);
+
+    if (!renamed) {
+      return res.status(404).json({ success: false, message: 'Study tool not found or access denied' });
+    }
+
+    res.json({ success: true, message: 'Renamed successfully', title: trimmedTitle });
+  } catch (error) {
+    console.error('Rename quiz error:', error);
+    res.status(500).json({ success: false, message: 'Failed to rename study tool' });
   }
 });
 

@@ -3,6 +3,7 @@ import Header from '../common/Header';
 import Footer from '../common/Footer';
 import LoadingSpinner from '../common/LoadingSpinner';
 import AnalysisAnimation from '../common/AnalysisAnimation';
+import ScholarMascot from '../common/ScholarMascot';
 import { ExportService, AnalysisData } from '../../services/exportService';
 import { trackAction } from '../../data/achievements';
 
@@ -1307,13 +1308,22 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
         {/* Header */}
         <div className="mb-10">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-stone-900">
-                AI Scholar Analysis
-              </h1>
-              <p className="mt-3 text-lg text-stone-600">
-                Get comprehensive AI-powered feedback on your academic documents
-              </p>
+            <div className="flex items-center gap-4">
+              {/* Mascot with analytical pose - glasses, clipboard, magnifying glass */}
+              <div className="relative p-2 sm:p-3 bg-gradient-to-br from-violet-50 to-purple-50 rounded-2xl border border-violet-100 shadow-sm">
+                <div className="absolute -top-1 -right-1 w-6 h-6 bg-violet-500 rounded-full flex items-center justify-center">
+                  <span className="text-white text-xs">🔍</span>
+                </div>
+                <ScholarMascot size={70} animated={true} pose="analyzing" />
+              </div>
+              <div>
+                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-stone-900">
+                  AI Scholar Analysis
+                </h1>
+                <p className="mt-3 text-lg text-stone-600">
+                  Get comprehensive AI-powered feedback on your academic documents
+                </p>
+              </div>
             </div>
             <button
               onClick={() => onNavigate?.('analysis-history')}

@@ -8,6 +8,7 @@ import { getResetsInText } from '../../../utils/usageReset';
 interface SummarizerPageProps {
   onNavigate: (page: string) => void;
   user?: any;
+  onLogout?: () => void;
 }
 
 interface SummaryResult {
@@ -18,7 +19,7 @@ interface SummaryResult {
   summaryWordCount: number;
 }
 
-const SummarizerPage = ({ onNavigate, user }: SummarizerPageProps) => {
+const SummarizerPage = ({ onNavigate, user, onLogout }: SummarizerPageProps) => {
   const [inputText, setInputText] = useState('');
   const [summaryResult, setSummaryResult] = useState<SummaryResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -185,7 +186,7 @@ const SummarizerPage = ({ onNavigate, user }: SummarizerPageProps) => {
   if (showFakeAnimation) {
     return (
       <div className="min-h-screen flex flex-col bg-gradient-to-b from-stone-50 to-white dark:bg-stone-900 dark:from-stone-900 dark:to-stone-800">
-        <Header onNavigate={onNavigate} user={user} />
+        <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="summarizer" />
         <main className="flex-1 flex items-center justify-center">
           <div className="text-center">
             <AnalysisAnimation message="Preparing your summary..." />
@@ -200,7 +201,7 @@ const SummarizerPage = ({ onNavigate, user }: SummarizerPageProps) => {
   if (showSignupPrompt) {
     return (
       <div className="min-h-screen flex flex-col bg-gradient-to-b from-stone-50 to-white dark:bg-stone-900 dark:from-stone-900 dark:to-stone-800">
-        <Header onNavigate={onNavigate} user={user} />
+        <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="summarizer" />
         <main className="flex-1 flex items-center justify-center px-4">
           <div className="max-w-md w-full bg-white dark:bg-stone-800 rounded-2xl shadow-xl border border-stone-200 dark:border-stone-600 p-8 text-center">
             <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-500/30">
@@ -237,7 +238,7 @@ const SummarizerPage = ({ onNavigate, user }: SummarizerPageProps) => {
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-stone-50 to-white dark:bg-stone-900 dark:from-stone-900 dark:to-stone-800">
-      <Header onNavigate={onNavigate} user={user} />
+      <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="summarizer" />
       
       <main className="flex-1 w-full min-w-0 overflow-x-hidden">
         {/* Hero Section */}

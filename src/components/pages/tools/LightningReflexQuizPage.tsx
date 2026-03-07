@@ -126,6 +126,8 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
   const [loadedFromSavedGame, setLoadedFromSavedGame] = useState(false);
   const [isPlayForFun, setIsPlayForFun] = useState(false);
   const [showMinimalUI, setShowMinimalUI] = useState(false);
+  const [questionResults, setQuestionResults] = useState<{question: Question, isCorrect: boolean, userAnswerIndex: number | null}[]>([]);
+  const [showResults, setShowResults] = useState(false);
 
   useEffect(() => {
     const minimal = localStorage.getItem('writescholar_minimal_ui') === 'true';
@@ -286,6 +288,9 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
     if (roundResolvedRef.current || !gameActiveRef.current) return;
     roundResolvedRef.current = true;
 
+    const currentQ = questionsRef.current[currentQIdxRef.current % questionsRef.current.length];
+    setQuestionResults(prev => [...prev, { question: currentQ, isCorrect: crater.isCorrect, userAnswerIndex: crater.answerIndex }]);
+
     const reactionMs = Date.now() - roundStartRef.current;
     const eid = `exp-${Date.now()}`;
     setExplosions(prev => [...prev, { id: eid, x: hitX, y: hitY, isCorrect: crater.isCorrect }]);
@@ -431,6 +436,10 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
     if (roundResolvedRef.current || !gameActiveRef.current) return;
     if (!isCorrect) return;
     roundResolvedRef.current = true;
+    
+    const currentQ = questionsRef.current[currentQIdxRef.current % questionsRef.current.length];
+    setQuestionResults(prev => [...prev, { question: currentQ, isCorrect: false, userAnswerIndex: null }]);
+
     setCraters(prev => prev.map(c => ({ ...c, status: c.status === 'falling' ? 'missed' as const : c.status })));
     loseLife();
   }, [loseLife]);
@@ -477,6 +486,7 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
     sync('correct', 0); sync('longest', 0); sync('qIdx', 0); sync('fall', BASE_FALL_DURATION);
     setScorePopups([]); setScreenEffect(''); setExplosions([]);
     setProjPos(null); projDataRef.current = null;
+    setQuestionResults([]); setShowResults(false);
     gameActiveRef.current = true;
   };
 
@@ -1051,6 +1061,46 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
   };
 
   const renderGameOver = () => {
+    if (showResults) {
+      return (
+        <div className="flex-1 flex flex-col px-4 py-8 max-w-3xl mx-auto w-full">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold text-stone-900">Game Review</h2>
+            <button onClick={() => setShowResults(false)} className="px-4 py-2 rounded-lg bg-stone-200 text-stone-700 font-semibold hover:bg-stone-300 transition-colors">
+              Back to Score
+            </button>
+          </div>
+          <div className="bg-white rounded-2xl shadow-sm border border-stone-200/80 overflow-hidden mb-8">
+            <div className="divide-y divide-stone-100">
+              {questionResults.map((res, idx) => (
+                <div key={idx} className={`p-4 sm:p-5 flex gap-4 ${res.isCorrect ? 'bg-emerald-50/30' : 'bg-red-50/30'}`}>
+                  <div className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center font-bold ${res.isCorrect ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-600'}`}>
+                    {res.isCorrect ? '✓' : '✗'}
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-stone-900 mb-2">{res.question.prompt}</h4>
+                    <div className="grid sm:grid-cols-2 gap-2">
+                      {res.question.answers.map((ans, i) => (
+                        <div key={i} className={`px-3 py-2 rounded-lg text-sm border ${
+                          i === res.question.correctIndex 
+                            ? 'bg-emerald-100 border-emerald-200 text-emerald-800 font-medium'
+                            : i === res.userAnswerIndex
+                            ? 'bg-red-100 border-red-200 text-red-800 font-medium'
+                            : 'bg-white border-stone-200 text-stone-600'
+                        }`}>
+                          {ans}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     const totalAnswered = correctCount + (INITIAL_LIVES - lives);
     const accuracy = totalAnswered > 0 ? Math.round((correctCount / totalAnswered) * 100) : 0;
 
@@ -1092,6 +1142,13 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
                     {isPlayForFun ? 'Back to Menu' : 'New Topic'}
                   </button>
                 </div>
+                {questionResults.length > 0 && (
+                  <button onClick={() => { setShowResults(true); window.scrollTo(0, 0); }}
+                    className="w-full py-3 rounded-xl bg-white text-stone-700 font-semibold hover:bg-stone-50 active:scale-[0.98] transition-all border border-stone-200 shadow-sm flex items-center justify-center gap-2">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+                    Review Questions
+                  </button>
+                )}
                 {user && !isPlayForFun && (
                   <>
                     {loadedFromSavedGame ? (

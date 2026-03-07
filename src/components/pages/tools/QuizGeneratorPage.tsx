@@ -1,4 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
+
+function shuffleAndTake<T>(arr: T[], count: number): T[] {
+  const shuffled = [...arr].sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, Math.min(count, shuffled.length));
+}
 import Header from '../../common/Header';
 import Footer from '../../common/Footer';
 import AnalysisAnimation from '../../common/AnalysisAnimation';
@@ -12,6 +17,7 @@ import { saveAs } from 'file-saver';
 interface QuizGeneratorPageProps {
   onNavigate: (page: string) => void;
   user?: any;
+  onLogout?: () => void;
   initialStudyToolMode?: 'quiz' | 'flashcards' | 'crossword';
 }
 
@@ -30,6 +36,7 @@ interface Quiz {
   quizType: string;
   difficulty: string;
   questionCount: number;
+  displayCount?: number;
   sourceWordCount: number;
 }
 
@@ -39,7 +46,7 @@ interface UserAnswer {
   isCorrect: boolean;
 }
 
-const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: QuizGeneratorPageProps) => {
+const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 'quiz' }: QuizGeneratorPageProps) => {
   const [inputText, setInputText] = useState('');
   const [studyToolMode, setStudyToolMode] = useState<'quiz' | 'flashcards' | 'crossword'>(initialStudyToolMode);
 
@@ -55,6 +62,8 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
   const [questionCount, setQuestionCount] = useState(10);
   const [showFakeAnimation, setShowFakeAnimation] = useState(false);
   const [showSignupPrompt, setShowSignupPrompt] = useState(false);
+  const [isParsingDoc, setIsParsingDoc] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   // Quiz taking state
   const [isQuizMode, setIsQuizMode] = useState(false);
@@ -63,7 +72,9 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
   const [selectedAnswer, setSelectedAnswer] = useState<string>('');
   const [showResult, setShowResult] = useState(false);
   const [quizCompleted, setQuizCompleted] = useState(false);
-  
+  const [showQuizReview, setShowQuizReview] = useState(false);
+  const [retakeKey, setRetakeKey] = useState(0);
+
   // Flashcard state
   const [flashcardResult, setFlashcardResult] = useState<any>(null);
   const [flashcardCount, setFlashcardCount] = useState(15);
@@ -112,6 +123,13 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
   // Free users can use quiz with limits; paid users have unlimited
   const quizExhausted = isFreeUser && quizUsage.generationLimit !== -1 && quizUsage.generationsRemaining <= 0;
 
+  // Random subset from question bank - different each retake
+  const displayedQuestions = useMemo(() => {
+    if (!quiz?.questions?.length) return [];
+    const displayCount = quiz.questionCount ?? quiz.displayCount ?? quiz.questions.length;
+    return shuffleAndTake(quiz.questions, Math.min(displayCount, quiz.questions.length));
+  }, [quiz, retakeKey]);
+
   useEffect(() => {
     document.title = 'AI Quiz Generator – Create Quizzes from Documents | WriteScholar';
     const metaDescription = document.querySelector('meta[name="description"]');
@@ -143,6 +161,7 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
         setSelectedAnswer('');
         setShowResult(false);
         setQuizCompleted(false);
+        setShowQuizReview(false);
         setError(null);
         setShowMinimalUI(true);
         setOpenedFromHistory(true);
@@ -550,6 +569,38 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
     }
   };
 
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    e.target.value = '';
+    if (!user) {
+      setShowFakeAnimation(true);
+      setTimeout(() => { setShowFakeAnimation(false); setShowSignupPrompt(true); }, 2500);
+      return;
+    }
+    const token = localStorage.getItem('authToken');
+    if (!token) { onNavigate('signup'); return; }
+    setIsParsingDoc(true);
+    setError(null);
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+      const formData = new FormData();
+      formData.append('file', file);
+      const res = await fetch(`${apiUrl}/analysis/parse-document`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+        body: formData,
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Failed to parse document');
+      setInputText(data.data.content || '');
+    } catch (err: any) {
+      setError(err.message || 'Failed to parse document');
+    } finally {
+      setIsParsingDoc(false);
+    }
+  };
+
   const handleClear = () => {
     setInputText('');
     setQuiz(null);
@@ -569,9 +620,9 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
   };
 
   const submitAnswer = () => {
-    if (!quiz) return;
+    if (!quiz || !displayedQuestions.length) return;
     
-    const question = quiz.questions[currentQuestion];
+    const question = displayedQuestions[currentQuestion];
     const answer = selectedAnswer;
     const isCorrect = answer === question.correctAnswer;
 
@@ -586,9 +637,9 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
   };
 
   const nextQuestion = () => {
-    if (!quiz) return;
+    if (!quiz || !displayedQuestions.length) return;
     
-    if (currentQuestion + 1 >= quiz.questions.length) {
+    if (currentQuestion + 1 >= displayedQuestions.length) {
       setQuizCompleted(true);
     } else {
       setCurrentQuestion(currentQuestion + 1);
@@ -598,11 +649,13 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
   };
 
   const resetQuiz = () => {
+    setRetakeKey(k => k + 1);
     setCurrentQuestion(0);
     setUserAnswers([]);
     setSelectedAnswer('');
     setShowResult(false);
     setQuizCompleted(false);
+    setShowQuizReview(false);
   };
 
   const getScore = () => {
@@ -611,12 +664,12 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
   };
 
   const downloadQuiz = () => {
-    if (!quiz) return;
+    if (!quiz || !displayedQuestions.length) return;
     
     let content = `${quiz.title}\n${'='.repeat(quiz.title.length)}\n\n`;
     content += `Difficulty: ${quiz.difficulty} | Type: ${quiz.quizType}\n\n`;
     
-    quiz.questions.forEach((q, idx) => {
+    displayedQuestions.forEach((q, idx) => {
       content += `${idx + 1}. ${q.question}\n`;
       if (q.options) {
         q.options.forEach(opt => {
@@ -639,7 +692,7 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
   };
 
   const exportQuizToPDF = () => {
-    if (!quiz) return;
+    if (!quiz || !displayedQuestions.length) return;
     const doc = new jsPDF();
     let yPos = 20;
     const pageHeight = doc.internal.pageSize.height;
@@ -654,10 +707,10 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
 
     doc.setFontSize(10);
     doc.setFont('helvetica', 'normal');
-    doc.text(`Type: ${quiz.quizType} | Difficulty: ${quiz.difficulty} | Questions: ${quiz.questions.length}`, margin, yPos);
+    doc.text(`Type: ${quiz.quizType} | Difficulty: ${quiz.difficulty} | Questions: ${displayedQuestions.length}`, margin, yPos);
     yPos += 15;
 
-    quiz.questions.forEach((q, idx) => {
+    displayedQuestions.forEach((q, idx) => {
       if (yPos > pageHeight - 60) { doc.addPage(); yPos = 20; }
       doc.setFontSize(12);
       doc.setFont('helvetica', 'bold');
@@ -691,7 +744,7 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
     yPos += 12;
     doc.setFontSize(10);
     doc.setFont('helvetica', 'normal');
-    quiz.questions.forEach((q, idx) => {
+    displayedQuestions.forEach((q, idx) => {
       if (yPos > pageHeight - 30) { doc.addPage(); yPos = 20; }
       doc.text(`${idx + 1}. ${q.correctAnswer}`, margin, yPos);
       yPos += lineHeight;
@@ -707,14 +760,14 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
   };
 
   const exportQuizToDOCX = async () => {
-    if (!quiz) return;
+    if (!quiz || !displayedQuestions.length) return;
     const children: any[] = [];
 
     children.push(new Paragraph({ text: quiz.title || 'Quiz', heading: HeadingLevel.HEADING_1 }));
-    children.push(new Paragraph({ children: [new TextRun({ text: `Type: ${quiz.quizType} | Difficulty: ${quiz.difficulty} | Questions: ${quiz.questions.length}`, size: 20, color: '666666' })] }));
+    children.push(new Paragraph({ children: [new TextRun({ text: `Type: ${quiz.quizType} | Difficulty: ${quiz.difficulty} | Questions: ${displayedQuestions.length}`, size: 20, color: '666666' })] }));
     children.push(new Paragraph({ text: '' }));
 
-    quiz.questions.forEach((q, idx) => {
+    displayedQuestions.forEach((q, idx) => {
       children.push(new Paragraph({ children: [new TextRun({ text: `${idx + 1}. ${q.question}`, bold: true })] }));
       if (q.type === 'true_false') {
         children.push(new Paragraph({ text: '   ☐ True    ☐ False' }));
@@ -727,7 +780,7 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
     });
 
     children.push(new Paragraph({ text: 'Answer Key', heading: HeadingLevel.HEADING_2 }));
-    quiz.questions.forEach((q, idx) => {
+    displayedQuestions.forEach((q, idx) => {
       children.push(new Paragraph({ children: [new TextRun({ text: `${idx + 1}. `, bold: true }), new TextRun({ text: q.correctAnswer })] }));
       if (q.explanation) {
         children.push(new Paragraph({ children: [new TextRun({ text: `   Explanation: ${q.explanation}`, italics: true, size: 20, color: '666666' })] }));
@@ -1001,6 +1054,63 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
     if (!quiz || !isQuizMode) return null;
 
     if (quizCompleted) {
+      if (showQuizReview) {
+        return (
+          <div className="bg-white dark:bg-stone-800 rounded-2xl sm:rounded-3xl shadow-xl shadow-stone-100/50 dark:shadow-none border border-stone-200 dark:border-stone-600 overflow-hidden">
+            <div className="p-4 sm:p-6 border-b border-stone-200 dark:border-stone-600 flex items-center justify-between">
+              <h2 className="text-xl font-bold text-stone-900 dark:text-stone-100">Quiz Review</h2>
+              <button onClick={() => setShowQuizReview(false)} className="px-4 py-2 rounded-lg bg-stone-200 dark:bg-stone-600 text-stone-700 dark:text-stone-200 font-semibold hover:bg-stone-300 dark:hover:bg-stone-500 transition-colors">
+                Back to Score
+              </button>
+            </div>
+            <div className="p-4 sm:p-6 max-h-[70vh] overflow-y-auto divide-y divide-stone-100 dark:divide-stone-700">
+              {displayedQuestions.map((q, idx) => {
+                const ua = userAnswers[idx];
+                const isCorrect = ua?.isCorrect ?? false;
+                const correctAns = q.correctAnswer;
+                const options = q.options || [];
+                const correctIdx = typeof correctAns === 'string' && correctAns.length === 1 && correctAns >= 'A' && correctAns <= 'Z'
+                  ? correctAns.charCodeAt(0) - 65
+                  : options.findIndex(o => o === correctAns);
+                const userIdx = options.findIndex(o => o === ua?.answer);
+                return (
+                  <div key={idx} className={`p-4 sm:p-5 flex gap-4 ${isCorrect ? 'bg-emerald-50/30 dark:bg-emerald-900/10' : 'bg-red-50/30 dark:bg-red-900/10'}`}>
+                    <div className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center font-bold ${isCorrect ? 'bg-emerald-100 dark:bg-emerald-800 text-emerald-600 dark:text-emerald-300' : 'bg-red-100 dark:bg-red-800 text-red-600 dark:text-red-300'}`}>
+                      {isCorrect ? '✓' : '✗'}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-semibold text-stone-900 dark:text-stone-100 mb-2">{q.question}</h4>
+                      {options.length > 0 ? (
+                        <div className="grid sm:grid-cols-2 gap-2">
+                          {options.map((opt, i) => (
+                            <div key={i} className={`px-3 py-2 rounded-lg text-sm border ${
+                              i === correctIdx
+                                ? 'bg-emerald-100 dark:bg-emerald-800/50 border-emerald-200 dark:border-emerald-700 text-emerald-800 dark:text-emerald-200 font-medium'
+                                : i === userIdx && !isCorrect
+                                ? 'bg-red-100 dark:bg-red-800/50 border-red-200 dark:border-red-700 text-red-800 dark:text-red-200 font-medium'
+                                : 'bg-white dark:bg-stone-700 border-stone-200 dark:border-stone-600 text-stone-600 dark:text-stone-300'
+                            }`}>
+                              {opt}
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-sm text-stone-600 dark:text-stone-400">
+                          Correct: <span className="font-medium text-emerald-700 dark:text-emerald-400">{correctAns}</span>
+                          {!isCorrect && ua?.answer && (
+                            <> · Your answer: <span className="font-medium text-red-700 dark:text-red-400">{ua.answer}</span></>
+                          )}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        );
+      }
+
       const score = getScore();
       return (
         <div className="bg-white dark:bg-stone-800 rounded-2xl sm:rounded-3xl shadow-xl shadow-stone-100/50 dark:shadow-none border border-stone-200 dark:border-stone-600 overflow-hidden p-6 sm:p-10 text-center">
@@ -1074,13 +1184,20 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
               </>
             )}
             <button
+              onClick={() => { setShowQuizReview(true); window.scrollTo(0, 0); }}
+              className="w-full sm:w-auto px-6 py-3 bg-white dark:bg-stone-700 text-stone-700 dark:text-stone-200 font-semibold rounded-xl transition-all border border-stone-200 dark:border-stone-600 hover:bg-stone-50 dark:hover:bg-stone-600 flex items-center justify-center gap-2"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+              Review Questions
+            </button>
+            <button
               onClick={resetQuiz}
               className="px-6 py-3 bg-stone-100 dark:bg-stone-700 hover:bg-stone-200 dark:hover:bg-stone-600 text-stone-700 dark:text-stone-300 font-semibold rounded-xl transition-all flex items-center justify-center gap-2"
             >
               🔄 Try Again
             </button>
             <button
-              onClick={() => { setQuiz(null); setIsQuizMode(false); }}
+              onClick={() => { setQuiz(null); setIsQuizMode(false); setShowQuizReview(false); }}
               className="px-6 py-3 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-semibold rounded-xl transition-all flex items-center justify-center gap-2"
             >
               ✨ New Quiz
@@ -1090,7 +1207,7 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
       );
     }
 
-    const question = quiz.questions[currentQuestion];
+    const question = displayedQuestions[currentQuestion];
 
     return (
       <div className="bg-white dark:bg-stone-800 rounded-2xl sm:rounded-3xl shadow-xl shadow-stone-100/50 dark:shadow-none border border-stone-200 dark:border-stone-600 overflow-hidden">
@@ -1098,7 +1215,7 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
         <div className="h-2 bg-stone-200 dark:bg-stone-600">
           <div 
             className="h-full bg-gradient-to-r from-amber-500 to-orange-500 transition-all duration-300"
-            style={{ width: `${((currentQuestion + 1) / quiz.questions.length) * 100}%` }}
+            style={{ width: `${((currentQuestion + 1) / displayedQuestions.length) * 100}%` }}
           ></div>
         </div>
 
@@ -1106,7 +1223,7 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
           {/* Question header */}
           <div className="flex items-center justify-between mb-6">
             <span className="text-sm font-medium text-stone-500 dark:text-stone-400">
-              Question {currentQuestion + 1} of {quiz.questions.length}
+              Question {currentQuestion + 1} of {displayedQuestions.length}
             </span>
             <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
               question.type === 'multiple_choice' ? 'bg-blue-100 text-blue-700' :
@@ -1274,7 +1391,7 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
                 onClick={nextQuestion}
                 className="px-6 py-3 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-semibold rounded-xl transition-all flex items-center gap-2"
               >
-                {currentQuestion + 1 >= quiz.questions.length ? (
+                {currentQuestion + 1 >= displayedQuestions.length ? (
                   <>🏆 See Results</>
                 ) : (
                   <>Next Question →</>
@@ -1299,7 +1416,7 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
               <div>
                 <h2 className="text-xl sm:text-2xl font-bold text-stone-800 dark:text-stone-100">{quiz.title}</h2>
                 <p className="text-stone-600 dark:text-stone-400 text-sm mt-1">
-                  {quiz.questions.length} questions • {quiz.difficulty} difficulty • {quiz.quizType} format
+                  {displayedQuestions.length} questions • {quiz.difficulty} difficulty • {quiz.quizType} format
                 </p>
               </div>
               <div className="flex gap-2 flex-wrap">
@@ -1364,7 +1481,7 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
 
         <div className="p-4 sm:p-6 max-h-[500px] overflow-y-auto">
           <div className="space-y-4">
-            {quiz.questions.map((q, idx) => (
+            {displayedQuestions.map((q, idx) => (
               <div key={q.id} className="p-4 bg-stone-50 dark:bg-stone-800/50 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-700/50 transition-colors">
                 <div className="flex items-start gap-3">
                   <span className="flex-shrink-0 w-8 h-8 rounded-lg bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center text-white font-semibold text-sm">
@@ -1400,9 +1517,16 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-stone-50 to-white dark:bg-stone-900 dark:from-stone-900 dark:to-stone-800">
-      {!showMinimalUI && <Header onNavigate={onNavigate} user={user} />}
+      {!showMinimalUI && <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage={studyToolMode === 'quiz' ? 'quiz-generator' : studyToolMode === 'flashcards' ? 'flashcard-generator' : 'crossword-generator'} />}
       
       <main className="flex-1 w-full min-w-0 overflow-x-hidden">
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".pdf,.doc,.docx,.txt,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"
+          onChange={handleFileUpload}
+          className="hidden"
+        />
         {/* Hero Section - minimal bar when loaded from recents */}
         {showMinimalUI ? (
           <div className="sticky top-0 z-10 flex items-center gap-3 px-4 sm:px-6 py-4 bg-white/95 dark:bg-stone-800/95 backdrop-blur border-b border-stone-200 dark:border-stone-700">
@@ -1524,6 +1648,10 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
                       <div className="px-3 sm:px-5 py-2.5 sm:py-3 border-b border-stone-200 dark:border-stone-600 bg-gradient-to-r from-stone-50 dark:from-stone-800/50 to-transparent flex items-center justify-between">
                         <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-amber-500"></div><span className="text-sm font-semibold text-stone-700 dark:text-stone-300">Source Material</span></div>
                         <div className="flex items-center gap-1">
+                          <button onClick={() => fileInputRef.current?.click()} disabled={isParsingDoc} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-800/50 font-semibold text-xs transition-colors disabled:opacity-50 border border-amber-200 dark:border-amber-700" title="Upload PDF, Word, or TXT">
+                            {isParsingDoc ? <span className="w-3.5 h-3.5 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" /> : <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>}
+                            {isParsingDoc ? 'Parsing...' : 'Upload Document'}
+                          </button>
                           <button onClick={handlePaste} className="p-1.5 text-stone-400 dark:text-stone-500 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/30 rounded-lg transition-colors" title="Paste from clipboard"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg></button>
                           <button onClick={handleClear} className="p-1.5 text-stone-400 dark:text-stone-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors" title="Clear text"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
                         </div>
@@ -1561,6 +1689,7 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
                       onExportDOCX={isPaidUser ? exportFlashcardsToDOCX : undefined}
                       onNewDeck={() => setFlashcardResult(null)}
                       canExport={isPaidUser}
+                      onLoadPrevious={() => (onNavigate as (p: string, s?: string, o?: { quizHistoryFilter?: string }) => void)('quiz-history', undefined, { quizHistoryFilter: 'flashcards' })}
                     />
                   </div>
                 ) : (
@@ -1593,6 +1722,10 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
                       <div className="px-3 sm:px-5 py-2.5 sm:py-3 border-b border-stone-200 dark:border-stone-600 bg-gradient-to-r from-stone-50 dark:from-stone-800/50 to-transparent flex items-center justify-between">
                         <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-amber-500"></div><span className="text-sm font-semibold text-stone-700 dark:text-stone-300">Source Material</span></div>
                         <div className="flex items-center gap-1">
+                          <button onClick={() => fileInputRef.current?.click()} disabled={isParsingDoc} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-800/50 font-semibold text-xs transition-colors disabled:opacity-50 border border-amber-200 dark:border-amber-700" title="Upload PDF, Word, or TXT">
+                            {isParsingDoc ? <span className="w-3.5 h-3.5 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" /> : <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>}
+                            {isParsingDoc ? 'Parsing...' : 'Upload Document'}
+                          </button>
                           <button onClick={handlePaste} className="p-1.5 text-stone-400 dark:text-stone-500 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/30 rounded-lg transition-colors" title="Paste"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg></button>
                           <button onClick={handleClear} className="p-1.5 text-stone-400 dark:text-stone-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors" title="Clear"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
                         </div>
@@ -1847,6 +1980,10 @@ const QuizGeneratorPage = ({ onNavigate, user, initialStudyToolMode = 'quiz' }: 
                       <div className="px-3 sm:px-5 py-2.5 sm:py-3 border-b border-stone-200 dark:border-stone-600 bg-gradient-to-r from-stone-50 dark:from-stone-800/50 to-transparent flex items-center justify-between">
                         <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-amber-500"></div><span className="text-sm font-semibold text-stone-700 dark:text-stone-300">Source Material</span></div>
                         <div className="flex items-center gap-1">
+                          <button onClick={() => fileInputRef.current?.click()} disabled={isParsingDoc} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-800/50 font-semibold text-xs transition-colors disabled:opacity-50 border border-amber-200 dark:border-amber-700" title="Upload PDF, Word, or TXT">
+                            {isParsingDoc ? <span className="w-3.5 h-3.5 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" /> : <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>}
+                            {isParsingDoc ? 'Parsing...' : 'Upload Document'}
+                          </button>
                           <button onClick={handlePaste} className="p-1.5 text-stone-400 dark:text-stone-500 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/30 rounded-lg transition-colors" title="Paste"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg></button>
                           <button onClick={handleClear} className="p-1.5 text-stone-400 dark:text-stone-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors" title="Clear"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
                         </div>

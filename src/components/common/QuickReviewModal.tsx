@@ -103,6 +103,8 @@ const QuickReviewModal = ({ userName, userId, onComplete, onSkip }: QuickReviewM
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [isFlipped, setIsFlipped] = useState(false);
   const [showResults, setShowResults] = useState(false);
+  const [showReview, setShowReview] = useState(false);
+  const [questionResults, setQuestionResults] = useState<Array<{ item: ReviewItem; isCorrect: boolean; userAnswer?: string }>>([]);
   const [isVisible, setIsVisible] = useState(true);
   const [noContent, setNoContent] = useState(false);
   const [streak, setStreak] = useState(0);
@@ -230,6 +232,19 @@ const QuickReviewModal = ({ userName, userId, onComplete, onSkip }: QuickReviewM
     return answer === correctAnswer || answer?.toLowerCase() === correctAnswer?.toLowerCase();
   };
 
+  const getCorrectAnswerText = (item: ReviewItem): string => {
+    if (item.type !== 'quiz') return '';
+    const { correctAnswer, options } = item.data;
+    if (options && options.length > 0) {
+      const letter = correctAnswer?.toString().toUpperCase();
+      if (letter && letter >= 'A' && letter <= 'Z') {
+        const idx = letter.charCodeAt(0) - 65;
+        return options[idx] ?? correctAnswer ?? '';
+      }
+    }
+    return correctAnswer ?? '';
+  };
+
   const handleQuizAnswer = (answer: string) => {
     if (answered) return;
     
@@ -239,6 +254,7 @@ const QuickReviewModal = ({ userName, userId, onComplete, onSkip }: QuickReviewM
     const currentItem = reviewItems[currentIndex];
     if (currentItem.type === 'quiz') {
       const isCorrect = isCorrectQuizAnswer(answer, currentItem);
+      setQuestionResults(prev => [...prev, { item: currentItem, isCorrect, userAnswer: answer }]);
       if (isCorrect) {
         setScore(s => s + 1);
         setStreak(s => {
@@ -253,6 +269,10 @@ const QuickReviewModal = ({ userName, userId, onComplete, onSkip }: QuickReviewM
   };
 
   const handleFlashcardKnew = (knew: boolean) => {
+    const currentItem = reviewItems[currentIndex];
+    if (currentItem?.type === 'flashcard') {
+      setQuestionResults(prev => [...prev, { item: currentItem, isCorrect: knew }]);
+    }
     if (knew) {
       setScore(s => s + 1);
       setStreak(s => {
@@ -395,6 +415,105 @@ const QuickReviewModal = ({ userName, userId, onComplete, onSkip }: QuickReviewM
 
   // Results screen
   if (showResults) {
+    // Review Questions view
+    if (showReview) {
+      return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-stone-900/60 backdrop-blur-sm animate-smoothFadeIn overflow-y-auto">
+          <div className="relative w-full max-w-lg max-h-[min(calc(100vh-1rem),90vh)] sm:max-h-[calc(100vh-2rem)] bg-white rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden overflow-y-auto my-auto animate-smoothSlideUp">
+            <div className="h-3 bg-gradient-to-r from-violet-500 via-purple-500 to-fuchsia-500" />
+            <div className="p-4 sm:p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold text-stone-800">Review Questions</h2>
+                <button
+                  onClick={() => setShowReview(false)}
+                  className="px-4 py-2 rounded-lg bg-stone-200 text-stone-700 font-semibold hover:bg-stone-300 transition-colors text-sm"
+                >
+                  Back to Score
+                </button>
+              </div>
+              <div className="space-y-3 max-h-[calc(90vh-8rem)] overflow-y-auto">
+                {questionResults.map((res, idx) => (
+                  <div
+                    key={idx}
+                    className={`p-4 rounded-xl border-2 ${
+                      res.isCorrect ? 'bg-emerald-50/50 border-emerald-200' : 'bg-red-50/50 border-red-200'
+                    }`}
+                  >
+                    <div className="flex gap-3">
+                      <div
+                        className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center font-bold ${
+                          res.isCorrect ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-600'
+                        }`}
+                      >
+                        {res.isCorrect ? '✓' : '✗'}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        {res.item.type === 'quiz' ? (
+                          <>
+                            <h4 className="font-semibold text-stone-900 mb-2">{res.item.data.question}</h4>
+                            {res.item.data.options && res.item.data.options.length > 0 ? (
+                              <div className="space-y-1.5">
+                                {res.item.data.options.map((opt, i) => {
+                                  const isCorrectOpt = opt === getCorrectAnswerText(res.item);
+                                  const isUserWrong = !res.isCorrect && res.userAnswer === opt;
+                                  return (
+                                    <div
+                                      key={i}
+                                      className={`px-3 py-2 rounded-lg text-sm border ${
+                                        isCorrectOpt
+                                          ? 'bg-emerald-100 border-emerald-200 text-emerald-800 font-medium'
+                                          : isUserWrong
+                                            ? 'bg-red-100 border-red-200 text-red-800 font-medium'
+                                            : 'bg-white border-stone-200 text-stone-600'
+                                      }`}
+                                    >
+                                      {opt}
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            ) : (
+                              <div className="space-y-1.5">
+                                <div className="px-3 py-2 rounded-lg text-sm bg-emerald-100 border border-emerald-200 text-emerald-800 font-medium">
+                                  Correct: {getCorrectAnswerText(res.item)}
+                                </div>
+                                {!res.isCorrect && res.userAnswer && (
+                                  <div className="px-3 py-2 rounded-lg text-sm bg-red-100 border border-red-200 text-red-800 font-medium">
+                                    Your answer: {res.userAnswer}
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                            {res.item.data.explanation && (
+                              <p className="mt-2 text-xs text-blue-700 bg-blue-50/70 border border-blue-100 rounded-lg px-2 py-1.5">
+                                {res.item.data.explanation}
+                              </p>
+                            )}
+                          </>
+                        ) : (
+                          <>
+                            <h4 className="font-semibold text-stone-900 mb-1">{res.item.data.front}</h4>
+                            <p className="text-sm text-stone-600 mb-2">Answer: {res.item.data.back}</p>
+                            <span
+                              className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
+                                res.isCorrect ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'
+                              }`}
+                            >
+                              {res.isCorrect ? 'Got it!' : 'Still learning'}
+                            </span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     const emoji = scorePercentage >= 80 ? '🎉' : scorePercentage >= 60 ? '👏' : scorePercentage >= 40 ? '💪' : '📚';
     const message = scorePercentage >= 80 ? 'Amazing!' : scorePercentage >= 60 ? 'Great job!' : scorePercentage >= 40 ? 'Good effort!' : 'Keep practicing!';
     
@@ -453,7 +572,7 @@ const QuickReviewModal = ({ userName, userId, onComplete, onSkip }: QuickReviewM
               </div>
             </div>
             
-            <p className="text-stone-500 mb-4 sm:mb-8 text-sm sm:text-base">
+            <p className="text-stone-500 mb-4 sm:mb-6 text-sm sm:text-base">
               {scorePercentage >= 80 
                 ? "Your retention is excellent! Keep it up!" 
                 : scorePercentage >= 60 
@@ -461,12 +580,25 @@ const QuickReviewModal = ({ userName, userId, onComplete, onSkip }: QuickReviewM
                   : "Review these topics again to boost your retention."}
             </p>
             
-            <button
-              onClick={handleClose}
-              className="px-6 sm:px-10 py-3 sm:py-4 bg-gradient-to-r from-violet-600 to-purple-600 text-white rounded-full font-semibold text-base sm:text-lg shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all"
-            >
-              Continue to Dashboard
-            </button>
+            <div className="flex flex-col gap-3">
+              {questionResults.length > 0 && (
+                <button
+                  onClick={() => setShowReview(true)}
+                  className="w-full py-3 rounded-xl bg-white text-stone-700 font-semibold hover:bg-stone-50 active:scale-[0.98] transition-all border border-stone-200 shadow-sm flex items-center justify-center gap-2"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                  </svg>
+                  Review Questions
+                </button>
+              )}
+              <button
+                onClick={handleClose}
+                className="px-6 sm:px-10 py-3 sm:py-4 bg-gradient-to-r from-violet-600 to-purple-600 text-white rounded-full font-semibold text-base sm:text-lg shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all"
+              >
+                Continue to Dashboard
+              </button>
+            </div>
           </div>
         </div>
       </div>

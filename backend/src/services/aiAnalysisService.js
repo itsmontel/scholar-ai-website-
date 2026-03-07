@@ -2544,7 +2544,7 @@ IMPORTANT REQUIREMENTS:
         title: quiz.title,
         quiz_type: quiz.quizType,
         difficulty: quiz.difficulty,
-        question_count: quiz.questions?.length || quiz.questionCount,
+        question_count: quiz.displayCount ?? quiz.questionCount ?? quiz.questions?.length,
         questions: quiz.questions,
         source_word_count: quiz.sourceWordCount || sourceText?.trim().split(/\s+/).length || 0,
         created_at: new Date().toISOString(),
@@ -2833,6 +2833,33 @@ IMPORTANT REQUIREMENTS:
       return true;
     } catch (error) {
       console.error('Database error in deleteQuiz:', error);
+      return false;
+    }
+  }
+
+  async renameQuiz(userId, quizId, newTitle) {
+    try {
+      const { createClient } = require('@supabase/supabase-js');
+      const supabase = createClient(
+        process.env.SUPABASE_URL,
+        process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
+      );
+
+      const { data, error } = await supabase
+        .from('quizzes')
+        .update({ title: newTitle })
+        .eq('id', quizId)
+        .eq('user_id', userId)
+        .select();
+
+      if (error) {
+        console.error('Error renaming quiz:', error);
+        return false;
+      }
+
+      return (data || []).length > 0;
+    } catch (error) {
+      console.error('Database error in renameQuiz:', error);
       return false;
     }
   }
@@ -3127,10 +3154,13 @@ IMPORTANT:
    * @param {string} text - The text to generate questions from
    * @param {string} quizType - Quiz type: 'multiple_choice', 'true_false', 'fill_blank', 'mixed'
    * @param {string} difficulty - Difficulty: 'easy', 'medium', 'hard'
-   * @param {number} questionCount - Number of questions to generate
-   * @returns {Object} Quiz with questions and answers
+   * @param {number} bankCount - Number of questions to generate in the bank (e.g. 30)
+   * @param {number} displayCount - Number to show per attempt (e.g. 10); if omitted, same as bankCount
+   * @returns {Object} Quiz with questions array (full bank) and displayCount
    */
-  async generateQuiz(text, quizType = 'mixed', difficulty = 'medium', questionCount = 10, userPlan = 'starter') {
+  async generateQuiz(text, quizType = 'mixed', difficulty = 'medium', bankCount = 10, displayCount = null, userPlan = 'starter') {
+    const questionCount = bankCount;
+    if (displayCount == null) displayCount = bankCount;
     if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY === 'your_openai_api_key_here') {
       console.log('OpenAI API key not configured');
       throw new Error('OpenAI API key not configured');
@@ -3207,7 +3237,7 @@ DO NOT include any text outside the JSON object.`;
           { role: 'system', content: systemPrompt },
           { role: 'user', content: `Generate a ${difficulty} difficulty quiz with ${questionCount} ${quizType === 'mixed' ? 'mixed-type' : quizType.replace('_', ' ')} questions based on this text:\n\n${text}` }
         ],
-        max_tokens: 4000,
+        max_tokens: 8000,
         temperature: 0.7,
       });
 
@@ -3235,7 +3265,9 @@ DO NOT include any text outside the JSON object.`;
         ...quiz,
         quizType,
         difficulty,
-        questionCount: quiz.questions?.length || questionCount,
+        questionCount: displayCount,
+        displayCount,
+        questionBankSize: quiz.questions?.length || questionCount,
         sourceWordCount: text.trim().split(/\s+/).length
       };
     } catch (error) {

@@ -246,10 +246,10 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
 
   // ── Logged-in header ───────────────────────────────────────────────────────
   return (
-    <header className={`sticky top-0 z-50 transition-all duration-300 border-b ${
+    <header className={`sticky top-0 left-0 right-0 z-50 transition-all duration-300 border-b ${
       isScrolled 
-        ? 'bg-white/80 dark:bg-stone-900/80 backdrop-blur-xl shadow-sm border-stone-200/50 dark:border-stone-700/50' 
-        : 'bg-transparent border-transparent'
+        ? 'bg-white/90 dark:bg-stone-900/90 backdrop-blur-xl shadow-sm border-stone-200/50 dark:border-stone-700/50' 
+        : 'bg-white/70 dark:bg-stone-900/70 backdrop-blur-md border-stone-200/30 dark:border-stone-700/30'
     }`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 sm:h-20">

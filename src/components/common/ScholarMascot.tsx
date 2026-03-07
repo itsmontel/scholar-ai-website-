@@ -2,7 +2,7 @@ interface ScholarMascotProps {
   size?: number;
   className?: string;
   animated?: boolean;
-  pose?: 'default' | 'waving' | 'pointing' | 'celebrating' | 'studying' | 'thinking';
+  pose?: 'default' | 'waving' | 'pointing' | 'celebrating' | 'studying' | 'thinking' | 'analyzing';
 }
 
 const ScholarMascot = ({ size = 200, className = '', animated = true, pose = 'default' }: ScholarMascotProps) => {
@@ -226,6 +226,71 @@ const ScholarMascot = ({ size = 200, className = '', animated = true, pose = 'de
           </>
         );
       
+      case 'analyzing':
+        return (
+          <>
+            {/* Left arm (holding clipboard - lowered so face/glasses stay visible) */}
+            <g transform="translate(25, 105)">
+              <ellipse cx="18" cy="28" rx="12" ry="15" fill="#8B5CF6" />
+              <ellipse cx="18" cy="25" rx="9" ry="11" fill="#A78BFA" />
+              {/* Hand supporting clipboard */}
+              <circle cx="30" cy="15" r="10" fill="#A78BFA" />
+              <circle cx="30" cy="15" r="7" fill="#C4B5FD" opacity="0.5" />
+            </g>
+            
+            {/* Right arm (pointing at clipboard) */}
+            <g transform="translate(130, 110)">
+              <ellipse cx="8" cy="28" rx="12" ry="15" fill="#8B5CF6" />
+              <ellipse cx="8" cy="25" rx="9" ry="11" fill="#A78BFA" />
+              {/* Hand pointing */}
+              <circle cx="-5" cy="10" r="10" fill="#A78BFA" />
+              <circle cx="-5" cy="10" r="7" fill="#C4B5FD" opacity="0.5" />
+              {/* Pointing finger */}
+              <ellipse cx="-18" cy="5" rx="8" ry="4" fill="#A78BFA" transform="rotate(-15 -18 5)" />
+            </g>
+            
+            {/* Clipboard - lowered below face so glasses are clearly visible */}
+            <g transform="translate(50, 125)">
+              {/* Clipboard back */}
+              <rect x="5" y="0" width="90" height="50" rx="4" fill="#8B5CF6" />
+              {/* Clipboard clip */}
+              <rect x="35" y="-5" width="30" height="10" rx="2" fill="#6D28D9" />
+              <rect x="40" y="-3" width="20" height="6" rx="1" fill="#9CA3AF" />
+              {/* Paper */}
+              <rect x="10" y="5" width="80" height="40" rx="2" fill="#FAFAF9" stroke="#E7E5E4" strokeWidth="1" />
+              {/* Analysis lines / chart */}
+              <g opacity="0.6">
+                <rect x="15" y="10" width="30" height="3" rx="1" fill="#8B5CF6" />
+                <rect x="15" y="16" width="45" height="3" rx="1" fill="#A78BFA" />
+                <rect x="15" y="22" width="35" height="3" rx="1" fill="#8B5CF6" />
+                {/* Mini bar chart */}
+                <rect x="60" y="28" width="6" height="12" rx="1" fill="#22C55E" />
+                <rect x="68" y="24" width="6" height="16" rx="1" fill="#8B5CF6" />
+                <rect x="76" y="31" width="6" height="9" rx="1" fill="#F59E0B" />
+              </g>
+              {/* Checkmarks */}
+              <g stroke="#22C55E" strokeWidth="2" strokeLinecap="round" fill="none">
+                <path d="M52 11 L54 13 L58 9" />
+                <path d="M52 17 L54 19 L58 15" />
+              </g>
+            </g>
+            
+            {/* Floating analysis icons */}
+            <g filter={`url(#sparkleGlow-${uniqueId})`} opacity="0.8">
+              {/* Magnifying glass */}
+              <g transform="translate(160, 50)">
+                <circle cx="8" cy="8" r="7" fill="none" stroke="#C4B5FD" strokeWidth="2" />
+                <line x1="13" y1="13" x2="18" y2="18" stroke="#C4B5FD" strokeWidth="2" strokeLinecap="round" />
+              </g>
+              {/* Checkmark badge */}
+              <g transform="translate(30, 55)">
+                <circle cx="8" cy="8" r="8" fill="#DDD6FE" />
+                <path d="M5 8 L7 10 L11 6" stroke="#22C55E" strokeWidth="2" strokeLinecap="round" fill="none" />
+              </g>
+            </g>
+          </>
+        );
+      
       default:
         return (
           <>
@@ -322,6 +387,36 @@ const ScholarMascot = ({ size = 200, className = '', animated = true, pose = 'de
             <ellipse cx="122" cy="105" rx="8" ry="10" fill="#1F2937" />
             <circle cx="118" cy="100" r="5" fill="white" opacity="0.9" />
             <circle cx="125" cy="109" r="2.5" fill="white" opacity="0.5" />
+          </g>
+        );
+      
+      case 'analyzing':
+        return (
+          <g>
+            {baseEyes}
+            {/* Eyes looking down at clipboard - focused */}
+            <ellipse cx="84" cy="112" rx="8" ry="10" fill="#1F2937" />
+            <circle cx="80" cy="108" r="5" fill="white" opacity="0.9" />
+            <circle cx="87" cy="116" r="2.5" fill="white" opacity="0.5" />
+            <ellipse cx="120" cy="112" rx="8" ry="10" fill="#1F2937" />
+            <circle cx="116" cy="108" r="5" fill="white" opacity="0.9" />
+            <circle cx="123" cy="116" r="2.5" fill="white" opacity="0.5" />
+            {/* Glasses frame */}
+            <g fill="none" stroke="#374151" strokeWidth="2.5">
+              {/* Left lens */}
+              <ellipse cx="82" cy="108" rx="18" ry="16" />
+              {/* Right lens */}
+              <ellipse cx="118" cy="108" rx="18" ry="16" />
+              {/* Bridge */}
+              <path d="M100 108 Q100 105 100 108" />
+              <line x1="100" y1="106" x2="100" y2="110" />
+              {/* Temple arms (sides) */}
+              <path d="M64 106 L55 100" strokeLinecap="round" />
+              <path d="M136 106 L145 100" strokeLinecap="round" />
+            </g>
+            {/* Lens shine */}
+            <ellipse cx="75" cy="102" rx="4" ry="3" fill="white" opacity="0.3" />
+            <ellipse cx="111" cy="102" rx="4" ry="3" fill="white" opacity="0.3" />
           </g>
         );
       
