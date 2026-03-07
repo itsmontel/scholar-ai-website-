@@ -2176,11 +2176,16 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                   </div>
                   {/* Image side - RIGHT (below content on mobile) */}
                   <div className="order-2 lg:order-2 relative overflow-hidden bg-gradient-to-br from-indigo-50 to-violet-50 dark:from-indigo-900/20 dark:to-violet-900/20 min-h-[200px] sm:min-h-[360px] lg:min-h-[400px] flex items-center justify-center p-3 sm:p-4">
-                    <img 
-                      src="/notes pic.png" 
-                      alt="Paste your notes or study material into WriteScholar"
+                    <video
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
                       className="w-full h-full object-contain group-hover:scale-[1.02] transition-transform duration-700"
-                    />
+                      aria-label="Paste your notes or study material into WriteScholar"
+                    >
+                      <source src="/notesvid.mp4" type="video/mp4" />
+                    </video>
                   </div>
                 </div>
               </div>
@@ -2383,7 +2388,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
               Ready to ace your classes?
             </h2>
             <p className="text-base sm:text-lg text-stone-600 dark:text-stone-400 mb-8 sm:mb-10 max-w-xl mx-auto px-2">
-              Join 50,000+ students using WriteScholar to study smarter. Start for free today.
+              Join 38k+ students using WriteScholar to study smarter. Start for free today.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
               <button

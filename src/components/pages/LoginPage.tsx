@@ -167,8 +167,8 @@ const LoginPage = ({ onNavigate, onLogin }: LoginPageProps) => {
         {/* Header */}
         <div className="p-6 pt-20 sm:pt-6">
           <div className="flex items-center space-x-2.5">
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/30">
-              <span className="text-white font-black text-lg">W</span>
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center overflow-hidden shadow-lg shadow-indigo-500/30">
+              <img src="/mascot.png" alt="WriteScholar" className="w-full h-full object-contain" />
             </div>
             <span className="text-xl font-extrabold tracking-tight text-indigo-600 dark:text-indigo-400">WriteScholar</span>
           </div>

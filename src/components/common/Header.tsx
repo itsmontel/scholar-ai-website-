@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
 import PromoBanner from './PromoBanner';
-import ScholarMascot from './ScholarMascot';
 import { getResetsInText } from '../../utils/usageReset';
 
 interface HeaderProps {
@@ -149,7 +148,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
               className="flex items-center gap-2 sm:gap-2.5 group min-w-0 shrink"
             >
               <div className="relative w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center group-hover:scale-105 transition-transform duration-300 shrink-0 overflow-hidden">
-                <ScholarMascot size={48} animated={false} className="drop-shadow-lg scale-[0.83] sm:scale-100 origin-center" />
+                <img src="/mascot.png" alt="WriteScholar mascot" className="w-full h-full object-contain drop-shadow-lg" />
               </div>
               <span className="text-base sm:text-xl font-extrabold tracking-tight text-stone-800 dark:text-stone-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors duration-300 truncate max-w-[110px] sm:max-w-none">
                 WriteScholar
@@ -188,8 +187,9 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
                 Sign up free
               </button>
               <button
+                type="button"
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="md:hidden p-2 rounded-full hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors text-stone-600 dark:text-stone-400 shrink-0"
+                className="mobile-menu-button md:hidden p-2 rounded-full hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors text-stone-600 dark:text-stone-400 shrink-0"
                 aria-label="Toggle menu"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -258,8 +258,8 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
             onClick={() => onNavigate?.('dashboard')}
             className="flex items-center gap-2.5 group"
           >
-            <div className="relative w-12 h-12 flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
-              <ScholarMascot size={48} animated={false} className="drop-shadow-lg" />
+            <div className="relative w-12 h-12 flex items-center justify-center group-hover:scale-105 transition-transform duration-300 overflow-hidden">
+              <img src="/mascot.png" alt="WriteScholar mascot" className="w-full h-full object-contain drop-shadow-lg" />
             </div>
             <span className="text-base sm:text-xl font-extrabold tracking-tight text-stone-800 dark:text-stone-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors duration-300 truncate max-w-[140px] sm:max-w-none">
               WriteScholar
