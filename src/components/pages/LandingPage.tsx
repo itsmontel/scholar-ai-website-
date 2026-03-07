@@ -531,7 +531,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
             </h1>
 
             <p className="text-base sm:text-xl text-stone-600 dark:text-stone-400 mb-12 sm:mb-14 max-w-2xl mx-auto leading-relaxed px-2">
-              #1 Quizlet alternative. Paste notes. Get quizzes, flashcards & crosswords in seconds. Essay feedback, humanizer, we got you covered. 🙌
+              #1 Quizlet alternative. Paste <span className="font-semibold text-lime-500">notes</span>. Get <span className="font-semibold text-orange-500">quizzes</span>, <span className="font-semibold text-pink-500">flashcards</span> & <span className="font-semibold text-amber-500">crosswords</span> in seconds. Essay <span className="font-semibold text-blue-500">feedback</span>, <span className="font-semibold text-violet-500">humanizer</span>, we got you covered. 🙌
             </p>
             
             {/* Primary CTA - mascot peeking behind button with grip hands */}
