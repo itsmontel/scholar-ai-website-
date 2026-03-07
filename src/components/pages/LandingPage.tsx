@@ -924,7 +924,61 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
       <section className="relative py-12 sm:py-20 overflow-hidden bg-white dark:bg-stone-900">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_60%_at_50%_50%,rgba(99,102,241,0.07),transparent)] dark:bg-[radial-gradient(ellipse_70%_60%_at_50%_50%,rgba(139,92,246,0.06),transparent)]" />
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-8 items-center">
+          {/* Mobile layout — badge above mascots, title/subtitle, share instructions */}
+          <div className="lg:hidden flex flex-col items-center text-center">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 rounded-full text-sm font-semibold mb-4">
+              <span>👫</span>
+              <span>Social Study, Levelled Up</span>
+            </div>
+            <h2 className="text-2xl font-extrabold text-stone-900 dark:text-stone-50 leading-tight mb-2">
+              Study Better,{' '}
+              <span className="bg-gradient-to-r from-indigo-500 via-violet-500 to-purple-600 dark:from-indigo-400 dark:via-violet-400 dark:to-purple-400 bg-clip-text text-transparent">
+                Together
+              </span>
+            </h2>
+            <p className="text-sm text-stone-600 dark:text-stone-300 leading-relaxed mb-5 max-w-sm">
+              Add friends with your unique code and share flashcards, quizzes, crosswords & notes in one tap.
+            </p>
+            <div className="relative flex items-center justify-center mb-6 w-full max-w-[280px]">
+              <div className="absolute inset-0 bg-gradient-to-r from-indigo-400/10 to-violet-400/10 rounded-3xl blur-3xl" />
+              <DualMascot size={240} />
+            </div>
+            <p className="text-xs text-stone-500 dark:text-stone-400 mb-5 px-2 leading-relaxed">
+              To share: go to <strong>Study Tools</strong> in the dashboard or header → tap the <strong>Share</strong> button on any quiz, flashcard, or crossword → select your friend.
+            </p>
+            <div className="flex flex-wrap justify-center gap-6 mb-6">
+              {[
+                { value: '1 tap', label: 'to share anything' },
+                { value: 'Instant', label: 'delivery to friends' },
+                { value: 'Free', label: 'forever for core sharing' },
+              ].map((s) => (
+                <div key={s.label} className="text-center">
+                  <div className="text-lg font-extrabold bg-gradient-to-r from-indigo-600 to-violet-600 dark:from-indigo-400 dark:to-violet-400 bg-clip-text text-transparent">{s.value}</div>
+                  <div className="text-xs text-stone-500 dark:text-stone-400 font-medium">{s.label}</div>
+                </div>
+              ))}
+            </div>
+            <div className="flex flex-col gap-3 w-full max-w-xs">
+              <button
+                onClick={() => onNavigate('signup')}
+                className="w-full px-6 py-3.5 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 text-white font-bold rounded-2xl shadow-lg shadow-indigo-500/30 active:scale-[0.98] text-sm flex items-center justify-center gap-2"
+              >
+                <span>Start sharing free</span>
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
+              </button>
+              <button
+                onClick={() => onNavigate('features')}
+                className="w-full px-6 py-3.5 bg-white dark:bg-stone-800 text-stone-700 dark:text-stone-200 font-semibold rounded-2xl border border-stone-200 dark:border-stone-700 text-sm"
+              >
+                See all features
+              </button>
+            </div>
+          </div>
+
+          {/* Desktop layout — unchanged */}
+          <div className="hidden lg:grid lg:grid-cols-2 gap-8 items-center">
             <div className="text-center lg:text-left order-2 lg:order-1 pb-8 lg:pb-0">
               <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 rounded-full text-sm font-semibold mb-5">
                 <span>👫</span>
