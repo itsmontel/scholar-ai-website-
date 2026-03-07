@@ -61,6 +61,7 @@ import LightningReflexQuizPage from './pages/tools/LightningReflexQuizPage';
 import ErrorBoundary from './common/ErrorBoundary';
 import PromoBanner from './common/PromoBanner';
 import BadgeNotificationToast from './common/BadgeNotificationToast';
+import MobileGoogleSignInPopup from './common/MobileGoogleSignInPopup';
 
 // Type definitions
 interface User {
@@ -858,6 +859,13 @@ const AcademicAIApp = () => {
       {renderCurrentPage()}
       {/* Global achievement popup - shows on any page when badge is unlocked */}
       {user && <BadgeNotificationToast onNavigate={navigateTo} />}
+      {/* Mobile-only bottom Google sign-in popup (Quizlet-style) */}
+      {!user && (
+        <MobileGoogleSignInPopup
+          currentPage={currentPage}
+          hideOnPages={['login', 'signup', 'auth-callback', 'reset-password', 'email-verification']}
+        />
+      )}
     </div>
     </ErrorBoundary>
   );
