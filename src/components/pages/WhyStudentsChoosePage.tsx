@@ -47,8 +47,8 @@ const WhyStudentsChoosePage: React.FC<WhyStudentsChoosePageProps> = ({ onNavigat
           </div>
 
           <div className="bg-white dark:bg-stone-800 rounded-2xl shadow-lg border border-stone-200 dark:border-stone-700 overflow-hidden">
-            <div className="grid grid-cols-4 bg-stone-50 border-b border-stone-200">
-              <div className="p-4 sm:p-6 font-semibold text-stone-700">Feature</div>
+            <div className="grid grid-cols-4 bg-stone-50 dark:bg-stone-800/50 border-b border-stone-200 dark:border-stone-700">
+              <div className="p-4 sm:p-6 font-semibold text-stone-700 dark:text-stone-300">Feature</div>
               <div className="p-4 sm:p-6 text-center">
                 <div className="flex flex-col items-center">
                   <div className="w-10 h-10 flex items-center justify-center mb-1 shrink-0 overflow-hidden">
@@ -58,14 +58,14 @@ const WhyStudentsChoosePage: React.FC<WhyStudentsChoosePageProps> = ({ onNavigat
                 </div>
               </div>
               <div className="p-4 sm:p-6 text-center">
-                <span className="font-medium text-stone-600 text-sm sm:text-base">Grammarly</span>
+                <span className="font-medium text-stone-600 dark:text-stone-400 text-sm sm:text-base">Grammarly</span>
               </div>
               <div className="p-4 sm:p-6 text-center">
-                <span className="font-medium text-stone-600 text-sm sm:text-base">QuillBot</span>
+                <span className="font-medium text-stone-600 dark:text-stone-400 text-sm sm:text-base">QuillBot</span>
               </div>
             </div>
 
-            <div className="divide-y divide-stone-100">
+            <div className="divide-y divide-stone-100 dark:divide-stone-700">
               {[
                 { feature: 'Built for Academic Writing', ws: true, grammarly: false, quillbot: false },
                 { feature: 'Citation Generator & Checker', ws: true, grammarly: true, quillbot: true, alt: true },
