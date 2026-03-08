@@ -12,16 +12,15 @@ const PromoBanner: React.FC<PromoBannerProps> = ({ embedded = false }) => {
   return (
     <div className={`sticky top-0 left-0 right-0 text-white py-2 sm:py-2.5 px-2 sm:px-4 z-30 bg-gradient-to-r from-indigo-600 to-violet-600`}>
       <div className="max-w-7xl mx-auto flex items-center justify-center gap-2 sm:gap-4">
-        <div className="flex items-center justify-center gap-2 sm:gap-3 text-center">
-          <span className="text-xs sm:text-sm font-medium">
-            <span className="hidden sm:inline">🎉 Get </span>
-            <span className="sm:hidden">🎉 </span>
-            <span className="font-semibold text-indigo-200">50% off</span>
-            <span className="sm:hidden"> first month</span>
-            <span className="hidden sm:inline"> your first month on any monthly plan</span>
+        <div className="flex items-center justify-center gap-2 sm:gap-3 text-center flex-wrap">
+          <span className="text-xs sm:text-sm font-medium sm:hidden">
+            Hurry! 50% off first month <span className="text-indigo-200/70">•</span> Code: <span className="font-semibold text-indigo-200">OFF50</span>
+          </span>
+          <span className="text-xs sm:text-sm font-medium hidden sm:inline">
+            Hurry! Get <span className="font-semibold text-indigo-200">50% off</span> your first month on any monthly plan
           </span>
           <span className="text-indigo-200/70 hidden sm:inline">•</span>
-          <span className="bg-white/15 text-white px-2.5 sm:px-3 py-1 rounded-md font-medium text-xs sm:text-sm">
+          <span className="bg-white/15 text-white px-2.5 sm:px-3 py-1 rounded-md font-medium text-xs sm:text-sm hidden sm:inline-flex">
             Code: <span className="text-indigo-200 font-bold">OFF50</span>
           </span>
         </div>
