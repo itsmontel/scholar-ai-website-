@@ -16,6 +16,10 @@ interface FlashcardViewerProps {
   onCardsChange?: (cards: FlashCard[]) => void;
   onLoadPrevious?: () => void;
   isCreateFromScratch?: boolean;
+  /** When provided, shows an enlarge button to open in full page */
+  onEnlarge?: () => void;
+  /** When provided, shows Save to Study Tools button - called with (title, cards) */
+  onSaveToStudyTools?: (title: string, cards: { front: string; back: string }[]) => void | Promise<void>;
 }
 
 type ThemeId = 'classic' | 'ocean' | 'forest' | 'sunset' | 'violet' | 'monochrome';
@@ -133,10 +137,17 @@ const FlashcardViewer = ({
   onCardsChange,
   onLoadPrevious,
   isCreateFromScratch = false,
+  onEnlarge,
+  onSaveToStudyTools,
 }: FlashcardViewerProps) => {
   const [cards, setCards] = useState<FlashCard[]>(() =>
     initialCards.map((c, i) => ({ id: `card-${i}-${Date.now()}`, front: c.front, back: c.back }))
   );
+  const [deckTitle, setDeckTitle] = useState(title);
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [currentCard, setCurrentCard] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
   const [knownCards, setKnownCards] = useState<Set<number>>(new Set());
@@ -166,6 +177,29 @@ const FlashcardViewer = ({
       setKnownCards(new Set());
     }
   }, [initialCards]);
+
+  useEffect(() => {
+    setDeckTitle(title);
+  }, [title]);
+
+  const handleSaveToStudyTools = async () => {
+    if (!onSaveToStudyTools || cards.length === 0) return;
+    const trimmedTitle = deckTitle.trim() || 'My Flashcards';
+    setIsSaving(true);
+    setSaveSuccess(false);
+    setSaveError(null);
+    try {
+      await onSaveToStudyTools(trimmedTitle, cards.map(c => ({ front: c.front, back: c.back })));
+      setDeckTitle(trimmedTitle);
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 2500);
+    } catch (err: any) {
+      setSaveError(err?.message || 'Failed to save');
+      setTimeout(() => setSaveError(null), 4000);
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   useEffect(() => {
     onCardsChange?.(cards);
@@ -317,9 +351,22 @@ const FlashcardViewer = ({
             <h3 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-violet-700 to-purple-700 dark:from-violet-400 dark:to-purple-400 bg-clip-text text-transparent mb-3">
               Create Your Deck
             </h3>
-            <p className="text-stone-500 dark:text-stone-400 text-sm sm:text-base max-w-md mx-auto mb-8">
+            <p className="text-stone-500 dark:text-stone-400 text-sm sm:text-base max-w-md mx-auto mb-4">
               Build custom flashcards from scratch or load one of your previously saved decks to continue studying
             </p>
+            {/* Deck name - show when creating from scratch */}
+            {isCreateFromScratch && (
+              <div className="mb-6 max-w-xs mx-auto">
+                <label className="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1.5">Deck name</label>
+                <input
+                  type="text"
+                  value={deckTitle}
+                  onChange={e => setDeckTitle(e.target.value)}
+                  placeholder="e.g. Biology Chapter 5"
+                  className="w-full px-4 py-2.5 rounded-xl border border-violet-200 dark:border-violet-700 bg-white dark:bg-stone-800 text-stone-800 dark:text-stone-100 placeholder-stone-400 focus:ring-2 focus:ring-violet-500 focus:border-transparent text-sm"
+                />
+              </div>
+            )}
             
             {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mb-8">
@@ -445,7 +492,35 @@ const FlashcardViewer = ({
     <div className="space-y-4">
       {/* Header with title and controls */}
       <div className="flex items-center justify-between flex-wrap gap-3">
-        <h3 className="text-lg font-bold text-stone-800 dark:text-stone-100">{title}</h3>
+        <div className="flex items-center gap-2 min-w-0">
+          {isEditingTitle ? (
+            <input
+              type="text"
+              value={deckTitle}
+              onChange={e => setDeckTitle(e.target.value)}
+              onBlur={() => setIsEditingTitle(false)}
+              onKeyDown={e => { if (e.key === 'Enter') setIsEditingTitle(false); }}
+              autoFocus
+              className="text-lg font-bold text-stone-800 dark:text-stone-100 bg-stone-100 dark:bg-stone-700 rounded-lg px-2 py-1 border border-violet-200 dark:border-violet-700 focus:ring-2 focus:ring-violet-500 focus:border-transparent min-w-[120px] max-w-[240px]"
+              placeholder="Set name"
+            />
+          ) : (
+            <h3
+              onClick={() => setIsEditingTitle(true)}
+              className="text-lg font-bold text-stone-800 dark:text-stone-100 cursor-pointer hover:text-violet-600 dark:hover:text-violet-400 transition-colors truncate max-w-[200px] sm:max-w-[280px]"
+              title="Click to rename"
+            >
+              {deckTitle || 'Flashcards'}
+            </h3>
+          )}
+          <button
+            onClick={() => setIsEditingTitle(true)}
+            className="p-1 text-stone-400 hover:text-violet-600 dark:hover:text-violet-400 rounded transition-colors shrink-0"
+            title="Rename set"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+          </button>
+        </div>
         <div className="flex items-center gap-2 flex-wrap">
           {canExport && onExportPDF && (
             <button onClick={onExportPDF} className="px-3 py-1.5 bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 font-medium rounded-lg hover:bg-red-100 dark:hover:bg-red-900/50 transition-colors flex items-center gap-1.5 text-xs">
@@ -471,6 +546,34 @@ const FlashcardViewer = ({
             <button onClick={onNewDeck} className="px-3 py-1.5 text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/30 rounded-lg hover:bg-amber-100 dark:hover:bg-amber-900/50 font-medium transition-colors text-xs">
               New Deck
             </button>
+          )}
+          {onEnlarge && (
+            <button onClick={onEnlarge} className="px-3 py-1.5 text-sky-700 dark:text-sky-400 bg-sky-50 dark:bg-sky-900/30 rounded-lg hover:bg-sky-100 dark:hover:bg-sky-900/50 font-medium transition-colors text-xs flex items-center gap-1.5" title="Open in full page">
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" /></svg>
+              Enlarge
+            </button>
+          )}
+          {onSaveToStudyTools && cards.length > 0 && (
+            <div className="flex items-center gap-2">
+              {saveError && (
+                <span className="text-xs text-red-600 dark:text-red-400 max-w-[120px] truncate" title={saveError}>{saveError}</span>
+              )}
+              <button
+                onClick={handleSaveToStudyTools}
+                disabled={isSaving}
+                className={`px-3 py-1.5 font-medium rounded-lg transition-colors text-xs flex items-center gap-1.5 ${saveSuccess ? 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400' : 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/50'}`}
+                title="Save to Study Tools"
+              >
+                {isSaving ? (
+                  <span className="w-3.5 h-3.5 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+                ) : saveSuccess ? (
+                  <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>
+                ) : (
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" /></svg>
+                )}
+                {saveSuccess ? 'Saved!' : isSaving ? 'Saving...' : 'Save to Study Tools'}
+              </button>
+            </div>
           )}
         </div>
       </div>

@@ -58,6 +58,24 @@ const HumanizerPage = ({ onNavigate, user, onLogout }: HumanizerPageProps) => {
     }
   }, [user]);
 
+  useEffect(() => {
+    const saved = localStorage.getItem('humanizerOpenData');
+    if (!saved) return;
+    try {
+      const data = JSON.parse(saved);
+      localStorage.removeItem('humanizerOpenData');
+      if (data.inputText) setInputText(data.inputText);
+      if (data.humanizedResult) {
+        setHumanizedResult(data.humanizedResult);
+        setShowResult(true);
+      }
+      if (data.humanizeMode) setHumanizeMode(data.humanizeMode);
+      if (data.humanizeIntensity) setHumanizeIntensity(data.humanizeIntensity);
+    } catch (_) {
+      localStorage.removeItem('humanizerOpenData');
+    }
+  }, []);
+
   const fetchUsage = async () => {
     try {
       const token = localStorage.getItem('authToken');

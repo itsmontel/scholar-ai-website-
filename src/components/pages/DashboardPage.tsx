@@ -19,13 +19,14 @@ import { saveAs } from 'file-saver';
 import { trackAction, syncFromAPIData, trackExport, trackCopy } from '../../data/achievements';
 import { getResetsInText, getExpiringSoonCount, getExpiringSoonUrgencyText, getDaysUntilExpiration } from '../../utils/usageReset';
 import { resolveTutorial } from '../../utils/onboarding';
+import InteractiveLessonPage from './tools/InteractiveLessonPage';
 
 interface DashboardProps {
   onNavigate: (page: string) => void;
   user: any;
   onLogout: () => void;
   onUserUpdate?: (updates: { welcomeTutorialCompleted?: boolean }) => void;
-  initialMode?: 'analyze' | 'citations' | 'humanize' | 'summarize' | 'quiz';
+  initialMode?: 'analyze' | 'citations' | 'humanize' | 'summarize' | 'quiz' | 'lesson';
 }
 
 const getTimeGreeting = (): { greeting: string; emoji: string } => {
@@ -90,7 +91,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
   const [isActivityLoading, setIsActivityLoading] = useState(true);
   const [showAnalysisPopup, setShowAnalysisPopup] = useState(false);
   const [analysisComplete, setAnalysisComplete] = useState(false);
-  const [mode, setMode] = useState<'analyze' | 'citations' | 'humanize' | 'summarize' | 'quiz'>(initialMode);
+  const [mode, setMode] = useState<'analyze' | 'citations' | 'humanize' | 'summarize' | 'quiz' | 'lesson'>(initialMode);
 
   // Sync tab when navigating to dashboard via footer (e.g. "Analyze Essay" or "Citations")
   useEffect(() => {
@@ -816,6 +817,59 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
       onNavigate(activity.navigateTo);
     }
     setSearchQuery('');
+  };
+
+  const handleEnlargeQuiz = () => {
+    if (!quizResult?.questions?.length) return;
+    const payload = {
+      title: quizResult.title || 'Quiz',
+      questions: quizResult.questions,
+      quiz_type: quizResult.quizType || quizResult.quiz_type || 'mixed',
+      difficulty: quizResult.difficulty || 'medium',
+      question_count: quizResult.questionCount ?? quizResult.questions?.length ?? 10,
+      source_word_count: quizResult.sourceWordCount ?? 0
+    };
+    localStorage.setItem('savedQuiz', JSON.stringify(payload));
+    onNavigate('quiz-generator');
+  };
+
+  const handleEnlargeFlashcards = () => {
+    if (!flashcardResult?.cards?.length) return;
+    const payload = {
+      title: flashcardResult.title || 'Flashcards',
+      questions: flashcardResult.cards,
+      source_word_count: flashcardResult.sourceWordCount ?? 0
+    };
+    localStorage.setItem('savedFlashcards', JSON.stringify(payload));
+    onNavigate('flashcard-generator');
+  };
+
+  const handleEnlargeCrossword = () => {
+    if (!crosswordResult?.placedWords?.length) return;
+    const payload = {
+      title: crosswordResult.title || 'Crossword',
+      questions: {
+        grid: crosswordResult.grid,
+        clues: crosswordResult.clues,
+        gridSize: crosswordResult.gridSize,
+        placedWords: crosswordResult.placedWords
+      },
+      source_word_count: crosswordResult.sourceWordCount ?? 0
+    };
+    localStorage.setItem('savedCrossword', JSON.stringify(payload));
+    onNavigate('crossword-generator');
+  };
+
+  const handleEnlargeHumanize = () => {
+    if (!showHumanizeResult || !humanizedResult) return;
+    localStorage.setItem('humanizerOpenData', JSON.stringify({ inputText, humanizedResult, humanizeMode, humanizeIntensity }));
+    onNavigate('humanizer');
+  };
+
+  const handleEnlargeSummarize = () => {
+    if (!summaryResult) return;
+    localStorage.setItem('summarizerOpenData', JSON.stringify({ inputText, summaryResult, summaryStyle, summaryLength }));
+    onNavigate('summarizer');
   };
 
   const getWordCount = (text: string) => {
@@ -2112,6 +2166,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                 { id: 'humanize' as const, icon: '✨', title: 'Humanize', desc: 'Transform AI text into natural human writing', mobileDesc: 'Humanize AI text', gradient: 'from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/15', border: 'border-violet-200/70 dark:border-violet-700/40', activeBorder: 'border-violet-400 dark:border-violet-500 ring-2 ring-violet-300/50 dark:ring-violet-600/40', iconBg: 'bg-gradient-to-br from-violet-400 to-purple-500', accentColor: 'text-violet-600 dark:text-violet-400', pro: true, setStudyMode: null },
                 { id: 'summarize_tool' as const, icon: '📋', title: 'Summarize', desc: 'Condense papers and articles instantly', mobileDesc: 'Summarize text', gradient: 'from-teal-50 to-cyan-50 dark:from-teal-900/20 dark:to-cyan-900/15', border: 'border-teal-200/70 dark:border-teal-700/40', activeBorder: 'border-teal-400 dark:border-teal-500 ring-2 ring-teal-300/50 dark:ring-teal-600/40', iconBg: 'bg-gradient-to-br from-teal-400 to-cyan-500', accentColor: 'text-teal-600 dark:text-teal-400', pro: false, setStudyMode: null },
                 { id: 'crater_blast' as const, icon: '🚀', title: 'Crater Blast', desc: 'Play the learning game with your content', mobileDesc: 'Quiz game', gradient: 'from-violet-900/30 to-purple-900/40 dark:from-violet-900/30 dark:to-purple-900/40', border: 'border-violet-200/70 dark:border-violet-700/40', activeBorder: 'border-violet-500 dark:border-violet-500 ring-2 ring-violet-400/50 dark:ring-violet-600/40', iconBg: 'bg-gradient-to-br from-violet-600 to-purple-700', accentColor: 'text-violet-600 dark:text-violet-300', pro: false, setStudyMode: 'crater_blast' as const, badge: 'NEW' },
+                { id: 'lesson' as const, icon: '🎓', title: 'Lessons', desc: 'Turn text into engaging interactive lessons', mobileDesc: 'Interactive lessons', gradient: 'from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/15', border: 'border-violet-200/70 dark:border-violet-700/40', activeBorder: 'border-violet-400 dark:border-violet-500 ring-2 ring-violet-300/50 dark:ring-violet-600/40', iconBg: 'bg-gradient-to-br from-violet-400 to-purple-500', accentColor: 'text-violet-600 dark:text-violet-400', pro: false, setStudyMode: null, badge: 'NEW' },
               ] as const).map(tool => (
                 <button
                   key={tool.id}
@@ -2121,6 +2176,8 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                       if (tool.setStudyMode) setStudyToolMode(tool.setStudyMode);
                     } else if (tool.id === 'summarize_tool') {
                       setMode('summarize');
+                    } else if (tool.id === 'lesson') {
+                      setMode('lesson');
                     } else {
                       setMode(tool.id as 'analyze' | 'citations' | 'humanize');
                     }
@@ -2128,7 +2185,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                     setShowWordWarning(false);
                     if (tool.id !== 'humanize') setShowHumanizeResult(false);
                     if (tool.id !== 'summarize_tool') setSummaryResult(null);
-                    if (tool.id !== 'quiz' && tool.id !== 'flashcards' && tool.id !== 'crater_blast') { setQuizResult(null); setFlashcardResult(null); setCrosswordResult(null); }
+                    if (tool.id !== 'quiz' && tool.id !== 'flashcards' && tool.id !== 'crater_blast' && tool.id !== 'lesson') { setQuizResult(null); setFlashcardResult(null); setCrosswordResult(null); }
                   }}
                   className={`relative p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl border bg-white dark:bg-stone-800 text-left transition-all duration-200 group active:scale-[0.98] sm:hover:shadow-2xl sm:hover:-translate-y-1 overflow-hidden ${
                     (mode === tool.id && !['quiz', 'flashcards', 'crater_blast'].includes(tool.id)) ||
@@ -2159,23 +2216,6 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                   )}
                 </button>
               ))}
-              {/* Interactive Lesson */}
-              <button
-                onClick={() => onNavigate('interactive-lesson')}
-                className="relative p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl border border-violet-200/60 dark:border-violet-700/40 bg-gradient-to-br from-violet-50/80 via-white to-purple-50/80 dark:from-violet-900/20 dark:via-stone-800 dark:to-purple-900/20 text-left transition-all duration-200 group active:scale-[0.98] sm:hover:shadow-2xl sm:hover:-translate-y-1 sm:hover:border-violet-400 dark:sm:hover:border-violet-500 sm:hover:shadow-violet-500/20 overflow-hidden"
-              >
-                <div className="absolute top-0 right-0 w-16 sm:w-24 h-16 sm:h-24 rounded-full -translate-y-1/2 translate-x-1/2 bg-gradient-to-br from-violet-400 to-purple-500 opacity-40 sm:group-hover:opacity-60 transition-opacity" />
-                <div className="absolute bottom-2 left-2 w-6 sm:w-8 h-6 sm:h-8 rounded-lg bg-violet-300/20 dark:bg-violet-600/20 rotate-12 sm:group-hover:scale-110 transition-transform" />
-                <div className="relative z-10 w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-violet-400 to-purple-500 rounded-xl sm:rounded-2xl flex items-center justify-center mb-2.5 sm:mb-4 group-active:scale-95 sm:group-hover:scale-110 sm:group-hover:rotate-3 transition-all duration-300 shadow-md sm:shadow-lg shadow-violet-500/30">
-                  <span className="text-xl sm:text-2xl">🎓</span>
-                </div>
-                <h3 className="font-bold text-sm sm:text-base leading-tight text-violet-700 dark:text-violet-300 sm:group-hover:text-violet-800 dark:sm:group-hover:text-violet-200 transition-colors">Lessons</h3>
-                <p className="text-stone-500 dark:text-stone-400 text-[11px] sm:text-xs mt-1 sm:mt-2 leading-relaxed line-clamp-2">
-                  <span className="hidden sm:inline">Turn text into engaging interactive lessons</span>
-                  <span className="sm:hidden">Interactive lessons</span>
-                </p>
-                <span className="absolute top-2 right-2 sm:top-3 sm:right-3 px-1.5 sm:px-2 py-0.5 sm:py-1 text-[8px] sm:text-[10px] font-bold rounded-md sm:rounded-lg bg-gradient-to-r from-emerald-500 to-teal-500 text-white leading-none shadow-md z-20 animate-pulse">NEW</span>
-              </button>
               </div>
 
               {/* More Tools Link - Subtle */}
@@ -2191,6 +2231,13 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
               </div>
             </div>
             )}
+
+        {/* LESSON MODE - Interactive Lesson Generator inline */}
+        {mode === 'lesson' && (
+          <div className="min-h-0 flex-1 overflow-auto">
+            <InteractiveLessonPage onNavigate={onNavigate} user={user} onLogout={onLogout} embedded onBack={() => setMode('analyze')} />
+          </div>
+        )}
 
         {/* ANALYZE MODE - Upload First Design - Mobile optimized */}
         {mode === 'analyze' && (
@@ -2541,6 +2588,9 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                           >
                             {humanizeCopied ? (<> <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg> Copied! </>) : (<> <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg> Copy All </>)}
                           </button>
+                          <button onClick={handleEnlargeHumanize} className="p-1.5 text-sky-600 dark:text-sky-400 hover:bg-sky-50 dark:hover:bg-sky-900/20 rounded-lg transition-colors" title="Open in full page">
+                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" /></svg>
+                          </button>
                         </>
                       )}
                     </div>
@@ -2801,12 +2851,17 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                       )}
                     </div>
                     {summaryResult && (
-                      <button
-                        onClick={() => { navigator.clipboard.writeText(summaryResult.summary); setSummaryCopied(true); setTimeout(() => setSummaryCopied(false), 2000); trackCopy(); }}
-                        className={`text-xs font-medium ${summaryCopied ? 'text-teal-600' : 'text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300'}`}
-                      >
-                        {summaryCopied ? '✓ Copied!' : 'Copy'}
-                      </button>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => { navigator.clipboard.writeText(summaryResult.summary); setSummaryCopied(true); setTimeout(() => setSummaryCopied(false), 2000); trackCopy(); }}
+                          className={`text-xs font-medium ${summaryCopied ? 'text-teal-600' : 'text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300'}`}
+                        >
+                          {summaryCopied ? '✓ Copied!' : 'Copy'}
+                        </button>
+                        <button onClick={handleEnlargeSummarize} className="p-1.5 text-sky-600 dark:text-sky-400 hover:bg-sky-50 dark:hover:bg-sky-900/20 rounded-lg transition-colors" title="Open in full page">
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" /></svg>
+                        </button>
+                      </div>
                     )}
                   </div>
                   <div className="flex-1 min-h-[280px] sm:min-h-[350px] max-h-[350px] overflow-y-auto">
@@ -2945,6 +3000,11 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                 {/* Quiz Taking View - Mobile optimized */}
                 {quizResult && isQuizMode && (
                   <div className={`bg-white dark:bg-stone-800 rounded-2xl sm:rounded-3xl shadow-xl border border-gray-100 dark:border-stone-700 overflow-hidden mb-6 ${!canUseQuiz ? 'opacity-50 pointer-events-none' : ''}`}>
+                    <div className="flex justify-end p-2 sm:p-3 border-b border-stone-100 dark:border-stone-700">
+                      <button onClick={handleEnlargeQuiz} className="p-2 text-stone-500 hover:text-sky-600 dark:text-stone-400 dark:hover:text-sky-400 rounded-lg hover:bg-sky-50 dark:hover:bg-sky-900/20 transition-colors" title="Open in full page">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" /></svg>
+                      </button>
+                    </div>
                     {quizCompleted ? (
                       <div className="p-5 sm:p-8 text-center">
                         <div className={`w-16 h-16 sm:w-24 sm:h-24 mx-auto rounded-full flex items-center justify-center mb-3 sm:mb-4 text-2xl sm:text-4xl ${userAnswers.filter(a => a.isCorrect).length / userAnswers.length >= 0.7 ? 'bg-gradient-to-br from-green-500 to-emerald-600' : 'bg-gradient-to-br from-amber-500 to-orange-600'}`}>🏆</div>
@@ -3239,6 +3299,19 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                       canExport={isPaidUser}
                       onLoadPrevious={() => (onNavigate as (p: string, s?: string, o?: { quizHistoryFilter?: string }) => void)('quiz-history', undefined, { quizHistoryFilter: 'flashcards' })}
                       isCreateFromScratch={!flashcardResult.cards || flashcardResult.cards.length === 0}
+                      onEnlarge={handleEnlargeFlashcards}
+                      onSaveToStudyTools={user ? async (title, cards) => {
+                        const token = localStorage.getItem('authToken') || localStorage.getItem('token');
+                        if (!token) { onNavigate('signup'); return; }
+                        const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/analysis/save-flashcards`, {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                          body: JSON.stringify({ title, cards, sourceText: inputText })
+                        });
+                        const data = await res.json();
+                        if (!res.ok) throw new Error(data.message || 'Failed to save');
+                        trackAction('flashcards_count');
+                      } : undefined}
                     />
                   </div>
                 ) : (
@@ -3362,8 +3435,11 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                 {crosswordResult && crosswordResult.placedWords?.length > 0 ? (
                   <div className="mb-6">
                     <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
-                      <h3 className="text-lg font-bold text-gray-900">{crosswordResult.title}</h3>
+                      <h3 className="text-lg font-bold text-gray-900 dark:text-stone-100">{crosswordResult.title}</h3>
                       <div className="flex items-center gap-2 flex-wrap">
+                        <button onClick={handleEnlargeCrossword} className="p-2 text-stone-500 hover:text-sky-600 dark:text-stone-400 dark:hover:text-sky-400 rounded-lg hover:bg-sky-50 dark:hover:bg-sky-900/20 transition-colors" title="Open in full page">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" /></svg>
+                        </button>
                         {isPaidUser ? (
                           <>
                             <button onClick={exportCrosswordToPDF} className="px-3 py-1.5 bg-red-50 text-red-700 font-medium rounded-lg hover:bg-red-100 transition-colors flex items-center gap-1.5 text-xs">

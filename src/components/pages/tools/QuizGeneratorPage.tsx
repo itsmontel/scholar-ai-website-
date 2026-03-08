@@ -102,6 +102,7 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
   // Minimal UI when loaded from dashboard recents or study tools history (no header, footer, or features section)
   const [showMinimalUI, setShowMinimalUI] = useState(false);
   const [openedFromHistory, setOpenedFromHistory] = useState(false);
+  const [openedFromDashboard, setOpenedFromDashboard] = useState(false);
   useEffect(() => {
     const minimal = localStorage.getItem('writescholar_minimal_ui') === 'true';
     if (minimal) {
@@ -165,7 +166,9 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
         setShowQuizReview(false);
         setError(null);
         setShowMinimalUI(true);
-        setOpenedFromHistory(true);
+        const fromDashboard = sessionStorage.getItem('writescholar_enlarge_from_dashboard') === 'quiz';
+        setOpenedFromDashboard(fromDashboard);
+        setOpenedFromHistory(!fromDashboard);
       }
     } catch (e) {
       console.error('Failed to load saved quiz:', e);
@@ -192,7 +195,9 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
         setStudyToolMode('flashcards');
         setError(null);
         setShowMinimalUI(true);
-        setOpenedFromHistory(true);
+        const fromDashboard = sessionStorage.getItem('writescholar_enlarge_from_dashboard') === 'flashcards';
+        setOpenedFromDashboard(fromDashboard);
+        setOpenedFromHistory(!fromDashboard);
       }
     } catch (e) {
       console.error('Failed to load saved flashcards:', e);
@@ -227,7 +232,9 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
         setHintsUsed(0);
         setError(null);
         setShowMinimalUI(true);
-        setOpenedFromHistory(true);
+        const fromDashboard = sessionStorage.getItem('writescholar_enlarge_from_dashboard') === 'crossword';
+        setOpenedFromDashboard(fromDashboard);
+        setOpenedFromHistory(!fromDashboard);
       }
     } catch (e) {
       console.error('Failed to load saved crossword:', e);
@@ -1531,7 +1538,7 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
         {/* Hero Section - minimal bar when loaded from recents */}
         {showMinimalUI ? (
           <div className="sticky top-0 z-10 flex items-center gap-3 px-4 sm:px-6 py-4 bg-white/95 dark:bg-stone-800/95 backdrop-blur border-b border-stone-200 dark:border-stone-700">
-            <button onClick={() => onNavigate(openedFromHistory ? 'quiz-history' : 'dashboard')} className="p-2.5 -ml-2 text-stone-500 hover:text-stone-700 dark:text-stone-400 dark:hover:text-stone-200 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-700 transition-colors" aria-label={openedFromHistory ? 'Back to study tools' : 'Back to dashboard'}>
+            <button onClick={() => onNavigate(openedFromDashboard ? 'dashboard' : openedFromHistory ? 'quiz-history' : 'dashboard')} className="p-2.5 -ml-2 text-stone-500 hover:text-stone-700 dark:text-stone-400 dark:hover:text-stone-200 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-700 transition-colors" aria-label={openedFromDashboard ? 'Back to dashboard' : openedFromHistory ? 'Back to study tools' : 'Back to dashboard'}>
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
             </button>
             <span className="text-sm font-medium text-stone-600 dark:text-stone-400">
@@ -1696,6 +1703,18 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
                       onNewDeck={() => setFlashcardResult(null)}
                       canExport={isPaidUser}
                       onLoadPrevious={() => (onNavigate as (p: string, s?: string, o?: { quizHistoryFilter?: string }) => void)('quiz-history', undefined, { quizHistoryFilter: 'flashcards' })}
+                      onSaveToStudyTools={user ? async (title, cards) => {
+                        const token = localStorage.getItem('authToken') || localStorage.getItem('token');
+                        if (!token) { onNavigate('signup'); return; }
+                        const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/analysis/save-flashcards`, {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                          body: JSON.stringify({ title, cards, sourceText: inputText })
+                        });
+                        const data = await res.json();
+                        if (!res.ok) throw new Error(data.message || 'Failed to save');
+                        trackAction('flashcards_count');
+                      } : undefined}
                     />
                   </div>
                 ) : (

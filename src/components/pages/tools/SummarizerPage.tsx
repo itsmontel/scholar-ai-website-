@@ -47,6 +47,21 @@ const SummarizerPage = ({ onNavigate, user, onLogout }: SummarizerPageProps) => 
     }
   }, []);
 
+  useEffect(() => {
+    const saved = localStorage.getItem('summarizerOpenData');
+    if (!saved) return;
+    try {
+      const data = JSON.parse(saved);
+      localStorage.removeItem('summarizerOpenData');
+      if (data.inputText) setInputText(data.inputText);
+      if (data.summaryResult) setSummaryResult(data.summaryResult);
+      if (data.summaryStyle) setStyle(data.summaryStyle);
+      if (data.summaryLength) setLength(data.summaryLength);
+    } catch (_) {
+      localStorage.removeItem('summarizerOpenData');
+    }
+  }, []);
+
   const handleSummarize = async () => {
     if (!inputText.trim()) return;
 

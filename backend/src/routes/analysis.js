@@ -583,6 +583,47 @@ router.post('/save-lesson', authenticateToken, async (req, res) => {
   }
 });
 
+// @route   POST /api/analysis/save-flashcards
+// @desc    Save a flashcard set to study tools (manual or generated)
+// @access  Private
+router.post('/save-flashcards', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const userPlan = req.user.subscription_plan || req.user.plan || 'free';
+    const { title, cards, sourceText } = req.body;
+
+    if (!title || typeof title !== 'string' || !title.trim()) {
+      return res.status(400).json({ success: false, message: 'Flashcard set name is required' });
+    }
+    if (!cards || !Array.isArray(cards) || cards.length === 0) {
+      return res.status(400).json({ success: false, message: 'At least one flashcard is required' });
+    }
+
+    const flashcards = {
+      title: title.trim(),
+      cards: cards.map(c => ({
+        front: (c.front || '').trim(),
+        back: (c.back || '').trim()
+      })).filter(c => c.front || c.back)
+    };
+
+    if (flashcards.cards.length === 0) {
+      return res.status(400).json({ success: false, message: 'At least one flashcard with content is required' });
+    }
+
+    const saved = await aiAnalysisService.saveFlashcards(userId, flashcards, sourceText || '', userPlan);
+
+    if (!saved) {
+      return res.status(500).json({ success: false, message: 'Failed to save flashcards' });
+    }
+
+    res.json({ success: true, data: saved });
+  } catch (error) {
+    console.error('Save flashcards error:', error);
+    res.status(500).json({ success: false, message: error.message || 'Failed to save flashcards' });
+  }
+});
+
 // @route   GET /api/analysis/lesson-history
 // @desc    Get user's saved lessons
 // @access  Private

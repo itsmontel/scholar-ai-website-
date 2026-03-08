@@ -10,6 +10,10 @@ interface InteractiveLessonPageProps {
   onNavigate: (page: string) => void;
   user?: any;
   onLogout?: () => void;
+  /** When true, renders without Header/Footer for embedding in dashboard */
+  embedded?: boolean;
+  /** When embedded, called when user clicks back from lesson/quiz view */
+  onBack?: () => void;
 }
 
 interface LessonSlide {
@@ -57,7 +61,7 @@ interface UsageData {
   plan: string;
 }
 
-const InteractiveLessonPage = ({ onNavigate, user, onLogout }: InteractiveLessonPageProps) => {
+const InteractiveLessonPage = ({ onNavigate, user, onLogout, embedded = false, onBack }: InteractiveLessonPageProps) => {
   const [inputText, setInputText] = useState('');
   const [allLessons, setAllLessons] = useState<AllLessons | null>(null);
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -452,8 +456,8 @@ const InteractiveLessonPage = ({ onNavigate, user, onLogout }: InteractiveLesson
 
   if (showSignupPrompt) {
     return (
-      <div className="min-h-screen flex flex-col bg-gradient-to-b from-stone-50 to-white dark:bg-stone-900 dark:from-stone-900 dark:to-stone-800">
-        <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="interactive-lesson" />
+      <div className={`flex flex-col bg-gradient-to-b from-stone-50 to-white dark:bg-stone-900 dark:from-stone-900 dark:to-stone-800 ${embedded ? 'min-h-0' : 'min-h-screen'}`}>
+        {!embedded && <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="interactive-lesson" />}
         <main className="flex-1 flex items-center justify-center px-4">
           <div className="max-w-md w-full bg-white dark:bg-stone-800 rounded-2xl shadow-xl border border-stone-200 dark:border-stone-600 p-8 text-center">
             <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-violet-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg shadow-violet-500/30">
@@ -483,7 +487,7 @@ const InteractiveLessonPage = ({ onNavigate, user, onLogout }: InteractiveLesson
             </div>
           </div>
         </main>
-        <Footer onNavigate={onNavigate} />
+        {!embedded && <Footer onNavigate={onNavigate} />}
       </div>
     );
   }
@@ -491,22 +495,47 @@ const InteractiveLessonPage = ({ onNavigate, user, onLogout }: InteractiveLesson
   const isLessonFullScreen = !!lessonResult || showQuiz;
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-b from-stone-50 to-white dark:bg-stone-900 dark:from-stone-900 dark:to-stone-800 overflow-x-hidden">
-      {!isLessonFullScreen && <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="interactive-lesson" />}
+    <div className={`flex flex-col bg-gradient-to-b from-stone-50 to-white dark:bg-stone-900 dark:from-stone-900 dark:to-stone-800 overflow-x-hidden ${embedded ? 'min-h-0' : 'min-h-screen'}`}>
+      {!embedded && !isLessonFullScreen && <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="interactive-lesson" />}
 
       {/* Minimal top bar when in lesson/quiz full screen mode */}
       {isLessonFullScreen && (
         <div className="sticky top-0 z-20 flex items-center gap-3 px-4 sm:px-6 py-3 sm:py-4 bg-white/95 dark:bg-stone-800/95 backdrop-blur border-b border-stone-200 dark:border-stone-700">
           <button
-            onClick={showQuiz ? backToLesson : () => onNavigate('quiz-history')}
+            onClick={showQuiz ? backToLesson : () => { 
+              if (embedded && onBack) onBack(); 
+              else if (typeof sessionStorage !== 'undefined' && sessionStorage.getItem('writescholar_enlarge_from_dashboard') === 'lesson') onNavigate('dashboard'); 
+              else onNavigate('quiz-history'); 
+            }}
             className="p-2.5 -ml-2 text-stone-500 hover:text-stone-700 dark:text-stone-400 dark:hover:text-stone-200 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-700 transition-colors"
-            aria-label="Back to study tools"
+            aria-label={showQuiz ? 'Back to lesson' : typeof sessionStorage !== 'undefined' && sessionStorage.getItem('writescholar_enlarge_from_dashboard') === 'lesson' ? 'Back to dashboard' : 'Back to study tools'}
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
           </button>
           <span className="text-sm font-medium text-stone-600 dark:text-stone-400 truncate flex-1 min-w-0">
             {showQuiz ? 'Lesson Quiz' : lessonResult ? lessonResult.title : 'Lesson'}
           </span>
+          {embedded && lessonResult && !showQuiz && (
+            <button
+              onClick={() => {
+                const payload = {
+                  title: lessonResult.title,
+                  questions: lessonResult.slides,
+                  difficulty: lessonStyle,
+                  question_count: lessonResult.slides.length,
+                  estimated_read_time: lessonResult.estimatedReadTime,
+                  quiz_bank: lessonResult.quizBank || [],
+                  quiz_display_count: lessonResult.quizDisplayCount ?? 6
+                };
+                localStorage.setItem('savedLesson', JSON.stringify(payload));
+                onNavigate('interactive-lesson');
+              }}
+              className="p-2 text-stone-500 hover:text-sky-600 dark:text-stone-400 dark:hover:text-sky-400 rounded-lg hover:bg-sky-50 dark:hover:bg-sky-900/20 transition-colors"
+              title="Open in full page"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" /></svg>
+            </button>
+          )}
         </div>
       )}
       
@@ -1322,7 +1351,7 @@ One click = 3 unique lessons!
         )}
       </main>
 
-      {!isLessonFullScreen && <Footer onNavigate={onNavigate} />}
+      {!embedded && !isLessonFullScreen && <Footer onNavigate={onNavigate} />}
 
       {/* Same popup style as citation search / essay analysis */}
       {(isLoading || showFakeAnimation) && (
