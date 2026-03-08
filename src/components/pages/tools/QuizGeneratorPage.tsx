@@ -133,10 +133,10 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
   }, [quiz, retakeKey]);
 
   useEffect(() => {
-    document.title = 'AI Quiz Generator – Create Quizzes from Documents | WriteScholar';
+    document.title = 'Quiz Generator from Text – Free AI Quiz Maker | WriteScholar';
     const metaDescription = document.querySelector('meta[name="description"]');
     if (metaDescription) {
-      metaDescription.setAttribute('content', 'Turn any article, textbook, or research paper into interactive quizzes. Multiple choice, true/false, and fill-in-the-blank questions. Free plan: 3 quizzes/month.');
+      metaDescription.setAttribute('content', 'Free quiz generator from text: paste notes or articles and get multiple-choice, true/false, fill-in-the-blank quizzes in seconds. Best free Quizlet alternative. No signup to start.');
     }
   }, []);
 

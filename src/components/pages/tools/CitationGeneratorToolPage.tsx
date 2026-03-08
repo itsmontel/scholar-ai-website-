@@ -86,10 +86,10 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
 
   // SEO: Set page title and meta description
   useEffect(() => {
-    document.title = 'Free Citation Generator - APA, MLA, Chicago, Harvard | WriteScholar';
+    document.title = 'Free Citation Generator – APA, MLA, Chicago, Harvard | WriteScholar';
     const metaDescription = document.querySelector('meta[name="description"]');
     if (metaDescription) {
-      metaDescription.setAttribute('content', 'Free citation generator for APA, MLA, Chicago, Harvard, IEEE, and Vancouver styles. Create accurate citations for books, journals, websites, and more. No signup required.');
+      metaDescription.setAttribute('content', 'Free online citation generator. Create APA, MLA, Chicago, Harvard citations for books, journals, websites. Generate citations instantly—no signup. Trusted by students.');
     }
   }, []);
   const [copied, setCopied] = useState(false);
