@@ -55,7 +55,7 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
       icon: '🆓',
       features: [
         '3 documents per month',
-        '3 AI essay analyses per month',
+        '1 AI essay analysis per month',
         '3 study tool generations/month',
         '5,000 words/month Humanizer & Summarizer',
         '2 citation searches per month',
@@ -65,14 +65,14 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
     },
     {
       id: 'starter',
-      name: 'Starter',
+      name: 'Pro',
       price: billingCycle === 'monthly' ? 19.99 : 199.99,
       interval: billingCycle === 'monthly' ? 'month' : 'year',
       description: 'Most popular for students',
       icon: '🚀',
       features: [
         'Unlimited document uploads',
-        '999 AI essay analyses per month',
+        '99 AI essay analyses per month',
         'Unlimited quiz, flashcard & crossword generation',
         '999,999 words/month Humanizer & Summarizer',
         '99 citation searches per month',
@@ -91,10 +91,11 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
       description: 'For researchers and institutions',
       icon: '⭐',
       features: [
-        'Everything in Starter',
+        'Everything in Pro',
+        '199 AI essay analyses per month',
+        '199 citation searches per month',
         'Our top-tier premium AI model',
         'All quiz types & difficulty levels unlocked',
-        '199 citation searches per month',
         'All summarizer styles & lengths unlocked',
         'Advanced AI essay analysis',
         'Advanced grammar and style checking',
@@ -540,7 +541,7 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
                 {usageStats.analysesRemaining === -1 ? '∞' : usageStats.analysesRemaining}
               </div>
               <div className="text-xs text-stone-500">
-                {currentPlan === 'free' ? 'analyses remaining' : '999/month'}
+                {currentPlan === 'free' ? 'analyses remaining' : currentPlan === 'starter' ? '99/month' : '199/month'}
               </div>
             </div>
 

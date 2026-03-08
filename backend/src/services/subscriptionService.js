@@ -11,7 +11,7 @@ const supabase = createClient(
 const PLAN_LIMITS = {
   free: {
     documentsPerMonth: 3,
-    analysesPerMonth: 3,
+    analysesPerMonth: 1,
     citationSearchesPerMonth: 2,
     humanizeWordsPerMonth: 5000,
     summarizeWordsPerMonth: 5000,
@@ -30,7 +30,7 @@ const PLAN_LIMITS = {
   },
   starter: {
     documentsPerMonth: -1,
-    analysesPerMonth: 999,
+    analysesPerMonth: 99,
     citationSearchesPerMonth: 99,
     humanizeWordsPerMonth: 999999,
     summarizeWordsPerMonth: 999999,
@@ -45,12 +45,12 @@ const PLAN_LIMITS = {
     maxDocumentSize: 25 * 1024 * 1024,
     maxTotalStorage: 25 * 1024 * 1024,
     maxAnalysisPercentage: 100,
-    name: 'Starter',
+    name: 'Pro',
     price: 19.99
   },
   premium: {
     documentsPerMonth: -1,
-    analysesPerMonth: 999,
+    analysesPerMonth: 199,
     citationSearchesPerMonth: 199,
     humanizeWordsPerMonth: 999999,
     summarizeWordsPerMonth: 999999,

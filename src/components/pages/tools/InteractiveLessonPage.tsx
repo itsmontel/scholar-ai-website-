@@ -925,7 +925,7 @@ One click = 3 unique lessons!
                         <p className="text-violet-800 dark:text-violet-200 font-medium text-sm">
                           {isFreeUser 
                             ? `Free plan: ${usage.generationsRemaining}/${usage.generationLimit} lesson${usage.generationLimit === 1 ? '' : 's'} remaining this month`
-                            : `${userPlan === 'premium' ? 'Premium' : 'Starter'}: ${usage.generationsRemaining.toLocaleString()}/${usage.generationLimit} lessons remaining`
+                            : `${userPlan === 'premium' ? 'Premium' : 'Pro'}: ${usage.generationsRemaining.toLocaleString()}/${usage.generationLimit} lessons remaining`
                           }
                         </p>
                         <p className="text-violet-600 dark:text-violet-400 text-xs mt-0.5">

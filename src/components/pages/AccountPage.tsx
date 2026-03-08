@@ -399,11 +399,11 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
                   <div className="font-semibold text-stone-800">Plan Features</div>
                   <div className="text-stone-600">
                     {userStats.subscriptionPlan === 'free'
-                      ? '3 documents per month, Basic analysis, Standard support'
+                      ? '3 documents, 1 analysis per month, 2 citation searches'
                       : userStats.subscriptionPlan === 'starter'
-                      ? '50 documents per month, Advanced analysis, Priority support'
+                      ? 'Unlimited documents, 99 analyses, 99 citation searches (Pro)'
                       : userStats.subscriptionPlan === 'premium'
-                      ? 'Unlimited documents, Premium analysis, 24/7 support'
+                      ? 'Unlimited documents, 199 analyses, 199 citation searches (Premium)'
                       : 'Basic features included'
                     }
                   </div>
@@ -416,27 +416,33 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
                 <div className="space-y-2 text-sm text-stone-600">
                   {userStats.subscriptionPlan === 'free' && (
                     <>
-                      <div>• 5 document analyses per month</div>
-                      <div>• Basic writing feedback</div>
-                      <div>• Standard email support</div>
-                      <div>• Basic citation checking</div>
+                      <div>• 3 documents per month</div>
+                      <div>• 1 AI essay analysis per month</div>
+                      <div>• 2 citation searches per month</div>
+                      <div>• 5,000 Humanizer/Summarizer words</div>
+                      <div>• 3 study tool generations (quiz/flashcards/crossword)</div>
                     </>
                   )}
                   {userStats.subscriptionPlan === 'starter' && (
                     <>
-                      <div>• 50 document analyses per month</div>
-                      <div>• Advanced writing feedback</div>
-                      <div>• Priority email support</div>
-                      <div>• Advanced citation checking</div>
+                      <div>• Unlimited document uploads</div>
+                      <div>• 99 AI essay analyses per month</div>
+                      <div>• 99 citation searches per month</div>
+                      <div>• 999,999 Humanizer/Summarizer words</div>
+                      <div>• Unlimited study tool generations</div>
+                      <div>• PDF & Word export</div>
                     </>
                   )}
                   {userStats.subscriptionPlan === 'premium' && (
                     <>
-                      <div>• Unlimited document analyses</div>
-                      <div>• Premium AI writing feedback</div>
-                      <div>• 24/7 priority support</div>
-                      <div>• Custom citation styles</div>
-                      <div>• Bulk document processing</div>
+                      <div>• Everything in Pro</div>
+                      <div>• 199 AI essay analyses per month</div>
+                      <div>• 199 citation searches per month</div>
+                      <div>• Top-tier premium AI model</div>
+                      <div>• All quiz types & difficulty levels</div>
+                      <div>• All summarizer styles & lengths</div>
+                      <div>• Advanced essay analysis</div>
+                      <div>• Priority support</div>
                     </>
                   )}
                 </div>

@@ -2052,7 +2052,7 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
               </div>
             )}
 
-            {/* Plan Info for free and starter users */}
+            {/* Plan Info for free and Pro users */}
             {user && !isPremiumUser && !quizExhausted && !quiz && !flashcardResult && !crosswordResult && (
               <div className="mt-6 mx-3 sm:mx-0">
 <div className="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border border-amber-200 dark:border-amber-800 rounded-2xl p-5 flex items-center justify-between flex-wrap gap-3">
@@ -2068,7 +2068,7 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
                         </>
                       ) : (
                         <>
-                          <p className="text-amber-800 dark:text-amber-200 font-medium text-sm">Starter plan: Mixed type + Medium difficulty only</p>
+                          <p className="text-amber-800 dark:text-amber-200 font-medium text-sm">Pro plan: Mixed type + Medium difficulty only</p>
                           <p className="text-amber-600 dark:text-amber-400 text-xs mt-0.5">Upgrade to Premium for all quiz types, difficulties, and our premium AI model</p>
                         </>
                       )}

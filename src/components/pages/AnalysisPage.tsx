@@ -54,6 +54,26 @@ interface Annotation {
   suggestion?: string;
 }
 
+interface RubricCriterion {
+  criterion: string;
+  status: 'met' | 'partially_met' | 'not_met';
+  score_estimate?: string;
+  assessment: string;
+  evidence?: string;
+  suggestions?: string[];
+}
+
+interface RubricAlignment {
+  success: boolean;
+  result: string;
+  criteria: RubricCriterion[];
+  missingElements: string[];
+  priorityImprovements: string[];
+  overallAssessment: string;
+  timestamp: string;
+  model: string;
+}
+
 interface AnalysisResult {
   success: boolean;
   data: {
@@ -64,6 +84,7 @@ interface AnalysisResult {
     annotations?: Annotation[];
     isContentLimited?: boolean;
     maxAnalysisPercentage?: number;
+    rubricAlignment?: RubricAlignment | null;
   };
 }
 
@@ -91,7 +112,13 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
   const [currentPlan, setCurrentPlan] = useState<string>('free');
   const [isExporting, setIsExporting] = useState(false);
   const [cameFromLibrary, setCameFromLibrary] = useState(false);
+  const [showRubricSection, setShowRubricSection] = useState(true);
+  const [rubricContent, setRubricContent] = useState<string>('');
+  const [rubricInputMode, setRubricInputMode] = useState<'paste' | 'upload'>('paste');
+  const [isParsingRubric, setIsParsingRubric] = useState(false);
+  const [rubricAlignment, setRubricAlignment] = useState<any>(null);
   const documentRef = useRef<HTMLDivElement>(null);
+  const rubricFileInputRef = useRef<HTMLInputElement>(null);
 
   // Mobile detection utility
   const isMobileDevice = () => {
@@ -599,6 +626,9 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
           setSelectedAnalysisType(analysis.analysis_type || 'comprehensive');
           setSelectedCitationStyle(analysisResults.citation_style || 'None');
           
+          // Restore rubric alignment from saved analysis (or clear if none)
+          setRubricAlignment(analysisResults.rubric_alignment || null);
+          
           console.log('=== ANALYSIS LOADED SUCCESSFULLY ===');
           console.log('Final annotations count:', annotations.length);
         } else {
@@ -691,10 +721,46 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
     setAnalysisResult('');
     setAnnotations([]);
     setDocumentContent('');
+    setRubricAlignment(null);
     
     // If user came from Library, navigate back to Library
     if (cameFromLibrary && onNavigate) {
       onNavigate('library');
+    }
+  };
+
+  const handleRubricFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    e.target.value = '';
+
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+      setError('Please log in to upload files');
+      return;
+    }
+
+    setIsParsingRubric(true);
+    setError('');
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const res = await fetch(`${apiUrl}/analysis/parse-document`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Failed to parse rubric file');
+      setRubricContent(data.data.content || '');
+    } catch (err: any) {
+      console.error('Rubric upload error:', err);
+      setError(err.message || 'Failed to parse rubric file');
+    } finally {
+      setIsParsingRubric(false);
     }
   };
 
@@ -786,6 +852,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
           analysisType: selectedAnalysisType,
           citationStyle: selectedCitationStyle,
           educationLevel: selectedEducationLevel,
+          rubricContent: rubricContent.trim() || undefined,
         }),
       });
 
@@ -796,6 +863,10 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
 
       const result: AnalysisResult = await response.json();
       setAnalysisResult(result.data.result);
+      
+      if (result.data.rubricAlignment) {
+        setRubricAlignment(result.data.rubricAlignment);
+      }
       
       // Check if content was limited by the backend
       if (result.data.isContentLimited) {
@@ -1100,7 +1171,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
               </div>
               <button
                 onClick={() => onNavigate?.('billing')}
-                className="px-6 py-2 bg-gradient-to-r from-indigo-500 to-violet-600 text-white rounded-lg hover:from-indigo-400 hover:to-violet-500 transition-colors"
+                className="px-6 py-2 bg-gradient-to-r from-violet-500 to-purple-600 text-white rounded-lg hover:from-violet-400 hover:to-purple-500 transition-colors font-semibold shadow-lg shadow-violet-500/25"
               >
                 Upgrade Now
               </button>
@@ -1257,7 +1328,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
             </div>
             <button
               onClick={() => onNavigate?.('billing')}
-              className="px-6 py-2 bg-lime-400 text-stone-900 rounded-lg hover:bg-lime-300 transition-colors"
+              className="px-6 py-2 bg-gradient-to-r from-violet-500 to-purple-600 text-white rounded-lg hover:from-violet-400 hover:to-purple-500 transition-colors font-semibold shadow-lg shadow-violet-500/25"
             >
               Upgrade Now
             </button>
@@ -1377,9 +1448,10 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
         )}
 
         {!analysisResult ? (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Analysis Configuration */}
-            <div className="bg-white border border-stone-200 rounded-2xl p-6 sm:p-8">
+          <>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+            {/* Analysis Configuration - left column */}
+            <div className="bg-white border border-stone-200 rounded-2xl p-6 sm:p-8 min-h-0">
               <h2 className="text-xl font-bold text-stone-900 mb-6">Configure Analysis</h2>
               
               {/* Document Selection */}
@@ -1547,8 +1619,8 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
               </button>
             </div>
 
-            {/* Document Preview */}
-            <div className="bg-white border border-stone-200 rounded-2xl p-6 sm:p-8">
+            {/* Document Preview - right column, row 1 */}
+            <div className="bg-white border border-stone-200 rounded-2xl p-6 sm:p-8 min-h-[700px]">
               <h2 className="text-xl font-bold text-stone-900 mb-6">Document Preview</h2>
               
               {!selectedDocument && !documentContent ? (
@@ -1569,8 +1641,8 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                   <p className="mt-4 text-stone-600">Loading document preview...</p>
                 </div>
               ) : previewContent || documentContent ? (
-                <div className="max-h-[500px] overflow-y-auto">
-                  <div className="bg-stone-50 rounded-xl p-5 border border-stone-200">
+                <div className="relative min-h-[600px] max-h-[800px] overflow-y-auto">
+                  <div className="relative z-0 bg-stone-50 rounded-xl p-5 border border-stone-200">
                     <div className="flex items-center justify-between mb-4">
                       <h3 className="font-medium text-stone-900">
                         {selectedDocument 
@@ -1593,6 +1665,124 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                   <p className="mt-4 text-center text-sm text-gray-500">
                     This is the content that will be analyzed. Click "Analyze Document" to begin.
                   </p>
+
+                  {/* Rubric / Requirements - directly below */}
+                  <div className="mt-2 border border-stone-200 rounded-xl overflow-hidden bg-white shadow-sm">
+                    <button
+                      type="button"
+                      onClick={() => setShowRubricSection(!showRubricSection)}
+                      className="flex items-center justify-between w-full px-4 py-3.5 bg-stone-50 hover:bg-stone-100 transition-colors text-left"
+                    >
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
+                        <span className="text-xl flex-shrink-0">📋</span>
+                        <div className="min-w-0 flex-1">
+                          <div className="font-medium text-stone-900 text-sm">Add Rubric or Requirements</div>
+                          <div className="text-stone-600 text-xs mt-1">
+                            {rubricContent ? 'Rubric added — will be compared against your essay' : 'Optional — compare your essay against assignment criteria'}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 flex-shrink-0 ml-2">
+                        {rubricContent && (
+                          <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs font-medium rounded-full">Added</span>
+                        )}
+                        <svg className={`w-5 h-5 text-stone-500 transition-transform ${showRubricSection ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </div>
+                    </button>
+
+                    {showRubricSection && (
+                      <div className="px-4 pb-4 pt-1 border-t border-stone-200 bg-white space-y-4">
+                        <div className="flex space-x-2">
+                          <button
+                            type="button"
+                            onClick={() => setRubricInputMode('paste')}
+                            className={`flex-1 px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                              rubricInputMode === 'paste'
+                                ? 'bg-violet-100 text-violet-700 border border-violet-300'
+                                : 'bg-white text-stone-600 border border-stone-200 hover:bg-stone-100'
+                            }`}
+                          >
+                            Paste Text
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setRubricInputMode('upload')}
+                            className={`flex-1 px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                              rubricInputMode === 'upload'
+                                ? 'bg-violet-100 text-violet-700 border border-violet-300'
+                                : 'bg-white text-stone-600 border border-stone-200 hover:bg-stone-100'
+                            }`}
+                          >
+                            Upload File
+                          </button>
+                        </div>
+
+                        {rubricInputMode === 'paste' ? (
+                          <textarea
+                            value={rubricContent}
+                            onChange={(e) => setRubricContent(e.target.value)}
+                            placeholder="Paste your rubric, essay question, or assignment requirements here..."
+                            className="w-full px-4 py-3 text-sm border-2 border-stone-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-colors resize-y min-h-[120px] bg-white text-stone-900 placeholder-stone-400"
+                            rows={5}
+                            disabled={isAnalyzing}
+                          />
+                        ) : (
+                          <div>
+                            <input
+                              ref={rubricFileInputRef}
+                              type="file"
+                              accept=".pdf,.doc,.docx,.txt"
+                              onChange={handleRubricFileUpload}
+                              className="hidden"
+                              disabled={isAnalyzing || isParsingRubric}
+                            />
+                            <button
+                              type="button"
+                              onClick={() => rubricFileInputRef.current?.click()}
+                              disabled={isAnalyzing || isParsingRubric}
+                              className="w-full px-4 py-6 border-2 border-dashed border-stone-300 rounded-xl text-stone-500 hover:border-violet-400 hover:text-violet-600 hover:bg-violet-50 transition-colors disabled:opacity-50"
+                            >
+                              {isParsingRubric ? (
+                                <div className="flex items-center justify-center space-x-2">
+                                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-violet-600"></div>
+                                  <span className="text-sm">Parsing rubric file...</span>
+                                </div>
+                              ) : (
+                                <div className="text-center">
+                                  <svg className="w-8 h-8 mx-auto mb-2 text-stone-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                  </svg>
+                                  <span className="text-sm font-medium">Upload rubric (PDF, DOCX, TXT)</span>
+                                </div>
+                              )}
+                            </button>
+                          </div>
+                        )}
+
+                        {rubricContent && (
+                          <div className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-lg">
+                            <div className="flex items-center space-x-2">
+                              <svg className="w-4 h-4 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                              </svg>
+                              <span className="text-sm text-green-700 font-medium">
+                                Rubric loaded ({rubricContent.split(/\s+/).filter(Boolean).length} words)
+                              </span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => setRubricContent('')}
+                              className="text-sm text-red-500 hover:text-red-700 font-medium"
+                            >
+                              Remove
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
               ) : selectedDocument ? (
                 <div className="text-center py-16">
@@ -1609,8 +1799,10 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
               ) : null}
             </div>
           </div>
+          </>
         ) : (
-          /* Premium Analysis Results Display */
+          <>
+          {/* Premium Analysis Results Display */}
           <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
             {/* Results Header */}
             <div className="bg-gray-900 text-white px-6 py-5">
@@ -1706,7 +1898,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                                 Unlock Full Document
                               </h3>
                               <p className="text-gray-600 mb-6 max-w-md mx-auto">
-                                You're viewing 50% of your document. Upgrade to Starter or Premium to unlock the remaining content and get full AI analysis.
+                                You're viewing 50% of your document. Upgrade to Pro or Premium to unlock the remaining content and get full AI analysis.
                               </p>
                               
                               {/* Blurred text preview */}
@@ -1720,7 +1912,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                               <div className="flex flex-col sm:flex-row justify-center items-center space-y-3 sm:space-y-0 sm:space-x-4">
                                 <button
                                   onClick={() => onNavigate?.('billing')}
-                                  className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-xl hover:shadow-2xl transform hover:scale-105 flex items-center justify-center space-x-2"
+                                  className="w-full sm:w-auto bg-gradient-to-r from-violet-500 to-purple-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:from-violet-400 hover:to-purple-500 transition-all duration-200 shadow-xl shadow-violet-500/25 hover:shadow-violet-500/30 transform hover:scale-105 flex items-center justify-center space-x-2"
                                 >
                                   <span>🚀</span>
                                   <span>Upgrade Now</span>
@@ -1851,7 +2043,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                           </p>
                           <button
                             onClick={() => onNavigate?.('billing')}
-                            className="px-4 py-2 text-sm bg-gradient-to-r from-indigo-500 to-violet-600 text-white rounded-lg hover:from-indigo-600 hover:to-violet-700 transition-colors font-medium"
+                            className="px-4 py-2 text-sm bg-gradient-to-r from-violet-500 to-purple-600 text-white rounded-lg hover:from-violet-400 hover:to-purple-500 transition-colors font-medium shadow-md shadow-violet-500/20"
                           >
                             Upgrade
                           </button>
@@ -1885,6 +2077,229 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
               </div>
             </div>
           </div>
+
+          {/* Rubric Alignment Results */}
+          {rubricAlignment && (
+            <div className="mt-8 bg-white dark:bg-stone-800 rounded-2xl sm:rounded-3xl border border-stone-200/60 dark:border-stone-700/40 shadow-lg shadow-stone-200/50 dark:shadow-stone-900/50 overflow-hidden">
+              {/* Rubric Header - matches dashboard Analyze tool style */}
+              <div className="bg-gradient-to-r from-rose-500 to-pink-600 text-white px-6 py-5 shadow-lg shadow-rose-500/25">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
+                    <span className="text-xl sm:text-2xl">📋</span>
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold">Rubric Alignment</h2>
+                    <p className="text-rose-100 text-sm mt-0.5">How your essay measures up against the rubric criteria</p>
+                  </div>
+                </div>
+              </div>
+
+              {currentPlan === 'free' ? (
+                /* Free users: show 50% of rubric content + CTA to upgrade (like document preview) */
+                <div className="p-6 relative">
+                  {/* Overall Assessment - truncated to 50% */}
+                  {rubricAlignment.overallAssessment && (
+                    <div className="mb-6 p-4 sm:p-5 bg-gradient-to-br from-rose-50 to-pink-50 dark:from-rose-900/20 dark:to-pink-900/20 border border-rose-200/70 dark:border-rose-700/40 rounded-2xl shadow-sm">
+                      <h3 className="font-semibold text-rose-700 dark:text-rose-300 mb-2">Overall Assessment</h3>
+                      <p className="text-sm text-stone-700 dark:text-stone-300 leading-relaxed">
+                        {rubricAlignment.overallAssessment.length > 1
+                          ? rubricAlignment.overallAssessment.substring(0, Math.floor(rubricAlignment.overallAssessment.length / 2)) + '...'
+                          : rubricAlignment.overallAssessment}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Score Summary */}
+                  {rubricAlignment.criteria && rubricAlignment.criteria.length > 0 && (
+                    <div className="flex flex-wrap gap-4 mb-6">
+                      <div className="flex-1 min-w-[100px] p-3 bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 border border-emerald-200/70 dark:border-emerald-700/40 rounded-2xl text-center shadow-sm">
+                        <span className="text-xl font-bold text-emerald-700 dark:text-emerald-300">{rubricAlignment.criteria.filter((c: any) => c.status === 'met').length}</span>
+                        <p className="text-xs text-emerald-600 dark:text-emerald-400 font-medium mt-1">Criteria Met</p>
+                      </div>
+                      <div className="flex-1 min-w-[100px] p-3 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border border-amber-200/70 dark:border-amber-700/40 rounded-2xl text-center shadow-sm">
+                        <span className="text-xl font-bold text-amber-700 dark:text-amber-300">{rubricAlignment.criteria.filter((c: any) => c.status === 'partially_met').length}</span>
+                        <p className="text-xs text-amber-600 dark:text-amber-400 font-medium mt-1">Partially Met</p>
+                      </div>
+                      <div className="flex-1 min-w-[100px] p-3 bg-gradient-to-br from-rose-50 to-red-50 dark:from-rose-900/20 dark:to-red-900/20 border border-rose-200/70 dark:border-rose-700/40 rounded-2xl text-center shadow-sm">
+                        <span className="text-xl font-bold text-rose-700 dark:text-rose-300">{rubricAlignment.criteria.filter((c: any) => c.status === 'not_met').length}</span>
+                        <p className="text-xs text-rose-600 dark:text-rose-400 font-medium mt-1">Not Met</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* First 50% of criteria (show half the list) */}
+                  {rubricAlignment.criteria && rubricAlignment.criteria.length > 0 && (
+                    <div className="mb-6">
+                      <h3 className="text-lg font-bold text-stone-900 dark:text-stone-100 mb-4">Criterion-by-Criterion Breakdown</h3>
+                      <div className="space-y-4">
+                        {rubricAlignment.criteria.slice(0, Math.ceil(rubricAlignment.criteria.length / 2)).map((criterion: any, index: number) => {
+                          const statusConfig: Record<string, { bg: string; border: string; icon: string; label: string; textColor: string }> = {
+                            met: { bg: 'from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20', border: 'border-emerald-200/70 dark:border-emerald-700/40', icon: '✅', label: 'Met', textColor: 'text-emerald-700 dark:text-emerald-300' },
+                            partially_met: { bg: 'from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20', border: 'border-amber-200/70 dark:border-amber-700/40', icon: '⚠️', label: 'Partially Met', textColor: 'text-amber-700 dark:text-amber-300' },
+                            not_met: { bg: 'from-rose-50 to-red-50 dark:from-rose-900/20 dark:to-red-900/20', border: 'border-rose-200/70 dark:border-rose-700/40', icon: '❌', label: 'Not Met', textColor: 'text-rose-700 dark:text-rose-300' }
+                          };
+                          const config = statusConfig[criterion.status] || statusConfig.partially_met;
+                          const truncatedAssessment = criterion.assessment ? criterion.assessment.substring(0, Math.floor(criterion.assessment.length / 2)) + '...' : criterion.assessment;
+                          return (
+                            <div key={index} className={`p-4 sm:p-5 bg-gradient-to-br ${config.bg} border ${config.border} rounded-2xl shadow-sm`}>
+                              <div className="flex items-start justify-between mb-2">
+                                <div className="flex items-center space-x-2">
+                                  <span>{config.icon}</span>
+                                  <h4 className="font-semibold text-stone-900 dark:text-stone-100">{criterion.criterion}</h4>
+                                </div>
+                                <span className={`px-2 py-0.5 rounded-lg text-xs font-medium ${config.textColor} bg-white/80 dark:bg-stone-800/80`}>{config.label}</span>
+                              </div>
+                              <p className="text-sm text-stone-700 dark:text-stone-300">{truncatedAssessment}</p>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Gradient overlay + CTA - like document preview */}
+                  <div className="relative mt-6 pt-8 -mb-2">
+                    <div className="absolute inset-0 bg-gradient-to-t from-white dark:from-stone-800 via-white/90 dark:via-stone-800/90 to-transparent pointer-events-none" style={{ marginTop: '-120px', height: '140px' }} />
+                    <div className="relative p-6 bg-gradient-to-r from-violet-50 to-indigo-50 dark:from-violet-900/20 dark:to-indigo-900/20 border border-violet-200/70 dark:border-violet-700/40 rounded-2xl">
+                      <div className="flex items-center space-x-3 mb-3">
+                        <div className="p-2 bg-gradient-to-br from-violet-500 to-purple-600 rounded-full">
+                          <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m0 0v2m0-2h2m-2 0H9m12-9V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-9z" />
+                          </svg>
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-semibold text-stone-900 dark:text-stone-100">Want to see the full rubric alignment?</h3>
+                          <p className="text-sm text-stone-600 dark:text-stone-400">Upgrade to view the complete criterion breakdown, evidence quotes, suggestions, missing elements, and priority improvements.</p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => onNavigate?.('billing')}
+                        className="px-6 py-2.5 bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-400 hover:to-purple-500 text-white rounded-xl font-semibold transition-all shadow-lg shadow-violet-500/25 hover:shadow-violet-500/30"
+                      >
+                        Upgrade to View Full Analysis
+                      </button>
+                      <p className="text-xs text-stone-500 dark:text-stone-500 mt-2">Starting at $19.99/month</p>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                /* Full rubric results for paid users */
+                <div className="p-6">
+                  {/* Overall Assessment - dashboard card style */}
+                  {rubricAlignment.overallAssessment && (
+                    <div className="mb-6 p-4 sm:p-5 bg-gradient-to-br from-rose-50 to-pink-50 dark:from-rose-900/20 dark:to-pink-900/20 border border-rose-200/70 dark:border-rose-700/40 rounded-2xl shadow-sm">
+                      <h3 className="font-semibold text-rose-700 dark:text-rose-300 mb-2">Overall Assessment</h3>
+                      <p className="text-sm text-stone-700 dark:text-stone-300 leading-relaxed">{rubricAlignment.overallAssessment}</p>
+                    </div>
+                  )}
+
+                  {/* Score Summary - dashboard card style */}
+                  {rubricAlignment.criteria && rubricAlignment.criteria.length > 0 && (
+                    <div className="flex flex-wrap gap-4 mb-6">
+                      <div className="flex-1 min-w-[120px] p-4 bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 border border-emerald-200/70 dark:border-emerald-700/40 rounded-2xl text-center shadow-sm">
+                        <span className="text-2xl font-bold text-emerald-700 dark:text-emerald-300">{rubricAlignment.criteria.filter((c: any) => c.status === 'met').length}</span>
+                        <p className="text-sm text-emerald-600 dark:text-emerald-400 font-medium mt-1">Criteria Met</p>
+                      </div>
+                      <div className="flex-1 min-w-[120px] p-4 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border border-amber-200/70 dark:border-amber-700/40 rounded-2xl text-center shadow-sm">
+                        <span className="text-2xl font-bold text-amber-700 dark:text-amber-300">{rubricAlignment.criteria.filter((c: any) => c.status === 'partially_met').length}</span>
+                        <p className="text-sm text-amber-600 dark:text-amber-400 font-medium mt-1">Partially Met</p>
+                      </div>
+                      <div className="flex-1 min-w-[120px] p-4 bg-gradient-to-br from-rose-50 to-red-50 dark:from-rose-900/20 dark:to-red-900/20 border border-rose-200/70 dark:border-rose-700/40 rounded-2xl text-center shadow-sm">
+                        <span className="text-2xl font-bold text-rose-700 dark:text-rose-300">{rubricAlignment.criteria.filter((c: any) => c.status === 'not_met').length}</span>
+                        <p className="text-sm text-rose-600 dark:text-rose-400 font-medium mt-1">Not Met</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Criterion-by-Criterion Breakdown - dashboard card style */}
+                  {rubricAlignment.criteria && rubricAlignment.criteria.length > 0 && (
+                    <div className="mb-6">
+                      <h3 className="text-lg font-bold text-stone-900 dark:text-stone-100 mb-4">Criterion-by-Criterion Breakdown</h3>
+                      <div className="space-y-4">
+                        {rubricAlignment.criteria.map((criterion: any, index: number) => {
+                          const statusConfig = {
+                            met: { bg: 'from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20', border: 'border-emerald-200/70 dark:border-emerald-700/40', icon: '✅', label: 'Met', textColor: 'text-emerald-700 dark:text-emerald-300' },
+                            partially_met: { bg: 'from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20', border: 'border-amber-200/70 dark:border-amber-700/40', icon: '⚠️', label: 'Partially Met', textColor: 'text-amber-700 dark:text-amber-300' },
+                            not_met: { bg: 'from-rose-50 to-red-50 dark:from-rose-900/20 dark:to-red-900/20', border: 'border-rose-200/70 dark:border-rose-700/40', icon: '❌', label: 'Not Met', textColor: 'text-rose-700 dark:text-rose-300' }
+                          };
+                          const config = statusConfig[criterion.status as keyof typeof statusConfig] || statusConfig.partially_met;
+
+                          return (
+                            <div key={index} className={`p-4 sm:p-5 bg-gradient-to-br ${config.bg} border ${config.border} rounded-2xl shadow-sm`}>
+                              <div className="flex items-start justify-between mb-2">
+                                <div className="flex items-center space-x-2">
+                                  <span>{config.icon}</span>
+                                  <h4 className="font-semibold text-stone-900 dark:text-stone-100">{criterion.criterion}</h4>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                  {criterion.score_estimate && criterion.score_estimate !== 'N/A' && (
+                                    <span className="px-2 py-0.5 bg-white/80 dark:bg-stone-800/80 rounded-lg text-sm font-medium text-stone-700 dark:text-stone-300">{criterion.score_estimate}</span>
+                                  )}
+                                  <span className={`px-2 py-0.5 rounded-lg text-xs font-medium ${config.textColor} bg-white/80 dark:bg-stone-800/80`}>{config.label}</span>
+                                </div>
+                              </div>
+                              <p className="text-sm text-stone-700 dark:text-stone-300 mb-2">{criterion.assessment}</p>
+                              {criterion.evidence && criterion.evidence !== 'No relevant content found' && (
+                                <div className="mb-2 p-3 bg-white/60 dark:bg-stone-800/60 rounded-xl border border-stone-200/60 dark:border-stone-600/40">
+                                  <p className="text-xs text-stone-500 dark:text-stone-400 font-medium mb-1">Evidence from essay:</p>
+                                  <p className="text-sm text-stone-700 dark:text-stone-300 italic">"{criterion.evidence}"</p>
+                                </div>
+                              )}
+                              {criterion.suggestions && criterion.suggestions.length > 0 && (
+                                <div className="mt-2">
+                                  <p className="text-xs text-stone-500 dark:text-stone-400 font-medium mb-1">Suggestions:</p>
+                                  <ul className="space-y-1">
+                                    {criterion.suggestions.map((suggestion: string, sIdx: number) => (
+                                      <li key={sIdx} className="text-sm text-stone-600 dark:text-stone-400 flex items-start space-x-2">
+                                        <span className="text-rose-500 dark:text-rose-400 mt-0.5">•</span>
+                                        <span>{suggestion}</span>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Missing Elements - dashboard card style */}
+                  {rubricAlignment.missingElements && rubricAlignment.missingElements.length > 0 && (
+                    <div className="mb-6 p-4 sm:p-5 bg-gradient-to-br from-rose-50 to-red-50 dark:from-rose-900/20 dark:to-red-900/20 border border-rose-200/70 dark:border-rose-700/40 rounded-2xl shadow-sm">
+                      <h3 className="font-semibold text-rose-700 dark:text-rose-300 mb-3">Missing Elements</h3>
+                      <p className="text-sm text-stone-700 dark:text-stone-300 mb-2">The following rubric requirements are not addressed in your essay:</p>
+                      <ul className="space-y-2">
+                        {rubricAlignment.missingElements.map((element: string, index: number) => (
+                          <li key={index} className="flex items-start space-x-2 text-sm text-stone-700 dark:text-stone-300">
+                            <span className="mt-0.5 text-rose-500">❌</span>
+                            <span>{element}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* Priority Improvements - dashboard card style */}
+                  {rubricAlignment.priorityImprovements && rubricAlignment.priorityImprovements.length > 0 && (
+                    <div className="p-4 sm:p-5 bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20 border border-violet-200/70 dark:border-violet-700/40 rounded-2xl shadow-sm">
+                      <h3 className="font-semibold text-violet-700 dark:text-violet-300 mb-3">Priority Improvements</h3>
+                      <ol className="space-y-2">
+                        {rubricAlignment.priorityImprovements.map((improvement: string, index: number) => (
+                          <li key={index} className="flex items-start space-x-3 text-sm text-stone-700 dark:text-stone-300">
+                            <span className="flex-shrink-0 w-6 h-6 bg-gradient-to-br from-violet-400 to-purple-500 text-white rounded-full flex items-center justify-center text-xs font-bold shadow-sm">{index + 1}</span>
+                            <span>{improvement}</span>
+                          </li>
+                        ))}
+                      </ol>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+          </>
         )}
 
         {/* Hover Tooltip - Mobile Responsive */}

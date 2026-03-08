@@ -76,9 +76,9 @@ const TermsOfServicePage: React.FC<TermsOfServicePageProps> = ({ onNavigate, use
               <div className="space-y-4 text-stone-600 dark:text-stone-400">
                 <p>WriteScholar offers the following plans:</p>
                 <ul className="list-disc list-inside space-y-2 ml-4">
-                  <li><strong>Free</strong> — limited monthly usage: 5,000 words for Humanizer, 5,000 words for Summarizer, 3 study tool generations (quiz/flashcards/crossword), 2 citation searches per month, essay analysis included</li>
-                  <li><strong>Starter ($19.99/month)</strong> — unlimited quiz generations, 999,999 words/month for Humanizer and Summarizer, 99 citation searches per month; mixed quiz type and medium difficulty</li>
-                  <li><strong>Premium ($39.99/month)</strong> — all Starter features plus 199 citation searches per month, our top-tier premium AI model, all quiz types and difficulty levels, all summarizer styles and lengths, advanced essay analysis, and priority support</li>
+                  <li><strong>Free</strong> — 3 documents per month, 1 AI essay analysis per month, 5,000 words for Humanizer and Summarizer, 3 study tool generations (quiz/flashcards/crossword), 2 citation searches per month</li>
+                  <li><strong>Pro ($19.99/month)</strong> — unlimited documents, 99 AI essay analyses per month, unlimited quiz generations, 999,999 words/month for Humanizer and Summarizer, 99 citation searches per month; mixed quiz type and medium difficulty</li>
+                  <li><strong>Premium ($39.99/month)</strong> — all Pro features plus 199 AI essay analyses per month, 199 citation searches per month, our top-tier premium AI model, all quiz types and difficulty levels, all summarizer styles and lengths, advanced essay analysis, and priority support</li>
                 </ul>
                 <p>
                   Monthly usage limits reset on the 1st of each calendar month. Unused allowances do not carry

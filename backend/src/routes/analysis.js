@@ -1382,8 +1382,12 @@ router.post('/simple-analyze', authenticateToken, async (req, res) => {
  */
 router.post('/analyze', authenticateToken, validateCreateAnalysis, async (req, res) => {
   try {
-    const { documentId, content, analysisType, citationStyle, educationLevel } = req.body;
+    const { documentId, content, analysisType, citationStyle, educationLevel, rubricContent } = req.body;
     const userId = req.user.id;
+
+    if (rubricContent) {
+      console.log('Rubric/requirements content provided, length:', rubricContent.length);
+    }
 
     // Additional validation for citation review
     if (analysisType === 'citation_review') {
@@ -1493,12 +1497,30 @@ router.post('/analyze', authenticateToken, validateCreateAnalysis, async (req, r
       educationLevel || 'college'
     );
 
-    // Automatically save the analysis to database
+    // Run rubric alignment analysis first if rubric content was provided (so we can save it)
+    let rubricAlignment = null;
+    if (rubricContent && rubricContent.trim().length > 0) {
+      try {
+        console.log('Running rubric alignment analysis...');
+        rubricAlignment = await aiAnalysisService.analyzeRubricAlignment(
+          analysisContent,
+          rubricContent,
+          userId,
+          educationLevel || 'college'
+        );
+        console.log('Rubric alignment analysis completed successfully');
+      } catch (rubricError) {
+        console.error('Rubric analysis failed (non-blocking):', rubricError);
+      }
+    }
+
+    // Automatically save the analysis to database (including rubric alignment when present)
     try {
       console.log('=== SAVING ANALYSIS DEBUG ===');
       console.log('analysisDocumentId:', analysisDocumentId);
       console.log('userId:', userId);
       console.log('analysisType:', analysisType);
+      console.log('rubricAlignment:', rubricAlignment ? 'included' : 'none');
       
       const savedAnalysis = await aiAnalysisService.saveAnalysis(
         analysisDocumentId,
@@ -1507,7 +1529,8 @@ router.post('/analyze', authenticateToken, validateCreateAnalysis, async (req, r
         analysisResult.result,
         originalContent, // Save the full content, not the limited one
         analysisResult.annotations,
-        citationStyle
+        citationStyle,
+        rubricAlignment
       );
       
       console.log('Analysis automatically saved to database:', savedAnalysis.id);
@@ -1525,7 +1548,8 @@ router.post('/analyze', authenticateToken, validateCreateAnalysis, async (req, r
       data: {
         ...analysisResult,
         isContentLimited: isContentLimited,
-        maxAnalysisPercentage: planLimits.maxAnalysisPercentage
+        maxAnalysisPercentage: planLimits.maxAnalysisPercentage,
+        rubricAlignment: rubricAlignment
       }
     });
 

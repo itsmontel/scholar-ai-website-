@@ -564,7 +564,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
                                   : 'bg-stone-200 dark:bg-stone-700 text-stone-600 dark:text-stone-400'
                             }`}>
                               {usageStats?.plan === 'premium' && '⭐ '}
-                              {(usageStats?.plan || 'Free').charAt(0).toUpperCase() + (usageStats?.plan || 'free').slice(1)}
+                              {usageStats?.plan === 'starter' ? 'Pro' : usageStats?.plan === 'premium' ? 'Premium' : 'Free'}
                             </span>
                           </div>
                         </div>

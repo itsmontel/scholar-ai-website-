@@ -718,7 +718,7 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
                           ? 'text-stone-400 hover:text-stone-600 hover:bg-stone-100/50'
                           : 'text-stone-500 hover:text-stone-700 hover:bg-stone-100/50'
                     }`}
-                    title={isLocked ? (user ? 'Upgrade to Starter or Premium to use Study Notes' : 'Sign up for Starter or Premium to use Study Notes') : undefined}
+                    title={isLocked ? (user ? 'Upgrade to Pro or Premium to use Study Notes' : 'Sign up for Pro or Premium to use Study Notes') : undefined}
                   >
                     {isLocked && <span className="text-xs">🔒</span>}
                     {labels[mode]}

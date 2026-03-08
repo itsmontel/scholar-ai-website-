@@ -163,7 +163,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
       yearlyPrice: 0,
       features: [
         '3 documents per month',
-        '3 AI essay analyses per month',
+        '1 AI essay analysis per month',
         '3 study tool generations/month (quiz, flashcards, crossword)',
         '5,000 words/month for Humanizer & Summarizer',
         '2 citation searches per month',
@@ -181,13 +181,13 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
     },
     {
       id: 'starter',
-      name: 'Starter',
+      name: 'Pro',
       description: 'Most popular for students',
       monthlyPrice: 19.99,
       yearlyPrice: 199.99,
       features: [
         'Unlimited document uploads',
-        '999 AI essay analyses per month',
+        '99 AI essay analyses per month',
         'Unlimited quiz, flashcard & crossword generation',
         '999,999 words/month for Humanizer & Summarizer',
         '99 citation searches per month',
@@ -201,8 +201,8 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
       buttonText: !user 
         ? 'Try for Free' 
         : (currentPlan === 'free' 
-          ? (isTrialEligible ? 'Try for Free' : 'Upgrade to Starter') 
-          : 'Switch to Starter'),
+          ? (isTrialEligible ? 'Try for Free' : 'Upgrade to Pro') 
+          : 'Switch to Pro'),
       buttonAction: () => handlePlanAction('starter')
     },
     {
@@ -212,7 +212,8 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
       monthlyPrice: 39.99,
       yearlyPrice: 399.99,
       features: [
-        'Everything in Starter',
+        'Everything in Pro',
+        '199 AI essay analyses per month',
         '199 citation searches per month',
         'Our top-tier premium AI model',
         'All quiz types & difficulty levels unlocked',
@@ -235,15 +236,15 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
   const faqs = [
     {
       question: "How does the 7-day free trial work?",
-      answer: "New users get a 7-day free trial on Starter or Premium plans. Your card is collected at checkout but won't be charged until the trial ends. Cancel anytime during the trial to avoid charges. Each email address can only use one free trial."
+      answer: "New users get a 7-day free trial on Pro or Premium plans. Your card is collected at checkout but won't be charged until the trial ends. Cancel anytime during the trial to avoid charges. Each email address can only use one free trial."
     },
     {
       question: "What's included in the free plan?",
-      answer: "The free plan includes 3 documents per month, 3 AI essay analyses, 3 study tool generations (quiz, flashcards, or crossword), 5,000 words for the Humanizer and Summarizer, and 2 citation searches. It's perfect for students just getting started."
+      answer: "The free plan includes 3 documents per month, 1 AI essay analysis, 3 study tool generations (quiz, flashcards, or crossword), 5,000 words for the Humanizer and Summarizer, and 2 citation searches. It's perfect for students just getting started."
     },
     {
-      question: "What's the difference between Starter and Premium?",
-      answer: "Starter gives you unlimited documents, 999 AI analyses, unlimited study tool generations (quizzes, flashcards, crosswords), 999,999 Humanizer/Summarizer words, 99 citation searches per month, all citation styles, and PDF/Word export. Premium upgrades you to 199 citation searches per month, our top-tier premium AI model, all quiz types and difficulty levels, all summarizer styles and lengths, advanced essay analysis, advanced grammar checking, and priority support."
+      question: "What's the difference between Pro and Premium?",
+      answer: "Pro gives you unlimited documents, 99 AI analyses per month, unlimited study tool generations (quizzes, flashcards, crosswords), 999,999 Humanizer/Summarizer words, 99 citation searches per month, all citation styles, and PDF/Word export. Premium upgrades you to 199 analyses and 199 citation searches per month, our top-tier premium AI model, all quiz types and difficulty levels, all summarizer styles and lengths, advanced essay analysis, advanced grammar checking, and priority support."
     },
     {
       question: "Can I change my plan after subscribing?",

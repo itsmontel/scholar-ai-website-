@@ -249,6 +249,226 @@ class AIAnalysisService {
   }
 
   /**
+   * Analyze an essay against a rubric or set of requirements
+   * Runs as a separate analysis pass after the standard essay analysis
+   */
+  async analyzeRubricAlignment(essayContent, rubricContent, userId, educationLevel = 'college') {
+    try {
+      if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY === 'your_openai_api_key_here') {
+        console.log('🤖 Using mock rubric analysis (OpenAI API key not configured)');
+        return this.mockRubricAnalysis();
+      }
+
+      let selectedModel = process.env.OPENAI_STANDARD_MODEL || 'gpt-4o-mini';
+      let maxTokens = 6000;
+
+      try {
+        const { plan } = await subscriptionService.getUserSubscriptionDetails(userId);
+        if (plan === 'premium') {
+          selectedModel = process.env.OPENAI_PREMIUM_MODEL || 'gpt-5-mini';
+          maxTokens = 8000;
+        } else if (plan === 'starter') {
+          selectedModel = process.env.OPENAI_STANDARD_MODEL || 'gpt-4o-mini';
+          maxTokens = 6000;
+        }
+      } catch (planErr) {
+        console.log('Could not fetch plan for rubric analysis, using defaults');
+      }
+
+      const educationGuidance = educationLevel === 'sixth_form'
+        ? 'The student is in sixth form / high school (ages 16-18). Use clear, encouraging language and age-appropriate expectations.'
+        : educationLevel === 'middle_school'
+        ? 'The student is in middle school (ages 11-15). Be very encouraging, use simple language, and focus on foundational skills.'
+        : 'The student is at college/university level. Use rigorous academic standards.';
+
+      const systemPrompt = `You are an expert academic assessor who evaluates essays against rubrics and assignment requirements. You provide clear, actionable feedback that helps students understand exactly where their essay meets, partially meets, or falls short of each rubric criterion. ${educationGuidance}`;
+
+      const userPrompt = `Below is a student's essay and the rubric/requirements it should be evaluated against.
+
+=== RUBRIC / REQUIREMENTS ===
+${rubricContent}
+
+=== STUDENT'S ESSAY ===
+${essayContent}
+
+Please evaluate the essay against the rubric/requirements and return your analysis in the following JSON format:
+
+{
+  "overall_rubric_assessment": "A 2-3 sentence overview of how well the essay meets the rubric requirements overall.",
+  "criteria": [
+    {
+      "criterion": "Name of this rubric criterion or requirement",
+      "status": "met" | "partially_met" | "not_met",
+      "score_estimate": "If the rubric has point values, estimate the score (e.g. '8/10'). Otherwise use 'N/A'.",
+      "assessment": "Detailed explanation of how the essay performs on this criterion",
+      "evidence": "A direct quote from the essay that demonstrates the assessment (or 'No relevant content found' if the criterion is not addressed)",
+      "suggestions": ["Specific, actionable suggestion 1", "Specific, actionable suggestion 2"]
+    }
+  ],
+  "missing_elements": ["List of requirements from the rubric that the essay does not address at all"],
+  "priority_improvements": ["Top 3-5 most impactful changes the student should make to better meet the rubric requirements, ordered by importance"]
+}
+
+IMPORTANT:
+- Extract EVERY criterion or requirement from the rubric, even if the essay does not address it.
+- For each criterion, quote specific text from the essay as evidence.
+- Be constructive and specific in suggestions — tell the student exactly what to add or change and where.
+- If the rubric includes a grading scale or point breakdown, estimate scores for each criterion.`;
+
+      let completion;
+      try {
+        completion = await this.openai.chat.completions.create({
+          model: selectedModel,
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: userPrompt }
+          ],
+          max_tokens: maxTokens,
+          temperature: 0.3,
+        });
+      } catch (modelErr) {
+        if (selectedModel !== 'gpt-4o-mini') {
+          console.log(`Model ${selectedModel} failed for rubric analysis, falling back to gpt-4o-mini`);
+          selectedModel = 'gpt-4o-mini';
+          completion = await this.openai.chat.completions.create({
+            model: selectedModel,
+            messages: [
+              { role: 'system', content: systemPrompt },
+              { role: 'user', content: userPrompt }
+            ],
+            max_tokens: maxTokens,
+            temperature: 0.3,
+          });
+        } else {
+          throw modelErr;
+        }
+      }
+
+      const rawResult = completion.choices[0].message.content;
+      const parsed = this.parseRubricAnalysis(rawResult);
+
+      return {
+        success: true,
+        result: parsed.formattedResult,
+        criteria: parsed.criteria,
+        missingElements: parsed.missingElements,
+        priorityImprovements: parsed.priorityImprovements,
+        overallAssessment: parsed.overallAssessment,
+        timestamp: new Date().toISOString(),
+        model: selectedModel
+      };
+    } catch (error) {
+      console.error('Rubric Analysis Error:', error);
+      throw new Error(`Rubric analysis failed: ${error.message}`);
+    }
+  }
+
+  parseRubricAnalysis(rawResult) {
+    try {
+      const jsonMatch = rawResult.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) {
+        return {
+          formattedResult: rawResult,
+          criteria: [],
+          missingElements: [],
+          priorityImprovements: [],
+          overallAssessment: ''
+        };
+      }
+
+      const data = JSON.parse(jsonMatch[0]);
+      const criteria = data.criteria || [];
+      const missingElements = data.missing_elements || [];
+      const priorityImprovements = data.priority_improvements || [];
+      const overallAssessment = data.overall_rubric_assessment || '';
+
+      let formatted = `# Rubric Alignment Analysis\n\n`;
+      formatted += `## Overall Assessment\n${overallAssessment}\n\n`;
+
+      const metCount = criteria.filter(c => c.status === 'met').length;
+      const partialCount = criteria.filter(c => c.status === 'partially_met').length;
+      const notMetCount = criteria.filter(c => c.status === 'not_met').length;
+
+      formatted += `## Score Summary\n`;
+      formatted += `- **Met:** ${metCount} criteria\n`;
+      formatted += `- **Partially Met:** ${partialCount} criteria\n`;
+      formatted += `- **Not Met:** ${notMetCount} criteria\n\n`;
+
+      formatted += `## Criterion-by-Criterion Breakdown\n\n`;
+      criteria.forEach((c, i) => {
+        const statusIcon = c.status === 'met' ? '✅' : c.status === 'partially_met' ? '⚠️' : '❌';
+        formatted += `### ${statusIcon} ${c.criterion}\n`;
+        if (c.score_estimate && c.score_estimate !== 'N/A') {
+          formatted += `**Estimated Score:** ${c.score_estimate}\n\n`;
+        }
+        formatted += `${c.assessment}\n\n`;
+        if (c.evidence && c.evidence !== 'No relevant content found') {
+          formatted += `**Evidence from essay:** "${c.evidence}"\n\n`;
+        }
+        if (c.suggestions && c.suggestions.length > 0) {
+          formatted += `**Suggestions:**\n`;
+          c.suggestions.forEach(s => {
+            formatted += `- ${s}\n`;
+          });
+          formatted += '\n';
+        }
+      });
+
+      if (missingElements.length > 0) {
+        formatted += `## Missing Elements\nThe following rubric requirements are not addressed in the essay:\n`;
+        missingElements.forEach(el => {
+          formatted += `- ❌ ${el}\n`;
+        });
+        formatted += '\n';
+      }
+
+      if (priorityImprovements.length > 0) {
+        formatted += `## Priority Improvements\n`;
+        priorityImprovements.forEach((imp, i) => {
+          formatted += `${i + 1}. ${imp}\n`;
+        });
+      }
+
+      return {
+        formattedResult: formatted,
+        criteria,
+        missingElements,
+        priorityImprovements,
+        overallAssessment
+      };
+    } catch (error) {
+      console.error('Error parsing rubric analysis:', error);
+      return {
+        formattedResult: rawResult,
+        criteria: [],
+        missingElements: [],
+        priorityImprovements: [],
+        overallAssessment: ''
+      };
+    }
+  }
+
+  mockRubricAnalysis() {
+    const formatted = `# Rubric Alignment Analysis\n\n## Overall Assessment\nYour essay demonstrates a solid understanding of the topic and meets most rubric criteria at a satisfactory level. There are a few areas where alignment with the rubric could be strengthened.\n\n## Score Summary\n- **Met:** 3 criteria\n- **Partially Met:** 2 criteria\n- **Not Met:** 1 criteria\n\n## Criterion-by-Criterion Breakdown\n\n### ✅ Thesis Statement\nThe essay presents a clear and arguable thesis statement that addresses the prompt directly.\n\n**Suggestions:**\n- Consider making the thesis more specific by including your main supporting points.\n\n### ✅ Evidence & Support\nMultiple pieces of evidence are used throughout the essay to support claims.\n\n### ⚠️ Organization & Structure\nThe essay follows a general logical structure but some transitions between paragraphs are weak.\n\n**Suggestions:**\n- Add stronger transition sentences between sections.\n- Ensure each body paragraph begins with a clear topic sentence.\n\n### ❌ Counterargument\nThe essay does not address any opposing viewpoints as required by the rubric.\n\n**Suggestions:**\n- Add a paragraph that acknowledges and refutes a counterargument.\n\n## Priority Improvements\n1. Add a counterargument section as required by the rubric.\n2. Strengthen paragraph transitions for better flow.\n3. Make the thesis statement more specific.`;
+
+    return {
+      success: true,
+      result: formatted,
+      criteria: [
+        { criterion: 'Thesis Statement', status: 'met', assessment: 'Clear thesis present', suggestions: [] },
+        { criterion: 'Evidence & Support', status: 'met', assessment: 'Good evidence used', suggestions: [] },
+        { criterion: 'Organization', status: 'partially_met', assessment: 'Needs better transitions', suggestions: ['Add transitions'] },
+        { criterion: 'Counterargument', status: 'not_met', assessment: 'Not addressed', suggestions: ['Add counterargument section'] }
+      ],
+      missingElements: ['Counterargument section'],
+      priorityImprovements: ['Add counterargument', 'Improve transitions', 'Sharpen thesis'],
+      overallAssessment: 'Your essay meets most criteria but is missing a counterargument section.',
+      timestamp: new Date().toISOString(),
+      model: 'mock'
+    };
+  }
+
+  /**
    * Mock analysis for development/testing
    */
   async mockAnalysis(documentId, content, analysisType, userId) {
@@ -1551,8 +1771,9 @@ CRITICAL REQUIREMENTS:
 
   /**
    * Save analysis results to database
+   * @param {object|null} rubricAlignment - Optional rubric alignment result to persist
    */
-  async saveAnalysis(documentId, userId, analysisType, result, originalContent, annotations = null, citationStyle = null) {
+  async saveAnalysis(documentId, userId, analysisType, result, originalContent, annotations = null, citationStyle = null, rubricAlignment = null) {
     try {
       console.log('=== SAVE ANALYSIS DEBUG ===');
       console.log('documentId:', documentId);
@@ -1597,7 +1818,8 @@ CRITICAL REQUIREMENTS:
           strong_points: strongPoints, // Add the format expected by frontend
           areas_to_improve: areasToImprove, // Add the format expected by frontend
           serious_concerns: seriousConcerns, // Add the format expected by frontend
-          citation_style: citationStyle
+          citation_style: citationStyle,
+          rubric_alignment: rubricAlignment || null // Persist rubric alignment when provided
         },
         processing_time_ms: Math.floor(Date.now() / 1000), // Convert to seconds
         created_at: new Date().toISOString(),

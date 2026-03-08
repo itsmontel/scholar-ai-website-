@@ -463,7 +463,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
     plan: 'free',
     planLimits: {
       documentsPerMonth: 3,
-      analysesPerMonth: 3,
+      analysesPerMonth: 1,
       maxDocumentSize: 1024 * 1024,
       name: 'Free'
     }
@@ -2665,7 +2665,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                   <span className="text-xl sm:text-2xl">📝</span>
                   <div className="min-w-0">
                     <p className="text-teal-800 dark:text-teal-200 font-medium text-xs sm:text-sm">
-                      {usageStats.plan === 'free' ? `Free: 5,000 words/mo • ${getResetsInText()}` : 'Starter: 999,999 words/mo'}
+                      {usageStats.plan === 'free' ? `Free: 5,000 words/mo • ${getResetsInText()}` : 'Pro: 999,999 words/mo'}
                       {!isPremiumUser && ' • Bullet + Medium'}
                     </p>
                     <p className="text-teal-600 dark:text-teal-400 text-[10px] sm:text-xs mt-0.5 line-clamp-2">Upgrade for all styles, lengths & premium AI</p>
@@ -2912,7 +2912,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
               </div>
             )}
 
-            {/* Plan info banner for free and starter users - Mobile optimized */}
+            {/* Plan info banner for free and Pro users - Mobile optimized */}
             {!isPremiumUser && !quizExhausted && (
               <div className="mb-4 sm:mb-6 bg-gradient-to-r from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20 border border-violet-200 dark:border-violet-800/50 rounded-xl sm:rounded-2xl p-3 sm:p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-3">
                 <div className="flex items-start sm:items-center gap-2 sm:gap-3">
@@ -2927,7 +2927,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                       </>
                     ) : (
                       <>
-                        <p className="text-violet-800 dark:text-violet-200 font-medium text-xs sm:text-sm">Starter: Mixed type + Medium difficulty only</p>
+                        <p className="text-violet-800 dark:text-violet-200 font-medium text-xs sm:text-sm">Pro: Mixed type + Medium difficulty only</p>
                         <p className="text-violet-600 dark:text-violet-400 text-[10px] sm:text-xs mt-0.5">Upgrade for all quiz types & difficulties</p>
                       </>
                     )}

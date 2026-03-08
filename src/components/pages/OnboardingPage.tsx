@@ -620,7 +620,7 @@ const OnboardingPage = ({ onNavigate, user, onComplete, onUserUpdate }: Onboardi
                       : 'text-stone-500 hover:text-stone-700'
                   }`}
                 >
-                  Starter · $19.99/mo
+                  Pro · $19.99/mo
                 </button>
                 <button
                   onClick={() => setSelectedPlan('premium')}
@@ -637,7 +637,7 @@ const OnboardingPage = ({ onNavigate, user, onComplete, onUserUpdate }: Onboardi
               {/* Features for selected plan */}
               <div className="bg-white rounded-2xl border border-stone-200 p-5 mb-6 shadow-sm">
                 <p className="text-xs font-semibold text-stone-400 uppercase tracking-wide mb-3">
-                  {selectedPlan === 'starter' ? 'Starter includes' : 'Premium includes'}
+                  {selectedPlan === 'starter' ? 'Pro includes' : 'Premium includes'}
                 </p>
                 <div className="space-y-2.5">
                   {trialFeatures.map(f => (

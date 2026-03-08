@@ -156,7 +156,11 @@ const validationSchemas = {
     documentId: commonSchemas.uuid,
     analysisType: commonSchemas.analysisType,
     citationStyle: commonSchemas.citationStyle,
-    content: commonSchemas.content
+    content: commonSchemas.content,
+    educationLevel: Joi.string().valid('college', 'sixth_form', 'middle_school').optional().default('college'),
+    rubricContent: Joi.string().max(100000).optional().allow('').messages({
+      'string.max': 'Rubric content is too long (max 100,000 characters)'
+    })
   }),
 
   // Citation review endpoint (temporary analysis, no documentId needed)

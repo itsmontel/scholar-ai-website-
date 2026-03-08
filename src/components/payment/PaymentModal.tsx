@@ -37,7 +37,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
   };
 
   const getPlanName = () => {
-    return planType.charAt(0).toUpperCase() + planType.slice(1);
+    return planType === 'starter' ? 'Pro' : 'Premium';
   };
 
   return (
