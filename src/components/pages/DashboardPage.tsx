@@ -238,14 +238,13 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
     daysUntilReset: undefined as number | undefined
   });
 
-  // Welcome tutorial state — parent is the sole guard.
-  // resolveTutorial checks both user.welcomeTutorialCompleted (set by parent on every user build)
-  // and the durable localStorage key, so this is correct even on first render after login.
-  const [showWelcomeTutorial, setShowWelcomeTutorial] = useState(() => {
-    if (!user?.id) return false;
-    if (resolveTutorial(user.id, (user as any).welcomeTutorialCompleted)) return false;
-    return (user as any).onboardingCompleted === true;
-  });
+  // Welcome tutorial — derived from user (like onboarding), so it updates when server data arrives.
+  // This ensures tutorial only shows once across devices/sessions; server is source of truth.
+  const showWelcomeTutorial = Boolean(
+    user?.id &&
+    (user as any).onboardingCompleted === true &&
+    !resolveTutorial(user.id, (user as any).welcomeTutorialCompleted)
+  );
 
   // Quick Review state - show to returning users who haven't reviewed today
   const [showQuickReview, setShowQuickReview] = useState(() => {
@@ -1815,7 +1814,6 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
           userName={user?.name?.split(' ')[0] || user?.name || ''}
           userId={user?.id}
           onComplete={() => {
-            setShowWelcomeTutorial(false);
             onUserUpdate?.({ welcomeTutorialCompleted: true });
           }}
         />
