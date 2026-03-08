@@ -16,8 +16,8 @@
 
 #### **Create Live Products**
 1. Go to **Products** (in Live mode)
-2. Create **Starter Plan**:
-   - Name: "WriteScholar Starter"
+2. Create **Pro Plan**:
+   - Name: "WriteScholar Pro"
    - Monthly: $19.99 USD
    - Yearly: $199.99 USD (save price IDs)
 3. Create **Premium Plan**:

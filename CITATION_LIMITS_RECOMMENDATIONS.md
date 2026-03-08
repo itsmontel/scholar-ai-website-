@@ -16,7 +16,7 @@ This document provides recommendations for citation search limits across subscri
 
 ### Current Subscription Limits (Analyses)
 - **Free**: 3 analyses per month
-- **Starter ($19.99/month)**: 999 analyses per month
+- **Pro ($19.99/month)**: 999 analyses per month
 - **Premium ($39.99/month)**: 999 analyses per month
 
 ## Recommended Citation Limits
@@ -32,7 +32,7 @@ Treat citations as a separate feature with its own limits:
   - Doesn't consume their document analysis quota
   - Typical student writes 2-3 papers per month
 
-#### **Starter Tier ($19.99/month)**
+#### **Pro Tier ($19.99/month)**
 - **Unlimited citation searches**
 - **Rationale**:
   - Major value-add over free tier
@@ -41,7 +41,7 @@ Treat citations as a separate feature with its own limits:
   - Makes the paid tier significantly more attractive
 
 #### **Premium Tier ($39.99/month)**
-- **Unlimited citation searches** (same as Starter)
+- **Unlimited citation searches** (same as Pro)
 - **Additional Benefits**:
   - Priority processing for citations
   - Access to citation history/saved searches
@@ -76,7 +76,7 @@ const PLAN_LIMITS = {
     maxAnalysisPercentage: 50,
     name: 'Free'
   },
-  starter: {
+  pro: {
     documentsPerMonth: -1,
     analysesPerMonth: 999,
     citationSearchesPerMonth: -1,  // NEW (unlimited)
@@ -84,7 +84,7 @@ const PLAN_LIMITS = {
     maxDocumentSize: 25 * 1024 * 1024,
     maxTotalStorage: 25 * 1024 * 1024,
     maxAnalysisPercentage: 100,
-    name: 'Starter',
+    name: 'Pro',
     price: 19.99
   },
   premium: {
@@ -146,9 +146,9 @@ if (!citationLimit.allowed) {
 - **Paid Tier (avg 20 searches/month)**: ~$4/user/month
 
 ### Revenue Impact
-- **Free → Starter Conversion**: "Unlimited citations" is a strong motivator
-- **Starter Value Prop**: $19.99/month for unlimited searches (vs $0.20/search elsewhere)
-- **Break-even**: User needs ~10 citation searches to justify Starter tier cost
+- **Free → Pro Conversion**: "Unlimited citations" is a strong motivator
+- **Pro Value Prop**: $19.99/month for unlimited searches (vs $0.20/search elsewhere)
+- **Break-even**: User needs ~10 citation searches to justify Pro tier cost
 
 ## Competitive Analysis
 
@@ -173,7 +173,7 @@ if (!citationLimit.allowed) {
 > "Unlimited citation searches included! Never worry about finding the right sources for your research. Get 10 perfectly formatted citations for any topic, instantly."
 
 ### Upgrade Prompt
-> "You've used all your free citation searches this month. Upgrade to Starter for unlimited access to our AI-powered citation finder and never run out of sources again!"
+> "You've used all your free citation searches this month. Upgrade to Pro for unlimited access to our AI-powered citation finder and never run out of sources again!"
 
 ## Recommended Next Steps
 

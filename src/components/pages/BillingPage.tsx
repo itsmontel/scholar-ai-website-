@@ -39,7 +39,7 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
     storageUsed: 0,
     storageLimit: 1024 * 1024, // 1MB in bytes
     uploadsRemaining: 3,
-    analysesRemaining: 3
+    analysesRemaining: 1
   });
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState<string | null>(null);
@@ -55,7 +55,7 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
       icon: '🆓',
       features: [
         '3 documents per month',
-        '1 AI essay analysis per month',
+        '3 AI essay analyses per month',
         '3 study tool generations/month',
         '5,000 words/month Humanizer & Summarizer',
         '2 citation searches per month',
@@ -64,7 +64,7 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
       stripePriceId: ''
     },
     {
-      id: 'starter',
+      id: 'pro',
       name: 'Pro',
       price: billingCycle === 'monthly' ? 19.99 : 199.99,
       interval: billingCycle === 'monthly' ? 'month' : 'year',
@@ -541,7 +541,7 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
                 {usageStats.analysesRemaining === -1 ? '∞' : usageStats.analysesRemaining}
               </div>
               <div className="text-xs text-stone-500">
-                {currentPlan === 'free' ? 'analyses remaining' : currentPlan === 'starter' ? '99/month' : '199/month'}
+                {currentPlan === 'free' ? 'analyses remaining' : currentPlan === 'pro' ? '99/month' : '199/month'}
               </div>
             </div>
 

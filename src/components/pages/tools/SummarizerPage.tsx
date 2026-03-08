@@ -31,10 +31,11 @@ const SummarizerPage = ({ onNavigate, user, onLogout }: SummarizerPageProps) => 
   const [showFakeAnimation, setShowFakeAnimation] = useState(false);
   const [showSignupPrompt, setShowSignupPrompt] = useState(false);
   const [isParsing, setIsParsing] = useState(false);
+  const [daysUntilReset, setDaysUntilReset] = useState<number | undefined>(undefined);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const isPremiumUser = user && (user.subscription_plan === 'premium' || user.plan === 'premium');
-  const isFreeUser = !user || (user?.subscription_plan !== 'starter' && user?.subscription_plan !== 'premium' && user?.plan !== 'starter' && user?.plan !== 'premium');
+  const isFreeUser = !user || (user?.subscription_plan !== 'pro' && user?.subscription_plan !== 'premium' && user?.plan !== 'pro' && user?.plan !== 'premium');
   const maxWords = isFreeUser ? 5000 : 5000;
   const userPlan = user?.subscription_plan || user?.plan || 'free';
   const wordCount = inputText.trim().split(/\s+/).filter(Boolean).length;
@@ -46,6 +47,20 @@ const SummarizerPage = ({ onNavigate, user, onLogout }: SummarizerPageProps) => 
       metaDescription.setAttribute('content', 'Transform lengthy papers, articles, and research documents into concise key points. Perfect for literature reviews and quick comprehension. Premium AI tool.');
     }
   }, []);
+
+  useEffect(() => {
+    if (user) {
+      const token = localStorage.getItem('authToken');
+      if (token) {
+        fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/analysis/summarize-usage`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        })
+          .then(r => r.json())
+          .then(data => { if (data.success && data.data?.daysUntilReset != null) setDaysUntilReset(data.data.daysUntilReset); })
+          .catch(() => {});
+      }
+    }
+  }, [user]);
 
   useEffect(() => {
     const saved = localStorage.getItem('summarizerOpenData');
@@ -539,7 +554,7 @@ const SummarizerPage = ({ onNavigate, user, onLogout }: SummarizerPageProps) => 
                     <span className="text-2xl">📝</span>
                     <div>
                       <p className="text-emerald-800 dark:text-emerald-200 font-medium text-sm">
-                        {userPlan === 'free' ? `Free plan: 5,000 words/month • Bullet + Medium only • ${getResetsInText()}` : 'Pro plan: 999,999 words/month • Bullet + Medium only'}
+                        {userPlan === 'free' ? `Free plan: 5,000 words/month • Bullet + Medium only • ${getResetsInText(daysUntilReset)}` : 'Pro plan: 999,999 words/month • Bullet + Medium only'}
                       </p>
                       <p className="text-emerald-600 dark:text-emerald-400 text-xs mt-0.5">Upgrade to Premium for all styles, lengths, and our premium AI model</p>
                     </div>

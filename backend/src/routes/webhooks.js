@@ -139,7 +139,7 @@ async function handleCheckoutSessionCompleted(session) {
     let plan = 'free';
     
     if (priceId === process.env.STRIPE_STARTER_MONTHLY_PRICE_ID || priceId === process.env.STRIPE_STARTER_YEARLY_PRICE_ID) {
-      plan = 'starter';
+      plan = 'pro';
     } else if (priceId === process.env.STRIPE_PREMIUM_MONTHLY_PRICE_ID || priceId === process.env.STRIPE_PREMIUM_YEARLY_PRICE_ID) {
       plan = 'premium';
     }
@@ -220,7 +220,7 @@ async function handleSubscriptionCreated(subscription) {
     let plan = 'free';
     
     if (priceId === process.env.STRIPE_STARTER_MONTHLY_PRICE_ID || priceId === process.env.STRIPE_STARTER_YEARLY_PRICE_ID) {
-      plan = 'starter';
+      plan = 'pro';
     } else if (priceId === process.env.STRIPE_PREMIUM_MONTHLY_PRICE_ID || priceId === process.env.STRIPE_PREMIUM_YEARLY_PRICE_ID) {
       plan = 'premium';
     }
@@ -261,7 +261,7 @@ async function handleSubscriptionUpdated(subscription) {
     let plan = 'free';
     
     if (priceId === process.env.STRIPE_STARTER_MONTHLY_PRICE_ID || priceId === process.env.STRIPE_STARTER_YEARLY_PRICE_ID) {
-      plan = 'starter';
+      plan = 'pro';
     } else if (priceId === process.env.STRIPE_PREMIUM_MONTHLY_PRICE_ID || priceId === process.env.STRIPE_PREMIUM_YEARLY_PRICE_ID) {
       plan = 'premium';
     }

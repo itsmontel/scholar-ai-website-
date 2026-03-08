@@ -29,7 +29,7 @@ const OnboardingPage = ({ onNavigate, user, onComplete, onUserUpdate }: Onboardi
   const [selectedGrade, setSelectedGrade] = useState<string | null>(null);
   const [selectedReferral, setSelectedReferral] = useState<string | null>(null);
   const [selectedGoals, setSelectedGoals] = useState<string[]>([]);
-  const [selectedPlan, setSelectedPlan] = useState<'starter' | 'premium'>('starter');
+  const [selectedPlan, setSelectedPlan] = useState<'pro' | 'premium'>('pro');
   const [isLoadingCheckout, setIsLoadingCheckout] = useState(false);
   const [trialSecondsLeft, setTrialSecondsLeft] = useState(10 * 60);
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -613,9 +613,9 @@ const OnboardingPage = ({ onNavigate, user, onComplete, onUserUpdate }: Onboardi
               {/* Plan toggle */}
               <div className="flex bg-stone-100 rounded-full p-1 mb-5">
                 <button
-                  onClick={() => setSelectedPlan('starter')}
+                  onClick={() => setSelectedPlan('pro')}
                   className={`flex-1 py-2.5 rounded-full text-sm font-semibold transition-all ${
-                    selectedPlan === 'starter'
+                    selectedPlan === 'pro'
                       ? 'bg-white text-stone-800 shadow-sm'
                       : 'text-stone-500 hover:text-stone-700'
                   }`}
@@ -637,7 +637,7 @@ const OnboardingPage = ({ onNavigate, user, onComplete, onUserUpdate }: Onboardi
               {/* Features for selected plan */}
               <div className="bg-white rounded-2xl border border-stone-200 p-5 mb-6 shadow-sm">
                 <p className="text-xs font-semibold text-stone-400 uppercase tracking-wide mb-3">
-                  {selectedPlan === 'starter' ? 'Pro includes' : 'Premium includes'}
+                  {selectedPlan === 'pro' ? 'Pro includes' : 'Premium includes'}
                 </p>
                 <div className="space-y-2.5">
                   {trialFeatures.map(f => (
@@ -704,7 +704,7 @@ const OnboardingPage = ({ onNavigate, user, onComplete, onUserUpdate }: Onboardi
                 )}
               </button>
               <p className="text-center text-xs text-stone-400 mt-3">
-                Then ${selectedPlan === 'starter' ? '19.99' : '39.99'}/month. Cancel anytime before day 7 and pay nothing.
+                Then ${selectedPlan === 'pro' ? '19.99' : '39.99'}/month. Cancel anytime before day 7 and pay nothing.
               </p>
 
               <div className="mt-4 flex items-center justify-between">

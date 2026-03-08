@@ -43,12 +43,12 @@ async function fixUserSubscription() {
       console.log('📋 User subscriptions:', subscriptions);
     }
     
-    // Update user to starter plan
-    console.log('🔄 Updating user to starter plan...');
+    // Update user to pro plan
+    console.log('🔄 Updating user to pro plan...');
     const { error: updateError } = await supabase
       .from('users')
       .update({
-        subscription_plan: 'starter',
+        subscription_plan: 'pro',
         subscription_status: 'active',
         updated_at: new Date().toISOString()
       })
@@ -57,7 +57,7 @@ async function fixUserSubscription() {
     if (updateError) {
       console.error('❌ Error updating user:', updateError);
     } else {
-      console.log('✅ User updated to starter plan successfully!');
+      console.log('✅ User updated to pro plan successfully!');
     }
     
     // Create a subscription record if none exists
@@ -68,8 +68,8 @@ async function fixUserSubscription() {
         .insert({
           id: require('uuid').v4(),
           user_id: user.id,
-          stripe_subscription_id: 'manual_starter_' + Date.now(),
-          plan_type: 'starter',
+          stripe_subscription_id: 'manual_pro_' + Date.now(),
+          plan_type: 'pro',
           billing_cycle: 'monthly',
           status: 'active',
           current_period_start: new Date().toISOString(),

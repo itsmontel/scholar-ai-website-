@@ -11,7 +11,7 @@ const supabase = createClient(
 const PLAN_LIMITS = {
   free: {
     documentsPerMonth: 3,
-    analysesPerMonth: 1,
+    analysesPerMonth: 3,
     citationSearchesPerMonth: 2,
     humanizeWordsPerMonth: 5000,
     summarizeWordsPerMonth: 5000,
@@ -28,7 +28,7 @@ const PLAN_LIMITS = {
     maxAnalysisPercentage: 50,
     name: 'Free'
   },
-  starter: {
+  pro: {
     documentsPerMonth: -1,
     analysesPerMonth: 99,
     citationSearchesPerMonth: 99,
@@ -61,7 +61,7 @@ const PLAN_LIMITS = {
     lessonWordsPerMonth: 999999,
     lessonGenerationsPerMonth: 199,
     lessonMaxWordsPerGeneration: 10000,
-    aiModel: 'gpt-4.1-mini',
+    aiModel: 'gpt-4.1-nano', // Premium uses nano for study tools; mini reserved for AI essay analysis only
     maxDocumentSize: 1024 * 1024 * 1024,
     maxTotalStorage: 1024 * 1024 * 1024,
     maxAnalysisPercentage: 100,
@@ -71,7 +71,7 @@ const PLAN_LIMITS = {
 };
 
 
-// Get user's plan string (free, starter, premium) - for retention policies etc.
+// Get user's plan string (free, pro, premium) - for retention policies etc.
 const getUserPlan = async (userId) => {
   const { plan } = await getUserSubscriptionDetails(userId);
   return plan || 'free';
@@ -91,14 +91,85 @@ const getUserSubscriptionDetails = async (userId) => {
       return { plan: 'free', stripeCustomerId: null };
     }
 
+    let plan = user.subscription_plan || 'free';
+    if (plan === 'starter') plan = 'pro'; // backward compat
     return {
-      plan: user.subscription_plan || 'free',
+      plan,
       stripeCustomerId: user.stripe_customer_id
     };
   } catch (error) {
     console.error('Error in getUserSubscriptionDetails:', error);
     return { plan: 'free', stripeCustomerId: null };
   }
+};
+
+/**
+ * Get the current usage period start and end for a user.
+ * - Paid (pro/premium): uses subscription current_period_start/end from Stripe
+ * - Free: rolling 30-day periods from signup date
+ * - Fallback: calendar month (legacy users, missing data)
+ */
+const getUsagePeriod = async (userId) => {
+  const now = new Date();
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+
+  try {
+    const { plan } = await getUserSubscriptionDetails(userId);
+
+    if (plan === 'pro' || plan === 'premium') {
+      const { data: sub, error } = await supabase
+        .from('subscriptions')
+        .select('current_period_start, current_period_end')
+        .eq('user_id', userId)
+        .in('status', ['active', 'trialing'])
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (!error && sub?.current_period_start) {
+        const periodStart = typeof sub.current_period_start === 'string'
+          ? sub.current_period_start
+          : new Date(sub.current_period_start).toISOString();
+        const periodEnd = typeof sub.current_period_end === 'string'
+          ? sub.current_period_end
+          : new Date(sub.current_period_end).toISOString();
+        const periodEndDate = new Date(periodEnd);
+        const daysUntilReset = Math.max(0, Math.ceil((periodEndDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
+        return { periodStart, periodEnd, daysUntilReset };
+      }
+    }
+
+    // Free users: rolling 30-day periods from signup
+    const { data: user, error: userError } = await supabase
+      .from('users')
+      .select('created_at')
+      .eq('id', userId)
+      .single();
+
+    if (!userError && user?.created_at) {
+      const signup = new Date(user.created_at);
+      const msPer30Days = 30 * 24 * 60 * 60 * 1000;
+      const elapsed = now.getTime() - signup.getTime();
+      const periodsElapsed = Math.floor(elapsed / msPer30Days);
+      const periodStartDate = new Date(signup.getTime() + periodsElapsed * msPer30Days);
+      const periodEndDate = new Date(periodStartDate.getTime() + msPer30Days);
+      const periodStart = periodStartDate.toISOString();
+      const periodEnd = periodEndDate.toISOString();
+      const daysUntilReset = Math.max(0, Math.ceil((periodEndDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
+      return { periodStart, periodEnd, daysUntilReset };
+    }
+  } catch (err) {
+    console.error('getUsagePeriod error:', err);
+  }
+
+  // Fallback: calendar month
+  const daysUntilReset = Math.ceil((endOfMonth.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+  return {
+    periodStart: startOfMonth.toISOString(),
+    periodEnd: endOfMonth.toISOString(),
+    daysUntilReset: Math.max(0, daysUntilReset)
+  };
 };
 
 // Check if user has exceeded a specific limit
@@ -111,9 +182,7 @@ const checkLimit = async (userId, limitType) => {
       return { allowed: true, limit: -1, usage: 0, remaining: -1 };
     }
 
-    // Get current usage for this month
-    const currentDate = new Date();
-    const startOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+    const { periodStart, periodEnd, daysUntilReset } = await getUsagePeriod(userId);
     
     // Use service role key to bypass RLS for limit checking
     // This is safe because we've already authenticated the user
@@ -130,34 +199,34 @@ const checkLimit = async (userId, limitType) => {
         .from('documents')
         .select('id')
         .eq('user_id', userId)
-        .gte('created_at', startOfMonth.toISOString());
+        .gte('created_at', periodStart);
       
       if (!error) {
         usage = documents.length;
       }
-      console.log(`checkLimit: Found ${usage} documents for user ${userId} this month`);
+      console.log(`checkLimit: Found ${usage} documents for user ${userId} this period`);
     } else if (limitType === 'analysesPerMonth') {
       const { data: analyses, error} = await supabaseServiceRole
         .from('document_analyses')
         .select('id')
         .eq('user_id', userId)
-        .gte('created_at', startOfMonth.toISOString());
+        .gte('created_at', periodStart);
       
       if (!error) {
         usage = analyses.length;
       }
-      console.log(`checkLimit: Found ${usage} analyses for user ${userId} this month (limit: ${planLimits[limitType]})`);
+      console.log(`checkLimit: Found ${usage} analyses for user ${userId} this period (limit: ${planLimits[limitType]})`);
     } else if (limitType === 'citationSearchesPerMonth') {
       const { data: citationSearches, error } = await supabaseServiceRole
         .from('citation_searches')
         .select('id')
         .eq('user_id', userId)
-        .gte('created_at', startOfMonth.toISOString());
+        .gte('created_at', periodStart);
       
       if (!error) {
         usage = citationSearches ? citationSearches.length : 0;
       }
-      console.log(`checkLimit: Found ${usage} citation searches for user ${userId} this month (limit: ${planLimits[limitType]})`);
+      console.log(`checkLimit: Found ${usage} citation searches for user ${userId} this period (limit: ${planLimits[limitType]})`);
     }
 
     const limit = planLimits[limitType];
@@ -169,7 +238,9 @@ const checkLimit = async (userId, limitType) => {
       limit,
       usage,
       remaining,
-      planLimits
+      planLimits,
+      periodEnd,
+      daysUntilReset
     };
   } catch (error) {
     console.error('Error checking limit:', error);
@@ -382,8 +453,9 @@ const createCheckoutSession = async (customerId, planType, billingCycle, userId,
 
 // Get price ID based on plan and billing cycle
 const getPriceId = (planType, billingCycle) => {
+  const planKey = planType === 'starter' ? 'pro' : planType;
   const prices = {
-    'starter': {
+    'pro': {
       'monthly': process.env.STRIPE_STARTER_MONTHLY_PRICE_ID || 'price_starter_monthly',
       'yearly': process.env.STRIPE_STARTER_YEARLY_PRICE_ID || 'price_starter_yearly'
     },
@@ -393,7 +465,7 @@ const getPriceId = (planType, billingCycle) => {
     }
   };
 
-  const priceId = prices[planType]?.[billingCycle];
+  const priceId = prices[planKey]?.[billingCycle];
   if (!priceId) {
     throw new Error(`Invalid plan type or billing cycle: ${planType}/${billingCycle}`);
   }
@@ -629,6 +701,7 @@ module.exports = {
   getPriceId,
   getUserPlan,
   getUserSubscriptionDetails,
+  getUsagePeriod,
   checkLimit,
   getRemainingUsage,
   getPlanDetails,

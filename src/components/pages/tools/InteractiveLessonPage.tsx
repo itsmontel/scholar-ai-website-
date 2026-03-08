@@ -59,6 +59,7 @@ interface UsageData {
   generationLimit: number;
   generationsRemaining: number;
   plan: string;
+  daysUntilReset?: number;
 }
 
 const InteractiveLessonPage = ({ onNavigate, user, onLogout, embedded = false, onBack }: InteractiveLessonPageProps) => {
@@ -91,7 +92,7 @@ const InteractiveLessonPage = ({ onNavigate, user, onLogout, embedded = false, o
   const [answeredQuestions, setAnsweredQuestions] = useState<Set<number>>(new Set());
 
   const userPlan = user?.subscription_plan || user?.plan || 'free';
-  const isFreeUser = !user || (userPlan !== 'starter' && userPlan !== 'premium');
+  const isFreeUser = !user || (userPlan !== 'pro' && userPlan !== 'premium');
   const isPremiumUser = userPlan === 'premium';
   const maxWords = isFreeUser ? 5000 : 10000;
   const wordCount = inputText.trim().split(/\s+/).filter(Boolean).length;
@@ -931,7 +932,7 @@ One click = 3 unique lessons!
                     <p className="text-red-800 dark:text-red-200 text-sm">{error}</p>
                     {isFreeUser && user && (
                       <>
-                        <p className="text-red-600 dark:text-red-400 text-xs mt-1">{getResetsInText()}</p>
+                        <p className="text-red-600 dark:text-red-400 text-xs mt-1">{getResetsInText(usage?.daysUntilReset)}</p>
                         <button
                           onClick={() => onNavigate('pricing')}
                           className="mt-2 px-4 py-1.5 bg-gradient-to-r from-violet-600 to-purple-600 text-white text-sm font-medium rounded-lg hover:from-violet-500 hover:to-purple-500 transition-all inline-flex items-center gap-2"
@@ -953,13 +954,13 @@ One click = 3 unique lessons!
                       <div>
                         <p className="text-violet-800 dark:text-violet-200 font-medium text-sm">
                           {isFreeUser 
-                            ? `Free plan: ${usage.generationsRemaining}/${usage.generationLimit} lesson${usage.generationLimit === 1 ? '' : 's'} remaining this month`
+                            ? `Free plan: ${usage.generationsRemaining}/${usage.generationLimit} lesson${usage.generationLimit === 1 ? '' : 's'} remaining this period`
                             : `${userPlan === 'premium' ? 'Premium' : 'Pro'}: ${usage.generationsRemaining.toLocaleString()}/${usage.generationLimit} lessons remaining`
                           }
                         </p>
                         <p className="text-violet-600 dark:text-violet-400 text-xs mt-0.5">
                           {isFreeUser 
-                            ? `Lessons saved for 30 days • ${getResetsInText()}`
+                            ? `Lessons saved for 30 days • ${getResetsInText(usage?.daysUntilReset)}`
                             : 'Lessons saved permanently'
                           }
                         </p>

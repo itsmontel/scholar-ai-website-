@@ -4,7 +4,7 @@ import StripeCheckout from './StripeCheckout';
 interface PaymentModalProps {
   isOpen: boolean;
   onClose: () => void;
-  planType: 'starter' | 'premium';
+  planType: 'pro' | 'premium';
   billingCycle: 'monthly' | 'yearly';
   onSuccess: (subscriptionId: string) => void;
 }
@@ -30,14 +30,14 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
 
   const getPlanPrice = () => {
     const prices = {
-      starter: { monthly: 19.99, yearly: 199.99 },
+      pro: { monthly: 19.99, yearly: 199.99 },
       premium: { monthly: 39.99, yearly: 399.99 }
     };
     return prices[planType][billingCycle];
   };
 
   const getPlanName = () => {
-    return planType === 'starter' ? 'Pro' : 'Premium';
+    return planType === 'pro' ? 'Pro' : 'Premium';
   };
 
   return (

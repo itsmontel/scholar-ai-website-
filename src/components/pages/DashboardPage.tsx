@@ -234,7 +234,8 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
     maxWordsPerGeneration: 5000,
     wordsUsed: 0,
     wordLimit: 15000,
-    plan: 'free'
+    plan: 'free',
+    daysUntilReset: undefined as number | undefined
   });
 
   // Welcome tutorial state — parent is the sole guard.
@@ -464,7 +465,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
     plan: 'free',
     planLimits: {
       documentsPerMonth: 3,
-      analysesPerMonth: 1,
+      analysesPerMonth: 3,
       maxDocumentSize: 1024 * 1024,
       name: 'Free'
     }
@@ -583,7 +584,8 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
             maxWordsPerGeneration: data.data.maxWordsPerGeneration || 5000,
             wordsUsed: data.data.wordsUsed || 0,
             wordLimit: data.data.wordLimit || 15000,
-            plan: data.data.plan || 'free'
+            plan: data.data.plan || 'free',
+            daysUntilReset: data.data.daysUntilReset
           });
         }
       }
@@ -877,7 +879,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
   };
 
   const isPremiumUser = usageStats.plan === 'premium';
-  const isPaidUser = usageStats.plan === 'starter' || usageStats.plan === 'premium';
+  const isPaidUser = usageStats.plan === 'pro' || usageStats.plan === 'premium';
   const isFreeUser = usageStats.plan === 'free';
   // Free users can use quiz with limits (3 generations/month); paid users have unlimited
   const canUseQuiz = isPaidUser || (isFreeUser && (quizUsage.generationLimit === -1 || quizUsage.generationsRemaining > 0));
@@ -987,6 +989,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
 
   const [humanizeWordsUsed, setHumanizeWordsUsed] = useState(0);
   const [humanizeWordLimit, setHumanizeWordLimit] = useState(1000);
+  const [humanizeDaysUntilReset, setHumanizeDaysUntilReset] = useState<number | undefined>(undefined);
   const [humanizeError, setHumanizeError] = useState('');
   const [isParsingDoc, setIsParsingDoc] = useState(false);
   const parseFileInputRef = useRef<HTMLInputElement>(null);
@@ -1003,6 +1006,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
             if (data.success) {
               setHumanizeWordsUsed(data.data.wordsUsed);
               setHumanizeWordLimit(data.data.wordLimit);
+              setHumanizeDaysUntilReset(data.data.daysUntilReset);
             }
           })
           .catch(() => {});
@@ -1052,6 +1056,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
       if (data.data.wordsUsed !== undefined) {
         setHumanizeWordsUsed(data.data.wordsUsed);
         setHumanizeWordLimit(data.data.wordLimit);
+        setHumanizeDaysUntilReset(data.data.daysUntilReset);
       }
     } catch (error: any) {
       console.error('Humanize error:', error);
@@ -1084,7 +1089,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
 
   const handleGenerateQuiz = async () => {
     if (quizExhausted) {
-      setQuizError('You\'ve used all 3 quiz generations this month. Upgrade for unlimited quizzes.');
+      setQuizError('You\'ve used all 3 quiz generations this period. Upgrade for unlimited quizzes.');
       return;
     }
     setIsGeneratingQuiz(true);
@@ -1117,7 +1122,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
 
   const handleGenerateFlashcards = async () => {
     if (quizExhausted) {
-      setQuizError('You\'ve used all 3 study tool generations this month. Upgrade for unlimited access.');
+      setQuizError('You\'ve used all 3 study tool generations this period. Upgrade for unlimited access.');
       return;
     }
     setIsGeneratingFlashcards(true);
@@ -1143,7 +1148,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
 
   const handleGenerateCrossword = async () => {
     if (quizExhausted) {
-      setQuizError('You\'ve used all 3 study tool generations this month. Upgrade for unlimited access.');
+      setQuizError('You\'ve used all 3 study tool generations this period. Upgrade for unlimited access.');
       return;
     }
     setIsGeneratingCrossword(true);
@@ -2694,7 +2699,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                 <p className="text-red-700 dark:text-red-400 text-sm font-medium">{humanizeError}</p>
                 {humanizeWordLimit < 999999 && (
                   <>
-                    <p className="text-red-600 dark:text-red-500 text-xs mt-1">{getResetsInText()}</p>
+                    <p className="text-red-600 dark:text-red-500 text-xs mt-1">{getResetsInText(humanizeDaysUntilReset)}</p>
                     <button onClick={() => onNavigate('pricing')} className="mt-2 px-4 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold rounded-lg transition-colors">
                       Upgrade for unlimited words/month
                     </button>
@@ -2715,7 +2720,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                   <span className="text-xl sm:text-2xl">📝</span>
                   <div className="min-w-0">
                     <p className="text-teal-800 dark:text-teal-200 font-medium text-xs sm:text-sm">
-                      {usageStats.plan === 'free' ? `Free: 5,000 words/mo • ${getResetsInText()}` : 'Pro: 999,999 words/mo'}
+                      {usageStats.plan === 'free' ? `Free: 5,000 words/mo • ${getResetsInText((usageStats as any).daysUntilReset)}` : 'Pro: 999,999 words/mo'}
                       {!isPremiumUser && ' • Bullet + Medium'}
                     </p>
                     <p className="text-teal-600 dark:text-teal-400 text-[10px] sm:text-xs mt-0.5 line-clamp-2">Upgrade for all styles, lengths & premium AI</p>
@@ -2904,7 +2909,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                 <p className="text-red-700 dark:text-red-400 text-sm font-medium">{summaryError}</p>
                 {usageStats.plan === 'free' && (
                   <>
-                    <p className="text-red-600 dark:text-red-500 text-xs mt-1">{getResetsInText()}</p>
+                    <p className="text-red-600 dark:text-red-500 text-xs mt-1">{getResetsInText((usageStats as any).daysUntilReset)}</p>
                     <button onClick={() => onNavigate('pricing')} className="mt-2 px-4 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold rounded-lg">
                       Upgrade Plan
                     </button>
@@ -2956,8 +2961,8 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
               <div className="mb-4 sm:mb-6 bg-gradient-to-r from-violet-600 to-purple-600 dark:from-violet-700 dark:to-purple-700 rounded-xl sm:rounded-2xl p-4 sm:p-6 text-white text-center">
                 <span className="text-3xl sm:text-4xl mb-2 sm:mb-3 block">🔒</span>
                 <h3 className="text-lg sm:text-xl font-bold mb-1 sm:mb-2">Monthly Limit Reached</h3>
-                <p className="text-violet-100 dark:text-stone-200 mb-1 text-sm sm:text-base">You've used all 3 study tool generations this month. Upgrade for unlimited access!</p>
-                <p className="text-violet-200/90 text-xs sm:text-sm mb-3 sm:mb-4">{getResetsInText()}</p>
+                <p className="text-violet-100 dark:text-stone-200 mb-1 text-sm sm:text-base">You've used all 3 study tool generations this period. Upgrade for unlimited access!</p>
+                <p className="text-violet-200/90 text-xs sm:text-sm mb-3 sm:mb-4">{getResetsInText(quizUsage.daysUntilReset)}</p>
                 <button
                   onClick={() => onNavigate('pricing')}
                   className="w-full sm:w-auto px-5 sm:px-6 py-2 sm:py-2.5 bg-white dark:bg-stone-800 text-amber-700 dark:text-amber-400 font-semibold rounded-xl active:bg-stone-50 sm:hover:bg-stone-50 dark:sm:hover:bg-stone-700 transition-all inline-flex items-center justify-center gap-2 text-sm sm:text-base"
@@ -2976,7 +2981,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                     {isFreeUser ? (
                       <>
                         <p className="text-violet-800 dark:text-violet-200 font-medium text-xs sm:text-sm">
-                          Free: {quizUsage.generationsRemaining}/{quizUsage.generationLimit} generations • {(quizUsage.maxWordsPerGeneration || 5000).toLocaleString()} words max • {getResetsInText()}
+                          Free: {quizUsage.generationsRemaining}/{quizUsage.generationLimit} generations • {(quizUsage.maxWordsPerGeneration || 5000).toLocaleString()} words max • {getResetsInText(quizUsage.daysUntilReset)}
                         </p>
                         <p className="text-violet-600 dark:text-violet-400 text-[10px] sm:text-xs mt-0.5 line-clamp-2">Upgrade for unlimited quizzes, flashcards, crosswords</p>
                       </>
@@ -3808,7 +3813,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                 <p className="text-red-700 dark:text-red-400 text-sm font-medium">{quizError}</p>
                 {(quizExhausted || quizError.includes('Upgrade')) && (
                   <>
-                    <p className="text-red-600 dark:text-red-500 text-xs mt-1">{getResetsInText()}</p>
+                    <p className="text-red-600 dark:text-red-500 text-xs mt-1">{getResetsInText(quizUsage.daysUntilReset)}</p>
                     <button onClick={() => onNavigate('pricing')} className="mt-2 px-4 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold rounded-lg">
                       View Plans
                     </button>

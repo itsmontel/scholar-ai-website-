@@ -145,10 +145,10 @@ router.put('/update', authenticateToken, async (req, res) => {
     const { newPlan } = req.body;
     const userId = req.user.id;
 
-    if (!newPlan || !['starter', 'premium'].includes(newPlan)) {
+    if (!newPlan || !['pro', 'premium'].includes(newPlan)) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid plan. Must be starter or premium.'
+        message: 'Invalid plan. Must be pro or premium.'
       });
     }
 
@@ -583,9 +583,7 @@ router.get('/usage', authenticateToken, async (req, res) => {
     const subscriptionDetails = await subscriptionService.getUserSubscriptionDetails(userId);
     const planLimits = subscriptionService.PLAN_LIMITS[subscriptionDetails.plan];
 
-    // Get current month usage
-    const currentDate = new Date();
-    const startOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+    const { periodStart, periodEnd, daysUntilReset } = await subscriptionService.getUsagePeriod(userId);
 
     // Use service role key to bypass RLS for usage statistics
     // This is safe because user is already authenticated via JWT
@@ -595,24 +593,24 @@ router.get('/usage', authenticateToken, async (req, res) => {
       process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
     );
 
-    // Get documents uploaded this month
+    // Get documents uploaded this period
     const { data: documents, error: docsError } = await supabaseServiceRole
       .from('documents')
       .select('id, file_size')
       .eq('user_id', userId)
-      .gte('created_at', startOfMonth.toISOString());
+      .gte('created_at', periodStart);
 
-    // Get analyses performed this month
+    // Get analyses performed this period
     const { data: analyses, error: analysesError } = await supabaseServiceRole
       .from('document_analyses')
       .select('id')
       .eq('user_id', userId)
-      .gte('created_at', startOfMonth.toISOString());
+      .gte('created_at', periodStart);
 
     // Debug logging
     console.log('=== USAGE ENDPOINT DEBUG ===');
     console.log('User ID:', userId);
-    console.log('Start of month:', startOfMonth.toISOString());
+    console.log('Period start:', periodStart);
     console.log('Documents query result:', { data: documents, error: docsError });
     console.log('Analyses query result:', { data: analyses, error: analysesError });
 
@@ -643,7 +641,9 @@ router.get('/usage', authenticateToken, async (req, res) => {
       uploadsRemaining,
       analysesRemaining,
       plan: subscriptionDetails.plan,
-      planLimits
+      planLimits,
+      periodEnd,
+      daysUntilReset
     });
 
   } catch (error) {

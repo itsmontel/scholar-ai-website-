@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import Header from '../common/Header';
 import Footer from '../common/Footer';
+import ScholarMascot from '../common/ScholarMascot';
 
 interface FAQPageProps {
   onNavigate?: (page: string) => void;
@@ -164,77 +165,28 @@ const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
       description: 'Upload a document or paste text to get AI-powered feedback',
       action: () => onNavigate?.('dashboard'),
       color: 'lime',
-      icon: (
-        <svg viewBox="0 0 56 56" fill="none" className="w-14 h-14">
-          <circle cx="28" cy="28" r="28" fill="#D9F99D"/>
-          <ellipse cx="28" cy="30" rx="14" ry="15" fill="#E8C4A0"/>
-          <path d="M14 26 Q12 16 20 12 Q28 8 36 12 Q44 16 42 26 Q40 20 34 16 Q28 12 22 16 Q16 20 14 26" fill="#1F2937"/>
-          <ellipse cx="22" cy="30" rx="3" ry="3.5" fill="#1F2937"/>
-          <ellipse cx="34" cy="30" rx="3" ry="3.5" fill="#1F2937"/>
-          <circle cx="23" cy="29" r="1" fill="white"/>
-          <circle cx="35" cy="29" r="1" fill="white"/>
-          <path d="M24 40 Q28 45 32 40" stroke="#1F2937" strokeWidth="2" fill="none" strokeLinecap="round"/>
-        </svg>
-      )
+      icon: <ScholarMascot size={56} animated={false} pose="pointing" />
     },
     {
       title: 'View Analysis History',
       description: 'Access all your saved analyses and results',
       action: () => onNavigate?.('analysis-history'),
       color: 'lime',
-      icon: (
-        <svg viewBox="0 0 56 56" fill="none" className="w-14 h-14">
-          <circle cx="28" cy="28" r="28" fill="#ECFCCB"/>
-          <ellipse cx="28" cy="30" rx="14" ry="15" fill="#FCD9B6"/>
-          <path d="M14 24 Q12 12 22 10 Q28 8 34 10 Q44 12 42 24 Q40 18 34 14 Q28 10 22 14 Q16 18 14 24" fill="#8B6914"/>
-          <ellipse cx="21" cy="30" rx="6" ry="5" fill="none" stroke="#374151" strokeWidth="2"/>
-          <ellipse cx="35" cy="30" rx="6" ry="5" fill="none" stroke="#374151" strokeWidth="2"/>
-          <path d="M27 30 L29 30" stroke="#374151" strokeWidth="2"/>
-          <ellipse cx="21" cy="31" rx="2.5" ry="3" fill="#1F2937"/>
-          <ellipse cx="35" cy="31" rx="2.5" ry="3" fill="#1F2937"/>
-          <path d="M24 42 Q28 47 32 42" stroke="#1F2937" strokeWidth="2" fill="none" strokeLinecap="round"/>
-        </svg>
-      )
+      icon: <ScholarMascot size={56} animated={false} pose="studying" />
     },
     {
       title: 'Upload Documents',
       description: 'Upload PDF, DOC, DOCX, or TXT files for analysis',
       action: () => onNavigate?.('dashboard'),
       color: 'lime',
-      icon: (
-        <svg viewBox="0 0 56 56" fill="none" className="w-14 h-14">
-          <circle cx="28" cy="28" r="28" fill="#BEF264"/>
-          <ellipse cx="28" cy="30" rx="14" ry="15" fill="#8B5A2B"/>
-          <path d="M14 28 Q12 18 20 14 Q28 10 36 14 Q44 18 42 28 Q40 22 34 18 Q28 14 22 18 Q16 22 14 28" fill="#1F2937"/>
-          <ellipse cx="16" cy="30" rx="5" ry="7" fill="#1F2937"/>
-          <ellipse cx="40" cy="30" rx="5" ry="7" fill="#1F2937"/>
-          <ellipse cx="22" cy="30" rx="3" ry="3.5" fill="#1F2937"/>
-          <ellipse cx="34" cy="30" rx="3" ry="3.5" fill="#1F2937"/>
-          <circle cx="23" cy="29" r="1" fill="white"/>
-          <circle cx="35" cy="29" r="1" fill="white"/>
-          <path d="M24 40 Q28 46 32 40" stroke="#1F2937" strokeWidth="2" fill="none" strokeLinecap="round"/>
-        </svg>
-      )
+      icon: <ScholarMascot size={56} animated={false} pose="celebrating" />
     },
     {
       title: 'Contact Support',
       description: 'Get help from our expert team',
       action: () => onNavigate?.('contact'),
       color: 'lime',
-      icon: (
-        <svg viewBox="0 0 56 56" fill="none" className="w-14 h-14">
-          <circle cx="28" cy="28" r="28" fill="#D9F99D"/>
-          <ellipse cx="28" cy="30" rx="14" ry="15" fill="#D4A574"/>
-          <path d="M12 26 Q10 14 20 10 Q28 6 36 10 Q46 14 44 26 Q42 18 34 14 Q28 10 22 14 Q16 18 12 26" fill="#3D2314"/>
-          <path d="M12 26 Q6 40 16 48" fill="#3D2314"/>
-          <path d="M44 26 Q50 40 40 48" fill="#3D2314"/>
-          <ellipse cx="22" cy="30" rx="3" ry="3.5" fill="#1F2937"/>
-          <ellipse cx="34" cy="30" rx="3" ry="3.5" fill="#1F2937"/>
-          <circle cx="23" cy="29" r="1" fill="white"/>
-          <circle cx="35" cy="29" r="1" fill="white"/>
-          <path d="M24 41 Q28 46 32 41" stroke="#1F2937" strokeWidth="2" fill="none" strokeLinecap="round"/>
-        </svg>
-      )
+      icon: <ScholarMascot size={56} animated={false} pose="waving" />
     }
   ];
 
@@ -355,7 +307,7 @@ const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
                 onClick={action.action}
                 className="p-6 bg-white border border-stone-200 rounded-2xl hover:shadow-lg hover:border-stone-300 transition-all text-left group"
               >
-                <div className="w-14 h-14 rounded-full mb-4 overflow-hidden">
+                <div className="w-14 h-14 rounded-2xl mb-4 flex items-center justify-center overflow-hidden bg-violet-50/50 dark:bg-violet-900/20">
                   {action.icon}
                 </div>
                 <h4 className="font-semibold text-stone-800 mb-1 group-hover:text-violet-600 transition-colors">{action.title}</h4>

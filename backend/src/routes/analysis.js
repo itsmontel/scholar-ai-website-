@@ -49,7 +49,7 @@ const documentService = require('../services/documentService');
 const subscriptionService = require('../services/subscriptionService');
 
 // @route   GET /api/analysis/humanize-usage
-// @desc    Get user's humanize word usage this month
+// @desc    Get user's humanize word usage this period
 // @access  Private
 router.get('/humanize-usage', authenticateToken, async (req, res) => {
   try {
@@ -57,21 +57,19 @@ router.get('/humanize-usage', authenticateToken, async (req, res) => {
     const userPlan = req.user.subscription_plan || 'free';
     const planLimits = subscriptionService.PLAN_LIMITS[userPlan] || subscriptionService.PLAN_LIMITS.free;
 
+    const { periodStart, periodEnd, daysUntilReset } = await subscriptionService.getUsagePeriod(userId);
+
     const { createClient } = require('@supabase/supabase-js');
     const supabase = createClient(
       process.env.SUPABASE_URL,
       process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
     );
 
-    const startOfMonth = new Date();
-    startOfMonth.setDate(1);
-    startOfMonth.setHours(0, 0, 0, 0);
-
     const { data, error } = await supabase
       .from('humanize_usage')
       .select('words_count')
       .eq('user_id', userId)
-      .gte('created_at', startOfMonth.toISOString());
+      .gte('created_at', periodStart);
 
     const wordsUsed = (error || !data) ? 0 : (data || []).reduce((sum, row) => sum + (row.words_count || 0), 0);
     const wordLimit = planLimits.humanizeWordsPerMonth;
@@ -82,7 +80,9 @@ router.get('/humanize-usage', authenticateToken, async (req, res) => {
         wordsUsed,
         wordLimit,
         wordsRemaining: Math.max(0, wordLimit - wordsUsed),
-        plan: userPlan
+        plan: userPlan,
+        periodEnd,
+        daysUntilReset
       }
     });
   } catch (error) {
@@ -163,15 +163,13 @@ router.post('/humanize', authenticateToken, async (req, res) => {
       process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
     );
 
-    const startOfMonth = new Date();
-    startOfMonth.setDate(1);
-    startOfMonth.setHours(0, 0, 0, 0);
+    const { periodStart } = await subscriptionService.getUsagePeriod(userId);
 
     const { data: usageData, error: usageError } = await supabase
       .from('humanize_usage')
       .select('words_count')
       .eq('user_id', userId)
-      .gte('created_at', startOfMonth.toISOString());
+      .gte('created_at', periodStart);
 
     const wordsUsedThisMonth = usageError ? 0 : (usageData || []).reduce((sum, row) => sum + (row.words_count || 0), 0);
     const wordLimit = planLimits.humanizeWordsPerMonth;
@@ -181,8 +179,8 @@ router.post('/humanize', authenticateToken, async (req, res) => {
       return res.status(429).json({
         success: false,
         message: remaining === 0
-          ? `You've used all ${wordLimit.toLocaleString()} words this month. ${userPlan === 'free' ? 'Upgrade for 999,999 words/month.' : 'Limit resets next month.'}`
-          : `This text is ${wordCount} words but you only have ${remaining} words remaining this month.${userPlan === 'free' ? ' Upgrade for 999,999 words/month.' : ''}`,
+          ? `You've used all ${wordLimit.toLocaleString()} words this period. ${userPlan === 'free' ? 'Upgrade for 999,999 words/month.' : 'Limit resets when your billing period renews.'}`
+          : `This text is ${wordCount} words but you only have ${remaining} words remaining this period.${userPlan === 'free' ? ' Upgrade for 999,999 words/month.' : ''}`,
         wordsUsed: wordsUsedThisMonth,
         wordLimit,
         wordsRemaining: remaining,
@@ -227,7 +225,7 @@ router.post('/humanize', authenticateToken, async (req, res) => {
 });
 
 // @route   GET /api/analysis/summarize-usage
-// @desc    Get user's summarize word usage this month
+// @desc    Get user's summarize word usage this period
 // @access  Private
 router.get('/summarize-usage', authenticateToken, async (req, res) => {
   try {
@@ -241,15 +239,13 @@ router.get('/summarize-usage', authenticateToken, async (req, res) => {
       process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
     );
 
-    const startOfMonth = new Date();
-    startOfMonth.setDate(1);
-    startOfMonth.setHours(0, 0, 0, 0);
+    const { periodStart, periodEnd, daysUntilReset } = await subscriptionService.getUsagePeriod(userId);
 
     const { data, error } = await supabase
       .from('summarize_usage')
       .select('words_count')
       .eq('user_id', userId)
-      .gte('created_at', startOfMonth.toISOString());
+      .gte('created_at', periodStart);
 
     const wordsUsed = (error || !data) ? 0 : (data || []).reduce((sum, row) => sum + (row.words_count || 0), 0);
     const wordLimit = planLimits.summarizeWordsPerMonth;
@@ -260,7 +256,9 @@ router.get('/summarize-usage', authenticateToken, async (req, res) => {
         wordsUsed,
         wordLimit,
         wordsRemaining: Math.max(0, wordLimit - wordsUsed),
-        plan: userPlan
+        plan: userPlan,
+        periodEnd,
+        daysUntilReset
       }
     });
   } catch (error) {
@@ -324,15 +322,13 @@ router.post('/summarize', authenticateToken, async (req, res) => {
       process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
     );
 
-    const startOfMonth = new Date();
-    startOfMonth.setDate(1);
-    startOfMonth.setHours(0, 0, 0, 0);
+    const { periodStart } = await subscriptionService.getUsagePeriod(userId);
 
     const { data: usageData, error: usageError } = await supabase
       .from('summarize_usage')
       .select('words_count')
       .eq('user_id', userId)
-      .gte('created_at', startOfMonth.toISOString());
+      .gte('created_at', periodStart);
 
     const wordsUsedThisMonth = usageError ? 0 : (usageData || []).reduce((sum, row) => sum + (row.words_count || 0), 0);
     const wordLimit = planLimits.summarizeWordsPerMonth;
@@ -342,8 +338,8 @@ router.post('/summarize', authenticateToken, async (req, res) => {
       return res.status(429).json({
         success: false,
         message: remaining === 0
-          ? `You've used all ${wordLimit.toLocaleString()} summarize words this month. ${userPlan === 'free' ? 'Upgrade for 999,999 words/month.' : 'Limit resets next month.'}`
-          : `This text is ${wordCount} words but you only have ${remaining} summarize words remaining this month.${userPlan === 'free' ? ' Upgrade for 999,999 words/month.' : ''}`,
+          ? `You've used all ${wordLimit.toLocaleString()} summarize words this period. ${userPlan === 'free' ? 'Upgrade for 999,999 words/month.' : 'Limit resets when your billing period renews.'}`
+          : `This text is ${wordCount} words but you only have ${remaining} summarize words remaining this period.${userPlan === 'free' ? ' Upgrade for 999,999 words/month.' : ''}`,
         wordsUsed: wordsUsedThisMonth,
         wordLimit,
         wordsRemaining: remaining,
@@ -424,16 +420,14 @@ router.post('/generate-lesson', authenticateToken, async (req, res) => {
       process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
     );
 
-    const startOfMonth = new Date();
-    startOfMonth.setDate(1);
-    startOfMonth.setHours(0, 0, 0, 0);
+    const { periodStart } = await subscriptionService.getUsagePeriod(userId);
 
     // Check word usage
     const { data: wordUsageData, error: wordUsageError } = await supabase
       .from('lesson_usage')
       .select('words_count')
       .eq('user_id', userId)
-      .gte('created_at', startOfMonth.toISOString());
+      .gte('created_at', periodStart);
 
     const wordsUsedThisMonth = wordUsageError ? 0 : (wordUsageData || []).reduce((sum, row) => sum + (row.words_count || 0), 0);
     const wordLimit = planLimits.lessonWordsPerMonth;
@@ -443,7 +437,7 @@ router.post('/generate-lesson', authenticateToken, async (req, res) => {
       .from('lesson_usage')
       .select('id')
       .eq('user_id', userId)
-      .gte('created_at', startOfMonth.toISOString());
+      .gte('created_at', periodStart);
 
     const generationsUsed = genCountError ? 0 : (genCountData || []).length;
     const generationLimit = planLimits.lessonGenerationsPerMonth;
@@ -452,7 +446,7 @@ router.post('/generate-lesson', authenticateToken, async (req, res) => {
     if (generationsUsed >= generationLimit) {
       return res.status(429).json({
         success: false,
-        message: `You've used all ${generationLimit} lesson generation${generationLimit === 1 ? '' : 's'} this month. ${userPlan === 'free' ? 'Upgrade for 99+ generations/month.' : 'Limit resets next month.'}`,
+        message: `You've used all ${generationLimit} lesson generation${generationLimit === 1 ? '' : 's'} this period. ${userPlan === 'free' ? 'Upgrade for 99+ generations/month.' : 'Limit resets when your billing period renews.'}`,
         generationsUsed,
         generationLimit,
         generationsRemaining: 0,
@@ -466,8 +460,8 @@ router.post('/generate-lesson', authenticateToken, async (req, res) => {
       return res.status(429).json({
         success: false,
         message: remaining === 0
-          ? `You've used all ${wordLimit.toLocaleString()} lesson words this month. ${userPlan === 'free' ? 'Upgrade for 999,999 words/month.' : 'Limit resets next month.'}`
-          : `This text is ${wordCount} words but you only have ${remaining} words remaining this month.`,
+          ? `You've used all ${wordLimit.toLocaleString()} lesson words this period. ${userPlan === 'free' ? 'Upgrade for 999,999 words/month.' : 'Limit resets when your billing period renews.'}`
+          : `This text is ${wordCount} words but you only have ${remaining} words remaining this period.`,
         wordsUsed: wordsUsedThisMonth,
         wordLimit,
         wordsRemaining: remaining,
@@ -502,7 +496,7 @@ router.post('/generate-lesson', authenticateToken, async (req, res) => {
 });
 
 // @route   GET /api/analysis/lesson-usage
-// @desc    Get user's lesson generation usage this month
+// @desc    Get user's lesson generation usage this period
 // @access  Private
 router.get('/lesson-usage', authenticateToken, async (req, res) => {
   try {
@@ -516,23 +510,21 @@ router.get('/lesson-usage', authenticateToken, async (req, res) => {
       process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
     );
 
-    const startOfMonth = new Date();
-    startOfMonth.setDate(1);
-    startOfMonth.setHours(0, 0, 0, 0);
+    const { periodStart, periodEnd, daysUntilReset } = await subscriptionService.getUsagePeriod(userId);
 
     // Get word usage
     const { data: wordData, error: wordError } = await supabase
       .from('lesson_usage')
       .select('words_count')
       .eq('user_id', userId)
-      .gte('created_at', startOfMonth.toISOString());
+      .gte('created_at', periodStart);
 
     // Get generation count
     const { data: genData, error: genError } = await supabase
       .from('lesson_usage')
       .select('id')
       .eq('user_id', userId)
-      .gte('created_at', startOfMonth.toISOString());
+      .gte('created_at', periodStart);
 
     const wordsUsed = (wordError || !wordData) ? 0 : (wordData || []).reduce((sum, row) => sum + (row.words_count || 0), 0);
     const generationsUsed = (genError || !genData) ? 0 : (genData || []).length;
@@ -548,7 +540,9 @@ router.get('/lesson-usage', authenticateToken, async (req, res) => {
         generationsUsed,
         generationLimit,
         generationsRemaining: Math.max(0, generationLimit - generationsUsed),
-        plan: userPlan
+        plan: userPlan,
+        periodEnd,
+        daysUntilReset
       }
     });
   } catch (error) {
@@ -744,7 +738,7 @@ router.put('/lesson/:id/rename', authenticateToken, async (req, res) => {
 });
 
 // @route   GET /api/analysis/quiz-usage
-// @desc    Get user's quiz word usage this month
+// @desc    Get user's quiz word usage this period
 // @access  Private
 router.get('/quiz-usage', authenticateToken, async (req, res) => {
   try {
@@ -758,15 +752,13 @@ router.get('/quiz-usage', authenticateToken, async (req, res) => {
       process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
     );
 
-    const startOfMonth = new Date();
-    startOfMonth.setDate(1);
-    startOfMonth.setHours(0, 0, 0, 0);
+    const { periodStart, periodEnd, daysUntilReset } = await subscriptionService.getUsagePeriod(userId);
 
     const { data, error } = await supabase
       .from('quiz_usage')
       .select('words_count')
       .eq('user_id', userId)
-      .gte('created_at', startOfMonth.toISOString());
+      .gte('created_at', periodStart);
 
     const generationsUsed = (error || !data) ? 0 : (data || []).length;
     const wordsUsed = (error || !data) ? 0 : (data || []).reduce((sum, row) => sum + (row.words_count || 0), 0);
@@ -784,7 +776,9 @@ router.get('/quiz-usage', authenticateToken, async (req, res) => {
         generationLimit,
         generationsRemaining: generationLimit === -1 ? -1 : Math.max(0, generationLimit - generationsUsed),
         maxWordsPerGeneration,
-        plan: userPlan
+        plan: userPlan,
+        periodEnd,
+        daysUntilReset
       }
     });
   } catch (error) {
@@ -804,7 +798,7 @@ router.post('/generate-quiz', authenticateToken, async (req, res) => {
     const planLimits = subscriptionService.PLAN_LIMITS[userPlan] || subscriptionService.PLAN_LIMITS.free;
 
     // Enforce quiz type/difficulty/count restrictions based on plan
-    // Free & Starter: mixed type, medium difficulty, 10 questions
+    // Free & Pro: mixed type, medium difficulty, 10 questions
     // Premium: full customization
     let effectiveType = quizType || 'mixed';
     let effectiveDifficulty = difficulty || 'medium';
@@ -814,7 +808,7 @@ router.post('/generate-quiz', authenticateToken, async (req, res) => {
       effectiveType = 'mixed';
       effectiveDifficulty = 'medium';
       effectiveCount = 10;
-    } else if (userPlan === 'starter') {
+    } else if (userPlan === 'pro') {
       effectiveType = 'mixed';
       effectiveDifficulty = 'medium';
     }
@@ -852,15 +846,13 @@ router.post('/generate-quiz', authenticateToken, async (req, res) => {
       process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
     );
 
-    const startOfMonth = new Date();
-    startOfMonth.setDate(1);
-    startOfMonth.setHours(0, 0, 0, 0);
+    const { periodStart } = await subscriptionService.getUsagePeriod(userId);
 
     const { data: usageData, error: usageError } = await supabase
       .from('quiz_usage')
       .select('words_count')
       .eq('user_id', userId)
-      .gte('created_at', startOfMonth.toISOString());
+      .gte('created_at', periodStart);
 
     const generationsThisMonth = usageError ? 0 : (usageData || []).length;
     const wordsUsedThisMonth = usageError ? 0 : (usageData || []).reduce((sum, row) => sum + (row.words_count || 0), 0);
@@ -871,7 +863,7 @@ router.post('/generate-quiz', authenticateToken, async (req, res) => {
     if (generationLimit !== -1 && generationsThisMonth >= generationLimit) {
       return res.status(429).json({
         success: false,
-        message: `You've used all ${generationLimit} quiz generations this month. Upgrade for unlimited quizzes.`,
+        message: `You've used all ${generationLimit} quiz generations this period. Upgrade for unlimited quizzes.`,
         generationsUsed: generationsThisMonth,
         generationLimit,
         upgrade: true
@@ -884,8 +876,8 @@ router.post('/generate-quiz', authenticateToken, async (req, res) => {
       return res.status(429).json({
         success: false,
         message: remaining === 0
-          ? `You've used all ${wordLimit.toLocaleString()} quiz words this month. ${userPlan === 'free' ? 'Upgrade for 999,999 words/month.' : 'Limit resets next month.'}`
-          : `This text is ${wordCount} words but you only have ${remaining} quiz words remaining this month.${userPlan === 'free' ? ' Upgrade for 999,999 words/month.' : ''}`,
+          ? `You've used all ${wordLimit.toLocaleString()} quiz words this period. ${userPlan === 'free' ? 'Upgrade for 999,999 words/month.' : 'Limit resets when your billing period renews.'}`
+          : `This text is ${wordCount} words but you only have ${remaining} quiz words remaining this period.${userPlan === 'free' ? ' Upgrade for 999,999 words/month.' : ''}`,
         wordsUsed: wordsUsedThisMonth,
         wordLimit,
         wordsRemaining: remaining,
@@ -980,15 +972,13 @@ router.post('/generate-flashcards', authenticateToken, async (req, res) => {
       process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
     );
 
-    const startOfMonth = new Date();
-    startOfMonth.setDate(1);
-    startOfMonth.setHours(0, 0, 0, 0);
+    const { periodStart } = await subscriptionService.getUsagePeriod(userId);
 
     const { data: usageData, error: usageError } = await supabase
       .from('quiz_usage')
       .select('words_count')
       .eq('user_id', userId)
-      .gte('created_at', startOfMonth.toISOString());
+      .gte('created_at', periodStart);
 
     const generationsThisMonth = usageError ? 0 : (usageData || []).length;
     const wordsUsedThisMonth = usageError ? 0 : (usageData || []).reduce((sum, row) => sum + (row.words_count || 0), 0);
@@ -998,7 +988,7 @@ router.post('/generate-flashcards', authenticateToken, async (req, res) => {
     if (generationLimit !== -1 && generationsThisMonth >= generationLimit) {
       return res.status(429).json({
         success: false,
-        message: `You've used all ${generationLimit} study tool generations this month. Upgrade for unlimited access.`,
+        message: `You've used all ${generationLimit} study tool generations this period. Upgrade for unlimited access.`,
         upgrade: true
       });
     }
@@ -1006,7 +996,7 @@ router.post('/generate-flashcards', authenticateToken, async (req, res) => {
     if (wordsUsedThisMonth + wordCount > wordLimit) {
       return res.status(429).json({
         success: false,
-        message: `Word limit reached for this month.${userPlan === 'free' ? ' Upgrade for 999,999 words/month.' : ''}`,
+        message: `Word limit reached for this period.${userPlan === 'free' ? ' Upgrade for 999,999 words/month.' : ''}`,
         upgrade: userPlan === 'free'
       });
     }
@@ -1085,15 +1075,13 @@ router.post('/generate-crossword', authenticateToken, async (req, res) => {
       process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
     );
 
-    const startOfMonth = new Date();
-    startOfMonth.setDate(1);
-    startOfMonth.setHours(0, 0, 0, 0);
+    const { periodStart } = await subscriptionService.getUsagePeriod(userId);
 
     const { data: usageData, error: usageError } = await supabase
       .from('quiz_usage')
       .select('words_count')
       .eq('user_id', userId)
-      .gte('created_at', startOfMonth.toISOString());
+      .gte('created_at', periodStart);
 
     const generationsThisMonth = usageError ? 0 : (usageData || []).length;
     const wordsUsedThisMonth = usageError ? 0 : (usageData || []).reduce((sum, row) => sum + (row.words_count || 0), 0);
@@ -1103,7 +1091,7 @@ router.post('/generate-crossword', authenticateToken, async (req, res) => {
     if (generationLimit !== -1 && generationsThisMonth >= generationLimit) {
       return res.status(429).json({
         success: false,
-        message: `You've used all ${generationLimit} study tool generations this month. Upgrade for unlimited access.`,
+        message: `You've used all ${generationLimit} study tool generations this period. Upgrade for unlimited access.`,
         upgrade: true
       });
     }
@@ -1111,7 +1099,7 @@ router.post('/generate-crossword', authenticateToken, async (req, res) => {
     if (wordsUsedThisMonth + wordCount > wordLimitMonth) {
       return res.status(429).json({
         success: false,
-        message: `Word limit reached for this month.${userPlan === 'free' ? ' Upgrade for 999,999 words/month.' : ''}`,
+        message: `Word limit reached for this period.${userPlan === 'free' ? ' Upgrade for 999,999 words/month.' : ''}`,
         upgrade: userPlan === 'free'
       });
     }
@@ -1183,7 +1171,7 @@ router.post('/citation-search', authenticateToken, async (req, res) => {
     if (!limitCheck.allowed) {
       return res.status(429).json({
         success: false,
-        message: `Citation search limit reached. You have used ${limitCheck.usage} of ${limitCheck.limit} searches this month. Upgrade to get ${limitCheck.limit === 2 ? 'unlimited' : 'more'} citation searches.`,
+        message: `Citation search limit reached. You have used ${limitCheck.usage} of ${limitCheck.limit} searches this period. Upgrade to get ${limitCheck.limit === 2 ? 'unlimited' : 'more'} citation searches.`,
         limit: limitCheck.limit,
         usage: limitCheck.usage,
         remaining: limitCheck.remaining,
@@ -1292,7 +1280,7 @@ router.post('/citation-review', authenticateToken, validateCitationReview, async
     if (!limitCheck.allowed) {
       return res.status(429).json({
         success: false,
-        message: 'Monthly analysis limit reached. Please upgrade your plan or wait until next month.',
+        message: 'Analysis limit reached for this period. Please upgrade your plan or wait until your period resets.',
         limit: limitCheck.limit,
         usage: limitCheck.usage
       });
@@ -1336,7 +1324,7 @@ router.post('/citation-review', authenticateToken, validateCitationReview, async
 // @access  Private
 router.post('/simple-analyze', authenticateToken, async (req, res) => {
   try {
-    const { documentId, content, analysisType, citationStyle } = req.body;
+    const { documentId, content, analysisType, citationStyle, educationLevel } = req.body;
     const userId = req.user.id;
 
     console.log('=== SIMPLE ANALYSIS REQUEST ===');
@@ -1383,7 +1371,7 @@ router.post('/simple-analyze', authenticateToken, async (req, res) => {
         analysisType,
         userId,
         citationStyle,
-        focusAreas
+        educationLevel || 'college'
       );
 
       console.log('✅ AI analysis completed');
@@ -1506,7 +1494,7 @@ router.post('/analyze', authenticateToken, validateCreateAnalysis, async (req, r
         if (!analysisCheck.allowed) {
           return res.status(403).json({
             success: false,
-            message: `Monthly analysis limit exceeded. You have used ${analysisCheck.usage}/${analysisCheck.limit} analyses this month.`,
+            message: `Analysis limit exceeded for this period. You have used ${analysisCheck.usage}/${analysisCheck.limit} analyses.`,
             usage: {
               limit: analysisCheck.limit,
               used: analysisCheck.usage,

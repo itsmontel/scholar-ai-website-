@@ -159,7 +159,7 @@ class AIAnalysisService {
       // Get user's subscription plan for model and token selection
       let userPlan = 'free';
       let selectedModel = process.env.OPENAI_MODEL || 'gpt-4o-mini';
-      let maxTokens = 4000; // Default for free/starter
+      let maxTokens = 4000; // Default for free/pro
       
       try {
         const { plan } = await subscriptionService.getUserSubscriptionDetails(userId);
@@ -169,9 +169,9 @@ class AIAnalysisService {
           // Premium users get better model and more tokens
           selectedModel = process.env.OPENAI_PREMIUM_MODEL || 'gpt-5-mini';
           maxTokens = 8000; // Double tokens for premium
-        } else if (plan === 'starter') {
+        } else if (plan === 'pro') {
           selectedModel = process.env.OPENAI_STANDARD_MODEL || 'gpt-4o-mini';
-          maxTokens = 6000; // 50% more tokens for starter
+          maxTokens = 6000; // 50% more tokens for pro
         } else {
           selectedModel = process.env.OPENAI_STANDARD_MODEL || 'gpt-4o-mini';
           maxTokens = 4000; // Standard for free
@@ -267,7 +267,7 @@ class AIAnalysisService {
         if (plan === 'premium') {
           selectedModel = process.env.OPENAI_PREMIUM_MODEL || 'gpt-5-mini';
           maxTokens = 8000;
-        } else if (plan === 'starter') {
+        } else if (plan === 'pro') {
           selectedModel = process.env.OPENAI_STANDARD_MODEL || 'gpt-4o-mini';
           maxTokens = 6000;
         }
@@ -825,7 +825,7 @@ CRITICAL REQUIREMENTS:
       else if (wordCount > 3000) targetAnnotations = 25;
       else if (wordCount > 1500) targetAnnotations = 20;
       else targetAnnotations = 15;
-    } else if (userPlan === 'starter') {
+    } else if (userPlan === 'pro') {
       if (wordCount > 5000) targetAnnotations = 25;
       else if (wordCount > 3000) targetAnnotations = 20;
       else if (wordCount > 1500) targetAnnotations = 15;
@@ -1266,7 +1266,7 @@ CRITICAL REQUIREMENTS:
       else if (wordCount > 3000) minTotal = 25;
       else if (wordCount > 1500) minTotal = 20;
       else minTotal = 15;
-    } else if (userPlan === 'starter') {
+    } else if (userPlan === 'pro') {
       if (wordCount > 5000) minTotal = 25;
       else if (wordCount > 3000) minTotal = 20;
       else if (wordCount > 1500) minTotal = 15;
@@ -2673,7 +2673,7 @@ IMPORTANT REQUIREMENTS:
 
   /**
    * Save citation search to history
-   * @param {string} userPlan - User's subscription plan ('free', 'starter', 'premium')
+   * @param {string} userPlan - User's subscription plan ('free', 'pro', 'premium')
    */
   async saveCitationSearch(userId, researchTopic, citationStyle, searchResults, yearRange = 'all', userPlan = 'free') {
     try {
@@ -2685,8 +2685,8 @@ IMPORTANT REQUIREMENTS:
         process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
       );
 
-      // Free users: expires 30 days after creation; Paid users (starter/premium): no expiration (null)
-      const isPaidUser = userPlan === 'starter' || userPlan === 'premium';
+      // Free users: expires 30 days after creation; Paid users (pro/premium): no expiration (null)
+      const isPaidUser = userPlan === 'pro' || userPlan === 'premium';
       const expiresAt = isPaidUser ? null : getExpiresAt30Days();
 
       // Note: yearRange is already included in searchResults.yearRange
@@ -2794,7 +2794,7 @@ IMPORTANT REQUIREMENTS:
 
   /**
    * Save quiz to history
-   * @param {string} userPlan - User's subscription plan ('free', 'starter', 'premium')
+   * @param {string} userPlan - User's subscription plan ('free', 'pro', 'premium')
    */
   async saveQuiz(userId, quiz, sourceText, userPlan = 'free') {
     try {
@@ -2806,8 +2806,8 @@ IMPORTANT REQUIREMENTS:
         process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
       );
 
-      // Free users: expires 30 days after creation; Paid users (starter/premium): no expiration (null)
-      const isPaidUser = userPlan === 'starter' || userPlan === 'premium';
+      // Free users: expires 30 days after creation; Paid users (pro/premium): no expiration (null)
+      const isPaidUser = userPlan === 'pro' || userPlan === 'premium';
       const expiresAt = isPaidUser ? null : getExpiresAt30Days();
 
       const quizData = {
@@ -2842,7 +2842,7 @@ IMPORTANT REQUIREMENTS:
 
   /**
    * Save flashcards to history
-   * @param {string} userPlan - User's subscription plan ('free', 'starter', 'premium')
+   * @param {string} userPlan - User's subscription plan ('free', 'pro', 'premium')
    */
   async saveFlashcards(userId, flashcards, sourceText, userPlan = 'free') {
     try {
@@ -2854,8 +2854,8 @@ IMPORTANT REQUIREMENTS:
         process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
       );
 
-      // Free users: expires 30 days after creation; Paid users (starter/premium): no expiration (null)
-      const isPaidUser = userPlan === 'starter' || userPlan === 'premium';
+      // Free users: expires 30 days after creation; Paid users (pro/premium): no expiration (null)
+      const isPaidUser = userPlan === 'pro' || userPlan === 'premium';
       const expiresAt = isPaidUser ? null : getExpiresAt30Days();
 
       const flashcardData = {
@@ -2890,7 +2890,7 @@ IMPORTANT REQUIREMENTS:
 
   /**
    * Save crossword to history
-   * @param {string} userPlan - User's subscription plan ('free', 'starter', 'premium')
+   * @param {string} userPlan - User's subscription plan ('free', 'pro', 'premium')
    */
   async saveCrossword(userId, crossword, sourceText, userPlan = 'free') {
     try {
@@ -2902,8 +2902,8 @@ IMPORTANT REQUIREMENTS:
         process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
       );
 
-      // Free users: expires 30 days after creation; Paid users (starter/premium): no expiration (null)
-      const isPaidUser = userPlan === 'starter' || userPlan === 'premium';
+      // Free users: expires 30 days after creation; Paid users (pro/premium): no expiration (null)
+      const isPaidUser = userPlan === 'pro' || userPlan === 'premium';
       const expiresAt = isPaidUser ? null : getExpiresAt30Days();
 
       // Build clues object from placedWords for display in history
@@ -2955,7 +2955,7 @@ IMPORTANT REQUIREMENTS:
    * Save Crater Blast game to history
    * @param {string} userId
    * @param {object} payload - { questions, title, inputType, sourceText }
-   * @param {string} userPlan - 'free', 'starter', 'premium'
+   * @param {string} userPlan - 'free', 'pro', 'premium'
    */
   async saveCraterBlastGame(userId, payload, userPlan = 'free') {
     try {
@@ -2965,7 +2965,7 @@ IMPORTANT REQUIREMENTS:
         process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
       );
 
-      const isPaidUser = userPlan === 'starter' || userPlan === 'premium';
+      const isPaidUser = userPlan === 'pro' || userPlan === 'premium';
       const expiresAt = isPaidUser ? null : getExpiresAt30Days();
 
       const title = (payload.title || payload.sourceText || 'Crater Blast Game').toString().slice(0, 200);
@@ -3172,7 +3172,7 @@ IMPORTANT REQUIREMENTS:
 
   /**
    * Save lesson plan to history
-   * @param {string} userPlan - User's subscription plan ('free', 'starter', 'premium')
+   * @param {string} userPlan - User's subscription plan ('free', 'pro', 'premium')
    */
   async saveLesson(userId, lesson, sourceText, userPlan = 'free') {
     try {
@@ -3184,8 +3184,8 @@ IMPORTANT REQUIREMENTS:
         process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
       );
 
-      // Free users: expires 30 days after creation; Paid users (starter/premium): no expiration (null)
-      const isPaidUser = userPlan === 'starter' || userPlan === 'premium';
+      // Free users: expires 30 days after creation; Paid users (pro/premium): no expiration (null)
+      const isPaidUser = userPlan === 'pro' || userPlan === 'premium';
       const expiresAt = isPaidUser ? null : getExpiresAt30Days();
 
       const lessonData = {
@@ -3401,13 +3401,13 @@ IMPORTANT REQUIREMENTS:
       }
     ];
   }
-  async humanizeText(text, mode = 'standard', intensity = 'medium', userPlan = 'starter') {
+  async humanizeText(text, mode = 'standard', intensity = 'medium', userPlan = 'pro') {
     if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY === 'your_openai_api_key_here') {
       console.log('OpenAI API key not configured - returning original text');
       return text;
     }
 
-    const selectedModel = userPlan === 'premium' ? 'gpt-4.1-mini' : 'gpt-4.1-nano';
+    const selectedModel = 'gpt-4.1-nano'; // All plans use nano (premium keeps mini only for AI essay analysis)
     const maxTokens = 8000;
 
     const intensityInstructions = {
@@ -3561,7 +3561,7 @@ INTENSITY LEVEL: ${intensityInstructions[intensity] || intensityInstructions.med
       throw new Error('OpenAI API key not configured');
     }
 
-    const selectedModel = userPlan === 'premium' ? 'gpt-4.1-mini' : 'gpt-4.1-nano';
+    const selectedModel = 'gpt-4.1-nano'; // All plans use nano (premium keeps mini only for AI essay analysis)
 
     const lengthInstructions = {
       short: 'Create a very concise summary (3-5 key points or 50-100 words).',
@@ -3643,7 +3643,7 @@ IMPORTANT:
    * @param {number} displayCount - Number to show per attempt (e.g. 10); if omitted, same as bankCount
    * @returns {Object} Quiz with questions array (full bank) and displayCount
    */
-  async generateQuiz(text, quizType = 'mixed', difficulty = 'medium', bankCount = 10, displayCount = null, userPlan = 'starter') {
+  async generateQuiz(text, quizType = 'mixed', difficulty = 'medium', bankCount = 10, displayCount = null, userPlan = 'pro') {
     const questionCount = bankCount;
     if (displayCount == null) displayCount = bankCount;
     if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY === 'your_openai_api_key_here') {
@@ -3651,7 +3651,7 @@ IMPORTANT:
       throw new Error('OpenAI API key not configured');
     }
 
-    const selectedModel = userPlan === 'premium' ? 'gpt-4.1-mini' : 'gpt-4.1-nano';
+    const selectedModel = 'gpt-4.1-nano'; // All plans use nano (premium keeps mini only for AI essay analysis)
 
     const difficultyInstructions = {
       easy: 'Create straightforward questions that test basic recall and comprehension. Focus on main ideas and explicit facts.',
@@ -3760,12 +3760,12 @@ DO NOT include any text outside the JSON object.`;
       throw new Error('Failed to generate quiz: ' + error.message);
     }
   }
-  async generateFlashcards(text, cardCount = 15, userPlan = 'starter') {
+  async generateFlashcards(text, cardCount = 15, userPlan = 'pro') {
     if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY === 'your_openai_api_key_here') {
       throw new Error('OpenAI API key not configured');
     }
 
-    const selectedModel = userPlan === 'premium' ? 'gpt-4.1-mini' : 'gpt-4.1-nano';
+    const selectedModel = 'gpt-4.1-nano'; // All plans use nano (premium keeps mini only for AI essay analysis)
 
     const systemPrompt = `You are an expert study-aid creator. Generate exactly ${cardCount} flashcards from the provided text.
 
@@ -3827,12 +3827,12 @@ DO NOT include any text outside the JSON object.`;
     }
   }
 
-  async generateCrossword(text, wordCount = 12, userPlan = 'starter') {
+  async generateCrossword(text, wordCount = 12, userPlan = 'pro') {
     if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY === 'your_openai_api_key_here') {
       throw new Error('OpenAI API key not configured');
     }
 
-    const selectedModel = userPlan === 'premium' ? 'gpt-4.1-mini' : 'gpt-4.1-nano';
+    const selectedModel = 'gpt-4.1-nano'; // All plans use nano (premium keeps mini only for AI essay analysis)
 
     const systemPrompt = `You are an expert crossword puzzle creator for educational content. Extract exactly ${wordCount} key terms from the provided text and create clues for them.
 
@@ -4052,7 +4052,7 @@ DO NOT include any text outside the JSON object.`;
       throw new Error('OpenAI API key not configured');
     }
 
-    const selectedModel = userPlan === 'premium' ? 'gpt-4.1-mini' : 'gpt-4.1-nano';
+    const selectedModel = 'gpt-4.1-nano'; // All plans use nano (premium keeps mini only for AI essay analysis)
 
     const systemPrompt = `You are a quiz question generator for a fast-paced arcade-style reflex game.
 
@@ -4130,7 +4130,7 @@ DO NOT include any text outside the JSON object.`;
       throw new Error('OpenAI API key not configured');
     }
 
-    const selectedModel = userPlan === 'premium' ? 'gpt-4.1-mini' : 'gpt-4.1-nano';
+    const selectedModel = 'gpt-4.1-nano'; // All plans use nano (premium keeps mini only for AI essay analysis)
 
     // Use only the first 10,000 words for AI processing
     const words = text.trim().split(/\s+/);

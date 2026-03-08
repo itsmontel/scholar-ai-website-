@@ -1,6 +1,6 @@
 -- Add expires_at column to citation_searches table for retention policy
 -- Free users: citations expire after 7 days
--- Starter/Premium users: citations never expire (null)
+-- Pro/Premium users: citations never expire (null)
 
 ALTER TABLE citation_searches 
 ADD COLUMN IF NOT EXISTS expires_at TIMESTAMP WITH TIME ZONE;

@@ -22,6 +22,7 @@ const HumanizerPage = ({ onNavigate, user, onLogout }: HumanizerPageProps) => {
   const [copied, setCopied] = useState(false);
   const [wordsUsed, setWordsUsed] = useState(0);
   const [wordLimit, setWordLimit] = useState(1000);
+  const [daysUntilReset, setDaysUntilReset] = useState<number | undefined>(undefined);
   const [error, setError] = useState('');
   const [showFakeAnimation, setShowFakeAnimation] = useState(false);
   const [showSignupPrompt, setShowSignupPrompt] = useState(false);
@@ -94,6 +95,7 @@ const HumanizerPage = ({ onNavigate, user, onLogout }: HumanizerPageProps) => {
         const usageData = result.data || result;
         setWordsUsed(usageData.wordsUsed || 0);
         setWordLimit(usageData.wordLimit || 1000);
+        setDaysUntilReset(usageData.daysUntilReset);
       }
     } catch (error) {
       console.error('Error fetching usage:', error);
@@ -198,7 +200,7 @@ const HumanizerPage = ({ onNavigate, user, onLogout }: HumanizerPageProps) => {
 
   const wordCount = inputText.trim().split(/\s+/).filter(Boolean).length;
   const outputWordCount = humanizedResult.split(/\s+/).filter(Boolean).length;
-  const isFreeUser = !user || (user?.subscription_plan !== 'starter' && user?.subscription_plan !== 'premium' && user?.plan !== 'starter' && user?.plan !== 'premium');
+  const isFreeUser = !user || (user?.subscription_plan !== 'pro' && user?.subscription_plan !== 'premium' && user?.plan !== 'pro' && user?.plan !== 'premium');
   const maxWords = isFreeUser ? 1000 : 5000;
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -610,7 +612,7 @@ const HumanizerPage = ({ onNavigate, user, onLogout }: HumanizerPageProps) => {
               <p className="text-red-700 dark:text-red-300 text-sm font-medium">{error}</p>
               {wordLimit < 999999 && (
                 <>
-                  <p className="text-red-600 dark:text-red-400 text-xs mt-1">{getResetsInText()}</p>
+                  <p className="text-red-600 dark:text-red-400 text-xs mt-1">{getResetsInText(daysUntilReset)}</p>
                   <button onClick={() => onNavigate('pricing')} className="mt-2 px-4 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold rounded-lg transition-colors">
                     Upgrade for unlimited words/month
                   </button>

@@ -141,7 +141,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
   const [createDropdownOpen, setCreateDropdownOpen] = useState(false);
 
   const userPlan = user?.plan || user?.subscription_plan || 'free';
-  const isPaidUser = userPlan === 'starter' || userPlan === 'premium';
+  const isPaidUser = userPlan === 'pro' || userPlan === 'premium';
 
   useEffect(() => {
     fetchStudyToolHistory();

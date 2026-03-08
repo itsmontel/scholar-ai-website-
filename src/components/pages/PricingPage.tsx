@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import Header from '../common/Header';
 import Footer from '../common/Footer';
 import PaymentModal from '../payment/PaymentModal';
+import ScholarMascot from '../common/ScholarMascot';
 
 interface PricingPageProps {
   onNavigate: (page: string) => void;
@@ -15,11 +16,11 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
   const [isTrialEligible, setIsTrialEligible] = useState<boolean>(true);
   const [paymentModal, setPaymentModal] = useState<{
     isOpen: boolean;
-    planType: 'starter' | 'premium';
+    planType: 'pro' | 'premium';
     billingCycle: 'monthly' | 'yearly';
   }>({
     isOpen: false,
-    planType: 'starter',
+    planType: 'pro',
     billingCycle: 'monthly'
   });
 
@@ -109,7 +110,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
     } else {
       setPaymentModal({
         isOpen: true,
-        planType: planId as 'starter' | 'premium',
+        planType: planId as 'pro' | 'premium',
         billingCycle: billingCycle as 'monthly' | 'yearly'
       });
     }
@@ -163,7 +164,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
       yearlyPrice: 0,
       features: [
         '3 documents per month',
-        '1 AI essay analysis per month',
+        '3 AI essay analyses per month',
         '3 study tool generations/month (quiz, flashcards, crossword)',
         '5,000 words/month for Humanizer & Summarizer',
         '2 citation searches per month',
@@ -180,7 +181,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
       buttonAction: handleFreePlanAction
     },
     {
-      id: 'starter',
+      id: 'pro',
       name: 'Pro',
       description: 'Most popular for students',
       monthlyPrice: 19.99,
@@ -203,7 +204,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
         : (currentPlan === 'free' 
           ? (isTrialEligible ? 'Try for Free' : 'Upgrade to Pro') 
           : 'Switch to Pro'),
-      buttonAction: () => handlePlanAction('starter')
+        buttonAction: () => handlePlanAction('pro')
     },
     {
       id: 'premium',
@@ -240,7 +241,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
     },
     {
       question: "What's included in the free plan?",
-      answer: "The free plan includes 3 documents per month, 1 AI essay analysis, 3 study tool generations (quiz, flashcards, or crossword), 5,000 words for the Humanizer and Summarizer, and 2 citation searches. It's perfect for students just getting started."
+        answer: "The free plan includes 3 documents per month, 3 AI essay analyses, 3 study tool generations (quiz, flashcards, or crossword), 5,000 words for the Humanizer and Summarizer, and 2 citation searches. It's perfect for students just getting started."
     },
     {
       question: "What's the difference between Pro and Premium?",
@@ -294,35 +295,15 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
     <div className="min-h-screen bg-gradient-to-b from-blue-50/80 via-stone-50 to-white dark:from-stone-950 dark:via-stone-900 dark:to-stone-900">
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="pricing" />
 
-      {/* Hero Section - with illustration like landing page */}
+      {/* Hero Section - mascot instead of illustration */}
       <section className="relative py-12 sm:py-16 border-b border-stone-200/60 dark:border-stone-700/60 overflow-hidden">
         <div className="absolute top-[30%] left-[5%] hidden xl:block text-4xl opacity-50 animate-float">💰</div>
         <div className="absolute top-[35%] right-[6%] hidden xl:block text-3xl opacity-45 animate-float-delayed">✨</div>
         <div className="absolute bottom-[40%] left-[6%] hidden xl:block text-3xl opacity-45 animate-float">📋</div>
         <div className="absolute bottom-[35%] right-[5%] hidden xl:block text-4xl opacity-50 animate-float-delayed">🎯</div>
-        {/* Right illustration - pricing/checklist character */}
-        <div className="hidden lg:block absolute right-4 xl:right-12 top-1/2 -translate-y-1/2 w-24 h-28 xl:w-28 xl:h-32 z-10 opacity-90 animate-float">
-          <svg viewBox="0 0 140 160" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
-            <path d="M50 95 Q45 125 50 155 L90 155 Q95 125 90 95" fill="#8B5CF6" />
-            <rect x="62" y="72" width="16" height="26" fill="#E8B796" />
-            <ellipse cx="70" cy="45" rx="30" ry="33" fill="#E8B796" />
-            <path d="M40 38 Q38 18 55 12 Q70 6 88 12 Q105 18 100 38 Q98 28 85 20 Q70 12 55 20 Q42 28 40 38" fill="#4A3728" />
-            <ellipse cx="58" cy="45" rx="4" ry="5" fill="#1F2937" />
-            <ellipse cx="82" cy="45" rx="4" ry="5" fill="#1F2937" />
-            <circle cx="59" cy="43" r="1.5" fill="white" />
-            <circle cx="83" cy="43" r="1.5" fill="white" />
-            <path d="M55 58 Q70 68 85 58" stroke="#1F2937" strokeWidth="2" fill="none" strokeLinecap="round" />
-            <path d="M45 98 Q20 100 5 115" stroke="#E8B796" strokeWidth="12" fill="none" strokeLinecap="round" />
-            <path d="M95 98 Q120 100 135 115" stroke="#E8B796" strokeWidth="12" fill="none" strokeLinecap="round" />
-            <ellipse cx="3" cy="118" rx="8" ry="9" fill="#E8B796" />
-            <ellipse cx="137" cy="118" rx="8" ry="9" fill="#E8B796" />
-            <rect x="20" y="88" width="100" height="62" rx="6" fill="#FEF3C7" stroke="#F59E0B" strokeWidth="2" />
-            <rect x="28" y="98" width="84" height="8" rx="2" fill="#FDE68A" />
-            <rect x="28" y="112" width="60" height="8" rx="2" fill="#FDE68A" />
-            <rect x="28" y="126" width="70" height="8" rx="2" fill="#FDE68A" />
-            <circle cx="100" cy="116" r="6" fill="#22C55E" stroke="white" strokeWidth="2" />
-            <path d="M97 116 L99 118 L103 114" stroke="white" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
+        {/* Mascot - pointing pose */}
+        <div className="hidden lg:flex absolute right-4 xl:right-12 top-1/2 -translate-y-1/2 z-10 items-center justify-center">
+          <ScholarMascot size={140} animated={true} pose="pointing" />
         </div>
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8 lg:gap-12">

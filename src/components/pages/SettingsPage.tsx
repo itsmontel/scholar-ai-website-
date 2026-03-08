@@ -338,9 +338,9 @@ const SettingsPage = ({ onNavigate, user, onLogout, onUserUpdate }: SettingsPage
                   <div className="font-semibold text-stone-800">Plan Features</div>
                   <div className="text-stone-600">
                     {userStats.subscriptionPlan === 'free' 
-                      ? '1 analysis per month' 
-                      : userStats.subscriptionPlan === 'starter' || userStats.subscriptionPlan === 'premium'
-                      ? (userStats.subscriptionPlan === 'starter' ? '99 analyses per month' : '199 analyses per month')
+                      ? '3 analyses per month'
+                      : userStats.subscriptionPlan === 'pro' || userStats.subscriptionPlan === 'premium'
+                      ? (userStats.subscriptionPlan === 'pro' ? '99 analyses per month' : '199 analyses per month')
                       : 'View billing for details'
                     }
                   </div>

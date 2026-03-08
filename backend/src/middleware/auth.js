@@ -59,7 +59,7 @@ const authenticateToken = async (req, res, next) => {
   }
 };
 
-const requireSubscription = (requiredPlan = 'basic') => {
+const requireSubscription = (requiredPlan = 'pro') => {
   return (req, res, next) => {
     const user = req.user;
     
@@ -72,7 +72,7 @@ const requireSubscription = (requiredPlan = 'basic') => {
 
     const planHierarchy = {
       'free': 0,
-      'basic': 1,
+      'pro': 1,
       'premium': 2
     };
 

@@ -74,7 +74,7 @@ const CitationHistoryPage = ({ onNavigate, user, onLogout }: CitationHistoryProp
   }, [currentPage]);
 
   const userPlan = user?.plan || user?.subscription_plan || 'free';
-  const isPaidUser = userPlan === 'starter' || userPlan === 'premium';
+  const isPaidUser = userPlan === 'pro' || userPlan === 'premium';
 
   useEffect(() => {
     fetchCitationHistory();

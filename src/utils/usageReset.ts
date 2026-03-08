@@ -1,8 +1,9 @@
 /**
- * Usage limits reset on the 1st of each calendar month.
- * Returns the number of days until the next reset.
+ * Usage limits reset: paid = billing period, free = rolling 30 days from signup.
+ * When daysUntilReset is provided from API, use it. Otherwise fallback to calendar month.
  */
-export function getDaysUntilReset(): number {
+export function getDaysUntilReset(daysFromApi?: number | null): number {
+  if (typeof daysFromApi === 'number' && daysFromApi >= 0) return daysFromApi;
   const now = new Date();
   const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
   const diffMs = nextMonth.getTime() - now.getTime();
@@ -11,9 +12,10 @@ export function getDaysUntilReset(): number {
 
 /**
  * Returns a user-friendly string like "Resets in 5 days" or "Resets tomorrow"
+ * @param daysUntilReset - Optional. When provided from API (paid period or free signup-based), uses it. Else uses calendar month.
  */
-export function getResetsInText(): string {
-  const days = getDaysUntilReset();
+export function getResetsInText(daysUntilReset?: number | null): string {
+  const days = getDaysUntilReset(daysUntilReset);
   if (days <= 0) return 'Resets today';
   if (days === 1) return 'Resets tomorrow';
   return `Resets in ${days} days`;

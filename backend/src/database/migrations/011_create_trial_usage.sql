@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS trial_usage (
     email VARCHAR(255) NOT NULL,
     stripe_customer_id VARCHAR(255),
     trial_started_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    trial_plan VARCHAR(50) NOT NULL, -- 'starter' or 'premium'
+    trial_plan VARCHAR(50) NOT NULL, -- 'pro' or 'premium'
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 

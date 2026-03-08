@@ -165,7 +165,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
     const checkPlanChanges = setInterval(async () => {
       try {
         const newPlan = await fetchUserPlan();
-        if (newPlan && newPlan !== currentPlan && (newPlan === 'starter' || newPlan === 'premium')) {
+        if (newPlan && newPlan !== currentPlan && (newPlan === 'pro' || newPlan === 'premium')) {
           console.log('Plan upgrade detected:', currentPlan, '->', newPlan);
           setCurrentPlan(newPlan);
           // Show success message

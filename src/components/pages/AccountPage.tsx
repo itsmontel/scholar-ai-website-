@@ -17,7 +17,7 @@ interface AccountPageProps {
   onNavigate: (page: string) => void;
   user: User | null;
   onLogout: () => void;
-  onUserUpdate?: (updates: { username?: string; name?: string }) => void;
+  onUserUpdate?: (updates: { username?: string; name?: string; firstName?: string; lastName?: string }) => void;
 }
 
 interface UserStats {
@@ -65,6 +65,10 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
   const [usernameLoading, setUsernameLoading] = useState(false);
   const [usernameError, setUsernameError] = useState('');
   const [usernameSuccess, setUsernameSuccess] = useState('');
+  const [displayName, setDisplayName] = useState('');
+  const [nameLoading, setNameLoading] = useState(false);
+  const [nameError, setNameError] = useState('');
+  const [nameSuccess, setNameSuccess] = useState('');
 
   // Fetch user stats and profile data
   const fetchUserData = async () => {
@@ -87,6 +91,8 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
         const userData = profileData.data.user;
         const createdDate = new Date(userData.createdAt);
         setUsername(userData.username || userData.name || '');
+        const nameVal = userData.name || (userData.firstName && userData.lastName ? `${userData.firstName} ${userData.lastName}`.trim() : '') || '';
+        setDisplayName(nameVal);
         setUserStats(prev => ({
           ...prev,
           memberSince: createdDate.toLocaleDateString('en-US', {
@@ -132,6 +138,9 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
   useEffect(() => {
     if (user) {
       setDisplayUser(user);
+      // Pre-fill name from user prop for immediate display (before profile loads)
+      const n = user.name || (user.firstName && user.lastName ? `${user.firstName} ${user.lastName}`.trim() : '') || '';
+      setDisplayName(prev => (prev === '' ? n : prev));
     } else if (typeof window !== 'undefined') {
       // Fallback to localStorage if no user prop
       try {
@@ -140,6 +149,8 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
           const parsedUser = JSON.parse(userData);
           console.log('AccountPage - using localStorage user:', parsedUser);
           setDisplayUser(parsedUser);
+          const n = parsedUser.name || (parsedUser.firstName && parsedUser.lastName ? `${parsedUser.firstName} ${parsedUser.lastName}`.trim() : '') || '';
+          setDisplayName(prev => (prev === '' ? n : prev));
         }
       } catch (error) {
         console.error('Error getting user from localStorage:', error);
@@ -206,6 +217,53 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
       setUsernameError('Failed to update username');
     } finally {
       setUsernameLoading(false);
+    }
+  };
+
+  const handleSaveName = async () => {
+    const trimmed = displayName.trim();
+    if (!trimmed) {
+      setNameError('Name cannot be empty');
+      return;
+    }
+    if (trimmed.length > 100) {
+      setNameError('Name must be 100 characters or less');
+      return;
+    }
+    setNameLoading(true);
+    setNameError('');
+    setNameSuccess('');
+    try {
+      const token = localStorage.getItem('authToken');
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/users/profile`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ name: trimmed }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setNameSuccess('Name updated!');
+        onUserUpdate?.({ name: trimmed });
+        if (typeof window !== 'undefined') {
+          try {
+            const stored = localStorage.getItem('user');
+            if (stored) {
+              const parsed = JSON.parse(stored);
+              localStorage.setItem('user', JSON.stringify({ ...parsed, name: trimmed }));
+            }
+          } catch (_) {}
+        }
+        setTimeout(() => setNameSuccess(''), 3000);
+      } else {
+        setNameError(data.message || 'Failed to update name');
+      }
+    } catch (e) {
+      setNameError('Failed to update name');
+    } finally {
+      setNameLoading(false);
     }
   };
 
@@ -338,6 +396,27 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
               </div>
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 py-3 border-b border-stone-200">
                 <div className="flex-1">
+                  <div className="font-semibold text-stone-800 mb-1">Name</div>
+                  <input
+                    type="text"
+                    value={displayName}
+                    onChange={(e) => setDisplayName(e.target.value)}
+                    placeholder="Your display name"
+                    className="w-full sm:max-w-xs px-4 py-2.5 border border-stone-200 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-all text-stone-800"
+                  />
+                  {nameError && <p className="text-red-600 text-sm mt-1">{nameError}</p>}
+                  {nameSuccess && <p className="text-violet-600 text-sm mt-1">{nameSuccess}</p>}
+                </div>
+                <button
+                  onClick={handleSaveName}
+                  disabled={nameLoading || !displayName.trim()}
+                  className="bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 disabled:bg-stone-300 text-white px-5 py-2.5 rounded-full font-medium transition-colors shrink-0"
+                >
+                  {nameLoading ? 'Saving...' : 'Save'}
+                </button>
+              </div>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 py-3 border-b border-stone-200">
+                <div className="flex-1">
                   <div className="font-semibold text-stone-800 mb-1">Username</div>
                   <input
                     type="text"
@@ -399,8 +478,8 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
                   <div className="font-semibold text-stone-800">Plan Features</div>
                   <div className="text-stone-600">
                     {userStats.subscriptionPlan === 'free'
-                      ? '3 documents, 1 analysis per month, 2 citation searches'
-                      : userStats.subscriptionPlan === 'starter'
+                      ? '3 documents, 3 analyses per month, 2 citation searches'
+                      : userStats.subscriptionPlan === 'pro'
                       ? 'Unlimited documents, 99 analyses, 99 citation searches (Pro)'
                       : userStats.subscriptionPlan === 'premium'
                       ? 'Unlimited documents, 199 analyses, 199 citation searches (Premium)'
@@ -417,13 +496,13 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
                   {userStats.subscriptionPlan === 'free' && (
                     <>
                       <div>• 3 documents per month</div>
-                      <div>• 1 AI essay analysis per month</div>
+                      <div>• 3 AI essay analyses per month</div>
                       <div>• 2 citation searches per month</div>
                       <div>• 5,000 Humanizer/Summarizer words</div>
                       <div>• 3 study tool generations (quiz/flashcards/crossword)</div>
                     </>
                   )}
-                  {userStats.subscriptionPlan === 'starter' && (
+                  {userStats.subscriptionPlan === 'pro' && (
                     <>
                       <div>• Unlimited document uploads</div>
                       <div>• 99 AI essay analyses per month</div>

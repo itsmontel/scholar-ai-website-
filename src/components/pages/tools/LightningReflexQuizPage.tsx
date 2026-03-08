@@ -98,7 +98,7 @@ function computePoints(reactionMs: number, streak: number) {
 
 const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflexQuizPageProps) => {
   const userPlan = (user?.plan || user?.subscription_plan || 'free').toLowerCase();
-  const canUseStudyTools = user && (userPlan === 'starter' || userPlan === 'premium');
+  const canUseStudyTools = user && (userPlan === 'pro' || userPlan === 'premium');
   const maxWords = canUseStudyTools ? 10000 : 5000;
 
   const [gameState, setGameState] = useState<GameState>('menu');

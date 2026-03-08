@@ -664,7 +664,7 @@ class FriendsService {
 
     const originalQuiz = request.quiz;
     const userPlan = await subscriptionService.getUserPlan(userId);
-    const isPaidUser = userPlan === 'starter' || userPlan === 'premium';
+    const isPaidUser = userPlan === 'pro' || userPlan === 'premium';
     const expiresAt = isPaidUser ? null : (() => {
       const now = new Date();
       const exp = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);

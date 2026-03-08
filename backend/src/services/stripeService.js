@@ -235,7 +235,11 @@ class StripeService {
   // Get price ID based on plan and billing cycle
   getPriceId(planType, billingCycle) {
     const prices = {
-      'starter': {
+      'pro': {
+        'monthly': process.env.STRIPE_STARTER_MONTHLY_PRICE_ID || 'price_starter_monthly',
+        'yearly': process.env.STRIPE_STARTER_YEARLY_PRICE_ID || 'price_starter_yearly'
+      },
+      'starter': { // backward compat
         'monthly': process.env.STRIPE_STARTER_MONTHLY_PRICE_ID || 'price_starter_monthly',
         'yearly': process.env.STRIPE_STARTER_YEARLY_PRICE_ID || 'price_starter_yearly'
       },

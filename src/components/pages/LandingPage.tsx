@@ -168,7 +168,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
     },
     {
       question: "What's the difference between Free, Pro, and Premium?",
-      answer: "Free includes 3 documents, 1 essay analysis per month, 3 study tool generations (quiz/flashcards/crossword), 5,000 Humanizer/Summarizer words per month, and 2 citation searches. Pro unlocks unlimited study tools, 99 essay analyses per month, 999,999 Humanizer/Summarizer words, 99 citation searches per month, all citation styles, and PDF/Word export. Premium adds 199 analyses and 199 citation searches per month, our top-tier premium AI model, all quiz types and difficulty levels, all summarizer styles and lengths, advanced essay analysis, and priority support."
+      answer: "Free includes 3 documents, 3 essay analyses per month, 3 study tool generations (quiz/flashcards/crossword), 5,000 Humanizer/Summarizer words per month, and 2 citation searches. Pro unlocks unlimited study tools, 99 essay analyses per month, 999,999 Humanizer/Summarizer words, 99 citation searches per month, all citation styles, and PDF/Word export. Premium adds 199 analyses and 199 citation searches per month, our top-tier premium AI model, all quiz types and difficulty levels, all summarizer styles and lengths, advanced essay analysis, and priority support."
     },
     {
       question: "How do I add friends and share my study materials?",

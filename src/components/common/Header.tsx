@@ -37,6 +37,7 @@ interface UsageStats {
     maxDocumentSize: number;
     name: string;
   };
+  daysUntilReset?: number;
 }
 
 const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage, showPromoBanner = true, sticky = true }) => {
@@ -559,12 +560,12 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
                             <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
                               usageStats?.plan === 'premium' 
                                 ? 'bg-gradient-to-r from-amber-400 to-orange-500 text-stone-900' 
-                                : usageStats?.plan === 'starter' 
+                                : usageStats?.plan === 'pro' 
                                   ? 'bg-lime-100 dark:bg-lime-900/50 text-lime-700 dark:text-lime-400' 
                                   : 'bg-stone-200 dark:bg-stone-700 text-stone-600 dark:text-stone-400'
                             }`}>
                               {usageStats?.plan === 'premium' && '⭐ '}
-                              {usageStats?.plan === 'starter' ? 'Pro' : usageStats?.plan === 'premium' ? 'Premium' : 'Free'}
+                              {usageStats?.plan === 'pro' ? 'Pro' : usageStats?.plan === 'premium' ? 'Premium' : 'Free'}
                             </span>
                           </div>
                         </div>
@@ -615,7 +616,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
                           </div>
                           {(usageStats.uploadsRemaining !== -1 || usageStats.analysesRemaining !== -1) && (
                             <p className="text-[10px] text-stone-500 dark:text-stone-400 mt-1.5">
-                              {getResetsInText()}
+                              {getResetsInText(usageStats.daysUntilReset)}
                             </p>
                           )}
                         </div>
