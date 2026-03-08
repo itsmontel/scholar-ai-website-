@@ -153,18 +153,24 @@ router.post('/complete-onboarding', authenticateToken, async (req, res) => {
 // @access  Private
 router.post('/complete-tutorial', authenticateToken, async (req, res) => {
   try {
+    const userId = req.user.id;
+    console.log('[complete-tutorial] userId:', userId, 'email:', req.user.email);
+
+    // Use service role to bypass RLS. userService may fall back to anon key.
     const supabase = createClient(
       process.env.SUPABASE_URL,
       process.env.SUPABASE_SERVICE_ROLE_KEY
     );
 
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('users')
       .update({ welcome_tutorial_completed: true, updated_at: new Date().toISOString() })
-      .eq('id', req.user.id);
+      .eq('id', userId)
+      .select('id, welcome_tutorial_completed')
+      .single();
 
     if (error) {
-      console.error('Complete tutorial Supabase error:', error.message, error.details);
+      console.error('[complete-tutorial] Supabase error:', error.message, error.code, error.details);
       return res.status(500).json({
         success: false,
         message: 'Failed to save tutorial status',
@@ -172,10 +178,23 @@ router.post('/complete-tutorial', authenticateToken, async (req, res) => {
       });
     }
 
+    if (!data || data.welcome_tutorial_completed !== true) {
+      console.error('[complete-tutorial] No row updated. data:', data, 'userId:', userId);
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to save tutorial status (user not found or column missing)'
+      });
+    }
+
+    console.log('[complete-tutorial] Success for user', userId);
     res.json({ success: true, message: 'Tutorial marked as completed' });
   } catch (error) {
-    console.error('Complete tutorial error:', error);
-    res.status(500).json({ success: false, message: 'Failed to save tutorial status' });
+    console.error('[complete-tutorial] Error:', error.message);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to save tutorial status',
+      ...(process.env.NODE_ENV !== 'production' && { debug: error.message })
+    });
   }
 });
 
