@@ -1,6 +1,7 @@
 import React from 'react';
 import Header from '../common/Header';
 import Footer from '../common/Footer';
+import ScholarMascot from '../common/ScholarMascot';
 
 interface WhyStudentsChoosePageProps {
   onNavigate: (page: string) => void;
@@ -39,32 +40,9 @@ const WhyStudentsChoosePage: React.FC<WhyStudentsChoosePageProps> = ({ onNavigat
       <section className="py-20 sm:py-24 bg-white dark:bg-stone-900/50">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="relative text-center mb-12">
-            {/* Character pointing at chart */}
-            <div className="hidden lg:block absolute -left-[6rem] xl:-left-[7rem] top-0 -translate-y-[80%] w-28 h-36">
-              <svg viewBox="0 0 140 180" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
-                <path d="M50 100 Q45 130 50 160 L90 160 Q95 130 90 100" fill="#3B82F6" />
-                <rect x="62" y="75" width="16" height="28" fill="#E8B796" />
-                <ellipse cx="70" cy="48" rx="32" ry="35" fill="#E8B796" />
-                <path d="M38 38 Q35 16 52 10 Q70 2 90 10 Q107 16 104 38 Q100 26 85 18 Q70 10 55 18 Q42 26 38 38" fill="#4A3728" />
-                <path d="M38 38 Q32 48 38 58" fill="#4A3728" />
-                <path d="M102 38 Q108 48 102 58" fill="#4A3728" />
-                <ellipse cx="56" cy="48" rx="5" ry="6" fill="#1F2937" />
-                <ellipse cx="84" cy="48" rx="5" ry="6" fill="#1F2937" />
-                <circle cx="57" cy="46" r="2" fill="white" />
-                <circle cx="85" cy="46" r="2" fill="white" />
-                <path d="M46 38 Q56 34 66 38" stroke="#4A3728" strokeWidth="2.5" fill="none" strokeLinecap="round" />
-                <path d="M74 38 Q84 34 94 38" stroke="#4A3728" strokeWidth="2.5" fill="none" strokeLinecap="round" />
-                <path d="M55 65 Q70 76 85 65" stroke="#1F2937" strokeWidth="2.5" fill="none" strokeLinecap="round" />
-                <ellipse cx="42" cy="58" rx="6" ry="4" fill="#FECACA" opacity="0.4" />
-                <ellipse cx="98" cy="58" rx="6" ry="4" fill="#FECACA" opacity="0.4" />
-                <path d="M95 105 Q120 95 135 80" stroke="#E8B796" strokeWidth="14" fill="none" strokeLinecap="round" />
-                <ellipse cx="138" cy="78" rx="8" ry="10" fill="#E8B796" />
-                <ellipse cx="145" cy="70" rx="4" ry="8" fill="#E8B796" />
-                <path d="M45 105 Q30 115 25 135" stroke="#E8B796" strokeWidth="12" fill="none" strokeLinecap="round" />
-                <ellipse cx="23" cy="138" rx="8" ry="9" fill="#E8B796" />
-                <path d="M58 95 L70 108 L82 95" stroke="#2563EB" strokeWidth="2" fill="none" />
-                <path d="M125 50 L128 58 L136 61 L128 64 L125 72 L122 64 L114 61 L122 58 Z" fill="#FCD34D" />
-              </svg>
+            {/* Mascot pointing at chart */}
+            <div className="hidden lg:block absolute -left-[6rem] xl:-left-[7rem] top-0 -translate-y-[80%] w-28 h-36 flex items-center justify-center">
+              <ScholarMascot size={112} animated={true} pose="pointing" />
             </div>
           </div>
 
@@ -73,10 +51,10 @@ const WhyStudentsChoosePage: React.FC<WhyStudentsChoosePageProps> = ({ onNavigat
               <div className="p-4 sm:p-6 font-semibold text-stone-700">Feature</div>
               <div className="p-4 sm:p-6 text-center">
                 <div className="flex flex-col items-center">
-                  <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-lg flex items-center justify-center mb-1 shadow-lg shadow-indigo-500/30">
-                    <span className="text-white font-bold text-sm">W</span>
+                  <div className="w-10 h-10 flex items-center justify-center mb-1 shrink-0 overflow-hidden">
+                    <img src="/mascot.png" alt="WriteScholar" className="w-full h-full object-contain drop-shadow-md" />
                   </div>
-                  <span className="font-semibold text-stone-900 text-sm sm:text-base">WriteScholar</span>
+                  <span className="font-semibold text-stone-900 dark:text-stone-100 text-sm sm:text-base">WriteScholar</span>
                 </div>
               </div>
               <div className="p-4 sm:p-6 text-center">
