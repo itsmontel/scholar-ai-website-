@@ -93,9 +93,8 @@ const WelcomeTutorial = ({ userName, userId, onComplete }: WelcomeTutorialProps)
   };
 
   const handleComplete = async () => {
-    if (userId) {
-      await persistTutorialToServer();
-    }
+    // Always persist — backend gets user from token. Persist even if userId prop is missing.
+    await persistTutorialToServer();
     setIsDissolving(true);
     setTimeout(() => {
       setIsVisible(false);

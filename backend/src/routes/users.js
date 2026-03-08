@@ -164,7 +164,12 @@ router.post('/complete-tutorial', authenticateToken, async (req, res) => {
       .eq('id', req.user.id);
 
     if (error) {
-      return res.status(500).json({ success: false, message: 'Failed to save tutorial status' });
+      console.error('Complete tutorial Supabase error:', error.message, error.details);
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to save tutorial status',
+        ...(process.env.NODE_ENV !== 'production' && { debug: error.message })
+      });
     }
 
     res.json({ success: true, message: 'Tutorial marked as completed' });
