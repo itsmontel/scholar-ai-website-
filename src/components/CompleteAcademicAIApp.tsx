@@ -94,25 +94,66 @@ const AcademicAIApp = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState<User | null>(null);
 
-  // Initialize user state from localStorage on mount
+  // Stale-while-revalidate: instant load from cache, then background fetch. Server overwrites when it arrives.
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
+    const userData = typeof window !== 'undefined' ? localStorage.getItem('user') : null;
+    if (!token) return;
+    setIsLoggedIn(true);
+    // 1. Instant: hydrate from cache for immediate render
+    if (userData) {
       try {
-        const token = localStorage.getItem('authToken');
-        const userData = localStorage.getItem('user');
-        if (token && userData) {
-          const parsedUser = JSON.parse(userData);
-          const restoredUser = { ...parsedUser, onboardingCompleted: parsedUser?.onboardingCompleted === true, welcomeTutorialCompleted: parsedUser?.welcomeTutorialCompleted === true };
-          logger.log('Initializing user state from localStorage:', restoredUser);
-          setIsLoggedIn(true);
-          setUser(restoredUser);
-        }
-      } catch (error) {
-        logger.error('Error parsing initial user data:', error);
-        localStorage.removeItem('authToken');
-        localStorage.removeItem('user');
-      }
+        const parsed = JSON.parse(userData);
+        setUser({
+          ...parsed,
+          onboardingCompleted: parsed?.onboardingCompleted === true,
+          welcomeTutorialCompleted: parsed?.welcomeTutorialCompleted === true
+        });
+      } catch (_e) {}
     }
+    // 2. Background: fetch /me, server overwrites cache
+    (async () => {
+      try {
+        const { BulletproofAPI } = await import('../config/api');
+        const res = await BulletproofAPI.get('/auth/me', token);
+        if (res.status === 401) {
+          localStorage.removeItem('authToken');
+          localStorage.removeItem('user');
+          setIsLoggedIn(false);
+          setUser(null);
+          setCurrentPage('login');
+          return;
+        }
+        if (res.ok) {
+          const data = await res.json();
+          const u = data.data?.user;
+          if (u?.email) {
+            const fresh = {
+              id: u.id,
+              email: u.email,
+              username: u.username,
+              name: u.name || (u.firstName && u.lastName ? `${u.firstName} ${u.lastName}` : null) || u.email,
+              plan: u.subscriptionPlan || 'free',
+              subscription_status: u.subscriptionStatus,
+              email_verified: u.emailVerified,
+              onboardingCompleted: u.onboardingCompleted === true,
+              welcomeTutorialCompleted: u.welcomeTutorialCompleted === true
+            };
+            setUser(fresh);
+            localStorage.setItem('user', JSON.stringify(fresh));
+          }
+        }
+      } catch (_e) {
+        // Network error: keep cached data if we had it; otherwise clear invalid session
+        if (!userData) {
+          localStorage.removeItem('authToken');
+          localStorage.removeItem('user');
+          setIsLoggedIn(false);
+          setUser(null);
+          setCurrentPage('login');
+        }
+      }
+    })();
   }, []);
 
   // Route protection for authenticated pages
@@ -311,40 +352,25 @@ const AcademicAIApp = () => {
     }
   };
 
-  // Handle URL-based routing and authentication persistence
+  // Clear payment params from URL
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('payment') === 'success') {
+      window.history.replaceState(null, '', window.location.pathname);
+    }
+  }, []);
+
+  // payment=cancelled: clear URL only; user stays on onboarding (hard paywall — must complete trial)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('payment') === 'cancelled') {
+      window.history.replaceState(null, '', window.location.pathname);
+    }
+  }, []);
+
+  // Handle URL-based routing
   useEffect(() => {
     const path = window.location.pathname;
-    
-    // Validate token in background if user is logged in
-    // User state is already initialized from localStorage, so no need to set it again
-    if (isLoggedIn && user) {
-      logger.log('User already logged in from initial state:', user);
-      // Validate token in background, but don't let failures clear the user immediately
-      setTimeout(() => {
-        validateAndRefreshToken();
-      }, 100); // Small delay to ensure UI renders first
-      const params = new URLSearchParams(window.location.search);
-      if (params.get('payment') === 'success') {
-        // After Stripe success, refetch /me to get webhook-updated onboarding_completed
-        setTimeout(() => {
-          validateAndRefreshToken();
-          window.history.replaceState(null, '', window.location.pathname);
-        }, 2500);
-      } else if (params.get('payment') === 'cancelled') {
-        // User clicked back on Stripe: mark onboarding complete, they become free user, go to tutorial
-        (async () => {
-          const ok = await persistOnboardingToServer();
-          if (ok && user) {
-            const updatedUser = { ...user, onboardingCompleted: true };
-            setUser(updatedUser);
-            localStorage.setItem('user', JSON.stringify(updatedUser));
-          }
-          window.history.replaceState(null, '', window.location.pathname);
-        })();
-      }
-    } else {
-      logger.log('No user logged in on initial load');
-    }
     
     // Set initial page based on URL
     const getPageFromPath = (pathname: string) => {
@@ -666,10 +692,25 @@ const AcademicAIApp = () => {
 
   const needsOnboarding = isLoggedIn && user?.id && !user.onboardingCompleted;
 
+  const handleDashboardUserUpdate = (u: { welcomeTutorialCompleted?: boolean }) => {
+    if (user && u.welcomeTutorialCompleted) {
+      const updated = { ...user, welcomeTutorialCompleted: true };
+      setUser(updated);
+      localStorage.setItem('user', JSON.stringify(updated));
+    }
+  };
+
   const renderCurrentPage = () => {
-    // Redirect to login if trying to access protected route while not logged in
     if (protectedRoutes.includes(currentPage) && !isLoggedIn) {
       return <LoginPage onNavigate={navigateTo} onLogin={handleLogin} />;
+    }
+    // No cache + fetch in progress: brief loading (cache usually exists for instant render)
+    if (isLoggedIn && !user && protectedRoutes.includes(currentPage)) {
+      return (
+        <div className="min-h-screen flex items-center justify-center bg-stone-50">
+          <div className="animate-pulse text-stone-500">Loading...</div>
+        </div>
+      );
     }
 
     switch (currentPage) {
@@ -716,13 +757,13 @@ const AcademicAIApp = () => {
         return <UnsubscribePage onNavigate={navigateTo} />;
       case 'dashboard':
         if (needsOnboarding) return renderOnboarding('dashboard');
-        return <DashboardPage onNavigate={navigateTo} user={user} onLogout={handleLogout} onUserUpdate={(u) => { if (user && u.welcomeTutorialCompleted) { const updated = { ...user, welcomeTutorialCompleted: true }; setUser(updated); localStorage.setItem('user', JSON.stringify(updated)); } }} />;
+        return <DashboardPage onNavigate={navigateTo} user={user} onLogout={handleLogout} onUserUpdate={handleDashboardUserUpdate} />;
       case 'analyze':
         if (needsOnboarding) return renderOnboarding('analyze');
-        return isLoggedIn ? <DashboardPage onNavigate={navigateTo} user={user} onLogout={handleLogout} onUserUpdate={(u) => { if (user && u.welcomeTutorialCompleted) { const updated = { ...user, welcomeTutorialCompleted: true }; setUser(updated); localStorage.setItem('user', JSON.stringify(updated)); } }} initialMode="analyze" /> : <LandingPage onNavigate={navigateTo} />;
+        return isLoggedIn ? <DashboardPage onNavigate={navigateTo} user={user} onLogout={handleLogout} onUserUpdate={handleDashboardUserUpdate} initialMode="analyze" /> : <LandingPage onNavigate={navigateTo} />;
       case 'citations':
         if (needsOnboarding) return renderOnboarding('citations');
-        return isLoggedIn ? <DashboardPage onNavigate={navigateTo} user={user} onLogout={handleLogout} onUserUpdate={(u) => { if (user && u.welcomeTutorialCompleted) { const updated = { ...user, welcomeTutorialCompleted: true }; setUser(updated); localStorage.setItem('user', JSON.stringify(updated)); } }} initialMode="citations" /> : <LandingPage onNavigate={navigateTo} />;
+        return isLoggedIn ? <DashboardPage onNavigate={navigateTo} user={user} onLogout={handleLogout} onUserUpdate={handleDashboardUserUpdate} initialMode="citations" /> : <LandingPage onNavigate={navigateTo} />;
       case 'analysis':
         return <AnalysisPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'analysis-history':
@@ -741,7 +782,7 @@ const AcademicAIApp = () => {
           );
         } else {
           navigateTo('dashboard');
-          return <DashboardPage onNavigate={navigateTo} user={user} onLogout={handleLogout} onUserUpdate={(u) => { if (user && u.welcomeTutorialCompleted) { const updated = { ...user, welcomeTutorialCompleted: true }; setUser(updated); localStorage.setItem('user', JSON.stringify(updated)); } }} />;
+          return <DashboardPage onNavigate={navigateTo} user={user} onLogout={handleLogout} onUserUpdate={handleDashboardUserUpdate} />;
         }
       case 'citation-history':
         return <CitationHistoryPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;

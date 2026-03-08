@@ -13,6 +13,10 @@ const apiUrl = (import.meta as any).env?.VITE_API_URL || 'http://localhost:3001/
  */
 export async function persistOnboardingToServer(maxRetries = 3): Promise<boolean> {
   const token = typeof localStorage !== 'undefined' ? localStorage.getItem('authToken') : null;
+  if (!token) {
+    console.warn('persistOnboardingToServer: No auth token');
+    return false;
+  }
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
       const res = await fetch(`${apiUrl}/users/complete-onboarding`, {
@@ -20,12 +24,14 @@ export async function persistOnboardingToServer(maxRetries = 3): Promise<boolean
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (res.ok) return true;
-    } catch (_e) {
-      // retry
+      if (attempt === maxRetries) {
+        console.error('persistOnboardingToServer failed:', res.status, await res.text().catch(() => ''));
+      }
+    } catch (e) {
+      if (attempt === maxRetries) console.error('persistOnboardingToServer error:', e);
     }
     if (attempt < maxRetries) await new Promise(r => setTimeout(r, 500 * attempt));
   }
-  console.error('Failed to persist onboarding to server after retries');
   return false;
 }
 
@@ -35,6 +41,10 @@ export async function persistOnboardingToServer(maxRetries = 3): Promise<boolean
  */
 export async function persistTutorialToServer(maxRetries = 3): Promise<boolean> {
   const token = typeof localStorage !== 'undefined' ? localStorage.getItem('authToken') : null;
+  if (!token) {
+    console.warn('persistTutorialToServer: No auth token');
+    return false;
+  }
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
       const res = await fetch(`${apiUrl}/users/complete-tutorial`, {
@@ -42,11 +52,13 @@ export async function persistTutorialToServer(maxRetries = 3): Promise<boolean> 
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (res.ok) return true;
-    } catch (_e) {
-      // retry
+      if (attempt === maxRetries) {
+        console.error('persistTutorialToServer failed:', res.status, await res.text().catch(() => ''));
+      }
+    } catch (e) {
+      if (attempt === maxRetries) console.error('persistTutorialToServer error:', e);
     }
     if (attempt < maxRetries) await new Promise(r => setTimeout(r, 500 * attempt));
   }
-  console.error('Failed to persist tutorial completion to server after retries');
   return false;
 }

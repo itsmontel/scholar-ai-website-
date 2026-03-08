@@ -708,15 +708,6 @@ const OnboardingPage = ({ onNavigate, user, onComplete, onUserUpdate }: Onboardi
                   : 'Cancel anytime.'}
               </p>
 
-              <p className="text-center mt-3">
-                <button
-                  onClick={() => onComplete?.()}
-                  className="text-sm text-stone-500 hover:text-stone-700 underline underline-offset-2"
-                >
-                  Continue as free user
-                </button>
-              </p>
-
               <div className="mt-4 flex justify-center">
                 <button onClick={goBack} className="flex items-center text-stone-400 hover:text-stone-600 transition-colors">
                   <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
