@@ -1,39 +1,18 @@
-const KEY_PREFIX = 'writescholar_onboarding_completed_';
-const TUTORIAL_KEY_PREFIX = 'writescholar_welcome_tutorial_completed_';
-
 /**
- * Check if onboarding is done according to localStorage.
- * This key survives logout (only authToken and user are cleared on logout).
+ * Onboarding and tutorial persistence — Supabase is the single source of truth.
+ * onboarding_completed / welcome_tutorial_completed in users table:
+ * - false = show onboarding/tutorial
+ * - true = never show again (persists across devices/sessions)
  */
-export function isOnboardingDone(userId: string | undefined | null): boolean {
-  if (!userId) return false;
-  return localStorage.getItem(`${KEY_PREFIX}${userId}`) === 'true';
-}
+
+const apiUrl = (import.meta as any).env?.VITE_API_URL || 'http://localhost:3001/api';
 
 /**
- * Persist onboarding completion in localStorage.
- * This MUST be called before any API call so the flag is set even if the network fails.
- */
-export function setOnboardingDone(userId: string): void {
-  localStorage.setItem(`${KEY_PREFIX}${userId}`, 'true');
-}
-
-/**
- * Resolve onboarding status from any combination of server flag + localStorage.
- * Returns true if EITHER source says onboarding is done.
- * Use this every time you construct a user object.
- */
-export function resolveOnboarding(userId: string | undefined | null, serverFlag: boolean | undefined): boolean {
-  return serverFlag === true || isOnboardingDone(userId);
-}
-
-/**
- * Persist onboarding completion to the server with retries.
- * localStorage is already set before this is called, so the UX is correct even if this fails.
+ * Persist onboarding completion to Supabase via API.
+ * Call this when user completes onboarding; the DB flag is the only source of truth.
  */
 export async function persistOnboardingToServer(maxRetries = 3): Promise<boolean> {
-  const apiUrl = (import.meta as any).env?.VITE_API_URL || 'http://localhost:3001/api';
-  const token = localStorage.getItem('authToken');
+  const token = typeof localStorage !== 'undefined' ? localStorage.getItem('authToken') : null;
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
       const res = await fetch(`${apiUrl}/users/complete-onboarding`, {
@@ -50,26 +29,12 @@ export async function persistOnboardingToServer(maxRetries = 3): Promise<boolean
   return false;
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// Welcome Tutorial — same one-truth pattern as onboarding
-// ═══════════════════════════════════════════════════════════════════════════
-
-export function isTutorialDone(userId: string | undefined | null): boolean {
-  if (!userId) return false;
-  return localStorage.getItem(`${TUTORIAL_KEY_PREFIX}${userId}`) === 'true';
-}
-
-export function setTutorialDone(userId: string): void {
-  localStorage.setItem(`${TUTORIAL_KEY_PREFIX}${userId}`, 'true');
-}
-
-export function resolveTutorial(userId: string | undefined | null, serverFlag: boolean | undefined): boolean {
-  return serverFlag === true || isTutorialDone(userId);
-}
-
+/**
+ * Persist tutorial completion to Supabase via API.
+ * Call this when user completes the welcome tutorial.
+ */
 export async function persistTutorialToServer(maxRetries = 3): Promise<boolean> {
-  const apiUrl = (import.meta as any).env?.VITE_API_URL || 'http://localhost:3001/api';
-  const token = localStorage.getItem('authToken');
+  const token = typeof localStorage !== 'undefined' ? localStorage.getItem('authToken') : null;
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
       const res = await fetch(`${apiUrl}/users/complete-tutorial`, {

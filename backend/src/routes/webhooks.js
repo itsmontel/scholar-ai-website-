@@ -144,10 +144,10 @@ async function handleCheckoutSessionCompleted(session) {
       plan = 'premium';
     }
 
-    // Update user's subscription plan using PostgreSQL
+    // Update user's subscription plan and mark onboarding complete (they subscribed = past onboarding)
     console.log('🔥 WEBHOOK: Updating user plan to:', plan, 'for user:', user.id);
     await query(
-      'UPDATE users SET subscription_plan = $1, subscription_status = $2 WHERE id = $3',
+      'UPDATE users SET subscription_plan = $1, subscription_status = $2, onboarding_completed = true WHERE id = $3',
       [plan, subscription.status, user.id]
     );
     console.log('🔥 WEBHOOK: User plan updated successfully!');

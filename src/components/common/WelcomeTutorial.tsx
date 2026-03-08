@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import ScholarMascot from './ScholarMascot';
-import { setTutorialDone, persistTutorialToServer } from '../../utils/onboarding';
+import { persistTutorialToServer } from '../../utils/onboarding';
 
 interface WelcomeTutorialProps {
   userName?: string;
@@ -94,14 +94,6 @@ const WelcomeTutorial = ({ userName, userId, onComplete }: WelcomeTutorialProps)
 
   const handleComplete = async () => {
     if (userId) {
-      setTutorialDone(userId);
-      const stored = localStorage.getItem('user');
-      if (stored) {
-        try {
-          const parsed = JSON.parse(stored);
-          localStorage.setItem('user', JSON.stringify({ ...parsed, welcomeTutorialCompleted: true }));
-        } catch (_) {}
-      }
       await persistTutorialToServer();
     }
     setIsDissolving(true);

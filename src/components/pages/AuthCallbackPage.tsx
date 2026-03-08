@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { resolveOnboarding, setOnboardingDone, resolveTutorial, setTutorialDone } from '../../utils/onboarding';
 
 interface AuthCallbackPageProps {
   onNavigate: (page: string) => void;
@@ -29,8 +28,8 @@ const AuthCallbackPage: React.FC<AuthCallbackPageProps> = ({ onNavigate, onLogin
           setStatus('success');
           window.history.replaceState(null, '', '/auth/callback');
 
-          let onboardingCompleted = resolveOnboarding(userData.id, userData.onboardingCompleted);
-          let welcomeTutorialCompleted = resolveTutorial(userData.id, userData.welcomeTutorialCompleted);
+          let onboardingCompleted = userData.onboardingCompleted === true;
+          let welcomeTutorialCompleted = userData.welcomeTutorialCompleted === true;
 
           try {
             const meRes = await fetch(
@@ -39,8 +38,11 @@ const AuthCallbackPage: React.FC<AuthCallbackPageProps> = ({ onNavigate, onLogin
             );
             if (meRes.ok) {
               const meData = await meRes.json();
-              onboardingCompleted = resolveOnboarding(userData.id, onboardingCompleted || meData.data?.user?.onboardingCompleted);
-              welcomeTutorialCompleted = resolveTutorial(userData.id, welcomeTutorialCompleted || meData.data?.user?.welcomeTutorialCompleted);
+              const meUser = meData.data?.user;
+              if (meUser) {
+                onboardingCompleted = meUser.onboardingCompleted === true || onboardingCompleted;
+                welcomeTutorialCompleted = meUser.welcomeTutorialCompleted === true || welcomeTutorialCompleted;
+              }
               if (meData.data?.achievements) {
                 const { mergeFromServer } = await import('../../data/achievements');
                 mergeFromServer(
@@ -50,11 +52,8 @@ const AuthCallbackPage: React.FC<AuthCallbackPageProps> = ({ onNavigate, onLogin
               }
             }
           } catch (_e) {
-            // Network error — localStorage + OAuth payload are still checked
+            // Network error — use OAuth payload values
           }
-
-          if (onboardingCompleted) setOnboardingDone(userData.id);
-          if (welcomeTutorialCompleted) setTutorialDone(userData.id);
 
           const finalUser = { ...userData, onboardingCompleted, welcomeTutorialCompleted };
           localStorage.setItem('user', JSON.stringify(finalUser));
@@ -73,7 +72,7 @@ const AuthCallbackPage: React.FC<AuthCallbackPageProps> = ({ onNavigate, onLogin
           if (storedUser) {
             try {
               const p = JSON.parse(storedUser);
-              nextPage = resolveOnboarding(p.id, p.onboardingCompleted) ? 'dashboard' : 'onboarding';
+              nextPage = p.onboardingCompleted === true ? 'dashboard' : 'onboarding';
             } catch (_) {}
           }
           setTimeout(() => onNavigate(nextPage), 300);

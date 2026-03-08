@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
 import ScholarMascot from '../common/ScholarMascot';
-import { setOnboardingDone, persistOnboardingToServer } from '../../utils/onboarding';
 
 interface OnboardingPageProps {
   onNavigate: (page: string) => void;
@@ -32,7 +31,20 @@ const OnboardingPage = ({ onNavigate, user, onComplete, onUserUpdate }: Onboardi
   const [selectedPlan, setSelectedPlan] = useState<'pro' | 'premium'>('pro');
   const [isLoadingCheckout, setIsLoadingCheckout] = useState(false);
   const [trialSecondsLeft, setTrialSecondsLeft] = useState(10 * 60);
+  const [isTrialEligible, setIsTrialEligible] = useState<boolean | null>(null);
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    if (user?.id) {
+      const token = localStorage.getItem('authToken');
+      fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/subscriptions/trial-eligibility`, {
+        headers: { 'Authorization': `Bearer ${token}` },
+      })
+        .then(res => res.ok ? res.json() : null)
+        .then(data => { if (data && typeof data.eligible === 'boolean') setIsTrialEligible(data.eligible); })
+        .catch(() => {});
+    }
+  }, [user?.id]);
 
   useEffect(() => {
     if (currentStep === 'trial') {
@@ -131,25 +143,14 @@ const OnboardingPage = ({ onNavigate, user, onComplete, onUserUpdate }: Onboardi
     );
   };
 
-  const markOnboardingComplete = async (userId: string) => {
-    setOnboardingDone(userId);
-    const stored = localStorage.getItem('user');
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored);
-        localStorage.setItem('user', JSON.stringify({ ...parsed, onboardingCompleted: true }));
-      } catch (_) {}
-    }
-    await persistOnboardingToServer();
-  };
-
   const handleStartTrial = async () => {
     if (!user) {
       onNavigate('login');
       return;
     }
 
-    await markOnboardingComplete(user.id);
+    // Do NOT mark onboarding complete here — only the Stripe webhook does that after successful checkout.
+    // This creates a hard paywall: users must complete free trial signup to access the app.
 
     if (user.id) {
       await saveProfile();
@@ -186,21 +187,6 @@ const OnboardingPage = ({ onNavigate, user, onComplete, onUserUpdate }: Onboardi
       console.error('Checkout error:', err);
       setIsLoadingCheckout(false);
       onNavigate('pricing');
-    }
-  };
-
-  const handleSkip = async () => {
-    if (user?.id) {
-      await saveProfile();
-    }
-    if (user && onComplete) {
-      await markOnboardingComplete(user.id);
-      onComplete();
-    } else if (user?.id) {
-      await markOnboardingComplete(user.id);
-      onNavigate('dashboard');
-    } else {
-      onNavigate('login');
     }
   };
 
@@ -499,7 +485,9 @@ const OnboardingPage = ({ onNavigate, user, onComplete, onUserUpdate }: Onboardi
                 <h1 className="text-3xl text-stone-800 mb-2" style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 400 }}>
                   Unlock <span className="text-violet-600">everything</span>
                 </h1>
-                <p className="text-stone-500 text-lg">See what you get with a free trial</p>
+                <p className="text-stone-500 text-lg">
+                  {isTrialEligible ? 'See what you get with a free trial' : 'See what you get with Pro'}
+                </p>
               </div>
 
               <div className="bg-white rounded-2xl border border-stone-200 overflow-hidden shadow-sm">
@@ -510,7 +498,7 @@ const OnboardingPage = ({ onNavigate, user, onComplete, onUserUpdate }: Onboardi
                     <span className="text-sm font-semibold text-stone-500">Free</span>
                   </div>
                   <div className="p-4 text-center rounded-t-xl" style={{ background: 'linear-gradient(180deg, #EDE9FE 0%, #F5F3FF 100%)' }}>
-                    <span className="text-sm font-bold text-violet-700">Trial</span>
+                    <span className="text-sm font-bold text-violet-700">{isTrialEligible ? 'Trial' : 'Pro'}</span>
                   </div>
                 </div>
                 {/* Feature rows */}
@@ -571,17 +559,26 @@ const OnboardingPage = ({ onNavigate, user, onComplete, onUserUpdate }: Onboardi
                 <ScholarMascot size={140} animated={true} pose={STEP_MASCOT_POSES.trial} />
               </div>
               <div className="text-center mb-6">
+                {isTrialEligible && (
                 <div className="inline-flex items-center gap-2 px-3 py-1 bg-violet-100 rounded-full mb-4">
                   <span className="w-2 h-2 bg-violet-500 rounded-full animate-pulse"></span>
                   <span className="text-xs font-semibold text-violet-700 uppercase tracking-wide">Limited time offer</span>
                 </div>
+                )}
                 <h1 className="text-3xl text-stone-800 mb-2" style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 400 }}>
-                  Try everything <span className="text-violet-600 italic">free</span> for 7 days
+                  {isTrialEligible ? (
+                    <>Try everything <span className="text-violet-600 italic">free</span> for 7 days</>
+                  ) : (
+                    <>Get full access to <span className="text-violet-600">{selectedPlan === 'pro' ? 'Pro' : 'Premium'}</span></>
+                  )}
                 </h1>
-                <p className="text-stone-500">Cancel anytime. No charge until the trial ends.</p>
+                <p className="text-stone-500">
+                  {isTrialEligible ? 'Cancel anytime. No charge until the trial ends.' : 'Subscribe to unlock all features. Cancel anytime.'}
+                </p>
               </div>
 
-              {/* Timeline */}
+              {/* Timeline - only show trial timeline when eligible */}
+              {isTrialEligible && (
               <div className="bg-white rounded-2xl border border-stone-200 p-5 mb-6 shadow-sm">
                 <div className="flex items-start gap-4">
                   <div className="flex flex-col items-center">
@@ -609,6 +606,7 @@ const OnboardingPage = ({ onNavigate, user, onComplete, onUserUpdate }: Onboardi
                   </div>
                 </div>
               </div>
+              )}
 
               {/* Plan toggle */}
               <div className="flex bg-stone-100 rounded-full p-1 mb-5">
@@ -672,7 +670,8 @@ const OnboardingPage = ({ onNavigate, user, onComplete, onUserUpdate }: Onboardi
                 </div>
               </div>
 
-              {/* Urgency countdown */}
+              {/* Urgency countdown - only when trial eligible */}
+              {isTrialEligible && (
               <div className="flex items-center justify-center gap-2 bg-red-50 border border-red-200 rounded-xl px-4 py-3 mb-4">
                 <svg className="w-4 h-4 text-red-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -683,6 +682,7 @@ const OnboardingPage = ({ onNavigate, user, onComplete, onUserUpdate }: Onboardi
                   {' '}don't miss your free trial!
                 </p>
               </div>
+              )}
 
               {/* CTA */}
               <button
@@ -699,26 +699,24 @@ const OnboardingPage = ({ onNavigate, user, onComplete, onUserUpdate }: Onboardi
                     </svg>
                     Redirecting to checkout...
                   </span>
-                ) : (
+                ) : isTrialEligible ? (
                   'Start 7-day free trial for $0.00'
+                ) : (
+                  `Subscribe to ${selectedPlan === 'pro' ? 'Pro' : 'Premium'} · $${selectedPlan === 'pro' ? '19.99' : '39.99'}/mo`
                 )}
               </button>
               <p className="text-center text-xs text-stone-400 mt-3">
-                Then ${selectedPlan === 'pro' ? '19.99' : '39.99'}/month. Cancel anytime before day 7 and pay nothing.
+                {isTrialEligible
+                  ? `Then $${selectedPlan === 'pro' ? '19.99' : '39.99'}/month. Cancel anytime before day 7 and pay nothing.`
+                  : 'Cancel anytime.'}
               </p>
 
-              <div className="mt-4 flex items-center justify-between">
+              <div className="mt-4 flex justify-center">
                 <button onClick={goBack} className="flex items-center text-stone-400 hover:text-stone-600 transition-colors">
                   <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                   </svg>
                   Back
-                </button>
-                <button
-                  onClick={handleSkip}
-                  className="text-sm text-stone-400 hover:text-stone-600 transition-colors"
-                >
-                  Continue with free plan
                 </button>
               </div>
             </div>

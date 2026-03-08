@@ -450,7 +450,9 @@ router.delete('/account', authenticateToken, async (req, res) => {
       process.env.SUPABASE_SERVICE_ROLE_KEY
     );
 
-    // Note: This will cascade delete all related records due to foreign key constraints
+    // Note: Deletes from users table only. trial_usage is intentionally NOT deleted —
+    // it tracks emails that have used a free trial, so re-registering with the same
+    // email cannot grant another trial.
     const { error } = await supabase
       .from('users')
       .delete()

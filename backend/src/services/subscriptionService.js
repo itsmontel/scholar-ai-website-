@@ -7,6 +7,12 @@ const supabase = createClient(
   process.env.SUPABASE_ANON_KEY
 );
 
+// Service role client for trial_usage (bypasses RLS; trial_usage must never be blocked)
+const supabaseServiceRole = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
+);
+
 // Plan limits configuration
 const PLAN_LIMITS = {
   free: {
@@ -276,8 +282,8 @@ const checkTrialEligibility = async (email) => {
   try {
     const normalizedEmail = email.toLowerCase().trim();
     
-    // Check if this email has ever used a trial
-    const { data: existingTrial, error } = await supabase
+    // Check if this email has ever used a trial (service role bypasses RLS)
+    const { data: existingTrial, error } = await supabaseServiceRole
       .from('trial_usage')
       .select('id, trial_started_at')
       .ilike('email', normalizedEmail)
@@ -312,7 +318,7 @@ const recordTrialUsage = async (email, stripeCustomerId, planType) => {
   try {
     const normalizedEmail = email.toLowerCase().trim();
     
-    const { error } = await supabase
+    const { error } = await supabaseServiceRole
       .from('trial_usage')
       .insert({
         email: normalizedEmail,

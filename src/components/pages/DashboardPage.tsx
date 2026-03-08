@@ -18,7 +18,6 @@ import { Document, Packer, Paragraph, TextRun, HeadingLevel } from 'docx';
 import { saveAs } from 'file-saver';
 import { trackAction, syncFromAPIData, trackExport, trackCopy } from '../../data/achievements';
 import { getResetsInText, getExpiringSoonCount, getExpiringSoonUrgencyText, getDaysUntilExpiration } from '../../utils/usageReset';
-import { resolveTutorial } from '../../utils/onboarding';
 import InteractiveLessonPage from './tools/InteractiveLessonPage';
 
 interface DashboardProps {
@@ -238,18 +237,17 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
     daysUntilReset: undefined as number | undefined
   });
 
-  // Welcome tutorial — derived from user (like onboarding), so it updates when server data arrives.
-  // This ensures tutorial only shows once across devices/sessions; server is source of truth.
+  // Welcome tutorial — Supabase is source of truth. true = never show again.
   const showWelcomeTutorial = Boolean(
     user?.id &&
     (user as any).onboardingCompleted === true &&
-    !resolveTutorial(user.id, (user as any).welcomeTutorialCompleted)
+    (user as any).welcomeTutorialCompleted !== true
   );
 
   // Quick Review state - show to returning users who haven't reviewed today
   const [showQuickReview, setShowQuickReview] = useState(() => {
     if (!user?.id) return false;
-    const tutorialDone = resolveTutorial(user.id, (user as any).welcomeTutorialCompleted);
+    const tutorialDone = (user as any).welcomeTutorialCompleted === true;
     if ((user as any).onboardingCompleted && !tutorialDone) return false;
     
     // Check if already shown today
