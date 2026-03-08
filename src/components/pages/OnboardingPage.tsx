@@ -149,9 +149,6 @@ const OnboardingPage = ({ onNavigate, user, onComplete, onUserUpdate }: Onboardi
       return;
     }
 
-    // Do NOT mark onboarding complete here — only the Stripe webhook does that after successful checkout.
-    // This creates a hard paywall: users must complete free trial signup to access the app.
-
     if (user.id) {
       await saveProfile();
     }
@@ -709,6 +706,15 @@ const OnboardingPage = ({ onNavigate, user, onComplete, onUserUpdate }: Onboardi
                 {isTrialEligible
                   ? `Then $${selectedPlan === 'pro' ? '19.99' : '39.99'}/month. Cancel anytime before day 7 and pay nothing.`
                   : 'Cancel anytime.'}
+              </p>
+
+              <p className="text-center mt-3">
+                <button
+                  onClick={() => onComplete?.()}
+                  className="text-sm text-stone-500 hover:text-stone-700 underline underline-offset-2"
+                >
+                  Continue as free user
+                </button>
               </p>
 
               <div className="mt-4 flex justify-center">

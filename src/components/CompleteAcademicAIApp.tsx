@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { logger } from '../utils/logger';
+import { persistOnboardingToServer } from '../utils/onboarding';
 
 // Import all page components
 import LandingPage from './pages/LandingPage';
@@ -322,13 +323,24 @@ const AcademicAIApp = () => {
       setTimeout(() => {
         validateAndRefreshToken();
       }, 100); // Small delay to ensure UI renders first
-      // After Stripe success redirect, refetch /me again so we get webhook-updated onboarding_completed
       const params = new URLSearchParams(window.location.search);
       if (params.get('payment') === 'success') {
+        // After Stripe success, refetch /me to get webhook-updated onboarding_completed
         setTimeout(() => {
           validateAndRefreshToken();
           window.history.replaceState(null, '', window.location.pathname);
         }, 2500);
+      } else if (params.get('payment') === 'cancelled') {
+        // User clicked back on Stripe: mark onboarding complete, they become free user, go to tutorial
+        (async () => {
+          const ok = await persistOnboardingToServer();
+          if (ok && user) {
+            const updatedUser = { ...user, onboardingCompleted: true };
+            setUser(updatedUser);
+            localStorage.setItem('user', JSON.stringify(updatedUser));
+          }
+          window.history.replaceState(null, '', window.location.pathname);
+        })();
       }
     } else {
       logger.log('No user logged in on initial load');
@@ -623,8 +635,9 @@ const AcademicAIApp = () => {
     localStorage.removeItem('user');
   };
 
-  const handleOnboardingComplete = (destination: string) => {
+  const handleOnboardingComplete = async (destination: string) => {
     if (user?.id) {
+      await persistOnboardingToServer();
       const updatedUser = { ...user, onboardingCompleted: true };
       setUser(updatedUser);
       localStorage.setItem('user', JSON.stringify(updatedUser));
