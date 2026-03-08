@@ -7,6 +7,9 @@ export interface AchievementStats {
   flashcards_count: number;
   crosswords_count: number;
   citations_count: number;
+  lessons_count: number;
+  lesson_styles_used_session: number;
+  lesson_styles_used_this_session: string[];
   longest_streak: number;
   current_streak: number;
   used_after_10pm: boolean;
@@ -150,7 +153,7 @@ export const BADGES: Badge[] = [
   { id: 'early_bird', name: 'Early Bird', creatureName: 'Sol', description: 'Use WriteScholar before 7 AM', xp: 15, category: 'special', rarity: 'uncommon', condition: (s) => s.used_before_7am, conditionText: 'Use app before 7 AM' },
   { id: 'midnight_scholar', name: 'Midnight Scholar', creatureName: 'Midnight', description: 'Use WriteScholar between midnight and 3 AM', xp: 25, category: 'special', rarity: 'rare', condition: (s) => s.midnight_usage, conditionText: 'Use app midnight–3 AM' },
   { id: 'weekend_warrior', name: 'Weekend Warrior', creatureName: 'Weekender', description: 'Use WriteScholar on a weekend', xp: 10, category: 'special', rarity: 'common', condition: (s) => s.weekend_usage, conditionText: 'Use app on a weekend' },
-  { id: 'all_rounder', name: 'All-Rounder', creatureName: 'Omni', description: 'Use every tool type at least once', xp: 50, category: 'special', rarity: 'epic', condition: (s) => (s.tools_used_ever || []).length >= 7, conditionText: 'Use all 7 tool types' },
+  { id: 'all_rounder', name: 'All-Rounder', creatureName: 'Omni', description: 'Use every tool type at least once', xp: 50, category: 'special', rarity: 'epic', condition: (s) => (s.tools_used_ever || []).length >= 8, conditionText: 'Use all 8 tool types' },
   { id: 'export_pro', name: 'Export Pro', creatureName: 'Exporto', description: 'Export a quiz or flashcard set', xp: 15, category: 'special', rarity: 'uncommon', condition: (s) => s.exports_count >= 1, conditionText: 'Export 1 study tool' },
   { id: 'comeback_kid', name: 'Comeback Kid', creatureName: 'Boomerang', description: 'Return after 7+ days away', xp: 20, category: 'special', rarity: 'uncommon', condition: (s) => {
     if (!s.last_active_date) return false;
@@ -212,6 +215,17 @@ export const BADGES: Badge[] = [
   { id: 'perfectionist', name: 'Perfectionist', creatureName: 'Flawless', description: 'Get 5 perfect Quick Review scores', xp: 60, category: 'mastery', rarity: 'epic', condition: (s) => s.quick_review_perfect_scores >= 5, conditionText: '5 perfect Quick Reviews' },
   { id: 'memory_machine', name: 'Memory Machine', creatureName: 'Mnemonic', description: 'Get 25 perfect Quick Review scores', xp: 150, category: 'mastery', rarity: 'legendary', condition: (s) => s.quick_review_perfect_scores >= 25, conditionText: '25 perfect Quick Reviews' },
   { id: 'export_empire', name: 'Export Empire', creatureName: 'Empirex', description: 'Export 25 study tools', xp: 75, category: 'special', rarity: 'epic', condition: (s) => s.exports_count >= 25, conditionText: 'Export 25 study tools' },
+
+  // ═══════════════════════════════════════════════
+  // INTERACTIVE LESSONS (7 badges)
+  // ═══════════════════════════════════════════════
+  { id: 'lesson_learner', name: 'Lesson Learner', creatureName: 'Slidely', description: 'Generate your first interactive lesson', xp: 15, category: 'getting-started', rarity: 'common', condition: (s) => (s.lessons_count || 0) >= 1, conditionText: 'Generate 1 lesson' },
+  { id: 'lesson_explorer', name: 'Lesson Explorer', creatureName: 'Explorix', description: 'Generate 3 interactive lessons', xp: 25, category: 'mastery', rarity: 'uncommon', condition: (s) => (s.lessons_count || 0) >= 3, conditionText: 'Generate 3 lessons' },
+  { id: 'lesson_lover', name: 'Lesson Lover', creatureName: 'Lovely', description: 'Generate 5 interactive lessons', xp: 35, category: 'mastery', rarity: 'rare', condition: (s) => (s.lessons_count || 0) >= 5, conditionText: 'Generate 5 lessons' },
+  { id: 'lesson_master', name: 'Lesson Master', creatureName: 'Masterly', description: 'Generate 10 interactive lessons', xp: 50, category: 'mastery', rarity: 'epic', condition: (s) => (s.lessons_count || 0) >= 10, conditionText: 'Generate 10 lessons' },
+  { id: 'lesson_legend', name: 'Lesson Legend', creatureName: 'Legendix', description: 'Generate 25 interactive lessons', xp: 75, category: 'mastery', rarity: 'legendary', condition: (s) => (s.lessons_count || 0) >= 25, conditionText: 'Generate 25 lessons' },
+  { id: 'lesson_centurion', name: 'Lesson Centurion', creatureName: 'Lessonix', description: 'Generate 100 interactive lessons', xp: 150, category: 'mastery', rarity: 'legendary', condition: (s) => (s.lessons_count || 0) >= 100, conditionText: 'Generate 100 lessons' },
+  { id: 'triple_threat', name: 'Triple Threat', creatureName: 'Triplix', description: 'Use all 3 lesson styles (Visual, Step-by-Step, Story) in one session', xp: 30, category: 'special', rarity: 'rare', condition: (s) => (s.lesson_styles_used_session || 0) >= 3, conditionText: 'Use all 3 lesson styles in one session' },
 ];
 
 const STATS_KEY = 'writescholar_achievement_stats';
@@ -230,6 +244,9 @@ function defaultStats(): AchievementStats {
     flashcards_count: 0,
     crosswords_count: 0,
     citations_count: 0,
+    lessons_count: 0,
+    lesson_styles_used_session: 0,
+    lesson_styles_used_this_session: [],
     longest_streak: 0,
     current_streak: 0,
     used_after_10pm: false,
@@ -318,6 +335,7 @@ export function mergeFromServer(serverStats: Record<string, unknown>, serverBadg
   const numericKeys = [
     'uploads_count', 'analyses_count', 'humanize_count', 'summaries_count',
     'quizzes_count', 'flashcards_count', 'crosswords_count', 'citations_count',
+    'lessons_count',
     'longest_streak', 'current_streak', 'tools_used_session', 'study_tools_session',
     'exports_count', 'copies_count',
     // New stats
@@ -344,6 +362,10 @@ export function mergeFromServer(serverStats: Record<string, unknown>, serverBadg
   }
   if (Array.isArray(serverStats.unique_friends_shared_with)) {
     merged.unique_friends_shared_with = [...new Set([...(merged.unique_friends_shared_with || []), ...(serverStats.unique_friends_shared_with as string[])])];
+  }
+  if (Array.isArray(serverStats.lesson_styles_used_this_session)) {
+    merged.lesson_styles_used_this_session = [...new Set([...(merged.lesson_styles_used_this_session || []), ...(serverStats.lesson_styles_used_this_session as string[])])];
+    merged.lesson_styles_used_session = Math.max(merged.lesson_styles_used_session || 0, merged.lesson_styles_used_this_session.length);
   }
   if (serverStats.paid_since && (!merged.paid_since || new Date(serverStats.paid_since as string) < new Date(merged.paid_since))) {
     merged.paid_since = serverStats.paid_since as string;
@@ -404,6 +426,7 @@ const TOOL_TYPE_MAP: Record<string, string> = {
   flashcards_count: 'flashcard',
   crosswords_count: 'crossword',
   citations_count: 'citation',
+  lessons_count: 'lesson',
 };
 
 export function trackAction(action: keyof AchievementStats, value?: number | boolean): string[] {
@@ -518,6 +541,24 @@ export function trackCraterBlastGame(isPerfect: boolean = false, score: number =
   stats.crater_blast_high_score = Math.max(stats.crater_blast_high_score || 0, score);
   saveStats(stats);
   return checkAndUnlockBadges(stats);
+}
+
+export function trackLessonStyleUsed(style: 'visual' | 'stepByStep' | 'story'): string[] {
+  const stats = getStats();
+  const used = stats.lesson_styles_used_this_session || [];
+  if (!used.includes(style)) {
+    stats.lesson_styles_used_this_session = [...used, style];
+    stats.lesson_styles_used_session = stats.lesson_styles_used_this_session.length;
+  }
+  saveStats(stats);
+  return checkAndUnlockBadges(stats);
+}
+
+export function resetLessonStyleSession(): void {
+  const stats = getStats();
+  stats.lesson_styles_used_this_session = [];
+  stats.lesson_styles_used_session = 0;
+  saveStats(stats);
 }
 
 export function trackStudyToolCreated(wordCount: number = 0): string[] {

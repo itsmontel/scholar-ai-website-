@@ -66,6 +66,7 @@ function mergeStats(existing, incoming) {
   const numericKeys = [
     'uploads_count', 'analyses_count', 'humanize_count', 'summaries_count',
     'quizzes_count', 'flashcards_count', 'crosswords_count', 'citations_count',
+    'lessons_count', 'lesson_styles_used_session',
     'longest_streak', 'current_streak', 'tools_used_session', 'study_tools_session',
     'exports_count', 'copies_count',
     // New stats
@@ -93,7 +94,7 @@ function mergeStats(existing, incoming) {
   }
 
   // Merge array fields
-  const arrayKeys = ['tools_used_ever', 'unique_friends_shared_with'];
+  const arrayKeys = ['tools_used_ever', 'unique_friends_shared_with', 'lesson_styles_used_this_session'];
   for (const key of arrayKeys) {
     if (incoming[key] && Array.isArray(incoming[key])) {
       const existingArr = merged[key] || [];

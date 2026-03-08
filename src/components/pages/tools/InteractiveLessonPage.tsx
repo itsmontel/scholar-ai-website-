@@ -3,7 +3,7 @@ import Header from '../../common/Header';
 import Footer from '../../common/Footer';
 import ScholarMascot from '../../common/ScholarMascot';
 import AnalysisAnimation from '../../common/AnalysisAnimation';
-import { trackAction } from '../../../data/achievements';
+import { trackAction, trackLessonStyleUsed, resetLessonStyleSession } from '../../../data/achievements';
 import { getResetsInText } from '../../../utils/usageReset';
 
 interface InteractiveLessonPageProps {
@@ -91,6 +91,13 @@ const InteractiveLessonPage = ({ onNavigate, user, onLogout }: InteractiveLesson
   const isPremiumUser = userPlan === 'premium';
   const maxWords = isFreeUser ? 5000 : 10000;
   const wordCount = inputText.trim().split(/\s+/).filter(Boolean).length;
+
+  // Track lesson style for Triple Threat badge (use all 3 styles in one session)
+  useEffect(() => {
+    if (lessonResult) {
+      trackLessonStyleUsed(lessonStyle);
+    }
+  }, [lessonResult, lessonStyle]);
 
   useEffect(() => {
     document.title = 'Interactive Lesson Generator – Turn Text into Fun Lessons | WriteScholar';
@@ -214,6 +221,7 @@ const InteractiveLessonPage = ({ onNavigate, user, onLogout }: InteractiveLesson
     setRevealedItems(new Set());
     setSavedLessonId(null);
     setLessonStyle('visual'); // Start with visual
+    resetLessonStyleSession();
 
     try {
       const token = localStorage.getItem('authToken') || localStorage.getItem('token');
@@ -984,6 +992,7 @@ One click = 3 unique lessons!
                           setLessonStyle(opt.value as any);
                           setCurrentSlide(0);
                           setRevealedItems(new Set());
+                          trackLessonStyleUsed(opt.value as 'visual' | 'stepByStep' | 'story');
                         }
                       }}
                       title={opt.description}
