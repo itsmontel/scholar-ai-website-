@@ -436,13 +436,14 @@ const AcademicAIApp = () => {
     }
   }, []);
 
-  // Handle URL-based routing (sync on popstate, re-run when isLoggedIn changes for redirect)
+  // Handle URL-based routing (sync on popstate, re-run when isLoggedIn/user changes for redirect)
   useEffect(() => {
     const path = window.location.pathname;
     const initialPage = getPageFromPath(path);
     
-    // If user is logged in and trying to access landing page, redirect to dashboard
-    if (isLoggedIn && initialPage === 'landing') {
+    // Only redirect landing → dashboard if user has completed onboarding.
+    // Users who haven't completed onboarding can browse the landing page and other public pages.
+    if (isLoggedIn && initialPage === 'landing' && user?.onboardingCompleted) {
       setCurrentPage('dashboard');
       window.history.replaceState(null, '', '/dashboard');
     } else {
@@ -476,16 +477,16 @@ const AcademicAIApp = () => {
     return () => {
       window.removeEventListener('popstate', handlePopState);
     };
-  }, [isLoggedIn]);
+  }, [isLoggedIn, user?.onboardingCompleted]);
 
-  // Handle authentication state changes - redirect to dashboard if logged in and on landing page
+  // Redirect landing → dashboard only when logged in AND onboarding is complete
   useEffect(() => {
-    if (isLoggedIn && currentPage === 'landing') {
-      logger.log('User logged in, redirecting from landing to dashboard');
+    if (isLoggedIn && currentPage === 'landing' && user?.onboardingCompleted) {
+      logger.log('User logged in with onboarding complete, redirecting from landing to dashboard');
       setCurrentPage('dashboard');
       window.history.replaceState(null, '', '/dashboard');
     }
-  }, [isLoggedIn, currentPage]);
+  }, [isLoggedIn, currentPage, user?.onboardingCompleted]);
 
   // Sync user data from localStorage when it changes (e.g., from another tab or after login)
   useEffect(() => {
