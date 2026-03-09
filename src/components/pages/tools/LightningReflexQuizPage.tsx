@@ -905,7 +905,7 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
     const streakFire = streak >= 3;
 
     return (
-      <div className="flex-1 flex flex-col" style={screenEffect === 'shake' ? { animation: 'lrqScreenShake 0.5s ease-in-out' } : undefined}>
+      <div className="flex-1 flex flex-col pb-24 sm:pb-0" style={screenEffect === 'shake' ? { animation: 'lrqScreenShake 0.5s ease-in-out' } : undefined}>
         {/* HUD */}
         <div className="bg-gradient-to-b from-slate-900 to-slate-800 border-b border-slate-700/50 px-4 py-2.5">
           <div className="max-w-3xl mx-auto flex items-center justify-between">
