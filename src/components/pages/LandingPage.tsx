@@ -503,7 +503,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
           <div className="max-w-4xl mx-auto text-center">
             {/* Hero headline */}
             <h1 className="text-3xl sm:text-5xl lg:text-6xl xl:text-7xl font-extrabold text-stone-800 dark:text-stone-100 leading-[1.1] mb-6 sm:mb-6 tracking-tight" style={{ letterSpacing: '-0.03em' }}>
-              The AI Quizlet alternative to<br />
+              The #1 Quizlet alternative to<br />
               <span className="text-violet-500">ace school</span>
             </h1>
 
