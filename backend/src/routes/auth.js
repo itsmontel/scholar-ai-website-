@@ -341,17 +341,13 @@ router.get('/verify-email', async (req, res) => {
       return res.redirect(`${frontendUrl}/login?error=missing-token`);
     }
 
-    console.log('Verification attempt with token:', token);
 
     // Use userService to find and update the user
     const user = await userService.findUserByVerificationToken(token);
     
     if (!user) {
-      console.log('No user found with token:', token);
       return res.redirect(`${frontendUrl}/login?error=invalid-token`);
     }
-
-    console.log('User found:', user.email);
 
     // Update the user to mark email as verified
     await userService.updateUser(user.id, {
@@ -379,7 +375,6 @@ router.get('/verify-email', async (req, res) => {
 router.post('/forgot-password', async (req, res) => {
   try {
     const { email } = req.body;
-    console.log('Forgot password request for email:', email);
 
     if (!email) {
       return res.status(400).json({

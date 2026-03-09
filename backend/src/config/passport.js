@@ -25,13 +25,6 @@ passport.use(new GoogleStrategy({
   callbackURL: process.env.GOOGLE_CALLBACK_URL || "/api/auth/google/callback"
 }, async (accessToken, refreshToken, profile, done) => {
   try {
-    console.log('Google OAuth Profile:', {
-      id: profile.id,
-      email: profile.emails?.[0]?.value,
-      name: profile.displayName,
-      picture: profile.photos?.[0]?.value
-    });
-
     // Check if user already exists with this Google ID
     let user = await userService.findUserByGoogleId(profile.id);
 

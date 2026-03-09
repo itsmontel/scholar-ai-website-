@@ -22,21 +22,15 @@ router.post('/stripe', express.raw({ type: 'application/json' }), async (req, re
     const signature = req.headers['stripe-signature'];
     const payload = req.body;
 
-    // Verify webhook signature (bypass for testing)
-    let event;
-    if (signature && signature.includes('fake_signature_for_testing')) {
-      console.log('🔥 WEBHOOK: Bypassing signature verification for testing');
-      event = JSON.parse(payload);
-    } else {
-      const verificationResult = subscriptionService.verifyWebhookSignature(payload, signature);
-      
-      if (!verificationResult.success) {
-        console.error('Webhook signature verification failed:', verificationResult.error);
-        return res.status(400).json({ error: 'Invalid signature' });
-      }
-
-      event = verificationResult.event;
+    // Verify webhook signature
+    const verificationResult = subscriptionService.verifyWebhookSignature(payload, signature);
+    
+    if (!verificationResult.success) {
+      console.error('Webhook signature verification failed:', verificationResult.error);
+      return res.status(400).json({ error: 'Invalid signature' });
     }
+
+    const event = verificationResult.event;
     console.log(`Received Stripe webhook: ${event.type}`);
 
     // Handle different event types
@@ -85,12 +79,8 @@ router.post('/stripe', express.raw({ type: 'application/json' }), async (req, re
 // Handle successful checkout session
 async function handleCheckoutSessionCompleted(session) {
   try {
-    console.log('🔥 WEBHOOK: Processing checkout session completed:', session.id);
-    console.log('🔥 WEBHOOK: Session data:', JSON.stringify(session, null, 2));
-    
     // Get customer ID from session
     const customerId = session.customer;
-    console.log('🔥 WEBHOOK: Customer ID:', customerId);
     
     // Find user by Stripe customer ID using Supabase client directly
     const { getSupabase } = require('../database/connection');
@@ -109,12 +99,11 @@ async function handleCheckoutSessionCompleted(session) {
     const userResult = { rows: users };
 
     if (userResult.rows.length === 0) {
-      console.error('🔥 WEBHOOK ERROR: User not found for customer:', customerId);
+      console.error('Webhook: User not found for Stripe customer');
       return;
     }
 
     const user = userResult.rows[0];
-    console.log('🔥 WEBHOOK: Found user:', user.email);
 
     // Get subscription details from Stripe
     const subscriptionId = session.subscription;
@@ -123,14 +112,11 @@ async function handleCheckoutSessionCompleted(session) {
       return;
     }
 
-    console.log('🔥 WEBHOOK: Fetching subscription from Stripe:', subscriptionId);
     const stripeResult = await subscriptionService.getStripeSubscription(subscriptionId);
     if (!stripeResult.success) {
       console.error('🔥 WEBHOOK ERROR: Failed to fetch subscription from Stripe:', stripeResult.error);
       return;
     }
-
-    console.log('🔥 WEBHOOK: Got subscription from Stripe:', stripeResult.subscription.id);
 
     const subscription = stripeResult.subscription;
     
@@ -145,13 +131,10 @@ async function handleCheckoutSessionCompleted(session) {
     }
 
     // Update user's subscription plan and mark onboarding complete (they subscribed = past onboarding)
-    console.log('🔥 WEBHOOK: Updating user plan to:', plan, 'for user:', user.id);
     await query(
       'UPDATE users SET subscription_plan = $1, subscription_status = $2, onboarding_completed = true WHERE id = $3',
       [plan, subscription.status, user.id]
     );
-    console.log('🔥 WEBHOOK: User plan updated successfully!');
-    console.log('Successfully updated user subscription plan');
 
     // Record subscription in database using PostgreSQL
     try {
@@ -174,7 +157,6 @@ async function handleCheckoutSessionCompleted(session) {
           new Date(subscription.current_period_end * 1000)
         ]
       );
-      console.log('Successfully recorded subscription in database');
     } catch (subError) {
       console.error('Error recording subscription:', subError);
     }
@@ -184,13 +166,10 @@ async function handleCheckoutSessionCompleted(session) {
     if (subscription.trial_end) {
       try {
         await subscriptionService.recordTrialUsage(user.email, customerId, plan);
-        console.log(`🔥 WEBHOOK: Recorded trial usage for ${user.email}`);
       } catch (trialError) {
         console.error('🔥 WEBHOOK: Error recording trial usage (non-fatal):', trialError);
       }
     }
-
-    console.log(`Successfully processed subscription for user ${user.id}: ${plan} plan`);
 
   } catch (error) {
     console.error('Error handling checkout session completed:', error);
@@ -200,8 +179,6 @@ async function handleCheckoutSessionCompleted(session) {
 // Handle subscription created
 async function handleSubscriptionCreated(subscription) {
   try {
-    console.log('Processing subscription created:', subscription.id);
-    
     // Find user by customer ID using PostgreSQL
     const userResult = await query(
       'SELECT id, email FROM users WHERE stripe_customer_id = $1',
@@ -209,7 +186,7 @@ async function handleSubscriptionCreated(subscription) {
     );
 
     if (userResult.rows.length === 0) {
-      console.error('User not found for customer:', subscription.customer);
+      console.error('User not found for Stripe customer');
       return;
     }
 
@@ -231,8 +208,6 @@ async function handleSubscriptionCreated(subscription) {
       [plan, subscription.status, user.id]
     );
 
-    console.log(`Subscription created for user ${user.id}: ${plan} plan`);
-
   } catch (error) {
     console.error('Error handling subscription created:', error);
   }
@@ -241,8 +216,6 @@ async function handleSubscriptionCreated(subscription) {
 // Handle subscription updated
 async function handleSubscriptionUpdated(subscription) {
   try {
-    console.log('Processing subscription updated:', subscription.id);
-    
     // Find user by customer ID using PostgreSQL
     const userResult = await query(
       'SELECT id, email FROM users WHERE stripe_customer_id = $1',
@@ -250,7 +223,7 @@ async function handleSubscriptionUpdated(subscription) {
     );
 
     if (userResult.rows.length === 0) {
-      console.error('User not found for customer:', subscription.customer);
+      console.error('User not found for Stripe customer');
       return;
     }
 
@@ -311,7 +284,6 @@ async function handleSubscriptionUpdated(subscription) {
           );
         } else if (unsubscribeCheck.rows[0].is_subscribed === false) {
           // Email exists but is unsubscribed - don't add them back
-          console.log(`User ${normalizedEmail} has unsubscribed, not adding to email list`);
         } else {
           // Email exists and is subscribed, update user_id if needed
           await query(
@@ -325,8 +297,6 @@ async function handleSubscriptionUpdated(subscription) {
       }
     }
 
-    console.log(`Subscription updated for user ${user.id}: ${plan} plan`);
-
   } catch (error) {
     console.error('Error handling subscription updated:', error);
   }
@@ -335,8 +305,6 @@ async function handleSubscriptionUpdated(subscription) {
 // Handle subscription deleted
 async function handleSubscriptionDeleted(subscription) {
   try {
-    console.log('Processing subscription deleted:', subscription.id);
-    
     // Find user by customer ID using PostgreSQL
     const userResult = await query(
       'SELECT id FROM users WHERE stripe_customer_id = $1',
@@ -344,7 +312,7 @@ async function handleSubscriptionDeleted(subscription) {
     );
 
     if (userResult.rows.length === 0) {
-      console.error('User not found for customer:', subscription.customer);
+      console.error('User not found for Stripe customer');
       return;
     }
 
@@ -392,7 +360,6 @@ async function handleSubscriptionDeleted(subscription) {
           );
         } else if (unsubscribeCheck.rows[0].is_subscribed === false) {
           // Email exists but is unsubscribed - don't add them back
-          console.log(`User ${normalizedEmail} has unsubscribed, not adding to email list`);
         } else {
           // Email exists and is subscribed, update user_id if needed
           await query(
@@ -406,8 +373,6 @@ async function handleSubscriptionDeleted(subscription) {
       }
     }
 
-    console.log(`Subscription canceled for user ${user.id}, downgraded to free plan`);
-
   } catch (error) {
     console.error('Error handling subscription deleted:', error);
   }
@@ -416,8 +381,6 @@ async function handleSubscriptionDeleted(subscription) {
 // Handle successful invoice payment
 async function handleInvoicePaymentSucceeded(invoice) {
   try {
-    console.log('Processing invoice payment succeeded:', invoice.id);
-    
     // Find user by customer ID using PostgreSQL
     const userResult = await query(
       'SELECT id FROM users WHERE stripe_customer_id = $1',
@@ -425,7 +388,7 @@ async function handleInvoicePaymentSucceeded(invoice) {
     );
 
     if (userResult.rows.length === 0) {
-      console.error('User not found for customer:', invoice.customer);
+      console.error('User not found for Stripe customer');
       return;
     }
 
@@ -444,8 +407,6 @@ async function handleInvoicePaymentSucceeded(invoice) {
       ['active', user.id]
     );
 
-    console.log(`Invoice payment succeeded for user ${user.id}`);
-
   } catch (error) {
     console.error('Error handling invoice payment succeeded:', error);
   }
@@ -454,8 +415,6 @@ async function handleInvoicePaymentSucceeded(invoice) {
 // Handle failed invoice payment
 async function handleInvoicePaymentFailed(invoice) {
   try {
-    console.log('Processing invoice payment failed:', invoice.id);
-    
     // Find user by customer ID using PostgreSQL
     const userResult = await query(
       'SELECT id FROM users WHERE stripe_customer_id = $1',
@@ -463,7 +422,7 @@ async function handleInvoicePaymentFailed(invoice) {
     );
 
     if (userResult.rows.length === 0) {
-      console.error('User not found for customer:', invoice.customer);
+      console.error('User not found for Stripe customer');
       return;
     }
 
@@ -482,8 +441,6 @@ async function handleInvoicePaymentFailed(invoice) {
       ['past_due', user.id]
     );
 
-    console.log(`Invoice payment failed for user ${user.id}`);
-
   } catch (error) {
     console.error('Error handling invoice payment failed:', error);
   }
@@ -492,8 +449,6 @@ async function handleInvoicePaymentFailed(invoice) {
 // Handle trial will end
 async function handleTrialWillEnd(subscription) {
   try {
-    console.log('Processing trial will end:', subscription.id);
-    
     // Find user by customer ID using PostgreSQL
     const userResult = await query(
       'SELECT id, email FROM users WHERE stripe_customer_id = $1',
@@ -501,14 +456,13 @@ async function handleTrialWillEnd(subscription) {
     );
 
     if (userResult.rows.length === 0) {
-      console.error('User not found for customer:', subscription.customer);
+      console.error('User not found for Stripe customer');
       return;
     }
 
     const user = userResult.rows[0];
 
     // TODO: Send notification email about trial ending
-    console.log(`Trial ending soon for user ${user.id} (${user.email})`);
 
   } catch (error) {
     console.error('Error handling trial will end:', error);

@@ -20,7 +20,6 @@ class DatabaseService {
     const supabase = this.getSupabaseClient();
     
     try {
-      console.log('Executing query:', { sql, params });
       
       // Handle different query types
       const queryType = sql.trim().split(' ')[0].toUpperCase();
@@ -68,8 +67,6 @@ class DatabaseService {
         const whereClause = whereMatch[1];
         
         // Handle common WHERE patterns
-        console.log('WHERE clause:', whereClause);
-        console.log('Params:', params);
         
         if (whereClause.includes('email = $1')) {
           query = query.eq('email', params[0]);
@@ -207,8 +204,6 @@ class DatabaseService {
       return { rows: [result], rowCount: 1 };
     } else if (tableName === 'subscriptions') {
       // For subscriptions table, handle ON CONFLICT with upsert
-      console.log('Upserting subscription data:', data);
-      
       const { data: result, error } = await supabase
         .from(tableName)
         .upsert([data], { 
@@ -221,7 +216,6 @@ class DatabaseService {
         console.error('Subscription upsert error:', error);
         throw error;
       }
-      console.log('Subscription upsert result:', result);
       return { rows: result || [], rowCount: result?.length || 0 };
     } else {
       // For other tables

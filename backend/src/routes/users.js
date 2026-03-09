@@ -154,7 +154,6 @@ router.post('/complete-onboarding', authenticateToken, async (req, res) => {
 router.post('/complete-tutorial', authenticateToken, async (req, res) => {
   try {
     const userId = req.user.id;
-    console.log('[complete-tutorial] userId:', userId, 'email:', req.user.email);
 
     // Use service role to bypass RLS. userService may fall back to anon key.
     const supabase = createClient(
@@ -186,7 +185,6 @@ router.post('/complete-tutorial', authenticateToken, async (req, res) => {
       });
     }
 
-    console.log('[complete-tutorial] Success for user', userId);
     res.json({ success: true, message: 'Tutorial marked as completed' });
   } catch (error) {
     console.error('[complete-tutorial] Error:', error.message);

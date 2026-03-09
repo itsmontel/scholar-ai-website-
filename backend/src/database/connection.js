@@ -4,10 +4,6 @@ let supabase;
 
 const connectDB = async () => {
   try {
-    console.log('🔗 Connecting to Supabase...');
-    console.log('SUPABASE_URL:', process.env.SUPABASE_URL);
-    console.log('SUPABASE_ANON_KEY:', process.env.SUPABASE_ANON_KEY ? 'SET' : 'NOT SET');
-    
     supabase = createClient(
       process.env.SUPABASE_URL,
       process.env.SUPABASE_ANON_KEY

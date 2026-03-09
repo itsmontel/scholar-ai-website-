@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import DOMPurify from 'dompurify';
 import Header from '../common/Header';
 import Footer from '../common/Footer';
 import { trackCopy } from '../../data/achievements';
@@ -291,7 +292,11 @@ const CitationResultsPage = ({
               <div className="bg-gray-50 rounded-xl p-4 mb-5 border border-gray-200">
                 <p 
                   className="text-gray-800 leading-relaxed font-serif"
-                  dangerouslySetInnerHTML={{ __html: makeLinksClickable(citation.citation) }}
+                  dangerouslySetInnerHTML={{ 
+                    __html: DOMPurify.sanitize(makeLinksClickable(citation.citation), { 
+                      ADD_ATTR: ['target', 'rel', 'class'] 
+                    }) 
+                  }}
                 />
               </div>
 

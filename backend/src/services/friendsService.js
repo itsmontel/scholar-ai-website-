@@ -413,7 +413,6 @@ class FriendsService {
       throw new Error('Failed to block user');
     }
 
-    console.log(`User ${blockerId} blocked user ${blockedId}`);
     return { success: true, message: 'User blocked' };
   }
 
@@ -437,7 +436,6 @@ class FriendsService {
       throw new Error('User is not blocked');
     }
 
-    console.log(`User ${blockerId} unblocked user ${blockedId}`);
     return { success: true, message: 'User unblocked' };
   }
 

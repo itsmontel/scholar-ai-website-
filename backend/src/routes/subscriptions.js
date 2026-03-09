@@ -20,8 +20,6 @@ router.post('/create-checkout-session', authenticateToken, async (req, res) => {
 
     // Get user details from the authenticated user (already available from auth middleware)
     const user = req.user;
-    console.log('Using authenticated user:', { id: user.id, email: user.email });
-
     let customerId = user.stripe_customer_id;
 
     // Create Stripe customer if doesn't exist
@@ -339,7 +337,6 @@ router.post('/cancel', authenticateToken, async (req, res) => {
           );
         } else if (unsubscribeCheck.rows[0].is_subscribed === false) {
           // Email exists but is unsubscribed - don't add them back
-          console.log(`User ${normalizedEmail} has unsubscribed, not adding to email list`);
         } else {
           // Email exists and is subscribed, update user_id if needed
           await query(
@@ -607,13 +604,6 @@ router.get('/usage', authenticateToken, async (req, res) => {
       .eq('user_id', userId)
       .gte('created_at', periodStart);
 
-    // Debug logging
-    console.log('=== USAGE ENDPOINT DEBUG ===');
-    console.log('User ID:', userId);
-    console.log('Period start:', periodStart);
-    console.log('Documents query result:', { data: documents, error: docsError });
-    console.log('Analyses query result:', { data: analyses, error: analysesError });
-
     // Calculate current storage used (only existing documents - decreases when files are deleted)
     const { data: currentDocuments, error: currentDocsError } = await supabaseServiceRole
       .from('documents')
@@ -622,9 +612,7 @@ router.get('/usage', authenticateToken, async (req, res) => {
 
     const documentsUploaded = documents ? documents.length : 0;
     const documentsAnalyzed = analyses ? analyses.length : 0;
-    console.log('Calculated counts - Documents:', documentsUploaded, 'Analyses:', documentsAnalyzed);
     const storageUsed = currentDocuments ? currentDocuments.reduce((total, doc) => total + (doc.file_size || 0), 0) : 0;
-    console.log('Current storage used:', storageUsed, 'bytes from', currentDocuments?.length || 0, 'documents');
 
     // Calculate remaining usage
     const uploadsRemaining = planLimits.documentsPerMonth === -1 ? -1 : Math.max(0, planLimits.documentsPerMonth - documentsUploaded);

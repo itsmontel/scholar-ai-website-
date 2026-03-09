@@ -26,9 +26,6 @@ const securityMiddleware = [
   // Prevent NoSQL injection attacks
   mongoSanitize({
     replaceWith: '_',
-    onSanitize: ({ req, key }) => {
-      console.warn(`Sanitized key: ${key} in request:`, req.url);
-    },
   }),
 
   // Prevent XSS attacks

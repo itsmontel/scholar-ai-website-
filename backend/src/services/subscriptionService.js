@@ -210,7 +210,6 @@ const checkLimit = async (userId, limitType) => {
       if (!error) {
         usage = documents.length;
       }
-      console.log(`checkLimit: Found ${usage} documents for user ${userId} this period`);
     } else if (limitType === 'analysesPerMonth') {
       const { data: analyses, error} = await supabaseServiceRole
         .from('document_analyses')
@@ -221,7 +220,6 @@ const checkLimit = async (userId, limitType) => {
       if (!error) {
         usage = analyses.length;
       }
-      console.log(`checkLimit: Found ${usage} analyses for user ${userId} this period (limit: ${planLimits[limitType]})`);
     } else if (limitType === 'citationSearchesPerMonth') {
       const { data: citationSearches, error } = await supabaseServiceRole
         .from('citation_searches')
@@ -232,7 +230,6 @@ const checkLimit = async (userId, limitType) => {
       if (!error) {
         usage = citationSearches ? citationSearches.length : 0;
       }
-      console.log(`checkLimit: Found ${usage} citation searches for user ${userId} this period (limit: ${planLimits[limitType]})`);
     }
 
     const limit = planLimits[limitType];
@@ -298,7 +295,6 @@ const checkTrialEligibility = async (email) => {
     }
 
     if (existingTrial) {
-      console.log(`Email ${normalizedEmail} already used trial on ${existingTrial.trial_started_at}`);
       return { 
         eligible: false, 
         reason: 'This email has already used a free trial',
@@ -330,14 +326,12 @@ const recordTrialUsage = async (email, stripeCustomerId, planType) => {
     if (error) {
       // If it's a duplicate key error, that's fine - trial was already recorded
       if (error.code === '23505') {
-        console.log(`Trial already recorded for ${normalizedEmail}`);
         return { success: true, alreadyRecorded: true };
       }
       console.error('Error recording trial usage:', error);
       return { success: false, error: error.message };
     }
 
-    console.log(`Recorded trial usage for ${normalizedEmail}`);
     return { success: true };
   } catch (error) {
     console.error('Error in recordTrialUsage:', error);
@@ -375,11 +369,8 @@ const createCheckoutSession = async (customerId, planType, billingCycle, userId,
       applyTrial = trialEligibility.eligible;
       
       if (applyTrial) {
-        console.log(`User ${userEmail} is eligible for 7-day free trial`);
         // Trial usage is recorded in the webhook (checkout.session.completed) only after
         // the user actually enters card details and completes checkout — not just by opening it.
-      } else {
-        console.log(`User ${userEmail} is NOT eligible for trial: ${trialEligibility.reason}`);
       }
     }
     
@@ -693,7 +684,6 @@ const cleanupOldCitations = async () => {
     }
 
     const deletedCount = data?.length || 0;
-    console.log(`✅ Successfully cleaned up ${deletedCount} expired citations (free user 30-day retention)`);
     return { success: true, deletedCount };
   } catch (error) {
     console.error('Error in cleanupOldCitations:', error);
