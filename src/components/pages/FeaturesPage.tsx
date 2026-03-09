@@ -1,5 +1,6 @@
 import Header from '../common/Header';
 import Footer from '../common/Footer';
+import ScholarMascot from '../common/ScholarMascot';
 
 interface FeaturesPageProps {
   onNavigate: (page: string) => void;
@@ -36,32 +37,9 @@ const FeaturesPage = ({ onNavigate, user, onLogout }: FeaturesPageProps) => {
         <div className="absolute top-[40%] right-[6%] hidden xl:block text-3xl opacity-45 animate-float-delayed">🃏</div>
         <div className="absolute bottom-[35%] left-[6%] hidden xl:block text-3xl opacity-45 animate-float">✨</div>
         <div className="absolute bottom-[30%] right-[5%] hidden xl:block text-4xl opacity-50 animate-float-delayed">📚</div>
-        {/* Right character - studying with book (same as landing hero) */}
-        <div className="hidden lg:block absolute right-4 xl:right-12 top-1/2 -translate-y-1/2 w-24 h-28 xl:w-28 xl:h-32 z-10 opacity-90 animate-float">
-          <svg viewBox="0 0 140 160" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
-            <path d="M50 95 Q45 125 50 155 L90 155 Q95 125 90 95" fill="#6366F1" />
-            <rect x="62" y="72" width="16" height="26" fill="#E8B796" />
-            <ellipse cx="70" cy="45" rx="30" ry="33" fill="#E8B796" />
-            <path d="M40 38 Q38 18 55 12 Q70 6 88 12 Q105 18 100 38 Q98 28 85 20 Q70 12 55 20 Q42 28 40 38" fill="#4A3728" />
-            <path d="M40 38 Q34 50 40 62" fill="#4A3728" />
-            <path d="M100 38 Q106 50 100 62" fill="#4A3728" />
-            <ellipse cx="58" cy="45" rx="4" ry="5" fill="#1F2937" />
-            <ellipse cx="82" cy="45" rx="4" ry="5" fill="#1F2937" />
-            <circle cx="59" cy="43" r="1.5" fill="white" />
-            <circle cx="83" cy="43" r="1.5" fill="white" />
-            <path d="M55 58 Q70 68 85 58" stroke="#1F2937" strokeWidth="2" fill="none" strokeLinecap="round" />
-            <ellipse cx="42" cy="52" rx="5" ry="3" fill="#FECACA" opacity="0.5" />
-            <ellipse cx="98" cy="52" rx="5" ry="3" fill="#FECACA" opacity="0.5" />
-            <path d="M45 98 Q20 100 5 115" stroke="#E8B796" strokeWidth="12" fill="none" strokeLinecap="round" />
-            <path d="M95 98 Q120 100 135 115" stroke="#E8B796" strokeWidth="12" fill="none" strokeLinecap="round" />
-            <ellipse cx="3" cy="118" rx="8" ry="9" fill="#E8B796" />
-            <ellipse cx="137" cy="118" rx="8" ry="9" fill="#E8B796" />
-            <rect x="25" y="95" width="90" height="55" rx="4" fill="#FEF3C7" stroke="#F59E0B" strokeWidth="2" />
-            <line x1="70" y1="95" x2="70" y2="150" stroke="#F59E0B" strokeWidth="1.5" />
-            <path d="M35 110 Q65 108 95 110" stroke="#92400E" strokeWidth="2" fill="none" />
-            <path d="M35 125 Q65 123 95 125" stroke="#92400E" strokeWidth="1.5" fill="none" />
-            <path d="M58 95 L70 108 L82 95" stroke="#4F46E5" strokeWidth="2" fill="none" />
-          </svg>
+        {/* Right mascot - studying pose */}
+        <div className="hidden lg:block absolute right-4 xl:right-12 top-1/2 -translate-y-1/2 z-10 opacity-90 animate-float">
+          <ScholarMascot size={112} animated={true} pose="studying" />
         </div>
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-10 lg:gap-12">
@@ -85,145 +63,55 @@ const FeaturesPage = ({ onNavigate, user, onLogout }: FeaturesPageProps) => {
       <section className="py-16 sm:py-20 bg-white dark:bg-stone-900/50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-            {/* AI-Powered Analysis - Asian man */}
+            {/* AI-Powered Analysis */}
             <div className="bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-2xl p-6 hover:shadow-lg hover:border-indigo-300 dark:hover:border-indigo-600 transition-all">
-              <div className="w-14 h-14 rounded-full bg-blue-50 flex items-center justify-center mb-4 overflow-hidden">
-                <svg viewBox="0 0 56 56" fill="none" className="w-14 h-14">
-                  <circle cx="28" cy="28" r="28" fill="#DBEAFE"/>
-                  <ellipse cx="28" cy="30" rx="14" ry="15" fill="#E8C4A0"/>
-                  <path d="M14 26 Q12 16 20 12 Q28 8 36 12 Q44 16 42 26 Q40 20 34 16 Q28 12 22 16 Q16 20 14 26" fill="#1F2937"/>
-                  <path d="M14 26 Q10 30 14 36" fill="#1F2937"/>
-                  <path d="M42 26 Q46 30 42 36" fill="#1F2937"/>
-                  <ellipse cx="22" cy="30" rx="3" ry="3.5" fill="#1F2937"/>
-                  <ellipse cx="34" cy="30" rx="3" ry="3.5" fill="#1F2937"/>
-                  <circle cx="23" cy="29" r="1" fill="white"/>
-                  <circle cx="35" cy="29" r="1" fill="white"/>
-                  <path d="M24 40 Q28 45 32 40" stroke="#1F2937" strokeWidth="2" fill="none" strokeLinecap="round"/>
-                  <ellipse cx="18" cy="35" rx="3" ry="2" fill="#FECACA" opacity="0.4"/>
-                  <ellipse cx="38" cy="35" rx="3" ry="2" fill="#FECACA" opacity="0.4"/>
-                </svg>
+              <div className="w-14 h-14 flex items-center justify-center mb-4">
+                <ScholarMascot size={56} animated={false} pose="analyzing" />
               </div>
               <h3 className="font-semibold text-stone-800 dark:text-stone-100 text-lg mb-2">AI-Powered Analysis</h3>
               <p className="text-base text-stone-500 dark:text-stone-400 leading-relaxed">Advanced natural language processing provides detailed feedback on your academic writing, identifying strengths and areas for improvement.</p>
             </div>
             
-            {/* Citation Generator - Black woman */}
+            {/* Citation Generator */}
             <div className="bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-2xl p-6 hover:shadow-lg hover:border-indigo-300 dark:hover:border-indigo-600 transition-all">
-              <div className="w-14 h-14 rounded-full bg-green-50 flex items-center justify-center mb-4 overflow-hidden">
-                <svg viewBox="0 0 56 56" fill="none" className="w-14 h-14">
-                  <circle cx="28" cy="28" r="28" fill="#D1FAE5"/>
-                  <ellipse cx="28" cy="30" rx="14" ry="15" fill="#8B5A2B"/>
-                  <path d="M14 28 Q12 18 20 14 Q28 10 36 14 Q44 18 42 28 Q40 22 34 18 Q28 14 22 18 Q16 22 14 28" fill="#1F2937"/>
-                  <ellipse cx="16" cy="30" rx="5" ry="7" fill="#1F2937"/>
-                  <ellipse cx="40" cy="30" rx="5" ry="7" fill="#1F2937"/>
-                  <ellipse cx="20" cy="18" rx="4" ry="5" fill="#1F2937"/>
-                  <ellipse cx="28" cy="14" rx="5" ry="4" fill="#1F2937"/>
-                  <ellipse cx="36" cy="18" rx="4" ry="5" fill="#1F2937"/>
-                  <ellipse cx="22" cy="30" rx="3" ry="3.5" fill="#1F2937"/>
-                  <ellipse cx="34" cy="30" rx="3" ry="3.5" fill="#1F2937"/>
-                  <circle cx="23" cy="29" r="1" fill="white"/>
-                  <circle cx="35" cy="29" r="1" fill="white"/>
-                  <path d="M24 40 Q28 46 32 40" stroke="#1F2937" strokeWidth="2" fill="none" strokeLinecap="round"/>
-                  <ellipse cx="18" cy="35" rx="3" ry="2" fill="#C9958A" opacity="0.4"/>
-                  <ellipse cx="38" cy="35" rx="3" ry="2" fill="#C9958A" opacity="0.4"/>
-                </svg>
+              <div className="w-14 h-14 flex items-center justify-center mb-4">
+                <ScholarMascot size={56} animated={false} pose="studying" />
               </div>
               <h3 className="font-semibold text-stone-800 dark:text-stone-100 text-lg mb-2">Citation Generator</h3>
               <p className="text-base text-stone-500 dark:text-stone-400 leading-relaxed">Instantly find and format academic citations in APA, MLA, Chicago, Harvard, IEEE, and Vancouver styles.</p>
             </div>
             
-            {/* Grammar & Style Check - White man with glasses */}
+            {/* Grammar & Style Check */}
             <div className="bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-2xl p-6 hover:shadow-lg hover:border-indigo-300 dark:hover:border-indigo-600 transition-all">
-              <div className="w-14 h-14 rounded-full bg-purple-50 flex items-center justify-center mb-4 overflow-hidden">
-                <svg viewBox="0 0 56 56" fill="none" className="w-14 h-14">
-                  <circle cx="28" cy="28" r="28" fill="#F3E8FF"/>
-                  <ellipse cx="28" cy="30" rx="14" ry="15" fill="#FCD9B6"/>
-                  <path d="M14 24 Q12 12 22 10 Q28 8 34 10 Q44 12 42 24 Q40 18 34 14 Q28 10 22 14 Q16 18 14 24" fill="#8B6914"/>
-                  <path d="M14 24 Q10 28 14 34" fill="#8B6914"/>
-                  <path d="M42 24 Q46 28 42 34" fill="#8B6914"/>
-                  <ellipse cx="21" cy="30" rx="6" ry="5" fill="none" stroke="#374151" strokeWidth="2"/>
-                  <ellipse cx="35" cy="30" rx="6" ry="5" fill="none" stroke="#374151" strokeWidth="2"/>
-                  <path d="M27 30 L29 30" stroke="#374151" strokeWidth="2"/>
-                  <path d="M15 28 L12 26" stroke="#374151" strokeWidth="2"/>
-                  <path d="M41 28 L44 26" stroke="#374151" strokeWidth="2"/>
-                  <ellipse cx="21" cy="31" rx="2.5" ry="3" fill="#1F2937"/>
-                  <ellipse cx="35" cy="31" rx="2.5" ry="3" fill="#1F2937"/>
-                  <circle cx="22" cy="30" r="0.8" fill="white"/>
-                  <circle cx="36" cy="30" r="0.8" fill="white"/>
-                  <path d="M24 42 Q28 47 32 42" stroke="#1F2937" strokeWidth="2" fill="none" strokeLinecap="round"/>
-                  <ellipse cx="17" cy="36" rx="3" ry="2" fill="#FECACA" opacity="0.4"/>
-                  <ellipse cx="39" cy="36" rx="3" ry="2" fill="#FECACA" opacity="0.4"/>
-                </svg>
+              <div className="w-14 h-14 flex items-center justify-center mb-4">
+                <ScholarMascot size={56} animated={false} pose="pointing" />
               </div>
               <h3 className="font-semibold text-stone-800 dark:text-stone-100 text-lg mb-2">Grammar & Style Check</h3>
               <p className="text-base text-stone-500 dark:text-stone-400 leading-relaxed">Comprehensive grammar checking, style suggestions, and readability improvements to enhance your writing quality.</p>
             </div>
             
-            {/* Document Library - Hispanic woman */}
+            {/* Document Library */}
             <div className="bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-2xl p-6 hover:shadow-lg hover:border-indigo-300 dark:hover:border-indigo-600 transition-all">
-              <div className="w-14 h-14 rounded-full bg-orange-50 flex items-center justify-center mb-4 overflow-hidden">
-                <svg viewBox="0 0 56 56" fill="none" className="w-14 h-14">
-                  <circle cx="28" cy="28" r="28" fill="#FFEDD5"/>
-                  <ellipse cx="28" cy="30" rx="14" ry="15" fill="#D4A574"/>
-                  <path d="M12 26 Q10 14 20 10 Q28 6 36 10 Q46 14 44 26 Q42 18 34 14 Q28 10 22 14 Q16 18 12 26" fill="#3D2314"/>
-                  <path d="M12 26 Q6 40 16 48" fill="#3D2314"/>
-                  <path d="M44 26 Q50 40 40 48" fill="#3D2314"/>
-                  <ellipse cx="22" cy="30" rx="3" ry="3.5" fill="#1F2937"/>
-                  <ellipse cx="34" cy="30" rx="3" ry="3.5" fill="#1F2937"/>
-                  <circle cx="23" cy="29" r="1" fill="white"/>
-                  <circle cx="35" cy="29" r="1" fill="white"/>
-                  <path d="M17 24 Q22 20 27 24" stroke="#3D2314" strokeWidth="2" fill="none" strokeLinecap="round"/>
-                  <path d="M29 24 Q34 20 39 24" stroke="#3D2314" strokeWidth="2" fill="none" strokeLinecap="round"/>
-                  <path d="M24 41 Q28 46 32 41" stroke="#1F2937" strokeWidth="2" fill="none" strokeLinecap="round"/>
-                  <ellipse cx="17" cy="35" rx="3" ry="2" fill="#E8A090" opacity="0.5"/>
-                  <ellipse cx="39" cy="35" rx="3" ry="2" fill="#E8A090" opacity="0.5"/>
-                </svg>
+              <div className="w-14 h-14 flex items-center justify-center mb-4">
+                <ScholarMascot size={56} animated={false} pose="default" />
               </div>
               <h3 className="font-semibold text-stone-800 dark:text-stone-100 text-lg mb-2">Document Library</h3>
               <p className="text-base text-stone-500 dark:text-stone-400 leading-relaxed">Organize and manage your academic documents with our intuitive library system and cloud storage.</p>
             </div>
             
-            {/* Structure Analysis - South Asian man */}
+            {/* Structure Analysis */}
             <div className="bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-2xl p-6 hover:shadow-lg hover:border-indigo-300 dark:hover:border-indigo-600 transition-all">
-              <div className="w-14 h-14 rounded-full bg-pink-50 flex items-center justify-center mb-4 overflow-hidden">
-                <svg viewBox="0 0 56 56" fill="none" className="w-14 h-14">
-                  <circle cx="28" cy="28" r="28" fill="#FCE7F3"/>
-                  <ellipse cx="28" cy="30" rx="14" ry="15" fill="#C68642"/>
-                  <path d="M14 24 Q12 12 22 10 Q28 8 34 10 Q44 12 42 24 Q40 18 34 14 Q28 10 22 14 Q16 18 14 24" fill="#1A1A1A"/>
-                  <path d="M14 24 Q10 28 14 34" fill="#1A1A1A"/>
-                  <path d="M42 24 Q46 28 42 34" fill="#1A1A1A"/>
-                  <ellipse cx="22" cy="30" rx="3" ry="3.5" fill="#1F2937"/>
-                  <ellipse cx="34" cy="30" rx="3" ry="3.5" fill="#1F2937"/>
-                  <circle cx="23" cy="29" r="1" fill="white"/>
-                  <circle cx="35" cy="29" r="1" fill="white"/>
-                  <path d="M16 24 Q22 20 28 24" stroke="#1A1A1A" strokeWidth="2.5" fill="none" strokeLinecap="round"/>
-                  <path d="M28 24 Q34 20 40 24" stroke="#1A1A1A" strokeWidth="2.5" fill="none" strokeLinecap="round"/>
-                  <path d="M24 41 Q28 46 32 41" stroke="#1F2937" strokeWidth="2" fill="none" strokeLinecap="round"/>
-                  <ellipse cx="17" cy="35" rx="3" ry="2" fill="#D4A07A" opacity="0.5"/>
-                  <ellipse cx="39" cy="35" rx="3" ry="2" fill="#D4A07A" opacity="0.5"/>
-                </svg>
+              <div className="w-14 h-14 flex items-center justify-center mb-4">
+                <ScholarMascot size={56} animated={false} pose="thinking" />
               </div>
               <h3 className="font-semibold text-stone-800 dark:text-stone-100 text-lg mb-2">Structure Analysis</h3>
               <p className="text-base text-stone-500 dark:text-stone-400 leading-relaxed">Get detailed feedback on your essay structure including introduction, body paragraphs, and conclusion.</p>
             </div>
             
-            {/* Academic Vocabulary - East Asian woman */}
+            {/* Academic Vocabulary */}
             <div className="bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-2xl p-6 hover:shadow-lg hover:border-indigo-300 dark:hover:border-indigo-600 transition-all">
-              <div className="w-14 h-14 rounded-full bg-indigo-50 flex items-center justify-center mb-4 overflow-hidden">
-                <svg viewBox="0 0 56 56" fill="none" className="w-14 h-14">
-                  <circle cx="28" cy="28" r="28" fill="#E0E7FF"/>
-                  <ellipse cx="28" cy="30" rx="14" ry="15" fill="#F5DEB3"/>
-                  <path d="M12 26 Q10 14 20 10 Q28 6 36 10 Q46 14 44 26 Q42 18 34 14 Q28 10 22 14 Q16 18 12 26" fill="#1A1A1A"/>
-                  <path d="M12 26 Q6 40 16 50" fill="#1A1A1A"/>
-                  <path d="M44 26 Q50 40 40 50" fill="#1A1A1A"/>
-                  <ellipse cx="22" cy="30" rx="3" ry="3.5" fill="#1F2937"/>
-                  <ellipse cx="34" cy="30" rx="3" ry="3.5" fill="#1F2937"/>
-                  <circle cx="23" cy="29" r="1" fill="white"/>
-                  <circle cx="35" cy="29" r="1" fill="white"/>
-                  <path d="M24 41 Q28 46 32 41" stroke="#1F2937" strokeWidth="2" fill="none" strokeLinecap="round"/>
-                  <ellipse cx="17" cy="35" rx="3" ry="2" fill="#FECACA" opacity="0.4"/>
-                  <ellipse cx="39" cy="35" rx="3" ry="2" fill="#FECACA" opacity="0.4"/>
-                </svg>
+              <div className="w-14 h-14 flex items-center justify-center mb-4">
+                <ScholarMascot size={56} animated={false} pose="celebrating" />
               </div>
               <h3 className="font-semibold text-stone-800 dark:text-stone-100 text-lg mb-2">Academic Vocabulary</h3>
               <p className="text-base text-stone-500 dark:text-stone-400 leading-relaxed">Enhance your writing with suggestions for more formal, academic-appropriate language and terminology.</p>

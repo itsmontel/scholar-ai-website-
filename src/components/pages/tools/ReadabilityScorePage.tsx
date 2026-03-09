@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import Header from '../../common/Header';
 import Footer from '../../common/Footer';
+import ScholarMascot from '../../common/ScholarMascot';
 
 interface ReadabilityScorePageProps {
   onNavigate: (page: string) => void;
@@ -190,26 +191,8 @@ const ReadabilityScorePage = ({ onNavigate, user, onLogout }: ReadabilityScorePa
       <section className="py-16 sm:py-20 bg-gradient-to-b from-purple-50/50 to-white">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center max-w-3xl mx-auto">
-            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-purple-100 mb-6 shadow-lg shadow-purple-100">
-              <svg viewBox="0 0 56 56" fill="none" className="w-16 h-16">
-                <circle cx="28" cy="28" r="28" fill="#F3E8FF"/>
-                <ellipse cx="28" cy="30" rx="14" ry="15" fill="#FCD9B6"/>
-                <path d="M14 24 Q12 12 22 10 Q28 8 34 10 Q44 12 42 24 Q40 18 34 14 Q28 10 22 14 Q16 18 14 24" fill="#8B6914"/>
-                <path d="M14 24 Q10 28 14 34" fill="#8B6914"/>
-                <path d="M42 24 Q46 28 42 34" fill="#8B6914"/>
-                <ellipse cx="21" cy="30" rx="6" ry="5" fill="none" stroke="#374151" strokeWidth="2"/>
-                <ellipse cx="35" cy="30" rx="6" ry="5" fill="none" stroke="#374151" strokeWidth="2"/>
-                <path d="M27 30 L29 30" stroke="#374151" strokeWidth="2"/>
-                <path d="M15 28 L12 26" stroke="#374151" strokeWidth="2"/>
-                <path d="M41 28 L44 26" stroke="#374151" strokeWidth="2"/>
-                <ellipse cx="21" cy="31" rx="2.5" ry="3" fill="#1F2937"/>
-                <ellipse cx="35" cy="31" rx="2.5" ry="3" fill="#1F2937"/>
-                <circle cx="22" cy="30" r="0.8" fill="white"/>
-                <circle cx="36" cy="30" r="0.8" fill="white"/>
-                <path d="M24 42 Q28 47 32 42" stroke="#1F2937" strokeWidth="2" fill="none" strokeLinecap="round"/>
-                <ellipse cx="17" cy="36" rx="3" ry="2" fill="#FECACA" opacity="0.4"/>
-                <ellipse cx="39" cy="36" rx="3" ry="2" fill="#FECACA" opacity="0.4"/>
-              </svg>
+            <div className="inline-flex items-center justify-center mb-6">
+              <ScholarMascot size={80} animated={false} pose="default" />
             </div>
             <span className="inline-flex items-center px-4 py-1.5 bg-purple-100 text-purple-700 rounded-full text-sm font-semibold mb-5">
               Free Tool

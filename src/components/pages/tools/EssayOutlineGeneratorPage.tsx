@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import Header from '../../common/Header';
 import Footer from '../../common/Footer';
+import ScholarMascot from '../../common/ScholarMascot';
 
 interface EssayOutlineGeneratorPageProps {
   onNavigate: (page: string) => void;
@@ -336,24 +337,8 @@ const EssayOutlineGeneratorPage = ({ onNavigate, user, onLogout }: EssayOutlineG
       <section className="py-16 sm:py-20 bg-gradient-to-b from-indigo-50/50 to-white">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center max-w-3xl mx-auto">
-            {/* Cute Character - South Asian man */}
-            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-indigo-100 mb-6 shadow-lg shadow-indigo-100">
-              <svg viewBox="0 0 56 56" fill="none" className="w-16 h-16">
-                <circle cx="28" cy="28" r="28" fill="#E0E7FF"/>
-                <ellipse cx="28" cy="30" rx="14" ry="15" fill="#C68642"/>
-                <path d="M14 24 Q12 12 22 10 Q28 8 34 10 Q44 12 42 24 Q40 18 34 14 Q28 10 22 14 Q16 18 14 24" fill="#1A1A1A"/>
-                <path d="M14 24 Q10 28 14 34" fill="#1A1A1A"/>
-                <path d="M42 24 Q46 28 42 34" fill="#1A1A1A"/>
-                <ellipse cx="22" cy="30" rx="3" ry="3.5" fill="#1F2937"/>
-                <ellipse cx="34" cy="30" rx="3" ry="3.5" fill="#1F2937"/>
-                <circle cx="23" cy="29" r="1" fill="white"/>
-                <circle cx="35" cy="29" r="1" fill="white"/>
-                <path d="M16 24 Q22 20 28 24" stroke="#1A1A1A" strokeWidth="2.5" fill="none" strokeLinecap="round"/>
-                <path d="M28 24 Q34 20 40 24" stroke="#1A1A1A" strokeWidth="2.5" fill="none" strokeLinecap="round"/>
-                <path d="M24 41 Q28 46 32 41" stroke="#1F2937" strokeWidth="2" fill="none" strokeLinecap="round"/>
-                <ellipse cx="17" cy="35" rx="3" ry="2" fill="#D4A07A" opacity="0.5"/>
-                <ellipse cx="39" cy="35" rx="3" ry="2" fill="#D4A07A" opacity="0.5"/>
-              </svg>
+            <div className="inline-flex items-center justify-center mb-6">
+              <ScholarMascot size={80} animated={false} pose="default" />
             </div>
             <span className="inline-flex items-center px-4 py-1.5 bg-indigo-100 text-indigo-700 rounded-full text-sm font-semibold mb-5">
               Free Tool

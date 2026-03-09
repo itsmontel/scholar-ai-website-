@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import Header from '../../common/Header';
 import Footer from '../../common/Footer';
+import ScholarMascot from '../../common/ScholarMascot';
 
 interface ThesisGeneratorPageProps {
   onNavigate: (page: string) => void;
@@ -115,23 +116,8 @@ const ThesisGeneratorPage = ({ onNavigate, user, onLogout }: ThesisGeneratorPage
       <section className="py-16 sm:py-20 bg-gradient-to-b from-teal-50/50 to-white">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center max-w-3xl mx-auto">
-            {/* Cute Character - Young person with modern hair */}
-            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-teal-100 mb-6 shadow-lg shadow-teal-100">
-              <svg viewBox="0 0 56 56" fill="none" className="w-16 h-16">
-                <circle cx="28" cy="28" r="28" fill="#CCFBF1"/>
-                {/* Hair - smooth dome on top, soft sides */}
-                <path d="M14 18 Q14 4 28 4 Q42 4 42 18 Q42 26 28 27 Q14 26 14 18" fill="#14B8A6"/>
-                <path d="M14 20 Q8 35 14 45" stroke="#14B8A6" strokeWidth="4" fill="none" strokeLinecap="round"/>
-                <path d="M42 20 Q48 35 42 45" stroke="#14B8A6" strokeWidth="4" fill="none" strokeLinecap="round"/>
-                <ellipse cx="28" cy="30" rx="14" ry="15" fill="#FCD9B6"/>
-                <ellipse cx="22" cy="32" rx="3" ry="3.5" fill="#1F2937"/>
-                <ellipse cx="34" cy="32" rx="3" ry="3.5" fill="#1F2937"/>
-                <circle cx="23" cy="31" r="1" fill="white"/>
-                <circle cx="35" cy="31" r="1" fill="white"/>
-                <path d="M24 42 Q28 48 32 42" stroke="#1F2937" strokeWidth="2" fill="none" strokeLinecap="round"/>
-                <ellipse cx="17" cy="37" rx="3" ry="2" fill="#FECACA" opacity="0.5"/>
-                <ellipse cx="39" cy="37" rx="3" ry="2" fill="#FECACA" opacity="0.5"/>
-              </svg>
+            <div className="inline-flex items-center justify-center mb-6">
+              <ScholarMascot size={80} animated={false} pose="default" />
             </div>
             <span className="inline-flex items-center px-4 py-1.5 bg-teal-100 text-teal-700 rounded-full text-sm font-semibold mb-5">
               Free Tool

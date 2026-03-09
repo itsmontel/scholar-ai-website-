@@ -8,7 +8,7 @@ interface ConverterPageProps {
   onLogout?: () => void;
 }
 
-type CategoryId = 'length' | 'weight' | 'temperature' | 'volume' | 'area' | 'time';
+type CategoryId = 'length' | 'weight' | 'temperature' | 'volume' | 'area' | 'time' | 'speed' | 'energy';
 
 interface Unit {
   id: string;
@@ -31,6 +31,8 @@ const categories: Record<CategoryId, { label: string; icon: string; units: Unit[
       { id: 'km', label: 'Kilometers (km)', toBase: (v) => v * 1000, fromBase: (v) => v / 1000 },
       { id: 'mi', label: 'Miles (mi)', toBase: (v) => v * 1609.34, fromBase: (v) => v / 1609.34 },
       { id: 'mm', label: 'Millimeters (mm)', toBase: (v) => v / 1000, fromBase: (v) => v * 1000 },
+      { id: 'nm', label: 'Nautical miles (nmi)', toBase: (v) => v * 1852, fromBase: (v) => v / 1852 },
+      { id: 'um', label: 'Micrometers (µm)', toBase: (v) => v / 1e6, fromBase: (v) => v * 1e6 },
     ],
   },
   weight: {
@@ -64,6 +66,8 @@ const categories: Record<CategoryId, { label: string; icon: string; units: Unit[
       { id: 'floz', label: 'Fluid Ounces (fl oz)', toBase: (v) => v * 0.0295735, fromBase: (v) => v / 0.0295735 },
       { id: 'cup', label: 'Cups (cup)', toBase: (v) => v * 0.236588, fromBase: (v) => v / 0.236588 },
       { id: 'tbsp', label: 'Tablespoons (tbsp)', toBase: (v) => v * 0.0147868, fromBase: (v) => v / 0.0147868 },
+      { id: 'tsp', label: 'Teaspoons (tsp)', toBase: (v) => v * 0.00492892, fromBase: (v) => v / 0.00492892 },
+      { id: 'qt', label: 'Quarts (qt)', toBase: (v) => v * 0.946353, fromBase: (v) => v / 0.946353 },
     ],
   },
   area: {
@@ -87,11 +91,36 @@ const categories: Record<CategoryId, { label: string; icon: string; units: Unit[
       { id: 'hr', label: 'Hours (hr)', toBase: (v) => v * 3600, fromBase: (v) => v / 3600 },
       { id: 'day', label: 'Days (day)', toBase: (v) => v * 86400, fromBase: (v) => v / 86400 },
       { id: 'wk', label: 'Weeks (wk)', toBase: (v) => v * 604800, fromBase: (v) => v / 604800 },
+      { id: 'yr', label: 'Years (yr)', toBase: (v) => v * 31557600, fromBase: (v) => v / 31557600 },
+    ],
+  },
+  speed: {
+    label: 'Speed',
+    icon: '🚀',
+    units: [
+      { id: 'ms', label: 'm/s', toBase: (v) => v, fromBase: (v) => v },
+      { id: 'kmh', label: 'km/h', toBase: (v) => v / 3.6, fromBase: (v) => v * 3.6 },
+      { id: 'mph', label: 'mph', toBase: (v) => v / 2.23694, fromBase: (v) => v * 2.23694 },
+      { id: 'knots', label: 'Knots', toBase: (v) => v / 1.94384, fromBase: (v) => v * 1.94384 },
+      { id: 'fts', label: 'ft/s', toBase: (v) => v / 3.28084, fromBase: (v) => v * 3.28084 },
+      { id: 'c', label: 'Speed of light (c)', toBase: (v) => v * 299792458, fromBase: (v) => v / 299792458 },
+    ],
+  },
+  energy: {
+    label: 'Energy',
+    icon: '⚡',
+    units: [
+      { id: 'J', label: 'Joules (J)', toBase: (v) => v, fromBase: (v) => v },
+      { id: 'cal', label: 'Calories (cal)', toBase: (v) => v * 4.184, fromBase: (v) => v / 4.184 },
+      { id: 'kcal', label: 'Kilocalories (kcal)', toBase: (v) => v * 4184, fromBase: (v) => v / 4184 },
+      { id: 'kWh', label: 'Kilowatt-hours (kWh)', toBase: (v) => v * 3.6e6, fromBase: (v) => v / 3.6e6 },
+      { id: 'BTU', label: 'BTU', toBase: (v) => v * 1055.06, fromBase: (v) => v / 1055.06 },
+      { id: 'eV', label: 'Electron-volts (eV)', toBase: (v) => v * 1.602e-19, fromBase: (v) => v / 1.602e-19 },
     ],
   },
 };
 
-const categoryIds: CategoryId[] = ['length', 'weight', 'temperature', 'volume', 'area', 'time'];
+const categoryIds: CategoryId[] = ['length', 'weight', 'temperature', 'volume', 'area', 'time', 'speed', 'energy'];
 
 function formatResult(val: number): string {
   if (val === 0) return '0';
@@ -115,7 +144,7 @@ const ConverterPage = ({ onNavigate, user, onLogout }: ConverterPageProps) => {
     document.title = 'Free Unit Converter – Length, Weight, Temperature & More | WriteScholar';
     const meta = document.querySelector('meta[name="description"]');
     if (meta) {
-      meta.setAttribute('content', 'Free online unit converter for students. Convert meters to feet, inches to cm, kg to lbs, Celsius to Fahrenheit, and more. Length, weight, temperature, volume, area, time. No signup required.');
+      meta.setAttribute('content', 'Free online unit converter for students. Length, weight, temperature, volume, area, time, speed, energy. Meters to feet, m/s to mph & more. No signup required.');
     }
   }, []);
 
@@ -168,7 +197,7 @@ const ConverterPage = ({ onNavigate, user, onLogout }: ConverterPageProps) => {
               Unit Converter
             </h1>
             <p className="text-stone-500 dark:text-stone-400">
-              Convert length, weight, temperature, volume, area & time. Meters to feet, inches to cm, kg to lbs & more.
+              Convert length, weight, temperature, volume, area, time, speed & energy. Meters to feet, m/s to mph & more.
             </p>
           </div>
 

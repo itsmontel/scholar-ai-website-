@@ -114,6 +114,31 @@ const BlogPage = ({ onNavigate, user, onLogout }: BlogPageProps) => {
       );
     }
 
+    if (post.slug.includes('study-effectively') || post.slug.includes('study-tools')) {
+      return (
+        <svg viewBox="0 0 200 140" fill="none" className="w-full h-full">
+          <rect width="200" height="140" fill="#EEF2FF" />
+          <circle cx="100" cy="70" r="28" fill="white" stroke="#6366F1" strokeWidth="2" />
+          <path d="M88 70 Q92 58 100 62 Q108 58 112 70 Q115 82 100 86 Q85 82 88 70" fill="#6366F1" />
+          <circle cx="95" cy="68" r="2" fill="white" />
+          <circle cx="105" cy="68" r="2" fill="white" />
+          <rect x="45" y="45" width="35" height="25" rx="3" fill="white" stroke="#0EA5E9" strokeWidth="2" />
+          <text x="62" y="62" textAnchor="middle" fontSize="12" fill="#0EA5E9" fontWeight="bold">?</text>
+          <rect x="120" y="42" width="35" height="28" rx="3" fill="white" stroke="#8B5CF6" strokeWidth="2" />
+          <circle cx="132" cy="52" r="4" fill="#DDD6FE" />
+          <line x1="140" y1="52" x2="148" y2="52" stroke="#E5E7EB" strokeWidth="2" />
+          <circle cx="132" cy="64" r="4" fill="#DDD6FE" />
+          <line x1="140" y1="64" x2="148" y2="64" stroke="#E5E7EB" strokeWidth="2" />
+          <rect x="82" y="105" width="36" height="22" rx="2" fill="white" stroke="#F59E0B" strokeWidth="2" />
+          <line x1="92" y1="105" x2="92" y2="127" stroke="#FCD34D" strokeWidth="1" />
+          <line x1="108" y1="105" x2="108" y2="127" stroke="#FCD34D" strokeWidth="1" />
+          <line x1="82" y1="116" x2="118" y2="116" stroke="#FCD34D" strokeWidth="1" />
+          <circle cx="165" cy="45" r="5" fill="#FCD34D" />
+          <circle cx="50" cy="100" r="4" fill="#10B981" />
+        </svg>
+      );
+    }
+
     if (post.slug.includes('tool') || post.slug.includes('ai') || post.slug.includes('assistant')) {
       return (
         <svg viewBox="0 0 200 140" fill="none" className="w-full h-full">

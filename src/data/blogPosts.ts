@@ -14,12 +14,20 @@ export interface BlogPostMeta {
 
 export const blogPostList: BlogPostMeta[] = [
   {
+    slug: 'how-to-study-effectively-complete-guide',
+    title: 'How to Study Effectively: The Complete Guide for College Students',
+    description: 'Stop cramming and start learning. Evidence-based study strategies, from active recall to the Pomodoro technique, that actually work for college students.',
+    date: '2026-03-08',
+    author: 'WriteScholar Team',
+    readTime: '7 min read'
+  },
+  {
     slug: 'students-who-get-as-dont-work-harder',
     title: "The Students Who Get A's Don't Work Harder—Here's Their Secret",
     description: "It's not intelligence, luck, or staying up later. The students who consistently get top grades have figured out one thing: leverage. Here's the method behind their results.",
     date: '2026-03-04',
     author: 'WriteScholar Team',
-    readTime: '8 min read'
+    readTime: '6 min read'
   },
   {
     slug: 'ai-study-tools-flashcards-quizzes-crosswords',
@@ -27,7 +35,7 @@ export const blogPostList: BlogPostMeta[] = [
     description: 'Discover how AI-powered study tools like flashcards, quizzes, and crosswords can boost retention and make studying more effective. Learn why WriteScholar is the best choice for students.',
     date: '2026-03-03',
     author: 'WriteScholar Team',
-    readTime: '11 min read'
+    readTime: '10 min read'
   },
   {
     slug: 'free-writing-tools-every-student-needs',
@@ -35,7 +43,7 @@ export const blogPostList: BlogPostMeta[] = [
     description: 'Discover the best free writing tools for students including word counters, grammar checkers, citation generators, and paraphrasing tools to improve your academic writing.',
     date: '2026-03-01',
     author: 'WriteScholar Team',
-    readTime: '10 min read'
+    readTime: '9 min read'
   },
   {
     slug: 'how-to-write-a-thesis-statement',
@@ -43,7 +51,7 @@ export const blogPostList: BlogPostMeta[] = [
     description: 'Learn how to write a clear, arguable thesis statement for any essay or research paper. Includes examples for argumentative, analytical, and expository writing.',
     date: '2026-02-28',
     author: 'WriteScholar Team',
-    readTime: '8 min read'
+    readTime: '7 min read'
   },
   {
     slug: 'how-to-write-apa-research-paper',
@@ -51,7 +59,7 @@ export const blogPostList: BlogPostMeta[] = [
     description: 'Step-by-step guide to formatting and writing an APA research paper, from title page to references. Get the structure right and avoid common mistakes.',
     date: '2026-02-01',
     author: 'WriteScholar Team',
-    readTime: '9 min read'
+    readTime: '6 min read'
   },
   {
     slug: 'citation-checker-academic-writing',
@@ -59,7 +67,7 @@ export const blogPostList: BlogPostMeta[] = [
     description: 'A citation checker saves time and improves grades. Learn how AI citation tools validate APA, MLA, Chicago, and Harvard references in seconds.',
     date: '2026-01-28',
     author: 'WriteScholar Team',
-    readTime: '8 min read'
+    readTime: '6 min read'
   },
   {
     slug: 'best-academic-writing-tools-for-students',
@@ -67,7 +75,7 @@ export const blogPostList: BlogPostMeta[] = [
     description: 'Compare grammar checkers, citation tools, and AI writing assistants for essays and research papers. Find the right academic writing tool for you.',
     date: '2026-01-25',
     author: 'WriteScholar Team',
-    readTime: '9 min read'
+    readTime: '6 min read'
   },
   {
     slug: 'grammar-checker-academic-writing',
@@ -75,7 +83,7 @@ export const blogPostList: BlogPostMeta[] = [
     description: 'Not all grammar checkers are built for academic writing. Learn what makes a grammar checker suitable for essays, theses, and research papers.',
     date: '2026-01-20',
     author: 'WriteScholar Team',
-    readTime: '8 min read'
+    readTime: '5 min read'
   },
   {
     slug: 'mla-vs-apa-vs-chicago-citation-style',
@@ -83,7 +91,7 @@ export const blogPostList: BlogPostMeta[] = [
     description: 'Quick comparison of MLA, APA, and Chicago citation styles. Choose the right format for your discipline and avoid formatting errors.',
     date: '2026-01-15',
     author: 'WriteScholar Team',
-    readTime: '8 min read'
+    readTime: '5 min read'
   },
   {
     slug: 'ai-writing-assistant-for-students',
@@ -91,7 +99,7 @@ export const blogPostList: BlogPostMeta[] = [
     description: 'How AI writing assistants help with structure, clarity, and citations—and how to use them without compromising academic integrity.',
     date: '2026-01-10',
     author: 'WriteScholar Team',
-    readTime: '9 min read'
+    readTime: '6 min read'
   }
 ];
 

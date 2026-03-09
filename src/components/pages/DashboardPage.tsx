@@ -204,26 +204,39 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
 
   // Badge notifications now shown globally via BadgeNotificationToast (event from achievements.ts)
 
-  // Ebook banner: show for 24 hours after first dashboard visit, or until user dismisses
-  const EBOOK_BANNER_KEY = 'writescholar_ebook_banner_first_seen';
-  const EBOOK_BANNER_DISMISSED_KEY = 'writescholar_ebook_banner_dismissed';
+  // Ebook banner: show for 24 hours after first dashboard visit, or until user dismisses (per-user, never show again after X)
   const EBOOK_BANNER_MS = 24 * 60 * 60 * 1000;
   const [showEbookBanner, setShowEbookBanner] = useState(true);
-  const [ebookBannerDismissed, setEbookBannerDismissed] = useState(() => localStorage.getItem(EBOOK_BANNER_DISMISSED_KEY) === '1');
+  const [ebookBannerDismissed, setEbookBannerDismissed] = useState(() => {
+    const uid = user?.id || 'anon';
+    return localStorage.getItem(`writescholar_ebook_banner_dismissed_${uid}`) === '1';
+  });
   useEffect(() => {
-    const raw = localStorage.getItem(EBOOK_BANNER_KEY);
+    const uid = user?.id || 'anon';
+    const firstSeenKey = `writescholar_ebook_banner_first_seen_${uid}`;
+    const dismissedKey = `writescholar_ebook_banner_dismissed_${uid}`;
+    const dismissed = localStorage.getItem(dismissedKey) === '1';
+    setEbookBannerDismissed(dismissed);
+    if (dismissed) {
+      setShowEbookBanner(false);
+      return;
+    }
+    const raw = localStorage.getItem(firstSeenKey);
     const firstSeen = raw ? parseInt(raw, 10) : null;
     const now = Date.now();
     if (firstSeen == null) {
-      localStorage.setItem(EBOOK_BANNER_KEY, String(now));
+      localStorage.setItem(firstSeenKey, String(now));
       setShowEbookBanner(true);
     } else {
       setShowEbookBanner(now - firstSeen < EBOOK_BANNER_MS);
     }
-  }, []);
+  }, [user?.id]);
   const dismissEbookBanner = () => {
-    localStorage.setItem(EBOOK_BANNER_DISMISSED_KEY, '1');
+    const uid = user?.id || 'anon';
+    const dismissedKey = `writescholar_ebook_banner_dismissed_${uid}`;
+    localStorage.setItem(dismissedKey, '1');
     setEbookBannerDismissed(true);
+    setShowEbookBanner(false);
   };
   
   const [quizUsage, setQuizUsage] = useState({

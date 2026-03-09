@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Header from '../../common/Header';
 import Footer from '../../common/Footer';
+import ScholarMascot from '../../common/ScholarMascot';
 
 interface PomodoroTimerPageProps {
   onNavigate: (page: string) => void;
@@ -184,23 +185,8 @@ const PomodoroTimerPage = ({ onNavigate, user, onLogout }: PomodoroTimerPageProp
       <section className="py-16 sm:py-20 bg-gradient-to-b from-rose-50/50 to-white">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center max-w-3xl mx-auto">
-            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-rose-100 mb-6 shadow-lg shadow-rose-100">
-              <svg viewBox="0 0 56 56" fill="none" className="w-16 h-16">
-                <circle cx="28" cy="28" r="28" fill="#FFE4E6"/>
-                <ellipse cx="28" cy="30" rx="14" ry="15" fill="#FCD9B6"/>
-                <path d="M14 26 Q12 14 24 10 Q28 8 32 10 Q44 14 42 26 Q40 18 34 14 Q28 10 22 14 Q16 18 14 26" fill="#F59E0B"/>
-                <path d="M14 26 Q10 32 14 38" fill="#F59E0B"/>
-                <path d="M42 26 Q46 32 42 38" fill="#F59E0B"/>
-                <ellipse cx="22" cy="30" rx="3" ry="3.5" fill="#1F2937"/>
-                <ellipse cx="34" cy="30" rx="3" ry="3.5" fill="#1F2937"/>
-                <circle cx="23" cy="29" r="1" fill="white"/>
-                <circle cx="35" cy="29" r="1" fill="white"/>
-                <path d="M24 40 Q28 44 32 40" stroke="#1F2937" strokeWidth="2" fill="none" strokeLinecap="round"/>
-                <ellipse cx="18" cy="35" rx="3" ry="2" fill="#FECACA" opacity="0.4"/>
-                <ellipse cx="38" cy="35" rx="3" ry="2" fill="#FECACA" opacity="0.4"/>
-                <circle cx="44" cy="12" r="10" fill="#EF4444" stroke="#FFF" strokeWidth="2"/>
-                <path d="M44 8 L44 13 L48 13" stroke="white" strokeWidth="2" strokeLinecap="round"/>
-              </svg>
+            <div className="inline-flex items-center justify-center mb-6">
+              <ScholarMascot size={80} animated={false} pose="default" />
             </div>
             <span className="inline-flex items-center px-4 py-1.5 bg-rose-100 text-rose-700 rounded-full text-sm font-semibold mb-5">
               Free Tool

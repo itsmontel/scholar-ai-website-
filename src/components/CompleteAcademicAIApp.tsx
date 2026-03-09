@@ -61,6 +61,7 @@ import InteractiveLessonPage from './pages/tools/InteractiveLessonPage';
 // Import common components
 import ErrorBoundary from './common/ErrorBoundary';
 import BadgeNotificationToast from './common/BadgeNotificationToast';
+import StudyTimerWidget from './common/StudyTimerWidget';
 import MobileGoogleSignInPopup from './common/MobileGoogleSignInPopup';
 
 // Type definitions
@@ -192,7 +193,7 @@ const AcademicAIApp = () => {
     'gpa-calculator': { title: 'Free GPA Calculator – Calculate Your Grade Point Average | WriteScholar', description: 'Free GPA calculator for college and high school students. Calculate semester or cumulative GPA instantly. Add courses, credits, and grades. No signup required.' },
     'pomodoro-timer': { title: 'Free Pomodoro Timer – Study Timer & Focus Tool | WriteScholar', description: 'Free Pomodoro timer for focused studying. Boost productivity with timed work sessions and breaks. Customizable focus and break intervals. No signup required.' },
     'calculator': { title: 'Free Scientific Calculator – Trig, Log, Powers | WriteScholar', description: 'Free online scientific calculator for students. Trigonometry (sin, cos, tan), logarithms, square root, powers, and more. Works in degrees or radians. No signup required.' },
-    'converter': { title: 'Free Unit Converter – Length, Weight, Temperature & More | WriteScholar', description: 'Free online unit converter for students. Convert meters to feet, inches to cm, kg to lbs, Celsius to Fahrenheit, and more. Length, weight, temperature, volume, area, time. No signup required.' },
+    'converter': { title: 'Free Unit Converter – Length, Weight, Temperature & More | WriteScholar', description: 'Free online unit converter for students. Length, weight, temperature, volume, area, time, speed, energy. Meters to feet, m/s to mph & more. No signup required.' },
     'crater-blast': { title: 'Crater Blast – AI Quiz Shooter Game | WriteScholar', description: 'Blast the correct falling crater before it lands! AI generates quiz questions as craters. Aim your cannon, build streaks, and beat your high score.' },
     'more-tools': { title: 'More Free Tools – Word Counter, Calculator, Converter | WriteScholar', description: 'Free student tools: word counter, citation generator, scientific calculator, unit converter, essay outline, thesis generator, grammar checker, readability score, paraphrasing tips, text case converter, GPA calculator, Pomodoro timer.' },
     'interactive-lesson': { title: 'Interactive Lesson Generator – Turn Text into Fun Lessons | WriteScholar', description: 'Transform boring study material into engaging, interactive lessons. Break down complex topics into digestible slides with key concepts, examples, and fun facts. Learn before you quiz!' },
@@ -916,6 +917,8 @@ const AcademicAIApp = () => {
       {renderCurrentPage()}
       {/* Global achievement popup - shows on any page when badge is unlocked */}
       {user && <BadgeNotificationToast onNavigate={navigateTo} />}
+      {/* Global study timer - floating in corner when logged in */}
+      {user && <StudyTimerWidget currentPage={currentPage} />}
       {/* Mobile-only bottom Google sign-in popup (Quizlet-style) */}
       {!user && (
         <MobileGoogleSignInPopup
