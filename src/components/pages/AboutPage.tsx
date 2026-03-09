@@ -1,5 +1,6 @@
 import Header from '../common/Header';
 import Footer from '../common/Footer';
+import ScholarMascot from '../common/ScholarMascot';
 
 interface AboutPageProps {
   onNavigate: (page: string) => void;
@@ -22,14 +23,10 @@ const AboutPage = ({ onNavigate, user, onLogout }: AboutPageProps) => {
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-center lg:gap-12 xl:gap-16">
             {/* Mascot - top on mobile, left on desktop */}
             <div className="flex lg:hidden flex-shrink-0 justify-center mb-2 order-1">
-              <div className="w-20 h-20 animate-float">
-                <img src="/mascot.png" alt="WriteScholar mascot" className="w-full h-full object-contain drop-shadow-xl" loading="lazy" width="200" height="200" />
-              </div>
+              <ScholarMascot size={80} animated={true} pose="default" />
             </div>
             <div className="hidden lg:flex flex-shrink-0 items-center justify-center order-1">
-              <div className="w-32 h-32 xl:w-40 xl:h-40 animate-float">
-                <img src="/mascot.png" alt="WriteScholar mascot" className="w-full h-full object-contain drop-shadow-xl" loading="lazy" width="200" height="200" />
-              </div>
+              <ScholarMascot size={160} animated={true} pose="default" />
             </div>
             <div className="flex-1 text-center lg:text-left max-w-3xl mx-auto lg:mx-0 order-2">
               <span className="inline-flex items-center px-3 py-1 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-400 rounded-full text-sm font-semibold mb-6">
@@ -173,7 +170,7 @@ const AboutPage = ({ onNavigate, user, onLogout }: AboutPageProps) => {
         </div>
       </section>
 
-      {/* Values Section with Cute Characters */}
+      {/* Values Section with Mascot */}
       <section className="py-16 sm:py-20 bg-white dark:bg-stone-900/50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-12">
@@ -184,107 +181,33 @@ const AboutPage = ({ onNavigate, user, onLogout }: AboutPageProps) => {
           </div>
           
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {/* Quality - Professional woman with bun */}
             <div className="bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-2xl p-6 text-center hover:shadow-lg hover:border-indigo-300 dark:hover:border-indigo-600 transition-all">
-              <div className="w-16 h-16 rounded-full bg-blue-50 flex items-center justify-center mb-4 mx-auto overflow-hidden">
-                <svg viewBox="0 0 64 64" fill="none" className="w-16 h-16">
-                  <circle cx="32" cy="32" r="32" fill="#DBEAFE"/>
-                  <ellipse cx="32" cy="36" rx="14" ry="15" fill="#E8B796"/>
-                  {/* Hair with bun */}
-                  <path d="M18 30 Q16 18 26 14 Q32 10 38 14 Q48 18 46 30 Q44 22 38 18 Q32 14 26 18 Q20 22 18 30" fill="#5D3A1A"/>
-                  <ellipse cx="32" cy="10" rx="8" ry="7" fill="#5D3A1A"/>
-                  <path d="M18 30 Q14 36 18 42" fill="#5D3A1A"/>
-                  <path d="M46 30 Q50 36 46 42" fill="#5D3A1A"/>
-                  {/* Eyes */}
-                  <ellipse cx="26" cy="35" rx="2.5" ry="3" fill="#1F2937"/>
-                  <ellipse cx="38" cy="35" rx="2.5" ry="3" fill="#1F2937"/>
-                  <circle cx="27" cy="34" r="0.8" fill="white"/>
-                  <circle cx="39" cy="34" r="0.8" fill="white"/>
-                  {/* Confident smile */}
-                  <path d="M27 46 Q32 51 37 46" stroke="#1F2937" strokeWidth="2" fill="none" strokeLinecap="round"/>
-                  <ellipse cx="21" cy="40" rx="3" ry="2" fill="#FECACA" opacity="0.4"/>
-                  <ellipse cx="43" cy="40" rx="3" ry="2" fill="#FECACA" opacity="0.4"/>
-                </svg>
+              <div className="flex justify-center mb-4">
+                <ScholarMascot size={64} animated={false} pose="analyzing" />
               </div>
               <h3 className="font-semibold text-stone-800 dark:text-stone-100 mb-2">Quality</h3>
               <p className="text-stone-500 dark:text-stone-400 text-sm">Highest standards in AI analysis and feedback</p>
             </div>
 
-            {/* Privacy - Man with beard */}
             <div className="bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-2xl p-6 text-center hover:shadow-lg hover:border-indigo-300 dark:hover:border-indigo-600 transition-all">
-              <div className="w-16 h-16 rounded-full bg-green-50 flex items-center justify-center mb-4 mx-auto overflow-hidden">
-                <svg viewBox="0 0 64 64" fill="none" className="w-16 h-16">
-                  <circle cx="32" cy="32" r="32" fill="#D1FAE5"/>
-                  <ellipse cx="32" cy="36" rx="14" ry="15" fill="#D4A574"/>
-                  {/* Hair */}
-                  <path d="M18 28 Q16 14 28 10 Q32 8 36 10 Q48 14 46 28 Q44 20 38 16 Q32 12 26 16 Q20 20 18 28" fill="#3D2314"/>
-                  <path d="M18 28 Q14 34 18 40" fill="#3D2314"/>
-                  <path d="M46 28 Q50 34 46 40" fill="#3D2314"/>
-                  {/* Beard */}
-                  <path d="M20 42 Q22 54 32 56 Q42 54 44 42" fill="#3D2314"/>
-                  {/* Eyes */}
-                  <ellipse cx="26" cy="34" rx="2.5" ry="3" fill="#1F2937"/>
-                  <ellipse cx="38" cy="34" rx="2.5" ry="3" fill="#1F2937"/>
-                  <circle cx="27" cy="33" r="0.8" fill="white"/>
-                  <circle cx="39" cy="33" r="0.8" fill="white"/>
-                  {/* Slight smile in beard */}
-                  <path d="M28 46 Q32 49 36 46" stroke="#2D1810" strokeWidth="2" fill="none" strokeLinecap="round"/>
-                  <ellipse cx="21" cy="38" rx="3" ry="2" fill="#E8A090" opacity="0.4"/>
-                  <ellipse cx="43" cy="38" rx="3" ry="2" fill="#E8A090" opacity="0.4"/>
-                </svg>
+              <div className="flex justify-center mb-4">
+                <ScholarMascot size={64} animated={false} pose="thinking" />
               </div>
               <h3 className="font-semibold text-stone-800 dark:text-stone-100 mb-2">Privacy</h3>
               <p className="text-stone-500 dark:text-stone-400 text-sm">Enterprise-grade security for your documents</p>
             </div>
 
-            {/* Innovation - Young person with modern hair */}
             <div className="bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-2xl p-6 text-center hover:shadow-lg hover:border-indigo-300 dark:hover:border-indigo-600 transition-all">
-              <div className="w-16 h-16 rounded-full bg-purple-50 flex items-center justify-center mb-4 mx-auto overflow-hidden">
-                <svg viewBox="0 0 64 64" fill="none" className="w-16 h-16">
-                  <circle cx="32" cy="32" r="32" fill="#F3E8FF"/>
-                  <ellipse cx="32" cy="36" rx="14" ry="15" fill="#FCD9B6"/>
-                  {/* Modern swooped hair */}
-                  <path d="M16 32 Q14 16 28 12 Q40 8 48 16 Q52 22 48 32 Q46 24 40 18 Q32 12 24 18 Q18 24 16 32" fill="#6366F1"/>
-                  <path d="M16 32 Q12 38 16 44" fill="#6366F1"/>
-                  <path d="M48 26 Q54 20 50 14" fill="#6366F1"/>
-                  {/* Eyes - excited */}
-                  <ellipse cx="26" cy="35" rx="3" ry="3.5" fill="#1F2937"/>
-                  <ellipse cx="38" cy="35" rx="3" ry="3.5" fill="#1F2937"/>
-                  <circle cx="27" cy="34" r="1" fill="white"/>
-                  <circle cx="39" cy="34" r="1" fill="white"/>
-                  {/* Big smile */}
-                  <path d="M26 46 Q32 52 38 46" stroke="#1F2937" strokeWidth="2" fill="none" strokeLinecap="round"/>
-                  <ellipse cx="20" cy="40" rx="3" ry="2" fill="#FECACA" opacity="0.5"/>
-                  <ellipse cx="44" cy="40" rx="3" ry="2" fill="#FECACA" opacity="0.5"/>
-                </svg>
+              <div className="flex justify-center mb-4">
+                <ScholarMascot size={64} animated={false} pose="pointing" />
               </div>
               <h3 className="font-semibold text-stone-800 dark:text-stone-100 mb-2">Innovation</h3>
               <p className="text-stone-500 dark:text-stone-400 text-sm">Continuous improvement of our technology</p>
             </div>
 
-            {/* Accessibility - Friendly person with headphones */}
             <div className="bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-2xl p-6 text-center hover:shadow-lg hover:border-indigo-300 dark:hover:border-indigo-600 transition-all">
-              <div className="w-16 h-16 rounded-full bg-orange-50 flex items-center justify-center mb-4 mx-auto overflow-hidden">
-                <svg viewBox="0 0 64 64" fill="none" className="w-16 h-16">
-                  <circle cx="32" cy="32" r="32" fill="#FFEDD5"/>
-                  <ellipse cx="32" cy="36" rx="14" ry="15" fill="#8B5A2B"/>
-                  {/* Hair - short curly */}
-                  <path d="M18 30 Q16 18 26 14 Q32 10 38 14 Q48 18 46 30 Q44 22 38 18 Q32 14 26 18 Q20 22 18 30" fill="#1F2937"/>
-                  <ellipse cx="20" cy="28" rx="4" ry="5" fill="#1F2937"/>
-                  <ellipse cx="44" cy="28" rx="4" ry="5" fill="#1F2937"/>
-                  <ellipse cx="26" cy="16" rx="3" ry="4" fill="#1F2937"/>
-                  <ellipse cx="32" cy="12" rx="4" ry="3" fill="#1F2937"/>
-                  <ellipse cx="38" cy="16" rx="3" ry="4" fill="#1F2937"/>
-                  {/* Eyes */}
-                  <ellipse cx="26" cy="35" rx="2.5" ry="3" fill="#1F2937"/>
-                  <ellipse cx="38" cy="35" rx="2.5" ry="3" fill="#1F2937"/>
-                  <circle cx="27" cy="34" r="0.8" fill="white"/>
-                  <circle cx="39" cy="34" r="0.8" fill="white"/>
-                  {/* Warm smile */}
-                  <path d="M26 46 Q32 52 38 46" stroke="#1F2937" strokeWidth="2" fill="none" strokeLinecap="round"/>
-                  <ellipse cx="20" cy="40" rx="3" ry="2" fill="#C9958A" opacity="0.4"/>
-                  <ellipse cx="44" cy="40" rx="3" ry="2" fill="#C9958A" opacity="0.4"/>
-                </svg>
+              <div className="flex justify-center mb-4">
+                <ScholarMascot size={64} animated={false} pose="waving" />
               </div>
               <h3 className="font-semibold text-stone-800 dark:text-stone-100 mb-2">Accessibility</h3>
               <p className="text-stone-500 dark:text-stone-400 text-sm">Tools for the global academic community</p>
