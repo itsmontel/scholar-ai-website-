@@ -222,7 +222,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
               className="flex items-center gap-2 sm:gap-2.5 group min-w-0 shrink lg:-ml-4"
             >
               <div className="relative w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center group-hover:scale-105 transition-transform duration-300 shrink-0 overflow-hidden">
-                <img src="/mascot.png" alt="WriteScholar mascot" className="w-full h-full object-contain drop-shadow-lg" />
+                <img src="/mascot.png" alt="WriteScholar mascot" className="w-full h-full object-contain drop-shadow-lg" fetchPriority="high" width="40" height="40" />
               </div>
               <span className="text-base sm:text-xl font-extrabold tracking-tight text-stone-800 dark:text-stone-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors duration-300 truncate max-w-[110px] sm:max-w-none">
                 WriteScholar
@@ -396,7 +396,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
             className="flex items-center gap-2.5 group"
           >
             <div className="relative w-12 h-12 flex items-center justify-center group-hover:scale-105 transition-transform duration-300 overflow-hidden">
-              <img src="/mascot.png" alt="WriteScholar mascot" className="w-full h-full object-contain drop-shadow-lg" />
+              <img src="/mascot.png" alt="WriteScholar mascot" className="w-full h-full object-contain drop-shadow-lg" fetchPriority="high" width="40" height="40" />
             </div>
             <span className="text-base sm:text-xl font-extrabold tracking-tight text-stone-800 dark:text-stone-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors duration-300 truncate max-w-[140px] sm:max-w-none">
               WriteScholar

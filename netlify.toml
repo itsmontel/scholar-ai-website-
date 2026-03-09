@@ -2,6 +2,14 @@
   command = "npm run build"
   publish = "dist"
 
+# Canonical domain: redirect www to non-www so writescholar.com and www.writescholar.com
+# don't exist as separate pages (301 permanent redirect)
+[[redirects]]
+  from = "https://www.writescholar.com/*"
+  to = "https://writescholar.com/:splat"
+  status = 301
+  force = true
+
 # SPA fallback - serve index.html for all routes, let React handle routing
 [[redirects]]
   from = "/*"

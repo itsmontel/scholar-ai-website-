@@ -1,62 +1,63 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { logger } from '../utils/logger';
 import { persistOnboardingToServer } from '../utils/onboarding';
 
-// Import all page components
+// Eager: landing, login, signup (critical for first paint)
 import LandingPage from './pages/LandingPage';
 import SignUpPage from './pages/SignUpPage';
 import LoginPage from './pages/LoginPage';
-import EmailVerificationPage from './pages/EmailVerificationPage';
-import OnboardingPage from './pages/OnboardingPage';
-import AuthCallbackPage from './pages/AuthCallbackPage';
-import DashboardPage from './pages/DashboardPage';
-import AnalysisPage from './pages/AnalysisPage';
-import AnalysisHistoryPage from './pages/AnalysisHistoryPage';
-import CitationResultsPage from './pages/CitationResultsPage';
-import CitationHistoryPage from './pages/CitationHistoryPage';
-import QuizHistoryPage from './pages/QuizHistoryPage';
-import FriendsPage from './pages/FriendsPage';
-import UploadPage from './pages/UploadPage';
-import SettingsPage from './pages/SettingsPage';
-import AccountPage from './pages/AccountPage';
-import PricingPage from './pages/PricingPage';
-import FeaturesPage from './pages/FeaturesPage';
-import ProfilePage from './pages/ProfilePage';
-import LibraryPage from './pages/LibraryPage';
-import FAQPage from './pages/HelpCenterPage';
-import AboutPage from './pages/AboutPage';
-import WhyStudentsChoosePage from './pages/WhyStudentsChoosePage';
-import StudyToolsComparisonPage from './pages/StudyToolsComparisonPage';
-import ContactPage from './pages/ContactPage';
-import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
-import TermsOfServicePage from './pages/TermsOfServicePage';
-import BillingPage from './pages/BillingPage';
-import ResetPasswordPage from './pages/ResetPasswordPage';
-import UnsubscribePage from './pages/UnsubscribePage';
-import BlogPage from './pages/BlogPage';
-import BlogPostPage from './pages/BlogPostPage';
-import MoreToolsPage from './pages/MoreToolsPage';
-import BadgesPage from './pages/BadgesPage';
-import ShareFriendsPage from './pages/ShareFriendsPage';
 
-// Import free tool pages
-import WordCounterPage from './pages/tools/WordCounterPage';
-import CitationGeneratorToolPage from './pages/tools/CitationGeneratorToolPage';
-import ReadabilityScorePage from './pages/tools/ReadabilityScorePage';
-import ParaphrasingTipsPage from './pages/tools/ParaphrasingTipsPage';
-import EssayOutlineGeneratorPage from './pages/tools/EssayOutlineGeneratorPage';
-import TextCaseConverterPage from './pages/tools/TextCaseConverterPage';
-import ThesisGeneratorPage from './pages/tools/ThesisGeneratorPage';
-import GrammarCheckerPage from './pages/tools/GrammarCheckerPage';
-import HumanizerPage from './pages/tools/HumanizerPage';
-import SummarizerPage from './pages/tools/SummarizerPage';
-import QuizGeneratorPage from './pages/tools/QuizGeneratorPage';
-import GPACalculatorPage from './pages/tools/GPACalculatorPage';
-import PomodoroTimerPage from './pages/tools/PomodoroTimerPage';
-import CalculatorPage from './pages/tools/CalculatorPage';
-import ConverterPage from './pages/tools/ConverterPage';
-import LightningReflexQuizPage from './pages/tools/LightningReflexQuizPage';
-import InteractiveLessonPage from './pages/tools/InteractiveLessonPage';
+// Lazy: all other pages (reduces initial bundle ~400KB+)
+const EmailVerificationPage = lazy(() => import('./pages/EmailVerificationPage'));
+const OnboardingPage = lazy(() => import('./pages/OnboardingPage'));
+const AuthCallbackPage = lazy(() => import('./pages/AuthCallbackPage'));
+const DashboardPage = lazy(() => import('./pages/DashboardPage'));
+const AnalysisPage = lazy(() => import('./pages/AnalysisPage'));
+const AnalysisHistoryPage = lazy(() => import('./pages/AnalysisHistoryPage'));
+const CitationResultsPage = lazy(() => import('./pages/CitationResultsPage'));
+const CitationHistoryPage = lazy(() => import('./pages/CitationHistoryPage'));
+const QuizHistoryPage = lazy(() => import('./pages/QuizHistoryPage'));
+const FriendsPage = lazy(() => import('./pages/FriendsPage'));
+const UploadPage = lazy(() => import('./pages/UploadPage'));
+const SettingsPage = lazy(() => import('./pages/SettingsPage'));
+const AccountPage = lazy(() => import('./pages/AccountPage'));
+const PricingPage = lazy(() => import('./pages/PricingPage'));
+const FeaturesPage = lazy(() => import('./pages/FeaturesPage'));
+const ProfilePage = lazy(() => import('./pages/ProfilePage'));
+const LibraryPage = lazy(() => import('./pages/LibraryPage'));
+const FAQPage = lazy(() => import('./pages/HelpCenterPage'));
+const AboutPage = lazy(() => import('./pages/AboutPage'));
+const WhyStudentsChoosePage = lazy(() => import('./pages/WhyStudentsChoosePage'));
+const StudyToolsComparisonPage = lazy(() => import('./pages/StudyToolsComparisonPage'));
+const ContactPage = lazy(() => import('./pages/ContactPage'));
+const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage'));
+const TermsOfServicePage = lazy(() => import('./pages/TermsOfServicePage'));
+const BillingPage = lazy(() => import('./pages/BillingPage'));
+const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage'));
+const UnsubscribePage = lazy(() => import('./pages/UnsubscribePage'));
+const BlogPage = lazy(() => import('./pages/BlogPage'));
+const BlogPostPage = lazy(() => import('./pages/BlogPostPage'));
+const MoreToolsPage = lazy(() => import('./pages/MoreToolsPage'));
+const BadgesPage = lazy(() => import('./pages/BadgesPage'));
+const ShareFriendsPage = lazy(() => import('./pages/ShareFriendsPage'));
+
+const WordCounterPage = lazy(() => import('./pages/tools/WordCounterPage'));
+const CitationGeneratorToolPage = lazy(() => import('./pages/tools/CitationGeneratorToolPage'));
+const ReadabilityScorePage = lazy(() => import('./pages/tools/ReadabilityScorePage'));
+const ParaphrasingTipsPage = lazy(() => import('./pages/tools/ParaphrasingTipsPage'));
+const EssayOutlineGeneratorPage = lazy(() => import('./pages/tools/EssayOutlineGeneratorPage'));
+const TextCaseConverterPage = lazy(() => import('./pages/tools/TextCaseConverterPage'));
+const ThesisGeneratorPage = lazy(() => import('./pages/tools/ThesisGeneratorPage'));
+const GrammarCheckerPage = lazy(() => import('./pages/tools/GrammarCheckerPage'));
+const HumanizerPage = lazy(() => import('./pages/tools/HumanizerPage'));
+const SummarizerPage = lazy(() => import('./pages/tools/SummarizerPage'));
+const QuizGeneratorPage = lazy(() => import('./pages/tools/QuizGeneratorPage'));
+const GPACalculatorPage = lazy(() => import('./pages/tools/GPACalculatorPage'));
+const PomodoroTimerPage = lazy(() => import('./pages/tools/PomodoroTimerPage'));
+const CalculatorPage = lazy(() => import('./pages/tools/CalculatorPage'));
+const ConverterPage = lazy(() => import('./pages/tools/ConverterPage'));
+const LightningReflexQuizPage = lazy(() => import('./pages/tools/LightningReflexQuizPage'));
+const InteractiveLessonPage = lazy(() => import('./pages/tools/InteractiveLessonPage'));
 
 // Import common components
 import ErrorBoundary from './common/ErrorBoundary';
@@ -162,7 +163,7 @@ const AcademicAIApp = () => {
 
   // SEO: dynamic document title and meta description per page (SPA)
   const pageMeta: Record<string, { title: string; description: string }> = {
-    landing: { title: 'WriteScholar — #1 Free AI Study Toolkit | Quizlet & Knowt Alternative', description: 'Quiz generator from text, flashcard generator, free citation generator & more. #1 free Quizlet & Knowt alternative. AI humanizer, summarizer, crossword builder. Trusted by students. Free to start.' },
+    landing: { title: 'WriteScholar — #1 Free AI Study Toolkit | Quizlet & Knowt Alternative', description: 'WriteScholar is the AI study tool trusted by 38k+ students. Create flashcards, quizzes, get essay feedback & humanize text in seconds. Try free today.' },
     features: { title: '#1 Free AI Study Tools — Quiz Generator, Flashcards, Humanizer | WriteScholar', description: 'AI quiz generator, flashcard maker, crossword builder, humanizer, summarizer, citation finder, essay checker — all free to start. The best Quizlet alternative for students.' },
     pricing: { title: 'Pricing — Free Plan, Pro & Premium | WriteScholar', description: 'Start free with AI quizzes, flashcards, humanizer, and 10+ writing tools. Upgrade for unlimited usage. Better value than Quizlet Plus or Knowt premium.' },
     about: { title: 'About WriteScholar — The #1 Free Quizlet & Knowt Alternative', description: 'WriteScholar is the #1 free alternative to Quizlet and Knowt. AI quizzes, flashcards, crosswords, humanizer, summarizer, citations — everything students need in one place.' },
@@ -911,11 +912,19 @@ const AcademicAIApp = () => {
     }
   };
 
+  const pageFallback = (
+    <div className="min-h-screen flex items-center justify-center bg-stone-50 dark:bg-stone-900">
+      <div className="animate-pulse text-stone-500 text-sm">Loading...</div>
+    </div>
+  );
+
   return (
     <ErrorBoundary>
     <div className="min-h-screen bg-stone-50 dark:bg-stone-900 transition-colors">
-      {renderCurrentPage()}
-      {/* Global achievement popup - shows on any page when badge is unlocked */}
+      <Suspense fallback={pageFallback}>
+        {renderCurrentPage()}
+      </Suspense>
+      {/* Global achievement popup */}
       {user && <BadgeNotificationToast onNavigate={navigateTo} />}
       {/* Global study timer - floating in corner when logged in */}
       {user && <StudyTimerWidget currentPage={currentPage} />}

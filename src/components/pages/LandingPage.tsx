@@ -496,42 +496,19 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
           <div className="hidden lg:block absolute left-0 xl:left-4 top-[25%] -translate-y-1/2 z-10">
             <ScholarMascot size={140} animated={true} pose="waving" />
           </div>
-          {/* Right character - studying with book */}
-          <div className="hidden lg:block absolute right-2 xl:right-6 top-[22%] -translate-y-1/2 w-20 h-24 xl:w-24 xl:h-28 z-10 opacity-90">
-            <svg viewBox="0 0 140 160" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
-              <path d="M50 95 Q45 125 50 155 L90 155 Q95 125 90 95" fill="#6366F1" />
-              <rect x="62" y="72" width="16" height="26" fill="#E8B796" />
-              <ellipse cx="70" cy="45" rx="30" ry="33" fill="#E8B796" />
-              <path d="M40 38 Q38 18 55 12 Q70 6 88 12 Q105 18 100 38 Q98 28 85 20 Q70 12 55 20 Q42 28 40 38" fill="#4A3728" />
-              <path d="M40 38 Q34 50 40 62" fill="#4A3728" />
-              <path d="M100 38 Q106 50 100 62" fill="#4A3728" />
-              <ellipse cx="58" cy="45" rx="4" ry="5" fill="#1F2937" />
-              <ellipse cx="82" cy="45" rx="4" ry="5" fill="#1F2937" />
-              <circle cx="59" cy="43" r="1.5" fill="white" />
-              <circle cx="83" cy="43" r="1.5" fill="white" />
-              <path d="M55 58 Q70 68 85 58" stroke="#1F2937" strokeWidth="2" fill="none" strokeLinecap="round" />
-              <ellipse cx="42" cy="52" rx="5" ry="3" fill="#FECACA" opacity="0.5" />
-              <ellipse cx="98" cy="52" rx="5" ry="3" fill="#FECACA" opacity="0.5" />
-              <path d="M45 98 Q20 100 5 115" stroke="#E8B796" strokeWidth="12" fill="none" strokeLinecap="round" />
-              <path d="M95 98 Q120 100 135 115" stroke="#E8B796" strokeWidth="12" fill="none" strokeLinecap="round" />
-              <ellipse cx="3" cy="118" rx="8" ry="9" fill="#E8B796" />
-              <ellipse cx="137" cy="118" rx="8" ry="9" fill="#E8B796" />
-              <rect x="25" y="95" width="90" height="55" rx="4" fill="#FEF3C7" stroke="#F59E0B" strokeWidth="2" />
-              <line x1="70" y1="95" x2="70" y2="150" stroke="#F59E0B" strokeWidth="1.5" />
-              <path d="M35 110 Q65 108 95 110" stroke="#92400E" strokeWidth="2" fill="none" />
-              <path d="M35 125 Q65 123 95 125" stroke="#92400E" strokeWidth="1.5" fill="none" />
-              <path d="M58 95 L70 108 L82 95" stroke="#4F46E5" strokeWidth="2" fill="none" />
-            </svg>
+          {/* Right mascot - studying pose */}
+          <div className="hidden lg:block absolute right-2 xl:right-6 top-[22%] -translate-y-1/2 z-10 opacity-90">
+            <ScholarMascot size={112} animated={true} pose="studying" />
           </div>
           <div className="max-w-4xl mx-auto text-center">
             {/* Hero headline */}
             <h1 className="text-3xl sm:text-5xl lg:text-6xl xl:text-7xl font-extrabold text-stone-800 dark:text-stone-100 leading-[1.1] mb-6 sm:mb-6 tracking-tight" style={{ letterSpacing: '-0.03em' }}>
-              Everything you need to<br />
+              The AI Quizlet alternative to<br />
               <span className="text-violet-500">ace school</span>
             </h1>
 
             <p className="text-base sm:text-xl text-stone-600 dark:text-stone-400 mb-16 sm:mb-14 max-w-2xl mx-auto leading-relaxed px-2">
-              #1 Quizlet alternative. Paste <span className="font-semibold text-lime-500">notes</span>. Get <span className="font-semibold text-orange-500">quizzes</span>, <span className="font-semibold text-pink-500">flashcards</span> & <span className="font-semibold text-amber-500">crosswords</span> in seconds. Essay <span className="font-semibold text-blue-500">feedback</span>, <span className="font-semibold text-violet-500">humanizer</span>, we got you covered. 🙌
+              The #1 Quizlet alternative. Paste your notes — get quizzes, flashcards, crosswords & essay feedback in seconds.
             </p>
             
             {/* Primary CTA - mascot peeking behind button with grip hands */}

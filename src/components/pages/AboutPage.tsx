@@ -23,12 +23,12 @@ const AboutPage = ({ onNavigate, user, onLogout }: AboutPageProps) => {
             {/* Mascot - top on mobile, left on desktop */}
             <div className="flex lg:hidden flex-shrink-0 justify-center mb-2 order-1">
               <div className="w-20 h-20 animate-float">
-                <img src="/mascot.png" alt="WriteScholar mascot" className="w-full h-full object-contain drop-shadow-xl" />
+                <img src="/mascot.png" alt="WriteScholar mascot" className="w-full h-full object-contain drop-shadow-xl" loading="lazy" width="200" height="200" />
               </div>
             </div>
             <div className="hidden lg:flex flex-shrink-0 items-center justify-center order-1">
               <div className="w-32 h-32 xl:w-40 xl:h-40 animate-float">
-                <img src="/mascot.png" alt="WriteScholar mascot" className="w-full h-full object-contain drop-shadow-xl" />
+                <img src="/mascot.png" alt="WriteScholar mascot" className="w-full h-full object-contain drop-shadow-xl" loading="lazy" width="200" height="200" />
               </div>
             </div>
             <div className="flex-1 text-center lg:text-left max-w-3xl mx-auto lg:mx-0 order-2">

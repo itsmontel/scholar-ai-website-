@@ -107,7 +107,7 @@ const StudyToolsComparisonPage: React.FC<StudyToolsComparisonPageProps> = ({ onN
               <div className="p-4 sm:p-6 text-center">
                 <div className="flex flex-col items-center">
                   <div className="w-10 h-10 flex items-center justify-center mb-1 shrink-0 overflow-hidden">
-                    <img src="/mascot.png" alt="WriteScholar" className="w-full h-full object-contain drop-shadow-md" />
+                    <img src="/mascot.png" alt="WriteScholar" className="w-full h-full object-contain drop-shadow-md" loading="lazy" width="112" height="112" />
                   </div>
                   <span className="font-semibold text-stone-900 dark:text-stone-100 text-sm sm:text-base">WriteScholar</span>
                 </div>
