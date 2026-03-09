@@ -56,7 +56,7 @@ const relativeTime = (date: Date): string => {
 
 interface ActivityItem {
   id: string;
-  type: 'document' | 'analysis' | 'quiz' | 'flashcard' | 'crossword' | 'humanize' | 'summary' | 'citation';
+  type: 'document' | 'analysis' | 'quiz' | 'flashcard' | 'crossword' | 'lesson' | 'humanize' | 'summary' | 'citation';
   title: string;
   subtitle: string;
   date: Date;
@@ -73,6 +73,7 @@ const activityMeta: Record<ActivityItem['type'], { emoji: string; bg: string; la
   quiz: { emoji: '🎯', bg: 'bg-amber-100 dark:bg-amber-900/30', label: 'Quiz', cardBg: 'from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20', border: 'border-amber-200/70 dark:border-amber-700/40', accent: 'text-amber-700 dark:text-amber-300', shape: 'circle' },
   flashcard: { emoji: '🃏', bg: 'bg-violet-100 dark:bg-violet-900/30', label: 'Flashcards', cardBg: 'from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20', border: 'border-violet-200/70 dark:border-violet-700/40', accent: 'text-violet-700 dark:text-violet-300', shape: 'diamond' },
   crossword: { emoji: '🧩', bg: 'bg-orange-100 dark:bg-orange-900/30', label: 'Crossword', cardBg: 'from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20', border: 'border-orange-200/70 dark:border-orange-700/40', accent: 'text-orange-700 dark:text-orange-300', shape: 'square' },
+  lesson: { emoji: '🎓', bg: 'bg-violet-100 dark:bg-violet-900/30', label: 'Lesson', cardBg: 'from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20', border: 'border-violet-200/70 dark:border-violet-700/40', accent: 'text-violet-700 dark:text-violet-300', shape: 'circle' },
   humanize: { emoji: '✨', bg: 'bg-purple-100 dark:bg-purple-900/30', label: 'Humanized', cardBg: 'from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20', border: 'border-violet-200/70 dark:border-violet-700/40', accent: 'text-violet-700 dark:text-violet-300', shape: 'circle' },
   summary: { emoji: '📋', bg: 'bg-teal-100 dark:bg-teal-900/30', label: 'Summary', cardBg: 'from-teal-50 to-cyan-50 dark:from-teal-900/20 dark:to-cyan-900/20', border: 'border-teal-200/70 dark:border-teal-700/40', accent: 'text-teal-700 dark:text-teal-300', shape: 'square' },
   citation: { emoji: '📚', bg: 'bg-sky-100 dark:bg-sky-900/30', label: 'Citations', cardBg: 'from-sky-50 to-blue-50 dark:from-sky-900/20 dark:to-blue-900/20', border: 'border-sky-200/70 dark:border-sky-700/40', accent: 'text-sky-700 dark:text-sky-300', shape: 'diamond' },
@@ -744,14 +745,19 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                 const typeMap: Record<string, ActivityItem['type']> = {
                   flashcards: 'flashcard',
                   crossword: 'crossword',
+                  lesson: 'lesson',
                 };
                 const activityType: ActivityItem['type'] = typeMap[tool.quiz_type] || 'quiz';
-                const countLabel = tool.question_count ? `${tool.question_count} questions` : '';
+                const isLesson = tool.quiz_type === 'lesson';
+                const countLabel = isLesson
+                  ? (tool.question_count ? `${tool.question_count} slides` : '')
+                  : (tool.question_count ? `${tool.question_count} questions` : '');
                 const diffLabel = tool.difficulty ? ` · ${tool.difficulty}` : '';
                 const navMap: Record<string, string> = {
                   flashcards: 'flashcard-generator',
                   crossword: 'crossword-generator',
                   crater_blast: 'crater-blast',
+                  lesson: 'interactive-lesson',
                 };
                 const navigateTo = navMap[tool.quiz_type] || 'quiz-generator';
                 activities.push({
@@ -821,6 +827,9 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
       } else if (t.quiz_type === 'crater_blast') {
         localStorage.setItem('savedCraterBlast', JSON.stringify(t));
         onNavigate('crater-blast');
+      } else if (t.quiz_type === 'lesson') {
+        localStorage.setItem('savedLesson', JSON.stringify(t));
+        onNavigate('interactive-lesson');
       } else {
         localStorage.setItem('savedQuiz', JSON.stringify(t));
         onNavigate('quiz-generator');
@@ -2070,25 +2079,32 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                   <div className="hidden sm:block flex-shrink-0">
                     <ScholarMascot size={100} animated={false} pose="default" />
                   </div>
-                  <div className="flex-1 min-w-0 text-center sm:text-left">
+                  <div className="flex-1 min-w-0 text-center sm:text-left overflow-hidden">
                     <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-stone-800 dark:text-stone-100 leading-tight truncate">
-                      {greeting.greeting}{user?.name ? `, ${user.name.split(' ')[0]}` : ''}! <span className="inline-block animate-[wave_1.8s_ease-in-out_infinite]">{greeting.emoji}</span>
+                      {greeting.greeting}
+                      {user?.name
+                        ? (() => {
+                            const first = user.name.split(' ')[0] || '';
+                            return `, ${first.length > 12 ? first.slice(0, 12) + '…' : first}`;
+                          })()
+                        : ''}
+                      ! <span className="inline-block animate-[wave_1.8s_ease-in-out_infinite]">{greeting.emoji}</span>
                     </h1>
                     <p className="text-stone-500 dark:text-stone-400 mt-1 sm:mt-2 text-sm sm:text-base">
                       Everything you need to <span className="text-violet-500 font-semibold">ace school</span>
                     </p>
-                  {/* Mobile Quick Review + Friends Buttons */}
-                  <div className="mt-4 lg:hidden flex gap-2">
+                  {/* Mobile Quick Review + Friends + Saved Materials Buttons */}
+                  <div className="mt-4 lg:hidden flex flex-wrap gap-2">
                     <button
                       onClick={() => setShowQuickReview(true)}
-                      className="flex-1 flex items-center justify-center gap-2 px-3 py-3 bg-gradient-to-r from-violet-500 to-purple-600 rounded-xl shadow-md shadow-violet-500/20 text-white font-semibold text-sm active:scale-[0.98] transition-all"
+                      className="flex-1 min-w-[7rem] flex items-center justify-center gap-2 px-3 py-3 bg-gradient-to-r from-violet-500 to-purple-600 rounded-xl shadow-md shadow-violet-500/20 text-white font-semibold text-sm active:scale-[0.98] transition-all"
                     >
                       <span className="text-lg">🧠</span>
                       <span>Quick Review</span>
                     </button>
                     <button
                       onClick={() => onNavigate('friends')}
-                      className="relative flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-xl shadow-md shadow-emerald-500/20 text-white font-semibold text-sm active:scale-[0.98] transition-all"
+                      className="relative flex-1 min-w-[7rem] flex items-center justify-center gap-2 px-3 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-xl shadow-md shadow-emerald-500/20 text-white font-semibold text-sm active:scale-[0.98] transition-all"
                     >
                       <span className="text-lg">👥</span>
                       <span>Friends</span>
@@ -2097,6 +2113,13 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                           {friendNotificationCount > 9 ? '9+' : friendNotificationCount}
                         </span>
                       )}
+                    </button>
+                    <button
+                      onClick={() => onNavigate('quiz-history')}
+                      className="flex-1 min-w-[7rem] flex items-center justify-center gap-2 px-3 py-3 bg-gradient-to-r from-amber-500 to-orange-500 rounded-xl shadow-md shadow-amber-500/20 text-white font-semibold text-sm active:scale-[0.98] transition-all"
+                    >
+                      <span className="text-lg">📁</span>
+                      <span>Saved Materials</span>
                     </button>
                   </div>
                   </div>
@@ -3870,7 +3893,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                     Library
                   </button>
                 )}
-                {recentActivity.some(a => a.type === 'quiz' || a.type === 'flashcard' || a.type === 'crossword') && (
+                {recentActivity.some(a => a.type === 'quiz' || a.type === 'flashcard' || a.type === 'crossword' || a.type === 'lesson') && (
                   <button onClick={() => onNavigate('quiz-history')} className="text-xs sm:text-sm text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 font-semibold transition-colors px-2 py-1 rounded-lg active:bg-violet-50 dark:active:bg-violet-900/30">
                     History
                   </button>

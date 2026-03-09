@@ -85,10 +85,12 @@ interface Friend {
 type FilterType = 'all' | 'quiz' | 'flashcards' | 'crossword' | 'crater_blast' | 'lesson';
 type TimePeriod = 'all' | '7days' | '30days' | '3months';
 
-/** Sanitize text for jsPDF - replaces Unicode chars that cause garbled output (e.g. smart quotes, em dashes) */
+/** Sanitize text for jsPDF - replaces Unicode chars that cause garbled output (e.g. smart quotes, em dashes, emojis) */
 function sanitizeForPDF(text: string): string {
   if (!text) return '';
   return String(text)
+    // Strip emojis and other symbols jsPDF can't render (lesson plans are emoji-heavy)
+    .replace(/[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F600}-\u{1F64F}\u{1F680}-\u{1F6FF}\u{1F1E0}-\u{1F1FF}\u{2300}-\u{23FF}\u{2B50}\u{2705}\u{274C}\u{2714}\u{2716}\u{274E}\u{2753}-\u{2755}\u{2757}\u{2763}\u{2764}\u{2795}-\u{2797}\u{27A1}\u{27B0}\u{27BF}\u{2934}\u{2935}\u{3030}\u{303D}\u{3297}\u{3299}]/gu, '')
     .replace(/\u2019/g, "'")   // right single quote '
     .replace(/\u2018/g, "'")   // left single quote '
     .replace(/\u201C/g, '"')   // left double quote "
@@ -97,7 +99,7 @@ function sanitizeForPDF(text: string): string {
     .replace(/\u2014/g, '-')   // em dash —
     .replace(/\u2026/g, '...') // ellipsis …
     .replace(/\u2022/g, '-')   // bullet •
-    .replace(/[^\x00-\x7F]/g, (c) => {  // any remaining non-ASCII -> safe ASCII
+    .replace(/[^\x00-\x7F]/g, (c) => {  // any remaining non-ASCII -> safe ASCII or strip
       const fallback: Record<string, string> = {
         'á': 'a', 'à': 'a', 'â': 'a', 'ä': 'a', 'ã': 'a', 'å': 'a', 'æ': 'ae', 'ç': 'c',
         'é': 'e', 'è': 'e', 'ê': 'e', 'ë': 'e', 'í': 'i', 'ì': 'i', 'î': 'i', 'ï': 'i',
@@ -107,8 +109,9 @@ function sanitizeForPDF(text: string): string {
         'Í': 'I', 'Ì': 'I', 'Î': 'I', 'Ï': 'I', 'Ñ': 'N', 'Ó': 'O', 'Ò': 'O', 'Ô': 'O',
         'Ö': 'O', 'Ú': 'U', 'Ù': 'U', 'Û': 'U', 'Ü': 'U', 'Ý': 'Y',
       };
-      return fallback[c] ?? '?';
-    });
+      return fallback[c] ?? '';  // strip unsupported chars instead of '?'
+    })
+    .replace(/\s{2,}/g, ' ');  // collapse multiple spaces from stripped emojis
 }
 
 const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFilterProp }: QuizHistoryProps) => {
@@ -819,56 +822,204 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
   const exportLessonToPDF = (tool: StudyTool) => {
     const slides = (tool.questions as LessonSlide[]) || [];
     const doc = new jsPDF();
-    let yPos = 20;
-    const pageHeight = doc.internal.pageSize.height;
-    const margin = 20;
-    const lineHeight = 6;
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const margin = 14;
+    const lineHeight = 5;
+    const notesLineSpacing = 7;
+    const notesLineCount = 10;
 
-    doc.setFontSize(18);
+    // Lecture notes layout: top half = lecture, bottom half = notes
+    const contentTop = 18;
+    const dividerY = pageHeight / 2;
+    const lectureBottom = dividerY - 6;
+    const lectureHeight = lectureBottom - contentTop;
+    const notesTop = dividerY + 4;
+    const notesHeight = pageHeight - notesTop - 18;
+    const contentWidth = pageWidth - margin * 2;
+
+    const styleLabel = (tool.difficulty === 'stepByStep' || tool.difficulty === 'step_by_step') ? 'Step-by-Step' : tool.difficulty === 'story' ? 'Story Mode' : 'Visual';
+
+    const getSlideTypeLabel = (type?: string) => {
+      const t = (type || '').toLowerCase();
+      if (t === 'intro') return 'INTRODUCTION';
+      if (t === 'concept') return 'CONCEPT';
+      if (t === 'example') return 'EXAMPLE';
+      if (t === 'keypoint') return 'KEY POINT';
+      if (t === 'funfact') return 'FUN FACT';
+      if (t === 'summary') return 'SUMMARY';
+      return 'SLIDE';
+    };
+
+    const getSlideColor = (type?: string): [number, number, number] => {
+      const t = (type || '').toLowerCase();
+      if (t === 'intro') return [124, 58, 237];
+      if (t === 'concept') return [59, 130, 246];
+      if (t === 'example') return [245, 158, 11];
+      if (t === 'keypoint') return [16, 185, 129];
+      if (t === 'funfact') return [236, 72, 153];
+      if (t === 'summary') return [99, 102, 241];
+      return [100, 116, 139];
+    };
+
+    const drawNotesArea = (topY: number, height: number) => {
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(180, 180, 180);
+      doc.text('Notes', margin, topY + 4);
+      doc.setDrawColor(225, 225, 230);
+      doc.setLineWidth(0.25);
+      for (let i = 0; i < notesLineCount; i++) {
+        const y = topY + 10 + i * notesLineSpacing;
+        if (y < topY + height - 8) doc.line(margin, y, pageWidth - margin, y);
+      }
+    };
+
+    const safeFilename = (title: string) => {
+      return (title || 'Lesson Plan')
+        .replace(/[^a-zA-Z0-9\s]/g, '')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .slice(0, 50) || 'Lesson';
+    };
+
+    // ---- Cover page (title slide style) ----
+    doc.setFillColor(248, 250, 252);
+    doc.rect(0, 0, pageWidth, pageHeight, 'F');
+
+    const [coverR, coverG, coverB] = [124, 58, 237];
+    doc.setFillColor(coverR, coverG, coverB);
+    doc.rect(0, 0, pageWidth, 45, 'F');
+
+    doc.setFontSize(22);
     doc.setFont('helvetica', 'bold');
-    const titleText = doc.splitTextToSize(sanitizeForPDF(tool.title || 'Lesson'), 170);
-    doc.text(titleText, margin, yPos);
-    yPos += titleText.length * 8 + 5;
-
-    doc.setFontSize(10);
+    doc.setTextColor(255, 255, 255);
+    const coverTitle = sanitizeForPDF(tool.title || 'Lesson Plan');
+    doc.text(coverTitle, pageWidth / 2, 28, { align: 'center' });
+    doc.setFontSize(11);
     doc.setFont('helvetica', 'normal');
-    const styleLabel = (tool.difficulty === 'stepByStep' ? 'Step-by-Step' : tool.difficulty === 'story' ? 'Story Mode' : 'Visual') || 'Lesson';
-    doc.text(sanitizeForPDF(`Style: ${styleLabel} | Slides: ${slides.length}`), margin, yPos);
-    yPos += 15;
+    doc.text(`${styleLabel}  |  ${slides.length} slides`, pageWidth / 2, 38, { align: 'center' });
 
+    let yPos = 70;
+    doc.setFontSize(12);
+    doc.setTextColor(100, 116, 139);
+    doc.text(`Lecture Notes`, pageWidth / 2, yPos, { align: 'center' });
+    yPos += 8;
+    doc.setFontSize(10);
+    doc.text(new Date().toLocaleDateString(), pageWidth / 2, yPos, { align: 'center' });
+
+    doc.setDrawColor(200, 200, 200);
+    doc.setLineWidth(0.5);
+    doc.line(margin, 100, pageWidth - margin, 100);
+
+    doc.setFontSize(9);
+    doc.setTextColor(150, 150, 150);
+    doc.text(`Page 1 of ${slides.length + 1}`, pageWidth - margin, pageHeight - 10);
+
+    // ---- Slide pages (lecture top, notes bottom) ----
     slides.forEach((slide: LessonSlide, idx: number) => {
-      if (yPos > pageHeight - 40) { doc.addPage(); yPos = 20; }
-      doc.setFontSize(12);
+      doc.addPage();
+      const [r, g, b] = getSlideColor(slide.type);
+      const typeLabel = getSlideTypeLabel(slide.type);
+
+      // LECTURE AREA (top half)
+      doc.setFillColor(252, 252, 254);
+      doc.rect(margin, contentTop, contentWidth, lectureHeight, 'F');
+
+      doc.setDrawColor(235, 235, 240);
+      doc.setLineWidth(0.5);
+      doc.rect(margin, contentTop, contentWidth, lectureHeight, 'S');
+
+      // Colored header bar
+      doc.setFillColor(r, g, b);
+      doc.rect(margin, contentTop, contentWidth, 12, 'F');
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(255, 255, 255);
+      doc.text(typeLabel, margin + 6, contentTop + 8);
+      doc.setFontSize(9);
+      doc.setTextColor(255, 255, 255);
+      doc.text(`${idx + 1}`, pageWidth - margin - 10, contentTop + 8);
+
+      let slideY = contentTop + 22;
+      const slideContentWidth = contentWidth - 16;
+
+      doc.setTextColor(30, 41, 59);
+
+      // Slide title
+      doc.setFontSize(13);
       doc.setFont('helvetica', 'bold');
       const slideTitle = sanitizeForPDF(slide.title || `Slide ${idx + 1}`);
-      const splitTitle = doc.splitTextToSize(`${idx + 1}. ${slideTitle}`, 170);
-      doc.text(splitTitle, margin, yPos);
-      yPos += splitTitle.length * lineHeight + 3;
+      const titleLines = doc.splitTextToSize(slideTitle, slideContentWidth);
+      titleLines.forEach((line: string) => {
+        doc.text(line, margin + 8, slideY);
+        slideY += lineHeight + 1;
+      });
+      slideY += 3;
 
-      doc.setFontSize(10);
-      doc.setFont('helvetica', 'normal');
+      // Content
       const content = sanitizeForPDF(slide.content || '');
       if (content) {
-        const splitContent = doc.splitTextToSize(content, 170);
-        splitContent.forEach((line: string) => {
-          if (yPos > pageHeight - 15) { doc.addPage(); yPos = 20; }
-          doc.text(line, margin + 2, yPos);
-          yPos += lineHeight;
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
+        const contentLines = doc.splitTextToSize(content, slideContentWidth);
+        contentLines.forEach((line: string) => {
+          if (slideY < lectureBottom - 10) {
+            doc.text(line, margin + 8, slideY);
+            slideY += lineHeight;
+          }
         });
+        slideY += 3;
       }
+
+      // Highlighted term
+      if (slide.highlightedTerm && slideY < lectureBottom - 15) {
+        const term = sanitizeForPDF(slide.highlightedTerm);
+        doc.setFillColor(241, 245, 249);
+        doc.rect(margin + 8, slideY - 2, Math.min(doc.getTextWidth(term) + 8, slideContentWidth - 8), 6, 'F');
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(r, g, b);
+        doc.text(term, margin + 12, slideY + 2);
+        doc.setTextColor(30, 41, 59);
+        slideY += 10;
+      }
+
+      // Bullet points
       if (slide.bulletPoints && slide.bulletPoints.length > 0) {
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
         slide.bulletPoints.forEach((bp: string) => {
-          if (yPos > pageHeight - 15) { doc.addPage(); yPos = 20; }
-          const split = doc.splitTextToSize(`  - ${sanitizeForPDF(bp)}`, 165);
-          doc.text(split, margin + 2, yPos);
-          yPos += split.length * lineHeight;
+          if (slideY >= lectureBottom - 8) return;
+          const sanitized = sanitizeForPDF(bp);
+          doc.setFillColor(r, g, b);
+          doc.rect(margin + 10, slideY, 2.5, 2.5, 'F');
+          const bpLines = doc.splitTextToSize(sanitized, slideContentWidth - 14);
+          bpLines.forEach((line: string) => {
+            if (slideY < lectureBottom - 5) {
+              doc.text(line, margin + 16, slideY + 2);
+              slideY += lineHeight;
+            }
+          });
+          slideY += 3;
         });
       }
-      yPos += 8;
+
+      // HORIZONTAL DIVIDER
+      doc.setDrawColor(220, 220, 220);
+      doc.setLineWidth(0.5);
+      doc.line(margin, dividerY, pageWidth - margin, dividerY);
+
+      // NOTES AREA (bottom half) - ruled lines for note-taking
+      drawNotesArea(notesTop, notesHeight);
+
+      // Page number
+      doc.setFontSize(9);
+      doc.setTextColor(150, 150, 150);
+      doc.text(`${idx + 2}`, pageWidth - margin, pageHeight - 10);
     });
 
-    const safeTitle = (tool.title || 'lesson').replace(/[^a-zA-Z0-9]/g, '-').slice(0, 50);
-    doc.save(`${safeTitle}-${Date.now()}.pdf`);
+    doc.save(`${safeFilename(tool.title || '')} Lecture Notes.pdf`);
   };
 
   const exportLessonToDOCX = async (tool: StudyTool) => {
@@ -876,7 +1027,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
     const children: any[] = [];
 
     children.push(new Paragraph({ text: tool.title || 'Lesson', heading: HeadingLevel.HEADING_1 }));
-    const styleLabel = (tool.difficulty === 'stepByStep' ? 'Step-by-Step' : tool.difficulty === 'story' ? 'Story Mode' : 'Visual') || 'Lesson';
+    const styleLabel = (tool.difficulty === 'stepByStep' || tool.difficulty === 'step_by_step') ? 'Step-by-Step' : tool.difficulty === 'story' ? 'Story Mode' : 'Visual';
     children.push(new Paragraph({ children: [new TextRun({ text: `Style: ${styleLabel} | Slides: ${slides.length}`, size: 20, color: '666666' })] }));
     children.push(new Paragraph({ text: '' }));
 
@@ -991,7 +1142,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
               </div>
               <div>
                 <h1 className="text-2xl sm:text-3xl font-bold text-stone-900 tracking-tight">
-                  My Study Tools
+                  Saved Materials
                 </h1>
                 <p className="text-sm text-stone-500 mt-0.5">
                   {filteredTools.length} {filteredTools.length === 1 ? 'tool' : 'tools'} saved

@@ -1024,7 +1024,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
               </video>
             </div>
             <p className="text-xs text-stone-500 dark:text-stone-400 mb-6 px-2 leading-relaxed">
-              To share: go to <strong>Study Tools</strong> in the dashboard or header → tap the <strong>Share</strong> button on any quiz, flashcard, or crossword → select your friend.
+              To share: go to <strong>Saved Materials</strong> in the dashboard or header → tap the <strong>Share</strong> button on any quiz, flashcard, or crossword → select your friend.
             </p>
             <div className="flex flex-col gap-3 w-full max-w-xs">
               <button
@@ -1062,7 +1062,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                 Add friends with your unique code and share flashcards, quizzes, crosswords & notes in one tap. It delivers straight to their device — all they have to do is accept.
               </p>
               <p className="text-sm text-stone-500 dark:text-stone-400 leading-relaxed mb-6 max-w-lg mx-auto lg:mx-0">
-                To share: go to <strong>Study Tools</strong> in the dashboard or header → tap the <strong>Share</strong> button on any quiz, flashcard, or crossword → select your friend.
+                To share: go to <strong>Saved Materials</strong> in the dashboard or header → tap the <strong>Share</strong> button on any quiz, flashcard, or crossword → select your friend.
               </p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
                 <button

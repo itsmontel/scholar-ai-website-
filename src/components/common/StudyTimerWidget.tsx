@@ -211,9 +211,9 @@ const StudyTimerWidget = ({ currentPage = '' }: StudyTimerWidgetProps) => {
   return (
     <div className="fixed bottom-4 right-4 z-[9998] flex flex-col items-end gap-2">
       {isExpanded && (
-        <div className="w-72 sm:w-80 bg-white dark:bg-stone-800 rounded-2xl shadow-xl border border-stone-200 dark:border-stone-700 overflow-hidden">
+        <div className="w-64 sm:w-80 bg-white dark:bg-stone-800 rounded-xl sm:rounded-2xl shadow-xl border border-stone-200 dark:border-stone-700 overflow-hidden">
           {showCompleted ? (
-            <div className="p-6 text-center">
+            <div className="p-4 sm:p-6 text-center">
               <div className="w-14 h-14 mx-auto mb-3 rounded-full bg-green-100 dark:bg-green-900/20 flex items-center justify-center">
                 <span className="text-2xl">✓</span>
               </div>
@@ -236,8 +236,8 @@ const StudyTimerWidget = ({ currentPage = '' }: StudyTimerWidgetProps) => {
             </div>
           ) : (
             <>
-              <div className="px-4 pt-4 pb-2 flex items-center justify-between">
-                <span className="text-sm font-medium text-stone-600 dark:text-stone-400">Study timer</span>
+              <div className="px-3 sm:px-4 pt-3 sm:pt-4 pb-2 flex items-center justify-between">
+                <span className="text-xs sm:text-sm font-medium text-stone-600 dark:text-stone-400">Study timer</span>
                 <button
                   onClick={() => setIsExpanded(false)}
                   className="p-1 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-700 text-stone-800 dark:text-stone-200 transition-colors"
@@ -248,17 +248,17 @@ const StudyTimerWidget = ({ currentPage = '' }: StudyTimerWidgetProps) => {
                   </svg>
                 </button>
               </div>
-              <div className="px-4 pb-4">
-                <div className="text-4xl font-mono font-bold text-stone-900 dark:text-stone-100 mb-4 text-center tabular-nums">
+              <div className="px-3 sm:px-4 pb-3 sm:pb-4">
+                <div className="text-3xl sm:text-4xl font-mono font-bold text-stone-900 dark:text-stone-100 mb-3 sm:mb-4 text-center tabular-nums">
                   {formatTime(displayMinutes, displaySeconds)}
                 </div>
-                <div className="flex gap-2 mb-3 flex-wrap">
+                <div className="flex gap-1.5 sm:gap-2 mb-2 sm:mb-3 flex-wrap">
                   {PRESETS.map(m => (
                     <button
                       key={m}
                       onClick={() => handlePreset(m)}
                       disabled={isRunning}
-                      className={`flex-1 min-w-[3.5rem] py-2 rounded-lg text-sm font-medium transition-colors ${
+                      className={`flex-1 min-w-[2.75rem] sm:min-w-[3.5rem] py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors ${
                         !isCustom && isPreset(m)
                           ? 'bg-violet-600 text-white'
                           : 'bg-stone-100 dark:bg-stone-700 text-stone-700 dark:text-stone-200 hover:bg-stone-200 dark:hover:bg-stone-600'
@@ -270,7 +270,7 @@ const StudyTimerWidget = ({ currentPage = '' }: StudyTimerWidgetProps) => {
                   <button
                     onClick={handleCustomSelect}
                     disabled={isRunning}
-                    className={`flex-1 min-w-[3.5rem] py-2 rounded-lg text-sm font-medium transition-colors ${
+                    className={`flex-1 min-w-[2.75rem] sm:min-w-[3.5rem] py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors ${
                       isCustom
                         ? 'bg-violet-600 text-white'
                         : 'bg-stone-100 dark:bg-stone-700 text-stone-700 dark:text-stone-200 hover:bg-stone-200 dark:hover:bg-stone-600'
@@ -280,7 +280,7 @@ const StudyTimerWidget = ({ currentPage = '' }: StudyTimerWidgetProps) => {
                   </button>
                 </div>
                 {isCustom && (
-                  <div className="flex gap-2 mb-4">
+                  <div className="flex gap-2 mb-3 sm:mb-4">
                     <input
                       type="number"
                       min={1}
@@ -302,25 +302,25 @@ const StudyTimerWidget = ({ currentPage = '' }: StudyTimerWidgetProps) => {
                     </button>
                   </div>
                 )}
-                <div className="flex gap-2">
+                <div className="flex gap-1.5 sm:gap-2">
                   {isRunning ? (
                     <button
                       onClick={handlePause}
-                      className="flex-1 py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-medium rounded-lg transition-colors"
+                      className="flex-1 py-2 sm:py-2.5 bg-amber-500 hover:bg-amber-600 text-white text-sm font-medium rounded-lg transition-colors"
                     >
                       Pause
                     </button>
                   ) : (
                     <button
                       onClick={handleStart}
-                      className="flex-1 py-2.5 bg-violet-600 hover:bg-violet-700 text-white font-medium rounded-lg transition-colors"
+                      className="flex-1 py-2 sm:py-2.5 bg-violet-600 hover:bg-violet-700 text-white text-sm font-medium rounded-lg transition-colors"
                     >
                       Start
                     </button>
                   )}
                   <button
                     onClick={handleReset}
-                    className="px-4 py-2.5 bg-stone-100 dark:bg-stone-700 hover:bg-stone-200 dark:hover:bg-stone-600 text-stone-700 dark:text-stone-200 font-medium rounded-lg transition-colors"
+                    className="px-3 sm:px-4 py-2 sm:py-2.5 bg-stone-100 dark:bg-stone-700 hover:bg-stone-200 dark:hover:bg-stone-600 text-stone-700 dark:text-stone-200 text-sm font-medium rounded-lg transition-colors"
                   >
                     Reset
                   </button>
@@ -333,15 +333,15 @@ const StudyTimerWidget = ({ currentPage = '' }: StudyTimerWidgetProps) => {
 
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className={`flex items-center gap-2 px-4 py-2.5 rounded-xl shadow-lg border transition-all ${
+        className={`flex items-center gap-1.5 sm:gap-2 px-2.5 py-2 sm:px-4 sm:py-2.5 rounded-lg sm:rounded-xl shadow-lg border transition-all ${
           isRunning
             ? 'bg-violet-600 border-violet-500 text-white'
             : 'bg-white dark:bg-stone-800 border-stone-200 dark:border-stone-700 text-stone-800 dark:text-stone-200 hover:bg-stone-50 dark:hover:bg-stone-700'
         }`}
         aria-label={isExpanded ? 'Minimize study timer' : 'Open study timer'}
       >
-        <span className="text-lg">⏱</span>
-        <span className="font-mono font-semibold tabular-nums text-sm">
+        <span className="text-sm sm:text-lg">⏱</span>
+        <span className="font-mono font-semibold tabular-nums text-xs sm:text-sm">
           {showCompleted
             ? 'Done'
             : isRunning

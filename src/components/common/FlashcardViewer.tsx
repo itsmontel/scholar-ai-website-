@@ -18,7 +18,7 @@ interface FlashcardViewerProps {
   isCreateFromScratch?: boolean;
   /** When provided, shows an enlarge button to open in full page */
   onEnlarge?: () => void;
-  /** When provided, shows Save to Study Tools button - called with (title, cards) */
+  /** When provided, shows Save to Saved Materials button - called with (title, cards) */
   onSaveToStudyTools?: (title: string, cards: { front: string; back: string }[]) => void | Promise<void>;
 }
 
@@ -562,7 +562,7 @@ const FlashcardViewer = ({
                 onClick={handleSaveToStudyTools}
                 disabled={isSaving}
                 className={`px-3 py-1.5 font-medium rounded-lg transition-colors text-xs flex items-center gap-1.5 ${saveSuccess ? 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400' : 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/50'}`}
-                title="Save to Study Tools"
+                title="Save to Saved Materials"
               >
                 {isSaving ? (
                   <span className="w-3.5 h-3.5 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
@@ -571,7 +571,7 @@ const FlashcardViewer = ({
                 ) : (
                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" /></svg>
                 )}
-                {saveSuccess ? 'Saved!' : isSaving ? 'Saving...' : 'Save to Study Tools'}
+                {saveSuccess ? 'Saved!' : isSaving ? 'Saving...' : 'Save to Saved Materials'}
               </button>
             </div>
           )}

@@ -1266,7 +1266,7 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
                   <>
                     {loadedFromSavedGame ? (
                       <div className="w-full py-3 rounded-xl font-medium border flex items-center justify-center gap-2 bg-emerald-50 border-emerald-200 text-emerald-700">
-                        ✓ Already saved to Saved Tools — replay anytime
+                        ✓ Already saved to Saved Materials — replay anytime
                       </div>
                     ) : (
                       <button
@@ -1282,7 +1282,7 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
                         {isSaving ? (
                           <span className="w-4 h-4 border-2 border-stone-300 border-t-stone-600 rounded-full animate-spin" />
                         ) : saveSuccess ? (
-                          '✓ Saved to Saved Tools'
+                          '✓ Saved to Saved Materials'
                         ) : (
                           '💾 Save Game to Replay Later'
                         )}

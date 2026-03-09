@@ -1548,7 +1548,7 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
         {/* Hero Section - minimal bar when loaded from recents */}
         {showMinimalUI ? (
           <div className="sticky top-0 z-10 flex items-center gap-3 px-4 sm:px-6 py-4 bg-white/95 dark:bg-stone-800/95 backdrop-blur border-b border-stone-200 dark:border-stone-700">
-            <button onClick={() => onNavigate(openedFromDashboard ? 'dashboard' : openedFromHistory ? 'quiz-history' : 'dashboard')} className="p-2.5 -ml-2 text-stone-500 hover:text-stone-700 dark:text-stone-400 dark:hover:text-stone-200 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-700 transition-colors" aria-label={openedFromDashboard ? 'Back to dashboard' : openedFromHistory ? 'Back to study tools' : 'Back to dashboard'}>
+            <button onClick={() => onNavigate(openedFromDashboard ? 'dashboard' : openedFromHistory ? 'quiz-history' : 'dashboard')} className="p-2.5 -ml-2 text-stone-500 hover:text-stone-700 dark:text-stone-400 dark:hover:text-stone-200 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-700 transition-colors" aria-label={openedFromDashboard ? 'Back to dashboard' : openedFromHistory ? 'Back to saved materials' : 'Back to dashboard'}>
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
             </button>
             <span className="text-sm font-medium text-stone-600 dark:text-stone-400">

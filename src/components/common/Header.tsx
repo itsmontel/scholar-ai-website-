@@ -465,7 +465,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
                 currentPage === 'quiz-history' ? 'ring-2 ring-violet-400 ring-offset-2' : ''
               }`}
             >
-              <span>Study Tools</span>
+              <span>Saved Materials</span>
               <span className="px-1.5 py-0.5 text-[10px] font-bold bg-white/25 text-white rounded-full">PRO</span>
             </button>
 
@@ -729,7 +729,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
                 currentPage === 'quiz-history' ? 'ring-2 ring-violet-400 ring-offset-2' : ''
               }`}
             >
-              <span>Saved Tools</span>
+              <span>Saved Materials</span>
               <span className="px-2 py-0.5 text-[10px] font-bold bg-white/25 text-white rounded-full">PRO</span>
             </button>
 
