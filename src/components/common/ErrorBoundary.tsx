@@ -40,6 +40,27 @@ class ErrorBoundary extends Component<Props, State> {
     this.setState({ hasError: false, error: undefined, errorInfo: undefined });
   };
 
+  handleSessionExpired = () => {
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('user');
+    window.location.href = '/login';
+  };
+
+  isSessionExpiredError = (): boolean => {
+    const msg = (this.state.error?.message || '').toLowerCase();
+    const authIndicators = [
+      'token expired',
+      '401',
+      'unauthorized',
+      'please log in',
+      'session expired',
+      'jwt expired',
+      'invalid token',
+      'authentication',
+    ];
+    return authIndicators.some((indicator) => msg.includes(indicator));
+  };
+
   render() {
     if (this.state.hasError) {
       // Custom fallback UI
@@ -47,7 +68,39 @@ class ErrorBoundary extends Component<Props, State> {
         return this.props.fallback;
       }
 
-      // Default fallback UI
+      const isSessionExpired = this.isSessionExpiredError();
+
+      // Session expired / auth error UI – clear, actionable
+      if (isSessionExpired) {
+        return (
+          <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50 flex items-center justify-center p-6">
+            <div className="max-w-md w-full bg-white rounded-2xl shadow-xl border border-amber-200 p-8 text-center">
+              <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg className="w-8 h-8 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+              </div>
+
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">
+                Session expired
+              </h2>
+
+              <p className="text-gray-600 mb-6">
+                Your session has expired for security. Please log in again to continue.
+              </p>
+
+              <button
+                onClick={this.handleSessionExpired}
+                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl"
+              >
+                Log in again
+              </button>
+            </div>
+          </div>
+        );
+      }
+
+      // Default fallback UI for other errors
       return (
         <div className="min-h-screen bg-gradient-to-br from-red-50 to-orange-50 flex items-center justify-center p-6">
           <div className="max-w-md w-full bg-white rounded-2xl shadow-xl border border-red-200 p-8 text-center">
