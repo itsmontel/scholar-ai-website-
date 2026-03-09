@@ -489,7 +489,7 @@ const FlashcardViewer = ({
   const card = cards[currentCard];
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 min-w-0 w-full overflow-x-hidden">
       {/* Header with title and controls */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div className="flex items-center gap-2 min-w-0">
@@ -812,7 +812,7 @@ const FlashcardViewer = ({
             <span className={`text-[10px] sm:text-xs font-bold ${currentTheme.frontAccent} uppercase tracking-widest mb-3 sm:mb-4`}>
               {studyDirection === 'back-to-front' ? 'Back' : 'Front'}
             </span>
-            <p className={`${currentFontSize.front} font-semibold ${currentTheme.frontText} leading-relaxed`}>
+            <p className={`${currentFontSize.front} font-semibold ${currentTheme.frontText} leading-relaxed break-words max-w-full`}>
               {getDisplayContent(card, 'front')}
             </p>
             <p className={`text-[10px] sm:text-xs ${currentTheme.frontAccent} mt-4 sm:mt-6`}>Tap to flip</p>
@@ -825,7 +825,7 @@ const FlashcardViewer = ({
             <span className={`text-[10px] sm:text-xs font-bold ${currentTheme.backAccent} uppercase tracking-widest mb-3 sm:mb-4`}>
               {studyDirection === 'back-to-front' ? 'Front' : 'Back'}
             </span>
-            <p className={`${currentFontSize.back} ${currentTheme.backText} leading-relaxed`}>
+            <p className={`${currentFontSize.back} ${currentTheme.backText} leading-relaxed break-words max-w-full`}>
               {getDisplayContent(card, 'back')}
             </p>
             <p className={`text-[10px] sm:text-xs ${currentTheme.backAccent} mt-4 sm:mt-6`}>Tap to flip back</p>

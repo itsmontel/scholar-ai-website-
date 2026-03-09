@@ -1231,7 +1231,7 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
     const question = displayedQuestions[currentQuestion];
 
     return (
-      <div className="bg-white dark:bg-stone-800 rounded-2xl sm:rounded-3xl shadow-xl shadow-stone-100/50 dark:shadow-none border border-stone-200 dark:border-stone-600 overflow-hidden">
+      <div className="bg-white dark:bg-stone-800 rounded-2xl sm:rounded-3xl shadow-xl shadow-stone-100/50 dark:shadow-none border border-stone-200 dark:border-stone-600 overflow-hidden min-w-0">
         {/* Progress bar */}
         <div className="h-2 bg-stone-200 dark:bg-stone-600">
           <div 
@@ -1257,7 +1257,7 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
           </div>
 
           {/* Question */}
-          <h3 className="text-xl sm:text-2xl font-semibold text-stone-800 dark:text-stone-100 mb-6 leading-relaxed">
+          <h3 className="text-xl sm:text-2xl font-semibold text-stone-800 dark:text-stone-100 mb-6 leading-relaxed break-words">
             {question.question}
           </h3>
 
@@ -1289,7 +1289,7 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
                   }`}>
                     {letter}
                   </span>
-                  <span className="flex-1">{option.substring(3)}</span>
+                  <span className="flex-1 min-w-0 break-words text-left">{option.substring(3)}</span>
                   {isCorrect && <span className="text-green-500">✓</span>}
                   {isWrong && <span className="text-red-500">✗</span>}
                 </button>
@@ -1323,7 +1323,7 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
                       }`}>
                         {opt === 'true' ? '✓' : '✗'}
                       </span>
-                      <span className="flex-1 capitalize font-medium">{opt}</span>
+                      <span className="flex-1 min-w-0 break-words text-left capitalize font-medium">{opt}</span>
                       {isCorrect && <span className="text-green-500">✓</span>}
                       {isWrong && <span className="text-red-500">✗</span>}
                     </button>
@@ -1360,7 +1360,7 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
                       }`}>
                         {letter}
                       </span>
-                      <span className="flex-1 font-medium">{opt.substring(3)}</span>
+                      <span className="flex-1 min-w-0 break-words text-left font-medium">{opt.substring(3)}</span>
                       {isCorrect && <span className="text-green-500">✓</span>}
                       {isWrong && <span className="text-red-500">✗</span>}
                     </button>
@@ -1429,7 +1429,7 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
     if (!quiz || isQuizMode) return null;
 
     return (
-      <div className="mt-4 mx-3 sm:mx-0">
+      <div className="mt-4 min-w-0 w-full">
         <button onClick={() => setQuiz(null)} className="mb-4 px-4 py-2 text-stone-600 dark:text-stone-400 hover:text-stone-800 dark:text-stone-100 flex items-center gap-2">← Create New Quiz</button>
         <div className="bg-white dark:bg-stone-800 rounded-2xl sm:rounded-3xl shadow-xl shadow-stone-100/50 dark:shadow-none border border-stone-200 dark:border-stone-600 overflow-hidden">
           <div className="p-4 sm:p-6 border-b border-stone-200 dark:border-stone-600 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20">
@@ -1541,7 +1541,7 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-15%,rgba(251,191,36,0.15),transparent)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-15%,rgba(245,158,11,0.08),transparent)] pointer-events-none" aria-hidden />
       {!showMinimalUI && <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage={studyToolMode === 'quiz' ? 'quiz-generator' : studyToolMode === 'flashcards' ? 'flashcard-generator' : 'crossword-generator'} />}
       
-      <main className="flex-1 w-full min-w-0 overflow-x-hidden relative">
+      <main className="flex-1 w-full min-w-0 overflow-x-hidden relative max-w-full">
         <input
           ref={fileInputRef}
           type="file"
@@ -1618,7 +1618,7 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
         ) : null}
 
         {/* Main Content */}
-        <div className={`pb-8 sm:pb-16 relative ${showMinimalUI ? 'pt-6 sm:pt-8 px-4 sm:px-6 lg:px-8' : showLockedOutLayout ? 'pt-8 sm:pt-12 px-4 sm:px-6 lg:px-8' : 'px-0 sm:px-6 lg:px-8'}`}>
+        <div className={`pb-8 sm:pb-16 relative ${showMinimalUI ? 'pt-6 sm:pt-8 px-4 sm:px-6 lg:px-8' : showLockedOutLayout ? 'pt-8 sm:pt-12 px-4 sm:px-6 lg:px-8' : 'px-4 sm:px-6 lg:px-8'}`}>
           {/* Floating decorative elements - hidden when minimal UI */}
           {!showMinimalUI && (
             <>
@@ -1936,7 +1936,7 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
             {studyToolMode === 'flashcards' && (
               <>
                 {flashcardResult ? (
-                  <div className="mx-3 sm:mx-0">
+                  <div className="min-w-0 w-full overflow-x-hidden">
                     <FlashcardViewer
                       initialCards={flashcardResult.cards ?? []}
                       title={flashcardResult.title || 'Flashcards'}
@@ -2018,7 +2018,7 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
             {studyToolMode === 'crossword' && (
               <>
                 {crosswordResult && crosswordResult.placedWords?.length > 0 ? (
-                  <div className="mx-3 sm:mx-0">
+                  <div className="min-w-0 w-full overflow-x-hidden">
                     <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
                       <h3 className="text-lg font-bold text-stone-800 dark:text-stone-100">{crosswordResult.title}</h3>
                       <div className="flex items-center gap-2 flex-wrap">
@@ -2086,19 +2086,19 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
                         </div>
                       );
                     })()}
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 min-w-0">
                       {/* Crossword Grid - Interactive */}
                       <div 
-                        className="bg-white dark:bg-stone-600 rounded-2xl border border-stone-200 dark:border-stone-600 p-4 overflow-x-auto focus:outline-none focus:ring-2 focus:ring-amber-400 dark:focus:ring-amber-600"
+                        className="bg-white dark:bg-stone-600 rounded-2xl border border-stone-200 dark:border-stone-600 p-3 sm:p-4 overflow-x-auto overflow-y-visible focus:outline-none focus:ring-2 focus:ring-amber-400 dark:focus:ring-amber-600 min-w-0"
                         tabIndex={0}
                         onKeyDown={handleCrosswordKeyDown}
                       >
                         <p className="text-xs text-stone-500 dark:text-stone-400 mb-3">Click a cell to type, or use the clue inputs below. Arrow keys to navigate.</p>
-                        <div className="inline-block">
+                        <div className="inline-block min-w-0">
                           {crosswordResult.grid?.map((row: string[], rowIdx: number) => (
                             <div key={rowIdx} className="flex">
                               {row.map((cell: string, colIdx: number) => {
-                                if (cell === '') return <div key={colIdx} className="w-8 h-8 sm:w-9 sm:h-9"></div>;
+                                if (cell === '') return <div key={colIdx} className="w-6 h-6 sm:w-8 sm:h-8 lg:w-9 lg:h-9 flex-shrink-0"></div>;
                                 const wordAtCell = crosswordResult.placedWords.find((pw: any) => pw.row === rowIdx && pw.col === colIdx);
                                 const cellNumber = wordAtCell?.number;
                                 const typedLetter = getCellLetter(rowIdx, colIdx);
@@ -2134,7 +2134,7 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
                                   <div 
                                     key={colIdx} 
                                     onClick={() => handleCellClick(rowIdx, colIdx)}
-                                    className={`w-8 h-8 sm:w-9 sm:h-9 border ${cellColor} flex items-center justify-center relative cursor-pointer transition-colors`}
+                                    className={`w-6 h-6 sm:w-8 sm:h-8 lg:w-9 lg:h-9 flex-shrink-0 border ${cellColor} flex items-center justify-center relative cursor-pointer transition-colors`}
                                   >
                                     {cellNumber && <span className="absolute top-0 left-0.5 text-[8px] font-bold text-stone-500 dark:text-stone-400 leading-none">{cellNumber}</span>}
                                     <span className="text-xs sm:text-sm font-bold text-stone-700 dark:text-stone-200">{crosswordChecked ? cell : typedLetter}</span>
