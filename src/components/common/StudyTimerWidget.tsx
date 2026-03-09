@@ -137,14 +137,17 @@ const StudyTimerWidget = ({ currentPage = '' }: StudyTimerWidgetProps) => {
   }, [isRunning, timeLeft, saveState]);
 
   const handleStart = () => {
+    const effectiveTimeLeft = timeLeft > 0 ? timeLeft : duration;
     if (timeLeft <= 0) {
       setTimeLeft(duration);
       saveState({ timeLeft: duration });
     }
     setIsRunning(true);
-    const now = Date.now();
+    // When resuming: set startedAt so that duration - elapsed = timeLeft (avoids resetting to full duration)
+    const elapsed = duration - effectiveTimeLeft;
+    const now = Date.now() - elapsed * 1000;
     setStartedAt(now);
-    saveState({ isRunning: true, startedAt: now, duration, timeLeft: timeLeft > 0 ? timeLeft : duration });
+    saveState({ isRunning: true, startedAt: now, duration, timeLeft: effectiveTimeLeft });
   };
 
   const handlePause = () => {
@@ -315,7 +318,7 @@ const StudyTimerWidget = ({ currentPage = '' }: StudyTimerWidgetProps) => {
                       onClick={handleStart}
                       className="flex-1 py-2 sm:py-2.5 bg-violet-600 hover:bg-violet-700 text-white text-sm font-medium rounded-lg transition-colors"
                     >
-                      Start
+                      {timeLeft > 0 && timeLeft < duration ? 'Resume' : 'Start'}
                     </button>
                   )}
                   <button

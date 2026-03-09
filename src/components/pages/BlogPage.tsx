@@ -114,7 +114,28 @@ const BlogPage = ({ onNavigate, user, onLogout }: BlogPageProps) => {
       );
     }
 
-    if (post.slug.includes('study-effectively') || post.slug.includes('study-tools')) {
+    if (post.slug === 'how-to-study-effectively-complete-guide') {
+      return (
+        <svg viewBox="0 0 200 140" fill="none" className="w-full h-full">
+          <rect width="200" height="140" fill="#ECFDF5" />
+          <circle cx="100" cy="55" r="22" fill="white" stroke="#10B981" strokeWidth="2" />
+          <path d="M92 55 L97 60 L108 49" stroke="#10B981" strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+          <rect x="55" y="88" width="90" height="35" rx="4" fill="white" stroke="#059669" strokeWidth="2" />
+          <line x1="65" y1="98" x2="135" y2="98" stroke="#A7F3D0" strokeWidth="2" />
+          <line x1="65" y1="108" x2="120" y2="108" stroke="#A7F3D0" strokeWidth="2" />
+          <line x1="65" y1="118" x2="130" y2="118" stroke="#A7F3D0" strokeWidth="2" />
+          <circle cx="165" cy="50" r="18" fill="white" stroke="#F59E0B" strokeWidth="2" />
+          <path d="M165 38 L165 50 L172 56" stroke="#F59E0B" strokeWidth="2" fill="none" strokeLinecap="round" />
+          <rect x="35" y="45" width="25" height="32" rx="2" fill="white" stroke="#6366F1" strokeWidth="2" transform="rotate(-15 35 45)" />
+          <line x1="40" y1="55" x2="55" y2="55" stroke="#C4B5FD" strokeWidth="1" transform="rotate(-15 40 55)" />
+          <line x1="40" y1="62" x2="52" y2="62" stroke="#C4B5FD" strokeWidth="1" transform="rotate(-15 40 62)" />
+          <circle cx="50" cy="95" r="6" fill="#10B981" opacity="0.3" />
+          <circle cx="155" cy="95" r="5" fill="#F59E0B" opacity="0.3" />
+        </svg>
+      );
+    }
+
+    if (post.slug.includes('study-tools')) {
       return (
         <svg viewBox="0 0 200 140" fill="none" className="w-full h-full">
           <rect width="200" height="140" fill="#EEF2FF" />
