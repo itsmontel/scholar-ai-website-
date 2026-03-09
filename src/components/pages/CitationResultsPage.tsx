@@ -39,10 +39,11 @@ const CitationResultsPage = ({
 }: CitationResultsProps) => {
   const [copiedIndex, setCopiedIndex] = useState<number | string | null>(null);
   
-  const hasOldData = searchResults.citations.some(c => !c.ready_to_use_sentence);
+  const hasOldData = searchResults?.citations?.some(c => !c.ready_to_use_sentence) ?? false;
   const [showOldDataWarning, setShowOldDataWarning] = useState(hasOldData);
 
-  const makeLinksClickable = (citationText: string) => {
+  const makeLinksClickable = (citationText: string | null | undefined) => {
+    if (citationText == null || typeof citationText !== 'string') return '';
     const urlRegex = /(https?:\/\/[^\s<]+)/g;
     return citationText.replace(urlRegex, '<a href="$1" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800 underline">$1</a>');
   };
@@ -83,9 +84,10 @@ const CitationResultsPage = ({
   };
 
   const copyAllCitations = () => {
-    const allContent = searchResults.citations
+    const allContent = (searchResults.citations ?? [])
       .map((c, i) => {
-        let content = `[${i + 1}] ${c.citation.replace(/<\/?i>/g, '')}`;
+        const citationText = c.citation ?? '';
+        let content = `[${i + 1}] ${String(citationText).replace(/<\/?i>/g, '')}`;
         if (c.ready_to_use_sentence) {
           content += `\n\nReady-to-use sentence: ${c.ready_to_use_sentence}`;
         }
@@ -204,7 +206,7 @@ const CitationResultsPage = ({
               Search Strategies
             </h2>
             <ul className="space-y-3">
-              {searchResults.searchStrategies.map((strategy, index) => (
+              {(searchResults.searchStrategies ?? []).map((strategy, index) => (
                 <li key={index} className="flex items-start">
                   <span className="flex-shrink-0 w-6 h-6 bg-violet-600 text-white rounded-full flex items-center justify-center text-xs font-bold mr-3">
                     {index + 1}
@@ -242,7 +244,7 @@ const CitationResultsPage = ({
 
         {/* Citations List */}
         <div className="space-y-6">
-          {searchResults.citations.map((citation, index) => (
+          {(searchResults.citations ?? []).map((citation, index) => (
             <div
               key={index}
               className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-md hover:border-gray-300 transition-all"
@@ -262,12 +264,12 @@ const CitationResultsPage = ({
                       </span>
                     </div>
                     <p className="text-sm text-gray-500 capitalize">
-                      {citation.type.replace(/_/g, ' ')}
+                      {(citation.type ?? '').replace(/_/g, ' ')}
                     </p>
                   </div>
                 </div>
                 <button
-                  onClick={() => copyCitation(citation.citation, index)}
+                  onClick={() => copyCitation(citation.citation ?? '', index)}
                   className="flex items-center px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors font-medium text-sm"
                 >
                   {copiedIndex === index ? (
@@ -295,7 +297,7 @@ const CitationResultsPage = ({
                   dangerouslySetInnerHTML={{ 
                     __html: DOMPurify.sanitize(makeLinksClickable(citation.citation), { 
                       ADD_ATTR: ['target', 'rel', 'class'] 
-                    }) 
+                    }) || ''
                   }}
                 />
               </div>

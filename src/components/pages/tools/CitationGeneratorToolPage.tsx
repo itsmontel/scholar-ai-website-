@@ -1237,7 +1237,7 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
                 <div className="bg-gray-50 rounded-xl p-4 min-h-[120px]">
                   {citation ? (
                     <p className="text-gray-800 leading-relaxed" dangerouslySetInnerHTML={{ 
-                      __html: DOMPurify.sanitize(citation.replace(/\*([^*]+)\*/g, '<em>$1</em>'), { ALLOWED_TAGS: ['em', 'i'] })
+                      __html: DOMPurify.sanitize(String(citation).replace(/\*([^*]+)\*/g, '<em>$1</em>'), { ALLOWED_TAGS: ['em', 'i'] })
                     }} />
                   ) : (
                     <p className="text-gray-400 italic">Your formatted citation will appear here...</p>
