@@ -89,6 +89,7 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
   const [selectedCell, setSelectedCell] = useState<{ row: number; col: number } | null>(null);
   const [selectedDirection, setSelectedDirection] = useState<'across' | 'down'>('across');
   const [hintsUsed, setHintsUsed] = useState(0);
+  const crosswordInputRef = useRef<HTMLInputElement | null>(null);
 
   const isPremiumUser = user && (user.subscription_plan === 'premium' || user.plan === 'premium');
   const userPlan = user?.subscription_plan || user?.plan || 'free';
@@ -441,6 +442,22 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
       return colIdx === pw.col && rowIdx >= pw.row && rowIdx < pw.row + pw.length;
     });
   };
+
+  // Focus clue input when cell is tapped (mobile keyboard won't open for div focus)
+  useEffect(() => {
+    if (selectedClue !== null && !crosswordChecked) {
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      if (isMobile) {
+        // Small delay so React has finished rendering the input with the ref
+        const id = requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            crosswordInputRef.current?.focus();
+          });
+        });
+        return () => cancelAnimationFrame(id);
+      }
+    }
+  }, [selectedClue, selectedDirection, crosswordChecked]);
 
   // Handle cell click in crossword
   const handleCellClick = (rowIdx: number, colIdx: number) => {
@@ -2184,6 +2201,7 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
                                         <p className="text-sm text-stone-700 dark:text-stone-300">{pw.clue} <span className="text-stone-400 dark:text-stone-500">({pw.word.length} letters)</span></p>
                                       </div>
                                       <input 
+                                        ref={selectedClue === pw.number && selectedDirection === pw.direction ? crosswordInputRef : undefined}
                                         type="text" 
                                         maxLength={pw.word.length} 
                                         value={crosswordAnswers[answerKey] || ''} 
