@@ -140,7 +140,7 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
               </li>
               {/* Teal/Blues */}
               <li>
-                <a href="/tools/citations" onClick={(e) => { e.preventDefault(); onNavigate?.('citations'); }} className="text-teal-400 hover:text-teal-300 text-sm font-medium transition-colors flex items-center gap-1.5">
+                <a href="/tools/citations" onClick={(e) => { e.preventDefault(); onNavigate?.('citations'); }} className="text-sky-400 hover:text-sky-300 text-sm font-medium transition-colors flex items-center gap-1.5">
                   Citations Finder
                   <span className="text-xs opacity-75">📚</span>
                 </a>

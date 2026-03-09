@@ -58,12 +58,76 @@ const CalculatorPage = lazy(() => import('./pages/tools/CalculatorPage'));
 const ConverterPage = lazy(() => import('./pages/tools/ConverterPage'));
 const LightningReflexQuizPage = lazy(() => import('./pages/tools/LightningReflexQuizPage'));
 const InteractiveLessonPage = lazy(() => import('./pages/tools/InteractiveLessonPage'));
+const AnalyzeEssayPage = lazy(() => import('./pages/AnalyzeEssayPage'));
+const CitationsPage = lazy(() => import('./pages/CitationsPage'));
 
 // Import common components
 import ErrorBoundary from './common/ErrorBoundary';
 import BadgeNotificationToast from './common/BadgeNotificationToast';
 import StudyTimerWidget from './common/StudyTimerWidget';
 import MobileGoogleSignInPopup from './common/MobileGoogleSignInPopup';
+
+/** Derive page from pathname - used for initial state and URL sync */
+function getPageFromPath(pathname: string): string {
+  const p = pathname.replace(/\/$/, '') || '/'; // normalize trailing slash
+  if (p === '/email-verification') return 'email-verification';
+  if (p === '/onboarding') return 'onboarding';
+  if (p === '/auth/callback') return 'auth-callback';
+  if (p === '/signup') return 'signup';
+  if (p === '/login') return 'login';
+  if (p === '/reset-password') return 'reset-password';
+  if (p === '/dashboard') return 'dashboard';
+  if (p === '/pricing') return 'pricing';
+  if (p === '/features') return 'features';
+  if (p === '/why-students-choose' || p === '/compare') return 'why-students-choose';
+  if (p === '/vs-quizlet-knowt' || p === '/study-tools-comparison' || p === '/compare-study-tools') return 'study-tools-comparison';
+  if (p === '/contact') return 'contact';
+  if (p === '/analysis') return 'analysis';
+  if (p === '/analysis-history') return 'analysis-history';
+  if (p === '/citation-results') return 'citation-results';
+  if (p === '/citation-history') return 'citation-history';
+  if (p === '/quiz-history') return 'quiz-history';
+  if (p === '/friends') return 'friends';
+  if (p === '/upload') return 'upload';
+  if (p === '/settings') return 'settings';
+  if (p === '/profile') return 'profile';
+  if (p === '/library') return 'library';
+  if (p === '/account') return 'account';
+  if (p === '/billing') return 'billing';
+  if (p === '/help' || p === '/help-center') return 'help';
+  if (p === '/privacy' || p === '/privacy-policy') return 'privacy';
+  if (p === '/terms' || p === '/terms-of-service') return 'terms';
+  if (p === '/unsubscribe') return 'unsubscribe';
+  if (p === '/blog' || p === '/blog') return 'blog';
+  if (p.startsWith('/blog/')) {
+    const slug = p.replace(/^\/blog\/?/, '').split('/')[0]?.trim() ?? '';
+    return slug ? 'blog-post' : 'blog';
+  }
+  if (p === '/tools/word-counter' || p === '/word-counter') return 'word-counter';
+  if (p === '/tools/citation-generator' || p === '/citation-generator-tool') return 'citation-generator-tool';
+  if (p === '/tools/readability-score' || p === '/readability-score') return 'readability-score';
+  if (p === '/tools/paraphrasing-tips' || p === '/paraphrasing-tips') return 'paraphrasing-tips';
+  if (p === '/tools/essay-outline' || p === '/essay-outline') return 'essay-outline';
+  if (p === '/tools/text-case-converter' || p === '/text-case-converter') return 'text-case-converter';
+  if (p === '/tools/thesis-generator' || p === '/thesis-generator') return 'thesis-generator';
+  if (p === '/tools/grammar-checker' || p === '/grammar-checker') return 'grammar-checker';
+  if (p === '/tools/humanizer' || p === '/humanizer') return 'humanizer';
+  if (p === '/tools/summarizer' || p === '/summarizer') return 'summarizer';
+  if (p === '/tools/quiz-generator' || p === '/quiz-generator') return 'quiz-generator';
+  if (p === '/tools/flashcard-generator' || p === '/flashcard-generator') return 'flashcard-generator';
+  if (p === '/tools/crossword-generator' || p === '/crossword-generator') return 'crossword-generator';
+  if (p === '/tools/gpa-calculator' || p === '/gpa-calculator') return 'gpa-calculator';
+  if (p === '/tools/pomodoro-timer' || p === '/pomodoro-timer') return 'pomodoro-timer';
+  if (p === '/tools/calculator' || p === '/calculator') return 'calculator';
+  if (p === '/tools/converter' || p === '/converter') return 'converter';
+  if (p === '/tools/crater-blast' || p === '/crater-blast' || p === '/tools/lightning-reflex-quiz' || p === '/lightning-reflex-quiz') return 'crater-blast';
+  if (p === '/tools/interactive-lesson' || p === '/interactive-lesson' || p === '/lesson-generator') return 'interactive-lesson';
+  if (p === '/tools/more' || p === '/more-tools' || p === '/view-more-tools') return 'more-tools';
+  if (p === '/badges' || p === '/achievements') return 'badges';
+  if (p === '/tools/analyze' || p === '/analyze') return 'analyze';
+  if (p === '/tools/citations' || p === '/citations') return 'citations';
+  return 'landing';
+}
 
 // Type definitions
 interface User {
@@ -92,7 +156,9 @@ interface UserProps extends NavigationProps {
 
 // Main Application Component
 const AcademicAIApp = () => {
-  const [currentPage, setCurrentPage] = useState('landing');
+  const [currentPage, setCurrentPage] = useState(() =>
+    typeof window !== 'undefined' ? getPageFromPath(window.location.pathname) : 'landing'
+  );
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState<User | null>(null);
 
@@ -370,75 +436,9 @@ const AcademicAIApp = () => {
     }
   }, []);
 
-  // Handle URL-based routing
+  // Handle URL-based routing (sync on popstate, re-run when isLoggedIn changes for redirect)
   useEffect(() => {
     const path = window.location.pathname;
-    
-    // Set initial page based on URL
-    const getPageFromPath = (pathname: string) => {
-      if (pathname === '/email-verification') return 'email-verification';
-      if (pathname === '/onboarding') return 'onboarding';
-      if (pathname === '/auth/callback') return 'auth-callback';
-      if (pathname === '/signup') return 'signup';
-      if (pathname === '/login') return 'login';
-      if (pathname === '/reset-password') return 'reset-password';
-      if (pathname === '/dashboard') return 'dashboard';
-      if (pathname === '/pricing') return 'pricing';
-      if (pathname === '/features') return 'features';
-      if (pathname === '/about') return 'about';
-      if (pathname === '/why-students-choose' || pathname === '/compare') return 'why-students-choose';
-      if (pathname === '/vs-quizlet-knowt' || pathname === '/study-tools-comparison' || pathname === '/compare-study-tools') return 'study-tools-comparison';
-      if (pathname === '/contact') return 'contact';
-      if (pathname === '/analysis') return 'analysis';
-      if (pathname === '/analysis-history') return 'analysis-history';
-      if (pathname === '/citation-results') return 'citation-results';
-      if (pathname === '/citation-history') return 'citation-history';
-      if (pathname === '/quiz-history') return 'quiz-history';
-      if (pathname === '/friends') return 'friends';
-      if (pathname === '/upload') return 'upload';
-      if (pathname === '/settings') return 'settings';
-      if (pathname === '/profile') return 'profile';
-      if (pathname === '/library') return 'library';
-      if (pathname === '/account') return 'account';
-      if (pathname === '/billing') return 'billing';
-      if (pathname === '/help' || pathname === '/help-center') return 'help';
-      if (pathname === '/privacy' || pathname === '/privacy-policy') return 'privacy';
-      if (pathname === '/terms' || pathname === '/terms-of-service') return 'terms';
-      if (pathname === '/unsubscribe') return 'unsubscribe';
-      if (pathname === '/blog' || pathname === '/blog/') return 'blog';
-      if (pathname.startsWith('/blog/')) {
-        const slug = pathname.replace(/^\/blog\/?/, '').split('/')[0]?.trim() ?? '';
-        if (slug) return 'blog-post';
-        return 'blog';
-      }
-      // Free Tools routes
-      if (pathname === '/tools/word-counter' || pathname === '/word-counter') return 'word-counter';
-      if (pathname === '/tools/citation-generator' || pathname === '/citation-generator-tool') return 'citation-generator-tool';
-      if (pathname === '/tools/readability-score' || pathname === '/readability-score') return 'readability-score';
-      if (pathname === '/tools/paraphrasing-tips' || pathname === '/paraphrasing-tips') return 'paraphrasing-tips';
-      if (pathname === '/tools/essay-outline' || pathname === '/essay-outline') return 'essay-outline';
-      if (pathname === '/tools/text-case-converter' || pathname === '/text-case-converter') return 'text-case-converter';
-      if (pathname === '/tools/thesis-generator' || pathname === '/thesis-generator') return 'thesis-generator';
-      if (pathname === '/tools/grammar-checker' || pathname === '/grammar-checker') return 'grammar-checker';
-      if (pathname === '/tools/humanizer' || pathname === '/humanizer') return 'humanizer';
-      if (pathname === '/tools/summarizer' || pathname === '/summarizer') return 'summarizer';
-      if (pathname === '/tools/quiz-generator' || pathname === '/quiz-generator') return 'quiz-generator';
-      if (pathname === '/tools/flashcard-generator' || pathname === '/flashcard-generator') return 'flashcard-generator';
-      if (pathname === '/tools/crossword-generator' || pathname === '/crossword-generator') return 'crossword-generator';
-      if (pathname === '/tools/gpa-calculator' || pathname === '/gpa-calculator') return 'gpa-calculator';
-      if (pathname === '/tools/pomodoro-timer' || pathname === '/pomodoro-timer') return 'pomodoro-timer';
-      if (pathname === '/tools/calculator' || pathname === '/calculator') return 'calculator';
-      if (pathname === '/tools/converter' || pathname === '/converter') return 'converter';
-      if (pathname === '/tools/crater-blast' || pathname === '/crater-blast' || pathname === '/tools/lightning-reflex-quiz' || pathname === '/lightning-reflex-quiz') return 'crater-blast';
-      if (pathname === '/tools/interactive-lesson' || pathname === '/interactive-lesson' || pathname === '/lesson-generator') return 'interactive-lesson';
-      if (pathname === '/tools/more' || pathname === '/more-tools' || pathname === '/view-more-tools') return 'more-tools';
-      if (pathname === '/badges' || pathname === '/achievements') return 'badges';
-      // Dashboard modes
-      if (pathname === '/tools/analyze' || pathname === '/analyze') return 'analyze';
-      if (pathname === '/tools/citations' || pathname === '/citations') return 'citations';
-      return 'landing';
-    };
-    
     const initialPage = getPageFromPath(path);
     
     // If user is logged in and trying to access landing page, redirect to dashboard
@@ -762,10 +762,10 @@ const AcademicAIApp = () => {
         return <DashboardPage onNavigate={navigateTo} user={user} onLogout={handleLogout} onUserUpdate={handleDashboardUserUpdate} />;
       case 'analyze':
         if (needsOnboarding) return renderOnboarding('analyze');
-        return isLoggedIn ? <DashboardPage onNavigate={navigateTo} user={user} onLogout={handleLogout} onUserUpdate={handleDashboardUserUpdate} initialMode="analyze" /> : <LandingPage onNavigate={navigateTo} />;
+        return <AnalyzeEssayPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'citations':
         if (needsOnboarding) return renderOnboarding('citations');
-        return isLoggedIn ? <DashboardPage onNavigate={navigateTo} user={user} onLogout={handleLogout} onUserUpdate={handleDashboardUserUpdate} initialMode="citations" /> : <LandingPage onNavigate={navigateTo} />;
+        return <CitationsPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'analysis':
         return <AnalysisPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'analysis-history':
@@ -779,12 +779,12 @@ const AcademicAIApp = () => {
               user={user} 
               onLogout={handleLogout}
               searchResults={JSON.parse(citationResults)}
-              onNewSearch={() => navigateTo('dashboard')}
+              onNewSearch={() => navigateTo('citations')}
             />
           );
         } else {
-          navigateTo('dashboard');
-          return <DashboardPage onNavigate={navigateTo} user={user} onLogout={handleLogout} onUserUpdate={handleDashboardUserUpdate} />;
+          navigateTo('citations');
+          return <CitationsPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
         }
       case 'citation-history':
         return <CitationHistoryPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
@@ -886,11 +886,11 @@ const AcademicAIApp = () => {
       case 'summarizer':
         return <SummarizerPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'quiz-generator':
-        return <QuizGeneratorPage onNavigate={navigateTo} user={user} onLogout={handleLogout} initialStudyToolMode="quiz" />;
+        return <QuizGeneratorPage key="quiz-generator" onNavigate={navigateTo} user={user} onLogout={handleLogout} initialStudyToolMode="quiz" />;
       case 'flashcard-generator':
-        return <QuizGeneratorPage onNavigate={navigateTo} user={user} onLogout={handleLogout} initialStudyToolMode="flashcards" />;
+        return <QuizGeneratorPage key="flashcard-generator" onNavigate={navigateTo} user={user} onLogout={handleLogout} initialStudyToolMode="flashcards" />;
       case 'crossword-generator':
-        return <QuizGeneratorPage onNavigate={navigateTo} user={user} onLogout={handleLogout} initialStudyToolMode="crossword" />;
+        return <QuizGeneratorPage key="crossword-generator" onNavigate={navigateTo} user={user} onLogout={handleLogout} initialStudyToolMode="crossword" />;
       case 'gpa-calculator':
         return <GPACalculatorPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'pomodoro-timer':
