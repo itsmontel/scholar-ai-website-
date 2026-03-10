@@ -59,7 +59,7 @@ export default function UnlockQuizPage() {
   const [showExtensionHint, setShowExtensionHint] = useState(false);
 
   const currentItem = questions[currentIndex];
-  const isPassed = score >= UNLOCK_THRESHOLD;
+  const isPassed = score >= passThreshold;
 
   const isCorrectQuizAnswer = useCallback((answer: string, item: QuizItem): boolean => {
     if (item.type !== 'quiz') return false;
@@ -239,7 +239,7 @@ export default function UnlockQuizPage() {
             {isPassed ? 'You did it!' : 'Almost there!'}
           </h1>
           <p className="text-stone-600 mb-4">
-            {score} of {TOTAL_QUESTIONS} correct. You need at least {UNLOCK_THRESHOLD} to unlock.
+            {score} of {totalQuestions} correct. You need at least {passThreshold} to unlock.
           </p>
           {isPassed ? (
             <>
