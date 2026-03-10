@@ -45,6 +45,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   const planBadge = document.getElementById('planBadge');
   const accountBtn = document.getElementById('accountBtn');
   const syncBtn = document.getElementById('syncBtn');
+  const unlockDurationSelect = document.getElementById('unlockDuration');
+  const unlockTimer = document.getElementById('unlockTimer');
+  const unlockTimerList = document.getElementById('unlockTimerList');
 
   // Trigger sync on popup open to get fresh plan/config from server
   const { authToken } = await chrome.storage.local.get('authToken');
@@ -52,10 +55,82 @@ document.addEventListener('DOMContentLoaded', async () => {
     await new Promise(resolve => chrome.runtime.sendMessage({ type: 'SYNC_CONFIG' }, resolve));
   }
 
-  const { authToken: token, config } = await chrome.storage.local.get(['authToken', 'config']);
+  const { authToken: token, config, unlockDurationMs } = await chrome.storage.local.get(['authToken', 'config', 'unlockDurationMs']);
   let blocked = config?.blockedDomains || [];
   const plan = (config?.plan || 'free').toLowerCase();
   const isPaid = plan === 'pro' || plan === 'premium';
+  
+  // Load unlock duration preference (default: 30 minutes)
+  const defaultDuration = 1800000; // 30 minutes
+  if (unlockDurationMs) {
+    unlockDurationSelect.value = unlockDurationMs.toString();
+  } else {
+    unlockDurationSelect.value = defaultDuration.toString();
+  }
+  
+  // Save unlock duration when changed
+  unlockDurationSelect.addEventListener('change', async () => {
+    const duration = parseInt(unlockDurationSelect.value, 10);
+    await chrome.storage.local.set({ unlockDurationMs: duration });
+    showToast('Unlock duration saved');
+  });
+
+  // Format remaining time
+  function formatRemainingTime(ms) {
+    if (ms <= 0) return 'Expired';
+    const totalSeconds = Math.floor(ms / 1000);
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+    
+    if (hours > 0) {
+      return `${hours}h ${minutes}m`;
+    } else if (minutes > 0) {
+      return `${minutes}m ${seconds}s`;
+    } else {
+      return `${seconds}s`;
+    }
+  }
+
+  // Update unlock timer display
+  function updateUnlockTimer() {
+    chrome.storage.local.get('unlocks', ({ unlocks = {} }) => {
+      const now = Date.now();
+      const activeUnlocks = Object.entries(unlocks)
+        .filter(([domain, expiresAt]) => expiresAt > now)
+        .map(([domain, expiresAt]) => ({
+          domain,
+          expiresAt,
+          remaining: expiresAt - now
+        }))
+        .sort((a, b) => a.expiresAt - b.expiresAt);
+
+      if (activeUnlocks.length === 0) {
+        unlockTimer.style.display = 'none';
+        return;
+      }
+
+      unlockTimer.style.display = 'block';
+      unlockTimerList.innerHTML = activeUnlocks.map(({ domain, remaining }) => {
+        const formatted = formatRemainingTime(remaining);
+        const isExpiringSoon = remaining < 5 * 60 * 1000; // Less than 5 minutes
+        return `
+          <div class="unlock-item">
+            <span class="unlock-domain">${domain}</span>
+            <span class="unlock-time ${isExpiringSoon ? 'expired' : ''}">${formatted}</span>
+          </div>
+        `;
+      }).join('');
+    });
+  }
+
+  // Update timer every second
+  let timerInterval = null;
+  function startTimer() {
+    updateUnlockTimer();
+    if (timerInterval) clearInterval(timerInterval);
+    timerInterval = setInterval(updateUnlockTimer, 1000);
+  }
 
   if (!token) {
     statusEl.className = 'status error';
@@ -78,6 +153,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   planBadge.textContent = plan === 'premium' ? 'Premium' : 'Pro';
   planBadge.style.display = 'inline-block';
   sitesSection.classList.add('visible');
+  unlockDurationSelect.style.display = 'block';
   actionsRow.style.display = 'flex';
   accountBtn.onclick = () => chrome.tabs.create({ url: `${SCHOLAR_BASE}/account` });
   syncBtn.onclick = async () => {
@@ -89,6 +165,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       window.close();
     });
   };
+  
+  // Start timer for paid users
+  startTimer();
 
   const updateStatus = () => {
     if (blocked.length > 0) {
@@ -106,6 +185,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         blocked = r.blockedDomains || next;
         renderSites();
         updateStatus();
+        updateUnlockTimer(); // Refresh timer when sites change
         showToast(r.savedToServer ? 'Saved' : 'Saved locally (sync when online)');
       } else {
         showToast('Failed to save', 'error');
@@ -167,5 +247,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   chrome.runtime.sendMessage({ type: 'FETCH_PRESETS' }, (r) => {
     if (r?.presets?.length) presets = r.presets;
     renderSites();
+  });
+
+  // Clean up timer when popup closes
+  window.addEventListener('beforeunload', () => {
+    if (timerInterval) clearInterval(timerInterval);
   });
 });

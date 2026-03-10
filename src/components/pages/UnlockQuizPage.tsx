@@ -394,6 +394,7 @@ export default function UnlockQuizPage() {
               )}
             </div>
           )}
+          </div>
         </div>
       </div>
     </div>

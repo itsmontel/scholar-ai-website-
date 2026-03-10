@@ -4,9 +4,14 @@
  */
 
 const RULE_ID_BASE = 1000;
-const UNLOCK_DURATION_MS = 60 * 60 * 1000; // 1 hour
+const UNLOCK_DURATION_MS_DEFAULT = 30 * 60 * 1000; // 30 minutes default
 const SCHOLAR_BASE = 'https://writescholar.com';
 const API_BASE_FALLBACK = 'https://api.writescholar.com/api';
+
+async function getUnlockDuration() {
+  const { unlockDurationMs } = await chrome.storage.local.get('unlockDurationMs');
+  return unlockDurationMs || UNLOCK_DURATION_MS_DEFAULT;
+}
 
 function getScholarBase() {
   return SCHOLAR_BASE;
@@ -184,21 +189,24 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       sendResponse({ ok: false });
       return true;
     }
-    const expiresAt = Date.now() + UNLOCK_DURATION_MS;
-    console.log('[WriteScholar BG] Setting unlock for', site, 'expires:', new Date(expiresAt).toISOString());
-    setUnlock(site, expiresAt)
-      .then(() => {
-        console.log('[WriteScholar BG] Unlock stored, syncing rules...');
-        return syncRules();
-      })
-      .then(() => {
-        console.log('[WriteScholar BG] Rules synced, sending ok response');
-        sendResponse({ ok: true });
-      })
-      .catch((e) => {
-        console.error('[WriteScholar BG] Unlock site failed:', e);
-        sendResponse({ ok: false });
-      });
+    getUnlockDuration().then((duration) => {
+      const expiresAt = Date.now() + duration;
+      const durationHours = (duration / (60 * 60 * 1000)).toFixed(1);
+      console.log('[WriteScholar BG] Setting unlock for', site, 'duration:', durationHours, 'hours, expires:', new Date(expiresAt).toISOString());
+      return setUnlock(site, expiresAt)
+        .then(() => {
+          console.log('[WriteScholar BG] Unlock stored, syncing rules...');
+          return syncRules();
+        })
+        .then(() => {
+          console.log('[WriteScholar BG] Rules synced, sending ok response');
+          sendResponse({ ok: true });
+        })
+        .catch((e) => {
+          console.error('[WriteScholar BG] Unlock site failed:', e);
+          sendResponse({ ok: false });
+        });
+    });
     return true;
   }
   if (msg.type === 'SYNC_CONFIG') {
