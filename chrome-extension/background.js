@@ -40,9 +40,11 @@ async function getUnlocks() {
 }
 
 async function setUnlock(domain, expiresAt) {
+  console.log('[WriteScholar BG] setUnlock called for domain:', domain, 'expiresAt:', expiresAt);
   const unlocks = await getUnlocks();
   unlocks[domain] = expiresAt;
   await chrome.storage.local.set({ unlocks });
+  console.log('[WriteScholar BG] Unlock saved. All unlocks now:', unlocks);
 }
 
 async function removeUnlock(domain) {
@@ -72,22 +74,29 @@ function normalizeDomains(domains) {
 }
 
 async function syncRules() {
+  console.log('[WriteScholar BG] syncRules called');
   const config = await getStoredConfig();
   const unlocks = await getUnlocks();
   const now = Date.now();
+  
+  console.log('[WriteScholar BG] Config blockedDomains:', config.blockedDomains);
+  console.log('[WriteScholar BG] Current unlocks:', unlocks);
 
   const toBlock = (config.blockedDomains || []).filter(
     (d) => !unlocks[d] || unlocks[d] < now
   );
+  
+  console.log('[WriteScholar BG] Domains to block (after unlock filter):', toBlock);
 
   if (toBlock.length === 0) {
-    await chrome.declarativeNetRequest.updateDynamicRules({ removeRuleIds: [] });
+    console.log('[WriteScholar BG] No domains to block, clearing all rules');
     const existing = await chrome.declarativeNetRequest.getDynamicRules();
     if (existing.length > 0) {
       await chrome.declarativeNetRequest.updateDynamicRules({
         removeRuleIds: existing.map((r) => r.id),
       });
     }
+    console.log('[WriteScholar BG] Rules cleared');
     return;
   }
 
@@ -109,10 +118,15 @@ async function syncRules() {
 
   const existing = await chrome.declarativeNetRequest.getDynamicRules();
   const removeIds = existing.map((r) => r.id);
+  console.log('[WriteScholar BG] Removing old rules:', removeIds);
+  console.log('[WriteScholar BG] Adding new rules:', rules.map(r => r.condition.urlFilter));
+  
   await chrome.declarativeNetRequest.updateDynamicRules({
     removeRuleIds: removeIds,
     addRules: rules,
   });
+  
+  console.log('[WriteScholar BG] Rules updated successfully');
 }
 
 async function fetchConfig(token) {
@@ -151,26 +165,38 @@ chrome.runtime.onInstalled.addListener(async () => {
 });
 
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+  console.log('[WriteScholar BG] Message received:', msg.type, 'from:', sender?.url);
+  
   if (msg.type === 'AUTH_TOKEN') {
     const updates = { authToken: msg.token };
     if (msg.apiBase) updates.apiBase = msg.apiBase;
     chrome.storage.local.set(updates, () => {
+      console.log('[WriteScholar BG] AUTH_TOKEN stored');
       syncFromServer().then(() => sendResponse({ ok: true }));
     });
     return true;
   }
   if (msg.type === 'UNLOCK_SITE') {
     const { site, redirect } = msg;
+    console.log('[WriteScholar BG] UNLOCK_SITE request. site:', site, 'redirect:', redirect);
     if (!site) {
+      console.warn('[WriteScholar BG] No site provided');
       sendResponse({ ok: false });
       return true;
     }
     const expiresAt = Date.now() + UNLOCK_DURATION_MS;
+    console.log('[WriteScholar BG] Setting unlock for', site, 'expires:', new Date(expiresAt).toISOString());
     setUnlock(site, expiresAt)
-      .then(() => syncRules())
-      .then(() => sendResponse({ ok: true }))
+      .then(() => {
+        console.log('[WriteScholar BG] Unlock stored, syncing rules...');
+        return syncRules();
+      })
+      .then(() => {
+        console.log('[WriteScholar BG] Rules synced, sending ok response');
+        sendResponse({ ok: true });
+      })
       .catch((e) => {
-        console.error('Unlock site failed:', e);
+        console.error('[WriteScholar BG] Unlock site failed:', e);
         sendResponse({ ok: false });
       });
     return true;

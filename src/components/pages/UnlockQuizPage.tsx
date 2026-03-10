@@ -139,16 +139,52 @@ export default function UnlockQuizPage() {
   const handleUnlockAndContinue = () => {
     const siteDomain = site || (redirect ? new URL(redirect).hostname.replace(/^www\./, '') : '');
     const finalRedirect = redirect || `https://${siteDomain}`;
+    console.log('[UnlockQuiz] Continue clicked. siteDomain:', siteDomain, 'redirect:', finalRedirect);
     setIsRedirecting(true);
     setShowExtensionHint(false);
 
     const payload = { site: siteDomain, redirect: finalRedirect };
+    
+    // Method 1: DOM-based communication (most reliable)
+    console.log('[UnlockQuiz] Setting DOM unlock request');
+    const unlockEl = document.createElement('div');
+    unlockEl.id = 'writescholar-unlock-request';
+    unlockEl.dataset.site = siteDomain;
+    unlockEl.dataset.redirect = finalRedirect;
+    unlockEl.style.display = 'none';
+    document.body.appendChild(unlockEl);
+    
+    // Method 2: CustomEvent
+    console.log('[UnlockQuiz] Dispatching CustomEvent focus-mode-unlock');
     document.dispatchEvent(new CustomEvent('focus-mode-unlock', { detail: payload, bubbles: true }));
+    
+    // Method 3: postMessage
+    console.log('[UnlockQuiz] Posting message WRITESCHOLAR_FOCUS_UNLOCK');
     window.postMessage({ type: 'WRITESCHOLAR_FOCUS_UNLOCK', ...payload }, '*');
+    
+    // Method 4: Direct chrome API if available (won't work from page context, but try anyway)
+    if (typeof chrome !== 'undefined' && chrome.runtime?.sendMessage) {
+      console.log('[UnlockQuiz] Trying direct chrome.runtime.sendMessage');
+      try {
+        chrome.runtime.sendMessage({ type: 'UNLOCK_SITE', site: siteDomain, redirect: finalRedirect }, (response: { ok?: boolean } | undefined) => {
+          const err = chrome.runtime?.lastError;
+          console.log('[UnlockQuiz] Direct chrome response:', response, 'error:', err);
+          if (response?.ok && finalRedirect) {
+            console.log('[UnlockQuiz] Direct unlock succeeded, redirecting...');
+            window.location.replace(finalRedirect);
+          }
+        });
+      } catch (e) {
+        console.log('[UnlockQuiz] Direct chrome.runtime.sendMessage failed:', e);
+      }
+    }
 
     setTimeout(() => {
+      console.log('[UnlockQuiz] Timeout reached, showing hint');
       setIsRedirecting(false);
       setShowExtensionHint(true);
+      // Clean up DOM element
+      document.getElementById('writescholar-unlock-request')?.remove();
     }, 5000);
   };
 
