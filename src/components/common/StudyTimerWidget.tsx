@@ -33,7 +33,7 @@ interface StudyTimerWidgetProps {
   currentPage?: string;
 }
 
-const HIDE_ON_PAGES = ['login', 'signup', 'auth-callback', 'reset-password', 'email-verification', 'onboarding'];
+const HIDE_ON_PAGES = ['login', 'signup', 'auth-callback', 'reset-password', 'email-verification', 'onboarding', 'unlock-quiz'];
 
 const StudyTimerWidget = ({ currentPage = '' }: StudyTimerWidgetProps) => {
   const [isExpanded, setIsExpanded] = useState(false);

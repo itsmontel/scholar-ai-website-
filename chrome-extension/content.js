@@ -1,10 +1,25 @@
 /**
- * Content script on WriteScholar - syncs auth token and listens for unlock success
+ * Content script on WriteScholar - syncs auth token, API base URL, and listens for unlock success
  */
 (function syncAuthToken() {
   try {
     const token = localStorage.getItem('authToken');
-    if (token) chrome.runtime.sendMessage({ type: 'AUTH_TOKEN', token }, () => {});
+    const origin = window.location.origin;
+    fetch(`${origin}/api-config.json`)
+      .then((r) => r.ok ? r.json() : null)
+      .then((cfg) => {
+        const apiBase = cfg?.apiUrl?.replace(/\/$/, '') || null;
+        if (token || apiBase) {
+          chrome.runtime.sendMessage({
+            type: 'AUTH_TOKEN',
+            token: token || '',
+            apiBase: apiBase || undefined
+          }, () => {});
+        }
+      })
+      .catch(() => {
+        if (token) chrome.runtime.sendMessage({ type: 'AUTH_TOKEN', token }, () => {});
+      });
   } catch (_e) {}
 })();
 
@@ -15,7 +30,7 @@ document.addEventListener('focus-mode-unlock', (e) => {
     { type: 'UNLOCK_SITE', site, redirect },
     (response) => {
       if (response?.ok && redirect) {
-        window.location.href = redirect;
+        window.location.replace(redirect);
       }
     }
   );

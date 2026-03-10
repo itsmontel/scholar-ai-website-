@@ -2,88 +2,235 @@
 <html>
 <head>
   <meta charset="UTF-8">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Crimson+Text:wght@600;700&display=swap" rel="stylesheet">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      width: 320px;
-      padding: 16px;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      width: 380px;
+      min-height: 320px;
+      padding: 20px;
+      font-family: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif;
       font-size: 14px;
       color: #292524;
-      background: linear-gradient(180deg, #faf5ff 0%, #f5f3ff 100%);
+      background: linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%);
     }
-    h1 {
-      font-size: 16px;
-      font-weight: 700;
-      margin-bottom: 4px;
-      color: #4c1d95;
-    }
-    p {
-      color: #57534e;
-      margin-bottom: 12px;
-      line-height: 1.5;
-    }
-    .status {
-      padding: 10px 12px;
-      border-radius: 10px;
-      margin-bottom: 12px;
-      font-size: 13px;
+    .header {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .header img {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+    }
+    .header h1 {
+      font-family: 'Crimson Text', Georgia, serif;
+      font-size: 20px;
+      font-weight: 600;
+      color: #1c1917;
+    }
+    .header .badge {
+      font-size: 11px;
+      font-weight: 700;
+      color: #4f46e5;
+      background: #eef2ff;
+      padding: 4px 10px;
+      border-radius: 8px;
+      margin-left: auto;
+    }
+    .subtitle {
+      color: #57534e;
+      font-size: 13px;
+      line-height: 1.5;
+      margin-bottom: 16px;
+    }
+    .card {
+      background: white;
+      border: 1px solid #e7e5e4;
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+    .status {
+      padding: 12px 14px;
+      border-radius: 12px;
+      margin-bottom: 16px;
+      font-size: 13px;
+      font-weight: 500;
     }
     .status.inactive {
       background: #fef3c7;
       color: #92400e;
+      border: 1px solid #fde68a;
     }
     .status.active {
       background: #d1fae5;
       color: #065f46;
+      border: 1px solid #a7f3d0;
     }
     .status.error {
       background: #fee2e2;
       color: #991b1b;
+      border: 1px solid #fecaca;
     }
     button {
       width: 100%;
-      padding: 10px 16px;
+      padding: 12px 16px;
       border: none;
-      border-radius: 10px;
+      border-radius: 12px;
       font-size: 14px;
       font-weight: 600;
+      font-family: inherit;
       cursor: pointer;
-      transition: opacity 0.2s;
+      transition: all 0.2s;
     }
     button:disabled { opacity: 0.6; cursor: not-allowed; }
     .btn-primary {
-      background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
       color: white;
       margin-bottom: 8px;
     }
-    .btn-primary:hover:not(:disabled) { opacity: 0.95; }
-    .btn-secondary {
-      background: #e7e5e4;
-      color: #44403c;
+    .btn-primary:hover:not(:disabled) {
+      background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+      box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
     }
-    .btn-secondary:hover:not(:disabled) { background: #d6d3d1; }
+    .btn-secondary {
+      background: #f5f5f4;
+      color: #44403c;
+      border: 1px solid #e7e5e4;
+    }
+    .btn-secondary:hover:not(:disabled) {
+      background: #e7e5e4;
+    }
     a {
-      color: #7c3aed;
+      color: #6366f1;
       text-decoration: none;
-      font-weight: 500;
+      font-weight: 600;
     }
     a:hover { text-decoration: underline; }
-    .footer { margin-top: 12px; font-size: 12px; color: #78716c; }
+    .footer {
+      margin-top: 16px;
+      padding-top: 12px;
+      border-top: 1px solid #e7e5e4;
+      font-size: 12px;
+      color: #78716c;
+    }
+    .sites-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: #292524;
+      margin-bottom: 10px;
+    }
+    .sites-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .site-btn {
+      width: auto !important;
+      padding: 8px 14px !important;
+      border-radius: 10px;
+      font-size: 12px !important;
+      font-weight: 600;
+      background: #f5f5f4;
+      color: #57534e;
+      border: 1px solid #e7e5e4;
+    }
+    .site-btn.blocked {
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+      color: white;
+      border: none;
+    }
+    .site-btn:hover:not(:disabled) {
+      opacity: 0.9;
+    }
+    .sites-section { display: none; }
+    .sites-section.visible { display: block; }
+    .add-domain {
+      display: flex;
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .add-domain input {
+      flex: 1;
+      padding: 10px 14px;
+      border: 1px solid #e7e5e4;
+      border-radius: 12px;
+      font-size: 13px;
+      font-family: inherit;
+    }
+    .add-domain input:focus {
+      outline: none;
+      border-color: #6366f1;
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+    }
+    .add-domain input::placeholder {
+      color: #a8a29e;
+    }
+    .add-domain button {
+      width: auto !important;
+      padding: 10px 18px !important;
+    }
+    .btn-mascot {
+      background: #8B5CF6 !important;
+      color: white !important;
+    }
+    .btn-mascot:hover:not(:disabled) {
+      background: #7C3AED !important;
+      box-shadow: 0 2px 8px rgba(139, 92, 246, 0.4);
+    }
+    .actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .actions button { flex: 1; }
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 10px 18px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 600;
+      z-index: 100;
+    }
+    .toast.success {
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+      color: white;
+    }
+    .toast.error { background: #dc2626; color: white; }
   </style>
 </head>
 <body>
-  <h1>WriteScholar Focus Mode</h1>
-  <p>Block distracting sites until you answer 5 study questions.</p>
+  <div class="header">
+    <img src="mascot.png" alt="WriteScholar" />
+    <h1>Focus Mode</h1>
+    <span id="planBadge" class="badge" style="display:none"></span>
+  </div>
+  <p class="subtitle">Block distracting sites until you answer 5 study questions.</p>
   <div id="status" class="status inactive">Checking status...</div>
   <button id="loginBtn" class="btn-primary" style="display:none">Log in at WriteScholar</button>
-  <button id="settingsBtn" class="btn-primary" style="display:none">Open Settings</button>
-  <button id="syncBtn" class="btn-secondary" style="display:none">Sync</button>
+  <div id="sitesSection" class="sites-section">
+    <div class="card">
+      <div class="sites-label">Sites to block</div>
+      <div id="sitesGrid" class="sites-grid"></div>
+      <div class="add-domain">
+        <input id="customDomain" type="text" placeholder="youtube.com, instagram.com..." maxlength="100" />
+        <button id="addDomainBtn" class="btn-primary btn-mascot">Add</button>
+      </div>
+    </div>
+  </div>
+  <div id="actionsRow" class="actions" style="display:none">
+    <button id="accountBtn" class="btn-secondary">Account</button>
+    <button id="syncBtn" class="btn-secondary">Sync</button>
+  </div>
   <div class="footer">
-    <a href="https://writescholar.com/account" target="_blank">Configure blocked sites</a>
+    <a href="https://writescholar.com/account" target="_blank">Account settings</a>
   </div>
   <script src="popup.js"></script>
 </body>

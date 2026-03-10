@@ -24,6 +24,22 @@ interface QuizItem {
 const UNLOCK_THRESHOLD = 4; // Must get at least 4 of 5 right
 const TOTAL_QUESTIONS = 5;
 
+function formatSiteName(domain: string): string {
+  const names: Record<string, string> = {
+    'youtube.com': 'YouTube',
+    'tiktok.com': 'TikTok',
+    'instagram.com': 'Instagram',
+    'facebook.com': 'Facebook',
+    'twitter.com': 'X',
+    'reddit.com': 'Reddit',
+    'netflix.com': 'Netflix',
+    'twitch.tv': 'Twitch',
+    'pinterest.com': 'Pinterest',
+    'snapchat.com': 'Snapchat',
+  };
+  return names[domain] || domain;
+}
+
 export default function UnlockQuizPage() {
   const params = getSearchParams();
   const site = params.site;
@@ -115,7 +131,12 @@ export default function UnlockQuizPage() {
         detail: { site: siteDomain, redirect: finalRedirect },
       })
     );
-    window.location.href = finalRedirect;
+    // Content script handles redirect after background confirms unlock (avoids race where
+    // page navigates before unlock is saved, causing user to get blocked again).
+    // Fallback: if extension doesn't respond in 2s, redirect anyway (e.g. no extension loaded).
+    setTimeout(() => {
+      window.location.href = finalRedirect;
+    }, 2000);
   };
 
   const handleGoToScholar = () => {
@@ -197,23 +218,28 @@ export default function UnlockQuizPage() {
   }
 
   const progress = ((currentIndex + 1) / questions.length) * 100;
+  const siteDisplay = site ? formatSiteName(site) : 'this site';
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50 p-4">
-      <div className="w-full max-w-lg bg-white rounded-2xl shadow-xl overflow-hidden">
-        <div className="h-1 bg-stone-100">
-          <div
-            className="h-full bg-gradient-to-r from-violet-500 to-purple-500 transition-all duration-300"
-            style={{ width: `${progress}%` }}
-          />
-        </div>
-        <div className="p-6 sm:p-8">
-          <p className="text-sm text-stone-500 mb-2">
-            Question {currentIndex + 1} of {questions.length}
-          </p>
-          <p className="text-xs text-stone-400 mb-4">
-            Get {UNLOCK_THRESHOLD} of {TOTAL_QUESTIONS} right to unlock
-          </p>
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50">
+      <div className="flex items-center gap-4 px-4 py-4 sm:px-6 border-b border-violet-100/80 bg-white/60 backdrop-blur-sm">
+        <ScholarMascot size={56} animated />
+        <p className="text-base sm:text-lg font-semibold text-stone-800">
+          Get {UNLOCK_THRESHOLD}/{TOTAL_QUESTIONS} or more to unlock {siteDisplay}
+        </p>
+      </div>
+      <div className="flex-1 flex items-center justify-center p-4">
+        <div className="w-full max-w-lg bg-white rounded-2xl shadow-xl overflow-hidden">
+          <div className="h-1 bg-stone-100">
+            <div
+              className="h-full bg-gradient-to-r from-violet-500 to-purple-500 transition-all duration-300"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+          <div className="p-6 sm:p-8">
+            <p className="text-sm text-stone-500 mb-2">
+              Question {currentIndex + 1} of {questions.length}
+            </p>
 
           {currentItem?.type === 'quiz' && (
             <>
@@ -313,6 +339,7 @@ export default function UnlockQuizPage() {
           )}
         </div>
       </div>
+    </div>
     </div>
   );
 }
