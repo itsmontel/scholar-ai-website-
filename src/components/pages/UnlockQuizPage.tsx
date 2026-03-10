@@ -54,6 +54,8 @@ export default function UnlockQuizPage() {
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [showResults, setShowResults] = useState(false);
   const [isFlipped, setIsFlipped] = useState(false);
+  const [isRedirecting, setIsRedirecting] = useState(false);
+  const [showExtensionHint, setShowExtensionHint] = useState(false);
 
   const currentItem = questions[currentIndex];
   const isPassed = score >= UNLOCK_THRESHOLD;
@@ -123,20 +125,31 @@ export default function UnlockQuizPage() {
     }
   }, [currentIndex, questions.length]);
 
+  useEffect(() => {
+    const handler = (e: MessageEvent) => {
+      if (e.source === window && e.data?.type === 'WRITESCHOLAR_UNLOCK_FAILED') {
+        setIsRedirecting(false);
+        setShowExtensionHint(true);
+      }
+    };
+    window.addEventListener('message', handler);
+    return () => window.removeEventListener('message', handler);
+  }, []);
+
   const handleUnlockAndContinue = () => {
     const siteDomain = site || (redirect ? new URL(redirect).hostname.replace(/^www\./, '') : '');
     const finalRedirect = redirect || `https://${siteDomain}`;
-    window.dispatchEvent(
-      new CustomEvent('focus-mode-unlock', {
-        detail: { site: siteDomain, redirect: finalRedirect },
-      })
-    );
-    // Content script handles redirect after background confirms unlock (avoids race where
-    // page navigates before unlock is saved, causing user to get blocked again).
-    // Fallback: if extension doesn't respond in 2s, redirect anyway (e.g. no extension loaded).
+    setIsRedirecting(true);
+    setShowExtensionHint(false);
+
+    const payload = { site: siteDomain, redirect: finalRedirect };
+    document.dispatchEvent(new CustomEvent('focus-mode-unlock', { detail: payload, bubbles: true }));
+    window.postMessage({ type: 'WRITESCHOLAR_FOCUS_UNLOCK', ...payload }, '*');
+
     setTimeout(() => {
-      window.location.href = finalRedirect;
-    }, 2000);
+      setIsRedirecting(false);
+      setShowExtensionHint(true);
+    }, 5000);
   };
 
   const handleGoToScholar = () => {
@@ -187,12 +200,20 @@ export default function UnlockQuizPage() {
             {score} of {TOTAL_QUESTIONS} correct. You need at least {UNLOCK_THRESHOLD} to unlock.
           </p>
           {isPassed ? (
-            <button
-              onClick={handleUnlockAndContinue}
-              className="w-full px-6 py-4 bg-gradient-to-r from-violet-600 to-purple-600 text-white rounded-xl font-semibold hover:opacity-90 transition-opacity"
-            >
-              Continue to {site || 'site'}
-            </button>
+            <>
+              <button
+                onClick={handleUnlockAndContinue}
+                disabled={isRedirecting}
+                className="w-full px-6 py-4 bg-gradient-to-r from-violet-600 to-purple-600 text-white rounded-xl font-semibold hover:opacity-90 transition-opacity disabled:opacity-70 disabled:cursor-wait"
+              >
+                {isRedirecting ? 'Redirecting...' : `Continue to ${site ? formatSiteName(site) : 'site'}`}
+              </button>
+              {showExtensionHint && (
+                <p className="mt-3 text-sm text-stone-500">
+                  If you weren&apos;t redirected, ensure the WriteScholar extension is installed and try again.
+                </p>
+              )}
+            </>
           ) : (
             <button
               onClick={() => {
@@ -339,7 +360,6 @@ export default function UnlockQuizPage() {
           )}
         </div>
       </div>
-    </div>
     </div>
   );
 }

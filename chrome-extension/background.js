@@ -163,12 +163,16 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     const { site, redirect } = msg;
     if (!site) {
       sendResponse({ ok: false });
-      return;
+      return true;
     }
     const expiresAt = Date.now() + UNLOCK_DURATION_MS;
-    setUnlock(site, expiresAt).then(() => {
-      syncRules().then(() => sendResponse({ ok: true }));
-    });
+    setUnlock(site, expiresAt)
+      .then(() => syncRules())
+      .then(() => sendResponse({ ok: true }))
+      .catch((e) => {
+        console.error('Unlock site failed:', e);
+        sendResponse({ ok: false });
+      });
     return true;
   }
   if (msg.type === 'SYNC_CONFIG') {
