@@ -48,6 +48,9 @@ export interface AchievementStats {
   total_words_analyzed: number;
   documents_in_single_day: number;
   study_sessions_count: number;
+  // Focus Mode
+  focus_mode_unlocks_count: number;
+  focus_mode_sites_blocked: number;
 }
 
 export interface Badge {
@@ -226,6 +229,15 @@ export const BADGES: Badge[] = [
   { id: 'lesson_legend', name: 'Lesson Legend', creatureName: 'Legendix', description: 'Generate 25 interactive lessons', xp: 75, category: 'mastery', rarity: 'legendary', condition: (s) => (s.lessons_count || 0) >= 25, conditionText: 'Generate 25 lessons' },
   { id: 'lesson_centurion', name: 'Lesson Centurion', creatureName: 'Lessonix', description: 'Generate 100 interactive lessons', xp: 150, category: 'mastery', rarity: 'legendary', condition: (s) => (s.lessons_count || 0) >= 100, conditionText: 'Generate 100 lessons' },
   { id: 'triple_threat', name: 'Triple Threat', creatureName: 'Triplix', description: 'Use all 3 lesson styles (Visual, Step-by-Step, Story) in one session', xp: 30, category: 'special', rarity: 'rare', condition: (s) => (s.lesson_styles_used_session || 0) >= 3, conditionText: 'Use all 3 lesson styles in one session' },
+
+  // ═══════════════════════════════════════════════
+  // FOCUS MODE (5 badges)
+  // ═══════════════════════════════════════════════
+  { id: 'focus_mode_first_unlock', name: 'Unlocked!', creatureName: 'Keyley', description: 'Complete your first Focus Mode unlock', xp: 15, category: 'getting-started', rarity: 'common', condition: (s) => (s.focus_mode_unlocks_count || 0) >= 1, conditionText: 'Pass the unlock quiz once' },
+  { id: 'focus_mode_first_block', name: 'Block Party', creatureName: 'Blocky', description: 'Block your first distracting website', xp: 15, category: 'getting-started', rarity: 'common', condition: (s) => (s.focus_mode_sites_blocked || 0) >= 1, conditionText: 'Block 1 website' },
+  { id: 'focus_mode_unlock_5', name: 'Earned It', creatureName: 'Earnix', description: 'Unlock sites 5 times with the quiz', xp: 30, category: 'mastery', rarity: 'uncommon', condition: (s) => (s.focus_mode_unlocks_count || 0) >= 5, conditionText: 'Unlock sites 5 times' },
+  { id: 'focus_mode_block_5', name: 'Distraction Destroyer', creatureName: 'Destroyix', description: 'Block 5 distracting websites', xp: 30, category: 'mastery', rarity: 'uncommon', condition: (s) => (s.focus_mode_sites_blocked || 0) >= 5, conditionText: 'Block 5 websites' },
+  { id: 'focus_mode_master', name: 'Focus Master', creatureName: 'Focusix', description: 'Unlock sites 10 times', xp: 50, category: 'mastery', rarity: 'epic', condition: (s) => (s.focus_mode_unlocks_count || 0) >= 10, conditionText: 'Unlock sites 10 times' },
 ];
 
 const STATS_KEY = 'writescholar_achievement_stats';
@@ -279,6 +291,8 @@ function defaultStats(): AchievementStats {
     total_words_analyzed: 0,
     documents_in_single_day: 0,
     study_sessions_count: 0,
+    focus_mode_unlocks_count: 0,
+    focus_mode_sites_blocked: 0,
   };
 }
 
@@ -341,9 +355,10 @@ export function mergeFromServer(serverStats: Record<string, unknown>, serverBadg
     // New stats
     'calendar_events_count', 'friend_requests_sent', 'friends_count', 'shares_count',
     'quick_review_count', 'quick_review_perfect_scores', 'quick_review_current_streak',
-    'quick_review_longest_streak', 'crater_blast_games', 'crater_blast_perfect_games',
+    'quick_review_longest_streak',     'crater_blast_games', 'crater_blast_perfect_games',
     'crater_blast_high_score', 'total_study_tools_created', 'total_words_analyzed',
     'documents_in_single_day', 'study_sessions_count',
+    'focus_mode_unlocks_count', 'focus_mode_sites_blocked',
   ];
   const merged = { ...local };
   for (const key of numericKeys) {
@@ -528,6 +543,13 @@ export function updateQuickReviewStreak(currentStreak: number): string[] {
   const stats = getStats();
   stats.quick_review_current_streak = currentStreak;
   stats.quick_review_longest_streak = Math.max(stats.quick_review_longest_streak || 0, currentStreak);
+  saveStats(stats);
+  return checkAndUnlockBadges(stats);
+}
+
+export function trackFocusModeUnlock(): string[] {
+  const stats = getStats();
+  stats.focus_mode_unlocks_count = (stats.focus_mode_unlocks_count || 0) + 1;
   saveStats(stats);
   return checkAndUnlockBadges(stats);
 }

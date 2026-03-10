@@ -72,9 +72,10 @@ function mergeStats(existing, incoming) {
     // New stats
     'calendar_events_count', 'friend_requests_sent', 'friends_count', 'shares_count',
     'quick_review_count', 'quick_review_perfect_scores', 'quick_review_current_streak',
-    'quick_review_longest_streak', 'crater_blast_games', 'crater_blast_perfect_games',
+    'quick_review_longest_streak',     'crater_blast_games', 'crater_blast_perfect_games',
     'crater_blast_high_score', 'total_study_tools_created', 'total_words_analyzed',
-    'documents_in_single_day', 'study_sessions_count'
+    'documents_in_single_day', 'study_sessions_count',
+    'focus_mode_unlocks_count', 'focus_mode_sites_blocked'
   ];
 
   const merged = { ...existing };

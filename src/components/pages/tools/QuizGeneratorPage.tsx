@@ -2331,6 +2331,31 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
               </div>
             )}
 
+            {/* See how it works - Video (when signed in, generator form visible) */}
+            {!showLockedOutLayout && !quiz && !flashcardResult && !crosswordResult && (
+              <div className="mt-8 sm:mt-10">
+                <div className="flex items-center gap-2 mb-4">
+                  <h2 className="text-lg font-bold text-stone-800 dark:text-stone-100">See how it works</h2>
+                  <span className="h-px flex-1 max-w-32 bg-gradient-to-r from-amber-300/60 to-transparent dark:from-amber-500/40 rounded-full" />
+                </div>
+                <div className="relative bg-white dark:bg-stone-800 rounded-2xl overflow-hidden shadow-xl shadow-stone-200/50 dark:shadow-stone-900/50 border border-stone-200/60 dark:border-stone-600/50 max-w-3xl mx-auto">
+                  <div className="bg-gradient-to-br from-amber-50/60 to-orange-50/60 dark:from-amber-900/25 dark:to-orange-900/25 flex items-center justify-center aspect-video min-h-[200px] sm:min-h-[320px]">
+                    <video key={studyToolMode} autoPlay loop muted playsInline className="w-full h-full object-contain" aria-label={`See how ${studyToolMode} generator works`}>
+                      <source src={studyToolMode === 'quiz' ? '/quizvid.mp4' : studyToolMode === 'flashcards' ? '/flashcardsvid.mp4' : '/crosswordvid.mp4'} type="video/mp4" />
+                    </video>
+                  </div>
+                  <div className="px-4 py-3.5 border-t border-stone-100 dark:border-stone-700/80">
+                    <p className="text-sm font-semibold text-stone-800 dark:text-stone-100">
+                      {studyToolMode === 'quiz' ? 'Quiz generator' : studyToolMode === 'flashcards' ? 'Flashcard generator' : 'Crossword generator'}
+                    </p>
+                    <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
+                      {studyToolMode === 'quiz' ? 'Transform notes into interactive quizzes with multiple choice, true/false & fill-in-the-blank' : studyToolMode === 'flashcards' ? 'Turn study material into flip-card decks for effective memorization' : 'Build vocabulary puzzles from your key terms'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Plan Info for free and Pro users */}
             {user && !isPremiumUser && !quizExhausted && !quiz && !flashcardResult && !crosswordResult && (
               <div className="mt-6 mx-3 sm:mx-0">

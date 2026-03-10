@@ -19,13 +19,14 @@ import { saveAs } from 'file-saver';
 import { trackAction, syncFromAPIData, trackExport, trackCopy } from '../../data/achievements';
 import { getResetsInText, getExpiringSoonCount, getExpiringSoonUrgencyText, getDaysUntilExpiration } from '../../utils/usageReset';
 import InteractiveLessonPage from './tools/InteractiveLessonPage';
+import FocusModeSettingsSection from '../common/FocusModeSettingsSection';
 
 interface DashboardProps {
   onNavigate: (page: string) => void;
   user: any;
   onLogout: () => void;
   onUserUpdate?: (updates: { welcomeTutorialCompleted?: boolean }) => void;
-  initialMode?: 'analyze' | 'citations' | 'humanize' | 'summarize' | 'quiz' | 'lesson';
+  initialMode?: 'analyze' | 'citations' | 'humanize' | 'summarize' | 'quiz' | 'lesson' | 'focus_mode';
 }
 
 const getTimeGreeting = (): { greeting: string; emoji: string } => {
@@ -91,7 +92,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
   const [isActivityLoading, setIsActivityLoading] = useState(true);
   const [showAnalysisPopup, setShowAnalysisPopup] = useState(false);
   const [analysisComplete, setAnalysisComplete] = useState(false);
-  const [mode, setMode] = useState<'analyze' | 'citations' | 'humanize' | 'summarize' | 'quiz' | 'lesson'>(initialMode);
+  const [mode, setMode] = useState<'analyze' | 'citations' | 'humanize' | 'summarize' | 'quiz' | 'lesson' | 'focus_mode'>(initialMode);
 
   // Sync tab when navigating to dashboard via footer (e.g. "Analyze Essay" or "Citations")
   useEffect(() => {
@@ -2198,17 +2199,27 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
               {([
                 { id: 'analyze' as const, icon: '📝', title: 'Analyze', desc: 'Get professor-style feedback on your essays', mobileDesc: 'Essay feedback', gradient: 'from-rose-50 to-pink-50 dark:from-rose-900/20 dark:to-pink-900/15', border: 'border-rose-200/70 dark:border-rose-700/40', activeBorder: 'border-rose-400 dark:border-rose-500 ring-2 ring-rose-300/50 dark:ring-rose-600/40', iconBg: 'bg-gradient-to-br from-rose-400 to-pink-500', accentColor: 'text-rose-600 dark:text-rose-400', pro: false, setStudyMode: null },
                 { id: 'citations' as const, icon: '📚', title: 'Citations', desc: 'Find and format academic sources instantly', mobileDesc: 'Find sources', gradient: 'from-sky-50 to-blue-50 dark:from-sky-900/20 dark:to-blue-900/15', border: 'border-sky-200/70 dark:border-sky-700/40', activeBorder: 'border-sky-400 dark:border-sky-500 ring-2 ring-sky-300/50 dark:ring-sky-600/40', iconBg: 'bg-gradient-to-br from-sky-400 to-blue-500', accentColor: 'text-sky-600 dark:text-sky-400', pro: false, setStudyMode: null },
-                { id: 'quiz' as const, icon: '🎯', title: 'Quiz', desc: 'Create quizzes from your study material', mobileDesc: 'Generate quizzes', gradient: 'from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/15', border: 'border-amber-200/70 dark:border-amber-700/40', activeBorder: 'border-amber-400 dark:border-amber-500 ring-2 ring-amber-300/50 dark:ring-amber-600/40', iconBg: 'bg-gradient-to-br from-amber-400 to-orange-500', accentColor: 'text-amber-600 dark:text-amber-400', pro: false, setStudyMode: 'quiz' as const },
-                { id: 'flashcards' as const, icon: '🃏', title: 'Flashcards', desc: 'Generate flashcards from any content', mobileDesc: 'Study cards', gradient: 'from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/15', border: 'border-emerald-200/70 dark:border-emerald-700/40', activeBorder: 'border-emerald-400 dark:border-emerald-500 ring-2 ring-emerald-300/50 dark:ring-emerald-600/40', iconBg: 'bg-gradient-to-br from-emerald-400 to-teal-500', accentColor: 'text-emerald-600 dark:text-emerald-400', pro: false, setStudyMode: 'flashcards' as const },
-                { id: 'humanize' as const, icon: '✨', title: 'Humanize', desc: 'Transform AI text into natural human writing', mobileDesc: 'Humanize AI text', gradient: 'from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/15', border: 'border-violet-200/70 dark:border-violet-700/40', activeBorder: 'border-violet-400 dark:border-violet-500 ring-2 ring-violet-300/50 dark:ring-violet-600/40', iconBg: 'bg-gradient-to-br from-violet-400 to-purple-500', accentColor: 'text-violet-600 dark:text-violet-400', pro: true, setStudyMode: null },
-                { id: 'summarize_tool' as const, icon: '📋', title: 'Summarize', desc: 'Condense papers and articles instantly', mobileDesc: 'Summarize text', gradient: 'from-teal-50 to-cyan-50 dark:from-teal-900/20 dark:to-cyan-900/15', border: 'border-teal-200/70 dark:border-teal-700/40', activeBorder: 'border-teal-400 dark:border-teal-500 ring-2 ring-teal-300/50 dark:ring-teal-600/40', iconBg: 'bg-gradient-to-br from-teal-400 to-cyan-500', accentColor: 'text-teal-600 dark:text-teal-400', pro: false, setStudyMode: null },
+                { id: 'study_tools' as const, icon: '🎯', title: 'Study Tools', desc: 'Create quizzes, flashcards & crosswords from your notes', mobileDesc: 'Quizzes & flashcards', gradient: 'from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/15', border: 'border-amber-200/70 dark:border-amber-700/40', activeBorder: 'border-amber-400 dark:border-amber-500 ring-2 ring-amber-300/50 dark:ring-amber-600/40', iconBg: 'bg-gradient-to-br from-amber-400 to-orange-500', accentColor: 'text-amber-600 dark:text-amber-400', pro: false, setStudyMode: 'quiz' as const },
+                { id: 'focus_mode' as const, icon: '🔒', title: 'Focus Mode', desc: 'Block distracting sites until you study', mobileDesc: 'Block distractions', gradient: 'from-violet-100 to-purple-100 dark:from-violet-800/40 dark:to-purple-800/40', border: 'border-violet-300 dark:border-violet-600', activeBorder: 'border-violet-500 dark:border-violet-400 ring-2 ring-violet-400/60 dark:ring-violet-500/50', iconBg: 'bg-gradient-to-br from-violet-500 to-purple-600', accentColor: 'text-violet-700 dark:text-violet-300', pro: true, setStudyMode: null, special: true, badge: 'NEW' },
                 { id: 'crater_blast' as const, icon: '🚀', title: 'Crater Blast', desc: 'Play the learning game with your content', mobileDesc: 'Quiz game', gradient: 'from-violet-900/30 to-purple-900/40 dark:from-violet-900/30 dark:to-purple-900/40', border: 'border-violet-200/70 dark:border-violet-700/40', activeBorder: 'border-violet-500 dark:border-violet-500 ring-2 ring-violet-400/50 dark:ring-violet-600/40', iconBg: 'bg-gradient-to-br from-violet-600 to-purple-700', accentColor: 'text-violet-600 dark:text-violet-300', pro: false, setStudyMode: 'crater_blast' as const, badge: 'NEW' },
-                { id: 'lesson' as const, icon: '🎓', title: 'Lessons', desc: 'Turn text into engaging interactive lessons', mobileDesc: 'Interactive lessons', gradient: 'from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/15', border: 'border-violet-200/70 dark:border-violet-700/40', activeBorder: 'border-violet-400 dark:border-violet-500 ring-2 ring-violet-300/50 dark:ring-violet-600/40', iconBg: 'bg-gradient-to-br from-violet-400 to-purple-500', accentColor: 'text-violet-600 dark:text-violet-400', pro: false, setStudyMode: null, badge: 'NEW' },
+                { id: 'more_tools' as const, icon: '🔧', title: 'More Tools', desc: 'Lessons, summarize, humanize & utilities', mobileDesc: 'Lessons & more', gradient: 'from-stone-100 to-stone-200 dark:from-stone-700/50 dark:to-stone-600/50', border: 'border-stone-200 dark:border-stone-600/60', activeBorder: 'border-stone-400 dark:border-stone-500', iconBg: 'bg-gradient-to-br from-stone-400 to-stone-500', accentColor: 'text-stone-600 dark:text-stone-400', pro: false, setStudyMode: null, isMoreTools: true },
               ] as const).map(tool => (
                 <button
                   key={tool.id}
                   onClick={() => {
-                    if (tool.id === 'flashcards' || tool.id === 'crater_blast' || (tool.id === 'quiz' && tool.setStudyMode)) {
+                    if (tool.id === 'focus_mode') {
+                      if (isPaidUser) {
+                        setMode('focus_mode');
+                      } else {
+                        onNavigate('focus-mode');
+                      }
+                      return;
+                    }
+                    if ('isMoreTools' in tool && tool.isMoreTools) {
+                      onNavigate('more-tools');
+                      return;
+                    }
+                    if (tool.id === 'study_tools' || tool.id === 'crater_blast') {
                       setMode('quiz');
                       if (tool.setStudyMode) setStudyToolMode(tool.setStudyMode);
                     } else if (tool.id === 'summarize_tool') {
@@ -2222,16 +2233,19 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                     setShowWordWarning(false);
                     if (tool.id !== 'humanize') setShowHumanizeResult(false);
                     if (tool.id !== 'summarize_tool') setSummaryResult(null);
-                    if (tool.id !== 'quiz' && tool.id !== 'flashcards' && tool.id !== 'crater_blast' && tool.id !== 'lesson') { setQuizResult(null); setFlashcardResult(null); setCrosswordResult(null); }
+                    if (tool.id !== 'study_tools' && tool.id !== 'crater_blast' && tool.id !== 'lesson') { setQuizResult(null); setFlashcardResult(null); setCrosswordResult(null); }
                   }}
-                  className={`relative p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl border bg-white dark:bg-stone-800 text-left transition-all duration-200 group active:scale-[0.98] sm:hover:shadow-2xl sm:hover:-translate-y-1 overflow-hidden ${
-                    (mode === tool.id && !['quiz', 'flashcards', 'crater_blast'].includes(tool.id)) ||
-                    (tool.id === 'flashcards' && mode === 'quiz' && studyToolMode === 'flashcards') ||
+                  className={`relative p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl border text-left transition-all duration-200 group active:scale-[0.98] sm:hover:shadow-2xl sm:hover:-translate-y-1 overflow-hidden ${
+                    'special' in tool && tool.special
+                      ? 'bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50 dark:from-violet-900/30 dark:via-purple-900/30 dark:to-fuchsia-900/30 ring-2 ring-violet-200 dark:ring-violet-700/50 shadow-lg shadow-violet-200/50 dark:shadow-violet-900/30'
+                      : 'bg-white dark:bg-stone-800'
+                  } ${
+                    (mode === tool.id && !['more_tools'].includes(tool.id)) ||
                     (tool.id === 'crater_blast' && mode === 'quiz' && studyToolMode === 'crater_blast') ||
-                    (tool.id === 'quiz' && mode === 'quiz' && studyToolMode === 'quiz') ||
+                    (tool.id === 'study_tools' && mode === 'quiz' && (studyToolMode === 'quiz' || studyToolMode === 'flashcards' || studyToolMode === 'crossword')) ||
                     (tool.id === 'summarize_tool' && mode === 'summarize')
                       ? `shadow-lg sm:shadow-xl ${tool.activeBorder}` 
-                      : `${tool.border} sm:hover:shadow-lg border-stone-200/60 dark:border-stone-700/40`
+                      : `${tool.border} sm:hover:shadow-lg`
                   }`}
                 >
                   {/* Colored accent orb - smaller on mobile */}
@@ -2254,18 +2268,6 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                 </button>
               ))}
               </div>
-
-              {/* More Tools Link - Subtle */}
-              <div className="flex justify-center mt-2">
-                <button
-                  onClick={() => onNavigate('more-tools')}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-medium text-stone-500 dark:text-stone-400 hover:text-violet-600 dark:hover:text-violet-400 hover:bg-violet-50 dark:hover:bg-violet-900/20 rounded-full transition-colors"
-                >
-                  <span>➕</span>
-                  <span>10+ More Free Tools</span>
-                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
-                </button>
-              </div>
             </div>
             )}
 
@@ -2274,6 +2276,11 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
           <div className="min-h-0 flex-1 overflow-auto">
             <InteractiveLessonPage onNavigate={onNavigate} user={user} onLogout={onLogout} embedded onBack={() => setMode('analyze')} />
           </div>
+        )}
+
+        {/* FOCUS MODE - Settings section for paid users */}
+        {mode === 'focus_mode' && (
+          <FocusModeSettingsSection embedded onBack={() => setMode('analyze')} />
         )}
 
         {/* ANALYZE MODE - Upload First Design - Mobile optimized */}

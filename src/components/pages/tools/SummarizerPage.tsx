@@ -568,6 +568,25 @@ const SummarizerPage = ({ onNavigate, user, onLogout }: SummarizerPageProps) => 
                 </div>
               </div>
             )}
+
+            {/* See how it works - Video */}
+            <div className="mt-8 sm:mt-10">
+              <div className="flex items-center gap-2 mb-4">
+                <h2 className="text-lg font-bold text-stone-800 dark:text-stone-100">See how it works</h2>
+                <span className="h-px flex-1 max-w-32 bg-gradient-to-r from-emerald-300/60 to-transparent dark:from-emerald-500/40 rounded-full" />
+              </div>
+              <div className="relative bg-white dark:bg-stone-800 rounded-2xl overflow-hidden shadow-xl shadow-stone-200/50 dark:shadow-stone-900/50 border border-stone-200/60 dark:border-stone-600/50 max-w-3xl mx-auto">
+                <div className="bg-gradient-to-br from-emerald-50/50 to-teal-50/50 dark:from-emerald-900/20 dark:to-teal-900/20 flex items-center justify-center aspect-video min-h-[200px] sm:min-h-[320px]">
+                  <video autoPlay loop muted playsInline className="w-full h-full object-contain" aria-label="See how the AI Summarizer works">
+                    <source src="/summarisevid.mp4" type="video/mp4" />
+                  </video>
+                </div>
+                <div className="px-4 py-3.5 border-t border-stone-100 dark:border-stone-700/80">
+                  <p className="text-sm font-semibold text-stone-800 dark:text-stone-100">AI Summarizer</p>
+                  <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">Paste text or upload a document, choose your style and length, and get a concise summary in seconds.</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 

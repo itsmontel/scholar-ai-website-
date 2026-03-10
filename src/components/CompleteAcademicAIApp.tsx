@@ -22,6 +22,7 @@ const UploadPage = lazy(() => import('./pages/UploadPage'));
 const AccountPage = lazy(() => import('./pages/AccountPage'));
 const PricingPage = lazy(() => import('./pages/PricingPage'));
 const FeaturesPage = lazy(() => import('./pages/FeaturesPage'));
+const FocusModePage = lazy(() => import('./pages/FocusModePage'));
 const ProfilePage = lazy(() => import('./pages/ProfilePage'));
 const LibraryPage = lazy(() => import('./pages/LibraryPage'));
 const FAQPage = lazy(() => import('./pages/HelpCenterPage'));
@@ -79,6 +80,7 @@ function getPageFromPath(pathname: string): string {
   if (p === '/dashboard') return 'dashboard';
   if (p === '/pricing') return 'pricing';
   if (p === '/features') return 'features';
+  if (p === '/focus-mode' || p === '/focus') return 'focus-mode';
   if (p === '/why-students-choose' || p === '/compare') return 'why-students-choose';
   if (p === '/vs-quizlet-knowt' || p === '/study-tools-comparison' || p === '/compare-study-tools') return 'study-tools-comparison';
   if (p === '/contact') return 'contact';
@@ -232,6 +234,7 @@ const AcademicAIApp = () => {
   const pageMeta: Record<string, { title: string; description: string }> = {
     landing: { title: 'WriteScholar — #1 Free AI Study Toolkit | Quizlet & Knowt Alternative', description: 'WriteScholar is the AI study tool trusted by 38k+ students. Create flashcards, quizzes, get essay feedback & humanize text in seconds. Try free today.' },
     features: { title: '#1 Free AI Study Tools — Quiz Generator, Flashcards, Humanizer | WriteScholar', description: 'AI quiz generator, flashcard maker, crossword builder, humanizer, summarizer, citation finder, essay checker — all free to start. The best Quizlet alternative for students.' },
+    'focus-mode': { title: 'Focus Mode — Block Websites Until You Study | WriteScholar', description: 'Block distracting websites like YouTube, TikTok, Instagram until you answer study questions. Earn your screen time. Chrome extension for Pro & Premium. Study to unlock sites.' },
     pricing: { title: 'Pricing — Free Plan, Pro & Premium | WriteScholar', description: 'Start free with AI quizzes, flashcards, humanizer, and 10+ writing tools. Upgrade for unlimited usage. Better value than Quizlet Plus or Knowt premium.' },
     about: { title: 'About WriteScholar — The #1 Free Quizlet & Knowt Alternative', description: 'WriteScholar is the #1 free alternative to Quizlet and Knowt. AI quizzes, flashcards, crosswords, humanizer, summarizer, citations — everything students need in one place.' },
     'why-students-choose': { title: 'WriteScholar vs Grammarly vs QuillBot: Honest Comparison 2026', description: 'See how WriteScholar compares to Grammarly and QuillBot. Built for academic writing, citation finder, AI humanizer, essay analysis, and more.' },
@@ -263,7 +266,7 @@ const AcademicAIApp = () => {
     'calculator': { title: 'Free Scientific Calculator – Trig, Log, Powers | WriteScholar', description: 'Free online scientific calculator for students. Trigonometry (sin, cos, tan), logarithms, square root, powers, and more. Works in degrees or radians. No signup required.' },
     'converter': { title: 'Free Unit Converter – Length, Weight, Temperature & More | WriteScholar', description: 'Free online unit converter for students. Length, weight, temperature, volume, area, time, speed, energy. Meters to feet, m/s to mph & more. No signup required.' },
     'crater-blast': { title: 'Crater Blast – AI Quiz Shooter Game | WriteScholar', description: 'Blast the correct falling crater before it lands! AI generates quiz questions as craters. Aim your cannon, build streaks, and beat your high score.' },
-    'more-tools': { title: 'More Free Tools – Word Counter, Calculator, Converter | WriteScholar', description: 'Free student tools: word counter, citation generator, scientific calculator, unit converter, essay outline, thesis generator, grammar checker, readability score, paraphrasing tips, text case converter, GPA calculator, Pomodoro timer.' },
+    'more-tools': { title: 'More Tools – Lessons, Summarize, Humanize & Utilities | WriteScholar', description: 'Lessons, summarize, humanize, plus word counter, citation generator, calculator, converter, essay outline, thesis generator, grammar checker, and more.' },
     'interactive-lesson': { title: 'Interactive Lesson Generator – Turn Text into Fun Lessons | WriteScholar', description: 'Transform boring study material into engaging, interactive lessons. Break down complex topics into digestible slides with key concepts, examples, and fun facts. Learn before you quiz!' },
     'badges': { title: 'Achievements & Badges | WriteScholar', description: 'Collect badges, earn XP, and level up your scholar journey. Unlock cute monster companions by using WriteScholar tools.' },
     'friends': { title: 'Friends | WriteScholar', description: 'Connect with friends to share quizzes, flashcards, and crosswords. Add friends by code and collaborate on studying.' }
@@ -739,6 +742,14 @@ const AcademicAIApp = () => {
         return <PricingPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'features':
         return <FeaturesPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
+      case 'focus-mode': {
+        const plan = (user?.plan || user?.subscription_plan || 'free').toLowerCase();
+        const isPaidFocus = plan === 'pro' || plan === 'premium';
+        if (isLoggedIn && user && isPaidFocus) {
+          return <DashboardPage onNavigate={navigateTo} user={user} onLogout={handleLogout} onUserUpdate={handleDashboardUserUpdate} initialMode="focus_mode" />;
+        }
+        return <FocusModePage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
+      }
       case 'about':
         return <AboutPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'why-students-choose':

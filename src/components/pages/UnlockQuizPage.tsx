@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import ScholarMascot from '../common/ScholarMascot';
+import { trackFocusModeUnlock } from '../../data/achievements';
 
 function getSearchParams() {
   const sp = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
@@ -21,8 +22,8 @@ interface QuizItem {
   };
 }
 
-const UNLOCK_THRESHOLD = 4; // Must get at least 4 of 5 right
-const TOTAL_QUESTIONS = 5;
+const DEFAULT_PASS_THRESHOLD = 4;
+const DEFAULT_TOTAL_QUESTIONS = 5;
 
 function formatSiteName(domain: string): string {
   const names: Record<string, string> = {
@@ -35,7 +36,7 @@ function formatSiteName(domain: string): string {
     'netflix.com': 'Netflix',
     'twitch.tv': 'Twitch',
     'pinterest.com': 'Pinterest',
-    'snapchat.com': 'Snapchat',
+    'discord.com': 'Discord',
   };
   return names[domain] || domain;
 }
@@ -91,6 +92,8 @@ export default function UnlockQuizPage() {
           return;
         }
         setQuestions(data.data.questions || []);
+        setPassThreshold(data.data.passThreshold ?? DEFAULT_PASS_THRESHOLD);
+        setTotalQuestions(data.data.totalQuestions ?? DEFAULT_TOTAL_QUESTIONS);
         setIsLoading(false);
       })
       .catch(() => {
@@ -137,6 +140,9 @@ export default function UnlockQuizPage() {
   }, []);
 
   const handleUnlockAndContinue = () => {
+    // Track achievement: first / repeated unlock
+    trackFocusModeUnlock();
+
     const siteDomain = site || (redirect ? new URL(redirect).hostname.replace(/^www\./, '') : '');
     const finalRedirect = redirect || `https://${siteDomain}`;
     console.log('[UnlockQuiz] Continue clicked. siteDomain:', siteDomain, 'redirect:', finalRedirect);
@@ -203,7 +209,7 @@ export default function UnlockQuizPage() {
     );
   }
 
-  if (error || questions.length < TOTAL_QUESTIONS) {
+  if (error || questions.length < totalQuestions) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50 p-4">
         <div className="bg-white rounded-2xl p-8 shadow-xl max-w-md text-center">
@@ -282,7 +288,7 @@ export default function UnlockQuizPage() {
       <div className="flex items-center gap-4 px-4 py-4 sm:px-6 border-b border-violet-100/80 bg-white/60 backdrop-blur-sm">
         <ScholarMascot size={56} animated />
         <p className="text-base sm:text-lg font-semibold text-stone-800">
-          Get {UNLOCK_THRESHOLD}/{TOTAL_QUESTIONS} or more to unlock {siteDisplay}
+          Get {passThreshold}/{totalQuestions} or more to unlock {siteDisplay}
         </p>
       </div>
       <div className="flex-1 flex items-center justify-center p-4">

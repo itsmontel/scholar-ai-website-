@@ -7,7 +7,10 @@ interface MoreToolsPageProps {
   onLogout?: () => void;
 }
 
-const freeTools = [
+const moreTools = [
+  { id: 'interactive-lesson', icon: '🎓', title: 'Lessons', desc: 'Turn text into engaging interactive lessons', gradient: 'from-violet-400 to-purple-500', page: 'interactive-lesson' },
+  { id: 'summarizer', icon: '📋', title: 'Summarize', desc: 'Condense papers and articles instantly', gradient: 'from-teal-400 to-cyan-500', page: 'summarizer' },
+  { id: 'humanizer', icon: '✨', title: 'Humanize', desc: 'Transform AI text into natural human writing', gradient: 'from-violet-400 to-purple-500', page: 'humanizer' },
   { id: 'citation-generator-tool', icon: '📚', title: 'Citation Generator', desc: 'Format citations in APA, MLA, Chicago, Harvard', gradient: 'from-sky-400 to-blue-500', page: 'citation-generator-tool' },
   { id: 'word-counter', icon: '📊', title: 'Word Counter', desc: 'Count words, characters, sentences & reading time', gradient: 'from-blue-400 to-indigo-500', page: 'word-counter' },
   { id: 'essay-outline', icon: '📋', title: 'Essay Outline', desc: 'Generate structured outlines for any essay type', gradient: 'from-teal-400 to-cyan-500', page: 'essay-outline' },
@@ -21,6 +24,7 @@ const freeTools = [
   { id: 'calculator', icon: '🧮', title: 'Scientific Calculator', desc: 'Trig, log, powers & more for math & science', gradient: 'from-violet-400 to-fuchsia-500', page: 'calculator' },
   { id: 'converter', icon: '📐', title: 'Unit Converter', desc: 'Length, weight, temp, volume, speed & energy', gradient: 'from-amber-400 to-orange-500', page: 'converter' },
 ];
+
 
 const MoreToolsPage = ({ onNavigate, user, onLogout }: MoreToolsPageProps) => {
   return (
@@ -43,16 +47,16 @@ const MoreToolsPage = ({ onNavigate, user, onLogout }: MoreToolsPageProps) => {
         {/* Header */}
         <div className="mb-10">
           <h1 className="text-3xl sm:text-4xl font-extrabold text-stone-800 dark:text-stone-100 mb-3">
-            More Free Tools
+            More Tools
           </h1>
           <p className="text-stone-500 dark:text-stone-400 text-lg max-w-2xl">
-            Handy utilities for students, All free.
+            Lessons, summarize, humanize, and handy utilities for students.
           </p>
         </div>
 
         {/* Tools grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {freeTools.map((tool) => (
+          {moreTools.map((tool) => (
             <button
               key={tool.id}
               onClick={() => onNavigate(tool.page)}

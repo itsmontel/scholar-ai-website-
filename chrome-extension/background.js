@@ -148,7 +148,11 @@ async function fetchConfig(token) {
     }
     const data = await res.json();
     if (data.success && data.data) {
-      return data.data;
+      const cfg = data.data;
+      if (cfg.unlock_duration_ms) {
+        await chrome.storage.local.set({ unlockDurationMs: cfg.unlock_duration_ms });
+      }
+      return cfg;
     }
   } catch (e) {
     console.error('Focus mode fetch config:', e);
@@ -213,6 +217,10 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     syncFromServer().then(() => sendResponse({ ok: true }));
     return true;
   }
+  if (msg.type === 'GET_API_BASE') {
+    getApiBase().then(apiBase => sendResponse({ apiBase }));
+    return true;
+  }
   if (msg.type === 'FETCH_PRESETS') {
     getApiBase().then(async (apiBase) => {
       try {
@@ -257,6 +265,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
               const config = await getStoredConfig();
               await chrome.storage.local.set({
                 config: {
+                  ...config,
                   blockedDomains: serverDomains,
                   plan: config.plan || 'free',
                   enabled: serverDomains.length > 0

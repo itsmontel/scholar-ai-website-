@@ -267,6 +267,25 @@
     .unlock-time.expired {
       color: #dc2626;
     }
+    .quiz-settings { margin-top: 8px; padding-top: 12px; border-top: 1px solid #e7e5e4; }
+    .quiz-count-btns { display: flex; gap: 8px; }
+    .quiz-count-btn {
+      width: auto !important;
+      padding: 6px 14px !important;
+      border-radius: 10px;
+      font-size: 13px !important;
+      font-weight: 600;
+      background: #f5f5f4;
+      color: #57534e;
+      border: 1px solid #e7e5e4;
+      cursor: pointer;
+    }
+    .quiz-count-btn.active {
+      background: #8B5CF6;
+      color: white;
+      border-color: #8B5CF6;
+    }
+    .quiz-count-btn:hover:not(.active) { background: #e7e5e4; }
   </style>
 </head>
 <body>
@@ -275,7 +294,7 @@
     <h1>Focus Mode</h1>
     <span id="planBadge" class="badge" style="display:none"></span>
   </div>
-  <p class="subtitle">Block distracting sites until you answer 5 study questions.</p>
+  <p class="subtitle" id="subtitle">Block distracting sites until you answer study questions.</p>
   <div id="status" class="status inactive">Checking status...</div>
   <button id="loginBtn" class="btn-primary" style="display:none">Log in at WriteScholar</button>
   <div id="sitesSection" class="sites-section">
@@ -298,6 +317,21 @@
           <option value="43200000">12 hours</option>
           <option value="86400000">24 hours</option>
         </select>
+      </div>
+      <div class="quiz-settings" id="quizSettings" style="display:none">
+        <div class="setting-row" style="margin-top:12px">
+          <span class="setting-label">Quiz: questions</span>
+          <div class="quiz-count-btns">
+            <button type="button" class="quiz-count-btn" data-val="5">5</button>
+            <button type="button" class="quiz-count-btn" data-val="10">10</button>
+            <button type="button" class="quiz-count-btn" data-val="15">15</button>
+          </div>
+        </div>
+        <div class="setting-row">
+          <span class="setting-label">Pass threshold</span>
+          <select id="passThreshold">
+          </select>
+        </div>
       </div>
       <div class="sites-label">Sites to block</div>
       <div id="sitesGrid" class="sites-grid"></div>

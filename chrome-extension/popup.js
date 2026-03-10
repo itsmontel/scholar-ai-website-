@@ -20,6 +20,36 @@ function showToast(message, type = 'success') {
   setTimeout(() => el.remove(), 2500);
 }
 
+async function saveSettingsToServer(updates) {
+  const { authToken, config } = await chrome.storage.local.get(['authToken', 'config']);
+  if (!authToken) return false;
+  const apiBase = await new Promise((resolve) => {
+    chrome.runtime.sendMessage({ type: 'GET_API_BASE' }, (r) => resolve(r?.apiBase || 'https://api.writescholar.com/api'));
+  });
+  try {
+    const body = {
+      blockedDomains: config?.blockedDomains || [],
+      question_count: updates.question_count ?? config?.question_count ?? 5,
+      pass_threshold: updates.pass_threshold ?? config?.pass_threshold ?? 4,
+      unlock_duration_ms: updates.unlock_duration_ms ?? parseInt(document.getElementById('unlockDuration')?.value || '1800000', 10)
+    };
+    const res = await fetch(`${apiBase}/focus-mode/settings`, {
+      method: 'PUT',
+      headers: { Authorization: `Bearer ${authToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    const data = await res.json();
+    if (data.success && data.data) {
+      const newConfig = { ...config, ...data.data, blockedDomains: data.data.blockedDomains };
+      await chrome.storage.local.set({ config: newConfig });
+      return true;
+    }
+  } catch (e) {
+    console.error('saveSettingsToServer:', e);
+  }
+  return false;
+}
+
 // Fallback presets when API is unreachable
 const PRESET_SITES = [
   { domain: 'youtube.com', label: 'YouTube' },
@@ -31,7 +61,7 @@ const PRESET_SITES = [
   { domain: 'netflix.com', label: 'Netflix' },
   { domain: 'twitch.tv', label: 'Twitch' },
   { domain: 'pinterest.com', label: 'Pinterest' },
-  { domain: 'snapchat.com', label: 'Snapchat' }
+  { domain: 'discord.com', label: 'Discord' }
 ];
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -59,19 +89,25 @@ document.addEventListener('DOMContentLoaded', async () => {
   let blocked = config?.blockedDomains || [];
   const plan = (config?.plan || 'free').toLowerCase();
   const isPaid = plan === 'pro' || plan === 'premium';
+
+  // Quiz settings from config (synced from server) or defaults
+  let questionCount = config?.question_count ?? 5;
+  let passThreshold = config?.pass_threshold ?? 4;
   
-  // Load unlock duration preference (default: 30 minutes)
+  // Unlock duration: prefer server (config), then local storage, then default
   const defaultDuration = 1800000; // 30 minutes
-  if (unlockDurationMs) {
-    unlockDurationSelect.value = unlockDurationMs.toString();
-  } else {
-    unlockDurationSelect.value = defaultDuration.toString();
+  const serverUnlockMs = config?.unlock_duration_ms;
+  const effectiveUnlockMs = serverUnlockMs ?? unlockDurationMs ?? defaultDuration;
+  unlockDurationSelect.value = effectiveUnlockMs.toString();
+  if (serverUnlockMs && !unlockDurationMs) {
+    await chrome.storage.local.set({ unlockDurationMs: serverUnlockMs });
   }
   
-  // Save unlock duration when changed
+  // Save unlock duration when changed (persist locally + sync to server)
   unlockDurationSelect.addEventListener('change', async () => {
     const duration = parseInt(unlockDurationSelect.value, 10);
     await chrome.storage.local.set({ unlockDurationMs: duration });
+    await saveSettingsToServer({ unlock_duration_ms: duration });
     showToast('Unlock duration saved');
   });
 
@@ -149,12 +185,69 @@ document.addEventListener('DOMContentLoaded', async () => {
     return;
   }
 
-  // Paid user: show sites to block directly in popup
+  // Paid user: show sites to block and quiz customization
   planBadge.textContent = plan === 'premium' ? 'Premium' : 'Pro';
   planBadge.style.display = 'inline-block';
   sitesSection.classList.add('visible');
   unlockDurationSelect.style.display = 'block';
   actionsRow.style.display = 'flex';
+
+  // Quiz customization UI
+  const quizSettings = document.getElementById('quizSettings');
+  const passThresholdSelect = document.getElementById('passThreshold');
+  const subtitleEl = document.querySelector('#subtitle');
+  const quizCountBtns = document.querySelectorAll('.quiz-count-btn');
+  quizSettings.style.display = 'block';
+
+  function updateSubtitle() {
+    if (subtitleEl) subtitleEl.textContent = `Block distracting sites until you answer ${questionCount} study questions (get ${passThreshold}+ correct).`;
+  }
+  updateSubtitle();
+
+  function renderPassThresholdOptions() {
+    passThresholdSelect.innerHTML = '';
+    for (let i = 1; i <= questionCount; i++) {
+      const opt = document.createElement('option');
+      opt.value = i;
+      opt.textContent = `${i} of ${questionCount} correct`;
+      if (i === passThreshold) opt.selected = true;
+      passThresholdSelect.appendChild(opt);
+    }
+  }
+
+  function setQuestionCountUI(val) {
+    questionCount = val;
+    if (passThreshold > questionCount) passThreshold = questionCount;
+    quizCountBtns.forEach((btn) => {
+      btn.classList.toggle('active', parseInt(btn.dataset.val, 10) === questionCount);
+    });
+    renderPassThresholdOptions();
+    updateSubtitle();
+  }
+
+  function setPassThresholdUI(val) {
+    passThreshold = Math.min(questionCount, Math.max(1, val));
+    renderPassThresholdOptions();
+    updateSubtitle();
+  }
+
+  setQuestionCountUI(questionCount);
+
+  quizCountBtns.forEach((btn) => {
+    btn.onclick = async () => {
+      const val = parseInt(btn.dataset.val, 10);
+      setQuestionCountUI(val);
+      const ok = await saveSettingsToServer({ question_count: val, pass_threshold: passThreshold });
+      showToast(ok ? 'Saved' : 'Sync when online to save', ok ? 'success' : 'error');
+    };
+  });
+
+  passThresholdSelect.addEventListener('change', async () => {
+    const val = parseInt(passThresholdSelect.value, 10);
+    setPassThresholdUI(val);
+    const ok = await saveSettingsToServer({ pass_threshold: val });
+    showToast(ok ? 'Saved' : 'Sync when online to save', ok ? 'success' : 'error');
+  });
   accountBtn.onclick = () => chrome.tabs.create({ url: `${SCHOLAR_BASE}/account` });
   syncBtn.onclick = async () => {
     syncBtn.disabled = true;

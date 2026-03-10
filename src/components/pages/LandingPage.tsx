@@ -820,6 +820,140 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
         </div>
       </section>
 
+      {/* Focus Mode - Earn Your Free Time */}
+      <section className="relative py-16 sm:py-24 bg-gradient-to-b from-stone-50 via-orange-50/30 to-white dark:from-stone-900 dark:via-stone-900 dark:to-stone-900 overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_40%_at_50%_50%,rgba(249,115,22,0.06),transparent)] dark:bg-[radial-gradient(ellipse_60%_40%_at_50%_50%,rgba(249,115,22,0.04),transparent)]" />
+        <div className="absolute top-20 left-[6%] hidden xl:block text-4xl opacity-30 animate-float">🔒</div>
+        <div className="absolute top-32 right-[8%] hidden xl:block text-3xl opacity-25 animate-float-delayed">🧠</div>
+        <div className="absolute bottom-20 left-[12%] hidden xl:block text-3xl opacity-25 animate-float">📵</div>
+
+        <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12 sm:mb-16">
+            <span className="inline-block px-4 py-1.5 bg-orange-100 dark:bg-orange-900/50 text-orange-700 dark:text-orange-400 rounded-full text-sm font-semibold mb-4">
+              New Feature
+            </span>
+            <h2 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-stone-800 dark:text-stone-100 mb-4">
+              Earn Your{' '}
+              <span className="bg-gradient-to-r from-orange-500 to-amber-500 dark:from-orange-400 dark:to-amber-400 bg-clip-text text-transparent">Free Time</span>
+            </h2>
+            <p className="text-base sm:text-lg text-stone-600 dark:text-stone-400 max-w-2xl mx-auto">
+              Focus Mode blocks distracting websites until you answer study questions. You can&apos;t scroll — until you&apos;ve studied.
+            </p>
+          </div>
+
+          {/* How it works - 3 step flow */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 mb-12 sm:mb-16">
+            {/* Step 1 */}
+            <div className="relative group">
+              <div className="absolute -inset-1 bg-gradient-to-br from-orange-400/20 to-amber-400/20 rounded-3xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="relative bg-white dark:bg-stone-800 rounded-3xl p-6 sm:p-8 border border-orange-100 dark:border-orange-800/40 shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center mb-5 shadow-lg shadow-orange-500/25">
+                  <span className="text-2xl">🚫</span>
+                </div>
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-xs font-bold text-orange-500 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/30 px-2.5 py-1 rounded-full">Step 1</span>
+                </div>
+                <h3 className="text-lg font-bold text-stone-800 dark:text-stone-100 mb-2">Pick Sites to Block</h3>
+                <p className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed">
+                  Choose the sites that steal your focus — YouTube, TikTok, Instagram, Reddit, or any custom domain.
+                </p>
+              </div>
+            </div>
+
+            {/* Step 2 */}
+            <div className="relative group">
+              <div className="absolute -inset-1 bg-gradient-to-br from-violet-400/20 to-purple-400/20 rounded-3xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="relative bg-white dark:bg-stone-800 rounded-3xl p-6 sm:p-8 border border-violet-100 dark:border-violet-800/40 shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center mb-5 shadow-lg shadow-violet-500/25">
+                  <span className="text-2xl">📝</span>
+                </div>
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-xs font-bold text-violet-500 dark:text-violet-400 bg-violet-50 dark:bg-violet-900/30 px-2.5 py-1 rounded-full">Step 2</span>
+                </div>
+                <h3 className="text-lg font-bold text-stone-800 dark:text-stone-100 mb-2">Answer to Unlock</h3>
+                <p className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed">
+                  Try to visit a blocked site and you&apos;ll face a quick quiz from your own study material. Get 4 out of 5 right to unlock it.
+                </p>
+              </div>
+            </div>
+
+            {/* Step 3 */}
+            <div className="relative group">
+              <div className="absolute -inset-1 bg-gradient-to-br from-emerald-400/20 to-teal-400/20 rounded-3xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="relative bg-white dark:bg-stone-800 rounded-3xl p-6 sm:p-8 border border-emerald-100 dark:border-emerald-800/40 shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center mb-5 shadow-lg shadow-emerald-500/25">
+                  <span className="text-2xl">🎉</span>
+                </div>
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-xs font-bold text-emerald-500 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 px-2.5 py-1 rounded-full">Step 3</span>
+                </div>
+                <h3 className="text-lg font-bold text-stone-800 dark:text-stone-100 mb-2">Enjoy Your Break</h3>
+                <p className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed">
+                  Passed the quiz? The site unlocks for 15 minutes to 24 hours — you choose. When time&apos;s up, study again to earn more time.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Feature highlights */}
+          <div className="relative">
+            <div className="absolute -inset-1 bg-gradient-to-r from-orange-400/10 via-violet-400/10 to-emerald-400/10 rounded-3xl blur-xl" />
+            <div className="relative bg-white dark:bg-stone-800 rounded-3xl p-8 sm:p-10 border border-stone-200 dark:border-stone-700 shadow-xl">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-xl bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center flex-shrink-0">
+                    <svg className="w-5 h-5 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-stone-800 dark:text-stone-100 text-sm mb-1">Chrome Extension</h4>
+                    <p className="text-xs text-stone-500 dark:text-stone-400 leading-relaxed">Works directly in your browser. No app downloads needed.</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-xl bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center flex-shrink-0">
+                    <svg className="w-5 h-5 text-violet-600 dark:text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-stone-800 dark:text-stone-100 text-sm mb-1">Customisable Timer</h4>
+                    <p className="text-xs text-stone-500 dark:text-stone-400 leading-relaxed">Set unlock duration from 15 minutes to 24 hours.</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center flex-shrink-0">
+                    <svg className="w-5 h-5 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-stone-800 dark:text-stone-100 text-sm mb-1">Your Own Material</h4>
+                    <p className="text-xs text-stone-500 dark:text-stone-400 leading-relaxed">Questions pulled from your uploaded notes and study tools.</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center flex-shrink-0">
+                    <svg className="w-5 h-5 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-stone-800 dark:text-stone-100 text-sm mb-1">Block Any Site</h4>
+                    <p className="text-xs text-stone-500 dark:text-stone-400 leading-relaxed">Popular presets plus add any custom domain you want.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* CTA */}
+          <div className="text-center mt-10 sm:mt-14">
+            <button
+              onClick={() => onNavigate('focus-mode')}
+              className="group inline-flex items-center px-8 py-4 text-white font-bold rounded-2xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 hover:scale-105 active:scale-95 shadow-xl shadow-orange-500/25 hover:shadow-orange-500/40 transition-all duration-300 text-lg"
+            >
+              Try Focus Mode Free
+              <svg className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+            </button>
+            <p className="mt-4 text-stone-500 dark:text-stone-400 text-sm">Available with Pro &amp; Premium plans</p>
+          </div>
+        </div>
+      </section>
+
       {/* See WriteScholar in Action - Study Tools Showcase (Turn Your Notes Into) */}
       <section className="relative py-12 sm:py-28 overflow-hidden max-lg:bg-gradient-to-b max-lg:from-violet-50/60 max-lg:via-white max-lg:to-stone-50 dark:max-lg:from-violet-950/25 dark:max-lg:via-stone-900 dark:max-lg:to-stone-900 bg-white dark:bg-stone-900">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-10%,rgba(99,102,241,0.08),transparent)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-10%,rgba(139,92,246,0.06),transparent)] max-lg:bg-[radial-gradient(ellipse_100%_60%_at_50%_0%,rgba(139,92,246,0.12),transparent_70%)] max-lg:dark:bg-[radial-gradient(ellipse_100%_60%_at_50%_0%,rgba(139,92,246,0.08),transparent_70%)]" />
@@ -1818,7 +1952,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
       </section>
 
       {/* Try Our Free Writing Tools - moved here, styled like Complete Study Toolkit */}
-      <section className="py-12 sm:py-20 bg-white dark:bg-stone-900">
+      <section className="py-12 sm:py-20 bg-white dark:bg-stone-900 hidden">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="relative text-center mb-8 sm:mb-14">
             <span className="inline-block px-4 py-1.5 bg-lime-100 dark:bg-lime-900/50 text-lime-700 dark:text-lime-400 rounded-full text-sm font-semibold mb-4">100% Free</span>

@@ -579,7 +579,7 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
             <div className="bg-white border border-stone-200 rounded-2xl p-6 sm:p-8">
               <h2 className="text-xl font-bold text-stone-800 mb-2">Focus Mode</h2>
               <p className="text-stone-600 text-sm mb-6">
-                Block distracting sites until you answer 5 questions from your study tools (need 4+ correct). Install the Chrome extension to enable.
+                Block distracting sites until you answer study questions. Customize question count and pass threshold on the Dashboard.
               </p>
               {focusModeLoading ? (
                 <p className="text-stone-500">Loading...</p>
@@ -617,6 +617,12 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
                   >
                     Get Chrome Extension →
                   </a>
+                  <button
+                    onClick={() => onNavigate('focus-mode')}
+                    className="block mt-2 text-violet-600 hover:text-violet-700 font-medium text-sm"
+                  >
+                    Configure quiz rules on Dashboard →
+                  </button>
                 </>
               )}
             </div>
