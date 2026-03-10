@@ -57,6 +57,8 @@ export default function UnlockQuizPage() {
   const [isFlipped, setIsFlipped] = useState(false);
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [showExtensionHint, setShowExtensionHint] = useState(false);
+  const [passThreshold, setPassThreshold] = useState(DEFAULT_PASS_THRESHOLD);
+  const [totalQuestions, setTotalQuestions] = useState(DEFAULT_TOTAL_QUESTIONS);
 
   const currentItem = questions[currentIndex];
   const isPassed = score >= passThreshold;
