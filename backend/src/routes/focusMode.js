@@ -292,7 +292,41 @@ router.get('/unlock-quiz', authenticateToken, requireSubscription('pro'), async 
     const shuffled = allItems.sort(() => Math.random() - 0.5);
     const selected = shuffled.slice(0, totalQuestions);
 
-    if (selected.length < totalQuestions) {
+    // Shuffle options for each quiz question so the answer isn't always in the same position
+    const shuffleOptions = (item) => {
+      if (item.type !== 'quiz' || !item.data.options?.length) return item;
+      const { options, correctAnswer } = item.data;
+      
+      // Find the correct answer text
+      let correctText = correctAnswer;
+      const letter = String(correctAnswer).toUpperCase();
+      if (letter >= 'A' && letter <= 'Z' && letter.length === 1) {
+        const idx = letter.charCodeAt(0) - 65;
+        if (idx >= 0 && idx < options.length) {
+          correctText = options[idx];
+        }
+      }
+      
+      // Shuffle options
+      const shuffledOptions = [...options].sort(() => Math.random() - 0.5);
+      
+      // Find new index of correct answer and convert to letter
+      const newIdx = shuffledOptions.findIndex(opt => opt === correctText);
+      const newLetter = newIdx >= 0 ? String.fromCharCode(65 + newIdx) : correctAnswer;
+      
+      return {
+        ...item,
+        data: {
+          ...item.data,
+          options: shuffledOptions,
+          correctAnswer: newLetter
+        }
+      };
+    };
+    
+    const finalQuestions = selected.map(shuffleOptions);
+
+    if (finalQuestions.length < totalQuestions) {
       return res.status(400).json({
         success: false,
         message: `You need at least ${totalQuestions} questions in your study tools to use Focus Mode. Create some quizzes or flashcards first.`,
@@ -303,7 +337,7 @@ router.get('/unlock-quiz', authenticateToken, requireSubscription('pro'), async 
     res.json({
       success: true,
       data: {
-        questions: selected,
+        questions: finalQuestions,
         passThreshold,
         totalQuestions
       }
