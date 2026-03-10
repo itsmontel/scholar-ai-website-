@@ -10,9 +10,10 @@ const customersImg = '';
 
 interface LandingPageProps {
   onNavigate: (page: string, slug?: string) => void;
+  user?: { plan?: string; subscription_plan?: string } | null;
 }
 
-const LandingPage = ({ onNavigate }: LandingPageProps) => {
+const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { theme: _theme, toggleTheme: _toggleTheme } = useTheme();
   const [inputText, setInputText] = useState('');
@@ -443,34 +444,36 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
       <main className="min-h-screen relative transition-colors font-sans overflow-x-hidden" role="main">
       {/* HERO SECTION - Fun, Gen Z, full of energy */}
       <section className="relative min-h-[70vh] sm:min-h-[85vh] flex flex-col overflow-hidden">
-        {/* Background - soft tint */}
-        <div className="absolute inset-0 bg-gradient-to-b from-violet-50/60 via-violet-50/35 to-white dark:from-stone-950 dark:via-stone-900/95 dark:to-stone-900" />
+        {/* Background - same purple as Earn Your Free Time */}
+        <div className="absolute inset-0 bg-gradient-to-b from-indigo-950 via-violet-900 to-purple-950" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_0%,rgba(139,92,246,0.25),transparent_50%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_40%_at_80%_80%,rgba(236,72,153,0.15),transparent_50%)]" />
         
-        {/* Floating shapes for mobile - adds depth like dashboard */}
-        <div className="absolute top-[12%] left-[8%] w-12 h-12 rounded-2xl bg-gradient-to-br from-rose-400/20 to-pink-500/20 rotate-12 lg:hidden animate-float pointer-events-none" />
-        <div className="absolute top-[22%] right-[10%] w-10 h-10 rounded-full bg-gradient-to-br from-violet-400/20 to-purple-500/20 lg:hidden animate-float-delayed pointer-events-none" />
-        <div className="absolute top-[45%] left-[6%] w-8 h-8 rounded-lg bg-gradient-to-br from-sky-400/20 to-blue-500/20 -rotate-12 lg:hidden animate-float pointer-events-none" style={{ animationDelay: '1s' }} />
-        <div className="absolute top-[55%] right-[8%] w-11 h-11 rounded-2xl bg-gradient-to-br from-emerald-400/20 to-teal-500/20 rotate-6 lg:hidden animate-float-delayed pointer-events-none" />
-        <div className="absolute bottom-[35%] left-[10%] w-9 h-9 rounded-full bg-gradient-to-br from-amber-400/20 to-orange-500/20 lg:hidden animate-float pointer-events-none" style={{ animationDelay: '0.5s' }} />
-        <div className="absolute bottom-[25%] right-[12%] w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-400/20 to-violet-500/20 -rotate-6 lg:hidden animate-float-delayed pointer-events-none" style={{ animationDelay: '0.8s' }} />
+        {/* Floating shapes for mobile - adds depth */}
+        <div className="absolute top-[12%] left-[8%] w-12 h-12 rounded-2xl bg-white/10 rotate-12 lg:hidden animate-float pointer-events-none" />
+        <div className="absolute top-[22%] right-[10%] w-10 h-10 rounded-full bg-white/10 lg:hidden animate-float-delayed pointer-events-none" />
+        <div className="absolute top-[45%] left-[6%] w-8 h-8 rounded-lg bg-white/5 -rotate-12 lg:hidden animate-float pointer-events-none" style={{ animationDelay: '1s' }} />
+        <div className="absolute top-[55%] right-[8%] w-11 h-11 rounded-2xl bg-white/10 rotate-6 lg:hidden animate-float-delayed pointer-events-none" />
+        <div className="absolute bottom-[35%] left-[10%] w-9 h-9 rounded-full bg-white/5 lg:hidden animate-float pointer-events-none" style={{ animationDelay: '0.5s' }} />
+        <div className="absolute bottom-[25%] right-[12%] w-10 h-10 rounded-lg bg-white/10 -rotate-6 lg:hidden animate-float-delayed pointer-events-none" style={{ animationDelay: '0.8s' }} />
         
         {/* Floating tool mockups - scattered around hero */}
         <div className="absolute top-[18%] left-[10%] xl:left-[12%] hidden lg:block animate-float">
-          <div className="bg-white dark:bg-stone-800 rounded-2xl p-3 shadow-xl border border-violet-200/60 dark:border-violet-800/40 rotate-[-6deg] hover:rotate-0 transition-transform">
+          <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-3 shadow-xl border border-white/20 rotate-[-6deg] hover:rotate-0 transition-transform">
             <span className="text-2xl block mb-1">📝</span>
             <span className="text-xs font-bold text-violet-600 dark:text-violet-400">Quiz</span>
             <div className="mt-1.5 h-1.5 bg-violet-100 dark:bg-violet-900/50 rounded-full w-12" />
           </div>
         </div>
         <div className="absolute top-[25%] right-[12%] hidden lg:block animate-float-delayed">
-          <div className="bg-white dark:bg-stone-800 rounded-2xl p-3 shadow-xl border border-rose-200/60 dark:border-rose-800/40 rotate-[4deg] hover:rotate-0 transition-transform">
+          <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-3 shadow-xl border border-white/20 rotate-[4deg] hover:rotate-0 transition-transform">
             <span className="text-2xl block mb-1">🃏</span>
             <span className="text-xs font-bold text-rose-600 dark:text-rose-400">Cards</span>
             <div className="mt-1.5 h-1.5 bg-rose-100 dark:bg-rose-900/50 rounded-full w-10" />
           </div>
         </div>
         <div className="absolute bottom-[22%] left-[15%] hidden lg:block animate-float" style={{ animationDelay: '1s' }}>
-          <div className="bg-white dark:bg-stone-800 rounded-2xl p-3 shadow-xl border border-blue-200/60 dark:border-blue-800/40 rotate-[3deg] hover:rotate-0 transition-transform">
+          <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-3 shadow-xl border border-white/20 rotate-[3deg] hover:rotate-0 transition-transform">
             <span className="text-2xl block mb-1">🧩</span>
             <span className="text-xs font-bold text-blue-600 dark:text-blue-400">Puzzle</span>
             <div className="mt-1.5 grid grid-cols-3 gap-0.5">
@@ -479,7 +482,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
           </div>
         </div>
         <div className="absolute bottom-[28%] right-[10%] hidden lg:block animate-float-delayed">
-          <div className="bg-white dark:bg-stone-800 rounded-2xl p-3 shadow-xl border border-emerald-200/60 dark:border-emerald-800/40 rotate-[-5deg] hover:rotate-0 transition-transform">
+          <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-3 shadow-xl border border-white/20 rotate-[-5deg] hover:rotate-0 transition-transform">
             <span className="text-2xl block mb-1">✨</span>
             <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">Summarize</span>
             <div className="mt-1.5 flex gap-1"><div className="w-2 h-2 rounded-full bg-emerald-400"/><div className="w-3 h-2 rounded-full bg-emerald-300/60"/></div>
@@ -502,12 +505,12 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
           </div>
           <div className="max-w-4xl mx-auto text-center">
             {/* Hero headline */}
-            <h1 className="text-3xl sm:text-5xl lg:text-6xl xl:text-7xl font-extrabold text-stone-800 dark:text-stone-100 leading-[1.1] mb-6 sm:mb-6 tracking-tight" style={{ letterSpacing: '-0.03em' }}>
+            <h1 className="text-3xl sm:text-5xl lg:text-6xl xl:text-7xl font-extrabold text-white leading-[1.1] mb-6 sm:mb-6 tracking-tight" style={{ letterSpacing: '-0.03em' }}>
               The #1 Quizlet alternative to<br />
-              <span className="text-violet-500">ace school</span>
+              <span className="text-violet-300">ace school</span>
             </h1>
 
-            <p className="text-base sm:text-xl text-stone-600 dark:text-stone-400 mb-16 sm:mb-14 max-w-2xl mx-auto leading-relaxed px-2">
+            <p className="text-base sm:text-xl text-violet-200/90 mb-16 sm:mb-14 max-w-2xl mx-auto leading-relaxed px-2">
               The #1 Quizlet alternative. Paste your notes — get quizzes, flashcards, crosswords & essay feedback in seconds.
             </p>
             
@@ -587,7 +590,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                   </svg>
                   <button
                     onClick={() => onNavigate('login')}
-                    className="btn-glisten relative z-10 px-10 py-4 bg-violet-500 text-white font-bold rounded-full hover:bg-violet-600 hover:scale-105 active:scale-95 transition-all duration-300 ease-out shadow-xl shadow-violet-500/25 hover:shadow-2xl hover:shadow-violet-500/40 text-lg"
+                    className="btn-glisten relative z-10 px-10 py-4 bg-white text-violet-900 font-bold rounded-full hover:bg-violet-100 hover:scale-105 active:scale-95 transition-all duration-300 ease-out shadow-xl shadow-black/20 hover:shadow-2xl text-lg"
                   >
                     I'm ready to level up
                   </button>
@@ -595,7 +598,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
               </div>
             </div>
             
-            <p className="text-sm text-stone-500 dark:text-stone-400 mb-12">
+            <p className="text-sm text-violet-300/80 mb-12">
               Trusted by 38k+ students
             </p>
             
@@ -604,7 +607,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
               <button
                 onClick={() => setStudyCardsCarouselIndex((i) => Math.max(0, i - 1))}
                 disabled={studyCardsCarouselIndex === 0}
-                className="hidden sm:flex absolute left-4 sm:left-6 top-1/2 -translate-y-1/2 z-20 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white dark:bg-stone-800 shadow-lg border border-stone-200 dark:border-stone-600 items-center justify-center text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-700 hover:text-stone-900 dark:hover:text-stone-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-300"
+                className="hidden sm:flex absolute left-4 sm:left-6 top-1/2 -translate-y-1/2 z-20 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/95 backdrop-blur-sm shadow-lg border border-white/20 items-center justify-center text-violet-800 hover:bg-white hover:text-violet-900 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-300"
                 aria-label="Previous"
               >
                 <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
@@ -612,7 +615,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
               <button
                 onClick={() => setStudyCardsCarouselIndex((i) => Math.min(3, i + 1))}
                 disabled={studyCardsCarouselIndex === 3}
-                className="hidden sm:flex absolute right-4 sm:right-6 top-1/2 -translate-y-1/2 z-20 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white dark:bg-stone-800 shadow-lg border border-stone-200 dark:border-stone-600 items-center justify-center text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-700 hover:text-stone-900 dark:hover:text-stone-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-300"
+                className="hidden sm:flex absolute right-4 sm:right-6 top-1/2 -translate-y-1/2 z-20 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/95 backdrop-blur-sm shadow-lg border border-white/20 items-center justify-center text-violet-800 hover:bg-white hover:text-violet-900 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-300"
                 aria-label="Next"
               >
                 <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
@@ -820,140 +823,6 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
         </div>
       </section>
 
-      {/* Focus Mode - Earn Your Free Time */}
-      <section className="relative py-16 sm:py-24 bg-gradient-to-b from-stone-50 via-orange-50/30 to-white dark:from-stone-900 dark:via-stone-900 dark:to-stone-900 overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_40%_at_50%_50%,rgba(249,115,22,0.06),transparent)] dark:bg-[radial-gradient(ellipse_60%_40%_at_50%_50%,rgba(249,115,22,0.04),transparent)]" />
-        <div className="absolute top-20 left-[6%] hidden xl:block text-4xl opacity-30 animate-float">🔒</div>
-        <div className="absolute top-32 right-[8%] hidden xl:block text-3xl opacity-25 animate-float-delayed">🧠</div>
-        <div className="absolute bottom-20 left-[12%] hidden xl:block text-3xl opacity-25 animate-float">📵</div>
-
-        <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12 sm:mb-16">
-            <span className="inline-block px-4 py-1.5 bg-orange-100 dark:bg-orange-900/50 text-orange-700 dark:text-orange-400 rounded-full text-sm font-semibold mb-4">
-              New Feature
-            </span>
-            <h2 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-stone-800 dark:text-stone-100 mb-4">
-              Earn Your{' '}
-              <span className="bg-gradient-to-r from-orange-500 to-amber-500 dark:from-orange-400 dark:to-amber-400 bg-clip-text text-transparent">Free Time</span>
-            </h2>
-            <p className="text-base sm:text-lg text-stone-600 dark:text-stone-400 max-w-2xl mx-auto">
-              Focus Mode blocks distracting websites until you answer study questions. You can&apos;t scroll — until you&apos;ve studied.
-            </p>
-          </div>
-
-          {/* How it works - 3 step flow */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 mb-12 sm:mb-16">
-            {/* Step 1 */}
-            <div className="relative group">
-              <div className="absolute -inset-1 bg-gradient-to-br from-orange-400/20 to-amber-400/20 rounded-3xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              <div className="relative bg-white dark:bg-stone-800 rounded-3xl p-6 sm:p-8 border border-orange-100 dark:border-orange-800/40 shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center mb-5 shadow-lg shadow-orange-500/25">
-                  <span className="text-2xl">🚫</span>
-                </div>
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="text-xs font-bold text-orange-500 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/30 px-2.5 py-1 rounded-full">Step 1</span>
-                </div>
-                <h3 className="text-lg font-bold text-stone-800 dark:text-stone-100 mb-2">Pick Sites to Block</h3>
-                <p className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed">
-                  Choose the sites that steal your focus — YouTube, TikTok, Instagram, Reddit, or any custom domain.
-                </p>
-              </div>
-            </div>
-
-            {/* Step 2 */}
-            <div className="relative group">
-              <div className="absolute -inset-1 bg-gradient-to-br from-violet-400/20 to-purple-400/20 rounded-3xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              <div className="relative bg-white dark:bg-stone-800 rounded-3xl p-6 sm:p-8 border border-violet-100 dark:border-violet-800/40 shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center mb-5 shadow-lg shadow-violet-500/25">
-                  <span className="text-2xl">📝</span>
-                </div>
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="text-xs font-bold text-violet-500 dark:text-violet-400 bg-violet-50 dark:bg-violet-900/30 px-2.5 py-1 rounded-full">Step 2</span>
-                </div>
-                <h3 className="text-lg font-bold text-stone-800 dark:text-stone-100 mb-2">Answer to Unlock</h3>
-                <p className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed">
-                  Try to visit a blocked site and you&apos;ll face a quick quiz from your own study material. Get 4 out of 5 right to unlock it.
-                </p>
-              </div>
-            </div>
-
-            {/* Step 3 */}
-            <div className="relative group">
-              <div className="absolute -inset-1 bg-gradient-to-br from-emerald-400/20 to-teal-400/20 rounded-3xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              <div className="relative bg-white dark:bg-stone-800 rounded-3xl p-6 sm:p-8 border border-emerald-100 dark:border-emerald-800/40 shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center mb-5 shadow-lg shadow-emerald-500/25">
-                  <span className="text-2xl">🎉</span>
-                </div>
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="text-xs font-bold text-emerald-500 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 px-2.5 py-1 rounded-full">Step 3</span>
-                </div>
-                <h3 className="text-lg font-bold text-stone-800 dark:text-stone-100 mb-2">Enjoy Your Break</h3>
-                <p className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed">
-                  Passed the quiz? The site unlocks for 15 minutes to 24 hours — you choose. When time&apos;s up, study again to earn more time.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Feature highlights */}
-          <div className="relative">
-            <div className="absolute -inset-1 bg-gradient-to-r from-orange-400/10 via-violet-400/10 to-emerald-400/10 rounded-3xl blur-xl" />
-            <div className="relative bg-white dark:bg-stone-800 rounded-3xl p-8 sm:p-10 border border-stone-200 dark:border-stone-700 shadow-xl">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-xl bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center flex-shrink-0">
-                    <svg className="w-5 h-5 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-stone-800 dark:text-stone-100 text-sm mb-1">Chrome Extension</h4>
-                    <p className="text-xs text-stone-500 dark:text-stone-400 leading-relaxed">Works directly in your browser. No app downloads needed.</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-xl bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center flex-shrink-0">
-                    <svg className="w-5 h-5 text-violet-600 dark:text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-stone-800 dark:text-stone-100 text-sm mb-1">Customisable Timer</h4>
-                    <p className="text-xs text-stone-500 dark:text-stone-400 leading-relaxed">Set unlock duration from 15 minutes to 24 hours.</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center flex-shrink-0">
-                    <svg className="w-5 h-5 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-stone-800 dark:text-stone-100 text-sm mb-1">Your Own Material</h4>
-                    <p className="text-xs text-stone-500 dark:text-stone-400 leading-relaxed">Questions pulled from your uploaded notes and study tools.</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center flex-shrink-0">
-                    <svg className="w-5 h-5 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-stone-800 dark:text-stone-100 text-sm mb-1">Block Any Site</h4>
-                    <p className="text-xs text-stone-500 dark:text-stone-400 leading-relaxed">Popular presets plus add any custom domain you want.</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* CTA */}
-          <div className="text-center mt-10 sm:mt-14">
-            <button
-              onClick={() => onNavigate('focus-mode')}
-              className="group inline-flex items-center px-8 py-4 text-white font-bold rounded-2xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 hover:scale-105 active:scale-95 shadow-xl shadow-orange-500/25 hover:shadow-orange-500/40 transition-all duration-300 text-lg"
-            >
-              Try Focus Mode Free
-              <svg className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
-            </button>
-            <p className="mt-4 text-stone-500 dark:text-stone-400 text-sm">Available with Pro &amp; Premium plans</p>
-          </div>
-        </div>
-      </section>
-
       {/* See WriteScholar in Action - Study Tools Showcase (Turn Your Notes Into) */}
       <section className="relative py-12 sm:py-28 overflow-hidden max-lg:bg-gradient-to-b max-lg:from-violet-50/60 max-lg:via-white max-lg:to-stone-50 dark:max-lg:from-violet-950/25 dark:max-lg:via-stone-900 dark:max-lg:to-stone-900 bg-white dark:bg-stone-900">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-10%,rgba(99,102,241,0.08),transparent)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-10%,rgba(139,92,246,0.06),transparent)] max-lg:bg-[radial-gradient(ellipse_100%_60%_at_50%_0%,rgba(139,92,246,0.12),transparent_70%)] max-lg:dark:bg-[radial-gradient(ellipse_100%_60%_at_50%_0%,rgba(139,92,246,0.08),transparent_70%)]" />
@@ -1095,6 +964,129 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
               <svg className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
             </button>
             <p className="mt-4 text-stone-500 dark:text-stone-400 text-sm">Free plan includes 3 generations per month</p>
+          </div>
+        </div>
+      </section>
+
+      {/* Focus Mode - Earn Your Free Time - Revamped */}
+      <section className="relative py-20 sm:py-32 overflow-hidden">
+        {/* Bold gradient background */}
+        <div className="absolute inset-0 bg-gradient-to-b from-indigo-950 via-violet-900 to-purple-950 dark:from-indigo-950 dark:via-violet-950 dark:to-stone-900" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_0%,rgba(139,92,246,0.25),transparent_50%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_40%_at_80%_80%,rgba(236,72,153,0.15),transparent_50%)]" />
+
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Hero - centered, bold */}
+          <div className="text-center mb-16 sm:mb-20">
+            <div className="inline-flex items-center gap-2 mb-6">
+              <ScholarMascot size={64} animated={true} pose="pointing" />
+              <span className="px-4 py-1.5 bg-white/10 backdrop-blur-sm text-violet-200 rounded-full text-sm font-semibold border border-white/10">
+                Focus Mode
+              </span>
+            </div>
+            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white mb-5 tracking-tight">
+              Earn Your Free Time
+            </h2>
+            <p className="text-lg sm:text-xl text-violet-200/90 max-w-2xl mx-auto leading-relaxed">
+              Block distracting sites until you answer study questions. No scroll until you&apos;ve studied.
+            </p>
+          </div>
+
+          {/* Video - hero showcase (non-paid only) */}
+          {!(user && ['pro', 'premium'].includes((user.plan || user.subscription_plan || '').toLowerCase())) && (
+            <div className="mb-20">
+              <div className="relative max-w-4xl mx-auto rounded-2xl overflow-hidden ring-2 ring-white/20 shadow-2xl">
+                <video autoPlay loop muted playsInline className="w-full aspect-video object-cover" aria-label="See how Focus Mode works">
+                  <source src="/focusmode.mp4" type="video/mp4" />
+                </video>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
+              </div>
+            </div>
+          )}
+
+          {/* How it works - numbered timeline */}
+          <div className="mb-20">
+            <h3 className="text-xl font-bold text-white/90 mb-10 text-center">How it works</h3>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-6">
+              {/* Step 1 */}
+              <div className="relative flex flex-col">
+                <div className="flex-1 rounded-2xl overflow-hidden bg-white/5 backdrop-blur-sm border border-white/10 hover:border-violet-400/30 hover:bg-white/10 transition-all duration-300">
+                  <div className="aspect-[5/4] min-h-[220px] flex items-center justify-center p-6 bg-gradient-to-b from-violet-500/20 to-transparent">
+                    <img src="/step%201.png" alt="Pick sites to block" className="max-w-full max-h-full object-contain" />
+                  </div>
+                  <div className="p-6">
+                    <span className="text-xs font-bold text-violet-400">STEP 1</span>
+                    <h4 className="text-lg font-bold text-white mt-1 mb-2">Pick Sites to Block</h4>
+                    <p className="text-sm text-violet-200/80 leading-relaxed">
+                      YouTube, TikTok, Instagram, Reddit — or any custom domain. You choose what to block.
+                    </p>
+                  </div>
+                </div>
+                <div className="hidden lg:flex absolute top-1/2 -right-3 w-6 h-0.5 bg-gradient-to-r from-violet-400 to-transparent z-10" aria-hidden />
+              </div>
+
+              {/* Step 2 */}
+              <div className="relative flex flex-col">
+                <div className="flex-1 rounded-2xl overflow-hidden bg-white/5 backdrop-blur-sm border border-white/10 hover:border-purple-400/30 hover:bg-white/10 transition-all duration-300">
+                  <div className="aspect-[5/4] min-h-[220px] flex items-center justify-center p-6 bg-gradient-to-b from-purple-500/20 to-transparent">
+                    <img src="/step%202.png" alt="Unlock quiz rules" className="max-w-full max-h-full object-contain" />
+                  </div>
+                  <div className="p-6">
+                    <span className="text-xs font-bold text-purple-400">STEP 2</span>
+                    <h4 className="text-lg font-bold text-white mt-1 mb-2">Answer to Unlock</h4>
+                    <p className="text-sm text-violet-200/80 leading-relaxed">
+                      Visit a blocked site → face a quiz from your notes. Get questions right to unlock.
+                    </p>
+                  </div>
+                </div>
+                <div className="hidden lg:flex absolute top-1/2 -right-3 w-6 h-0.5 bg-gradient-to-r from-purple-400 to-transparent z-10" aria-hidden />
+              </div>
+
+              {/* Step 3 */}
+              <div className="flex flex-col">
+                <div className="flex-1 rounded-2xl overflow-hidden bg-white/5 backdrop-blur-sm border border-white/10 hover:border-fuchsia-400/30 hover:bg-white/10 transition-all duration-300">
+                  <div className="aspect-[5/4] min-h-[220px] flex items-center justify-center p-6 bg-gradient-to-b from-fuchsia-500/20 to-transparent">
+                    <div className="w-28 h-28 rounded-full bg-gradient-to-br from-fuchsia-500 to-pink-600 flex items-center justify-center shadow-2xl shadow-fuchsia-500/30">
+                      <svg className="w-14 h-14 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    </div>
+                  </div>
+                  <div className="p-6">
+                    <span className="text-xs font-bold text-fuchsia-400">STEP 3</span>
+                    <h4 className="text-lg font-bold text-white mt-1 mb-2">Enjoy Your Break</h4>
+                    <p className="text-sm text-violet-200/80 leading-relaxed">
+                      Site unlocks for 15 min to 24 hours. Time&apos;s up? Study again to earn more.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Features - compact pills */}
+          <div className="flex flex-wrap justify-center gap-3 mb-12">
+            {[
+              { icon: '🌐', label: 'Chrome Extension' },
+              { icon: '⏱️', label: 'Custom timer' },
+              { icon: '📚', label: 'Your notes' },
+              { icon: '🔗', label: 'Block any site' },
+            ].map((f) => (
+              <div key={f.label} className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-violet-200 text-sm">
+                <span>{f.icon}</span>
+                <span>{f.label}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* CTA */}
+          <div className="text-center">
+            <button
+              onClick={() => onNavigate('focus-mode')}
+              className="inline-flex items-center gap-2 px-8 py-4 text-lg font-bold text-violet-900 bg-white rounded-2xl hover:bg-violet-100 hover:scale-105 active:scale-95 shadow-xl shadow-black/20 transition-all duration-300"
+            >
+              Try Focus Mode Free
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+            </button>
+            <p className="mt-4 text-violet-300/80 text-sm">Pro &amp; Premium plans</p>
           </div>
         </div>
       </section>

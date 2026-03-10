@@ -99,6 +99,16 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
     setMode(initialMode);
   }, [initialMode]);
 
+  // Detect desktop for Focus Mode (Chrome extension only works on desktop)
+  const [isDesktop, setIsDesktop] = useState(true);
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 768px)');
+    setIsDesktop(mq.matches);
+    const h = () => setIsDesktop(mq.matches);
+    mq.addEventListener('change', h);
+    return () => mq.removeEventListener('change', h);
+  }, []);
+
   const [citationStyle, setCitationStyle] = useState('APA');
   const [citationYearRange, setCitationYearRange] = useState('all');
   const [isSearchingCitations, setIsSearchingCitations] = useState(false);
@@ -2200,9 +2210,9 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                 { id: 'analyze' as const, icon: '📝', title: 'Analyze', desc: 'Get professor-style feedback on your essays', mobileDesc: 'Essay feedback', gradient: 'from-rose-50 to-pink-50 dark:from-rose-900/20 dark:to-pink-900/15', border: 'border-rose-200/70 dark:border-rose-700/40', activeBorder: 'border-rose-400 dark:border-rose-500 ring-2 ring-rose-300/50 dark:ring-rose-600/40', iconBg: 'bg-gradient-to-br from-rose-400 to-pink-500', accentColor: 'text-rose-600 dark:text-rose-400', pro: false, setStudyMode: null },
                 { id: 'citations' as const, icon: '📚', title: 'Citations', desc: 'Find and format academic sources instantly', mobileDesc: 'Find sources', gradient: 'from-sky-50 to-blue-50 dark:from-sky-900/20 dark:to-blue-900/15', border: 'border-sky-200/70 dark:border-sky-700/40', activeBorder: 'border-sky-400 dark:border-sky-500 ring-2 ring-sky-300/50 dark:ring-sky-600/40', iconBg: 'bg-gradient-to-br from-sky-400 to-blue-500', accentColor: 'text-sky-600 dark:text-sky-400', pro: false, setStudyMode: null },
                 { id: 'study_tools' as const, icon: '🎯', title: 'Study Tools', desc: 'Create quizzes, flashcards & crosswords from your notes', mobileDesc: 'Quizzes & flashcards', gradient: 'from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/15', border: 'border-amber-200/70 dark:border-amber-700/40', activeBorder: 'border-amber-400 dark:border-amber-500 ring-2 ring-amber-300/50 dark:ring-amber-600/40', iconBg: 'bg-gradient-to-br from-amber-400 to-orange-500', accentColor: 'text-amber-600 dark:text-amber-400', pro: false, setStudyMode: 'quiz' as const },
-                { id: 'focus_mode' as const, icon: '🔒', title: 'Focus Mode', desc: 'Block distracting sites until you study', mobileDesc: 'Block distractions', gradient: 'from-violet-100 to-purple-100 dark:from-violet-800/40 dark:to-purple-800/40', border: 'border-violet-300 dark:border-violet-600', activeBorder: 'border-violet-500 dark:border-violet-400 ring-2 ring-violet-400/60 dark:ring-violet-500/50', iconBg: 'bg-gradient-to-br from-violet-500 to-purple-600', accentColor: 'text-violet-700 dark:text-violet-300', pro: true, setStudyMode: null, special: true, badge: 'NEW' },
+                { id: 'focus_mode' as const, icon: '🔒', title: 'Focus Mode', desc: 'Earn screen time—block sites until you pass study questions', mobileDesc: 'Earn your breaks', gradient: 'from-violet-100 to-purple-100 dark:from-violet-800/40 dark:to-purple-800/40', border: 'border-violet-300 dark:border-violet-600', activeBorder: 'border-violet-500 dark:border-violet-400 ring-2 ring-violet-400/60 dark:ring-violet-500/50', iconBg: 'bg-gradient-to-br from-violet-500 to-purple-600', accentColor: 'text-violet-700 dark:text-violet-300', pro: true, setStudyMode: null, special: true, badge: 'NEW' },
                 { id: 'crater_blast' as const, icon: '🚀', title: 'Crater Blast', desc: 'Play the learning game with your content', mobileDesc: 'Quiz game', gradient: 'from-violet-900/30 to-purple-900/40 dark:from-violet-900/30 dark:to-purple-900/40', border: 'border-violet-200/70 dark:border-violet-700/40', activeBorder: 'border-violet-500 dark:border-violet-500 ring-2 ring-violet-400/50 dark:ring-violet-600/40', iconBg: 'bg-gradient-to-br from-violet-600 to-purple-700', accentColor: 'text-violet-600 dark:text-violet-300', pro: false, setStudyMode: 'crater_blast' as const, badge: 'NEW' },
-                { id: 'more_tools' as const, icon: '🔧', title: 'More Tools', desc: 'Lessons, summarize, humanize & utilities', mobileDesc: 'Lessons & more', gradient: 'from-stone-100 to-stone-200 dark:from-stone-700/50 dark:to-stone-600/50', border: 'border-stone-200 dark:border-stone-600/60', activeBorder: 'border-stone-400 dark:border-stone-500', iconBg: 'bg-gradient-to-br from-stone-400 to-stone-500', accentColor: 'text-stone-600 dark:text-stone-400', pro: false, setStudyMode: null, isMoreTools: true },
+                { id: 'more_tools' as const, icon: '🔧', title: 'More Tools', desc: 'Lessons, summarize, humanize & utilities', mobileDesc: 'Lessons & more', gradient: 'from-teal-50 to-cyan-50 dark:from-teal-900/30 dark:to-cyan-900/30', border: 'border-teal-200/70 dark:border-teal-700/40', activeBorder: 'border-teal-400 dark:border-teal-500 ring-2 ring-teal-300/50 dark:ring-teal-600/40', iconBg: 'bg-gradient-to-br from-teal-500 to-cyan-600', accentColor: 'text-teal-700 dark:text-teal-300', pro: false, setStudyMode: null, isMoreTools: true },
               ] as const).map(tool => (
                 <button
                   key={tool.id}
@@ -2278,9 +2288,40 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
           </div>
         )}
 
-        {/* FOCUS MODE - Settings section for paid users */}
+        {/* FOCUS MODE - Settings section for paid users; on mobile show desktop-only info */}
         {mode === 'focus_mode' && (
-          <FocusModeSettingsSection embedded onBack={() => setMode('analyze')} />
+          isDesktop ? (
+            <FocusModeSettingsSection embedded onBack={() => setMode('analyze')} />
+          ) : (
+            <div className="min-h-0 flex-1 overflow-auto">
+              <div className="p-6 sm:p-8 max-w-2xl">
+                <button
+                  onClick={() => setMode('analyze')}
+                  className="mb-6 flex items-center gap-2 text-stone-500 hover:text-stone-700 dark:hover:text-stone-300 text-sm font-medium"
+                >
+                  ← Back to Dashboard
+                </button>
+                <div className="bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-2xl p-6 sm:p-8">
+                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center mb-6 text-2xl">🔒</div>
+                  <h2 className="text-xl font-bold text-stone-800 dark:text-stone-100 mb-2">Focus Mode</h2>
+                  <p className="text-stone-600 dark:text-stone-400 text-sm mb-4">
+                    Focus Mode is a <strong>desktop feature</strong>. It works with our Chrome extension to block distracting websites (YouTube, TikTok, Reddit, etc.) until you answer study questions from your own material.
+                  </p>
+                  <p className="text-stone-600 dark:text-stone-400 text-sm mb-6">
+                    Mobile browsers don&apos;t support extensions, so Focus Mode is only available on desktop. Use a computer with Chrome, install our extension, and earn your screen time by studying first.
+                  </p>
+                  <a
+                    href="https://chrome.google.com/webstore"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 font-medium text-sm"
+                  >
+                    Get Chrome Extension (desktop) →
+                  </a>
+                </div>
+              </div>
+            </div>
+          )
         )}
 
         {/* ANALYZE MODE - Upload First Design - Mobile optimized */}

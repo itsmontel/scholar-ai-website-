@@ -8,21 +8,21 @@ interface MoreToolsPageProps {
 }
 
 const moreTools = [
-  { id: 'interactive-lesson', icon: '🎓', title: 'Lessons', desc: 'Turn text into engaging interactive lessons', gradient: 'from-violet-400 to-purple-500', page: 'interactive-lesson' },
-  { id: 'summarizer', icon: '📋', title: 'Summarize', desc: 'Condense papers and articles instantly', gradient: 'from-teal-400 to-cyan-500', page: 'summarizer' },
-  { id: 'humanizer', icon: '✨', title: 'Humanize', desc: 'Transform AI text into natural human writing', gradient: 'from-violet-400 to-purple-500', page: 'humanizer' },
-  { id: 'citation-generator-tool', icon: '📚', title: 'Citation Generator', desc: 'Format citations in APA, MLA, Chicago, Harvard', gradient: 'from-sky-400 to-blue-500', page: 'citation-generator-tool' },
-  { id: 'word-counter', icon: '📊', title: 'Word Counter', desc: 'Count words, characters, sentences & reading time', gradient: 'from-blue-400 to-indigo-500', page: 'word-counter' },
-  { id: 'essay-outline', icon: '📋', title: 'Essay Outline', desc: 'Generate structured outlines for any essay type', gradient: 'from-teal-400 to-cyan-500', page: 'essay-outline' },
-  { id: 'thesis-generator', icon: '🎯', title: 'Thesis Generator', desc: 'Create strong thesis statements for your essays', gradient: 'from-violet-400 to-purple-500', page: 'thesis-generator' },
-  { id: 'grammar-checker', icon: '✏️', title: 'Grammar Checker', desc: 'Fix spelling, grammar & punctuation errors', gradient: 'from-emerald-400 to-teal-500', page: 'grammar-checker' },
-  { id: 'readability-score', icon: '📖', title: 'Readability Score', desc: 'Check Flesch-Kincaid grade level & reading ease', gradient: 'from-amber-400 to-orange-500', page: 'readability-score' },
-  { id: 'paraphrasing-tips', icon: '🔄', title: 'Paraphrasing Tips', desc: 'Find overused words & get synonym suggestions', gradient: 'from-rose-400 to-pink-500', page: 'paraphrasing-tips' },
-  { id: 'text-case-converter', icon: 'Aa', title: 'Text Case Converter', desc: 'UPPERCASE, lowercase, Title Case & more', gradient: 'from-indigo-400 to-violet-500', page: 'text-case-converter' },
-  { id: 'gpa-calculator', icon: '📚', title: 'GPA Calculator', desc: 'Calculate semester or cumulative GPA', gradient: 'from-cyan-400 to-sky-500', page: 'gpa-calculator' },
-  { id: 'pomodoro-timer', icon: '⏱️', title: 'Pomodoro Timer', desc: 'Focus timer with work & break intervals', gradient: 'from-orange-400 to-amber-500', page: 'pomodoro-timer' },
-  { id: 'calculator', icon: '🧮', title: 'Scientific Calculator', desc: 'Trig, log, powers & more for math & science', gradient: 'from-violet-400 to-fuchsia-500', page: 'calculator' },
-  { id: 'converter', icon: '📐', title: 'Unit Converter', desc: 'Length, weight, temp, volume, speed & energy', gradient: 'from-amber-400 to-orange-500', page: 'converter' },
+  { id: 'interactive-lesson', icon: '🎓', title: 'Lessons', desc: 'Turn text into engaging interactive lessons', gradient: 'from-violet-400 to-purple-500', page: 'interactive-lesson', free: false },
+  { id: 'summarizer', icon: '📋', title: 'Summarize', desc: 'Condense papers and articles instantly', gradient: 'from-teal-400 to-cyan-500', page: 'summarizer', free: false },
+  { id: 'humanizer', icon: '✨', title: 'Humanize', desc: 'Transform AI text into natural human writing', gradient: 'from-violet-400 to-purple-500', page: 'humanizer', free: false },
+  { id: 'citation-generator-tool', icon: '📚', title: 'Citation Generator', desc: 'Format citations in APA, MLA, Chicago, Harvard', gradient: 'from-sky-400 to-blue-500', page: 'citation-generator-tool', free: true },
+  { id: 'word-counter', icon: '📊', title: 'Word Counter', desc: 'Count words, characters, sentences & reading time', gradient: 'from-blue-400 to-indigo-500', page: 'word-counter', free: true },
+  { id: 'essay-outline', icon: '📋', title: 'Essay Outline', desc: 'Generate structured outlines for any essay type', gradient: 'from-teal-400 to-cyan-500', page: 'essay-outline', free: true },
+  { id: 'thesis-generator', icon: '🎯', title: 'Thesis Generator', desc: 'Create strong thesis statements for your essays', gradient: 'from-violet-400 to-purple-500', page: 'thesis-generator', free: true },
+  { id: 'grammar-checker', icon: '✏️', title: 'Grammar Checker', desc: 'Fix spelling, grammar & punctuation errors', gradient: 'from-emerald-400 to-teal-500', page: 'grammar-checker', free: true },
+  { id: 'readability-score', icon: '📖', title: 'Readability Score', desc: 'Check Flesch-Kincaid grade level & reading ease', gradient: 'from-amber-400 to-orange-500', page: 'readability-score', free: true },
+  { id: 'paraphrasing-tips', icon: '🔄', title: 'Paraphrasing Tips', desc: 'Find overused words & get synonym suggestions', gradient: 'from-rose-400 to-pink-500', page: 'paraphrasing-tips', free: true },
+  { id: 'text-case-converter', icon: 'Aa', title: 'Text Case Converter', desc: 'UPPERCASE, lowercase, Title Case & more', gradient: 'from-indigo-400 to-violet-500', page: 'text-case-converter', free: true },
+  { id: 'gpa-calculator', icon: '📚', title: 'GPA Calculator', desc: 'Calculate semester or cumulative GPA', gradient: 'from-cyan-400 to-sky-500', page: 'gpa-calculator', free: true },
+  { id: 'pomodoro-timer', icon: '⏱️', title: 'Pomodoro Timer', desc: 'Focus timer with work & break intervals', gradient: 'from-orange-400 to-amber-500', page: 'pomodoro-timer', free: true },
+  { id: 'calculator', icon: '🧮', title: 'Scientific Calculator', desc: 'Trig, log, powers & more for math & science', gradient: 'from-violet-400 to-fuchsia-500', page: 'calculator', free: true },
+  { id: 'converter', icon: '📐', title: 'Unit Converter', desc: 'Length, weight, temp, volume, speed & energy', gradient: 'from-amber-400 to-orange-500', page: 'converter', free: true },
 ];
 
 
@@ -70,9 +70,16 @@ const MoreToolsPage = ({ onNavigate, user, onLogout }: MoreToolsPageProps) => {
                   <span className="text-2xl">{tool.icon}</span>
                 )}
               </div>
-              <h3 className="font-bold text-base leading-tight text-stone-800 dark:text-stone-100 relative z-10 mb-1">
-                {tool.title}
-              </h3>
+              <div className="flex items-center gap-2 relative z-10 mb-1">
+                <h3 className="font-bold text-base leading-tight text-stone-800 dark:text-stone-100">
+                  {tool.title}
+                </h3>
+                {tool.free && (
+                  <span className="px-2 py-0.5 text-[10px] font-bold rounded-md bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-400">
+                    Free
+                  </span>
+                )}
+              </div>
               <p className="text-stone-500 dark:text-stone-400 text-xs leading-relaxed relative z-10">
                 {tool.desc}
               </p>

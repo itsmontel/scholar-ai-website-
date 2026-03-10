@@ -130,6 +130,29 @@ const FocusModePage = ({ onNavigate, user, onLogout }: FocusModePageProps) => {
         </div>
       </section>
 
+      {/* Video: How Focus Mode works - hide for logged-in paid users */}
+      {!(user && ['pro', 'premium'].includes((user.plan || user.subscription_plan || '').toLowerCase())) && (
+        <section className="py-12 sm:py-16 bg-white dark:bg-stone-900/50">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6">
+            <h2 className="text-xl sm:text-2xl font-extrabold text-stone-800 dark:text-stone-100 mb-6 text-center">
+              See how it works
+            </h2>
+            <div className="relative rounded-2xl overflow-hidden border border-stone-200 dark:border-stone-700 shadow-xl aspect-video bg-stone-100 dark:bg-stone-800">
+              <video
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="w-full h-full object-cover"
+                aria-label="See how Focus Mode works"
+              >
+                <source src="/focusmode.mp4" type="video/mp4" />
+              </video>
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* How It Works - 3 Steps */}
       <section className="py-16 sm:py-20 bg-white dark:bg-stone-900/50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">

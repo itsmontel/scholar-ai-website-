@@ -722,7 +722,7 @@ const AcademicAIApp = () => {
 
     switch (currentPage) {
       case 'landing':
-        return <LandingPage onNavigate={navigateTo} />;
+        return <LandingPage onNavigate={navigateTo} user={user} />;
       case 'signup':
         return <SignUpPage onNavigate={navigateTo} onSignUp={handleSignUp} />;
       case 'login':
@@ -902,7 +902,7 @@ const AcademicAIApp = () => {
       case 'collaboration':
         return <CollaborationPage onNavigate={navigateTo} user={user} />;
       default:
-        return <LandingPage onNavigate={navigateTo} />;
+        return <LandingPage onNavigate={navigateTo} user={user} />;
     }
   };
 
