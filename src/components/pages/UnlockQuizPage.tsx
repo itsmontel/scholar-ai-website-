@@ -337,29 +337,63 @@ export default function UnlockQuizPage() {
                     );
                   })}
                 </div>
-              ) : (
-                <div className="space-y-2">
-                  <input
-                    type="text"
-                    placeholder="Type your answer..."
-                    className="w-full px-4 py-3 border-2 border-stone-200 rounded-xl"
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' && e.currentTarget.value.trim()) {
-                        handleQuizAnswer(e.currentTarget.value.trim());
-                      }
-                    }}
-                  />
-                  <button
-                    onClick={() => {
-                      const inp = document.querySelector<HTMLInputElement>('input[placeholder="Type your answer..."]');
-                      if (inp?.value.trim()) handleQuizAnswer(inp.value.trim());
-                    }}
-                    className="px-4 py-2 bg-violet-600 text-white rounded-lg font-medium"
-                  >
-                    Submit
-                  </button>
-                </div>
-              )}
+              ) : (() => {
+                const ca = currentItem.data.correctAnswer?.toString().toLowerCase();
+                const isTrueFalse = ca === 'true' || ca === 'false';
+                if (isTrueFalse) {
+                  return (
+                    <div className="flex gap-3">
+                      {['True', 'False'].map((opt) => {
+                        const isSelected = selectedAnswer === opt || selectedAnswer?.toLowerCase() === opt.toLowerCase();
+                        const isCorrect = isCorrectQuizAnswer(opt, currentItem);
+                        const showCorrect = answered && isCorrect;
+                        const showWrong = answered && isSelected && !isCorrect;
+                        return (
+                          <button
+                            key={opt}
+                            onClick={() => handleQuizAnswer(opt)}
+                            disabled={answered}
+                            className={`flex-1 px-4 py-3 rounded-xl border-2 font-medium transition-all ${
+                              showCorrect
+                                ? 'border-emerald-500 bg-emerald-50'
+                                : showWrong
+                                ? 'border-red-400 bg-red-50'
+                                : isSelected
+                                ? 'border-violet-500 bg-violet-50'
+                                : 'border-stone-200 hover:border-violet-300 hover:bg-violet-50/50'
+                            }`}
+                          >
+                            {opt}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  );
+                }
+                return (
+                  <div className="space-y-2">
+                    <input
+                      type="text"
+                      placeholder="Type your answer..."
+                      className="w-full px-4 py-3 border-2 border-stone-200 rounded-xl"
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && e.currentTarget.value.trim()) {
+                          handleQuizAnswer(e.currentTarget.value.trim());
+                        }
+                      }}
+                    />
+                    <button
+                      onClick={() => {
+                        const inp = document.querySelector<HTMLInputElement>('input[placeholder="Type your answer..."]');
+                        if (inp?.value.trim()) handleQuizAnswer(inp.value.trim());
+                      }}
+                      className="px-4 py-2 bg-violet-600 text-white rounded-lg font-medium"
+                    >
+                      Submit
+                    </button>
+                  </div>
+                );
+              })()}
               {answered && (
                 <button
                   onClick={goToNext}
