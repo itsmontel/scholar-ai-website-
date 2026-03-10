@@ -19,7 +19,6 @@ const CitationHistoryPage = lazy(() => import('./pages/CitationHistoryPage'));
 const QuizHistoryPage = lazy(() => import('./pages/QuizHistoryPage'));
 const FriendsPage = lazy(() => import('./pages/FriendsPage'));
 const UploadPage = lazy(() => import('./pages/UploadPage'));
-const SettingsPage = lazy(() => import('./pages/SettingsPage'));
 const AccountPage = lazy(() => import('./pages/AccountPage'));
 const PricingPage = lazy(() => import('./pages/PricingPage'));
 const FeaturesPage = lazy(() => import('./pages/FeaturesPage'));
@@ -60,6 +59,7 @@ const LightningReflexQuizPage = lazy(() => import('./pages/tools/LightningReflex
 const InteractiveLessonPage = lazy(() => import('./pages/tools/InteractiveLessonPage'));
 const AnalyzeEssayPage = lazy(() => import('./pages/AnalyzeEssayPage'));
 const CitationsPage = lazy(() => import('./pages/CitationsPage'));
+const UnlockQuizPage = lazy(() => import('./pages/UnlockQuizPage'));
 
 // Import common components
 import ErrorBoundary from './common/ErrorBoundary';
@@ -89,7 +89,8 @@ function getPageFromPath(pathname: string): string {
   if (p === '/quiz-history') return 'quiz-history';
   if (p === '/friends') return 'friends';
   if (p === '/upload') return 'upload';
-  if (p === '/settings') return 'settings';
+  if (p === '/settings') return 'account';
+  if (p === '/unlock-quiz' || p.startsWith('/unlock-quiz?')) return 'unlock-quiz';
   if (p === '/profile') return 'profile';
   if (p === '/library') return 'library';
   if (p === '/account') return 'account';
@@ -225,7 +226,7 @@ const AcademicAIApp = () => {
   }, []);
 
   // Route protection for authenticated pages
-  const protectedRoutes = ['dashboard', 'analysis', 'analysis-history', 'citation-results', 'citation-history', 'quiz-history', 'friends', 'upload', 'settings', 'profile', 'library', 'account', 'billing', 'badges'];
+  const protectedRoutes = ['dashboard', 'analysis', 'analysis-history', 'citation-results', 'citation-history', 'quiz-history', 'friends', 'upload', 'profile', 'library', 'account', 'billing', 'badges'];
 
   // SEO: dynamic document title and meta description per page (SPA)
   const pageMeta: Record<string, { title: string; description: string }> = {
@@ -758,6 +759,8 @@ const AcademicAIApp = () => {
         return <BlogPostPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'unsubscribe':
         return <UnsubscribePage onNavigate={navigateTo} />;
+      case 'unlock-quiz':
+        return <UnlockQuizPage />;
       case 'dashboard':
         if (needsOnboarding) return renderOnboarding('dashboard');
         return <DashboardPage onNavigate={navigateTo} user={user} onLogout={handleLogout} onUserUpdate={handleDashboardUserUpdate} />;
@@ -799,27 +802,6 @@ const AcademicAIApp = () => {
         return <FriendsPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'upload':
         return <UploadPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
-      case 'settings':
-        return (
-          <SettingsPage
-            onNavigate={navigateTo}
-            user={user}
-            onLogout={handleLogout}
-            onUserUpdate={(updates: { username?: string }) => {
-              if (user && updates.username !== undefined) {
-                const updatedUser = { ...user, username: updates.username };
-                setUser(updatedUser);
-                try {
-                  const stored = localStorage.getItem('user');
-                  if (stored) {
-                    const parsed = JSON.parse(stored);
-                    localStorage.setItem('user', JSON.stringify({ ...parsed, username: updates.username }));
-                  }
-                } catch (_) {}
-              }
-            }}
-          />
-        );
       case 'profile':
         return <ProfilePage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'library':

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      width: 320px;
+      padding: 16px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 14px;
+      color: #292524;
+      background: linear-gradient(180deg, #faf5ff 0%, #f5f3ff 100%);
+    }
+    h1 {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 4px;
+      color: #4c1d95;
+    }
+    p {
+      color: #57534e;
+      margin-bottom: 12px;
+      line-height: 1.5;
+    }
+    .status {
+      padding: 10px 12px;
+      border-radius: 10px;
+      margin-bottom: 12px;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .status.inactive {
+      background: #fef3c7;
+      color: #92400e;
+    }
+    .status.active {
+      background: #d1fae5;
+      color: #065f46;
+    }
+    .status.error {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+    button {
+      width: 100%;
+      padding: 10px 16px;
+      border: none;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    button:disabled { opacity: 0.6; cursor: not-allowed; }
+    .btn-primary {
+      background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+      color: white;
+      margin-bottom: 8px;
+    }
+    .btn-primary:hover:not(:disabled) { opacity: 0.95; }
+    .btn-secondary {
+      background: #e7e5e4;
+      color: #44403c;
+    }
+    .btn-secondary:hover:not(:disabled) { background: #d6d3d1; }
+    a {
+      color: #7c3aed;
+      text-decoration: none;
+      font-weight: 500;
+    }
+    a:hover { text-decoration: underline; }
+    .footer { margin-top: 12px; font-size: 12px; color: #78716c; }
+  </style>
+</head>
+<body>
+  <h1>WriteScholar Focus Mode</h1>
+  <p>Block distracting sites until you answer 5 study questions.</p>
+  <div id="status" class="status inactive">Checking status...</div>
+  <button id="loginBtn" class="btn-primary" style="display:none">Log in at WriteScholar</button>
+  <button id="settingsBtn" class="btn-primary" style="display:none">Open Settings</button>
+  <button id="syncBtn" class="btn-secondary" style="display:none">Sync</button>
+  <div class="footer">
+    <a href="https://writescholar.com/account" target="_blank">Configure blocked sites</a>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>

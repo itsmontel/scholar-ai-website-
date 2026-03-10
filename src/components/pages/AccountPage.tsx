@@ -69,6 +69,12 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
   const [nameLoading, setNameLoading] = useState(false);
   const [nameError, setNameError] = useState('');
   const [nameSuccess, setNameSuccess] = useState('');
+  const [blockedDomains, setBlockedDomains] = useState<string[]>([]);
+  const [presets, setPresets] = useState<{ domain: string; label: string }[]>([]);
+  const [focusModeLoading, setFocusModeLoading] = useState(false);
+  const [focusModeSaving, setFocusModeSaving] = useState(false);
+
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
   // Fetch user stats and profile data
   const fetchUserData = async () => {
@@ -159,13 +165,52 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
   }, [user]);
 
   useEffect(() => {
-    console.log('AccountPage - displayUser changed:', displayUser);
     if (displayUser) {
       fetchUserData();
     } else {
       setLoading(false);
     }
   }, [displayUser]);
+
+  const isPaidUser = userStats.subscriptionPlan === 'pro' || userStats.subscriptionPlan === 'premium';
+
+  useEffect(() => {
+    if (!isPaidUser) return;
+    const token = localStorage.getItem('authToken');
+    if (!token) return;
+    setFocusModeLoading(true);
+    Promise.all([
+      fetch(`${API_URL}/focus-mode/blocked-sites`, { headers: { Authorization: `Bearer ${token}` } }),
+      fetch(`${API_URL}/focus-mode/presets`)
+    ])
+      .then(([r1, r2]) => Promise.all([r1.json(), r2.json()]))
+      .then(([d1, d2]) => {
+        if (d1.success) setBlockedDomains(d1.data.blockedDomains || []);
+        if (d2.success) setPresets(d2.data || []);
+      })
+      .catch(() => {})
+      .finally(() => setFocusModeLoading(false));
+  }, [isPaidUser, API_URL]);
+
+  const toggleBlockedSite = async (domain: string) => {
+    const token = localStorage.getItem('authToken');
+    if (!token) return;
+    setFocusModeSaving(true);
+    const next = blockedDomains.includes(domain)
+      ? blockedDomains.filter((d) => d !== domain)
+      : [...blockedDomains, domain];
+    try {
+      const r = await fetch(`${API_URL}/focus-mode/blocked-sites`, {
+        method: 'PUT',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ blockedDomains: next })
+      });
+      const data = await r.json();
+      if (data.success) setBlockedDomains(data.data.blockedDomains || []);
+    } finally {
+      setFocusModeSaving(false);
+    }
+  };
 
   const handleSaveUsername = async () => {
     const trimmed = username.trim().toLowerCase().replace(/[^a-z0-9_]/g, '');
@@ -528,6 +573,54 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
               </div>
             </div>
           </div>
+
+          {/* Focus Mode - Block websites (paid only) */}
+          {isPaidUser && (
+            <div className="bg-white border border-stone-200 rounded-2xl p-6 sm:p-8">
+              <h2 className="text-xl font-bold text-stone-800 mb-2">Focus Mode</h2>
+              <p className="text-stone-600 text-sm mb-6">
+                Block distracting sites until you answer 5 questions from your study tools (need 4+ correct). Install the Chrome extension to enable.
+              </p>
+              {focusModeLoading ? (
+                <p className="text-stone-500">Loading...</p>
+              ) : (
+                <>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {presets.map((p) => {
+                      const active = blockedDomains.includes(p.domain);
+                      return (
+                        <button
+                          key={p.domain}
+                          onClick={() => toggleBlockedSite(p.domain)}
+                          disabled={focusModeSaving}
+                          className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
+                            active
+                              ? 'bg-violet-600 text-white'
+                              : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
+                          }`}
+                        >
+                          {p.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {blockedDomains.length > 0 && (
+                    <p className="text-sm text-stone-500">
+                      Blocked: {blockedDomains.join(', ')}
+                    </p>
+                  )}
+                  <a
+                    href="https://chrome.google.com/webstore"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 mt-4 text-violet-600 hover:text-violet-700 font-medium text-sm"
+                  >
+                    Get Chrome Extension →
+                  </a>
+                </>
+              )}
+            </div>
+          )}
 
           {/* Security */}
           <div className="bg-white border border-stone-200 rounded-2xl p-6 sm:p-8">
