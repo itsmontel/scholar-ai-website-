@@ -1,69 +1,71 @@
-import { useState, useEffect, lazy, Suspense } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { logger } from '../utils/logger';
 import { persistOnboardingToServer } from '../utils/onboarding';
+import { lazyWithRetry } from '../utils/lazyWithRetry';
 
 // Eager: landing, login, signup (critical for first paint)
 import LandingPage from './pages/LandingPage';
 import SignUpPage from './pages/SignUpPage';
 import LoginPage from './pages/LoginPage';
 
-// Lazy: all other pages (reduces initial bundle ~400KB+)
-const EmailVerificationPage = lazy(() => import('./pages/EmailVerificationPage'));
-const OnboardingPage = lazy(() => import('./pages/OnboardingPage'));
-const AuthCallbackPage = lazy(() => import('./pages/AuthCallbackPage'));
-const DashboardPage = lazy(() => import('./pages/DashboardPage'));
-const AnalysisPage = lazy(() => import('./pages/AnalysisPage'));
-const AnalysisHistoryPage = lazy(() => import('./pages/AnalysisHistoryPage'));
-const CitationResultsPage = lazy(() => import('./pages/CitationResultsPage'));
-const CitationHistoryPage = lazy(() => import('./pages/CitationHistoryPage'));
-const QuizHistoryPage = lazy(() => import('./pages/QuizHistoryPage'));
-const FriendsPage = lazy(() => import('./pages/FriendsPage'));
-const UploadPage = lazy(() => import('./pages/UploadPage'));
-const AccountPage = lazy(() => import('./pages/AccountPage'));
-const PricingPage = lazy(() => import('./pages/PricingPage'));
-const FeaturesPage = lazy(() => import('./pages/FeaturesPage'));
-const FocusModePage = lazy(() => import('./pages/FocusModePage'));
-const ProfilePage = lazy(() => import('./pages/ProfilePage'));
-const LibraryPage = lazy(() => import('./pages/LibraryPage'));
-const FAQPage = lazy(() => import('./pages/HelpCenterPage'));
-const AboutPage = lazy(() => import('./pages/AboutPage'));
-const WhyStudentsChoosePage = lazy(() => import('./pages/WhyStudentsChoosePage'));
-const StudyToolsComparisonPage = lazy(() => import('./pages/StudyToolsComparisonPage'));
-const ContactPage = lazy(() => import('./pages/ContactPage'));
-const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage'));
-const TermsOfServicePage = lazy(() => import('./pages/TermsOfServicePage'));
-const BillingPage = lazy(() => import('./pages/BillingPage'));
-const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage'));
-const UnsubscribePage = lazy(() => import('./pages/UnsubscribePage'));
-const BlogPage = lazy(() => import('./pages/BlogPage'));
-const BlogPostPage = lazy(() => import('./pages/BlogPostPage'));
-const MoreToolsPage = lazy(() => import('./pages/MoreToolsPage'));
-const BadgesPage = lazy(() => import('./pages/BadgesPage'));
-const ShareFriendsPage = lazy(() => import('./pages/ShareFriendsPage'));
+// Lazy with retry: recovers from chunk load failures (network/404), retries 3x before failing
+const EmailVerificationPage = lazyWithRetry(() => import('./pages/EmailVerificationPage'));
+const OnboardingPage = lazyWithRetry(() => import('./pages/OnboardingPage'));
+const AuthCallbackPage = lazyWithRetry(() => import('./pages/AuthCallbackPage'));
+const DashboardPage = lazyWithRetry(() => import('./pages/DashboardPage'));
+const AnalysisPage = lazyWithRetry(() => import('./pages/AnalysisPage'));
+const AnalysisHistoryPage = lazyWithRetry(() => import('./pages/AnalysisHistoryPage'));
+const CitationResultsPage = lazyWithRetry(() => import('./pages/CitationResultsPage'));
+const CitationHistoryPage = lazyWithRetry(() => import('./pages/CitationHistoryPage'));
+const QuizHistoryPage = lazyWithRetry(() => import('./pages/QuizHistoryPage'));
+const FriendsPage = lazyWithRetry(() => import('./pages/FriendsPage'));
+const UploadPage = lazyWithRetry(() => import('./pages/UploadPage'));
+const AccountPage = lazyWithRetry(() => import('./pages/AccountPage'));
+const PricingPage = lazyWithRetry(() => import('./pages/PricingPage'));
+const FeaturesPage = lazyWithRetry(() => import('./pages/FeaturesPage'));
+const FocusModePage = lazyWithRetry(() => import('./pages/FocusModePage'));
+const ProfilePage = lazyWithRetry(() => import('./pages/ProfilePage'));
+const LibraryPage = lazyWithRetry(() => import('./pages/LibraryPage'));
+const FAQPage = lazyWithRetry(() => import('./pages/HelpCenterPage'));
+const AboutPage = lazyWithRetry(() => import('./pages/AboutPage'));
+const WhyStudentsChoosePage = lazyWithRetry(() => import('./pages/WhyStudentsChoosePage'));
+const StudyToolsComparisonPage = lazyWithRetry(() => import('./pages/StudyToolsComparisonPage'));
+const ContactPage = lazyWithRetry(() => import('./pages/ContactPage'));
+const PrivacyPolicyPage = lazyWithRetry(() => import('./pages/PrivacyPolicyPage'));
+const TermsOfServicePage = lazyWithRetry(() => import('./pages/TermsOfServicePage'));
+const BillingPage = lazyWithRetry(() => import('./pages/BillingPage'));
+const ResetPasswordPage = lazyWithRetry(() => import('./pages/ResetPasswordPage'));
+const UnsubscribePage = lazyWithRetry(() => import('./pages/UnsubscribePage'));
+const BlogPage = lazyWithRetry(() => import('./pages/BlogPage'));
+const BlogPostPage = lazyWithRetry(() => import('./pages/BlogPostPage'));
+const MoreToolsPage = lazyWithRetry(() => import('./pages/MoreToolsPage'));
+const BadgesPage = lazyWithRetry(() => import('./pages/BadgesPage'));
+const ShareFriendsPage = lazyWithRetry(() => import('./pages/ShareFriendsPage'));
 
-const WordCounterPage = lazy(() => import('./pages/tools/WordCounterPage'));
-const CitationGeneratorToolPage = lazy(() => import('./pages/tools/CitationGeneratorToolPage'));
-const ReadabilityScorePage = lazy(() => import('./pages/tools/ReadabilityScorePage'));
-const ParaphrasingTipsPage = lazy(() => import('./pages/tools/ParaphrasingTipsPage'));
-const EssayOutlineGeneratorPage = lazy(() => import('./pages/tools/EssayOutlineGeneratorPage'));
-const TextCaseConverterPage = lazy(() => import('./pages/tools/TextCaseConverterPage'));
-const ThesisGeneratorPage = lazy(() => import('./pages/tools/ThesisGeneratorPage'));
-const GrammarCheckerPage = lazy(() => import('./pages/tools/GrammarCheckerPage'));
-const HumanizerPage = lazy(() => import('./pages/tools/HumanizerPage'));
-const SummarizerPage = lazy(() => import('./pages/tools/SummarizerPage'));
-const QuizGeneratorPage = lazy(() => import('./pages/tools/QuizGeneratorPage'));
-const GPACalculatorPage = lazy(() => import('./pages/tools/GPACalculatorPage'));
-const PomodoroTimerPage = lazy(() => import('./pages/tools/PomodoroTimerPage'));
-const CalculatorPage = lazy(() => import('./pages/tools/CalculatorPage'));
-const ConverterPage = lazy(() => import('./pages/tools/ConverterPage'));
-const LightningReflexQuizPage = lazy(() => import('./pages/tools/LightningReflexQuizPage'));
-const InteractiveLessonPage = lazy(() => import('./pages/tools/InteractiveLessonPage'));
-const AnalyzeEssayPage = lazy(() => import('./pages/AnalyzeEssayPage'));
-const CitationsPage = lazy(() => import('./pages/CitationsPage'));
-const UnlockQuizPage = lazy(() => import('./pages/UnlockQuizPage'));
+const WordCounterPage = lazyWithRetry(() => import('./pages/tools/WordCounterPage'));
+const CitationGeneratorToolPage = lazyWithRetry(() => import('./pages/tools/CitationGeneratorToolPage'));
+const ReadabilityScorePage = lazyWithRetry(() => import('./pages/tools/ReadabilityScorePage'));
+const ParaphrasingTipsPage = lazyWithRetry(() => import('./pages/tools/ParaphrasingTipsPage'));
+const EssayOutlineGeneratorPage = lazyWithRetry(() => import('./pages/tools/EssayOutlineGeneratorPage'));
+const TextCaseConverterPage = lazyWithRetry(() => import('./pages/tools/TextCaseConverterPage'));
+const ThesisGeneratorPage = lazyWithRetry(() => import('./pages/tools/ThesisGeneratorPage'));
+const GrammarCheckerPage = lazyWithRetry(() => import('./pages/tools/GrammarCheckerPage'));
+const HumanizerPage = lazyWithRetry(() => import('./pages/tools/HumanizerPage'));
+const SummarizerPage = lazyWithRetry(() => import('./pages/tools/SummarizerPage'));
+const QuizGeneratorPage = lazyWithRetry(() => import('./pages/tools/QuizGeneratorPage'));
+const GPACalculatorPage = lazyWithRetry(() => import('./pages/tools/GPACalculatorPage'));
+const PomodoroTimerPage = lazyWithRetry(() => import('./pages/tools/PomodoroTimerPage'));
+const CalculatorPage = lazyWithRetry(() => import('./pages/tools/CalculatorPage'));
+const ConverterPage = lazyWithRetry(() => import('./pages/tools/ConverterPage'));
+const LightningReflexQuizPage = lazyWithRetry(() => import('./pages/tools/LightningReflexQuizPage'));
+const InteractiveLessonPage = lazyWithRetry(() => import('./pages/tools/InteractiveLessonPage'));
+const AnalyzeEssayPage = lazyWithRetry(() => import('./pages/AnalyzeEssayPage'));
+const CitationsPage = lazyWithRetry(() => import('./pages/CitationsPage'));
+const UnlockQuizPage = lazyWithRetry(() => import('./pages/UnlockQuizPage'));
 
 // Import common components
 import ErrorBoundary from './common/ErrorBoundary';
+import PageErrorBoundary from './common/PageErrorBoundary';
 import BadgeNotificationToast from './common/BadgeNotificationToast';
 import StudyTimerWidget from './common/StudyTimerWidget';
 import MobileGoogleSignInPopup from './common/MobileGoogleSignInPopup';
@@ -785,22 +787,44 @@ const AcademicAIApp = () => {
         return <AnalysisPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'analysis-history':
         return <AnalysisHistoryPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
-      case 'citation-results':
+      case 'citation-results': {
         const citationResults = localStorage.getItem('citationSearchResults');
         if (citationResults) {
+          let parsed: unknown;
+          try {
+            parsed = JSON.parse(citationResults);
+          } catch {
+            localStorage.removeItem('citationSearchResults');
+            navigateTo('citations');
+            return <CitationsPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
+          }
+          const ok = parsed && typeof parsed === 'object' && Array.isArray((parsed as { citations?: unknown }).citations);
+          if (!ok) {
+            localStorage.removeItem('citationSearchResults');
+            navigateTo('citations');
+            return <CitationsPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
+          }
+          const searchResults = parsed as { citations: unknown[]; keywords?: string[]; searchStrategies?: string[]; researchTopic?: string; citationStyle?: string; yearRange?: string };
           return (
             <CitationResultsPage 
               onNavigate={navigateTo} 
               user={user} 
               onLogout={handleLogout}
-              searchResults={JSON.parse(citationResults)}
+              searchResults={{
+                citations: searchResults.citations ?? [],
+                keywords: searchResults.keywords ?? [],
+                searchStrategies: searchResults.searchStrategies ?? [],
+                researchTopic: searchResults.researchTopic ?? '',
+                citationStyle: searchResults.citationStyle ?? 'APA',
+                yearRange: searchResults.yearRange
+              }}
               onNewSearch={() => navigateTo('citations')}
             />
           );
-        } else {
-          navigateTo('citations');
-          return <CitationsPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
         }
+        navigateTo('citations');
+        return <CitationsPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
+      }
       case 'citation-history':
         return <CitationHistoryPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'quiz-history': {
@@ -916,7 +940,9 @@ const AcademicAIApp = () => {
     <ErrorBoundary>
     <div className="min-h-screen bg-stone-50 dark:bg-stone-900 transition-colors">
       <Suspense fallback={pageFallback}>
-        {renderCurrentPage()}
+        <PageErrorBoundary key={currentPage} onGoBack={() => navigateTo('dashboard')}>
+          {renderCurrentPage()}
+        </PageErrorBoundary>
       </Suspense>
       {/* Global achievement popup */}
       {user && <BadgeNotificationToast onNavigate={navigateTo} />}
