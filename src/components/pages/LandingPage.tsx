@@ -1360,76 +1360,74 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
         </div>
       </section>
 
-      {/* STUDY YOUR WAY - Tabbed video showcase */}
-      <section className="relative py-10 sm:py-20 bg-gradient-to-b from-indigo-50/30 via-stone-50 to-white dark:from-stone-900 dark:via-stone-900 dark:to-stone-900 overflow-hidden">
-        {/* Floating illustrations */}
-        <div className="absolute top-16 left-[6%] hidden lg:flex items-center gap-2 bg-white/90 dark:bg-stone-800/90 backdrop-blur rounded-2xl px-3 py-2 shadow-lg border border-lime-200/60 animate-float z-10">
-          <span className="text-2xl">📝</span><span className="text-xs font-bold text-lime-600 dark:text-lime-400">Analyse</span>
-        </div>
-        <div className="absolute top-28 right-[5%] hidden lg:flex items-center gap-2 bg-white/90 dark:bg-stone-800/90 backdrop-blur rounded-2xl px-3 py-2 shadow-lg border border-rose-200/60 animate-float-delayed z-10">
-          <span className="text-2xl">🃏</span><span className="text-xs font-bold text-rose-600 dark:text-rose-400">Flashcards</span>
-        </div>
-        <div className="absolute bottom-32 left-[8%] hidden lg:flex items-center gap-2 bg-white/90 dark:bg-stone-800/90 backdrop-blur rounded-2xl px-3 py-2 shadow-lg border border-violet-200/60 animate-float z-10" style={{ animationDelay: '0.5s' }}>
-          <span className="text-2xl">✨</span><span className="text-xs font-bold text-violet-600 dark:text-violet-400">Humanise</span>
-        </div>
-        <div className="absolute bottom-24 right-[7%] hidden lg:flex items-center gap-2 bg-white/90 dark:bg-stone-800/90 backdrop-blur rounded-2xl px-3 py-2 shadow-lg border border-amber-200/60 animate-float-delayed z-10" style={{ animationDelay: '0.3s' }}>
-          <span className="text-2xl">🧩</span><span className="text-xs font-bold text-amber-600 dark:text-amber-400">Crosswords</span>
-        </div>
-        <div className="absolute top-1/3 left-[3%] hidden xl:block text-4xl opacity-40 animate-float">📚</div>
-        <div className="absolute top-2/5 right-[4%] hidden xl:block text-3xl opacity-35 animate-float-delayed">✏️</div>
-        <div className="absolute bottom-1/3 left-[4%] hidden xl:block text-3xl opacity-35 animate-float" style={{ animationDelay: '0.7s' }}>🎯</div>
-        <div className="absolute bottom-1/4 right-[3%] hidden xl:block text-4xl opacity-40 animate-float-delayed" style={{ animationDelay: '0.4s' }}>🚀</div>
-        {/* Mobile floating elements */}
-        <div className="lg:hidden absolute top-20 left-4 text-3xl opacity-50 animate-float">📚</div>
-        <div className="lg:hidden absolute top-32 right-4 text-2xl opacity-45 animate-float-delayed">✏️</div>
-        <div className="lg:hidden absolute bottom-64 left-6 text-2xl opacity-45 animate-float" style={{ animationDelay: '0.5s' }}>🎯</div>
-        <div className="lg:hidden absolute bottom-48 right-6 text-3xl opacity-50 animate-float-delayed" style={{ animationDelay: '0.3s' }}>🚀</div>
-        <div className="lg:hidden absolute top-1/3 right-8 w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-400/25 to-violet-400/15 animate-float" />
-        <div className="lg:hidden absolute bottom-1/3 left-6 w-10 h-10 rounded-full bg-gradient-to-br from-violet-400/20 to-indigo-400/15 animate-float-delayed" style={{ animationDelay: '0.6s' }} />
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="relative flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-8 mb-10 sm:mb-14">
-            {/* Mascot - studying pose */}
-            <div className="hidden lg:block flex-shrink-0">
-              <ScholarMascot size={140} animated={true} pose="studying" />
-            </div>
-            <div className="text-center sm:text-left">
-              <h2 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-stone-800 dark:text-stone-100 mb-3 sm:mb-4">
-                Study your way
-              </h2>
-              <p className="text-lg text-stone-600 dark:text-stone-400 max-w-2xl mx-auto sm:mx-0">
-                Pick a tool. Watch it work. It's really that easy.
-              </p>
+      {/* STUDY YOUR WAY - Tabbed video showcase (redesigned for cohesion) */}
+      <section className="relative py-16 sm:py-24 overflow-hidden bg-white dark:bg-stone-900">
+        {/* Subtle radial gradient - matches Study Better Together / One Code vibe */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_60%_at_50%_0%,rgba(99,102,241,0.06),transparent_60%)] dark:bg-[radial-gradient(ellipse_70%_60%_at_50%_0%,rgba(139,92,246,0.05),transparent_60%)]" />
+        <div className="absolute bottom-0 left-0 right-0 h-1/2 bg-gradient-to-t from-violet-50/50 to-transparent dark:from-violet-950/20 dark:to-transparent pointer-events-none" />
+        {/* Minimal accent - single soft blob */}
+        <div className="absolute top-0 right-1/4 w-96 h-96 bg-violet-200/30 dark:bg-violet-500/5 rounded-full blur-3xl -translate-y-1/2 pointer-events-none" />
+        <div className="absolute bottom-0 left-1/4 w-80 h-80 bg-indigo-200/20 dark:bg-indigo-500/5 rounded-full blur-3xl translate-y-1/2 pointer-events-none" />
+
+        <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Header - centered, clean hierarchy */}
+          <div className="text-center mb-12 sm:mb-16">
+            <span className="inline-block px-4 py-1.5 bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-400 rounded-full text-sm font-semibold mb-5">
+              Every tool in one place
+            </span>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-8 mb-6">
+              <div className="hidden sm:block flex-shrink-0">
+                <ScholarMascot size={120} animated={true} pose="studying" />
+              </div>
+              <div className="text-center sm:text-left">
+                <h2 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-stone-800 dark:text-stone-100 mb-3 tracking-tight">
+                  Study your way
+                </h2>
+                <p className="text-base sm:text-lg text-stone-600 dark:text-stone-400 max-w-xl mx-auto sm:mx-0">
+                  Pick a tool. Watch it work. It&apos;s really that easy.
+                </p>
+              </div>
+              <div className="sm:hidden flex-shrink-0">
+                <ScholarMascot size={80} animated={true} pose="studying" />
+              </div>
             </div>
           </div>
 
-          {/* Tabs + descriptions */}
+          {/* Tabs - unified violet theme */}
           {(() => {
             const tabs = [
-              { id: 'analyse', label: 'Analyse', icon: '📝', desc: 'Upload your paper and get professor-style feedback on structure, clarity, and how to improve.', activeClasses: 'bg-lime-500 text-white shadow-lg shadow-lime-500/30', inactiveClasses: 'bg-lime-50 dark:bg-lime-900/20 text-lime-700 dark:text-lime-400 border border-lime-200 dark:border-lime-800/50 hover:bg-lime-100 dark:hover:bg-lime-900/40' },
-              { id: 'flashcards', label: 'Flashcards', icon: '🃏', desc: 'Copy and paste your notes or content to generate flip cards for memorization and quick review.', activeClasses: 'bg-rose-500 text-white shadow-lg shadow-rose-500/30', inactiveClasses: 'bg-rose-50 dark:bg-rose-900/20 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-800/50 hover:bg-rose-100 dark:hover:bg-rose-900/40' },
-              { id: 'quiz', label: 'Practice Tests', icon: '📋', desc: 'Paste your study material and get instant quizzes — multiple choice, true/false, and more.', activeClasses: 'bg-amber-500 text-white shadow-lg shadow-amber-500/30', inactiveClasses: 'bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800/50 hover:bg-amber-100 dark:hover:bg-amber-900/40' },
-              { id: 'summarise', label: 'Summarise', icon: '📋', desc: 'Upload documents or copy and paste text to get concise bullet points or summaries in seconds.', activeClasses: 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30', inactiveClasses: 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/50 hover:bg-emerald-100 dark:hover:bg-emerald-900/40' },
-              { id: 'crossword', label: 'Crosswords', icon: '🧩', desc: 'Paste key terms or notes to create an interactive crossword puzzle and test your vocabulary.', activeClasses: 'bg-violet-500 text-white shadow-lg shadow-violet-500/30', inactiveClasses: 'bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-400 border border-violet-200 dark:border-violet-800/50 hover:bg-violet-100 dark:hover:bg-violet-900/40' },
-              { id: 'games', label: 'Games', icon: '🎮', desc: 'Play Crater Blast — blast the correct falling answer before it lands. Turn your study material into an addictive quiz shooter game.', activeClasses: 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/30', inactiveClasses: 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800/50 hover:bg-indigo-100 dark:hover:bg-indigo-900/40' },
-              { id: 'humanise', label: 'Humanise', icon: '✨', desc: 'Paste AI-generated text to transform it into natural, human-sounding writing that bypasses detectors.', activeClasses: 'bg-purple-500 text-white shadow-lg shadow-purple-500/30', inactiveClasses: 'bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400 border border-purple-200 dark:border-purple-800/50 hover:bg-purple-100 dark:hover:bg-purple-900/40' },
+              { id: 'analyse', label: 'Analyse', icon: '📝', desc: 'Upload your paper and get professor-style feedback on structure, clarity, and how to improve.' },
+              { id: 'flashcards', label: 'Flashcards', icon: '🃏', desc: 'Copy and paste your notes or content to generate flip cards for memorization and quick review.' },
+              { id: 'quiz', label: 'Practice Tests', icon: '📋', desc: 'Paste your study material and get instant quizzes — multiple choice, true/false, and more.' },
+              { id: 'summarise', label: 'Summarise', icon: '📋', desc: 'Upload documents or copy and paste text to get concise bullet points or summaries in seconds.' },
+              { id: 'crossword', label: 'Crosswords', icon: '🧩', desc: 'Paste key terms or notes to create an interactive crossword puzzle and test your vocabulary.' },
+              { id: 'games', label: 'Games', icon: '🎮', desc: 'Play Crater Blast — blast the correct falling answer before it lands. Turn your study material into an addictive quiz shooter game.' },
+              { id: 'humanise', label: 'Humanise', icon: '✨', desc: 'Paste AI-generated text to transform it into natural, human-sounding writing that bypasses detectors.' },
             ];
             const activeTab = tabs.find(t => t.id === activeStudyTab);
             return (
               <>
-                <div className="flex overflow-x-auto scrollbar-hide gap-2.5 sm:gap-3 mb-4 sm:mb-6 pb-2 sm:pb-0 sm:mx-0 sm:px-0 sm:flex-wrap sm:justify-center snap-x snap-mandatory sm:snap-none px-1">
-                  {tabs.map((tab) => (
-                    <button
-                      key={tab.id}
-                      onClick={() => setActiveStudyTab(tab.id)}
-                      className={`flex items-center gap-1.5 sm:gap-2 px-4 sm:px-5 py-2.5 sm:py-3 rounded-2xl font-semibold text-sm sm:text-base transition-all duration-300 flex-shrink-0 snap-start whitespace-nowrap ${activeStudyTab === tab.id ? tab.activeClasses + ' scale-105' : tab.inactiveClasses}`}
-                    >
-                      <span className="text-base sm:text-lg">{tab.icon}</span>
-                      <span>{tab.label}</span>
-                    </button>
-                  ))}
+                <div className="flex overflow-x-auto scrollbar-hide gap-2 sm:gap-2.5 mb-6 pb-2 sm:pb-0 sm:flex-wrap sm:justify-center snap-x snap-mandatory sm:snap-none px-1 -mx-1">
+                  {tabs.map((tab) => {
+                    const isActive = activeStudyTab === tab.id;
+                    return (
+                      <button
+                        key={tab.id}
+                        onClick={() => setActiveStudyTab(tab.id)}
+                        className={`flex items-center gap-2 px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl font-semibold text-sm sm:text-base transition-all duration-200 flex-shrink-0 snap-start whitespace-nowrap
+                          ${isActive
+                            ? 'bg-violet-500 text-white shadow-lg shadow-violet-500/25 scale-[1.02]'
+                            : 'bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400 border border-stone-200 dark:border-stone-700 hover:border-violet-300 dark:hover:border-violet-700 hover:text-violet-600 dark:hover:text-violet-400'
+                          }`}
+                      >
+                        <span className="text-base sm:text-lg">{tab.icon}</span>
+                        <span>{tab.label}</span>
+                      </button>
+                    );
+                  })}
                 </div>
                 {activeTab && (
-                  <p className="text-center text-stone-600 dark:text-stone-400 text-base sm:text-lg max-w-2xl mx-auto mb-6 px-4">
+                  <p className="text-center text-stone-600 dark:text-stone-400 text-base sm:text-lg max-w-2xl mx-auto mb-8 px-4 leading-relaxed">
                     {activeTab.desc}
                   </p>
                 )}
@@ -1437,34 +1435,34 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
             );
           })()}
 
-          {/* Video container */}
-          <div className="relative">
-            <div className="absolute -inset-2 max-lg:-inset-3 max-lg:opacity-100 bg-gradient-to-r from-blue-400/20 via-violet-400/20 to-purple-400/20 rounded-3xl blur-2xl animate-notes-glow-pulse"></div>
-            <div className="relative bg-white dark:bg-stone-800 rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl border border-stone-200/50 dark:border-stone-700">
-              {[
-                { id: 'analyse', src: '/analysevid.mp4', gradient: 'from-lime-500/10 to-emerald-500/10' },
-                { id: 'flashcards', src: '/flashcardsvid.mp4', gradient: 'from-rose-500/10 to-pink-500/10' },
-                { id: 'quiz', src: '/quizvid.mp4', gradient: 'from-amber-500/10 to-orange-500/10' },
-                { id: 'summarise', src: '/summarisevid.mp4', gradient: 'from-emerald-500/10 to-teal-500/10' },
-                { id: 'crossword', src: '/crosswordvid.mp4', gradient: 'from-violet-500/10 to-purple-500/10' },
-                { id: 'games', src: '/craterblast.mp4', gradient: 'from-indigo-500/10 to-violet-500/10' },
-                { id: 'humanise', src: '/humanisevid.mp4', gradient: 'from-purple-500/10 to-fuchsia-500/10' },
-              ].map((vid) => (
-                activeStudyTab === vid.id && (
-                  <div key={vid.id} className={`bg-gradient-to-br ${vid.gradient} flex items-center justify-center min-h-[200px] sm:min-h-[360px]`}>
+          {/* Video container - clean card matching Study Smarter section */}
+          <div className="relative group">
+            <div className="absolute -inset-1 bg-gradient-to-r from-violet-400 to-purple-400 rounded-3xl blur-xl opacity-15 group-hover:opacity-25 transition-opacity duration-500" />
+            <div className="relative bg-white dark:bg-stone-800 rounded-2xl sm:rounded-3xl overflow-hidden shadow-xl border border-stone-200/60 dark:border-stone-700 group-hover:shadow-2xl group-hover:border-violet-200/60 dark:group-hover:border-violet-800/40 transition-all duration-300">
+              <div className="bg-gradient-to-br from-violet-50/30 to-indigo-50/20 dark:from-violet-950/30 dark:to-indigo-950/20 flex items-center justify-center min-h-[200px] sm:min-h-[380px]">
+                {[
+                  { id: 'analyse', src: '/analysevid.mp4' },
+                  { id: 'flashcards', src: '/flashcardsvid.mp4' },
+                  { id: 'quiz', src: '/quizvid.mp4' },
+                  { id: 'summarise', src: '/summarisevid.mp4' },
+                  { id: 'crossword', src: '/crosswordvid.mp4' },
+                  { id: 'games', src: '/craterblast.mp4' },
+                  { id: 'humanise', src: '/humanisevid.mp4' },
+                ].map((vid) => (
+                  activeStudyTab === vid.id && (
                     <video
                       key={vid.id}
                       autoPlay
                       loop
                       muted
                       playsInline
-                      className="w-full max-h-[40vh] sm:max-h-[60vh] object-contain"
+                      className="w-full max-h-[40vh] sm:max-h-[65vh] object-contain"
                     >
                       <source src={vid.src} type="video/mp4" />
                     </video>
-                  </div>
-                )
-              ))}
+                  )
+                ))}
+              </div>
             </div>
           </div>
 
@@ -1472,10 +1470,14 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
           <div className="text-center mt-10 sm:mt-12">
             <button
               onClick={() => onNavigate('signup')}
-              className="px-8 py-4 bg-violet-500 hover:bg-violet-600 text-white font-bold rounded-2xl hover:scale-105 active:scale-95 transition-all shadow-xl shadow-violet-500/25 text-lg"
+              className="group inline-flex items-center gap-2 px-8 py-4 bg-violet-500 hover:bg-violet-600 text-white font-bold rounded-2xl hover:scale-105 active:scale-95 transition-all shadow-xl shadow-violet-500/25 hover:shadow-violet-500/35 text-base sm:text-lg"
             >
               Try it free
+              <svg className="w-5 h-5 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              </svg>
             </button>
+            <p className="mt-4 text-stone-500 dark:text-stone-400 text-sm">No credit card required</p>
           </div>
         </div>
       </section>
