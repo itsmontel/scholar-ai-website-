@@ -444,36 +444,34 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
       <main className="min-h-screen relative transition-colors font-sans overflow-x-hidden" role="main">
       {/* HERO SECTION - Fun, Gen Z, full of energy */}
       <section className="relative min-h-[70vh] sm:min-h-[85vh] flex flex-col overflow-hidden">
-        {/* Background - same purple as Earn Your Free Time */}
-        <div className="absolute inset-0 bg-gradient-to-b from-indigo-950 via-violet-900 to-purple-950" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_0%,rgba(139,92,246,0.25),transparent_50%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_40%_at_80%_80%,rgba(236,72,153,0.15),transparent_50%)]" />
+        {/* Background - soft tint */}
+        <div className="absolute inset-0 bg-gradient-to-b from-violet-50/60 via-violet-50/35 to-white dark:from-stone-950 dark:via-stone-900/95 dark:to-stone-900" />
         
-        {/* Floating shapes for mobile - adds depth */}
-        <div className="absolute top-[12%] left-[8%] w-12 h-12 rounded-2xl bg-white/10 rotate-12 lg:hidden animate-float pointer-events-none" />
-        <div className="absolute top-[22%] right-[10%] w-10 h-10 rounded-full bg-white/10 lg:hidden animate-float-delayed pointer-events-none" />
-        <div className="absolute top-[45%] left-[6%] w-8 h-8 rounded-lg bg-white/5 -rotate-12 lg:hidden animate-float pointer-events-none" style={{ animationDelay: '1s' }} />
-        <div className="absolute top-[55%] right-[8%] w-11 h-11 rounded-2xl bg-white/10 rotate-6 lg:hidden animate-float-delayed pointer-events-none" />
-        <div className="absolute bottom-[35%] left-[10%] w-9 h-9 rounded-full bg-white/5 lg:hidden animate-float pointer-events-none" style={{ animationDelay: '0.5s' }} />
-        <div className="absolute bottom-[25%] right-[12%] w-10 h-10 rounded-lg bg-white/10 -rotate-6 lg:hidden animate-float-delayed pointer-events-none" style={{ animationDelay: '0.8s' }} />
+        {/* Floating shapes for mobile - adds depth like dashboard */}
+        <div className="absolute top-[12%] left-[8%] w-12 h-12 rounded-2xl bg-gradient-to-br from-rose-400/20 to-pink-500/20 rotate-12 lg:hidden animate-float pointer-events-none" />
+        <div className="absolute top-[22%] right-[10%] w-10 h-10 rounded-full bg-gradient-to-br from-violet-400/20 to-purple-500/20 lg:hidden animate-float-delayed pointer-events-none" />
+        <div className="absolute top-[45%] left-[6%] w-8 h-8 rounded-lg bg-gradient-to-br from-sky-400/20 to-blue-500/20 -rotate-12 lg:hidden animate-float pointer-events-none" style={{ animationDelay: '1s' }} />
+        <div className="absolute top-[55%] right-[8%] w-11 h-11 rounded-2xl bg-gradient-to-br from-emerald-400/20 to-teal-500/20 rotate-6 lg:hidden animate-float-delayed pointer-events-none" />
+        <div className="absolute bottom-[35%] left-[10%] w-9 h-9 rounded-full bg-gradient-to-br from-amber-400/20 to-orange-500/20 lg:hidden animate-float pointer-events-none" style={{ animationDelay: '0.5s' }} />
+        <div className="absolute bottom-[25%] right-[12%] w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-400/20 to-violet-500/20 -rotate-6 lg:hidden animate-float-delayed pointer-events-none" style={{ animationDelay: '0.8s' }} />
         
         {/* Floating tool mockups - scattered around hero */}
         <div className="absolute top-[18%] left-[10%] xl:left-[12%] hidden lg:block animate-float">
-          <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-3 shadow-xl border border-white/20 rotate-[-6deg] hover:rotate-0 transition-transform">
+          <div className="bg-white dark:bg-stone-800 rounded-2xl p-3 shadow-xl border border-violet-200/60 dark:border-violet-800/40 rotate-[-6deg] hover:rotate-0 transition-transform">
             <span className="text-2xl block mb-1">📝</span>
             <span className="text-xs font-bold text-violet-600 dark:text-violet-400">Quiz</span>
             <div className="mt-1.5 h-1.5 bg-violet-100 dark:bg-violet-900/50 rounded-full w-12" />
           </div>
         </div>
         <div className="absolute top-[25%] right-[12%] hidden lg:block animate-float-delayed">
-          <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-3 shadow-xl border border-white/20 rotate-[4deg] hover:rotate-0 transition-transform">
+          <div className="bg-white dark:bg-stone-800 rounded-2xl p-3 shadow-xl border border-rose-200/60 dark:border-rose-800/40 rotate-[4deg] hover:rotate-0 transition-transform">
             <span className="text-2xl block mb-1">🃏</span>
             <span className="text-xs font-bold text-rose-600 dark:text-rose-400">Cards</span>
             <div className="mt-1.5 h-1.5 bg-rose-100 dark:bg-rose-900/50 rounded-full w-10" />
           </div>
         </div>
         <div className="absolute bottom-[22%] left-[15%] hidden lg:block animate-float" style={{ animationDelay: '1s' }}>
-          <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-3 shadow-xl border border-white/20 rotate-[3deg] hover:rotate-0 transition-transform">
+          <div className="bg-white dark:bg-stone-800 rounded-2xl p-3 shadow-xl border border-blue-200/60 dark:border-blue-800/40 rotate-[3deg] hover:rotate-0 transition-transform">
             <span className="text-2xl block mb-1">🧩</span>
             <span className="text-xs font-bold text-blue-600 dark:text-blue-400">Puzzle</span>
             <div className="mt-1.5 grid grid-cols-3 gap-0.5">
@@ -482,7 +480,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
           </div>
         </div>
         <div className="absolute bottom-[28%] right-[10%] hidden lg:block animate-float-delayed">
-          <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-3 shadow-xl border border-white/20 rotate-[-5deg] hover:rotate-0 transition-transform">
+          <div className="bg-white dark:bg-stone-800 rounded-2xl p-3 shadow-xl border border-emerald-200/60 dark:border-emerald-800/40 rotate-[-5deg] hover:rotate-0 transition-transform">
             <span className="text-2xl block mb-1">✨</span>
             <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">Summarize</span>
             <div className="mt-1.5 flex gap-1"><div className="w-2 h-2 rounded-full bg-emerald-400"/><div className="w-3 h-2 rounded-full bg-emerald-300/60"/></div>
@@ -505,12 +503,12 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
           </div>
           <div className="max-w-4xl mx-auto text-center">
             {/* Hero headline */}
-            <h1 className="text-3xl sm:text-5xl lg:text-6xl xl:text-7xl font-extrabold text-white leading-[1.1] mb-6 sm:mb-6 tracking-tight" style={{ letterSpacing: '-0.03em' }}>
+            <h1 className="text-3xl sm:text-5xl lg:text-6xl xl:text-7xl font-extrabold text-stone-800 dark:text-stone-100 leading-[1.1] mb-6 sm:mb-6 tracking-tight" style={{ letterSpacing: '-0.03em' }}>
               The #1 Quizlet alternative to<br />
-              <span className="text-violet-300">ace school</span>
+              <span className="text-violet-500">ace school</span>
             </h1>
 
-            <p className="text-base sm:text-xl text-violet-200/90 mb-16 sm:mb-14 max-w-2xl mx-auto leading-relaxed px-2">
+            <p className="text-base sm:text-xl text-stone-600 dark:text-stone-400 mb-16 sm:mb-14 max-w-2xl mx-auto leading-relaxed px-2">
               The #1 Quizlet alternative. Paste your notes — get quizzes, flashcards, crosswords & essay feedback in seconds.
             </p>
             
@@ -590,7 +588,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   </svg>
                   <button
                     onClick={() => onNavigate('login')}
-                    className="btn-glisten relative z-10 px-10 py-4 bg-white text-violet-900 font-bold rounded-full hover:bg-violet-100 hover:scale-105 active:scale-95 transition-all duration-300 ease-out shadow-xl shadow-black/20 hover:shadow-2xl text-lg"
+                    className="btn-glisten relative z-10 px-10 py-4 bg-violet-500 text-white font-bold rounded-full hover:bg-violet-600 hover:scale-105 active:scale-95 transition-all duration-300 ease-out shadow-xl shadow-violet-500/25 hover:shadow-2xl hover:shadow-violet-500/40 text-lg"
                   >
                     I'm ready to level up
                   </button>
@@ -598,7 +596,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
               </div>
             </div>
             
-            <p className="text-sm text-violet-300/80 mb-12">
+            <p className="text-sm text-stone-500 dark:text-stone-400 mb-12">
               Trusted by 38k+ students
             </p>
             
@@ -607,7 +605,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
               <button
                 onClick={() => setStudyCardsCarouselIndex((i) => Math.max(0, i - 1))}
                 disabled={studyCardsCarouselIndex === 0}
-                className="hidden sm:flex absolute left-4 sm:left-6 top-1/2 -translate-y-1/2 z-20 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/95 backdrop-blur-sm shadow-lg border border-white/20 items-center justify-center text-violet-800 hover:bg-white hover:text-violet-900 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-300"
+                className="hidden sm:flex absolute left-4 sm:left-6 top-1/2 -translate-y-1/2 z-20 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white dark:bg-stone-800 shadow-lg border border-stone-200 dark:border-stone-600 items-center justify-center text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-700 hover:text-stone-900 dark:hover:text-stone-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-300"
                 aria-label="Previous"
               >
                 <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
@@ -615,7 +613,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
               <button
                 onClick={() => setStudyCardsCarouselIndex((i) => Math.min(3, i + 1))}
                 disabled={studyCardsCarouselIndex === 3}
-                className="hidden sm:flex absolute right-4 sm:right-6 top-1/2 -translate-y-1/2 z-20 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/95 backdrop-blur-sm shadow-lg border border-white/20 items-center justify-center text-violet-800 hover:bg-white hover:text-violet-900 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-300"
+                className="hidden sm:flex absolute right-4 sm:right-6 top-1/2 -translate-y-1/2 z-20 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white dark:bg-stone-800 shadow-lg border border-stone-200 dark:border-stone-600 items-center justify-center text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-700 hover:text-stone-900 dark:hover:text-stone-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-300"
                 aria-label="Next"
               >
                 <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
@@ -1011,8 +1009,10 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
               {/* Step 1 */}
               <div className="relative flex flex-col">
                 <div className="flex-1 rounded-2xl overflow-hidden bg-white/5 backdrop-blur-sm border border-white/10 hover:border-violet-400/30 hover:bg-white/10 transition-all duration-300">
-                  <div className="aspect-[5/4] min-h-[220px] flex items-center justify-center p-6 bg-gradient-to-b from-violet-500/20 to-transparent">
-                    <img src="/step%201.png" alt="Pick sites to block" className="max-w-full max-h-full object-contain" />
+                  <div className="aspect-[5/4] min-h-[220px] flex items-center justify-center bg-gradient-to-b from-violet-500/20 to-transparent overflow-hidden">
+                    <video autoPlay loop muted playsInline className="w-full h-full object-cover" aria-label="Pick sites to block">
+                      <source src="/step1.mp4" type="video/mp4" />
+                    </video>
                   </div>
                   <div className="p-6">
                     <span className="text-xs font-bold text-violet-400">STEP 1</span>
@@ -1028,8 +1028,10 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
               {/* Step 2 */}
               <div className="relative flex flex-col">
                 <div className="flex-1 rounded-2xl overflow-hidden bg-white/5 backdrop-blur-sm border border-white/10 hover:border-purple-400/30 hover:bg-white/10 transition-all duration-300">
-                  <div className="aspect-[5/4] min-h-[220px] flex items-center justify-center p-6 bg-gradient-to-b from-purple-500/20 to-transparent">
-                    <img src="/step%202.png" alt="Unlock quiz rules" className="max-w-full max-h-full object-contain" />
+                  <div className="aspect-[5/4] min-h-[220px] flex items-center justify-center bg-gradient-to-b from-purple-500/20 to-transparent overflow-hidden">
+                    <video autoPlay loop muted playsInline className="w-full h-full object-cover" aria-label="Answer to unlock">
+                      <source src="/step2.mp4" type="video/mp4" />
+                    </video>
                   </div>
                   <div className="p-6">
                     <span className="text-xs font-bold text-purple-400">STEP 2</span>
@@ -1045,10 +1047,10 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
               {/* Step 3 */}
               <div className="flex flex-col">
                 <div className="flex-1 rounded-2xl overflow-hidden bg-white/5 backdrop-blur-sm border border-white/10 hover:border-fuchsia-400/30 hover:bg-white/10 transition-all duration-300">
-                  <div className="aspect-[5/4] min-h-[220px] flex items-center justify-center p-6 bg-gradient-to-b from-fuchsia-500/20 to-transparent">
-                    <div className="w-28 h-28 rounded-full bg-gradient-to-br from-fuchsia-500 to-pink-600 flex items-center justify-center shadow-2xl shadow-fuchsia-500/30">
-                      <svg className="w-14 h-14 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                    </div>
+                  <div className="aspect-[5/4] min-h-[220px] flex items-center justify-center bg-gradient-to-b from-fuchsia-500/20 to-transparent overflow-hidden">
+                    <video autoPlay loop muted playsInline className="w-full h-full object-cover" aria-label="Enjoy your break">
+                      <source src="/step3.mp4" type="video/mp4" />
+                    </video>
                   </div>
                   <div className="p-6">
                     <span className="text-xs font-bold text-fuchsia-400">STEP 3</span>

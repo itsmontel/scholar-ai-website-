@@ -16,6 +16,7 @@ interface HeaderProps {
     firstName?: string;
     lastName?: string;
     plan: string;
+    subscription_plan?: string;
     subscription_status?: string;
     email_verified?: boolean;
   } | null;
@@ -297,7 +298,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
             </div>
           </div>
         </div>
-        {showPromoBanner && <PromoBanner embedded />}
+        {showPromoBanner && user && !['pro', 'premium'].includes((user.plan || user.subscription_plan || '').toLowerCase()) && <PromoBanner embedded />}
         {/* Search dropdown portal - renders above all content */}
         {headerSearchOpen && headerSearchQuery.trim() && searchDropdownRect && createPortal(
           <div
