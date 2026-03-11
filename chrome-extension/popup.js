@@ -12,6 +12,11 @@ function parseDomain(input) {
   return host;
 }
 
+function escapeHtml(str) {
+  if (str == null || typeof str !== 'string') return '';
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
 function showToast(message, type = 'success') {
   const el = document.createElement('div');
   el.className = `toast ${type}`;
@@ -152,8 +157,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         const isExpiringSoon = remaining < 5 * 60 * 1000; // Less than 5 minutes
         return `
           <div class="unlock-item">
-            <span class="unlock-domain">${domain}</span>
-            <span class="unlock-time ${isExpiringSoon ? 'expired' : ''}">${formatted}</span>
+            <span class="unlock-domain">${escapeHtml(domain)}</span>
+            <span class="unlock-time ${isExpiringSoon ? 'expired' : ''}">${escapeHtml(formatted)}</span>
           </div>
         `;
       }).join('');
@@ -176,23 +181,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     return;
   }
 
-  if (!isPaid) {
-    statusEl.className = 'status inactive';
-    statusEl.textContent = 'Focus Mode requires Pro or Premium. Upgrade to use.';
-    loginBtn.textContent = 'Upgrade Plan';
-    loginBtn.style.display = 'block';
-    loginBtn.onclick = () => chrome.tabs.create({ url: `${SCHOLAR_BASE}/pricing` });
-    return;
-  }
+  // Free users: 1 site max. Paid users: up to 20 sites.
+  const maxBlocked = isPaid ? 20 : 1;
 
-  // Paid user: show sites to block and quiz customization
-  planBadge.textContent = plan === 'premium' ? 'Premium' : 'Pro';
+  planBadge.textContent = isPaid ? (plan === 'premium' ? 'Premium' : 'Pro') : 'Free';
   planBadge.style.display = 'inline-block';
   sitesSection.classList.add('visible');
   unlockDurationSelect.style.display = 'block';
   actionsRow.style.display = 'flex';
 
-  // Quiz customization UI
+  // Quiz customization UI - free and paid users can customize questions and unlock duration
   const quizSettings = document.getElementById('quizSettings');
   const passThresholdSelect = document.getElementById('passThreshold');
   const subtitleEl = document.querySelector('#subtitle');
@@ -200,7 +198,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   quizSettings.style.display = 'block';
 
   function updateSubtitle() {
-    if (subtitleEl) subtitleEl.textContent = `Block distracting sites until you answer ${questionCount} study questions (get ${passThreshold}+ correct).`;
+    if (subtitleEl) {
+      const base = `Block ${maxBlocked} site${maxBlocked > 1 ? 's' : ''} until you answer ${questionCount} study questions (get ${passThreshold}+ correct).`;
+      subtitleEl.textContent = isPaid ? base : `${base} Upgrade for more sites.`;
+    }
   }
   updateSubtitle();
 
@@ -302,9 +303,15 @@ document.addEventListener('DOMContentLoaded', async () => {
       btn.textContent = p.label;
       btn.onclick = () => {
         btn.disabled = true;
-        const next = blocked.includes(p.domain)
+        const isRemoving = blocked.includes(p.domain);
+        const next = isRemoving
           ? blocked.filter(d => d !== p.domain)
           : [...blocked, p.domain];
+        if (!isRemoving && next.length > maxBlocked) {
+          showToast(maxBlocked === 1 ? 'Free plan: block 1 site only. Upgrade for more.' : `Max ${maxBlocked} sites`, 'error');
+          btn.disabled = false;
+          return;
+        }
         updateBlocked(next, btn);
       };
       sitesGrid.appendChild(btn);
@@ -321,8 +328,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       showToast('Already blocked', 'error');
       return;
     }
-    if (blocked.length >= 20) {
-      showToast('Max 20 sites', 'error');
+    if (blocked.length >= maxBlocked) {
+      showToast(maxBlocked === 1 ? 'Free plan: block 1 site only. Upgrade for more.' : `Max ${maxBlocked} sites`, 'error');
       return;
     }
     customDomainInput.value = '';

@@ -46,8 +46,10 @@ export default function UnlockQuizPage() {
   const site = params.site;
   const redirect = params.redirect;
 
-  const [isLoading, setIsLoading] = useState(true);
+  const [phase, setPhase] = useState<'blocked' | 'loading' | 'quiz' | 'results'>('blocked');
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [needsMoreContent, setNeedsMoreContent] = useState(false);
   const [questions, setQuestions] = useState<QuizItem[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [score, setScore] = useState(0);
@@ -76,13 +78,10 @@ export default function UnlockQuizPage() {
     return answer === correctAnswer || answer?.toLowerCase() === correctAnswer?.toLowerCase();
   }, []);
 
-  useEffect(() => {
-    const token = localStorage.getItem('authToken');
-    if (!token) {
-      setError('Please log in to use Focus Mode.');
-      setIsLoading(false);
-      return;
-    }
+  const fetchQuiz = useCallback((token: string) => {
+    setPhase('loading');
+    setIsLoading(true);
+    setError(null);
     fetch(`${API_URL}/focus-mode/unlock-quiz`, {
       headers: { Authorization: `Bearer ${token}` },
     })
@@ -90,19 +89,45 @@ export default function UnlockQuizPage() {
       .then((data) => {
         if (!data.success) {
           setError(data.message || 'Failed to load quiz');
+          setNeedsMoreContent(!!data.needsMoreContent);
+          setPhase('results');
           setIsLoading(false);
           return;
         }
         setQuestions(data.data.questions || []);
         setPassThreshold(data.data.passThreshold ?? DEFAULT_PASS_THRESHOLD);
         setTotalQuestions(data.data.totalQuestions ?? DEFAULT_TOTAL_QUESTIONS);
+        setPhase('quiz');
         setIsLoading(false);
       })
       .catch(() => {
         setError('Failed to load quiz. Check your connection.');
+        setPhase('results');
         setIsLoading(false);
       });
   }, []);
+
+  useEffect(() => {
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+      setError('Please log in to use Focus Mode.');
+      setPhase('results');
+      return;
+    }
+    if (!site) {
+      setPhase('loading');
+      fetchQuiz(token);
+    }
+  }, [site, fetchQuiz]);
+
+  const handleStartQuiz = () => {
+    const token = localStorage.getItem('authToken');
+    if (token) fetchQuiz(token);
+  };
+
+  const handleGoBack = () => {
+    window.location.href = 'https://www.google.com';
+  };
 
   const handleQuizAnswer = (answer: string) => {
     if (answered || !currentItem) return;
@@ -200,24 +225,93 @@ export default function UnlockQuizPage() {
     window.location.href = FRONTEND_URL;
   };
 
-  if (isLoading) {
+  if (phase === 'blocked' && site) {
+    const siteDisplay = formatSiteName(site);
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50">
-        <div className="bg-white rounded-2xl p-8 shadow-xl">
-          <div className="w-12 h-12 border-4 border-violet-200 border-t-violet-600 rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-stone-600 font-medium">Loading your quiz...</p>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50 dark:from-violet-950/40 dark:via-purple-950/30 dark:to-fuchsia-950/30 p-4">
+        <div className="bg-white dark:bg-stone-800 rounded-2xl p-8 sm:p-10 shadow-xl border border-stone-200/60 dark:border-stone-700 max-w-md w-full text-center">
+          <div className="flex justify-center mb-6">
+            <ScholarMascot size={100} animated />
+          </div>
+          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center mx-auto mb-6 text-2xl">
+            🔒
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-stone-800 dark:text-stone-100 mb-3">
+            {siteDisplay} is blocked
+          </h1>
+          <p className="text-stone-600 dark:text-stone-400 mb-8 leading-relaxed">
+            Answer study questions from your own material to unlock access. Or go back to browse elsewhere.
+          </p>
+          <div className="space-y-4">
+            <button
+              onClick={handleStartQuiz}
+              className="w-full px-6 py-4 bg-gradient-to-r from-violet-600 to-purple-600 text-white rounded-xl font-semibold hover:from-violet-500 hover:to-purple-500 transition-all shadow-lg shadow-violet-500/25 active:scale-[0.98]"
+            >
+              Solve quiz to unlock
+            </button>
+            <button
+              onClick={handleGoBack}
+              className="w-full px-6 py-3 text-stone-600 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200 font-medium transition-colors"
+            >
+              Browse elsewhere
+            </button>
+          </div>
         </div>
       </div>
     );
   }
 
-  if (error || questions.length < totalQuestions) {
+  if (isLoading || phase === 'loading') {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50 p-4">
-        <div className="bg-white rounded-2xl p-8 shadow-xl max-w-md text-center">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50 dark:from-violet-950/40 dark:via-purple-950/30 dark:to-fuchsia-950/30">
+        <div className="bg-white dark:bg-stone-800 rounded-2xl p-8 shadow-xl border border-stone-200/60 dark:border-stone-700">
+          <div className="w-12 h-12 border-4 border-violet-200 border-t-violet-600 rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-stone-600 dark:text-stone-400 font-medium">Loading your quiz...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || (phase === 'results' && questions.length < totalQuestions)) {
+    if (needsMoreContent) {
+      return (
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50 dark:from-violet-950/40 dark:via-purple-950/30 dark:to-fuchsia-950/30 p-4">
+          <div className="bg-white dark:bg-stone-800 rounded-2xl p-8 sm:p-10 shadow-xl border border-stone-200/60 dark:border-stone-700 max-w-lg w-full text-center">
+            <div className="flex justify-center mb-6">
+              <ScholarMascot size={100} animated />
+            </div>
+            <div className="w-14 h-14 rounded-2xl bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center mx-auto mb-6 text-2xl">
+              📚
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-stone-800 dark:text-stone-100 mb-3">
+              You need study material first
+            </h1>
+            <p className="text-stone-600 dark:text-stone-400 mb-6 leading-relaxed">
+              Focus Mode blocks websites until you answer questions from <strong>your own</strong> study material. Right now you don&apos;t have any quizzes or flashcards to draw from.
+            </p>
+            <div className="bg-violet-50 dark:bg-violet-900/20 rounded-xl p-4 mb-6 text-left border border-violet-100 dark:border-violet-800/40">
+              <p className="text-sm font-semibold text-stone-800 dark:text-stone-100 mb-2">To use Focus Mode:</p>
+              <ol className="text-sm text-stone-600 dark:text-stone-400 space-y-2 list-decimal list-inside">
+                <li>Create a <strong>quiz</strong> or <strong>flashcards</strong> from your notes (Study Tools on WriteScholar)</li>
+                <li>Come back and try unlocking again</li>
+              </ol>
+            </div>
+            <button
+              onClick={() => { window.location.href = `${FRONTEND_URL}/tools/quiz-generator`; }}
+              className="w-full px-6 py-4 bg-gradient-to-r from-violet-600 to-purple-600 text-white rounded-xl font-semibold hover:from-violet-500 hover:to-purple-500 transition-all shadow-lg shadow-violet-500/25"
+            >
+              Create quiz or flashcards →
+            </button>
+          </div>
+        </div>
+      );
+    }
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50 dark:from-violet-950/40 dark:via-purple-950/30 dark:to-fuchsia-950/30 p-4">
+        <div className="bg-white dark:bg-stone-800 rounded-2xl p-8 shadow-xl border border-stone-200/60 dark:border-stone-700 max-w-md text-center">
           <ScholarMascot size={100} animated />
-          <h1 className="text-2xl font-bold text-stone-800 mt-6 mb-2">Focus Mode Unlock</h1>
-          <p className="text-stone-600 mb-6">{error || 'You need at least 5 questions in your study tools.'}</p>
+          <h1 className="text-2xl font-bold text-stone-800 dark:text-stone-100 mt-6 mb-2">Focus Mode Unlock</h1>
+          <p className="text-stone-600 dark:text-stone-400 mb-6">{error || 'Something went wrong.'}</p>
           <button
             onClick={handleGoToScholar}
             className="px-6 py-3 bg-violet-600 text-white rounded-xl font-semibold hover:bg-violet-500 transition-colors"
@@ -231,16 +325,16 @@ export default function UnlockQuizPage() {
 
   if (showResults) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50 p-4">
-        <div className="bg-white rounded-2xl p-8 shadow-xl max-w-md text-center">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50 dark:from-violet-950/40 dark:via-purple-950/30 dark:to-fuchsia-950/30 p-4">
+        <div className="bg-white dark:bg-stone-800 rounded-2xl p-8 shadow-xl border border-stone-200/60 dark:border-stone-700 max-w-md text-center">
           <div className="flex justify-center mb-4">
             <ScholarMascot size={120} animated pose={isPassed ? 'celebrating' : 'default'} />
           </div>
           <span className="text-5xl block mb-2">{isPassed ? '🎉' : '📚'}</span>
-          <h1 className="text-2xl font-bold text-stone-800 mb-2">
+          <h1 className="text-2xl font-bold text-stone-800 dark:text-stone-100 mb-2">
             {isPassed ? 'You did it!' : 'Almost there!'}
           </h1>
-          <p className="text-stone-600 mb-4">
+          <p className="text-stone-600 dark:text-stone-400 mb-4">
             {score} of {totalQuestions} correct. You need at least {passThreshold} to unlock.
           </p>
           {isPassed ? (
@@ -273,7 +367,7 @@ export default function UnlockQuizPage() {
           )}
           <button
             onClick={handleGoToScholar}
-            className="mt-4 text-stone-500 hover:text-stone-700 text-sm"
+            className="mt-4 text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 text-sm"
           >
             Go to WriteScholar instead
           </button>
@@ -286,15 +380,15 @@ export default function UnlockQuizPage() {
   const siteDisplay = site ? formatSiteName(site) : 'this site';
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50">
-      <div className="flex items-center gap-4 px-4 py-4 sm:px-6 border-b border-violet-100/80 bg-white/60 backdrop-blur-sm">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50 dark:from-violet-950/40 dark:via-purple-950/30 dark:to-fuchsia-950/30">
+      <div className="flex items-center gap-4 px-4 py-4 sm:px-6 border-b border-violet-100/80 dark:border-violet-900/40 bg-white/60 dark:bg-stone-800/60 backdrop-blur-sm">
         <ScholarMascot size={56} animated />
-        <p className="text-base sm:text-lg font-semibold text-stone-800">
+        <p className="text-base sm:text-lg font-semibold text-stone-800 dark:text-stone-100">
           Get {passThreshold}/{totalQuestions} or more to unlock {siteDisplay}
         </p>
       </div>
       <div className="flex-1 flex items-center justify-center p-4">
-        <div className="w-full max-w-lg bg-white rounded-2xl shadow-xl overflow-hidden">
+        <div className="w-full max-w-lg bg-white dark:bg-stone-800 rounded-2xl shadow-xl border border-stone-200/60 dark:border-stone-700 overflow-hidden">
           <div className="h-1 bg-stone-100">
             <div
               className="h-full bg-gradient-to-r from-violet-500 to-purple-500 transition-all duration-300"

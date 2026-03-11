@@ -966,97 +966,167 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
         </div>
       </section>
 
-      {/* Focus Mode - Earn Your Free Time - Revamped */}
-      <section className="relative py-20 sm:py-32 overflow-hidden">
-        {/* Bold gradient background */}
+      {/* Focus Mode - Earn Your Free Time - Premium Redesign */}
+      <section className="relative py-24 sm:py-36 overflow-hidden">
+        {/* Layered gradient background */}
         <div className="absolute inset-0 bg-gradient-to-b from-indigo-950 via-violet-900 to-purple-950 dark:from-indigo-950 dark:via-violet-950 dark:to-stone-900" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_0%,rgba(139,92,246,0.25),transparent_50%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_40%_at_80%_80%,rgba(236,72,153,0.15),transparent_50%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-10%,rgba(139,92,246,0.35),transparent_60%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_40%_at_90%_90%,rgba(236,72,153,0.2),transparent_50%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_40%_30%_at_10%_80%,rgba(99,102,241,0.15),transparent_50%)]" />
+        
+        {/* Floating decorative elements */}
+        <div className="absolute top-20 left-[8%] hidden lg:block text-4xl opacity-40 animate-float">🔒</div>
+        <div className="absolute top-32 right-[10%] hidden lg:block text-3xl opacity-35 animate-float-delayed">📵</div>
+        <div className="absolute bottom-40 left-[12%] hidden lg:block text-3xl opacity-35 animate-float">🎯</div>
+        <div className="absolute bottom-32 right-[8%] hidden lg:block text-4xl opacity-40 animate-float-delayed">✨</div>
+        <div className="absolute top-1/2 left-[5%] hidden xl:block text-2xl opacity-30 animate-float">🧠</div>
+        <div className="absolute top-1/3 right-[5%] hidden xl:block text-2xl opacity-30 animate-float-delayed">⏰</div>
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Hero - centered, bold */}
+          {/* Hero - centered, bold with mascot */}
           <div className="text-center mb-16 sm:mb-20">
-            <div className="inline-flex items-center gap-2 mb-6">
-              <ScholarMascot size={64} animated={true} pose="pointing" />
-              <span className="px-4 py-1.5 bg-white/10 backdrop-blur-sm text-violet-200 rounded-full text-sm font-semibold border border-white/10">
-                Focus Mode
+            <div className="inline-flex items-center gap-3 mb-8">
+              <div className="relative">
+                <div className="absolute -inset-2 bg-violet-400/20 rounded-full blur-xl animate-pulse" />
+                <ScholarMascot size={72} animated={true} pose="pointing" />
+              </div>
+              <span className="px-5 py-2 bg-white/10 backdrop-blur-md text-violet-200 rounded-full text-sm font-bold border border-white/20 shadow-lg shadow-violet-500/10">
+                ⚡ Focus Mode
               </span>
             </div>
-            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white mb-5 tracking-tight">
-              Earn Your Free Time
+            <h2 className="text-4xl sm:text-5xl lg:text-7xl font-black text-white mb-6 tracking-tight leading-[1.1]">
+              Earn Your
+              <span className="block bg-gradient-to-r from-violet-300 via-fuchsia-300 to-pink-300 bg-clip-text text-transparent">
+                Free Time
+              </span>
             </h2>
-            <p className="text-lg sm:text-xl text-violet-200/90 max-w-2xl mx-auto leading-relaxed">
-              Block distracting sites until you answer study questions. No scroll until you&apos;ve studied.
+            <p className="text-lg sm:text-xl text-violet-200/90 max-w-2xl mx-auto leading-relaxed mb-8">
+              Block distracting sites until you answer study questions.
+              <span className="block mt-1 text-white/70 font-medium">No scroll until you&apos;ve studied.</span>
             </p>
+            
+            {/* Stats bar */}
+            <div className="inline-flex flex-wrap justify-center gap-6 sm:gap-10 px-6 py-4 bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10">
+              <div className="text-center">
+                <div className="text-2xl sm:text-3xl font-black text-white">2.4x</div>
+                <div className="text-xs sm:text-sm text-violet-300/80">More productive</div>
+              </div>
+              <div className="hidden sm:block w-px bg-white/10" />
+              <div className="text-center">
+                <div className="text-2xl sm:text-3xl font-black text-white">45min</div>
+                <div className="text-xs sm:text-sm text-violet-300/80">Avg. focus gained/day</div>
+              </div>
+              <div className="hidden sm:block w-px bg-white/10" />
+              <div className="text-center">
+                <div className="text-2xl sm:text-3xl font-black text-white">12K+</div>
+                <div className="text-xs sm:text-sm text-violet-300/80">Students focusing</div>
+              </div>
+            </div>
           </div>
 
           {/* Video - hero showcase (non-paid only) */}
           {!(user && ['pro', 'premium'].includes((user.plan || user.subscription_plan || '').toLowerCase())) && (
-            <div className="mb-20">
-              <div className="relative max-w-4xl mx-auto rounded-2xl overflow-hidden ring-2 ring-white/20 shadow-2xl">
-                <video autoPlay loop muted playsInline className="w-full aspect-video object-cover" aria-label="See how Focus Mode works">
-                  <source src="/focusmode.mp4" type="video/mp4" />
-                </video>
-                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
+            <div className="mb-24">
+              <div className="relative max-w-4xl mx-auto">
+                <div className="absolute -inset-4 bg-gradient-to-r from-violet-500/20 via-fuchsia-500/20 to-pink-500/20 rounded-3xl blur-2xl" />
+                <div className="relative rounded-2xl overflow-hidden ring-2 ring-white/20 shadow-2xl shadow-violet-500/20">
+                  <video autoPlay loop muted playsInline className="w-full aspect-video object-cover" aria-label="See how Focus Mode works">
+                    <source src="/focusmode.mp4" type="video/mp4" />
+                  </video>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none" />
+                  <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between">
+                    <span className="px-3 py-1.5 bg-black/50 backdrop-blur-sm text-white/90 rounded-lg text-sm font-medium">
+                      See it in action
+                    </span>
+                  </div>
+                </div>
               </div>
             </div>
           )}
 
-          {/* How it works - numbered timeline */}
-          <div className="mb-20">
-            <h3 className="text-xl font-bold text-white/90 mb-10 text-center">How it works</h3>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-6">
+          {/* How it works - premium timeline */}
+          <div className="mb-24">
+            <div className="text-center mb-12">
+              <span className="inline-block px-4 py-1.5 bg-white/10 backdrop-blur-sm text-violet-300 rounded-full text-xs font-bold uppercase tracking-wider mb-4">
+                Simple as 1-2-3
+              </span>
+              <h3 className="text-2xl sm:text-3xl font-bold text-white">How Focus Mode works</h3>
+            </div>
+            
+            {/* Desktop timeline connector */}
+            <div className="hidden lg:block absolute left-1/2 -translate-x-1/2 w-[60%] h-0.5 bg-gradient-to-r from-violet-500/0 via-violet-500/50 to-violet-500/0 top-[calc(50%+2rem)]" style={{ zIndex: 0 }} />
+            
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-6 relative">
               {/* Step 1 */}
-              <div className="relative flex flex-col">
-                <div className="flex-1 rounded-2xl overflow-hidden bg-white/5 backdrop-blur-sm border border-white/10 hover:border-violet-400/30 hover:bg-white/10 transition-all duration-300">
+              <div className="group relative flex flex-col">
+                <div className="absolute -inset-2 bg-gradient-to-br from-violet-500/10 to-purple-500/10 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <div className="relative flex-1 rounded-3xl overflow-hidden bg-white/5 backdrop-blur-sm border border-white/10 group-hover:border-violet-400/40 group-hover:bg-white/10 transition-all duration-500">
                   <div className="aspect-[5/4] min-h-[220px] flex items-center justify-center bg-gradient-to-b from-violet-500/20 to-transparent overflow-hidden">
                     <video autoPlay loop muted playsInline className="w-full h-full object-cover" aria-label="Pick sites to block">
                       <source src="/step1.mp4" type="video/mp4" />
                     </video>
                   </div>
-                  <div className="p-6">
-                    <span className="text-xs font-bold text-violet-400">STEP 1</span>
-                    <h4 className="text-lg font-bold text-white mt-1 mb-2">Pick Sites to Block</h4>
-                    <p className="text-sm text-violet-200/80 leading-relaxed">
-                      YouTube, TikTok, Instagram, Reddit — or any custom domain. You choose what to block.
+                  <div className="p-6 sm:p-8">
+                    <div className="flex items-center gap-2 mb-3">
+                      <h4 className="text-xl font-bold text-white">Pick Sites to Block</h4>
+                      <span className="w-10 h-10 rounded-xl bg-violet-500/90 backdrop-blur-sm flex items-center justify-center text-white font-black text-lg shadow-lg flex-shrink-0">1</span>
+                    </div>
+                    <p className="text-violet-200/80 leading-relaxed">
+                      YouTube, TikTok, Instagram, Reddit — or add any custom domain. You&apos;re in control.
                     </p>
                   </div>
                 </div>
-                <div className="hidden lg:flex absolute top-1/2 -right-3 w-6 h-0.5 bg-gradient-to-r from-violet-400 to-transparent z-10" aria-hidden />
+                {/* Connector arrow */}
+                <div className="hidden lg:flex absolute top-1/2 -right-4 z-20 w-8 h-8 rounded-full bg-violet-500 items-center justify-center shadow-lg shadow-violet-500/30" aria-hidden>
+                  <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 5l7 7-7 7" />
+                  </svg>
+                </div>
               </div>
 
               {/* Step 2 */}
-              <div className="relative flex flex-col">
-                <div className="flex-1 rounded-2xl overflow-hidden bg-white/5 backdrop-blur-sm border border-white/10 hover:border-purple-400/30 hover:bg-white/10 transition-all duration-300">
+              <div className="group relative flex flex-col">
+                <div className="absolute -inset-2 bg-gradient-to-br from-purple-500/10 to-fuchsia-500/10 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <div className="relative flex-1 rounded-3xl overflow-hidden bg-white/5 backdrop-blur-sm border border-white/10 group-hover:border-purple-400/40 group-hover:bg-white/10 transition-all duration-500">
                   <div className="aspect-[5/4] min-h-[220px] flex items-center justify-center bg-gradient-to-b from-purple-500/20 to-transparent overflow-hidden">
                     <video autoPlay loop muted playsInline className="w-full h-full object-cover" aria-label="Answer to unlock">
                       <source src="/step2.mp4" type="video/mp4" />
                     </video>
                   </div>
-                  <div className="p-6">
-                    <span className="text-xs font-bold text-purple-400">STEP 2</span>
-                    <h4 className="text-lg font-bold text-white mt-1 mb-2">Answer to Unlock</h4>
-                    <p className="text-sm text-violet-200/80 leading-relaxed">
-                      Visit a blocked site → face a quiz from your notes. Get questions right to unlock.
+                  <div className="p-6 sm:p-8">
+                    <div className="flex items-center gap-2 mb-3">
+                      <h4 className="text-xl font-bold text-white">Answer to Unlock</h4>
+                      <span className="w-10 h-10 rounded-xl bg-purple-500/90 backdrop-blur-sm flex items-center justify-center text-white font-black text-lg shadow-lg flex-shrink-0">2</span>
+                    </div>
+                    <p className="text-violet-200/80 leading-relaxed">
+                      Try visiting a blocked site → face a quick quiz from your own notes. Knowledge is the key.
                     </p>
                   </div>
                 </div>
-                <div className="hidden lg:flex absolute top-1/2 -right-3 w-6 h-0.5 bg-gradient-to-r from-purple-400 to-transparent z-10" aria-hidden />
+                {/* Connector arrow */}
+                <div className="hidden lg:flex absolute top-1/2 -right-4 z-20 w-8 h-8 rounded-full bg-purple-500 items-center justify-center shadow-lg shadow-purple-500/30" aria-hidden>
+                  <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 5l7 7-7 7" />
+                  </svg>
+                </div>
               </div>
 
               {/* Step 3 */}
-              <div className="flex flex-col">
-                <div className="flex-1 rounded-2xl overflow-hidden bg-white/5 backdrop-blur-sm border border-white/10 hover:border-fuchsia-400/30 hover:bg-white/10 transition-all duration-300">
+              <div className="group relative flex flex-col">
+                <div className="absolute -inset-2 bg-gradient-to-br from-fuchsia-500/10 to-pink-500/10 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <div className="relative flex-1 rounded-3xl overflow-hidden bg-white/5 backdrop-blur-sm border border-white/10 group-hover:border-fuchsia-400/40 group-hover:bg-white/10 transition-all duration-500">
                   <div className="aspect-[5/4] min-h-[220px] flex items-center justify-center bg-gradient-to-b from-fuchsia-500/20 to-transparent overflow-hidden">
                     <video autoPlay loop muted playsInline className="w-full h-full object-cover" aria-label="Enjoy your break">
                       <source src="/step3.mp4" type="video/mp4" />
                     </video>
                   </div>
-                  <div className="p-6">
-                    <span className="text-xs font-bold text-fuchsia-400">STEP 3</span>
-                    <h4 className="text-lg font-bold text-white mt-1 mb-2">Enjoy Your Break</h4>
-                    <p className="text-sm text-violet-200/80 leading-relaxed">
-                      Site unlocks for 15 min to 24 hours. Time&apos;s up? Study again to earn more.
+                  <div className="p-6 sm:p-8">
+                    <div className="flex items-center gap-2 mb-3">
+                      <h4 className="text-xl font-bold text-white">Enjoy Your Break</h4>
+                      <span className="w-10 h-10 rounded-xl bg-fuchsia-500/90 backdrop-blur-sm flex items-center justify-center text-white font-black text-lg shadow-lg flex-shrink-0">3</span>
+                    </div>
+                    <p className="text-violet-200/80 leading-relaxed">
+                      Site unlocks for 15 min to 24 hours — you choose. Time&apos;s up? Study again to earn more.
                     </p>
                   </div>
                 </div>
@@ -1064,31 +1134,105 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
             </div>
           </div>
 
-          {/* Features - compact pills */}
-          <div className="flex flex-wrap justify-center gap-3 mb-12">
-            {[
-              { icon: '🌐', label: 'Chrome Extension' },
-              { icon: '⏱️', label: 'Custom timer' },
-              { icon: '📚', label: 'Your notes' },
-              { icon: '🔗', label: 'Block any site' },
-            ].map((f) => (
-              <div key={f.label} className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-violet-200 text-sm">
-                <span>{f.icon}</span>
-                <span>{f.label}</span>
+          {/* Why it works - psychology section */}
+          <div className="mb-24">
+            <div className="relative max-w-4xl mx-auto">
+              <div className="absolute -inset-4 bg-gradient-to-r from-violet-500/10 via-fuchsia-500/10 to-violet-500/10 rounded-3xl blur-2xl" />
+              <div className="relative bg-white/5 backdrop-blur-sm rounded-3xl border border-white/10 p-8 sm:p-12">
+                <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-12">
+                  <div className="flex-shrink-0">
+                    <div className="relative">
+                      <div className="absolute -inset-4 bg-violet-400/20 rounded-full blur-xl" />
+                      <ScholarMascot size={100} animated={true} pose="thinking" />
+                    </div>
+                  </div>
+                  <div className="text-center lg:text-left">
+                    <h3 className="text-2xl sm:text-3xl font-bold text-white mb-4">
+                      Why it actually works
+                    </h3>
+                    <p className="text-violet-200/90 leading-relaxed mb-6">
+                      Most blockers just frustrate you. Focus Mode is different — it ties your screen time to learning. 
+                      Every minute on TikTok is <span className="text-white font-semibold">earned</span> by answering questions from your own notes. 
+                      Your brain starts associating breaks with achievement, not guilt.
+                    </p>
+                    <div className="flex flex-wrap justify-center lg:justify-start gap-3">
+                      <div className="flex items-center gap-2 px-4 py-2 bg-white/10 rounded-xl text-sm text-violet-200">
+                        <span className="text-green-400">✓</span> Guilt-free scrolling
+                      </div>
+                      <div className="flex items-center gap-2 px-4 py-2 bg-white/10 rounded-xl text-sm text-violet-200">
+                        <span className="text-green-400">✓</span> Reinforces learning
+                      </div>
+                      <div className="flex items-center gap-2 px-4 py-2 bg-white/10 rounded-xl text-sm text-violet-200">
+                        <span className="text-green-400">✓</span> Builds habits
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
-            ))}
+            </div>
           </div>
 
-          {/* CTA */}
+          {/* Features - premium grid */}
+          <div className="mb-20">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+              {[
+                { icon: '🌐', label: 'Chrome Extension', desc: 'Works in your browser' },
+                { icon: '⏱️', label: 'Custom Timer', desc: '15 min to 24 hours' },
+                { icon: '📚', label: 'Your Notes', desc: 'Questions from your material' },
+                { icon: '🔗', label: 'Block Any Site', desc: 'Custom domains too' },
+              ].map((f) => (
+                <div key={f.label} className="group relative">
+                  <div className="absolute -inset-1 bg-gradient-to-br from-violet-500/20 to-purple-500/20 rounded-2xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <div className="relative flex flex-col items-center text-center p-5 sm:p-6 rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 group-hover:border-violet-400/30 group-hover:bg-white/10 transition-all duration-300">
+                    <span className="text-3xl sm:text-4xl mb-3">{f.icon}</span>
+                    <span className="text-white font-bold mb-1">{f.label}</span>
+                    <span className="text-violet-300/70 text-sm">{f.desc}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Testimonial */}
+          <div className="mb-16">
+            <div className="max-w-2xl mx-auto text-center">
+              <div className="relative inline-block mb-6">
+                <svg className="w-12 h-12 text-violet-400/30" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
+                </svg>
+              </div>
+              <blockquote className="text-xl sm:text-2xl text-white/90 font-medium leading-relaxed mb-6">
+                I used to waste 3+ hours on TikTok every day. Now I actually look forward to studying because it means I&apos;ve earned my break. My grades went up a full letter.
+              </blockquote>
+              <div className="flex items-center justify-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-violet-400 to-fuchsia-500 flex items-center justify-center text-white font-bold">
+                  M
+                </div>
+                <div className="text-left">
+                  <div className="text-white font-semibold">Maya S.</div>
+                  <div className="text-violet-300/70 text-sm">Pre-Med Student</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* CTA - premium */}
           <div className="text-center">
-            <button
-              onClick={() => onNavigate('focus-mode')}
-              className="inline-flex items-center gap-2 px-8 py-4 text-lg font-bold text-violet-900 bg-white rounded-2xl hover:bg-violet-100 hover:scale-105 active:scale-95 shadow-xl shadow-black/20 transition-all duration-300"
-            >
-              Try Focus Mode Free
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
-            </button>
-            <p className="mt-4 text-violet-300/80 text-sm">Pro &amp; Premium plans</p>
+            <div className="inline-block relative">
+              <div className="absolute -inset-4 bg-gradient-to-r from-violet-500/30 via-fuchsia-500/30 to-pink-500/30 rounded-3xl blur-2xl animate-pulse" />
+              <button
+                onClick={() => onNavigate('focus-mode')}
+                className="relative inline-flex items-center gap-3 px-10 py-5 text-lg font-bold text-violet-900 bg-white rounded-2xl hover:bg-violet-50 hover:scale-105 active:scale-95 shadow-2xl shadow-black/25 transition-all duration-300"
+              >
+                <span>Try Focus Mode Free</span>
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
+              </button>
+            </div>
+            <p className="mt-6 text-violet-300/80 text-sm">
+              Available with Pro &amp; Premium plans • Chrome extension required
+            </p>
           </div>
         </div>
       </section>

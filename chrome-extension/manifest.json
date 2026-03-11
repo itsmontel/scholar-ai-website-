@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "WriteScholar Focus Mode",
   "version": "1.0.0",
-  "description": "Block distracting sites until you answer 5 study questions. Requires WriteScholar Pro or Premium.",
+  "description": "Block distracting sites until you answer study questions. Free: 1 site. Pro: up to 20 sites.",
   "permissions": [
     "storage",
     "declarativeNetRequest",
@@ -34,14 +34,14 @@
   "action": {
     "default_popup": "popup.html",
     "default_icon": {
-      "16": "mascot.png",
-      "48": "mascot.png",
-      "128": "mascot.png"
+      "16": "icon16.png",
+      "48": "icon48.png",
+      "128": "icon128.png"
     }
   },
   "icons": {
-    "16": "mascot.png",
-    "48": "mascot.png",
-    "128": "mascot.png"
+    "16": "icon16.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
   }
 }

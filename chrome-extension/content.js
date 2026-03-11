@@ -30,15 +30,30 @@ console.log('[WriteScholar Content] Script loaded on:', window.location.href);
   }
 })();
 
+function isValidRedirect(site, redirect) {
+  if (!redirect || typeof redirect !== 'string') return false;
+  const s = site.replace(/^https?:\/\//, '').split('/')[0].toLowerCase();
+  try {
+    const url = new URL(redirect);
+    if (url.protocol !== 'https:') return false;
+    const host = url.hostname.toLowerCase().replace(/^www\./, '');
+    const siteHost = s.replace(/^www\./, '');
+    return host === siteHost || host.endsWith('.' + siteHost);
+  } catch (_) {
+    return false;
+  }
+}
+
 function handleUnlockRequest(site, redirect, source) {
-  console.log('[WriteScholar Content] handleUnlockRequest called from:', source, 'site:', site, 'redirect:', redirect);
+  console.log('[WriteScholar Content] handleUnlockRequest called from:', source, 'site:', site);
   if (!site) {
     console.warn('[WriteScholar Content] No site provided, aborting');
     return;
   }
+  const safeRedirect = isValidRedirect(site, redirect) ? redirect : `https://${site.replace(/^https?:\/\//, '').split('/')[0]}`;
   console.log('[WriteScholar Content] Sending UNLOCK_SITE to background...');
   chrome.runtime.sendMessage(
-    { type: 'UNLOCK_SITE', site, redirect },
+    { type: 'UNLOCK_SITE', site, redirect: safeRedirect },
     (response) => {
       console.log('[WriteScholar Content] Background response:', response, 'lastError:', chrome.runtime.lastError);
       if (chrome.runtime.lastError) {
@@ -46,9 +61,9 @@ function handleUnlockRequest(site, redirect, source) {
         window.postMessage({ type: 'WRITESCHOLAR_UNLOCK_FAILED' }, '*');
         return;
       }
-      if (response?.ok && redirect) {
-        console.log('[WriteScholar Content] Unlock succeeded! Redirecting to:', redirect);
-        window.location.replace(redirect);
+      if (response?.ok && safeRedirect) {
+        console.log('[WriteScholar Content] Unlock succeeded! Redirecting to:', safeRedirect);
+        window.location.replace(safeRedirect);
       } else {
         console.warn('[WriteScholar Content] Unlock failed or no redirect. Response:', response);
         window.postMessage({ type: 'WRITESCHOLAR_UNLOCK_FAILED' }, '*');

@@ -55,10 +55,13 @@ function clampSettings(settings) {
 }
 
 // @route   GET /api/focus-mode/settings
-// @desc    Get full Focus Mode settings (paid only)
-router.get('/settings', authenticateToken, requireSubscription('pro'), async (req, res) => {
+// @desc    Get full Focus Mode settings (free: 1 site, paid: 20 sites)
+router.get('/settings', authenticateToken, async (req, res) => {
   try {
     const userId = req.user.id;
+    const plan = (req.user.subscription_plan || 'free').toLowerCase();
+    const isPaid = plan === 'pro' || plan === 'premium';
+    const maxSites = isPaid ? 20 : 1;
     const supabase = getSupabase();
     const { data, error } = await supabase
       .from('focus_mode_settings')
@@ -66,7 +69,7 @@ router.get('/settings', authenticateToken, requireSubscription('pro'), async (re
       .eq('user_id', userId)
       .maybeSingle();
     if (error) throw error;
-    const domains = data?.blocked_domains || [];
+    const domains = (data?.blocked_domains || []).slice(0, maxSites);
     const questionCount = [5, 10, 15].includes(data?.question_count) ? data.question_count : DEFAULT_QUESTION_COUNT;
     const passThreshold = typeof data?.pass_threshold === 'number' && data.pass_threshold >= 1 && data.pass_threshold <= questionCount
       ? data.pass_threshold : Math.max(1, Math.floor(questionCount * 0.8));
@@ -87,17 +90,20 @@ router.get('/settings', authenticateToken, requireSubscription('pro'), async (re
 });
 
 // @route   PUT /api/focus-mode/settings
-// @desc    Update Focus Mode settings (paid only)
-router.put('/settings', authenticateToken, requireSubscription('pro'), async (req, res) => {
+// @desc    Update Focus Mode settings (free: 1 site, paid: 20 sites)
+router.put('/settings', authenticateToken, async (req, res) => {
   try {
     const userId = req.user.id;
+    const plan = (req.user.subscription_plan || 'free').toLowerCase();
+    const isPaid = plan === 'pro' || plan === 'premium';
+    const maxSites = isPaid ? 20 : 1;
     const { blockedDomains, question_count, pass_threshold, unlock_duration_ms } = req.body;
     const supabase = getSupabase();
 
     let finalDomains = [];
     if (Array.isArray(blockedDomains)) {
       finalDomains = [...new Set(
-        blockedDomains.slice(0, 20).map(d => String(d).toLowerCase().trim()).filter(d => d.length > 0)
+        blockedDomains.slice(0, maxSites).map(d => String(d).toLowerCase().trim()).filter(d => d.length > 0)
           .map(d => {
             const parts = d.replace(/^https?:\/\//, '').split('/')[0].split('.');
             return parts.length >= 2 ? parts.slice(-2).join('.') : d;
@@ -147,10 +153,13 @@ router.put('/settings', authenticateToken, requireSubscription('pro'), async (re
 });
 
 // @route   GET /api/focus-mode/blocked-sites
-// @desc    Get user's blocked sites (paid only)
-router.get('/blocked-sites', authenticateToken, requireSubscription('pro'), async (req, res) => {
+// @desc    Get user's blocked sites (free: 1 site, paid: 20 sites)
+router.get('/blocked-sites', authenticateToken, async (req, res) => {
   try {
     const userId = req.user.id;
+    const plan = (req.user.subscription_plan || 'free').toLowerCase();
+    const isPaid = plan === 'pro' || plan === 'premium';
+    const maxSites = isPaid ? 20 : 1;
     const supabase = getSupabase();
 
     const { data, error } = await supabase
@@ -161,8 +170,9 @@ router.get('/blocked-sites', authenticateToken, requireSubscription('pro'), asyn
 
     if (error) throw error;
 
-    const domains = data?.blocked_domains || [];
-    res.json({ success: true, data: { blockedDomains: domains } });
+    const allDomains = data?.blocked_domains || [];
+    const domains = allDomains.slice(0, maxSites);
+    res.json({ success: true, data: { blockedDomains: domains, maxSites } });
   } catch (err) {
     console.error('Focus mode get blocked sites:', err);
     res.status(500).json({
@@ -174,20 +184,23 @@ router.get('/blocked-sites', authenticateToken, requireSubscription('pro'), asyn
 });
 
 // @route   PUT /api/focus-mode/blocked-sites
-// @desc    Update user's blocked sites (paid only)
-router.put('/blocked-sites', authenticateToken, requireSubscription('pro'), async (req, res) => {
+// @desc    Update user's blocked sites (free: 1 site max, paid: 20 sites max)
+router.put('/blocked-sites', authenticateToken, async (req, res) => {
   try {
     const userId = req.user.id;
+    const plan = (req.user.subscription_plan || 'free').toLowerCase();
+    const isPaid = plan === 'pro' || plan === 'premium';
+    const maxSites = isPaid ? 20 : 1;
     const { blockedDomains } = req.body;
 
     if (!Array.isArray(blockedDomains)) {
       return res.status(400).json({ success: false, message: 'blockedDomains must be an array' });
     }
 
-    // Normalize: lowercase, strip subdomains to base domain, limit 20
+    // Normalize: lowercase, strip subdomains to base domain, limit by plan
     const normalized = [...new Set(
       blockedDomains
-        .slice(0, 20)
+        .slice(0, maxSites)
         .map(d => String(d).toLowerCase().trim())
         .filter(d => d.length > 0)
         .map(d => {
@@ -216,7 +229,7 @@ router.put('/blocked-sites', authenticateToken, requireSubscription('pro'), asyn
       stats: { focus_mode_sites_blocked: normalized.length }
     }).catch(() => { /* ignore */ });
 
-    res.json({ success: true, data: { blockedDomains: normalized } });
+    res.json({ success: true, data: { blockedDomains: normalized, maxSites } });
   } catch (err) {
     console.error('Focus mode update blocked sites:', err);
     res.status(500).json({
@@ -234,10 +247,13 @@ router.get('/presets', (req, res) => {
 });
 
 // @route   GET /api/focus-mode/unlock-quiz
-// @desc    Get random questions from user's study tools for unlock quiz (paid only)
-router.get('/unlock-quiz', authenticateToken, requireSubscription('pro'), async (req, res) => {
+// @desc    Get random questions from user's study tools for unlock quiz
+// Free users: default 5 questions, paid users: customizable (5/10/15)
+router.get('/unlock-quiz', authenticateToken, async (req, res) => {
   try {
     const userId = req.user.id;
+    const plan = (req.user.subscription_plan || 'free').toLowerCase();
+    const isPaid = plan === 'pro' || plan === 'premium';
     const limit = 30;
 
     const supabase = getSupabase();
@@ -246,6 +262,7 @@ router.get('/unlock-quiz', authenticateToken, requireSubscription('pro'), async 
       .select('question_count, pass_threshold')
       .eq('user_id', userId)
       .maybeSingle();
+    // All users (free and paid) can customize; use saved settings or defaults
     const totalQuestions = [5, 10, 15].includes(fmSettings?.question_count) ? fmSettings.question_count : DEFAULT_QUESTION_COUNT;
     const passThreshold = typeof fmSettings?.pass_threshold === 'number' && fmSettings.pass_threshold >= 1 && fmSettings.pass_threshold <= totalQuestions
       ? fmSettings.pass_threshold : Math.max(1, Math.floor(totalQuestions * 0.8));
@@ -354,18 +371,13 @@ router.get('/unlock-quiz', authenticateToken, requireSubscription('pro'), async 
 
 // @route   GET /api/focus-mode/config
 // @desc    Extension: get blocked domains + plan (requires token for sync)
+// Free users: 1 site max, paid users: 20 sites max
 router.get('/config', authenticateToken, async (req, res) => {
   try {
     const userId = req.user.id;
     const plan = (req.user.subscription_plan || 'free').toLowerCase();
     const isPaid = plan === 'pro' || plan === 'premium';
-
-    if (!isPaid) {
-      return res.json({
-        success: true,
-        data: { blockedDomains: [], plan, enabled: false }
-      });
-    }
+    const maxSites = isPaid ? 20 : 1;
 
     const supabase = getSupabase();
     const { data } = await supabase
@@ -374,7 +386,8 @@ router.get('/config', authenticateToken, async (req, res) => {
       .eq('user_id', userId)
       .maybeSingle();
 
-    const domains = data?.blocked_domains || [];
+    const allDomains = data?.blocked_domains || [];
+    const domains = allDomains.slice(0, maxSites);
     const questionCount = [5, 10, 15].includes(data?.question_count) ? data.question_count : DEFAULT_QUESTION_COUNT;
     const passThreshold = typeof data?.pass_threshold === 'number' && data.pass_threshold >= 1 && data.pass_threshold <= questionCount
       ? data.pass_threshold : Math.max(1, Math.floor(questionCount * 0.8));
@@ -388,7 +401,8 @@ router.get('/config', authenticateToken, async (req, res) => {
         enabled: domains.length > 0,
         question_count: questionCount,
         pass_threshold: passThreshold,
-        unlock_duration_ms: unlockMs
+        unlock_duration_ms: unlockMs,
+        maxSites
       }
     });
   } catch (err) {

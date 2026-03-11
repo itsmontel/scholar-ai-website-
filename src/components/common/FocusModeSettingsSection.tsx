@@ -32,9 +32,11 @@ function parseDomain(input: string): string | null {
 interface FocusModeSettingsSectionProps {
   onBack?: () => void;
   embedded?: boolean;
+  isPaidUser?: boolean;
+  onNavigate?: (page: string) => void;
 }
 
-export default function FocusModeSettingsSection({ onBack, embedded = false }: FocusModeSettingsSectionProps) {
+export default function FocusModeSettingsSection({ onBack, embedded = false, isPaidUser = true, onNavigate }: FocusModeSettingsSectionProps) {
   const [blockedDomains, setBlockedDomains] = useState<string[]>([]);
   const [questionCount, setQuestionCount] = useState(5);
   const [passThreshold, setPassThreshold] = useState(4);
@@ -45,6 +47,8 @@ export default function FocusModeSettingsSection({ onBack, embedded = false }: F
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+
+  const maxSites = isPaidUser ? 20 : 1;
 
   useEffect(() => {
     const token = localStorage.getItem('authToken');
@@ -57,7 +61,7 @@ export default function FocusModeSettingsSection({ onBack, embedded = false }: F
       .then(([r1, r2]) => Promise.all([r1.json(), r2.json()]))
       .then(([d1, d2]) => {
         if (d1.success) {
-          setBlockedDomains(d1.data.blockedDomains || []);
+          setBlockedDomains((d1.data.blockedDomains || []).slice(0, maxSites));
           setQuestionCount(d1.data.question_count ?? 5);
           setPassThreshold(d1.data.pass_threshold ?? 4);
           setUnlockDurationMs(d1.data.unlock_duration_ms ?? 30 * 60 * 1000);
@@ -66,7 +70,7 @@ export default function FocusModeSettingsSection({ onBack, embedded = false }: F
       })
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, [API_URL]);
+  }, [API_URL, maxSites]);
 
   const saveSettings = async (updates?: Partial<{ blockedDomains: string[]; question_count: number; pass_threshold: number; unlock_duration_ms: number }>) => {
     const token = localStorage.getItem('authToken');
@@ -74,8 +78,9 @@ export default function FocusModeSettingsSection({ onBack, embedded = false }: F
     setSaving(true);
     setSaveSuccess(false);
     try {
+      const domains = (updates?.blockedDomains ?? blockedDomains).slice(0, maxSites);
       const body = {
-        blockedDomains: updates?.blockedDomains ?? blockedDomains,
+        blockedDomains: domains,
         question_count: updates?.question_count ?? questionCount,
         pass_threshold: updates?.pass_threshold ?? passThreshold,
         unlock_duration_ms: updates?.unlock_duration_ms ?? unlockDurationMs
@@ -100,9 +105,15 @@ export default function FocusModeSettingsSection({ onBack, embedded = false }: F
   };
 
   const toggleBlockedSite = async (domain: string) => {
-    const next = blockedDomains.includes(domain)
-      ? blockedDomains.filter((d) => d !== domain)
-      : [...blockedDomains, domain];
+    const isRemoving = blockedDomains.includes(domain);
+    let next: string[];
+    if (isRemoving) {
+      next = blockedDomains.filter((d) => d !== domain);
+    } else if (blockedDomains.length >= maxSites) {
+      next = [domain];
+    } else {
+      next = [...blockedDomains, domain];
+    }
     setBlockedDomains(next);
     await saveSettings({ blockedDomains: next });
   };
@@ -123,11 +134,18 @@ export default function FocusModeSettingsSection({ onBack, embedded = false }: F
       setAddError('Enter a valid domain (e.g. youtube.com, reddit.com)');
       return;
     }
-    if (blockedDomains.length + toAdd.length > 20) {
-      setAddError('Maximum 20 sites allowed');
+    if (blockedDomains.length >= maxSites && toAdd.length > 0) {
+      const next = [toAdd[0]];
+      setBlockedDomains(next);
+      setCustomDomainInput('');
+      await saveSettings({ blockedDomains: next });
       return;
     }
-    const next = [...blockedDomains, ...toAdd];
+    if (blockedDomains.length + toAdd.length > maxSites) {
+      setAddError(maxSites === 1 ? 'Free plan: block 1 site only. Upgrade for more.' : 'Maximum 20 sites allowed');
+      return;
+    }
+    const next = [...blockedDomains, ...toAdd].slice(0, maxSites);
     setBlockedDomains(next);
     setCustomDomainInput('');
     await saveSettings({ blockedDomains: next });
@@ -181,7 +199,9 @@ export default function FocusModeSettingsSection({ onBack, embedded = false }: F
         <div className="bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-2xl p-6 sm:p-8">
           <h2 className="text-xl font-bold text-stone-800 dark:text-stone-100 mb-2">Focus Mode Settings</h2>
           <p className="text-stone-600 dark:text-stone-400 text-sm mb-6">
-            Block distracting sites until you answer study questions. Configure how many questions and how many you need correct to unlock.
+            {isPaidUser
+              ? 'Block distracting sites until you answer study questions. Configure how many questions and how many you need correct to unlock.'
+              : 'Block 1 site until you answer study questions. Customize questions and unlock duration below. Upgrade for more sites.'}
           </p>
 
           {/* Sites to block */}
@@ -243,6 +263,28 @@ export default function FocusModeSettingsSection({ onBack, embedded = false }: F
             {blockedDomains.length > 0 && (
               <p className="text-sm text-stone-500 mt-3">
                 Blocked: {blockedDomains.join(', ')}
+                {!isPaidUser && (
+                  <span>
+                    {' '}(Free: 1 site max —{' '}
+                    {onNavigate ? (
+                      <button
+                        type="button"
+                        onClick={() => onNavigate('pricing')}
+                        className="text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 font-medium underline underline-offset-1"
+                      >
+                        Upgrade for more sites
+                      </button>
+                    ) : (
+                      <a
+                        href="/pricing"
+                        className="text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 font-medium"
+                      >
+                        Upgrade for more sites
+                      </a>
+                    )}
+                    )
+                  </span>
+                )}
               </p>
             )}
           </div>
