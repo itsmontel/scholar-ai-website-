@@ -1004,24 +1004,6 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
               Block distracting sites until you answer study questions.
               <span className="block mt-1 text-white/70 font-medium">No scroll until you&apos;ve studied.</span>
             </p>
-            
-            {/* Stats bar */}
-            <div className="inline-flex flex-wrap justify-center gap-6 sm:gap-10 px-6 py-4 bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10">
-              <div className="text-center">
-                <div className="text-2xl sm:text-3xl font-black text-white">2.4x</div>
-                <div className="text-xs sm:text-sm text-violet-300/80">More productive</div>
-              </div>
-              <div className="hidden sm:block w-px bg-white/10" />
-              <div className="text-center">
-                <div className="text-2xl sm:text-3xl font-black text-white">45min</div>
-                <div className="text-xs sm:text-sm text-violet-300/80">Avg. focus gained/day</div>
-              </div>
-              <div className="hidden sm:block w-px bg-white/10" />
-              <div className="text-center">
-                <div className="text-2xl sm:text-3xl font-black text-white">12K+</div>
-                <div className="text-xs sm:text-sm text-violet-300/80">Students focusing</div>
-              </div>
-            </div>
           </div>
 
           {/* Video - hero showcase (non-paid only) */}
@@ -1068,8 +1050,8 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   </div>
                   <div className="p-6 sm:p-8">
                     <div className="flex items-center gap-2 mb-3">
-                      <h4 className="text-xl font-bold text-white">Pick Sites to Block</h4>
                       <span className="w-10 h-10 rounded-xl bg-violet-500/90 backdrop-blur-sm flex items-center justify-center text-white font-black text-lg shadow-lg flex-shrink-0">1</span>
+                      <h4 className="text-xl font-bold text-white">Pick Sites to Block</h4>
                     </div>
                     <p className="text-violet-200/80 leading-relaxed">
                       YouTube, TikTok, Instagram, Reddit — or add any custom domain. You&apos;re in control.
@@ -1095,8 +1077,8 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   </div>
                   <div className="p-6 sm:p-8">
                     <div className="flex items-center gap-2 mb-3">
-                      <h4 className="text-xl font-bold text-white">Answer to Unlock</h4>
                       <span className="w-10 h-10 rounded-xl bg-purple-500/90 backdrop-blur-sm flex items-center justify-center text-white font-black text-lg shadow-lg flex-shrink-0">2</span>
+                      <h4 className="text-xl font-bold text-white">Answer to Unlock</h4>
                     </div>
                     <p className="text-violet-200/80 leading-relaxed">
                       Try visiting a blocked site → face a quick quiz from your own notes. Knowledge is the key.
@@ -1122,8 +1104,8 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   </div>
                   <div className="p-6 sm:p-8">
                     <div className="flex items-center gap-2 mb-3">
-                      <h4 className="text-xl font-bold text-white">Enjoy Your Break</h4>
                       <span className="w-10 h-10 rounded-xl bg-fuchsia-500/90 backdrop-blur-sm flex items-center justify-center text-white font-black text-lg shadow-lg flex-shrink-0">3</span>
+                      <h4 className="text-xl font-bold text-white">Enjoy Your Break</h4>
                     </div>
                     <p className="text-violet-200/80 leading-relaxed">
                       Site unlocks for 15 min to 24 hours — you choose. Time&apos;s up? Study again to earn more.
@@ -1172,27 +1154,6 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
             </div>
           </div>
 
-          {/* Features - premium grid */}
-          <div className="mb-20">
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-              {[
-                { icon: '🌐', label: 'Chrome Extension', desc: 'Works in your browser' },
-                { icon: '⏱️', label: 'Custom Timer', desc: '15 min to 24 hours' },
-                { icon: '📚', label: 'Your Notes', desc: 'Questions from your material' },
-                { icon: '🔗', label: 'Block Any Site', desc: 'Custom domains too' },
-              ].map((f) => (
-                <div key={f.label} className="group relative">
-                  <div className="absolute -inset-1 bg-gradient-to-br from-violet-500/20 to-purple-500/20 rounded-2xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  <div className="relative flex flex-col items-center text-center p-5 sm:p-6 rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 group-hover:border-violet-400/30 group-hover:bg-white/10 transition-all duration-300">
-                    <span className="text-3xl sm:text-4xl mb-3">{f.icon}</span>
-                    <span className="text-white font-bold mb-1">{f.label}</span>
-                    <span className="text-violet-300/70 text-sm">{f.desc}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
           {/* Testimonial */}
           <div className="mb-16">
             <div className="max-w-2xl mx-auto text-center">
@@ -1231,7 +1192,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
               </button>
             </div>
             <p className="mt-6 text-violet-300/80 text-sm">
-              Available with Pro &amp; Premium plans • Chrome extension required
+              Chrome extension required
             </p>
           </div>
         </div>

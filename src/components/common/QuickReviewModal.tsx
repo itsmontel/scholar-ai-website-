@@ -298,6 +298,10 @@ const QuickReviewModal = ({ userName, userId, onComplete, onSkip }: QuickReviewM
   }, [currentIndex, reviewItems.length]);
 
   const handleClose = () => {
+    if (userId) {
+      const today = new Date().toDateString();
+      localStorage.setItem(`writescholar_quick_review_last_shown_${userId}`, today);
+    }
     setIsVisible(false);
     setTimeout(() => {
       onComplete();
@@ -305,6 +309,10 @@ const QuickReviewModal = ({ userName, userId, onComplete, onSkip }: QuickReviewM
   };
 
   const handleSkip = () => {
+    if (userId) {
+      const today = new Date().toDateString();
+      localStorage.setItem(`writescholar_quick_review_last_shown_${userId}`, today);
+    }
     setIsVisible(false);
     setTimeout(() => {
       onSkip();
