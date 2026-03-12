@@ -14,6 +14,7 @@ interface TutorialStep {
   body: string;
   emoji: string;
   targetSelector: string | null;
+  mobileTargetSelector?: string;
   mascotPose: MascotPose;
   interactSelector?: string;
   spotlightPadding?: number;
@@ -108,6 +109,7 @@ const STEPS: TutorialStep[] = [
     body: "Every day you use WriteScholar, your streak grows. It tracks your consistency and unlocks badges along the way. Try to keep it going. Consistency beats cramming every time!",
     emoji: '🔥',
     targetSelector: '[data-tutorial="streak-widget"]',
+    mobileTargetSelector: '[data-tutorial="streak-widget-mobile"]',
     mascotPose: 'celebrating',
   },
   {
@@ -116,6 +118,7 @@ const STEPS: TutorialStep[] = [
     body: "Each day you come back, Quick Review quizzes you on things you've studied before using spaced repetition. It only takes a minute and makes sure knowledge actually sticks long-term.",
     emoji: '🧠',
     targetSelector: '[data-tutorial="quick-review-btn"]',
+    mobileTargetSelector: '[data-tutorial="quick-review-btn-mobile"]',
     mascotPose: 'studying',
   },
   {
@@ -124,6 +127,7 @@ const STEPS: TutorialStep[] = [
     body: "Add your classmates and friends here! You can share study materials with each other, see their current streak, and keep each other motivated. Studying together > studying alone.",
     emoji: '👥',
     targetSelector: '[data-tutorial="friends-btn"]',
+    mobileTargetSelector: '[data-tutorial="friends-btn-mobile"]',
     mascotPose: 'waving',
   },
   {
@@ -132,6 +136,7 @@ const STEPS: TutorialStep[] = [
     body: "Your recent quizzes, flashcards, analyses, citations, and lessons appear here. Use it to quickly revisit, re-study, or export what you've created lately.",
     emoji: '📁',
     targetSelector: '[data-tutorial="saved-materials"]',
+    mobileTargetSelector: '[data-tutorial="saved-btn-mobile"]',
     mascotPose: 'pointing',
     spotlightPadding: 10,
   },
@@ -332,14 +337,24 @@ const InteractiveTutorial = ({ userName, onComplete }: InteractiveTutorialProps)
   const [exiting, setExiting] = useState(false);
   const [confettiTrigger, setConfettiTrigger] = useState(-1);
   const [tooltipH, setTooltipH] = useState(260);
+  const [isMobile, setIsMobile] = useState(false);
   const prevStepRef = useRef(-1);
   const tooltipRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 1024);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const current = STEPS[step];
   const total = STEPS.length;
   const isFirst = step === 0;
   const isLast = step === total - 1;
   const padding = current.spotlightPadding ?? 16;
+
+  const effectiveSelector = (isMobile && current.mobileTargetSelector) ? current.mobileTargetSelector : current.targetSelector;
 
   const confettiCanvas = useConfetti(confettiTrigger);
   const smoothRect = useSmoothRect(rawRect, 600);
@@ -359,15 +374,15 @@ const InteractiveTutorial = ({ userName, onComplete }: InteractiveTutorialProps)
 
   /* ── Track target element rect ── */
   const updateRect = useCallback(() => {
-    if (!current.targetSelector) { setRawRect(null); return; }
-    const el = document.querySelector(current.targetSelector);
+    if (!effectiveSelector) { setRawRect(null); return; }
+    const el = document.querySelector(effectiveSelector);
     if (el) {
       const r = el.getBoundingClientRect();
       setRawRect({ x: r.left, y: r.top, w: r.width, h: r.height });
     } else {
       setRawRect(null);
     }
-  }, [current.targetSelector]);
+  }, [effectiveSelector]);
 
   useEffect(() => {
     updateRect();
@@ -383,13 +398,13 @@ const InteractiveTutorial = ({ userName, onComplete }: InteractiveTutorialProps)
 
   /* ── Scroll into view ── */
   useEffect(() => {
-    if (!current.targetSelector) return;
-    const el = document.querySelector(current.targetSelector);
+    if (!effectiveSelector) return;
+    const el = document.querySelector(effectiveSelector);
     if (el) {
       el.scrollIntoView({ behavior: 'smooth', block: 'center' });
       [400, 700, 1000].forEach(d => setTimeout(updateRect, d));
     }
-  }, [step]);
+  }, [step, effectiveSelector]);
 
   /* ── Content key for crossfade ── */
   useEffect(() => { setContentKey(k => k + 1); }, [step]);

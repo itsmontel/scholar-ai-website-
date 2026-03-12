@@ -2141,7 +2141,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
           {/* RIGHT MAIN CONTENT */}
           <div className="order-1 lg:order-2 min-w-0 pt-4 sm:pt-10 overflow-visible">
             {/* Mobile Header: Compact streak + Badge widget */}
-            <div className="flex items-stretch gap-2 mb-4 lg:hidden">
+            <div className="flex items-stretch gap-2 mb-4 lg:hidden" data-tutorial="streak-widget-mobile">
               <StreakWidget compact />
               <div className="flex-1 min-w-0">
                 <BadgeWidget onNavigate={onNavigate} mobileExpanded />
@@ -2237,6 +2237,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                   <div className="mt-4 lg:hidden flex flex-wrap gap-2">
                     <button
                       onClick={() => setShowQuickReview(true)}
+                      data-tutorial="quick-review-btn-mobile"
                       className="flex-1 min-w-[7rem] flex items-center justify-center gap-2 px-3 py-3 bg-gradient-to-r from-violet-500 to-purple-600 rounded-xl shadow-md shadow-violet-500/20 text-white font-semibold text-sm active:scale-[0.98] transition-all"
                     >
                       <span className="text-lg">🧠</span>
@@ -2244,6 +2245,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                     </button>
                     <button
                       onClick={() => onNavigate('friends')}
+                      data-tutorial="friends-btn-mobile"
                       className="relative flex-1 min-w-[7rem] flex items-center justify-center gap-2 px-3 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-xl shadow-md shadow-emerald-500/20 text-white font-semibold text-sm active:scale-[0.98] transition-all"
                     >
                       <span className="text-lg">👥</span>
@@ -2256,7 +2258,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                     </button>
                     <button
                       onClick={() => onNavigate('quiz-history')}
-                      data-tutorial="saved-btn"
+                      data-tutorial="saved-btn-mobile"
                       className="flex-1 min-w-[7rem] flex items-center justify-center gap-2 px-3 py-3 bg-gradient-to-r from-amber-500 to-orange-500 rounded-xl shadow-md shadow-amber-500/20 text-white font-semibold text-sm active:scale-[0.98] transition-all"
                     >
                       <span className="text-lg">📁</span>
