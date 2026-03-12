@@ -170,9 +170,11 @@ const AnalysisAnimation: React.FC<AnalysisAnimationProps> = ({
             {/* Progress bar */}
             <div className="w-full bg-gray-100 rounded-full h-3 mb-3 overflow-hidden">
               <div 
-                className={`h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full transition-all duration-300 ease-out ${
-                  isCycling ? 'animate-pulse' : ''
-                }`}
+                className={`h-full rounded-full transition-all duration-300 ease-out ${
+                  variant === 'studyPack'
+                    ? 'bg-gradient-to-r from-amber-500 to-orange-500'
+                    : 'bg-gradient-to-r from-blue-500 to-indigo-500'
+                } ${isCycling ? 'animate-pulse' : ''}`}
                 style={{ width: `${Math.min(progress, 100)}%` }}
               />
             </div>
@@ -186,8 +188,10 @@ const AnalysisAnimation: React.FC<AnalysisAnimationProps> = ({
             </div>
 
             {/* Helpful tip */}
-            <div className="mt-6 px-4 py-3 bg-blue-50 rounded-xl border border-blue-100 w-full">
-              <p className="text-sm text-blue-700 text-center">
+            <div className={`mt-6 px-4 py-3 rounded-xl w-full ${
+              variant === 'studyPack' ? 'bg-amber-50 border border-amber-100' : 'bg-blue-50 border border-blue-100'
+            }`}>
+              <p className={`text-sm text-center ${variant === 'studyPack' ? 'text-amber-800' : 'text-blue-700'}`}>
                 {variant === 'citations'
                   ? '💡 Tip: We search millions of peer-reviewed sources in your citation style.'
                   : variant === 'lesson'

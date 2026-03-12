@@ -277,7 +277,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
             <div className="flex items-center gap-2 sm:gap-3 min-w-0 shrink-0">
               <button 
                 onClick={() => onNavigate?.('login')} 
-                className="hidden sm:inline-flex px-5 py-2.5 text-sm font-semibold text-stone-600 dark:text-stone-300 hover:text-stone-900 dark:hover:text-white rounded-full hover:bg-stone-100 dark:hover:bg-stone-800 transition-all duration-300 shrink-0"
+                className="hidden sm:inline-flex px-4 py-2 text-sm font-medium text-stone-600 dark:text-stone-400 rounded-full border border-stone-200/50 dark:border-stone-700/50 bg-stone-100/50 dark:bg-stone-800/50 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-200/50 dark:hover:bg-stone-700/50 transition-all duration-300 shrink-0"
               >
                 Log in
               </button>
@@ -367,7 +367,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
               <div className="pt-2 pb-1 flex flex-col gap-2">
                 <button 
                   onClick={() => { onNavigate?.('login'); setIsMobileMenuOpen(false); }} 
-                  className="block text-center px-4 py-3 text-sm font-medium text-stone-600 dark:text-stone-400 rounded-xl border border-stone-200 dark:border-stone-700 hover:bg-stone-100 dark:hover:bg-stone-800 transition-all"
+                  className="block text-center px-4 py-3 text-sm font-medium text-stone-600 dark:text-stone-400 rounded-full border border-stone-200/50 dark:border-stone-700/50 bg-stone-100/50 dark:bg-stone-800/50 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-200/50 dark:hover:bg-stone-700/50 transition-all"
                 >
                   Log in
                 </button>

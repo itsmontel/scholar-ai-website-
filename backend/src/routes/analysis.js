@@ -2396,6 +2396,7 @@ router.post('/generate-study-pack', authenticateToken, async (req, res) => {
     }
 
     const pack = await aiAnalysisService.generateStudyPack(text, userPlan);
+    pack.originalNotes = text.trim();
 
     supabase.from('quiz_usage').insert({
       user_id: userId,
@@ -2421,6 +2422,7 @@ router.post('/generate-study-pack', authenticateToken, async (req, res) => {
         crossword: pack.crossword,
         lesson: pack.lesson,
         craterBlast: pack.craterBlast,
+        originalNotes: pack.originalNotes,
       },
       source_word_count: wordCount,
       created_at: new Date().toISOString(),

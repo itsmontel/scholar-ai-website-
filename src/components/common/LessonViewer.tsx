@@ -17,6 +17,10 @@ interface LessonViewerProps {
   onEnlarge?: (state?: { slideIndex?: number }) => void;
   /** Restore position when returning from full screen */
   initialSlideIndex?: number;
+  /** When true and on last slide, shows Try Quiz button to switch to quiz section */
+  hasQuiz?: boolean;
+  /** Called when user clicks Try Quiz (e.g. to switch to quiz tab in study pack) */
+  onTryQuiz?: () => void;
 }
 
 const getSlideIcon = (type?: LessonSlide['type']) => {
@@ -55,7 +59,7 @@ const getSlideBackground = (type?: LessonSlide['type']) => {
   }
 };
 
-const LessonViewer = ({ slides, title, onEnlarge, initialSlideIndex }: LessonViewerProps) => {
+const LessonViewer = ({ slides, title, onEnlarge, initialSlideIndex, hasQuiz, onTryQuiz }: LessonViewerProps) => {
   const [currentSlide, setCurrentSlide] = useState(() => {
     if (initialSlideIndex == null || !slides?.length) return 0;
     return Math.min(Math.max(0, initialSlideIndex), slides.length - 1);
@@ -206,17 +210,27 @@ const LessonViewer = ({ slides, title, onEnlarge, initialSlideIndex }: LessonVie
         >
           <span>←</span> Previous
         </button>
-        <button
-          onClick={() => setCurrentSlide(Math.min(slides.length - 1, currentSlide + 1))}
-          disabled={currentSlide === slides.length - 1}
-          className={`px-4 py-2.5 rounded-xl font-semibold text-sm transition-all flex items-center gap-2 ${
-            currentSlide === slides.length - 1
-              ? 'bg-stone-100 dark:bg-stone-800 text-stone-400 cursor-not-allowed'
-              : 'bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 text-white shadow-lg shadow-violet-500/25'
-          }`}
-        >
-          Next <span>→</span>
-        </button>
+        {currentSlide === slides.length - 1 && hasQuiz && onTryQuiz ? (
+          <button
+            onClick={onTryQuiz}
+            className="px-4 py-2.5 rounded-xl font-semibold text-sm bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-white shadow-lg shadow-amber-500/25 transition-all flex items-center gap-2"
+          >
+            <span>Try Quiz</span>
+            <span>🎯</span>
+          </button>
+        ) : (
+          <button
+            onClick={() => setCurrentSlide(Math.min(slides.length - 1, currentSlide + 1))}
+            disabled={currentSlide === slides.length - 1}
+            className={`px-4 py-2.5 rounded-xl font-semibold text-sm transition-all flex items-center gap-2 ${
+              currentSlide === slides.length - 1
+                ? 'bg-stone-100 dark:bg-stone-800 text-stone-400 cursor-not-allowed'
+                : 'bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-white shadow-lg shadow-amber-500/25'
+            }`}
+          >
+            Next <span>→</span>
+          </button>
+        )}
       </div>
     </div>
   );

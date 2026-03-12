@@ -3233,7 +3233,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                 { icon: '🧩', label: 'Crossword' },
                 { icon: '💥', label: 'Crater Blast' },
               ].map((t) => (
-                <span key={t.label} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-violet-50 dark:bg-violet-900/20 border border-violet-200/60 dark:border-violet-700/40 text-violet-700 dark:text-violet-300 text-xs font-semibold">
+                <span key={t.label} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200/60 dark:border-amber-700/40 text-amber-700 dark:text-amber-300 text-xs font-semibold">
                   <span>{t.icon}</span> {t.label}
                 </span>
               ))}
@@ -3241,11 +3241,11 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
 
             {/* Exhausted generations banner for free users */}
             {quizExhausted && (
-              <div className="mb-4 sm:mb-6 bg-gradient-to-r from-violet-600 to-purple-600 dark:from-violet-700 dark:to-purple-700 rounded-xl sm:rounded-2xl p-4 sm:p-6 text-white text-center">
+              <div className="mb-4 sm:mb-6 bg-gradient-to-r from-amber-500 to-orange-600 dark:from-amber-600 dark:to-orange-700 rounded-xl sm:rounded-2xl p-4 sm:p-6 text-white text-center shadow-lg shadow-amber-500/25">
                 <span className="text-3xl sm:text-4xl mb-2 sm:mb-3 block">🔒</span>
                 <h3 className="text-lg sm:text-xl font-bold mb-1 sm:mb-2">Monthly Limit Reached</h3>
-                <p className="text-violet-100 dark:text-stone-200 mb-1 text-sm sm:text-base">You've used all {quizUsage.generationLimit} study pack generations this period. Upgrade for more!</p>
-                <p className="text-violet-200/90 text-xs sm:text-sm mb-3 sm:mb-4">{getResetsInText(quizUsage.daysUntilReset)}</p>
+                <p className="text-amber-100 dark:text-amber-100/90 mb-1 text-sm sm:text-base">You've used all {quizUsage.generationLimit} study pack generations this period. Upgrade for more!</p>
+                <p className="text-amber-200/90 text-xs sm:text-sm mb-3 sm:mb-4">{getResetsInText(quizUsage.daysUntilReset)}</p>
                 <button
                   onClick={() => onNavigate('pricing')}
                   className="w-full sm:w-auto px-5 sm:px-6 py-2 sm:py-2.5 bg-white dark:bg-stone-800 text-amber-700 dark:text-amber-400 font-semibold rounded-xl active:bg-stone-50 sm:hover:bg-stone-50 dark:sm:hover:bg-stone-700 transition-all inline-flex items-center justify-center gap-2 text-sm sm:text-base"
@@ -3257,23 +3257,23 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
 
             {/* Plan info banner */}
             {!isPremiumUser && !quizExhausted && (
-              <div className="mb-4 sm:mb-6 bg-gradient-to-r from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20 border border-violet-200 dark:border-violet-800/50 rounded-xl sm:rounded-2xl p-3 sm:p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-3">
+              <div className="mb-4 sm:mb-6 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border border-amber-200 dark:border-amber-800/50 rounded-xl sm:rounded-2xl p-3 sm:p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-3">
                 <div className="flex items-start sm:items-center gap-2 sm:gap-3">
                   <span className="text-xl sm:text-2xl">🧠</span>
                   <div className="min-w-0">
                     {isFreeUser ? (
                       <>
-                        <p className="text-violet-800 dark:text-violet-200 font-medium text-xs sm:text-sm">
+                        <p className="text-amber-800 dark:text-amber-200 font-medium text-xs sm:text-sm">
                           Free: {quizUsage.generationsRemaining}/{quizUsage.generationLimit} study packs • {(quizUsage.maxWordsPerGeneration || 5000).toLocaleString()} words max • {getResetsInText(quizUsage.daysUntilReset)}
                         </p>
-                        <p className="text-violet-600 dark:text-violet-400 text-[10px] sm:text-xs mt-0.5 line-clamp-2">Lesson, flashcards & quiz included • Crossword & Crater Blast unlock with Pro</p>
+                        <p className="text-amber-600 dark:text-amber-400 text-[10px] sm:text-xs mt-0.5 line-clamp-2">Lesson, flashcards & quiz included • Crossword & Crater Blast unlock with Pro</p>
                       </>
                     ) : (
-                      <p className="text-violet-800 dark:text-violet-200 font-medium text-xs sm:text-sm">Pro: {quizUsage.generationsRemaining}/{quizUsage.generationLimit} study packs remaining</p>
+                      <p className="text-amber-800 dark:text-amber-200 font-medium text-xs sm:text-sm">Pro: {quizUsage.generationsRemaining}/{quizUsage.generationLimit} study packs remaining</p>
                     )}
                   </div>
                 </div>
-                <button onClick={() => onNavigate('pricing')} className="w-full sm:w-auto px-3 sm:px-4 py-1.5 bg-violet-600 text-white text-xs font-semibold rounded-lg sm:rounded-xl active:bg-violet-700 sm:hover:bg-violet-500 transition-all flex-shrink-0">
+                <button onClick={() => onNavigate('pricing')} className="w-full sm:w-auto px-3 sm:px-4 py-1.5 bg-gradient-to-r from-amber-500 to-orange-600 text-white text-xs font-semibold rounded-lg sm:rounded-xl active:from-amber-600 active:to-orange-700 sm:hover:from-amber-400 sm:hover:to-orange-500 transition-all flex-shrink-0">
                   Upgrade
                 </button>
               </div>
@@ -3287,9 +3287,9 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
             )}
 
             {/* ============ UNIFIED STUDY PACK INPUT ============ */}
-            <div className="relative rounded-2xl sm:rounded-3xl shadow-xl overflow-hidden mb-6">
-              <div className="bg-white dark:bg-stone-800 rounded-2xl sm:rounded-3xl border border-violet-200/60 dark:border-violet-700/40">
-                <div className="bg-gradient-to-r from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20 border-b border-violet-200/60 dark:border-violet-700/40 px-4 sm:px-5 py-3 sm:py-4 flex items-center justify-between">
+            <div className="relative rounded-2xl sm:rounded-3xl shadow-xl shadow-amber-500/10 overflow-hidden mb-6">
+              <div className="bg-white dark:bg-stone-800 rounded-2xl sm:rounded-3xl border border-amber-200/60 dark:border-amber-700/40">
+                <div className="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border-b border-amber-200/60 dark:border-amber-700/40 px-4 sm:px-5 py-3 sm:py-4 flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span className="text-lg">📚</span>
                     <span className="font-bold text-sm text-stone-800 dark:text-stone-100">Paste your notes or study material</span>
@@ -3298,7 +3298,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                     <button
                       onClick={() => studyToolsFileInputRef.current?.click()}
                       disabled={isParsingStudyDoc || isGeneratingStudyPack}
-                      className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 hover:bg-violet-200 dark:hover:bg-violet-900/50 transition-colors disabled:opacity-50"
+                      className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 hover:bg-amber-200 dark:hover:bg-amber-900/50 transition-colors disabled:opacity-50"
                     >
                       {isParsingStudyDoc ? 'Parsing...' : 'Upload file'}
                     </button>
@@ -3326,7 +3326,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                   <button
                     onClick={handleGenerateStudyPack}
                     disabled={isGeneratingStudyPack || quizExhausted || getWordCount(inputText) < 50}
-                    className="w-full sm:w-auto px-6 py-3 rounded-xl bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 disabled:from-stone-400 disabled:to-stone-500 text-white font-bold text-sm shadow-lg shadow-violet-500/25 hover:shadow-xl transition-all active:scale-[0.98] disabled:active:scale-100 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    className="w-full sm:w-auto px-6 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 disabled:from-stone-400 disabled:to-stone-500 text-white font-bold text-sm shadow-lg shadow-amber-500/25 hover:shadow-xl transition-all active:scale-[0.98] disabled:active:scale-100 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
                     {isGeneratingStudyPack ? (
                       <>

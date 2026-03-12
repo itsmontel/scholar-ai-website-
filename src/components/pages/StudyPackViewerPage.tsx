@@ -8,6 +8,7 @@ import CraterBlastViewer from '../common/CraterBlastViewer';
 import ScholarMascot from '../common/ScholarMascot';
 
 const TABS = [
+  { key: 'notes', label: 'Original Notes', icon: '📄', proOnly: false },
   { key: 'lesson', label: 'Lesson', icon: '📖', proOnly: false },
   { key: 'flashcards', label: 'Flashcards', icon: '🃏', proOnly: false },
   { key: 'quiz', label: 'Quiz', icon: '📝', proOnly: false },
@@ -31,7 +32,12 @@ interface StudyPackViewerPageProps {
 
 const StudyPackViewerPage = ({ onNavigate, user, onLogout, initialData }: StudyPackViewerPageProps) => {
   const [pack, setPack] = useState<{ data: any; title: string } | null>(initialData || null);
-  const [activeTab, setActiveTab] = useState<TabKey>('lesson');
+  const [activeTab, setActiveTab] = useState<TabKey>(() => {
+    try {
+      const data = initialData?.data ?? (() => { const r = sessionStorage.getItem(STORAGE_KEY); return r ? JSON.parse(r)?.data : null; })();
+      return data?.originalNotes ? 'notes' : 'lesson';
+    } catch { return 'lesson'; }
+  });
   const [returnState, setReturnState] = useState<Record<string, number> | null>(null);
 
   useEffect(() => {
@@ -157,7 +163,7 @@ const StudyPackViewerPage = ({ onNavigate, user, onLogout, initialData }: StudyP
           <p className="text-stone-500 dark:text-stone-400 mt-2">Open a study pack from your Recents or generate one from the dashboard.</p>
           <button
             onClick={() => onNavigate('dashboard')}
-            className="mt-6 px-6 py-3 bg-gradient-to-r from-violet-500 to-purple-600 text-white font-semibold rounded-xl hover:from-violet-600 hover:to-purple-700 transition-all"
+            className="mt-6 px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white font-semibold rounded-xl hover:from-amber-400 hover:to-orange-500 transition-all shadow-lg shadow-amber-500/25"
           >
             Go to Dashboard
           </button>
@@ -166,7 +172,7 @@ const StudyPackViewerPage = ({ onNavigate, user, onLogout, initialData }: StudyP
     );
   }
 
-  const hasData = (key: TabKey) => !!pack.data[key];
+  const hasData = (key: TabKey) => key === 'notes' ? !!pack.data?.originalNotes : !!pack.data[key];
   const packTitle = pack.title || pack.data.quiz?.title || pack.data.flashcards?.title || pack.data.lesson?.title || 'Study Pack';
   const flashcardCards = pack.data.flashcards?.cards?.map((c: any, i: number) => ({
     id: `card-${i}`,
@@ -211,15 +217,15 @@ const StudyPackViewerPage = ({ onNavigate, user, onLogout, initialData }: StudyP
                 disabled={!has}
                 className={`flex-shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium text-sm transition-all ${
                   active
-                    ? 'bg-gradient-to-r from-violet-500 to-purple-600 text-white shadow-lg shadow-violet-500/25'
+                    ? 'bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-lg shadow-amber-500/25'
                     : has
-                      ? 'bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-700 dark:text-stone-300 hover:border-violet-300'
+                      ? 'bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-700 dark:text-stone-300 hover:border-amber-300'
                       : 'bg-stone-100 dark:bg-stone-800 text-stone-400 cursor-not-allowed'
                 }`}
               >
                 <span>{tab.icon}</span>
                 <span>{tab.label}</span>
-                {locked && has && <span className="text-[10px] px-1.5 py-0.5 rounded bg-violet-500/20 text-violet-600 dark:text-violet-400">Pro</span>}
+                {locked && has && <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-700 dark:text-amber-400">Pro</span>}
               </button>
             );
           })}
@@ -227,12 +233,26 @@ const StudyPackViewerPage = ({ onNavigate, user, onLogout, initialData }: StudyP
 
         {/* Content area */}
         <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 shadow-lg overflow-hidden min-h-[400px]">
+          {activeTab === 'notes' && hasData('notes') && (
+            <div className="p-4 sm:p-6 flex flex-col min-h-0 h-full">
+              <div className="flex items-center justify-between mb-4 flex-shrink-0">
+                <span className="text-sm font-medium text-stone-500 dark:text-stone-400">Your original study material</span>
+              </div>
+              <div className="flex-1 min-h-0 overflow-auto rounded-xl bg-stone-50 dark:bg-stone-900/50 border border-stone-200 dark:border-stone-600 p-4 sm:p-6">
+                <p className="text-stone-700 dark:text-stone-300 text-sm sm:text-base leading-relaxed whitespace-pre-wrap break-words" style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}>
+                  {pack.data.originalNotes}
+                </p>
+              </div>
+            </div>
+          )}
           {activeTab === 'lesson' && hasData('lesson') && !isLocked('lesson') && (
             <LessonViewer
               slides={pack.data.lesson?.slides ?? []}
               title={pack.data.lesson?.title || packTitle}
               onEnlarge={(state) => handleOpenFull('lesson', state)}
               initialSlideIndex={returnState?.slideIndex}
+              hasQuiz={hasData('quiz')}
+              onTryQuiz={() => setActiveTab('quiz')}
             />
           )}
           {activeTab === 'flashcards' && hasData('flashcards') && !isLocked('flashcards') && (
@@ -267,7 +287,8 @@ const StudyPackViewerPage = ({ onNavigate, user, onLogout, initialData }: StudyP
               onEnlarge={() => handleOpenFull('craterBlast')}
             />
           )}
-          {(activeTab !== 'lesson' || isLocked('lesson') || !hasData('lesson')) &&
+          {(activeTab !== 'notes' || !hasData('notes')) &&
+           (activeTab !== 'lesson' || isLocked('lesson') || !hasData('lesson')) &&
            (activeTab !== 'flashcards' || isLocked('flashcards') || !hasData('flashcards')) &&
            (activeTab !== 'quiz' || isLocked('quiz') || !hasData('quiz')) &&
            (activeTab !== 'crossword' || isLocked('crossword') || !hasData('crossword')) &&
@@ -275,14 +296,14 @@ const StudyPackViewerPage = ({ onNavigate, user, onLogout, initialData }: StudyP
             <div className="p-8 sm:p-12 flex flex-col items-center justify-center min-h-[400px] text-center">
               {isLocked(activeTab) ? (
                 <>
-                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-r from-violet-100 to-purple-100 dark:from-violet-900/40 dark:to-purple-900/40 flex items-center justify-center text-4xl mb-4">
+                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-r from-amber-100 to-orange-100 dark:from-amber-900/40 dark:to-orange-900/40 flex items-center justify-center text-4xl mb-4">
                     {TABS.find(t => t.key === activeTab)?.icon}
                   </div>
                   <h3 className="text-lg font-bold text-stone-800 dark:text-stone-100 mb-2">{TABS.find(t => t.key === activeTab)?.label} is a Pro feature</h3>
                   <p className="text-stone-500 dark:text-stone-400 text-sm mb-6">Upgrade to unlock crosswords and Crater Blast.</p>
                   <button
                     onClick={() => onNavigate('pricing')}
-                    className="px-6 py-3 bg-gradient-to-r from-violet-500 to-purple-600 text-white font-semibold rounded-xl hover:from-violet-600 hover:to-purple-700 transition-all"
+                    className="px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white font-semibold rounded-xl hover:from-amber-400 hover:to-orange-500 transition-all shadow-lg shadow-amber-500/25"
                   >
                     Upgrade to Pro
                   </button>
@@ -307,7 +328,7 @@ const StudyPackViewerPage = ({ onNavigate, user, onLogout, initialData }: StudyP
                 </>
               ) : hasData(activeTab) ? (
                 <>
-                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-r from-violet-100 to-purple-100 dark:from-violet-900/40 dark:to-purple-900/40 flex items-center justify-center text-4xl mb-4">
+                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-r from-amber-100 to-orange-100 dark:from-amber-900/40 dark:to-orange-900/40 flex items-center justify-center text-4xl mb-4">
                     {TABS.find(t => t.key === activeTab)?.icon}
                   </div>
                   <h3 className="text-lg font-bold text-stone-800 dark:text-stone-100 mb-2">Open {TABS.find(t => t.key === activeTab)?.label}</h3>
@@ -320,7 +341,7 @@ const StudyPackViewerPage = ({ onNavigate, user, onLogout, initialData }: StudyP
                   </p>
                   <button
                     onClick={() => handleOpenFull(activeTab)}
-                    className="px-6 py-3 bg-gradient-to-r from-violet-500 to-purple-600 text-white font-semibold rounded-xl hover:from-violet-600 hover:to-purple-700 transition-all flex items-center gap-2"
+                    className="px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white font-semibold rounded-xl hover:from-amber-400 hover:to-orange-500 transition-all shadow-lg shadow-amber-500/25 flex items-center gap-2"
                   >
                     <span>Open {TABS.find(t => t.key === activeTab)?.label}</span>
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>

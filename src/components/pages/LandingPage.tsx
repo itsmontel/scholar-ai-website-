@@ -444,8 +444,8 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
       <main className="min-h-screen relative transition-colors font-sans overflow-x-hidden" role="main">
       {/* HERO SECTION - Fun, Gen Z, full of energy */}
       <section className="relative min-h-[70vh] sm:min-h-[85vh] flex flex-col overflow-hidden">
-        {/* Background - soft tint */}
-        <div className="absolute inset-0 bg-gradient-to-b from-violet-50/60 via-violet-50/35 to-white dark:from-stone-950 dark:via-stone-900/95 dark:to-stone-900" />
+        {/* Background - soft violet tint, ends crisp at white for section break */}
+        <div className="absolute inset-0 bg-gradient-to-b from-violet-100/90 via-violet-50/55 to-white dark:from-stone-950 dark:via-stone-900/95 dark:to-stone-900" />
         
         {/* Floating shapes for mobile - adds depth like dashboard */}
         <div className="absolute top-[12%] left-[8%] w-12 h-12 rounded-2xl bg-gradient-to-br from-rose-400/20 to-pink-500/20 rotate-12 lg:hidden animate-float pointer-events-none" />
@@ -822,8 +822,8 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
       </section>
 
       {/* See WriteScholar in Action - Study Tools Showcase (Turn Your Notes Into) */}
-      <section className="relative py-12 sm:py-28 overflow-hidden max-lg:bg-gradient-to-b max-lg:from-violet-50/60 max-lg:via-white max-lg:to-stone-50 dark:max-lg:from-violet-950/25 dark:max-lg:via-stone-900 dark:max-lg:to-stone-900 bg-white dark:bg-stone-900">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-10%,rgba(99,102,241,0.08),transparent)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-10%,rgba(139,92,246,0.06),transparent)] max-lg:bg-[radial-gradient(ellipse_100%_60%_at_50%_0%,rgba(139,92,246,0.12),transparent_70%)] max-lg:dark:bg-[radial-gradient(ellipse_100%_60%_at_50%_0%,rgba(139,92,246,0.08),transparent_70%)]" />
+      <section className="relative py-12 sm:py-28 overflow-hidden bg-stone-50 dark:bg-stone-900">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-10%,rgba(99,102,241,0.06),transparent)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-10%,rgba(139,92,246,0.04),transparent)] lg:bg-[radial-gradient(ellipse_70%_40%_at_50%_10%,rgba(120,113,108,0.05),transparent)]" />
         <div className="absolute top-24 left-[5%] hidden xl:block text-5xl opacity-40 animate-float">📚</div>
         <div className="absolute top-40 right-[8%] hidden xl:block text-4xl opacity-35 animate-float-delayed">✏️</div>
         <div className="absolute bottom-40 left-[7%] hidden xl:block text-4xl opacity-35 animate-float" style={{ animationDelay: '0.7s' }}>🎯</div>

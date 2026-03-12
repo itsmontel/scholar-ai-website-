@@ -1065,7 +1065,7 @@ One click = 3 unique lessons!
                       className="ml-auto px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-medium text-sm shadow-md shadow-emerald-500/20 transition-all flex items-center gap-2 shrink-0"
                     >
                       <span>🎯</span>
-                      <span>Take Quiz</span>
+                      <span>Try quiz</span>
                     </button>
                   )}
                 </div>
@@ -1277,20 +1277,12 @@ One click = 3 unique lessons!
                 </button>
                 
                 {currentSlide === lessonResult.slides.length - 1 ? (
-                  lessonResult.quizBank && lessonResult.quizBank.length > 0 ? (
+                  lessonResult.quizBank && lessonResult.quizBank.length > 0 && (
                     <button
                       onClick={startQuiz}
                       className="px-4 sm:px-6 py-3 rounded-xl font-semibold text-sm bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white shadow-lg shadow-emerald-500/30 transition-all flex items-center gap-2 shrink-0"
                     >
-                      <span>Take the Quiz!</span>
-                      <span>🎯</span>
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => onNavigate('quiz-generator')}
-                      className="px-4 sm:px-6 py-3 rounded-xl font-semibold text-sm bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white shadow-lg shadow-emerald-500/30 transition-all flex items-center gap-2 shrink-0"
-                    >
-                      <span>Create a Quiz</span>
+                      <span>Try quiz</span>
                       <span>🎯</span>
                     </button>
                   )

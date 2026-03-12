@@ -85,6 +85,7 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
     day: ''
   });
   const [citation, setCitation] = useState('');
+  const [validationError, setValidationError] = useState<string | null>(null);
 
   // SEO: Set page title and meta description
   useEffect(() => {
@@ -100,110 +101,186 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const formatAuthorsAPA = (authors: string) => {
-    const authorList = authors.split(',').map(a => a.trim()).filter(Boolean);
-    if (authorList.length === 0) return '';
-    if (authorList.length === 1) {
-      const parts = authorList[0].split(' ');
-      if (parts.length >= 2) {
-        const lastName = parts[parts.length - 1];
-        const initials = parts.slice(0, -1).map(n => n[0]?.toUpperCase() + '.').join(' ');
-        return `${lastName}, ${initials}`;
+  const SUFFIXES = /^(Jr\.?|Sr\.?|II|III|IV|V|Ph\.?D\.?|M\.?D\.?|Esq\.?)$/i;
+  const CORPORATE_SUFFIXES = /\b(organization|association|committee|institute|department|university|commission|bureau|society|council|foundation|administration|service|agency|authority|office|division|board|group|inc\.?|ltd\.?|corp\.?|co\.?)\s*$/i;
+
+  const isCorporateAuthor = (name: string): boolean => {
+    const t = name.trim();
+    if (!t || t.includes(',')) return false;
+    return CORPORATE_SUFFIXES.test(t);
+  };
+
+  const parseAuthorName = (name: string): { lastName: string; firstParts: string[]; suffix?: string; isCorporate: boolean } => {
+    const t = name.trim();
+    if (!t) return { lastName: '', firstParts: [], isCorporate: false };
+    if (isCorporateAuthor(t)) return { lastName: t, firstParts: [], isCorporate: true };
+    const parts = t.split(/\s+/).filter(Boolean);
+    if (parts.length === 1) return { lastName: parts[0], firstParts: [], isCorporate: false };
+    if (t.includes(',') && t.split(',').length === 2) {
+      const [left, right] = t.split(',').map(s => s.trim());
+      if (left && right) {
+        const rightParts = right.split(/\s+/).filter(Boolean);
+        const lastRightPart = rightParts[rightParts.length - 1];
+        if (rightParts.length >= 2 && SUFFIXES.test(lastRightPart)) {
+          return { lastName: left, firstParts: rightParts.slice(0, -1), suffix: lastRightPart, isCorporate: false };
+        }
+        return { lastName: left, firstParts: rightParts, isCorporate: false };
       }
-      return authorList[0];
+    }
+    const last = parts[parts.length - 1];
+    const hasSuffix = SUFFIXES.test(last);
+    if (hasSuffix && parts.length >= 3) {
+      return { lastName: parts[parts.length - 2], firstParts: parts.slice(0, -2), suffix: last, isCorporate: false };
+    }
+    return { lastName: parts[parts.length - 1], firstParts: parts.slice(0, -1), isCorporate: false };
+  };
+
+  const formatInitialsAPA = (firstParts: string[]): string => {
+    return firstParts.map(p => {
+      if (p.includes('-')) {
+        const subParts = p.split('-').filter(Boolean);
+        return subParts.map(s => s[0]?.toUpperCase() + '.').join('-');
+      }
+      return p[0]?.toUpperCase() + '.';
+    }).join(' ');
+  };
+
+  const authorSplit = (s: string): string[] => {
+    const t = s.trim();
+    if (!t) return [];
+    const bySemicolon = t.split(/\s*;\s*/).map(a => a.trim()).filter(Boolean);
+    if (bySemicolon.length > 1) return bySemicolon;
+    const byComma = t.split(',').map(a => a.trim()).filter(Boolean);
+    if (byComma.length >= 2 && byComma.every(part => part.includes(' '))) {
+      return byComma;
+    }
+    return [t];
+  };
+
+  const formatAuthorsAPA = (authors: string) => {
+    const authorList = authorSplit(authors);
+    if (authorList.length === 0) return '';
+    const formatOne = (author: string) => {
+      const { lastName, firstParts, suffix, isCorporate } = parseAuthorName(author);
+      if (!lastName) return author;
+      if (isCorporate || firstParts.length === 0) return lastName;
+      const base = `${lastName}, ${formatInitialsAPA(firstParts)}`;
+      return suffix ? `${base}, ${suffix}` : base;
+    };
+    if (authorList.length === 1) return formatOne(authorList[0]);
+    if (authorList.length === 2) {
+      return `${formatOne(authorList[0])}, & ${formatOne(authorList[1])}`;
     }
     if (authorList.length > 20) {
-      const formatted = authorList.slice(0, 19).map((author) => {
-        const parts = author.split(' ');
-        if (parts.length >= 2) {
-          const lastName = parts[parts.length - 1];
-          const initials = parts.slice(0, -1).map(n => n[0]?.toUpperCase() + '.').join(' ');
-          return `${lastName}, ${initials}`;
-        }
-        return author;
-      });
-      const lastAuthor = authorList[authorList.length - 1].split(' ');
-      const lastFormatted = lastAuthor.length >= 2 
-        ? `${lastAuthor[lastAuthor.length - 1]}, ${lastAuthor.slice(0, -1).map(n => n[0]?.toUpperCase() + '.').join(' ')}`
-        : lastAuthor[0];
+      const formatted = authorList.slice(0, 19).map(formatOne);
+      const lastFormatted = formatOne(authorList[authorList.length - 1]);
       return `${formatted.join(', ')}, ... ${lastFormatted}`;
     }
-    return authorList.map((author, i) => {
-      const parts = author.split(' ');
-      if (parts.length >= 2) {
-        const lastName = parts[parts.length - 1];
-        const initials = parts.slice(0, -1).map(n => n[0]?.toUpperCase() + '.').join(' ');
-        return `${lastName}, ${initials}`;
-      }
-      return author;
-    }).join(', & ');
+    const allButLast = authorList.slice(0, -1).map(formatOne);
+    const last = formatOne(authorList[authorList.length - 1]);
+    return `${allButLast.join(', ')}, & ${last}`;
   };
 
   const formatAuthorsMLA = (authors: string) => {
-    const authorList = authors.split(',').map(a => a.trim()).filter(Boolean);
+    const authorList = authorSplit(authors);
     if (authorList.length === 0) return '';
-    if (authorList.length === 1) {
-      const parts = authorList[0].split(' ');
-      if (parts.length >= 2) {
-        const lastName = parts[parts.length - 1];
-        const firstName = parts.slice(0, -1).join(' ');
-        return `${lastName}, ${firstName}`;
-      }
-      return authorList[0];
-    }
+    const formatFirst = (author: string) => {
+      const { lastName, firstParts, suffix, isCorporate } = parseAuthorName(author);
+      if (!lastName) return author;
+      if (isCorporate || firstParts.length === 0) return lastName;
+      const base = `${lastName}, ${firstParts.join(' ')}`;
+      return suffix ? `${base}, ${suffix}` : base;
+    };
+    const formatSubsequent = (author: string) => {
+      const { lastName, firstParts, suffix, isCorporate } = parseAuthorName(author);
+      if (!lastName) return author;
+      if (isCorporate || firstParts.length === 0) return lastName;
+      const base = `${firstParts.join(' ')} ${lastName}`;
+      return suffix ? `${base}, ${suffix}` : base;
+    };
+    if (authorList.length === 1) return formatFirst(authorList[0]);
     if (authorList.length === 2) {
-      const first = authorList[0].split(' ');
-      const second = authorList[1].split(' ');
-      const firstFormatted = first.length >= 2 
-        ? `${first[first.length - 1]}, ${first.slice(0, -1).join(' ')}`
-        : first[0];
-      const secondFormatted = second.length >= 2
-        ? `${second.slice(0, -1).join(' ')} ${second[second.length - 1]}`
-        : second[0];
-      return `${firstFormatted}, and ${secondFormatted}`;
+      return `${formatFirst(authorList[0])}, and ${formatSubsequent(authorList[1])}`;
     }
-    const first = authorList[0].split(' ');
-    const firstFormatted = first.length >= 2 
-      ? `${first[first.length - 1]}, ${first.slice(0, -1).join(' ')}`
-      : first[0];
-    return `${firstFormatted}, et al.`;
+    return `${formatFirst(authorList[0])}, et al.`;
   };
 
   const formatAuthorsIEEE = (authors: string) => {
-    const authorList = authors.split(',').map(a => a.trim()).filter(Boolean);
+    const authorList = authorSplit(authors);
     if (authorList.length === 0) return '';
-    return authorList.map((author) => {
-      const parts = author.split(' ');
-      if (parts.length >= 2) {
-        const lastName = parts[parts.length - 1];
-        const initials = parts.slice(0, -1).map(n => n[0]?.toUpperCase() + '.').join(' ');
-        return `${initials} ${lastName}`;
-      }
-      return author;
-    }).join(authorList.length > 3 ? ' et al.' : ', ');
+    const formatOne = (author: string) => {
+      const { lastName, firstParts, suffix, isCorporate } = parseAuthorName(author);
+      if (!lastName) return author;
+      if (isCorporate || firstParts.length === 0) return lastName;
+      const initials = firstParts.map(n => n.includes('-') ? n.split('-').map(s => s[0]?.toUpperCase() + '.').join('-') : n[0]?.toUpperCase() + '.').join(' ');
+      const base = `${initials} ${lastName}`;
+      return suffix ? `${base}, ${suffix}` : base;
+    };
+    if (authorList.length <= 6) {
+      return authorList.map(formatOne).join(', ');
+    }
+    return `${formatOne(authorList[0])} et al.`;
   };
 
   const formatAuthorsVancouver = (authors: string) => {
-    const authorList = authors.split(',').map(a => a.trim()).filter(Boolean);
+    const authorList = authorSplit(authors);
     if (authorList.length === 0) return '';
-    const formatted = authorList.slice(0, 6).map((author) => {
-      const parts = author.split(' ');
-      if (parts.length >= 2) {
-        const lastName = parts[parts.length - 1];
-        const initials = parts.slice(0, -1).map(n => n[0]?.toUpperCase()).join('');
-        return `${lastName} ${initials}`;
-      }
-      return author;
-    });
-    if (authorList.length > 6) {
-      return `${formatted.join(', ')}, et al.`;
-    }
+    const formatOne = (author: string) => {
+      const { lastName, firstParts, suffix, isCorporate } = parseAuthorName(author);
+      if (!lastName) return author;
+      if (isCorporate || firstParts.length === 0) return lastName;
+      const initials = firstParts.map(n => n.includes('-') ? n.split('-').map(s => s[0]?.toUpperCase()).join('') : n[0]?.toUpperCase()).join('');
+      const base = `${lastName} ${initials}`;
+      return suffix ? `${base} ${suffix.replace(/\./g, '')}` : base;
+    };
+    const formatted = authorList.slice(0, 6).map(formatOne);
+    if (authorList.length > 6) return `${formatted.join(', ')}, et al.`;
     return formatted.join(', ');
   };
 
+  const formatAuthorsChicago = (authors: string) => {
+    const authorList = authorSplit(authors);
+    if (authorList.length === 0) return '';
+    const formatFirst = (author: string) => {
+      const { lastName, firstParts, suffix, isCorporate } = parseAuthorName(author);
+      if (!lastName) return author;
+      if (isCorporate || firstParts.length === 0) return lastName;
+      const base = `${lastName}, ${firstParts.join(' ')}`;
+      return suffix ? `${base}, ${suffix}` : base;
+    };
+    const formatSubsequent = (author: string) => {
+      const { lastName, firstParts, suffix, isCorporate } = parseAuthorName(author);
+      if (!lastName) return author;
+      if (isCorporate || firstParts.length === 0) return lastName;
+      const base = `${firstParts.join(' ')} ${lastName}`;
+      return suffix ? `${base}, ${suffix}` : base;
+    };
+    if (authorList.length === 1) return formatFirst(authorList[0]);
+    if (authorList.length === 2) {
+      return `${formatFirst(authorList[0])} and ${formatSubsequent(authorList[1])}`;
+    }
+    if (authorList.length === 3) {
+      return `${formatFirst(authorList[0])}, ${formatSubsequent(authorList[1])}, and ${formatSubsequent(authorList[2])}`;
+    }
+    return `${formatFirst(authorList[0])} et al.`;
+  };
+
   const generateCitation = () => {
-    const { authors, title, year, publisher, city, journalName, volume, issue, pages, doi, url, accessDate, websiteName, newspaperName, conferenceName, conferenceLocation, university, degree, platform, director, episodeTitle, hostName, organization, reportNumber, magazineName, encyclopediaName, editorName, month, day } = formData;
-    
+    setValidationError(null);
+    const { authors, title, year, publisher, city, journalName, volume, issue, pages, doi, url, accessDate, websiteName, newspaperName, edition, conferenceName, conferenceLocation, university, degree, platform, director, episodeTitle, hostName, organization, reportNumber, magazineName, encyclopediaName, editorName, month, day } = formData;
+
+    if (!title?.trim()) {
+      setValidationError('Title is required.');
+      setCitation('');
+      return;
+    }
+    const hasAuthor = authors?.trim() || (sourceType === 'report' && organization?.trim()) || (sourceType === 'website' && websiteName?.trim());
+    if (!hasAuthor) {
+      setValidationError('Author(s), organization, or website name is required for this source type.');
+      setCitation('');
+      return;
+    }
+
     let result = '';
     
     if (style === 'apa') {
@@ -283,30 +360,32 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
         result = `${formattedAuthors}. *${title}*. ${publisher}, ${year}. ${platform || 'E-book'}.`;
       }
     } else if (style === 'chicago') {
+      const formattedChicago = (sourceType === 'report' && organization?.trim()) ? organization : formatAuthorsChicago(authors || '');
+      const chicagoAuthor = (authors?.trim() || (sourceType === 'report' && organization?.trim())) ? formattedChicago : (websiteName || '');
       if (sourceType === 'book') {
-        result = `${authors}. *${title}*${edition ? `, ${edition} ed` : ''}. ${city ? `${city}: ` : ''}${publisher}${year ? `, ${year}` : ''}.`;
+        result = `${formattedChicago}. *${title}*${edition ? `, ${edition} ed` : ''}. ${city ? `${city}: ` : ''}${publisher}${year ? `, ${year}` : ''}.`;
       } else if (sourceType === 'journal') {
-        result = `${authors}. "${title}." *${journalName}*${volume ? ` ${volume}` : ''}${issue ? `, no. ${issue}` : ''} (${year})${pages ? `: ${pages}` : ''}.${doi ? ` https://doi.org/${doi}` : ''}`;
+        result = `${formattedChicago}. "${title}." *${journalName}*${volume ? ` ${volume}` : ''}${issue ? `, no. ${issue}` : ''} (${year})${pages ? `: ${pages}` : ''}.${doi ? ` https://doi.org/${doi}` : ''}`;
       } else if (sourceType === 'website') {
-        result = `${authors || websiteName}. "${title}." ${websiteName}${year ? `. ${month || ''} ${day || ''}, ${year}` : ''}. ${url}${accessDate ? `. Accessed ${accessDate}` : ''}.`;
+        result = `${chicagoAuthor}. "${title}." ${websiteName}${year ? `. ${month || ''} ${day || ''}, ${year}` : ''}. ${url}${accessDate ? `. Accessed ${accessDate}` : ''}.`;
       } else if (sourceType === 'newspaper') {
-        result = `${authors}. "${title}." *${newspaperName}*${year ? `, ${month || ''} ${day || ''}, ${year}` : ''}.${url ? ` ${url}` : ''}`;
+        result = `${formattedChicago}. "${title}." *${newspaperName}*${year ? `, ${month || ''} ${day || ''}, ${year}` : ''}.${url ? ` ${url}` : ''}`;
       } else if (sourceType === 'conference') {
-        result = `${authors}. "${title}." Paper presented at ${conferenceName}${conferenceLocation ? `, ${conferenceLocation}` : ''}${year ? `, ${year}` : ''}.`;
+        result = `${formattedChicago}. "${title}." Paper presented at ${conferenceName}${conferenceLocation ? `, ${conferenceLocation}` : ''}${year ? `, ${year}` : ''}.`;
       } else if (sourceType === 'thesis') {
-        result = `${authors}. "${title}." ${degree || 'PhD diss.'}, ${university}, ${year}.`;
+        result = `${formattedChicago}. "${title}." ${degree || 'PhD diss.'}, ${university}, ${year}.`;
       } else if (sourceType === 'video') {
-        result = `*${title}*. Directed by ${director || authors}. ${city ? `${city}: ` : ''}${publisher || platform}, ${year}.`;
+        result = `*${title}*. Directed by ${director || formattedChicago}. ${city ? `${city}: ` : ''}${publisher || platform}, ${year}.`;
       } else if (sourceType === 'report') {
-        result = `${organization || authors}. *${title}*${reportNumber ? `, ${reportNumber}` : ''}. ${city ? `${city}: ` : ''}${publisher || organization}, ${year}.`;
+        result = `${organization || formattedChicago}. *${title}*${reportNumber ? `, ${reportNumber}` : ''}. ${city ? `${city}: ` : ''}${publisher || organization}, ${year}.`;
       } else if (sourceType === 'magazine') {
-        result = `${authors}. "${title}." *${magazineName}*${year ? `, ${month || ''} ${day || ''}, ${year}` : ''}${pages ? `, ${pages}` : ''}.`;
+        result = `${formattedChicago}. "${title}." *${magazineName}*${year ? `, ${month || ''} ${day || ''}, ${year}` : ''}${pages ? `, ${pages}` : ''}.`;
       } else if (sourceType === 'encyclopedia') {
-        result = `${authors ? `${authors}. ` : ''}"${title}." In *${encyclopediaName}*${edition ? `, ${edition} ed` : ''}${editorName ? `, edited by ${editorName}` : ''}${pages ? `, ${pages}` : ''}. ${city ? `${city}: ` : ''}${publisher}, ${year}.`;
+        result = `${formattedChicago ? `${formattedChicago}. ` : ''}"${title}." In *${encyclopediaName}*${edition ? `, ${edition} ed` : ''}${editorName ? `, edited by ${editorName}` : ''}${pages ? `, ${pages}` : ''}. ${city ? `${city}: ` : ''}${publisher}, ${year}.`;
       } else if (sourceType === 'ebook') {
-        result = `${authors}. *${title}*. ${city ? `${city}: ` : ''}${publisher}, ${year}. ${platform}.`;
+        result = `${formattedChicago}. *${title}*. ${city ? `${city}: ` : ''}${publisher}, ${year}. ${platform}.`;
       } else if (sourceType === 'podcast') {
-        result = `${hostName || authors}. "${episodeTitle || title}." In *${title}*. Podcast audio. ${month || ''} ${day || ''}, ${year}. ${url}`;
+        result = `${hostName || formattedChicago}. "${episodeTitle || title}." In *${title}*. Podcast audio. ${month || ''} ${day || ''}, ${year}. ${url}`;
       }
     } else if (style === 'harvard') {
       if (sourceType === 'book') {
@@ -403,8 +482,19 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
     setCitation(result);
   };
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(citation.replace(/\*/g, ''));
+  const handleCopy = async () => {
+    const plainText = citation.replace(/\*([^*]+)\*/g, '$1'); // strip asterisks for plain
+    const htmlText = citation.replace(/\*([^*]+)\*/g, '<i>$1</i>'); // HTML for rich paste (Word, Docs)
+    try {
+      await navigator.clipboard.write([
+        new ClipboardItem({
+          'text/plain': new Blob([plainText], { type: 'text/plain' }),
+          'text/html': new Blob([`<p>${htmlText}</p>`], { type: 'text/html' })
+        })
+      ]);
+    } catch {
+      navigator.clipboard.writeText(plainText);
+    }
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
     trackCopy();
@@ -434,10 +524,10 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
             type="text"
             value={formData.authors}
             onChange={(e) => handleInputChange('authors', e.target.value)}
-            placeholder="John Smith, Jane Doe"
+            placeholder="John Smith, Jane Doe or Li, Wei (family-name-first)"
             className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
           />
-          <p className="text-xs text-gray-500 mt-1">Separate multiple authors with commas</p>
+          <p className="text-xs text-gray-500 mt-1">Multiple authors: use commas (John Smith, Jane Doe) or semicolons. Use &quot;Li, Wei&quot; for family-name-first (one author).</p>
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Title *</label>
@@ -1207,6 +1297,11 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
                 {renderFormFields()}
               </div>
 
+              {validationError && (
+                <p className="mt-4 text-sm text-amber-600 bg-amber-50 border border-amber-200 rounded-lg px-4 py-2">
+                  {validationError}
+                </p>
+              )}
               <button
                 onClick={generateCitation}
                 className="w-full mt-6 px-6 py-3 bg-gradient-to-r from-indigo-500 to-violet-600 text-white font-semibold rounded-xl hover:from-indigo-600 hover:to-violet-700 transition-all"
@@ -1286,6 +1381,13 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
                     </>
                   )}
                 </div>
+              </div>
+
+              {/* Disclaimer */}
+              <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4">
+                <p className="text-sm text-amber-800">
+                  <strong>Please verify:</strong> Always check citations against your style guide or professor&apos;s requirements. Formatting rules vary by edition and institution.
+                </p>
               </div>
 
               {/* Tips */}
