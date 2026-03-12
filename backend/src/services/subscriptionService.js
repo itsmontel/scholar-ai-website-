@@ -14,6 +14,7 @@ const supabaseServiceRole = createClient(
 );
 
 // Plan limits configuration
+// Study packs: one generation creates quiz + flashcards + crossword + lesson + crater blast
 const PLAN_LIMITS = {
   free: {
     documentsPerMonth: 3,
@@ -21,12 +22,14 @@ const PLAN_LIMITS = {
     citationSearchesPerMonth: 2,
     humanizeWordsPerMonth: 5000,
     summarizeWordsPerMonth: 5000,
+    studyPackGenerationsPerMonth: 2,
+    studyPackMaxWordsPerGeneration: 5000,
     quizWordsPerMonth: 15000,
-    quizGenerationsPerMonth: 3,
+    quizGenerationsPerMonth: 2,
     quizMaxWordsPerGeneration: 5000,
     craterBlastMaxWordsPerGeneration: 5000,
     lessonWordsPerMonth: 5000,
-    lessonGenerationsPerMonth: 3,
+    lessonGenerationsPerMonth: 2,
     lessonMaxWordsPerGeneration: 5000,
     aiModel: 'gpt-4.1-nano',
     maxDocumentSize: 1024 * 1024,
@@ -40,9 +43,11 @@ const PLAN_LIMITS = {
     citationSearchesPerMonth: 99,
     humanizeWordsPerMonth: 999999,
     summarizeWordsPerMonth: 999999,
+    studyPackGenerationsPerMonth: 99,
+    studyPackMaxWordsPerGeneration: 10000,
     quizWordsPerMonth: 999999,
     quizGenerationsPerMonth: 99,
-    quizMaxWordsPerGeneration: 15000,
+    quizMaxWordsPerGeneration: 10000,
     craterBlastMaxWordsPerGeneration: 10000,
     lessonWordsPerMonth: 999999,
     lessonGenerationsPerMonth: 99,
@@ -60,14 +65,16 @@ const PLAN_LIMITS = {
     citationSearchesPerMonth: 199,
     humanizeWordsPerMonth: 999999,
     summarizeWordsPerMonth: 999999,
+    studyPackGenerationsPerMonth: 199,
+    studyPackMaxWordsPerGeneration: 20000,
     quizWordsPerMonth: 999999,
     quizGenerationsPerMonth: 199,
-    quizMaxWordsPerGeneration: 15000,
+    quizMaxWordsPerGeneration: 20000,
     craterBlastMaxWordsPerGeneration: 10000,
     lessonWordsPerMonth: 999999,
     lessonGenerationsPerMonth: 199,
     lessonMaxWordsPerGeneration: 10000,
-    aiModel: 'gpt-4.1-nano', // Premium uses nano for study tools; mini reserved for AI essay analysis only
+    aiModel: 'gpt-4.1-nano',
     maxDocumentSize: 1024 * 1024 * 1024,
     maxTotalStorage: 1024 * 1024 * 1024,
     maxAnalysisPercentage: 100,
@@ -112,8 +119,8 @@ const getUserSubscriptionDetails = async (userId) => {
 /**
  * Get the current usage period start and end for a user.
  * - Paid (pro/premium): uses subscription current_period_start/end from Stripe
- * - Free: rolling 30-day periods from signup date
- * - Fallback: calendar month (legacy users, missing data)
+ * - Free: rolling period from signup (reset on same calendar day each month, e.g. Mar 4 → Apr 4)
+ * - Fallback: calendar month (legacy users, missing created_at)
  */
 const getUsagePeriod = async (userId) => {
   const now = new Date();
@@ -121,45 +128,89 @@ const getUsagePeriod = async (userId) => {
   const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
 
   try {
-    const { plan } = await getUserSubscriptionDetails(userId);
+    const { plan, stripeCustomerId } = await getUserSubscriptionDetails(userId);
 
     if (plan === 'pro' || plan === 'premium') {
-      const { data: sub, error } = await supabase
-        .from('subscriptions')
-        .select('current_period_start, current_period_end')
-        .eq('user_id', userId)
-        .in('status', ['active', 'trialing'])
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
+      let periodStart = null;
+      let periodEnd = null;
 
-      if (!error && sub?.current_period_start) {
-        const periodStart = typeof sub.current_period_start === 'string'
-          ? sub.current_period_start
-          : new Date(sub.current_period_start).toISOString();
-        const periodEnd = typeof sub.current_period_end === 'string'
-          ? sub.current_period_end
-          : new Date(sub.current_period_end).toISOString();
+      // 1. Prefer Stripe as source of truth when we have customer ID (avoids stale Supabase data)
+      let customerId = stripeCustomerId;
+      if (!customerId) {
+        const { data: u } = await supabaseServiceRole.from('users').select('stripe_customer_id').eq('id', userId).single();
+        customerId = u?.stripe_customer_id;
+      }
+      if (customerId) {
+        const stripeSub = await getActiveSubscriptionByCustomer(customerId);
+        if (stripeSub?.current_period_start) {
+          periodStart = new Date(stripeSub.current_period_start * 1000).toISOString();
+          periodEnd = new Date(stripeSub.current_period_end * 1000).toISOString();
+        }
+      }
+
+      // 2. Fallback to Supabase if Stripe didn't return data
+      if (!periodStart) {
+        const { data: sub, error } = await supabaseServiceRole
+          .from('subscriptions')
+          .select('current_period_start, current_period_end')
+          .eq('user_id', userId)
+          .in('status', ['active', 'trialing'])
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (!error && sub?.current_period_start) {
+          periodStart = typeof sub.current_period_start === 'string'
+            ? sub.current_period_start
+            : new Date(sub.current_period_start).toISOString();
+          periodEnd = typeof sub.current_period_end === 'string'
+            ? sub.current_period_end
+            : new Date(sub.current_period_end).toISOString();
+        }
+      }
+
+      if (periodStart && periodEnd) {
         const periodEndDate = new Date(periodEnd);
         const daysUntilReset = Math.max(0, Math.ceil((periodEndDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
         return { periodStart, periodEnd, daysUntilReset };
       }
     }
 
-    // Free users: rolling 30-day periods from signup
-    const { data: user, error: userError } = await supabase
+    // Free users: rolling 30-day periods from signup (NOT calendar month)
+    // e.g. signed up March 4 → period 1: Mar 4–Apr 3, period 2: Apr 4–May 3, reset Apr 4
+    const MS_PER_30_DAYS = 30 * 24 * 60 * 60 * 1000;
+    let anchorDate = null;
+
+    // 1. Try users.created_at (created_at is standard for app signups)
+    const { data: userRow, error: userError } = await supabaseServiceRole
       .from('users')
       .select('created_at')
       .eq('id', userId)
-      .single();
+      .maybeSingle();
+    if (!userError && userRow?.created_at) {
+      const d = new Date(userRow.created_at);
+      if (!isNaN(d.getTime())) anchorDate = d;
+    }
 
-    if (!userError && user?.created_at) {
-      const signup = new Date(user.created_at);
-      const msPer30Days = 30 * 24 * 60 * 60 * 1000;
-      const elapsed = now.getTime() - signup.getTime();
-      const periodsElapsed = Math.floor(elapsed / msPer30Days);
-      const periodStartDate = new Date(signup.getTime() + periodsElapsed * msPer30Days);
-      const periodEndDate = new Date(periodStartDate.getTime() + msPer30Days);
+    // 2. Fallback: earliest activity as proxy (Supabase Auth sync, missing created_at)
+    if (!anchorDate) {
+      const [q, d, a] = await Promise.all([
+        supabaseServiceRole.from('quiz_usage').select('created_at').eq('user_id', userId).order('created_at', { ascending: true }).limit(1).maybeSingle(),
+        supabaseServiceRole.from('documents').select('created_at').eq('user_id', userId).order('created_at', { ascending: true }).limit(1).maybeSingle(),
+        supabaseServiceRole.from('document_analyses').select('created_at').eq('user_id', userId).order('created_at', { ascending: true }).limit(1).maybeSingle(),
+      ]);
+      const dates = [q?.data?.created_at, d?.data?.created_at, a?.data?.created_at].filter(Boolean);
+      if (dates.length) {
+        const earliest = new Date(dates.sort((x, y) => new Date(x) - new Date(y))[0]);
+        if (!isNaN(earliest.getTime())) anchorDate = earliest;
+      }
+    }
+
+    if (anchorDate) {
+      const elapsed = now.getTime() - anchorDate.getTime();
+      const periodsElapsed = Math.floor(elapsed / MS_PER_30_DAYS);
+      const periodStartDate = new Date(anchorDate.getTime() + periodsElapsed * MS_PER_30_DAYS);
+      const periodEndDate = new Date(periodStartDate.getTime() + MS_PER_30_DAYS);
       const periodStart = periodStartDate.toISOString();
       const periodEnd = periodEndDate.toISOString();
       const daysUntilReset = Math.max(0, Math.ceil((periodEndDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
@@ -478,6 +529,29 @@ const getStripeSubscription = async (subscriptionId) => {
   } catch (error) {
     console.error('Error fetching Stripe subscription:', error);
     return { success: false, error: error.message };
+  }
+};
+
+// List active subscriptions for a Stripe customer (fallback when DB is out of sync)
+const getActiveSubscriptionByCustomer = async (stripeCustomerId) => {
+  if (!stripeCustomerId) return null;
+  try {
+    const subscriptions = await stripe.subscriptions.list({
+      customer: stripeCustomerId,
+      status: 'active',
+      limit: 1
+    });
+    if (subscriptions.data?.[0]) return subscriptions.data[0];
+    // Also check trialing
+    const trialing = await stripe.subscriptions.list({
+      customer: stripeCustomerId,
+      status: 'trialing',
+      limit: 1
+    });
+    return trialing.data?.[0] || null;
+  } catch (error) {
+    console.error('Error listing Stripe subscriptions:', error);
+    return null;
   }
 };
 

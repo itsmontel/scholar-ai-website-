@@ -83,7 +83,7 @@ interface Friend {
 }
 
 type FilterType = 'all' | 'quiz' | 'flashcards' | 'crossword' | 'crater_blast' | 'lesson';
-type TimePeriod = 'all' | '7days' | '30days' | '3months';
+type TimePeriod = 'all' | '7days' | '30days' | '3months' | 'week';
 
 /** Sanitize text for jsPDF - replaces Unicode chars that cause garbled output (e.g. smart quotes, em dashes, emojis) */
 function sanitizeForPDF(text: string): string {
@@ -122,6 +122,14 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
   const [isDeleting, setIsDeleting] = useState(false);
   const [filter, setFilter] = useState<FilterType>(initialFilterProp ?? 'all');
   const [timePeriod, setTimePeriod] = useState<TimePeriod>('all');
+  const getMondayOfWeek = (d: Date) => {
+    const copy = new Date(d);
+    const day = copy.getDay();
+    copy.setDate(copy.getDate() - (day === 0 ? 6 : day - 1));
+    copy.setHours(0, 0, 0, 0);
+    return copy;
+  };
+  const [selectedWeekStart, setSelectedWeekStart] = useState<Date>(() => getMondayOfWeek(new Date()));
   const [currentPage, setCurrentPage] = useState(1);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
@@ -226,15 +234,17 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
   };
 
   const filteredTools = studyTools.filter(tool => {
+    if (timePeriod === 'week') {
+      const toolDate = new Date(tool.created_at);
+      const weekEnd = new Date(selectedWeekStart);
+      weekEnd.setDate(weekEnd.getDate() + 7);
+      return toolDate >= selectedWeekStart && toolDate < weekEnd;
+    }
     const cutoffDate = getTimePeriodDate(timePeriod);
     if (cutoffDate && new Date(tool.created_at) < cutoffDate) {
       return false;
     }
-
-    if (filter === 'all') return true;
-    if (filter === 'quiz') return !['flashcards', 'crossword', 'crater_blast', 'lesson'].includes(tool.quiz_type);
-    if (filter === 'lesson') return tool.quiz_type === 'lesson';
-    return tool.quiz_type === filter;
+    return true;
   });
 
   const PAGE_SIZE = 10;
@@ -243,13 +253,14 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [filter, timePeriod]);
+  }, [filter, timePeriod, selectedWeekStart.getTime()]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [currentPage]);
 
   const getToolIcon = (type: string) => {
+    if (type === 'study_pack') return '📚';
     if (type === 'flashcards') return '🃏';
     if (type === 'crossword') return '🧩';
     if (type === 'crater_blast') return '💥';
@@ -277,6 +288,17 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
   };
 
   const startStudyTool = (tool: StudyTool) => {
+    if (tool.quiz_type === 'study_pack') {
+      try {
+        const packData = (tool.questions || tool) as { quiz?: { title?: string }; flashcards?: { title?: string }; lesson?: { title?: string } };
+        sessionStorage.setItem('writescholar_study_pack_viewer', JSON.stringify({
+          data: packData,
+          title: tool.title || packData?.quiz?.title || packData?.flashcards?.title || packData?.lesson?.title || 'Study Pack',
+        }));
+      } catch (_) {}
+      onNavigate('study-pack-viewer');
+      return;
+    }
     if (tool.quiz_type === 'flashcards') {
       localStorage.setItem('savedFlashcards', JSON.stringify(tool));
       onNavigate('flashcard-generator');
@@ -487,6 +509,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
 
   const getTypeLabel = (type: string) => {
     switch (type) {
+      case 'study_pack': return 'Study Pack';
       case 'multiple_choice': return 'Multiple Choice';
       case 'true_false': return 'True/False';
       case 'fill_blank': return 'Fill in the Blank';
@@ -1092,40 +1115,45 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
     );
   }
 
-  const filterTabs = [
-    { key: 'all' as FilterType, label: 'All', icon: '📚', count: studyTools.length, color: 'stone' },
-    { key: 'quiz' as FilterType, label: 'Quizzes', icon: '📝', count: studyTools.filter(t => !['flashcards', 'crossword', 'crater_blast', 'lesson'].includes(t.quiz_type)).length, color: 'blue' },
-    { key: 'flashcards' as FilterType, label: 'Flashcards', icon: '🃏', count: studyTools.filter(t => t.quiz_type === 'flashcards').length, color: 'fuchsia' },
-    { key: 'crossword' as FilterType, label: 'Crosswords', icon: '🧩', count: studyTools.filter(t => t.quiz_type === 'crossword').length, color: 'emerald' },
-    { key: 'crater_blast' as FilterType, label: 'Crater Blast', icon: '💥', count: studyTools.filter(t => t.quiz_type === 'crater_blast').length, color: 'orange' },
-    { key: 'lesson' as FilterType, label: 'Lessons', icon: '🎓', count: studyTools.filter(t => t.quiz_type === 'lesson').length, color: 'violet' },
-  ];
-
   const timePeriodOptions = [
-    { key: 'all' as TimePeriod, label: 'All Time' },
-    { key: '7days' as TimePeriod, label: 'Last 7 Days' },
-    { key: '30days' as TimePeriod, label: 'Last 30 Days' },
-    { key: '3months' as TimePeriod, label: 'Last 3 Months' },
+    { key: 'all' as TimePeriod, label: 'All time' },
+    { key: '30days' as TimePeriod, label: 'Last 30 days' },
+    { key: '3months' as TimePeriod, label: '3 months' },
   ];
 
-  const getFilterTabStyle = (tab: typeof filterTabs[0], isActive: boolean) => {
-    if (!isActive) {
-      return 'bg-white/80 text-stone-600 hover:bg-white hover:text-stone-900 border border-stone-200/80';
-    }
-    switch (tab.color) {
-      case 'blue':
-        return 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/25';
-      case 'fuchsia':
-        return 'bg-gradient-to-r from-fuchsia-500 to-pink-500 text-white shadow-md shadow-fuchsia-500/25';
-      case 'emerald':
-        return 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-md shadow-emerald-500/25';
-      case 'orange':
-        return 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md shadow-orange-500/25';
-      case 'violet':
-        return 'bg-gradient-to-r from-violet-500 to-purple-500 text-white shadow-md shadow-violet-500/25';
-      default:
-        return 'bg-gradient-to-r from-violet-600 to-purple-600 text-white shadow-md shadow-violet-500/25';
-    }
+  const thisWeekStart = getMondayOfWeek(new Date());
+  const isCurrentWeek = selectedWeekStart.getTime() === thisWeekStart.getTime();
+  const weekEnd = new Date(selectedWeekStart);
+  weekEnd.setDate(weekEnd.getDate() + 6);
+
+  const formatWeekLabel = () => {
+    if (isCurrentWeek) return 'This week';
+    const startStr = selectedWeekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    const endStr = weekEnd.toLocaleDateString('en-US', {
+      month: 'short', day: 'numeric',
+      year: selectedWeekStart.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined,
+    });
+    return `${startStr} – ${endStr}`;
+  };
+
+  const goToPrevWeek = () => {
+    const prev = new Date(selectedWeekStart);
+    prev.setDate(prev.getDate() - 7);
+    setSelectedWeekStart(prev);
+    if (timePeriod !== 'week') setTimePeriod('week');
+  };
+
+  const goToNextWeek = () => {
+    if (isCurrentWeek) return;
+    const next = new Date(selectedWeekStart);
+    next.setDate(next.getDate() + 7);
+    setSelectedWeekStart(next);
+    if (timePeriod !== 'week') setTimePeriod('week');
+  };
+
+  const goToThisWeek = () => {
+    setSelectedWeekStart(getMondayOfWeek(new Date()));
+    setTimePeriod('week');
   };
 
   return (
@@ -1202,96 +1230,134 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
           </div>
         </div>
 
-        {/* Crater Blast Banner */}
-        <button
-          onClick={() => onNavigate('crater-blast')}
-          className="w-full mb-8 group relative overflow-hidden rounded-2xl border border-indigo-200/60 transition-all hover:shadow-lg hover:-translate-y-0.5"
-          style={{ background: 'linear-gradient(135deg, #4f46e5 0%, #6366f1 40%, #818cf8 100%)' }}
-        >
-          <span className="absolute top-1.5 right-2 sm:top-2 sm:right-2 px-1.5 py-0.5 text-[9px] sm:text-[10px] font-bold rounded-md bg-white/90 text-indigo-600 shadow-md z-10">NEW</span>
-          <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 80% 30%, rgba(255,255,255,0.3) 0%, transparent 60%)' }} />
-          <div className="relative px-4 sm:px-5 py-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4">
-            <div className="flex items-center gap-3 sm:gap-4 min-w-0">
-              <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center text-xl sm:text-2xl shrink-0">
-                💥
-              </div>
-              <div className="text-left min-w-0">
-                <div className="text-white font-bold text-base">Crater Blast</div>
-                <div className="text-indigo-200 text-xs sm:text-sm truncate">AI quiz shooter — blast the correct crater before it lands</div>
-              </div>
+        {/* Filter Controls */}
+        <div className="mb-8 space-y-3">
+
+          {/* Week navigator — primary browsing control */}
+          <div className="bg-white rounded-2xl border border-stone-200/70 shadow-sm overflow-hidden">
+            <div className="flex items-stretch">
+              {/* Prev arrow */}
+              <button
+                onClick={goToPrevWeek}
+                className="flex items-center justify-center w-12 sm:w-14 shrink-0 text-stone-400 hover:text-stone-700 hover:bg-stone-50 border-r border-stone-100 transition-colors group"
+                aria-label="Previous week"
+              >
+                <svg className="w-5 h-5 group-hover:-translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+
+              {/* Centre label */}
+              <button
+                onClick={goToThisWeek}
+                className="flex-1 flex flex-col items-center justify-center gap-0.5 py-3.5 sm:py-4 hover:bg-stone-50/70 transition-colors"
+              >
+                <span className={`text-base sm:text-lg font-bold tracking-tight transition-colors ${timePeriod === 'week' ? 'text-stone-900' : 'text-stone-400'}`}>
+                  {timePeriod === 'week' ? formatWeekLabel() : 'Browse by week'}
+                </span>
+                {timePeriod === 'week' ? (
+                  <span className="text-[11px] sm:text-xs text-stone-400 font-medium">
+                    {isCurrentWeek
+                      ? `${selectedWeekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} – ${weekEnd.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
+                      : 'click to jump to this week'
+                    }
+                  </span>
+                ) : (
+                  <span className="text-[11px] text-stone-400">click to start</span>
+                )}
+              </button>
+
+              {/* Next arrow — fades when at current week */}
+              <button
+                onClick={goToNextWeek}
+                disabled={timePeriod === 'week' && isCurrentWeek}
+                className={`flex items-center justify-center w-12 sm:w-14 shrink-0 border-l border-stone-100 transition-colors group ${
+                  timePeriod === 'week' && isCurrentWeek
+                    ? 'text-stone-200 cursor-default'
+                    : 'text-stone-400 hover:text-stone-700 hover:bg-stone-50'
+                }`}
+                aria-label="Next week"
+              >
+                <svg className="w-5 h-5 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
             </div>
-            <div className="shrink-0 px-4 py-2 rounded-xl bg-white/20 text-white text-sm font-semibold group-hover:bg-white/30 transition-colors text-center">
-              Play Now →
-            </div>
+
+            {/* Day-of-week mini strip — shows when browsing by week */}
+            {timePeriod === 'week' && (
+              <div className="grid grid-cols-7 border-t border-stone-100">
+                {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((d, i) => {
+                  const dayDate = new Date(selectedWeekStart);
+                  dayDate.setDate(dayDate.getDate() + i);
+                  const today = new Date();
+                  const isToday =
+                    dayDate.getDate() === today.getDate() &&
+                    dayDate.getMonth() === today.getMonth() &&
+                    dayDate.getFullYear() === today.getFullYear();
+                  const isFuture = dayDate > today;
+                  const dayHasItems = studyTools.some(t => {
+                    const td = new Date(t.created_at);
+                    return td.getDate() === dayDate.getDate() && td.getMonth() === dayDate.getMonth() && td.getFullYear() === dayDate.getFullYear();
+                  });
+                  return (
+                    <div
+                      key={i}
+                      className={`flex flex-col items-center py-2 sm:py-2.5 gap-1 text-center ${isFuture ? 'opacity-30' : ''}`}
+                    >
+                      <span className={`text-[10px] sm:text-xs font-semibold uppercase tracking-wider ${isToday ? 'text-violet-600' : 'text-stone-400'}`}>{d}</span>
+                      <span className={`text-xs sm:text-sm font-bold ${isToday ? 'text-violet-600 bg-violet-100 w-6 h-6 flex items-center justify-center rounded-full' : 'text-stone-600'}`}>
+                        {dayDate.getDate()}
+                      </span>
+                      {dayHasItems && (
+                        <span className="w-1.5 h-1.5 rounded-full bg-violet-400" />
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
-        </button>
 
-        {/* Filter Controls - Type + Time Period */}
-        <div className="bg-white/60 backdrop-blur-sm rounded-2xl border border-stone-200/60 p-3 sm:p-4 mb-8 overflow-hidden">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-            {/* Type Filter */}
-            <div className="flex-1 min-w-0">
-              <div className="text-[10px] sm:text-xs font-medium text-stone-500 uppercase tracking-wider mb-2">Filter by Type</div>
-              <div className="flex flex-wrap gap-1.5 sm:gap-2">
-                {filterTabs.map((tab) => (
-                  <button
-                    key={tab.key}
-                    onClick={() => setFilter(tab.key)}
-                    className={`px-2 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-medium transition-all flex items-center gap-1 sm:gap-2 ${getFilterTabStyle(tab, filter === tab.key)}`}
-                  >
-                    <span>{tab.icon}</span>
-                    <span className="hidden sm:inline">{tab.label}</span>
-                    <span className={`text-[10px] sm:text-xs px-1 sm:px-1.5 py-0.5 rounded-md ${filter === tab.key ? 'bg-white/20' : 'bg-stone-100'}`}>
-                      {tab.count}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Time Period Filter */}
-            <div className="lg:border-l lg:border-stone-200 lg:pl-4 min-w-0">
-              <div className="text-[10px] sm:text-xs font-medium text-stone-500 uppercase tracking-wider mb-2">Time Period</div>
-              <div className="flex flex-wrap gap-1 sm:gap-1.5">
-                {timePeriodOptions.map((option) => (
-                  <button
-                    key={option.key}
-                    onClick={() => setTimePeriod(option.key)}
-                    className={`px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all ${
-                      timePeriod === option.key
-                        ? 'bg-stone-900 text-white'
-                        : 'bg-stone-100 text-stone-600 hover:bg-stone-200 hover:text-stone-800'
-                    }`}
-                  >
-                    {option.label}
-                  </button>
-                ))}
-              </div>
-            </div>
+          {/* Quick period pills — secondary shortcuts */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-xs text-stone-400 font-medium shrink-0">Quick:</span>
+            {timePeriodOptions.map((option) => (
+              <button
+                key={option.key}
+                onClick={() => setTimePeriod(option.key)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                  timePeriod === option.key
+                    ? 'bg-stone-900 text-white shadow-sm'
+                    : 'bg-white border border-stone-200 text-stone-500 hover:border-stone-300 hover:text-stone-700 hover:bg-stone-50'
+                }`}
+              >
+                {option.label}
+              </button>
+            ))}
+            <span className="ml-auto text-xs text-stone-400">
+              {filteredTools.length} set{filteredTools.length !== 1 ? 's' : ''}
+            </span>
           </div>
         </div>
 
         {/* Results count when filtering */}
-        {(filter !== 'all' || timePeriod !== 'all') && (
-          <div className="mb-4 flex items-center gap-2 text-sm text-stone-600">
-            <span className="font-medium">{filteredTools.length}</span>
-            <span>
-              {filter === 'all' ? 'tool' : filter === 'quiz' ? 'quiz' : filter === 'flashcards' ? 'flashcard set' : filter === 'crossword' ? 'crossword' : filter === 'lesson' ? 'lesson' : 'Crater Blast game'}
-              {filteredTools.length !== 1 ? (filter === 'flashcards' ? 's' : filter === 'quiz' ? 'zes' : 's') : ''}
+        {timePeriod !== 'all' && (
+          <div className="mb-4 flex items-center gap-2 text-sm text-stone-500">
+            <span className="font-semibold text-stone-700">{filteredTools.length}</span>
+            <span>study set{filteredTools.length !== 1 ? 's' : ''}</span>
+            <span className="text-stone-400">
+              {timePeriod === 'week'
+                ? `from ${formatWeekLabel()}`
+                : timePeriod === '30days' ? 'from the last 30 days'
+                : 'from the last 3 months'}
             </span>
-            {timePeriod !== 'all' && (
-              <span className="text-stone-400">
-                from {timePeriod === '7days' ? 'the last 7 days' : timePeriod === '30days' ? 'the last 30 days' : 'the last 3 months'}
-              </span>
-            )}
-            {(filter !== 'all' || timePeriod !== 'all') && (
-              <button
-                onClick={() => { setFilter('all'); setTimePeriod('all'); }}
-                className="ml-2 text-violet-600 hover:text-violet-700 font-medium underline underline-offset-2"
-              >
-                Clear filters
-              </button>
-            )}
+            <button
+              onClick={() => { setTimePeriod('all'); setSelectedWeekStart(getMondayOfWeek(new Date())); }}
+              className="ml-1 text-xs text-stone-400 hover:text-stone-600 underline underline-offset-2"
+            >
+              clear
+            </button>
           </div>
         )}
 
@@ -1333,12 +1399,10 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
               🧠
             </div>
             <h2 className="text-xl font-bold text-stone-900 mb-2">
-              {filter === 'all' ? 'No study tools yet' : `No ${getTypeLabel(filter === 'quiz' ? 'mixed' : filter)} yet`}
+              No study sets yet
             </h2>
             <p className="text-stone-500 mb-8 max-w-sm mx-auto">
-              {filter === 'all' 
-                ? 'Create quizzes, flashcards, or crosswords from your notes to get started.'
-                : `Create your first ${filter === 'quiz' ? 'quiz' : filter} to see it here.`}
+              Generate a study pack from your notes to see it here.
             </p>
             <div className="relative inline-block" onClick={(e) => e.stopPropagation()}>
               <button
@@ -1377,6 +1441,15 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
               
               const getToolStyles = (type: string) => {
                 switch (type) {
+                  case 'study_pack':
+                    return {
+                      border: 'border-l-4 border-l-violet-500',
+                      iconBg: 'bg-gradient-to-br from-violet-100 to-purple-100',
+                      iconText: 'text-violet-600',
+                      badge: 'bg-violet-100 text-violet-700',
+                      preview: 'bg-violet-50 text-violet-700',
+                      button: 'from-violet-500 to-purple-500 shadow-violet-500/25',
+                    };
                   case 'flashcards':
                     return {
                       border: 'border-l-4 border-l-fuchsia-500',
@@ -1501,7 +1574,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                                 {getTypeLabel(tool.quiz_type)}
                               </span>
                               <span className="px-1.5 sm:px-2 py-0.5 rounded-md text-[10px] sm:text-xs font-medium bg-stone-100 text-stone-600">
-                                {tool.question_count} {tool.quiz_type === 'flashcards' ? 'cards' : tool.quiz_type === 'crossword' ? 'words' : tool.quiz_type === 'crater_blast' ? 'questions' : tool.quiz_type === 'lesson' ? 'slides' : 'questions'}
+                                {tool.quiz_type === 'study_pack' ? '5 formats' : `${tool.question_count} ${tool.quiz_type === 'flashcards' ? 'cards' : tool.quiz_type === 'crossword' ? 'words' : tool.quiz_type === 'crater_blast' ? 'questions' : tool.quiz_type === 'lesson' ? 'slides' : 'questions'}`}
                               </span>
                               {tool.quiz_type === 'lesson' && tool.quiz_bank && tool.quiz_bank.length > 0 && (
                                 <span className="px-1.5 sm:px-2 py-0.5 rounded-md text-[10px] sm:text-xs font-medium bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300">
@@ -1527,7 +1600,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                           onClick={() => startStudyTool(tool)}
                           className={`px-2.5 sm:px-4 py-2 sm:py-2.5 rounded-xl font-medium text-xs sm:text-sm text-white bg-gradient-to-r ${styles.button} hover:opacity-90 transition-all flex items-center gap-1 sm:gap-2 shadow-md shrink-0`}
                         >
-                          {tool.quiz_type === 'flashcards' ? 'Study' : tool.quiz_type === 'crossword' || tool.quiz_type === 'crater_blast' ? 'Play' : tool.quiz_type === 'lesson' ? 'Review' : 'Take Quiz'}
+                          Open
                           <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                           </svg>

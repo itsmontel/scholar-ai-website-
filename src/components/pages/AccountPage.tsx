@@ -544,7 +544,8 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
                       <div>• 3 AI essay analyses per month</div>
                       <div>• 2 citation searches per month</div>
                       <div>• 5,000 Humanizer/Summarizer words</div>
-                      <div>• 3 study tool generations (quiz/flashcards/crossword)</div>
+                      <div>• 2 study packs (lesson & flashcards — quiz, crossword & Crater Blast with Pro)</div>
+                      <div className="text-stone-400 text-xs">Crossword & Crater Blast unlock with Pro</div>
                     </>
                   )}
                   {userStats.subscriptionPlan === 'pro' && (
@@ -553,7 +554,7 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
                       <div>• 99 AI essay analyses per month</div>
                       <div>• 99 citation searches per month</div>
                       <div>• 999,999 Humanizer/Summarizer words</div>
-                      <div>• Unlimited study tool generations</div>
+                      <div>• 99 study packs (lesson, flashcards, quiz, crossword & Crater Blast)</div>
                       <div>• PDF & Word export</div>
                     </>
                   )}
@@ -561,6 +562,7 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
                     <>
                       <div>• Everything in Pro</div>
                       <div>• 199 AI essay analyses per month</div>
+                      <div>• 199 study packs per month</div>
                       <div>• 199 citation searches per month</div>
                       <div>• Top-tier premium AI model</div>
                       <div>• All quiz types & difficulty levels</div>

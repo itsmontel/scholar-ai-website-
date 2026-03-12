@@ -9,8 +9,6 @@ interface MoreToolsPageProps {
 
 const moreTools = [
   { id: 'interactive-lesson', icon: '🎓', title: 'Lessons', desc: 'Turn text into engaging interactive lessons', gradient: 'from-violet-400 to-purple-500', page: 'interactive-lesson', free: false },
-  { id: 'summarizer', icon: '📋', title: 'Summarize', desc: 'Condense papers and articles instantly', gradient: 'from-teal-400 to-cyan-500', page: 'summarizer', free: false },
-  { id: 'humanizer', icon: '✨', title: 'Humanize', desc: 'Transform AI text into natural human writing', gradient: 'from-violet-400 to-purple-500', page: 'humanizer', free: false },
   { id: 'citation-generator-tool', icon: '📚', title: 'Citation Generator', desc: 'Format citations in APA, MLA, Chicago, Harvard', gradient: 'from-sky-400 to-blue-500', page: 'citation-generator-tool', free: true },
   { id: 'word-counter', icon: '📊', title: 'Word Counter', desc: 'Count words, characters, sentences & reading time', gradient: 'from-blue-400 to-indigo-500', page: 'word-counter', free: true },
   { id: 'essay-outline', icon: '📋', title: 'Essay Outline', desc: 'Generate structured outlines for any essay type', gradient: 'from-teal-400 to-cyan-500', page: 'essay-outline', free: true },

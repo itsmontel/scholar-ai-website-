@@ -9,7 +9,7 @@ interface AnalysisAnimationProps {
   isPopup?: boolean;
   onComplete?: () => void;
   isComplete?: boolean;
-  variant?: 'analyze' | 'citations' | 'lesson';
+  variant?: 'analyze' | 'citations' | 'lesson' | 'studyPack';
 }
 
 const analysisSteps = [
@@ -48,6 +48,18 @@ const lessonSteps = [
   { text: 'Almost ready...', icon: '🚀' }
 ];
 
+const studyPackSteps = [
+  { text: 'Reading your notes...', icon: '📖' },
+  { text: 'Creating your lesson...', icon: '🎓' },
+  { text: 'Building flashcards...', icon: '🃏' },
+  { text: 'Generating quiz questions...', icon: '📝' },
+  { text: 'Building crossword puzzle...', icon: '🧩' },
+  { text: 'Preparing Crater Blast...', icon: '💥' },
+  { text: 'Finalizing study pack...', icon: '✨' },
+  { text: 'Almost ready...', icon: '🚀' },
+  { text: 'Your study pack is ready!', icon: '✅' }
+];
+
 const AnalysisAnimation: React.FC<AnalysisAnimationProps> = ({
   size = 'md',
   text,
@@ -71,7 +83,10 @@ const AnalysisAnimation: React.FC<AnalysisAnimationProps> = ({
     lg: 'w-16 h-16'
   };
 
-  const steps = variant === 'citations' ? citationSteps : variant === 'lesson' ? lessonSteps : analysisSteps;
+  const steps = variant === 'citations' ? citationSteps 
+    : variant === 'lesson' ? lessonSteps 
+    : variant === 'studyPack' ? studyPackSteps 
+    : analysisSteps;
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -132,13 +147,16 @@ const AnalysisAnimation: React.FC<AnalysisAnimationProps> = ({
               <ScholarMascot
                 size={140}
                 animated={true}
-                pose={variant === 'citations' ? 'studying' : 'analyzing'}
+                pose={variant === 'citations' ? 'studying' : variant === 'studyPack' ? 'studying' : 'analyzing'}
               />
             </div>
 
             {/* Title */}
             <h3 className="text-xl font-bold text-gray-900 mb-2">
-              {variant === 'citations' ? 'Finding Citations' : variant === 'lesson' ? 'Creating Your Lessons' : 'AI Analysis in Progress'}
+              {variant === 'citations' ? 'Finding Citations' 
+                : variant === 'lesson' ? 'Creating Your Lessons' 
+                : variant === 'studyPack' ? 'Creating Your Study Pack' 
+                : 'AI Analysis in Progress'}
             </h3>
             
             {/* Current step with icon */}
@@ -174,7 +192,9 @@ const AnalysisAnimation: React.FC<AnalysisAnimationProps> = ({
                   ? '💡 Tip: We search millions of peer-reviewed sources in your citation style.'
                   : variant === 'lesson'
                     ? '💡 Tip: One click = 3 unique lessons! Visual Cards, Step-by-Step, and Story Mode.'
-                    : '💡 Tip: Our AI analyzes structure, grammar, citations, and more!'}
+                    : variant === 'studyPack'
+                      ? '💡 Tip: One generation = lesson, flashcards, quiz, crossword & Crater Blast!'
+                      : '💡 Tip: Our AI analyzes structure, grammar, citations, and more!'}
               </p>
             </div>
           </div>

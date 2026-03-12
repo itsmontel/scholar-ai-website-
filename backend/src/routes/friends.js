@@ -1,8 +1,17 @@
 const express = require('express');
+const { createClient } = require('@supabase/supabase-js');
 const { authenticateToken } = require('../middleware/auth');
 const friendsService = require('../services/friendsService');
+const { computeStreakFromDates } = require('../services/streakService');
 
 const router = express.Router();
+
+function getSupabase() {
+  return createClient(
+    process.env.SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
+  );
+}
 
 // @route   GET /api/friends/my-code
 // @desc    Get current user's friend code
@@ -60,6 +69,49 @@ router.get('/', authenticateToken, async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to get friends'
+    });
+  }
+});
+
+// @route   GET /api/friends/streaks
+// @desc    Get current streak for each friend
+// @access  Private
+router.get('/streaks', authenticateToken, async (req, res) => {
+  try {
+    const friends = await friendsService.getFriends(req.user.id);
+    if (friends.length === 0) {
+      return res.json({ success: true, data: [] });
+    }
+
+    const friendIds = friends.map(f => f.id);
+    const supabase = getSupabase();
+
+    const { data: rows, error } = await supabase
+      .from('user_login_dates')
+      .select('user_id, login_date')
+      .in('user_id', friendIds)
+      .order('login_date', { ascending: false });
+
+    if (error) throw error;
+
+    const byUser = {};
+    for (const r of rows || []) {
+      if (!byUser[r.user_id]) byUser[r.user_id] = [];
+      byUser[r.user_id].push(r.login_date);
+    }
+
+    const result = friendIds.map(userId => {
+      const dates = byUser[userId] || [];
+      const { currentStreak } = computeStreakFromDates(dates);
+      return { userId, currentStreak };
+    });
+
+    res.json({ success: true, data: result });
+  } catch (error) {
+    console.error('Get friend streaks error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to get friend streaks'
     });
   }
 });

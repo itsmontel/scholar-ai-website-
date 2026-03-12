@@ -138,14 +138,16 @@ async function handleCheckoutSessionCompleted(session) {
 
     // Record subscription in database using PostgreSQL
     try {
+      const cancelAtPeriodEnd = Boolean(subscription.cancel_at_period_end);
       await query(
-        `INSERT INTO subscriptions (user_id, stripe_subscription_id, stripe_customer_id, plan, status, current_period_start, current_period_end, created_at, updated_at)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), NOW())
+        `INSERT INTO subscriptions (user_id, stripe_subscription_id, stripe_customer_id, plan, status, current_period_start, current_period_end, cancel_at_period_end, created_at, updated_at)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW(), NOW())
          ON CONFLICT (stripe_subscription_id) DO UPDATE SET
          plan = EXCLUDED.plan,
          status = EXCLUDED.status,
          current_period_start = EXCLUDED.current_period_start,
          current_period_end = EXCLUDED.current_period_end,
+         cancel_at_period_end = EXCLUDED.cancel_at_period_end,
          updated_at = NOW()`,
         [
           user.id,
@@ -154,7 +156,8 @@ async function handleCheckoutSessionCompleted(session) {
           plan,
           subscription.status,
           new Date(subscription.current_period_start * 1000),
-          new Date(subscription.current_period_end * 1000)
+          new Date(subscription.current_period_end * 1000),
+          cancelAtPeriodEnd
         ]
       );
     } catch (subError) {
@@ -240,19 +243,22 @@ async function handleSubscriptionUpdated(subscription) {
     }
 
     // Update subscription in database using PostgreSQL
+    const cancelAtPeriodEnd = Boolean(subscription.cancel_at_period_end);
     await query(
       `UPDATE subscriptions SET
         plan = $1,
         status = $2,
         current_period_start = $3,
         current_period_end = $4,
+        cancel_at_period_end = $5,
         updated_at = NOW()
-      WHERE stripe_subscription_id = $5`,
+      WHERE stripe_subscription_id = $6`,
       [
         plan,
         subscription.status,
         new Date(subscription.current_period_start * 1000),
         new Date(subscription.current_period_end * 1000),
+        cancelAtPeriodEnd,
         subscription.id
       ]
     );

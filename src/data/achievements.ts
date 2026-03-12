@@ -8,8 +8,6 @@ export interface AchievementStats {
   crosswords_count: number;
   citations_count: number;
   lessons_count: number;
-  lesson_styles_used_session: number;
-  lesson_styles_used_this_session: string[];
   longest_streak: number;
   current_streak: number;
   used_after_10pm: boolean;
@@ -51,6 +49,8 @@ export interface AchievementStats {
   // Focus Mode
   focus_mode_unlocks_count: number;
   focus_mode_sites_blocked: number;
+  // Study Packs (unified study tool generation)
+  study_packs_count: number;
 }
 
 export interface Badge {
@@ -100,11 +100,8 @@ export const BADGES: Badge[] = [
   { id: 'first_steps', name: 'First Steps', creatureName: 'Blobby', description: 'Upload your first document', xp: 10, category: 'getting-started', rarity: 'common', condition: (s) => s.uploads_count >= 1, conditionText: 'Upload 1 document' },
   { id: 'brain_spark', name: 'Brain Spark', creatureName: 'Sparky', description: 'Analyze your first paper', xp: 15, category: 'getting-started', rarity: 'common', condition: (s) => s.analyses_count >= 1, conditionText: 'Analyze 1 paper' },
   { id: 'word_wizard', name: 'Word Wizard', creatureName: 'Mystiq', description: 'Humanize your first text', xp: 15, category: 'getting-started', rarity: 'common', condition: (s) => s.humanize_count >= 1, conditionText: 'Humanize 1 text' },
-  { id: 'flash_master', name: 'Flash Master', creatureName: 'Flashy', description: 'Create your first flashcard set', xp: 10, category: 'getting-started', rarity: 'common', condition: (s) => s.flashcards_count >= 1, conditionText: 'Create 1 flashcard set' },
-  { id: 'quiz_whiz', name: 'Quiz Whiz', creatureName: 'Hootsworth', description: 'Complete your first quiz', xp: 10, category: 'getting-started', rarity: 'common', condition: (s) => s.quizzes_count >= 1, conditionText: 'Complete 1 quiz' },
   { id: 'citation_hunter', name: 'Citation Hunter', creatureName: 'Snoop', description: 'Find your first citation', xp: 10, category: 'getting-started', rarity: 'common', condition: (s) => s.citations_count >= 1, conditionText: 'Find 1 citation' },
   { id: 'summary_sage', name: 'Summary Sage', creatureName: 'Scrollie', description: 'Summarize your first paper', xp: 10, category: 'getting-started', rarity: 'common', condition: (s) => s.summaries_count >= 1, conditionText: 'Summarize 1 paper' },
-  { id: 'puzzle_pro', name: 'Puzzle Pro', creatureName: 'Puzzler', description: 'Complete your first crossword', xp: 15, category: 'getting-started', rarity: 'uncommon', condition: (s) => s.crosswords_count >= 1, conditionText: 'Complete 1 crossword' },
   { id: 'explorer', name: 'Badge Explorer', creatureName: 'Peeker', description: 'Visit the badges page', xp: 5, category: 'getting-started', rarity: 'common', condition: (s) => s.visited_badges, conditionText: 'Visit the Badges page' },
 
   // ═══════════════════════════════════════════════
@@ -122,18 +119,11 @@ export const BADGES: Badge[] = [
   // ═══════════════════════════════════════════════
   // MASTERY (18 badges)
   // ═══════════════════════════════════════════════
-  { id: 'quiz_champion', name: 'Quiz Champion', creatureName: 'Champ', description: 'Complete 5 quizzes', xp: 25, category: 'mastery', rarity: 'rare', condition: (s) => s.quizzes_count >= 5, conditionText: 'Complete 5 quizzes' },
-  { id: 'quiz_addict', name: 'Quiz Addict', creatureName: 'Quizilla', description: 'Complete 10 quizzes', xp: 40, category: 'mastery', rarity: 'epic', condition: (s) => s.quizzes_count >= 10, conditionText: 'Complete 10 quizzes' },
-  { id: 'quiz_legend', name: 'Quiz Legend', creatureName: 'Quizor', description: 'Complete 25 quizzes', xp: 75, category: 'mastery', rarity: 'legendary', condition: (s) => s.quizzes_count >= 25, conditionText: 'Complete 25 quizzes' },
   { id: 'paper_shredder', name: 'Paper Shredder', creatureName: 'Shredz', description: 'Analyze 5 papers', xp: 25, category: 'mastery', rarity: 'rare', condition: (s) => s.analyses_count >= 5, conditionText: 'Analyze 5 papers' },
   { id: 'analysis_master', name: 'Analysis Master', creatureName: 'Analytix', description: 'Analyze 10 papers', xp: 40, category: 'mastery', rarity: 'epic', condition: (s) => s.analyses_count >= 10, conditionText: 'Analyze 10 papers' },
   { id: 'analysis_legend', name: 'Analysis Legend', creatureName: 'Analytor', description: 'Analyze 25 papers', xp: 75, category: 'mastery', rarity: 'legendary', condition: (s) => s.analyses_count >= 25, conditionText: 'Analyze 25 papers' },
-  { id: 'flashcard_fiend', name: 'Flashcard Fiend', creatureName: 'Flippy', description: 'Create 3 flashcard sets', xp: 20, category: 'mastery', rarity: 'uncommon', condition: (s) => s.flashcards_count >= 3, conditionText: 'Create 3 flashcard sets' },
-  { id: 'flash_genius', name: 'Flash Genius', creatureName: 'Cardano', description: 'Create 10 flashcard sets', xp: 40, category: 'mastery', rarity: 'epic', condition: (s) => s.flashcards_count >= 10, conditionText: 'Create 10 flashcard sets' },
   { id: 'humanize_hero', name: 'Humanize Hero', creatureName: 'Morpher', description: 'Humanize 5 texts', xp: 25, category: 'mastery', rarity: 'rare', condition: (s) => s.humanize_count >= 5, conditionText: 'Humanize 5 texts' },
   { id: 'humanize_legend', name: 'Humanize Legend', creatureName: 'Metamorph', description: 'Humanize 15 texts', xp: 50, category: 'mastery', rarity: 'epic', condition: (s) => s.humanize_count >= 15, conditionText: 'Humanize 15 texts' },
-  { id: 'crossword_king', name: 'Crossword King', creatureName: 'Kingy', description: 'Complete 3 crosswords', xp: 20, category: 'mastery', rarity: 'uncommon', condition: (s) => s.crosswords_count >= 3, conditionText: 'Complete 3 crosswords' },
-  { id: 'crossword_emperor', name: 'Crossword Emperor', creatureName: 'Gridlord', description: 'Complete 10 crosswords', xp: 40, category: 'mastery', rarity: 'epic', condition: (s) => s.crosswords_count >= 10, conditionText: 'Complete 10 crosswords' },
   { id: 'citation_master', name: 'Citation Master', creatureName: 'Bookwyrm', description: 'Find 10 citations', xp: 30, category: 'mastery', rarity: 'epic', condition: (s) => s.citations_count >= 10, conditionText: 'Find 10 citations' },
   { id: 'citation_legend', name: 'Citation Legend', creatureName: 'Librax', description: 'Find 25 citations', xp: 50, category: 'mastery', rarity: 'legendary', condition: (s) => s.citations_count >= 25, conditionText: 'Find 25 citations' },
   { id: 'summary_scholar', name: 'Summary Scholar', creatureName: 'Sage', description: 'Summarize 5 papers', xp: 25, category: 'mastery', rarity: 'rare', condition: (s) => s.summaries_count >= 5, conditionText: 'Summarize 5 papers' },
@@ -220,15 +210,16 @@ export const BADGES: Badge[] = [
   { id: 'export_empire', name: 'Export Empire', creatureName: 'Empirex', description: 'Export 25 study tools', xp: 75, category: 'special', rarity: 'epic', condition: (s) => s.exports_count >= 25, conditionText: 'Export 25 study tools' },
 
   // ═══════════════════════════════════════════════
-  // INTERACTIVE LESSONS (7 badges)
+  // STUDY PACKS (8 badges) — unified study tool generation
   // ═══════════════════════════════════════════════
-  { id: 'lesson_learner', name: 'Lesson Learner', creatureName: 'Slidely', description: 'Generate your first interactive lesson', xp: 15, category: 'getting-started', rarity: 'common', condition: (s) => (s.lessons_count || 0) >= 1, conditionText: 'Generate 1 lesson' },
-  { id: 'lesson_explorer', name: 'Lesson Explorer', creatureName: 'Explorix', description: 'Generate 3 interactive lessons', xp: 25, category: 'mastery', rarity: 'uncommon', condition: (s) => (s.lessons_count || 0) >= 3, conditionText: 'Generate 3 lessons' },
-  { id: 'lesson_lover', name: 'Lesson Lover', creatureName: 'Lovely', description: 'Generate 5 interactive lessons', xp: 35, category: 'mastery', rarity: 'rare', condition: (s) => (s.lessons_count || 0) >= 5, conditionText: 'Generate 5 lessons' },
-  { id: 'lesson_master', name: 'Lesson Master', creatureName: 'Masterly', description: 'Generate 10 interactive lessons', xp: 50, category: 'mastery', rarity: 'epic', condition: (s) => (s.lessons_count || 0) >= 10, conditionText: 'Generate 10 lessons' },
-  { id: 'lesson_legend', name: 'Lesson Legend', creatureName: 'Legendix', description: 'Generate 25 interactive lessons', xp: 75, category: 'mastery', rarity: 'legendary', condition: (s) => (s.lessons_count || 0) >= 25, conditionText: 'Generate 25 lessons' },
-  { id: 'lesson_centurion', name: 'Lesson Centurion', creatureName: 'Lessonix', description: 'Generate 100 interactive lessons', xp: 150, category: 'mastery', rarity: 'legendary', condition: (s) => (s.lessons_count || 0) >= 100, conditionText: 'Generate 100 lessons' },
-  { id: 'triple_threat', name: 'Triple Threat', creatureName: 'Triplix', description: 'Use all 3 lesson styles (Visual, Step-by-Step, Story) in one session', xp: 30, category: 'special', rarity: 'rare', condition: (s) => (s.lesson_styles_used_session || 0) >= 3, conditionText: 'Use all 3 lesson styles in one session' },
+  { id: 'study_pack_pioneer', name: 'Study Pack Pioneer', creatureName: 'Packly', description: 'Generate your first Study Pack', xp: 15, category: 'getting-started', rarity: 'common', condition: (s) => (s.study_packs_count || 0) >= 1, conditionText: 'Generate 1 Study Pack' },
+  { id: 'study_pack_explorer', name: 'Study Pack Explorer', creatureName: 'Explorix', description: 'Generate 3 Study Packs', xp: 25, category: 'mastery', rarity: 'uncommon', condition: (s) => (s.study_packs_count || 0) >= 3, conditionText: 'Generate 3 Study Packs' },
+  { id: 'study_pack_pro', name: 'Study Pack Pro', creatureName: 'Studix', description: 'Generate 5 Study Packs', xp: 35, category: 'mastery', rarity: 'rare', condition: (s) => (s.study_packs_count || 0) >= 5, conditionText: 'Generate 5 Study Packs' },
+  { id: 'study_pack_master', name: 'Study Pack Master', creatureName: 'Masterly', description: 'Generate 10 Study Packs', xp: 50, category: 'mastery', rarity: 'epic', condition: (s) => (s.study_packs_count || 0) >= 10, conditionText: 'Generate 10 Study Packs' },
+  { id: 'study_pack_champion', name: 'Study Pack Champion', creatureName: 'Champton', description: 'Generate 25 Study Packs', xp: 75, category: 'mastery', rarity: 'epic', condition: (s) => (s.study_packs_count || 0) >= 25, conditionText: 'Generate 25 Study Packs' },
+  { id: 'study_pack_legend', name: 'Study Pack Legend', creatureName: 'Legendix', description: 'Generate 50 Study Packs', xp: 100, category: 'mastery', rarity: 'legendary', condition: (s) => (s.study_packs_count || 0) >= 50, conditionText: 'Generate 50 Study Packs' },
+  { id: 'study_pack_centurion', name: 'Study Pack Centurion', creatureName: 'Centurion', description: 'Generate 100 Study Packs', xp: 150, category: 'mastery', rarity: 'legendary', condition: (s) => (s.study_packs_count || 0) >= 100, conditionText: 'Generate 100 Study Packs' },
+  { id: 'study_pack_god', name: 'Study Pack God', creatureName: 'Packgod', description: 'Generate 200 Study Packs', xp: 250, category: 'mastery', rarity: 'legendary', condition: (s) => (s.study_packs_count || 0) >= 200, conditionText: 'Generate 200 Study Packs' },
 
   // ═══════════════════════════════════════════════
   // FOCUS MODE (5 badges)
@@ -257,8 +248,6 @@ function defaultStats(): AchievementStats {
     crosswords_count: 0,
     citations_count: 0,
     lessons_count: 0,
-    lesson_styles_used_session: 0,
-    lesson_styles_used_this_session: [],
     longest_streak: 0,
     current_streak: 0,
     used_after_10pm: false,
@@ -293,6 +282,7 @@ function defaultStats(): AchievementStats {
     study_sessions_count: 0,
     focus_mode_unlocks_count: 0,
     focus_mode_sites_blocked: 0,
+    study_packs_count: 0,
   };
 }
 
@@ -352,13 +342,13 @@ export function mergeFromServer(serverStats: Record<string, unknown>, serverBadg
     'lessons_count',
     'longest_streak', 'current_streak', 'tools_used_session', 'study_tools_session',
     'exports_count', 'copies_count',
-    // New stats
     'calendar_events_count', 'friend_requests_sent', 'friends_count', 'shares_count',
     'quick_review_count', 'quick_review_perfect_scores', 'quick_review_current_streak',
-    'quick_review_longest_streak',     'crater_blast_games', 'crater_blast_perfect_games',
+    'quick_review_longest_streak', 'crater_blast_games', 'crater_blast_perfect_games',
     'crater_blast_high_score', 'total_study_tools_created', 'total_words_analyzed',
     'documents_in_single_day', 'study_sessions_count',
     'focus_mode_unlocks_count', 'focus_mode_sites_blocked',
+    'study_packs_count',
   ];
   const merged = { ...local };
   for (const key of numericKeys) {
@@ -377,10 +367,6 @@ export function mergeFromServer(serverStats: Record<string, unknown>, serverBadg
   }
   if (Array.isArray(serverStats.unique_friends_shared_with)) {
     merged.unique_friends_shared_with = [...new Set([...(merged.unique_friends_shared_with || []), ...(serverStats.unique_friends_shared_with as string[])])];
-  }
-  if (Array.isArray(serverStats.lesson_styles_used_this_session)) {
-    merged.lesson_styles_used_this_session = [...new Set([...(merged.lesson_styles_used_this_session || []), ...(serverStats.lesson_styles_used_this_session as string[])])];
-    merged.lesson_styles_used_session = Math.max(merged.lesson_styles_used_session || 0, merged.lesson_styles_used_this_session.length);
   }
   if (serverStats.paid_since && (!merged.paid_since || new Date(serverStats.paid_since as string) < new Date(merged.paid_since))) {
     merged.paid_since = serverStats.paid_since as string;
@@ -442,6 +428,7 @@ const TOOL_TYPE_MAP: Record<string, string> = {
   crosswords_count: 'crossword',
   citations_count: 'citation',
   lessons_count: 'lesson',
+  study_packs_count: 'study_pack',
 };
 
 export function trackAction(action: keyof AchievementStats, value?: number | boolean): string[] {
@@ -565,22 +552,47 @@ export function trackCraterBlastGame(isPerfect: boolean = false, score: number =
   return checkAndUnlockBadges(stats);
 }
 
-export function trackLessonStyleUsed(style: 'visual' | 'stepByStep' | 'story'): string[] {
+/**
+ * Track a unified Study Pack generation.
+ * This increments all individual tool counters (quiz, flashcards, crossword, lesson)
+ * plus the study_packs_count, and updates total_study_tools_created.
+ */
+export function trackStudyPackGenerated(wordCount: number = 0): string[] {
   const stats = getStats();
-  const used = stats.lesson_styles_used_this_session || [];
-  if (!used.includes(style)) {
-    stats.lesson_styles_used_this_session = [...used, style];
-    stats.lesson_styles_used_session = stats.lesson_styles_used_this_session.length;
+  
+  // Increment the study pack counter
+  stats.study_packs_count = (stats.study_packs_count || 0) + 1;
+  
+  // A study pack creates 5 different study tools, so increment each
+  stats.quizzes_count = (stats.quizzes_count || 0) + 1;
+  stats.flashcards_count = (stats.flashcards_count || 0) + 1;
+  stats.crosswords_count = (stats.crosswords_count || 0) + 1;
+  stats.lessons_count = (stats.lessons_count || 0) + 1;
+  // Crater Blast questions are generated but we track games played separately
+  
+  // Update total study tools (5 tools per pack)
+  stats.total_study_tools_created = (stats.total_study_tools_created || 0) + 5;
+  
+  // Track words analyzed
+  if (wordCount > 0) {
+    stats.total_words_analyzed = (stats.total_words_analyzed || 0) + wordCount;
   }
+  
+  // Track tool diversity for all_rounder badge
+  const toolsEver = stats.tools_used_ever || [];
+  const newTools = ['quiz', 'flashcard', 'crossword', 'lesson', 'study_pack'];
+  for (const tool of newTools) {
+    if (!toolsEver.includes(tool)) {
+      toolsEver.push(tool);
+    }
+  }
+  stats.tools_used_ever = toolsEver;
+  stats.tools_used_session = (stats.tools_used_session || 0) + 1;
+  stats.study_tools_session = (stats.study_tools_session || 0) + 5;
+  
+  applyTimeChecks(stats);
   saveStats(stats);
   return checkAndUnlockBadges(stats);
-}
-
-export function resetLessonStyleSession(): void {
-  const stats = getStats();
-  stats.lesson_styles_used_this_session = [];
-  stats.lesson_styles_used_session = 0;
-  saveStats(stats);
 }
 
 export function trackStudyToolCreated(wordCount: number = 0): string[] {

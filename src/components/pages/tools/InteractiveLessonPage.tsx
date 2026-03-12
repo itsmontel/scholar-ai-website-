@@ -3,7 +3,7 @@ import Header from '../../common/Header';
 import Footer from '../../common/Footer';
 import ScholarMascot from '../../common/ScholarMascot';
 import AnalysisAnimation from '../../common/AnalysisAnimation';
-import { trackAction, trackLessonStyleUsed, resetLessonStyleSession } from '../../../data/achievements';
+import { trackAction } from '../../../data/achievements';
 import { getResetsInText } from '../../../utils/usageReset';
 
 interface InteractiveLessonPageProps {
@@ -97,13 +97,6 @@ const InteractiveLessonPage = ({ onNavigate, user, onLogout, embedded = false, o
   const maxWords = isFreeUser ? 5000 : 10000;
   const wordCount = inputText.trim().split(/\s+/).filter(Boolean).length;
 
-  // Track lesson style for Triple Threat badge (use all 3 styles in one session)
-  useEffect(() => {
-    if (lessonResult) {
-      trackLessonStyleUsed(lessonStyle);
-    }
-  }, [lessonResult, lessonStyle]);
-
   useEffect(() => {
     document.title = 'Interactive Lesson Generator – Turn Text into Fun Lessons | WriteScholar';
     const metaDescription = document.querySelector('meta[name="description"]');
@@ -147,6 +140,11 @@ const InteractiveLessonPage = ({ onNavigate, user, onLogout, embedded = false, o
           });
           setLessonStyle(style);
           setSavedLessonId(parsed.id);
+          // Set initial slide index if provided (when enlarging from study pack viewer)
+          const initialIdx = parsed.initial_slide_index;
+          if (initialIdx != null && initialIdx >= 0 && initialIdx < parsed.questions.length) {
+            setCurrentSlide(initialIdx);
+          }
         }
         localStorage.removeItem('savedLesson');
       } catch (err) {
@@ -226,7 +224,6 @@ const InteractiveLessonPage = ({ onNavigate, user, onLogout, embedded = false, o
     setRevealedItems(new Set());
     setSavedLessonId(null);
     setLessonStyle('visual'); // Start with visual
-    resetLessonStyleSession();
 
     try {
       const token = localStorage.getItem('authToken') || localStorage.getItem('token');
@@ -503,13 +500,17 @@ const InteractiveLessonPage = ({ onNavigate, user, onLogout, embedded = false, o
       {isLessonFullScreen && (
         <div className="sticky top-0 z-20 flex items-center gap-3 px-4 sm:px-6 py-3 sm:py-4 bg-white/95 dark:bg-stone-800/95 backdrop-blur border-b border-stone-200 dark:border-stone-700">
           <button
-            onClick={showQuiz ? backToLesson : () => { 
-              if (embedded && onBack) onBack(); 
-              else if (typeof sessionStorage !== 'undefined' && sessionStorage.getItem('writescholar_enlarge_from_dashboard') === 'lesson') onNavigate('dashboard'); 
-              else onNavigate('quiz-history'); 
+            onClick={showQuiz ? backToLesson : () => {
+              if (embedded && onBack) onBack();
+              else if (typeof sessionStorage !== 'undefined' && sessionStorage.getItem('writescholar_return_to_study_pack_viewer') === 'true') {
+                sessionStorage.removeItem('writescholar_return_to_study_pack_viewer');
+                sessionStorage.setItem('writescholar_study_pack_return_state', JSON.stringify({ slideIndex: currentSlide }));
+                onNavigate('study-pack-viewer');
+              } else if (typeof sessionStorage !== 'undefined' && sessionStorage.getItem('writescholar_enlarge_from_dashboard') === 'lesson') onNavigate('dashboard');
+              else onNavigate('quiz-history');
             }}
             className="p-2.5 -ml-2 text-stone-500 hover:text-stone-700 dark:text-stone-400 dark:hover:text-stone-200 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-700 transition-colors"
-            aria-label={showQuiz ? 'Back to lesson' : typeof sessionStorage !== 'undefined' && sessionStorage.getItem('writescholar_enlarge_from_dashboard') === 'lesson' ? 'Back to dashboard' : 'Back to study tools'}
+            aria-label={showQuiz ? 'Back to lesson' : typeof sessionStorage !== 'undefined' && sessionStorage.getItem('writescholar_return_to_study_pack_viewer') === 'true' ? 'Back to study pack' : typeof sessionStorage !== 'undefined' && sessionStorage.getItem('writescholar_enlarge_from_dashboard') === 'lesson' ? 'Back to dashboard' : 'Back to study tools'}
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
           </button>
@@ -1041,7 +1042,6 @@ One click = 3 unique lessons!
                           setLessonStyle(opt.value as any);
                           setCurrentSlide(0);
                           setRevealedItems(new Set());
-                          trackLessonStyleUsed(opt.value as 'visual' | 'stepByStep' | 'story');
                         }
                       }}
                       title={opt.description}

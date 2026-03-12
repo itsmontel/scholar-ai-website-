@@ -17,6 +17,7 @@ interface Friend {
   friend_code: string;
   friendshipId: string;
   since: string;
+  currentStreak?: number;
 }
 
 interface FriendRequest {
@@ -155,10 +156,39 @@ const FriendsPage = ({ onNavigate, user, onLogout }: FriendsPageProps) => {
       });
       const data = await response.json();
       if (data.success) {
-        setFriends(data.data || []);
+        const friendsList: Friend[] = data.data || [];
+        setFriends(friendsList);
+        fetchFriendStreaks(friendsList);
       }
     } catch (err) {
       console.error('Error fetching friends:', err);
+    }
+  };
+
+  const fetchFriendStreaks = async (friendsList: Friend[]) => {
+    if (friendsList.length === 0) return;
+    try {
+      const res = await fetch(`${API_URL}/friends/streaks`, {
+        headers: getAuthHeaders()
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        console.warn('[Friends] Streaks API error:', data?.message || res.status);
+        return;
+      }
+      if (data.success && data.data) {
+        const streakMap: Record<string, number> = {};
+        for (const s of data.data) {
+          const id = s.userId ?? s.id;
+          if (id) streakMap[id] = s.currentStreak ?? 0;
+        }
+        setFriends(prev => prev.map(f => ({
+          ...f,
+          currentStreak: streakMap[f.id] ?? f.currentStreak,
+        })));
+      }
+    } catch (err) {
+      console.warn('[Friends] Failed to fetch streaks:', err);
     }
   };
 
@@ -694,13 +724,23 @@ const FriendsPage = ({ onNavigate, user, onLogout }: FriendsPageProps) => {
                       friends.map((friend) => (
                         <div key={friend.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
                           <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                            <div className="relative w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
                               <span className="text-purple-600 font-semibold text-lg">
                                 {(friend.first_name?.[0] || friend.email?.[0] || '?').toUpperCase()}
                               </span>
+                              {friend.currentStreak != null && friend.currentStreak > 0 && (
+                                <span className="absolute -bottom-1 -right-1 flex items-center gap-0.5 px-1.5 py-0.5 bg-gradient-to-r from-orange-400 to-amber-500 text-white text-[10px] font-bold rounded-full shadow-sm leading-none">
+                                  <span className="text-[9px]">🔥</span>{friend.currentStreak}
+                                </span>
+                              )}
                             </div>
                             <div>
-                              <h4 className="font-medium text-gray-900">{getName(friend)}</h4>
+                              <div className="flex items-center gap-2">
+                                <h4 className="font-medium text-gray-900">{getName(friend)}</h4>
+                                {friend.currentStreak != null && friend.currentStreak > 0 && (
+                                  <span className="text-xs text-amber-600 font-semibold">{friend.currentStreak} day streak</span>
+                                )}
+                              </div>
                               <p className="text-sm text-gray-500">
                                 Friends since {formatDate(friend.since)}
                               </p>

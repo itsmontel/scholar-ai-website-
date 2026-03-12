@@ -4430,6 +4430,75 @@ Rules:
       return { questions: [], displayCount };
     }
   }
+
+  async generateVisualLesson(text, userPlan = 'free') {
+    if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY === 'your_openai_api_key_here') {
+      throw new Error('OpenAI API key not configured');
+    }
+
+    const selectedModel = 'gpt-4.1-nano';
+    const words = text.trim().split(/\s+/);
+    const first10kWords = words.slice(0, 10000).join(' ');
+    const wordCount = Math.min(words.length, 10000);
+    const slideCount = Math.min(25, Math.max(6, Math.ceil(wordCount / 400)));
+
+    const systemPrompt = `You are a FUN, energetic educational content creator who makes learning feel like scrolling through social media. Create a VISUAL CARDS lesson that's colorful, emoji-heavy, and super engaging.
+
+Your style:
+- Use LOTS of emojis (2-3 per slide title)
+- Write like you're excited to share cool facts
+- Use phrases like "Did you know?", "Fun fact!", "Mind-blown moment:", "Pro tip:"
+- Make each card feel like a quick, satisfying social media post
+- Include "clickable" bullet points that reveal surprising details
+- Highlight vocabulary with Key Term callouts
+
+Create ${slideCount} slides. Each slide needs:
+- type: one of "intro", "concept", "example", "keypoint", "funfact", "summary"
+- title: emoji-rich, catchy title (like a TikTok caption)
+- content: 2-3 punchy sentences with personality
+- emoji: the MAIN emoji for this card
+- bulletPoints: 3-5 reveal items for concept/keypoint types (make them interesting facts!)
+- highlightedTerm: optional vocabulary word
+
+JSON format:
+{
+  "title": "Catchy Lesson Title Here!",
+  "slides": [
+    {"id": 1, "type": "intro", "title": "Welcome! Let's Learn Something Cool", "content": "Get ready...", "emoji": "🎉"},
+    {"id": 2, "type": "concept", "title": "Mind = Blown", "content": "Here's the thing...", "emoji": "💡", "bulletPoints": ["Fact 1", "Fact 2", "Fact 3"], "highlightedTerm": "Key word"}
+  ],
+  "estimatedReadTime": ${Math.ceil(slideCount * 1.2)}
+}
+
+Rules:
+- Be enthusiastic and fun, not boring or academic
+- Each card should feel complete on its own
+- Use emojis strategically to highlight key points
+- Never use em dashes. Use commas, periods, or colons instead.
+- Return ONLY valid JSON`;
+
+    const userMessage = `Transform this study material into a FUN, emoji-rich visual cards lesson. Make it feel like scrolling through engaging social media content. Material:\n\n${first10kWords}`;
+
+    return this.generateSingleLesson(systemPrompt, userMessage, selectedModel, 'visual');
+  }
+
+  async generateStudyPack(text, userPlan = 'free') {
+    const words = text.trim().split(/\s+/);
+    const wordCount = words.length;
+    const quizCount = Math.min(25, Math.max(10, Math.ceil(wordCount / 200)));
+    const flashcardCount = userPlan === 'free' ? 15 : 20;
+    const crosswordWordCount = userPlan === 'free' ? Math.min(10, Math.max(6, Math.ceil(wordCount / 500))) : Math.min(15, Math.max(8, Math.ceil(wordCount / 400)));
+
+    const [quiz, flashcards, crossword, lesson, craterBlast] = await Promise.all([
+      this.generateQuiz(text, 'mixed', 'medium', quizCount, quizCount, userPlan),
+      this.generateFlashcards(text, flashcardCount, userPlan),
+      this.generateCrossword(text, crosswordWordCount, userPlan),
+      this.generateVisualLesson(text, userPlan),
+      this.generateReflexQuestions('notes', text, userPlan),
+    ]);
+
+    return { quiz, flashcards, crossword, lesson, craterBlast };
+  }
 }
 
 module.exports = new AIAnalysisService();

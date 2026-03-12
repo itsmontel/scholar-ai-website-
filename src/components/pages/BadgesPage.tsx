@@ -196,12 +196,10 @@ const BadgesPage = ({ onNavigate, user, onLogout }: BadgesPageProps) => {
             {[
               { label: 'Documents', value: stats.uploads_count, icon: '📄' },
               { label: 'Analyses', value: stats.analyses_count, icon: '🔍' },
+              { label: 'Study Packs', value: (stats as any).study_packs_count || 0, icon: '📚' },
               { label: 'Humanized', value: stats.humanize_count, icon: '✨' },
               { label: 'Summaries', value: stats.summaries_count, icon: '📋' },
-              { label: 'Quizzes', value: stats.quizzes_count, icon: '🎯' },
-              { label: 'Flashcards', value: stats.flashcards_count, icon: '🃏' },
-              { label: 'Crosswords', value: stats.crosswords_count, icon: '🧩' },
-              { label: 'Citations', value: stats.citations_count, icon: '📚' },
+              { label: 'Citations', value: stats.citations_count, icon: '🔗' },
             ].map(stat => (
               <div key={stat.label} className="flex items-center gap-3 p-3 rounded-xl bg-stone-50 dark:bg-stone-700/50">
                 <span className="text-xl">{stat.icon}</span>

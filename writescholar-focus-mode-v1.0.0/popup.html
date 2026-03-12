@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Crimson+Text:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      width: 380px;
+      min-height: 320px;
+      padding: 20px;
+      font-family: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 14px;
+      color: #292524;
+      background: linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%);
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .header img {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+    }
+    .header h1 {
+      font-family: 'Crimson Text', Georgia, serif;
+      font-size: 20px;
+      font-weight: 600;
+      color: #1c1917;
+    }
+    .header .badge {
+      font-size: 11px;
+      font-weight: 700;
+      color: #4f46e5;
+      background: #eef2ff;
+      padding: 4px 10px;
+      border-radius: 8px;
+      margin-left: auto;
+    }
+    .subtitle {
+      color: #57534e;
+      font-size: 13px;
+      line-height: 1.5;
+      margin-bottom: 16px;
+    }
+    .card {
+      background: white;
+      border: 1px solid #e7e5e4;
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+    .status {
+      padding: 12px 14px;
+      border-radius: 12px;
+      margin-bottom: 16px;
+      font-size: 13px;
+      font-weight: 500;
+    }
+    .status.inactive {
+      background: #fef3c7;
+      color: #92400e;
+      border: 1px solid #fde68a;
+    }
+    .status.active {
+      background: #d1fae5;
+      color: #065f46;
+      border: 1px solid #a7f3d0;
+    }
+    .status.error {
+      background: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #fecaca;
+    }
+    button {
+      width: 100%;
+      padding: 12px 16px;
+      border: none;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    button:disabled { opacity: 0.6; cursor: not-allowed; }
+    .btn-primary {
+      background: #8B5CF6;
+      color: white;
+      margin-bottom: 8px;
+    }
+    .btn-primary:hover:not(:disabled) {
+      background: #7C3AED;
+      box-shadow: 0 2px 8px rgba(139, 92, 246, 0.4);
+    }
+    .btn-secondary {
+      background: #f5f5f4;
+      color: #44403c;
+      border: 1px solid #e7e5e4;
+    }
+    .btn-secondary:hover:not(:disabled) {
+      background: #e7e5e4;
+    }
+    a {
+      color: #6366f1;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    a:hover { text-decoration: underline; }
+    .footer {
+      margin-top: 16px;
+      padding-top: 12px;
+      border-top: 1px solid #e7e5e4;
+      font-size: 12px;
+      color: #78716c;
+    }
+    .sites-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: #292524;
+      margin-bottom: 10px;
+    }
+    .sites-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .site-btn {
+      width: auto !important;
+      padding: 8px 14px !important;
+      border-radius: 10px;
+      font-size: 12px !important;
+      font-weight: 600;
+      background: #f5f5f4;
+      color: #57534e;
+      border: 1px solid #e7e5e4;
+    }
+    .site-btn.blocked {
+      background: #8B5CF6;
+      color: white;
+      border: none;
+    }
+    .site-btn:hover:not(:disabled) {
+      opacity: 0.9;
+    }
+    .sites-section { display: none; }
+    .sites-section.visible { display: block; }
+    .add-domain {
+      display: flex;
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .add-domain input {
+      flex: 1;
+      padding: 10px 14px;
+      border: 1px solid #e7e5e4;
+      border-radius: 12px;
+      font-size: 13px;
+      font-family: inherit;
+    }
+    .add-domain input:focus {
+      outline: none;
+      border-color: #6366f1;
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+    }
+    .add-domain input::placeholder {
+      color: #a8a29e;
+    }
+    .add-domain button {
+      width: auto !important;
+      padding: 10px 18px !important;
+    }
+    .btn-mascot {
+      background: #8B5CF6 !important;
+      color: white !important;
+    }
+    .btn-mascot:hover:not(:disabled) {
+      background: #7C3AED !important;
+      box-shadow: 0 2px 8px rgba(139, 92, 246, 0.4);
+    }
+    .actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .actions button { flex: 1; }
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 10px 18px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 600;
+      z-index: 100;
+    }
+    .toast.success {
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+      color: white;
+    }
+    .toast.error { background: #dc2626; color: white; }
+    .setting-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .setting-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #292524;
+    }
+    select {
+      padding: 8px 12px;
+      border: 1px solid #e7e5e4;
+      border-radius: 10px;
+      font-size: 13px;
+      font-family: inherit;
+      background: white;
+      color: #292524;
+      cursor: pointer;
+      min-width: 140px;
+    }
+    select:focus {
+      outline: none;
+      border-color: #6366f1;
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+    }
+    .unlock-timer {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 12px;
+      font-size: 12px;
+    }
+    .unlock-timer-title {
+      font-weight: 700;
+      color: #166534;
+      margin-bottom: 8px;
+      font-size: 13px;
+    }
+    .unlock-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 0;
+      border-bottom: 1px solid #d1fae5;
+    }
+    .unlock-item:last-child {
+      border-bottom: none;
+    }
+    .unlock-domain {
+      font-weight: 600;
+      color: #292524;
+    }
+    .unlock-time {
+      color: #059669;
+      font-weight: 600;
+      font-family: 'Courier New', monospace;
+    }
+    .unlock-time.expired {
+      color: #dc2626;
+    }
+    .quiz-settings { margin-top: 8px; padding-top: 12px; border-top: 1px solid #e7e5e4; }
+    .quiz-count-btns { display: flex; gap: 8px; }
+    .quiz-count-btn {
+      width: auto !important;
+      padding: 6px 14px !important;
+      border-radius: 10px;
+      font-size: 13px !important;
+      font-weight: 600;
+      background: #f5f5f4;
+      color: #57534e;
+      border: 1px solid #e7e5e4;
+      cursor: pointer;
+    }
+    .quiz-count-btn.active {
+      background: #8B5CF6;
+      color: white;
+      border-color: #8B5CF6;
+    }
+    .quiz-count-btn:hover:not(.active) { background: #e7e5e4; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <img src="mascot.png" alt="WriteScholar" />
+    <h1>Focus Mode</h1>
+    <span id="planBadge" class="badge" style="display:none"></span>
+  </div>
+  <p class="subtitle" id="subtitle">Block distracting sites until you answer study questions.</p>
+  <div id="status" class="status inactive">Checking status...</div>
+  <button id="loginBtn" class="btn-primary" style="display:none">Log in at WriteScholar</button>
+  <div id="sitesSection" class="sites-section">
+    <div id="unlockTimer" class="unlock-timer" style="display:none">
+      <div class="unlock-timer-title">🔓 Currently Unlocked</div>
+      <div id="unlockTimerList"></div>
+    </div>
+    <div class="card">
+      <div class="setting-row">
+        <label class="setting-label" for="unlockDuration">Unlock duration:</label>
+        <select id="unlockDuration" style="display:none">
+          <option value="900000">15 minutes</option>
+          <option value="1800000" selected>30 minutes</option>
+          <option value="3600000">1 hour</option>
+          <option value="7200000">2 hours</option>
+          <option value="10800000">3 hours</option>
+          <option value="14400000">4 hours</option>
+          <option value="21600000">6 hours</option>
+          <option value="28800000">8 hours</option>
+          <option value="43200000">12 hours</option>
+          <option value="86400000">24 hours</option>
+        </select>
+      </div>
+      <div class="quiz-settings" id="quizSettings" style="display:none">
+        <div class="setting-row" style="margin-top:12px">
+          <span class="setting-label">Quiz: questions</span>
+          <div class="quiz-count-btns">
+            <button type="button" class="quiz-count-btn" data-val="5">5</button>
+            <button type="button" class="quiz-count-btn" data-val="10">10</button>
+            <button type="button" class="quiz-count-btn" data-val="15">15</button>
+          </div>
+        </div>
+        <div class="setting-row">
+          <span class="setting-label">Pass threshold</span>
+          <select id="passThreshold">
+          </select>
+        </div>
+      </div>
+      <div class="sites-label">Sites to block</div>
+      <div id="sitesGrid" class="sites-grid"></div>
+      <div class="add-domain">
+        <input id="customDomain" type="text" placeholder="youtube.com, instagram.com..." maxlength="100" />
+        <button id="addDomainBtn" class="btn-primary btn-mascot">Add</button>
+      </div>
+    </div>
+  </div>
+  <div id="actionsRow" class="actions" style="display:none">
+    <button id="accountBtn" class="btn-secondary">Account</button>
+    <button id="syncBtn" class="btn-secondary">Sync</button>
+  </div>
+  <div class="footer">
+    <a href="https://writescholar.com/account" target="_blank">Account settings</a>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>

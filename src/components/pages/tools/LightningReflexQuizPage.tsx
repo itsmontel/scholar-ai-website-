@@ -1306,7 +1306,14 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
       {!showMinimalUI && <Header onNavigate={onNavigate} user={user} onLogout={onLogout || (() => {})} currentPage="crater-blast" />}
       {showMinimalUI && (gameState === 'menu' || gameState === 'loading' || gameState === 'ready' || gameState === 'gameover') && (
         <div className="sticky top-0 z-10 flex items-center justify-between px-3 py-2 bg-white/95 backdrop-blur border-b border-stone-200">
-          <button onClick={() => onNavigate('dashboard')} className="p-2 -ml-2 text-stone-500 hover:text-stone-700 rounded-lg hover:bg-stone-100 transition-colors" aria-label="Back to dashboard">
+          <button onClick={() => {
+            if (typeof sessionStorage !== 'undefined' && sessionStorage.getItem('writescholar_return_to_study_pack_viewer') === 'true') {
+              sessionStorage.removeItem('writescholar_return_to_study_pack_viewer');
+              onNavigate('study-pack-viewer');
+            } else {
+              onNavigate('dashboard');
+            }
+          }} className="p-2 -ml-2 text-stone-500 hover:text-stone-700 rounded-lg hover:bg-stone-100 transition-colors" aria-label={typeof sessionStorage !== 'undefined' && sessionStorage.getItem('writescholar_return_to_study_pack_viewer') === 'true' ? 'Back to study pack' : 'Back to dashboard'}>
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
           </button>
           <span className="text-sm font-semibold text-stone-700">Crater Blast</span>

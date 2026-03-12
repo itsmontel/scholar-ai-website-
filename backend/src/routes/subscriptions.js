@@ -604,6 +604,21 @@ router.get('/usage', authenticateToken, async (req, res) => {
       .eq('user_id', userId)
       .gte('created_at', periodStart);
 
+    // Get citation searches this period
+    const { data: citationSearches, error: citationsError } = await supabaseServiceRole
+      .from('citation_searches')
+      .select('id')
+      .eq('user_id', userId)
+      .gte('created_at', periodStart);
+
+    // Get study pack generations this period (recorded in quiz_usage with quiz_type='study_pack')
+    const { data: studyPacks, error: studyPacksError } = await supabaseServiceRole
+      .from('quiz_usage')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('quiz_type', 'study_pack')
+      .gte('created_at', periodStart);
+
     // Calculate current storage used (only existing documents - decreases when files are deleted)
     const { data: currentDocuments, error: currentDocsError } = await supabaseServiceRole
       .from('documents')
@@ -612,22 +627,30 @@ router.get('/usage', authenticateToken, async (req, res) => {
 
     const documentsUploaded = documents ? documents.length : 0;
     const documentsAnalyzed = analyses ? analyses.length : 0;
+    const citationSearchesUsed = citationSearches ? citationSearches.length : 0;
+    const studyPacksGenerated = studyPacks ? studyPacks.length : 0;
     const storageUsed = currentDocuments ? currentDocuments.reduce((total, doc) => total + (doc.file_size || 0), 0) : 0;
 
     // Calculate remaining usage
     const uploadsRemaining = planLimits.documentsPerMonth === -1 ? -1 : Math.max(0, planLimits.documentsPerMonth - documentsUploaded);
     const analysesRemaining = planLimits.analysesPerMonth === -1 ? -1 : Math.max(0, planLimits.analysesPerMonth - documentsAnalyzed);
+    const citationsRemaining = planLimits.citationSearchesPerMonth === -1 ? -1 : Math.max(0, planLimits.citationSearchesPerMonth - citationSearchesUsed);
+    const studyPacksRemaining = planLimits.studyPackGenerationsPerMonth === -1 ? -1 : Math.max(0, planLimits.studyPackGenerationsPerMonth - studyPacksGenerated);
     const storageRemaining = planLimits.maxTotalStorage ? Math.max(0, planLimits.maxTotalStorage - storageUsed) : -1;
 
     res.json({
       success: true,
       documentsUploaded,
       documentsAnalyzed,
+      citationSearchesUsed,
+      studyPacksGenerated,
       storageUsed,
       storageLimit: planLimits.maxTotalStorage,
       storageRemaining,
       uploadsRemaining,
       analysesRemaining,
+      citationsRemaining,
+      studyPacksRemaining,
       plan: subscriptionDetails.plan,
       planLimits,
       periodEnd,

@@ -283,11 +283,39 @@ router.get('/unlock-quiz', authenticateToken, async (req, res) => {
     const tools = [...quizHistory, ...lessonHistory];
     const allItems = [];
 
-    const isQuiz = (t) => !['flashcards', 'crossword'].includes(t.quiz_type);
+    const isStudyPack = (t) => t.quiz_type === 'study_pack';
+    const isQuiz = (t) => !['flashcards', 'crossword', 'study_pack'].includes(t.quiz_type);
     const isFlashcards = (t) => t.quiz_type === 'flashcards';
 
     for (const tool of tools) {
-      if (isQuiz(tool)) {
+      // Handle unified study packs (contains quiz, flashcards, crossword, lesson, craterBlast)
+      if (isStudyPack(tool)) {
+        const packData = tool.questions || {};
+        
+        // Extract quiz questions from study pack
+        const quizData = packData.quiz;
+        if (quizData?.questions?.length) {
+          const qs = quizData.questions.filter(q => q && q.question && (q.options?.length || q.correctAnswer));
+          qs.slice(0, 6).forEach(q => allItems.push({ type: 'quiz', data: { ...q, sourceTitle: tool.title } }));
+        }
+        
+        // Extract flashcards from study pack
+        const flashcardsData = packData.flashcards;
+        if (Array.isArray(flashcardsData) && flashcardsData.length) {
+          const cards = flashcardsData.filter(c => c && c.front && c.back).slice(0, 6);
+          cards.forEach(c => allItems.push({
+            type: 'flashcard',
+            data: { front: c.front, back: c.back, sourceTitle: tool.title }
+          }));
+        }
+        
+        // Extract Crater Blast questions from study pack (they work like quiz questions)
+        const craterBlastData = packData.craterBlast;
+        if (Array.isArray(craterBlastData) && craterBlastData.length) {
+          const cbQs = craterBlastData.filter(q => q && q.question && (q.options?.length || q.correctAnswer));
+          cbQs.slice(0, 4).forEach(q => allItems.push({ type: 'quiz', data: { ...q, sourceTitle: tool.title } }));
+        }
+      } else if (isQuiz(tool)) {
         let qs = [];
         if (Array.isArray(tool.questions)) {
           qs = tool.questions.filter(q => q && q.question && (q.options?.length || q.correctAnswer));

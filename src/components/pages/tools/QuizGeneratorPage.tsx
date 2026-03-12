@@ -4,6 +4,32 @@ function shuffleAndTake<T>(arr: T[], count: number): T[] {
   const shuffled = [...arr].sort(() => Math.random() - 0.5);
   return shuffled.slice(0, Math.min(count, shuffled.length));
 }
+
+function shuffleArray<T>(arr: T[]): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function shuffleQuestionOptions(question: QuizQuestion): QuizQuestion {
+  const opts = question.options || [];
+  if (opts.length <= 1) return { ...question };
+  const correctIdx = question.correctAnswer?.length === 1 && question.correctAnswer >= 'A' && question.correctAnswer <= 'Z'
+    ? question.correctAnswer.charCodeAt(0) - 65
+    : opts.findIndex(o => o.charAt(0) === question.correctAnswer?.charAt(0) || o === question.correctAnswer);
+  const correctOption = opts[Math.max(0, correctIdx)];
+  const shuffled = shuffleArray(opts);
+  const newCorrectIdx = shuffled.indexOf(correctOption);
+  const newCorrectLetter = String.fromCharCode(65 + Math.max(0, newCorrectIdx));
+  const relabeled = shuffled.map((opt, i) => {
+    const rest = opt.length > 3 ? opt.slice(3) : ''; // after "X. "
+    return String.fromCharCode(65 + i) + '. ' + rest;
+  });
+  return { ...question, options: relabeled, correctAnswer: newCorrectLetter };
+}
 import Header from '../../common/Header';
 import Footer from '../../common/Footer';
 import ScholarMascot from '../../common/ScholarMascot';
@@ -104,6 +130,7 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
   const [showMinimalUI, setShowMinimalUI] = useState(false);
   const [openedFromHistory, setOpenedFromHistory] = useState(false);
   const [openedFromDashboard, setOpenedFromDashboard] = useState(false);
+  const [openedFromStudyPackViewer, setOpenedFromStudyPackViewer] = useState(false);
   useEffect(() => {
     const minimal = localStorage.getItem('writescholar_minimal_ui') === 'true';
     if (minimal) {
@@ -127,7 +154,7 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
     daysUntilReset?: number;
   }>({
     generationsUsed: 0,
-    generationLimit: 3,
+    generationLimit: 2,
     generationsRemaining: 3,
     maxWordsPerGeneration: 5000,
     wordsUsed: 0,
@@ -138,11 +165,12 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
   // Free users can use quiz with limits; paid users have unlimited
   const quizExhausted = isFreeUser && quizUsage.generationLimit !== -1 && quizUsage.generationsRemaining <= 0;
 
-  // Random subset from question bank - different each retake
+  // Random subset from question bank - different each retake; shuffle answer options on each load
   const displayedQuestions = useMemo(() => {
     if (!quiz?.questions?.length) return [];
     const displayCount = quiz.questionCount ?? quiz.displayCount ?? quiz.questions.length;
-    return shuffleAndTake(quiz.questions, Math.min(displayCount, quiz.questions.length));
+    const subset = shuffleAndTake(quiz.questions, Math.min(displayCount, quiz.questions.length));
+    return subset.map(shuffleQuestionOptions);
   }, [quiz, retakeKey]);
 
   useEffect(() => {
@@ -171,7 +199,9 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
       if (normalized.questions.length > 0) {
         setQuiz(normalized);
         setIsQuizMode(true);
-        setCurrentQuestion(0);
+        const initialIdx = parsed.initial_question_index;
+        const startIdx = initialIdx != null && initialIdx >= 0 && initialIdx < normalized.questions.length ? initialIdx : 0;
+        setCurrentQuestion(startIdx);
         setUserAnswers([]);
         setSelectedAnswer('');
         setShowResult(false);
@@ -179,9 +209,11 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
         setShowQuizReview(false);
         setError(null);
         setShowMinimalUI(true);
+        const fromStudyPack = sessionStorage.getItem('writescholar_return_to_study_pack_viewer') === 'true';
         const fromDashboard = sessionStorage.getItem('writescholar_enlarge_from_dashboard') === 'quiz';
-        setOpenedFromDashboard(fromDashboard);
-        setOpenedFromHistory(!fromDashboard);
+        setOpenedFromStudyPackViewer(fromStudyPack);
+        setOpenedFromDashboard(!fromStudyPack && fromDashboard);
+        setOpenedFromHistory(!fromStudyPack && !fromDashboard);
       }
     } catch (e) {
       console.error('Failed to load saved quiz:', e);
@@ -208,9 +240,11 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
         setStudyToolMode('flashcards');
         setError(null);
         setShowMinimalUI(true);
+        const fromStudyPack = sessionStorage.getItem('writescholar_return_to_study_pack_viewer') === 'true';
         const fromDashboard = sessionStorage.getItem('writescholar_enlarge_from_dashboard') === 'flashcards';
-        setOpenedFromDashboard(fromDashboard);
-        setOpenedFromHistory(!fromDashboard);
+        setOpenedFromStudyPackViewer(fromStudyPack);
+        setOpenedFromDashboard(!fromStudyPack && fromDashboard);
+        setOpenedFromHistory(!fromStudyPack && !fromDashboard);
       }
     } catch (e) {
       console.error('Failed to load saved flashcards:', e);
@@ -245,9 +279,11 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
         setHintsUsed(0);
         setError(null);
         setShowMinimalUI(true);
+        const fromStudyPack = sessionStorage.getItem('writescholar_return_to_study_pack_viewer') === 'true';
         const fromDashboard = sessionStorage.getItem('writescholar_enlarge_from_dashboard') === 'crossword';
-        setOpenedFromDashboard(fromDashboard);
-        setOpenedFromHistory(!fromDashboard);
+        setOpenedFromStudyPackViewer(fromStudyPack);
+        setOpenedFromDashboard(!fromStudyPack && fromDashboard);
+        setOpenedFromHistory(!fromStudyPack && !fromDashboard);
       }
     } catch (e) {
       console.error('Failed to load saved crossword:', e);
@@ -276,7 +312,7 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
           if (data.success) {
             setQuizUsage({
               generationsUsed: data.data.generationsUsed || 0,
-              generationLimit: data.data.generationLimit ?? 3,
+              generationLimit: data.data.generationLimit ?? 2,
               generationsRemaining: data.data.generationsRemaining ?? 3,
               maxWordsPerGeneration: data.data.maxWordsPerGeneration || 5000,
               wordsUsed: data.data.wordsUsed || 0,
@@ -307,7 +343,7 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
     }
 
     if (quizExhausted) {
-      setError('You\'ve used all 3 quiz generations this period. Upgrade for unlimited quizzes.');
+      setError('You\'ve used all your quiz generations this period. Upgrade to Pro for more quizzes.');
       return;
     }
 
@@ -363,7 +399,7 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
   const handleGenerateFlashcards = async () => {
     if (!inputText.trim()) return;
     if (!user) { setShowFakeAnimation(true); setTimeout(() => { setShowFakeAnimation(false); setShowSignupPrompt(true); }, 14000); return; }
-    if (quizExhausted) { setError('You\'ve used all 3 study tool generations this period. Upgrade for unlimited access.'); return; }
+    if (quizExhausted) { setError('You\'ve used all your study pack generations this period. Upgrade to Pro for more access.'); return; }
     setIsLoading(true);
     setError(null);
     try {
@@ -386,7 +422,7 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
   const handleGenerateCrossword = async () => {
     if (!inputText.trim()) return;
     if (!user) { setShowFakeAnimation(true); setTimeout(() => { setShowFakeAnimation(false); setShowSignupPrompt(true); }, 14000); return; }
-    if (quizExhausted) { setError('You\'ve used all 3 study tool generations this period. Upgrade for unlimited access.'); return; }
+    if (quizExhausted) { setError('You\'ve used all your study pack generations this period. Upgrade to Pro for more access.'); return; }
     setIsLoading(true);
     setError(null);
     try {
@@ -1569,7 +1605,15 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
         {/* Hero Section - minimal bar when loaded from recents; hide when locked-out layout (hero in grid) */}
         {showMinimalUI ? (
           <div className="sticky top-0 z-10 flex items-center gap-3 px-4 sm:px-6 py-4 bg-white/95 dark:bg-stone-800/95 backdrop-blur border-b border-stone-200 dark:border-stone-700">
-            <button onClick={() => onNavigate(openedFromDashboard ? 'dashboard' : openedFromHistory ? 'quiz-history' : 'dashboard')} className="p-2.5 -ml-2 text-stone-500 hover:text-stone-700 dark:text-stone-400 dark:hover:text-stone-200 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-700 transition-colors" aria-label={openedFromDashboard ? 'Back to dashboard' : openedFromHistory ? 'Back to saved materials' : 'Back to dashboard'}>
+            <button onClick={() => {
+              if (openedFromStudyPackViewer) {
+                sessionStorage.removeItem('writescholar_return_to_study_pack_viewer');
+                if (studyToolMode === 'quiz') {
+                  sessionStorage.setItem('writescholar_study_pack_return_state', JSON.stringify({ questionIndex: currentQuestion }));
+                }
+              }
+              onNavigate(openedFromStudyPackViewer ? 'study-pack-viewer' : openedFromDashboard ? 'dashboard' : openedFromHistory ? 'quiz-history' : 'dashboard');
+            }} className="p-2.5 -ml-2 text-stone-500 hover:text-stone-700 dark:text-stone-400 dark:hover:text-stone-200 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-700 transition-colors" aria-label={openedFromStudyPackViewer ? 'Back to study pack' : openedFromDashboard ? 'Back to dashboard' : openedFromHistory ? 'Back to saved materials' : 'Back to dashboard'}>
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
             </button>
             <span className="text-sm font-medium text-stone-600 dark:text-stone-400">
@@ -2319,7 +2363,7 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
                 <div className="bg-gradient-to-r from-amber-600 to-orange-600 rounded-2xl p-6 text-white text-center">
                   <span className="text-4xl mb-3 block">🔒</span>
                   <h3 className="text-xl font-bold mb-2">Monthly Limit Reached</h3>
-                  <p className="text-amber-100 mb-1">You've used all 3 quiz generations this period. Upgrade for unlimited quizzes!</p>
+                  <p className="text-amber-100 mb-1">You've used all your quiz generations this period. Upgrade to Pro for more!</p>
                   <p className="text-amber-200/90 text-sm mb-4">{getResetsInText(quizUsage.daysUntilReset)}</p>
                   <button
                     onClick={() => onNavigate('pricing')}
@@ -2463,7 +2507,7 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
                   <svg className="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
-                  Unlimited study tool generations
+                  Unlimited quiz & study pack generations
                 </li>
                 <li className="flex items-center gap-2">
                   <svg className="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
@@ -2538,8 +2582,8 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
                   </svg>
                 </span>
                 <div>
-                  <p className="text-amber-800 dark:text-amber-200 font-semibold text-sm">3 free generations per month</p>
-                  <p className="text-amber-600 dark:text-amber-400 text-xs mt-0.5">Sign up to unlock Study Tools — upgrade for unlimited</p>
+                  <p className="text-amber-800 dark:text-amber-200 font-semibold text-sm">Sign up to generate quizzes</p>
+                  <p className="text-amber-600 dark:text-amber-400 text-xs mt-0.5">Create a free account — upgrade to Pro for unlimited</p>
                 </div>
               </div>
             </div>

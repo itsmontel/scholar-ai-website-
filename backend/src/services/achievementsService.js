@@ -66,16 +66,16 @@ function mergeStats(existing, incoming) {
   const numericKeys = [
     'uploads_count', 'analyses_count', 'humanize_count', 'summaries_count',
     'quizzes_count', 'flashcards_count', 'crosswords_count', 'citations_count',
-    'lessons_count', 'lesson_styles_used_session',
+    'lessons_count',
     'longest_streak', 'current_streak', 'tools_used_session', 'study_tools_session',
     'exports_count', 'copies_count',
-    // New stats
     'calendar_events_count', 'friend_requests_sent', 'friends_count', 'shares_count',
     'quick_review_count', 'quick_review_perfect_scores', 'quick_review_current_streak',
-    'quick_review_longest_streak',     'crater_blast_games', 'crater_blast_perfect_games',
+    'quick_review_longest_streak', 'crater_blast_games', 'crater_blast_perfect_games',
     'crater_blast_high_score', 'total_study_tools_created', 'total_words_analyzed',
     'documents_in_single_day', 'study_sessions_count',
-    'focus_mode_unlocks_count', 'focus_mode_sites_blocked'
+    'focus_mode_unlocks_count', 'focus_mode_sites_blocked',
+    'study_packs_count'
   ];
 
   const merged = { ...existing };
@@ -95,7 +95,7 @@ function mergeStats(existing, incoming) {
   }
 
   // Merge array fields
-  const arrayKeys = ['tools_used_ever', 'unique_friends_shared_with', 'lesson_styles_used_this_session'];
+  const arrayKeys = ['tools_used_ever', 'unique_friends_shared_with'];
   for (const key of arrayKeys) {
     if (incoming[key] && Array.isArray(incoming[key])) {
       const existingArr = merged[key] || [];

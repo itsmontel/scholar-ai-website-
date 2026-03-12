@@ -1,0 +1,340 @@
+import { useState, useEffect } from 'react';
+import Header from '../common/Header';
+import FlashcardViewer from '../common/FlashcardViewer';
+import LessonViewer from '../common/LessonViewer';
+import QuizViewer from '../common/QuizViewer';
+import CrosswordViewer from '../common/CrosswordViewer';
+import CraterBlastViewer from '../common/CraterBlastViewer';
+import ScholarMascot from '../common/ScholarMascot';
+
+const TABS = [
+  { key: 'lesson', label: 'Lesson', icon: '📖', proOnly: false },
+  { key: 'flashcards', label: 'Flashcards', icon: '🃏', proOnly: false },
+  { key: 'quiz', label: 'Quiz', icon: '📝', proOnly: false },
+  { key: 'crossword', label: 'Crossword', icon: '🧩', proOnly: true },
+  { key: 'craterBlast', label: 'Crater Blast', icon: '💥', proOnly: true },
+] as const;
+
+type TabKey = typeof TABS[number]['key'];
+
+const STORAGE_KEY = 'writescholar_study_pack_viewer';
+const RETURN_TAB_KEY = 'writescholar_study_pack_return_tab';
+const RETURN_STATE_KEY = 'writescholar_study_pack_return_state';
+
+interface StudyPackViewerPageProps {
+  onNavigate: (page: string) => void;
+  user?: { id: string; plan?: string } | null;
+  onLogout?: () => void;
+  /** Optional: pass data directly when navigating from Dashboard after generation */
+  initialData?: { data: any; title?: string };
+}
+
+const StudyPackViewerPage = ({ onNavigate, user, onLogout, initialData }: StudyPackViewerPageProps) => {
+  const [pack, setPack] = useState<{ data: any; title: string } | null>(initialData || null);
+  const [activeTab, setActiveTab] = useState<TabKey>('lesson');
+  const [returnState, setReturnState] = useState<Record<string, number> | null>(null);
+
+  useEffect(() => {
+    if (initialData) {
+      setPack(initialData);
+      return;
+    }
+    try {
+      const raw = sessionStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed?.data) setPack({ data: parsed.data, title: parsed.title || 'Study Pack' });
+      }
+    } catch (_) {}
+  }, [initialData]);
+
+  useEffect(() => {
+    try {
+      const tab = sessionStorage.getItem(RETURN_TAB_KEY) as TabKey | null;
+      if (tab && TABS.some(t => t.key === tab)) {
+        setActiveTab(tab);
+        sessionStorage.removeItem(RETURN_TAB_KEY);
+      }
+      const stateRaw = sessionStorage.getItem(RETURN_STATE_KEY);
+      if (stateRaw) {
+        const state = JSON.parse(stateRaw) as Record<string, number>;
+        setReturnState(state);
+        sessionStorage.removeItem(RETURN_STATE_KEY);
+      }
+    } catch (_) {}
+  }, []);
+
+  useEffect(() => {
+    if (returnState) {
+      const t = setTimeout(() => setReturnState(null), 100);
+      return () => clearTimeout(t);
+    }
+  }, [returnState]);
+
+  const plan = (user?.plan || 'free').toLowerCase();
+  const isPaidUser = plan === 'pro' || plan === 'premium';
+  const isLocked = (key: TabKey) => !isPaidUser && ['crossword', 'craterBlast'].includes(key);
+
+  const handleOpenFull = (tab: TabKey, state?: { questionIndex?: number; slideIndex?: number }) => {
+    const d = pack?.data?.[tab];
+    if (!d) return;
+    if (isLocked(tab)) {
+      onNavigate('pricing');
+      return;
+    }
+    localStorage.setItem('writescholar_minimal_ui', 'true');
+    sessionStorage.setItem('writescholar_return_to_study_pack_viewer', 'true');
+    sessionStorage.setItem(RETURN_TAB_KEY, tab);
+    if (state && Object.keys(state).length > 0) {
+      sessionStorage.setItem(RETURN_STATE_KEY, JSON.stringify(state));
+    }
+    const title = pack?.title || 'Study Set';
+
+    switch (tab) {
+      case 'quiz':
+        localStorage.setItem('savedQuiz', JSON.stringify({
+          title: d.title || title,
+          questions: d.questions,
+          quiz_type: d.quizType || 'mixed',
+          difficulty: d.difficulty || 'medium',
+          question_count: d.questionCount ?? d.questions?.length ?? 10,
+          source_word_count: d.sourceWordCount ?? 0,
+          initial_question_index: state?.questionIndex,
+        }));
+        onNavigate('quiz-generator');
+        break;
+      case 'flashcards':
+        localStorage.setItem('savedFlashcards', JSON.stringify({
+          title: d.title || title,
+          questions: d.cards,
+          source_word_count: d.sourceWordCount ?? 0,
+        }));
+        onNavigate('flashcard-generator');
+        break;
+      case 'crossword':
+        localStorage.setItem('savedCrossword', JSON.stringify({
+          title: d.title || title,
+          questions: { grid: d.grid, clues: d.clues, gridSize: d.gridSize, placedWords: d.placedWords },
+          source_word_count: d.sourceWordCount ?? 0,
+        }));
+        onNavigate('crossword-generator');
+        break;
+      case 'lesson':
+        // InteractiveLessonPage expects questions = array of slides, not object
+        const slides = d.slides || [];
+        if (slides.length > 0) {
+          localStorage.setItem('savedLesson', JSON.stringify({
+            title: d.title || title,
+            questions: slides,
+            question_count: d.totalSlides ?? slides.length,
+            estimated_read_time: d.estimatedReadTime ?? Math.ceil(slides.length * 1.5),
+            difficulty: d.style || 'visual',
+            quiz_bank: d.quizBank || [],
+            quiz_display_count: d.quizDisplayCount ?? 6,
+            initial_slide_index: state?.slideIndex,
+          }));
+          onNavigate('interactive-lesson');
+        }
+        break;
+      case 'craterBlast':
+        localStorage.setItem('savedCraterBlast', JSON.stringify({
+          title: title,
+          questions: { questions: d.questions, inputType: 'notes' },
+          quiz_type: 'crater_blast',
+        }));
+        onNavigate('crater-blast');
+        break;
+    }
+  };
+
+  if (!pack?.data) {
+    return (
+      <div className="min-h-screen bg-stone-50 dark:bg-stone-900">
+        <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="study-pack-viewer" />
+        <div className="max-w-2xl mx-auto px-4 py-20 text-center">
+          <ScholarMascot size={100} animated={true} pose="studying" />
+          <h2 className="text-xl font-bold text-stone-800 dark:text-stone-100 mt-6">No study pack loaded</h2>
+          <p className="text-stone-500 dark:text-stone-400 mt-2">Open a study pack from your Recents or generate one from the dashboard.</p>
+          <button
+            onClick={() => onNavigate('dashboard')}
+            className="mt-6 px-6 py-3 bg-gradient-to-r from-violet-500 to-purple-600 text-white font-semibold rounded-xl hover:from-violet-600 hover:to-purple-700 transition-all"
+          >
+            Go to Dashboard
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const hasData = (key: TabKey) => !!pack.data[key];
+  const packTitle = pack.title || pack.data.quiz?.title || pack.data.flashcards?.title || pack.data.lesson?.title || 'Study Pack';
+  const flashcardCards = pack.data.flashcards?.cards?.map((c: any, i: number) => ({
+    id: `card-${i}`,
+    front: c.front ?? c.term ?? '',
+    back: c.back ?? c.definition ?? '',
+  })) ?? [];
+
+  return (
+    <div className="min-h-screen bg-stone-50 dark:bg-stone-900 flex flex-col">
+      <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="study-pack-viewer" />
+
+      <main className="flex-1 max-w-6xl mx-auto w-full px-4 py-6">
+        {/* Back + Title */}
+        <div className="flex items-center gap-4 mb-6">
+          <button
+            onClick={() => onNavigate('dashboard')}
+            className="p-2 rounded-lg text-stone-500 hover:text-stone-700 hover:bg-stone-200 dark:hover:bg-stone-700 dark:hover:text-stone-300 transition-colors"
+            aria-label="Back"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          <div>
+            <h1 className="text-xl sm:text-2xl font-bold text-stone-800 dark:text-stone-100" style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}>
+              {packTitle}
+            </h1>
+            <p className="text-sm text-stone-500 dark:text-stone-400">Switch between study tools below</p>
+          </div>
+        </div>
+
+        {/* Tab bar - horizontal pills, scroll on mobile */}
+        <div className="flex gap-2 overflow-x-auto pb-2 mb-6 scrollbar-hide">
+          {TABS.map((tab) => {
+            const has = hasData(tab.key);
+            const locked = isLocked(tab.key);
+            const active = activeTab === tab.key;
+            return (
+              <button
+                key={tab.key}
+                onClick={() => has && setActiveTab(tab.key)}
+                disabled={!has}
+                className={`flex-shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium text-sm transition-all ${
+                  active
+                    ? 'bg-gradient-to-r from-violet-500 to-purple-600 text-white shadow-lg shadow-violet-500/25'
+                    : has
+                      ? 'bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-700 dark:text-stone-300 hover:border-violet-300'
+                      : 'bg-stone-100 dark:bg-stone-800 text-stone-400 cursor-not-allowed'
+                }`}
+              >
+                <span>{tab.icon}</span>
+                <span>{tab.label}</span>
+                {locked && has && <span className="text-[10px] px-1.5 py-0.5 rounded bg-violet-500/20 text-violet-600 dark:text-violet-400">Pro</span>}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Content area */}
+        <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 shadow-lg overflow-hidden min-h-[400px]">
+          {activeTab === 'lesson' && hasData('lesson') && !isLocked('lesson') && (
+            <LessonViewer
+              slides={pack.data.lesson?.slides ?? []}
+              title={pack.data.lesson?.title || packTitle}
+              onEnlarge={(state) => handleOpenFull('lesson', state)}
+              initialSlideIndex={returnState?.slideIndex}
+            />
+          )}
+          {activeTab === 'flashcards' && hasData('flashcards') && !isLocked('flashcards') && (
+            <div className="p-4">
+              <FlashcardViewer
+                initialCards={flashcardCards}
+                title={packTitle}
+                onEnlarge={() => handleOpenFull('flashcards')}
+              />
+            </div>
+          )}
+          {activeTab === 'quiz' && hasData('quiz') && !isLocked('quiz') && (
+            <QuizViewer
+              questions={pack.data.quiz?.questions ?? []}
+              title={pack.data.quiz?.title || packTitle}
+              onEnlarge={(state) => handleOpenFull('quiz', state)}
+              initialQuestionIndex={returnState?.questionIndex}
+            />
+          )}
+          {activeTab === 'crossword' && hasData('crossword') && !isLocked('crossword') && (
+            <CrosswordViewer
+              grid={pack.data.crossword?.grid ?? []}
+              placedWords={pack.data.crossword?.placedWords ?? []}
+              title={pack.data.crossword?.title || packTitle}
+              onEnlarge={() => handleOpenFull('crossword')}
+            />
+          )}
+          {activeTab === 'craterBlast' && hasData('craterBlast') && !isLocked('craterBlast') && (
+            <CraterBlastViewer
+              questions={pack.data.craterBlast?.questions ?? []}
+              title={packTitle}
+              onEnlarge={() => handleOpenFull('craterBlast')}
+            />
+          )}
+          {(activeTab !== 'lesson' || isLocked('lesson') || !hasData('lesson')) &&
+           (activeTab !== 'flashcards' || isLocked('flashcards') || !hasData('flashcards')) &&
+           (activeTab !== 'quiz' || isLocked('quiz') || !hasData('quiz')) &&
+           (activeTab !== 'crossword' || isLocked('crossword') || !hasData('crossword')) &&
+           (activeTab !== 'craterBlast' || isLocked('craterBlast') || !hasData('craterBlast')) && (
+            <div className="p-8 sm:p-12 flex flex-col items-center justify-center min-h-[400px] text-center">
+              {isLocked(activeTab) ? (
+                <>
+                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-r from-violet-100 to-purple-100 dark:from-violet-900/40 dark:to-purple-900/40 flex items-center justify-center text-4xl mb-4">
+                    {TABS.find(t => t.key === activeTab)?.icon}
+                  </div>
+                  <h3 className="text-lg font-bold text-stone-800 dark:text-stone-100 mb-2">{TABS.find(t => t.key === activeTab)?.label} is a Pro feature</h3>
+                  <p className="text-stone-500 dark:text-stone-400 text-sm mb-6">Upgrade to unlock crosswords and Crater Blast.</p>
+                  <button
+                    onClick={() => onNavigate('pricing')}
+                    className="px-6 py-3 bg-gradient-to-r from-violet-500 to-purple-600 text-white font-semibold rounded-xl hover:from-violet-600 hover:to-purple-700 transition-all"
+                  >
+                    Upgrade to Pro
+                  </button>
+                  {(activeTab === 'crossword' || activeTab === 'craterBlast') && (
+                    <div className="mt-8 w-full max-w-md md:max-w-2xl lg:max-w-3xl mx-auto">
+                      <p className="text-xs font-medium text-stone-500 dark:text-stone-400 mb-2">See how it works</p>
+                      <div className="rounded-xl overflow-hidden border border-stone-200 dark:border-stone-600 shadow-lg aspect-video bg-stone-100 dark:bg-stone-800">
+                        <video
+                          key={activeTab}
+                          autoPlay
+                          loop
+                          muted
+                          playsInline
+                          className="w-full h-full object-contain"
+                          aria-label={`See how ${activeTab === 'crossword' ? 'Crossword' : 'Crater Blast'} works`}
+                        >
+                          <source src={activeTab === 'crossword' ? '/crosswordvid.mp4' : '/craterblast.mp4'} type="video/mp4" />
+                        </video>
+                      </div>
+                    </div>
+                  )}
+                </>
+              ) : hasData(activeTab) ? (
+                <>
+                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-r from-violet-100 to-purple-100 dark:from-violet-900/40 dark:to-purple-900/40 flex items-center justify-center text-4xl mb-4">
+                    {TABS.find(t => t.key === activeTab)?.icon}
+                  </div>
+                  <h3 className="text-lg font-bold text-stone-800 dark:text-stone-100 mb-2">Open {TABS.find(t => t.key === activeTab)?.label}</h3>
+                  <p className="text-stone-500 dark:text-stone-400 text-sm mb-6">
+                    {activeTab === 'lesson' && `${pack.data.lesson?.slides?.length || 0} slides`}
+                    {activeTab === 'quiz' && `${pack.data.quiz?.questions?.length || 0} questions`}
+                    {activeTab === 'crossword' && `${pack.data.crossword?.placedWords?.length || 0} words`}
+                    {activeTab === 'craterBlast' && `${pack.data.craterBlast?.questions?.length || 0} questions`}
+                    {!['lesson','quiz','crossword','craterBlast'].includes(activeTab) && 'Ready to study'}
+                  </p>
+                  <button
+                    onClick={() => handleOpenFull(activeTab)}
+                    className="px-6 py-3 bg-gradient-to-r from-violet-500 to-purple-600 text-white font-semibold rounded-xl hover:from-violet-600 hover:to-purple-700 transition-all flex items-center gap-2"
+                  >
+                    <span>Open {TABS.find(t => t.key === activeTab)?.label}</span>
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                  </button>
+                </>
+              ) : (
+                <p className="text-stone-500 dark:text-stone-400">No data for this tool</p>
+              )}
+            </div>
+          )}
+        </div>
+      </main>
+    </div>
+  );
+};
+
+export default StudyPackViewerPage;

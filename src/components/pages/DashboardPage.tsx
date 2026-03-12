@@ -11,13 +11,15 @@ import ScholarMascot from '../common/ScholarMascot';
 import StreakWidget from '../common/StreakWidget';
 import BadgeWidget from '../common/BadgeWidget';
 import FlashcardViewer from '../common/FlashcardViewer';
-import WelcomeTutorial from '../common/WelcomeTutorial';
 import QuickReviewModal from '../common/QuickReviewModal';
+import InteractiveTutorial from '../common/InteractiveTutorial';
+import SoftPaywall from '../common/SoftPaywall';
 import { jsPDF } from 'jspdf';
 import { Document, Packer, Paragraph, TextRun, HeadingLevel } from 'docx';
 import { saveAs } from 'file-saver';
-import { trackAction, syncFromAPIData, trackExport, trackCopy } from '../../data/achievements';
+import { trackAction, syncFromAPIData, trackExport, trackCopy, trackStudyPackGenerated } from '../../data/achievements';
 import { getResetsInText, getExpiringSoonCount, getExpiringSoonUrgencyText, getDaysUntilExpiration } from '../../utils/usageReset';
+import { persistTutorialToServer } from '../../utils/onboarding';
 import InteractiveLessonPage from './tools/InteractiveLessonPage';
 import FocusModeSettingsSection from '../common/FocusModeSettingsSection';
 
@@ -57,7 +59,7 @@ const relativeTime = (date: Date): string => {
 
 interface ActivityItem {
   id: string;
-  type: 'document' | 'analysis' | 'quiz' | 'flashcard' | 'crossword' | 'lesson' | 'humanize' | 'summary' | 'citation';
+  type: 'document' | 'analysis' | 'quiz' | 'flashcard' | 'crossword' | 'lesson' | 'study_pack' | 'humanize' | 'summary' | 'citation';
   title: string;
   subtitle: string;
   date: Date;
@@ -72,6 +74,7 @@ const activityMeta: Record<ActivityItem['type'], { emoji: string; bg: string; la
   document: { emoji: '📄', bg: 'bg-blue-100 dark:bg-blue-900/30', label: 'Uploaded', cardBg: 'from-blue-50 to-sky-50 dark:from-blue-900/20 dark:to-sky-900/20', border: 'border-blue-200/70 dark:border-blue-700/40', accent: 'text-blue-700 dark:text-blue-300', shape: 'circle' },
   analysis: { emoji: '🔍', bg: 'bg-rose-100 dark:bg-rose-900/30', label: 'Analyzed', cardBg: 'from-rose-50 to-pink-50 dark:from-rose-900/20 dark:to-pink-900/20', border: 'border-rose-200/70 dark:border-rose-700/40', accent: 'text-rose-700 dark:text-rose-300', shape: 'square' },
   quiz: { emoji: '🎯', bg: 'bg-amber-100 dark:bg-amber-900/30', label: 'Quiz', cardBg: 'from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20', border: 'border-amber-200/70 dark:border-amber-700/40', accent: 'text-amber-700 dark:text-amber-300', shape: 'circle' },
+  study_pack: { emoji: '📦', bg: 'bg-sky-100 dark:bg-sky-900/30', label: 'Study Pack', cardBg: 'from-sky-50 to-blue-50 dark:from-sky-900/20 dark:to-blue-900/20', border: 'border-sky-200/70 dark:border-sky-700/40', accent: 'text-sky-700 dark:text-sky-300', shape: 'diamond' },
   flashcard: { emoji: '🃏', bg: 'bg-violet-100 dark:bg-violet-900/30', label: 'Flashcards', cardBg: 'from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20', border: 'border-violet-200/70 dark:border-violet-700/40', accent: 'text-violet-700 dark:text-violet-300', shape: 'diamond' },
   crossword: { emoji: '🧩', bg: 'bg-orange-100 dark:bg-orange-900/30', label: 'Crossword', cardBg: 'from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20', border: 'border-orange-200/70 dark:border-orange-700/40', accent: 'text-orange-700 dark:text-orange-300', shape: 'square' },
   lesson: { emoji: '🎓', bg: 'bg-violet-100 dark:bg-violet-900/30', label: 'Lesson', cardBg: 'from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20', border: 'border-violet-200/70 dark:border-violet-700/40', accent: 'text-violet-700 dark:text-violet-300', shape: 'circle' },
@@ -98,6 +101,38 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
   useEffect(() => {
     setMode(initialMode);
   }, [initialMode]);
+
+  // Interactive tutorial — triggered from onboarding completion via sessionStorage flag
+  const [showInteractiveTutorial, setShowInteractiveTutorial] = useState(false);
+  useEffect(() => {
+    try {
+      const shouldShow = sessionStorage.getItem('writescholar_show_interactive_tutorial');
+      if (shouldShow === 'true') {
+        setShowInteractiveTutorial(true);
+      }
+    } catch (_) {}
+  }, []);
+  const [showSoftPaywall, setShowSoftPaywall] = useState(false);
+  const handleInteractiveTutorialComplete = async () => {
+    try {
+      sessionStorage.removeItem('writescholar_show_interactive_tutorial');
+      await persistTutorialToServer();
+    } catch (_) {}
+    setShowInteractiveTutorial(false);
+    onUserUpdate?.({ welcomeTutorialCompleted: true });
+    setShowSoftPaywall(true);
+  };
+
+  const handlePaywallStartTrial = () => {
+    // Soft paywall opens Stripe directly; this is for analytics or fallback
+  };
+  const handlePaywallDismiss = () => {
+    setShowSoftPaywall(false);
+  };
+  const handlePaywallNavigatePricing = () => {
+    setShowSoftPaywall(false);
+    onNavigate('pricing');
+  };
 
   // Detect desktop for Focus Mode (Chrome extension only works on desktop)
   const [isDesktop, setIsDesktop] = useState(true);
@@ -129,7 +164,11 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
   const [summaryError, setSummaryError] = useState('');
   const [summaryCopied, setSummaryCopied] = useState(false);
   
-  // Quiz generator state
+  // Study Pack state (unified generation: quiz + flashcards + crossword + lesson + crater blast)
+  const [studyPackResult, setStudyPackResult] = useState<any>(null);
+  const [isGeneratingStudyPack, setIsGeneratingStudyPack] = useState(false);
+  const [studyPackError, setStudyPackError] = useState('');
+  // Quiz generator state (legacy, kept for viewing saved items)
   const [studyToolMode, setStudyToolMode] = useState<'quiz' | 'flashcards' | 'crossword' | 'crater_blast'>('quiz');
   const [quizType, setQuizType] = useState<'mixed' | 'multiple_choice' | 'true_false' | 'fill_blank'>('mixed');
   const [quizDifficulty, setQuizDifficulty] = useState<'easy' | 'medium' | 'hard'>('medium');
@@ -253,8 +292,8 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
   
   const [quizUsage, setQuizUsage] = useState({
     generationsUsed: 0,
-    generationLimit: 3,
-    generationsRemaining: 3,
+    generationLimit: 2,
+    generationsRemaining: 2,
     maxWordsPerGeneration: 5000,
     wordsUsed: 0,
     wordLimit: 15000,
@@ -480,14 +519,21 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
   const [usageStats, setUsageStats] = useState({
     documentsUploaded: 0,
     documentsAnalyzed: 0,
+    citationSearchesUsed: 0,
+    studyPacksGenerated: 0,
     storageUsed: 0,
     storageLimit: 0,
     uploadsRemaining: 0,
     analysesRemaining: 0,
+    citationsRemaining: 0,
+    studyPacksRemaining: 0,
     plan: 'free',
+    daysUntilReset: 30,
     planLimits: {
       documentsPerMonth: 3,
       analysesPerMonth: 3,
+      citationSearchesPerMonth: 2,
+      studyPackGenerationsPerMonth: 2,
       maxDocumentSize: 1024 * 1024,
       name: 'Free'
     }
@@ -589,7 +635,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
       const token = localStorage.getItem('authToken');
       if (!token) return;
 
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/analysis/quiz-usage`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/analysis/study-pack-usage`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -601,18 +647,18 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
         if (data.success) {
           setQuizUsage({
             generationsUsed: data.data.generationsUsed || 0,
-            generationLimit: data.data.generationLimit ?? 3,
-            generationsRemaining: data.data.generationsRemaining ?? 3,
+            generationLimit: data.data.generationLimit ?? 2,
+            generationsRemaining: data.data.generationsRemaining ?? 2,
             maxWordsPerGeneration: data.data.maxWordsPerGeneration || 5000,
-            wordsUsed: data.data.wordsUsed || 0,
-            wordLimit: data.data.wordLimit || 15000,
+            wordsUsed: 0,
+            wordLimit: 999999,
             plan: data.data.plan || 'free',
             daysUntilReset: data.data.daysUntilReset
           });
         }
       }
     } catch (error) {
-      console.error('Error fetching quiz usage:', error);
+      console.error('Error fetching study pack usage:', error);
     }
   };
 
@@ -754,17 +800,22 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
               const quizData = await quizRes.json();
               (quizData.data || []).forEach((tool: any) => {
                 const typeMap: Record<string, ActivityItem['type']> = {
+                  study_pack: 'study_pack',
                   flashcards: 'flashcard',
                   crossword: 'crossword',
                   lesson: 'lesson',
                 };
                 const activityType: ActivityItem['type'] = typeMap[tool.quiz_type] || 'quiz';
+                const isStudyPack = tool.quiz_type === 'study_pack';
                 const isLesson = tool.quiz_type === 'lesson';
-                const countLabel = isLesson
-                  ? (tool.question_count ? `${tool.question_count} slides` : '')
-                  : (tool.question_count ? `${tool.question_count} questions` : '');
-                const diffLabel = tool.difficulty ? ` · ${tool.difficulty}` : '';
+                const countLabel = isStudyPack
+                  ? '5 formats'
+                  : isLesson
+                    ? (tool.question_count ? `${tool.question_count} slides` : '')
+                    : (tool.question_count ? `${tool.question_count} questions` : '');
+                const diffLabel = isStudyPack ? '' : (tool.difficulty ? ` · ${tool.difficulty}` : '');
                 const navMap: Record<string, string> = {
+                  study_pack: 'study-pack-viewer',
                   flashcards: 'flashcard-generator',
                   crossword: 'crossword-generator',
                   crater_blast: 'crater-blast',
@@ -828,22 +879,33 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
   const handleActivityClick = (activity: ActivityItem) => {
     if (activity.toolData) {
       const t = activity.toolData;
-      localStorage.setItem('writescholar_minimal_ui', 'true');
-      if (t.quiz_type === 'flashcards') {
-        localStorage.setItem('savedFlashcards', JSON.stringify(t));
-        onNavigate('flashcard-generator');
-      } else if (t.quiz_type === 'crossword') {
-        localStorage.setItem('savedCrossword', JSON.stringify(t));
-        onNavigate('crossword-generator');
-      } else if (t.quiz_type === 'crater_blast') {
-        localStorage.setItem('savedCraterBlast', JSON.stringify(t));
-        onNavigate('crater-blast');
-      } else if (t.quiz_type === 'lesson') {
-        localStorage.setItem('savedLesson', JSON.stringify(t));
-        onNavigate('interactive-lesson');
+      if (t.quiz_type === 'study_pack') {
+        try {
+          const packData = t.questions || t;
+          sessionStorage.setItem('writescholar_study_pack_viewer', JSON.stringify({
+            data: packData,
+            title: t.title || packData?.quiz?.title || packData?.flashcards?.title || packData?.lesson?.title || 'Study Pack',
+          }));
+        } catch (_) {}
+        onNavigate('study-pack-viewer');
       } else {
-        localStorage.setItem('savedQuiz', JSON.stringify(t));
-        onNavigate('quiz-generator');
+        localStorage.setItem('writescholar_minimal_ui', 'true');
+        if (t.quiz_type === 'flashcards') {
+          localStorage.setItem('savedFlashcards', JSON.stringify(t));
+          onNavigate('flashcard-generator');
+        } else if (t.quiz_type === 'crossword') {
+          localStorage.setItem('savedCrossword', JSON.stringify(t));
+          onNavigate('crossword-generator');
+        } else if (t.quiz_type === 'crater_blast') {
+          localStorage.setItem('savedCraterBlast', JSON.stringify(t));
+          onNavigate('crater-blast');
+        } else if (t.quiz_type === 'lesson') {
+          localStorage.setItem('savedLesson', JSON.stringify(t));
+          onNavigate('interactive-lesson');
+        } else {
+          localStorage.setItem('savedQuiz', JSON.stringify(t));
+          onNavigate('quiz-generator');
+        }
       }
     } else {
       onNavigate(activity.navigateTo);
@@ -911,7 +973,6 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
   const isPremiumUser = usageStats.plan === 'premium';
   const isPaidUser = usageStats.plan === 'pro' || usageStats.plan === 'premium';
   const isFreeUser = usageStats.plan === 'free';
-  // Free users can use quiz with limits (3 generations/month); paid users have unlimited
   const canUseQuiz = isPaidUser || (isFreeUser && (quizUsage.generationLimit === -1 || quizUsage.generationsRemaining > 0));
   const quizExhausted = isFreeUser && quizUsage.generationLimit !== -1 && quizUsage.generationsRemaining <= 0;
   
@@ -924,8 +985,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
     if (mode === 'quiz') {
       const wordCount = getWordCount(inputText);
       const maxWords = quizUsage.maxWordsPerGeneration || 15000;
-      const minWords = studyToolMode === 'quiz' ? 100 : 50;
-      return wordCount >= minWords && wordCount <= maxWords;
+      return wordCount >= 50 && wordCount <= maxWords;
     }
     return getWordCount(inputText) >= 200;
   };
@@ -1119,7 +1179,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
 
   const handleGenerateQuiz = async () => {
     if (quizExhausted) {
-      setQuizError('You\'ve used all 3 quiz generations this period. Upgrade for unlimited quizzes.');
+      setQuizError('You\'ve used all your quiz generations this period. Upgrade to Pro for more quizzes.');
       return;
     }
     setIsGeneratingQuiz(true);
@@ -1152,7 +1212,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
 
   const handleGenerateFlashcards = async () => {
     if (quizExhausted) {
-      setQuizError('You\'ve used all 3 study tool generations this period. Upgrade for unlimited access.');
+      setQuizError('You\'ve used all your study pack generations this period. Upgrade to Pro for more access.');
       return;
     }
     setIsGeneratingFlashcards(true);
@@ -1178,7 +1238,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
 
   const handleGenerateCrossword = async () => {
     if (quizExhausted) {
-      setQuizError('You\'ve used all 3 study tool generations this period. Upgrade for unlimited access.');
+      setQuizError('You\'ve used all your study pack generations this period. Upgrade to Pro for more access.');
       return;
     }
     setIsGeneratingCrossword(true);
@@ -1204,6 +1264,48 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
       setQuizError(error.message || 'Crossword generation failed. Please try again.');
     } finally {
       setIsGeneratingCrossword(false);
+    }
+  };
+
+  const handleGenerateStudyPack = async () => {
+    if (quizExhausted) {
+      setStudyPackError('You\'ve used all study pack generations this period. Upgrade for more.');
+      return;
+    }
+    const wordCount = getWordCount(inputText);
+    if (wordCount < 50) {
+      setStudyPackError('Please enter at least 50 words to generate a study pack.');
+      return;
+    }
+    setIsGeneratingStudyPack(true);
+    setStudyPackError('');
+    setStudyPackResult(null);
+    try {
+      const token = localStorage.getItem('authToken');
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/analysis/generate-study-pack`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ text: inputText })
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || 'Study pack generation failed');
+      setStudyPackResult(data.data);
+      // Navigate to study pack viewer so user can flick between all 5 tools
+      try {
+        sessionStorage.setItem('writescholar_study_pack_viewer', JSON.stringify({
+          data: data.data,
+          title: data.data?.quiz?.title || data.data?.flashcards?.title || data.data?.lesson?.title || 'Study Pack',
+        }));
+      } catch (_) {}
+      onNavigate('study-pack-viewer');
+      // Track study pack generation with word count for achievements
+      const wordCount = inputText.trim().split(/\s+/).length;
+      trackStudyPackGenerated(wordCount);
+      fetchQuizUsage();
+    } catch (error: any) {
+      setStudyPackError(error.message || 'Study pack generation failed. Please try again.');
+    } finally {
+      setIsGeneratingStudyPack(false);
     }
   };
 
@@ -1819,9 +1921,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
     } else if (mode === 'summarize') {
       handleSummarize();
     } else if (mode === 'quiz') {
-      if (studyToolMode === 'flashcards') handleGenerateFlashcards();
-      else if (studyToolMode === 'crossword') handleGenerateCrossword();
-      else handleGenerateQuiz();
+      handleGenerateStudyPack();
     } else {
       handleAnalyze();
     }
@@ -1839,19 +1939,39 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
       
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="dashboard" />
 
-      {/* Welcome Tutorial - shows after onboarding completion */}
-      {showWelcomeTutorial && (
-        <WelcomeTutorial
+      {/* Interactive Tutorial - comprehensive product tour after onboarding */}
+      {(showInteractiveTutorial || showWelcomeTutorial) && (
+        <InteractiveTutorial
           userName={user?.name?.split(' ')[0] || user?.name || ''}
-          userId={user?.id}
-          onComplete={() => {
+          onComplete={showInteractiveTutorial ? handleInteractiveTutorialComplete : () => {
             onUserUpdate?.({ welcomeTutorialCompleted: true });
           }}
         />
       )}
 
+      {/* Soft Paywall - shown after tutorial completion to drive trial signups */}
+      {showSoftPaywall && (
+        <SoftPaywall
+          userName={user?.name?.split(' ')[0] || user?.name || ''}
+          onStartTrial={handlePaywallStartTrial}
+          onDismiss={handlePaywallDismiss}
+          onNavigatePricing={handlePaywallNavigatePricing}
+          onNavigate={onNavigate}
+        />
+      )}
+
+      {/* Study Pack generation animation - mascot overlay like essay analyzer */}
+      {isGeneratingStudyPack && (
+        <AnalysisAnimation
+          isPopup={true}
+          text="Creating your study pack"
+          variant="studyPack"
+          isComplete={false}
+        />
+      )}
+
       {/* Quick Review - shows to returning users once per day */}
-      {showQuickReview && !showWelcomeTutorial && (
+      {showQuickReview && !showWelcomeTutorial && !showInteractiveTutorial && (
         <QuickReviewModal
           userName={user?.name?.split(' ')[0] || user?.name || ''}
           userId={user?.id}
@@ -1866,13 +1986,14 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
           {/* LEFT SIDEBAR: Streak + Calendar / Schedule - Hidden on mobile for cleaner experience */}
           <aside className="hidden lg:block order-2 lg:order-1 space-y-4 sticky top-16 min-w-0">
             {/* Streak Widget - desktop only (mobile shows it at top of main content) */}
-            <div className="min-w-0">
+            <div className="min-w-0" data-tutorial="streak-widget">
               <StreakWidget />
             </div>
 
             {/* Quick Review Button */}
             <button
               onClick={() => setShowQuickReview(true)}
+              data-tutorial="quick-review-btn"
               className="w-full group bg-gradient-to-br from-violet-500 to-purple-600 hover:from-violet-400 hover:to-purple-500 rounded-2xl p-4 shadow-lg shadow-violet-500/25 hover:shadow-xl hover:shadow-violet-500/30 transition-all hover:scale-[1.02]"
             >
               <div className="flex items-center gap-3">
@@ -1887,6 +2008,14 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
               </div>
+            </button>
+
+            {/* Test: View Onboarding */}
+            <button
+              onClick={() => onNavigate('onboarding')}
+              className="w-full flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl border-2 border-dashed border-amber-400 dark:border-amber-500 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/30 text-xs font-semibold transition-all"
+            >
+              <span>👀</span> View Onboarding (Test)
             </button>
 
             {/* Schedule Section */}
@@ -2084,7 +2213,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
             </div>
 
             {/* Warm Welcome Section - Mobile Optimized */}
-            <div className="mb-6 sm:mb-8">
+            <div className="mb-6 sm:mb-8" data-tutorial="greeting-area">
               <div className="flex items-start sm:items-center justify-between flex-col sm:flex-row gap-3 sm:gap-4">
                 <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-5 flex-1 min-w-0">
                   <div className="hidden sm:block flex-shrink-0">
@@ -2127,6 +2256,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                     </button>
                     <button
                       onClick={() => onNavigate('quiz-history')}
+                      data-tutorial="saved-btn"
                       className="flex-1 min-w-[7rem] flex items-center justify-center gap-2 px-3 py-3 bg-gradient-to-r from-amber-500 to-orange-500 rounded-xl shadow-md shadow-amber-500/20 text-white font-semibold text-sm active:scale-[0.98] transition-all"
                     >
                       <span className="text-lg">📁</span>
@@ -2139,6 +2269,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                   {/* Desktop Friends Button */}
                   <button
                     onClick={() => onNavigate('friends')}
+                    data-tutorial="friends-btn"
                     className="hidden lg:flex relative items-center gap-2 px-3 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white text-sm font-bold rounded-full transition-all shadow-md shadow-emerald-500/30 hover:shadow-lg hover:scale-105"
                   >
                     <span>👥</span>
@@ -2190,6 +2321,91 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                   </button>
                 </div>
               )}
+
+              {/* Usage Overview Widget */}
+              {!loadingStats && (
+                <div className="mt-4 p-4 rounded-xl bg-gradient-to-r from-stone-50 to-stone-100/50 dark:from-stone-800/50 dark:to-stone-800/30 border border-stone-200/60 dark:border-stone-700/40">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-sm font-semibold text-stone-700 dark:text-stone-200 flex items-center gap-2">
+                      <svg className="w-4 h-4 text-violet-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                      </svg>
+                      Monthly Usage
+                    </h3>
+                    <span className="text-xs text-stone-500 dark:text-stone-400">
+                      {getResetsInText(usageStats.daysUntilReset)}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    <div className="bg-white dark:bg-stone-700/50 rounded-lg p-2.5 border border-stone-200/50 dark:border-stone-600/30">
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <span className="text-sm">🔍</span>
+                        <span className="text-xs text-stone-500 dark:text-stone-400">Analyses</span>
+                      </div>
+                      <div className={`text-lg font-bold ${
+                        usageStats.analysesRemaining === -1 ? 'text-lime-600 dark:text-lime-400' :
+                        usageStats.analysesRemaining <= 0 ? 'text-red-500' :
+                        usageStats.analysesRemaining <= 1 ? 'text-amber-500' : 'text-stone-800 dark:text-stone-100'
+                      }`}>
+                        {usageStats.analysesRemaining === -1 ? '∞' : usageStats.analysesRemaining}
+                        <span className="text-xs font-normal text-stone-400 ml-0.5">left</span>
+                      </div>
+                    </div>
+                    <div className="bg-white dark:bg-stone-700/50 rounded-lg p-2.5 border border-stone-200/50 dark:border-stone-600/30">
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <span className="text-sm">📚</span>
+                        <span className="text-xs text-stone-500 dark:text-stone-400">Citations</span>
+                      </div>
+                      <div className={`text-lg font-bold ${
+                        usageStats.citationsRemaining === -1 ? 'text-lime-600 dark:text-lime-400' :
+                        usageStats.citationsRemaining <= 0 ? 'text-red-500' :
+                        usageStats.citationsRemaining <= 1 ? 'text-amber-500' : 'text-stone-800 dark:text-stone-100'
+                      }`}>
+                        {usageStats.citationsRemaining === -1 ? '∞' : usageStats.citationsRemaining}
+                        <span className="text-xs font-normal text-stone-400 ml-0.5">left</span>
+                      </div>
+                    </div>
+                    <div className="bg-white dark:bg-stone-700/50 rounded-lg p-2.5 border border-stone-200/50 dark:border-stone-600/30">
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <span className="text-sm">📦</span>
+                        <span className="text-xs text-stone-500 dark:text-stone-400">Study Packs</span>
+                      </div>
+                      <div className={`text-lg font-bold ${
+                        usageStats.studyPacksRemaining === -1 ? 'text-lime-600 dark:text-lime-400' :
+                        usageStats.studyPacksRemaining <= 0 ? 'text-red-500' :
+                        usageStats.studyPacksRemaining <= 1 ? 'text-amber-500' : 'text-stone-800 dark:text-stone-100'
+                      }`}>
+                        {usageStats.studyPacksRemaining === -1 ? '∞' : usageStats.studyPacksRemaining}
+                        <span className="text-xs font-normal text-stone-400 ml-0.5">left</span>
+                      </div>
+                    </div>
+                    <div className="bg-white dark:bg-stone-700/50 rounded-lg p-2.5 border border-stone-200/50 dark:border-stone-600/30">
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <span className="text-sm">📄</span>
+                        <span className="text-xs text-stone-500 dark:text-stone-400">Uploads</span>
+                      </div>
+                      <div className={`text-lg font-bold ${
+                        usageStats.uploadsRemaining === -1 ? 'text-lime-600 dark:text-lime-400' :
+                        usageStats.uploadsRemaining <= 0 ? 'text-red-500' :
+                        usageStats.uploadsRemaining <= 1 ? 'text-amber-500' : 'text-stone-800 dark:text-stone-100'
+                      }`}>
+                        {usageStats.uploadsRemaining === -1 ? '∞' : usageStats.uploadsRemaining}
+                        <span className="text-xs font-normal text-stone-400 ml-0.5">left</span>
+                      </div>
+                    </div>
+                  </div>
+                  {usageStats.plan === 'free' && (
+                    <div className="mt-3 text-center">
+                      <button
+                        onClick={() => onNavigate('pricing')}
+                        className="text-xs font-medium text-violet-600 dark:text-violet-400 hover:underline"
+                      >
+                        Upgrade for more limits →
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Quick Action Cards - Mobile-optimized 2-col grid */}
@@ -2204,18 +2420,29 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                 ))}
               </div>
             ) : (
-            <div className="mb-6 sm:mb-8 pt-4 sm:pt-6 pb-4 sm:pb-6 overflow-visible">
+            <div className="mb-6 sm:mb-8 pt-4 sm:pt-6 pb-4 sm:pb-6 overflow-visible" data-tutorial="tool-cards">
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-4">
               {([
                 { id: 'analyze' as const, icon: '📝', title: 'Analyze', desc: 'Get professor-style feedback on your essays', mobileDesc: 'Essay feedback', gradient: 'from-rose-50 to-pink-50 dark:from-rose-900/20 dark:to-pink-900/15', border: 'border-rose-200/70 dark:border-rose-700/40', activeBorder: 'border-rose-400 dark:border-rose-500 ring-2 ring-rose-300/50 dark:ring-rose-600/40', iconBg: 'bg-gradient-to-br from-rose-400 to-pink-500', accentColor: 'text-rose-600 dark:text-rose-400', pro: false, setStudyMode: null },
                 { id: 'citations' as const, icon: '📚', title: 'Citations', desc: 'Find and format academic sources instantly', mobileDesc: 'Find sources', gradient: 'from-sky-50 to-blue-50 dark:from-sky-900/20 dark:to-blue-900/15', border: 'border-sky-200/70 dark:border-sky-700/40', activeBorder: 'border-sky-400 dark:border-sky-500 ring-2 ring-sky-300/50 dark:ring-sky-600/40', iconBg: 'bg-gradient-to-br from-sky-400 to-blue-500', accentColor: 'text-sky-600 dark:text-sky-400', pro: false, setStudyMode: null },
-                { id: 'study_tools' as const, icon: '🎯', title: 'Study Tools', desc: 'Create quizzes, flashcards & crosswords from your notes', mobileDesc: 'Quizzes & flashcards', gradient: 'from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/15', border: 'border-amber-200/70 dark:border-amber-700/40', activeBorder: 'border-amber-400 dark:border-amber-500 ring-2 ring-amber-300/50 dark:ring-amber-600/40', iconBg: 'bg-gradient-to-br from-amber-400 to-orange-500', accentColor: 'text-amber-600 dark:text-amber-400', pro: false, setStudyMode: 'quiz' as const },
-                { id: 'focus_mode' as const, icon: '🔒', title: 'Focus Mode', desc: 'Earn screen time—block sites until you pass study questions', mobileDesc: 'Earn your breaks', gradient: 'from-violet-100 to-purple-100 dark:from-violet-800/40 dark:to-purple-800/40', border: 'border-violet-300 dark:border-violet-600', activeBorder: 'border-violet-500 dark:border-violet-400 ring-2 ring-violet-400/60 dark:ring-violet-500/50', iconBg: 'bg-gradient-to-br from-violet-500 to-purple-600', accentColor: 'text-violet-700 dark:text-violet-300', pro: false, setStudyMode: null, special: true, badge: 'NEW' },
-                { id: 'crater_blast' as const, icon: '🚀', title: 'Crater Blast', desc: 'Play the learning game with your content', mobileDesc: 'Quiz game', gradient: 'from-violet-900/30 to-purple-900/40 dark:from-violet-900/30 dark:to-purple-900/40', border: 'border-violet-200/70 dark:border-violet-700/40', activeBorder: 'border-violet-500 dark:border-violet-500 ring-2 ring-violet-400/50 dark:ring-violet-600/40', iconBg: 'bg-gradient-to-br from-violet-600 to-purple-700', accentColor: 'text-violet-600 dark:text-violet-300', pro: false, setStudyMode: 'crater_blast' as const, badge: 'NEW' },
-                { id: 'more_tools' as const, icon: '🔧', title: 'More Tools', desc: 'Lessons, summarize, humanize & utilities', mobileDesc: 'Lessons & more', gradient: 'from-teal-50 to-cyan-50 dark:from-teal-900/30 dark:to-cyan-900/30', border: 'border-teal-200/70 dark:border-teal-700/40', activeBorder: 'border-teal-400 dark:border-teal-500 ring-2 ring-teal-300/50 dark:ring-teal-600/40', iconBg: 'bg-gradient-to-br from-teal-500 to-cyan-600', accentColor: 'text-teal-700 dark:text-teal-300', pro: false, setStudyMode: null, isMoreTools: true },
+                { id: 'study_tools' as const, icon: '📚', title: 'Study Pack', desc: 'Generate lesson, flashcards, quiz, crossword & Crater Blast from your notes', mobileDesc: 'All study tools', gradient: 'from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/15', border: 'border-amber-200/70 dark:border-amber-700/40', activeBorder: 'border-amber-400 dark:border-amber-500 ring-2 ring-amber-300/50 dark:ring-amber-600/40', iconBg: 'bg-gradient-to-br from-amber-400 to-orange-500', accentColor: 'text-amber-600 dark:text-amber-400', pro: false, setStudyMode: 'quiz' as const },
+                { id: 'focus_mode' as const, icon: '🔒', title: 'Focus Mode', desc: 'Earn screen time, block sites until you pass study questions', mobileDesc: 'Earn your breaks', gradient: 'from-violet-100 to-purple-100 dark:from-violet-800/40 dark:to-purple-800/40', border: 'border-violet-300 dark:border-violet-600', activeBorder: 'border-violet-500 dark:border-violet-400 ring-2 ring-violet-400/60 dark:ring-violet-500/50', iconBg: 'bg-gradient-to-br from-violet-500 to-purple-600', accentColor: 'text-violet-700 dark:text-violet-300', pro: false, setStudyMode: null, special: true, badge: 'NEW' },
+                { id: 'summarize' as const, icon: '📋', title: 'Summarize', desc: 'Condense papers and articles instantly', mobileDesc: 'Summarize', gradient: 'from-teal-50 to-cyan-50 dark:from-teal-900/20 dark:to-cyan-900/15', border: 'border-teal-200/70 dark:border-teal-700/40', activeBorder: 'border-teal-400 dark:border-teal-500 ring-2 ring-teal-300/50 dark:ring-teal-600/40', iconBg: 'bg-gradient-to-br from-teal-500 to-cyan-600', accentColor: 'text-teal-700 dark:text-teal-300', pro: false, setStudyMode: null },
+                { id: 'humanize' as const, icon: '✨', title: 'Humanize', desc: 'Transform AI text into natural human writing', mobileDesc: 'Humanize', gradient: 'from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/15', border: 'border-violet-200/70 dark:border-violet-700/40', activeBorder: 'border-violet-400 dark:border-violet-500 ring-2 ring-violet-300/50 dark:ring-violet-600/40', iconBg: 'bg-gradient-to-br from-violet-500 to-purple-600', accentColor: 'text-violet-700 dark:text-violet-300', pro: false, setStudyMode: null },
+                { id: 'more_tools' as const, icon: '🔧', title: 'More Tools', desc: 'Word counter, outline, citation generator & more', mobileDesc: 'More', gradient: 'from-indigo-50 to-slate-50 dark:from-indigo-900/20 dark:to-slate-900/20', border: 'border-indigo-200/70 dark:border-indigo-700/40', activeBorder: 'border-indigo-400 dark:border-indigo-500 ring-2 ring-indigo-300/50 dark:ring-indigo-600/40', iconBg: 'bg-gradient-to-br from-indigo-500 to-slate-600', accentColor: 'text-indigo-700 dark:text-indigo-300', pro: false, setStudyMode: null, isMoreTools: true },
               ] as const).map(tool => (
                 <button
                   key={tool.id}
+                  data-tutorial={
+                    tool.id === 'analyze' ? 'analyze-card' :
+                    tool.id === 'citations' ? 'citations-card' :
+                    tool.id === 'study_tools' ? 'study-card' :
+                    tool.id === 'summarize' ? 'summarize-card' :
+                    tool.id === 'humanize' ? 'humanize-card' :
+                    tool.id === 'focus_mode' ? 'focus-card' :
+                    tool.id === 'more_tools' ? 'more-tools-card' :
+                    undefined
+                  }
                   onClick={() => {
                     if (tool.id === 'focus_mode') {
                       setMode('focus_mode');
@@ -2225,21 +2452,16 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                       onNavigate('more-tools');
                       return;
                     }
-                    if (tool.id === 'study_tools' || tool.id === 'crater_blast') {
+                    if (tool.id === 'study_tools') {
                       setMode('quiz');
-                      if (tool.setStudyMode) setStudyToolMode(tool.setStudyMode);
-                    } else if (tool.id === 'summarize_tool') {
-                      setMode('summarize');
-                    } else if (tool.id === 'lesson') {
-                      setMode('lesson');
                     } else {
-                      setMode(tool.id as 'analyze' | 'citations' | 'humanize');
+                      setMode(tool.id as any);
                     }
                     setInputText('');
                     setShowWordWarning(false);
-                    if (tool.id !== 'humanize') setShowHumanizeResult(false);
-                    if (tool.id !== 'summarize_tool') setSummaryResult(null);
-                    if (tool.id !== 'study_tools' && tool.id !== 'crater_blast' && tool.id !== 'lesson') { setQuizResult(null); setFlashcardResult(null); setCrosswordResult(null); }
+                    setShowHumanizeResult(false);
+                    setSummaryResult(null);
+                    if (tool.id !== 'study_tools') { setQuizResult(null); setFlashcardResult(null); setCrosswordResult(null); setStudyPackResult(null); }
                   }}
                   className={`relative p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl border text-left transition-all duration-200 group active:scale-[0.98] sm:hover:shadow-2xl sm:hover:-translate-y-1 overflow-hidden ${
                     'special' in tool && tool.special
@@ -2247,9 +2469,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                       : 'bg-white dark:bg-stone-800'
                   } ${
                     (mode === tool.id && !['more_tools'].includes(tool.id)) ||
-                    (tool.id === 'crater_blast' && mode === 'quiz' && studyToolMode === 'crater_blast') ||
-                    (tool.id === 'study_tools' && mode === 'quiz' && (studyToolMode === 'quiz' || studyToolMode === 'flashcards' || studyToolMode === 'crossword')) ||
-                    (tool.id === 'summarize_tool' && mode === 'summarize')
+                    (tool.id === 'study_tools' && mode === 'quiz')
                       ? `shadow-lg sm:shadow-xl ${tool.activeBorder}` 
                       : `${tool.border} sm:hover:shadow-lg`
                   }`}
@@ -2324,7 +2544,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
         {mode === 'analyze' && (
           <>
             {/* Primary: Upload Section - Mobile optimized */}
-            <div className="relative mb-6 sm:mb-8 overflow-visible">
+            <div className="relative mb-6 sm:mb-8 overflow-visible" data-tutorial="essay-upload">
               <div 
                 onClick={() => onNavigate('upload')}
                 className="relative bg-gradient-to-br from-rose-50 via-white to-pink-50 dark:from-rose-900/20 dark:via-stone-800 dark:to-pink-900/20 rounded-2xl sm:rounded-3xl p-6 sm:p-12 text-center border border-rose-200/60 dark:border-rose-700/40 active:border-rose-300 dark:active:border-rose-600 sm:hover:border-rose-300 dark:sm:hover:border-rose-600 cursor-pointer transition-all duration-200 sm:hover:shadow-2xl sm:hover:-translate-y-1 group shadow-md sm:shadow-lg overflow-hidden"
@@ -2365,7 +2585,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
             </div>
 
             {/* Secondary: Text Input (smaller) */}
-            <div className="mb-12">
+            <div className="mb-12" data-tutorial-target="essay-input-wrapper">
               <div className="relative bg-white dark:bg-stone-800 rounded-3xl border border-stone-200/80 dark:border-stone-600/50 shadow-lg hover:border-rose-300 dark:hover:border-rose-600 hover:shadow-xl focus-within:border-rose-400 dark:focus-within:border-rose-500 focus-within:shadow-2xl focus-within:shadow-rose-500/10 focus-within:ring-2 focus-within:ring-rose-400/20 transition-all duration-300">
                 <textarea
                   value={inputText}
@@ -2396,6 +2616,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
               {/* Submit button */}
               <div className="flex justify-center mt-4">
                 <button
+                  data-tutorial-target="essay-analyze-btn"
                   onClick={handleSubmit}
                   disabled={!isTextValid()}
                   className={`px-6 py-3 rounded-2xl flex items-center justify-center transition-all font-bold text-base ${
@@ -2452,7 +2673,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
             </div>
 
             {/* Input Area */}
-            <div className="mb-8 relative overflow-visible">
+            <div className="mb-8 relative overflow-visible" data-tutorial-target="citations-input">
               <div className="relative bg-white rounded-3xl border border-stone-200/80 shadow-sm hover:border-stone-300 hover:shadow-md focus-within:border-[#22A7AB]/40 focus-within:shadow-xl focus-within:shadow-[#22A7AB]/5 focus-within:ring-2 focus-within:ring-[#22A7AB]/20 transition-all duration-300">
                 <textarea
                   value={inputText}
@@ -2481,6 +2702,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
               
               <div className="flex justify-center mt-4">
                 <button
+                  data-tutorial-target="citations-search-btn"
                   onClick={handleSubmit}
                   disabled={!isTextValid() || isSearchingCitations}
                   className={`px-8 py-3.5 rounded-2xl flex items-center justify-center transition-all font-bold text-base ${
@@ -2576,6 +2798,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                     </div>
                   </div>
                   <button
+                    data-tutorial-target="humanizer-btn"
                     onClick={handleSubmit}
                     disabled={!isTextValid() || isHumanizing}
                     className={`w-full sm:w-auto px-6 py-2.5 rounded-xl flex items-center justify-center transition-all font-semibold text-sm flex-shrink-0 ${
@@ -2607,7 +2830,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
               {/* Editor Panels */}
               <div className="grid grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-stone-200 dark:divide-stone-600 min-w-0">
                 {/* Left Panel */}
-                <div className="flex flex-col min-w-0">
+                <div className="flex flex-col min-w-0" data-tutorial-target="humanizer-input">
                   <div className="flex items-center justify-between px-3 sm:px-5 py-2.5 sm:py-3 bg-stone-50 dark:bg-stone-800/50 border-b border-stone-200 dark:border-stone-600 gap-2 min-w-0">
                     <div className="flex items-center gap-2 min-w-0">
                       <div className="w-2 h-2 rounded-full bg-stone-400 dark:bg-stone-500 flex-shrink-0"></div>
@@ -2996,10 +3219,10 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
           </>
         )}
 
-        {/* STUDY TOOLS MODE (Quiz / Flashcards / Crossword) */}
+        {/* STUDY TOOLS MODE — unified Study Pack generation */}
         {mode === 'quiz' && (
           <>
-            {/* Hidden file input for document upload - shared by quiz, flashcards, crossword */}
+            {/* Hidden file input for document upload */}
             <input
               ref={studyToolsFileInputRef}
               type="file"
@@ -3007,37 +3230,27 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
               onChange={handleStudyToolsFileUpload}
               className="hidden"
             />
-            {/* Study Tool Sub-Mode Tabs - Horizontally scrollable on mobile */}
-            <div className="mb-6 sm:mb-8 -mx-3 sm:mx-0 px-3 sm:px-0">
-              <div className="flex sm:flex-wrap sm:justify-center gap-2 sm:gap-3 overflow-x-auto pb-2 sm:pb-0 scrollbar-hide snap-x snap-mandatory">
-              {([
-                { key: 'quiz' as const, label: 'Quiz', icon: '🎯', gradient: 'from-amber-50 to-orange-50', border: 'border-amber-200/70', active: 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg shadow-amber-500/25' },
-                { key: 'flashcards' as const, label: 'Flashcards', icon: '🃏', gradient: 'from-emerald-50 to-teal-50', border: 'border-emerald-200/70', active: 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg shadow-emerald-500/25' },
-                { key: 'crossword' as const, label: 'Crossword', icon: '🧩', gradient: 'from-orange-50 to-amber-50', border: 'border-orange-200/70', active: 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-lg shadow-orange-500/25' },
-                { key: 'crater_blast' as const, label: 'Crater Blast', icon: '🚀', gradient: 'from-violet-50 to-purple-50', border: 'border-violet-200/70', active: 'bg-gradient-to-r from-violet-600 to-purple-600 text-white shadow-lg shadow-violet-500/25' },
-              ]).map((tool) => (
-                <button
-                  key={tool.key}
-                  onClick={() => { setStudyToolMode(tool.key); setQuizResult(null); setFlashcardResult(null); setCrosswordResult(null); setQuizError(''); setIsQuizMode(false); }}
-                  className={`px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-sm font-semibold transition-all duration-200 flex items-center gap-1.5 sm:gap-2 border flex-shrink-0 snap-start active:scale-95 ${
-                    studyToolMode === tool.key
-                      ? `${tool.active} border-transparent`
-                      : `bg-white dark:bg-stone-800 ${tool.border} dark:border-stone-600 text-stone-600 dark:text-stone-400 sm:hover:shadow-md sm:hover:-translate-y-0.5`
-                  }`}
-                >
-                  <span className="text-base sm:text-lg">{tool.icon}</span>
-                  <span className="whitespace-nowrap">{tool.label}</span>
-                </button>
+            {/* Study Pack info: what gets generated */}
+            <div className="mb-4 sm:mb-6 flex flex-wrap justify-center gap-2 sm:gap-3">
+              {[
+                { icon: '📖', label: 'Lesson' },
+                { icon: '🃏', label: 'Flashcards' },
+                { icon: '📝', label: 'Quiz' },
+                { icon: '🧩', label: 'Crossword' },
+                { icon: '💥', label: 'Crater Blast' },
+              ].map((t) => (
+                <span key={t.label} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-violet-50 dark:bg-violet-900/20 border border-violet-200/60 dark:border-violet-700/40 text-violet-700 dark:text-violet-300 text-xs font-semibold">
+                  <span>{t.icon}</span> {t.label}
+                </span>
               ))}
-              </div>
             </div>
 
-            {/* Exhausted generations banner for free users - Mobile optimized */}
+            {/* Exhausted generations banner for free users */}
             {quizExhausted && (
               <div className="mb-4 sm:mb-6 bg-gradient-to-r from-violet-600 to-purple-600 dark:from-violet-700 dark:to-purple-700 rounded-xl sm:rounded-2xl p-4 sm:p-6 text-white text-center">
                 <span className="text-3xl sm:text-4xl mb-2 sm:mb-3 block">🔒</span>
                 <h3 className="text-lg sm:text-xl font-bold mb-1 sm:mb-2">Monthly Limit Reached</h3>
-                <p className="text-violet-100 dark:text-stone-200 mb-1 text-sm sm:text-base">You've used all 3 study tool generations this period. Upgrade for unlimited access!</p>
+                <p className="text-violet-100 dark:text-stone-200 mb-1 text-sm sm:text-base">You've used all {quizUsage.generationLimit} study pack generations this period. Upgrade for more!</p>
                 <p className="text-violet-200/90 text-xs sm:text-sm mb-3 sm:mb-4">{getResetsInText(quizUsage.daysUntilReset)}</p>
                 <button
                   onClick={() => onNavigate('pricing')}
@@ -3048,7 +3261,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
               </div>
             )}
 
-            {/* Plan info banner for free and Pro users - Mobile optimized */}
+            {/* Plan info banner */}
             {!isPremiumUser && !quizExhausted && (
               <div className="mb-4 sm:mb-6 bg-gradient-to-r from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20 border border-violet-200 dark:border-violet-800/50 rounded-xl sm:rounded-2xl p-3 sm:p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-3">
                 <div className="flex items-start sm:items-center gap-2 sm:gap-3">
@@ -3057,15 +3270,12 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                     {isFreeUser ? (
                       <>
                         <p className="text-violet-800 dark:text-violet-200 font-medium text-xs sm:text-sm">
-                          Free: {quizUsage.generationsRemaining}/{quizUsage.generationLimit} generations • {(quizUsage.maxWordsPerGeneration || 5000).toLocaleString()} words max • {getResetsInText(quizUsage.daysUntilReset)}
+                          Free: {quizUsage.generationsRemaining}/{quizUsage.generationLimit} study packs • {(quizUsage.maxWordsPerGeneration || 5000).toLocaleString()} words max • {getResetsInText(quizUsage.daysUntilReset)}
                         </p>
-                        <p className="text-violet-600 dark:text-violet-400 text-[10px] sm:text-xs mt-0.5 line-clamp-2">Upgrade for unlimited quizzes, flashcards, crosswords</p>
+                        <p className="text-violet-600 dark:text-violet-400 text-[10px] sm:text-xs mt-0.5 line-clamp-2">Lesson, flashcards & quiz included • Crossword & Crater Blast unlock with Pro</p>
                       </>
                     ) : (
-                      <>
-                        <p className="text-violet-800 dark:text-violet-200 font-medium text-xs sm:text-sm">Pro: Mixed type + Medium difficulty only</p>
-                        <p className="text-violet-600 dark:text-violet-400 text-[10px] sm:text-xs mt-0.5">Upgrade for all quiz types & difficulties</p>
-                      </>
+                      <p className="text-violet-800 dark:text-violet-200 font-medium text-xs sm:text-sm">Pro: {quizUsage.generationsRemaining}/{quizUsage.generationLimit} study packs remaining</p>
                     )}
                   </div>
                 </div>
@@ -3075,8 +3285,76 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
               </div>
             )}
 
-            {/* ============ QUIZ SUB-MODE ============ */}
-            {studyToolMode === 'quiz' && (
+            {/* Study pack error */}
+            {studyPackError && (
+              <div className="mb-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl text-center">
+                <p className="text-red-700 dark:text-red-400 text-sm font-medium">{studyPackError}</p>
+              </div>
+            )}
+
+            {/* ============ UNIFIED STUDY PACK INPUT ============ */}
+            <div className="relative rounded-2xl sm:rounded-3xl shadow-xl overflow-hidden mb-6">
+              <div className="bg-white dark:bg-stone-800 rounded-2xl sm:rounded-3xl border border-violet-200/60 dark:border-violet-700/40">
+                <div className="bg-gradient-to-r from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20 border-b border-violet-200/60 dark:border-violet-700/40 px-4 sm:px-5 py-3 sm:py-4 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg">📚</span>
+                    <span className="font-bold text-sm text-stone-800 dark:text-stone-100">Paste your notes or study material</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => studyToolsFileInputRef.current?.click()}
+                      disabled={isParsingStudyDoc || isGeneratingStudyPack}
+                      className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 hover:bg-violet-200 dark:hover:bg-violet-900/50 transition-colors disabled:opacity-50"
+                    >
+                      {isParsingStudyDoc ? 'Parsing...' : 'Upload file'}
+                    </button>
+                    {inputText.trim() && (
+                      <button onClick={() => setInputText('')} className="p-1.5 text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-700 transition-colors">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                      </button>
+                    )}
+                  </div>
+                </div>
+                <textarea
+                  value={inputText}
+                  onChange={(e) => setInputText(e.target.value)}
+                  placeholder="Paste your study notes, textbook chapter, article, or any learning material here... (minimum 50 words)"
+                  className="w-full min-h-[200px] sm:min-h-[250px] p-4 sm:p-5 text-stone-800 dark:text-stone-100 text-[15px] border-none outline-none resize-none bg-transparent placeholder-stone-400 dark:placeholder-stone-500 leading-relaxed"
+                  disabled={isGeneratingStudyPack}
+                />
+                <div className="border-t border-stone-100 dark:border-stone-700 px-4 sm:px-5 py-3 sm:py-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+                  <div className="flex items-center gap-3 text-xs text-stone-400 dark:text-stone-500">
+                    <span>{getWordCount(inputText).toLocaleString()} words</span>
+                    {getWordCount(inputText) > 0 && getWordCount(inputText) < 50 && (
+                      <span className="text-amber-500">Need at least 50 words</span>
+                    )}
+                  </div>
+                  <button
+                    onClick={handleGenerateStudyPack}
+                    disabled={isGeneratingStudyPack || quizExhausted || getWordCount(inputText) < 50}
+                    className="w-full sm:w-auto px-6 py-3 rounded-xl bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 disabled:from-stone-400 disabled:to-stone-500 text-white font-bold text-sm shadow-lg shadow-violet-500/25 hover:shadow-xl transition-all active:scale-[0.98] disabled:active:scale-100 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  >
+                    {isGeneratingStudyPack ? (
+                      <>
+                        <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                        </svg>
+                        Generating 5 study tools...
+                      </>
+                    ) : (
+                      <>
+                        <span>Generate Study Pack</span>
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Legacy quiz sub-modes kept for backward compat (viewing saved items) - hidden */}
+            {false && studyToolMode === 'quiz' && (
               <>
                 {/* Quiz Taking View - Mobile optimized */}
                 {quizResult && isQuizMode && (
@@ -3278,6 +3556,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                           </div>
                         </div>
                         <button
+                          data-tutorial-target="study-generate-btn"
                           onClick={handleSubmit}
                           disabled={!isTextValid() || isGeneratingQuiz || !canUseQuiz}
                           className={`w-full sm:w-auto px-6 py-2.5 rounded-xl flex items-center justify-center transition-all font-semibold text-sm flex-shrink-0 ${
@@ -3300,7 +3579,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                         </button>
                       </div>
                     </div>
-                    <div className="flex flex-col min-w-0">
+                    <div className="flex flex-col min-w-0" data-tutorial-target="study-input">
                       <div className="flex items-center justify-between px-3 sm:px-5 py-2.5 sm:py-3 bg-gray-50/50 border-b border-stone-200 dark:border-stone-600">
                         <div className="flex items-center gap-2">
                           <div className="w-2 h-2 rounded-full bg-amber-500"></div>
@@ -3366,7 +3645,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
             )}
 
             {/* ============ FLASHCARD SUB-MODE ============ */}
-            {studyToolMode === 'flashcards' && (
+            {false && studyToolMode === 'flashcards' && (
               <>
                 {/* Flashcard Interactive View with Customization */}
                 {flashcardResult ? (
@@ -3422,6 +3701,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                             ✏️ Create from Scratch
                           </button>
                           <button
+                            data-tutorial-target="study-generate-btn"
                             onClick={handleSubmit}
                             disabled={!isTextValid() || isGeneratingFlashcards || !canUseQuiz}
                             className={`w-full sm:w-auto px-6 py-2.5 rounded-xl flex items-center justify-center transition-all font-semibold text-sm flex-shrink-0 ${
@@ -3510,7 +3790,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
             )}
 
             {/* ============ CROSSWORD SUB-MODE ============ */}
-            {studyToolMode === 'crossword' && (
+            {false && studyToolMode === 'crossword' && (
               <>
                 {/* Crossword Interactive View */}
                 {crosswordResult && crosswordResult.placedWords?.length > 0 ? (
@@ -3775,6 +4055,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                           </div>
                         </div>
                         <button
+                          data-tutorial-target="study-generate-btn"
                           onClick={handleSubmit}
                           disabled={!isTextValid() || isGeneratingCrossword || !canUseQuiz}
                           className={`w-full sm:w-auto px-6 py-2.5 rounded-xl flex items-center justify-center transition-all font-semibold text-sm flex-shrink-0 ${
@@ -3862,7 +4143,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
             )}
 
             {/* ============ CRATER BLAST SUB-MODE ============ */}
-            {studyToolMode === 'crater_blast' && (
+            {false && studyToolMode === 'crater_blast' && (
               <div className="bg-white dark:bg-stone-800 rounded-2xl sm:rounded-3xl shadow-xl border border-violet-200/50 dark:border-violet-800/30 overflow-hidden mb-6">
                 <div className="p-8 sm:p-10 text-center relative overflow-hidden">
                   <div className="absolute -top-8 -right-8 w-24 h-24 rounded-full bg-violet-500/20 blur-2xl" />
@@ -3925,7 +4206,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
         })()}
 
         {/* Recent Activity - Mobile optimized with horizontal scroll */}
-        <div className={isFreeUser && getExpiringSoonCount(recentActivity, 7) > 0 ? 'mt-4' : 'mt-8 sm:mt-10'}>
+        <div className={isFreeUser && getExpiringSoonCount(recentActivity, 7) > 0 ? 'mt-4' : 'mt-8 sm:mt-10'} data-tutorial="saved-materials">
           <div className="flex items-center justify-between mb-3 sm:mb-4">
             <h2 className="text-base sm:text-lg font-bold text-stone-800 dark:text-stone-100 flex items-center gap-2">
               <span className="text-lg sm:text-xl">📂</span> Recents

@@ -76,8 +76,8 @@ const TermsOfServicePage: React.FC<TermsOfServicePageProps> = ({ onNavigate, use
               <div className="space-y-4 text-stone-600 dark:text-stone-400">
                 <p>WriteScholar offers the following plans:</p>
                 <ul className="list-disc list-inside space-y-2 ml-4">
-                  <li><strong>Free</strong> — 3 documents per month, 3 AI essay analyses per month, 5,000 words for Humanizer and Summarizer, 3 study tool generations (quiz/flashcards/crossword), 2 citation searches per month</li>
-                  <li><strong>Pro ($19.99/month)</strong> — unlimited documents, 99 AI essay analyses per month, unlimited quiz generations, 999,999 words/month for Humanizer and Summarizer, 99 citation searches per month; mixed quiz type and medium difficulty</li>
+                  <li><strong>Free</strong> — 3 documents per month, 3 AI essay analyses per month, 5,000 words for Humanizer and Summarizer, 2 study pack generations (lesson, flashcards & quiz — crossword & Crater Blast unlock with Pro), 2 citation searches per month</li>
+                  <li><strong>Pro ($19.99/month)</strong> — unlimited documents, 99 AI essay analyses per month, 99 study pack generations (lesson, flashcards, quiz, crossword & Crater Blast), 999,999 words/month for Humanizer and Summarizer, 99 citation searches per month; all quiz types and difficulty levels</li>
                   <li><strong>Premium ($39.99/month)</strong> — all Pro features plus 199 AI essay analyses per month, 199 citation searches per month, our top-tier premium AI model, all quiz types and difficulty levels, all summarizer styles and lengths, advanced essay analysis, and priority support</li>
                 </ul>
                 <p>

@@ -56,7 +56,7 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
       features: [
         '3 documents per month',
         '3 AI essay analyses per month',
-        '3 study tool generations/month',
+        '2 study packs/month (lesson, flashcards & quiz — crossword & Crater Blast with Pro)',
         '5,000 words/month Humanizer & Summarizer',
         '2 citation searches per month',
         'Basic grammar check'
@@ -73,7 +73,7 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
       features: [
         'Unlimited document uploads',
         '99 AI essay analyses per month',
-        'Unlimited quiz, flashcard & crossword generation',
+        '99 study packs (lesson, flashcards, quiz, crossword & Crater Blast)',
         '999,999 words/month Humanizer & Summarizer',
         '99 citation searches per month',
         'All citation styles',
@@ -93,6 +93,7 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
       features: [
         'Everything in Pro',
         '199 AI essay analyses per month',
+        '199 study packs per month',
         '199 citation searches per month',
         'Our top-tier premium AI model',
         'All quiz types & difficulty levels unlocked',

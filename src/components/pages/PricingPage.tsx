@@ -165,16 +165,16 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
       features: [
         '3 documents per month',
         '3 AI essay analyses per month',
-        '3 study tool generations/month (quiz, flashcards, crossword)',
+        '2 study pack generations/month (lesson, flashcards & quiz — crossword & Crater Blast unlock with Pro)',
         '5,000 words/month for Humanizer & Summarizer',
         '2 citation searches per month',
         'Basic grammar check',
         'Standard citation styles'
       ],
       limitations: [
+        'Quiz & crossword locked (Pro feature)',
         'Limited to 3 documents',
-        'Basic AI model',
-        'No priority support'
+        'Basic AI model'
       ],
       popular: false,
       buttonText: getFreePlanButtonText(),
@@ -189,7 +189,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
       features: [
         'Unlimited document uploads',
         '99 AI essay analyses per month',
-        'Unlimited quiz, flashcard & crossword generation',
+        '99 study pack generations (lesson, flashcards, quiz & crossword)',
         '999,999 words/month for Humanizer & Summarizer',
         '99 citation searches per month',
         'All citation styles (APA, MLA, Chicago, Harvard…)',
@@ -215,6 +215,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
       features: [
         'Everything in Pro',
         '199 AI essay analyses per month',
+        '199 study pack generations per month',
         '199 citation searches per month',
         'Our top-tier premium AI model',
         'All quiz types & difficulty levels unlocked',
@@ -241,11 +242,11 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
     },
     {
       question: "What's included in the free plan?",
-        answer: "The free plan includes 3 documents per month, 3 AI essay analyses, 3 study tool generations (quiz, flashcards, or crossword), 5,000 words for the Humanizer and Summarizer, and 2 citation searches. It's perfect for students just getting started."
+        answer: "The free plan includes 3 documents per month, 3 AI essay analyses, 2 study pack generations (lesson, flashcards & quiz included — crossword & Crater Blast unlock with Pro), 5,000 words for the Humanizer and Summarizer, and 2 citation searches. It's perfect for students just getting started."
     },
     {
       question: "What's the difference between Pro and Premium?",
-      answer: "Pro gives you unlimited documents, 99 AI analyses per month, unlimited study tool generations (quizzes, flashcards, crosswords), 999,999 Humanizer/Summarizer words, 99 citation searches per month, all citation styles, and PDF/Word export. Premium upgrades you to 199 analyses and 199 citation searches per month, our top-tier premium AI model, all quiz types and difficulty levels, all summarizer styles and lengths, advanced essay analysis, advanced grammar checking, and priority support."
+      answer: "Pro gives you unlimited documents, 99 AI analyses per month, 99 study pack generations with full access to lesson, flashcards, quiz, crossword & Crater Blast, 999,999 Humanizer/Summarizer words, 99 citation searches per month, all citation styles, and PDF/Word export. Premium upgrades you to 199 analyses, 199 study packs, and 199 citation searches per month, our top-tier premium AI model, all quiz types and difficulty levels, all summarizer styles and lengths, advanced essay analysis, advanced grammar checking, and priority support."
     },
     {
       question: "Can I change my plan after subscribing?",

@@ -1,0 +1,47 @@
+{
+  "manifest_version": 3,
+  "name": "WriteScholar Focus Mode",
+  "version": "1.0.0",
+  "description": "Block distracting sites until you answer 5 study questions. Requires WriteScholar Pro or Premium.",
+  "permissions": [
+    "storage",
+    "declarativeNetRequest",
+    "declarativeNetRequestWithHostAccess",
+    "alarms"
+  ],
+  "host_permissions": [
+    "https://*.writescholar.com/*",
+    "https://writescholar.com/*",
+    "http://localhost:5173/*",
+    "http://localhost:3000/*",
+    "http://localhost:3001/*",
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://*.writescholar.com/*",
+        "https://writescholar.com/*",
+        "http://localhost:5173/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_end"
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "mascot.png",
+      "48": "mascot.png",
+      "128": "mascot.png"
+    }
+  },
+  "icons": {
+    "16": "mascot.png",
+    "48": "mascot.png",
+    "128": "mascot.png"
+  }
+}

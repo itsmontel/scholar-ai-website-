@@ -153,7 +153,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
     },
     {
       question: "Can I create study quizzes from my notes?",
-      answer: "Yes! The Quiz Generator turns any text into interactive quizzes with multiple choice and true/false questions. Paste your study notes, textbook chapters, or articles and get instant quizzes. Free users get 3 quizzes/month; paid plans have unlimited."
+      answer: "Yes! The Quiz Generator turns any text into interactive quizzes with multiple choice and true/false questions. Paste your study notes, textbook chapters, or articles and get instant quizzes. Quiz, crossword and Crater Blast are Pro features — free users get lesson and flashcards with each study pack generation."
     },
     {
       question: "How does the Paper Summarizer work?",
@@ -169,7 +169,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
     },
     {
       question: "What's the difference between Free, Pro, and Premium?",
-      answer: "Free includes 3 documents, 3 essay analyses per month, 3 study tool generations (quiz/flashcards/crossword), 5,000 Humanizer/Summarizer words per month, and 2 citation searches. Pro unlocks unlimited study tools, 99 essay analyses per month, 999,999 Humanizer/Summarizer words, 99 citation searches per month, all citation styles, and PDF/Word export. Premium adds 199 analyses and 199 citation searches per month, our top-tier premium AI model, all quiz types and difficulty levels, all summarizer styles and lengths, advanced essay analysis, and priority support."
+      answer: "Free includes 3 documents, 3 essay analyses, 2 study pack generations (lesson, flashcards & quiz — crossword & Crater Blast unlock with Pro), 5,000 Humanizer/Summarizer words, and 2 citation searches per month. Pro unlocks 99 analyses, 99 study packs with full crossword & Crater Blast access, 999,999 Humanizer/Summarizer words, 99 citation searches, all citation styles, and PDF/Word export. Premium gives you 199 analyses, 199 study packs, 199 citation searches, our top-tier premium AI model, all quiz types and difficulty levels, all summarizer styles and lengths, advanced essay analysis, and priority support."
     },
     {
       question: "How do I add friends and share my study materials?",
@@ -961,7 +961,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
               Try Study Tools Free
               <svg className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
             </button>
-            <p className="mt-4 text-stone-500 dark:text-stone-400 text-sm">Free plan includes 3 generations per month</p>
+            <p className="mt-4 text-stone-500 dark:text-stone-400 text-sm">Free plan includes 2 study packs per month (lesson & flashcards — quiz, crossword & Crater Blast with Pro)</p>
           </div>
         </div>
       </section>
@@ -3100,7 +3100,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   </svg>
                 </span>
                 <div>
-                  <p className="text-amber-800 font-semibold text-sm">3 free generations per month</p>
+                  <p className="text-amber-800 font-semibold text-sm">2 free study packs per month (lesson & flashcards — quiz, crossword & Crater Blast with Pro)</p>
                   <p className="text-amber-600 text-xs mt-0.5">Sign up to unlock Study Tools — upgrade for unlimited</p>
                 </div>
               </div>

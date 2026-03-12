@@ -59,6 +59,7 @@ const CalculatorPage = lazyWithRetry(() => import('./pages/tools/CalculatorPage'
 const ConverterPage = lazyWithRetry(() => import('./pages/tools/ConverterPage'));
 const LightningReflexQuizPage = lazyWithRetry(() => import('./pages/tools/LightningReflexQuizPage'));
 const InteractiveLessonPage = lazyWithRetry(() => import('./pages/tools/InteractiveLessonPage'));
+const StudyPackViewerPage = lazyWithRetry(() => import('./pages/StudyPackViewerPage'));
 const AnalyzeEssayPage = lazyWithRetry(() => import('./pages/AnalyzeEssayPage'));
 const CitationsPage = lazyWithRetry(() => import('./pages/CitationsPage'));
 const UnlockQuizPage = lazyWithRetry(() => import('./pages/UnlockQuizPage'));
@@ -86,6 +87,7 @@ function getPageFromPath(pathname: string): string {
   if (p === '/why-students-choose' || p === '/compare') return 'why-students-choose';
   if (p === '/vs-quizlet-knowt' || p === '/study-tools-comparison' || p === '/compare-study-tools') return 'study-tools-comparison';
   if (p === '/contact') return 'contact';
+  if (p === '/about') return 'about';
   if (p === '/analysis') return 'analysis';
   if (p === '/analysis-history') return 'analysis-history';
   if (p === '/citation-results') return 'citation-results';
@@ -127,6 +129,7 @@ function getPageFromPath(pathname: string): string {
   if (p === '/tools/converter' || p === '/converter') return 'converter';
   if (p === '/tools/crater-blast' || p === '/crater-blast' || p === '/tools/lightning-reflex-quiz' || p === '/lightning-reflex-quiz') return 'crater-blast';
   if (p === '/tools/interactive-lesson' || p === '/interactive-lesson' || p === '/lesson-generator') return 'interactive-lesson';
+  if (p === '/study-pack-viewer' || p === '/tools/study-pack-viewer') return 'study-pack-viewer';
   if (p === '/tools/more' || p === '/more-tools' || p === '/view-more-tools') return 'more-tools';
   if (p === '/badges' || p === '/achievements') return 'badges';
   if (p === '/tools/analyze' || p === '/analyze') return 'analyze';
@@ -259,9 +262,9 @@ const AcademicAIApp = () => {
     'grammar-checker': { title: 'Free Grammar Checker – Fix Spelling & Grammar Errors | WriteScholar', description: 'Check your writing for common spelling mistakes, grammar errors, punctuation issues, and style suggestions. Quick client-side grammar check.' },
     'humanizer': { title: 'AI Humanizer – Bypass AI Detection Free | WriteScholar', description: 'Transform AI-generated text from ChatGPT, Claude, Gemini into undetectable human writing. Bypass Turnitin, GPTZero, and other AI detectors. A tool Quizlet and Knowt don\'t offer. Free to try.' },
     'summarizer': { title: 'AI Summarizer – Condense Papers & Articles Free | WriteScholar', description: 'Summarize research papers, articles, and textbooks into key points. Bullet points or paragraphs. Better than Quizlet for literature reviews. Free to try.' },
-    'quiz-generator': { title: 'Quiz Generator from Text – Free AI Quiz Maker | WriteScholar', description: 'Free quiz generator from text: paste notes or articles and get multiple-choice, true/false, fill-in-the-blank quizzes in seconds. Best free Quizlet alternative. No signup to start.' },
+    'quiz-generator': { title: 'AI Quiz Generator from Text – Pro Study Tool | WriteScholar', description: 'Generate quizzes from your notes or articles. Multiple-choice, true/false, fill-in-the-blank questions in seconds. Quiz generation is a Pro feature. Best Quizlet alternative.' },
     'flashcard-generator': { title: 'Flashcard Generator – Free AI Flashcard Maker from Text | WriteScholar', description: 'Free flashcard generator: turn your notes, textbooks, or articles into flashcards with AI. No typing—paste text and study in seconds. Best free Quizlet & Knowt alternative.' },
-    'crossword-generator': { title: 'Free AI Crossword Generator — Unique Study Tool | WriteScholar', description: 'Turn your notes into fun crossword puzzles with AI. A study mode you won\'t find on Quizlet or Knowt. Memorize key terms the engaging way. Free to try.' },
+    'crossword-generator': { title: 'AI Crossword Generator — Pro Study Tool | WriteScholar', description: 'Turn your notes into fun crossword puzzles with AI. A unique study mode you won\'t find on Quizlet or Knowt. Crossword generation is a Pro feature.' },
     'quiz-history': { title: 'Saved Materials | WriteScholar', description: 'View and retake your saved quizzes, flashcards, and crosswords. Study materials are stored for 30 days.' },
     'gpa-calculator': { title: 'Free GPA Calculator – Calculate Your Grade Point Average | WriteScholar', description: 'Free GPA calculator for college and high school students. Calculate semester or cumulative GPA instantly. Add courses, credits, and grades. No signup required.' },
     'pomodoro-timer': { title: 'Free Pomodoro Timer – Study Timer & Focus Tool | WriteScholar', description: 'Free Pomodoro timer for focused studying. Boost productivity with timed work sessions and breaks. Customizable focus and break intervals. No signup required.' },
@@ -612,6 +615,7 @@ const AcademicAIApp = () => {
     'gpa-calculator': '/tools/gpa-calculator',
     'pomodoro-timer': '/tools/pomodoro-timer',
     'crater-blast': '/tools/crater-blast',
+    'study-pack-viewer': '/study-pack-viewer',
     'analyze': '/tools/analyze',
     'citations': '/tools/citations',
     'more-tools': '/more-tools',
@@ -677,6 +681,9 @@ const AcademicAIApp = () => {
       setUser(updatedUser);
       localStorage.setItem('user', JSON.stringify(updatedUser));
     }
+    try {
+      sessionStorage.setItem('writescholar_show_interactive_tutorial', 'true');
+    } catch (_) {}
     navigateTo(destination);
   };
 
@@ -684,6 +691,7 @@ const AcademicAIApp = () => {
     <OnboardingPage
       onNavigate={navigateTo}
       user={user}
+      onLogout={handleLogout}
       onUserUpdate={(updates) => {
         if (user && (updates.name !== undefined || updates.username !== undefined)) {
           const updatedUser = {
@@ -921,6 +929,8 @@ const AcademicAIApp = () => {
         return <LightningReflexQuizPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'interactive-lesson':
         return <InteractiveLessonPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
+      case 'study-pack-viewer':
+        return <StudyPackViewerPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'admin':
         return <AdminDashboard onNavigate={navigateTo} user={user} />;
       case 'collaboration':

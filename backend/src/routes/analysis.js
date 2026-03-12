@@ -2340,4 +2340,156 @@ router.delete('/study-events/:id', authenticateToken, async (req, res) => {
   }
 });
 
+// @route   POST /api/analysis/generate-study-pack
+// @desc    Generate a unified study pack (quiz + flashcards + crossword + lesson + crater blast)
+// @access  Private
+router.post('/generate-study-pack', authenticateToken, async (req, res) => {
+  try {
+    const { text } = req.body;
+    if (!text || typeof text !== 'string' || text.trim().length === 0) {
+      return res.status(400).json({ success: false, message: 'Text content is required' });
+    }
+
+    const wordCount = text.trim().split(/\s+/).length;
+    if (wordCount < 50) {
+      return res.status(400).json({ success: false, message: 'Please provide at least 50 words for a study pack.' });
+    }
+
+    const userId = req.user.id;
+    const userPlan = req.user.subscription_plan || 'free';
+    const planLimits = subscriptionService.PLAN_LIMITS[userPlan] || subscriptionService.PLAN_LIMITS.free;
+
+    const maxWords = planLimits.studyPackMaxWordsPerGeneration || planLimits.quizMaxWordsPerGeneration || 5000;
+    if (wordCount > maxWords) {
+      return res.status(400).json({
+        success: false,
+        message: `Text exceeds the ${maxWords.toLocaleString()} word limit for your plan. Please shorten your text.`
+      });
+    }
+
+    const { createClient } = require('@supabase/supabase-js');
+    const supabase = createClient(
+      process.env.SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
+    );
+
+    const { periodStart } = await subscriptionService.getUsagePeriod(userId);
+
+    const { data: usageData, error: usageError } = await supabase
+      .from('quiz_usage')
+      .select('id')
+      .eq('user_id', userId)
+      .gte('created_at', periodStart);
+
+    const generationsUsed = usageError ? 0 : (usageData || []).length;
+    const generationLimit = planLimits.studyPackGenerationsPerMonth || planLimits.quizGenerationsPerMonth;
+
+    if (generationLimit !== -1 && generationsUsed >= generationLimit) {
+      return res.status(429).json({
+        success: false,
+        message: `You've used all ${generationLimit} study pack generation${generationLimit === 1 ? '' : 's'} this period. ${userPlan === 'free' ? 'Upgrade for 99+ generations/month.' : 'Limit resets when your billing period renews.'}`,
+        generationsUsed,
+        generationLimit,
+        generationsRemaining: 0,
+        upgrade: userPlan === 'free'
+      });
+    }
+
+    const pack = await aiAnalysisService.generateStudyPack(text, userPlan);
+
+    supabase.from('quiz_usage').insert({
+      user_id: userId,
+      words_count: wordCount,
+      quiz_type: 'study_pack',
+      difficulty: 'mixed'
+    }).then(() => {}).catch(err => console.error('Failed to record study pack usage:', err));
+
+    const isPaidUser = userPlan === 'pro' || userPlan === 'premium';
+    const expiresAt = isPaidUser ? null : (() => { const d = new Date(); d.setDate(d.getDate() + 30); return d.toISOString(); })();
+
+    const packTitle = pack.quiz?.title || pack.flashcards?.title || pack.lesson?.title || 'Study Pack';
+
+    supabase.from('quizzes').insert([{
+      user_id: userId,
+      title: packTitle,
+      quiz_type: 'study_pack',
+      difficulty: 'mixed',
+      question_count: (pack.quiz?.questions?.length || 0) + (pack.flashcards?.cards?.length || 0),
+      questions: {
+        quiz: pack.quiz,
+        flashcards: pack.flashcards,
+        crossword: pack.crossword,
+        lesson: pack.lesson,
+        craterBlast: pack.craterBlast,
+      },
+      source_word_count: wordCount,
+      created_at: new Date().toISOString(),
+      expires_at: expiresAt
+    }]).select().then(({ data }) => {
+      if (data?.[0]) console.log('Study pack saved:', data[0].id);
+    }).catch(err => console.error('Failed to save study pack:', err));
+
+    res.json({
+      success: true,
+      message: 'Study pack generated successfully',
+      data: pack,
+      generationsUsed: generationsUsed + 1,
+      generationLimit,
+      generationsRemaining: Math.max(0, generationLimit - generationsUsed - 1),
+    });
+  } catch (error) {
+    console.error('Generate study pack error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Study pack generation failed. Please try again.',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
+// @route   GET /api/analysis/study-pack-usage
+// @desc    Get user's study pack generation usage this period
+// @access  Private
+router.get('/study-pack-usage', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const userPlan = req.user.subscription_plan || 'free';
+    const planLimits = subscriptionService.PLAN_LIMITS[userPlan] || subscriptionService.PLAN_LIMITS.free;
+
+    const { createClient } = require('@supabase/supabase-js');
+    const supabase = createClient(
+      process.env.SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
+    );
+
+    const { periodStart, daysUntilReset } = await subscriptionService.getUsagePeriod(userId);
+
+    const { data: usageData, error: usageError } = await supabase
+      .from('quiz_usage')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('quiz_type', 'study_pack')
+      .gte('created_at', periodStart);
+
+    const generationsUsed = usageError ? 0 : (usageData || []).length;
+    const generationLimit = planLimits.studyPackGenerationsPerMonth || planLimits.quizGenerationsPerMonth;
+    const maxWords = planLimits.studyPackMaxWordsPerGeneration || planLimits.quizMaxWordsPerGeneration || 5000;
+
+    res.json({
+      success: true,
+      data: {
+        generationsUsed,
+        generationLimit,
+        generationsRemaining: Math.max(0, generationLimit - generationsUsed),
+        maxWordsPerGeneration: maxWords,
+        plan: userPlan,
+        daysUntilReset
+      }
+    });
+  } catch (error) {
+    console.error('Study pack usage error:', error);
+    res.status(500).json({ success: false, message: 'Failed to get study pack usage' });
+  }
+});
+
 module.exports = router;

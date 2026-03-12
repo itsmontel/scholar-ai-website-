@@ -265,7 +265,7 @@ export default function FocusModeSettingsSection({ onBack, embedded = false, isP
                 Blocked: {blockedDomains.join(', ')}
                 {!isPaidUser && (
                   <span>
-                    {' '}(Free: 1 site max —{' '}
+                    {' '}(Free: 1 site max,{' '}
                     {onNavigate ? (
                       <button
                         type="button"
