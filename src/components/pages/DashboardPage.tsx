@@ -2262,6 +2262,13 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                       <span className="text-lg">📁</span>
                       <span>Saved Materials</span>
                     </button>
+                    <button
+                      onClick={() => onNavigate('onboarding')}
+                      className="flex-1 min-w-[7rem] flex items-center justify-center gap-2 px-3 py-3 rounded-xl border-2 border-dashed border-amber-400 dark:border-amber-500 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 font-semibold text-sm active:scale-[0.98] transition-all"
+                    >
+                      <span>👀</span>
+                      <span>Onboarding (Test)</span>
+                    </button>
                   </div>
                   </div>
                 </div>

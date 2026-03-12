@@ -200,8 +200,8 @@ const SoftPaywall = ({ userName, onStartTrial, onDismiss, onNavigatePricing, onN
             </div>
           ) : (
             <>
-          {/* Urgency countdown */}
-          <div className="flex justify-center mb-4">
+          {/* Urgency countdown - desktop only */}
+          <div className="hidden md:flex justify-center mb-4">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/60">
               <span className="text-[10px] font-bold uppercase tracking-wider text-red-600 dark:text-red-400">Offer expires in</span>
               <span className="tabular-nums font-mono text-xl font-bold text-red-600 dark:text-red-400">{timeStr}</span>
