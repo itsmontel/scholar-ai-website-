@@ -2010,14 +2010,6 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
               </div>
             </button>
 
-            {/* Test: View Onboarding */}
-            <button
-              onClick={() => onNavigate('onboarding')}
-              className="w-full flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl border-2 border-dashed border-amber-400 dark:border-amber-500 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/30 text-xs font-semibold transition-all"
-            >
-              <span>👀</span> View Onboarding (Test)
-            </button>
-
             {/* Schedule Section */}
             <div className="bg-white dark:bg-stone-800 rounded-3xl shadow-lg shadow-stone-200/50 dark:shadow-stone-900/50 border border-stone-200/60 dark:border-stone-600/40 p-5 hover:shadow-xl transition-shadow">
             <div className="flex items-center justify-between mb-3">
@@ -2263,13 +2255,6 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                     >
                       <span className="text-lg">📁</span>
                       <span>Saved Materials</span>
-                    </button>
-                    <button
-                      onClick={() => onNavigate('onboarding')}
-                      className="flex-1 min-w-[7rem] flex items-center justify-center gap-2 px-3 py-3 rounded-xl border-2 border-dashed border-amber-400 dark:border-amber-500 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 font-semibold text-sm active:scale-[0.98] transition-all"
-                    >
-                      <span>👀</span>
-                      <span>Onboarding (Test)</span>
                     </button>
                   </div>
                   </div>
