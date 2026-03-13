@@ -339,15 +339,17 @@ const CreateFlashcardsPage = ({ onNavigate, user, onLogout }: CreateFlashcardsPa
                 </svg>
                 Customize
               </button>
-              <button
-                onClick={() => onNavigate('dashboard')}
-                className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-medium text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-600 hover:bg-stone-50 dark:hover:bg-stone-700 transition-all"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-                Dashboard
-              </button>
+              {user && (
+                <button
+                  onClick={() => onNavigate('dashboard')}
+                  className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-medium text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-600 hover:bg-stone-50 dark:hover:bg-stone-700 transition-all"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  </svg>
+                  Dashboard
+                </button>
+              )}
             </div>
           </div>
         </div>
