@@ -295,8 +295,8 @@ const BlogPage = ({ onNavigate, user, onLogout }: BlogPageProps) => {
             </h1>
             <span className="text-3xl sm:text-4xl">🧊</span>
           </div>
-          <p className="text-lg text-stone-500 dark:text-stone-400">
-            Tips, guides, and insights for better academic writing
+          <p className="text-lg text-stone-500 dark:text-stone-400 max-w-2xl">
+            Real perspectives on studying and writing. Personal stories, honest opinions, and what actually works. Not the same advice you&apos;ll find everywhere else.
           </p>
         </header>
 

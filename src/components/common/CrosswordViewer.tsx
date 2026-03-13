@@ -26,7 +26,10 @@ const CrosswordViewer = ({ grid, placedWords, title, onEnlarge }: CrosswordViewe
   const inputRef = useRef<HTMLInputElement>(null);
 
   const getCellLetter = (row: number, col: number): string => {
-    const pw = placedWords.find(p => p.row === row && p.col === col);
+    const pw = placedWords.find(p => {
+      if (p.direction === 'across') return row === p.row && col >= p.col && col < p.col + p.length;
+      return col === p.col && row >= p.row && row < p.row + p.length;
+    });
     if (!pw) return '';
     const offset = pw.direction === 'across' ? col - pw.col : row - pw.row;
     const key = `word-${pw.number}`;

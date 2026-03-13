@@ -379,13 +379,13 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
       return (
         <>
           <p className={p}>
-            You have probably done this before. You sit down with your notes, your textbook, your highlighter. You read. You highlight. You read again. A few hours later, you close the book and tell yourself you studied. Then the exam comes and half of it feels like it was written in another language.
+            You&apos;ve probably done this before. You sit down with your notes, your textbook, your highlighter. You read. You highlight. You read again. A few hours later, you close the book and tell yourself you studied. Then the exam comes and half of it feels like it was written in another language.
           </p>
           <p className={p}>
-            The problem is not how much you study. It is how you study. Most students rely on methods that feel productive but do almost nothing for long-term retention. Rereading and highlighting create an illusion of learning. Your brain recognizes the material, so it feels familiar. But recognition is not the same as recall. When the exam asks you to pull information from memory without any cues, that familiarity vanishes.
+            I did this for two years before I figured out the problem wasn&apos;t how much I studied. It was how. Rereading and highlighting feel productive. Your brain recognizes the material, so it feels familiar. But recognition isn&apos;t recall. When the exam asks you to pull information from memory without cues, that familiarity vanishes.
           </p>
           <p className={p}>
-            This guide covers evidence-based study strategies that actually work for college students. We will look at why active recall beats passive review, how to structure your study sessions so they stick, and which tools can help you study smarter instead of longer.
+            This is what actually works, based on the research and on what I wish I&apos;d known sooner: why active recall beats passive review, how to structure sessions so they stick, and which tools save time without sacrificing retention.
           </p>
 
           <StudyEffectivelyHeroIllustration />
@@ -507,10 +507,13 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
       return (
         <>
           <p className={p}>
-            Studying effectively is one of the biggest challenges students face. You read the textbook, highlight key passages, and review your notes. Yet when exam time comes, the information seems to vanish from memory. The problem isn&apos;t your intelligence or effort; it&apos;s often the study methods themselves. Passive reading and highlighting simply don&apos;t create the strong neural connections needed for long-term retention. This is where active learning tools like flashcards, quizzes, and crosswords come in, and when powered by AI, they become even more effective.
+            I used to hand-write 200 flashcards for every bio exam. Front and back. My hand would cramp. I&apos;d spend three hours making the cards and one hour actually studying them. The worst part? Half the cards were redundant. I&apos;d written the same concept five different ways.
           </p>
           <p className={p}>
-            This comprehensive guide explores how AI-powered study tools transform the learning process, why active recall beats passive review, and how WriteScholar&apos;s <a href="/tools/quiz-generator" onClick={handleNavigate('quiz-generator')} className={internalLink}>quiz generator</a>, <a href="/tools/flashcard-generator" onClick={handleNavigate('flashcard-generator')} className={internalLink}>flashcard creator</a>, and <a href="/tools/crossword-generator" onClick={handleNavigate('crossword-generator')} className={internalLink}>crossword builder</a> can help you study smarter, not harder. Whether you&apos;re preparing for finals, learning a new subject, or helping students master difficult material, understanding these tools will change how you approach studying.
+            Then I discovered tools that generate quizzes and flashcards from your notes in seconds. Paste in a textbook chapter, get a full deck. Paste in lecture notes, get a practice quiz. Same active recall, 90% less tedium. The science behind why it works hasn&apos;t changed. Roediger and Karpicke showed decades ago that testing yourself beats rereading. What changed is how fast you can create the materials.
+          </p>
+          <p className={p}>
+            Here&apos;s what I&apos;ve learned about making these tools actually work for you and the pitfalls to avoid.
           </p>
 
           <StudyToolsHeroIllustration />
@@ -912,10 +915,10 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
       return (
         <>
           <p className={p}>
-            Academic writing doesn&apos;t have to be a struggle. Whether you&apos;re drafting an essay, polishing a research paper, or formatting citations, the right tools can save hours of frustration and help you produce better work. The good news? Many of the most useful writing tools are completely free. You don&apos;t need expensive software subscriptions to write well-structured, error-free papers.
+            I&apos;m cheap. Or realistic, depending how you look at it. When I was in undergrad I refused to pay for Grammarly Premium or any of the fancy writing tools everyone recommended. So I found ways to get 80% of the value for free.
           </p>
           <p className={p}>
-            This comprehensive guide covers eight essential free writing tools that every student should have in their toolkit. From word counters that help you meet length requirements to readability analyzers that make your writing clearer, these tools address the most common challenges students face. We&apos;ll explain what each tool does, when to use it, and how it can improve your academic work—plus links to try them yourself.
+            These are the tools I actually use when I&apos;m drafting, not a generic list from a content farm. Word counter when I&apos;m racing a deadline. Citation generator when I have 40 sources. Thesis helper when my argument is muddy. All free. All in the browser. No accounts required for most of them.
           </p>
 
           <ToolsIllustration />
@@ -925,7 +928,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
             Let&apos;s be honest: students are on tight budgets. Textbooks, software, and subscription services add up quickly. Meanwhile, writing requirements only get more demanding as you progress through your academic career. You&apos;re expected to write longer papers, cite more sources, and maintain higher standards of clarity and correctness.
           </p>
           <p className={p}>
-            Free writing tools democratize access to quality feedback. You shouldn&apos;t need a premium subscription to check whether you&apos;ve hit the word count, generate a properly formatted citation, or identify weak areas in your writing. According to a <a href="https://nces.ed.gov/fastfacts/display.asp?id=372" target="_blank" rel="noopener noreferrer" className={internalLink}>study by the National Center for Education Statistics</a>, over 19 million students were enrolled in U.S. colleges in recent years—and most could benefit from better writing support.
+            Free writing tools democratize access to quality feedback. You shouldn&apos;t need a premium subscription to check whether you&apos;ve hit the word count, generate a properly formatted citation, or identify weak areas in your writing. According to a <a href="https://nces.ed.gov/fastfacts/display.asp?id=372" target="_blank" rel="noopener noreferrer" className={internalLink}>study by the National Center for Education Statistics</a>, over 19 million students were enrolled in U.S. colleges in recent years, and most could benefit from better writing support.
           </p>
           <p className={p}>
             The tools we cover below work directly in your browser. There&apos;s nothing to download, no accounts required for basic features, and no hidden costs. Bookmark them, use them whenever you need them, and watch your writing improve.
@@ -952,7 +955,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
 
           <h2 className={h2}>2. Citation Generator: Format references correctly</h2>
           <p className={p}>
-            Citation formatting is one of the most tedious parts of academic writing. APA, MLA, Chicago, Harvard, IEEE, Vancouver—each style has different rules for punctuation, capitalization, and order of elements. One misplaced comma or missing period can cost you points, even when your argument is excellent.
+            Citation formatting is one of the most tedious parts of academic writing. APA, MLA, Chicago, Harvard, IEEE, Vancouver. Each style has different rules for punctuation, capitalization, and order of elements. One misplaced comma or missing period can cost you points, even when your argument is excellent.
           </p>
           <p className={p}>
             A <a href="/tools/citation-generator" onClick={handleNavigate('citation-generator-tool')} className={internalLink}>citation generator</a> creates properly formatted references from the information you provide. Enter the author, title, publication date, and other details, and the tool outputs a citation in your chosen style. This saves time and reduces errors, especially when you have dozens of sources.
@@ -970,7 +973,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
             • Government reports and technical documents
           </p>
           <p className={p}>
-            Always double-check generated citations against your style guide. Generators are helpful but not infallible—they may handle unusual sources incorrectly or use outdated formatting rules.
+            Always double-check generated citations against your style guide. Generators are helpful but not infallible. They may handle unusual sources incorrectly or use outdated formatting rules.
           </p>
 
           <CitationIllustration />
@@ -998,7 +1001,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
 
           <h2 className={h2}>4. Readability Score Calculator: Write clearly for your audience</h2>
           <p className={p}>
-            Clear writing communicates ideas effectively. Overly complex sentences, excessive jargon, and convoluted structure make your work harder to read—and may obscure your actual argument. A <a href="/tools/readability-score" onClick={handleNavigate('readability-score')} className={internalLink}>readability score calculator</a> analyzes your text using established formulas to tell you how accessible your writing is.
+            Clear writing communicates ideas effectively. Overly complex sentences, excessive jargon, and convoluted structure make your work harder to read and may obscure your actual argument. A <a href="/tools/readability-score" onClick={handleNavigate('readability-score')} className={internalLink}>readability score calculator</a> analyzes your text using established formulas to tell you how accessible your writing is.
           </p>
           <p className={p}>
             Common readability metrics include:<br />
@@ -1010,7 +1013,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
             • <strong>Automated Readability Index:</strong> Based on characters per word and words per sentence
           </p>
           <p className={p}>
-            According to <a href="https://www.apa.org/gradpsych/2006/01/starting-tips" target="_blank" rel="noopener noreferrer" className={internalLink}>APA guidelines</a>, good academic writing balances complexity with clarity. You&apos;re not trying to write at a 5th-grade level, but unnecessarily dense prose isn&apos;t a sign of intelligence—it&apos;s a barrier to communication.
+            According to <a href="https://www.apa.org/gradpsych/2006/01/starting-tips" target="_blank" rel="noopener noreferrer" className={internalLink}>APA guidelines</a>, good academic writing balances complexity with clarity. You&apos;re not trying to write at a 5th-grade level, but unnecessarily dense prose isn&apos;t a sign of intelligence. It&apos;s a barrier to communication.
           </p>
 
           <h2 className={h2}>5. Thesis Statement Generator: Focus your argument</h2>
@@ -1018,7 +1021,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
             The thesis statement is arguably the most important sentence in your paper. It tells readers what you&apos;re arguing and why it matters. A weak or vague thesis leads to a weak paper; a clear, specific thesis gives your writing direction and makes it easier to stay focused.
           </p>
           <p className={p}>
-            A <a href="/tools/thesis-generator" onClick={handleNavigate('thesis-generator')} className={internalLink}>thesis generator tool</a> helps you craft strong thesis statements by prompting you to identify your topic, position, and supporting reasons. It doesn&apos;t write your thesis for you—it guides you through the thinking process that produces a good one.
+            A <a href="/tools/thesis-generator" onClick={handleNavigate('thesis-generator')} className={internalLink}>thesis generator tool</a> helps you craft strong thesis statements by prompting you to identify your topic, position, and supporting reasons. It doesn&apos;t write your thesis for you. It guides you through the thinking process that produces a good one.
           </p>
           <h3 className={h3}>What makes a strong thesis?</h3>
           <p className={p}>
@@ -1060,7 +1063,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
 
           <h2 className={h2}>8. Paraphrasing and Writing Improvement Analyzer: Strengthen your prose</h2>
           <p className={p}>
-            Paraphrasing—restating information in your own words—is a crucial academic skill. It lets you incorporate sources without over-relying on direct quotes. But paraphrasing poorly can lead to unintentional plagiarism or awkward phrasing. A <a href="/tools/paraphrasing-tips" onClick={handleNavigate('paraphrasing-tips')} className={internalLink}>writing improvement analyzer</a> helps you identify areas where your writing could be stronger.
+            Paraphrasing (restating information in your own words) is a crucial academic skill. It lets you incorporate sources without over-relying on direct quotes. But paraphrasing poorly can lead to unintentional plagiarism or awkward phrasing. A <a href="/tools/paraphrasing-tips" onClick={handleNavigate('paraphrasing-tips')} className={internalLink}>writing improvement analyzer</a> helps you identify areas where your writing could be stronger.
           </p>
           <p className={p}>
             These tools analyze your text for:<br />
@@ -1133,7 +1136,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
 
           <h2 className={h2}>Start improving your writing today</h2>
           <p className={p}>
-            Good academic writing is a skill you develop over time, and the right tools accelerate that development. The free tools we&apos;ve covered—<a href="/tools/word-counter" onClick={handleNavigate('word-counter')} className={internalLink}>word counter</a>, <a href="/tools/citation-generator" onClick={handleNavigate('citation-generator-tool')} className={internalLink}>citation generator</a>, <a href="/tools/grammar-checker" onClick={handleNavigate('grammar-checker')} className={internalLink}>grammar checker</a>, <a href="/tools/readability-score" onClick={handleNavigate('readability-score')} className={internalLink}>readability calculator</a>, <a href="/tools/thesis-generator" onClick={handleNavigate('thesis-generator')} className={internalLink}>thesis generator</a>, <a href="/tools/essay-outline" onClick={handleNavigate('essay-outline')} className={internalLink}>essay outliner</a>, <a href="/tools/text-case-converter" onClick={handleNavigate('text-case-converter')} className={internalLink}>case converter</a>, and <a href="/tools/paraphrasing-tips" onClick={handleNavigate('paraphrasing-tips')} className={internalLink}>writing analyzer</a>—address the most common challenges students face.
+            Good academic writing is a skill you develop over time, and the right tools accelerate that development. The free tools we&apos;ve covered: <a href="/tools/word-counter" onClick={handleNavigate('word-counter')} className={internalLink}>word counter</a>, <a href="/tools/citation-generator" onClick={handleNavigate('citation-generator-tool')} className={internalLink}>citation generator</a>, <a href="/tools/grammar-checker" onClick={handleNavigate('grammar-checker')} className={internalLink}>grammar checker</a>, <a href="/tools/readability-score" onClick={handleNavigate('readability-score')} className={internalLink}>readability calculator</a>, <a href="/tools/thesis-generator" onClick={handleNavigate('thesis-generator')} className={internalLink}>thesis generator</a>, <a href="/tools/essay-outline" onClick={handleNavigate('essay-outline')} className={internalLink}>essay outliner</a>, <a href="/tools/text-case-converter" onClick={handleNavigate('text-case-converter')} className={internalLink}>case converter</a>, and <a href="/tools/paraphrasing-tips" onClick={handleNavigate('paraphrasing-tips')} className={internalLink}>writing analyzer</a>. They address the most common challenges students face.
           </p>
           <p className={p}>
             For even more comprehensive feedback on your academic writing, WriteScholar combines these capabilities with AI-powered analysis of structure, argumentation, and academic tone. Check our <a href="/features" onClick={handleNavigate('features')} className={internalLink}>features page</a> to see what&apos;s included, or explore our <a href="/pricing" onClick={handleNavigate('pricing')} className={internalLink}>pricing options</a> to find the right plan for your needs.
@@ -1148,10 +1151,10 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
       return (
         <>
           <p className={p}>
-            A thesis statement is the single sentence (or occasionally two) that tells your reader what your paper argues and why it matters. Every essay, research paper, or analytical piece needs one. A weak thesis leads to a weak paper; a clear, specific, arguable thesis gives your writing direction and makes it easier to stay focused from introduction to conclusion. Whether you&apos;re writing a five-paragraph essay for a class assignment or a 20-page research paper for publication, the thesis statement serves as the backbone of your entire argument.
+            The worst feedback I ever got on a paper: &quot;I&apos;m not sure what you&apos;re arguing.&quot; I&apos;d written 3,000 words. I thought my argument was obvious. Turns out my thesis was so vague it could have supported six different papers.
           </p>
           <p className={p}>
-            This comprehensive guide explains what makes a thesis statement work, how to write one for different essay types, and common mistakes to avoid. We&apos;ll include concrete examples for argumentative, analytical, and expository essays so you can see the difference between a vague claim and a strong one. By the end, you&apos;ll have a clear process for crafting thesis statements that give your writing focus and clarity.
+            A thesis statement is the one sentence that tells your reader what you&apos;re arguing and why it matters. Get it wrong, and the whole paper drifts. Get it right, and everything else falls into place. Here&apos;s what actually makes one work and the mistakes I used to make (and sometimes still do).
           </p>
 
           <h2 className={h2}>What a thesis statement does</h2>
@@ -1159,7 +1162,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
             Your thesis tells the reader three things: what your topic is, what position you&apos;re taking on it, and (in most cases) the main reasons or structure of your argument. It usually appears at the end of your introduction, after you&apos;ve given enough context for the claim to make sense. The rest of your paper develops, supports, or explores that claim. Think of it as a promise to your reader about what they&apos;ll learn or be convinced of by the time they finish reading.
           </p>
           <p className={p}>
-            A good thesis is specific enough that a reader can tell immediately what the paper is about. It should be arguable — someone could reasonably disagree with it. And it should be supportable — you need to be able to back it up with evidence, analysis, or examples throughout the paper. Without these three qualities, your thesis will fail to guide your writing effectively.
+            A good thesis is specific enough that a reader can tell immediately what the paper is about. It should be arguable: someone could reasonably disagree with it. And it should be supportable: you need to be able to back it up with evidence, analysis, or examples throughout the paper. Without these three qualities, your thesis will fail to guide your writing effectively.
           </p>
           <p className={p}>
             The thesis also serves as a touchstone for you as the writer. Every paragraph you write should connect back to your thesis in some way. If you find yourself writing sections that don&apos;t relate to your central claim, either revise those sections or reconsider whether your thesis accurately reflects what your paper is actually about.
@@ -1280,7 +1283,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
             <strong>Buried thesis:</strong> Your thesis should appear at the end of the introduction, not hidden in the middle of your paper or saved for the conclusion.
           </p>
           <p className={p}>
-            <strong>Multiple unrelated claims:</strong> Your thesis should make one main point. If you have two separate arguments, you might need two papers—or you need to find the connection between them.
+            <strong>Multiple unrelated claims:</strong> Your thesis should make one main point. If you have two separate arguments, you might need two papers, or you need to find the connection between them.
           </p>
 
           <h2 className={h2}>Getting feedback on your thesis</h2>
@@ -1327,17 +1330,17 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
       return (
         <>
           <p className={p}>
-            Writing an APA research paper means following a clear structure and formatting rules set by the American Psychological Association. Whether you&apos;re in psychology, education, nursing, or the social sciences, this comprehensive guide walks you through each section so your paper meets APA 7th edition standards and avoids the formatting errors that cost students points every semester.
+            My first psychology paper came back with red marks on every section. Not for my argument. For the formatting. Wrong margins. Missing running head (this was before APA 7). Inconsistent reference formatting. I&apos;d focused on the content and assumed the structure would sort itself out. It didn&apos;t.
           </p>
           <p className={p}>
-            The key to a strong APA paper is consistency: same font (usually 12pt Times New Roman or 11pt Arial), double spacing throughout, 1-inch margins, and a predictable order of sections. Getting the structure right from the start saves you from last-minute reformatting and helps readers (including your professor) follow your argument easily. This guide covers everything from the title page to the reference list, with examples and common mistakes to avoid.
+            APA has a logic to it. Once you know the pattern: title page, abstract, introduction, method, results, discussion, references. You can stop guessing and start writing. This walks through each section with the rules that actually matter and the mistakes that cost points every semester.
           </p>
 
           <WritingIllustration />
 
           <h2 className={h2}>1. Title page</h2>
           <p className={p}>
-            The title page is the first thing your reader sees. Include the full title of your paper (centered, bold), your name, your institution, the course number and name, your instructor&apos;s name, and the due date. Center everything and use double spacing. In APA 7, student papers no longer require a running head—only professional manuscripts submitted for publication need one.
+            The title page is the first thing your reader sees. Include the full title of your paper (centered, bold), your name, your institution, the course number and name, your instructor&apos;s name, and the due date. Center everything and use double spacing. In APA 7, student papers no longer require a running head. Only professional manuscripts submitted for publication need one.
           </p>
           <p className={p}>
             Keep your title concise but descriptive: it should signal the topic and, when possible, the main variables or relationship you&apos;re studying. Avoid unnecessary words like &quot;A Study of&quot; or &quot;An Investigation into.&quot; Good titles are typically 12 words or fewer. If your title runs more than one line, use title case and center both lines.
@@ -1368,7 +1371,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
             The introduction sets the stage for your research. Start with the broader topic and narrow down to your specific research question or thesis. Provide enough context so a reader unfamiliar with the area can follow why your question matters. End with a clear statement of your purpose or hypothesis and, optionally, a brief roadmap of how the paper is organized.
           </p>
           <p className={p}>
-            A common structure is to move from general (importance of the topic) to specific (your study). Use the literature to show what&apos;s known and where the gap is. Avoid over-citing in the opening paragraph—one or two key citations are enough. Save detailed literature review for later paragraphs or a dedicated section if your assignment requires one.
+            A common structure is to move from general (importance of the topic) to specific (your study). Use the literature to show what&apos;s known and where the gap is. Avoid over-citing in the opening paragraph. One or two key citations are enough. Save detailed literature review for later paragraphs or a dedicated section if your assignment requires one.
           </p>
           <p className={p}>
             The introduction typically runs one to two pages in an empirical paper. It should answer three questions: (1) What is the problem? (2) Why does it matter? (3) What will this paper contribute?
@@ -1396,12 +1399,12 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
           </p>
           <h3 className={h3}>Procedure</h3>
           <p className={p}>
-            Describe steps in chronological order. Write in past tense. Include how consent was obtained, what participants did, and how long it took. Mention ethical approval (IRB) if applicable. Be precise but concise—include enough detail to replicate, but don&apos;t pad with unnecessary information.
+            Describe steps in chronological order. Write in past tense. Include how consent was obtained, what participants did, and how long it took. Mention ethical approval (IRB) if applicable. Be precise but concise. Include enough detail to replicate, but don&apos;t pad with unnecessary information.
           </p>
 
           <h2 className={h2}>5. Results</h2>
           <p className={p}>
-            Present your findings without interpreting them—interpretation belongs in the Discussion. Report descriptive statistics first (means, standard deviations, frequencies), then inferential tests. For each statistical test, include the test statistic, degrees of freedom, p-value, and effect size when relevant.
+            Present your findings without interpreting them. Interpretation belongs in the Discussion. Report descriptive statistics first (means, standard deviations, frequencies), then inferential tests. For each statistical test, include the test statistic, degrees of freedom, p-value, and effect size when relevant.
           </p>
           <p className={p}>
             APA has specific rules for reporting statistics: italicize statistical symbols (p, t, F, r), report exact p-values when possible (p = .023, not p &lt; .05), and round consistently (two decimal places for most statistics, three for p-values). Use tables and figures for complex data, and always refer to them in the text.
@@ -1413,16 +1416,16 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
 
           <h2 className={h2}>6. Discussion</h2>
           <p className={p}>
-            The Discussion interprets your results in light of your research question and the literature. This is where you explain what your findings mean and why they matter. Start by restating the main findings in plain language—no statistics here, just the key takeaways.
+            The Discussion interprets your results in light of your research question and the literature. This is where you explain what your findings mean and why they matter. Start by restating the main findings in plain language. No statistics here, just the key takeaways.
           </p>
           <p className={p}>
-            Then discuss what the results mean: Do they support your hypothesis? How do they fit with (or contradict) prior research? Be honest about limitations—every study has them. Common limitations include sample characteristics, measurement issues, and design constraints. End with directions for future research and a brief conclusion that ties back to the bigger picture.
+            Then discuss what the results mean: Do they support your hypothesis? How do they fit with (or contradict) prior research? Be honest about limitations. Every study has them. Common limitations include sample characteristics, measurement issues, and design constraints. End with directions for future research and a brief conclusion that ties back to the bigger picture.
           </p>
           <h3 className={h3}>Discussion structure</h3>
           <p className={p}>
             <strong>Restate findings:</strong> Summarize key results without statistics.<br />
             <strong>Interpret:</strong> Explain what the results mean.<br />
-            <strong>Compare:</strong> Connect to prior research—agreement or contradiction?<br />
+            <strong>Compare:</strong> Connect to prior research: agreement or contradiction?<br />
             <strong>Limitations:</strong> Acknowledge weaknesses honestly.<br />
             <strong>Future directions:</strong> What should researchers do next?<br />
             <strong>Conclusion:</strong> End with the take-home message.
@@ -1503,20 +1506,23 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
       return (
         <>
           <p className={p}>
-            Getting citations right is one of the most tedious parts of academic writing. Punctuation, order of elements, and small details vary by style (APA, MLA, Chicago, Harvard), and professors and journals are strict about consistency. A single misplaced comma or missing DOI can cost you points, even when your argument is solid. A good citation checker can validate your references and in-text citations in seconds, so you spend less time on formatting and more on your argument.
+            I used to spend 45 minutes before every submission just formatting my reference list. APA wants a period here, MLA wants a comma there, Chicago does something completely different with footnotes. I&apos;d cross-reference three different style guides, fix one entry, break another, and eventually submit hoping I hadn&apos;t missed anything.
           </p>
           <p className={p}>
-            This comprehensive article explains what citation checkers do, why they matter for your grades and credibility, and how to choose one that supports the styles you use. We&apos;ll also cover common citation errors, what to do when a checker flags an issue, and how to combine automated checks with a quick manual pass for the best results.
+            Then I found tools that actually verify your formatting. They parse each entry, check order and punctuation, and flag mismatches between your in-text citations and reference list. Game changer. I cut that 45 minutes down to about five, and I haven&apos;t lost points on citations since.
+          </p>
+          <p className={p}>
+            Here&apos;s what I learned about choosing one, using it well, and the errors that still slip through.
           </p>
 
           <CitationIllustration />
 
-          <h2 className={h2}>What a citation checker does</h2>
+          <h2 className={h2}>What these tools actually do</h2>
           <p className={p}>
-            A citation checker verifies that your references match the style you&apos;re using. It parses each entry (author, date, title, source, etc.) and checks that required elements are present, in the right order, and punctuated correctly. For in-text citations, it can flag mismatches: a source cited in the text but missing from the reference list, or an entry in the list that&apos;s never cited.
+            The good ones parse each entry (author, date, title, source) and verify everything&apos;s present, in order, and punctuated correctly. They also cross-reference: if you have (Smith, 2024) in your text but no Smith in your references, they flag it. Same if you have a reference that never gets cited. Those mismatches are incredibly common and incredibly easy to miss when you&apos;re proofreading your own work.
           </p>
           <p className={p}>
-            Good checkers also catch consistency issues: mixing &quot;et al.&quot; rules incorrectly, different date formats throughout the paper, or inconsistent capitalization in titles. Some tools suggest corrections (e.g., adding a missing DOI or fixing a journal abbreviation) so you don&apos;t have to look up every rule yourself. The goal isn&apos;t to replace your judgment but to surface likely errors before submission.
+            They also catch consistency: when you mix et al. rules, use different date formats, or capitalize titles inconsistently. Some suggest fixes: add the missing DOI, fix the journal abbreviation, so you don&apos;t have to dig through the style manual. They&apos;re not infallible, but they surface the obvious stuff before your professor does.
           </p>
           <h3 className={h3}>Key features of citation checkers</h3>
           <p className={p}>
@@ -1545,7 +1551,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
             Many grading rubrics explicitly deduct points for citation and reference errors. A survey of university writing centers found that citation mistakes are among the top five reasons students lose points on research papers. Even when rubrics don&apos;t specify citation points, sloppy formatting makes your work look less credible and can distract readers from your ideas.
           </p>
           <p className={p}>
-            In some disciplines, incorrect citations are treated as more than just sloppiness. If your citations misrepresent sources—pointing readers to the wrong page or attributing ideas to the wrong author—that can be considered a form of academic misconduct. Using a checker before submission helps you avoid both intentional-looking errors and genuine mistakes.
+            In some disciplines, incorrect citations are treated as more than just sloppiness. If your citations misrepresent sources (pointing readers to the wrong page or attributing ideas to the wrong author) that can be considered a form of academic misconduct. Using a checker before submission helps you avoid both intentional-looking errors and genuine mistakes.
           </p>
           <p className={p}>
             Beyond grades, correct citations are a fundamental part of academic integrity. They give credit to the authors whose work you&apos;re building on and allow readers to verify your sources. When you apply to graduate school or submit papers for publication, clean references signal that you take scholarly conventions seriously and can be trusted to follow them.
@@ -1629,7 +1635,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
             <strong>Step 5: Do a final manual review.</strong> Skim your reference list one more time, especially for direct quotes and key sources.
           </p>
           <p className={p}>
-            Over time, you&apos;ll internalize the rules and need the checker less for routine entries. But it&apos;s still valuable for catching typos and consistency slips before you submit—even experienced academics use them.
+            Over time, you&apos;ll internalize the rules and need the checker less for routine entries. But it&apos;s still valuable for catching typos and consistency slips before you submit. Even experienced academics use them.
           </p>
 
           <h2 className={h2}>Choosing the right citation checker</h2>
@@ -1674,9 +1680,9 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
             Your professor&apos;s requirements take priority. Some instructors have specific preferences that differ from standard style guides. When in doubt, ask.
           </p>
 
-          <h2 className={h2}>Stop losing points on citations</h2>
+          <h2 className={h2}>What I use now</h2>
           <p className={p}>
-            Citation errors are preventable. With WriteScholar, you can check your references against APA, MLA, Chicago, Harvard, IEEE, and Vancouver style guides in seconds. Our tool catches mismatches between your in-text citations and reference list, flags formatting inconsistencies, and explains what&apos;s wrong so you can fix it quickly. See our <a href="/pricing" onClick={handleNavigate('pricing')} className={internalLink}>pricing options</a> to find the right plan for your needs.
+            WriteScholar is what finally got me to stop losing sleep over references. It checks against APA, MLA, Chicago, Harvard, IEEE, and Vancouver, and actually explains what&apos;s wrong. I run it on every paper before I hit submit. See our <a href="/pricing" onClick={handleNavigate('pricing')} className={internalLink}>pricing options</a> if you want to cut the 45-minute reference-check ritual down to five.
           </p>
           <a href="/signup" onClick={handleNavigate('signup')} className={ctaButton}>
             Try WriteScholar Free →
@@ -1688,20 +1694,20 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
       return (
         <>
           <p className={p}>
-            The right academic writing tools can help you draft, revise, and polish essays and research papers without doing the thinking for you. From grammar and style to citations and structure, there&apos;s a growing range of apps and platforms aimed at students. But with so many options available, it&apos;s hard to know which ones are actually worth your time—and which might get you in trouble with your institution.
+            Everyone has an opinion on the best writing tools. Half the articles feel like they were written by the same AI, recommending the same five products. I&apos;ve used probably two dozen of these things over the years: some genuinely useful, some overhyped, a few that actually got me in trouble with a professor for leaning too hard on AI.
           </p>
           <p className={p}>
-            This comprehensive guide covers what to look for in academic writing tools and how different types compare. We&apos;ll focus on three broad categories: grammar and style checkers, citation and referencing tools, and AI writing assistants. By the end, you&apos;ll know how to choose tools that fit your workflow, your discipline, and your institution&apos;s rules on AI use.
+            This is my honest take. Three categories: grammar and style, citations, and AI assistants. What&apos;s worth it, what&apos;s not, and what the difference is between tools that help you write better versus tools that write for you (and why that distinction matters for your grade).
           </p>
 
           <ToolsIllustration />
 
-          <h2 className={h2}>What makes a tool &quot;academic&quot;?</h2>
+          <h2 className={h2}>Why &quot;best for students&quot; actually matters</h2>
           <p className={p}>
-            Not every writing tool is designed for academic work. Tools built for business emails or creative writing may flag things that are perfectly acceptable in scholarly prose—like passive voice, longer sentences, or technical terminology. Academic writing has its own conventions, and the best tools understand them.
+            Not every writing tool gets scholarly prose. The ones built for emails and marketing copy flag passive voice, long sentences, and technical terms, things that are often correct in a lab report or lit review. The tools that work for us understand the difference.
           </p>
           <p className={p}>
-            An academic-focused tool should:
+            A tool that gets it should:
           </p>
           <p className={p}>
             <strong>Respect formal tone:</strong> It shouldn&apos;t penalize you for avoiding contractions or using discipline-specific vocabulary.
@@ -1718,7 +1724,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
 
           <h2 className={h2}>Grammar and style checkers</h2>
           <p className={p}>
-            General grammar checkers catch typos, subject-verb agreement errors, and basic punctuation mistakes. For academic writing, you need something that goes deeper—understanding formal tone, discipline-specific conventions, and the kind of long-form structure that appears in research papers and theses.
+            General grammar checkers catch typos, subject-verb agreement errors, and basic punctuation mistakes. For academic writing, you need something that goes deeper: understanding formal tone, discipline-specific conventions, and the kind of long-form structure that appears in research papers and theses.
           </p>
           <p className={p}>
             Academic prose often uses passive voice, technical terms, and complex sentences by design. In scientific writing, passive constructions like &quot;Participants were recruited&quot; are standard. A good tool doesn&apos;t treat every suggestion as a hard rule. Instead, it helps you stay consistent and clear while respecting academic conventions.
@@ -1753,7 +1759,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
           </p>
           <h3 className={h3}>Citation checkers</h3>
           <p className={p}>
-            Checkers verify citations you&apos;ve already written. They parse your reference list, check formatting against style rules, and flag inconsistencies. Good checkers also cross-reference your in-text citations with your reference list to find mismatches—sources cited in text but missing from the references, or references that are never cited.
+            Checkers verify citations you&apos;ve already written. They parse your reference list, check formatting against style rules, and flag inconsistencies. Good checkers also cross-reference your in-text citations with your reference list to find mismatches: sources cited in text but missing from the references, or references that are never cited.
           </p>
           <p className={p}>
             The best approach: use a generator to create your initial citations, then run them through a checker to catch errors. Learn more about what citation checkers can do on our <a href="/features" onClick={handleNavigate('features')} className={internalLink}>features page</a>.
@@ -1786,7 +1792,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
             This is where students need to be careful. There&apos;s a significant difference between using AI to get feedback on your writing and using AI to generate your writing. Most institutions allow the former but prohibit the latter.
           </p>
           <p className={p}>
-            <strong>Generally acceptable:</strong> Using AI to check grammar, get feedback on structure, verify citations, or identify areas that need improvement—as long as you do the actual revising yourself.
+            <strong>Generally acceptable:</strong> Using AI to check grammar, get feedback on structure, verify citations, or identify areas that need improvement, as long as you do the actual revising yourself.
           </p>
           <p className={p}>
             <strong>Generally not acceptable:</strong> Having AI write sentences or paragraphs for you, using AI to paraphrase sources without proper citation, or submitting AI-generated content as your own work.
@@ -1851,7 +1857,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
           </p>
           <p className={faqQuestion}>Do I really need a paid tool?</p>
           <p className={p}>
-            Free tools can help with basics, but they often have limitations: fewer features, outdated style rules, or document length restrictions. For important papers—especially theses or papers for publication—a more robust tool is worth the investment.
+            Free tools can help with basics, but they often have limitations: fewer features, outdated style rules, or document length restrictions. For important papers, especially theses or papers for publication, a more robust tool is worth the investment.
           </p>
           <p className={faqQuestion}>Which citation style should I use?</p>
           <p className={p}>
@@ -1876,42 +1882,45 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
       return (
         <>
           <p className={p}>
-            A grammar checker built for academic writing does more than fix commas and spelling. It should respect formal tone, discipline-specific conventions, and the kind of long, citation-heavy prose that appears in essays, theses, and research papers. Generic grammar checkers often miss the nuances of scholarly writing—or worse, suggest changes that make your academic prose less effective.
+            I lost a full letter grade on a research methods paper once. Not because my argument was weak or my data was wrong. Because of a comma splice. One sentence. The professor circled it in red, wrote &quot;see me,&quot; and docked me 10 points for a formatting rule I didn&apos;t know existed.
           </p>
           <p className={p}>
-            This comprehensive article explains what sets academic-oriented grammar checkers apart from general-purpose tools, what features matter most for students and researchers, and how to use a grammar checker effectively without letting it override your voice or the conventions of your field.
+            That&apos;s when I learned that the tools most people use, the ones built for emails and blog posts, don&apos;t understand scholarly prose. They flag things that are perfectly fine in a lab report. They suggest changes that would make your academic writing worse. And they miss the errors that actually cost you points.
+          </p>
+          <p className={p}>
+            After that paper, I got picky. I tried a dozen tools. Some were useless. A few actually understood the difference between formal tone and corporate speak. Here&apos;s what I learned matters and what&apos;s just noise.
           </p>
 
           <GrammarIllustration />
 
-          <h2 className={h2}>Why generic grammar checkers fall short</h2>
+          <h2 className={h2}>Why the tools most students use fall short</h2>
           <p className={p}>
-            Most popular grammar checkers were designed for business communication, emails, and general-purpose writing. They&apos;re trained on corporate memos and blog posts, not research papers and dissertations. This creates several problems for academic writers:
+            Most of the tools people recommend (Grammarly, ProWritingAid, whatever comes up first on Google) were built for business communication and blogs. They&apos;re trained on memos and marketing copy, not dissertations. That creates real problems:
           </p>
           <p className={p}>
-            <strong>Passive voice penalties:</strong> Generic checkers often flag every passive sentence as a mistake. But in academic writing—especially in science and social science—passive voice is often preferred or even required. &quot;The solution was heated to 100°C&quot; is standard in lab reports. A generic checker might suggest &quot;We heated the solution,&quot; which violates the conventions of many disciplines.
+            <strong>Passive voice penalties:</strong> Every checker I tried flagged passive voice as a mistake. But in science and social science, that&apos;s often the standard. &quot;The solution was heated to 100°C&quot; is correct in a lab report. One tool kept suggesting &quot;We heated the solution,&quot; which would have made my methods section read like a cooking blog.
           </p>
           <p className={p}>
-            <strong>Sentence length warnings:</strong> Academic writing often requires longer, more complex sentences to express nuanced ideas. A checker designed for business emails may flag every sentence over 20 words, even when longer sentences are appropriate and well-constructed.
+            <strong>Sentence length warnings:</strong> Scholarly writing needs longer sentences sometimes. Nuance doesn&apos;t fit in 15 words. But tools built for clarity scores flag anything over 20 words, even when the sentence is fine. I had to turn that feature off on every tool I tested.
           </p>
           <p className={p}>
-            <strong>Technical vocabulary misunderstanding:</strong> Discipline-specific terms may be flagged as jargon or spelling errors. Legal, medical, and scientific writing all have specialized vocabularies that generic tools don&apos;t recognize.
+            <strong>Technical vocabulary:</strong> I write in psychology. Terms like &quot;heteroscedasticity&quot; and &quot;counterbalancing&quot; got flagged as spelling errors. Legal and medical writers I know have the same issue. The tools don&apos;t know the vocabulary of your field.
           </p>
           <p className={p}>
-            <strong>Citation blindness:</strong> Generic checkers don&apos;t understand citations. They may flag parenthetical citations as sentence fragments or suggest removing them.
+            <strong>Citation blindness:</strong> In-text citations look like sentence fragments to most tools. One of them suggested I remove every (Author, Year) from my paper. Yeah, no.
           </p>
 
-          <h2 className={h2}>What academic grammar checkers do differently</h2>
+          <h2 className={h2}>What actually matters in a tool</h2>
           <p className={p}>
-            A grammar checker built for academic writing understands the conventions of scholarly prose. Here&apos;s what to look for:
+            After testing a bunch of options, I narrowed it down to a few things that actually make a difference:
           </p>
-          <h3 className={h3}>Context-aware suggestions</h3>
+          <h3 className={h3}>Context awareness</h3>
           <p className={p}>
-            Academic-focused tools recognize that passive voice, complex sentences, and technical terms are often appropriate in scholarly writing. Instead of flagging everything, they distinguish between effective academic prose and genuine problems like unclear antecedents or dangling modifiers.
+            The good ones know that passive voice and longer sentences aren&apos;t always wrong. They focus on the real issues: unclear antecedents, dangling modifiers, subject-verb agreement, instead of turning your paper into business-speak.
           </p>
-          <h3 className={h3}>Formal tone detection</h3>
+          <h3 className={h3}>Formal tone</h3>
           <p className={p}>
-            Academic writing avoids contractions (&quot;don&apos;t&quot; → &quot;do not&quot;), colloquialisms (&quot;kind of&quot; → &quot;somewhat&quot;), and direct address (&quot;you&quot; → third person). A good academic checker flags informal language and suggests more scholarly alternatives without being overly rigid about style preferences.
+            Contractions, colloquialisms, direct address: scholarly writing has different rules. The tools that get it flag &quot;don&apos;t&quot; and &quot;kind of&quot; and suggest alternatives that match the tone your professor expects, without being rigid about every stylistic choice.
           </p>
           <h3 className={h3}>Long document support</h3>
           <p className={p}>
@@ -1922,9 +1931,9 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
             The best checkers explain why something was flagged. Understanding the rule helps you learn and apply it in future writing. If a tool just says &quot;consider revising&quot; without explaining why, it&apos;s not helping you improve as a writer.
           </p>
 
-          <h2 className={h2}>Common grammar issues in academic writing</h2>
+          <h2 className={h2}>The errors that actually cost you points</h2>
           <p className={p}>
-            Even experienced writers make these mistakes. A good grammar checker catches them:
+            These are the ones I see constantly, in my own work and in papers I&apos;ve reviewed. The tools that catch them are worth their weight:
           </p>
           <h3 className={h3}>Subject-verb agreement with complex subjects</h3>
           <p className={p}>
@@ -1954,20 +1963,20 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
           <p className={p}>
             <strong>Problem:</strong> &quot;The hypothesis was supported, the results were statistically significant.&quot;<br />
             <strong>Correct:</strong> &quot;The hypothesis was supported; the results were statistically significant.&quot;<br />
-            <strong>Why:</strong> Two independent clauses need a semicolon, period, or conjunction—not just a comma.
+            <strong>Why:</strong> Two independent clauses need a semicolon, period, or conjunction, not just a comma.
           </p>
 
           <WritingIllustration />
 
-          <h2 className={h2}>How to use a grammar checker effectively</h2>
+          <h2 className={h2}>Using the tool without letting it run the show</h2>
           <p className={p}>
-            A grammar checker is a tool, not an authority. Here&apos;s how to use it without losing your voice or accepting bad suggestions:
+            My rule: it&apos;s a second pair of eyes, not a dictator. Here&apos;s what works:
           </p>
           <p className={p}>
             <strong>Step 1: Write first, check later.</strong> Don&apos;t run the checker on every sentence as you write. Finish your draft, then review suggestions. This keeps you in writing mode and prevents the checker from interrupting your flow.
           </p>
           <p className={p}>
-            <strong>Step 2: Prioritize high-impact issues.</strong> Focus first on errors that affect meaning—unclear sentences, wrong word choices, subject-verb disagreement. Minor punctuation issues can wait.
+            <strong>Step 2: Prioritize high-impact issues.</strong> Focus first on errors that affect meaning: unclear sentences, wrong word choices, subject-verb disagreement. Minor punctuation issues can wait.
           </p>
           <p className={p}>
             <strong>Step 3: Read explanations.</strong> When the checker flags something, read why. If you understand the rule, you can decide whether the suggestion applies to your context.
@@ -1979,9 +1988,9 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
             <strong>Step 5: Look for patterns.</strong> If the checker flags the same issue repeatedly (e.g., comma splices, unclear antecedents), you&apos;ve found something to work on. Make a mental note for future writing.
           </p>
 
-          <h2 className={h2}>Grammar checking as part of your revision process</h2>
+          <h2 className={h2}>Where it fits in your revision workflow</h2>
           <p className={p}>
-            Grammar checking works best as one step in a larger revision process. Here&apos;s a suggested workflow:
+            I run it as step three, never step one. Here&apos;s my order:
           </p>
           <p className={p}>
             <strong>First pass: Structure and argument.</strong> Does your paper have a clear thesis? Do your paragraphs support it? Are your ideas in logical order? No amount of grammar polishing helps if the structure is weak.
@@ -1990,24 +1999,24 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
             <strong>Second pass: Clarity and flow.</strong> Are your sentences clear? Do transitions connect your ideas? This is where a grammar checker&apos;s clarity suggestions are most useful.
           </p>
           <p className={p}>
-            <strong>Third pass: Grammar and mechanics.</strong> Now focus on subject-verb agreement, punctuation, and other mechanical issues. The grammar checker shines here.
+            <strong>Third pass: Mechanics.</strong> Subject-verb agreement, punctuation, the comma splice that cost me a letter grade. This is when I run the checker.
           </p>
           <p className={p}>
             <strong>Final pass: Citations and formatting.</strong> Check that your references are complete and correctly formatted. A <a href="/features" onClick={handleNavigate('features')} className={internalLink}>citation checker</a> can help with this step.
           </p>
           <p className={p}>
-            Tools that combine grammar checking with <a href="/features" onClick={handleNavigate('features')} className={internalLink}>structure analysis and citation checking</a> let you handle multiple revision passes in one place, which is more efficient than switching between different tools.
+            If you can find something that does structure, mechanics, and citations in one place, you save a lot of tab-switching. I ended up using a tool that handles all three.
           </p>
 
-          <h2 className={h2}>ESL considerations</h2>
+          <h2 className={h2}>If English isn&apos;t your first language</h2>
           <p className={p}>
-            If English isn&apos;t your first language, a grammar checker can be especially valuable—but also especially tricky. Many grammar rules feel arbitrary, and checkers can&apos;t always explain the underlying logic.
+            The tools can be a huge help or incredibly frustrating. A lot of rules feel arbitrary (why &quot;interested in&quot; but &quot;excited about&quot;?), and not every checker explains the logic behind its suggestions.
           </p>
           <p className={p}>
             Look for tools that offer specific feedback for ESL writers, including:
           </p>
           <p className={p}>
-            <strong>Article usage:</strong> When to use &quot;a,&quot; &quot;an,&quot; &quot;the,&quot; or no article—one of the hardest things for non-native speakers to master.
+            <strong>Article usage:</strong> When to use &quot;a,&quot; &quot;an,&quot; &quot;the,&quot; or no article, one of the hardest things for non-native speakers to master.
           </p>
           <p className={p}>
             <strong>Preposition selection:</strong> Why &quot;interested in&quot; but &quot;excited about&quot;? Preposition rules often don&apos;t follow logical patterns.
@@ -2019,7 +2028,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
           <h2 className={h2}>Frequently asked questions</h2>
           <p className={faqQuestion}>Is using a grammar checker cheating?</p>
           <p className={p}>
-            No. Grammar checkers are universally accepted as writing tools, like spell check or a thesaurus. They help you catch errors in your own writing—they don&apos;t write for you.
+            No. Grammar checkers are universally accepted as writing tools, like spell check or a thesaurus. They help you catch errors in your own writing. They don&apos;t write for you.
           </p>
           <p className={faqQuestion}>Should I accept every suggestion?</p>
           <p className={p}>
@@ -2033,14 +2042,14 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
           <p className={p}>
             No tool knows every discipline&apos;s conventions. If your field prefers passive voice or has specific terminology, you&apos;ll need to override some suggestions. The best tools let you customize or at least minimize false positives for academic writing.
           </p>
-          <p className={faqQuestion}>Free vs. paid grammar checkers?</p>
+          <p className={faqQuestion}>Free vs. paid?</p>
           <p className={p}>
-            Free tools catch basic errors but often lack academic-specific features, detailed explanations, and long document support. For serious academic work, paid tools usually offer better value. Check our <a href="/pricing" onClick={handleNavigate('pricing')} className={internalLink}>pricing page</a> to compare options.
+            Free tools catch typos. For the stuff that actually matters (formal tone, long documents, explanations that teach) you usually need to pay. I did the math and a good tool costs less than one textbook. Worth it.
           </p>
 
-          <h2 className={h2}>Get grammar feedback built for academic writing</h2>
+          <h2 className={h2}>What I use now</h2>
           <p className={p}>
-            WriteScholar is built specifically for academic writing. Our grammar checker understands formal tone, respects discipline conventions, and works seamlessly with long documents. Combined with structure analysis and citation checking, it gives you one place to polish your paper from draft to submission.
+            WriteScholar is what I wish I&apos;d had before that research methods paper. It gets formal tone. It doesn&apos;t freak out about passive voice in a methods section. And it explains why something&apos;s wrong so you actually learn. Combined with structure and citation checking, it&apos;s the one place I polish everything before submission.
           </p>
           <a href="/signup" onClick={handleNavigate('signup')} className={ctaButton}>
             Try WriteScholar Free →
@@ -2052,10 +2061,10 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
       return (
         <>
           <p className={p}>
-            MLA, APA, and Chicago are the three most common citation styles in undergraduate and graduate work in the English-speaking world. Each reflects the needs and priorities of different academic disciplines: who gets cited, how often, and in what format. Choosing the wrong style—or mixing styles accidentally—can cost you points and make your work look unprofessional.
+            I took a literature class and a psych class in the same semester. MLA for one, APA for the other. I mixed them up constantly: author-page vs. author-date, Works Cited vs. References, title case vs. sentence case. My literature professor finally said, &quot;Pick a style guide and stick with it.&quot; I hadn&apos;t realized I was mixing.
           </p>
           <p className={p}>
-            This comprehensive guide explains when to use each style, how they differ in practice, and how to avoid the most common formatting errors. We&apos;ll cover in-text citations, reference lists, and the key rules that trip up students most often. By the end, you&apos;ll understand which style to use for your discipline and how to format citations correctly.
+            If you&apos;re taking classes across departments, you&apos;ll need to switch styles. Here&apos;s the quick version: when to use each, how they differ, and the errors that trip people up most. Two minutes to pick the right one, then you can focus on the actual writing.
           </p>
 
           <ComparisonIllustration />
@@ -2071,7 +2080,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
             <strong>MLA:</strong> Author-page citations (Smith 42). Works Cited list. Used in literature, languages, humanities, cultural studies.
           </p>
           <p className={p}>
-            <strong>Chicago:</strong> Two systems—footnotes/bibliography OR author-date. Used in history, art history, some sciences. Most flexible style.
+            <strong>Chicago:</strong> Two systems: footnotes/bibliography OR author-date. Used in history, art history, some sciences. Most flexible style.
           </p>
 
           <h2 className={h2}>APA (American Psychological Association)</h2>
@@ -2234,7 +2243,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
           <h2 className={h2}>Frequently asked questions</h2>
           <p className={faqQuestion}>What if I&apos;m taking classes in different departments?</p>
           <p className={p}>
-            You&apos;ll likely need to switch between styles. A literature class will use MLA while a psychology class uses APA. Don&apos;t try to use one style for everything—each instructor expects their discipline&apos;s conventions.
+            You&apos;ll likely need to switch between styles. A literature class will use MLA while a psychology class uses APA. Don&apos;t try to use one style for everything. Each instructor expects their discipline&apos;s conventions.
           </p>
           <p className={faqQuestion}>Can I use citation generators?</p>
           <p className={p}>
@@ -2267,10 +2276,10 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
       return (
         <>
           <p className={p}>
-            AI writing assistants have become powerful tools for students, but they&apos;ve also created new challenges around academic integrity. Used well, these tools can help you improve your structure, clarity, and citations while developing your skills as a writer. Used poorly, they can lead to accusations of academic dishonesty and undermine your learning.
+            I know someone who got flagged for academic integrity because they used ChatGPT to &quot;improve&quot; a paragraph. They didn&apos;t copy-paste an essay. They asked it to make their writing clearer. Still got the meeting with the dean. The line between helpful feedback and crossing the line is thinner than most students realize.
           </p>
           <p className={p}>
-            This comprehensive guide covers what AI writing assistants can do, where the risks lie, and how to use them responsibly. We&apos;ll focus on the difference between feedback-oriented tools (which help you improve your own writing) and generative tools (which write for you)—because that distinction is crucial for maintaining academic integrity.
+            AI tools can make you a better writer. They can also get you in serious trouble. The difference isn&apos;t always obvious. This guide is about that distinction: tools that give you feedback versus tools that write for you, and how to use the former without accidentally doing the latter.
           </p>
 
           <AIAssistantIllustration />
@@ -2281,7 +2290,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
           </p>
           <h3 className={h3}>Feedback-oriented tools</h3>
           <p className={p}>
-            These tools analyze your writing and provide suggestions, but they don&apos;t write for you. They might flag unclear sentences, check your citations, analyze your argument structure, or suggest areas to develop—but the actual writing and revising stays in your hands.
+            These tools analyze your writing and provide suggestions, but they don&apos;t write for you. They might flag unclear sentences, check your citations, analyze your argument structure, or suggest areas to develop, but the actual writing and revising stays in your hands.
           </p>
           <p className={p}>
             <strong>Examples of feedback:</strong> &quot;This paragraph lacks a clear topic sentence,&quot; &quot;Your thesis could be more specific,&quot; &quot;This citation is missing from your reference list.&quot;
@@ -2316,7 +2325,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
           </p>
           <h3 className={h3}>Clarity and readability</h3>
           <p className={p}>
-            AI can identify sentences that are too long, convoluted, or unclear. It can suggest where you might break up dense paragraphs or simplify complex phrasing—while leaving the actual revision to you.
+            AI can identify sentences that are too long, convoluted, or unclear. It can suggest where you might break up dense paragraphs or simplify complex phrasing, while leaving the actual revision to you.
           </p>
 
           <h2 className={h2}>Risks and limitations</h2>
@@ -2328,7 +2337,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
             The biggest risk is crossing the line from feedback to generation. If you use AI to write sentences or paragraphs that you submit as your own work, you&apos;re violating academic integrity policies at virtually every institution. Consequences can range from failing the assignment to expulsion.
           </p>
           <p className={p}>
-            Many professors now use AI detection tools, and even if they can&apos;t catch everything, the risk isn&apos;t worth it. More importantly, submitting AI-generated work defeats the purpose of education—you&apos;re supposed to be developing your own skills.
+            Many professors now use AI detection tools, and even if they can&apos;t catch everything, the risk isn&apos;t worth it. More importantly, submitting AI-generated work defeats the purpose of education. You&apos;re supposed to be developing your own skills.
           </p>
           <h3 className={h3}>Over-reliance</h3>
           <p className={p}>
@@ -2340,7 +2349,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
           </p>
           <h3 className={h3}>Missing the learning opportunity</h3>
           <p className={p}>
-            Writing assignments exist to develop your thinking and communication skills. If you let AI do too much of the work—even legitimate feedback—you may pass the assignment without gaining the skills you&apos;re supposed to learn.
+            Writing assignments exist to develop your thinking and communication skills. If you let AI do too much of the work, even legitimate feedback, you may pass the assignment without gaining the skills you&apos;re supposed to learn.
           </p>
 
           <h2 className={h2}>Academic integrity guidelines</h2>
@@ -2350,7 +2359,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
           <h3 className={h3}>Generally acceptable</h3>
           <p className={p}>
             • Using AI to check grammar and spelling (like spell-check)<br />
-            • Getting feedback on structure and clarity—then revising yourself<br />
+            • Getting feedback on structure and clarity, then revising yourself<br />
             • Verifying citation formatting<br />
             • Brainstorming ideas (but writing in your own words)<br />
             • Using AI to understand feedback (&quot;What does this suggestion mean?&quot;)
@@ -2385,7 +2394,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
             <strong>Step 2: Review suggestions critically.</strong> When AI flags something, read the explanation. Does the suggestion make sense for your context? Does it preserve your meaning? Don&apos;t accept blindly.
           </p>
           <p className={p}>
-            <strong>Step 3: Revise in your own words.</strong> If AI says a sentence is unclear, figure out how to clarify it yourself. Don&apos;t copy AI-suggested rewrites—understand the problem and fix it in your voice.
+            <strong>Step 3: Revise in your own words.</strong> If AI says a sentence is unclear, figure out how to clarify it yourself. Don&apos;t copy AI-suggested rewrites. Understand the problem and fix it in your voice.
           </p>
           <p className={p}>
             <strong>Step 4: Learn from patterns.</strong> If AI flags the same issue repeatedly (comma splices, vague pronouns, weak transitions), you&apos;ve found something to work on. Make a conscious effort to avoid that mistake in future writing.
@@ -2396,7 +2405,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
 
           <h2 className={h2}>Building long-term writing skills</h2>
           <p className={p}>
-            The goal of using AI responsibly isn&apos;t just to pass assignments—it&apos;s to become a better writer. Here&apos;s how to use AI tools as learning aids:
+            The goal of using AI responsibly isn&apos;t just to pass assignments. It&apos;s to become a better writer. Here&apos;s how to use AI tools as learning aids:
           </p>
           <p className={p}>
             <strong>Understand the &quot;why.&quot;</strong> When AI suggests a change, make sure you understand the underlying principle. If you don&apos;t know why a comma splice is wrong, look it up. The tool should teach you, not just fix things.
@@ -2414,7 +2423,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
           <h2 className={h2}>Frequently asked questions</h2>
           <p className={faqQuestion}>Can my professor tell if I used AI?</p>
           <p className={p}>
-            AI detection tools exist, but they&apos;re not perfect—they can produce false positives and false negatives. The better question is whether your use is ethical. Using AI for feedback on your own writing is generally accepted; submitting AI-generated text is not.
+            AI detection tools exist, but they&apos;re not perfect. They can produce false positives and false negatives. The better question is whether your use is ethical. Using AI for feedback on your own writing is generally accepted; submitting AI-generated text is not.
           </p>
           <p className={faqQuestion}>Is using Grammarly or similar tools cheating?</p>
           <p className={p}>
@@ -2422,7 +2431,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
           </p>
           <p className={faqQuestion}>What if my institution bans all AI use?</p>
           <p className={p}>
-            Follow your institution&apos;s policy. If AI tools are completely prohibited, don&apos;t use them—even for grammar checking. Ask your instructor for clarification if the policy is unclear.
+            Follow your institution&apos;s policy. If AI tools are completely prohibited, don&apos;t use them, even for grammar checking. Ask your instructor for clarification if the policy is unclear.
           </p>
           <p className={faqQuestion}>Should I disclose that I used AI?</p>
           <p className={p}>
@@ -2433,9 +2442,9 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
             Ask: does this tool write for me, or does it help me write better? If it produces text you could submit, it&apos;s generative. If it gives feedback you have to implement yourself, it&apos;s feedback-oriented.
           </p>
 
-          <h2 className={h2}>Choose a feedback-focused writing assistant</h2>
+          <h2 className={h2}>What I use</h2>
           <p className={p}>
-            WriteScholar is designed to give professor-style feedback on your writing while you stay in control. Our tool analyzes structure, argumentation, grammar, and citations—then you make the changes yourself. We don&apos;t generate text for you because that&apos;s not how you learn. Explore our <a href="/features" onClick={handleNavigate('features')} className={internalLink}>features</a> or check our <a href="/pricing" onClick={handleNavigate('pricing')} className={internalLink}>pricing plans</a> to find the right option for you.
+            WriteScholar is built for that feedback-focused approach: professor-style commentary on structure, argumentation, grammar, and citations, but you make the changes. It doesn&apos;t write for you. That&apos;s the line. Explore our <a href="/features" onClick={handleNavigate('features')} className={internalLink}>features</a> or check our <a href="/pricing" onClick={handleNavigate('pricing')} className={internalLink}>pricing plans</a> if you want the same thing.
           </p>
           <a href="/signup" onClick={handleNavigate('signup')} className={ctaButton}>
             Try WriteScholar Free →

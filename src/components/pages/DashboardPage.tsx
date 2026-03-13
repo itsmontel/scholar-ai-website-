@@ -3886,8 +3886,8 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                           {crosswordResult.grid?.map((row: string[], rowIdx: number) => (
                             <div key={rowIdx} className="flex">
                               {row.map((cell: string, colIdx: number) => {
-                                if (cell === '') {
-                                  return <div key={colIdx} className="w-8 h-8 sm:w-9 sm:h-9"></div>;
+                                if (cell === '' || cell === '#') {
+                                  return <div key={colIdx} className="w-8 h-8 sm:w-9 sm:h-9 flex-shrink-0 bg-stone-800 dark:bg-stone-700" />;
                                 }
                                 const wordAtCell = crosswordResult.placedWords.find((pw: any) => pw.row === rowIdx && pw.col === colIdx);
                                 const cellNumber = wordAtCell?.number;
