@@ -312,13 +312,13 @@ const SummarizerPage = ({ onNavigate, user, onLogout }: SummarizerPageProps) => 
                       <span className="text-xs font-medium text-stone-500 dark:text-stone-400 flex-shrink-0">Style:</span>
                       <div className="flex items-center bg-white dark:bg-stone-700 rounded-xl px-0.5 sm:px-1 py-1 shadow-sm border border-stone-200 dark:border-stone-600">
                         {styleOptions.map((opt) => {
-                          const locked = user != null && !isPremiumUser && opt.value !== 'bullet';
+                          const locked = isFreeUser && opt.value !== 'bullet';
                           return (
                             <button
                               key={opt.value}
                               onClick={() => !locked && setStyle(opt.value as any)}
                               disabled={locked}
-                              title={locked ? 'Premium only' : opt.description}
+                              title={locked ? 'Pro or Premium' : opt.description}
                               className={`px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all whitespace-nowrap ${
                                 locked ? 'text-stone-400 dark:text-stone-500 cursor-not-allowed' :
                                 style === opt.value ? 'bg-emerald-600 text-white shadow-sm' : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-600'
@@ -335,13 +335,13 @@ const SummarizerPage = ({ onNavigate, user, onLogout }: SummarizerPageProps) => 
                       <span className="text-xs font-medium text-stone-500 dark:text-stone-400 flex-shrink-0">Length:</span>
                       <div className="flex items-center bg-white dark:bg-stone-700 rounded-xl px-0.5 sm:px-1 py-1 shadow-sm border border-stone-200 dark:border-stone-600">
                         {lengthOptions.map((opt) => {
-                          const locked = user != null && !isPremiumUser && opt.value !== 'medium';
+                          const locked = isFreeUser && opt.value !== 'medium';
                           return (
                             <button
                               key={opt.value}
                               onClick={() => !locked && setLength(opt.value as any)}
                               disabled={locked}
-                              title={locked ? 'Premium only' : opt.description}
+                              title={locked ? 'Pro or Premium' : opt.description}
                               className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all whitespace-nowrap ${
                                 locked ? 'text-stone-400 dark:text-stone-500 cursor-not-allowed' :
                                 length === opt.value ? 'bg-emerald-600 text-white shadow-sm' : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-600'
@@ -554,7 +554,7 @@ const SummarizerPage = ({ onNavigate, user, onLogout }: SummarizerPageProps) => 
                     <span className="text-2xl">📝</span>
                     <div>
                       <p className="text-emerald-800 dark:text-emerald-200 font-medium text-sm">
-                        {userPlan === 'free' ? `Free plan: 5,000 words/month • Bullet + Medium only • ${getResetsInText(daysUntilReset)}` : userPlan === 'premium' ? 'Premium: 999,999 words/month • Bullet + Medium only' : 'Pro: 99,999 words/month • Bullet + Medium only'}
+                        {userPlan === 'free' ? `Free plan: 5,000 words/month • Bullet + Medium only • ${getResetsInText(daysUntilReset)}` : userPlan === 'premium' ? 'Premium: 999,999 words/month • All styles & lengths' : 'Pro: 99,999 words/month • All styles & lengths'}
                       </p>
                       <p className="text-emerald-600 dark:text-emerald-400 text-xs mt-0.5">Upgrade to Premium for all styles, lengths, and our premium AI model</p>
                     </div>

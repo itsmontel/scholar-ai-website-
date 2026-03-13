@@ -297,10 +297,10 @@ router.post('/summarize', authenticateToken, async (req, res) => {
     const userPlan = getEffectivePlan(req);
     const planLimits = subscriptionService.PLAN_LIMITS[userPlan] || subscriptionService.PLAN_LIMITS.free;
 
-    // Enforce style/length restrictions for non-premium users
+    // Enforce style/length restrictions for free users only (Pro & Premium get all styles & lengths)
     let effectiveStyle = style || 'bullet';
     let effectiveLength = length || 'medium';
-    if (userPlan !== 'premium') {
+    if (userPlan === 'free') {
       effectiveStyle = 'bullet';
       effectiveLength = 'medium';
     }

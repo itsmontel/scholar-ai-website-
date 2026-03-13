@@ -82,7 +82,7 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
         'All citation styles, PDF/Word export',
         'Focus Mode (10 sites)',
         'Quiz, flashcards, crossword & Crater Blast',
-        'Summarizer (all lengths & styles)'
+        'Humanizer & Summarizer (all styles & lengths)'
       ],
       popular: true,
       stripePriceId: billingCycle === 'monthly' ? 'price_starter_monthly' : 'price_starter_yearly'

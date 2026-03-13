@@ -15,8 +15,8 @@
 |---------|------|-----|---------|
 | Document analyses | 3 | 99 | 199 |
 | Citation searches | 2 | 99 | 199 |
-| Humanize words | 5,000 | 999,999 | 999,999 |
-| Summarize words | 5,000 | 999,999 | 999,999 |
+| Humanize words | 5,000 | 99,999 | 999,999 |
+| Summarize words | 5,000 | 99,999 | 999,999 |
 | Quiz generations | 3 | 99 | 199 |
 | Quiz max words/gen | 5,000 | 15,000 | 15,000 |
 | Lesson generations | 3 | 99 | 199 |

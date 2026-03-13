@@ -3060,7 +3060,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                   <div className="min-w-0">
                     <p className="text-teal-800 dark:text-teal-200 font-medium text-xs sm:text-sm">
                       {usageStats.plan === 'free' ? `Free: 5,000 words/mo • ${getResetsInText((usageStats as any).daysUntilReset)}` : usageStats.plan === 'premium' ? 'Premium: 999,999 words/mo' : 'Pro: 99,999 words/mo'}
-                      {!isPremiumUser && ' • Bullet + Medium'}
+                      {isFreeUser && ' • Bullet + Medium'}
                     </p>
                     <p className="text-teal-600 dark:text-teal-400 text-[10px] sm:text-xs mt-0.5 line-clamp-2">Upgrade for all styles, lengths & premium AI</p>
                   </div>
@@ -3080,13 +3080,13 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                       <span className="text-xs font-medium text-stone-500 dark:text-stone-400 flex-shrink-0">Style:</span>
                       <div className="flex items-center bg-white dark:bg-stone-700 rounded-xl px-0.5 sm:px-1 py-1 shadow-sm border border-stone-200 dark:border-stone-600">
                         {(['bullet', 'paragraph', 'tldr', 'detailed'] as const).map((s) => {
-                          const locked = !isPremiumUser && s !== 'bullet';
+                          const locked = isFreeUser && s !== 'bullet';
                           return (
                             <button
                               key={s}
                               onClick={() => !locked && setSummaryStyle(s)}
                               disabled={locked}
-                              title={locked ? 'Premium only' : ''}
+                              title={locked ? 'Upgrade to Pro for all styles' : ''}
                               className={`px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all whitespace-nowrap relative ${
                                 locked ? 'text-stone-400 dark:text-stone-500 cursor-not-allowed' :
                                 summaryStyle === s ? 'bg-teal-600 text-white shadow-sm' : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-600'
@@ -3103,13 +3103,13 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                       <span className="text-xs font-medium text-stone-500 dark:text-stone-400 flex-shrink-0">Length:</span>
                       <div className="flex items-center bg-white dark:bg-stone-700 rounded-xl px-0.5 sm:px-1 py-1 shadow-sm border border-stone-200 dark:border-stone-600">
                         {(['short', 'medium', 'long'] as const).map((l) => {
-                          const locked = !isPremiumUser && l !== 'medium';
+                          const locked = isFreeUser && l !== 'medium';
                           return (
                             <button
                               key={l}
                               onClick={() => !locked && setSummaryLength(l)}
                               disabled={locked}
-                              title={locked ? 'Premium only' : ''}
+                              title={locked ? 'Upgrade to Pro for all lengths' : ''}
                               className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all whitespace-nowrap ${
                                 locked ? 'text-stone-400 dark:text-stone-500 cursor-not-allowed' :
                                 summaryLength === l ? 'bg-teal-600 text-white shadow-sm' : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-600'

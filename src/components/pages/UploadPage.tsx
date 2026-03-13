@@ -5,7 +5,7 @@ import LoadingSpinner from '../common/LoadingSpinner';
 
 interface UploadPageProps {
   onNavigate: (page: string) => void;
-  user?: { name: string; email: string } | null;
+  user?: { name: string; email: string; plan?: string } | null;
   onLogout?: () => void;
 }
 
@@ -21,6 +21,21 @@ interface UploadedDocument {
   createdAt: string;
 }
 
+// Plan limits: Free 1MB, Pro 25MB, Premium 1GB
+const getMaxFileSize = (plan: string) => {
+  const p = (plan || 'free').toLowerCase();
+  if (p === 'premium') return 1024 * 1024 * 1024; // 1GB
+  if (p === 'pro') return 25 * 1024 * 1024;       // 25MB
+  return 1024 * 1024;                              // 1MB (Free)
+};
+
+const getMaxFileSizeLabel = (plan: string) => {
+  const p = (plan || 'free').toLowerCase();
+  if (p === 'premium') return '1GB';
+  if (p === 'pro') return '25MB';
+  return '1MB';
+};
+
 const UploadPage = ({ onNavigate, user, onLogout }: UploadPageProps) => {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -31,6 +46,9 @@ const UploadPage = ({ onNavigate, user, onLogout }: UploadPageProps) => {
   const [documentTitle, setDocumentTitle] = useState('');
   
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const userPlan = (user?.plan || (user as { plan?: string })?.plan || 'free').toLowerCase();
+  const maxFileSize = getMaxFileSize(userPlan);
+  const maxFileSizeLabel = getMaxFileSizeLabel(userPlan);
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
@@ -65,9 +83,8 @@ const UploadPage = ({ onNavigate, user, onLogout }: UploadPageProps) => {
       return;
     }
 
-    const maxSize = 50 * 1024 * 1024;
-    if (file.size > maxSize) {
-      setError('File size must be less than 50MB.');
+    if (file.size > maxFileSize) {
+      setError(`File size must be less than ${maxFileSizeLabel}.`);
       return;
     }
 
@@ -356,7 +373,7 @@ const UploadPage = ({ onNavigate, user, onLogout }: UploadPageProps) => {
               </div>
               <div>
                 <p className="font-medium text-gray-900 text-sm">PDF</p>
-                <p className="text-xs text-gray-500">Up to 50MB</p>
+                <p className="text-xs text-gray-500">Up to {maxUploadLabel}</p>
               </div>
             </div>
             <div className="flex items-center space-x-3 bg-white rounded-xl p-4 border border-gray-200">
@@ -374,7 +391,7 @@ const UploadPage = ({ onNavigate, user, onLogout }: UploadPageProps) => {
               </div>
               <div>
                 <p className="font-medium text-gray-900 text-sm">Legacy</p>
-                <p className="text-xs text-gray-500">Up to 25MB</p>
+                <p className="text-xs text-gray-500">Up to {maxUploadLabel}</p>
               </div>
             </div>
             <div className="flex items-center space-x-3 bg-white rounded-xl p-4 border border-gray-200">

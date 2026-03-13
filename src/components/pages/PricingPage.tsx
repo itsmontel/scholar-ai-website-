@@ -190,7 +190,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
         'All citation styles, PDF/Word export',
         'Focus Mode (10 sites)',
         'Quiz, flashcards, crossword & Crater Blast',
-        'Summarizer (all lengths & styles)'
+        'Humanizer & Summarizer (all styles & lengths)'
       ],
       limitations: [],
       popular: true,

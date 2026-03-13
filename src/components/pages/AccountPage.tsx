@@ -525,7 +525,7 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
                     {userStats.subscriptionPlan === 'free'
                       ? '3 documents, 3 analyses per month, 2 citation searches'
                       : userStats.subscriptionPlan === 'pro'
-                      ? 'Unlimited documents, 19 analyses, 19 citation searches (Pro)'
+                      ? 'Unlimited documents, 99 combined/mo (analyses, study packs & citations)'
                       : userStats.subscriptionPlan === 'premium'
                       ? 'Unlimited documents, 999 combined/mo (10× Pro) (Premium)'
                       : 'Basic features included'
@@ -553,6 +553,7 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
                       <div>• Unlimited document uploads</div>
                       <div>• 99 combined (analyses, study packs & citations) per month</div>
                       <div>• 99,999 Humanizer/Summarizer words</div>
+                      <div>• All Humanizer & Summarizer styles & lengths</div>
                       <div>• PDF & Word export</div>
                     </>
                   )}
@@ -563,9 +564,9 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
                       <div>• 999,999 Humanizer/Summarizer words</div>
                       <div>• Top-tier premium AI model</div>
                       <div>• All quiz types & difficulty levels</div>
-                      <div>• All summarizer styles & lengths</div>
                       <div>• Advanced essay analysis</div>
                       <div>• Priority support</div>
+                      <div>• Larger document uploads (up to 1GB)</div>
                     </>
                   )}
                 </div>

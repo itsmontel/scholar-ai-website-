@@ -12,10 +12,11 @@ interface SoftPaywallProps {
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
 const FEATURES = [
-  { text: 'Unlimited essay analyses', icon: '📝' },
-  { text: 'Focus Mode block websites, unlock by studying', icon: '🔒' },
-  { text: 'Unlimited quizzes, flashcards & crosswords', icon: '🎯' },
-  { text: '19 citation searches/month', icon: '📚' },
+  { text: '99 combined analyses, study packs & citations per month', icon: '📝' },
+  { text: 'Focus Mode — block websites, unlock by studying', icon: '🔒' },
+  { text: 'Quizzes, flashcards & crosswords', icon: '🎯' },
+  { text: '99,999 Humanizer & Summarizer words per month', icon: '📚' },
+  { text: 'All Humanizer & Summarizer styles & lengths', icon: '✨' },
   { text: 'Export to PDF & Word', icon: '📄' },
   { text: 'All citation styles (APA, MLA, Chicago...)', icon: '✅' },
   { text: 'Priority AI model', icon: '⚡' },

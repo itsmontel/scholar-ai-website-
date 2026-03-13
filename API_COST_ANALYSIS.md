@@ -34,8 +34,8 @@
 |---------|------|-----|---------|
 | Citation searches | 2 | 99 | 199 |
 | Essay analyses | 3 | 99 | 199 |
-| Humanize words | 5,000 | 999,999 | 999,999 |
-| Summarize words | 5,000 | 999,999 | 999,999 |
+| Humanize words | 5,000 | 99,999 | 999,999 |
+| Summarize words | 5,000 | 99,999 | 999,999 |
 | Quiz generations | 3 | 99 | 199 |
 | Lesson generations | 3 | 99 | 199 |
 | Flashcards + crosswords | (shares quiz pool) | (shares) | (shares) |
@@ -66,14 +66,14 @@
 |---------|-------|------|
 | Citation searches | 99 | 99 × $0.0016 = $0.16 |
 | Essay analyses | 99 | 99 × $0.0047 = $0.47 |
-| Humanize | 999,999 words | 1,000 × $0.0007 = $0.70 |
-| Summarize | 999,999 words | 1,000 × $0.0005 = $0.50 |
+| Humanize | 99,999 words | 100 × $0.0007 = $0.07 |
+| Summarize | 99,999 words | 100 × $0.0005 = $0.05 |
 | Quiz | 99 | 99 × $0.0020 = $0.20 |
 | Lessons | 99 | 99 × $0.0028 = $0.28 |
-| **Total** | | **~$2.31** |
+| **Total** | | **~$1.18** |
 
-**Pro user max cost: ~$2.30/month**  
-**Pro profit margin: $19.99 − $2.31 ≈ $17.68 (~88%)**
+**Pro user max cost: ~$1.18/month**  
+**Pro profit margin: $19.99 − $1.18 ≈ $18.81 (~94%)**
 
 ---
 
@@ -99,7 +99,7 @@
 | Plan | Revenue | Max API Cost | Profit | Margin |
 |------|---------|--------------|--------|--------|
 | **Free** | $0 | ~$0.03–0.04 | −$0.03 | (loss) |
-| **Pro** | $19.99 | ~$2.31 | ~$17.68 | ~88% |
+| **Pro** | $19.99 | ~$1.18 | ~$18.81 | ~94% |
 | **Premium** | $39.99 | ~$6.12 | ~$33.87 | ~85% |
 
 ---
