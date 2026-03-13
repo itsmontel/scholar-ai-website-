@@ -67,7 +67,7 @@ const StudySetViewer = ({ data, title, onClose, onNavigate, userPlan }: StudySet
           questions: d.cards,
           source_word_count: d.sourceWordCount ?? 0,
         }));
-        onNavigate('flashcard-generator');
+        onNavigate('create-flashcards');
         break;
       case 'crossword':
         localStorage.setItem('savedCrossword', JSON.stringify({

@@ -409,13 +409,13 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
           <FlashcardsIllustration />
 
           <p className={p}>
-            The key is that the effort of retrieval matters. The harder your brain has to work to pull the information out, the stronger the memory becomes. This is why tools like <a href="/tools/flashcard-generator" onClick={handleNavigate('flashcard-generator')} className={internalLink}>flashcards</a> and <a href="/tools/quiz-generator" onClick={handleNavigate('quiz-generator')} className={internalLink}>practice quizzes</a> work so well. They force you to test yourself instead of just reviewing.
+            The key is that the effort of retrieval matters. The harder your brain has to work to pull the information out, the stronger the memory becomes. This is why tools like <a href="/tools/create-flashcards" onClick={handleNavigate('create-flashcards')} className={internalLink}>flashcards</a> and <a href="/tools/quiz-generator" onClick={handleNavigate('quiz-generator')} className={internalLink}>practice quizzes</a> work so well. They force you to test yourself instead of just reviewing.
           </p>
           <p className={p}>
             WriteScholar&apos;s <a href="/tools/quiz-generator" onClick={handleNavigate('quiz-generator')} className={internalLink}>quiz generator</a> turns your notes, textbook chapters, or any study material into practice questions in seconds. You paste in your content, choose how many questions you want, and the AI creates a quiz that tests real understanding. No more spending an hour writing questions by hand. You can focus on actually answering them.
           </p>
           <p className={p}>
-            The same goes for flashcards. Our <a href="/tools/flashcard-generator" onClick={handleNavigate('flashcard-generator')} className={internalLink}>flashcard tool</a> extracts key concepts from your material and builds a deck automatically. You get the benefit of active recall without the tedious prep work. Study the cards, flip them, test yourself. That is where the learning happens.
+            The same goes for flashcards. Our <a href="/dashboard" onClick={handleNavigate('dashboard')} className={internalLink}>Study Pack</a> extracts key concepts from your material and builds a deck automatically, or <a href="/tools/create-flashcards" onClick={handleNavigate('create-flashcards')} className={internalLink}>Create Flashcards</a> to build your own. You get the benefit of active recall without the tedious prep work. Study the cards, flip them, test yourself. That is where the learning happens.
           </p>
 
           <h2 className={h2}>Spaced repetition: study less, remember more</h2>
@@ -469,7 +469,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
             The best study strategy uses multiple methods together. Start with a Pomodoro block. Use the first 25 minutes to work through a quiz or flashcard deck generated from your latest lecture. Take a real break. In the next block, maybe tackle a different subject or review material from last week. The variety keeps you engaged. The active recall does the learning.
           </p>
           <p className={p}>
-            WriteScholar is built for this workflow. You can generate a <a href="/tools/quiz-generator" onClick={handleNavigate('quiz-generator')} className={internalLink}>quiz</a> from your notes, create <a href="/tools/flashcard-generator" onClick={handleNavigate('flashcard-generator')} className={internalLink}>flashcards</a> from a textbook chapter, and even build <a href="/tools/crossword-generator" onClick={handleNavigate('crossword-generator')} className={internalLink}>crossword puzzles</a> to reinforce vocabulary. All of it is saved to your account. You can return to any of it for spaced review. And the <a href="/tools/pomodoro-timer" onClick={handleNavigate('pomodoro-timer')} className={internalLink}>Pomodoro timer</a> keeps your sessions focused.
+            WriteScholar is built for this workflow. You can generate a <a href="/tools/quiz-generator" onClick={handleNavigate('quiz-generator')} className={internalLink}>quiz</a> from your notes, create <a href="/tools/create-flashcards" onClick={handleNavigate('create-flashcards')} className={internalLink}>flashcards</a> from a textbook chapter, and even build <a href="/dashboard" onClick={handleNavigate('dashboard')} className={internalLink}>crossword puzzles</a> to reinforce vocabulary. All of it is saved to your account. You can return to any of it for spaced review. And the <a href="/tools/pomodoro-timer" onClick={handleNavigate('pomodoro-timer')} className={internalLink}>Pomodoro timer</a> keeps your sessions focused.
           </p>
 
           <h2 className={h2}>Frequently asked questions</h2>
@@ -537,7 +537,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
           <FlashcardsIllustration />
 
           <p className={p}>
-            AI-powered flashcard generators like WriteScholar&apos;s <a href="/tools/flashcard-generator" onClick={handleNavigate('flashcard-generator')} className={internalLink}>flashcard tool</a> solve this problem by analyzing your source material and automatically extracting key concepts, definitions, and relationships. You paste in your notes, a textbook chapter, or lecture transcript, and the AI identifies what&apos;s worth remembering and creates well-structured question-answer pairs. What used to take an hour now takes thirty seconds.
+            AI-powered flashcard generators like WriteScholar&apos;s <a href="/dashboard" onClick={handleNavigate('dashboard')} className={internalLink}>Study Pack</a> solve this problem by analyzing your source material and automatically extracting key concepts, definitions, and relationships. You paste in your notes, a textbook chapter, or lecture transcript, and the AI identifies what&apos;s worth remembering and creates well-structured question-answer pairs. What used to take an hour now takes thirty seconds.
           </p>
           <p className={p}>
             The quality of AI-generated flashcards has improved dramatically. Modern AI doesn&apos;t just pull random sentences from your text. It understands context, identifies the most important concepts, and formulates questions that test genuine understanding rather than mere recognition. You can specify how many cards you want, and the AI will prioritize the most critical information from your source material.
@@ -574,7 +574,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
             What makes crosswords particularly valuable is how they test knowledge from multiple angles. A single word might be clued differently depending on which direction you&apos;re solving, forcing you to think about concepts from different perspectives. The interconnected nature of the puzzle means that getting one answer right helps you solve others, creating a web of associations that strengthens memory.
           </p>
           <p className={p}>
-            Creating crossword puzzles manually is notoriously difficult. You need to find words that intersect properly, write clues that are challenging but fair, and ensure the puzzle is actually solvable. WriteScholar&apos;s <a href="/tools/crossword-generator" onClick={handleNavigate('crossword-generator')} className={internalLink}>AI crossword generator</a> handles all of this automatically. You provide your study material, specify how many words you want in the puzzle, and the AI creates a complete crossword with clues derived from your content.
+            Creating crossword puzzles manually is notoriously difficult. You need to find words that intersect properly, write clues that are challenging but fair, and ensure the puzzle is actually solvable. WriteScholar&apos;s <a href="/dashboard" onClick={handleNavigate('dashboard')} className={internalLink}>Study Pack</a> handles all of this automatically. You provide your study material, specify how many words you want in the puzzle, and the AI creates a complete crossword with clues derived from your content.
           </p>
           <p className={p}>
             The crossword format is especially effective for learning terminology-heavy subjects like biology, medicine, law, or foreign languages. Instead of drilling vocabulary with boring repetition, you&apos;re solving a puzzle, which is inherently more engaging and memorable. Many students find that they remember terms better after solving a crossword than after reviewing flashcards, simply because the puzzle format creates stronger memory associations.
@@ -817,7 +817,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
             This is exactly the problem tools like WriteScholar&apos;s <a href="/tools/quiz-generator" onClick={handleNavigate('quiz-generator')} className={internalLink}>Quiz Generator</a> were built to solve. Paste your lecture notes, textbook chapter, or article, and it generates a full quiz in seconds. Multiple choice or true/false, you choose. What used to take an hour of prep now takes thirty seconds. The only thing left to do is actually learn.
           </p>
           <p className={p}>
-            The same goes for flashcards. The <a href="/tools/flashcard-generator" onClick={handleNavigate('flashcard-generator')} className={internalLink}>Flashcard Generator</a> turns any text into a ready-to-use deck. No formatting. No copying. Just your material, instantly testable.
+            The same goes for flashcards. <a href="/dashboard" onClick={handleNavigate('dashboard')} className={internalLink}>Study Pack</a> turns any text into a ready-to-use deck, or <a href="/tools/create-flashcards" onClick={handleNavigate('create-flashcards')} className={internalLink}>Create Flashcards</a> to build your own. No formatting. No copying. Just your material, instantly testable.
           </p>
 
           <QuizIllustration />
@@ -902,7 +902,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
           </p>
           <p className={faqQuestion}>How do I start using WriteScholar&apos;s study tools?</p>
           <p className={p}>
-            Create a free account at <a href="/signup" onClick={handleNavigate('signup')} className={internalLink}>writescholar.com</a>, then head to the <a href="/tools/quiz-generator" onClick={handleNavigate('quiz-generator')} className={internalLink}>Quiz Generator</a>, <a href="/tools/flashcard-generator" onClick={handleNavigate('flashcard-generator')} className={internalLink}>Flashcard Generator</a>, or any other tool. Paste in your study material, choose your settings, and generate in seconds. No credit card required.
+            Create a free account at <a href="/signup" onClick={handleNavigate('signup')} className={internalLink}>writescholar.com</a>, then head to the <a href="/dashboard" onClick={handleNavigate('dashboard')} className={internalLink}>dashboard</a> for Study Pack (quiz, flashcards, crosswords) or <a href="/tools/create-flashcards" onClick={handleNavigate('create-flashcards')} className={internalLink}>Create Flashcards</a> to build your own. Paste in your study material, choose your settings, and generate in seconds. No credit card required.
           </p>
 
           <a href="/signup" onClick={handleNavigate('signup')} className={ctaButton}>

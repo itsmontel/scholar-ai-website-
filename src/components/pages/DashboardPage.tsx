@@ -816,7 +816,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                 const diffLabel = isStudyPack ? '' : (tool.difficulty ? ` · ${tool.difficulty}` : '');
                 const navMap: Record<string, string> = {
                   study_pack: 'study-pack-viewer',
-                  flashcards: 'flashcard-generator',
+                  flashcards: 'create-flashcards',
                   crossword: 'crossword-generator',
                   crater_blast: 'crater-blast',
                   lesson: 'interactive-lesson',
@@ -891,8 +891,12 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
       } else {
         localStorage.setItem('writescholar_minimal_ui', 'true');
         if (t.quiz_type === 'flashcards') {
-          localStorage.setItem('savedFlashcards', JSON.stringify(t));
-          onNavigate('flashcard-generator');
+          localStorage.setItem('savedFlashcards', JSON.stringify({
+            title: t.title || 'Flashcards',
+            questions: t.questions || [],
+            source_word_count: t.source_word_count ?? 0,
+          }));
+          onNavigate('create-flashcards');
         } else if (t.quiz_type === 'crossword') {
           localStorage.setItem('savedCrossword', JSON.stringify(t));
           onNavigate('crossword-generator');
@@ -935,7 +939,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
       source_word_count: flashcardResult.sourceWordCount ?? 0
     };
     localStorage.setItem('savedFlashcards', JSON.stringify(payload));
-    onNavigate('flashcard-generator');
+    onNavigate('create-flashcards');
   };
 
   const handleEnlargeCrossword = () => {
@@ -2324,6 +2328,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
 
               {/* Usage Overview Widget + Quick Review (desktop: same row, Quick Review same size as sidebar) */}
               {!loadingStats && (
+                <>
                 <div className="mt-4 flex flex-col lg:flex-row gap-3 lg:gap-4 lg:items-stretch">
                   <div className="lg:flex-[3] lg:min-w-0 flex-1 p-4 rounded-xl bg-gradient-to-r from-stone-50 to-stone-100/50 dark:from-stone-800/50 dark:to-stone-800/30 border border-stone-200/60 dark:border-stone-700/40">
                   <div className="flex items-center justify-between mb-3">
@@ -2445,6 +2450,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                   </div>
                 </button>
               </div>
+                </>
               )}
             </div>
 
@@ -2465,7 +2471,8 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
               {([
                 { id: 'analyze' as const, icon: '📝', title: 'Analyze', desc: 'Get professor-style feedback on your essays', mobileDesc: 'Essay feedback', gradient: 'from-rose-50 to-pink-50 dark:from-rose-900/20 dark:to-pink-900/15', border: 'border-rose-200/70 dark:border-rose-700/40', activeBorder: 'border-rose-400 dark:border-rose-500 ring-2 ring-rose-300/50 dark:ring-rose-600/40', iconBg: 'bg-gradient-to-br from-rose-400 to-pink-500', accentColor: 'text-rose-600 dark:text-rose-400', pro: false, setStudyMode: null },
                 { id: 'citations' as const, icon: '📚', title: 'Citations', desc: 'Find and format academic sources instantly', mobileDesc: 'Find sources', gradient: 'from-sky-50 to-blue-50 dark:from-sky-900/20 dark:to-blue-900/15', border: 'border-sky-200/70 dark:border-sky-700/40', activeBorder: 'border-sky-400 dark:border-sky-500 ring-2 ring-sky-300/50 dark:ring-sky-600/40', iconBg: 'bg-gradient-to-br from-sky-400 to-blue-500', accentColor: 'text-sky-600 dark:text-sky-400', pro: false, setStudyMode: null },
-                { id: 'study_tools' as const, icon: '📚', title: 'Study Pack', desc: 'Generate lesson, flashcards, quiz, crossword & Crater Blast from your notes', mobileDesc: 'All study tools', gradient: 'from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/15', border: 'border-amber-200/70 dark:border-amber-700/40', activeBorder: 'border-amber-400 dark:border-amber-500 ring-2 ring-amber-300/50 dark:ring-amber-600/40', iconBg: 'bg-gradient-to-br from-amber-400 to-orange-500', accentColor: 'text-amber-600 dark:text-amber-400', pro: false, setStudyMode: 'quiz' as const },
+                { id: 'study_tools' as const, icon: '📦', title: 'Study Pack', desc: 'Generate lesson, flashcards, quiz, crossword & Crater Blast from your notes', mobileDesc: 'All study tools', gradient: 'from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/15', border: 'border-amber-200/70 dark:border-amber-700/40', activeBorder: 'border-amber-400 dark:border-amber-500 ring-2 ring-amber-300/50 dark:ring-amber-600/40', iconBg: 'bg-gradient-to-br from-amber-400 to-orange-500', accentColor: 'text-amber-600 dark:text-amber-400', pro: false, setStudyMode: 'quiz' as const },
+                { id: 'create_flashcards' as const, icon: '🃏', title: 'Create Cards', desc: 'Build and fully customize your own flashcard deck', mobileDesc: 'Make flashcards', gradient: 'from-fuchsia-50 to-pink-50 dark:from-fuchsia-900/20 dark:to-pink-900/15', border: 'border-fuchsia-200/70 dark:border-fuchsia-700/40', activeBorder: 'border-fuchsia-400 dark:border-fuchsia-500 ring-2 ring-fuchsia-300/50 dark:ring-fuchsia-600/40', iconBg: 'bg-gradient-to-br from-fuchsia-400 to-pink-500', accentColor: 'text-fuchsia-600 dark:text-fuchsia-400', pro: false, setStudyMode: null, isNav: true, navTo: 'create-flashcards' },
                 { id: 'focus_mode' as const, icon: '🔒', title: 'Focus Mode', desc: 'Earn screen time, block sites until you pass study questions', mobileDesc: 'Earn your breaks', gradient: 'from-violet-100 to-purple-100 dark:from-violet-800/40 dark:to-purple-800/40', border: 'border-violet-300 dark:border-violet-600', activeBorder: 'border-violet-500 dark:border-violet-400 ring-2 ring-violet-400/60 dark:ring-violet-500/50', iconBg: 'bg-gradient-to-br from-violet-500 to-purple-600', accentColor: 'text-violet-700 dark:text-violet-300', pro: false, setStudyMode: null, special: true, badge: 'NEW' },
                 { id: 'summarize' as const, icon: '📋', title: 'Summarize', desc: 'Condense papers and articles instantly', mobileDesc: 'Summarize', gradient: 'from-teal-50 to-cyan-50 dark:from-teal-900/20 dark:to-cyan-900/15', border: 'border-teal-200/70 dark:border-teal-700/40', activeBorder: 'border-teal-400 dark:border-teal-500 ring-2 ring-teal-300/50 dark:ring-teal-600/40', iconBg: 'bg-gradient-to-br from-teal-500 to-cyan-600', accentColor: 'text-teal-700 dark:text-teal-300', pro: false, setStudyMode: null },
                 { id: 'humanize' as const, icon: '✨', title: 'Humanize', desc: 'Transform AI text into natural human writing', mobileDesc: 'Humanize', gradient: 'from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/15', border: 'border-violet-200/70 dark:border-violet-700/40', activeBorder: 'border-violet-400 dark:border-violet-500 ring-2 ring-violet-300/50 dark:ring-violet-600/40', iconBg: 'bg-gradient-to-br from-violet-500 to-purple-600', accentColor: 'text-violet-700 dark:text-violet-300', pro: false, setStudyMode: null },
@@ -2477,6 +2484,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                     tool.id === 'analyze' ? 'analyze-card' :
                     tool.id === 'citations' ? 'citations-card' :
                     tool.id === 'study_tools' ? 'study-card' :
+                    tool.id === 'create_flashcards' ? 'create-cards-card' :
                     tool.id === 'summarize' ? 'summarize-card' :
                     tool.id === 'humanize' ? 'humanize-card' :
                     tool.id === 'focus_mode' ? 'focus-card' :
@@ -2490,6 +2498,10 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                     }
                     if ('isMoreTools' in tool && tool.isMoreTools) {
                       onNavigate('more-tools');
+                      return;
+                    }
+                    if ('isNav' in tool && tool.isNav && 'navTo' in tool) {
+                      onNavigate(tool.navTo as string);
                       return;
                     }
                     if (tool.id === 'study_tools') {

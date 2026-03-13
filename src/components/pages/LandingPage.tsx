@@ -882,8 +882,8 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                     </ul>
                   </div>
                   <div className="order-2 lg:order-2 relative overflow-hidden bg-gradient-to-br from-indigo-50 to-violet-50 dark:from-indigo-900/20 dark:to-violet-900/20 min-h-[200px] sm:min-h-[360px] lg:min-h-[400px] flex items-center justify-center p-3 sm:p-4">
-                    <video autoPlay loop muted playsInline className="w-full h-full object-contain group-hover:scale-[1.02] transition-transform duration-700" aria-label="Paste your notes or study material into WriteScholar">
-                      <source src="/notesvid.mp4" type="video/mp4" />
+                    <video autoPlay loop muted playsInline className="w-full h-full object-contain group-hover:scale-[1.02] transition-transform duration-700" title="WriteScholar — Paste notes to generate quizzes, flashcards and crosswords" aria-label="WriteScholar — Paste notes to generate quizzes, flashcards and crosswords instantly">
+                      <source src="/writescholar-notes-study-materials-demo.mp4" type="video/mp4" />
                     </video>
                   </div>
                 </div>
@@ -917,7 +917,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
               <div className="absolute -inset-1 bg-gradient-to-r from-violet-400 to-purple-400 rounded-3xl blur-xl opacity-0 group-hover:opacity-40 transition-all duration-500 max-lg:opacity-25 max-lg:-inset-1.5"></div>
               <div className="relative bg-white dark:bg-stone-800 rounded-3xl overflow-hidden shadow-xl border-2 border-stone-200/50 dark:border-stone-700 h-full hover:-translate-y-3 hover:scale-[1.02] hover:shadow-2xl hover:border-violet-200/80 dark:hover:border-violet-700/50 transition-all duration-500 max-lg:border-violet-200/50 max-lg:dark:border-violet-900/30 max-lg:shadow-violet-500/10">
                 <div className="relative h-40 sm:h-56 overflow-hidden bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20">
-                  <video autoPlay loop muted playsInline className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"><source src="/quizvid.mp4" type="video/mp4" /></video>
+                  <video autoPlay loop muted playsInline className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500" title="WriteScholar AI Quiz Generator — Turn notes into practice tests" aria-label="WriteScholar AI Quiz Generator — Turn notes into practice tests instantly"><source src="/writescholar-quiz-generator-demo.mp4" type="video/mp4" /></video>
                 </div>
                 <div className="p-6">
                   <div className="flex items-center gap-3">
@@ -931,7 +931,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
               <div className="absolute -inset-1 bg-gradient-to-r from-emerald-400 to-teal-400 rounded-3xl blur-xl opacity-0 group-hover:opacity-40 transition-all duration-500 max-lg:opacity-25 max-lg:-inset-1.5"></div>
               <div className="relative bg-white dark:bg-stone-800 rounded-3xl overflow-hidden shadow-xl border-2 border-stone-200/50 dark:border-stone-700 h-full hover:-translate-y-3 hover:scale-[1.02] hover:shadow-2xl hover:border-emerald-200/80 dark:hover:border-emerald-700/50 transition-all duration-500 max-lg:border-emerald-200/50 max-lg:dark:border-emerald-900/30 max-lg:shadow-emerald-500/10">
                 <div className="relative h-40 sm:h-56 overflow-hidden bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20">
-                  <video autoPlay loop muted playsInline className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"><source src="/flashcardsvid.mp4" type="video/mp4" /></video>
+                  <video autoPlay loop muted playsInline className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500" title="WriteScholar Study Pack — AI flashcard generator from notes" aria-label="WriteScholar Study Pack — AI flashcard generator from notes"><source src="/writescholar-flashcards-demo.mp4" type="video/mp4" /></video>
                 </div>
                 <div className="p-6">
                   <div className="flex items-center gap-3">
@@ -945,7 +945,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
               <div className="absolute -inset-1 bg-gradient-to-r from-rose-400 to-pink-400 rounded-3xl blur-xl opacity-0 group-hover:opacity-40 transition-all duration-500 max-lg:opacity-25 max-lg:-inset-1.5"></div>
               <div className="relative bg-white dark:bg-stone-800 rounded-3xl overflow-hidden shadow-xl border-2 border-stone-200/50 dark:border-stone-700 h-full hover:-translate-y-3 hover:scale-[1.02] hover:shadow-2xl hover:border-rose-200/80 dark:hover:border-rose-700/50 transition-all duration-500 max-lg:border-rose-200/50 max-lg:dark:border-rose-900/30 max-lg:shadow-rose-500/10">
                 <div className="relative h-40 sm:h-56 overflow-hidden bg-gradient-to-br from-rose-50 to-pink-50 dark:from-rose-900/20 dark:to-pink-900/20">
-                  <video autoPlay loop muted playsInline className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"><source src="/crosswordvid.mp4" type="video/mp4" /></video>
+                  <video autoPlay loop muted playsInline className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500" title="WriteScholar Crossword Generator — Create study puzzles from notes" aria-label="WriteScholar Crossword Generator — Create study puzzles from notes"><source src="/writescholar-crossword-demo.mp4" type="video/mp4" /></video>
                 </div>
                 <div className="p-6">
                   <div className="flex items-center gap-3">
@@ -1012,8 +1012,8 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
               <div className="relative max-w-4xl mx-auto">
                 <div className="absolute -inset-4 bg-gradient-to-r from-violet-500/20 via-fuchsia-500/20 to-pink-500/20 rounded-3xl blur-2xl" />
                 <div className="relative rounded-2xl overflow-hidden ring-2 ring-white/20 shadow-2xl shadow-violet-500/20">
-                  <video autoPlay loop muted playsInline className="w-full aspect-video object-cover" aria-label="See how Focus Mode works">
-                    <source src="/focusmode.mp4" type="video/mp4" />
+                  <video autoPlay loop muted playsInline className="w-full aspect-video object-cover" title="WriteScholar Focus Mode — Block distractions, answer quiz to unlock" aria-label="WriteScholar Focus Mode — Block distractions, answer quiz to unlock">
+                    <source src="/writescholar-focus-mode-demo.mp4" type="video/mp4" />
                   </video>
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none" />
                   <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between">
@@ -1044,8 +1044,8 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                 <div className="absolute -inset-2 bg-gradient-to-br from-violet-500/10 to-purple-500/10 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 <div className="relative flex-1 rounded-3xl overflow-hidden bg-white/5 backdrop-blur-sm border border-white/10 group-hover:border-violet-400/40 group-hover:bg-white/10 transition-all duration-500">
                   <div className="aspect-[5/4] min-h-[220px] flex items-center justify-center bg-gradient-to-b from-violet-500/20 to-transparent overflow-hidden">
-                    <video autoPlay loop muted playsInline className="w-full h-full object-cover" aria-label="Pick sites to block">
-                      <source src="/step1.mp4" type="video/mp4" />
+                    <video autoPlay loop muted playsInline className="w-full h-full object-cover" title="WriteScholar Focus Mode Step 1 — Pick sites to block" aria-label="WriteScholar Focus Mode Step 1 — Pick sites to block">
+                      <source src="/writescholar-focus-mode-step1-demo.mp4" type="video/mp4" />
                     </video>
                   </div>
                   <div className="p-6 sm:p-8">
@@ -1071,8 +1071,8 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                 <div className="absolute -inset-2 bg-gradient-to-br from-purple-500/10 to-fuchsia-500/10 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 <div className="relative flex-1 rounded-3xl overflow-hidden bg-white/5 backdrop-blur-sm border border-white/10 group-hover:border-purple-400/40 group-hover:bg-white/10 transition-all duration-500">
                   <div className="aspect-[5/4] min-h-[220px] flex items-center justify-center bg-gradient-to-b from-purple-500/20 to-transparent overflow-hidden">
-                    <video autoPlay loop muted playsInline className="w-full h-full object-cover" aria-label="Answer to unlock">
-                      <source src="/step2.mp4" type="video/mp4" />
+                    <video autoPlay loop muted playsInline className="w-full h-full object-cover" title="WriteScholar Focus Mode Step 2 — Answer quiz to unlock" aria-label="WriteScholar Focus Mode Step 2 — Answer quiz to unlock">
+                      <source src="/writescholar-focus-mode-step2-demo.mp4" type="video/mp4" />
                     </video>
                   </div>
                   <div className="p-6 sm:p-8">
@@ -1098,8 +1098,8 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                 <div className="absolute -inset-2 bg-gradient-to-br from-fuchsia-500/10 to-pink-500/10 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 <div className="relative flex-1 rounded-3xl overflow-hidden bg-white/5 backdrop-blur-sm border border-white/10 group-hover:border-fuchsia-400/40 group-hover:bg-white/10 transition-all duration-500">
                   <div className="aspect-[5/4] min-h-[220px] flex items-center justify-center bg-gradient-to-b from-fuchsia-500/20 to-transparent overflow-hidden">
-                    <video autoPlay loop muted playsInline className="w-full h-full object-cover" aria-label="Enjoy your break">
-                      <source src="/step3.mp4" type="video/mp4" />
+                    <video autoPlay loop muted playsInline className="w-full h-full object-cover" title="WriteScholar Focus Mode Step 3 — Enjoy your earned break" aria-label="WriteScholar Focus Mode Step 3 — Enjoy your earned break">
+                      <source src="/writescholar-focus-mode-step3-demo.mp4" type="video/mp4" />
                     </video>
                   </div>
                   <div className="p-6 sm:p-8">
@@ -1228,9 +1228,10 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                 muted
                 playsInline
                 className="w-full aspect-video object-cover"
-                aria-label="How to share study tools with friends"
+                title="WriteScholar Friends — Share quizzes, flashcards and crosswords"
+                aria-label="WriteScholar Friends — Share quizzes, flashcards and crosswords with friends"
               >
-                <source src="/friendsvid.mp4" type="video/mp4" />
+                <source src="/writescholar-friends-share-demo.mp4" type="video/mp4" />
               </video>
             </div>
             <p className="text-xs text-stone-500 dark:text-stone-400 mb-6 px-2 leading-relaxed">
@@ -1304,9 +1305,10 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   muted
                   playsInline
                   className="w-full aspect-video object-cover"
-                  aria-label="How to share study tools with friends"
+                  title="WriteScholar Friends — Share quizzes, flashcards and crosswords"
+                  aria-label="WriteScholar Friends — Share quizzes, flashcards and crosswords with friends"
                 >
-                  <source src="/friendsvid.mp4" type="video/mp4" />
+                  <source src="/writescholar-friends-share-demo.mp4" type="video/mp4" />
                 </video>
               </div>
             </div>
@@ -1441,13 +1443,13 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
             <div className="relative bg-white dark:bg-stone-800 rounded-2xl sm:rounded-3xl overflow-hidden shadow-xl border border-stone-200/60 dark:border-stone-700 group-hover:shadow-2xl group-hover:border-violet-200/60 dark:group-hover:border-violet-800/40 transition-all duration-300">
               <div className="bg-gradient-to-br from-violet-50/30 to-indigo-50/20 dark:from-violet-950/30 dark:to-indigo-950/20 flex items-center justify-center min-h-[200px] sm:min-h-[380px]">
                 {[
-                  { id: 'analyse', src: '/analysevid.mp4' },
-                  { id: 'flashcards', src: '/flashcardsvid.mp4' },
-                  { id: 'quiz', src: '/quizvid.mp4' },
-                  { id: 'summarise', src: '/summarisevid.mp4' },
-                  { id: 'crossword', src: '/crosswordvid.mp4' },
-                  { id: 'games', src: '/craterblast.mp4' },
-                  { id: 'humanise', src: '/humanisevid.mp4' },
+                  { id: 'analyse', src: '/writescholar-essay-checker-demo.mp4', title: 'WriteScholar Essay Checker — Professor-style feedback on your writing' },
+                  { id: 'flashcards', src: '/writescholar-flashcards-demo.mp4', title: 'WriteScholar Study Pack — AI flashcard generator from notes' },
+                  { id: 'quiz', src: '/writescholar-quiz-generator-demo.mp4', title: 'WriteScholar AI Quiz Generator — Turn notes into practice tests' },
+                  { id: 'summarise', src: '/writescholar-summarizer-demo.mp4', title: 'WriteScholar AI Summarizer — Condense papers into key points' },
+                  { id: 'crossword', src: '/writescholar-crossword-demo.mp4', title: 'WriteScholar Crossword Generator — Create study puzzles from notes' },
+                  { id: 'games', src: '/writescholar-crater-blast-demo.mp4', title: 'WriteScholar Crater Blast — Quiz game study mode' },
+                  { id: 'humanise', src: '/writescholar-humanizer-demo.mp4', title: 'WriteScholar AI Humanizer — Bypass AI detection naturally' },
                 ].map((vid) => (
                   activeStudyTab === vid.id && (
                     <video
@@ -1457,6 +1459,8 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                       muted
                       playsInline
                       className="w-full max-h-[40vh] sm:max-h-[65vh] object-contain"
+                      title={vid.title}
+                      aria-label={vid.title}
                     >
                       <source src={vid.src} type="video/mp4" />
                     </video>

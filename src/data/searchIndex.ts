@@ -14,8 +14,8 @@ export interface SearchItem {
 
 const TOOL_ITEMS: SearchItem[] = [
   { page: 'quiz-generator', label: 'Quiz Generator', keywords: ['quiz', 'quizzes', 'practice', 'test', 'questions'] },
-  { page: 'flashcard-generator', label: 'Flashcards', keywords: ['flashcard', 'flashcards', 'cards', 'study cards'] },
-  { page: 'crossword-generator', label: 'Crosswords', keywords: ['crossword', 'crosswords', 'puzzle'] },
+  { page: 'create-flashcards', label: 'Flashcards', keywords: ['flashcard', 'flashcards', 'cards', 'study cards'] },
+  { page: 'dashboard', label: 'Study Pack (Quiz, Crossword)', keywords: ['crossword', 'crosswords', 'puzzle', 'study pack'] },
   { page: 'humanizer', label: 'AI Humanizer', keywords: ['humanizer', 'humanize', 'ai detection', 'bypass'] },
   { page: 'summarizer', label: 'Summarizer', keywords: ['summarize', 'summarizer', 'summary', 'tldr'] },
   { page: 'analyze', label: 'Essay Analyzer', keywords: ['analyze', 'analysis', 'essay', 'feedback'] },

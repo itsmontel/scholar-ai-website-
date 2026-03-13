@@ -264,9 +264,10 @@ const CitationsPage = ({ onNavigate, user, onLogout }: CitationsPageProps) => {
                     muted
                     playsInline
                     className="w-full h-full object-contain"
-                    aria-label="See how citation search works"
+                    title="WriteScholar Citation Finder — APA, MLA, Chicago sources"
+                    aria-label="WriteScholar Citation Finder — Find and format APA, MLA, Chicago sources"
                   >
-                    <source src="/citationsvid.mp4" type="video/mp4" />
+                    <source src="/writescholar-citation-finder-demo.mp4" type="video/mp4" />
                   </video>
                 </div>
                 <div className="px-4 py-3.5 border-t border-stone-100 dark:border-stone-700/80">

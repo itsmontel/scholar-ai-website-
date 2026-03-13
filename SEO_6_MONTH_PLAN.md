@@ -66,7 +66,7 @@ Focus on expanding the content on these tool pages. Each should have:
 
 2. **"How to Study Effectively: The Complete Guide for College Students"**  
    Target: "how to study effectively", "study tips for college students"  
-   Link to: `/tools/quiz-generator`, `/tools/pomodoro-timer`, `/tools/flashcard-generator`
+   Link to: `/tools/quiz-generator`, `/tools/pomodoro-timer`, `/tools/create-flashcards`
 
 3. **"AI Essay Feedback: Get Analysis Tailored to Your Grade Level"**  
    Target: "AI essay checker", "essay feedback for students", "essay analysis"  
@@ -306,8 +306,8 @@ By the end of Month 6, aim for **35–40 total blog posts**. With 9 already publ
 | `/tools/humanizer` | humanize AI text | AI humanizer, bypass AI detection, undetectable AI |
 | `/tools/quiz-generator` | quiz generator from text | make quiz from notes, AI quiz maker |
 | `/tools/summarizer` | AI summarizer for students | summarize research paper, paper summarizer |
-| `/tools/flashcard-generator` | flashcard generator from notes | AI flashcard maker, create flashcards online |
-| `/tools/crossword-generator` | crossword puzzle maker | academic crossword generator |
+| `/tools/create-flashcards` | create & study flashcards | flashcard maker, study cards, custom deck |
+| `/dashboard` | Study Pack (crosswords via AI) | study pack, crossword, quiz, lesson |
 | `/tools/word-counter` | online word counter | word count tool, character counter |
 | `/tools/citation-generator` | free citation generator | APA citation generator, MLA citation maker |
 | `/tools/grammar-checker` | grammar checker for essays | academic grammar checker |

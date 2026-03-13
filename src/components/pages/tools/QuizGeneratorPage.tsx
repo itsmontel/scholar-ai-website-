@@ -1590,7 +1590,7 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
   return (
     <div className="min-h-screen flex flex-col relative bg-gradient-to-b from-amber-50/40 via-stone-50 to-white dark:bg-stone-900 dark:from-stone-900 dark:via-stone-900 dark:to-stone-800">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-15%,rgba(251,191,36,0.15),transparent)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-15%,rgba(245,158,11,0.08),transparent)] pointer-events-none" aria-hidden />
-      {!showMinimalUI && <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage={studyToolMode === 'quiz' ? 'quiz-generator' : studyToolMode === 'flashcards' ? 'flashcard-generator' : 'crossword-generator'} />}
+      {!showMinimalUI && <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage={studyToolMode === 'quiz' ? 'quiz-generator' : studyToolMode === 'flashcards' ? 'quiz-generator' : 'crossword-generator'} />}
       
       <main className="flex-1 w-full min-w-0 overflow-x-hidden relative max-w-full">
         <input
@@ -1889,8 +1889,8 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
                     </div>
                     <div className="relative bg-white dark:bg-stone-800 rounded-2xl overflow-hidden shadow-xl shadow-stone-200/50 dark:shadow-stone-900/50 border border-stone-200/60 dark:border-stone-600/50 ring-1 ring-stone-100 dark:ring-stone-700/50 max-w-3xl mx-auto">
                       <div className={`bg-gradient-to-br from-amber-50/60 to-orange-50/60 dark:from-amber-900/25 dark:to-orange-900/25 flex items-center justify-center aspect-video min-h-[200px] sm:min-h-[320px]`}>
-                        <video key={studyToolMode} autoPlay loop muted playsInline className="w-full h-full object-contain" aria-label={`See how ${studyToolMode} generator works`}>
-                          <source src={studyToolMode === 'quiz' ? '/quizvid.mp4' : studyToolMode === 'flashcards' ? '/flashcardsvid.mp4' : '/crosswordvid.mp4'} type="video/mp4" />
+                        <video key={studyToolMode} autoPlay loop muted playsInline className="w-full h-full object-contain" title={studyToolMode === 'quiz' ? 'WriteScholar AI Quiz Generator — Turn notes into practice tests' : studyToolMode === 'flashcards' ? 'WriteScholar Study Pack — AI flashcard generator from notes' : 'WriteScholar Crossword Generator — Create study puzzles from notes'} aria-label={studyToolMode === 'quiz' ? 'WriteScholar AI Quiz Generator — Turn notes into practice tests' : studyToolMode === 'flashcards' ? 'WriteScholar Study Pack — AI flashcard generator from notes' : 'WriteScholar Crossword Generator — Create study puzzles from notes'}>
+                          <source src={studyToolMode === 'quiz' ? '/writescholar-quiz-generator-demo.mp4' : studyToolMode === 'flashcards' ? '/writescholar-flashcards-demo.mp4' : '/writescholar-crossword-demo.mp4'} type="video/mp4" />
                         </video>
                       </div>
                       <div className="px-4 py-3.5 border-t border-stone-100 dark:border-stone-700/80">
@@ -2382,8 +2382,8 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
                 </div>
                 <div className="relative bg-white dark:bg-stone-800 rounded-2xl overflow-hidden shadow-xl shadow-stone-200/50 dark:shadow-stone-900/50 border border-stone-200/60 dark:border-stone-600/50 max-w-3xl mx-auto">
                   <div className="bg-gradient-to-br from-amber-50/60 to-orange-50/60 dark:from-amber-900/25 dark:to-orange-900/25 flex items-center justify-center aspect-video min-h-[200px] sm:min-h-[320px]">
-                    <video key={studyToolMode} autoPlay loop muted playsInline className="w-full h-full object-contain" aria-label={`See how ${studyToolMode} generator works`}>
-                      <source src={studyToolMode === 'quiz' ? '/quizvid.mp4' : studyToolMode === 'flashcards' ? '/flashcardsvid.mp4' : '/crosswordvid.mp4'} type="video/mp4" />
+                    <video key={studyToolMode} autoPlay loop muted playsInline className="w-full h-full object-contain" title={studyToolMode === 'quiz' ? 'WriteScholar AI Quiz Generator — Turn notes into practice tests' : studyToolMode === 'flashcards' ? 'WriteScholar Study Pack — AI flashcard generator from notes' : 'WriteScholar Crossword Generator — Create study puzzles from notes'} aria-label={studyToolMode === 'quiz' ? 'WriteScholar AI Quiz Generator — Turn notes into practice tests' : studyToolMode === 'flashcards' ? 'WriteScholar Study Pack — AI flashcard generator from notes' : 'WriteScholar Crossword Generator — Create study puzzles from notes'}>
+                      <source src={studyToolMode === 'quiz' ? '/writescholar-quiz-generator-demo.mp4' : studyToolMode === 'flashcards' ? '/writescholar-flashcards-demo.mp4' : '/writescholar-crossword-demo.mp4'} type="video/mp4" />
                     </video>
                   </div>
                   <div className="px-4 py-3.5 border-t border-stone-100 dark:border-stone-700/80">

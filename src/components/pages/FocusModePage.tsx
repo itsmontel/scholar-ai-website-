@@ -144,9 +144,10 @@ const FocusModePage = ({ onNavigate, user, onLogout }: FocusModePageProps) => {
                 muted
                 playsInline
                 className="w-full h-full object-cover"
-                aria-label="See how Focus Mode works"
+                title="WriteScholar Focus Mode — Block distractions, answer quiz to unlock"
+                aria-label="WriteScholar Focus Mode — Block distractions, answer quiz to unlock"
               >
-                <source src="/focusmode.mp4" type="video/mp4" />
+                <source src="/writescholar-focus-mode-demo.mp4" type="video/mp4" />
               </video>
             </div>
           </div>

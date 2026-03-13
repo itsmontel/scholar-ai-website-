@@ -265,9 +265,10 @@ const AnalyzeEssayPage = ({ onNavigate, user, onLogout }: AnalyzeEssayPageProps)
                       muted
                       playsInline
                       className="w-full h-full object-contain"
-                      aria-label="Essay analysis in action"
+                      title="WriteScholar Essay Checker — Professor-style feedback on your writing"
+                      aria-label="WriteScholar Essay Checker — Professor-style feedback on your writing"
                     >
-                      <source src="/analysevid.mp4" type="video/mp4" />
+                      <source src="/writescholar-essay-checker-demo.mp4" type="video/mp4" />
                     </video>
                   </div>
                   <div className="px-4 py-3.5 border-t border-stone-100 dark:border-stone-700/80">
@@ -285,9 +286,10 @@ const AnalyzeEssayPage = ({ onNavigate, user, onLogout }: AnalyzeEssayPageProps)
                       muted
                       playsInline
                       className="w-full h-full object-contain"
-                      aria-label="Rubric matching in action"
+                      title="WriteScholar Essay Rubric — Grading criteria feedback"
+                      aria-label="WriteScholar Essay Rubric — Grading criteria feedback"
                     >
-                      <source src="/rubricvid.mp4" type="video/mp4" />
+                      <source src="/writescholar-essay-rubric-demo.mp4" type="video/mp4" />
                     </video>
                   </div>
                   <div className="px-4 py-3.5 border-t border-stone-100 dark:border-stone-700/80">

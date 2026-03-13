@@ -22,9 +22,9 @@ interface FlashcardViewerProps {
   onSaveToStudyTools?: (title: string, cards: { front: string; back: string }[]) => void | Promise<void>;
 }
 
-type ThemeId = 'classic' | 'ocean' | 'forest' | 'sunset' | 'violet' | 'monochrome';
+type ThemeId = 'violet' | 'emerald' | 'blue' | 'amber' | 'rose';
 type FontSize = 'small' | 'medium' | 'large';
-type CardStyle = 'minimal' | 'bordered' | 'gradient';
+type CardStyle = 'minimal' | 'bordered' | 'elevated';
 type StudyDirection = 'front-to-back' | 'back-to-front' | 'both';
 
 interface Theme {
@@ -41,79 +41,28 @@ interface Theme {
 }
 
 const THEMES: Theme[] = [
-  {
-    id: 'classic',
-    name: 'Classic',
-    frontBg: 'from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20',
-    frontBorder: 'border-amber-200 dark:border-amber-700',
-    frontText: 'text-stone-800 dark:text-stone-100',
-    frontAccent: 'text-amber-500 dark:text-amber-400',
-    backBg: 'from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20',
-    backBorder: 'border-blue-200 dark:border-blue-700',
-    backText: 'text-stone-800 dark:text-stone-100',
-    backAccent: 'text-blue-500 dark:text-blue-400',
-  },
-  {
-    id: 'ocean',
-    name: 'Ocean',
-    frontBg: 'from-cyan-50 to-sky-50 dark:from-cyan-900/20 dark:to-sky-900/20',
-    frontBorder: 'border-cyan-200 dark:border-cyan-700',
-    frontText: 'text-stone-800 dark:text-stone-100',
-    frontAccent: 'text-cyan-600 dark:text-cyan-400',
-    backBg: 'from-teal-50 to-emerald-50 dark:from-teal-900/20 dark:to-emerald-900/20',
-    backBorder: 'border-teal-200 dark:border-teal-700',
-    backText: 'text-stone-800 dark:text-stone-100',
-    backAccent: 'text-teal-600 dark:text-teal-400',
-  },
-  {
-    id: 'forest',
-    name: 'Forest',
-    frontBg: 'from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-green-900/20',
-    frontBorder: 'border-emerald-200 dark:border-emerald-700',
-    frontText: 'text-stone-800 dark:text-stone-100',
-    frontAccent: 'text-emerald-600 dark:text-emerald-400',
-    backBg: 'from-lime-50 to-green-50 dark:from-lime-900/20 dark:to-green-900/20',
-    backBorder: 'border-lime-200 dark:border-lime-700',
-    backText: 'text-stone-800 dark:text-stone-100',
-    backAccent: 'text-lime-600 dark:text-lime-400',
-  },
-  {
-    id: 'sunset',
-    name: 'Sunset',
-    frontBg: 'from-orange-50 to-rose-50 dark:from-orange-900/20 dark:to-rose-900/20',
-    frontBorder: 'border-orange-200 dark:border-orange-700',
-    frontText: 'text-stone-800 dark:text-stone-100',
-    frontAccent: 'text-orange-600 dark:text-orange-400',
-    backBg: 'from-pink-50 to-red-50 dark:from-pink-900/20 dark:to-red-900/20',
-    backBorder: 'border-pink-200 dark:border-pink-700',
-    backText: 'text-stone-800 dark:text-stone-100',
-    backAccent: 'text-pink-600 dark:text-pink-400',
-  },
-  {
-    id: 'violet',
-    name: 'Violet',
-    frontBg: 'from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20',
-    frontBorder: 'border-violet-200 dark:border-violet-700',
-    frontText: 'text-stone-800 dark:text-stone-100',
-    frontAccent: 'text-violet-600 dark:text-violet-400',
-    backBg: 'from-fuchsia-50 to-pink-50 dark:from-fuchsia-900/20 dark:to-pink-900/20',
-    backBorder: 'border-fuchsia-200 dark:border-fuchsia-700',
-    backText: 'text-stone-800 dark:text-stone-100',
-    backAccent: 'text-fuchsia-600 dark:text-fuchsia-400',
-  },
-  {
-    id: 'monochrome',
-    name: 'Mono',
-    frontBg: 'from-stone-100 to-stone-50 dark:from-stone-800 dark:to-stone-900',
-    frontBorder: 'border-stone-300 dark:border-stone-600',
-    frontText: 'text-stone-800 dark:text-stone-100',
-    frontAccent: 'text-stone-500 dark:text-stone-400',
-    backBg: 'from-stone-50 to-white dark:from-stone-900 dark:to-stone-950',
-    backBorder: 'border-stone-200 dark:border-stone-700',
-    backText: 'text-stone-800 dark:text-stone-100',
-    backAccent: 'text-stone-500 dark:text-stone-400',
-  },
+  { id: 'violet', name: 'Violet', frontBg: 'from-violet-50/80 to-purple-50/80 dark:from-violet-900/20 dark:to-purple-900/20', frontBorder: 'border-violet-200 dark:border-violet-700/50', frontText: 'text-stone-800 dark:text-stone-100', frontAccent: 'text-violet-600 dark:text-violet-400', backBg: 'from-violet-50/80 to-purple-50/80 dark:from-violet-900/20 dark:to-purple-900/20', backBorder: 'border-violet-200 dark:border-violet-700/50', backText: 'text-stone-800 dark:text-stone-100', backAccent: 'text-violet-600 dark:text-violet-400' },
+  { id: 'emerald', name: 'Emerald', frontBg: 'from-emerald-50/80 to-teal-50/80 dark:from-emerald-900/20 dark:to-teal-900/20', frontBorder: 'border-emerald-200 dark:border-emerald-700/50', frontText: 'text-stone-800 dark:text-stone-100', frontAccent: 'text-emerald-600 dark:text-emerald-400', backBg: 'from-emerald-50/80 to-teal-50/80 dark:from-emerald-900/20 dark:to-teal-900/20', backBorder: 'border-emerald-200 dark:border-emerald-700/50', backText: 'text-stone-800 dark:text-stone-100', backAccent: 'text-emerald-600 dark:text-emerald-400' },
+  { id: 'blue', name: 'Blue', frontBg: 'from-blue-50/80 to-sky-50/80 dark:from-blue-900/20 dark:to-sky-900/20', frontBorder: 'border-blue-200 dark:border-blue-700/50', frontText: 'text-stone-800 dark:text-stone-100', frontAccent: 'text-blue-600 dark:text-blue-400', backBg: 'from-blue-50/80 to-sky-50/80 dark:from-blue-900/20 dark:to-sky-900/20', backBorder: 'border-blue-200 dark:border-blue-700/50', backText: 'text-stone-800 dark:text-stone-100', backAccent: 'text-blue-600 dark:text-blue-400' },
+  { id: 'amber', name: 'Amber', frontBg: 'from-amber-50/80 to-orange-50/80 dark:from-amber-900/20 dark:to-orange-900/20', frontBorder: 'border-amber-200 dark:border-amber-700/50', frontText: 'text-stone-800 dark:text-stone-100', frontAccent: 'text-amber-600 dark:text-amber-400', backBg: 'from-amber-50/80 to-orange-50/80 dark:from-amber-900/20 dark:to-orange-900/20', backBorder: 'border-amber-200 dark:border-amber-700/50', backText: 'text-stone-800 dark:text-stone-100', backAccent: 'text-amber-600 dark:text-amber-400' },
+  { id: 'rose', name: 'Rose', frontBg: 'from-rose-50/80 to-pink-50/80 dark:from-rose-900/20 dark:to-pink-900/20', frontBorder: 'border-rose-200 dark:border-rose-700/50', frontText: 'text-stone-800 dark:text-stone-100', frontAccent: 'text-rose-600 dark:text-rose-400', backBg: 'from-rose-50/80 to-pink-50/80 dark:from-rose-900/20 dark:to-pink-900/20', backBorder: 'border-rose-200 dark:border-rose-700/50', backText: 'text-stone-800 dark:text-stone-100', backAccent: 'text-rose-600 dark:text-rose-400' },
 ];
+
+const THEME_DOTS: Record<ThemeId, string> = {
+  violet: 'bg-gradient-to-br from-violet-400 to-purple-600',
+  emerald: 'bg-gradient-to-br from-emerald-400 to-teal-600',
+  blue: 'bg-gradient-to-br from-blue-400 to-sky-600',
+  amber: 'bg-gradient-to-br from-amber-400 to-orange-500',
+  rose: 'bg-gradient-to-br from-rose-400 to-pink-600',
+};
+
+const THEME_RINGS: Record<ThemeId, string> = {
+  violet: 'ring-violet-500',
+  emerald: 'ring-emerald-500',
+  blue: 'ring-blue-500',
+  amber: 'ring-amber-400',
+  rose: 'ring-rose-500',
+};
 
 const FONT_SIZES: { id: FontSize; name: string; front: string; back: string }[] = [
   { id: 'small', name: 'S', front: 'text-base sm:text-lg', back: 'text-sm sm:text-base' },
@@ -124,7 +73,7 @@ const FONT_SIZES: { id: FontSize; name: string; front: string; back: string }[] 
 const CARD_STYLES: { id: CardStyle; name: string }[] = [
   { id: 'minimal', name: 'Minimal' },
   { id: 'bordered', name: 'Bordered' },
-  { id: 'gradient', name: 'Gradient' },
+  { id: 'elevated', name: 'Elevated' },
 ];
 
 const FlashcardViewer = ({
@@ -152,13 +101,10 @@ const FlashcardViewer = ({
   const [isFlipped, setIsFlipped] = useState(false);
   const [knownCards, setKnownCards] = useState<Set<number>>(new Set());
 
-  const [theme, setTheme] = useState<ThemeId>('classic');
+  const [theme, setTheme] = useState<ThemeId>('violet');
   const [fontSize, setFontSize] = useState<FontSize>('medium');
-  const [cardStyle, setCardStyle] = useState<CardStyle>('gradient');
+  const [cardStyle, setCardStyle] = useState<CardStyle>('bordered');
   const [studyDirection, setStudyDirection] = useState<StudyDirection>('front-to-back');
-  const [useCustomColors, setUseCustomColors] = useState(false);
-  const [customFrontColor, setCustomFrontColor] = useState('#fef3c7');
-  const [customBackColor, setCustomBackColor] = useState('#dbeafe');
 
   const [showSettings, setShowSettings] = useState(false);
   const [showCardList, setShowCardList] = useState(false);
@@ -214,18 +160,12 @@ const FlashcardViewer = ({
     const border = side === 'front' ? t.frontBorder : t.backBorder;
 
     if (cardStyle === 'minimal') {
-      return `bg-white dark:bg-stone-800 ${border} border`;
+      return `bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-600`;
     }
     if (cardStyle === 'bordered') {
-      return `bg-white dark:bg-stone-800 ${border} border-2`;
+      return `bg-gradient-to-br ${bg} ${border} border-2 shadow-sm`;
     }
-    return `bg-gradient-to-br ${bg} ${border} border-2`;
-  };
-
-  const getCustomBgStyle = (side: 'front' | 'back') => {
-    if (!useCustomColors) return {};
-    const color = side === 'front' ? customFrontColor : customBackColor;
-    return { background: color };
+    return `bg-gradient-to-br ${bg} ${border} border shadow-xl shadow-stone-200/60 dark:shadow-stone-900/60`;
   };
 
   const shuffleCards = useCallback(() => {
@@ -489,7 +429,7 @@ const FlashcardViewer = ({
   const card = cards[currentCard];
 
   return (
-    <div className="space-y-4 min-w-0 w-full overflow-x-hidden">
+    <div className="space-y-4 min-w-0 w-full overflow-x-hidden max-w-4xl mx-auto">
       {/* Header with title and controls */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div className="flex items-center gap-2 min-w-0">
@@ -588,66 +528,37 @@ const FlashcardViewer = ({
             </button>
           </div>
 
-          {/* Theme Selection */}
+          {/* Theme Selection - matches Create Flashcards page */}
           <div>
-            <label className="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-2">Color Theme</label>
-            <div className="flex flex-wrap gap-2">
-              {THEMES.map(t => (
+            <label className="block text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide mb-3">Theme color</label>
+            <div className="flex flex-wrap gap-2.5">
+              {(Object.keys(THEME_DOTS) as ThemeId[]).map(key => (
                 <button
-                  key={t.id}
-                  onClick={() => { setTheme(t.id); setUseCustomColors(false); }}
-                  className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${theme === t.id && !useCustomColors ? 'ring-2 ring-violet-500 ring-offset-1 dark:ring-offset-stone-800' : ''}`}
-                  style={{
-                    background: t.id === 'classic' ? 'linear-gradient(135deg, #fef3c7, #dbeafe)' :
-                      t.id === 'ocean' ? 'linear-gradient(135deg, #cffafe, #ccfbf1)' :
-                      t.id === 'forest' ? 'linear-gradient(135deg, #d1fae5, #ecfccb)' :
-                      t.id === 'sunset' ? 'linear-gradient(135deg, #fed7aa, #fecdd3)' :
-                      t.id === 'violet' ? 'linear-gradient(135deg, #ede9fe, #fce7f3)' :
-                      'linear-gradient(135deg, #e7e5e4, #fafaf9)'
-                  }}
+                  key={key}
+                  onClick={() => setTheme(key)}
+                  title={key}
+                  className={`relative w-9 h-9 rounded-xl ${THEME_DOTS[key]} transition-all hover:scale-110 ${theme === key ? `ring-2 ring-offset-2 dark:ring-offset-stone-800 ${THEME_RINGS[key]}` : ''}`}
                 >
-                  <span className="text-stone-700">{t.name}</span>
+                  {theme === key && (
+                    <svg className="absolute inset-0 m-auto w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                    </svg>
+                  )}
                 </button>
               ))}
             </div>
           </div>
 
-          {/* Custom Colors */}
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <input
-                type="checkbox"
-                id="custom-colors"
-                checked={useCustomColors}
-                onChange={e => setUseCustomColors(e.target.checked)}
-                className="w-4 h-4 rounded border-stone-300 text-violet-600 focus:ring-violet-500"
-              />
-              <label htmlFor="custom-colors" className="text-xs font-medium text-stone-500 dark:text-stone-400">Use custom colors</label>
-            </div>
-            {useCustomColors && (
-              <div className="flex items-center gap-4 mt-2">
-                <div className="flex items-center gap-2">
-                  <label className="text-xs text-stone-500 dark:text-stone-400">Front:</label>
-                  <input type="color" value={customFrontColor} onChange={e => setCustomFrontColor(e.target.value)} className="w-8 h-8 rounded-lg cursor-pointer border border-stone-200 dark:border-stone-600" />
-                </div>
-                <div className="flex items-center gap-2">
-                  <label className="text-xs text-stone-500 dark:text-stone-400">Back:</label>
-                  <input type="color" value={customBackColor} onChange={e => setCustomBackColor(e.target.value)} className="w-8 h-8 rounded-lg cursor-pointer border border-stone-200 dark:border-stone-600" />
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Font Size & Card Style */}
+          {/* Font Size & Card Style - matches Create Flashcards page */}
           <div className="flex flex-wrap gap-6">
             <div>
-              <label className="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-2">Font Size</label>
-              <div className="flex gap-1">
+              <label className="block text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide mb-3">Font size</label>
+              <div className="flex gap-2">
                 {FONT_SIZES.map(f => (
                   <button
                     key={f.id}
                     onClick={() => setFontSize(f.id)}
-                    className={`w-9 h-9 rounded-lg text-xs font-bold transition-all ${fontSize === f.id ? 'bg-violet-500 text-white shadow-md' : 'bg-stone-100 dark:bg-stone-700 text-stone-600 dark:text-stone-400 hover:bg-stone-200 dark:hover:bg-stone-600'}`}
+                    className={`w-9 h-9 rounded-xl text-xs font-bold transition-all ${fontSize === f.id ? 'bg-violet-50 dark:bg-violet-900/30 border-violet-400 text-violet-700 dark:text-violet-300 border-2 font-semibold' : 'bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-600 text-stone-600 dark:text-stone-400 hover:border-stone-300'}`}
                   >
                     {f.name}
                   </button>
@@ -655,13 +566,13 @@ const FlashcardViewer = ({
               </div>
             </div>
             <div>
-              <label className="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-2">Card Style</label>
-              <div className="flex gap-1">
+              <label className="block text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide mb-3">Card style</label>
+              <div className="flex gap-2">
                 {CARD_STYLES.map(s => (
                   <button
                     key={s.id}
                     onClick={() => setCardStyle(s.id)}
-                    className={`px-3 py-2 rounded-lg text-xs font-medium transition-all ${cardStyle === s.id ? 'bg-violet-500 text-white shadow-md' : 'bg-stone-100 dark:bg-stone-700 text-stone-600 dark:text-stone-400 hover:bg-stone-200 dark:hover:bg-stone-600'}`}
+                    className={`px-3 py-2 rounded-xl text-xs font-medium transition-all capitalize ${cardStyle === s.id ? 'bg-violet-50 dark:bg-violet-900/30 border-violet-400 text-violet-700 dark:text-violet-300 border-2 font-semibold' : 'bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-600 text-stone-600 dark:text-stone-400 hover:border-stone-300'}`}
                   >
                     {s.name}
                   </button>
@@ -807,9 +718,9 @@ const FlashcardViewer = ({
           {/* Front */}
           <div
             className={`w-full min-h-[200px] sm:min-h-[320px] ${getCardClasses('front')} rounded-2xl sm:rounded-3xl p-5 sm:p-8 flex flex-col items-center justify-center text-center shadow-lg`}
-            style={{ backfaceVisibility: 'hidden', ...getCustomBgStyle('front') }}
+            style={{ backfaceVisibility: 'hidden' }}
           >
-            <span className={`text-[10px] sm:text-xs font-bold ${currentTheme.frontAccent} uppercase tracking-widest mb-3 sm:mb-4`}>
+            <span className={`text-[10px] sm:text-xs font-bold ${currentTheme.frontAccent} uppercase tracking-wide mb-3 sm:mb-4 truncate block min-w-0`}>
               {studyDirection === 'back-to-front' ? 'Back' : 'Front'}
             </span>
             <p className={`${currentFontSize.front} font-semibold ${currentTheme.frontText} leading-relaxed break-words max-w-full`}>
@@ -820,9 +731,9 @@ const FlashcardViewer = ({
           {/* Back */}
           <div
             className={`absolute inset-0 w-full min-h-[200px] sm:min-h-[320px] ${getCardClasses('back')} rounded-2xl sm:rounded-3xl p-5 sm:p-8 flex flex-col items-center justify-center text-center shadow-lg`}
-            style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)', ...getCustomBgStyle('back') }}
+            style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
           >
-            <span className={`text-[10px] sm:text-xs font-bold ${currentTheme.backAccent} uppercase tracking-widest mb-3 sm:mb-4`}>
+            <span className={`text-[10px] sm:text-xs font-bold ${currentTheme.backAccent} uppercase tracking-wide mb-3 sm:mb-4 truncate block min-w-0`}>
               {studyDirection === 'back-to-front' ? 'Front' : 'Back'}
             </span>
             <p className={`${currentFontSize.back} ${currentTheme.backText} leading-relaxed break-words max-w-full`}>

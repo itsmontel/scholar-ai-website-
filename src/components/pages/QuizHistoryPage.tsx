@@ -301,8 +301,12 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
       return;
     }
     if (tool.quiz_type === 'flashcards') {
-      localStorage.setItem('savedFlashcards', JSON.stringify(tool));
-      onNavigate('flashcard-generator');
+      localStorage.setItem('savedFlashcards', JSON.stringify({
+        title: tool.title || 'Flashcards',
+        questions: tool.questions || [],
+        source_word_count: tool.source_word_count ?? 0
+      }));
+      onNavigate('create-flashcards');
     } else if (tool.quiz_type === 'crossword') {
       localStorage.setItem('savedCrossword', JSON.stringify(tool));
       onNavigate('crossword-generator');
@@ -320,8 +324,8 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
 
   const createOptions = [
     { id: 'quiz', label: 'Quiz', icon: '📝', page: 'quiz-generator' as const },
-    { id: 'flashcards', label: 'Flashcards', icon: '🃏', page: 'flashcard-generator' as const },
-    { id: 'crossword', label: 'Crosswords', icon: '🧩', page: 'crossword-generator' as const },
+    { id: 'flashcards', label: 'Flashcards', icon: '🃏', page: 'create-flashcards' as const },
+    { id: 'crossword', label: 'Crosswords', icon: '🧩', page: 'dashboard' as const },
     { id: 'blast', label: 'Blast', icon: '💥', page: 'crater-blast' as const },
     { id: 'lessons', label: 'Lessons', icon: '🎓', page: 'interactive-lesson' as const },
   ];

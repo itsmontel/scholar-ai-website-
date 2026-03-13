@@ -59,6 +59,7 @@ const CalculatorPage = lazyWithRetry(() => import('./pages/tools/CalculatorPage'
 const ConverterPage = lazyWithRetry(() => import('./pages/tools/ConverterPage'));
 const LightningReflexQuizPage = lazyWithRetry(() => import('./pages/tools/LightningReflexQuizPage'));
 const InteractiveLessonPage = lazyWithRetry(() => import('./pages/tools/InteractiveLessonPage'));
+const CreateFlashcardsPage = lazyWithRetry(() => import('./pages/tools/CreateFlashcardsPage'));
 const StudyPackViewerPage = lazyWithRetry(() => import('./pages/StudyPackViewerPage'));
 const AnalyzeEssayPage = lazyWithRetry(() => import('./pages/AnalyzeEssayPage'));
 const CitationsPage = lazyWithRetry(() => import('./pages/CitationsPage'));
@@ -121,8 +122,18 @@ function getPageFromPath(pathname: string): string {
   if (p === '/tools/humanizer' || p === '/humanizer') return 'humanizer';
   if (p === '/tools/summarizer' || p === '/summarizer') return 'summarizer';
   if (p === '/tools/quiz-generator' || p === '/quiz-generator') return 'quiz-generator';
-  if (p === '/tools/flashcard-generator' || p === '/flashcard-generator') return 'flashcard-generator';
-  if (p === '/tools/crossword-generator' || p === '/crossword-generator') return 'crossword-generator';
+  if (p === '/tools/flashcard-generator' || p === '/flashcard-generator') return 'create-flashcards';
+  if (p === '/tools/create-flashcards' || p === '/create-flashcards') return 'create-flashcards';
+  if (p === '/tools/crossword-generator' || p === '/crossword-generator') {
+    try {
+      const s = typeof window !== 'undefined' ? localStorage.getItem('savedCrossword') : null;
+      if (!s) return 'dashboard';
+      const parsed = JSON.parse(s);
+      const q = parsed?.questions || parsed;
+      if (q?.grid && q?.placedWords) return 'crossword-generator';
+    } catch (_) {}
+    return 'dashboard';
+  }
   if (p === '/tools/gpa-calculator' || p === '/gpa-calculator') return 'gpa-calculator';
   if (p === '/tools/pomodoro-timer' || p === '/pomodoro-timer') return 'pomodoro-timer';
   if (p === '/tools/calculator' || p === '/calculator') return 'calculator';
@@ -232,6 +243,14 @@ const AcademicAIApp = () => {
     })();
   }, []);
 
+  // When crossword-generator redirects to dashboard (no saved data), update URL
+  useEffect(() => {
+    const path = window.location.pathname;
+    if ((path === '/tools/crossword-generator' || path === '/crossword-generator') && currentPage === 'dashboard') {
+      window.history.replaceState({}, '', '/dashboard');
+    }
+  }, [currentPage]);
+
   // Route protection for authenticated pages
   const protectedRoutes = ['dashboard', 'analysis', 'analysis-history', 'citation-results', 'citation-history', 'quiz-history', 'friends', 'upload', 'profile', 'library', 'account', 'billing', 'badges'];
 
@@ -263,7 +282,7 @@ const AcademicAIApp = () => {
     'humanizer': { title: 'AI Humanizer – Bypass AI Detection Free | WriteScholar', description: 'Transform AI-generated text from ChatGPT, Claude, Gemini into undetectable human writing. Bypass Turnitin, GPTZero, and other AI detectors. A tool Quizlet and Knowt don\'t offer. Free to try.' },
     'summarizer': { title: 'AI Summarizer – Condense Papers & Articles Free | WriteScholar', description: 'Summarize research papers, articles, and textbooks into key points. Bullet points or paragraphs. Better than Quizlet for literature reviews. Free to try.' },
     'quiz-generator': { title: 'AI Quiz Generator from Text – Pro Study Tool | WriteScholar', description: 'Generate quizzes from your notes or articles. Multiple-choice, true/false, fill-in-the-blank questions in seconds. Quiz generation is a Pro feature. Best Quizlet alternative.' },
-    'flashcard-generator': { title: 'Flashcard Generator – Free AI Flashcard Maker from Text | WriteScholar', description: 'Free flashcard generator: turn your notes, textbooks, or articles into flashcards with AI. No typing—paste text and study in seconds. Best free Quizlet & Knowt alternative.' },
+    'create-flashcards': { title: 'Create Flashcards – Custom Deck Builder | WriteScholar', description: 'Build and customize your own flashcard deck, or use Study Pack to generate from notes. Themes, labels, font size. Edit, reorder, duplicate. Like Anki, but simpler.' },
     'crossword-generator': { title: 'AI Crossword Generator — Pro Study Tool | WriteScholar', description: 'Turn your notes into fun crossword puzzles with AI. A unique study mode you won\'t find on Quizlet or Knowt. Crossword generation is a Pro feature.' },
     'quiz-history': { title: 'Saved Materials | WriteScholar', description: 'View and retake your saved quizzes, flashcards, and crosswords. Study materials are stored for 30 days.' },
     'gpa-calculator': { title: 'Free GPA Calculator – Calculate Your Grade Point Average | WriteScholar', description: 'Free GPA calculator for college and high school students. Calculate semester or cumulative GPA instantly. Add courses, credits, and grades. No signup required.' },
@@ -602,7 +621,7 @@ const AcademicAIApp = () => {
     humanizer: '/tools/humanizer',
     summarizer: '/tools/summarizer',
     'quiz-generator': '/tools/quiz-generator',
-    'flashcard-generator': '/tools/flashcard-generator',
+    'create-flashcards': '/tools/create-flashcards',
     'crossword-generator': '/tools/crossword-generator',
     'word-counter': '/tools/word-counter',
     'citation-generator-tool': '/tools/citation-generator',
@@ -913,8 +932,8 @@ const AcademicAIApp = () => {
         return <SummarizerPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'quiz-generator':
         return <QuizGeneratorPage key="quiz-generator" onNavigate={navigateTo} user={user} onLogout={handleLogout} initialStudyToolMode="quiz" />;
-      case 'flashcard-generator':
-        return <QuizGeneratorPage key="flashcard-generator" onNavigate={navigateTo} user={user} onLogout={handleLogout} initialStudyToolMode="flashcards" />;
+      case 'create-flashcards':
+        return <CreateFlashcardsPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'crossword-generator':
         return <QuizGeneratorPage key="crossword-generator" onNavigate={navigateTo} user={user} onLogout={handleLogout} initialStudyToolMode="crossword" />;
       case 'gpa-calculator':

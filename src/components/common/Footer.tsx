@@ -178,15 +178,9 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
                 </a>
               </li>
               <li>
-                <a href="/tools/flashcard-generator" onClick={(e) => { e.preventDefault(); onNavigate?.('flashcard-generator'); }} className="text-amber-400 hover:text-amber-300 text-sm font-medium transition-colors flex items-center gap-1.5">
-                  AI Flashcard Generator
+                <a href="/tools/create-flashcards" onClick={(e) => { e.preventDefault(); onNavigate?.('create-flashcards'); }} className="text-amber-400 hover:text-amber-300 text-sm font-medium transition-colors flex items-center gap-1.5">
+                  Flashcards
                   <span className="text-xs opacity-75">🃏</span>
-                </a>
-              </li>
-              <li>
-                <a href="/tools/crossword-generator" onClick={(e) => { e.preventDefault(); onNavigate?.('crossword-generator'); }} className="text-amber-400 hover:text-amber-300 text-sm font-medium transition-colors flex items-center gap-1.5">
-                  AI Crossword Generator
-                  <span className="text-xs opacity-75">🧩</span>
                 </a>
               </li>
             </ul>

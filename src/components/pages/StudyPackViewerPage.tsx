@@ -117,7 +117,7 @@ const StudyPackViewerPage = ({ onNavigate, user, onLogout, initialData }: StudyP
           questions: d.cards,
           source_word_count: d.sourceWordCount ?? 0,
         }));
-        onNavigate('flashcard-generator');
+        onNavigate('create-flashcards');
         break;
       case 'crossword':
         localStorage.setItem('savedCrossword', JSON.stringify({
@@ -372,9 +372,10 @@ const StudyPackViewerPage = ({ onNavigate, user, onLogout, initialData }: StudyP
                           muted
                           playsInline
                           className="w-full h-full object-contain"
-                          aria-label={`See how ${activeTab === 'crossword' ? 'Crossword' : 'Crater Blast'} works`}
+                          title={activeTab === 'crossword' ? 'WriteScholar Crossword Generator — Create study puzzles from notes' : 'WriteScholar Crater Blast — Quiz game study mode'}
+                          aria-label={activeTab === 'crossword' ? 'WriteScholar Crossword Generator — Create study puzzles from notes' : 'WriteScholar Crater Blast — Quiz game study mode'}
                         >
-                          <source src={activeTab === 'crossword' ? '/crosswordvid.mp4' : '/craterblast.mp4'} type="video/mp4" />
+                          <source src={activeTab === 'crossword' ? '/writescholar-crossword-demo.mp4' : '/writescholar-crater-blast-demo.mp4'} type="video/mp4" />
                         </video>
                       </div>
                     </div>
