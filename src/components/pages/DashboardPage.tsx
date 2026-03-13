@@ -3062,7 +3062,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                       {usageStats.plan === 'free' ? `Free: 5,000 words/mo • ${getResetsInText((usageStats as any).daysUntilReset)}` : usageStats.plan === 'premium' ? 'Premium: 999,999 words/mo' : 'Pro: 99,999 words/mo'}
                       {isFreeUser && ' • Bullet + Medium'}
                     </p>
-                    <p className="text-teal-600 dark:text-teal-400 text-[10px] sm:text-xs mt-0.5 line-clamp-2">Upgrade for all styles, lengths & premium AI</p>
+                    <p className="text-teal-600 dark:text-teal-400 text-[10px] sm:text-xs mt-0.5 line-clamp-2">{isFreeUser ? 'Upgrade for all styles, lengths & premium AI' : 'Upgrade to Premium for 10× usage & premium AI'}</p>
                   </div>
                 </div>
                 <button onClick={() => onNavigate('pricing')} className="w-full sm:w-auto px-3 sm:px-4 py-1.5 bg-teal-600 active:bg-teal-700 sm:hover:bg-teal-500 text-white text-xs font-semibold rounded-lg sm:rounded-xl transition-all flex-shrink-0">
