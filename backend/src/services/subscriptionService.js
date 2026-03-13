@@ -39,10 +39,12 @@ const PLAN_LIMITS = {
   },
   pro: {
     documentsPerMonth: -1,
-    analysesPerMonth: 99,
+    combinedActionsPerMonth: 99, // analyses + study packs + citations share this pool
+    combinedWordsPerMonth: 99999, // humanizer + summarizer share this pool
+    analysesPerMonth: 99, // used for combined check
     citationSearchesPerMonth: 99,
-    humanizeWordsPerMonth: 999999,
-    summarizeWordsPerMonth: 999999,
+    humanizeWordsPerMonth: 99999,
+    summarizeWordsPerMonth: 99999,
     studyPackGenerationsPerMonth: 99,
     studyPackMaxWordsPerGeneration: 10000,
     quizWordsPerMonth: 999999,
@@ -61,18 +63,20 @@ const PLAN_LIMITS = {
   },
   premium: {
     documentsPerMonth: -1,
-    analysesPerMonth: 199,
-    citationSearchesPerMonth: 199,
+    combinedActionsPerMonth: 999, // 10x Pro: analyses + study packs + citations
+    combinedWordsPerMonth: 999999, // 10x Pro: humanizer + summarizer
+    analysesPerMonth: 999,
+    citationSearchesPerMonth: 999,
     humanizeWordsPerMonth: 999999,
     summarizeWordsPerMonth: 999999,
-    studyPackGenerationsPerMonth: 199,
+    studyPackGenerationsPerMonth: 999,
     studyPackMaxWordsPerGeneration: 20000,
     quizWordsPerMonth: 999999,
-    quizGenerationsPerMonth: 199,
+    quizGenerationsPerMonth: 999,
     quizMaxWordsPerGeneration: 20000,
     craterBlastMaxWordsPerGeneration: 10000,
     lessonWordsPerMonth: 999999,
-    lessonGenerationsPerMonth: 199,
+    lessonGenerationsPerMonth: 999,
     lessonMaxWordsPerGeneration: 10000,
     aiModel: 'gpt-4.1-nano',
     maxDocumentSize: 1024 * 1024 * 1024,
@@ -306,6 +310,56 @@ const checkLimit = async (userId, limitType) => {
 const getRemainingUsage = async (userId, limitType) => {
   const result = await checkLimit(userId, limitType);
   return result.remaining;
+};
+
+// For Pro/Premium: combined pool of analyses + study packs + citations
+const checkCombinedActionsLimit = async (userId) => {
+  try {
+    const { plan } = await getUserSubscriptionDetails(userId);
+    const planLimits = PLAN_LIMITS[plan] || PLAN_LIMITS.free;
+    const limit = planLimits.combinedActionsPerMonth;
+    if (!limit || limit === -1 || (plan !== 'pro' && plan !== 'premium')) {
+      return { allowed: true, limit: -1, usage: 0, remaining: -1 };
+    }
+    const { periodStart } = await getUsagePeriod(userId);
+    const [analyses, citations, studyPacks] = await Promise.all([
+      supabaseServiceRole.from('document_analyses').select('id').eq('user_id', userId).gte('created_at', periodStart),
+      supabaseServiceRole.from('citation_searches').select('id').eq('user_id', userId).gte('created_at', periodStart),
+      supabaseServiceRole.from('quiz_usage').select('id').eq('user_id', userId).eq('quiz_type', 'study_pack').gte('created_at', periodStart)
+    ]);
+    const used = (analyses.data?.length || 0) + (citations.data?.length || 0) + (studyPacks.data?.length || 0);
+    const remaining = Math.max(0, limit - used);
+    return { allowed: used < limit, limit, usage: used, remaining };
+  } catch (err) {
+    console.error('checkCombinedActionsLimit:', err);
+    return { allowed: true, limit: -1, usage: 0, remaining: -1 };
+  }
+};
+
+// For Pro/Premium: combined humanizer + summarizer word pool
+const checkCombinedWordsLimit = async (userId, additionalWords = 0) => {
+  try {
+    const { plan } = await getUserSubscriptionDetails(userId);
+    const planLimits = PLAN_LIMITS[plan] || PLAN_LIMITS.free;
+    const limit = planLimits.combinedWordsPerMonth;
+    if (!limit || limit === -1 || (plan !== 'pro' && plan !== 'premium')) {
+      return { allowed: true, limit: -1, usage: 0, remaining: -1 };
+    }
+    const { periodStart } = await getUsagePeriod(userId);
+    const [humanizeData, summarizeData] = await Promise.all([
+      supabaseServiceRole.from('humanize_usage').select('words_count').eq('user_id', userId).gte('created_at', periodStart),
+      supabaseServiceRole.from('summarize_usage').select('words_count').eq('user_id', userId).gte('created_at', periodStart)
+    ]);
+    const humanizeWords = (humanizeData.data || []).reduce((s, r) => s + (r.words_count || 0), 0);
+    const summarizeWords = (summarizeData.data || []).reduce((s, r) => s + (r.words_count || 0), 0);
+    const used = humanizeWords + summarizeWords;
+    const remaining = Math.max(0, limit - used);
+    const allowed = used + additionalWords <= limit;
+    return { allowed, limit, usage: used, remaining };
+  } catch (err) {
+    console.error('checkCombinedWordsLimit:', err);
+    return { allowed: true, limit: -1, usage: 0, remaining: -1 };
+  }
 };
 
 // Get plan details
@@ -773,6 +827,8 @@ module.exports = {
   getUserSubscriptionDetails,
   getUsagePeriod,
   checkLimit,
+  checkCombinedActionsLimit,
+  checkCombinedWordsLimit,
   getRemainingUsage,
   getPlanDetails,
   getPlanLimits,

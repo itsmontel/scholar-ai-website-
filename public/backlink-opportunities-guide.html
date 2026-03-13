@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en" class="">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WriteScholar Backlink Opportunities Guide</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Inter:wght@500;600&display=swap" rel="stylesheet">
+  <script>
+    (function() {
+      const stored = localStorage.getItem('writescholar-theme');
+      const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const isDark = stored === 'dark' || (!stored && prefersDark);
+      if (isDark) document.documentElement.classList.add('dark');
+      else document.documentElement.classList.remove('dark');
+    })();
+  </script>
+  <style>
+    :root {
+      --bg: #fafaf9;
+      --bg-card: #ffffff;
+      --text: #1c1917;
+      --text-muted: #57534e;
+      --accent: #7c3aed;
+      --accent-hover: #6d28d9;
+      --accent-light: #ede9fe;
+      --border: #e7e5e4;
+      --gradient-violet: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 50%, #6d28d9 100%);
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+      --radius: 1rem;
+      --radius-xl: 1.5rem;
+    }
+    .dark {
+      --bg: #0c0a09;
+      --bg-card: #1c1917;
+      --text: #fafaf9;
+      --text-muted: #a8a29e;
+      --accent: #a78bfa;
+      --accent-hover: #8b5cf6;
+      --accent-light: #2e1065;
+      --border: #292524;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+    .container { max-width: 960px; margin: 0 auto; padding: 0 1.5rem; }
+    .header {
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 0;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      backdrop-filter: blur(8px);
+    }
+    .header-inner {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .logo {
+      width: 44px;
+      height: 44px;
+      object-fit: contain;
+    }
+    .header h1 { font-size: 1.25rem; font-weight: 800; margin: 0; }
+    .hero {
+      padding: 3rem 0 2.5rem;
+      text-align: center;
+    }
+    .hero h1 {
+      font-size: clamp(1.75rem, 5vw, 2.5rem);
+      font-weight: 800;
+      margin: 0 0 0.5rem;
+      letter-spacing: -0.03em;
+    }
+    .hero .accent { color: var(--accent); }
+    .hero p {
+      color: var(--text-muted);
+      font-size: 1.05rem;
+      max-width: 540px;
+      margin: 0 auto;
+    }
+    .section {
+      padding: 2rem 0;
+    }
+    .section-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .section-title .badge {
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 0.2rem 0.5rem;
+      border-radius: 9999px;
+      text-transform: uppercase;
+    }
+    .badge-free { background: #dcfce7; color: #166534; }
+    .badge-paid { background: #fef3c7; color: #92400e; }
+    .badge-outreach { background: #dbeafe; color: #1e40af; }
+    .badge-high { background: #ede9fe; color: #5b21b6; }
+    .dark .badge-free { background: #14532d; color: #86efac; }
+    .dark .badge-paid { background: #78350f; color: #fcd34d; }
+    .dark .badge-outreach { background: #1e3a8a; color: #93c5fd; }
+    .dark .badge-high { background: #4c1d95; color: #c4b5fd; }
+    .card-grid {
+      display: grid;
+      gap: 1rem;
+    }
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: 1.25rem 1.5rem;
+      transition: all 0.2s ease;
+    }
+    .card:hover {
+      box-shadow: var(--shadow-lg);
+      transform: translateY(-2px);
+      border-color: var(--accent);
+    }
+    .card-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+    .card-title {
+      font-weight: 700;
+      font-size: 1rem;
+      margin: 0 0 0.25rem;
+    }
+    .card-meta {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin: 0;
+    }
+    .card-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--accent);
+      text-decoration: none;
+      padding: 0.4rem 0.75rem;
+      border-radius: 0.5rem;
+      background: var(--accent-light);
+      flex-shrink: 0;
+      transition: all 0.2s;
+    }
+    .card-link:hover {
+      background: var(--accent);
+      color: white;
+    }
+    .card-link svg { width: 14px; height: 14px; }
+    .card-desc {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin: 0.5rem 0 0;
+      line-height: 1.5;
+    }
+    .quick-start {
+      background: var(--gradient-violet);
+      border-radius: var(--radius-xl);
+      padding: 2rem;
+      color: white;
+      margin: 2rem 0;
+    }
+    .quick-start h2 {
+      font-size: 1.35rem;
+      font-weight: 800;
+      margin: 0 0 1rem;
+    }
+    .quick-start ol {
+      margin: 0;
+      padding-left: 1.25rem;
+      line-height: 2;
+    }
+    .quick-start a {
+      color: #e9d5ff;
+      text-decoration: underline;
+    }
+    .quick-start a:hover { color: white; }
+    .tier-badge {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 0.15rem 0.4rem;
+      border-radius: 0.25rem;
+      margin-right: 0.5rem;
+    }
+    .tier-1 { background: #22c55e; color: white; }
+    .tier-2 { background: #3b82f6; color: white; }
+    .tier-3 { background: #8b5cf6; color: white; }
+    .cost-tag {
+      font-size: 0.75rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: 9999px;
+      background: var(--border);
+      color: var(--text-muted);
+    }
+    .outreach-box {
+      background: var(--bg-card);
+      border: 2px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      margin-top: 2rem;
+    }
+    .outreach-box h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      margin: 0 0 0.75rem;
+    }
+    .outreach-box pre {
+      font-family: ui-monospace, monospace;
+      font-size: 0.85rem;
+      white-space: pre-wrap;
+      margin: 0;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="container header-inner">
+      <img src="mascot.png" alt="WriteScholar" class="logo" />
+      <h1>Backlink Opportunities Guide</h1>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="container">
+        <h1>Link building for <span class="accent">WriteScholar</span></h1>
+        <p>Prioritized directory submissions, outreach targets, and niche opportunities to grow organic traffic.</p>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <h2 class="section-title">
+          <span>⚡ Quick Start — Do These 10 First</span>
+          <span class="badge badge-high">Priority</span>
+        </h2>
+        <div class="quick-start">
+          <h2>Your First Week Checklist</h2>
+          <ol>
+            <li><strong>AlternativeTo</strong> — Add WriteScholar as alternative to Quizlet, Quillbot, Grammarly</li>
+            <li><strong>There's An AI For That</strong> — <a href="https://theresanaiforthat.com/submit/" target="_blank" rel="noopener">theresanaiforthat.com/submit</a></li>
+            <li><strong>Toolify.ai</strong> — Free, <a href="https://www.toolify.ai/submit" target="_blank" rel="noopener">toolsify.ai/submit</a></li>
+            <li><strong>TopAI.tools</strong> — <a href="https://topai.tools/submit" target="_blank" rel="noopener">topai.tools/submit</a></li>
+            <li><strong>G2 + Capterra</strong> — Free vendor listings</li>
+            <li><strong>Product Hunt</strong> — Launch WriteScholar</li>
+            <li><strong>EdTech Listed</strong> — <a href="https://edtechlisted.com/submit/" target="_blank" rel="noopener">edtechlisted.com/submit</a></li>
+            <li><strong>Futurepedia</strong> — <a href="https://www.futurepedia.io/submit-tool" target="_blank" rel="noopener">futurepedia.io/submit-tool</a></li>
+            <li><strong>Outreach</strong> — Email IvyPanda, WholeSyllabus, SciJournal for roundup inclusion</li>
+            <li><strong>HARO</strong> — <a href="https://www.helpareporter.com/" target="_blank" rel="noopener">helpareporter.com</a> — Respond to education/AI queries</li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <h2 class="section-title">
+          <span>🤖 AI Tool Directories</span>
+          <span class="badge badge-free">Free / Low-Cost</span>
+        </h2>
+        <div class="card-grid">
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">There's An AI For That</h3>
+                <p class="card-meta">46k+ tools · 4M+ monthly visitors · 80M+ users</p>
+              </div>
+              <a href="https://theresanaiforthat.com/submit/" target="_blank" rel="noopener" class="card-link">Submit <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg></a>
+            </div>
+            <p class="card-desc">Major AI directory. Free submission. High authority.</p>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">Toolify.ai</h3>
+                <p class="card-meta">25k+ tools · Free submissions</p>
+              </div>
+              <a href="https://www.toolify.ai/submit" target="_blank" rel="noopener" class="card-link">Submit <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg></a>
+            </div>
+            <p class="card-desc">Free to submit. Good for humanizer category.</p>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">AI Exchange</h3>
+                <p class="card-meta">Auto-extracts info from your site</p>
+              </div>
+              <a href="https://www.aiexchange.tech/submit-tool" target="_blank" rel="noopener" class="card-link">Submit <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg></a>
+            </div>
+            <p class="card-desc">Free. Paste URL and email, AI fetches details.</p>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">TopAI.tools</h3>
+                <p class="card-meta">2.25M monthly · 21k+ tools</p>
+              </div>
+              <a href="https://topai.tools/submit" target="_blank" rel="noopener" class="card-link">Submit <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg></a>
+            </div>
+            <p class="card-desc"><span class="cost-tag">$47 fast / $229 premium</span> One-time. High traffic.</p>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">Futurepedia</h3>
+                <p class="card-meta">2,625+ tools · 350k+ users</p>
+              </div>
+              <a href="https://www.futurepedia.io/submit-tool" target="_blank" rel="noopener" class="card-link">Submit <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg></a>
+            </div>
+            <p class="card-desc"><span class="cost-tag">$247–497</span> Tiered listing options.</p>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">Toolsland.ai</h3>
+                <p class="card-meta">Free AI tool submission</p>
+              </div>
+              <a href="https://www.toolsland.ai/submit-ai-tool-free" target="_blank" rel="noopener" class="card-link">Submit <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg></a>
+            </div>
+            <p class="card-desc">Free. Submit AI tools for listing.</p>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">EliteAI.tools</h3>
+                <p class="card-meta">Free AI directory</p>
+              </div>
+              <a href="https://eliteai.tools/tool/submit-new-tool" target="_blank" rel="noopener" class="card-link">Submit <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg></a>
+            </div>
+            <p class="card-desc">Free submission for new AI tools.</p>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">RETRIEVE</h3>
+                <p class="card-meta">3,152+ tools · Education category</p>
+              </div>
+              <a href="https://retrieve.tools/education" target="_blank" rel="noopener" class="card-link">Visit & Submit <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg></a>
+            </div>
+            <p class="card-desc">Education category. Free listing.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <h2 class="section-title">
+          <span>🎓 EdTech & Education</span>
+          <span class="badge badge-paid">Paid</span>
+        </h2>
+        <div class="card-grid">
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">EdTech Listed</h3>
+                <p class="card-meta">EdTech-only directory · Awards program</p>
+              </div>
+              <a href="https://edtechlisted.com/submit/" target="_blank" rel="noopener" class="card-link">Submit <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg></a>
+            </div>
+            <p class="card-desc"><span class="cost-tag">$99–189/year</span> Verified, Premier, Complete tiers.</p>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">Educational App Store</h3>
+                <p class="card-meta">EAS certification · School outreach</p>
+              </div>
+              <a href="https://www.educationalappstore.com/blog/how-to-submit-ai-tool-to-educational-app-store" target="_blank" rel="noopener" class="card-link">Submit Guide <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg></a>
+            </div>
+            <p class="card-desc">Certification review for schools. See submit guide.</p>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">Curaited</h3>
+                <p class="card-meta">AI tools directory for educators</p>
+              </div>
+              <a href="https://curaited.io/ai-tools-directory/" target="_blank" rel="noopener" class="card-link">Visit & Contact <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg></a>
+            </div>
+            <p class="card-desc">Education-focused. Contact for listing.</p>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">AI Apps</h3>
+                <p class="card-meta">1,000+ tools · Education filters</p>
+              </div>
+              <a href="https://www.aiapps.com/" target="_blank" rel="noopener" class="card-link">Visit & Contact <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg></a>
+            </div>
+            <p class="card-desc">Contact for listing. Education category available.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <h2 class="section-title">
+          <span>🔄 Alternative & Comparison</span>
+        </h2>
+        <div class="card-grid">
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title"><span class="tier-badge tier-1">T1</span> AlternativeTo</h3>
+                <p class="card-meta">Quizlet, Quillbot, Grammarly alternatives</p>
+              </div>
+              <a href="https://alternativeto.net/software/quizlet/" target="_blank" rel="noopener" class="card-link">Suggest <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg></a>
+            </div>
+            <p class="card-desc">Submit WriteScholar as alternative to each. High DA. Free.</p>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">Product Hunt</h3>
+                <p class="card-meta">Launch page · Traffic + backlinks</p>
+              </div>
+              <a href="https://www.producthunt.com/" target="_blank" rel="noopener" class="card-link">Launch <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg></a>
+            </div>
+            <p class="card-desc">Prep tagline, 5 bullets, images, demo video.</p>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">G2</h3>
+                <p class="card-meta">86% of software buyers use G2</p>
+              </div>
+              <a href="https://sell.g2.com/create-a-profile" target="_blank" rel="noopener" class="card-link">Create Profile <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg></a>
+            </div>
+            <p class="card-desc">Free vendor profile. List Humanizer, Quiz Generator, Essay Checker.</p>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">Capterra</h3>
+                <p class="card-meta">Free vendor listing · Gartner network</p>
+              </div>
+              <a href="https://www.capterra.com/vendors/sign-up/" target="_blank" rel="noopener" class="card-link">Sign Up <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg></a>
+            </div>
+            <p class="card-desc">Reach B2B buyers. List under Study Tools / Academic Writing.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <h2 class="section-title">
+          <span>📚 Student & Academic Outreach</span>
+          <span class="badge badge-outreach">Outreach</span>
+        </h2>
+        <div class="card-grid">
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">IvyPanda</h3>
+                <p class="card-meta">189+ writing tools roundup</p>
+              </div>
+              <a href="https://ivypanda.com/blog/best-writing-tools-and-resources" target="_blank" rel="noopener" class="card-link">View Page <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg></a>
+            </div>
+            <p class="card-desc">Pitch for editorial inclusion in best writing tools.</p>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">WholeSyllabus</h3>
+                <p class="card-meta">Free study tools roundup</p>
+              </div>
+              <a href="https://wholesyllabus.com/free-study-tools-for-students-in-websites-resources/" target="_blank" rel="noopener" class="card-link">View Page <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg></a>
+            </div>
+            <p class="card-desc">Pitch for free study tools list.</p>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">Nextoolbox</h3>
+                <p class="card-meta">Free study tools 2025</p>
+              </div>
+              <a href="https://nextoolbox.com/free-study-tools-2025/" target="_blank" rel="noopener" class="card-link">View Page <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg></a>
+            </div>
+            <p class="card-desc">Pitch for free study tools 2025 roundup.</p>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">SciJournal</h3>
+                <p class="card-meta">Academic writing tools for researchers</p>
+              </div>
+              <a href="https://www.scijournal.org/articles/best-academic-writing-tools" target="_blank" rel="noopener" class="card-link">View Page <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg></a>
+            </div>
+            <p class="card-desc">Pitch for best academic writing tools list.</p>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">CognitiveFuture</h3>
+                <p class="card-meta">Best AI tools for academic writing</p>
+              </div>
+              <a href="https://cognitivefuture.ai/best-ai-tools-for-academic-writing/" target="_blank" rel="noopener" class="card-link">View Page <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg></a>
+            </div>
+            <p class="card-desc">Pitch for AI academic writing roundup.</p>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">AIToolVS</h3>
+                <p class="card-meta">AI grammar checkers 2026</p>
+              </div>
+              <a href="https://aitoolvs.com/best-ai-grammar-checkers-2026/" target="_blank" rel="noopener" class="card-link">View Page <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg></a>
+            </div>
+            <p class="card-desc">Pitch for best AI grammar checkers roundup.</p>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">Quizlet Alternative Roundups</h3>
+                <p class="card-meta">Cramberry, Studyx.ai, Flashcardmaker.me, Softstribe</p>
+              </div>
+              <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                <a href="https://www.cramberry.study/blog/quizlet-alternatives-2026" target="_blank" rel="noopener" class="card-link">Cramberry</a>
+                <a href="https://studyx.ai/blog/best-quizlet-alternatives-2026" target="_blank" rel="noopener" class="card-link">Studyx.ai</a>
+                <a href="https://flashcardmaker.me/alternatives/quizlet-alternatives" target="_blank" rel="noopener" class="card-link">Flashcardmaker</a>
+                <a href="https://softstribe.com/alternatives/quizlet-alternatives" target="_blank" rel="noopener" class="card-link">Softstribe</a>
+              </div>
+            </div>
+            <p class="card-desc">Email each to add WriteScholar to their Quizlet alternatives roundup.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <h2 class="section-title">✉️ Outreach Email Template</h2>
+        <div class="outreach-box">
+          <h3>Subject (pick one):</h3>
+          <ul style="margin: 0 0 0.75rem; padding-left: 1.25rem; font-size: 0.9rem; color: var(--text-muted);">
+            <li><strong>Re: Quick addition to your [Best Writing Tools] list</strong></li>
+            <li><strong>[Name], your roundup is missing one students actually use</strong></li>
+            <li><strong>Free tool for your readers – 2-minute add</strong></li>
+          </ul>
+          <pre>Hi [Name],
+
+I came across your [specific page title — e.g. "Best Writing Tools for Students"] and really liked how you curated it. One tool students keep asking about that might round it out: WriteScholar.
+
+It's free, no signup for most features, and covers quizzes, flashcards, essay feedback, and citations—so it fits both study-tools and writing-tools lists. Students love it because it's one place instead of five tabs.
+
+I've attached a ready-to-paste blurb below. Literally copy, drop in, done. If you'd rather write your own, I can send logo + screenshots.
+
+---
+
+<strong>WriteScholar</strong> — Free AI study platform: turn notes into quizzes and flashcards, get professor-style essay feedback by grade level, and find academic citations (APA, MLA, Chicago). No signup for most tools. writescholar.com
+
+---
+
+If it's not a fit, no worries at all. Thanks for the work you put into [site name]—it's genuinely helpful.
+
+[Your name]</pre>
+        </div>
+      </div>
+    </section>
+
+    <footer style="padding: 3rem 0; text-align: center; color: var(--text-muted); font-size: 0.9rem;">
+      <div class="container">
+        <p style="margin: 0;">WriteScholar Backlink Guide · Last updated March 2026</p>
+      </div>
+    </footer>
+  </main>
+</body>
+</html>

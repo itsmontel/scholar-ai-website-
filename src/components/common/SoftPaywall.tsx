@@ -15,7 +15,7 @@ const FEATURES = [
   { text: 'Unlimited essay analyses', icon: '📝' },
   { text: 'Focus Mode block websites, unlock by studying', icon: '🔒' },
   { text: 'Unlimited quizzes, flashcards & crosswords', icon: '🎯' },
-  { text: '99 citation searches/month', icon: '📚' },
+  { text: '19 citation searches/month', icon: '📚' },
   { text: 'Export to PDF & Word', icon: '📄' },
   { text: 'All citation styles (APA, MLA, Chicago...)', icon: '✅' },
   { text: 'Priority AI model', icon: '⚡' },

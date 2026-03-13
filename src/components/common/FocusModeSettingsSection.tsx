@@ -47,8 +47,7 @@ export default function FocusModeSettingsSection({ onBack, embedded = false, isP
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
-
-  const maxSites = isPaidUser ? 20 : 1;
+  const [maxSites, setMaxSites] = useState(isPaidUser ? 20 : 1);
 
   useEffect(() => {
     const token = localStorage.getItem('authToken');
@@ -61,7 +60,8 @@ export default function FocusModeSettingsSection({ onBack, embedded = false, isP
       .then(([r1, r2]) => Promise.all([r1.json(), r2.json()]))
       .then(([d1, d2]) => {
         if (d1.success) {
-          setBlockedDomains((d1.data.blockedDomains || []).slice(0, maxSites));
+          setMaxSites(d1.data.maxSites ?? (isPaidUser ? 20 : 1));
+          setBlockedDomains(d1.data.blockedDomains || []);
           setQuestionCount(d1.data.question_count ?? 5);
           setPassThreshold(d1.data.pass_threshold ?? 4);
           setUnlockDurationMs(d1.data.unlock_duration_ms ?? 30 * 60 * 1000);
@@ -70,7 +70,7 @@ export default function FocusModeSettingsSection({ onBack, embedded = false, isP
       })
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, [API_URL, maxSites]);
+  }, [API_URL, isPaidUser]);
 
   const saveSettings = async (updates?: Partial<{ blockedDomains: string[]; question_count: number; pass_threshold: number; unlock_duration_ms: number }>) => {
     const token = localStorage.getItem('authToken');
@@ -109,7 +109,7 @@ export default function FocusModeSettingsSection({ onBack, embedded = false, isP
     let next: string[];
     if (isRemoving) {
       next = blockedDomains.filter((d) => d !== domain);
-    } else if (blockedDomains.length >= maxSites) {
+    } else if (maxSites < 99999 && blockedDomains.length >= maxSites) {
       next = [domain];
     } else {
       next = [...blockedDomains, domain];
@@ -134,15 +134,13 @@ export default function FocusModeSettingsSection({ onBack, embedded = false, isP
       setAddError('Enter a valid domain (e.g. youtube.com, reddit.com)');
       return;
     }
-    if (blockedDomains.length >= maxSites && toAdd.length > 0) {
-      const next = [toAdd[0]];
-      setBlockedDomains(next);
-      setCustomDomainInput('');
-      await saveSettings({ blockedDomains: next });
+    if (maxSites < 99999 && blockedDomains.length >= maxSites && toAdd.length > 0) {
+      setAddError(maxSites === 1 ? 'Free plan: block 1 site only. Upgrade for more.' : `Maximum ${maxSites} sites. Remove one to add another. Upgrade to Premium for unlimited.`);
       return;
     }
-    if (blockedDomains.length + toAdd.length > maxSites) {
-      setAddError(maxSites === 1 ? 'Free plan: block 1 site only. Upgrade for more.' : 'Maximum 20 sites allowed');
+    const unlimited = maxSites >= 99999;
+    if (!unlimited && blockedDomains.length + toAdd.length > maxSites) {
+      setAddError(maxSites === 1 ? 'Free plan: block 1 site only. Upgrade for more.' : `Maximum ${maxSites} sites allowed. Upgrade to Premium for unlimited.`);
       return;
     }
     const next = [...blockedDomains, ...toAdd].slice(0, maxSites);
@@ -200,13 +198,20 @@ export default function FocusModeSettingsSection({ onBack, embedded = false, isP
           <h2 className="text-xl font-bold text-stone-800 dark:text-stone-100 mb-2">Focus Mode Settings</h2>
           <p className="text-stone-600 dark:text-stone-400 text-sm mb-6">
             {isPaidUser
-              ? 'Block distracting sites until you answer study questions. Configure how many questions and how many you need correct to unlock.'
-              : 'Block 1 site until you answer study questions. Customize questions and unlock duration below. Upgrade for more sites.'}
+              ? 'Block distracting sites until you answer study questions. Pro: 10 sites. Premium: unlimited. Configure questions and unlock duration below.'
+              : 'Block 1 site until you answer study questions. Pro: 10 sites. Premium: unlimited. Upgrade for more.'}
           </p>
 
           {/* Sites to block */}
           <div className="mb-8">
-            <h3 className="font-semibold text-stone-800 dark:text-stone-200 mb-3">Sites to block</h3>
+            <h3 className="font-semibold text-stone-800 dark:text-stone-200 mb-3">
+              Sites to block
+              {maxSites >= 99999 ? (
+                <span className="ml-2 text-sm font-normal text-stone-500">({blockedDomains.length} — unlimited)</span>
+              ) : (
+                <span className="ml-2 text-sm font-normal text-stone-500">({blockedDomains.length} of {maxSites})</span>
+              )}
+            </h3>
             <div className="flex flex-wrap gap-2 mb-3">
               {presets.map((p) => {
                 const active = blockedDomains.includes(p.domain);
@@ -265,7 +270,7 @@ export default function FocusModeSettingsSection({ onBack, embedded = false, isP
                 Blocked: {blockedDomains.join(', ')}
                 {!isPaidUser && (
                   <span>
-                    {' '}(Free: 1 site max,{' '}
+                    {' '}(Free: 1 site. Pro: 10. Premium: unlimited —{' '}
                     {onNavigate ? (
                       <button
                         type="button"

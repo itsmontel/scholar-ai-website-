@@ -181,8 +181,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     return;
   }
 
-  // Free users: 1 site max. Paid users: up to 20 sites.
-  const maxBlocked = isPaid ? 20 : 1;
+  // Free: 1 site. Pro: 10 sites. Premium: unlimited (99999). Use API value when available.
+  const maxBlocked = config?.maxSites ?? (isPaid ? (plan === 'premium' ? 99999 : 10) : 1);
 
   planBadge.textContent = isPaid ? (plan === 'premium' ? 'Premium' : 'Pro') : 'Free';
   planBadge.style.display = 'inline-block';
@@ -199,7 +199,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   function updateSubtitle() {
     if (subtitleEl) {
-      const base = `Block ${maxBlocked} site${maxBlocked > 1 ? 's' : ''} until you answer ${questionCount} study questions (get ${passThreshold}+ correct).`;
+      const limitText = maxBlocked >= 99999 ? 'sites (unlimited)' : `${maxBlocked} site${maxBlocked > 1 ? 's' : ''}`;
+      const base = `Block ${limitText} until you answer ${questionCount} study questions (get ${passThreshold}+ correct).`;
       subtitleEl.textContent = isPaid ? base : `${base} Upgrade for more sites.`;
     }
   }

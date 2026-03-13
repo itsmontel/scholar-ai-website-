@@ -169,7 +169,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
     },
     {
       question: "What's the difference between Free, Pro, and Premium?",
-      answer: "Free includes 3 documents, 3 essay analyses, 2 study pack generations (lesson, flashcards & quiz — crossword & Crater Blast unlock with Pro), 5,000 Humanizer/Summarizer words, and 2 citation searches per month. Pro unlocks 99 analyses, 99 study packs with full crossword & Crater Blast access, 999,999 Humanizer/Summarizer words, 99 citation searches, all citation styles, and PDF/Word export. Premium gives you 199 analyses, 199 study packs, 199 citation searches, our top-tier premium AI model, all quiz types and difficulty levels, all summarizer styles and lengths, advanced essay analysis, and priority support."
+      answer: "Free: 3 documents, 3 analyses, 2 study packs, 5k words, 2 citations/mo. Pro: 99 combined analyses, study packs & citations/mo, 99,999 words, all citation styles, PDF/Word export, Focus Mode (10 sites). Premium: 10× usage — 999 combined/mo, 999,999 words, premium AI, Focus Mode unlimited, priority support."
     },
     {
       question: "How do I add friends and share my study materials?",

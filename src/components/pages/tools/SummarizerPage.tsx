@@ -554,7 +554,7 @@ const SummarizerPage = ({ onNavigate, user, onLogout }: SummarizerPageProps) => 
                     <span className="text-2xl">📝</span>
                     <div>
                       <p className="text-emerald-800 dark:text-emerald-200 font-medium text-sm">
-                        {userPlan === 'free' ? `Free plan: 5,000 words/month • Bullet + Medium only • ${getResetsInText(daysUntilReset)}` : 'Pro plan: 999,999 words/month • Bullet + Medium only'}
+                        {userPlan === 'free' ? `Free plan: 5,000 words/month • Bullet + Medium only • ${getResetsInText(daysUntilReset)}` : userPlan === 'premium' ? 'Premium: 999,999 words/month • Bullet + Medium only' : 'Pro: 99,999 words/month • Bullet + Medium only'}
                       </p>
                       <p className="text-emerald-600 dark:text-emerald-400 text-xs mt-0.5">Upgrade to Premium for all styles, lengths, and our premium AI model</p>
                     </div>

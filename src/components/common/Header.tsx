@@ -36,6 +36,10 @@ interface UsageStats {
   citationsRemaining: number;
   studyPacksRemaining: number;
   plan: string;
+  combinedActionsUsed?: number;
+  combinedActionsRemaining?: number;
+  combinedWordsUsed?: number;
+  combinedWordsRemaining?: number;
   planLimits: {
     documentsPerMonth: number;
     analysesPerMonth: number;
@@ -607,7 +611,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
                             )}
                           </div>
 
-                          {/* Combined Usage Grid */}
+                          {/* Combined Usage Grid - Pro/Premium show combined pool; Free shows separate */}
                           <div className="grid grid-cols-2 gap-2">
                             <div className="bg-stone-50 dark:bg-stone-700/50 rounded-lg p-2">
                               <span className="text-[10px] text-stone-500 dark:text-stone-400 uppercase tracking-wide">Uploads</span>
@@ -615,26 +619,37 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
                                 {usageStats.uploadsRemaining === -1 ? '∞' : usageStats.uploadsRemaining} left
                               </div>
                             </div>
-                            <div className="bg-stone-50 dark:bg-stone-700/50 rounded-lg p-2">
-                              <span className="text-[10px] text-stone-500 dark:text-stone-400 uppercase tracking-wide">Analyses</span>
-                              <div className={`text-sm font-semibold ${getUsageColor(getUsagePercentage(usageStats.documentsAnalyzed, usageStats.planLimits.analysesPerMonth))}`}>
-                                {usageStats.analysesRemaining === -1 ? '∞' : usageStats.analysesRemaining} left
+                            {(usageStats.plan === 'pro' || usageStats.plan === 'premium') && usageStats.combinedActionsRemaining != null ? (
+                              <div className="bg-stone-50 dark:bg-stone-700/50 rounded-lg p-2 col-span-2">
+                                <span className="text-[10px] text-stone-500 dark:text-stone-400 uppercase tracking-wide">Combined (analyses, study packs, citations)</span>
+                                <div className={`text-sm font-semibold ${usageStats.combinedActionsRemaining === -1 ? 'text-lime-600' : usageStats.combinedActionsRemaining <= 0 ? 'text-red-600' : usageStats.combinedActionsRemaining <= 10 ? 'text-yellow-600' : 'text-green-600'}`}>
+                                  {usageStats.combinedActionsRemaining === -1 ? '∞' : usageStats.combinedActionsRemaining} left
+                                </div>
                               </div>
-                            </div>
-                            <div className="bg-stone-50 dark:bg-stone-700/50 rounded-lg p-2">
-                              <span className="text-[10px] text-stone-500 dark:text-stone-400 uppercase tracking-wide">Citations</span>
-                              <div className={`text-sm font-semibold ${getUsageColor(getUsagePercentage(usageStats.citationSearchesUsed, usageStats.planLimits.citationSearchesPerMonth))}`}>
-                                {usageStats.citationsRemaining === -1 ? '∞' : usageStats.citationsRemaining} left
-                              </div>
-                            </div>
-                            <div className="bg-stone-50 dark:bg-stone-700/50 rounded-lg p-2">
-                              <span className="text-[10px] text-stone-500 dark:text-stone-400 uppercase tracking-wide">Study Packs</span>
-                              <div className={`text-sm font-semibold ${getUsageColor(getUsagePercentage(usageStats.studyPacksGenerated, usageStats.planLimits.studyPackGenerationsPerMonth))}`}>
-                                {usageStats.studyPacksRemaining === -1 ? '∞' : usageStats.studyPacksRemaining} left
-                              </div>
-                            </div>
+                            ) : (
+                              <>
+                                <div className="bg-stone-50 dark:bg-stone-700/50 rounded-lg p-2">
+                                  <span className="text-[10px] text-stone-500 dark:text-stone-400 uppercase tracking-wide">Analyses</span>
+                                  <div className={`text-sm font-semibold ${getUsageColor(getUsagePercentage(usageStats.documentsAnalyzed, usageStats.planLimits.analysesPerMonth))}`}>
+                                    {usageStats.analysesRemaining === -1 ? '∞' : usageStats.analysesRemaining} left
+                                  </div>
+                                </div>
+                                <div className="bg-stone-50 dark:bg-stone-700/50 rounded-lg p-2">
+                                  <span className="text-[10px] text-stone-500 dark:text-stone-400 uppercase tracking-wide">Citations</span>
+                                  <div className={`text-sm font-semibold ${getUsageColor(getUsagePercentage(usageStats.citationSearchesUsed, usageStats.planLimits.citationSearchesPerMonth))}`}>
+                                    {usageStats.citationsRemaining === -1 ? '∞' : usageStats.citationsRemaining} left
+                                  </div>
+                                </div>
+                                <div className="bg-stone-50 dark:bg-stone-700/50 rounded-lg p-2">
+                                  <span className="text-[10px] text-stone-500 dark:text-stone-400 uppercase tracking-wide">Study Packs</span>
+                                  <div className={`text-sm font-semibold ${getUsageColor(getUsagePercentage(usageStats.studyPacksGenerated, usageStats.planLimits.studyPackGenerationsPerMonth))}`}>
+                                    {usageStats.studyPacksRemaining === -1 ? '∞' : usageStats.studyPacksRemaining} left
+                                  </div>
+                                </div>
+                              </>
+                            )}
                           </div>
-                          {(usageStats.uploadsRemaining !== -1 || usageStats.analysesRemaining !== -1 || usageStats.citationsRemaining !== -1 || usageStats.studyPacksRemaining !== -1) && (
+                          {(usageStats.uploadsRemaining !== -1 || (usageStats.plan === 'pro' || usageStats.plan === 'premium' ? usageStats.combinedActionsRemaining != null && usageStats.combinedActionsRemaining !== -1 : usageStats.analysesRemaining !== -1 || usageStats.citationsRemaining !== -1 || usageStats.studyPacksRemaining !== -1)) && (
                             <p className="text-[10px] text-stone-500 dark:text-stone-400 mt-2 text-center">
                               {getResetsInText(usageStats.daysUntilReset)}
                             </p>

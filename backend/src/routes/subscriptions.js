@@ -631,14 +631,39 @@ router.get('/usage', authenticateToken, async (req, res) => {
     const studyPacksGenerated = studyPacks ? studyPacks.length : 0;
     const storageUsed = currentDocuments ? currentDocuments.reduce((total, doc) => total + (doc.file_size || 0), 0) : 0;
 
-    // Calculate remaining usage
+    const isPaid = subscriptionDetails.plan === 'pro' || subscriptionDetails.plan === 'premium';
+
+    // Pro/Premium: combined pool (analyses + citations + study packs) and combined words (humanize + summarize)
+    let combinedActionsUsed, combinedActionsRemaining, combinedWordsUsed, combinedWordsRemaining;
+    if (isPaid && planLimits.combinedActionsPerMonth) {
+      combinedActionsUsed = documentsAnalyzed + citationSearchesUsed + studyPacksGenerated;
+      combinedActionsRemaining = Math.max(0, planLimits.combinedActionsPerMonth - combinedActionsUsed);
+
+      // Get humanize + summarize words for combined words pool
+      const { data: humanizeData } = await supabaseServiceRole
+        .from('humanize_usage')
+        .select('words_count')
+        .eq('user_id', userId)
+        .gte('created_at', periodStart);
+      const { data: summarizeData } = await supabaseServiceRole
+        .from('summarize_usage')
+        .select('words_count')
+        .eq('user_id', userId)
+        .gte('created_at', periodStart);
+      const humanizeWords = (humanizeData || []).reduce((s, r) => s + (r.words_count || 0), 0);
+      const summarizeWords = (summarizeData || []).reduce((s, r) => s + (r.words_count || 0), 0);
+      combinedWordsUsed = humanizeWords + summarizeWords;
+      combinedWordsRemaining = Math.max(0, (planLimits.combinedWordsPerMonth || 0) - combinedWordsUsed);
+    }
+
+    // Calculate remaining usage (legacy per-feature for free plan)
     const uploadsRemaining = planLimits.documentsPerMonth === -1 ? -1 : Math.max(0, planLimits.documentsPerMonth - documentsUploaded);
     const analysesRemaining = planLimits.analysesPerMonth === -1 ? -1 : Math.max(0, planLimits.analysesPerMonth - documentsAnalyzed);
     const citationsRemaining = planLimits.citationSearchesPerMonth === -1 ? -1 : Math.max(0, planLimits.citationSearchesPerMonth - citationSearchesUsed);
     const studyPacksRemaining = planLimits.studyPackGenerationsPerMonth === -1 ? -1 : Math.max(0, planLimits.studyPackGenerationsPerMonth - studyPacksGenerated);
     const storageRemaining = planLimits.maxTotalStorage ? Math.max(0, planLimits.maxTotalStorage - storageUsed) : -1;
 
-    res.json({
+    const payload = {
       success: true,
       documentsUploaded,
       documentsAnalyzed,
@@ -655,7 +680,14 @@ router.get('/usage', authenticateToken, async (req, res) => {
       planLimits,
       periodEnd,
       daysUntilReset
-    });
+    };
+    if (isPaid) {
+      payload.combinedActionsUsed = combinedActionsUsed;
+      payload.combinedActionsRemaining = combinedActionsRemaining;
+      payload.combinedWordsUsed = combinedWordsUsed;
+      payload.combinedWordsRemaining = combinedWordsRemaining;
+    }
+    res.json(payload);
 
   } catch (error) {
     console.error('Error fetching usage statistics:', error);

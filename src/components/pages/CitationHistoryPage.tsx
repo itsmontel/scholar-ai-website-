@@ -26,7 +26,14 @@ interface CitationHistoryProps {
   onLogout: () => void;
 }
 
-type TimePeriod = 'all' | '7days' | '30days' | '3months';
+type TimePeriod = 'all' | '30days' | '3months' | 'month';
+type StyleFilter = 'all' | 'APA' | 'MLA' | 'Chicago' | 'Harvard' | 'IEEE' | 'Vancouver';
+
+const getFirstOfMonth = (d: Date) => {
+  const copy = new Date(d.getFullYear(), d.getMonth(), 1);
+  copy.setHours(0, 0, 0, 0);
+  return copy;
+};
 
 const CitationHistoryPage = ({ onNavigate, user, onLogout }: CitationHistoryProps) => {
   const [searches, setSearches] = useState<CitationSearch[]>([]);
@@ -35,6 +42,8 @@ const CitationHistoryPage = ({ onNavigate, user, onLogout }: CitationHistoryProp
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [timePeriod, setTimePeriod] = useState<TimePeriod>('all');
+  const [styleFilter, setStyleFilter] = useState<StyleFilter>('all');
+  const [selectedMonthStart, setSelectedMonthStart] = useState<Date>(() => getFirstOfMonth(new Date()));
   const [currentPage, setCurrentPage] = useState(1);
 
   const PAGE_SIZE = 10;
@@ -42,8 +51,6 @@ const CitationHistoryPage = ({ onNavigate, user, onLogout }: CitationHistoryProp
   const getTimePeriodDate = (period: TimePeriod): Date | null => {
     const now = new Date();
     switch (period) {
-      case '7days':
-        return new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
       case '30days':
         return new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
       case '3months':
@@ -54,6 +61,13 @@ const CitationHistoryPage = ({ onNavigate, user, onLogout }: CitationHistoryProp
   };
 
   const filteredSearches = searches.filter((search) => {
+    if (styleFilter !== 'all' && search.citation_style !== styleFilter) return false;
+    if (timePeriod === 'month') {
+      const toolDate = new Date(search.created_at);
+      const monthStart = selectedMonthStart;
+      const monthEnd = new Date(monthStart.getFullYear(), monthStart.getMonth() + 1, 1);
+      return toolDate >= monthStart && toolDate < monthEnd;
+    }
     const cutoffDate = getTimePeriodDate(timePeriod);
     if (cutoffDate && new Date(search.created_at) < cutoffDate) return false;
     return true;
@@ -67,7 +81,7 @@ const CitationHistoryPage = ({ onNavigate, user, onLogout }: CitationHistoryProp
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [timePeriod]);
+  }, [timePeriod, styleFilter, selectedMonthStart.getTime()]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -184,7 +198,7 @@ const CitationHistoryPage = ({ onNavigate, user, onLogout }: CitationHistoryProp
         <main className="max-w-5xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
           <div className="flex items-center justify-center min-h-64">
             <div className="text-center">
-              <div className="animate-spin w-12 h-12 border-4 border-violet-500 border-t-transparent rounded-full mx-auto mb-4"></div>
+              <div className="animate-spin w-12 h-12 border-4 border-sky-500 border-t-transparent rounded-full mx-auto mb-4"></div>
               <p className="text-stone-600">Loading citation history...</p>
             </div>
           </div>
@@ -208,7 +222,7 @@ const CitationHistoryPage = ({ onNavigate, user, onLogout }: CitationHistoryProp
             <p className="text-stone-600 mb-6">{error}</p>
             <button
               onClick={fetchCitationHistory}
-              className="px-6 py-3 bg-gradient-to-r from-indigo-500 to-violet-600 text-white rounded-xl font-medium hover:from-indigo-600 hover:to-violet-700 transition-colors"
+              className="px-6 py-3 bg-gradient-to-r from-sky-500 to-blue-600 text-white rounded-xl font-medium hover:from-sky-600 hover:to-blue-700 transition-colors"
             >
               Try Again
             </button>
@@ -218,28 +232,80 @@ const CitationHistoryPage = ({ onNavigate, user, onLogout }: CitationHistoryProp
     );
   }
 
+  const timePeriodOptions = [
+    { key: 'all' as TimePeriod, label: 'All time' },
+    { key: '30days' as TimePeriod, label: 'Last 30 days' },
+    { key: '3months' as TimePeriod, label: '3 months' },
+    { key: 'month' as TimePeriod, label: 'This month' },
+  ];
+
+  const thisMonthStart = getFirstOfMonth(new Date());
+  const isCurrentMonth = selectedMonthStart.getTime() === thisMonthStart.getTime();
+
+  const formatMonthLabel = () => {
+    if (isCurrentMonth) return 'This month';
+    return selectedMonthStart.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  };
+
+  const goToPrevMonth = () => {
+    const prev = new Date(selectedMonthStart.getFullYear(), selectedMonthStart.getMonth() - 1, 1);
+    setSelectedMonthStart(prev);
+    if (timePeriod !== 'month') setTimePeriod('month');
+  };
+
+  const goToNextMonth = () => {
+    if (isCurrentMonth) return;
+    const next = new Date(selectedMonthStart.getFullYear(), selectedMonthStart.getMonth() + 1, 1);
+    setSelectedMonthStart(next);
+    if (timePeriod !== 'month') setTimePeriod('month');
+  };
+
+  const goToThisMonth = () => {
+    setSelectedMonthStart(getFirstOfMonth(new Date()));
+    setTimePeriod('month');
+  };
+
+  const styleFilterOptions: { key: StyleFilter; label: string }[] = [
+    { key: 'all', label: 'All styles' },
+    { key: 'APA', label: 'APA' },
+    { key: 'MLA', label: 'MLA' },
+    { key: 'Chicago', label: 'Chicago' },
+    { key: 'Harvard', label: 'Harvard' },
+    { key: 'IEEE', label: 'IEEE' },
+    { key: 'Vancouver', label: 'Vancouver' },
+  ];
+
   return (
-    <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%)' }}>
+    <div className="min-h-screen overflow-x-hidden" style={{ background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%)' }}>
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="citations" />
 
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
-        {/* Header Section */}
-        <div className="mb-10">
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-stone-800 mb-4">
-            Citation History
-          </h1>
-          <p className="text-lg text-stone-600 mb-6">
-            View and revisit your previous citation searches
-          </p>
-          
+      <main className="max-w-6xl mx-auto px-3 sm:px-6 py-8 sm:py-12 w-full min-w-0 overflow-x-hidden">
+        {/* Hero - compact and sleek (match Saved Materials) */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-6 mb-10">
+          <div>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl bg-gradient-to-br from-sky-500 to-blue-600 shadow-lg shadow-sky-500/30">
+                📚
+              </div>
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-bold text-stone-900 tracking-tight">
+                  Citation History
+                </h1>
+                <p className="text-sm text-stone-500 mt-0.5">
+                  {filteredSearches.length} {filteredSearches.length === 1 ? 'search' : 'searches'}
+                </p>
+              </div>
+            </div>
+          </div>
+
           <button
             onClick={startNewSearch}
-            className="inline-flex items-center px-5 py-3 bg-gradient-to-r from-indigo-500 to-violet-600 text-white font-semibold rounded-xl hover:from-indigo-600 hover:to-violet-700 transition-colors"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold text-white bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-500 hover:to-blue-500 transition-all duration-200 hover:shadow-lg hover:shadow-sky-500/25 hover:-translate-y-0.5"
           >
-            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
-            New Citation Search
+            New Search
           </button>
         </div>
 
@@ -267,49 +333,103 @@ const CitationHistoryPage = ({ onNavigate, user, onLogout }: CitationHistoryProp
           );
         })()}
 
-        {/* Time Period Filter + Results count */}
+        {/* Filter Controls - Browse by month + Quick period + Style (match Saved Materials) */}
         {searches.length > 0 && (
-          <div className="mb-8 bg-white/60 backdrop-blur-sm rounded-2xl border border-stone-200/60 p-4">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <div>
-                <div className="text-xs font-medium text-stone-500 uppercase tracking-wider mb-2">Time Period</div>
-                <div className="flex flex-wrap gap-1.5">
-              {[
-                { key: 'all' as TimePeriod, label: 'All Time' },
-                { key: '7days' as TimePeriod, label: 'Last 7 Days' },
-                { key: '30days' as TimePeriod, label: 'Last 30 Days' },
-                { key: '3months' as TimePeriod, label: 'Last 3 Months' },
-              ].map((option) => (
+          <div className="mb-8 space-y-3">
+            {/* Month navigator — primary browsing control */}
+            <div className="bg-white rounded-2xl border border-stone-200/70 shadow-sm overflow-hidden">
+              <div className="flex items-stretch">
                 <button
-                  key={option.key}
-                  onClick={() => setTimePeriod(option.key)}
-                  className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-                    timePeriod === option.key
-                      ? 'bg-stone-900 text-white'
-                      : 'bg-stone-100 text-stone-600 hover:bg-stone-200 hover:text-stone-800'
-                  }`}
+                  onClick={goToPrevMonth}
+                  className="flex items-center justify-center w-12 sm:w-14 shrink-0 text-stone-400 hover:text-stone-700 hover:bg-stone-50 border-r border-stone-100 transition-colors group"
+                  aria-label="Previous month"
                 >
-                  {option.label}
+                  <svg className="w-5 h-5 group-hover:-translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  </svg>
                 </button>
-              ))}
-                </div>
-              </div>
-              {timePeriod !== 'all' && (
-                <div className="flex items-center gap-2 text-sm text-stone-600">
-                  <span className="font-medium">{filteredSearches.length}</span>
-                  <span>searches</span>
-                  <span className="text-stone-400">
-                    from {timePeriod === '7days' ? 'the last 7 days' : timePeriod === '30days' ? 'the last 30 days' : 'the last 3 months'}
+                <button
+                  onClick={goToThisMonth}
+                  className="flex-1 flex flex-col items-center justify-center gap-0.5 py-3.5 sm:py-4 hover:bg-stone-50/70 transition-colors"
+                >
+                  <span className={`text-base sm:text-lg font-bold tracking-tight transition-colors ${timePeriod === 'month' ? 'text-stone-900' : 'text-stone-400'}`}>
+                    {timePeriod === 'month' ? formatMonthLabel() : 'Browse by month'}
                   </span>
-                  <button
-                    onClick={() => setTimePeriod('all')}
-                    className="text-indigo-600 hover:text-indigo-700 font-medium underline underline-offset-2"
-                  >
-                    Show all
-                  </button>
-                </div>
-              )}
+                  {timePeriod === 'month' ? (
+                    <span className="text-[11px] sm:text-xs text-stone-400 font-medium">
+                      {isCurrentMonth ? formatMonthLabel() : 'click to jump to this month'}
+                    </span>
+                  ) : (
+                    <span className="text-[11px] text-stone-400">click to start</span>
+                  )}
+                </button>
+                <button
+                  onClick={goToNextMonth}
+                  disabled={timePeriod === 'month' && isCurrentMonth}
+                  className={`flex items-center justify-center w-12 sm:w-14 shrink-0 border-l border-stone-100 transition-colors group ${
+                    timePeriod === 'month' && isCurrentMonth ? 'text-stone-200 cursor-default' : 'text-stone-400 hover:text-stone-700 hover:bg-stone-50'
+                  }`}
+                  aria-label="Next month"
+                >
+                  <svg className="w-5 h-5 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+              </div>
             </div>
+
+            {/* Quick period pills + Style filter */}
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3 flex-wrap">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-xs text-stone-400 font-medium shrink-0">Quick:</span>
+                {timePeriodOptions.map((option) => (
+                  <button
+                    key={option.key}
+                    onClick={() => {
+                      setTimePeriod(option.key);
+                      if (option.key === 'month') setSelectedMonthStart(getFirstOfMonth(new Date()));
+                    }}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                      timePeriod === option.key ? 'bg-stone-900 text-white shadow-sm' : 'bg-white border border-stone-200 text-stone-500 hover:border-stone-300 hover:text-stone-700 hover:bg-stone-50'
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+              <div className="flex items-center gap-2 flex-wrap border-l border-stone-200 pl-3 sm:pl-4">
+                <span className="text-xs text-stone-400 font-medium shrink-0">Style:</span>
+                {styleFilterOptions.map((opt) => (
+                  <button
+                    key={opt.key}
+                    onClick={() => setStyleFilter(opt.key)}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${
+                      styleFilter === opt.key ? 'bg-sky-600 text-white' : 'bg-white border border-stone-200 text-stone-500 hover:border-stone-300 hover:text-stone-700'
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+              <span className="ml-auto text-xs text-stone-400">
+                {filteredSearches.length} search{filteredSearches.length !== 1 ? 'es' : ''}
+              </span>
+            </div>
+            {timePeriod !== 'all' && (
+              <div className="flex items-center gap-2 text-sm text-stone-500">
+                <span className="font-semibold text-stone-700">{filteredSearches.length}</span>
+                <span>searches</span>
+                <span className="text-stone-400">
+                  {timePeriod === 'month' ? `from ${formatMonthLabel()}` : timePeriod === '30days' ? 'from the last 30 days' : 'from the last 3 months'}
+                </span>
+                <button
+                  onClick={() => { setTimePeriod('all'); setStyleFilter('all'); setSelectedMonthStart(getFirstOfMonth(new Date())); }}
+                  className="ml-1 text-xs text-stone-400 hover:text-stone-600 underline underline-offset-2"
+                >
+                  clear
+                </button>
+              </div>
+            )}
           </div>
         )}
 
@@ -344,7 +464,7 @@ const CitationHistoryPage = ({ onNavigate, user, onLogout }: CitationHistoryProp
             <p className="text-stone-600 mb-6">Start your first citation search to build your research library</p>
             <button
               onClick={startNewSearch}
-              className="px-6 py-3 bg-gradient-to-r from-indigo-500 to-violet-600 text-white font-semibold rounded-xl hover:from-indigo-600 hover:to-violet-700 transition-colors"
+              className="px-6 py-3 bg-gradient-to-r from-sky-500 to-blue-600 text-white font-semibold rounded-xl hover:from-sky-600 hover:to-blue-700 transition-colors"
             >
               Find Citations Now
             </button>
@@ -366,7 +486,7 @@ const CitationHistoryPage = ({ onNavigate, user, onLogout }: CitationHistoryProp
             </button>
             <button
               onClick={startNewSearch}
-              className="px-6 py-3 bg-gradient-to-r from-indigo-500 to-violet-600 text-white font-semibold rounded-xl hover:from-indigo-600 hover:to-violet-700 transition-colors"
+              className="px-6 py-3 bg-gradient-to-r from-sky-500 to-blue-600 text-white font-semibold rounded-xl hover:from-sky-600 hover:to-blue-700 transition-colors"
             >
               Find Citations Now
             </button>
@@ -391,7 +511,7 @@ const CitationHistoryPage = ({ onNavigate, user, onLogout }: CitationHistoryProp
                         </svg>
                         {formatDate(search.created_at)}
                       </span>
-                      <span className="px-2.5 py-1 bg-violet-50 text-violet-700 rounded-lg text-xs font-medium">
+                      <span className="px-2.5 py-1 bg-sky-50 text-sky-700 rounded-lg text-xs font-medium">
                         {search.citation_style}
                       </span>
                       {(search.year_range || search.search_results?.yearRange) && 
@@ -418,7 +538,7 @@ const CitationHistoryPage = ({ onNavigate, user, onLogout }: CitationHistoryProp
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => viewSearchResults(search)}
-                      className="px-4 py-2.5 bg-gradient-to-r from-indigo-500 to-violet-600 text-white rounded-xl hover:from-indigo-600 hover:to-violet-700 transition-colors font-medium text-sm"
+                      className="px-4 py-2.5 bg-gradient-to-r from-sky-500 to-blue-600 text-white rounded-xl hover:from-sky-600 hover:to-blue-700 transition-colors font-medium text-sm"
                     >
                       View Results
                     </button>
@@ -478,7 +598,7 @@ const CitationHistoryPage = ({ onNavigate, user, onLogout }: CitationHistoryProp
                     onClick={() => setCurrentPage(page)}
                     className={`w-10 h-10 rounded-lg font-medium transition-colors ${
                       currentPage === page
-                        ? 'bg-gradient-to-r from-indigo-500 to-violet-600 text-white shadow-md'
+                        ? 'bg-gradient-to-r from-sky-500 to-blue-600 text-white shadow-md'
                         : 'bg-white border border-stone-200 text-stone-600 hover:bg-stone-50'
                     }`}
                   >

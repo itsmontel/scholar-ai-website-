@@ -22,7 +22,7 @@ const FocusModePage = ({ onNavigate, user, onLogout }: FocusModePageProps) => {
     {
       num: 1,
       title: 'Pick Sites to Block',
-      desc: 'Choose the sites that steal your focus — YouTube, TikTok, Instagram, Reddit, or any custom domain. Add as many as you want.',
+      desc: 'Choose the sites that steal your focus — YouTube, TikTok, Instagram, Reddit, or any custom domain. Pro: 10 sites. Premium: unlimited.',
       icon: '🚫',
       gradient: 'from-orange-500 to-amber-600',
       shadow: 'shadow-orange-500/25',
@@ -75,7 +75,7 @@ const FocusModePage = ({ onNavigate, user, onLogout }: FocusModePageProps) => {
     },
     {
       title: 'Block Any Site',
-      desc: 'Popular presets plus add any custom domain. No site is off-limits.',
+      desc: 'Popular presets plus add any custom domain. Pro: 10 sites. Premium: unlimited.',
       icon: (
         <svg className="w-6 h-6 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
@@ -224,7 +224,7 @@ const FocusModePage = ({ onNavigate, user, onLogout }: FocusModePageProps) => {
             Ready to earn your screen time?
           </h2>
           <p className="text-stone-400 mb-8 max-w-xl mx-auto">
-            Focus Mode is available with Pro and Premium plans. Install the Chrome extension, add your study material, and start blocking distractions.
+            Focus Mode is available with Pro and Premium plans. Pro: 10 blocked sites. Premium: unlimited. Install the Chrome extension, add your study material, and start blocking distractions.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             {user ? (
@@ -262,7 +262,7 @@ const FocusModePage = ({ onNavigate, user, onLogout }: FocusModePageProps) => {
             )}
           </div>
           <p className="mt-6 text-stone-500 text-sm">
-            Pro &amp; Premium plans include Focus Mode • Chrome extension required
+            Pro: 10 sites • Premium: unlimited • Chrome extension required
           </p>
         </div>
       </section>

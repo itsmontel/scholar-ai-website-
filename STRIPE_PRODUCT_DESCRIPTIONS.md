@@ -4,31 +4,47 @@ Copy these descriptions into your Stripe Dashboard (**Products** → select prod
 
 ---
 
-## Premium Plan ($39.99/month)
+## Pro Plan ($19.99/month or $199.99/year)
 
 **Description to paste into Stripe:**
 
 ```
-Advanced AI-powered academic writing assistant with 199 essay analyses per month, 199 citation searches, document analysis with comprehensive feedback, 1GB storage, top-tier premium AI model, all quiz types and difficulty levels, all summarizer styles, advanced grammar checking, and priority support. Perfect for researchers and advanced students who need the highest level of writing support and analysis capabilities.
+AI-powered academic writing assistant for students. Includes: unlimited documents; 99 combined analyses, study packs & citations per month; 99,999 words for Humanizer & Summarizer; all citation styles; PDF/Word export; Focus Mode (10 sites); quiz, flashcards, crossword & Crater Blast; summarizer (all lengths & styles). Ideal for students who need robust writing support.
 ```
+
+**Feature list (for Stripe product metadata or marketing copy):**
+- Unlimited documents
+- 99 combined analyses, study packs & citations/mo
+- 99,999 words Humanizer & Summarizer
+- All citation styles, PDF/Word export
+- Focus Mode (10 sites)
+- Quiz, flashcards, crossword & Crater Blast
+- Summarizer (all lengths & styles)
 
 ---
 
-## Pro Plan ($19.99/month)
+## Premium Plan ($39.99/month or $399.99/year)
 
 **Description to paste into Stripe:**
 
 ```
-AI-powered academic writing assistant with 99 essay analyses per month, 99 citation searches, unlimited document uploads, document analysis with detailed feedback, 25MB storage, unlimited quiz/flashcard/crossword generation, 999,999 Humanizer and Summarizer words, all citation styles, and PDF/Word export. Ideal for students who need robust writing support without the premium tier.
+Advanced AI-powered academic writing assistant for researchers and institutions. Everything in Pro, plus 10× usage: 999 combined analyses, study packs & citations per month; 999,999 words for Humanizer & Summarizer; premium AI model & advanced essay analysis; priority support; Focus Mode (unlimited sites); larger document uploads (up to 1GB). Perfect for power users who need the highest capacity.
 ```
+
+**Feature list (for Stripe product metadata or marketing copy):**
+- Everything in Pro • 10× usage
+- 999 combined analyses, study packs & citations/mo
+- 999,999 words Humanizer & Summarizer
+- Premium AI model, advanced essay analysis
+- Priority support
+- Focus Mode (unlimited sites)
+- Larger document uploads (up to 1GB)
 
 ---
 
 ## How to Update in Stripe
 
 1. Go to [Stripe Dashboard](https://dashboard.stripe.com) → **Products**
-2. Click your **Premium** product
-3. Click **Edit** (or the three dots → Edit product)
-4. Paste the Premium description above into the **Description** field
-5. Repeat for **Pro** (if you have a separate Pro product)
-6. Click **Save**
+2. Click your **Pro** product → **Edit** → paste the Pro description above into the **Description** field
+3. Click your **Premium** product → **Edit** → paste the Premium description above into the **Description** field
+4. Click **Save** for each product

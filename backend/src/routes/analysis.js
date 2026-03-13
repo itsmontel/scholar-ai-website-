@@ -48,13 +48,19 @@ const aiAnalysisService = require('../services/aiAnalysisService');
 const documentService = require('../services/documentService');
 const subscriptionService = require('../services/subscriptionService');
 
+// Normalize plan for limit checks (starter -> pro for backward compat)
+const getEffectivePlan = (req) => {
+  const p = req.user?.subscription_plan || req.user?.plan || 'free';
+  return p === 'starter' ? 'pro' : p;
+};
+
 // @route   GET /api/analysis/humanize-usage
 // @desc    Get user's humanize word usage this period
 // @access  Private
 router.get('/humanize-usage', authenticateToken, async (req, res) => {
   try {
     const userId = req.user.id;
-    const userPlan = req.user.subscription_plan || 'free';
+    const userPlan = getEffectivePlan(req);
     const planLimits = subscriptionService.PLAN_LIMITS[userPlan] || subscriptionService.PLAN_LIMITS.free;
 
     const { periodStart, periodEnd, daysUntilReset } = await subscriptionService.getUsagePeriod(userId);
@@ -131,7 +137,7 @@ router.post('/humanize', authenticateToken, async (req, res) => {
   try {
     const { text, mode, intensity } = req.body;
     const userId = req.user.id;
-    const userPlan = req.user.subscription_plan || 'free';
+    const userPlan = getEffectivePlan(req);
     const planLimits = subscriptionService.PLAN_LIMITS[userPlan] || subscriptionService.PLAN_LIMITS.free;
 
     if (!text || text.trim().length === 0) {
@@ -163,29 +169,43 @@ router.post('/humanize', authenticateToken, async (req, res) => {
       process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
     );
 
-    const { periodStart } = await subscriptionService.getUsagePeriod(userId);
-
-    const { data: usageData, error: usageError } = await supabase
-      .from('humanize_usage')
-      .select('words_count')
-      .eq('user_id', userId)
-      .gte('created_at', periodStart);
-
-    const wordsUsedThisMonth = usageError ? 0 : (usageData || []).reduce((sum, row) => sum + (row.words_count || 0), 0);
-    const wordLimit = planLimits.humanizeWordsPerMonth;
-
-    if (wordsUsedThisMonth + wordCount > wordLimit) {
-      const remaining = Math.max(0, wordLimit - wordsUsedThisMonth);
-      return res.status(429).json({
-        success: false,
-        message: remaining === 0
-          ? `You've used all ${wordLimit.toLocaleString()} words this period. ${userPlan === 'free' ? 'Upgrade for 999,999 words/month.' : 'Limit resets when your billing period renews.'}`
-          : `This text is ${wordCount} words but you only have ${remaining} words remaining this period.${userPlan === 'free' ? ' Upgrade for 999,999 words/month.' : ''}`,
-        wordsUsed: wordsUsedThisMonth,
-        wordLimit,
-        wordsRemaining: remaining,
-        upgrade: userPlan === 'free'
-      });
+    let wordsUsedThisMonth, wordLimit;
+    if (userPlan === 'pro' || userPlan === 'premium') {
+      const combinedCheck = await subscriptionService.checkCombinedWordsLimit(userId, wordCount);
+      if (!combinedCheck.allowed) {
+        return res.status(429).json({
+          success: false,
+          message: `You've used all ${combinedCheck.limit.toLocaleString()} combined Humanizer & Summarizer words this period. Limit resets when your billing renews.`,
+          wordsUsed: combinedCheck.usage,
+          wordLimit: combinedCheck.limit,
+          wordsRemaining: combinedCheck.remaining,
+          upgrade: false
+        });
+      }
+      wordsUsedThisMonth = combinedCheck.usage;
+      wordLimit = combinedCheck.limit;
+    } else {
+      const { periodStart } = await subscriptionService.getUsagePeriod(userId);
+      const { data: usageData, error: usageError } = await supabase
+        .from('humanize_usage')
+        .select('words_count')
+        .eq('user_id', userId)
+        .gte('created_at', periodStart);
+      wordsUsedThisMonth = usageError ? 0 : (usageData || []).reduce((sum, row) => sum + (row.words_count || 0), 0);
+      wordLimit = planLimits.humanizeWordsPerMonth;
+      if (wordsUsedThisMonth + wordCount > wordLimit) {
+        const remaining = Math.max(0, wordLimit - wordsUsedThisMonth);
+        return res.status(429).json({
+          success: false,
+          message: remaining === 0
+            ? `You've used all ${wordLimit.toLocaleString()} words this period. Upgrade for more.`
+            : `This text is ${wordCount} words but you only have ${remaining} words remaining.`,
+          wordsUsed: wordsUsedThisMonth,
+          wordLimit,
+          wordsRemaining: remaining,
+          upgrade: true
+        });
+      }
     }
 
     const humanizedText = await aiAnalysisService.humanizeText(text, mode || 'standard', intensity || 'medium', userPlan);
@@ -230,7 +250,7 @@ router.post('/humanize', authenticateToken, async (req, res) => {
 router.get('/summarize-usage', authenticateToken, async (req, res) => {
   try {
     const userId = req.user.id;
-    const userPlan = req.user.subscription_plan || 'free';
+    const userPlan = getEffectivePlan(req);
     const planLimits = subscriptionService.PLAN_LIMITS[userPlan] || subscriptionService.PLAN_LIMITS.free;
 
     const { createClient } = require('@supabase/supabase-js');
@@ -274,7 +294,7 @@ router.post('/summarize', authenticateToken, async (req, res) => {
   try {
     const { text, style, length } = req.body;
     const userId = req.user.id;
-    const userPlan = req.user.subscription_plan || 'free';
+    const userPlan = getEffectivePlan(req);
     const planLimits = subscriptionService.PLAN_LIMITS[userPlan] || subscriptionService.PLAN_LIMITS.free;
 
     // Enforce style/length restrictions for non-premium users
@@ -315,36 +335,50 @@ router.post('/summarize', authenticateToken, async (req, res) => {
       });
     }
 
-    // Check word usage
+    // Check word usage (Pro/Premium: combined humanizer+summarizer pool)
     const { createClient } = require('@supabase/supabase-js');
     const supabase = createClient(
       process.env.SUPABASE_URL,
       process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
     );
 
-    const { periodStart } = await subscriptionService.getUsagePeriod(userId);
-
-    const { data: usageData, error: usageError } = await supabase
-      .from('summarize_usage')
-      .select('words_count')
-      .eq('user_id', userId)
-      .gte('created_at', periodStart);
-
-    const wordsUsedThisMonth = usageError ? 0 : (usageData || []).reduce((sum, row) => sum + (row.words_count || 0), 0);
-    const wordLimit = planLimits.summarizeWordsPerMonth;
-
-    if (wordsUsedThisMonth + wordCount > wordLimit) {
-      const remaining = Math.max(0, wordLimit - wordsUsedThisMonth);
-      return res.status(429).json({
-        success: false,
-        message: remaining === 0
-          ? `You've used all ${wordLimit.toLocaleString()} summarize words this period. ${userPlan === 'free' ? 'Upgrade for 999,999 words/month.' : 'Limit resets when your billing period renews.'}`
-          : `This text is ${wordCount} words but you only have ${remaining} summarize words remaining this period.${userPlan === 'free' ? ' Upgrade for 999,999 words/month.' : ''}`,
-        wordsUsed: wordsUsedThisMonth,
-        wordLimit,
-        wordsRemaining: remaining,
-        upgrade: userPlan === 'free'
-      });
+    let wordsUsedThisMonth, wordLimit;
+    if (userPlan === 'pro' || userPlan === 'premium') {
+      const combinedCheck = await subscriptionService.checkCombinedWordsLimit(userId, wordCount);
+      if (!combinedCheck.allowed) {
+        return res.status(429).json({
+          success: false,
+          message: `You've used all ${combinedCheck.limit.toLocaleString()} combined Humanizer & Summarizer words this period. Limit resets when your billing renews.`,
+          wordsUsed: combinedCheck.usage,
+          wordLimit: combinedCheck.limit,
+          wordsRemaining: combinedCheck.remaining,
+          upgrade: false
+        });
+      }
+      wordsUsedThisMonth = combinedCheck.usage;
+      wordLimit = combinedCheck.limit;
+    } else {
+      const { periodStart } = await subscriptionService.getUsagePeriod(userId);
+      const { data: usageData, error: usageError } = await supabase
+        .from('summarize_usage')
+        .select('words_count')
+        .eq('user_id', userId)
+        .gte('created_at', periodStart);
+      wordsUsedThisMonth = usageError ? 0 : (usageData || []).reduce((sum, row) => sum + (row.words_count || 0), 0);
+      wordLimit = planLimits.summarizeWordsPerMonth;
+      if (wordsUsedThisMonth + wordCount > wordLimit) {
+        const remaining = Math.max(0, wordLimit - wordsUsedThisMonth);
+        return res.status(429).json({
+          success: false,
+          message: remaining === 0
+            ? `You've used all ${wordLimit.toLocaleString()} summarize words this period. Upgrade for more.`
+            : `This text is ${wordCount} words but you only have ${remaining} words remaining.`,
+          wordsUsed: wordsUsedThisMonth,
+          wordLimit,
+          wordsRemaining: remaining,
+          upgrade: true
+        });
+      }
     }
 
     const result = await aiAnalysisService.summarizeText(text, effectiveStyle, effectiveLength, userPlan);
@@ -1166,16 +1200,20 @@ router.post('/citation-search', authenticateToken, async (req, res) => {
     const style = citationStyle || 'APA';
     const numCitations = numberOfCitations || 10;
 
-    // Check user's citation search limits
-    const limitCheck = await subscriptionService.checkLimit(userId, 'citationSearchesPerMonth');
+    const userPlan = getEffectivePlan(req);
+    const limitCheck = (userPlan === 'pro' || userPlan === 'premium')
+      ? await subscriptionService.checkCombinedActionsLimit(userId)
+      : await subscriptionService.checkLimit(userId, 'citationSearchesPerMonth');
     if (!limitCheck.allowed) {
       return res.status(429).json({
         success: false,
-        message: `Citation search limit reached. You have used ${limitCheck.usage} of ${limitCheck.limit} searches this period. Upgrade to get ${limitCheck.limit === 2 ? 'unlimited' : 'more'} citation searches.`,
+        message: (userPlan === 'pro' || userPlan === 'premium')
+          ? `You've used all ${limitCheck.limit} combined actions (analyses, study packs & citations) this period. Limit resets when your billing renews.`
+          : `Citation search limit reached. You have used ${limitCheck.usage} of ${limitCheck.limit} searches this period. Upgrade to get more.`,
         limit: limitCheck.limit,
         usage: limitCheck.usage,
         remaining: limitCheck.remaining,
-        upgrade: true
+        upgrade: userPlan === 'free'
       });
     }
 
@@ -1189,9 +1227,6 @@ router.post('/citation-search', authenticateToken, async (req, res) => {
     );
 
     console.log('Citation search completed successfully');
-
-    // Get user's plan for retention policy (free: 30 days, paid: permanent)
-    const userPlan = await subscriptionService.getUserPlan(userId);
 
     // Save search to history (don't block response if this fails)
     // Pass userPlan to determine retention: free users get 30-day expiration, paid users get permanent storage
@@ -1276,7 +1311,10 @@ router.post('/citation-review', authenticateToken, validateCitationReview, async
     }
 
     // Check user's analysis limits (citation review counts toward monthly limit)
-    const limitCheck = await subscriptionService.checkLimit(userId, 'analysesPerMonth');
+    const userPlan = getEffectivePlan(req);
+    const limitCheck = (userPlan === 'pro' || userPlan === 'premium')
+      ? await subscriptionService.checkCombinedActionsLimit(userId)
+      : await subscriptionService.checkLimit(userId, 'analysesPerMonth');
     if (!limitCheck.allowed) {
       return res.status(429).json({
         success: false,
@@ -1292,9 +1330,25 @@ router.post('/citation-review', authenticateToken, validateCitationReview, async
       citationStyle
     );
 
+    // Save citation review to database so it counts toward combined actions pool
+    try {
+      await aiAnalysisService.saveAnalysis(
+        null, // no document
+        userId,
+        'citation_review',
+        analysisResult.result,
+        content,
+        analysisResult.annotations,
+        citationStyle,
+        null  // no rubric alignment
+      );
+    } catch (saveErr) {
+      console.error('Failed to record citation review usage (non-blocking):', saveErr);
+      // Still return success - user gets their result; usage may not be counted for this request
+    }
+
     console.log('Citation review completed successfully');
 
-    // Return analysis result (not saved to database)
     res.json({
       success: true,
       message: 'Citation review completed successfully',
@@ -1304,8 +1358,7 @@ router.post('/citation-review', authenticateToken, validateCitationReview, async
         annotations: analysisResult.annotations,
         citationStyle: analysisResult.citationStyle,
         model: analysisResult.model,
-        timestamp: analysisResult.timestamp,
-        temporary: true // Indicates this is not saved
+        timestamp: analysisResult.timestamp
       }
     });
 
@@ -1481,20 +1534,26 @@ router.post('/analyze', authenticateToken, validateCreateAnalysis, async (req, r
       planLimits = subscriptionService.PLAN_LIMITS.free;
     }
     
-    // Check monthly analysis limit for free users
-    if (planLimits.analysesPerMonth !== -1) {
+    // Check monthly limit: Pro/Premium use combined pool; free uses analysesPerMonth
+    const userPlan = (await subscriptionService.getUserSubscriptionDetails(userId)).plan;
+    const useCombined = userPlan === 'pro' || userPlan === 'premium';
+    if (useCombined ? (planLimits.combinedActionsPerMonth != null && planLimits.combinedActionsPerMonth !== -1) : (planLimits.analysesPerMonth !== -1)) {
       try {
         const timeoutPromise = new Promise((_, reject) => {
           setTimeout(() => reject(new Error('Analysis check timeout')), 3000);
         });
         
-        const analysisCheckPromise = subscriptionService.checkLimit(userId, 'analysesPerMonth');
+        const analysisCheckPromise = useCombined
+          ? subscriptionService.checkCombinedActionsLimit(userId)
+          : subscriptionService.checkLimit(userId, 'analysesPerMonth');
         const analysisCheck = await Promise.race([analysisCheckPromise, timeoutPromise]);
         
         if (!analysisCheck.allowed) {
           return res.status(403).json({
             success: false,
-            message: `Analysis limit exceeded for this period. You have used ${analysisCheck.usage}/${analysisCheck.limit} analyses.`,
+            message: useCombined
+              ? `Combined action limit exceeded for this period. You have used ${analysisCheck.usage}/${analysisCheck.limit} (analyses, study packs & citations).`
+              : `Analysis limit exceeded for this period. You have used ${analysisCheck.usage}/${analysisCheck.limit} analyses.`,
             usage: {
               limit: analysisCheck.limit,
               used: analysisCheck.usage,
@@ -2356,7 +2415,7 @@ router.post('/generate-study-pack', authenticateToken, async (req, res) => {
     }
 
     const userId = req.user.id;
-    const userPlan = req.user.subscription_plan || 'free';
+    const userPlan = getEffectivePlan(req);
     const planLimits = subscriptionService.PLAN_LIMITS[userPlan] || subscriptionService.PLAN_LIMITS.free;
 
     const maxWords = planLimits.studyPackMaxWordsPerGeneration || planLimits.quizMaxWordsPerGeneration || 5000;
@@ -2375,24 +2434,39 @@ router.post('/generate-study-pack', authenticateToken, async (req, res) => {
 
     const { periodStart } = await subscriptionService.getUsagePeriod(userId);
 
-    const { data: usageData, error: usageError } = await supabase
-      .from('quiz_usage')
-      .select('id')
-      .eq('user_id', userId)
-      .gte('created_at', periodStart);
+    // Pro/Premium: use combined actions pool; Free: use studyPackGenerationsPerMonth
+    if (userPlan === 'pro' || userPlan === 'premium') {
+      const combinedCheck = await subscriptionService.checkCombinedActionsLimit(userId);
+      if (!combinedCheck.allowed) {
+        return res.status(429).json({
+          success: false,
+          message: `You've used all ${combinedCheck.limit} combined actions (analyses, study packs & citations) this period. Limit resets when your billing period renews.`,
+          generationsUsed: combinedCheck.usage,
+          generationLimit: combinedCheck.limit,
+          generationsRemaining: 0,
+          upgrade: false
+        });
+      }
+    } else {
+      const { data: usageData, error: usageError } = await supabase
+        .from('quiz_usage')
+        .select('id')
+        .eq('user_id', userId)
+        .gte('created_at', periodStart);
 
-    const generationsUsed = usageError ? 0 : (usageData || []).length;
-    const generationLimit = planLimits.studyPackGenerationsPerMonth || planLimits.quizGenerationsPerMonth;
+      const generationsUsed = usageError ? 0 : (usageData || []).length;
+      const generationLimit = planLimits.studyPackGenerationsPerMonth || planLimits.quizGenerationsPerMonth;
 
-    if (generationLimit !== -1 && generationsUsed >= generationLimit) {
-      return res.status(429).json({
-        success: false,
-        message: `You've used all ${generationLimit} study pack generation${generationLimit === 1 ? '' : 's'} this period. ${userPlan === 'free' ? 'Upgrade for 99+ generations/month.' : 'Limit resets when your billing period renews.'}`,
-        generationsUsed,
-        generationLimit,
-        generationsRemaining: 0,
-        upgrade: userPlan === 'free'
-      });
+      if (generationLimit !== -1 && generationsUsed >= generationLimit) {
+        return res.status(429).json({
+          success: false,
+          message: `You've used all ${generationLimit} study pack generation${generationLimit === 1 ? '' : 's'} this period. Upgrade for 99+ combined/month.`,
+          generationsUsed,
+          generationLimit,
+          generationsRemaining: 0,
+          upgrade: true
+        });
+      }
     }
 
     const pack = await aiAnalysisService.generateStudyPack(text, userPlan);

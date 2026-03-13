@@ -23,10 +23,17 @@ interface SubscriptionPlan {
 interface UsageStats {
   documentsUploaded: number;
   documentsAnalyzed: number;
+  citationSearchesUsed?: number;
+  studyPacksGenerated?: number;
   storageUsed: number;
   storageLimit: number;
   uploadsRemaining: number;
   analysesRemaining: number;
+  combinedActionsUsed?: number;
+  combinedActionsRemaining?: number;
+  combinedWordsUsed?: number;
+  combinedWordsRemaining?: number;
+  plan?: string;
 }
 
 const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout }) => {
@@ -54,11 +61,9 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
       description: 'Perfect for getting started',
       icon: '🆓',
       features: [
-        '3 documents per month',
-        '3 AI essay analyses per month',
-        '2 study packs/month (lesson, flashcards & quiz — crossword & Crater Blast with Pro)',
-        '5,000 words/month Humanizer & Summarizer',
-        '2 citation searches per month',
+        '3 documents, 3 analyses, 2 study packs/mo',
+        '5k words Humanizer & Summarizer',
+        '2 citation searches/mo',
         'Basic grammar check'
       ],
       stripePriceId: ''
@@ -71,14 +76,13 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
       description: 'Most popular for students',
       icon: '🚀',
       features: [
-        'Unlimited document uploads',
-        '99 AI essay analyses per month',
-        '99 study packs (lesson, flashcards, quiz, crossword & Crater Blast)',
-        '999,999 words/month Humanizer & Summarizer',
-        '99 citation searches per month',
-        'All citation styles',
-        'Export to PDF & Word',
-        'Study tools history'
+        'Unlimited documents',
+        '99 combined analyses, study packs & citations/mo',
+        '99,999 words Humanizer & Summarizer',
+        'All citation styles, PDF/Word export',
+        'Focus Mode (10 sites)',
+        'Quiz, flashcards, crossword & Crater Blast',
+        'Summarizer (all lengths & styles)'
       ],
       popular: true,
       stripePriceId: billingCycle === 'monthly' ? 'price_starter_monthly' : 'price_starter_yearly'
@@ -91,16 +95,13 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
       description: 'For researchers and institutions',
       icon: '⭐',
       features: [
-        'Everything in Pro',
-        '199 AI essay analyses per month',
-        '199 study packs per month',
-        '199 citation searches per month',
-        'Our top-tier premium AI model',
-        'All quiz types & difficulty levels unlocked',
-        'All summarizer styles & lengths unlocked',
-        'Advanced AI essay analysis',
-        'Advanced grammar and style checking',
-        'Priority support'
+        'Everything in Pro, 10× usage',
+        '999 combined analyses, study packs & citations/mo',
+        '999,999 words Humanizer & Summarizer',
+        'Premium AI model, advanced essay analysis',
+        'Priority support',
+        'Focus Mode (unlimited sites)',
+        'Larger document uploads (up to 1GB)'
       ],
       stripePriceId: billingCycle === 'monthly' ? 'price_premium_monthly' : 'price_premium_yearly'
     }
@@ -407,6 +408,13 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
                   </span>
                 </div>
               )}
+              {plan.id === 'premium' && (
+                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                  <span className="bg-gradient-to-r from-amber-500 to-orange-600 text-white px-4 py-1 rounded-full text-xs font-semibold shadow-md shadow-amber-500/20">
+                    10× Usage
+                  </span>
+                </div>
+              )}
 
               {/* Plan Name & Description */}
               <div className="text-center mb-6 pt-2">
@@ -528,10 +536,12 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
               </div>
             </div>
 
-            {/* Analyses Remaining */}
+            {/* Combined Actions (Pro/Premium) or Analyses (Free) */}
             <div className="bg-stone-50 border border-stone-200 rounded-xl p-5">
               <div className="flex items-center justify-between mb-3">
-                <h3 className="font-medium text-stone-800 text-sm">Analyses</h3>
+                <h3 className="font-medium text-stone-800 text-sm">
+                  {currentPlan === 'pro' || currentPlan === 'premium' ? 'Combined actions' : 'Analyses'}
+                </h3>
                 <div className="w-8 h-8 bg-stone-200 rounded-lg flex items-center justify-center">
                   <svg className="w-4 h-4 text-stone-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
@@ -539,10 +549,12 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
                 </div>
               </div>
               <div className="text-2xl font-bold text-stone-800 mb-1">
-                {usageStats.analysesRemaining === -1 ? '∞' : usageStats.analysesRemaining}
+                {(currentPlan === 'pro' || currentPlan === 'premium') && usageStats.combinedActionsRemaining != null
+                  ? (usageStats.combinedActionsRemaining === -1 ? '∞' : usageStats.combinedActionsRemaining)
+                  : (usageStats.analysesRemaining === -1 ? '∞' : usageStats.analysesRemaining)}
               </div>
               <div className="text-xs text-stone-500">
-                {currentPlan === 'free' ? 'analyses remaining' : currentPlan === 'pro' ? '99/month' : '199/month'}
+                {currentPlan === 'free' ? 'analyses remaining' : currentPlan === 'pro' ? '99 combined/month' : '999 combined/month (10× Pro)'}
               </div>
             </div>
 

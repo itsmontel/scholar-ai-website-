@@ -525,9 +525,9 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
                     {userStats.subscriptionPlan === 'free'
                       ? '3 documents, 3 analyses per month, 2 citation searches'
                       : userStats.subscriptionPlan === 'pro'
-                      ? 'Unlimited documents, 99 analyses, 99 citation searches (Pro)'
+                      ? 'Unlimited documents, 19 analyses, 19 citation searches (Pro)'
                       : userStats.subscriptionPlan === 'premium'
-                      ? 'Unlimited documents, 199 analyses, 199 citation searches (Premium)'
+                      ? 'Unlimited documents, 999 combined/mo (10× Pro) (Premium)'
                       : 'Basic features included'
                     }
                   </div>
@@ -551,19 +551,16 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
                   {userStats.subscriptionPlan === 'pro' && (
                     <>
                       <div>• Unlimited document uploads</div>
-                      <div>• 99 AI essay analyses per month</div>
-                      <div>• 99 citation searches per month</div>
-                      <div>• 999,999 Humanizer/Summarizer words</div>
-                      <div>• 99 study packs (lesson, flashcards, quiz, crossword & Crater Blast)</div>
+                      <div>• 99 combined (analyses, study packs & citations) per month</div>
+                      <div>• 99,999 Humanizer/Summarizer words</div>
                       <div>• PDF & Word export</div>
                     </>
                   )}
                   {userStats.subscriptionPlan === 'premium' && (
                     <>
-                      <div>• Everything in Pro</div>
-                      <div>• 199 AI essay analyses per month</div>
-                      <div>• 199 study packs per month</div>
-                      <div>• 199 citation searches per month</div>
+                      <div>• Everything in Pro — 10× usage</div>
+                      <div>• 999 combined (analyses, study packs & citations) per month</div>
+                      <div>• 999,999 Humanizer/Summarizer words</div>
                       <div>• Top-tier premium AI model</div>
                       <div>• All quiz types & difficulty levels</div>
                       <div>• All summarizer styles & lengths</div>

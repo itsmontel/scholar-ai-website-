@@ -45,6 +45,14 @@ const UNLOCK_DURATION_OPTIONS = [
   { value: 24 * 60 * 60 * 1000, label: '24 hours' },
 ];
 
+// Pro: 10 sites, Premium: unlimited, Free: 1 site
+function getMaxSites(plan) {
+  const p = (plan || 'free').toLowerCase();
+  if (p === 'premium') return 99999;
+  if (p === 'pro') return 10;
+  return 1;
+}
+
 function clampSettings(settings) {
   const q = Math.min(15, Math.max(5, parseInt(settings.question_count, 10) || DEFAULT_QUESTION_COUNT));
   const qc = QUESTION_COUNT_OPTIONS.includes(q) ? q : DEFAULT_QUESTION_COUNT;
@@ -55,13 +63,12 @@ function clampSettings(settings) {
 }
 
 // @route   GET /api/focus-mode/settings
-// @desc    Get full Focus Mode settings (free: 1 site, paid: 20 sites)
+// @desc    Get full Focus Mode settings (free: 1, pro: 10, premium: unlimited)
 router.get('/settings', authenticateToken, async (req, res) => {
   try {
     const userId = req.user.id;
-    const plan = (req.user.subscription_plan || 'free').toLowerCase();
-    const isPaid = plan === 'pro' || plan === 'premium';
-    const maxSites = isPaid ? 20 : 1;
+    const plan = req.user.subscription_plan || 'free';
+    const maxSites = getMaxSites(plan);
     const supabase = getSupabase();
     const { data, error } = await supabase
       .from('focus_mode_settings')
@@ -80,7 +87,8 @@ router.get('/settings', authenticateToken, async (req, res) => {
         blockedDomains: domains,
         question_count: questionCount,
         pass_threshold: passThreshold,
-        unlock_duration_ms: unlockMs
+        unlock_duration_ms: unlockMs,
+        maxSites
       }
     });
   } catch (err) {
@@ -90,13 +98,12 @@ router.get('/settings', authenticateToken, async (req, res) => {
 });
 
 // @route   PUT /api/focus-mode/settings
-// @desc    Update Focus Mode settings (free: 1 site, paid: 20 sites)
+// @desc    Update Focus Mode settings (free: 1, pro: 10, premium: unlimited)
 router.put('/settings', authenticateToken, async (req, res) => {
   try {
     const userId = req.user.id;
-    const plan = (req.user.subscription_plan || 'free').toLowerCase();
-    const isPaid = plan === 'pro' || plan === 'premium';
-    const maxSites = isPaid ? 20 : 1;
+    const plan = req.user.subscription_plan || 'free';
+    const maxSites = getMaxSites(plan);
     const { blockedDomains, question_count, pass_threshold, unlock_duration_ms } = req.body;
     const supabase = getSupabase();
 
@@ -153,13 +160,12 @@ router.put('/settings', authenticateToken, async (req, res) => {
 });
 
 // @route   GET /api/focus-mode/blocked-sites
-// @desc    Get user's blocked sites (free: 1 site, paid: 20 sites)
+// @desc    Get user's blocked sites (free: 1, pro: 10, premium: unlimited)
 router.get('/blocked-sites', authenticateToken, async (req, res) => {
   try {
     const userId = req.user.id;
-    const plan = (req.user.subscription_plan || 'free').toLowerCase();
-    const isPaid = plan === 'pro' || plan === 'premium';
-    const maxSites = isPaid ? 20 : 1;
+    const plan = req.user.subscription_plan || 'free';
+    const maxSites = getMaxSites(plan);
     const supabase = getSupabase();
 
     const { data, error } = await supabase
@@ -184,13 +190,12 @@ router.get('/blocked-sites', authenticateToken, async (req, res) => {
 });
 
 // @route   PUT /api/focus-mode/blocked-sites
-// @desc    Update user's blocked sites (free: 1 site max, paid: 20 sites max)
+// @desc    Update blocked sites (free: 1, pro: 10, premium: unlimited)
 router.put('/blocked-sites', authenticateToken, async (req, res) => {
   try {
     const userId = req.user.id;
-    const plan = (req.user.subscription_plan || 'free').toLowerCase();
-    const isPaid = plan === 'pro' || plan === 'premium';
-    const maxSites = isPaid ? 20 : 1;
+    const plan = req.user.subscription_plan || 'free';
+    const maxSites = getMaxSites(plan);
     const { blockedDomains } = req.body;
 
     if (!Array.isArray(blockedDomains)) {
@@ -399,13 +404,12 @@ router.get('/unlock-quiz', authenticateToken, async (req, res) => {
 
 // @route   GET /api/focus-mode/config
 // @desc    Extension: get blocked domains + plan (requires token for sync)
-// Free users: 1 site max, paid users: 20 sites max
+// Free: 1, Pro: 10, Premium: unlimited
 router.get('/config', authenticateToken, async (req, res) => {
   try {
     const userId = req.user.id;
-    const plan = (req.user.subscription_plan || 'free').toLowerCase();
-    const isPaid = plan === 'pro' || plan === 'premium';
-    const maxSites = isPaid ? 20 : 1;
+    const plan = req.user.subscription_plan || 'free';
+    const maxSites = getMaxSites(plan);
 
     const supabase = getSupabase();
     const { data } = await supabase

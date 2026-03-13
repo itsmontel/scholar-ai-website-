@@ -163,17 +163,14 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
       monthlyPrice: 0,
       yearlyPrice: 0,
       features: [
-        '3 documents per month',
-        '3 AI essay analyses per month',
-        '2 study pack generations/month (lesson, flashcards & quiz — crossword & Crater Blast unlock with Pro)',
-        '5,000 words/month for Humanizer & Summarizer',
-        '2 citation searches per month',
-        'Basic grammar check',
-        'Standard citation styles'
+        '3 documents, 3 analyses, 2 study packs/mo',
+        '5,000 words Humanizer & Summarizer',
+        '2 citation searches',
+        'Basic grammar & citation styles'
       ],
       limitations: [
-        'Quiz & crossword locked (Pro feature)',
-        'Limited to 3 documents',
+        'Quiz & crossword locked (Pro)',
+        '3 documents max',
         'Basic AI model'
       ],
       popular: false,
@@ -187,15 +184,13 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
       monthlyPrice: 19.99,
       yearlyPrice: 199.99,
       features: [
-        'Unlimited document uploads',
-        '99 AI essay analyses per month',
-        '99 study pack generations (lesson, flashcards, quiz & crossword)',
-        '999,999 words/month for Humanizer & Summarizer',
-        '99 citation searches per month',
-        'All citation styles (APA, MLA, Chicago, Harvard…)',
-        'Grammar and style checks',
-        'Export to PDF & Word',
-        'Study tools history'
+        'Unlimited documents',
+        '99 combined analyses, study packs & citations/mo',
+        '99,999 words Humanizer & Summarizer',
+        'All citation styles, PDF/Word export',
+        'Focus Mode (10 sites)',
+        'Quiz, flashcards, crossword & Crater Blast',
+        'Summarizer (all lengths & styles)'
       ],
       limitations: [],
       popular: true,
@@ -213,16 +208,13 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
       monthlyPrice: 39.99,
       yearlyPrice: 399.99,
       features: [
-        'Everything in Pro',
-        '199 AI essay analyses per month',
-        '199 study pack generations per month',
-        '199 citation searches per month',
-        'Our top-tier premium AI model',
-        'All quiz types & difficulty levels unlocked',
-        'All summarizer styles & lengths unlocked',
-        'Advanced AI essay analysis',
-        'Advanced grammar and style checking',
-        'Priority support'
+        'Everything in Pro • 10× usage',
+        '999 combined analyses, study packs & citations/mo',
+        '999,999 words Humanizer & Summarizer',
+        'Premium AI model, advanced essay analysis',
+        'Priority support',
+        'Focus Mode (unlimited sites)',
+        'Larger document uploads (up to 1GB)'
       ],
       limitations: [],
       popular: false,
@@ -246,7 +238,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
     },
     {
       question: "What's the difference between Pro and Premium?",
-      answer: "Pro gives you unlimited documents, 99 AI analyses per month, 99 study pack generations with full access to lesson, flashcards, quiz, crossword & Crater Blast, 999,999 Humanizer/Summarizer words, 99 citation searches per month, all citation styles, and PDF/Word export. Premium upgrades you to 199 analyses, 199 study packs, and 199 citation searches per month, our top-tier premium AI model, all quiz types and difficulty levels, all summarizer styles and lengths, advanced essay analysis, advanced grammar checking, and priority support."
+      answer: "Pro: 99 combined actions (analyses, study packs & citations)/mo, 99,999 words for Humanizer & Summarizer, all citation styles, Focus Mode (10 sites). Premium gives you 10× the usage: 999 combined actions/mo, 999,999 words, plus unlimited Focus Mode, premium AI model, advanced analysis, and priority support."
     },
     {
       question: "Can I change my plan after subscribing?",
@@ -368,6 +360,13 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
                 <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
                   <span className="bg-gradient-to-r from-indigo-500 to-violet-600 text-white px-4 py-1 rounded-full text-sm font-bold shadow-lg shadow-indigo-500/25">
                     Most Popular
+                  </span>
+                </div>
+              )}
+              {plan.id === 'premium' && (
+                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                  <span className="bg-gradient-to-r from-amber-500 to-orange-600 text-white px-4 py-1 rounded-full text-sm font-bold shadow-lg shadow-amber-500/25">
+                    10× Usage
                   </span>
                 </div>
               )}

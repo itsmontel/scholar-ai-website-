@@ -71,10 +71,10 @@ interface ActivityItem {
 }
 
 const activityMeta: Record<ActivityItem['type'], { emoji: string; bg: string; label: string; cardBg: string; border: string; accent: string; shape: 'circle' | 'square' | 'diamond' }> = {
-  document: { emoji: '📄', bg: 'bg-blue-100 dark:bg-blue-900/30', label: 'Uploaded', cardBg: 'from-blue-50 to-sky-50 dark:from-blue-900/20 dark:to-sky-900/20', border: 'border-blue-200/70 dark:border-blue-700/40', accent: 'text-blue-700 dark:text-blue-300', shape: 'circle' },
+  document: { emoji: '📄', bg: 'bg-rose-100 dark:bg-rose-900/30', label: 'Uploaded', cardBg: 'from-rose-50 to-pink-50 dark:from-rose-900/20 dark:to-pink-900/20', border: 'border-rose-200/70 dark:border-rose-700/40', accent: 'text-rose-700 dark:text-rose-300', shape: 'circle' },
   analysis: { emoji: '🔍', bg: 'bg-rose-100 dark:bg-rose-900/30', label: 'Analyzed', cardBg: 'from-rose-50 to-pink-50 dark:from-rose-900/20 dark:to-pink-900/20', border: 'border-rose-200/70 dark:border-rose-700/40', accent: 'text-rose-700 dark:text-rose-300', shape: 'square' },
   quiz: { emoji: '🎯', bg: 'bg-amber-100 dark:bg-amber-900/30', label: 'Quiz', cardBg: 'from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20', border: 'border-amber-200/70 dark:border-amber-700/40', accent: 'text-amber-700 dark:text-amber-300', shape: 'circle' },
-  study_pack: { emoji: '📦', bg: 'bg-sky-100 dark:bg-sky-900/30', label: 'Study Pack', cardBg: 'from-sky-50 to-blue-50 dark:from-sky-900/20 dark:to-blue-900/20', border: 'border-sky-200/70 dark:border-sky-700/40', accent: 'text-sky-700 dark:text-sky-300', shape: 'diamond' },
+  study_pack: { emoji: '📦', bg: 'bg-amber-100 dark:bg-amber-900/30', label: 'Study Pack', cardBg: 'from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20', border: 'border-amber-200/70 dark:border-amber-700/40', accent: 'text-amber-700 dark:text-amber-300', shape: 'diamond' },
   flashcard: { emoji: '🃏', bg: 'bg-violet-100 dark:bg-violet-900/30', label: 'Flashcards', cardBg: 'from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20', border: 'border-violet-200/70 dark:border-violet-700/40', accent: 'text-violet-700 dark:text-violet-300', shape: 'diamond' },
   crossword: { emoji: '🧩', bg: 'bg-orange-100 dark:bg-orange-900/30', label: 'Crossword', cardBg: 'from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20', border: 'border-orange-200/70 dark:border-orange-700/40', accent: 'text-orange-700 dark:text-orange-300', shape: 'square' },
   lesson: { emoji: '🎓', bg: 'bg-violet-100 dark:bg-violet-900/30', label: 'Lesson', cardBg: 'from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20', border: 'border-violet-200/70 dark:border-violet-700/40', accent: 'text-violet-700 dark:text-violet-300', shape: 'circle' },
@@ -1988,11 +1988,11 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
               <StreakWidget />
             </div>
 
-            {/* Quick Review Button */}
+            {/* Quick Review Button - hidden on desktop (moved to usage row with same size) */}
             <button
               onClick={() => setShowQuickReview(true)}
               data-tutorial="quick-review-btn"
-              className="w-full group bg-gradient-to-br from-violet-500 to-purple-600 hover:from-violet-400 hover:to-purple-500 rounded-2xl p-4 shadow-lg shadow-violet-500/25 hover:shadow-xl hover:shadow-violet-500/30 transition-all hover:scale-[1.02]"
+              className="hidden lg:hidden w-full group bg-gradient-to-br from-violet-500 to-purple-600 hover:from-violet-400 hover:to-purple-500 rounded-2xl p-4 shadow-lg shadow-violet-500/25 hover:shadow-xl hover:shadow-violet-500/30 transition-all hover:scale-[1.02]"
             >
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
@@ -2053,15 +2053,23 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                       key={i}
                       type="button"
                       onClick={() => openAddModal(d.date)}
-                      className={`w-full p-1.5 relative cursor-pointer rounded-lg transition-all ${
+                      className={`w-full flex items-center justify-center p-1.5 relative cursor-pointer rounded-lg transition-all ${
                         !d.isCurrentMonth ? 'text-stone-300 dark:text-stone-600' :
-                        today ? 'bg-gradient-to-br from-violet-500 to-purple-600 text-white font-bold shadow-lg shadow-violet-500/30 scale-110' :
+                        today ? 'text-white font-bold' :
                         'text-stone-700 dark:text-stone-300 hover:bg-violet-100 dark:hover:bg-violet-900/30 hover:text-violet-700'
                       }`}
                     >
-                      {d.day}
-                      {events.length > 0 && !today && (
-                        <span className={`absolute bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full ${eventTypeColors[events[0].event_type]?.dot || 'bg-violet-400'}`}></span>
+                      {today ? (
+                        <span className="inline-flex items-center justify-center min-w-[1.75rem] min-h-[1.75rem] w-fit px-1.5 py-0.5 leading-none tabular-nums rounded-full bg-gradient-to-br from-violet-500 to-purple-600 shadow-lg shadow-violet-500/30 text-white font-bold">
+                          {d.day}
+                        </span>
+                      ) : (
+                        <>
+                          {d.day}
+                          {events.length > 0 && (
+                            <span className={`absolute bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full ${eventTypeColors[events[0].event_type]?.dot || 'bg-violet-400'}`}></span>
+                          )}
+                        </>
                       )}
                     </button>
                   );
@@ -2314,9 +2322,10 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                 </div>
               )}
 
-              {/* Usage Overview Widget */}
+              {/* Usage Overview Widget + Quick Review (desktop: same row, Quick Review same size as sidebar) */}
               {!loadingStats && (
-                <div className="mt-4 p-4 rounded-xl bg-gradient-to-r from-stone-50 to-stone-100/50 dark:from-stone-800/50 dark:to-stone-800/30 border border-stone-200/60 dark:border-stone-700/40">
+                <div className="mt-4 flex flex-col lg:flex-row gap-3 lg:gap-4 lg:items-stretch">
+                  <div className="lg:flex-[3] lg:min-w-0 flex-1 p-4 rounded-xl bg-gradient-to-r from-stone-50 to-stone-100/50 dark:from-stone-800/50 dark:to-stone-800/30 border border-stone-200/60 dark:border-stone-700/40">
                   <div className="flex items-center justify-between mb-3">
                     <h3 className="text-sm font-semibold text-stone-700 dark:text-stone-200 flex items-center gap-2">
                       <svg className="w-4 h-4 text-violet-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2329,48 +2338,67 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                     </span>
                   </div>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                    <div className="bg-white dark:bg-stone-700/50 rounded-lg p-2.5 border border-stone-200/50 dark:border-stone-600/30">
-                      <div className="flex items-center gap-1.5 mb-1">
-                        <span className="text-sm">🔍</span>
-                        <span className="text-xs text-stone-500 dark:text-stone-400">Analyses</span>
+                    {(usageStats.plan === 'pro' || usageStats.plan === 'premium') && (usageStats as any).combinedActionsRemaining != null ? (
+                      <div className="bg-white dark:bg-stone-700/50 rounded-lg p-2.5 border border-stone-200/50 dark:border-stone-600/30 sm:col-span-2">
+                        <div className="flex items-center gap-1.5 mb-1">
+                          <span className="text-sm">⚡</span>
+                          <span className="text-xs text-stone-500 dark:text-stone-400">Combined (analyses, study packs, citations)</span>
+                        </div>
+                        <div className={`text-lg font-bold ${
+                          (usageStats as any).combinedActionsRemaining === -1 ? 'text-lime-600 dark:text-lime-400' :
+                          (usageStats as any).combinedActionsRemaining <= 0 ? 'text-red-500' :
+                          (usageStats as any).combinedActionsRemaining <= 10 ? 'text-amber-500' : 'text-stone-800 dark:text-stone-100'
+                        }`}>
+                          {(usageStats as any).combinedActionsRemaining === -1 ? '∞' : (usageStats as any).combinedActionsRemaining}
+                          <span className="text-xs font-normal text-stone-400 ml-0.5">left</span>
+                        </div>
                       </div>
-                      <div className={`text-lg font-bold ${
-                        usageStats.analysesRemaining === -1 ? 'text-lime-600 dark:text-lime-400' :
-                        usageStats.analysesRemaining <= 0 ? 'text-red-500' :
-                        usageStats.analysesRemaining <= 1 ? 'text-amber-500' : 'text-stone-800 dark:text-stone-100'
-                      }`}>
-                        {usageStats.analysesRemaining === -1 ? '∞' : usageStats.analysesRemaining}
-                        <span className="text-xs font-normal text-stone-400 ml-0.5">left</span>
-                      </div>
-                    </div>
-                    <div className="bg-white dark:bg-stone-700/50 rounded-lg p-2.5 border border-stone-200/50 dark:border-stone-600/30">
-                      <div className="flex items-center gap-1.5 mb-1">
-                        <span className="text-sm">📚</span>
-                        <span className="text-xs text-stone-500 dark:text-stone-400">Citations</span>
-                      </div>
-                      <div className={`text-lg font-bold ${
-                        usageStats.citationsRemaining === -1 ? 'text-lime-600 dark:text-lime-400' :
-                        usageStats.citationsRemaining <= 0 ? 'text-red-500' :
-                        usageStats.citationsRemaining <= 1 ? 'text-amber-500' : 'text-stone-800 dark:text-stone-100'
-                      }`}>
-                        {usageStats.citationsRemaining === -1 ? '∞' : usageStats.citationsRemaining}
-                        <span className="text-xs font-normal text-stone-400 ml-0.5">left</span>
-                      </div>
-                    </div>
-                    <div className="bg-white dark:bg-stone-700/50 rounded-lg p-2.5 border border-stone-200/50 dark:border-stone-600/30">
-                      <div className="flex items-center gap-1.5 mb-1">
-                        <span className="text-sm">📦</span>
-                        <span className="text-xs text-stone-500 dark:text-stone-400">Study Packs</span>
-                      </div>
-                      <div className={`text-lg font-bold ${
-                        usageStats.studyPacksRemaining === -1 ? 'text-lime-600 dark:text-lime-400' :
-                        usageStats.studyPacksRemaining <= 0 ? 'text-red-500' :
-                        usageStats.studyPacksRemaining <= 1 ? 'text-amber-500' : 'text-stone-800 dark:text-stone-100'
-                      }`}>
-                        {usageStats.studyPacksRemaining === -1 ? '∞' : usageStats.studyPacksRemaining}
-                        <span className="text-xs font-normal text-stone-400 ml-0.5">left</span>
-                      </div>
-                    </div>
+                    ) : (
+                      <>
+                        <div className="bg-white dark:bg-stone-700/50 rounded-lg p-2.5 border border-stone-200/50 dark:border-stone-600/30">
+                          <div className="flex items-center gap-1.5 mb-1">
+                            <span className="text-sm">🔍</span>
+                            <span className="text-xs text-stone-500 dark:text-stone-400">Analyses</span>
+                          </div>
+                          <div className={`text-lg font-bold ${
+                            usageStats.analysesRemaining === -1 ? 'text-lime-600 dark:text-lime-400' :
+                            usageStats.analysesRemaining <= 0 ? 'text-red-500' :
+                            usageStats.analysesRemaining <= 1 ? 'text-amber-500' : 'text-stone-800 dark:text-stone-100'
+                          }`}>
+                            {usageStats.analysesRemaining === -1 ? '∞' : usageStats.analysesRemaining}
+                            <span className="text-xs font-normal text-stone-400 ml-0.5">left</span>
+                          </div>
+                        </div>
+                        <div className="bg-white dark:bg-stone-700/50 rounded-lg p-2.5 border border-stone-200/50 dark:border-stone-600/30">
+                          <div className="flex items-center gap-1.5 mb-1">
+                            <span className="text-sm">📚</span>
+                            <span className="text-xs text-stone-500 dark:text-stone-400">Citations</span>
+                          </div>
+                          <div className={`text-lg font-bold ${
+                            usageStats.citationsRemaining === -1 ? 'text-lime-600 dark:text-lime-400' :
+                            usageStats.citationsRemaining <= 0 ? 'text-red-500' :
+                            usageStats.citationsRemaining <= 1 ? 'text-amber-500' : 'text-stone-800 dark:text-stone-100'
+                          }`}>
+                            {usageStats.citationsRemaining === -1 ? '∞' : usageStats.citationsRemaining}
+                            <span className="text-xs font-normal text-stone-400 ml-0.5">left</span>
+                          </div>
+                        </div>
+                        <div className="bg-white dark:bg-stone-700/50 rounded-lg p-2.5 border border-stone-200/50 dark:border-stone-600/30">
+                          <div className="flex items-center gap-1.5 mb-1">
+                            <span className="text-sm">📦</span>
+                            <span className="text-xs text-stone-500 dark:text-stone-400">Study Packs</span>
+                          </div>
+                          <div className={`text-lg font-bold ${
+                            usageStats.studyPacksRemaining === -1 ? 'text-lime-600 dark:text-lime-400' :
+                            usageStats.studyPacksRemaining <= 0 ? 'text-red-500' :
+                            usageStats.studyPacksRemaining <= 1 ? 'text-amber-500' : 'text-stone-800 dark:text-stone-100'
+                          }`}>
+                            {usageStats.studyPacksRemaining === -1 ? '∞' : usageStats.studyPacksRemaining}
+                            <span className="text-xs font-normal text-stone-400 ml-0.5">left</span>
+                          </div>
+                        </div>
+                      </>
+                    )}
                     <div className="bg-white dark:bg-stone-700/50 rounded-lg p-2.5 border border-stone-200/50 dark:border-stone-600/30">
                       <div className="flex items-center gap-1.5 mb-1">
                         <span className="text-sm">📄</span>
@@ -2397,6 +2425,26 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                     </div>
                   )}
                 </div>
+                {/* Quick Review - same size as sidebar (240px, compact height, no stretch) */}
+                <button
+                  onClick={() => setShowQuickReview(true)}
+                  data-tutorial="quick-review-btn"
+                  className="lg:w-[240px] lg:min-w-[240px] lg:flex-none lg:self-start w-full group bg-gradient-to-br from-violet-500 to-purple-600 hover:from-violet-400 hover:to-purple-500 rounded-2xl p-4 shadow-lg shadow-violet-500/25 hover:shadow-xl hover:shadow-violet-500/30 transition-all hover:scale-[1.02]"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
+                      <span className="text-xl">🧠</span>
+                    </div>
+                    <div className="text-left min-w-0">
+                      <div className="text-white font-bold text-sm">Quick Review</div>
+                      <div className="text-violet-200 text-xs">Test your memory</div>
+                    </div>
+                    <svg className="w-5 h-5 text-white/70 ml-auto group-hover:translate-x-1 transition-transform flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </div>
+                </button>
+              </div>
               )}
             </div>
 
@@ -3011,7 +3059,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                   <span className="text-xl sm:text-2xl">📝</span>
                   <div className="min-w-0">
                     <p className="text-teal-800 dark:text-teal-200 font-medium text-xs sm:text-sm">
-                      {usageStats.plan === 'free' ? `Free: 5,000 words/mo • ${getResetsInText((usageStats as any).daysUntilReset)}` : 'Pro: 999,999 words/mo'}
+                      {usageStats.plan === 'free' ? `Free: 5,000 words/mo • ${getResetsInText((usageStats as any).daysUntilReset)}` : usageStats.plan === 'premium' ? 'Premium: 999,999 words/mo' : 'Pro: 99,999 words/mo'}
                       {!isPremiumUser && ' • Bullet + Medium'}
                     </p>
                     <p className="text-teal-600 dark:text-teal-400 text-[10px] sm:text-xs mt-0.5 line-clamp-2">Upgrade for all styles, lengths & premium AI</p>
@@ -4215,6 +4263,11 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                     History
                   </button>
                 )}
+                {recentActivity.some(a => a.type === 'citation') && (
+                  <button onClick={() => onNavigate('citation-history')} className="text-xs sm:text-sm text-sky-600 dark:text-sky-400 hover:text-sky-700 dark:hover:text-sky-300 font-semibold transition-colors px-2 py-1 rounded-lg active:bg-sky-50 dark:active:bg-sky-900/30">
+                    Citations
+                  </button>
+                )}
               </div>
             )}
           </div>
@@ -4345,9 +4398,24 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                   const events = getEventsForDate(d.date);
                   const today = isToday(d.date);
                   return (
-                    <div key={i} className={`p-1 relative cursor-pointer rounded-lg transition-all ${!d.isCurrentMonth ? 'text-stone-300 dark:text-stone-600' : today ? 'bg-gradient-to-br from-violet-500 to-purple-600 text-white font-bold shadow-lg shadow-violet-500/30 scale-110' : 'text-stone-700 dark:text-stone-300 hover:bg-violet-100 dark:hover:bg-violet-900/30 hover:text-violet-700'}`}>
-                      {d.day}
-                      {events.length > 0 && !today && <span className={`absolute bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full ${eventTypeColors[events[0].event_type]?.dot || 'bg-violet-400'}`}></span>}
+                    <div
+                      key={i}
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => openAddModal(d.date)}
+                      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openAddModal(d.date); } }}
+                      className={`flex items-center justify-center p-1.5 relative cursor-pointer rounded-lg transition-all ${!d.isCurrentMonth ? 'text-stone-300 dark:text-stone-600' : today ? 'text-white font-bold' : 'text-stone-700 dark:text-stone-300 hover:bg-violet-100 dark:hover:bg-violet-900/30 hover:text-violet-700'}`}
+                    >
+                      {today ? (
+                        <span className="inline-flex items-center justify-center min-w-[1.75rem] min-h-[1.75rem] w-fit px-1.5 py-0.5 leading-none tabular-nums rounded-full bg-gradient-to-br from-violet-500 to-purple-600 shadow-lg shadow-violet-500/30 text-white font-bold">
+                          {d.day}
+                        </span>
+                      ) : (
+                        <>
+                          {d.day}
+                          {events.length > 0 && <span className={`absolute bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full ${eventTypeColors[events[0].event_type]?.dot || 'bg-violet-400'}`}></span>}
+                        </>
+                      )}
                     </div>
                   );
                 })}

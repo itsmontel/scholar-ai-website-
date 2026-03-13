@@ -65,7 +65,7 @@ function domainToRuleId(domain, idx) {
 function normalizeDomains(domains) {
   return [...new Set(
     domains
-      .slice(0, 20)
+      .slice(0, 500)
       .map(d => String(d).toLowerCase().trim())
       .filter(d => d.length > 0)
       .map(d => {
