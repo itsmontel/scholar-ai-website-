@@ -62,13 +62,13 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
             <h4 className="font-semibold text-white mb-4 text-sm">Free Tools</h4>
             <ul className="space-y-3">
               <li>
-                <a href="/tools/word-counter" onClick={(e) => { e.preventDefault(); onNavigate?.('word-counter'); }} className="text-stone-400 hover:text-white text-sm transition-colors">
-                  Word Counter
+                <a href="/tools/citation-generator" onClick={(e) => { e.preventDefault(); onNavigate?.('citation-generator-tool'); }} className="text-stone-400 hover:text-white text-sm transition-colors">
+                  Citation Generator
                 </a>
               </li>
               <li>
-                <a href="/tools/citation-generator" onClick={(e) => { e.preventDefault(); onNavigate?.('citation-generator-tool'); }} className="text-stone-400 hover:text-white text-sm transition-colors">
-                  Citation Generator
+                <a href="/tools/word-counter" onClick={(e) => { e.preventDefault(); onNavigate?.('word-counter'); }} className="text-stone-400 hover:text-white text-sm transition-colors">
+                  Word Counter
                 </a>
               </li>
               <li>

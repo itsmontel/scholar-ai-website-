@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import DOMPurify from 'dompurify';
 import Header from '../../common/Header';
 import Footer from '../../common/Footer';
@@ -96,6 +96,42 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
     }
   }, []);
   const [copied, setCopied] = useState(false);
+  const [openFAQ, setOpenFAQ] = useState<number | null>(null);
+  const [showMoreSourceTypes, setShowMoreSourceTypes] = useState(false);
+  const [openStyleGuide, setOpenStyleGuide] = useState(false);
+  const citationOutputRef = useRef<HTMLDivElement>(null);
+
+  // Scroll to citation output when citation is generated (helps mobile UX)
+  useEffect(() => {
+    if (citation && citationOutputRef.current) {
+      citationOutputRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }, [citation]);
+
+  // FAQPage schema for SEO / rich snippets in search results
+  useEffect(() => {
+    const faqSchema = {
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: [
+        { '@type': 'Question', name: 'What citation styles does this generator support?', acceptedAnswer: { '@type': 'Answer', text: 'We support APA 7th edition, MLA 9th edition, Chicago 17th edition, Harvard, IEEE, and Vancouver. Choose your style and source type to format citations correctly.' } },
+        { '@type': 'Question', name: 'Is the Citation Generator free?', acceptedAnswer: { '@type': 'Answer', text: 'Yes. The Citation Generator is completely free with no signup required. Create APA, MLA, Chicago, Harvard, IEEE, and Vancouver citations for books, journals, websites, and 12 source types—instantly.' } },
+        { '@type': 'Question', name: 'Can I cite websites, journals, and books?', acceptedAnswer: { '@type': 'Answer', text: 'Yes. You can generate citations for books, journals, websites, newspapers, conference papers, theses, videos, podcasts, reports, ebooks, magazines, and encyclopedias. Select the source type and fill in the details.' } },
+        { '@type': 'Question', name: 'Do I need to create an account?', acceptedAnswer: { '@type': 'Answer', text: 'No. The Citation Generator works without an account. Just select your citation style, choose the source type, enter the details, and copy your formatted citation.' } },
+        { '@type': 'Question', name: 'Should I verify my citations?', acceptedAnswer: { '@type': 'Answer', text: 'Yes. Always verify citations against your style guide or professor\'s requirements. Formatting rules vary by edition and institution. Use this tool as a starting point, then double-check.' } },
+        { '@type': 'Question', name: 'What\'s the difference between Citation Generator and Citation Finder?', acceptedAnswer: { '@type': 'Answer', text: 'The Citation Generator formats citations when you already have the source details. Citation Finder (in WriteScholar) searches academic databases to find relevant sources for your topic—then formats them. Use the generator for manual entries; use the finder to discover sources.' } }
+      ]
+    };
+    const script = document.createElement('script');
+    script.type = 'application/ld+json';
+    script.textContent = JSON.stringify(faqSchema);
+    script.id = 'faq-schema-citation-generator';
+    document.head.appendChild(script);
+    return () => {
+      const el = document.getElementById('faq-schema-citation-generator');
+      if (el) el.remove();
+    };
+  }, []);
 
   const handleInputChange = (field: keyof FormData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -500,11 +536,13 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
     trackCopy();
   };
 
-  const sourceTypes = [
+  const primarySourceTypes = [
     { value: 'book', label: 'Book', icon: '📚' },
-    { value: 'ebook', label: 'E-Book', icon: '📱' },
-    { value: 'journal', label: 'Journal', icon: '📄' },
     { value: 'website', label: 'Website', icon: '🌐' },
+    { value: 'journal', label: 'Journal', icon: '📄' },
+  ];
+  const moreSourceTypes = [
+    { value: 'ebook', label: 'E-Book', icon: '📱' },
     { value: 'newspaper', label: 'Newspaper', icon: '📰' },
     { value: 'magazine', label: 'Magazine', icon: '📖' },
     { value: 'conference', label: 'Conference', icon: '🎤' },
@@ -1223,32 +1261,32 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
     <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%)' }}>
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="citation-generator-tool" />
 
-      {/* Hero Section */}
-      <section className="py-16 sm:py-20 bg-gradient-to-b from-violet-50/50 to-white">
+      {/* Hero Section - compact for above-the-fold tool visibility */}
+      <section className="py-8 sm:py-12 bg-gradient-to-b from-violet-50/50 to-white">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center max-w-3xl mx-auto">
-            <div className="inline-flex items-center justify-center mb-6">
-              <ScholarMascot size={80} animated={false} pose="default" />
+            <div className="inline-flex items-center justify-center mb-4">
+              <ScholarMascot size={56} animated={false} pose="default" />
             </div>
-            <span className="inline-flex items-center px-4 py-1.5 bg-violet-100 text-violet-700 rounded-full text-sm font-semibold mb-5">
+            <span className="inline-flex items-center px-4 py-1.5 bg-violet-100 text-violet-700 rounded-full text-sm font-semibold mb-3">
               Free Tool
             </span>
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-5 leading-tight">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-3 leading-tight">
               Citation Generator
             </h1>
-            <p className="text-lg text-gray-500 leading-relaxed max-w-2xl mx-auto">
-              Generate properly formatted citations in APA, MLA, Chicago, Harvard, IEEE, and Vancouver styles for 12 different source types.
+            <p className="text-base sm:text-lg text-gray-500 leading-relaxed max-w-2xl mx-auto">
+              APA, MLA, Chicago, Harvard, IEEE & Vancouver for 12 source types.
             </p>
           </div>
         </div>
       </section>
 
       {/* Main Tool Section */}
-      <section className="py-12 sm:py-16">
+      <section className="py-8 sm:py-12">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="grid lg:grid-cols-2 gap-8">
-            {/* Input Form */}
-            <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow">
+          <div className="grid lg:grid-cols-2 gap-6 lg:gap-8">
+            {/* Input Form - order-2 on mobile so output appears first */}
+            <div className="order-2 lg:order-1 bg-white border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow">
               <h2 className="text-lg font-semibold text-gray-900 mb-6">Source Details</h2>
               
               {/* Citation Style Selection */}
@@ -1271,15 +1309,15 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
                 </div>
               </div>
 
-              {/* Source Type Selection */}
+              {/* Source Type Selection - Book, Website, Journal first; more expandable */}
               <div className="mb-6">
                 <label className="block text-sm font-medium text-gray-700 mb-2">Source Type</label>
-                <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
-                  {sourceTypes.map((type) => (
+                <div className="grid grid-cols-3 gap-2">
+                  {primarySourceTypes.map((type) => (
                     <button
                       key={type.value}
                       onClick={() => setSourceType(type.value as SourceType)}
-                      className={`px-3 py-2 rounded-xl text-xs font-medium transition-all flex flex-col items-center justify-center space-y-1 ${
+                      className={`px-3 py-2.5 rounded-xl text-xs font-medium transition-all flex flex-col items-center justify-center space-y-1 ${
                         sourceType === type.value
                           ? 'bg-violet-600 text-white'
                           : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -1290,6 +1328,40 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
                     </button>
                   ))}
                 </div>
+                {showMoreSourceTypes ? (
+                  <div className="mt-2 grid grid-cols-3 sm:grid-cols-4 gap-2">
+                    {moreSourceTypes.map((type) => (
+                      <button
+                        key={type.value}
+                        onClick={() => setSourceType(type.value as SourceType)}
+                        className={`px-3 py-2 rounded-xl text-xs font-medium transition-all flex flex-col items-center justify-center space-y-1 ${
+                          sourceType === type.value
+                            ? 'bg-violet-600 text-white'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                      >
+                        <span className="text-base">{type.icon}</span>
+                        <span>{type.label}</span>
+                      </button>
+                    ))}
+                    <button
+                      onClick={() => {
+                        if (moreSourceTypes.some(t => t.value === sourceType)) setSourceType('book');
+                        setShowMoreSourceTypes(false);
+                      }}
+                      className="px-3 py-2 rounded-xl text-xs font-medium text-violet-600 hover:bg-violet-50 transition-all flex items-center justify-center gap-1"
+                    >
+                      Fewer
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setShowMoreSourceTypes(true)}
+                    className="mt-2 w-full py-2 rounded-xl text-xs font-medium text-violet-600 hover:bg-violet-50 transition-all"
+                  >
+                    + More (E-Book, Newspaper, Thesis, etc.)
+                  </button>
+                )}
               </div>
 
               {/* Dynamic Form Fields */}
@@ -1310,8 +1382,8 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
               </button>
             </div>
 
-            {/* Output Panel */}
-            <div className="space-y-6">
+            {/* Output Panel - order-1 on mobile (visible first), sticky on desktop */}
+            <div ref={citationOutputRef} className="order-1 lg:order-2 space-y-6 lg:sticky lg:top-24 lg:self-start">
               {/* Generated Citation */}
               <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
                 <div className="flex items-center justify-between mb-4">
@@ -1329,58 +1401,70 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
                     </button>
                   )}
                 </div>
-                <div className="bg-gray-50 rounded-xl p-4 min-h-[120px]">
+                <div className="bg-gray-50 rounded-xl p-4 min-h-[100px]">
                   {citation ? (
-                    <p className="text-gray-800 leading-relaxed" dangerouslySetInnerHTML={{ 
+                    <p className="text-gray-800 leading-relaxed text-sm sm:text-base" dangerouslySetInnerHTML={{ 
                       __html: DOMPurify.sanitize(String(citation).replace(/\*([^*]+)\*/g, '<em>$1</em>'), { ALLOWED_TAGS: ['em', 'i'] })
                     }} />
                   ) : (
-                    <p className="text-gray-400 italic">Your formatted citation will appear here...</p>
+                    <p className="text-gray-500 text-sm">
+                      Fill in author, title, and year below, then click <strong>Generate Citation</strong>.
+                    </p>
                   )}
                 </div>
               </div>
 
-              {/* Style Guide */}
-              <div className="bg-gradient-to-br from-indigo-600 to-violet-600 rounded-2xl p-6 text-white">
-                <h3 className="text-lg font-semibold mb-4">About {style.toUpperCase()} Style</h3>
-                <div className="text-sm opacity-90 space-y-2">
-                  {style === 'apa' && (
-                    <>
-                      <p>APA (American Psychological Association) 7th edition is commonly used in psychology, education, and social sciences.</p>
-                      <p>Key features: Author-date citations, hanging indent in references, DOIs for digital sources.</p>
-                    </>
-                  )}
-                  {style === 'mla' && (
-                    <>
-                      <p>MLA (Modern Language Association) 9th edition is standard for humanities, especially literature and languages.</p>
-                      <p>Key features: Author-page citations, Works Cited page, containers for sources.</p>
-                    </>
-                  )}
-                  {style === 'chicago' && (
-                    <>
-                      <p>Chicago style (17th edition) is versatile, used in history, arts, and many other fields.</p>
-                      <p>Key features: Notes-Bibliography or Author-Date system options.</p>
-                    </>
-                  )}
-                  {style === 'harvard' && (
-                    <>
-                      <p>Harvard referencing is widely used in UK and Australian universities across disciplines.</p>
-                      <p>Key features: Author-date citations, alphabetical reference list.</p>
-                    </>
-                  )}
-                  {style === 'ieee' && (
-                    <>
-                      <p>IEEE style is used in technical fields like engineering, computer science, and electronics.</p>
-                      <p>Key features: Numbered citations in square brackets, numerical reference list.</p>
-                    </>
-                  )}
-                  {style === 'vancouver' && (
-                    <>
-                      <p>Vancouver style is primarily used in medicine and biomedical sciences.</p>
-                      <p>Key features: Numbered citations, references in order of appearance.</p>
-                    </>
-                  )}
-                </div>
+              {/* Style Guide - collapsible */}
+              <div className="border border-indigo-200 rounded-2xl overflow-hidden">
+                <button
+                  onClick={() => setOpenStyleGuide(!openStyleGuide)}
+                  className="w-full flex items-center justify-between px-5 py-4 bg-gradient-to-br from-indigo-600 to-violet-600 text-white text-left hover:from-indigo-700 hover:to-violet-700 transition-colors"
+                >
+                  <h3 className="text-base font-semibold">About {style.toUpperCase()} Style</h3>
+                  <svg className={`w-5 h-5 flex-shrink-0 transition-transform ${openStyleGuide ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                {openStyleGuide && (
+                  <div className="px-5 py-4 bg-indigo-50/50 text-indigo-900 text-sm space-y-2">
+                    {style === 'apa' && (
+                      <>
+                        <p>APA (American Psychological Association) 7th edition is commonly used in psychology, education, and social sciences.</p>
+                        <p>Key features: Author-date citations, hanging indent in references, DOIs for digital sources.</p>
+                      </>
+                    )}
+                    {style === 'mla' && (
+                      <>
+                        <p>MLA (Modern Language Association) 9th edition is standard for humanities, especially literature and languages.</p>
+                        <p>Key features: Author-page citations, Works Cited page, containers for sources.</p>
+                      </>
+                    )}
+                    {style === 'chicago' && (
+                      <>
+                        <p>Chicago style (17th edition) is versatile, used in history, arts, and many other fields.</p>
+                        <p>Key features: Notes-Bibliography or Author-Date system options.</p>
+                      </>
+                    )}
+                    {style === 'harvard' && (
+                      <>
+                        <p>Harvard referencing is widely used in UK and Australian universities across disciplines.</p>
+                        <p>Key features: Author-date citations, alphabetical reference list.</p>
+                      </>
+                    )}
+                    {style === 'ieee' && (
+                      <>
+                        <p>IEEE style is used in technical fields like engineering, computer science, and electronics.</p>
+                        <p>Key features: Numbered citations in square brackets, numerical reference list.</p>
+                      </>
+                    )}
+                    {style === 'vancouver' && (
+                      <>
+                        <p>Vancouver style is primarily used in medicine and biomedical sciences.</p>
+                        <p>Key features: Numbered citations, references in order of appearance.</p>
+                      </>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* Disclaimer */}
@@ -1413,6 +1497,40 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
                 </ul>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ Section - SEO rich snippets */}
+      <section className="py-12 sm:py-16 bg-white">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6">
+          <h2 className="text-2xl font-bold text-gray-900 mb-8 text-center">Frequently Asked Questions</h2>
+          <div className="space-y-3">
+            {[
+              { q: 'What citation styles does this generator support?', a: 'We support APA 7th edition, MLA 9th edition, Chicago 17th edition, Harvard, IEEE, and Vancouver. Choose your style and source type to format citations correctly.' },
+              { q: 'Is the Citation Generator free?', a: 'Yes. The Citation Generator is completely free with no signup required. Create APA, MLA, Chicago, Harvard, IEEE, and Vancouver citations for books, journals, websites, and 12 source types—instantly.' },
+              { q: 'Can I cite websites, journals, and books?', a: 'Yes. You can generate citations for books, journals, websites, newspapers, conference papers, theses, videos, podcasts, reports, ebooks, magazines, and encyclopedias. Select the source type and fill in the details.' },
+              { q: 'Do I need to create an account?', a: 'No. The Citation Generator works without an account. Just select your citation style, choose the source type, enter the details, and copy your formatted citation.' },
+              { q: 'Should I verify my citations?', a: 'Always verify citations against your style guide or professor\'s requirements. Formatting rules vary by edition and institution. Use this tool as a starting point, then double-check.' },
+              { q: 'What\'s the difference between Citation Generator and Citation Finder?', a: 'The Citation Generator formats citations when you already have the source details. Citation Finder (in WriteScholar) searches academic databases to find relevant sources for your topic—then formats them. Use the generator for manual entries; use the finder to discover sources.' }
+            ].map((faq, idx) => (
+              <div key={idx} className="border border-gray-200 rounded-xl overflow-hidden hover:border-gray-300 transition-colors">
+                <button
+                  onClick={() => setOpenFAQ(openFAQ === idx ? null : idx)}
+                  className="w-full px-5 py-4 text-left flex items-center justify-between gap-4 bg-white"
+                >
+                  <span className="font-semibold text-gray-900 text-sm sm:text-base">{faq.q}</span>
+                  <svg className={`w-5 h-5 text-gray-400 flex-shrink-0 transition-transform ${openFAQ === idx ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                {openFAQ === idx && (
+                  <div className="px-5 pb-4 pt-0 text-gray-600 text-sm sm:text-base leading-relaxed border-t border-gray-100">
+                    {faq.a}
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
         </div>
       </section>

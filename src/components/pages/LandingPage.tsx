@@ -2052,8 +2052,8 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
         </div>
       </section>
 
-      {/* Try Our Free Writing Tools - moved here, styled like Complete Study Toolkit */}
-      <section className="py-12 sm:py-20 bg-white dark:bg-stone-900 hidden">
+      {/* Try Our Free Writing Tools - prominently features Citation Generator (top performer) */}
+      <section className="py-12 sm:py-20 bg-white dark:bg-stone-900">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="relative text-center mb-8 sm:mb-14">
             <span className="inline-block px-4 py-1.5 bg-lime-100 dark:bg-lime-900/50 text-lime-700 dark:text-lime-400 rounded-full text-sm font-semibold mb-4">100% Free</span>
@@ -2066,15 +2066,6 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
-            <button onClick={() => onNavigate('word-counter')} className="group relative bg-gradient-to-br from-lime-50 to-emerald-50 dark:from-lime-900/20 dark:to-emerald-900/20 rounded-3xl p-5 sm:p-6 text-left hover:shadow-2xl hover:shadow-lime-500/20 hover:-translate-y-2 transition-all duration-300 overflow-hidden border border-lime-100 dark:border-lime-800/50">
-              <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-lime-400/20 to-emerald-400/20 rounded-full -translate-y-1/2 translate-x-1/2" />
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-lime-500 to-emerald-600 flex items-center justify-center mb-4 shadow-lg shadow-lime-500/30 relative z-10">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" /></svg>
-              </div>
-              <h3 className="font-bold text-stone-800 dark:text-stone-100 text-base mb-1 relative z-10">Word Counter</h3>
-              <p className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed relative z-10">Count words, characters & reading time</p>
-            </button>
-
             <button onClick={() => onNavigate('citation-generator-tool')} className="group relative bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20 rounded-3xl p-5 sm:p-6 text-left hover:shadow-2xl hover:shadow-violet-500/20 hover:-translate-y-2 transition-all duration-300 overflow-hidden border border-violet-100 dark:border-violet-800/50">
               <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-violet-400/20 to-purple-400/20 rounded-full -translate-y-1/2 translate-x-1/2" />
               <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center mb-4 shadow-lg shadow-violet-500/30 relative z-10">
@@ -2082,6 +2073,15 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
               </div>
               <h3 className="font-bold text-stone-800 dark:text-stone-100 text-base mb-1 relative z-10">Citation Generator</h3>
               <p className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed relative z-10">APA, MLA, Chicago & more</p>
+            </button>
+
+            <button onClick={() => onNavigate('word-counter')} className="group relative bg-gradient-to-br from-lime-50 to-emerald-50 dark:from-lime-900/20 dark:to-emerald-900/20 rounded-3xl p-5 sm:p-6 text-left hover:shadow-2xl hover:shadow-lime-500/20 hover:-translate-y-2 transition-all duration-300 overflow-hidden border border-lime-100 dark:border-lime-800/50">
+              <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-lime-400/20 to-emerald-400/20 rounded-full -translate-y-1/2 translate-x-1/2" />
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-lime-500 to-emerald-600 flex items-center justify-center mb-4 shadow-lg shadow-lime-500/30 relative z-10">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" /></svg>
+              </div>
+              <h3 className="font-bold text-stone-800 dark:text-stone-100 text-base mb-1 relative z-10">Word Counter</h3>
+              <p className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed relative z-10">Count words, characters & reading time</p>
             </button>
 
             <button onClick={() => onNavigate('grammar-checker')} className="group relative bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 rounded-3xl p-5 sm:p-6 text-left hover:shadow-2xl hover:shadow-emerald-500/20 hover:-translate-y-2 transition-all duration-300 overflow-hidden border border-emerald-100 dark:border-emerald-800/50">
@@ -2136,23 +2136,6 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
               </div>
               <h3 className="font-bold text-stone-800 dark:text-stone-100 text-base mb-1 relative z-10">Paraphrasing Tips</h3>
               <p className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed relative z-10">Improve vocabulary & style</p>
-            </button>
-          </div>
-
-          <div className="mt-8">
-            <button onClick={() => onNavigate('humanizer')} className="group w-full relative bg-gradient-to-br from-lime-50 to-emerald-50 dark:from-lime-900/20 dark:to-emerald-900/20 rounded-3xl p-6 sm:p-8 text-left hover:shadow-2xl hover:shadow-lime-500/20 hover:-translate-y-1 transition-all duration-300 overflow-hidden border-2 border-lime-200 dark:border-lime-700/50">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-lime-400/20 to-emerald-400/20 rounded-full -translate-y-1/2 translate-x-1/2" />
-              <div className="absolute top-4 right-4 px-3 py-1 bg-lime-500 text-stone-900 text-xs font-bold rounded-full">PREMIUM</div>
-              <div className="flex items-center gap-6 relative z-10">
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-lime-500 to-emerald-600 flex items-center justify-center flex-shrink-0 shadow-lg shadow-lime-500/30 group-hover:scale-110 transition-transform">
-                  <span className="text-2xl">✨</span>
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-lg font-bold text-stone-800 dark:text-stone-100 mb-1">AI Text Humanizer</h3>
-                  <p className="text-sm text-stone-600 dark:text-stone-400">Humanize ChatGPT, GPT-4, Gemini, Claude & LLaMA text. Bypass AI detectors with natural, human-sounding writing.</p>
-                </div>
-                <svg className="w-6 h-6 text-lime-600 flex-shrink-0 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
-              </div>
             </button>
           </div>
         </div>

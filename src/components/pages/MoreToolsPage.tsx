@@ -8,8 +8,8 @@ interface MoreToolsPageProps {
 }
 
 const moreTools = [
-  { id: 'interactive-lesson', icon: '🎓', title: 'Lessons', desc: 'Turn text into engaging interactive lessons', gradient: 'from-violet-400 to-purple-500', page: 'interactive-lesson', free: false },
   { id: 'citation-generator-tool', icon: '📚', title: 'Citation Generator', desc: 'Format citations in APA, MLA, Chicago, Harvard', gradient: 'from-sky-400 to-blue-500', page: 'citation-generator-tool', free: true },
+  { id: 'interactive-lesson', icon: '🎓', title: 'Lessons', desc: 'Turn text into engaging interactive lessons', gradient: 'from-violet-400 to-purple-500', page: 'interactive-lesson', free: false },
   { id: 'word-counter', icon: '📊', title: 'Word Counter', desc: 'Count words, characters, sentences & reading time', gradient: 'from-blue-400 to-indigo-500', page: 'word-counter', free: true },
   { id: 'essay-outline', icon: '📋', title: 'Essay Outline', desc: 'Generate structured outlines for any essay type', gradient: 'from-teal-400 to-cyan-500', page: 'essay-outline', free: true },
   { id: 'thesis-generator', icon: '🎯', title: 'Thesis Generator', desc: 'Create strong thesis statements for your essays', gradient: 'from-violet-400 to-purple-500', page: 'thesis-generator', free: true },

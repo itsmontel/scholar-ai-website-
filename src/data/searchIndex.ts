@@ -21,7 +21,7 @@ const TOOL_ITEMS: SearchItem[] = [
   { page: 'analyze', label: 'Essay Analyzer', keywords: ['analyze', 'analysis', 'essay', 'feedback'] },
   { page: 'citations', label: 'Citation Finder', keywords: ['citation', 'citations', 'sources', 'apa', 'mla', 'references'] },
   { page: 'word-counter', label: 'Word Counter', keywords: ['word count', 'word counter', 'characters'] },
-  { page: 'citation-generator-tool', label: 'Citation Generator', keywords: ['citation generator', 'format', 'bibliography'] },
+  { page: 'citation-generator-tool', label: 'Citation Generator', keywords: ['citation generator', 'citation', 'apa', 'mla', 'chicago', 'harvard', 'ieee', 'vancouver', 'format', 'bibliography', 'references', 'cite'] },
   { page: 'grammar-checker', label: 'Grammar Checker', keywords: ['grammar', 'spell', 'spelling'] },
   { page: 'thesis-generator', label: 'Thesis Generator', keywords: ['thesis', 'thesis statement'] },
   { page: 'essay-outline', label: 'Essay Outline', keywords: ['outline', 'essay outline'] },
