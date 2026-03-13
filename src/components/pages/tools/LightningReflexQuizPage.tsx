@@ -513,9 +513,8 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
       questionsRef.current = qs;
       setQuestions(qs);
       resetGameState();
-      setGameState('playing');
+      setGameState('ready');
       window.scrollTo(0, 0);
-      setTimeout(() => spawnRound(0, BASE_FALL_DURATION), 500);
     } catch (err: any) {
       setError(err.message || 'Something went wrong.');
       setGameState('menu');
@@ -885,14 +884,14 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
         <p className="text-stone-500 text-xs mb-8">{questions.length} questions ready</p>
         <button
           onClick={handleStartFromReady}
-          className="w-full max-w-xs mx-auto py-4 rounded-xl text-white font-bold text-base shadow-lg active:scale-[0.99] transition-all"
+          className="inline-block px-12 py-3.5 rounded-xl text-white font-bold text-base shadow-lg active:scale-[0.99] transition-all"
           style={{ background: 'linear-gradient(135deg, #4f46e5 0%, #6366f1 100%)', boxShadow: '0 10px 30px -5px rgba(99, 102, 241, 0.4)' }}
         >
           💥 Start Game
         </button>
         <button
           onClick={() => { setGameState('menu'); setInputText(''); setQuestions([]); questionsRef.current = []; setLoadedFromSavedGame(false); }}
-          className="mt-4 text-sm text-stone-500 hover:text-stone-700 font-medium"
+          className="mt-6 block w-full max-w-xs mx-auto px-6 py-3 rounded-xl bg-stone-200 dark:bg-stone-600 text-stone-700 dark:text-stone-200 font-semibold hover:bg-stone-300 dark:hover:bg-stone-500 transition-colors"
         >
           ← Back to menu
         </button>
@@ -905,7 +904,30 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
     const streakFire = streak >= 3;
 
     return (
-      <div className="flex-1 flex flex-col pb-24 sm:pb-0" style={screenEffect === 'shake' ? { animation: 'lrqScreenShake 0.5s ease-in-out' } : undefined}>
+      <div className="relative flex-1 flex flex-col pb-24 sm:pb-0" style={screenEffect === 'shake' ? { animation: 'lrqScreenShake 0.5s ease-in-out' } : undefined}>
+        {/* Back button - top left */}
+        <div className="absolute top-0 left-0 z-20 p-2 sm:p-3">
+          <button
+            onClick={() => {
+              gameActiveRef.current = false;
+              setCraters([]);
+              setProjPos(null);
+              projDataRef.current = null;
+              if (typeof sessionStorage !== 'undefined' && sessionStorage.getItem('writescholar_return_to_study_pack_viewer') === 'true') {
+                sessionStorage.removeItem('writescholar_return_to_study_pack_viewer');
+                onNavigate('study-pack-viewer');
+              } else {
+                setGameState('menu');
+              }
+            }}
+            className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-700/80 transition-colors"
+            aria-label={typeof sessionStorage !== 'undefined' && sessionStorage.getItem('writescholar_return_to_study_pack_viewer') === 'true' ? 'Back to study pack' : 'Back to menu'}
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+        </div>
         {/* HUD */}
         <div className="bg-gradient-to-b from-slate-900 to-slate-800 border-b border-slate-700/50 px-4 py-2.5">
           <div className="max-w-3xl mx-auto flex items-center justify-between">

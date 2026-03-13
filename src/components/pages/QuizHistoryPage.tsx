@@ -5,6 +5,7 @@ import { jsPDF } from 'jspdf';
 import { Document, Packer, Paragraph, TextRun, HeadingLevel } from 'docx';
 import { saveAs } from 'file-saver';
 import { getExpiringSoonCount, getExpiringSoonUrgencyText } from '../../utils/usageReset';
+import ExportFormatModal, { type ExportFormat } from '../common/ExportFormatModal';
 
 interface QuizQuestion {
   id: number;
@@ -83,7 +84,7 @@ interface Friend {
 }
 
 type FilterType = 'all' | 'quiz' | 'flashcards' | 'crossword' | 'crater_blast' | 'lesson';
-type TimePeriod = 'all' | '7days' | '30days' | '3months' | 'week';
+type TimePeriod = 'all' | '7days' | '30days' | '3months' | 'month';
 
 /** Sanitize text for jsPDF - replaces Unicode chars that cause garbled output (e.g. smart quotes, em dashes, emojis) */
 function sanitizeForPDF(text: string): string {
@@ -122,14 +123,12 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
   const [isDeleting, setIsDeleting] = useState(false);
   const [filter, setFilter] = useState<FilterType>(initialFilterProp ?? 'all');
   const [timePeriod, setTimePeriod] = useState<TimePeriod>('all');
-  const getMondayOfWeek = (d: Date) => {
-    const copy = new Date(d);
-    const day = copy.getDay();
-    copy.setDate(copy.getDate() - (day === 0 ? 6 : day - 1));
+  const getFirstOfMonth = (d: Date) => {
+    const copy = new Date(d.getFullYear(), d.getMonth(), 1);
     copy.setHours(0, 0, 0, 0);
     return copy;
   };
-  const [selectedWeekStart, setSelectedWeekStart] = useState<Date>(() => getMondayOfWeek(new Date()));
+  const [selectedMonthStart, setSelectedMonthStart] = useState<Date>(() => getFirstOfMonth(new Date()));
   const [currentPage, setCurrentPage] = useState(1);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
@@ -150,6 +149,8 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
   const [loadingFriends, setLoadingFriends] = useState(false);
   const [exportDropdownToolId, setExportDropdownToolId] = useState<string | null>(null);
   const [createDropdownOpen, setCreateDropdownOpen] = useState(false);
+  const [exportFormatModalTool, setExportFormatModalTool] = useState<StudyTool | null>(null);
+  const [exportFormatTarget, setExportFormatTarget] = useState<'pdf' | 'docx' | null>(null);
 
   const userPlan = user?.plan || user?.subscription_plan || 'free';
   const isPaidUser = userPlan === 'pro' || userPlan === 'premium';
@@ -234,11 +235,11 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
   };
 
   const filteredTools = studyTools.filter(tool => {
-    if (timePeriod === 'week') {
+    if (timePeriod === 'month') {
       const toolDate = new Date(tool.created_at);
-      const weekEnd = new Date(selectedWeekStart);
-      weekEnd.setDate(weekEnd.getDate() + 7);
-      return toolDate >= selectedWeekStart && toolDate < weekEnd;
+      const monthStart = selectedMonthStart;
+      const monthEnd = new Date(monthStart.getFullYear(), monthStart.getMonth() + 1, 1);
+      return toolDate >= monthStart && toolDate < monthEnd;
     }
     const cutoffDate = getTimePeriodDate(timePeriod);
     if (cutoffDate && new Date(tool.created_at) < cutoffDate) {
@@ -253,7 +254,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [filter, timePeriod, selectedWeekStart.getTime()]);
+  }, [filter, timePeriod, selectedMonthStart.getTime()]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -1074,6 +1075,99 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
     saveAs(blob, `${safeTitle}-${Date.now()}.docx`);
   };
 
+  const exportNotesToPDF = (title: string, text: string) => {
+    if (!text?.trim()) return;
+    const doc = new jsPDF();
+    const margin = 20;
+    const pageHeight = doc.internal.pageSize.height;
+    let yPos = 20;
+
+    doc.setFontSize(18);
+    doc.setFont('helvetica', 'bold');
+    const titleLines = doc.splitTextToSize(sanitizeForPDF(title || 'Original Notes'), 170);
+    doc.text(titleLines, margin, yPos);
+    yPos += titleLines.length * 8 + 12;
+
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'normal');
+    const bodyLines = doc.splitTextToSize(sanitizeForPDF(text), 170);
+    bodyLines.forEach((line: string) => {
+      if (yPos > pageHeight - 20) { doc.addPage(); yPos = 20; }
+      doc.text(line, margin, yPos);
+      yPos += 6;
+    });
+    doc.save(`notes-${Date.now()}.pdf`);
+  };
+
+  const exportNotesToDOCX = async (title: string, text: string) => {
+    if (!text?.trim()) return;
+    const children: any[] = [
+      new Paragraph({ text: title || 'Original Notes', heading: HeadingLevel.HEADING_1 }),
+      new Paragraph({ text: '' }),
+      new Paragraph({ text }),
+    ];
+    const docFile = new Document({ sections: [{ children }] });
+    const blob = await Packer.toBlob(docFile);
+    saveAs(blob, `notes-${Date.now()}.docx`);
+  };
+
+  const buildToolFromPackSegment = (pack: any, format: ExportFormat, baseTitle: string): StudyTool | null => {
+    const base: Partial<StudyTool> = { id: '', title: baseTitle, quiz_type: '', difficulty: 'medium', question_count: 0, questions: [], source_word_count: 0, created_at: '', expires_at: null };
+    switch (format) {
+      case 'quiz': {
+        const q = pack?.quiz;
+        if (!q?.questions?.length) return null;
+        return { ...base, quiz_type: q.quizType || 'mixed', difficulty: q.difficulty || 'medium', question_count: q.questions.length, questions: q.questions } as StudyTool;
+      }
+      case 'flashcards': {
+        const f = pack?.flashcards;
+        if (!f?.cards?.length) return null;
+        return { ...base, quiz_type: 'flashcards', question_count: f.cards.length, questions: f.cards } as StudyTool;
+      }
+      case 'crossword': {
+        const c = pack?.crossword;
+        if (!c?.placedWords?.length) return null;
+        return { ...base, quiz_type: 'crossword', question_count: c.placedWords.length, questions: { grid: c.grid, clues: c.clues, gridSize: c.gridSize, placedWords: c.placedWords } } as StudyTool;
+      }
+      case 'lesson': {
+        const l = pack?.lesson;
+        const slides = l?.slides || [];
+        if (!slides.length) return null;
+        return { ...base, quiz_type: 'lesson', difficulty: l.style || 'visual', question_count: slides.length, questions: slides } as StudyTool;
+      }
+      default: return null;
+    }
+  };
+
+  const handleExportFormatSelect = (format: ExportFormat) => {
+    if (!exportFormatModalTool || !exportFormatTarget) return;
+    const pack = (exportFormatModalTool.questions || exportFormatModalTool) as any;
+    const packTitle = exportFormatModalTool.title || pack?.quiz?.title || pack?.flashcards?.title || pack?.lesson?.title || 'Study Pack';
+
+    if (format === 'notes') {
+      const text = pack?.originalNotes || '';
+      if (exportFormatTarget === 'pdf') exportNotesToPDF(packTitle, text);
+      else exportNotesToDOCX(packTitle, text);
+    } else {
+      const tool = buildToolFromPackSegment(pack, format, packTitle);
+      if (!tool) return;
+      if (exportFormatTarget === 'pdf') {
+        if (format === 'quiz') exportQuizToPDF(tool);
+        else if (format === 'flashcards') exportFlashcardsToPDF(tool);
+        else if (format === 'crossword') exportCrosswordToPDF(tool);
+        else if (format === 'lesson') exportLessonToPDF(tool);
+      } else {
+        if (format === 'quiz') exportQuizToDOCX(tool);
+        else if (format === 'flashcards') exportFlashcardsToDOCX(tool);
+        else if (format === 'crossword') exportCrosswordToDOCX(tool);
+        else if (format === 'lesson') exportLessonToDOCX(tool);
+      }
+    }
+    setExportFormatModalTool(null);
+    setExportFormatTarget(null);
+    setExportDropdownToolId(null);
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%)' }}>
@@ -1119,41 +1213,33 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
     { key: 'all' as TimePeriod, label: 'All time' },
     { key: '30days' as TimePeriod, label: 'Last 30 days' },
     { key: '3months' as TimePeriod, label: '3 months' },
+    { key: 'month' as TimePeriod, label: 'This month' },
   ];
 
-  const thisWeekStart = getMondayOfWeek(new Date());
-  const isCurrentWeek = selectedWeekStart.getTime() === thisWeekStart.getTime();
-  const weekEnd = new Date(selectedWeekStart);
-  weekEnd.setDate(weekEnd.getDate() + 6);
+  const thisMonthStart = getFirstOfMonth(new Date());
+  const isCurrentMonth = selectedMonthStart.getTime() === thisMonthStart.getTime();
 
-  const formatWeekLabel = () => {
-    if (isCurrentWeek) return 'This week';
-    const startStr = selectedWeekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-    const endStr = weekEnd.toLocaleDateString('en-US', {
-      month: 'short', day: 'numeric',
-      year: selectedWeekStart.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined,
-    });
-    return `${startStr} – ${endStr}`;
+  const formatMonthLabel = () => {
+    if (isCurrentMonth) return 'This month';
+    return selectedMonthStart.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
   };
 
-  const goToPrevWeek = () => {
-    const prev = new Date(selectedWeekStart);
-    prev.setDate(prev.getDate() - 7);
-    setSelectedWeekStart(prev);
-    if (timePeriod !== 'week') setTimePeriod('week');
+  const goToPrevMonth = () => {
+    const prev = new Date(selectedMonthStart.getFullYear(), selectedMonthStart.getMonth() - 1, 1);
+    setSelectedMonthStart(prev);
+    if (timePeriod !== 'month') setTimePeriod('month');
   };
 
-  const goToNextWeek = () => {
-    if (isCurrentWeek) return;
-    const next = new Date(selectedWeekStart);
-    next.setDate(next.getDate() + 7);
-    setSelectedWeekStart(next);
-    if (timePeriod !== 'week') setTimePeriod('week');
+  const goToNextMonth = () => {
+    if (isCurrentMonth) return;
+    const next = new Date(selectedMonthStart.getFullYear(), selectedMonthStart.getMonth() + 1, 1);
+    setSelectedMonthStart(next);
+    if (timePeriod !== 'month') setTimePeriod('month');
   };
 
-  const goToThisWeek = () => {
-    setSelectedWeekStart(getMondayOfWeek(new Date()));
-    setTimePeriod('week');
+  const goToThisMonth = () => {
+    setSelectedMonthStart(getFirstOfMonth(new Date()));
+    setTimePeriod('month');
   };
 
   return (
@@ -1233,14 +1319,14 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
         {/* Filter Controls */}
         <div className="mb-8 space-y-3">
 
-          {/* Week navigator — primary browsing control */}
+          {/* Month navigator — primary browsing control */}
           <div className="bg-white rounded-2xl border border-stone-200/70 shadow-sm overflow-hidden">
             <div className="flex items-stretch">
               {/* Prev arrow */}
               <button
-                onClick={goToPrevWeek}
+                onClick={goToPrevMonth}
                 className="flex items-center justify-center w-12 sm:w-14 shrink-0 text-stone-400 hover:text-stone-700 hover:bg-stone-50 border-r border-stone-100 transition-colors group"
-                aria-label="Previous week"
+                aria-label="Previous month"
               >
                 <svg className="w-5 h-5 group-hover:-translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -1249,17 +1335,17 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
 
               {/* Centre label */}
               <button
-                onClick={goToThisWeek}
+                onClick={goToThisMonth}
                 className="flex-1 flex flex-col items-center justify-center gap-0.5 py-3.5 sm:py-4 hover:bg-stone-50/70 transition-colors"
               >
-                <span className={`text-base sm:text-lg font-bold tracking-tight transition-colors ${timePeriod === 'week' ? 'text-stone-900' : 'text-stone-400'}`}>
-                  {timePeriod === 'week' ? formatWeekLabel() : 'Browse by week'}
+                <span className={`text-base sm:text-lg font-bold tracking-tight transition-colors ${timePeriod === 'month' ? 'text-stone-900' : 'text-stone-400'}`}>
+                  {timePeriod === 'month' ? formatMonthLabel() : 'Browse by month'}
                 </span>
-                {timePeriod === 'week' ? (
+                {timePeriod === 'month' ? (
                   <span className="text-[11px] sm:text-xs text-stone-400 font-medium">
-                    {isCurrentWeek
-                      ? `${selectedWeekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} – ${weekEnd.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
-                      : 'click to jump to this week'
+                    {isCurrentMonth
+                      ? formatMonthLabel()
+                      : 'click to jump to this month'
                     }
                   </span>
                 ) : (
@@ -1267,16 +1353,16 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                 )}
               </button>
 
-              {/* Next arrow — fades when at current week */}
+              {/* Next arrow — fades when at current month */}
               <button
-                onClick={goToNextWeek}
-                disabled={timePeriod === 'week' && isCurrentWeek}
+                onClick={goToNextMonth}
+                disabled={timePeriod === 'month' && isCurrentMonth}
                 className={`flex items-center justify-center w-12 sm:w-14 shrink-0 border-l border-stone-100 transition-colors group ${
-                  timePeriod === 'week' && isCurrentWeek
+                  timePeriod === 'month' && isCurrentMonth
                     ? 'text-stone-200 cursor-default'
                     : 'text-stone-400 hover:text-stone-700 hover:bg-stone-50'
                 }`}
-                aria-label="Next week"
+                aria-label="Next month"
               >
                 <svg className="w-5 h-5 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -1284,39 +1370,6 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
               </button>
             </div>
 
-            {/* Day-of-week mini strip — shows when browsing by week */}
-            {timePeriod === 'week' && (
-              <div className="grid grid-cols-7 border-t border-stone-100">
-                {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((d, i) => {
-                  const dayDate = new Date(selectedWeekStart);
-                  dayDate.setDate(dayDate.getDate() + i);
-                  const today = new Date();
-                  const isToday =
-                    dayDate.getDate() === today.getDate() &&
-                    dayDate.getMonth() === today.getMonth() &&
-                    dayDate.getFullYear() === today.getFullYear();
-                  const isFuture = dayDate > today;
-                  const dayHasItems = studyTools.some(t => {
-                    const td = new Date(t.created_at);
-                    return td.getDate() === dayDate.getDate() && td.getMonth() === dayDate.getMonth() && td.getFullYear() === dayDate.getFullYear();
-                  });
-                  return (
-                    <div
-                      key={i}
-                      className={`flex flex-col items-center py-2 sm:py-2.5 gap-1 text-center ${isFuture ? 'opacity-30' : ''}`}
-                    >
-                      <span className={`text-[10px] sm:text-xs font-semibold uppercase tracking-wider ${isToday ? 'text-violet-600' : 'text-stone-400'}`}>{d}</span>
-                      <span className={`text-xs sm:text-sm font-bold ${isToday ? 'text-violet-600 bg-violet-100 w-6 h-6 flex items-center justify-center rounded-full' : 'text-stone-600'}`}>
-                        {dayDate.getDate()}
-                      </span>
-                      {dayHasItems && (
-                        <span className="w-1.5 h-1.5 rounded-full bg-violet-400" />
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            )}
           </div>
 
           {/* Quick period pills — secondary shortcuts */}
@@ -1325,7 +1378,10 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
             {timePeriodOptions.map((option) => (
               <button
                 key={option.key}
-                onClick={() => setTimePeriod(option.key)}
+                onClick={() => {
+                  setTimePeriod(option.key);
+                  if (option.key === 'month') setSelectedMonthStart(getFirstOfMonth(new Date()));
+                }}
                 className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                   timePeriod === option.key
                     ? 'bg-stone-900 text-white shadow-sm'
@@ -1347,13 +1403,13 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
             <span className="font-semibold text-stone-700">{filteredTools.length}</span>
             <span>study set{filteredTools.length !== 1 ? 's' : ''}</span>
             <span className="text-stone-400">
-              {timePeriod === 'week'
-                ? `from ${formatWeekLabel()}`
+              {timePeriod === 'month'
+                ? `from ${formatMonthLabel()}`
                 : timePeriod === '30days' ? 'from the last 30 days'
                 : 'from the last 3 months'}
             </span>
             <button
-              onClick={() => { setTimePeriod('all'); setSelectedWeekStart(getMondayOfWeek(new Date())); }}
+              onClick={() => { setTimePeriod('all'); setSelectedMonthStart(getFirstOfMonth(new Date())); }}
               className="ml-1 text-xs text-stone-400 hover:text-stone-600 underline underline-offset-2"
             >
               clear
@@ -1621,11 +1677,17 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                               <div className="absolute left-0 top-full mt-1.5 w-40 py-1 bg-white dark:bg-stone-800 rounded-xl shadow-xl border border-stone-200 dark:border-stone-600 z-[100]">
                                 <button
                                   onClick={() => {
-                                    if (tool.quiz_type === 'flashcards') exportFlashcardsToPDF(tool);
-                                    else if (tool.quiz_type === 'crossword') exportCrosswordToPDF(tool);
-                                    else if (tool.quiz_type === 'lesson') exportLessonToPDF(tool);
-                                    else exportQuizToPDF(tool);
-                                    setExportDropdownToolId(null);
+                                    if (tool.quiz_type === 'study_pack') {
+                                      setExportFormatModalTool(tool);
+                                      setExportFormatTarget('pdf');
+                                      setExportDropdownToolId(null);
+                                    } else {
+                                      if (tool.quiz_type === 'flashcards') exportFlashcardsToPDF(tool);
+                                      else if (tool.quiz_type === 'crossword') exportCrosswordToPDF(tool);
+                                      else if (tool.quiz_type === 'lesson') exportLessonToPDF(tool);
+                                      else exportQuizToPDF(tool);
+                                      setExportDropdownToolId(null);
+                                    }
                                   }}
                                   className="w-full px-4 py-2.5 text-left text-sm text-stone-700 dark:text-stone-200 hover:bg-stone-50 dark:hover:bg-stone-700 flex items-center gap-2 rounded-t-xl"
                                 >
@@ -1634,11 +1696,17 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                                 </button>
                                 <button
                                   onClick={() => {
-                                    if (tool.quiz_type === 'flashcards') exportFlashcardsToDOCX(tool);
-                                    else if (tool.quiz_type === 'crossword') exportCrosswordToDOCX(tool);
-                                    else if (tool.quiz_type === 'lesson') exportLessonToDOCX(tool);
-                                    else exportQuizToDOCX(tool);
-                                    setExportDropdownToolId(null);
+                                    if (tool.quiz_type === 'study_pack') {
+                                      setExportFormatModalTool(tool);
+                                      setExportFormatTarget('docx');
+                                      setExportDropdownToolId(null);
+                                    } else {
+                                      if (tool.quiz_type === 'flashcards') exportFlashcardsToDOCX(tool);
+                                      else if (tool.quiz_type === 'crossword') exportCrosswordToDOCX(tool);
+                                      else if (tool.quiz_type === 'lesson') exportLessonToDOCX(tool);
+                                      else exportQuizToDOCX(tool);
+                                      setExportDropdownToolId(null);
+                                    }
                                   }}
                                   className="w-full px-4 py-2.5 text-left text-sm text-stone-700 dark:text-stone-200 hover:bg-stone-50 dark:hover:bg-stone-700 flex items-center gap-2 rounded-b-xl"
                                 >
@@ -1825,6 +1893,15 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
       )}
 
       {/* Upgrade Modal for Export Feature */}
+      {exportFormatModalTool && exportFormatTarget && (
+        <ExportFormatModal
+          packData={(exportFormatModalTool.questions || exportFormatModalTool) as any}
+          packTitle={exportFormatModalTool.title || 'Study Pack'}
+          targetFormat={exportFormatTarget}
+          onSelect={handleExportFormatSelect}
+          onClose={() => { setExportFormatModalTool(null); setExportFormatTarget(null); setExportDropdownToolId(null); }}
+        />
+      )}
       {showUpgradeModal && (
         <div className="fixed inset-0 bg-stone-900/40 backdrop-blur-sm flex items-center justify-center z-50 px-4">
           <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 border border-stone-200/80">

@@ -4,8 +4,9 @@ import FlashcardViewer from '../common/FlashcardViewer';
 import LessonViewer from '../common/LessonViewer';
 import QuizViewer from '../common/QuizViewer';
 import CrosswordViewer from '../common/CrosswordViewer';
-import CraterBlastViewer from '../common/CraterBlastViewer';
 import ScholarMascot from '../common/ScholarMascot';
+import ExportFormatModal, { type ExportFormat } from '../common/ExportFormatModal';
+import { exportStudyPackSegment } from '../../utils/studyPackExport';
 
 const TABS = [
   { key: 'notes', label: 'Original Notes', icon: '📄', proOnly: false },
@@ -39,6 +40,7 @@ const StudyPackViewerPage = ({ onNavigate, user, onLogout, initialData }: StudyP
     } catch { return 'lesson'; }
   });
   const [returnState, setReturnState] = useState<Record<string, number> | null>(null);
+  const [exportFormatTarget, setExportFormatTarget] = useState<'pdf' | 'docx' | null>(null);
 
   useEffect(() => {
     if (initialData) {
@@ -153,6 +155,17 @@ const StudyPackViewerPage = ({ onNavigate, user, onLogout, initialData }: StudyP
     }
   };
 
+  const hasExportableContent = () => {
+    if (!pack?.data) return false;
+    return !!(
+      pack.data.originalNotes ||
+      pack.data.quiz?.questions?.length ||
+      pack.data.flashcards?.cards?.length ||
+      pack.data.crossword?.placedWords?.length ||
+      pack.data.lesson?.slides?.length
+    );
+  };
+
   if (!pack?.data) {
     return (
       <div className="min-h-screen bg-stone-50 dark:bg-stone-900">
@@ -174,6 +187,12 @@ const StudyPackViewerPage = ({ onNavigate, user, onLogout, initialData }: StudyP
 
   const hasData = (key: TabKey) => key === 'notes' ? !!pack.data?.originalNotes : !!pack.data[key];
   const packTitle = pack.title || pack.data.quiz?.title || pack.data.flashcards?.title || pack.data.lesson?.title || 'Study Pack';
+  const handleExportFormatSelect = (format: ExportFormat) => {
+    if (!pack?.data || !exportFormatTarget) return;
+    exportStudyPackSegment(pack.data, packTitle, format, exportFormatTarget);
+    setExportFormatTarget(null);
+  };
+
   const flashcardCards = pack.data.flashcards?.cards?.map((c: any, i: number) => ({
     id: `card-${i}`,
     front: c.front ?? c.term ?? '',
@@ -185,8 +204,8 @@ const StudyPackViewerPage = ({ onNavigate, user, onLogout, initialData }: StudyP
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="study-pack-viewer" />
 
       <main className="flex-1 max-w-6xl mx-auto w-full px-4 py-6">
-        {/* Back + Title */}
-        <div className="flex items-center gap-4 mb-6">
+        {/* Back + Title + Export */}
+        <div className="flex flex-wrap items-center gap-4 mb-6">
           <button
             onClick={() => onNavigate('dashboard')}
             className="p-2 rounded-lg text-stone-500 hover:text-stone-700 hover:bg-stone-200 dark:hover:bg-stone-700 dark:hover:text-stone-300 transition-colors"
@@ -196,12 +215,30 @@ const StudyPackViewerPage = ({ onNavigate, user, onLogout, initialData }: StudyP
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
           </button>
-          <div>
+          <div className="flex-1 min-w-0">
             <h1 className="text-xl sm:text-2xl font-bold text-stone-800 dark:text-stone-100" style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}>
               {packTitle}
             </h1>
             <p className="text-sm text-stone-500 dark:text-stone-400">Switch between study tools below</p>
           </div>
+          {hasExportableContent() && (
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                onClick={() => setExportFormatTarget('pdf')}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-900/30 font-medium text-sm transition-colors border border-red-200 dark:border-red-800"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                Export PDF
+              </button>
+              <button
+                onClick={() => setExportFormatTarget('docx')}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/30 font-medium text-sm transition-colors border border-blue-200 dark:border-blue-800"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                Export Word
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Tab bar - horizontal pills, scroll on mobile */}
@@ -281,11 +318,28 @@ const StudyPackViewerPage = ({ onNavigate, user, onLogout, initialData }: StudyP
             />
           )}
           {activeTab === 'craterBlast' && hasData('craterBlast') && !isLocked('craterBlast') && (
-            <CraterBlastViewer
-              questions={pack.data.craterBlast?.questions ?? []}
-              title={packTitle}
-              onEnlarge={() => handleOpenFull('craterBlast')}
-            />
+            <div className="p-6 flex flex-col items-center justify-center min-h-[400px]">
+              <div className="w-full max-w-sm text-center">
+                <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl mb-6 shadow-xl" style={{ background: 'linear-gradient(145deg, #4f46e5 0%, #6366f1 50%, #8b5cf6 100%)' }}>
+                  <span className="text-4xl">💥</span>
+                </div>
+                <h2 className="text-2xl font-extrabold text-stone-900 dark:text-stone-100 tracking-tight mb-2">Crater Blast</h2>
+                <p className="text-stone-500 dark:text-stone-400 text-sm mb-8">{(Array.isArray(pack.data.craterBlast?.questions) ? pack.data.craterBlast.questions : pack.data.craterBlast?.questions?.questions ?? []).length} questions ready</p>
+                <button
+                  onClick={() => handleOpenFull('craterBlast')}
+                  className="inline-block px-12 py-3.5 rounded-xl text-white font-bold text-base shadow-lg active:scale-[0.99] transition-all mb-6"
+                  style={{ background: 'linear-gradient(135deg, #4f46e5 0%, #6366f1 100%)', boxShadow: '0 10px 30px -5px rgba(99, 102, 241, 0.4)' }}
+                >
+                  💥 Start Game
+                </button>
+                <button
+                  onClick={() => setActiveTab('notes')}
+                  className="block w-full max-w-xs mx-auto px-6 py-3 rounded-xl bg-stone-200 dark:bg-stone-600 text-stone-700 dark:text-stone-200 font-semibold hover:bg-stone-300 dark:hover:bg-stone-500 transition-colors"
+                >
+                  ← Back to menu
+                </button>
+              </div>
+            </div>
           )}
           {(activeTab !== 'notes' || !hasData('notes')) &&
            (activeTab !== 'lesson' || isLocked('lesson') || !hasData('lesson')) &&
@@ -354,6 +408,16 @@ const StudyPackViewerPage = ({ onNavigate, user, onLogout, initialData }: StudyP
           )}
         </div>
       </main>
+
+      {exportFormatTarget && (
+        <ExportFormatModal
+          packData={pack.data}
+          packTitle={packTitle}
+          targetFormat={exportFormatTarget}
+          onSelect={handleExportFormatSelect}
+          onClose={() => setExportFormatTarget(null)}
+        />
+      )}
     </div>
   );
 };

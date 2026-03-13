@@ -448,21 +448,16 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
   };
 
   // Get the letter at a specific cell position based on user's answers
+  // Check ALL words at this cell (shared across/down) and return first non-empty letter
   const getCellLetter = (rowIdx: number, colIdx: number): string => {
     if (!crosswordResult?.placedWords) return '';
-    
-    for (const pw of crosswordResult.placedWords) {
+    const wordsAtCell = getWordsAtCell(rowIdx, colIdx);
+    for (const pw of wordsAtCell) {
       const answer = crosswordAnswers[`word-${pw.number}`] || '';
-      let letterIndex = -1;
-      
-      if (pw.direction === 'across' && rowIdx === pw.row && colIdx >= pw.col && colIdx < pw.col + pw.length) {
-        letterIndex = colIdx - pw.col;
-      } else if (pw.direction === 'down' && colIdx === pw.col && rowIdx >= pw.row && rowIdx < pw.row + pw.length) {
-        letterIndex = rowIdx - pw.row;
-      }
-      
+      const letterIndex = pw.direction === 'across' ? colIdx - pw.col : rowIdx - pw.row;
       if (letterIndex >= 0 && letterIndex < answer.length) {
-        return answer[letterIndex];
+        const ch = answer[letterIndex];
+        if (ch && /[A-Za-z]/.test(ch)) return ch.toUpperCase();
       }
     }
     return '';
@@ -543,10 +538,11 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
     
     if (e.key.length === 1 && /[a-zA-Z]/.test(e.key)) {
       e.preventDefault();
+      const letter = e.key.toUpperCase();
       // Build new answer with the letter at the correct position
       let newAnswer = currentAnswer.split('');
       while (newAnswer.length <= letterIndex) newAnswer.push('');
-      newAnswer[letterIndex] = e.key.toUpperCase();
+      newAnswer[letterIndex] = letter;
       setCrosswordAnswers({ ...crosswordAnswers, [answerKey]: newAnswer.join('') });
       
       // Move to next cell
@@ -561,11 +557,13 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
       e.preventDefault();
       let newAnswer = currentAnswer.split('');
       if (letterIndex < newAnswer.length && newAnswer[letterIndex]) {
-        // Delete current cell
+        // Delete current cell – only update the current word
         newAnswer[letterIndex] = '';
         setCrosswordAnswers({ ...crosswordAnswers, [answerKey]: newAnswer.join('').replace(/\s+$/, '') });
       } else if (letterIndex > 0) {
         // Move back and delete
+        const delRow = selectedDirection === 'across' ? row : row - 1;
+        const delCol = selectedDirection === 'across' ? col - 1 : col;
         newAnswer[letterIndex - 1] = '';
         setCrosswordAnswers({ ...crosswordAnswers, [answerKey]: newAnswer.join('').replace(/\s+$/, '') });
         if (selectedDirection === 'across') {

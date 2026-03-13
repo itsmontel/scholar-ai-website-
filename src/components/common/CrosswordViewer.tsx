@@ -25,28 +25,45 @@ const CrosswordViewer = ({ grid, placedWords, title, onEnlarge }: CrosswordViewe
   const [checked, setChecked] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const getCellLetter = (row: number, col: number): string => {
-    const pw = placedWords.find(p => {
+  const getWordsAtCell = (row: number, col: number) =>
+    placedWords.filter(p => {
       if (p.direction === 'across') return row === p.row && col >= p.col && col < p.col + p.length;
       return col === p.col && row >= p.row && row < p.row + p.length;
     });
-    if (!pw) return '';
-    const offset = pw.direction === 'across' ? col - pw.col : row - pw.row;
-    const key = `word-${pw.number}`;
-    const typed = crosswordAnswers[key] || '';
-    return typed[offset] || '';
+
+  // Check ALL words at this cell (shared across/down) and return first non-empty letter
+  const getCellLetter = (row: number, col: number): string => {
+    const wordsAtCell = getWordsAtCell(row, col);
+    for (const pw of wordsAtCell) {
+      const offset = pw.direction === 'across' ? col - pw.col : row - pw.row;
+      const typed = crosswordAnswers[`word-${pw.number}`] || '';
+      const ch = typed[offset];
+      if (ch && /[A-Za-z]/.test(ch)) return ch.toUpperCase();
+    }
+    return '';
+  };
+
+  // Update only the selected word – no syncing to other words; user must click to switch
+  const setAnswer = (wordNumber: number, newValue: string) => {
+    setCrosswordAnswers(prev => ({ ...prev, [`word-${wordNumber}`]: newValue }));
   };
 
   const handleCellClick = (row: number, col: number) => {
-    const pw = placedWords.find(p => {
-      if (p.direction === 'across') return row === p.row && col >= p.col && col < p.col + p.length;
-      return col === p.col && row >= p.row && row < p.row + p.length;
-    });
-    if (pw) {
-      setSelectedClue(pw.number);
-      setSelectedDirection(pw.direction);
-      setSelectedCell({ row: pw.row, col: pw.col });
-    }
+    const wordsAtCell = getWordsAtCell(row, col);
+    if (!wordsAtCell.length) return;
+    // If this cell has both across and down, toggle to the other word when re-clicking
+    const currentPw = selectedClue !== null ? placedWords.find(p => p.number === selectedClue) : null;
+    const isSameCell = currentPw && (
+      (currentPw.direction === 'across' && row === currentPw.row && col >= currentPw.col && col < currentPw.col + currentPw.length) ||
+      (currentPw.direction === 'down' && col === currentPw.col && row >= currentPw.row && row < currentPw.row + currentPw.length)
+    );
+    const otherWord = isSameCell && wordsAtCell.length > 1
+      ? wordsAtCell.find(w => w.number !== selectedClue)
+      : null;
+    const pw = otherWord || wordsAtCell[0];
+    setSelectedClue(pw.number);
+    setSelectedDirection(pw.direction);
+    setSelectedCell({ row: pw.row, col: pw.col });
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -61,14 +78,14 @@ const CrosswordViewer = ({ grid, placedWords, title, onEnlarge }: CrosswordViewe
         const offset = selectedCell.col - pw.col;
         if (offset > 0) {
           const newVal = current.slice(0, offset - 1) + current.slice(offset);
-          setCrosswordAnswers({ ...crosswordAnswers, [key]: newVal });
+          setAnswer(pw.number, newVal);
           setSelectedCell({ row: pw.row, col: pw.col + Math.max(0, offset - 2) });
         }
       } else {
         const offset = selectedCell.row - pw.row;
         if (offset > 0) {
           const newVal = current.slice(0, offset - 1) + current.slice(offset);
-          setCrosswordAnswers({ ...crosswordAnswers, [key]: newVal });
+          setAnswer(pw.number, newVal);
           setSelectedCell({ row: pw.row + Math.max(0, offset - 2), col: pw.col });
         }
       }
@@ -78,8 +95,8 @@ const CrosswordViewer = ({ grid, placedWords, title, onEnlarge }: CrosswordViewe
       const offset = pw.direction === 'across' ? selectedCell.col - pw.col : selectedCell.row - pw.row;
       let newVal = current.split('');
       newVal[offset] = letter;
-      newVal = newVal.join('').padEnd(pw.length, ' ').trimEnd();
-      setCrosswordAnswers({ ...crosswordAnswers, [key]: newVal });
+      newVal = newVal.join('').replace(/\s+$/, '');
+      setAnswer(pw.number, newVal);
       if (offset < pw.length - 1) {
         if (pw.direction === 'across') setSelectedCell({ row: pw.row, col: pw.col + offset + 1 });
         else setSelectedCell({ row: pw.row + offset + 1, col: pw.col });
@@ -194,7 +211,7 @@ const CrosswordViewer = ({ grid, placedWords, title, onEnlarge }: CrosswordViewe
                         type="text"
                         maxLength={pw.word.length}
                         value={val}
-                        onChange={(e) => setCrosswordAnswers({ ...crosswordAnswers, [key]: e.target.value.toUpperCase().replace(/[^A-Z]/g, '') })}
+                        onChange={(e) => setAnswer(pw.number, e.target.value.toUpperCase().replace(/[^A-Z]/g, ''))}
                         onFocus={() => { setSelectedClue(pw.number); setSelectedDirection('across'); setSelectedCell({ row: pw.row, col: pw.col }); }}
                         onClick={(e) => e.stopPropagation()}
                         disabled={checked}
@@ -232,7 +249,7 @@ const CrosswordViewer = ({ grid, placedWords, title, onEnlarge }: CrosswordViewe
                         type="text"
                         maxLength={pw.word.length}
                         value={val}
-                        onChange={(e) => setCrosswordAnswers({ ...crosswordAnswers, [key]: e.target.value.toUpperCase().replace(/[^A-Z]/g, '') })}
+                        onChange={(e) => setAnswer(pw.number, e.target.value.toUpperCase().replace(/[^A-Z]/g, ''))}
                         onFocus={() => { setSelectedClue(pw.number); setSelectedDirection('down'); setSelectedCell({ row: pw.row, col: pw.col }); }}
                         onClick={(e) => e.stopPropagation()}
                         disabled={checked}
