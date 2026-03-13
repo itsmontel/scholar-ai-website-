@@ -440,7 +440,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
 
   return (
     <>
-      <Header onNavigate={onNavigate} showPromoBanner={true} sticky={true} />
+      <Header onNavigate={onNavigate} user={user} showPromoBanner={true} sticky={true} />
       <main className="min-h-screen relative transition-colors font-sans overflow-x-hidden" role="main">
       {/* HERO SECTION - Fun, Gen Z, full of energy */}
       <section className="relative min-h-[70vh] sm:min-h-[85vh] flex flex-col overflow-hidden">

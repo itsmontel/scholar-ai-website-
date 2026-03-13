@@ -308,7 +308,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
             </div>
           </div>
         </div>
-        {showPromoBanner && user && !['pro', 'premium'].includes((user.plan || user.subscription_plan || '').toLowerCase()) && <PromoBanner embedded />}
+        {showPromoBanner && (!user || !['pro', 'premium'].includes((user?.plan || user?.subscription_plan || '').toLowerCase())) && <PromoBanner embedded />}
         {/* Search dropdown portal - renders above all content */}
         {headerSearchOpen && headerSearchQuery.trim() && searchDropdownRect && createPortal(
           <div
