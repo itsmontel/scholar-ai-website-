@@ -66,8 +66,23 @@ export async function exportStudyPackSegment(
   packData: any,
   packTitle: string,
   format: ExportFormat,
-  targetFormat: 'pdf' | 'docx'
+  targetFormat: 'pdf' | 'docx' | 'json'
 ): Promise<void> {
+  if (targetFormat === 'json' && format === 'flashcards') {
+    const cards = packData?.flashcards?.cards || [];
+    if (!cards.length) return;
+    const data = {
+      title: packData?.flashcards?.title || packTitle || 'Flashcards',
+      cards: cards.map((c: any) => ({ front: c.front || c.term || '', back: c.back || c.definition || '' })),
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `flashcards-${Date.now()}.json`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+    return;
+  }
   if (format === 'notes') {
     const text = packData?.originalNotes || '';
     if (!text?.trim()) return;

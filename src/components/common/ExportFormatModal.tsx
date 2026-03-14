@@ -13,7 +13,7 @@ const FORMAT_OPTIONS: { key: ExportFormat; label: string; icon: string }[] = [
 interface ExportFormatModalProps {
   packData: any;
   packTitle: string;
-  targetFormat: 'pdf' | 'docx';
+  targetFormat: 'pdf' | 'docx' | 'json';
   onSelect: (format: ExportFormat) => void;
   onClose: () => void;
 }
@@ -37,7 +37,9 @@ export default function ExportFormatModal({
     }
   };
 
-  const availableFormats = FORMAT_OPTIONS.filter(f => hasData(f.key));
+  const availableFormats = targetFormat === 'json'
+    ? FORMAT_OPTIONS.filter(f => f.key === 'flashcards' && hasData(f.key))
+    : FORMAT_OPTIONS.filter(f => hasData(f.key));
 
   return (
     <Fragment>
@@ -54,7 +56,7 @@ export default function ExportFormatModal({
       >
         <div className="flex items-center justify-between mb-4">
           <h2 id="export-format-title" className="text-lg font-bold text-stone-900 dark:text-stone-100">
-            Export as {targetFormat.toUpperCase()}
+            Export as {targetFormat === 'json' ? 'JSON' : targetFormat.toUpperCase()}
           </h2>
           <button
             onClick={onClose}

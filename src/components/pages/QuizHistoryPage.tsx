@@ -150,7 +150,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
   const [exportDropdownToolId, setExportDropdownToolId] = useState<string | null>(null);
   const [createDropdownOpen, setCreateDropdownOpen] = useState(false);
   const [exportFormatModalTool, setExportFormatModalTool] = useState<StudyTool | null>(null);
-  const [exportFormatTarget, setExportFormatTarget] = useState<'pdf' | 'docx' | null>(null);
+  const [exportFormatTarget, setExportFormatTarget] = useState<'pdf' | 'docx' | 'json' | null>(null);
 
   const userPlan = user?.plan || user?.subscription_plan || 'free';
   const isPaidUser = userPlan === 'pro' || userPlan === 'premium';
@@ -714,6 +714,21 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
     saveAs(blob, `flashcards-${Date.now()}.docx`);
   };
 
+  const exportFlashcardsToJSON = (tool: StudyTool) => {
+    const cards = (tool.questions as FlashCard[]) || [];
+    if (!cards.length) return;
+    const data = {
+      title: tool.title || 'Flashcards',
+      cards: cards.map((c: FlashCard) => ({ front: c.front || '', back: c.back || '' })),
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `flashcards-${Date.now()}.json`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  };
+
   const exportCrosswordToPDF = (tool: StudyTool) => {
     const crosswordData = tool.questions as CrosswordData;
     const placedWords = crosswordData?.placedWords || [];
@@ -1151,7 +1166,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
     if (format === 'notes') {
       const text = pack?.originalNotes || '';
       if (exportFormatTarget === 'pdf') exportNotesToPDF(packTitle, text);
-      else exportNotesToDOCX(packTitle, text);
+      else if (exportFormatTarget === 'docx') exportNotesToDOCX(packTitle, text);
     } else {
       const tool = buildToolFromPackSegment(pack, format, packTitle);
       if (!tool) return;
@@ -1160,11 +1175,13 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
         else if (format === 'flashcards') exportFlashcardsToPDF(tool);
         else if (format === 'crossword') exportCrosswordToPDF(tool);
         else if (format === 'lesson') exportLessonToPDF(tool);
-      } else {
+      } else if (exportFormatTarget === 'docx') {
         if (format === 'quiz') exportQuizToDOCX(tool);
         else if (format === 'flashcards') exportFlashcardsToDOCX(tool);
         else if (format === 'crossword') exportCrosswordToDOCX(tool);
         else if (format === 'lesson') exportLessonToDOCX(tool);
+      } else if (exportFormatTarget === 'json' && format === 'flashcards') {
+        exportFlashcardsToJSON(tool);
       }
     }
     setExportFormatModalTool(null);
@@ -1666,7 +1683,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                           </svg>
                         </button>
 
-                        {isPaidUser && tool.quiz_type !== 'crater_blast' ? (
+                        {(isPaidUser && tool.quiz_type !== 'crater_blast') || (tool.quiz_type === 'flashcards' || tool.quiz_type === 'study_pack') ? (
                           <div className="relative" onClick={(e) => e.stopPropagation()}>
                             <button
                               onClick={() => setExportDropdownToolId(exportDropdownToolId === tool.id ? null : tool.id)}
@@ -1679,44 +1696,66 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                             </button>
                             {exportDropdownToolId === tool.id && (
                               <div className="absolute left-0 top-full mt-1.5 w-40 py-1 bg-white dark:bg-stone-800 rounded-xl shadow-xl border border-stone-200 dark:border-stone-600 z-[100]">
-                                <button
-                                  onClick={() => {
-                                    if (tool.quiz_type === 'study_pack') {
-                                      setExportFormatModalTool(tool);
-                                      setExportFormatTarget('pdf');
-                                      setExportDropdownToolId(null);
-                                    } else {
-                                      if (tool.quiz_type === 'flashcards') exportFlashcardsToPDF(tool);
-                                      else if (tool.quiz_type === 'crossword') exportCrosswordToPDF(tool);
-                                      else if (tool.quiz_type === 'lesson') exportLessonToPDF(tool);
-                                      else exportQuizToPDF(tool);
-                                      setExportDropdownToolId(null);
-                                    }
-                                  }}
-                                  className="w-full px-4 py-2.5 text-left text-sm text-stone-700 dark:text-stone-200 hover:bg-stone-50 dark:hover:bg-stone-700 flex items-center gap-2 rounded-t-xl"
-                                >
-                                  <svg className="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
-                                  PDF
-                                </button>
-                                <button
-                                  onClick={() => {
-                                    if (tool.quiz_type === 'study_pack') {
-                                      setExportFormatModalTool(tool);
-                                      setExportFormatTarget('docx');
-                                      setExportDropdownToolId(null);
-                                    } else {
-                                      if (tool.quiz_type === 'flashcards') exportFlashcardsToDOCX(tool);
-                                      else if (tool.quiz_type === 'crossword') exportCrosswordToDOCX(tool);
-                                      else if (tool.quiz_type === 'lesson') exportLessonToDOCX(tool);
-                                      else exportQuizToDOCX(tool);
-                                      setExportDropdownToolId(null);
-                                    }
-                                  }}
-                                  className="w-full px-4 py-2.5 text-left text-sm text-stone-700 dark:text-stone-200 hover:bg-stone-50 dark:hover:bg-stone-700 flex items-center gap-2 rounded-b-xl"
-                                >
-                                  <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                                  Word
-                                </button>
+                                {isPaidUser && (
+                                  <>
+                                    <button
+                                      onClick={() => {
+                                        if (tool.quiz_type === 'study_pack') {
+                                          setExportFormatModalTool(tool);
+                                          setExportFormatTarget('pdf');
+                                          setExportDropdownToolId(null);
+                                        } else {
+                                          if (tool.quiz_type === 'flashcards') exportFlashcardsToPDF(tool);
+                                          else if (tool.quiz_type === 'crossword') exportCrosswordToPDF(tool);
+                                          else if (tool.quiz_type === 'lesson') exportLessonToPDF(tool);
+                                          else exportQuizToPDF(tool);
+                                          setExportDropdownToolId(null);
+                                        }
+                                      }}
+                                      className="w-full px-4 py-2.5 text-left text-sm text-stone-700 dark:text-stone-200 hover:bg-stone-50 dark:hover:bg-stone-700 flex items-center gap-2 rounded-t-xl"
+                                    >
+                                      <svg className="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
+                                      PDF
+                                    </button>
+                                    <button
+                                      onClick={() => {
+                                        if (tool.quiz_type === 'study_pack') {
+                                          setExportFormatModalTool(tool);
+                                          setExportFormatTarget('docx');
+                                          setExportDropdownToolId(null);
+                                        } else {
+                                          if (tool.quiz_type === 'flashcards') exportFlashcardsToDOCX(tool);
+                                          else if (tool.quiz_type === 'crossword') exportCrosswordToDOCX(tool);
+                                          else if (tool.quiz_type === 'lesson') exportLessonToDOCX(tool);
+                                          else exportQuizToDOCX(tool);
+                                          setExportDropdownToolId(null);
+                                        }
+                                      }}
+                                      className={`w-full px-4 py-2.5 text-left text-sm text-stone-700 dark:text-stone-200 hover:bg-stone-50 dark:hover:bg-stone-700 flex items-center gap-2 ${(tool.quiz_type === 'flashcards' || tool.quiz_type === 'study_pack') ? '' : 'rounded-b-xl'}`}
+                                    >
+                                      <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                                      Word
+                                    </button>
+                                  </>
+                                )}
+                                {(tool.quiz_type === 'flashcards' || tool.quiz_type === 'study_pack') && (
+                                  <button
+                                    onClick={() => {
+                                      if (tool.quiz_type === 'study_pack') {
+                                        setExportFormatModalTool(tool);
+                                        setExportFormatTarget('json');
+                                        setExportDropdownToolId(null);
+                                      } else {
+                                        exportFlashcardsToJSON(tool);
+                                        setExportDropdownToolId(null);
+                                      }
+                                    }}
+                                    className={`w-full px-4 py-2.5 text-left text-sm text-stone-700 dark:text-stone-200 hover:bg-stone-50 dark:hover:bg-stone-700 flex items-center gap-2 ${!isPaidUser ? 'rounded-t-xl rounded-b-xl' : 'rounded-b-xl'}`}
+                                  >
+                                    <svg className="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" /></svg>
+                                    JSON
+                                  </button>
+                                )}
                               </div>
                             )}
                           </div>
@@ -1901,7 +1940,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
         <ExportFormatModal
           packData={(exportFormatModalTool.questions || exportFormatModalTool) as any}
           packTitle={exportFormatModalTool.title || 'Study Pack'}
-          targetFormat={exportFormatTarget}
+          targetFormat={exportFormatTarget as 'pdf' | 'docx' | 'json'}
           onSelect={handleExportFormatSelect}
           onClose={() => { setExportFormatModalTool(null); setExportFormatTarget(null); setExportDropdownToolId(null); }}
         />

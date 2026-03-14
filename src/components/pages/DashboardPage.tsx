@@ -1768,6 +1768,21 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
     trackExport();
   };
 
+  const exportFlashcardsToJSON = () => {
+    if (!flashcardResult?.cards?.length) return;
+    const data = {
+      title: flashcardResult.title || 'Flashcards',
+      cards: flashcardResult.cards.map((c: any) => ({ front: c.front || '', back: c.back || '' })),
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `flashcards-${Date.now()}.json`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+    trackExport();
+  };
+
   const exportCrosswordToPDF = () => {
     if (!crosswordResult?.placedWords?.length) return;
     const doc = new jsPDF();
@@ -3734,6 +3749,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                       title={flashcardResult.title || 'Flashcards'}
                       onExportPDF={isPaidUser ? exportFlashcardsToPDF : undefined}
                       onExportDOCX={isPaidUser ? exportFlashcardsToDOCX : undefined}
+                      onExportJSON={exportFlashcardsToJSON}
                       onNewDeck={() => setFlashcardResult(null)}
                       canExport={isPaidUser}
                       onLoadPrevious={() => (onNavigate as (p: string, s?: string, o?: { quizHistoryFilter?: string }) => void)('quiz-history', undefined, { quizHistoryFilter: 'flashcards' })}

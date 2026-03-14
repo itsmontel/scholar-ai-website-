@@ -11,6 +11,7 @@ interface FlashcardViewerProps {
   title?: string;
   onExportPDF?: () => void;
   onExportDOCX?: () => void;
+  onExportJSON?: () => void;
   onNewDeck?: () => void;
   canExport?: boolean;
   onCardsChange?: (cards: FlashCard[]) => void;
@@ -81,6 +82,7 @@ const FlashcardViewer = ({
   title = 'Flashcards',
   onExportPDF,
   onExportDOCX,
+  onExportJSON,
   onNewDeck,
   canExport = false,
   onCardsChange,
@@ -472,6 +474,12 @@ const FlashcardViewer = ({
             <button onClick={onExportDOCX} className="px-3 py-1.5 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors flex items-center gap-1.5 text-xs">
               <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd"/></svg>
               DOCX
+            </button>
+          )}
+          {onExportJSON && (
+            <button onClick={onExportJSON} className="px-3 py-1.5 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 font-medium rounded-lg hover:bg-emerald-100 dark:hover:bg-emerald-900/50 transition-colors flex items-center gap-1.5 text-xs">
+              <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm3 10a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm-2-4a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1z" clipRule="evenodd"/></svg>
+              JSON
             </button>
           )}
           <button onClick={() => setShowCardList(!showCardList)} className={`px-3 py-1.5 font-medium rounded-lg transition-colors flex items-center gap-1.5 text-xs ${showCardList ? 'bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-violet-400' : 'bg-stone-100 dark:bg-stone-700 text-stone-600 dark:text-stone-400 hover:bg-stone-200 dark:hover:bg-stone-600'}`}>

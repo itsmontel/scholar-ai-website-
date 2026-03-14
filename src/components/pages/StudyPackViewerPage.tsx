@@ -40,7 +40,7 @@ const StudyPackViewerPage = ({ onNavigate, user, onLogout, initialData }: StudyP
     } catch { return 'lesson'; }
   });
   const [returnState, setReturnState] = useState<Record<string, number> | null>(null);
-  const [exportFormatTarget, setExportFormatTarget] = useState<'pdf' | 'docx' | null>(null);
+  const [exportFormatTarget, setExportFormatTarget] = useState<'pdf' | 'docx' | 'json' | null>(null);
 
   useEffect(() => {
     if (initialData) {
@@ -225,32 +225,44 @@ const StudyPackViewerPage = ({ onNavigate, user, onLogout, initialData }: StudyP
           </div>
           {hasExportableContent() && (
             <div className="flex items-center gap-2 w-full sm:w-auto sm:ml-auto">
-              {isPaidUser ? (
-                <div className="flex items-center gap-2 flex-1 sm:flex-initial justify-end sm:justify-start">
+              <div className="flex items-center gap-2 flex-1 sm:flex-initial justify-end sm:justify-start">
+                {isPaidUser && (
+                  <>
+                    <button
+                      onClick={() => setExportFormatTarget('pdf')}
+                      className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-900/30 font-medium text-xs sm:text-sm transition-colors border border-red-200 dark:border-red-800"
+                    >
+                      <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                      <span>PDF</span>
+                    </button>
+                    <button
+                      onClick={() => setExportFormatTarget('docx')}
+                      className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/30 font-medium text-xs sm:text-sm transition-colors border border-blue-200 dark:border-blue-800"
+                    >
+                      <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                      <span>Word</span>
+                    </button>
+                  </>
+                )}
+                {hasData('flashcards') && (
                   <button
-                    onClick={() => setExportFormatTarget('pdf')}
-                    className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-900/30 font-medium text-xs sm:text-sm transition-colors border border-red-200 dark:border-red-800"
+                    onClick={() => exportStudyPackSegment(pack.data, packTitle, 'flashcards', 'json')}
+                    className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/30 font-medium text-xs sm:text-sm transition-colors border border-emerald-200 dark:border-emerald-800"
                   >
-                    <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                    <span>PDF</span>
+                    <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm3 10a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm-2-4a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1z" clipRule="evenodd"/></svg>
+                    <span>JSON</span>
                   </button>
+                )}
+                {!isPaidUser && (
                   <button
-                    onClick={() => setExportFormatTarget('docx')}
-                    className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/30 font-medium text-xs sm:text-sm transition-colors border border-blue-200 dark:border-blue-800"
+                    onClick={() => onNavigate('pricing')}
+                    className="flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/30 font-medium text-xs sm:text-sm transition-colors border border-amber-200 dark:border-amber-800"
                   >
-                    <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                    <span>Word</span>
+                    <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                    Upgrade to export
                   </button>
-                </div>
-              ) : (
-                <button
-                  onClick={() => onNavigate('pricing')}
-                  className="flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/30 font-medium text-xs sm:text-sm transition-colors border border-amber-200 dark:border-amber-800"
-                >
-                  <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
-                  Upgrade to export
-                </button>
-              )}
+                )}
+              </div>
             </div>
           )}
         </div>
