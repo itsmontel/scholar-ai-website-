@@ -148,18 +148,12 @@ router.post('/humanize', authenticateToken, async (req, res) => {
     }
 
     const wordCount = text.trim().split(/\s+/).length;
+    const maxWordsPerRequest = (userPlan === 'pro' || userPlan === 'premium') ? 15000 : 5000;
 
-    if (wordCount > 5000) {
+    if (wordCount > maxWordsPerRequest) {
       return res.status(400).json({
         success: false,
-        message: 'Text exceeds maximum of 5,000 words per request'
-      });
-    }
-
-    if (userPlan === 'free' && wordCount > 5000) {
-      return res.status(400).json({
-        success: false,
-        message: 'Free plan allows up to 5,000 words per document. Upgrade for more.'
+        message: `Text exceeds maximum of ${maxWordsPerRequest.toLocaleString()} words per request${userPlan === 'free' ? '. Upgrade for up to 15,000 words.' : ''}`
       });
     }
 
@@ -313,18 +307,12 @@ router.post('/summarize', authenticateToken, async (req, res) => {
     }
 
     const wordCount = text.trim().split(/\s+/).length;
+    const maxWordsPerRequest = (userPlan === 'pro' || userPlan === 'premium') ? 15000 : 5000;
 
-    if (wordCount > 5000) {
+    if (wordCount > maxWordsPerRequest) {
       return res.status(400).json({
         success: false,
-        message: 'Text exceeds maximum of 5,000 words per request'
-      });
-    }
-
-    if (userPlan === 'free' && wordCount > 5000) {
-      return res.status(400).json({
-        success: false,
-        message: 'Free plan allows up to 5,000 words per document. Upgrade for more.'
+        message: `Text exceeds maximum of ${maxWordsPerRequest.toLocaleString()} words per request${userPlan === 'free' ? '. Upgrade for up to 15,000 words.' : ''}`
       });
     }
 

@@ -4,10 +4,9 @@ let supabase;
 
 const connectDB = async () => {
   try {
-    supabase = createClient(
-      process.env.SUPABASE_URL,
-      process.env.SUPABASE_ANON_KEY
-    );
+    // Use service role key - bypasses RLS. Required for backend DB operations.
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
+    supabase = createClient(process.env.SUPABASE_URL, key);
 
     // Test the connection
     const { data, error } = await supabase.from('users').select('count').limit(1);

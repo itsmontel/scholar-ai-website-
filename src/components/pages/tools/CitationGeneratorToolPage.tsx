@@ -1261,6 +1261,20 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
     <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%)' }}>
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="citation-generator-tool" />
 
+      {user && (
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-4">
+          <button
+            onClick={() => onNavigate('dashboard')}
+            className="inline-flex items-center gap-2 text-stone-600 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-100 transition-colors text-sm font-medium"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            Back to Dashboard
+          </button>
+        </div>
+      )}
+
       {/* Hero Section - compact for above-the-fold tool visibility */}
       <section className="py-8 sm:py-12 bg-gradient-to-b from-violet-50/50 to-white">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">

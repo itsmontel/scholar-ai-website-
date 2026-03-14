@@ -36,7 +36,7 @@ const SummarizerPage = ({ onNavigate, user, onLogout }: SummarizerPageProps) => 
 
   const isPremiumUser = user && (user.subscription_plan === 'premium' || user.plan === 'premium');
   const isFreeUser = !user || (user?.subscription_plan !== 'pro' && user?.subscription_plan !== 'premium' && user?.plan !== 'pro' && user?.plan !== 'premium');
-  const maxWords = isFreeUser ? 5000 : 5000;
+  const maxWords = isFreeUser ? 5000 : 15000;
   const userPlan = user?.subscription_plan || user?.plan || 'free';
   const wordCount = inputText.trim().split(/\s+/).filter(Boolean).length;
 
@@ -449,7 +449,7 @@ const SummarizerPage = ({ onNavigate, user, onLogout }: SummarizerPageProps) => 
                     <span className={`text-xs font-medium ${wordCount < 50 ? 'text-amber-600' : wordCount > maxWords ? 'text-red-600' : 'text-stone-500 dark:text-stone-400'}`}>
                       {wordCount.toLocaleString()} words / {maxWords.toLocaleString()} max
                       {wordCount < 50 && ' (min 50)'}
-                      {wordCount > maxWords && isFreeUser && ' — Upgrade for 5,000'}
+                      {wordCount > maxWords && isFreeUser && ' — Upgrade for 15,000'}
                     </span>
                   </div>
                 </div>

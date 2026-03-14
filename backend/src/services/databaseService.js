@@ -7,10 +7,10 @@ class DatabaseService {
 
   getSupabaseClient() {
     if (!this.supabase) {
-      this.supabase = createClient(
-        process.env.SUPABASE_URL,
-        process.env.SUPABASE_ANON_KEY
-      );
+      // Use service role key - bypasses RLS. Required for backend DB operations.
+      // Never expose service role key to the frontend.
+      const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
+      this.supabase = createClient(process.env.SUPABASE_URL, key);
     }
     return this.supabase;
   }

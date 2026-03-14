@@ -201,7 +201,7 @@ const HumanizerPage = ({ onNavigate, user, onLogout }: HumanizerPageProps) => {
   const wordCount = inputText.trim().split(/\s+/).filter(Boolean).length;
   const outputWordCount = humanizedResult.split(/\s+/).filter(Boolean).length;
   const isFreeUser = !user || (user?.subscription_plan !== 'pro' && user?.subscription_plan !== 'premium' && user?.plan !== 'pro' && user?.plan !== 'premium');
-  const maxWords = isFreeUser ? 1000 : 5000;
+  const maxWords = isFreeUser ? 1000 : 15000;
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -438,7 +438,7 @@ const HumanizerPage = ({ onNavigate, user, onLogout }: HumanizerPageProps) => {
                 <div className="flex items-center justify-between px-3 sm:px-5 py-2.5 sm:py-3 bg-stone-50/50 dark:bg-stone-800/30 border-t border-stone-200 dark:border-stone-600">
                   <span className={`text-xs font-medium ${wordCount > maxWords ? 'text-red-600' : 'text-stone-500 dark:text-stone-400'}`}>
                     {wordCount.toLocaleString()} words{wordCount > 0 && ` / ${maxWords.toLocaleString()} max`}
-                    {wordCount > maxWords && isFreeUser && ' — Upgrade for 5,000 words'}
+                    {wordCount > maxWords && isFreeUser && ' — Upgrade for 15,000 words'}
                   </span>
                   {!user && wordCount > 0 && (
                     <span className="text-xs text-stone-500 dark:text-stone-400">

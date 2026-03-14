@@ -989,7 +989,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
   const canUseQuiz = isPaidUser || (isFreeUser && (quizUsage.generationLimit === -1 || quizUsage.generationsRemaining > 0));
   const quizExhausted = isFreeUser && quizUsage.generationLimit !== -1 && quizUsage.generationsRemaining <= 0;
   
-  const humanizeSummarizeMaxWords = isFreeUser ? 5000 : 5000;
+  const humanizeSummarizeMaxWords = isFreeUser ? 5000 : 15000;
 
   const isTextValid = () => {
     if (mode === 'citations') return inputText.trim().length > 0;

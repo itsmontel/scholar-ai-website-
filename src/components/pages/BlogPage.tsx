@@ -37,18 +37,53 @@ const BlogPage = ({ onNavigate, user, onLogout }: BlogPageProps) => {
     if (post.slug.includes('thesis') || post.slug.includes('structure')) {
       return (
         <svg viewBox="0 0 200 140" fill="none" className="w-full h-full">
-          <rect width="200" height="140" fill={color.bg} />
-          <rect x="60" y="30" width="50" height="65" rx="4" fill="white" stroke={color.accent} strokeWidth="2" />
-          <line x1="70" y1="45" x2="100" y2="45" stroke={color.secondary} strokeWidth="2" />
-          <line x1="70" y1="55" x2="95" y2="55" stroke={color.secondary} strokeWidth="2" />
-          <line x1="70" y1="65" x2="100" y2="65" stroke={color.secondary} strokeWidth="2" />
-          <line x1="70" y1="75" x2="90" y2="75" stroke={color.secondary} strokeWidth="2" />
-          <circle cx="130" cy="50" r="20" fill={color.accent} opacity="0.2" />
-          <path d="M130 35 L130 30 M145 50 L150 50 M115 50 L110 50 M142 38 L146 34 M118 38 L114 34" stroke={color.accent} strokeWidth="2" strokeLinecap="round" />
-          <path d="M123 55 Q130 40 137 55 L135 65 Q130 68 125 65 Z" fill={color.accent} />
-          <rect x="125" y="65" width="10" height="5" rx="1" fill={color.secondary} />
-          <rect x="145" y="75" width="35" height="8" rx="2" fill={color.accent} transform="rotate(-45 145 75)" />
-          <polygon points="170,100 165,105 162,95" fill={color.secondary} />
+          <rect width="200" height="140" fill="#FEE2E2" />
+          <rect x="60" y="30" width="50" height="65" rx="4" fill="white" stroke="#EF4444" strokeWidth="2" />
+          <line x1="70" y1="45" x2="100" y2="45" stroke="#FCA5A5" strokeWidth="2" />
+          <line x1="70" y1="55" x2="95" y2="55" stroke="#FCA5A5" strokeWidth="2" />
+          <line x1="70" y1="65" x2="100" y2="65" stroke="#FCA5A5" strokeWidth="2" />
+          <line x1="70" y1="75" x2="90" y2="75" stroke="#FCA5A5" strokeWidth="2" />
+          <circle cx="130" cy="50" r="20" fill="#EF4444" opacity="0.2" />
+          <path d="M130 35 L130 30 M145 50 L150 50 M115 50 L110 50 M142 38 L146 34 M118 38 L114 34" stroke="#EF4444" strokeWidth="2" strokeLinecap="round" />
+          <path d="M123 55 Q130 40 137 55 L135 65 Q130 68 125 65 Z" fill="#EF4444" />
+          <rect x="125" y="65" width="10" height="5" rx="1" fill="#FCA5A5" />
+          <rect x="145" y="75" width="35" height="8" rx="2" fill="#EF4444" transform="rotate(-45 145 75)" />
+          <polygon points="170,100 165,105 162,95" fill="#FCA5A5" />
+        </svg>
+      );
+    }
+
+    if (post.slug === 'students-who-get-as-dont-work-harder') {
+      return (
+        <svg viewBox="0 0 200 140" fill="none" className="w-full h-full">
+          <rect width="200" height="140" fill="#FEF3C7" />
+          <rect x="55" y="40" width="55" height="70" rx="3" fill="white" stroke="#F59E0B" strokeWidth="2" transform="rotate(-5 55 40)" />
+          <rect x="60" y="35" width="55" height="70" rx="3" fill="white" stroke="#F59E0B" strokeWidth="2" />
+          <line x1="68" y1="50" x2="107" y2="50" stroke="#FCD34D" strokeWidth="2" />
+          <line x1="68" y1="60" x2="100" y2="60" stroke="#FCD34D" strokeWidth="2" />
+          <line x1="68" y1="70" x2="107" y2="70" stroke="#FCD34D" strokeWidth="2" />
+          <line x1="68" y1="80" x2="95" y2="80" stroke="#FCD34D" strokeWidth="2" />
+          <line x1="68" y1="90" x2="107" y2="90" stroke="#FCD34D" strokeWidth="2" />
+          <rect x="130" y="45" width="40" height="10" rx="2" fill="#F59E0B" transform="rotate(30 130 45)" />
+          <polygon points="125,72 120,80 132,77" fill="#FCD34D" />
+          <rect x="155" y="35" width="10" height="10" rx="1" fill="#FCD34D" transform="rotate(30 155 35)" />
+          <path d="M155 100 L158 108 L167 108 L160 113 L163 121 L155 116 L147 121 L150 113 L143 108 L152 108 Z" fill="#F59E0B" />
+        </svg>
+      );
+    }
+
+    if (post.slug.includes('plagiarism')) {
+      return (
+        <svg viewBox="0 0 200 140" fill="none" className="w-full h-full">
+          <rect width="200" height="140" fill="#ECFDF5" />
+          <rect x="55" y="35" width="55" height="75" rx="4" fill="white" stroke="#10B981" strokeWidth="2" />
+          <line x1="65" y1="50" x2="100" y2="50" stroke="#D1FAE5" strokeWidth="2" />
+          <line x1="65" y1="62" x2="95" y2="62" stroke="#D1FAE5" strokeWidth="2" />
+          <line x1="65" y1="74" x2="102" y2="74" stroke="#D1FAE5" strokeWidth="2" />
+          <circle cx="135" cy="75" r="22" fill="#10B981" />
+          <path d="M125 75 L131 81 L146 64" stroke="white" strokeWidth="4" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M155 45 L175 60 L175 95 Q165 110 155 120 Q145 110 135 95 L135 60 Z" fill="#D1FAE5" stroke="#10B981" strokeWidth="2" />
+          <path d="M150 78 L157 85 L172 68" stroke="#10B981" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       );
     }
@@ -93,11 +128,11 @@ const BlogPage = ({ onNavigate, user, onLogout }: BlogPageProps) => {
     if (post.slug.includes('free-writing-tools')) {
       return (
         <svg viewBox="0 0 200 140" fill="none" className="w-full h-full">
-          <rect width="200" height="140" fill="#E0F2FE" />
+          <rect width="200" height="140" fill="#D1FAE5" />
           {/* Toolbox */}
-          <rect x="60" y="60" width="80" height="50" rx="4" fill="#BFDBFE" stroke="#3B82F6" strokeWidth="2" />
-          <rect x="60" y="52" width="80" height="12" rx="2" fill="#93C5FD" stroke="#3B82F6" strokeWidth="2" />
-          <rect x="90" y="48" width="20" height="8" rx="2" fill="#3B82F6" />
+          <rect x="60" y="60" width="80" height="50" rx="4" fill="#A7F3D0" stroke="#10B981" strokeWidth="2" />
+          <rect x="60" y="52" width="80" height="12" rx="2" fill="#6EE7B7" stroke="#10B981" strokeWidth="2" />
+          <rect x="90" y="48" width="20" height="8" rx="2" fill="#10B981" />
           {/* Tools popping out */}
           <rect x="70" y="25" width="6" height="30" rx="1" fill="#FCD34D" />
           <rect x="70" y="20" width="6" height="8" rx="1" fill="#F59E0B" />
@@ -108,8 +143,8 @@ const BlogPage = ({ onNavigate, user, onLogout }: BlogPageProps) => {
           {/* Stars/sparkles */}
           <path d="M40 35 L42 40 L47 40 L43 44 L45 49 L40 46 L35 49 L37 44 L33 40 L38 40 Z" fill="#FBBF24" />
           <path d="M160 25 L161 28 L164 28 L162 30 L163 33 L160 31 L157 33 L158 30 L156 28 L159 28 Z" fill="#FBBF24" />
-          <circle cx="155" cy="95" r="10" fill="white" stroke="#3B82F6" strokeWidth="2" />
-          <text x="152" y="99" fontSize="10" fontWeight="bold" fill="#3B82F6">8</text>
+          <circle cx="155" cy="95" r="10" fill="white" stroke="#10B981" strokeWidth="2" />
+          <text x="152" y="99" fontSize="10" fontWeight="bold" fill="#10B981">8</text>
         </svg>
       );
     }
@@ -117,19 +152,19 @@ const BlogPage = ({ onNavigate, user, onLogout }: BlogPageProps) => {
     if (post.slug === 'how-to-study-effectively-complete-guide') {
       return (
         <svg viewBox="0 0 200 140" fill="none" className="w-full h-full">
-          <rect width="200" height="140" fill="#ECFDF5" />
-          <circle cx="100" cy="55" r="22" fill="white" stroke="#10B981" strokeWidth="2" />
-          <path d="M92 55 L97 60 L108 49" stroke="#10B981" strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-          <rect x="55" y="88" width="90" height="35" rx="4" fill="white" stroke="#059669" strokeWidth="2" />
-          <line x1="65" y1="98" x2="135" y2="98" stroke="#A7F3D0" strokeWidth="2" />
-          <line x1="65" y1="108" x2="120" y2="108" stroke="#A7F3D0" strokeWidth="2" />
-          <line x1="65" y1="118" x2="130" y2="118" stroke="#A7F3D0" strokeWidth="2" />
+          <rect width="200" height="140" fill="#DBEAFE" />
+          <circle cx="100" cy="55" r="22" fill="white" stroke="#3B82F6" strokeWidth="2" />
+          <path d="M92 55 L97 60 L108 49" stroke="#3B82F6" strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+          <rect x="55" y="88" width="90" height="35" rx="4" fill="white" stroke="#2563EB" strokeWidth="2" />
+          <line x1="65" y1="98" x2="135" y2="98" stroke="#93C5FD" strokeWidth="2" />
+          <line x1="65" y1="108" x2="120" y2="108" stroke="#93C5FD" strokeWidth="2" />
+          <line x1="65" y1="118" x2="130" y2="118" stroke="#93C5FD" strokeWidth="2" />
           <circle cx="165" cy="50" r="18" fill="white" stroke="#F59E0B" strokeWidth="2" />
           <path d="M165 38 L165 50 L172 56" stroke="#F59E0B" strokeWidth="2" fill="none" strokeLinecap="round" />
-          <rect x="35" y="45" width="25" height="32" rx="2" fill="white" stroke="#6366F1" strokeWidth="2" transform="rotate(-15 35 45)" />
-          <line x1="40" y1="55" x2="55" y2="55" stroke="#C4B5FD" strokeWidth="1" transform="rotate(-15 40 55)" />
-          <line x1="40" y1="62" x2="52" y2="62" stroke="#C4B5FD" strokeWidth="1" transform="rotate(-15 40 62)" />
-          <circle cx="50" cy="95" r="6" fill="#10B981" opacity="0.3" />
+          <rect x="35" y="45" width="25" height="32" rx="2" fill="white" stroke="#3B82F6" strokeWidth="2" transform="rotate(-15 35 45)" />
+          <line x1="40" y1="55" x2="55" y2="55" stroke="#93C5FD" strokeWidth="1" transform="rotate(-15 40 55)" />
+          <line x1="40" y1="62" x2="52" y2="62" stroke="#93C5FD" strokeWidth="1" transform="rotate(-15 40 62)" />
+          <circle cx="50" cy="95" r="6" fill="#3B82F6" opacity="0.3" />
           <circle cx="155" cy="95" r="5" fill="#F59E0B" opacity="0.3" />
         </svg>
       );
@@ -138,23 +173,23 @@ const BlogPage = ({ onNavigate, user, onLogout }: BlogPageProps) => {
     if (post.slug.includes('study-tools')) {
       return (
         <svg viewBox="0 0 200 140" fill="none" className="w-full h-full">
-          <rect width="200" height="140" fill="#EEF2FF" />
-          <circle cx="100" cy="70" r="28" fill="white" stroke="#6366F1" strokeWidth="2" />
-          <path d="M88 70 Q92 58 100 62 Q108 58 112 70 Q115 82 100 86 Q85 82 88 70" fill="#6366F1" />
+          <rect width="200" height="140" fill="#F3E8FF" />
+          <circle cx="100" cy="70" r="28" fill="white" stroke="#8B5CF6" strokeWidth="2" />
+          <path d="M88 70 Q92 58 100 62 Q108 58 112 70 Q115 82 100 86 Q85 82 88 70" fill="#8B5CF6" />
           <circle cx="95" cy="68" r="2" fill="white" />
           <circle cx="105" cy="68" r="2" fill="white" />
-          <rect x="45" y="45" width="35" height="25" rx="3" fill="white" stroke="#0EA5E9" strokeWidth="2" />
-          <text x="62" y="62" textAnchor="middle" fontSize="12" fill="#0EA5E9" fontWeight="bold">?</text>
-          <rect x="120" y="42" width="35" height="28" rx="3" fill="white" stroke="#8B5CF6" strokeWidth="2" />
-          <circle cx="132" cy="52" r="4" fill="#DDD6FE" />
+          <rect x="45" y="45" width="35" height="25" rx="3" fill="white" stroke="#7C3AED" strokeWidth="2" />
+          <text x="62" y="62" textAnchor="middle" fontSize="12" fill="#7C3AED" fontWeight="bold">?</text>
+          <rect x="120" y="42" width="35" height="28" rx="3" fill="white" stroke="#6D28D9" strokeWidth="2" />
+          <circle cx="132" cy="52" r="4" fill="#C4B5FD" />
           <line x1="140" y1="52" x2="148" y2="52" stroke="#E5E7EB" strokeWidth="2" />
-          <circle cx="132" cy="64" r="4" fill="#DDD6FE" />
+          <circle cx="132" cy="64" r="4" fill="#C4B5FD" />
           <line x1="140" y1="64" x2="148" y2="64" stroke="#E5E7EB" strokeWidth="2" />
-          <rect x="82" y="105" width="36" height="22" rx="2" fill="white" stroke="#F59E0B" strokeWidth="2" />
-          <line x1="92" y1="105" x2="92" y2="127" stroke="#FCD34D" strokeWidth="1" />
-          <line x1="108" y1="105" x2="108" y2="127" stroke="#FCD34D" strokeWidth="1" />
-          <line x1="82" y1="116" x2="118" y2="116" stroke="#FCD34D" strokeWidth="1" />
-          <circle cx="165" cy="45" r="5" fill="#FCD34D" />
+          <rect x="82" y="105" width="36" height="22" rx="2" fill="white" stroke="#7C3AED" strokeWidth="2" />
+          <line x1="92" y1="105" x2="92" y2="127" stroke="#C4B5FD" strokeWidth="1" />
+          <line x1="108" y1="105" x2="108" y2="127" stroke="#C4B5FD" strokeWidth="1" />
+          <line x1="82" y1="116" x2="118" y2="116" stroke="#C4B5FD" strokeWidth="1" />
+          <circle cx="165" cy="45" r="5" fill="#C4B5FD" />
           <circle cx="50" cy="100" r="4" fill="#10B981" />
         </svg>
       );
@@ -295,8 +330,8 @@ const BlogPage = ({ onNavigate, user, onLogout }: BlogPageProps) => {
             </h1>
             <span className="text-3xl sm:text-4xl">🧊</span>
           </div>
-          <p className="text-lg text-stone-500 dark:text-stone-400 max-w-2xl">
-            Real perspectives on studying and writing. Personal stories, honest opinions, and what actually works. Not the same advice you&apos;ll find everywhere else.
+          <p className="text-lg text-stone-500 dark:text-stone-400">
+            Tips, guides, and insights for better academic writing
           </p>
         </header>
 
