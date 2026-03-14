@@ -2439,22 +2439,22 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                     </div>
                   )}
                 </div>
-                {/* Quick Review + Create Cards - same size (240px on desktop), stacked */}
-                <div className="flex flex-col gap-3 lg:w-[240px] lg:min-w-[240px] lg:flex-none">
+                {/* Quick Review + Create Cards - same row, half width each */}
+                <div className="flex flex-row gap-2 sm:gap-3 lg:w-[240px] lg:min-w-[240px] lg:flex-none">
                   <button
                     onClick={() => setShowQuickReview(true)}
                     data-tutorial="quick-review-btn"
-                    className="w-full group bg-gradient-to-br from-violet-500 to-purple-600 hover:from-violet-400 hover:to-purple-500 rounded-2xl p-4 shadow-lg shadow-violet-500/25 hover:shadow-xl hover:shadow-violet-500/30 transition-all hover:scale-[1.02]"
+                    className="flex-1 min-w-0 group bg-gradient-to-br from-violet-500 to-purple-600 hover:from-violet-400 hover:to-purple-500 rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-lg shadow-violet-500/25 hover:shadow-xl hover:shadow-violet-500/30 transition-all active:scale-[0.98] sm:hover:scale-[1.02]"
                   >
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
-                        <span className="text-xl">🧠</span>
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 min-w-0">
+                      <div className="w-8 h-8 sm:w-10 sm:h-10 bg-white/20 rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0">
+                        <span className="text-base sm:text-xl">🧠</span>
                       </div>
-                      <div className="text-left min-w-0">
-                        <div className="text-white font-bold text-sm">Quick Review</div>
-                        <div className="text-violet-200 text-xs">Test your memory</div>
+                      <div className="text-left min-w-0 flex-1">
+                        <div className="text-white font-bold text-xs sm:text-sm truncate">Quick Review</div>
+                        <div className="text-violet-200 text-[10px] sm:text-xs truncate">Test your memory</div>
                       </div>
-                      <svg className="w-5 h-5 text-white/70 ml-auto group-hover:translate-x-1 transition-transform flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-4 h-4 sm:w-5 sm:h-5 text-white/70 hidden sm:block flex-shrink-0 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                       </svg>
                     </div>
@@ -2462,17 +2462,17 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                   <button
                     onClick={() => onNavigate('create-flashcards')}
                     data-tutorial="create-cards-card"
-                    className="w-full group bg-gradient-to-br from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 rounded-2xl p-4 shadow-lg shadow-amber-500/25 hover:shadow-xl hover:shadow-amber-500/30 transition-all hover:scale-[1.02]"
+                    className="flex-1 min-w-0 group bg-gradient-to-br from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-lg shadow-amber-500/25 hover:shadow-xl hover:shadow-amber-500/30 transition-all active:scale-[0.98] sm:hover:scale-[1.02]"
                   >
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
-                        <span className="text-xl">🃏</span>
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 min-w-0">
+                      <div className="w-8 h-8 sm:w-10 sm:h-10 bg-white/20 rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0">
+                        <span className="text-base sm:text-xl">🃏</span>
                       </div>
-                      <div className="text-left min-w-0">
-                        <div className="text-white font-bold text-sm">Create Cards</div>
-                        <div className="text-amber-200 text-xs">Build your deck</div>
+                      <div className="text-left min-w-0 flex-1">
+                        <div className="text-white font-bold text-xs sm:text-sm truncate">Create Cards</div>
+                        <div className="text-amber-200 text-[10px] sm:text-xs truncate">Build your deck</div>
                       </div>
-                      <svg className="w-5 h-5 text-white/70 ml-auto group-hover:translate-x-1 transition-transform flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-4 h-4 sm:w-5 sm:h-5 text-white/70 hidden sm:block flex-shrink-0 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                       </svg>
                     </div>
