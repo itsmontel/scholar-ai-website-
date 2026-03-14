@@ -1,6 +1,7 @@
 import Header from '../common/Header';
 import Footer from '../common/Footer';
 import ScholarMascot from '../common/ScholarMascot';
+import { FOCUS_MODE_COMING_SOON } from '../../constants/focusMode';
 
 interface FocusModePageProps {
   onNavigate: (page: string) => void;
@@ -88,6 +89,38 @@ const FocusModePage = ({ onNavigate, user, onLogout }: FocusModePageProps) => {
     <div className="min-h-screen bg-gradient-to-b from-blue-50/80 via-stone-50 to-white dark:from-stone-950 dark:via-stone-900 dark:to-stone-900">
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="focus-mode" />
 
+      {FOCUS_MODE_COMING_SOON ? (
+        /* Coming Soon — Chrome extension pending approval */
+        <section className="relative py-24 sm:py-32 px-4 sm:px-6">
+          <div className="max-w-2xl mx-auto text-center">
+            <span className="inline-flex items-center px-3 py-1 bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-400 rounded-full text-sm font-semibold mb-6">
+              Coming Soon
+            </span>
+            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center mx-auto mb-8 text-4xl shadow-xl shadow-violet-500/25">
+              🔒
+            </div>
+            <h1 className="text-3xl sm:text-4xl font-extrabold text-stone-800 dark:text-stone-100 mb-6">
+              Focus Mode is on its way
+            </h1>
+            <p className="text-lg text-stone-500 dark:text-stone-400 leading-relaxed mb-8">
+              Our Chrome extension is currently under review. Soon you&apos;ll be able to block distracting sites like YouTube, TikTok, and Reddit — and earn your screen time by answering study questions first. We&apos;ll have it ready for you as soon as it&apos;s approved.
+            </p>
+            <p className="text-sm text-stone-400 dark:text-stone-500">
+              Thanks for your patience — it&apos;ll be worth the wait.
+            </p>
+            {user && (
+              <button
+                onClick={() => onNavigate('dashboard')}
+                className="mt-8 px-6 py-3 border-2 border-stone-300 dark:border-stone-600 text-stone-700 dark:text-stone-300 font-semibold rounded-2xl hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
+              >
+                Back to Dashboard
+              </button>
+            )}
+          </div>
+        </section>
+        <Footer onNavigate={onNavigate} />
+      ) : (
+        <>
       {/* Hero Section */}
       <section className="relative py-16 sm:py-20 border-b border-stone-200/60 dark:border-stone-700/60 overflow-hidden">
         <div className="absolute top-[35%] left-[5%] hidden xl:block text-4xl opacity-50 animate-float">🔒</div>
@@ -269,6 +302,8 @@ const FocusModePage = ({ onNavigate, user, onLogout }: FocusModePageProps) => {
       </section>
 
       <Footer onNavigate={onNavigate} />
+        </>
+      )}
     </div>
   );
 };

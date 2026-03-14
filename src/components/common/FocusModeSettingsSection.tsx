@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { FOCUS_MODE_COMING_SOON } from '../../constants/focusMode';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
@@ -168,6 +169,35 @@ export default function FocusModeSettingsSection({ onBack, embedded = false, isP
   };
 
   const passThresholdOptions = Array.from({ length: questionCount }, (_, i) => i + 1);
+
+  if (FOCUS_MODE_COMING_SOON) {
+    return (
+      <div className="min-h-0 flex-1 overflow-auto">
+        <div className="p-6 sm:p-8 max-w-2xl">
+          {embedded && onBack && (
+            <button
+              onClick={onBack}
+              className="mb-6 flex items-center gap-2 text-stone-500 hover:text-stone-700 dark:hover:text-stone-300 text-sm font-medium"
+            >
+              ← Back to Dashboard
+            </button>
+          )}
+          <div className="bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-2xl p-8 sm:p-10 text-center">
+            <span className="inline-flex items-center px-3 py-1 bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-400 rounded-full text-sm font-semibold mb-6">
+              Coming Soon
+            </span>
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center mx-auto mb-6 text-3xl">
+              🔒
+            </div>
+            <h2 className="text-xl font-bold text-stone-800 dark:text-stone-100 mb-3">Focus Mode is on its way</h2>
+            <p className="text-stone-500 dark:text-stone-400 text-sm leading-relaxed max-w-md mx-auto">
+              Our Chrome extension is currently under review. Soon you&apos;ll be able to block distracting sites and earn your screen time by studying first. Thanks for your patience.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (

@@ -1,5 +1,6 @@
  import { useState, useEffect } from 'react';
 import Header from '../common/Header';
+import { FOCUS_MODE_COMING_SOON } from '../../constants/focusMode';
 
 interface User {
   id: string;
@@ -578,51 +579,62 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
           {isPaidUser && (
             <div className="bg-white border border-stone-200 rounded-2xl p-6 sm:p-8">
               <h2 className="text-xl font-bold text-stone-800 mb-2">Focus Mode</h2>
-              <p className="text-stone-600 text-sm mb-6">
-                Block distracting sites until you answer study questions. Customize question count and pass threshold on the Dashboard.
-              </p>
-              {focusModeLoading ? (
-                <p className="text-stone-500">Loading...</p>
+              {FOCUS_MODE_COMING_SOON ? (
+                <>
+                  <span className="inline-flex items-center px-3 py-1 bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-400 rounded-full text-sm font-semibold mb-4">Coming Soon</span>
+                  <p className="text-stone-600 text-sm mb-4">
+                    Our Chrome extension is currently under review. Soon you&apos;ll be able to block distracting sites and earn your screen time by studying first. Thanks for your patience.
+                  </p>
+                </>
               ) : (
                 <>
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {presets.map((p) => {
-                      const active = blockedDomains.includes(p.domain);
-                      return (
-                        <button
-                          key={p.domain}
-                          onClick={() => toggleBlockedSite(p.domain)}
-                          disabled={focusModeSaving}
-                          className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
-                            active
-                              ? 'bg-violet-600 text-white'
-                              : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
-                          }`}
-                        >
-                          {p.label}
-                        </button>
-                      );
-                    })}
-                  </div>
-                  {blockedDomains.length > 0 && (
-                    <p className="text-sm text-stone-500">
-                      Blocked: {blockedDomains.join(', ')}
-                    </p>
+                  <p className="text-stone-600 text-sm mb-6">
+                    Block distracting sites until you answer study questions. Customize question count and pass threshold on the Dashboard.
+                  </p>
+                  {focusModeLoading ? (
+                    <p className="text-stone-500">Loading...</p>
+                  ) : (
+                    <>
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        {presets.map((p) => {
+                          const active = blockedDomains.includes(p.domain);
+                          return (
+                            <button
+                              key={p.domain}
+                              onClick={() => toggleBlockedSite(p.domain)}
+                              disabled={focusModeSaving}
+                              className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
+                                active
+                                  ? 'bg-violet-600 text-white'
+                                  : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
+                              }`}
+                            >
+                              {p.label}
+                            </button>
+                          );
+                        })}
+                      </div>
+                      {blockedDomains.length > 0 && (
+                        <p className="text-sm text-stone-500">
+                          Blocked: {blockedDomains.join(', ')}
+                        </p>
+                      )}
+                      <a
+                        href="https://chrome.google.com/webstore"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 mt-4 text-violet-600 hover:text-violet-700 font-medium text-sm"
+                      >
+                        Get Chrome Extension →
+                      </a>
+                      <button
+                        onClick={() => onNavigate('focus-mode')}
+                        className="block mt-2 text-violet-600 hover:text-violet-700 font-medium text-sm"
+                      >
+                        Configure quiz rules on Dashboard →
+                      </button>
+                    </>
                   )}
-                  <a
-                    href="https://chrome.google.com/webstore"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 mt-4 text-violet-600 hover:text-violet-700 font-medium text-sm"
-                  >
-                    Get Chrome Extension →
-                  </a>
-                  <button
-                    onClick={() => onNavigate('focus-mode')}
-                    className="block mt-2 text-violet-600 hover:text-violet-700 font-medium text-sm"
-                  >
-                    Configure quiz rules on Dashboard →
-                  </button>
                 </>
               )}
             </div>
