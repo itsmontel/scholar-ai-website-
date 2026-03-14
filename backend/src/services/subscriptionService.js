@@ -95,9 +95,11 @@ const getUserPlan = async (userId) => {
 };
 
 // Get user's subscription details
+// IMPORTANT: Uses supabaseServiceRole to bypass RLS. The anon client cannot read users table
+// when RLS is enabled (migration 023); that caused all users to appear as 'free'.
 const getUserSubscriptionDetails = async (userId) => {
   try {
-    const { data: user, error } = await supabase
+    const { data: user, error } = await supabaseServiceRole
       .from('users')
       .select('subscription_plan, stripe_customer_id')
       .eq('id', userId)

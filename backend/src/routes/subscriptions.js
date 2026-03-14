@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const subscriptionService = require('../services/subscriptionService');
 const { authenticateToken } = require('../middleware/auth');
+const { getSupabase } = require('../database/connection');
 
 // @route   POST /api/subscriptions/create-checkout-session
 // @desc    Create a Stripe checkout session for subscription
@@ -39,8 +40,8 @@ router.post('/create-checkout-session', authenticateToken, async (req, res) => {
 
       customerId = customerResult.customerId;
 
-      // Update user with Stripe customer ID
-      const { error: updateError } = await subscriptionService.supabase
+      // Update user with Stripe customer ID (service role required - anon blocked by RLS)
+      const { error: updateError } = await getSupabase()
         .from('users')
         .update({ stripe_customer_id: customerId })
         .eq('id', user.id);
@@ -100,8 +101,8 @@ router.get('/current', authenticateToken, async (req, res) => {
     // If user has a paid plan, get details from Stripe
     let stripeSubscription = null;
     if (subscriptionDetails.plan !== 'free' && subscriptionDetails.stripeCustomerId) {
-      // Get the most recent active subscription
-      const { data: subscription, error } = await subscriptionService.supabase
+      // Get the most recent active subscription (service role required - subscriptions table has RLS)
+      const { data: subscription, error } = await getSupabase()
         .from('subscriptions')
         .select('stripe_subscription_id, status, current_period_start, current_period_end')
         .eq('user_id', userId)
@@ -159,8 +160,8 @@ router.put('/update', authenticateToken, async (req, res) => {
       });
     }
 
-    // Get current subscription
-    const { data: subscription, error: subError } = await subscriptionService.supabase
+    // Get current subscription (service role required - RLS on subscriptions)
+    const { data: subscription, error: subError } = await getSupabase()
       .from('subscriptions')
       .select('stripe_subscription_id')
       .eq('user_id', userId)
@@ -210,8 +211,8 @@ router.put('/update', authenticateToken, async (req, res) => {
       });
     }
 
-    // Update user's plan in database
-    const { error: updateError } = await subscriptionService.supabase
+    // Update user's plan in database (service role required - RLS on users)
+    const { error: updateError } = await getSupabase()
       .from('users')
       .update({ subscription_plan: newPlan })
       .eq('id', userId);
@@ -256,8 +257,8 @@ router.post('/cancel', authenticateToken, async (req, res) => {
       });
     }
 
-    // Get current subscription
-    const { data: subscription, error: subError } = await subscriptionService.supabase
+    // Get current subscription (service role required - RLS on subscriptions)
+    const { data: subscription, error: subError } = await getSupabase()
       .from('subscriptions')
       .select('stripe_subscription_id')
       .eq('user_id', userId)
@@ -284,8 +285,8 @@ router.post('/cancel', authenticateToken, async (req, res) => {
       });
     }
 
-    // Update subscription status in database
-    const { error: updateError } = await subscriptionService.supabase
+    // Update subscription status in database (service role required - RLS)
+    const { error: updateError } = await getSupabase()
       .from('subscriptions')
       .update({ 
         status: 'canceled',
@@ -298,15 +299,15 @@ router.post('/cancel', authenticateToken, async (req, res) => {
       console.error('Error updating subscription status:', updateError);
     }
 
-    // Get user email before downgrading
-    const { data: userData, error: userFetchError } = await subscriptionService.supabase
+    // Get user email before downgrading (service role required - RLS on users)
+    const { data: userData, error: userFetchError } = await getSupabase()
       .from('users')
       .select('email')
       .eq('id', userId)
       .single();
 
-    // Downgrade user to free plan
-    const { error: userUpdateError } = await subscriptionService.supabase
+    // Downgrade user to free plan (service role required - RLS on users)
+    const { error: userUpdateError } = await getSupabase()
       .from('users')
       .update({ subscription_plan: 'free' })
       .eq('id', userId);
