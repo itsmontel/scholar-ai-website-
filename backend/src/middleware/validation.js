@@ -16,9 +16,12 @@ const validate = (schema, property = 'body') => {
         value: detail.context?.value
       }));
 
+      // Use the first error's message as the main message so clients get a helpful reason (e.g. "Content is too long (max 100,000 characters)")
+      const mainMessage = errorDetails.length > 0 ? errorDetails[0].message : 'Validation failed';
+
       return res.status(400).json({
         success: false,
-        message: 'Validation failed',
+        message: mainMessage,
         errors: errorDetails
       });
     }
@@ -97,7 +100,7 @@ const commonSchemas = {
     .required()
     .messages({
       'string.min': 'Content must be at least 10 characters long',
-      'string.max': 'Content is too long',
+      'string.max': 'Content is too long (max 100,000 characters). Please shorten your text or split it into smaller sections.',
       'any.required': 'Content is required'
     }),
 

@@ -857,8 +857,9 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Analysis failed');
+        const errorData = await response.json().catch(() => ({}));
+        const errorMessage = errorData.errors?.[0]?.message || errorData.message || 'Analysis failed';
+        throw new Error(errorMessage);
       }
 
       const result: AnalysisResult = await response.json();

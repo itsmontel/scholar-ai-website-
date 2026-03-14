@@ -21,10 +21,9 @@
 | Essay analysis (premium) | gpt-5-mini | 9,000 | 8,000 | $0.0183 |
 | Humanize (per 1,000 words) | gpt-4.1-nano | 1,800 | 1,300 | $0.0007 |
 | Summarize (per 1,000 words) | gpt-4.1-nano | 1,800 | 800 | $0.0005 |
-| Quiz generation | gpt-4.1-nano | 4,000 | 4,000 | $0.0020 |
-| Flashcard generation | gpt-4.1-nano | 3,500 | 2,000 | $0.0012 |
-| Crossword generation | gpt-4.1-nano | 2,500 | 1,200 | $0.0009 |
-| Lesson generation | gpt-4.1-nano | 4,000 | 6,000 | $0.0028 |
+| **Study pack** (quiz + flashcards + crossword + lesson + crater blast) | gpt-4.1-nano | ~18,000 | ~16,000 | ~$0.0089 |
+
+*Study pack cost = quiz ($0.0020) + flashcards ($0.0012) + crossword ($0.0009) + lesson ($0.0028) + crater blast (~$0.0020).*
 
 ---
 
@@ -32,13 +31,11 @@
 
 | Feature | Free | Pro | Premium |
 |---------|------|-----|---------|
-| Citation searches | 2 | 99 | 199 |
-| Essay analyses | 3 | 99 | 199 |
+| Combined (analyses + study packs + citations) | 3 analyses, 2 study packs, 2 citations | 99 shared | 999 shared |
 | Humanize words | 5,000 | 99,999 | 999,999 |
 | Summarize words | 5,000 | 99,999 | 999,999 |
-| Quiz generations | 3 | 99 | 199 |
-| Lesson generations | 3 | 99 | 199 |
-| Flashcards + crosswords | (shares quiz pool) | (shares) | (shares) |
+
+*One study pack = quiz + flashcards + crossword + lesson + crater blast (single generation). Pro/Premium share one pool for analyses, study packs & citations.*
 
 ---
 
@@ -48,13 +45,12 @@
 
 | Feature | Usage | Cost |
 |---------|-------|------|
-| Citation searches | 2 | 2 × $0.0016 = $0.003 |
 | Essay analyses | 3 | 3 × $0.0034 = $0.010 |
+| Citation searches | 2 | 2 × $0.0016 = $0.003 |
+| Study packs | 2 | 2 × $0.0089 = $0.018 |
 | Humanize | 5,000 words | 5 × $0.0007 = $0.004 |
 | Summarize | 5,000 words | 5 × $0.0005 = $0.003 |
-| Quiz | 3 | 3 × $0.0020 = $0.006 |
-| Lessons | 3 | 3 × $0.0028 = $0.008 |
-| **Total** | | **~$0.034** |
+| **Total** | | **~$0.038** |
 
 **Free user max cost: ~$0.03–0.04/month**
 
@@ -64,16 +60,15 @@
 
 | Feature | Usage | Cost |
 |---------|-------|------|
-| Citation searches | 99 | 99 × $0.0016 = $0.16 |
-| Essay analyses | 99 | 99 × $0.0047 = $0.47 |
+| Combined pool (99 study packs)* | 99 | 99 × $0.0089 = $0.88 |
 | Humanize | 99,999 words | 100 × $0.0007 = $0.07 |
 | Summarize | 99,999 words | 100 × $0.0005 = $0.05 |
-| Quiz | 99 | 99 × $0.0020 = $0.20 |
-| Lessons | 99 | 99 × $0.0028 = $0.28 |
-| **Total** | | **~$1.18** |
+| **Total** | | **~$1.00** |
 
-**Pro user max cost: ~$1.18/month**  
-**Pro profit margin: $19.99 − $1.18 ≈ $18.81 (~94%)**
+*Analyses, study packs & citations share one pool. Max cost = all 99 used on study packs (quiz + flashcards + crossword + lesson + crater blast per pack).*
+
+**Pro user max cost: ~$1.00/month**  
+**Pro profit margin: $19.99 − $1.00 ≈ $18.99 (~95%)**
 
 ---
 
@@ -81,16 +76,15 @@
 
 | Feature | Usage | Cost |
 |---------|-------|------|
-| Citation searches | 199 | 199 × $0.0016 = $0.32 |
-| Essay analyses | 199 | 199 × $0.0183 = $3.64 |
+| Combined pool (999 analyses)* | 999 | 999 × $0.0183 = $18.27 |
 | Humanize | 999,999 words | 1,000 × $0.0007 = $0.70 |
 | Summarize | 999,999 words | 1,000 × $0.0005 = $0.50 |
-| Quiz | 199 | 199 × $0.0020 = $0.40 |
-| Lessons | 199 | 199 × $0.0028 = $0.56 |
-| **Total** | | **~$6.12** |
+| **Total** | | **~$19.47** |
 
-**Premium user max cost: ~$6.12/month**  
-**Premium profit margin: $39.99 − $6.12 ≈ $33.87 (~85%)**
+*Analyses, study packs & citations share one pool. Max cost = all 999 used on analyses (gpt-5-mini at $0.0183 each). Study packs are $0.0089 each, so analyses drive worst-case cost.*
+
+**Premium user max cost: ~$19.47/month**  
+**Premium profit margin: $39.99 − $19.47 ≈ $20.52 (~51%)**
 
 ---
 
@@ -99,18 +93,15 @@
 | Plan | Revenue | Max API Cost | Profit | Margin |
 |------|---------|--------------|--------|--------|
 | **Free** | $0 | ~$0.03–0.04 | −$0.03 | (loss) |
-| **Pro** | $19.99 | ~$1.18 | ~$18.81 | ~94% |
-| **Premium** | $39.99 | ~$6.12 | ~$33.87 | ~85% |
+| **Pro** | $19.99 | ~$1.00 | ~$18.99 | ~95% |
+| **Premium** | $39.99 | ~$19.47 | ~$20.52 | ~51% |
 
 ---
 
 ## Notes
 
 1. **Free users** cost ~$0.03–0.04 per period at max usage. This is the acquisition cost.
-2. **Pro** and **Premium** margins stay high even at full usage because:
-   - Humanize/summarize use gpt-4.1-nano
-   - Only essay analysis uses the more expensive models
-   - Premium essay analysis (gpt-5-mini) is the main cost driver
+2. **Study packs** = one generation producing quiz + flashcards + crossword + lesson + crater blast. Pro/Premium share a combined pool of analyses, study packs & citations; max cost depends on how the pool is used (analyses cost more on Premium).
 3. **Typical usage** is usually below limits, so real costs are often 20–50% of these max figures.
 4. **Stripe fees** (~2.9% + $0.30 per transaction) reduce net revenue by ~$0.88 on Pro and ~$1.46 on Premium per month.
 5. **Infrastructure** (hosting, Supabase, etc.) is not included in this analysis.
