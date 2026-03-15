@@ -26,7 +26,7 @@ import FocusModeSettingsSection from '../common/FocusModeSettingsSection';
 import { FOCUS_MODE_COMING_SOON } from '../../constants/focusMode';
 
 interface DashboardProps {
-  onNavigate: (page: string) => void;
+  onNavigate: (page: string, slug?: string, options?: { studyPack?: { data: any; title?: string } }) => void;
   user: any;
   onLogout: () => void;
   onUserUpdate?: (updates: { welcomeTutorialCompleted?: boolean }) => void;
@@ -929,12 +929,12 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
       if (t.quiz_type === 'study_pack') {
         try {
           const packData = t.questions || t;
-          sessionStorage.setItem('writescholar_study_pack_viewer', JSON.stringify({
-            data: packData,
-            title: t.title || packData?.quiz?.title || packData?.flashcards?.title || packData?.lesson?.title || 'Study Pack',
-          }));
-        } catch (_) {}
-        onNavigate('study-pack-viewer');
+          const packTitle = t.title || packData?.quiz?.title || packData?.flashcards?.title || packData?.lesson?.title || 'Study Pack';
+          sessionStorage.setItem('writescholar_study_pack_viewer', JSON.stringify({ data: packData, title: packTitle }));
+          onNavigate('study-pack-viewer', undefined, { studyPack: { data: packData, title: packTitle } });
+        } catch (_) {
+          onNavigate('study-pack-viewer');
+        }
       } else {
         localStorage.setItem('writescholar_minimal_ui', 'true');
         if (t.quiz_type === 'flashcards') {
@@ -1243,6 +1243,8 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
     setIsGeneratingStudyPack(true);
     setStudyPackError('');
     setStudyPackResult(null);
+    // Prefetch StudyPackViewerPage chunk so it's ready when we navigate (reduces load failures)
+    import('../pages/StudyPackViewerPage').catch(() => {});
     try {
       const token = localStorage.getItem('authToken');
       const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/analysis/generate-study-pack`, {
@@ -1255,14 +1257,13 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
       setStudyPackResult(data.data);
       const wasFirst = (getStats().study_packs_count || 0) === 0;
       if (wasFirst) trackEvent('first_study_pack');
-      // Navigate to study pack viewer so user can flick between all 5 tools
+      const packTitle = data.data?.quiz?.title || data.data?.flashcards?.title || data.data?.lesson?.title || 'Study Pack';
+      // Write to sessionStorage as fallback (e.g. refresh, recents)
       try {
-        sessionStorage.setItem('writescholar_study_pack_viewer', JSON.stringify({
-          data: data.data,
-          title: data.data?.quiz?.title || data.data?.flashcards?.title || data.data?.lesson?.title || 'Study Pack',
-        }));
+        sessionStorage.setItem('writescholar_study_pack_viewer', JSON.stringify({ data: data.data, title: packTitle }));
       } catch (_) {}
-      onNavigate('study-pack-viewer');
+      // Pass data via navigation state so viewer doesn't rely on sessionStorage timing
+      onNavigate('study-pack-viewer', undefined, { studyPack: { data: data.data, title: packTitle } });
       // Track study pack generation with word count for achievements
       const wordCount = inputText.trim().split(/\s+/).length;
       trackStudyPackGenerated(wordCount);

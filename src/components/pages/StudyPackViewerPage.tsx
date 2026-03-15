@@ -31,11 +31,25 @@ interface StudyPackViewerPageProps {
   initialData?: { data: any; title?: string };
 }
 
+function safeParseStorage(key: string): { data: any; title?: string } | null {
+  try {
+    const r = typeof sessionStorage !== 'undefined' ? sessionStorage.getItem(key) : null;
+    if (!r) return null;
+    const parsed = JSON.parse(r);
+    return parsed?.data ? { data: parsed.data, title: parsed.title || 'Study Pack' } : null;
+  } catch {
+    return null;
+  }
+}
+
 const StudyPackViewerPage = ({ onNavigate, user, onLogout, initialData }: StudyPackViewerPageProps) => {
-  const [pack, setPack] = useState<{ data: any; title: string } | null>(initialData || null);
+  const [pack, setPack] = useState<{ data: any; title: string } | null>(() => {
+    if (initialData?.data) return { data: initialData.data, title: initialData.title || 'Study Pack' };
+    return safeParseStorage(STORAGE_KEY);
+  });
   const [activeTab, setActiveTab] = useState<TabKey>(() => {
     try {
-      const data = initialData?.data ?? (() => { const r = sessionStorage.getItem(STORAGE_KEY); return r ? JSON.parse(r)?.data : null; })();
+      const data = initialData?.data ?? safeParseStorage(STORAGE_KEY)?.data;
       return data?.originalNotes ? 'notes' : 'lesson';
     } catch { return 'lesson'; }
   });
@@ -43,17 +57,12 @@ const StudyPackViewerPage = ({ onNavigate, user, onLogout, initialData }: StudyP
   const [exportFormatTarget, setExportFormatTarget] = useState<'pdf' | 'docx' | 'json' | null>(null);
 
   useEffect(() => {
-    if (initialData) {
-      setPack(initialData);
+    if (initialData?.data) {
+      setPack({ data: initialData.data, title: initialData.title || 'Study Pack' });
       return;
     }
-    try {
-      const raw = sessionStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        if (parsed?.data) setPack({ data: parsed.data, title: parsed.title || 'Study Pack' });
-      }
-    } catch (_) {}
+    const fromStorage = safeParseStorage(STORAGE_KEY);
+    if (fromStorage) setPack(fromStorage);
   }, [initialData]);
 
   useEffect(() => {
@@ -193,11 +202,11 @@ const StudyPackViewerPage = ({ onNavigate, user, onLogout, initialData }: StudyP
     setExportFormatTarget(null);
   };
 
-  const flashcardCards = pack.data.flashcards?.cards?.map((c: any, i: number) => ({
+  const flashcardCards = (Array.isArray(pack.data?.flashcards?.cards) ? pack.data.flashcards.cards : []).map((c: any, i: number) => ({
     id: `card-${i}`,
-    front: c.front ?? c.term ?? '',
-    back: c.back ?? c.definition ?? '',
-  })) ?? [];
+    front: c?.front ?? c?.term ?? '',
+    back: c?.back ?? c?.definition ?? '',
+  }));
 
   return (
     <div className="min-h-screen bg-stone-50 dark:bg-stone-900 flex flex-col">

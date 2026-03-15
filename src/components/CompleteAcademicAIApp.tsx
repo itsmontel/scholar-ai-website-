@@ -181,6 +181,7 @@ const AcademicAIApp = () => {
   );
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState<User | null>(null);
+  const [studyPackInitialData, setStudyPackInitialData] = useState<{ data: any; title?: string } | null>(null);
 
   // Stale-while-revalidate: instant load from cache, then background fetch. Server overwrites when it arrives.
   useEffect(() => {
@@ -644,7 +645,9 @@ const AcademicAIApp = () => {
     'study-tools-comparison': '/vs-quizlet-knowt',
   };
 
-  const navigateTo = (page: string, slug?: string, options?: { quizHistoryFilter?: 'all' | 'quiz' | 'flashcards' | 'crossword' | 'crater_blast' }) => {
+  const navigateTo = (page: string, slug?: string, options?: { quizHistoryFilter?: 'all' | 'quiz' | 'flashcards' | 'crossword' | 'crater_blast'; studyPack?: { data: any; title?: string } }) => {
+    if (page !== 'study-pack-viewer') setStudyPackInitialData(null);
+    if (page === 'study-pack-viewer' && options?.studyPack) setStudyPackInitialData(options.studyPack);
     setCurrentPage(page);
     // Update URL to canonical form
     if (page === 'blog-post' && slug) {
@@ -951,7 +954,7 @@ const AcademicAIApp = () => {
       case 'interactive-lesson':
         return <InteractiveLessonPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'study-pack-viewer':
-        return <StudyPackViewerPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
+        return <StudyPackViewerPage onNavigate={navigateTo} user={user} onLogout={handleLogout} initialData={studyPackInitialData || undefined} />;
       case 'admin':
         return <AdminDashboard onNavigate={navigateTo} user={user} />;
       case 'collaboration':
