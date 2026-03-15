@@ -190,47 +190,34 @@ router.get('/blocked-sites', authenticateToken, async (req, res) => {
   }
 });
 
-const BLOCK_ALL_SENTINEL = '__ALL__';
-
 // @route   PUT /api/focus-mode/blocked-sites
-// @desc    Update blocked sites (free: 1, pro: 10, premium: unlimited). blockAll (__ALL__) is paid only.
+// @desc    Update blocked sites (free: 1, pro: 10, premium: unlimited)
 router.put('/blocked-sites', authenticateToken, async (req, res) => {
   try {
     const userId = req.user.id;
     const plan = req.user.subscription_plan || 'free';
     const maxSites = getMaxSites(plan);
-    const isPaid = (plan || '').toLowerCase() === 'pro' || (plan || '').toLowerCase() === 'premium';
     const { blockedDomains } = req.body;
 
     if (!Array.isArray(blockedDomains)) {
       return res.status(400).json({ success: false, message: 'blockedDomains must be an array' });
     }
 
-    const wantsBlockAll = blockedDomains.includes(BLOCK_ALL_SENTINEL);
-    if (wantsBlockAll && !isPaid) {
-      return res.status(403).json({ success: false, message: 'Block All is a Pro/Premium feature. Upgrade to block every site until you study.' });
-    }
-
-    let normalized;
-    if (wantsBlockAll) {
-      normalized = [BLOCK_ALL_SENTINEL];
-    } else {
-      // Normalize: lowercase, strip subdomains to base domain, limit by plan
-      normalized = [...new Set(
-        blockedDomains
-          .filter(d => d !== BLOCK_ALL_SENTINEL)
-          .slice(0, maxSites)
-          .map(d => String(d).toLowerCase().trim())
-          .filter(d => d.length > 0)
-          .map(d => {
-            const parts = d.replace(/^https?:\/\//, '').split('/')[0].split('.');
-            if (parts.length >= 2) {
-              return parts.slice(-2).join('.');
-            }
-            return d;
-          })
-      )];
-    }
+    // Normalize: lowercase, strip subdomains to base domain, limit by plan
+    const normalized = [...new Set(
+      blockedDomains
+        .slice(0, maxSites)
+        .map(d => String(d).toLowerCase().trim())
+        .filter(d => d.length > 0)
+        .map(d => {
+          // Extract base domain (youtube.com from www.youtube.com)
+          const parts = d.replace(/^https?:\/\//, '').split('/')[0].split('.');
+          if (parts.length >= 2) {
+            return parts.slice(-2).join('.');
+          }
+          return d;
+        })
+    )];
 
     const supabase = getSupabase();
     const { error } = await supabase
@@ -244,9 +231,8 @@ router.put('/blocked-sites', authenticateToken, async (req, res) => {
     if (error) throw error;
 
     // Track focus_mode_sites_blocked for achievements (fire-and-forget)
-    const blockCount = wantsBlockAll ? 1 : normalized.length;
     achievementsService.upsertAchievements(userId, {
-      stats: { focus_mode_sites_blocked: blockCount }
+      stats: { focus_mode_sites_blocked: normalized.length }
     }).catch(() => { /* ignore */ });
 
     res.json({ success: true, data: { blockedDomains: normalized, maxSites } });

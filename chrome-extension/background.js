@@ -4,7 +4,6 @@
  */
 
 const RULE_ID_BASE = 1000;
-const BLOCK_ALL_SENTINEL = '__ALL__';
 const UNLOCK_DURATION_MS_DEFAULT = 30 * 60 * 1000; // 30 minutes default
 const SCHOLAR_BASE = 'https://writescholar.com';
 const API_BASE_FALLBACK = 'https://api.writescholar.com/api';
@@ -67,16 +66,14 @@ function normalizeDomains(domains) {
   return [...new Set(
     domains
       .slice(0, 500)
-      .map(d => String(d).trim())
+      .map(d => String(d).toLowerCase().trim())
       .filter(d => d.length > 0)
       .map(d => {
-        if (d === BLOCK_ALL_SENTINEL) return d;
-        const lower = d.toLowerCase();
-        const parts = lower.replace(/^https?:\/\//, '').split('/')[0].split('.');
+        const parts = d.replace(/^https?:\/\//, '').split('/')[0].split('.');
         if (parts.length >= 2) {
           return parts.slice(-2).join('.');
         }
-        return lower;
+        return d;
       })
   )];
 }
@@ -86,68 +83,48 @@ async function syncRules() {
   const config = await getStoredConfig();
   const unlocks = await getUnlocks();
   const now = Date.now();
-  const blocked = config.blockedDomains || [];
   
-  console.log('[WriteScholar BG] Config blockedDomains:', blocked);
+  console.log('[WriteScholar BG] Config blockedDomains:', config.blockedDomains);
   console.log('[WriteScholar BG] Current unlocks:', unlocks);
 
-  const isBlockAll = blocked.includes(BLOCK_ALL_SENTINEL);
-  const allUnlocked = unlocks[BLOCK_ALL_SENTINEL] && unlocks[BLOCK_ALL_SENTINEL] > now;
-  const toBlock = isBlockAll
-    ? (allUnlocked ? [] : [BLOCK_ALL_SENTINEL])
-    : blocked.filter((d) => d !== BLOCK_ALL_SENTINEL && (!unlocks[d] || unlocks[d] < now));
+  const toBlock = (config.blockedDomains || []).filter(
+    (d) => !unlocks[d] || unlocks[d] < now
+  );
   
-  console.log('[WriteScholar BG] toBlock (after unlock filter):', toBlock);
-
-  const existing = await chrome.declarativeNetRequest.getDynamicRules();
-  const removeIds = existing.map((r) => r.id);
+  console.log('[WriteScholar BG] Domains to block (after unlock filter):', toBlock);
 
   if (toBlock.length === 0) {
     console.log('[WriteScholar BG] No domains to block, clearing all rules');
-    if (removeIds.length > 0) {
-      await chrome.declarativeNetRequest.updateDynamicRules({ removeRuleIds: removeIds });
+    const existing = await chrome.declarativeNetRequest.getDynamicRules();
+    if (existing.length > 0) {
+      await chrome.declarativeNetRequest.updateDynamicRules({
+        removeRuleIds: existing.map((r) => r.id),
+      });
     }
     console.log('[WriteScholar BG] Rules cleared');
     return;
   }
 
   const base = getScholarBase();
-  let rules = [];
+  const rules = toBlock.map((domain, idx) => ({
+    id: domainToRuleId(domain, idx),
+    priority: 1,
+    action: {
+      type: 'redirect',
+      redirect: {
+        url: `${base}/unlock-quiz?site=${encodeURIComponent(domain)}&redirect=${encodeURIComponent(`https://${domain}`)}`,
+      },
+    },
+    condition: {
+      urlFilter: `||${domain}`,
+      resourceTypes: ['main_frame'],
+    },
+  }));
 
-  if (toBlock.includes(BLOCK_ALL_SENTINEL)) {
-    rules.push({
-      id: RULE_ID_BASE,
-      priority: 1,
-      action: {
-        type: 'redirect',
-        redirect: {
-          regexSubstitution: `${base}/unlock-quiz?mode=all&site=${BLOCK_ALL_SENTINEL}#\\0`,
-        },
-      },
-      condition: {
-        regexFilter: '^https?://(?!([^/]*\\.)?writescholar\\.com)(?!localhost)[^\\s]+$',
-        resourceTypes: ['main_frame'],
-      },
-    });
-  } else {
-    rules = toBlock.map((domain, idx) => ({
-      id: domainToRuleId(domain, idx),
-      priority: 1,
-      action: {
-        type: 'redirect',
-        redirect: {
-          url: `${base}/unlock-quiz?site=${encodeURIComponent(domain)}&redirect=${encodeURIComponent(`https://${domain}`)}`,
-        },
-      },
-      condition: {
-        urlFilter: `||${domain}`,
-        resourceTypes: ['main_frame'],
-      },
-    }));
-  }
-
+  const existing = await chrome.declarativeNetRequest.getDynamicRules();
+  const removeIds = existing.map((r) => r.id);
   console.log('[WriteScholar BG] Removing old rules:', removeIds);
-  console.log('[WriteScholar BG] Adding new rules:', rules.length);
+  console.log('[WriteScholar BG] Adding new rules:', rules.map(r => r.condition.urlFilter));
   
   await chrome.declarativeNetRequest.updateDynamicRules({
     removeRuleIds: removeIds,
@@ -325,17 +302,9 @@ const UNLOCK_EXPIRY_CHECK_MS = 15000;
 
 function isTabOnBlockedDomain(tabUrl, blockedDomains) {
   if (!tabUrl || !blockedDomains.length) return false;
-  if (blockedDomains.includes(BLOCK_ALL_SENTINEL)) {
-    try {
-      const host = new URL(tabUrl).hostname.toLowerCase();
-      return !host.endsWith('writescholar.com') && !host.includes('localhost');
-    } catch (_) {
-      return false;
-    }
-  }
   try {
     const host = new URL(tabUrl).hostname.toLowerCase();
-    return blockedDomains.some((d) => d !== BLOCK_ALL_SENTINEL && (host === d || host.endsWith('.' + d)));
+    return blockedDomains.some((d) => host === d || host.endsWith('.' + d));
   } catch (_) {
     return false;
   }
@@ -351,11 +320,7 @@ async function checkUnlockExpiryAndRedirect() {
   const now = Date.now();
   const blocked = config.blockedDomains || [];
 
-  const hasBlockAll = blocked.includes(BLOCK_ALL_SENTINEL);
-  const allExpired = hasBlockAll && (!unlocks[BLOCK_ALL_SENTINEL] || unlocks[BLOCK_ALL_SENTINEL] < now);
-  const expiredDomains = hasBlockAll
-    ? (allExpired ? [BLOCK_ALL_SENTINEL] : [])
-    : blocked.filter((d) => d !== BLOCK_ALL_SENTINEL && unlocks[d] && unlocks[d] < now);
+  const expiredDomains = blocked.filter((d) => unlocks[d] && unlocks[d] < now);
   if (expiredDomains.length === 0) return;
 
   console.log('[WriteScholar BG] Unlock(s) expired for:', expiredDomains);
@@ -363,19 +328,12 @@ async function checkUnlockExpiryAndRedirect() {
 
   const base = getScholarBase();
   for (const domain of expiredDomains) {
+    const redirectUrl = `${base}/unlock-quiz?site=${encodeURIComponent(domain)}&redirect=${encodeURIComponent(`https://${domain}`)}`;
     try {
-      let tabs;
-      if (domain === BLOCK_ALL_SENTINEL) {
-        tabs = await chrome.tabs.query({ url: ['http://*/*', 'https://*/*'] });
-      } else {
-        tabs = await chrome.tabs.query({ url: [`*://*.${domain}/*`, `*://${domain}/*`] });
-      }
+      const tabs = await chrome.tabs.query({ url: [`*://*.${domain}/*`, `*://${domain}/*`] });
       for (const tab of tabs) {
         if (!tab.id || !tab.url || tab.url.includes('/unlock-quiz')) continue;
         if (!isTabOnBlockedDomain(tab.url, blocked)) continue;
-        const redirectUrl = domain === BLOCK_ALL_SENTINEL
-          ? `${base}/unlock-quiz?mode=all&site=${BLOCK_ALL_SENTINEL}#${encodeURIComponent(tab.url)}`
-          : `${base}/unlock-quiz?site=${encodeURIComponent(domain)}&redirect=${encodeURIComponent(`https://${domain}`)}`;
         await chrome.tabs.update(tab.id, { url: redirectUrl });
         console.log('[WriteScholar BG] Redirected tab', tab.id, 'to unlock quiz (unlock expired)');
       }

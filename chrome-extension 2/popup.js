@@ -160,10 +160,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       unlockTimerList.innerHTML = activeUnlocks.map(({ domain, remaining }) => {
         const formatted = formatRemainingTime(remaining);
         const isExpiringSoon = remaining < 5 * 60 * 1000; // Less than 5 minutes
-        const displayName = domain === '__ALL__' ? 'All sites' : domain;
         return `
           <div class="unlock-item">
-            <span class="unlock-domain">${escapeHtml(displayName)}</span>
+            <span class="unlock-domain">${escapeHtml(domain)}</span>
             <span class="unlock-time ${isExpiringSoon ? 'expired' : ''}">${escapeHtml(formatted)}</span>
           </div>
         `;
@@ -270,13 +269,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Start timer for paid users
   startTimer();
 
-  const BLOCK_ALL = '__ALL__';
-
   const updateStatus = () => {
     if (blocked.length > 0) {
       statusEl.className = 'status active';
-      const isAll = blocked.includes(BLOCK_ALL);
-      statusEl.textContent = isAll ? 'Blocking all sites until you study' : `Blocking ${blocked.length} site(s): ${blocked.filter(d => d !== BLOCK_ALL).slice(0, 3).join(', ')}${blocked.length > 3 ? '...' : ''}`;
+      statusEl.textContent = `Blocking ${blocked.length} site(s): ${blocked.slice(0, 3).join(', ')}${blocked.length > 3 ? '...' : ''}`;
     } else {
       statusEl.className = 'status inactive';
       statusEl.textContent = 'Tap a site below to block it.';
@@ -300,14 +296,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   let presets = [];
   const allDomains = () => {
-    const isAll = blocked.includes(BLOCK_ALL);
-    if (isPaid) {
-      const allOption = { domain: BLOCK_ALL, label: 'All' };
-      if (isAll) return [allOption];
-      const presetDomains = new Set(presets.map(p => p.domain));
-      const custom = blocked.filter(d => d !== BLOCK_ALL && !presetDomains.has(d));
-      return [allOption, ...presets, ...custom.map(d => ({ domain: d, label: d }))];
-    }
     const presetDomains = new Set(presets.map(p => p.domain));
     const custom = blocked.filter(d => !presetDomains.has(d));
     return [...presets, ...custom.map(d => ({ domain: d, label: d }))];
@@ -317,30 +305,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     sitesGrid.innerHTML = '';
     for (const p of allDomains()) {
       const btn = document.createElement('button');
-      const isAll = p.domain === BLOCK_ALL;
-      const isBlocked = blocked.includes(p.domain);
-      btn.className = 'site-btn' + (isBlocked ? ' blocked' : '');
-      btn.textContent = isAll ? 'All' : p.label;
-      if (isAll && !isPaid) {
-        btn.className += ' site-btn-upgrade';
-        btn.title = 'Pro/Premium only';
-      }
+      btn.className = 'site-btn' + (blocked.includes(p.domain) ? ' blocked' : '');
+      btn.textContent = p.label;
       btn.onclick = () => {
-        if (isAll && !isPaid) {
-          showToast('Block All is Pro/Premium only. Upgrade to block every site.', 'error');
-          return;
-        }
         btn.disabled = true;
         const isRemoving = blocked.includes(p.domain);
-        let next;
-        if (isAll) {
-          next = isRemoving ? [] : [BLOCK_ALL];
-        } else {
-          next = isRemoving
-            ? blocked.filter(d => d !== p.domain)
-            : [...blocked.filter(d => d !== BLOCK_ALL), p.domain];
-        }
-        if (!isAll && !isRemoving && next.length > maxBlocked) {
+        const next = isRemoving
+          ? blocked.filter(d => d !== p.domain)
+          : [...blocked, p.domain];
+        if (!isRemoving && next.length > maxBlocked) {
           showToast(maxBlocked === 1 ? 'Free plan: block 1 site only. Upgrade for more.' : `Max ${maxBlocked} sites`, 'error');
           btn.disabled = false;
           return;
@@ -361,14 +334,13 @@ document.addEventListener('DOMContentLoaded', async () => {
       showToast('Already blocked', 'error');
       return;
     }
-    const next = blocked.includes(BLOCK_ALL) ? [domain] : [...blocked, domain];
-    if (next.length > maxBlocked) {
+    if (blocked.length >= maxBlocked) {
       showToast(maxBlocked === 1 ? 'Free plan: block 1 site only. Upgrade for more.' : `Max ${maxBlocked} sites`, 'error');
       return;
     }
     customDomainInput.value = '';
     addDomainBtn.disabled = true;
-    updateBlocked(next, addDomainBtn);
+    updateBlocked([...blocked, domain], addDomainBtn);
   };
 
   customDomainInput.addEventListener('keydown', (e) => {
