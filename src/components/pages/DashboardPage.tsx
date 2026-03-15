@@ -140,6 +140,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
       }
     } catch (_) {}
     setShowFirstActionPrompt(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handlePaywallStartTrial = () => {
@@ -1927,6 +1928,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
               }
             } catch (_) {}
             setShowFirstActionPrompt(true);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
         />
       )}
