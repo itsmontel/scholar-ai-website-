@@ -16,7 +16,6 @@ const FEATURES = [
   { text: 'Focus Mode — block websites, unlock by studying', icon: '🔒' },
   { text: 'Quizzes, flashcards & crosswords', icon: '🎯' },
   { text: '99,999 Humanizer & Summarizer words per month', icon: '📚' },
-  { text: 'All Humanizer & Summarizer styles & lengths', icon: '✨' },
   { text: 'Export to PDF & Word', icon: '📄' },
   { text: 'All citation styles (APA, MLA, Chicago...)', icon: '✅' },
   { text: 'Priority AI model', icon: '⚡' },
@@ -201,19 +200,19 @@ const SoftPaywall = ({ userName, onStartTrial, onDismiss, onNavigatePricing, onN
             </div>
           ) : (
             <>
-          {/* Urgency countdown */}
-          <div className="flex justify-center mb-4">
-            <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/60">
-              <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-red-600 dark:text-red-400">Offer expires in</span>
+          {/* Mascot + Offer expires — same line, mascot left */}
+          <div className="flex items-center gap-4 mb-6">
+            <div className="flex-shrink-0">
+              <ScholarMascot size={72} animated pose="celebrating" />
+            </div>
+            <div className="flex-1 min-w-0 flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/60">
+              <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-red-600 dark:text-red-400 whitespace-nowrap">Offer expires in</span>
               <span className="tabular-nums font-mono text-lg sm:text-xl font-bold text-red-600 dark:text-red-400">{timeStr}</span>
             </div>
           </div>
 
           {/* Header */}
           <div className="text-center mb-6">
-            <div className="flex justify-center mb-3">
-              <ScholarMascot size={80} animated pose="celebrating" />
-            </div>
             <h2
               className="text-xl sm:text-2xl font-extrabold text-stone-800 dark:text-stone-100 mb-1.5 leading-tight"
               style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}
