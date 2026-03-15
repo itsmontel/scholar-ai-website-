@@ -2422,9 +2422,12 @@ router.post('/generate-study-pack', authenticateToken, async (req, res) => {
 
     const { periodStart } = await subscriptionService.getUsagePeriod(userId);
 
+    let generationsUsed, generationLimit;
     // Pro/Premium: use combined actions pool; Free: use studyPackGenerationsPerMonth
     if (userPlan === 'pro' || userPlan === 'premium') {
       const combinedCheck = await subscriptionService.checkCombinedActionsLimit(userId);
+      generationsUsed = combinedCheck.usage;
+      generationLimit = combinedCheck.limit;
       if (!combinedCheck.allowed) {
         return res.status(429).json({
           success: false,
@@ -2440,10 +2443,11 @@ router.post('/generate-study-pack', authenticateToken, async (req, res) => {
         .from('quiz_usage')
         .select('id')
         .eq('user_id', userId)
+        .eq('quiz_type', 'study_pack')
         .gte('created_at', periodStart);
 
-      const generationsUsed = usageError ? 0 : (usageData || []).length;
-      const generationLimit = planLimits.studyPackGenerationsPerMonth || planLimits.quizGenerationsPerMonth;
+      generationsUsed = usageError ? 0 : (usageData || []).length;
+      generationLimit = planLimits.studyPackGenerationsPerMonth || planLimits.quizGenerationsPerMonth;
 
       if (generationLimit !== -1 && generationsUsed >= generationLimit) {
         return res.status(429).json({

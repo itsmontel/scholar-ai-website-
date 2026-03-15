@@ -53,6 +53,15 @@ const STEPS: TutorialStep[] = [
     spotlightPadding: 10,
   },
   {
+    id: 'recents',
+    title: 'Your recents',
+    body: "Everything you create shows up here—essays, study packs, citations, and more. Quick access to jump back into anything you've been working on.",
+    emoji: '📂',
+    targetSelector: '[data-tutorial="saved-materials"]',
+    mascotPose: 'pointing',
+    spotlightPadding: 10,
+  },
+  {
     id: 'finale',
     title: "You're ready!",
     body: `That's the full tour! Pick whichever tool you need and dive in. ${MASCOT_NAME} will be here whenever you need a hand. Go ace this semester!`,
