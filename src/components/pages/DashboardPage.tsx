@@ -3362,7 +3362,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                 <span className="text-3xl sm:text-4xl mb-2 sm:mb-3 block">🔒</span>
                 <h3 className="text-lg sm:text-xl font-bold mb-1 sm:mb-2">Monthly Limit Reached</h3>
                 <p className="text-amber-100 dark:text-amber-100/90 mb-1 text-sm sm:text-base">You've used all {quizUsage.generationLimit} study pack generations this period. Upgrade for more!</p>
-                <p className="text-amber-200/90 text-xs sm:text-sm mb-3 sm:mb-4">{getResetsInText(quizUsage.daysUntilReset)}</p>
+                <p className="text-amber-200/90 text-xs sm:text-sm mb-3 sm:mb-4">{getResetsInText(usageStats.daysUntilReset ?? quizUsage.daysUntilReset)}</p>
                 <button
                   onClick={() => onNavigate('pricing')}
                   className="w-full sm:w-auto px-5 sm:px-6 py-2 sm:py-2.5 bg-white dark:bg-stone-800 text-amber-700 dark:text-amber-400 font-semibold rounded-xl active:bg-stone-50 sm:hover:bg-stone-50 dark:sm:hover:bg-stone-700 transition-all inline-flex items-center justify-center gap-2 text-sm sm:text-base"
@@ -3381,7 +3381,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                     {isFreeUser ? (
                       <>
                         <p className="text-amber-800 dark:text-amber-200 font-medium text-xs sm:text-sm">
-                          Free: {quizUsage.generationsRemaining}/{quizUsage.generationLimit} study packs • {(quizUsage.maxWordsPerGeneration || 5000).toLocaleString()} words max • {getResetsInText(quizUsage.daysUntilReset)}
+                          Free: {quizUsage.generationsRemaining}/{quizUsage.generationLimit} study packs • {(quizUsage.maxWordsPerGeneration || 5000).toLocaleString()} words max • {getResetsInText(usageStats.daysUntilReset ?? quizUsage.daysUntilReset)}
                         </p>
                         <p className="text-amber-600 dark:text-amber-400 text-[10px] sm:text-xs mt-0.5 line-clamp-2">Lesson, flashcards & quiz included • Crossword & Crater Blast unlock with Pro</p>
                       </>
@@ -4282,7 +4282,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                 <p className="text-red-700 dark:text-red-400 text-sm font-medium">{quizError}</p>
                 {(quizExhausted || quizError.includes('Upgrade')) && (
                   <>
-                    <p className="text-red-600 dark:text-red-500 text-xs mt-1">{getResetsInText(quizUsage.daysUntilReset)}</p>
+                    <p className="text-red-600 dark:text-red-500 text-xs mt-1">{getResetsInText(usageStats.daysUntilReset ?? quizUsage.daysUntilReset)}</p>
                     <button onClick={() => onNavigate('pricing')} className="mt-2 px-4 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold rounded-lg">
                       View Plans
                     </button>
