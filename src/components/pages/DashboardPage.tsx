@@ -2522,13 +2522,13 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
               </div>
             ) : (
             <div className="mb-6 sm:mb-8 pt-4 sm:pt-6 pb-4 sm:pb-6 overflow-visible" data-tutorial="tool-cards">
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-4">
               {([
                 { id: 'analyze' as const, icon: '📝', title: 'Analyze', desc: 'Get professor-style feedback on your essays', mobileDesc: 'Essay feedback', gradient: 'from-rose-50 to-pink-50 dark:from-rose-900/20 dark:to-pink-900/15', border: 'border-rose-200/70 dark:border-rose-700/40', activeBorder: 'border-rose-400 dark:border-rose-500 ring-2 ring-rose-300/50 dark:ring-rose-600/40', iconBg: 'bg-gradient-to-br from-rose-400 to-pink-500', accentColor: 'text-rose-600 dark:text-rose-400', pro: false, setStudyMode: null },
                 { id: 'citations' as const, icon: '📚', title: 'Citations', desc: 'Find and format academic sources instantly', mobileDesc: 'Find sources', gradient: 'from-sky-50 to-blue-50 dark:from-sky-900/20 dark:to-blue-900/15', border: 'border-sky-200/70 dark:border-sky-700/40', activeBorder: 'border-sky-400 dark:border-sky-500 ring-2 ring-sky-300/50 dark:ring-sky-600/40', iconBg: 'bg-gradient-to-br from-sky-400 to-blue-500', accentColor: 'text-sky-600 dark:text-sky-400', pro: false, setStudyMode: null },
                 { id: 'study_tools' as const, icon: '📦', title: 'Study Pack', desc: 'Generate lesson, flashcards, quiz, crossword & Crater Blast from your notes', mobileDesc: 'All study tools', gradient: 'from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/15', border: 'border-amber-200/70 dark:border-amber-700/40', activeBorder: 'border-amber-400 dark:border-amber-500 ring-2 ring-amber-300/50 dark:ring-amber-600/40', iconBg: 'bg-gradient-to-br from-amber-400 to-orange-500', accentColor: 'text-amber-600 dark:text-amber-400', pro: false, setStudyMode: 'quiz' as const },
-                { id: 'focus_mode' as const, icon: '🔒', title: 'Focus Mode', desc: 'Earn screen time, block sites until you pass study questions', mobileDesc: 'Earn your breaks', gradient: 'from-violet-100 to-purple-100 dark:from-violet-800/40 dark:to-purple-800/40', border: 'border-violet-300 dark:border-violet-600', activeBorder: 'border-violet-500 dark:border-violet-400 ring-2 ring-violet-400/60 dark:ring-violet-500/50', iconBg: 'bg-gradient-to-br from-violet-500 to-purple-600', accentColor: 'text-violet-700 dark:text-violet-300', pro: false, setStudyMode: null, special: true, badge: FOCUS_MODE_COMING_SOON ? 'COMING SOON' : 'NEW' },
                 { id: 'more_tools' as const, icon: '🔧', title: 'More Tools', desc: 'Summarizer, humanizer, word counter & more', mobileDesc: 'More', gradient: 'from-indigo-50 to-slate-50 dark:from-indigo-900/20 dark:to-slate-900/20', border: 'border-indigo-200/70 dark:border-indigo-700/40', activeBorder: 'border-indigo-400 dark:border-indigo-500 ring-2 ring-indigo-300/50 dark:ring-indigo-600/40', iconBg: 'bg-gradient-to-br from-indigo-500 to-slate-600', accentColor: 'text-indigo-700 dark:text-indigo-300', pro: false, setStudyMode: null, isMoreTools: true },
+                { id: 'focus_mode' as const, icon: '🔒', title: 'Focus Mode', desc: 'Earn screen time, block sites until you pass study questions', mobileDesc: 'Earn your breaks', gradient: 'from-violet-100 to-purple-100 dark:from-violet-800/40 dark:to-purple-800/40', border: 'border-violet-300 dark:border-violet-600', activeBorder: 'border-violet-500 dark:border-violet-400 ring-2 ring-violet-400/60 dark:ring-violet-500/50', iconBg: 'bg-gradient-to-br from-violet-500 to-purple-600', accentColor: 'text-violet-700 dark:text-violet-300', pro: false, setStudyMode: null, special: true, span4: true, badge: FOCUS_MODE_COMING_SOON ? 'COMING SOON' : 'NEW' },
               ] as const).map(tool => (
                 <button
                   key={tool.id}
@@ -2564,7 +2564,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                     setSummaryResult(null);
                     if (tool.id !== 'study_tools') { setQuizResult(null); setFlashcardResult(null); setCrosswordResult(null); setStudyPackResult(null); }
                   }}
-                  className={`relative p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl border text-left transition-all duration-200 group active:scale-[0.98] sm:hover:shadow-2xl sm:hover:-translate-y-1 overflow-hidden ${
+                  className={`relative p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl border text-left transition-all duration-200 group active:scale-[0.98] sm:hover:shadow-2xl sm:hover:-translate-y-1 overflow-hidden ${('span4' in tool && tool.span4) ? 'col-span-2 sm:col-span-1 sm:row-span-2' : ''} ${
                     'special' in tool && tool.special
                       ? 'bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50 dark:from-violet-900/30 dark:via-purple-900/30 dark:to-fuchsia-900/30 ring-2 ring-violet-200 dark:ring-violet-700/50 shadow-lg shadow-violet-200/50 dark:shadow-violet-900/30'
                       : 'bg-white dark:bg-stone-800'
@@ -2578,14 +2578,23 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                   {/* Colored accent orb - smaller on mobile */}
                   <div className={`absolute top-0 right-0 w-16 sm:w-24 h-16 sm:h-24 rounded-full -translate-y-1/2 translate-x-1/2 bg-gradient-to-br ${tool.gradient} opacity-60`} />
                   
-                  <div className={`relative z-10 w-10 h-10 sm:w-12 sm:h-12 ${tool.iconBg} rounded-xl sm:rounded-2xl flex items-center justify-center mb-2.5 sm:mb-4 group-active:scale-95 sm:group-hover:scale-110 sm:group-hover:rotate-3 transition-all duration-300 shadow-md sm:shadow-lg`}>
-                    <span className="text-xl sm:text-2xl">{tool.icon}</span>
+                  <div className={`relative z-10 flex flex-col ${tool.id === 'focus_mode' ? 'min-h-[140px] sm:min-h-[160px] justify-between' : ''}`}>
+                    <div>
+                      <div className={`${tool.id === 'focus_mode' ? 'w-14 h-14 sm:w-16 sm:h-16 mb-3 sm:mb-4' : 'w-10 h-10 sm:w-12 sm:h-12 mb-2.5 sm:mb-4'} ${tool.iconBg} rounded-xl sm:rounded-2xl flex items-center justify-center group-active:scale-95 sm:group-hover:scale-110 sm:group-hover:rotate-3 transition-all duration-300 shadow-md sm:shadow-lg`}>
+                        <span className={tool.id === 'focus_mode' ? 'text-2xl sm:text-3xl' : 'text-xl sm:text-2xl'}>{tool.icon}</span>
+                      </div>
+                      <h3 className={`font-bold leading-tight relative z-10 ${tool.accentColor} ${tool.id === 'focus_mode' ? 'text-base sm:text-lg' : 'text-sm sm:text-base'}`}>{tool.title}</h3>
+                      <p className={`text-stone-500 dark:text-stone-400 mt-1 sm:mt-2 leading-relaxed relative z-10 ${tool.id === 'focus_mode' ? 'text-xs sm:text-sm line-clamp-3' : 'text-[11px] sm:text-xs line-clamp-2'}`}>
+                        <span className="hidden sm:inline">{tool.desc}</span>
+                        <span className="sm:hidden">{tool.mobileDesc}</span>
+                      </p>
+                    </div>
+                    {tool.id === 'focus_mode' && (
+                      <p className="relative z-10 text-violet-600 dark:text-violet-400 text-xs sm:text-sm font-semibold mt-3 sm:mt-4">
+                        Block sites → Study → Unlock ✓
+                      </p>
+                    )}
                   </div>
-                  <h3 className={`font-bold text-sm sm:text-base leading-tight relative z-10 ${tool.accentColor}`}>{tool.title}</h3>
-                  <p className="text-stone-500 dark:text-stone-400 text-[11px] sm:text-xs mt-1 sm:mt-2 leading-relaxed relative z-10 line-clamp-2">
-                    <span className="hidden sm:inline">{tool.desc}</span>
-                    <span className="sm:hidden">{tool.mobileDesc}</span>
-                  </p>
                   {tool.pro && usageStats.plan === 'free' && (
                     <span className="absolute top-2 right-2 sm:top-3 sm:right-3 px-1.5 sm:px-2 py-0.5 sm:py-1 text-[8px] sm:text-[10px] font-bold rounded-md sm:rounded-lg bg-gradient-to-r from-violet-500 to-purple-600 text-white leading-none shadow-md z-20">Upgrade</span>
                   )}

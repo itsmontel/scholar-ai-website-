@@ -3,8 +3,19 @@ import ScholarMascot from '../common/ScholarMascot';
 import { trackFocusModeUnlock } from '../../data/achievements';
 
 function getSearchParams() {
-  const sp = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
-  return { site: sp.get('site') || '', redirect: sp.get('redirect') || '' };
+  if (typeof window === 'undefined') return { site: '', redirect: '', mode: '' };
+  const sp = new URLSearchParams(window.location.search);
+  const site = sp.get('site') || '';
+  const mode = sp.get('mode') || '';
+  let redirect = sp.get('redirect') || '';
+  if (mode === 'all' && window.location.hash) {
+    try {
+      redirect = decodeURIComponent(window.location.hash.slice(1));
+    } catch (_) {
+      redirect = '';
+    }
+  }
+  return { site, redirect, mode };
 }
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
@@ -45,6 +56,7 @@ export default function UnlockQuizPage() {
   const params = getSearchParams();
   const site = params.site;
   const redirect = params.redirect;
+  const isBlockAll = params.mode === 'all' || site === '__ALL__';
 
   const [phase, setPhase] = useState<'blocked' | 'loading' | 'quiz' | 'results'>('blocked');
   const [isLoading, setIsLoading] = useState(false);
@@ -114,11 +126,11 @@ export default function UnlockQuizPage() {
       setPhase('results');
       return;
     }
-    if (!site) {
+    if (!site && !isBlockAll) {
       setPhase('loading');
       fetchQuiz(token);
     }
-  }, [site, fetchQuiz]);
+  }, [site, isBlockAll, fetchQuiz]);
 
   const handleStartQuiz = () => {
     const token = localStorage.getItem('authToken');
@@ -170,8 +182,8 @@ export default function UnlockQuizPage() {
     // Track achievement: first / repeated unlock
     trackFocusModeUnlock();
 
-    const siteDomain = site || (redirect ? new URL(redirect).hostname.replace(/^www\./, '') : '');
-    const finalRedirect = redirect || `https://${siteDomain}`;
+    const siteDomain = isBlockAll ? '__ALL__' : (site || (redirect ? new URL(redirect).hostname.replace(/^www\./, '') : ''));
+    const finalRedirect = redirect || (siteDomain !== '__ALL__' ? `https://${siteDomain}` : FRONTEND_URL);
     console.log('[UnlockQuiz] Continue clicked. siteDomain:', siteDomain, 'redirect:', finalRedirect);
     setIsRedirecting(true);
     setShowExtensionHint(false);
@@ -355,10 +367,15 @@ export default function UnlockQuizPage() {
           ) : (
             <button
               onClick={() => {
-                setShowResults(false);
-                setCurrentIndex(0);
-                setScore(0);
-                setAnswered(false);
+                const token = localStorage.getItem('authToken');
+                if (token) {
+                  setShowResults(false);
+                  setCurrentIndex(0);
+                  setScore(0);
+                  setAnswered(false);
+                  setSelectedAnswer(null);
+                  fetchQuiz(token);
+                }
               }}
               className="w-full px-6 py-4 bg-violet-600 text-white rounded-xl font-semibold hover:bg-violet-500 transition-colors"
             >

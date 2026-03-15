@@ -32,6 +32,14 @@ console.log('[WriteScholar Content] Script loaded on:', window.location.href);
 
 function isValidRedirect(site, redirect) {
   if (!redirect || typeof redirect !== 'string') return false;
+  if (site === '__ALL__') {
+    try {
+      const url = new URL(redirect);
+      return url.protocol === 'https:' || url.protocol === 'http:';
+    } catch (_) {
+      return false;
+    }
+  }
   const s = site.replace(/^https?:\/\//, '').split('/')[0].toLowerCase();
   try {
     const url = new URL(redirect);
@@ -50,7 +58,7 @@ function handleUnlockRequest(site, redirect, source) {
     console.warn('[WriteScholar Content] No site provided, aborting');
     return;
   }
-  const safeRedirect = isValidRedirect(site, redirect) ? redirect : `https://${site.replace(/^https?:\/\//, '').split('/')[0]}`;
+  const safeRedirect = isValidRedirect(site, redirect) ? redirect : (site === '__ALL__' ? 'https://writescholar.com' : `https://${site.replace(/^https?:\/\//, '').split('/')[0]}`);
   console.log('[WriteScholar Content] Sending UNLOCK_SITE to background...');
   chrome.runtime.sendMessage(
     { type: 'UNLOCK_SITE', site, redirect: safeRedirect },

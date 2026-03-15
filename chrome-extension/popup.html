@@ -139,10 +139,14 @@
       color: #57534e;
       border: 1px solid #e7e5e4;
     }
+    .site-btn-upgrade {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
     .site-btn.blocked {
-      background: #8B5CF6;
-      color: white;
-      border: none;
+      background: #8B5CF6 !important;
+      color: white !important;
+      border: none !important;
     }
     .site-btn:hover:not(:disabled) {
       opacity: 0.9;
@@ -306,6 +310,7 @@
       <div class="setting-row">
         <label class="setting-label" for="unlockDuration">Unlock duration:</label>
         <select id="unlockDuration" style="display:none">
+          <option value="300000">5 minutes</option>
           <option value="900000">15 minutes</option>
           <option value="1800000" selected>30 minutes</option>
           <option value="3600000">1 hour</option>

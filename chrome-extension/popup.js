@@ -99,21 +99,26 @@ document.addEventListener('DOMContentLoaded', async () => {
   let questionCount = config?.question_count ?? 5;
   let passThreshold = config?.pass_threshold ?? 4;
   
-  // Unlock duration: prefer server (config), then local storage, then default
+  // Unlock duration: prefer local (user's last selection), then server config, then default
   const defaultDuration = 1800000; // 30 minutes
   const serverUnlockMs = config?.unlock_duration_ms;
-  const effectiveUnlockMs = serverUnlockMs ?? unlockDurationMs ?? defaultDuration;
-  unlockDurationSelect.value = effectiveUnlockMs.toString();
-  if (serverUnlockMs && !unlockDurationMs) {
+  const effectiveUnlockMs = unlockDurationMs ?? serverUnlockMs ?? defaultDuration;
+  const optionExists = Array.from(unlockDurationSelect.options).some(o => o.value === effectiveUnlockMs.toString());
+  unlockDurationSelect.value = optionExists ? effectiveUnlockMs.toString() : defaultDuration.toString();
+  if (!unlockDurationMs && serverUnlockMs) {
     await chrome.storage.local.set({ unlockDurationMs: serverUnlockMs });
   }
   
-  // Save unlock duration when changed (persist locally + sync to server)
+  // Save unlock duration when changed (persist locally first, then sync to server)
   unlockDurationSelect.addEventListener('change', async () => {
     const duration = parseInt(unlockDurationSelect.value, 10);
     await chrome.storage.local.set({ unlockDurationMs: duration });
-    await saveSettingsToServer({ unlock_duration_ms: duration });
-    showToast('Unlock duration saved');
+    const ok = await saveSettingsToServer({ unlock_duration_ms: duration });
+    if (ok) {
+      showToast('Unlock duration saved');
+    } else {
+      showToast('Saved locally; sync when online', 'error');
+    }
   });
 
   // Format remaining time
@@ -155,9 +160,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       unlockTimerList.innerHTML = activeUnlocks.map(({ domain, remaining }) => {
         const formatted = formatRemainingTime(remaining);
         const isExpiringSoon = remaining < 5 * 60 * 1000; // Less than 5 minutes
+        const displayName = domain === '__ALL__' ? 'All sites' : domain;
         return `
           <div class="unlock-item">
-            <span class="unlock-domain">${escapeHtml(domain)}</span>
+            <span class="unlock-domain">${escapeHtml(displayName)}</span>
             <span class="unlock-time ${isExpiringSoon ? 'expired' : ''}">${escapeHtml(formatted)}</span>
           </div>
         `;
@@ -267,7 +273,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   const updateStatus = () => {
     if (blocked.length > 0) {
       statusEl.className = 'status active';
-      statusEl.textContent = `Blocking ${blocked.length} site(s): ${blocked.slice(0, 3).join(', ')}${blocked.length > 3 ? '...' : ''}`;
+      const isAll = blocked.includes(BLOCK_ALL);
+      statusEl.textContent = isAll ? 'Blocking all sites until you study' : `Blocking ${blocked.length} site(s): ${blocked.filter(d => d !== BLOCK_ALL).slice(0, 3).join(', ')}${blocked.length > 3 ? '...' : ''}`;
     } else {
       statusEl.className = 'status inactive';
       statusEl.textContent = 'Tap a site below to block it.';
@@ -289,8 +296,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   };
 
+  const BLOCK_ALL = '__ALL__';
   let presets = [];
   const allDomains = () => {
+    const isAll = blocked.includes(BLOCK_ALL);
+    if (isPaid) {
+      const allOption = { domain: BLOCK_ALL, label: 'All' };
+      if (isAll) return [allOption];
+      const presetDomains = new Set(presets.map(p => p.domain));
+      const custom = blocked.filter(d => d !== BLOCK_ALL && !presetDomains.has(d));
+      return [allOption, ...presets, ...custom.map(d => ({ domain: d, label: d }))];
+    }
     const presetDomains = new Set(presets.map(p => p.domain));
     const custom = blocked.filter(d => !presetDomains.has(d));
     return [...presets, ...custom.map(d => ({ domain: d, label: d }))];
@@ -300,15 +316,30 @@ document.addEventListener('DOMContentLoaded', async () => {
     sitesGrid.innerHTML = '';
     for (const p of allDomains()) {
       const btn = document.createElement('button');
-      btn.className = 'site-btn' + (blocked.includes(p.domain) ? ' blocked' : '');
-      btn.textContent = p.label;
+      const isAll = p.domain === BLOCK_ALL;
+      const isBlocked = blocked.includes(p.domain);
+      btn.className = 'site-btn' + (isBlocked ? ' blocked' : '');
+      btn.textContent = isAll ? 'All' : p.label;
+      if (isAll && !isPaid) {
+        btn.className += ' site-btn-upgrade';
+        btn.title = 'Pro/Premium only';
+      }
       btn.onclick = () => {
+        if (isAll && !isPaid) {
+          showToast('Block All is Pro/Premium only. Upgrade to block every site.', 'error');
+          return;
+        }
         btn.disabled = true;
         const isRemoving = blocked.includes(p.domain);
-        const next = isRemoving
-          ? blocked.filter(d => d !== p.domain)
-          : [...blocked, p.domain];
-        if (!isRemoving && next.length > maxBlocked) {
+        let next;
+        if (isAll) {
+          next = isRemoving ? [] : [BLOCK_ALL];
+        } else {
+          next = isRemoving
+            ? blocked.filter(d => d !== p.domain)
+            : [...blocked.filter(d => d !== BLOCK_ALL), p.domain];
+        }
+        if (!isAll && !isRemoving && next.length > maxBlocked) {
           showToast(maxBlocked === 1 ? 'Free plan: block 1 site only. Upgrade for more.' : `Max ${maxBlocked} sites`, 'error');
           btn.disabled = false;
           return;
@@ -329,13 +360,14 @@ document.addEventListener('DOMContentLoaded', async () => {
       showToast('Already blocked', 'error');
       return;
     }
-    if (blocked.length >= maxBlocked) {
+    const next = blocked.includes(BLOCK_ALL) ? [domain] : [...blocked, domain];
+    if (next.length > maxBlocked) {
       showToast(maxBlocked === 1 ? 'Free plan: block 1 site only. Upgrade for more.' : `Max ${maxBlocked} sites`, 'error');
       return;
     }
     customDomainInput.value = '';
     addDomainBtn.disabled = true;
-    updateBlocked([...blocked, domain], addDomainBtn);
+    updateBlocked(next, addDomainBtn);
   };
 
   customDomainInput.addEventListener('keydown', (e) => {

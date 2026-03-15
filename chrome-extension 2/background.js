@@ -4,6 +4,7 @@
  */
 
 const RULE_ID_BASE = 1000;
+const BLOCK_ALL_SENTINEL = '__ALL__';
 const UNLOCK_DURATION_MS_DEFAULT = 30 * 60 * 1000; // 30 minutes default
 const SCHOLAR_BASE = 'https://writescholar.com';
 const API_BASE_FALLBACK = 'https://api.writescholar.com/api';
@@ -66,14 +67,16 @@ function normalizeDomains(domains) {
   return [...new Set(
     domains
       .slice(0, 500)
-      .map(d => String(d).toLowerCase().trim())
+      .map(d => String(d).trim())
       .filter(d => d.length > 0)
       .map(d => {
-        const parts = d.replace(/^https?:\/\//, '').split('/')[0].split('.');
+        if (d === BLOCK_ALL_SENTINEL) return d;
+        const lower = d.toLowerCase();
+        const parts = lower.replace(/^https?:\/\//, '').split('/')[0].split('.');
         if (parts.length >= 2) {
           return parts.slice(-2).join('.');
         }
-        return d;
+        return lower;
       })
   )];
 }
@@ -83,48 +86,68 @@ async function syncRules() {
   const config = await getStoredConfig();
   const unlocks = await getUnlocks();
   const now = Date.now();
+  const blocked = config.blockedDomains || [];
   
-  console.log('[WriteScholar BG] Config blockedDomains:', config.blockedDomains);
+  console.log('[WriteScholar BG] Config blockedDomains:', blocked);
   console.log('[WriteScholar BG] Current unlocks:', unlocks);
 
-  const toBlock = (config.blockedDomains || []).filter(
-    (d) => !unlocks[d] || unlocks[d] < now
-  );
+  const isBlockAll = blocked.includes(BLOCK_ALL_SENTINEL);
+  const allUnlocked = unlocks[BLOCK_ALL_SENTINEL] && unlocks[BLOCK_ALL_SENTINEL] > now;
+  const toBlock = isBlockAll
+    ? (allUnlocked ? [] : [BLOCK_ALL_SENTINEL])
+    : blocked.filter((d) => d !== BLOCK_ALL_SENTINEL && (!unlocks[d] || unlocks[d] < now));
   
-  console.log('[WriteScholar BG] Domains to block (after unlock filter):', toBlock);
+  console.log('[WriteScholar BG] toBlock (after unlock filter):', toBlock);
+
+  const existing = await chrome.declarativeNetRequest.getDynamicRules();
+  const removeIds = existing.map((r) => r.id);
 
   if (toBlock.length === 0) {
     console.log('[WriteScholar BG] No domains to block, clearing all rules');
-    const existing = await chrome.declarativeNetRequest.getDynamicRules();
-    if (existing.length > 0) {
-      await chrome.declarativeNetRequest.updateDynamicRules({
-        removeRuleIds: existing.map((r) => r.id),
-      });
+    if (removeIds.length > 0) {
+      await chrome.declarativeNetRequest.updateDynamicRules({ removeRuleIds: removeIds });
     }
     console.log('[WriteScholar BG] Rules cleared');
     return;
   }
 
   const base = getScholarBase();
-  const rules = toBlock.map((domain, idx) => ({
-    id: domainToRuleId(domain, idx),
-    priority: 1,
-    action: {
-      type: 'redirect',
-      redirect: {
-        url: `${base}/unlock-quiz?site=${encodeURIComponent(domain)}&redirect=${encodeURIComponent(`https://${domain}`)}`,
-      },
-    },
-    condition: {
-      urlFilter: `||${domain}`,
-      resourceTypes: ['main_frame'],
-    },
-  }));
+  let rules = [];
 
-  const existing = await chrome.declarativeNetRequest.getDynamicRules();
-  const removeIds = existing.map((r) => r.id);
+  if (toBlock.includes(BLOCK_ALL_SENTINEL)) {
+    rules.push({
+      id: RULE_ID_BASE,
+      priority: 1,
+      action: {
+        type: 'redirect',
+        redirect: {
+          regexSubstitution: `${base}/unlock-quiz?mode=all&site=${BLOCK_ALL_SENTINEL}#\\0`,
+        },
+      },
+      condition: {
+        regexFilter: '^https?://(?!([^/]*\\.)?writescholar\\.com)(?!localhost)[^\\s]+$',
+        resourceTypes: ['main_frame'],
+      },
+    });
+  } else {
+    rules = toBlock.map((domain, idx) => ({
+      id: domainToRuleId(domain, idx),
+      priority: 1,
+      action: {
+        type: 'redirect',
+        redirect: {
+          url: `${base}/unlock-quiz?site=${encodeURIComponent(domain)}&redirect=${encodeURIComponent(`https://${domain}`)}`,
+        },
+      },
+      condition: {
+        urlFilter: `||${domain}`,
+        resourceTypes: ['main_frame'],
+      },
+    }));
+  }
+
   console.log('[WriteScholar BG] Removing old rules:', removeIds);
-  console.log('[WriteScholar BG] Adding new rules:', rules.map(r => r.condition.urlFilter));
+  console.log('[WriteScholar BG] Adding new rules:', rules.length);
   
   await chrome.declarativeNetRequest.updateDynamicRules({
     removeRuleIds: removeIds,
@@ -149,7 +172,8 @@ async function fetchConfig(token) {
     const data = await res.json();
     if (data.success && data.data) {
       const cfg = data.data;
-      if (cfg.unlock_duration_ms) {
+      const { unlockDurationMs: existing } = await chrome.storage.local.get('unlockDurationMs');
+      if (cfg.unlock_duration_ms && existing == null) {
         await chrome.storage.local.set({ unlockDurationMs: cfg.unlock_duration_ms });
       }
       return cfg;
@@ -171,6 +195,7 @@ async function syncFromServer() {
 
 chrome.runtime.onInstalled.addListener(async () => {
   await syncRules();
+  await checkUnlockExpiryAndRedirect();
 });
 
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
@@ -295,9 +320,81 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   }
 });
 
+/** Check interval for unlock expiry (ms) */
+const UNLOCK_EXPIRY_CHECK_MS = 15000;
+
+function isTabOnBlockedDomain(tabUrl, blockedDomains) {
+  if (!tabUrl || !blockedDomains.length) return false;
+  if (blockedDomains.includes(BLOCK_ALL_SENTINEL)) {
+    try {
+      const host = new URL(tabUrl).hostname.toLowerCase();
+      return !host.endsWith('writescholar.com') && !host.includes('localhost');
+    } catch (_) {
+      return false;
+    }
+  }
+  try {
+    const host = new URL(tabUrl).hostname.toLowerCase();
+    return blockedDomains.some((d) => d !== BLOCK_ALL_SENTINEL && (host === d || host.endsWith('.' + d)));
+  } catch (_) {
+    return false;
+  }
+}
+
+/**
+ * Check for expired unlocks, sync rules, and redirect only tabs on blocked domains that expired.
+ * Called every 15s so when timer hits zero, user gets blocked immediately (no refresh needed).
+ */
+async function checkUnlockExpiryAndRedirect() {
+  const config = await getStoredConfig();
+  const unlocks = await getUnlocks();
+  const now = Date.now();
+  const blocked = config.blockedDomains || [];
+
+  const hasBlockAll = blocked.includes(BLOCK_ALL_SENTINEL);
+  const allExpired = hasBlockAll && (!unlocks[BLOCK_ALL_SENTINEL] || unlocks[BLOCK_ALL_SENTINEL] < now);
+  const expiredDomains = hasBlockAll
+    ? (allExpired ? [BLOCK_ALL_SENTINEL] : [])
+    : blocked.filter((d) => d !== BLOCK_ALL_SENTINEL && unlocks[d] && unlocks[d] < now);
+  if (expiredDomains.length === 0) return;
+
+  console.log('[WriteScholar BG] Unlock(s) expired for:', expiredDomains);
+  await syncRules();
+
+  const base = getScholarBase();
+  for (const domain of expiredDomains) {
+    try {
+      let tabs;
+      if (domain === BLOCK_ALL_SENTINEL) {
+        tabs = await chrome.tabs.query({ url: ['http://*/*', 'https://*/*'] });
+      } else {
+        tabs = await chrome.tabs.query({ url: [`*://*.${domain}/*`, `*://${domain}/*`] });
+      }
+      for (const tab of tabs) {
+        if (!tab.id || !tab.url || tab.url.includes('/unlock-quiz')) continue;
+        if (!isTabOnBlockedDomain(tab.url, blocked)) continue;
+        const redirectUrl = domain === BLOCK_ALL_SENTINEL
+          ? `${base}/unlock-quiz?mode=all&site=${BLOCK_ALL_SENTINEL}#${encodeURIComponent(tab.url)}`
+          : `${base}/unlock-quiz?site=${encodeURIComponent(domain)}&redirect=${encodeURIComponent(`https://${domain}`)}`;
+        await chrome.tabs.update(tab.id, { url: redirectUrl });
+        console.log('[WriteScholar BG] Redirected tab', tab.id, 'to unlock quiz (unlock expired)');
+      }
+    } catch (e) {
+      console.error('[WriteScholar BG] Failed to redirect tabs for', domain, e);
+    }
+  }
+}
+
+function scheduleUnlockExpiryCheck() {
+  chrome.alarms.create('unlockExpiryCheck', { when: Date.now() + UNLOCK_EXPIRY_CHECK_MS });
+}
+
 chrome.alarms.create('focusModeSync', { periodInMinutes: 5 });
+scheduleUnlockExpiryCheck();
 chrome.alarms.onAlarm.addListener((alarm) => {
   if (alarm.name === 'focusModeSync') {
     syncFromServer();
+  } else if (alarm.name === 'unlockExpiryCheck') {
+    checkUnlockExpiryAndRedirect().then(scheduleUnlockExpiryCheck);
   }
 });
