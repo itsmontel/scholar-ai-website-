@@ -23,7 +23,7 @@ import { persistTutorialToServer } from '../../utils/onboarding';
 import { trackEvent } from '../../utils/analytics';
 import InteractiveLessonPage from './tools/InteractiveLessonPage';
 import FocusModeSettingsSection from '../common/FocusModeSettingsSection';
-import { FOCUS_MODE_COMING_SOON } from '../../constants/focusMode';
+import { FOCUS_MODE_COMING_SOON, FOCUS_MODE_CHROME_EXTENSION_URL } from '../../constants/focusMode';
 
 interface DashboardProps {
   onNavigate: (page: string, slug?: string, options?: { studyPack?: { data: any; title?: string } }) => void;
@@ -2639,7 +2639,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                         Mobile browsers don&apos;t support extensions, so Focus Mode is only available on desktop. Use a computer with Chrome, install our extension, and earn your screen time by studying first.
                       </p>
                       <a
-                        href="https://chrome.google.com/webstore"
+                        href={FOCUS_MODE_CHROME_EXTENSION_URL}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="inline-flex items-center gap-2 text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 font-medium text-sm"

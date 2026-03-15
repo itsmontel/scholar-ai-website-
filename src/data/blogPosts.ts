@@ -14,6 +14,14 @@ export interface BlogPostMeta {
 
 export const blogPostList: BlogPostMeta[] = [
   {
+    slug: 'block-websites-until-you-study-earn-screen-time',
+    title: 'Block Websites Until You Study: How to Earn Your Screen Time',
+    description: 'Stop scrolling and start studying. Learn how to block distracting websites until you answer quiz questions. Unlock YouTube, TikTok and social media by studying first. A better approach for students.',
+    date: '2026-03-15',
+    author: 'WriteScholar Team',
+    readTime: '6 min read'
+  },
+  {
     slug: 'how-to-avoid-plagiarism',
     title: 'How to Avoid Plagiarism: A Complete Guide for Students (2026)',
     description: 'Learn what counts as plagiarism, how to cite properly, paraphrase correctly, and use tools like citation checkers and plagiarism detectors without getting in trouble.',

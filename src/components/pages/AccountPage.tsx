@@ -1,6 +1,6 @@
  import { useState, useEffect } from 'react';
 import Header from '../common/Header';
-import { FOCUS_MODE_COMING_SOON } from '../../constants/focusMode';
+import { FOCUS_MODE_COMING_SOON, FOCUS_MODE_CHROME_EXTENSION_URL } from '../../constants/focusMode';
 
 interface User {
   id: string;
@@ -620,7 +620,7 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
                         </p>
                       )}
                       <a
-                        href="https://chrome.google.com/webstore"
+                        href={FOCUS_MODE_CHROME_EXTENSION_URL}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="inline-flex items-center gap-2 mt-4 text-violet-600 hover:text-violet-700 font-medium text-sm"

@@ -1,7 +1,19 @@
+import React, { useEffect } from 'react';
 import Header from '../common/Header';
 import Footer from '../common/Footer';
 import ScholarMascot from '../common/ScholarMascot';
-import { FOCUS_MODE_COMING_SOON } from '../../constants/focusMode';
+import { FOCUS_MODE_COMING_SOON, FOCUS_MODE_CHROME_EXTENSION_URL } from '../../constants/focusMode';
+
+const FOCUS_MODE_FAQ_SCHEMA = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: [
+    { '@type': 'Question', name: 'Does Focus Mode work on mobile?', acceptedAnswer: { '@type': 'Answer', text: 'Focus Mode uses a Chrome extension, so it works in Chrome on desktop. Mobile browsers don\'t support extensions yet. Many students find blocking on desktop alone significantly reduces distraction.' } },
+    { '@type': 'Question', name: 'What if I need YouTube for a lecture?', acceptedAnswer: { '@type': 'Answer', text: 'You can temporarily pause Focus Mode or add exceptions. The goal is to reduce mindless scrolling, not block legitimate study resources.' } },
+    { '@type': 'Question', name: 'How many questions do I need to answer to unlock?', acceptedAnswer: { '@type': 'Answer', text: 'You can customize the threshold and number of questions in your settings. By default it\'s 4 out of 5 correct. The quiz pulls questions from your own study material.' } },
+    { '@type': 'Question', name: 'Which sites can I block?', acceptedAnswer: { '@type': 'Answer', text: 'Popular presets include YouTube, TikTok, Instagram, Reddit, and Twitter. You can also add any custom domain. Pro: 10 sites. Premium: unlimited.' } },
+  ],
+};
 
 interface FocusModePageProps {
   onNavigate: (page: string) => void;
@@ -19,6 +31,19 @@ interface FocusModePageProps {
 }
 
 const FocusModePage = ({ onNavigate, user, onLogout }: FocusModePageProps) => {
+  useEffect(() => {
+    if (FOCUS_MODE_COMING_SOON) return;
+    const id = 'focus-mode-faq-schema';
+    let el = document.getElementById(id);
+    if (el) el.remove();
+    el = document.createElement('script');
+    el.id = id;
+    el.type = 'application/ld+json';
+    el.textContent = JSON.stringify(FOCUS_MODE_FAQ_SCHEMA);
+    document.head.appendChild(el);
+    return () => { document.getElementById(id)?.remove(); };
+  }, []);
+
   const steps = [
     {
       num: 1,
@@ -31,7 +56,7 @@ const FocusModePage = ({ onNavigate, user, onLogout }: FocusModePageProps) => {
     {
       num: 2,
       title: 'Answer to Unlock',
-      desc: "Try to visit a blocked site and you'll face a quick quiz from your own study material. Get 4 out of 5 right to unlock it.",
+      desc: "Try to visit a blocked site and you'll face a quick quiz from your own study material. Pass your customized threshold to unlock.",
       icon: '📝',
       gradient: 'from-violet-500 to-purple-600',
       shadow: 'shadow-violet-500/25',
@@ -123,95 +148,141 @@ const FocusModePage = ({ onNavigate, user, onLogout }: FocusModePageProps) => {
         </>
       ) : (
         <>
-      {/* Hero Section */}
-      <section className="relative py-16 sm:py-20 border-b border-stone-200/60 dark:border-stone-700/60 overflow-hidden">
-        <div className="absolute top-[35%] left-[5%] hidden xl:block text-4xl opacity-50 animate-float">🔒</div>
-        <div className="absolute top-[40%] right-[6%] hidden xl:block text-3xl opacity-45 animate-float-delayed">📵</div>
-        <div className="absolute bottom-[35%] left-[6%] hidden xl:block text-3xl opacity-45 animate-float">🧠</div>
-        <div className="absolute bottom-[30%] right-[5%] hidden xl:block text-4xl opacity-50 animate-float-delayed">✏️</div>
-        <div className="hidden lg:block absolute right-4 xl:right-12 top-1/2 -translate-y-1/2 z-10 opacity-90 animate-float">
-          <ScholarMascot size={120} animated={true} pose="celebrating" />
-        </div>
-        <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-10 lg:gap-12">
-            <div className="flex-1 text-center lg:text-left max-w-3xl mx-auto lg:mx-0">
-              <span className="inline-flex items-center px-3 py-1 bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-400 rounded-full text-sm font-semibold mb-6">
-                New Feature
+      {/* Premium Hero — full gradient, flagship treatment */}
+      <section className="relative py-20 sm:py-28 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-indigo-950 via-violet-900 to-purple-950 dark:from-indigo-950 dark:via-violet-950 dark:to-stone-900" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-10%,rgba(139,92,246,0.35),transparent_60%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_40%_at_90%_90%,rgba(236,72,153,0.2),transparent_50%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_40%_30%_at_10%_80%,rgba(99,102,241,0.15),transparent_50%)]" />
+        <div className="absolute top-20 left-[8%] hidden lg:block text-4xl opacity-40 animate-float">🔒</div>
+        <div className="absolute top-32 right-[10%] hidden lg:block text-3xl opacity-35 animate-float-delayed">📵</div>
+        <div className="absolute bottom-40 left-[12%] hidden lg:block text-3xl opacity-35 animate-float">🎯</div>
+        <div className="absolute bottom-32 right-[8%] hidden lg:block text-4xl opacity-40 animate-float-delayed">✨</div>
+        <div className="absolute top-1/2 left-[5%] hidden xl:block text-2xl opacity-30 animate-float">🧠</div>
+        <div className="absolute top-1/3 right-[5%] hidden xl:block text-2xl opacity-30 animate-float-delayed">⏰</div>
+
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12 sm:mb-16">
+            <div className="inline-flex items-center gap-3 mb-8">
+              <div className="relative">
+                <div className="absolute -inset-2 bg-violet-400/20 rounded-full blur-xl animate-pulse" />
+                <ScholarMascot size={72} animated={true} pose="pointing" />
+              </div>
+              <span className="px-5 py-2 bg-white/10 backdrop-blur-md text-violet-200 rounded-full text-sm font-bold border border-white/20 shadow-lg shadow-violet-500/10">
+                ⚡ Flagship Feature
               </span>
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-stone-800 dark:text-stone-100 mb-6 leading-tight">
-                Block distracting websites until you
-                <span className="block mt-1 bg-gradient-to-r from-violet-500 to-purple-600 dark:from-violet-400 dark:to-purple-400 bg-clip-text text-transparent">earn your break</span>
-              </h1>
-              <p className="text-lg text-stone-500 dark:text-stone-400 leading-relaxed">
-                Focus Mode blocks sites like YouTube, TikTok, and Instagram until you answer study questions. You can&apos;t scroll — until you've studied.
-              </p>
-              <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
-                <button
-                  onClick={() => onNavigate('signup')}
-                  className="px-6 py-3 bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-400 hover:to-purple-500 text-white font-bold rounded-2xl shadow-lg shadow-violet-500/25 transition-all"
-                >
-                  Try Focus Mode Free
-                </button>
+            </div>
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-black text-white mb-6 tracking-tight leading-[1.1]">
+              Earn Your
+              <span className="block mt-1 bg-gradient-to-r from-violet-300 via-fuchsia-300 to-pink-300 bg-clip-text text-transparent">
+                Free Time
+              </span>
+            </h1>
+            <p className="text-lg sm:text-xl text-violet-200/90 max-w-2xl mx-auto leading-relaxed mb-4">
+              Block distracting sites until you answer study questions. No scroll until you&apos;ve studied.
+            </p>
+            <p className="text-sm text-violet-300/70 mb-10">
+              Trusted by 38k+ students
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
+              <button
+                onClick={() => onNavigate('signup')}
+                className="inline-flex items-center gap-2 px-8 py-4 bg-white text-violet-900 font-bold rounded-2xl hover:bg-violet-50 hover:scale-105 active:scale-95 shadow-2xl shadow-black/25 transition-all"
+              >
+                Try Focus Mode Free
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
+              </button>
+              {user && ['pro', 'premium'].includes((user.plan || user.subscription_plan || '').toLowerCase()) && (
                 <button
                   onClick={() => onNavigate('account')}
-                  className="px-6 py-3 border-2 border-stone-300 dark:border-stone-600 text-stone-700 dark:text-stone-300 font-semibold rounded-2xl hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
+                  className="px-6 py-3 border-2 border-white/40 text-white font-semibold rounded-2xl hover:bg-white/10 transition-colors"
                 >
                   Manage Blocked Sites
                 </button>
-              </div>
+              )}
+              <a
+                href={FOCUS_MODE_CHROME_EXTENSION_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-white/10 backdrop-blur-sm text-white font-semibold rounded-2xl border border-white/20 hover:bg-white/20 transition-colors"
+              >
+                <span className="text-lg">🧩</span>
+                Install Chrome Extension
+              </a>
             </div>
-            <div className="hidden lg:block flex-shrink-0 w-24 h-28 xl:w-28 xl:h-32" />
           </div>
-        </div>
-      </section>
 
-      {/* Video: How Focus Mode works - hide for logged-in paid users */}
-      {!(user && ['pro', 'premium'].includes((user.plan || user.subscription_plan || '').toLowerCase())) && (
-        <section className="py-12 sm:py-16 bg-white dark:bg-stone-900/50">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6">
-            <h2 className="text-xl sm:text-2xl font-extrabold text-stone-800 dark:text-stone-100 mb-6 text-center">
-              See how it works
-            </h2>
-            <div className="relative rounded-2xl overflow-hidden border border-stone-200 dark:border-stone-700 shadow-xl aspect-video bg-stone-100 dark:bg-stone-800">
+          {/* Hero Video — always visible on flagship */}
+          <div className="relative max-w-4xl mx-auto">
+            <div className="absolute -inset-4 bg-gradient-to-r from-violet-500/20 via-fuchsia-500/20 to-pink-500/20 rounded-3xl blur-2xl" />
+            <div className="relative rounded-2xl overflow-hidden ring-2 ring-white/20 shadow-2xl shadow-violet-500/20">
               <video
                 autoPlay
                 loop
                 muted
                 playsInline
-                className="w-full h-full object-cover"
+                className="w-full aspect-video object-cover"
                 title="WriteScholar Focus Mode — Block distractions, answer quiz to unlock"
                 aria-label="WriteScholar Focus Mode — Block distractions, answer quiz to unlock"
               >
                 <source src="/writescholar-focus-mode-demo.mp4" type="video/mp4" />
               </video>
+              <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none" />
+              <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between">
+                <span className="px-3 py-1.5 bg-black/50 backdrop-blur-sm text-white/90 rounded-lg text-sm font-medium">
+                  See it in action
+                </span>
+              </div>
             </div>
           </div>
-        </section>
-      )}
+        </div>
+      </section>
 
-      {/* How It Works - 3 Steps */}
-      <section className="py-16 sm:py-20 bg-white dark:bg-stone-900/50">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="text-center mb-14">
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-stone-800 dark:text-stone-100 mb-4">How it works</h2>
+      {/* How It Works — 3 Steps with videos */}
+      <section className="relative py-20 sm:py-28 bg-white dark:bg-stone-900/50 overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-10%,rgba(139,92,246,0.06),transparent)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-10%,rgba(139,92,246,0.04),transparent)]" />
+        <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6">
+          <div className="text-center mb-16">
+            <span className="inline-block px-4 py-1.5 bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-400 rounded-full text-xs font-bold uppercase tracking-wider mb-4">
+              Simple as 1-2-3
+            </span>
+            <h2 className="text-2xl sm:text-4xl font-extrabold text-stone-800 dark:text-stone-100 mb-4">
+              Pick sites to block, answer to unlock, enjoy your break
+            </h2>
             <p className="text-stone-500 dark:text-stone-400 max-w-xl mx-auto">
               Three simple steps to turn procrastination into productivity
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-6 relative">
             {steps.map((step) => (
-              <div key={step.num} className="relative group">
-                <div className="absolute -inset-1 bg-gradient-to-br from-violet-400/10 to-purple-400/10 rounded-3xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                <div className="relative bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-3xl p-8 hover:shadow-xl hover:border-violet-200 dark:hover:border-violet-800/50 transition-all">
-                  <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${step.gradient} flex items-center justify-center mb-6 text-2xl shadow-lg ${step.shadow}`}>
-                    {step.icon}
+              <div key={step.num} className="group relative">
+                <div className="absolute -inset-2 bg-gradient-to-br from-violet-400/10 to-purple-400/10 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <div className="relative bg-white dark:bg-stone-800 border-2 border-stone-200 dark:border-stone-700 rounded-3xl overflow-hidden hover:shadow-2xl hover:border-violet-300 dark:hover:border-violet-700/50 transition-all duration-300">
+                  <div className="aspect-[5/4] min-h-[200px] flex items-center justify-center bg-gradient-to-b from-violet-500/10 to-transparent overflow-hidden">
+                    <video
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      title={`Focus Mode Step ${step.num} — ${step.title}`}
+                      aria-label={`Focus Mode Step ${step.num} — ${step.title}`}
+                    >
+                      <source src={`/writescholar-focus-mode-step${step.num}-demo.mp4`} type="video/mp4" />
+                    </video>
                   </div>
-                  <span className="inline-block px-2.5 py-1 bg-violet-50 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 rounded-full text-xs font-bold mb-4">
-                    Step {step.num}
-                  </span>
-                  <h3 className="text-xl font-bold text-stone-800 dark:text-stone-100 mb-3">{step.title}</h3>
-                  <p className="text-stone-500 dark:text-stone-400 leading-relaxed">{step.desc}</p>
+                  <div className="p-6 sm:p-8">
+                    <div className="flex items-center gap-3 mb-3">
+                      <span className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white font-black text-lg shadow-lg flex-shrink-0">
+                        {step.num}
+                      </span>
+                      <h3 className="text-xl font-bold text-stone-800 dark:text-stone-100">{step.title}</h3>
+                    </div>
+                    <p className="text-stone-500 dark:text-stone-400 leading-relaxed">{step.desc}</p>
+                  </div>
                 </div>
               </div>
             ))}
@@ -219,27 +290,38 @@ const FocusModePage = ({ onNavigate, user, onLogout }: FocusModePageProps) => {
         </div>
       </section>
 
-      {/* Features Grid */}
-      <section className="py-16 sm:py-20">
+      {/* Why It Works + Features Grid */}
+      <section className="py-20 sm:py-28 bg-stone-50 dark:bg-stone-900">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="flex flex-col lg:flex-row gap-12 items-center mb-14">
+          <div className="flex flex-col lg:flex-row gap-16 items-start mb-16">
             <div className="flex-1">
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-stone-800 dark:text-stone-100 mb-6">
-                Why Focus Mode works
+              <h2 className="text-2xl sm:text-4xl font-extrabold text-stone-800 dark:text-stone-100 mb-6">
+                Why Focus Mode actually works
               </h2>
-              <p className="text-stone-500 dark:text-stone-400 leading-relaxed mb-6">
-                Unlike simple website blockers, Focus Mode ties screen time to learning. Every minute you spend on a blocked site is earned by answering questions from your actual study material.
+              <p className="text-stone-600 dark:text-stone-400 leading-relaxed mb-6">
+                Most blockers just frustrate you. Focus Mode ties screen time to learning. Every minute on TikTok is earned by answering questions from your own notes. Your brain starts associating breaks with achievement, not guilt.
               </p>
+              <div className="flex flex-wrap gap-3 mb-8">
+                <div className="flex items-center gap-2 px-4 py-2 bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 rounded-xl text-sm font-medium">
+                  <span className="text-green-500">✓</span> Guilt-free scrolling
+                </div>
+                <div className="flex items-center gap-2 px-4 py-2 bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 rounded-xl text-sm font-medium">
+                  <span className="text-green-500">✓</span> Reinforces learning
+                </div>
+                <div className="flex items-center gap-2 px-4 py-2 bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 rounded-xl text-sm font-medium">
+                  <span className="text-green-500">✓</span> Builds habits
+                </div>
+              </div>
               <div className="flex items-center gap-4">
-                <ScholarMascot size={72} animated={true} pose="thinking" />
-                <p className="text-sm text-stone-500 dark:text-stone-400 italic">
-                  "Study first. Scroll later."
+                <ScholarMascot size={80} animated={true} pose="thinking" />
+                <p className="text-stone-600 dark:text-stone-400 italic font-medium">
+                  &quot;Study first. Scroll later.&quot;
                 </p>
               </div>
             </div>
             <div className="flex-1 grid grid-cols-2 gap-4">
               {features.map((f, i) => (
-                <div key={i} className="bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-2xl p-6 hover:shadow-lg hover:border-violet-200 dark:hover:border-violet-800/50 transition-all">
+                <div key={i} className="bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-2xl p-6 hover:shadow-xl hover:border-violet-200 dark:hover:border-violet-800/50 transition-all">
                   <div className="w-12 h-12 rounded-xl bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center mb-3">
                     {f.icon}
                   </div>
@@ -252,52 +334,125 @@ const FocusModePage = ({ onNavigate, user, onLogout }: FocusModePageProps) => {
         </div>
       </section>
 
-      {/* Requirements & CTA */}
-      <section className="py-16 sm:py-20 bg-stone-800 dark:bg-stone-900">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
-          <ScholarMascot size={80} animated={false} pose="celebrating" />
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-white mt-6 mb-4">
+      {/* Testimonial */}
+      <section className="py-16 sm:py-20 bg-white dark:bg-stone-900/50">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 text-center">
+          <div className="relative inline-block mb-6">
+            <svg className="w-14 h-14 text-violet-300 dark:text-violet-600" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
+            </svg>
+          </div>
+          <blockquote className="text-xl sm:text-2xl text-stone-700 dark:text-stone-200 font-medium leading-relaxed mb-8">
+            I used to waste 3+ hours on TikTok every day. Now I actually look forward to studying because it means I&apos;ve earned my break. My grades went up a full letter.
+          </blockquote>
+          <div className="flex items-center justify-center gap-4">
+            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-violet-400 to-fuchsia-500 flex items-center justify-center text-white font-bold text-lg">
+              M
+            </div>
+            <div className="text-left">
+              <div className="font-semibold text-stone-800 dark:text-stone-100">Maya S.</div>
+              <div className="text-stone-500 dark:text-stone-400 text-sm">Pre-Med Student</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section className="py-20 sm:py-28 bg-stone-50 dark:bg-stone-900" id="faq">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6">
+          <h2 className="text-2xl sm:text-4xl font-extrabold text-stone-800 dark:text-stone-100 mb-12 text-center">
+            Frequently asked questions
+          </h2>
+          <div className="space-y-8">
+            {[
+              { q: 'Does Focus Mode work on mobile?', a: 'Focus Mode uses a Chrome extension, so it works in Chrome on desktop. Mobile browsers don\'t support extensions yet. Many students find blocking on desktop alone significantly reduces distraction.' },
+              { q: 'What if I need YouTube for a lecture?', a: 'You can temporarily pause Focus Mode or add exceptions. The goal is to reduce mindless scrolling, not block legitimate study resources.' },
+              { q: 'How many questions do I need to answer to unlock?', a: 'You can customize the threshold and number of questions in your settings. By default it\'s 4 out of 5 correct. The quiz pulls questions from your own study material.' },
+              { q: 'Which sites can I block?', a: 'Popular presets include YouTube, TikTok, Instagram, Reddit, and Twitter. You can also add any custom domain. Pro: 10 sites. Premium: unlimited.' },
+            ].map((faq, i) => (
+              <div key={i} className="bg-white dark:bg-stone-800 rounded-2xl p-6 border border-stone-200 dark:border-stone-700">
+                <h3 className="font-bold text-stone-800 dark:text-stone-100 text-lg mb-3">{faq.q}</h3>
+                <p className="text-stone-500 dark:text-stone-400 leading-relaxed">{faq.a}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Final CTA */}
+      <section className="relative py-20 sm:py-28 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-indigo-950 via-violet-900 to-purple-950 dark:from-indigo-950 dark:via-violet-950 dark:to-stone-900" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-10%,rgba(139,92,246,0.25),transparent_60%)]" />
+        <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 text-center">
+          <ScholarMascot size={96} animated={true} pose="celebrating" />
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-white mt-6 mb-4">
             Ready to earn your screen time?
           </h2>
-          <p className="text-stone-400 mb-8 max-w-xl mx-auto">
-            Focus Mode is available with Pro and Premium plans. Pro: 10 blocked sites. Premium: unlimited. Install the Chrome extension, add your study material, and start blocking distractions.
+          <p className="text-violet-200/90 mb-10 max-w-xl mx-auto">
+            Pro: 10 blocked sites. Premium: unlimited. Install the Chrome extension, add your study material, and start blocking distractions.
           </p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             {user ? (
               <>
-                <button
-                  onClick={() => onNavigate('account')}
-                  className="px-6 py-3 bg-gradient-to-r from-violet-500 to-purple-600 text-white font-bold rounded-2xl hover:from-violet-400 hover:to-purple-500 shadow-lg shadow-violet-500/25 transition-all"
-                >
-                  Configure Focus Mode
-                </button>
-                {(user.plan === 'Free' || user.plan === 'free') && (
+                {['pro', 'premium'].includes((user.plan || user.subscription_plan || '').toLowerCase()) ? (
                   <button
-                    onClick={() => onNavigate('pricing')}
-                    className="px-6 py-3 border-2 border-stone-500 text-white font-semibold rounded-2xl hover:border-stone-400 transition-colors"
+                    onClick={() => onNavigate('account')}
+                    className="inline-flex items-center gap-2 px-8 py-4 bg-white text-violet-900 font-bold rounded-2xl hover:bg-violet-50 hover:scale-105 active:scale-95 shadow-2xl shadow-black/25 transition-all"
                   >
-                    Upgrade to Pro
+                    Configure Focus Mode
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
                   </button>
+                ) : (
+                  <>
+                    <button
+                      onClick={() => onNavigate('account')}
+                      className="px-6 py-3 border-2 border-white/40 text-white font-semibold rounded-2xl hover:bg-white/10 transition-colors"
+                    >
+                      Try with free plan (1 site)
+                    </button>
+                    <button
+                      onClick={() => onNavigate('pricing')}
+                      className="inline-flex items-center gap-2 px-8 py-4 bg-white text-violet-900 font-bold rounded-2xl hover:bg-violet-50 hover:scale-105 active:scale-95 shadow-2xl shadow-black/25 transition-all"
+                    >
+                      Upgrade to Pro (10 sites)
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                      </svg>
+                    </button>
+                  </>
                 )}
               </>
             ) : (
               <>
                 <button
                   onClick={() => onNavigate('signup')}
-                  className="px-6 py-3 bg-gradient-to-r from-violet-500 to-purple-600 text-white font-bold rounded-2xl hover:from-violet-400 hover:to-purple-500 shadow-lg shadow-violet-500/25 transition-all"
+                  className="inline-flex items-center gap-2 px-8 py-4 bg-white text-violet-900 font-bold rounded-2xl hover:bg-violet-50 hover:scale-105 active:scale-95 shadow-2xl shadow-black/25 transition-all"
                 >
-                  Try Free
+                  Try Focus Mode Free
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
                 </button>
                 <button
                   onClick={() => onNavigate('pricing')}
-                  className="px-6 py-3 border-2 border-stone-500 text-white font-semibold rounded-2xl hover:border-stone-400 transition-colors"
+                  className="px-6 py-3 border-2 border-white/40 text-white font-semibold rounded-2xl hover:bg-white/10 transition-colors"
                 >
                   View Pricing
                 </button>
               </>
             )}
+            <a
+              href={FOCUS_MODE_CHROME_EXTENSION_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-white/10 backdrop-blur-sm text-white font-semibold rounded-2xl border border-white/20 hover:bg-white/20 transition-colors"
+            >
+              Install Chrome Extension →
+            </a>
           </div>
-          <p className="mt-6 text-stone-500 text-sm">
+          <p className="mt-8 text-violet-300/80 text-sm">
             Pro: 10 sites • Premium: unlimited • Chrome extension required
           </p>
         </div>

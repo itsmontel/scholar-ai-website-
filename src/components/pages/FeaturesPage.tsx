@@ -19,6 +19,7 @@ interface FeaturesPageProps {
 
 const FeaturesPage = ({ onNavigate, user, onLogout }: FeaturesPageProps) => {
   const benefits = [
+    { label: "Focus Mode", description: "Block websites until you study, earn your screen time" },
     { label: "AI Humanizer", description: "Bypass AI detectors with natural text" },
     { label: "Quiz Generator", description: "Create study quizzes from any text" },
     { label: "Paper Summarizer", description: "Condense articles into key points" },
@@ -51,7 +52,7 @@ const FeaturesPage = ({ onNavigate, user, onLogout }: FeaturesPageProps) => {
                 The complete AI toolkit<br className="hidden sm:block" /> for <span className="bg-gradient-to-r from-indigo-500 to-violet-600 bg-clip-text text-transparent">students</span>
               </h1>
               <p className="text-lg text-stone-500 dark:text-stone-400 leading-relaxed">
-                AI Humanizer to bypass detectors, Quiz Generator for exam prep, Paper Summarizer for research, Citation Finder, and Essay Checker. Everything you need in one place.
+                Focus Mode blocks distracting sites until you study. Plus AI Humanizer, Quiz Generator, Paper Summarizer, Citation Finder, and Essay Checker. Everything you need in one place.
               </p>
             </div>
             <div className="hidden lg:block flex-shrink-0 w-24 h-28 xl:w-28 xl:h-32" />
@@ -116,6 +117,16 @@ const FeaturesPage = ({ onNavigate, user, onLogout }: FeaturesPageProps) => {
               <h3 className="font-semibold text-stone-800 dark:text-stone-100 text-lg mb-2">Academic Vocabulary</h3>
               <p className="text-base text-stone-500 dark:text-stone-400 leading-relaxed">Enhance your writing with suggestions for more formal, academic-appropriate language and terminology.</p>
             </div>
+
+            {/* Focus Mode */}
+            <button onClick={() => onNavigate('focus-mode')} className="bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20 border-2 border-violet-200 dark:border-violet-700 rounded-2xl p-6 hover:shadow-xl hover:border-violet-400 dark:hover:border-violet-500 transition-all text-left relative group">
+              <div className="absolute top-3 right-3 px-2 py-0.5 bg-violet-500 text-white text-[10px] font-bold rounded-full">PRO</div>
+              <div className="w-14 h-14 rounded-full bg-violet-100 dark:bg-violet-800/50 flex items-center justify-center mb-4">
+                <span className="text-2xl">🔒</span>
+              </div>
+              <h3 className="font-semibold text-violet-700 dark:text-violet-300 text-lg mb-2">Focus Mode</h3>
+              <p className="text-base text-stone-500 dark:text-stone-400 leading-relaxed">Block YouTube, TikTok and distracting sites until you answer study questions. Earn your screen time. Chrome extension required.</p>
+            </button>
 
             {/* AI Humanizer */}
             <button onClick={() => onNavigate('humanizer')} className="bg-gradient-to-br from-violet-50 to-purple-50 border-2 border-violet-200 rounded-2xl p-6 hover:shadow-xl hover:border-violet-400 transition-all text-left relative group">

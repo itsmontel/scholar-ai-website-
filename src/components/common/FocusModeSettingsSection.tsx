@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { FOCUS_MODE_COMING_SOON } from '../../constants/focusMode';
+import { FOCUS_MODE_COMING_SOON, FOCUS_MODE_CHROME_EXTENSION_URL } from '../../constants/focusMode';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
@@ -390,7 +390,7 @@ export default function FocusModeSettingsSection({ onBack, embedded = false, isP
           )}
 
           <a
-            href="https://chrome.google.com/webstore"
+            href={FOCUS_MODE_CHROME_EXTENSION_URL}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 font-medium text-sm"

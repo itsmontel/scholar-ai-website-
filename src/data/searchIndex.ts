@@ -34,6 +34,7 @@ const TOOL_ITEMS: SearchItem[] = [
 
 const PAGE_ITEMS: SearchItem[] = [
   { page: 'features', label: 'Features', keywords: ['features', 'what we offer'] },
+  { page: 'focus-mode', label: 'Focus Mode', keywords: ['focus mode', 'block websites', 'earn screen time', 'block distracting sites', 'study before social media', 'block youtube', 'block tiktok'] },
   { page: 'pricing', label: 'Pricing', keywords: ['pricing', 'price', 'plans', 'subscription'] },
   { page: 'about', label: 'About', keywords: ['about', 'who we are'] },
   { page: 'blog', label: 'Blog', keywords: ['blog', 'articles'] },

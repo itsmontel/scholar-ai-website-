@@ -35,6 +35,11 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
                 </a>
               </li>
               <li>
+                <a href="/focus-mode" onClick={(e) => { e.preventDefault(); onNavigate?.('focus-mode'); }} className="text-stone-400 hover:text-white text-sm transition-colors">
+                  Focus Mode
+                </a>
+              </li>
+              <li>
                 <a href="/why-students-choose" onClick={(e) => { e.preventDefault(); onNavigate?.('why-students-choose'); }} className="text-stone-400 hover:text-white text-sm transition-colors">
                   Why Students Choose
                 </a>

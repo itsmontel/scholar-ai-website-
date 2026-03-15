@@ -396,6 +396,90 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
   };
 
   switch (slug) {
+    case 'block-websites-until-you-study-earn-screen-time':
+      return (
+        <>
+          <p className={p}>
+            You sit down to study. Ten minutes later you are on YouTube. Or TikTok. Or Reddit. The tab was right there. One click and you are gone. You tell yourself you will get back to it. An hour later you have watched three videos and read seventeen comments. The study session never really started.
+          </p>
+          <p className={p}>
+            Website blockers help, but they feel punishing. You hit the limit and you are locked out. No exceptions. The frustration builds. Eventually you turn the blocker off or find a workaround. What if instead of blocking you out, a tool made you earn your way in? Study first, then scroll. That is the idea behind blocking distracting websites until you answer study questions.
+          </p>
+
+          <h2 className={h2}>Why block websites until you study?</h2>
+          <p className={p}>
+            Most students know they should study before scrolling. The problem is willpower. When YouTube is one tab away, the temptation wins more often than not. A blocker that simply blocks creates resistance. Your brain fights the restriction. A system that ties screen time to learning flips the script. You want that break. To get it, you answer a few quiz questions from your own notes. The quiz takes two minutes. Suddenly the break feels earned instead of stolen.
+          </p>
+          <p className={p}>
+            This approach works because it uses the reward, not just the restriction. You are not being told you cannot have something. You are being given a clear path to get it. Study first, then enjoy. Students who use this method often report less guilt and more consistent study habits. The screen time feels legitimate. You did the work.
+          </p>
+
+          <h2 className={h2}>Block distracting websites students actually use</h2>
+          <p className={p}>
+            Not all sites are created equal. The big ones are obvious: YouTube, TikTok, Instagram, Reddit, Twitter. But you might have your own rabbit holes. A gaming news site. A forum. A subreddit. A good block list lets you choose exactly which sites trip the study gate. Pick the ones that steal your focus and add them. When you try to visit one, you get a quiz instead of the feed.
+          </p>
+          <p className={p}>
+            The questions come from your own material. Upload your notes, paste a textbook chapter, or use study content you have already created in WriteScholar. The tool turns that into quiz questions. So when you try to open YouTube, you are not facing random trivia. You are reviewing what you are supposed to be learning. The block becomes a study prompt.
+          </p>
+
+          <h2 className={h2}>Unlock YouTube by studying</h2>
+          <p className={p}>
+            Here is how it works in practice. You block YouTube, TikTok, and whatever else you choose. You try to open YouTube. Instead of the homepage, you see a short quiz. Four or five questions pulled from your notes. Get most of them right and the site unlocks for a set amount of time. Fifteen minutes, an hour, or longer. You choose. When the timer runs out, the block comes back. Want more YouTube? Study again. Answer the quiz. Earn more time.
+          </p>
+          <p className={p}>
+            The unlock window is important. If it is too short, you feel like you are constantly being interrupted. If it is too long, you lose the incentive to study again soon. Most students find something in the 15 minute to 1 hour range works well. Enough time to actually enjoy the break. Not so much that you forget you have studying to do.
+          </p>
+
+          <h2 className={h2}>Block social media until quiz</h2>
+          <p className={p}>
+            The same logic applies to social media. Instagram, TikTok, Snapchat, whatever pulls you in. Block them. When you try to open one, you get a quiz. Pass the quiz and you earn access. The questions are from your own study material, so every time you want to scroll you are nudged to reinforce what you are learning.
+          </p>
+          <p className={p}>
+            Some tools let you block any custom domain. If you have a specific site that derails you, add it. Pro plans typically support 10 blocked sites. Premium plans often support unlimited. Start with the worst offenders and add more if you need to.
+          </p>
+
+          <h2 className={h2}>Study before social media</h2>
+          <p className={p}>
+            The core habit is simple: study before social media. Do not open the apps until you have done at least one focused study session. A quiz, a flashcard run, a review of your notes. Something that forces you to retrieve information. Then, and only then, allow yourself the scroll.
+          </p>
+          <p className={p}>
+            This is easier to enforce when the tool does it for you. You do not have to decide in the moment. The block is already in place. The only way through is the quiz. Over time the association strengthens. Want a break? Study first. The habit becomes automatic.
+          </p>
+          <p className={p}>
+            WriteScholar&apos;s <a href="/focus-mode" onClick={handleNavigate('focus-mode')} className={internalLink}>Focus Mode</a> does exactly this. You pick the sites to block. You connect your study material. When you try to visit a blocked site, you get a quiz from your own notes. Pass it and the site unlocks for your chosen duration. The <a href="/tools/quiz-generator" onClick={handleNavigate('quiz-generator')} className={internalLink}>quiz generator</a> and <a href="/tools/flashcard-generator" onClick={handleNavigate('flashcard-generator')} className={internalLink}>flashcards</a> feed into it, so your study tools and your screen time gate work together.
+          </p>
+
+          <h2 className={h2}>Frequently asked questions</h2>
+          <p className={faqQuestion}>Does this work on mobile?</p>
+          <p className={p}>
+            Focus Mode uses a Chrome extension, so it works in Chrome on desktop. Mobile support depends on the browser. Check the extension listing for compatibility. Many students find that blocking on desktop alone significantly reduces distraction, since that is where most study sessions happen.
+          </p>
+          <p className={faqQuestion}>What if I need to use YouTube for a lecture or assignment?</p>
+          <p className={p}>
+            You can temporarily disable the block or add exceptions. Some tools let you pause Focus Mode for a set period. The goal is to reduce mindless scrolling, not to block legitimate study resources. Use the flexibility when you need it.
+          </p>
+          <p className={faqQuestion}>How many questions do I need to answer to unlock?</p>
+          <p className={p}>
+            You can customize how many questions and what pass rate you need. Many students use 4 out of 5 correct as a starting point, then adjust in settings. The idea is to make sure you actually know the material, not just guess. The quiz should take a minute or two. Quick enough that it does not feel like a punishment. Substantial enough that it reinforces learning.
+          </p>
+          <p className={faqQuestion}>Can I block sites on a schedule?</p>
+          <p className={p}>
+            Some tools support scheduled blocking. For example, block during weekday study hours and allow free access on weekends. Check the specific product for scheduling options. Many students start with always on blocking and adjust as they learn what works.
+          </p>
+
+          <h2 className={h2}>Earn your screen time</h2>
+          <p className={p}>
+            Blocking distracting websites until you study is not about punishment. It is about making screen time something you earn. Every minute on TikTok becomes a reward for having studied first. The guilt fades. The habit sticks. And you actually learn the material because the gate forces you to practice.
+          </p>
+          <p className={p}>
+            If you have been struggling to stay off your phone or your favorite sites during study time, try a system that ties access to learning. Block the sites. Connect your notes. Answer the quiz to unlock. See if it changes how you approach both studying and breaks.
+          </p>
+          <a href="/signup" onClick={handleNavigate('signup')} className={ctaButton}>
+            Try WriteScholar Free →
+          </a>
+        </>
+      );
+
     case 'how-to-avoid-plagiarism':
       return (
         <>
