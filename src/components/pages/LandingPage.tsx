@@ -149,12 +149,24 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
 
   const faqs = [
     {
+      question: "How does Focus Mode work?",
+      answer: "Focus Mode blocks distracting sites like YouTube, TikTok, and Instagram until you answer quiz questions from your own study notes. Pick the sites to block, add your material, and when you try to visit a blocked site you face a short quiz. Pass it and the site unlocks for 5 minutes to 24 hours. You choose the duration. No scroll until you've studied."
+    },
+    {
+      question: "Can I block YouTube and TikTok until I study?",
+      answer: "Yes! Focus Mode lets you block any sites you choose. Add YouTube, TikTok, Instagram, Reddit, or custom domains. When you try to visit one, you get a quiz from your own notes. Pass the quiz and you earn access. It's a Chrome extension. Install it, connect your WriteScholar account, and start blocking."
+    },
+    {
+      question: "Do I need study material to use Focus Mode?",
+      answer: "Yes. Focus Mode pulls quiz questions from your own flashcards and quizzes in WriteScholar. Create a Study Pack or flashcards from your notes first, then when you're blocked you'll answer questions from that material. This way you're actually reinforcing what you're learning."
+    },
+    {
       question: "What is the AI Humanizer and how does it work?",
-      answer: "The AI Humanizer transforms text from ChatGPT, Claude, Gemini, and other AI models into natural human-sounding writing. It bypasses AI detection tools like Turnitin and GPTZero while preserving your original meaning. Free users get 5,000 words/month."
+      answer: "The AI Humanizer transforms text from ChatGPT, Claude, Gemini, and other AI models into natural human-sounding writing. It bypasses AI detection tools like Turnitin and GPTZero while preserving your original meaning. Free users get 5,000 words per month."
     },
     {
       question: "Can I create study quizzes from my notes?",
-      answer: "Yes! The Quiz Generator turns any text into interactive quizzes with multiple choice and true/false questions. Paste your study notes, textbook chapters, or articles and get instant quizzes. Quiz, crossword and Crater Blast are Pro features — free users get lesson and flashcards with each study pack generation."
+      answer: "Yes! The Quiz Generator turns any text into interactive quizzes with multiple choice and true/false questions. Paste your study notes, textbook chapters, or articles and get instant quizzes. Quiz, crossword and Crater Blast are Pro features. Free users get lesson and flashcards with each study pack generation."
     },
     {
       question: "How does the Paper Summarizer work?",
@@ -170,15 +182,15 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
     },
     {
       question: "What's the difference between Free, Pro, and Premium?",
-      answer: "Free: 3 documents, 3 analyses, 2 study packs, 5k words, 2 citations/mo. Pro: 99 combined analyses, study packs & citations/mo, 99,999 words, all citation styles, PDF/Word export, Focus Mode (10 sites). Premium: 10× usage — 999 combined/mo, 999,999 words, larger document uploads (1GB), premium AI, Focus Mode unlimited, priority support."
+      answer: "Free: 3 documents, 3 analyses, 2 study packs, 5k words, 2 citations per month. Pro: 99 combined analyses, study packs and citations per month, 99,999 words, all citation styles, PDF/Word export, Focus Mode (10 sites). Premium: 10× usage with 999 combined per month, 999,999 words, larger document uploads (1GB), premium AI, Focus Mode unlimited, priority support."
     },
     {
       question: "How do I add friends and share my study materials?",
-      answer: "Every account gets a unique friend code (e.g. WS-BUDDY-4872). Share your code with friends so they can add you. Once connected, you can share any flashcards, quizzes, crosswords, or notes with one tap — it delivers straight to their WriteScholar. They just tap Accept and it's in their library. Core sharing is free."
+      answer: "Every account gets a unique friend code (e.g. WS-BUDDY-4872). Share your code with friends so they can add you. Once connected, you can share any flashcards, quizzes, crosswords, or notes with one tap. It delivers straight to their WriteScholar. They just tap Accept and it's in their library. Core sharing is free."
     },
     {
       question: "What can I share with my friends?",
-      answer: "You can share flashcards, quizzes, crossword puzzles, and notes. Anything you create in WriteScholar can be sent to a friend instantly. They receive a notification, tap Accept, and it appears in their library — no links to copy, no files to forward. Perfect for study groups and exam prep."
+      answer: "You can share flashcards, quizzes, crossword puzzles, and notes. Anything you create in WriteScholar can be sent to a friend instantly. They receive a notification, tap Accept, and it appears in their library. No links to copy, no files to forward. Perfect for study groups and exam prep."
     }
   ];
 
@@ -591,7 +603,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                     onClick={() => onNavigate('login')}
                     className="btn-glisten relative z-10 px-10 py-4 bg-violet-500 text-white font-bold rounded-full hover:bg-violet-600 hover:scale-105 active:scale-95 transition-all duration-300 ease-out shadow-xl shadow-violet-500/25 hover:shadow-2xl hover:shadow-violet-500/40 text-lg"
                   >
-                    I'm ready to level up
+                    I'm ready to focus
                   </button>
                 </div>
               </div>

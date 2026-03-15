@@ -353,6 +353,7 @@ const AcademicAIApp = () => {
         if (refreshResponse.ok) {
           const refreshData = await refreshResponse.json();
           localStorage.setItem('authToken', refreshData.data.token);
+          window.dispatchEvent(new CustomEvent('writescholar-auth-changed'));
           logger.log('Token refreshed successfully');
           
           // After successful refresh, get updated user data
@@ -579,6 +580,7 @@ const AcademicAIApp = () => {
           if (refreshResponse.ok) {
             const refreshData = await refreshResponse.json();
             localStorage.setItem('authToken', refreshData.data.token);
+            window.dispatchEvent(new CustomEvent('writescholar-auth-changed'));
             logger.log('Token refreshed automatically');
             
             // Retry the original request with new token
@@ -695,6 +697,7 @@ const AcademicAIApp = () => {
     setCurrentPage('landing');
     localStorage.removeItem('authToken');
     localStorage.removeItem('user');
+    window.dispatchEvent(new CustomEvent('writescholar-auth-changed'));
   };
 
   const handleOnboardingComplete = async (destination: string) => {

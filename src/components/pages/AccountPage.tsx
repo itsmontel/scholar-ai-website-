@@ -388,6 +388,7 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
         setTimeout(() => {
           localStorage.removeItem('authToken');
           localStorage.removeItem('user');
+          window.dispatchEvent(new CustomEvent('writescholar-auth-changed'));
           onLogout();
           onNavigate('login');
         }, 3000); // 3 second animation

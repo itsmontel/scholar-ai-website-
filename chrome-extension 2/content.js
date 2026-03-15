@@ -3,32 +3,41 @@
  */
 console.log('[WriteScholar Content] Script loaded on:', window.location.href);
 
-(function syncAuthToken() {
+function syncAuthToken() {
   try {
     const token = localStorage.getItem('authToken');
     const origin = window.location.origin;
-    console.log('[WriteScholar Content] Syncing auth token, origin:', origin);
     fetch(`${origin}/api-config.json`)
       .then((r) => r.ok ? r.json() : null)
       .then((cfg) => {
         const apiBase = cfg?.apiUrl?.replace(/\/$/, '') || null;
-        if (token || apiBase) {
-          chrome.runtime.sendMessage({
-            type: 'AUTH_TOKEN',
-            token: token || '',
-            apiBase: apiBase || undefined
-          }, () => {
-            console.log('[WriteScholar Content] AUTH_TOKEN sent');
-          });
-        }
+        chrome.runtime.sendMessage({
+          type: 'AUTH_TOKEN',
+          token: token || '',
+          apiBase: apiBase || undefined
+        }, () => {
+          if (chrome.runtime.lastError) {
+            console.warn('[WriteScholar Content] AUTH_TOKEN send error:', chrome.runtime.lastError.message);
+          } else {
+            console.log('[WriteScholar Content] AUTH_TOKEN synced');
+          }
+        });
       })
       .catch(() => {
-        if (token) chrome.runtime.sendMessage({ type: 'AUTH_TOKEN', token }, () => {});
+        chrome.runtime.sendMessage({ type: 'AUTH_TOKEN', token: token || '', apiBase: undefined }, () => {});
       });
   } catch (_e) {
     console.error('[WriteScholar Content] syncAuthToken error:', _e);
   }
-})();
+}
+
+syncAuthToken();
+setTimeout(syncAuthToken, 2000);
+setTimeout(syncAuthToken, 5000);
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') syncAuthToken();
+});
+window.addEventListener('writescholar-auth-changed', syncAuthToken);
 
 function isValidRedirect(site, redirect) {
   if (!redirect || typeof redirect !== 'string') return false;

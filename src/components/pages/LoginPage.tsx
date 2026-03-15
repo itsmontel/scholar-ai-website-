@@ -81,6 +81,7 @@ const LoginPage = ({ onNavigate, onLogin }: LoginPageProps) => {
 
       localStorage.setItem('authToken', data.data.token);
       localStorage.setItem('user', JSON.stringify(transformedUser));
+      window.dispatchEvent(new CustomEvent('writescholar-auth-changed'));
 
       onLogin(transformedUser);
       onNavigate('dashboard');

@@ -186,7 +186,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
   // ── Logged-out (public) header - matches landing page nav ───────────────────
   if (!user) {
     const publicNavItems = [
-      { id: 'features', label: 'Features' },
+      { id: 'focus-mode', label: 'Focus Mode' },
       { id: 'why-students-choose', label: 'Why Students Choose' },
       { id: 'blog', label: 'Blog' },
       { id: 'about', label: 'About' },
@@ -203,7 +203,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
           onNavigate?.(match.page);
         }
       } else {
-        onNavigate?.('features');
+        onNavigate?.('focus-mode');
       }
       setHeaderSearchQuery('');
       setHeaderSearchOpen(false);

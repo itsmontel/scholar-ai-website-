@@ -52,6 +52,7 @@ class AuthService {
       
       localStorage.setItem('authToken', this.token);
       localStorage.setItem('user', JSON.stringify(this.user));
+      if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('writescholar-auth-changed'));
 
       return data;
     } catch (error) {
@@ -99,6 +100,7 @@ class AuthService {
       // Update token
       this.token = data.data.token;
       localStorage.setItem('authToken', this.token);
+      if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('writescholar-auth-changed'));
 
       return this.token;
     } catch (error) {
@@ -128,6 +130,7 @@ class AuthService {
       this.user = null;
       localStorage.removeItem('authToken');
       localStorage.removeItem('user');
+      if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('writescholar-auth-changed'));
     }
   }
 

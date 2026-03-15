@@ -26,6 +26,7 @@ const AuthCallbackPage: React.FC<AuthCallbackPageProps> = ({ onNavigate, onLogin
           const userData = JSON.parse(decodeURIComponent(userParam));
 
           localStorage.setItem('authToken', token);
+          window.dispatchEvent(new CustomEvent('writescholar-auth-changed'));
           setStatus('success');
           window.history.replaceState(null, '', '/auth/callback');
 

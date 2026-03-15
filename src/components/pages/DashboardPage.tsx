@@ -783,6 +783,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
             
             if (refreshResult.success && refreshResult.data?.token) {
             localStorage.setItem('authToken', refreshResult.data.token);
+            window.dispatchEvent(new CustomEvent('writescholar-auth-changed'));
               const retryToken = refreshResult.data.token ?? undefined;
               const retryResult = await BulletproofAPI.safeRequest(
                 () => BulletproofAPI.get('/documents', retryToken),
