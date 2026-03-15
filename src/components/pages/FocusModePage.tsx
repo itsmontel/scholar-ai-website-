@@ -90,7 +90,8 @@ const FocusModePage = ({ onNavigate, user, onLogout }: FocusModePageProps) => {
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="focus-mode" />
 
       {FOCUS_MODE_COMING_SOON ? (
-        /* Coming Soon — Chrome extension pending approval */
+        <>
+        {/* Coming Soon — Chrome extension pending approval */}
         <section className="relative py-24 sm:py-32 px-4 sm:px-6">
           <div className="max-w-2xl mx-auto text-center">
             <span className="inline-flex items-center px-3 py-1 bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-400 rounded-full text-sm font-semibold mb-6">
@@ -119,6 +120,7 @@ const FocusModePage = ({ onNavigate, user, onLogout }: FocusModePageProps) => {
           </div>
         </section>
         <Footer onNavigate={onNavigate} />
+        </>
       ) : (
         <>
       {/* Hero Section */}

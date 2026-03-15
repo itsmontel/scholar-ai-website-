@@ -1,6 +1,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { logger } from '../utils/logger';
 import { persistOnboardingToServer } from '../utils/onboarding';
+import { trackEvent } from '../utils/analytics';
 import { lazyWithRetry } from '../utils/lazyWithRetry';
 
 // Eager: landing, login, signup (critical for first paint)
@@ -694,6 +695,7 @@ const AcademicAIApp = () => {
   };
 
   const handleOnboardingComplete = async (destination: string) => {
+    trackEvent('onboarding_complete');
     if (user?.id) {
       await persistOnboardingToServer();
       const updatedUser = { ...user, onboardingCompleted: true };

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import ScholarMascot from './ScholarMascot';
+import { trackEvent } from '../../utils/analytics';
 
 interface InteractiveTutorialProps {
   userName: string;
@@ -48,95 +49,6 @@ const STEPS: TutorialStep[] = [
     body: "These cards are the heart of WriteScholar. Each one opens a different workspace: essay feedback, citations, study tools, and more. Tap any card to switch instantly.",
     emoji: '🛠️',
     targetSelector: '[data-tutorial="tool-cards"]',
-    mascotPose: 'pointing',
-    spotlightPadding: 10,
-  },
-  {
-    id: 'analyze-card',
-    title: 'Essay Analyzer',
-    body: "This is your secret weapon for essays. It gives you professor-level feedback on structure, argument strength, clarity, grammar, and tone, all in seconds. Aim for 500+ words for the best results.",
-    emoji: '📝',
-    targetSelector: '[data-tutorial="analyze-card"]',
-    mascotPose: 'studying',
-    interactSelector: '[data-tutorial="analyze-card"]',
-  },
-  {
-    id: 'essay-upload',
-    title: 'Upload your essay',
-    body: "You can upload PDF, DOCX, or TXT files directly, no copy-pasting needed. Just click here and pick your file, or paste text in the box below. Either way works!",
-    emoji: '📄',
-    targetSelector: '[data-tutorial="essay-upload"]',
-    mascotPose: 'pointing',
-    spotlightPadding: 10,
-  },
-  {
-    id: 'citations-card',
-    title: 'Citation Finder',
-    body: "Need academic sources? Type your research topic here and we'll search real academic databases. Pick APA, MLA, Chicago, or Harvard, then copy or export your formatted bibliography instantly.",
-    emoji: '📚',
-    targetSelector: '[data-tutorial="citations-card"]',
-    mascotPose: 'studying',
-    interactSelector: '[data-tutorial="citations-card"]',
-  },
-  {
-    id: 'study-card',
-    title: 'Study Tools',
-    body: "Paste your notes, a textbook chapter, or any material. One click generates a full Study Pack — lesson, flashcards, quiz, crossword, and Crater Blast (the quiz game). Lesson, flashcards & quiz are free; crossword & Crater Blast unlock with Pro.",
-    emoji: '🎯',
-    targetSelector: '[data-tutorial="study-card"]',
-    mascotPose: 'pointing',
-    interactSelector: '[data-tutorial="study-card"]',
-  },
-  {
-    id: 'focus-card',
-    title: 'Focus Mode',
-    body: "This one's a game-changer. Focus Mode uses a Chrome extension to block distracting sites like YouTube, TikTok, Instagram, and Reddit. You only unlock them by answering study questions from your own material. Study first, scroll later!",
-    emoji: '🔒',
-    targetSelector: '[data-tutorial="focus-card"]',
-    mascotPose: 'studying',
-  },
-  {
-    id: 'more-tools',
-    title: 'More in the toolbox',
-    body: "Word counter, essay outline, thesis generator, citation formatter, grammar checker, GPA calculator, and more — all the writing utilities in one place. We add new tools regularly!",
-    emoji: '🔧',
-    targetSelector: '[data-tutorial="more-tools-card"]',
-    mascotPose: 'pointing',
-  },
-  {
-    id: 'streak',
-    title: 'Your study streak',
-    body: "Every day you use WriteScholar, your streak grows. It tracks your consistency and unlocks badges along the way. Try to keep it going. Consistency beats cramming every time!",
-    emoji: '🔥',
-    targetSelector: '[data-tutorial="streak-widget"]',
-    mobileTargetSelector: '[data-tutorial="streak-widget-mobile"]',
-    mascotPose: 'celebrating',
-  },
-  {
-    id: 'quick-review',
-    title: 'Daily Quick Review',
-    body: "Each day you come back, Quick Review quizzes you on things you've studied before using spaced repetition. It only takes a minute and makes sure knowledge actually sticks long-term.",
-    emoji: '🧠',
-    targetSelector: '[data-tutorial="quick-review-btn"]',
-    mobileTargetSelector: '[data-tutorial="quick-review-btn-mobile"]',
-    mascotPose: 'studying',
-  },
-  {
-    id: 'friends',
-    title: 'Friends',
-    body: "Add your classmates and friends here! You can share study materials with each other, see their current streak, and keep each other motivated. Studying together > studying alone.",
-    emoji: '👥',
-    targetSelector: '[data-tutorial="friends-btn"]',
-    mobileTargetSelector: '[data-tutorial="friends-btn-mobile"]',
-    mascotPose: 'waving',
-  },
-  {
-    id: 'saved',
-    title: 'Your recent saved work',
-    body: "Your recent quizzes, flashcards, analyses, citations, and lessons appear here. Use it to quickly revisit, re-study, or export what you've created lately.",
-    emoji: '📁',
-    targetSelector: '[data-tutorial="saved-materials"]',
-    mobileTargetSelector: '[data-tutorial="saved-btn-mobile"]',
     mascotPose: 'pointing',
     spotlightPadding: 10,
   },
@@ -361,6 +273,8 @@ const InteractiveTutorial = ({ userName, onComplete }: InteractiveTutorialProps)
 
   useEffect(() => { requestAnimationFrame(() => setOverlayReady(true)); }, []);
 
+  useEffect(() => { trackEvent('tutorial_start'); }, []);
+
   /* ── Measure tooltip each step ── */
   useEffect(() => {
     const t = setTimeout(() => {
@@ -432,15 +346,19 @@ const InteractiveTutorial = ({ userName, onComplete }: InteractiveTutorialProps)
     const handler = (e: KeyboardEvent) => {
       if (e.key === 'ArrowRight' || e.key === 'Enter') { e.preventDefault(); goNext(); }
       else if (e.key === 'ArrowLeft' && !isFirst) { e.preventDefault(); goBack(); }
-      else if (e.key === 'Escape') handleExit();
+      else if (e.key === 'Escape') handleExit(true);
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
   }, [step, isLast, isFirst]);
 
-  const goNext = () => { if (isLast) handleExit(); else setStep(s => s + 1); };
+  const goNext = () => { if (isLast) handleExit(false); else setStep(s => s + 1); };
   const goBack = () => { if (!isFirst) setStep(s => s - 1); };
-  const handleExit = () => { setExiting(true); setTimeout(onComplete, 400); };
+  const handleExit = (skipped?: boolean) => {
+    if (skipped) trackEvent('tutorial_skip');
+    setExiting(true);
+    setTimeout(onComplete, 400);
+  };
 
   /* ── Tooltip position — computed from raw target rect (not smooth) for instant placement ── */
   const tooltipPos = useMemo(
@@ -568,7 +486,7 @@ const InteractiveTutorial = ({ userName, onComplete }: InteractiveTutorialProps)
 
             {/* Nav */}
             <div className="flex items-center gap-3 mt-4 pt-3.5 border-t border-stone-100 dark:border-stone-700/50">
-              <button onClick={handleExit} className="text-xs text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 transition-colors font-medium flex-shrink-0">
+              <button onClick={() => handleExit(true)} className="text-xs text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 transition-colors font-medium flex-shrink-0">
                 Skip tour
               </button>
 

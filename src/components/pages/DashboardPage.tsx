@@ -17,9 +17,10 @@ import SoftPaywall from '../common/SoftPaywall';
 import { jsPDF } from 'jspdf';
 import { Document, Packer, Paragraph, TextRun, HeadingLevel } from 'docx';
 import { saveAs } from 'file-saver';
-import { trackAction, syncFromAPIData, trackExport, trackCopy, trackStudyPackGenerated } from '../../data/achievements';
+import { trackAction, syncFromAPIData, trackExport, trackCopy, trackStudyPackGenerated, getStats } from '../../data/achievements';
 import { getResetsInText, getExpiringSoonCount, getExpiringSoonUrgencyText, getDaysUntilExpiration } from '../../utils/usageReset';
 import { persistTutorialToServer } from '../../utils/onboarding';
+import { trackEvent } from '../../utils/analytics';
 import InteractiveLessonPage from './tools/InteractiveLessonPage';
 import FocusModeSettingsSection from '../common/FocusModeSettingsSection';
 import { FOCUS_MODE_COMING_SOON } from '../../constants/focusMode';
@@ -123,6 +124,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
     } catch (_) {}
   }, []);
   const [showSoftPaywall, setShowSoftPaywall] = useState(false);
+  const [showFirstActionPrompt, setShowFirstActionPrompt] = useState(false);
   const handleInteractiveTutorialComplete = async () => {
     try {
       sessionStorage.removeItem('writescholar_show_interactive_tutorial');
@@ -130,13 +132,21 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
     } catch (_) {}
     setShowInteractiveTutorial(false);
     onUserUpdate?.({ welcomeTutorialCompleted: true });
-    setShowSoftPaywall(true);
+    trackEvent('tutorial_complete');
+    // Defer paywall until first success or return visit — don't show immediately
+    try {
+      if (user?.id) {
+        localStorage.setItem(`writescholar_paywall_deferred_${user.id}`, 'true');
+      }
+    } catch (_) {}
+    setShowFirstActionPrompt(true);
   };
 
   const handlePaywallStartTrial = () => {
-    // Soft paywall opens Stripe directly; this is for analytics or fallback
+    trackEvent('paywall_start_trial');
   };
   const handlePaywallDismiss = () => {
+    trackEvent('paywall_dismiss');
     setShowSoftPaywall(false);
   };
   const handlePaywallNavigatePricing = () => {
@@ -175,15 +185,15 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
   const [summaryCopied, setSummaryCopied] = useState(false);
   
   // Study Pack state (unified generation: quiz + flashcards + crossword + lesson + crater blast)
-  const [studyPackResult, setStudyPackResult] = useState<any>(null);
+  const [, setStudyPackResult] = useState<any>(null);
   const [isGeneratingStudyPack, setIsGeneratingStudyPack] = useState(false);
   const [studyPackError, setStudyPackError] = useState('');
   // Quiz generator state (legacy, kept for viewing saved items)
-  const [studyToolMode, setStudyToolMode] = useState<'quiz' | 'flashcards' | 'crossword' | 'crater_blast'>('quiz');
+  const [studyToolMode] = useState<'quiz' | 'flashcards' | 'crossword' | 'crater_blast'>('quiz');
   const [quizType, setQuizType] = useState<'mixed' | 'multiple_choice' | 'true_false' | 'fill_blank'>('mixed');
   const [quizDifficulty, setQuizDifficulty] = useState<'easy' | 'medium' | 'hard'>('medium');
   const [quizQuestionCount, setQuizQuestionCount] = useState(10);
-  const [isGeneratingQuiz, setIsGeneratingQuiz] = useState(false);
+  const [isGeneratingQuiz] = useState(false);
   const [quizResult, setQuizResult] = useState<any>(null);
   const [quizError, setQuizError] = useState('');
   const [isQuizMode, setIsQuizMode] = useState(false);
@@ -203,7 +213,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
   // Flashcard state
   const [flashcardResult, setFlashcardResult] = useState<any>(null);
   const [flashcardCount, setFlashcardCount] = useState(15);
-  const [isGeneratingFlashcards, setIsGeneratingFlashcards] = useState(false);
+  const [isGeneratingFlashcards] = useState(false);
   
   // Document upload for study tools (quiz, flashcards, crossword)
   const studyToolsFileInputRef = useRef<HTMLInputElement>(null);
@@ -212,7 +222,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
   // Crossword state
   const [crosswordResult, setCrosswordResult] = useState<any>(null);
   const [crosswordWordCount, setCrosswordWordCount] = useState(10);
-  const [isGeneratingCrossword, setIsGeneratingCrossword] = useState(false);
+  const [isGeneratingCrossword] = useState(false);
   const [crosswordAnswers, setCrosswordAnswers] = useState<Record<string, string>>({});
   const [crosswordChecked, setCrosswordChecked] = useState(false);
   const [selectedClue, setSelectedClue] = useState<number | null>(null);
@@ -338,6 +348,32 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
     
     return firstLoginDate !== today;
   });
+
+  useEffect(() => {
+    if (showFirstActionPrompt) trackEvent('first_action_prompt_view');
+  }, [showFirstActionPrompt]);
+
+  // Deferred paywall: show after first success (recentActivity) or return visit — not immediately after tutorial
+  useEffect(() => {
+    if (!user?.id || showInteractiveTutorial || showWelcomeTutorial) return;
+    try {
+      const deferred = localStorage.getItem(`writescholar_paywall_deferred_${user.id}`) === 'true';
+      const alreadyShown = localStorage.getItem(`writescholar_soft_paywall_shown_${user.id}`) === '1';
+      if (!deferred || alreadyShown) return;
+
+      const firstLoginDate = localStorage.getItem(`writescholar_first_login_${user.id}`);
+      const today = new Date().toDateString();
+      const isReturnVisit = Boolean(firstLoginDate && firstLoginDate !== today);
+      const hasActivity = !isActivityLoading && recentActivity.length > 0;
+
+      if (hasActivity || isReturnVisit) {
+        localStorage.removeItem(`writescholar_paywall_deferred_${user.id}`);
+        localStorage.setItem(`writescholar_soft_paywall_shown_${user.id}`, '1');
+        trackEvent('paywall_view', { trigger: hasActivity ? 'first_success' : 'return_visit' });
+        setShowSoftPaywall(true);
+      }
+    } catch (_) {}
+  }, [user?.id, showInteractiveTutorial, showWelcomeTutorial, isActivityLoading, recentActivity.length]);
 
   // Calendar / Study Events state
   interface StudyEvent {
@@ -1054,7 +1090,9 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
 
       if (data.success && data.data) {
         localStorage.setItem('citationSearchResults', JSON.stringify(data.data));
+        const wasFirst = (getStats().citations_count || 0) === 0;
         trackAction('citations_count');
+        if (wasFirst) trackEvent('first_citation');
         onNavigate('citation-results');
       } else {
         throw new Error('No citation results received');
@@ -1191,96 +1229,6 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
     }
   };
 
-  const handleGenerateQuiz = async () => {
-    if (quizExhausted) {
-      setQuizError('You\'ve used all your quiz generations this period. Upgrade to Pro for more quizzes.');
-      return;
-    }
-    setIsGeneratingQuiz(true);
-    setQuizError('');
-    try {
-      const token = localStorage.getItem('authToken');
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/analysis/generate-quiz`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ text: inputText, quizType, difficulty: quizDifficulty, questionCount: quizQuestionCount })
-      });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.message || 'Quiz generation failed');
-      setQuizResult(data.data);
-      trackAction('quizzes_count');
-      setIsQuizMode(true);
-      setCurrentQuestion(0);
-      setUserAnswers([]);
-      setQuizCompleted(false);
-      setSelectedAnswer('');
-      setShowQuizResult(false);
-      // Refresh quiz usage after successful generation
-      fetchQuizUsage();
-    } catch (error: any) {
-      setQuizError(error.message || 'Quiz generation failed. Please try again.');
-    } finally {
-      setIsGeneratingQuiz(false);
-    }
-  };
-
-  const handleGenerateFlashcards = async () => {
-    if (quizExhausted) {
-      setQuizError('You\'ve used all your study pack generations this period. Upgrade to Pro for more access.');
-      return;
-    }
-    setIsGeneratingFlashcards(true);
-    setQuizError('');
-    try {
-      const token = localStorage.getItem('authToken');
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/analysis/generate-flashcards`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ text: inputText, cardCount: isFreeUser ? 15 : flashcardCount })
-      });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.message || 'Flashcard generation failed');
-      setFlashcardResult(data.data);
-      trackAction('flashcards_count');
-      fetchQuizUsage();
-    } catch (error: any) {
-      setQuizError(error.message || 'Flashcard generation failed. Please try again.');
-    } finally {
-      setIsGeneratingFlashcards(false);
-    }
-  };
-
-  const handleGenerateCrossword = async () => {
-    if (quizExhausted) {
-      setQuizError('You\'ve used all your study pack generations this period. Upgrade to Pro for more access.');
-      return;
-    }
-    setIsGeneratingCrossword(true);
-    setQuizError('');
-    try {
-      const token = localStorage.getItem('authToken');
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/analysis/generate-crossword`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ text: inputText, wordCount: isFreeUser ? 10 : crosswordWordCount })
-      });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.message || 'Crossword generation failed');
-      setCrosswordResult(data.data);
-      trackAction('crosswords_count');
-      setCrosswordAnswers({});
-      setCrosswordChecked(false);
-      setSelectedClue(null);
-      setSelectedCell(null);
-      setHintsUsed(0);
-      fetchQuizUsage();
-    } catch (error: any) {
-      setQuizError(error.message || 'Crossword generation failed. Please try again.');
-    } finally {
-      setIsGeneratingCrossword(false);
-    }
-  };
-
   const handleGenerateStudyPack = async () => {
     if (quizExhausted) {
       setStudyPackError('You\'ve used all study pack generations this period. Upgrade for more.');
@@ -1304,6 +1252,8 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || 'Study pack generation failed');
       setStudyPackResult(data.data);
+      const wasFirst = (getStats().study_packs_count || 0) === 0;
+      if (wasFirst) trackEvent('first_study_pack');
       // Navigate to study pack viewer so user can flick between all 5 tools
       try {
         sessionStorage.setItem('writescholar_study_pack_viewer', JSON.stringify({
@@ -1452,8 +1402,6 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
         setCrosswordAnswers({ ...crosswordAnswers, [answerKey]: newAnswer.join('').replace(/\s+$/, '') });
       } else if (letterIndex > 0) {
         // Move back and delete
-        const delRow = selectedDirection === 'across' ? row : row - 1;
-        const delCol = selectedDirection === 'across' ? col - 1 : col;
         newAnswer[letterIndex - 1] = '';
         setCrosswordAnswers({ ...crosswordAnswers, [answerKey]: newAnswer.join('').replace(/\s+$/, '') });
         if (selectedDirection === 'across') {
@@ -1970,13 +1918,72 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
       {(showInteractiveTutorial || showWelcomeTutorial) && (
         <InteractiveTutorial
           userName={getDisplayNameForGreeting(user)}
-          onComplete={showInteractiveTutorial ? handleInteractiveTutorialComplete : () => {
+          onComplete={showInteractiveTutorial ? handleInteractiveTutorialComplete : async () => {
             onUserUpdate?.({ welcomeTutorialCompleted: true });
+            trackEvent('tutorial_complete');
+            try {
+              if (user?.id) {
+                localStorage.setItem(`writescholar_paywall_deferred_${user.id}`, 'true');
+              }
+            } catch (_) {}
+            setShowFirstActionPrompt(true);
           }}
         />
       )}
 
-      {/* Soft Paywall - shown after tutorial completion to drive trial signups */}
+      {/* First Action Prompt - explicit next step for new users after tutorial */}
+      {showFirstActionPrompt && !showSoftPaywall && !showInteractiveTutorial && !showWelcomeTutorial && (
+        <div className="max-w-6xl mx-auto px-3 sm:px-6 lg:ml-24 lg:mr-auto mb-4">
+          <div className="bg-gradient-to-r from-violet-500 to-purple-600 rounded-2xl p-5 sm:p-6 shadow-xl shadow-violet-500/25 border border-violet-400/30 relative overflow-hidden">
+            <button
+              onClick={() => {
+                setShowFirstActionPrompt(false);
+                trackEvent('first_action_prompt_dismiss');
+              }}
+              className="absolute top-3 right-3 p-1.5 text-white/80 hover:text-white hover:bg-white/20 rounded-lg transition-colors"
+              aria-label="Dismiss"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+              <div className="flex-1 min-w-0">
+                <h3 className="text-lg sm:text-xl font-bold text-white mb-1">Ready to dive in?</h3>
+                <p className="text-violet-100 text-sm sm:text-base">Upload your first essay for professor-style feedback, or try Study Pack to turn notes into quizzes and flashcards.</p>
+              </div>
+              <div className="flex flex-wrap gap-2 w-full sm:w-auto">
+                <button
+                  onClick={() => {
+                    setMode('analyze');
+                    setShowFirstActionPrompt(false);
+                    trackEvent('first_action_prompt_cta_click', { cta: 'analyze' });
+                    setTimeout(() => {
+                      document.querySelector('[data-tutorial="essay-upload"]')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }, 150);
+                  }}
+                  className="flex-1 sm:flex-none px-5 py-2.5 bg-white text-violet-700 font-semibold rounded-xl hover:bg-violet-50 transition-all shadow-md"
+                >
+                  📝 Analyze Essay
+                </button>
+                <button
+                  onClick={() => {
+                    setMode('quiz');
+                    setShowFirstActionPrompt(false);
+                    trackEvent('first_action_prompt_cta_click', { cta: 'study_pack' });
+                    setTimeout(() => {
+                      document.querySelector('[data-tutorial="study-pack-input"]')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }, 150);
+                  }}
+                  className="flex-1 sm:flex-none px-5 py-2.5 bg-white/20 text-white font-semibold rounded-xl hover:bg-white/30 transition-all border border-white/40"
+                >
+                  📦 Study Pack
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Soft Paywall - shown after first success or return visit (deferred from tutorial) */}
       {showSoftPaywall && (
         <SoftPaywall
           userName={getDisplayNameForGreeting(user)}
@@ -2324,7 +2331,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
               </div>
 
               {/* Ebook banner - subtle inline */}
-              {showEbookBanner && !ebookBannerDismissed && (
+              {showEbookBanner && !ebookBannerDismissed && !showFirstActionPrompt && (
                 <div className="mt-4 relative">
                   <a
                     href="/downloads/writescholar-ultimate-study-tips-guide.pdf"
@@ -2518,9 +2525,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                 { id: 'citations' as const, icon: '📚', title: 'Citations', desc: 'Find and format academic sources instantly', mobileDesc: 'Find sources', gradient: 'from-sky-50 to-blue-50 dark:from-sky-900/20 dark:to-blue-900/15', border: 'border-sky-200/70 dark:border-sky-700/40', activeBorder: 'border-sky-400 dark:border-sky-500 ring-2 ring-sky-300/50 dark:ring-sky-600/40', iconBg: 'bg-gradient-to-br from-sky-400 to-blue-500', accentColor: 'text-sky-600 dark:text-sky-400', pro: false, setStudyMode: null },
                 { id: 'study_tools' as const, icon: '📦', title: 'Study Pack', desc: 'Generate lesson, flashcards, quiz, crossword & Crater Blast from your notes', mobileDesc: 'All study tools', gradient: 'from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/15', border: 'border-amber-200/70 dark:border-amber-700/40', activeBorder: 'border-amber-400 dark:border-amber-500 ring-2 ring-amber-300/50 dark:ring-amber-600/40', iconBg: 'bg-gradient-to-br from-amber-400 to-orange-500', accentColor: 'text-amber-600 dark:text-amber-400', pro: false, setStudyMode: 'quiz' as const },
                 { id: 'focus_mode' as const, icon: '🔒', title: 'Focus Mode', desc: 'Earn screen time, block sites until you pass study questions', mobileDesc: 'Earn your breaks', gradient: 'from-violet-100 to-purple-100 dark:from-violet-800/40 dark:to-purple-800/40', border: 'border-violet-300 dark:border-violet-600', activeBorder: 'border-violet-500 dark:border-violet-400 ring-2 ring-violet-400/60 dark:ring-violet-500/50', iconBg: 'bg-gradient-to-br from-violet-500 to-purple-600', accentColor: 'text-violet-700 dark:text-violet-300', pro: false, setStudyMode: null, special: true, badge: FOCUS_MODE_COMING_SOON ? 'COMING SOON' : 'NEW' },
-                { id: 'summarize' as const, icon: '📋', title: 'Summarize', desc: 'Condense papers and articles instantly', mobileDesc: 'Summarize', gradient: 'from-teal-50 to-cyan-50 dark:from-teal-900/20 dark:to-cyan-900/15', border: 'border-teal-200/70 dark:border-teal-700/40', activeBorder: 'border-teal-400 dark:border-teal-500 ring-2 ring-teal-300/50 dark:ring-teal-600/40', iconBg: 'bg-gradient-to-br from-teal-500 to-cyan-600', accentColor: 'text-teal-700 dark:text-teal-300', pro: false, setStudyMode: null },
-                { id: 'humanize' as const, icon: '✨', title: 'Humanize', desc: 'Transform AI text into natural human writing', mobileDesc: 'Humanize', gradient: 'from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/15', border: 'border-violet-200/70 dark:border-violet-700/40', activeBorder: 'border-violet-400 dark:border-violet-500 ring-2 ring-violet-300/50 dark:ring-violet-600/40', iconBg: 'bg-gradient-to-br from-violet-500 to-purple-600', accentColor: 'text-violet-700 dark:text-violet-300', pro: false, setStudyMode: null },
-                { id: 'more_tools' as const, icon: '🔧', title: 'More Tools', desc: 'Word counter, outline, citation generator & more', mobileDesc: 'More', gradient: 'from-indigo-50 to-slate-50 dark:from-indigo-900/20 dark:to-slate-900/20', border: 'border-indigo-200/70 dark:border-indigo-700/40', activeBorder: 'border-indigo-400 dark:border-indigo-500 ring-2 ring-indigo-300/50 dark:ring-indigo-600/40', iconBg: 'bg-gradient-to-br from-indigo-500 to-slate-600', accentColor: 'text-indigo-700 dark:text-indigo-300', pro: false, setStudyMode: null, isMoreTools: true },
+                { id: 'more_tools' as const, icon: '🔧', title: 'More Tools', desc: 'Summarizer, humanizer, word counter & more', mobileDesc: 'More', gradient: 'from-indigo-50 to-slate-50 dark:from-indigo-900/20 dark:to-slate-900/20', border: 'border-indigo-200/70 dark:border-indigo-700/40', activeBorder: 'border-indigo-400 dark:border-indigo-500 ring-2 ring-indigo-300/50 dark:ring-indigo-600/40', iconBg: 'bg-gradient-to-br from-indigo-500 to-slate-600', accentColor: 'text-indigo-700 dark:text-indigo-300', pro: false, setStudyMode: null, isMoreTools: true },
               ] as const).map(tool => (
                 <button
                   key={tool.id}
@@ -2528,8 +2533,6 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                     tool.id === 'analyze' ? 'analyze-card' :
                     tool.id === 'citations' ? 'citations-card' :
                     tool.id === 'study_tools' ? 'study-card' :
-                    tool.id === 'summarize' ? 'summarize-card' :
-                    tool.id === 'humanize' ? 'humanize-card' :
                     tool.id === 'focus_mode' ? 'focus-card' :
                     tool.id === 'more_tools' ? 'more-tools-card' :
                     undefined
@@ -3401,7 +3404,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
             )}
 
             {/* ============ UNIFIED STUDY PACK INPUT ============ */}
-            <div className="relative rounded-2xl sm:rounded-3xl shadow-xl shadow-amber-500/10 overflow-hidden mb-6">
+            <div className="relative rounded-2xl sm:rounded-3xl shadow-xl shadow-amber-500/10 overflow-hidden mb-6" data-tutorial="study-pack-input">
               <div className="bg-white dark:bg-stone-800 rounded-2xl sm:rounded-3xl border border-amber-200/60 dark:border-amber-700/40">
                 <div className="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border-b border-amber-200/60 dark:border-amber-700/40 px-4 sm:px-5 py-3 sm:py-4 flex items-center justify-between">
                   <div className="flex items-center gap-2">
@@ -4419,19 +4422,48 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
             </div>
           ) : (
             <div className="text-center py-8 sm:py-12 bg-white dark:bg-stone-800 rounded-xl sm:rounded-2xl border border-stone-200/60 dark:border-stone-700/40">
-              {/* Simple mobile-friendly empty state */}
+              {/* Actionable empty state with clear first steps */}
               <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-violet-100 to-purple-100 dark:from-violet-900/30 dark:to-purple-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
                 <span className="text-3xl sm:text-4xl">📚</span>
               </div>
-              <p className="text-stone-800 dark:text-stone-200 font-semibold text-base sm:text-lg mb-1">No recent activity</p>
-              <p className="text-stone-400 dark:text-stone-500 text-xs sm:text-sm mb-5 sm:mb-6 max-w-[240px] sm:max-w-xs mx-auto px-4">Upload a document or use a tool to get started</p>
-              <button 
-                onClick={() => onNavigate('upload')} 
-                className="inline-flex items-center gap-2 px-4 sm:px-5 py-2.5 bg-gradient-to-r from-violet-500 to-purple-600 active:from-violet-600 active:to-purple-700 sm:hover:from-violet-400 sm:hover:to-purple-500 text-white font-semibold rounded-xl transition-all shadow-md shadow-violet-500/20 active:scale-95 sm:hover:shadow-lg sm:hover:scale-105 text-sm"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
-                Upload Document
-              </button>
+              <p className="text-stone-800 dark:text-stone-200 font-semibold text-base sm:text-lg mb-1">No recent activity yet</p>
+              <p className="text-stone-500 dark:text-stone-400 text-xs sm:text-sm mb-5 sm:mb-6 max-w-[280px] sm:max-w-sm mx-auto px-4">Try one of these to get started: upload an essay for feedback, generate a study pack from notes, or find citations for your topic.</p>
+              <div className="flex flex-col sm:flex-row gap-2 justify-center items-center flex-wrap">
+                <button
+                  onClick={() => {
+                    setMode('analyze');
+                    setTimeout(() => document.querySelector('[data-tutorial="essay-upload"]')?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 150);
+                  }}
+                  className="inline-flex items-center gap-2 px-4 sm:px-5 py-2.5 bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-400 hover:to-pink-500 text-white font-semibold rounded-xl transition-all shadow-md shadow-rose-500/20 hover:shadow-lg text-sm"
+                >
+                  <span>📝</span>
+                  Analyze an Essay
+                </button>
+                <button
+                  onClick={() => {
+                    setMode('quiz');
+                    setTimeout(() => document.querySelector('[data-tutorial="study-pack-input"]')?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 150);
+                  }}
+                  className="inline-flex items-center gap-2 px-4 sm:px-5 py-2.5 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-white font-semibold rounded-xl transition-all shadow-md shadow-amber-500/20 hover:shadow-lg text-sm"
+                >
+                  <span>📦</span>
+                  Generate Study Pack
+                </button>
+                <button
+                  onClick={() => setMode('citations')}
+                  className="inline-flex items-center gap-2 px-4 sm:px-5 py-2.5 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-semibold rounded-xl transition-all shadow-md shadow-sky-500/20 hover:shadow-lg text-sm"
+                >
+                  <span>📚</span>
+                  Find Citations
+                </button>
+                <button
+                  onClick={() => onNavigate('upload')}
+                  className="inline-flex items-center gap-2 px-4 sm:px-5 py-2.5 bg-stone-200 dark:bg-stone-600 hover:bg-stone-300 dark:hover:bg-stone-500 text-stone-800 dark:text-stone-100 font-semibold rounded-xl transition-all text-sm"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
+                  Upload Document
+                </button>
+              </div>
             </div>
           )}
         </div>

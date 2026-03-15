@@ -5,7 +5,8 @@ import LoadingSpinner from '../common/LoadingSpinner';
 import AnalysisAnimation from '../common/AnalysisAnimation';
 import ScholarMascot from '../common/ScholarMascot';
 import { ExportService, AnalysisData } from '../../services/exportService';
-import { trackAction } from '../../data/achievements';
+import { trackAction, getStats } from '../../data/achievements';
+import { trackEvent } from '../../utils/analytics';
 
 interface AnalysisPageProps {
   onNavigate?: (page: string) => void;
@@ -915,7 +916,9 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
         setAnnotations(aiAnnotations);
       }
 
+      const wasFirst = (getStats().analyses_count || 0) === 0;
       trackAction('analyses_count');
+      if (wasFirst) trackEvent('first_analysis');
 
       // Automatically save the analysis
       try {

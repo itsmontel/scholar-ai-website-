@@ -198,7 +198,28 @@ const getUsagePeriod = async (userId) => {
       if (!isNaN(d.getTime())) anchorDate = d;
     }
 
-    // 2. Fallback: earliest activity as proxy (Supabase Auth sync, missing created_at)
+    // 2. Fallback: auth.users.created_at (Supabase Auth always has signup date)
+    if (!anchorDate) {
+      try {
+        const { data: authData, error: authErr } = await supabaseServiceRole.auth.admin.getUserById(userId);
+        if (!authErr && authData?.user?.created_at) {
+          const d = new Date(authData.user.created_at);
+          if (!isNaN(d.getTime())) anchorDate = d;
+        }
+      } catch (_) {}
+      // Fallback: RPC reads auth.users via SECURITY DEFINER (works when admin API unavailable)
+      if (!anchorDate) {
+        try {
+          const { data: authCreated, error: rpcErr } = await supabaseServiceRole.rpc('get_auth_user_created_at', { user_uuid: userId });
+          if (!rpcErr && authCreated) {
+            const d = new Date(authCreated);
+            if (!isNaN(d.getTime())) anchorDate = d;
+          }
+        } catch (_) {}
+      }
+    }
+
+    // 3. Fallback: earliest activity as proxy (legacy users, missing created_at everywhere)
     if (!anchorDate) {
       const [q, d, a] = await Promise.all([
         supabaseServiceRole.from('quiz_usage').select('created_at').eq('user_id', userId).order('created_at', { ascending: true }).limit(1).maybeSingle(),

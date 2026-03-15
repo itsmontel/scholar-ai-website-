@@ -373,7 +373,7 @@ const UploadPage = ({ onNavigate, user, onLogout }: UploadPageProps) => {
               </div>
               <div>
                 <p className="font-medium text-gray-900 text-sm">PDF</p>
-                <p className="text-xs text-gray-500">Up to {maxUploadLabel}</p>
+                <p className="text-xs text-gray-500">Up to {maxFileSizeLabel}</p>
               </div>
             </div>
             <div className="flex items-center space-x-3 bg-white rounded-xl p-4 border border-gray-200">
@@ -391,7 +391,7 @@ const UploadPage = ({ onNavigate, user, onLogout }: UploadPageProps) => {
               </div>
               <div>
                 <p className="font-medium text-gray-900 text-sm">Legacy</p>
-                <p className="text-xs text-gray-500">Up to {maxUploadLabel}</p>
+                <p className="text-xs text-gray-500">Up to {maxFileSizeLabel}</p>
               </div>
             </div>
             <div className="flex items-center space-x-3 bg-white rounded-xl p-4 border border-gray-200">
