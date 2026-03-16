@@ -1875,6 +1875,18 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                       : ''}
                     ! <span className="inline-block animate-[wave_1.8s_ease-in-out_infinite]">{greeting.emoji}</span>
                   </h1>
+                  {/* Mobile: full subheading in mode color; Desktop: longer subheading */}
+                  <p className="sm:hidden mt-3 text-sm font-semibold leading-relaxed text-center sm:text-left">
+                    {mode === 'focus_mode' ? (
+                      <span className="text-violet-600 dark:text-violet-400">Block distractions until you study.</span>
+                    ) : mode === 'quiz' ? (
+                      <span className="text-amber-600 dark:text-amber-400">Quizzes, flashcards, and crosswords from your notes.</span>
+                    ) : mode === 'citations' ? (
+                      <span className="text-sky-600 dark:text-sky-400">Citations via academic sources in seconds.</span>
+                    ) : (
+                      <span className="text-rose-600 dark:text-rose-400">Professor-style feedback on every essay.</span>
+                    )}
+                  </p>
                   <p className="hidden sm:block text-stone-600 dark:text-stone-400 mt-3 text-sm sm:text-base max-w-md sm:max-w-lg leading-relaxed">
                     {mode === 'focus_mode' ? (
                       <><span className="text-violet-600 dark:text-violet-400 font-bold">Block distractions until you study.</span><span className="text-stone-500 dark:text-stone-400"> Study packs, citations & focus mode.</span></>
@@ -1892,31 +1904,8 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                 </div>
               </div>
 
-              {/* Row 2: On mobile = subheading + search same line; on desktop = search + streak + friends + badges */}
+              {/* Row 2: Desktop = search + streak + friends + badges; Mobile = no search, just streak + friends + badges */}
               <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 pt-4 border-t border-stone-200/60 dark:border-stone-600/40">
-                {/* Mobile: subheading + search on same line; Desktop: search in slot below */}
-                <div className="sm:hidden flex items-center gap-3 w-full">
-                  <span className="text-stone-600 dark:text-stone-400 text-sm flex-shrink-0">
-                    {mode === 'focus_mode' ? 'Block distractions' : mode === 'quiz' ? 'Study from notes' : mode === 'citations' ? 'Academic sources' : 'Essay feedback'}
-                  </span>
-                  <div className="relative flex-1 min-w-0">
-                    <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400 dark:text-stone-500 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                    <input
-                      type="text"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      placeholder="Search..."
-                      className="w-full pl-10 pr-10 py-2.5 bg-white/90 dark:bg-stone-700/70 border border-stone-200/80 dark:border-stone-600/60 rounded-xl text-sm text-stone-800 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500 outline-none focus:border-rose-300 dark:focus:border-rose-500/60 transition-all"
-                    />
-                    {searchQuery && (
-                      <button onClick={() => setSearchQuery('')} className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 rounded">
-                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-                      </button>
-                    )}
-                  </div>
-                </div>
                 <div className="hidden sm:block relative flex-1 min-w-0 sm:max-w-[400px] sm:flex-shrink-0">
                   <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400 dark:text-stone-500 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -2121,10 +2110,10 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                       'Professor-style feedback on structure, clarity, citations and tone in under 60 seconds'
                     )}
                   </p>
-                  <div className="relative grid grid-cols-2 sm:flex sm:flex-wrap justify-center gap-2 sm:gap-6 mb-6 sm:mb-8">
+                  <div className="relative sm:hidden grid grid-cols-2 justify-center gap-2 mb-6 sm:mb-8">
                     {(mode === 'citations' ? ['APA, MLA & Chicago', 'Peer-reviewed sources', 'Filter by year', 'Export ready'] : ['Quick structure analysis', 'Detailed annotations', 'Grade-level rubric', 'Improvement suggestions']).map((f, i) => (
-                      <span key={i} className="flex items-center gap-2.5 text-stone-600 dark:text-stone-400 text-sm sm:text-base">
-                        <span className="hidden sm:flex flex-shrink-0 w-5 h-5 rounded-full bg-emerald-500/15 items-center justify-center">
+                      <span key={i} className="flex items-center gap-2.5 text-stone-600 dark:text-stone-400 text-sm">
+                        <span className="flex-shrink-0 w-5 h-5 rounded-full bg-emerald-500/15 flex items-center justify-center">
                           <svg className="w-3 h-3 text-emerald-600 dark:text-emerald-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
                         </span>
                         {f}
@@ -2912,10 +2901,10 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                   <p className="relative text-stone-600 dark:text-stone-300 text-sm sm:text-lg text-center mb-6 sm:mb-8 max-w-xl mx-auto leading-relaxed">
                     Lesson, flashcards, quiz, crossword & Crater Blast — all from one paste
                   </p>
-                  <div className="relative grid grid-cols-2 sm:flex sm:flex-wrap justify-center gap-2 sm:gap-6 mb-6 sm:mb-8">
+                  <div className="relative sm:hidden grid grid-cols-2 justify-center gap-2 mb-6 sm:mb-8">
                     {['Lesson', 'Flashcards', 'Quiz', 'Crossword', 'Crater Blast'].map((f) => (
-                      <span key={f} className="flex items-center gap-2.5 text-stone-600 dark:text-stone-400 text-sm sm:text-base">
-                        <span className="hidden sm:flex flex-shrink-0 w-5 h-5 rounded-full bg-emerald-500/15 items-center justify-center">
+                      <span key={f} className="flex items-center gap-2.5 text-stone-600 dark:text-stone-400 text-sm">
+                        <span className="flex-shrink-0 w-5 h-5 rounded-full bg-emerald-500/15 flex items-center justify-center">
                           <svg className="w-3 h-3 text-emerald-600 dark:text-emerald-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
                         </span>
                         {f}

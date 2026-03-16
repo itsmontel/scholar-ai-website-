@@ -124,56 +124,56 @@ const FeaturesPage = ({ onNavigate, user, onLogout }: FeaturesPageProps) => {
           {/* More Tools */}
           <div className="pt-8 border-t border-stone-200/60 dark:border-stone-600/40">
             <h3 className="text-lg font-bold text-stone-700 dark:text-stone-300 mb-6">More tools</h3>
-            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6 min-w-0">
             {/* Document Library */}
-            <div className="group relative rounded-2xl sm:rounded-3xl overflow-hidden border border-white/60 dark:border-stone-600/50 shadow-xl shadow-stone-900/5 dark:shadow-black/20 backdrop-blur-2xl bg-white/70 dark:bg-stone-800/70 p-6 hover:shadow-2xl hover:border-stone-300/80 dark:hover:border-stone-500/50 transition-all duration-300">
-              <div className="relative flex items-center gap-4 mb-4">
-                <div className="w-12 h-12 rounded-xl bg-stone-100 dark:bg-stone-700/80 flex items-center justify-center flex-shrink-0">
-                  <ScholarMascot size={40} animated={false} pose="default" />
+            <div className="group relative rounded-2xl sm:rounded-3xl overflow-hidden border border-white/60 dark:border-stone-600/50 shadow-xl shadow-stone-900/5 dark:shadow-black/20 backdrop-blur-2xl bg-white/70 dark:bg-stone-800/70 p-4 sm:p-6 hover:shadow-2xl hover:border-stone-300/80 dark:hover:border-stone-500/50 transition-all duration-300 min-w-0">
+              <div className="relative flex items-center gap-2 sm:gap-4 mb-2 sm:mb-4 min-w-0">
+                <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-stone-100 dark:bg-stone-700/80 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                  <ScholarMascot size={36} animated={false} pose="default" />
                 </div>
-                <h3 className="font-bold text-stone-800 dark:text-stone-100 text-lg">Document Library</h3>
+                <h3 className="font-bold text-stone-800 dark:text-stone-100 text-sm sm:text-lg truncate min-w-0">Document Library</h3>
               </div>
-              <p className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed">Organize and manage your academic documents with our intuitive library system and cloud storage.</p>
+              <p className="text-xs sm:text-sm text-stone-600 dark:text-stone-400 leading-relaxed line-clamp-3 sm:line-clamp-none">Organize and manage your academic documents with our intuitive library system and cloud storage.</p>
             </div>
 
             {/* AI Humanizer */}
-            <button onClick={() => onNavigate('humanizer')} className="group relative rounded-2xl sm:rounded-3xl overflow-hidden border border-white/60 dark:border-stone-600/50 shadow-xl shadow-stone-900/5 dark:shadow-black/20 backdrop-blur-2xl bg-white/70 dark:bg-stone-800/70 p-6 hover:shadow-2xl hover:border-purple-300/80 dark:hover:border-purple-600/50 transition-all duration-300 text-left">
+            <button onClick={() => onNavigate('humanizer')} className="group relative rounded-2xl sm:rounded-3xl overflow-hidden border border-white/60 dark:border-stone-600/50 shadow-xl shadow-stone-900/5 dark:shadow-black/20 backdrop-blur-2xl bg-white/70 dark:bg-stone-800/70 p-4 sm:p-6 hover:shadow-2xl hover:border-purple-300/80 dark:hover:border-purple-600/50 transition-all duration-300 text-left min-w-0">
               <div className="absolute -inset-1 bg-gradient-to-br from-purple-400/0 to-fuchsia-500/0 group-hover:from-purple-400/10 group-hover:to-fuchsia-500/10 rounded-2xl sm:rounded-3xl blur-xl transition-all duration-300" />
-              <div className="relative flex items-center gap-4 mb-4">
-                <div className="w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-900/50 flex items-center justify-center flex-shrink-0 text-2xl">✨</div>
-                <h3 className="font-bold text-purple-700 dark:text-purple-400 text-lg">AI Humanizer</h3>
+              <div className="relative flex items-center gap-2 sm:gap-4 mb-2 sm:mb-4 min-w-0">
+                <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-purple-100 dark:bg-purple-900/50 flex items-center justify-center flex-shrink-0 text-lg sm:text-2xl">✨</div>
+                <h3 className="font-bold text-purple-700 dark:text-purple-400 text-sm sm:text-lg truncate min-w-0">AI Humanizer</h3>
               </div>
-              <p className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed">Transform ChatGPT, Claude, Gemini text into natural human writing. Bypass AI detectors. 5,000 free words/month.</p>
+              <p className="text-xs sm:text-sm text-stone-600 dark:text-stone-400 leading-relaxed line-clamp-3 sm:line-clamp-none">Transform ChatGPT, Claude, Gemini text into natural human writing. Bypass AI detectors. 5,000 free words/month.</p>
             </button>
 
             {/* Text Summarizer */}
-            <button onClick={() => onNavigate('summarizer')} className="group relative rounded-2xl sm:rounded-3xl overflow-hidden border border-white/60 dark:border-stone-600/50 shadow-xl shadow-stone-900/5 dark:shadow-black/20 backdrop-blur-2xl bg-white/70 dark:bg-stone-800/70 p-6 hover:shadow-2xl hover:border-teal-300/80 dark:hover:border-teal-600/50 transition-all duration-300 text-left">
+            <button onClick={() => onNavigate('summarizer')} className="group relative rounded-2xl sm:rounded-3xl overflow-hidden border border-white/60 dark:border-stone-600/50 shadow-xl shadow-stone-900/5 dark:shadow-black/20 backdrop-blur-2xl bg-white/70 dark:bg-stone-800/70 p-4 sm:p-6 hover:shadow-2xl hover:border-teal-300/80 dark:hover:border-teal-600/50 transition-all duration-300 text-left min-w-0">
               <div className="absolute -inset-1 bg-gradient-to-br from-teal-400/0 to-emerald-500/0 group-hover:from-teal-400/10 group-hover:to-emerald-500/10 rounded-2xl sm:rounded-3xl blur-xl transition-all duration-300" />
-              <div className="relative flex items-center gap-4 mb-4">
-                <div className="w-12 h-12 rounded-xl bg-teal-100 dark:bg-teal-900/50 flex items-center justify-center flex-shrink-0 text-2xl">📝</div>
-                <h3 className="font-bold text-teal-700 dark:text-teal-400 text-lg">Paper Summarizer</h3>
+              <div className="relative flex items-center gap-2 sm:gap-4 mb-2 sm:mb-4 min-w-0">
+                <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-teal-100 dark:bg-teal-900/50 flex items-center justify-center flex-shrink-0 text-lg sm:text-2xl">📝</div>
+                <h3 className="font-bold text-teal-700 dark:text-teal-400 text-sm sm:text-lg truncate min-w-0">Paper Summarizer</h3>
               </div>
-              <p className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed">Condense research papers, articles, and textbooks into key points. Bullet points or paragraphs. 5,000 free words/month.</p>
+              <p className="text-xs sm:text-sm text-stone-600 dark:text-stone-400 leading-relaxed line-clamp-3 sm:line-clamp-none">Condense research papers, articles, and textbooks into key points. Bullet points or paragraphs. 5,000 free words/month.</p>
             </button>
 
             {/* Citation Generator */}
-            <button onClick={() => onNavigate('citation-generator-tool')} className="group relative rounded-2xl sm:rounded-3xl overflow-hidden border border-white/60 dark:border-stone-600/50 shadow-xl shadow-stone-900/5 dark:shadow-black/20 backdrop-blur-2xl bg-white/70 dark:bg-stone-800/70 p-6 hover:shadow-2xl hover:border-sky-300/80 dark:hover:border-sky-600/50 transition-all duration-300 text-left">
+            <button onClick={() => onNavigate('citation-generator-tool')} className="group relative rounded-2xl sm:rounded-3xl overflow-hidden border border-white/60 dark:border-stone-600/50 shadow-xl shadow-stone-900/5 dark:shadow-black/20 backdrop-blur-2xl bg-white/70 dark:bg-stone-800/70 p-4 sm:p-6 hover:shadow-2xl hover:border-sky-300/80 dark:hover:border-sky-600/50 transition-all duration-300 text-left min-w-0">
               <div className="absolute -inset-1 bg-gradient-to-br from-sky-400/0 to-blue-500/0 group-hover:from-sky-400/10 group-hover:to-blue-500/10 rounded-2xl sm:rounded-3xl blur-xl transition-all duration-300" />
-              <div className="relative flex items-center gap-4 mb-4">
-                <div className="w-12 h-12 rounded-xl bg-sky-100 dark:bg-sky-900/50 flex items-center justify-center flex-shrink-0 text-2xl">📋</div>
-                <h3 className="font-bold text-sky-700 dark:text-sky-400 text-lg">Citation Generator</h3>
+              <div className="relative flex items-center gap-2 sm:gap-4 mb-2 sm:mb-4 min-w-0">
+                <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-sky-100 dark:bg-sky-900/50 flex items-center justify-center flex-shrink-0 text-lg sm:text-2xl">📋</div>
+                <h3 className="font-bold text-sky-700 dark:text-sky-400 text-sm sm:text-lg truncate min-w-0">Citation Generator</h3>
               </div>
-              <p className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed">Generate perfectly formatted citations from a URL, book, or journal. APA, MLA, Chicago, Harvard, and more.</p>
+              <p className="text-xs sm:text-sm text-stone-600 dark:text-stone-400 leading-relaxed line-clamp-3 sm:line-clamp-none">Generate perfectly formatted citations from a URL, book, or journal. APA, MLA, Chicago, Harvard, and more.</p>
             </button>
 
             {/* Pomodoro Timer */}
-            <button onClick={() => onNavigate('pomodoro-timer')} className="group relative rounded-2xl sm:rounded-3xl overflow-hidden border border-white/60 dark:border-stone-600/50 shadow-xl shadow-stone-900/5 dark:shadow-black/20 backdrop-blur-2xl bg-white/70 dark:bg-stone-800/70 p-6 hover:shadow-2xl hover:border-emerald-300/80 dark:hover:border-emerald-600/50 transition-all duration-300 text-left">
+            <button onClick={() => onNavigate('pomodoro-timer')} className="group relative rounded-2xl sm:rounded-3xl overflow-hidden border border-white/60 dark:border-stone-600/50 shadow-xl shadow-stone-900/5 dark:shadow-black/20 backdrop-blur-2xl bg-white/70 dark:bg-stone-800/70 p-4 sm:p-6 hover:shadow-2xl hover:border-emerald-300/80 dark:hover:border-emerald-600/50 transition-all duration-300 text-left min-w-0">
               <div className="absolute -inset-1 bg-gradient-to-br from-emerald-400/0 to-teal-500/0 group-hover:from-emerald-400/10 group-hover:to-teal-500/10 rounded-2xl sm:rounded-3xl blur-xl transition-all duration-300" />
-              <div className="relative flex items-center gap-4 mb-4">
-                <div className="w-12 h-12 rounded-xl bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center flex-shrink-0 text-2xl">⏱️</div>
-                <h3 className="font-bold text-emerald-700 dark:text-emerald-400 text-lg">Pomodoro Timer</h3>
+              <div className="relative flex items-center gap-2 sm:gap-4 mb-2 sm:mb-4 min-w-0">
+                <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center flex-shrink-0 text-lg sm:text-2xl">⏱️</div>
+                <h3 className="font-bold text-emerald-700 dark:text-emerald-400 text-sm sm:text-lg truncate min-w-0">Pomodoro Timer</h3>
               </div>
-              <p className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed">Stay focused with timed study sessions. Work in 25-minute sprints with built-in breaks for better productivity.</p>
+              <p className="text-xs sm:text-sm text-stone-600 dark:text-stone-400 leading-relaxed line-clamp-3 sm:line-clamp-none">Stay focused with timed study sessions. Work in 25-minute sprints with built-in breaks for better productivity.</p>
             </button>
           </div>
           </div>
