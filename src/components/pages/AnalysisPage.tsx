@@ -118,6 +118,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
   const [rubricInputMode, setRubricInputMode] = useState<'paste' | 'upload'>('paste');
   const [isParsingRubric, setIsParsingRubric] = useState(false);
   const [rubricAlignment, setRubricAlignment] = useState<any>(null);
+  const [isTrialEligible, setIsTrialEligible] = useState<boolean>(true);
   const documentRef = useRef<HTMLDivElement>(null);
   const rubricFileInputRef = useRef<HTMLInputElement>(null);
 
@@ -131,6 +132,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
     fetchDocuments();
     fetchAnalysisTypes();
     fetchUserPlan();
+    checkTrialEligibility();
     
     // Check if there's text content from dashboard
     const textContent = localStorage.getItem('textAnalysisContent');
@@ -241,6 +243,23 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
       console.error('💥 Critical error fetching user plan:', error);
       setCurrentPlan('free');
       return 'free';
+    }
+  };
+
+  const checkTrialEligibility = async () => {
+    try {
+      const token = localStorage.getItem('authToken');
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/subscriptions/trial-eligibility`, {
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setIsTrialEligible(data.eligible ?? false);
+      } else {
+        setIsTrialEligible(false);
+      }
+    } catch {
+      setIsTrialEligible(false);
     }
   };
 
@@ -1936,8 +1955,20 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                                   <span>Upgrade Now</span>
                                 </button>
                                 <div className="text-center sm:text-left">
-                                  <div className="text-sm text-gray-500">Starting at $19.99/month</div>
-                                  <div className="text-xs text-gray-400">Cancel anytime</div>
+                                  {isTrialEligible ? (
+                                    <>
+                                      <div className="text-sm text-gray-600">
+                                        Starting at <span className="line-through text-gray-400">$19.99</span>{' '}
+                                        <span className="font-semibold text-emerald-600">$9.99</span>/month
+                                      </div>
+                                      <div className="text-xs text-gray-500">First month $10 off · Then $19.99/mo · Cancel anytime</div>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <div className="text-sm text-gray-500">Starting at $19.99/month</div>
+                                      <div className="text-xs text-gray-400">Cancel anytime</div>
+                                    </>
+                                  )}
                                 </div>
                               </div>
                             </div>
@@ -2206,7 +2237,13 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                       >
                         Upgrade to View Full Analysis
                       </button>
-                      <p className="text-xs text-stone-500 dark:text-stone-500 mt-2">Starting at $19.99/month</p>
+                      <p className="text-xs text-stone-500 dark:text-stone-500 mt-2">
+                        {isTrialEligible ? (
+                          <>Starting at <span className="line-through">$19.99</span> <span className="font-semibold text-emerald-600 dark:text-emerald-400">$9.99</span>/month · First month $10 off · Cancel anytime</>
+                        ) : (
+                          <>Starting at $19.99/month · Cancel anytime</>
+                        )}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -2387,7 +2424,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
       {showAnalysisPopup && (
         <AnalysisAnimation
           isPopup={true}
-          text="AI is analyzing your document"
+          variant="analyze"
           isComplete={analysisComplete}
           onComplete={() => {
             setShowAnalysisPopup(false);

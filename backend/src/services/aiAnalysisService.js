@@ -19,6 +19,17 @@ class AIAnalysisService {
   }
 
   /**
+   * Get slide count for lesson generation based on word count.
+   * < 1000 words: 6 slides | 1000-2000: 6-8 | 2000-5000: 8-10 | 5000+: 10+ (capped at 25)
+   */
+  getSlideCountForWordCount(wordCount) {
+    if (wordCount < 1000) return 6;
+    if (wordCount < 2000) return 6 + Math.min(2, Math.floor((wordCount - 1000) / 500));
+    if (wordCount < 5000) return 8 + Math.min(2, Math.floor((wordCount - 2000) / 1500));
+    return Math.min(25, 10 + Math.floor((wordCount - 5000) / 1000));
+  }
+
+  /**
    * Search for relevant citations based on a research topic or question
    * @param {string} researchTopic - The research topic or essay question
    * @param {string} citationStyle - Citation style (APA, Harvard, etc.)
@@ -1536,6 +1547,55 @@ CRITICAL REQUIREMENTS:
       }
     }
     
+    // STEP 2: Free users - ensure at least 1 concern (red) in first 50% of document for conversion
+    if (userPlan === 'free') {
+      const contentLength = content.length;
+      const firstHalfEnd = Math.floor(contentLength * 0.5);
+      const concernsInFirstHalf = finalAnnotations.filter(a => a.type === 'concern' && a.startIndex < firstHalfEnd);
+
+      if (concernsInFirstHalf.length === 0) {
+        // Try to convert an 'improve' in the first half to 'concern'
+        const improveInFirstHalf = finalAnnotations.find(a => a.type === 'improve' && a.startIndex < firstHalfEnd);
+        if (improveInFirstHalf) {
+          improveInFirstHalf.type = 'concern';
+          improveInFirstHalf.comment = improveInFirstHalf.comment || 'This section needs attention to strengthen your argument.';
+          improveInFirstHalf.suggestion = improveInFirstHalf.suggestion || 'Consider revising this section to improve clarity and provide stronger support.';
+          console.log(`🔄 Free user: Converted 1 improve → concern in first 50% for conversion`);
+        } else {
+          // Add a new concern from an unused sentence in the first half
+          const firstHalfContent = content.substring(0, firstHalfEnd);
+          const firstHalfSentences = firstHalfContent.split(/[.!?]+/).filter(s => s.trim().length > 20);
+          for (const sent of firstHalfSentences) {
+            const trimmed = sent.trim();
+            const startIndex = content.indexOf(trimmed);
+            if (startIndex !== -1 && startIndex < firstHalfEnd && !usedTexts.has(trimmed.toLowerCase())) {
+              const overlap = finalAnnotations.some(a => {
+                const overlapStart = Math.max(startIndex, a.startIndex);
+                const overlapEnd = Math.min(startIndex + trimmed.length, a.endIndex);
+                return overlapEnd - overlapStart > (trimmed.length * 0.2);
+              });
+              if (!overlap) {
+                const nextId = Math.max(0, ...finalAnnotations.map(a => parseInt(a.id, 10) || 0)) + 1;
+                usedTexts.add(trimmed.toLowerCase());
+                finalAnnotations.push({
+                  id: nextId.toString(),
+                  type: 'concern',
+                  text: trimmed,
+                  startIndex,
+                  endIndex: startIndex + trimmed.length,
+                  comment: 'This section could be strengthened with clearer structure or additional evidence.',
+                  suggestion: 'Consider revising for clarity and adding supporting details to strengthen your argument.'
+                });
+                finalAnnotations.sort((a, b) => a.startIndex - b.startIndex);
+                console.log(`🔄 Free user: Added 1 concern in first 50% for conversion`);
+                break;
+              }
+            }
+          }
+        }
+      }
+    }
+
     const finalStrongCount = finalAnnotations.filter(a => a.type === 'strong').length;
     const finalImproveCount = finalAnnotations.filter(a => a.type === 'improve').length;
     const finalConcernCount = finalAnnotations.filter(a => a.type === 'concern').length;
@@ -4137,8 +4197,8 @@ DO NOT include any text outside the JSON object.`;
     const first10kWords = words.slice(0, 10000).join(' ');
     const wordCount = Math.min(words.length, 10000);
 
-    // Scale slides by word count
-    const slideCount = Math.min(25, Math.max(6, Math.ceil(wordCount / 400)));
+    // Scale slides by word count: <1k=6, 1k-2k=6-8, 2k-5k=8-10, 5k+=10+
+    const slideCount = this.getSlideCountForWordCount(wordCount);
 
     // Three completely different prompts for three unique lessons
     const prompts = {
@@ -4440,7 +4500,7 @@ Rules:
     const words = text.trim().split(/\s+/);
     const first10kWords = words.slice(0, 10000).join(' ');
     const wordCount = Math.min(words.length, 10000);
-    const slideCount = Math.min(25, Math.max(6, Math.ceil(wordCount / 400)));
+    const slideCount = this.getSlideCountForWordCount(wordCount);
 
     const systemPrompt = `You are a FUN, energetic educational content creator who makes learning feel like scrolling through social media. Create a VISUAL CARDS lesson that's colorful, emoji-heavy, and super engaging.
 

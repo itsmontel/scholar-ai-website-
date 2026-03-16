@@ -1690,13 +1690,25 @@ router.post('/save', authenticateToken, validateSaveAnalysis, async (req, res) =
 
 /**
  * @route GET /api/analysis/history
- * @desc Get user's analysis history
+ * @desc Get user's analysis history (Pro/Premium only)
  * @access Private
  */
 router.get('/history', authenticateToken, validateGetAnalysisHistory, async (req, res) => {
   try {
     const userId = req.user.id;
     const limit = parseInt(req.query.limit) || 10;
+
+    const subscriptionDetails = await subscriptionService.getUserSubscriptionDetails(userId);
+    const plan = (subscriptionDetails.plan || 'free').toLowerCase();
+    const isPaid = plan === 'pro' || plan === 'premium';
+
+    if (!isPaid) {
+      return res.status(403).json({
+        success: false,
+        message: 'Analysis history is a Pro feature. Upgrade to access your saved analyses.',
+        upgradeRequired: true
+      });
+    }
 
     const analysisHistory = await aiAnalysisService.getAnalysisHistory(userId, limit);
 

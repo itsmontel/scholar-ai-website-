@@ -12,7 +12,8 @@ interface AnalysisHistoryPageProps {
     email: string;
     firstName?: string;
     lastName?: string;
-    plan: string;
+    plan?: string;
+    subscription_plan?: string;
     subscription_status?: string;
     email_verified?: boolean;
   } | null;
@@ -43,9 +44,16 @@ const AnalysisHistoryPage: React.FC<AnalysisHistoryPageProps> = ({ onNavigate, u
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
   const [copySuccess, setCopySuccess] = useState<boolean>(false);
 
+  const userPlan = (user?.plan || user?.subscription_plan || 'free').toLowerCase();
+  const isPaidUser = userPlan === 'pro' || userPlan === 'premium';
+
   useEffect(() => {
-    fetchAnalysisHistory();
-  }, []);
+    if (isPaidUser) {
+      fetchAnalysisHistory();
+    } else {
+      setIsLoading(false);
+    }
+  }, [isPaidUser]);
 
   useEffect(() => {
     filterAnalyses();
@@ -265,6 +273,39 @@ const AnalysisHistoryPage: React.FC<AnalysisHistoryPageProps> = ({ onNavigate, u
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading analysis history...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isPaidUser) {
+    return (
+      <div className={showHeader ? 'min-h-screen' : ''} style={showHeader ? { background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%)' } : undefined}>
+        {showHeader && <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="analysis-history" />}
+        <div className={showHeader ? 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10' : 'p-6'}>
+          <div className="max-w-md mx-auto text-center py-16">
+            <div className="w-20 h-20 bg-violet-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
+              <svg className="w-10 h-10 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+            </div>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">Analysis History is a Pro Feature</h1>
+            <p className="text-gray-600 mb-8">
+              Upgrade to Pro or Premium to save and access your analysis history. View past analyses, export to PDF, and never lose your feedback.
+            </p>
+            <button
+              onClick={() => onNavigate?.('pricing')}
+              className="px-8 py-3 bg-gradient-to-r from-indigo-500 to-violet-600 text-white rounded-xl font-semibold hover:from-indigo-600 hover:to-violet-700 transition-colors"
+            >
+              Upgrade to Pro
+            </button>
+            <button
+              onClick={() => onNavigate?.('analysis')}
+              className="block mx-auto mt-4 text-gray-500 hover:text-gray-700 text-sm font-medium"
+            >
+              ← Back to Analysis
+            </button>
+          </div>
         </div>
       </div>
     );

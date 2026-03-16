@@ -13,15 +13,16 @@ interface AnalysisAnimationProps {
 }
 
 const analysisSteps = [
-  { text: 'Reading document...', icon: '📄' },
+  { text: 'Reading your document...', icon: '📄' },
   { text: 'Extracting text content...', icon: '📝' },
-  { text: 'Processing language patterns...', icon: '🔍' },
   { text: 'Analyzing document structure...', icon: '📊' },
-  { text: 'Evaluating writing quality...', icon: '✨' },
-  { text: 'Identifying key insights...', icon: '💡' },
-  { text: 'Generating recommendations...', icon: '📋' },
-  { text: 'Creating annotations...', icon: '🏷️' },
-  { text: 'Finalizing analysis...', icon: '✅' }
+  { text: 'Assessing grammar and style...', icon: '✏️' },
+  { text: 'Evaluating argument strength...', icon: '💪' },
+  { text: 'Checking citation formatting...', icon: '📚' },
+  { text: 'Identifying strengths and concerns...', icon: '🔍' },
+  { text: 'Making relevant annotations...', icon: '🏷️' },
+  { text: 'Generating improvement suggestions...', icon: '💡' },
+  { text: 'Finalizing your feedback...', icon: '✅' }
 ];
 
 const citationSteps = [
@@ -106,15 +107,17 @@ const AnalysisAnimation: React.FC<AnalysisAnimationProps> = ({
       return;
     }
 
-    if (progress >= 90 && !isCycling) {
-      setIsCycling(true);
-    }
-
     const interval = setInterval(() => {
       setCurrentStep(prev => (prev + 1) % steps.length);
-    }, 3000);
+    }, 1800);
     return () => clearInterval(interval);
-  }, [isComplete, onComplete, progress, isCycling, steps.length]);
+  }, [isComplete, onComplete, steps.length]);
+
+  useEffect(() => {
+    if (!isComplete && progress >= 90) {
+      setIsCycling(true);
+    }
+  }, [isComplete, progress]);
 
   useEffect(() => {
     if (isComplete) return;

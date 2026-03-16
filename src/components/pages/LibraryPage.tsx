@@ -1098,6 +1098,17 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
                                     {results.result.length > 500 && '...'}
                                   </div>
                                 </div>
+                                {results.result.length > 500 && (
+                                  <button
+                                    onClick={() => onNavigate('analysis-history')}
+                                    className="mt-3 w-full py-2.5 px-4 text-sm font-medium text-indigo-600 hover:text-indigo-700 bg-indigo-50 hover:bg-indigo-100 rounded-xl transition-colors flex items-center justify-center gap-2"
+                                  >
+                                    <span>View full analysis</span>
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                    </svg>
+                                  </button>
+                                )}
                               </div>
                             </div>
                           )}
