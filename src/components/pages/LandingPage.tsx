@@ -186,7 +186,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
     },
     {
       question: "What's the difference between Free, Pro, and Premium?",
-      answer: "Free: 3 documents, 3 analyses, 2 study packs, 5k words, 2 citations per month. Pro: 99 combined analyses, study packs and citations per month, 99,999 words, all citation styles, PDF/Word export, Focus Mode (10 sites). Premium: 10× usage with 999 combined per month, 999,999 words, larger document uploads (1GB), premium AI, Focus Mode unlimited, priority support."
+      answer: "Free: 3 documents, 3 analyses, 2 study packs, 5k words, 2 citations per month. Pro: 99 combined analyses, study packs and citations per month, 99,999 words, all citation styles, PDF/Word export, Focus Mode (20 sites). Premium: 10× usage with 999 combined per month, 999,999 words, larger document uploads (1GB), premium AI, Focus Mode unlimited, priority support."
     },
     {
       question: "How do I add friends and share my study materials?",

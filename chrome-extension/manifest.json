@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "WriteScholar Focus Mode",
-  "version": "1.0.1",
-  "description": "Block distracting sites until you answer study questions. Free: 1 site. Pro: 10 sites. Premium: unlimited.",
+  "version": "1.0.3",
+  "description": "Block distracting sites until you answer study questions. Free: 3 sites. Pro: 20 sites. Premium: unlimited.",
   "permissions": [
     "storage",
     "declarativeNetRequest",

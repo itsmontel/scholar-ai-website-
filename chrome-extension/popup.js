@@ -186,7 +186,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     return;
   }
 
-  // Free: 1 site. Pro: 10 sites. Premium: unlimited (99999). Use API value when available.
+  // Free: 3 sites. Pro: 20 sites. Premium: unlimited (99999). Use API value when available.
   const maxBlocked = config?.maxSites ?? (isPaid ? (plan === 'premium' ? 99999 : 10) : 1);
 
   planBadge.textContent = isPaid ? (plan === 'premium' ? 'Premium' : 'Pro') : 'Free';
@@ -314,7 +314,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           ? blocked.filter(d => d !== p.domain)
           : [...blocked, p.domain];
         if (!isRemoving && next.length > maxBlocked) {
-          showToast(maxBlocked === 1 ? 'Free plan: block 1 site only. Upgrade for more.' : `Max ${maxBlocked} sites`, 'error');
+          showToast(maxBlocked <= 3 ? `Free plan: block up to ${maxBlocked} sites. Upgrade for more.` : `Max ${maxBlocked} sites`, 'error');
           btn.disabled = false;
           return;
         }
@@ -335,7 +335,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       return;
     }
     if (blocked.length >= maxBlocked) {
-      showToast(maxBlocked === 1 ? 'Free plan: block 1 site only. Upgrade for more.' : `Max ${maxBlocked} sites`, 'error');
+      showToast(maxBlocked <= 3 ? `Free plan: block up to ${maxBlocked} sites. Upgrade for more.` : `Max ${maxBlocked} sites`, 'error');
       return;
     }
     customDomainInput.value = '';

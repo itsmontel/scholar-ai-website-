@@ -14,14 +14,14 @@ const PromoBanner: React.FC<PromoBannerProps> = ({ embedded = false }) => {
       <div className="max-w-7xl mx-auto flex items-center justify-center gap-2 sm:gap-4">
         <div className="flex items-center justify-center gap-2 sm:gap-3 text-center flex-wrap">
           <span className="text-xs sm:text-sm font-medium sm:hidden">
-            Hurry! 50% off first month <span className="text-indigo-200/70">•</span> Code: <span className="font-semibold text-indigo-200">OFF50</span>
+            <span className="font-semibold text-indigo-200">$10 off</span> first month <span className="text-indigo-200/70">•</span> Code: <span className="font-semibold text-indigo-200">OFF10</span>
           </span>
           <span className="text-xs sm:text-sm font-medium hidden sm:inline">
-            Hurry! Get <span className="font-semibold text-indigo-200">50% off</span> your first month on any monthly plan
+            Hurry! Get <span className="font-semibold text-indigo-200">$10 off</span> your first month on any plan
           </span>
           <span className="text-indigo-200/70 hidden sm:inline">•</span>
           <span className="bg-white/15 text-white px-2.5 sm:px-3 py-1 rounded-md font-medium text-xs sm:text-sm hidden sm:inline-flex">
-            Code: <span className="text-indigo-200 font-bold">OFF50</span>
+            Code: <span className="text-indigo-200 font-bold">OFF10</span>
           </span>
         </div>
         

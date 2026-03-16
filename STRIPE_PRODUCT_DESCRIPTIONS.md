@@ -9,7 +9,7 @@ Copy these descriptions into your Stripe Dashboard (**Products** → select prod
 **Description to paste into Stripe:**
 
 ```
-AI-powered academic writing assistant for students. Includes: unlimited documents; 99 combined analyses, study packs & citations per month; 99,999 words for Humanizer & Summarizer; all citation styles; PDF/Word export; Focus Mode (10 sites); quiz, flashcards, crossword & Crater Blast; Humanizer & Summarizer (all styles & lengths). Ideal for students who need robust writing support.
+AI-powered academic writing assistant for students. Includes: unlimited documents; 99 combined analyses, study packs & citations per month; 99,999 words for Humanizer & Summarizer; all citation styles; PDF/Word export; Focus Mode (20 sites); quiz, flashcards, crossword & Crater Blast; Humanizer & Summarizer (all styles & lengths). Ideal for students who need robust writing support.
 ```
 
 **Feature list (for Stripe product metadata or marketing copy):**
@@ -17,7 +17,7 @@ AI-powered academic writing assistant for students. Includes: unlimited document
 - 99 combined analyses, study packs & citations/mo
 - 99,999 words Humanizer & Summarizer
 - All citation styles, PDF/Word export
-- Focus Mode (10 sites)
+- Focus Mode (20 sites)
 - Quiz, flashcards, crossword & Crater Blast
 - Summarizer (all lengths & styles)
 

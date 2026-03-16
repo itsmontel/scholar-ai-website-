@@ -80,7 +80,7 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
         '99 combined analyses, study packs & citations/mo',
         '99,999 words Humanizer & Summarizer',
         'All citation styles, PDF/Word export',
-        'Focus Mode (10 sites)',
+        'Focus Mode (20 sites)',
         'Quiz, flashcards, crossword & Crater Blast',
         'Humanizer & Summarizer (all styles & lengths)'
       ],

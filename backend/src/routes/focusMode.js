@@ -46,12 +46,12 @@ const UNLOCK_DURATION_OPTIONS = [
   { value: 24 * 60 * 60 * 1000, label: '24 hours' },
 ];
 
-// Pro: 10 sites, Premium: unlimited, Free: 1 site
+// Pro: 20 sites, Premium: unlimited, Free: 3 sites
 function getMaxSites(plan) {
   const p = (plan || 'free').toLowerCase();
   if (p === 'premium') return 99999;
-  if (p === 'pro') return 10;
-  return 1;
+  if (p === 'pro') return 20;
+  return 3;
 }
 
 function clampSettings(settings) {
@@ -99,7 +99,7 @@ router.get('/settings', authenticateToken, async (req, res) => {
 });
 
 // @route   PUT /api/focus-mode/settings
-// @desc    Update Focus Mode settings (free: 1, pro: 10, premium: unlimited)
+// @desc    Update Focus Mode settings (free: 3, pro: 20, premium: unlimited)
 router.put('/settings', authenticateToken, async (req, res) => {
   try {
     const userId = req.user.id;
@@ -161,7 +161,7 @@ router.put('/settings', authenticateToken, async (req, res) => {
 });
 
 // @route   GET /api/focus-mode/blocked-sites
-// @desc    Get user's blocked sites (free: 1, pro: 10, premium: unlimited)
+// @desc    Get user's blocked sites (free: 3, pro: 20, premium: unlimited)
 router.get('/blocked-sites', authenticateToken, async (req, res) => {
   try {
     const userId = req.user.id;
@@ -191,7 +191,7 @@ router.get('/blocked-sites', authenticateToken, async (req, res) => {
 });
 
 // @route   PUT /api/focus-mode/blocked-sites
-// @desc    Update blocked sites (free: 1, pro: 10, premium: unlimited)
+// @desc    Update blocked sites (free: 3, pro: 20, premium: unlimited)
 router.put('/blocked-sites', authenticateToken, async (req, res) => {
   try {
     const userId = req.user.id;
@@ -405,7 +405,7 @@ router.get('/unlock-quiz', authenticateToken, async (req, res) => {
 
 // @route   GET /api/focus-mode/config
 // @desc    Extension: get blocked domains + plan (requires token for sync)
-// Free: 1, Pro: 10, Premium: unlimited
+// Free: 3, Pro: 20, Premium: unlimited
 router.get('/config', authenticateToken, async (req, res) => {
   try {
     const userId = req.user.id;

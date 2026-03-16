@@ -290,14 +290,14 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
               </button>
               <button 
                 onClick={() => onNavigate?.('signup')} 
-                className="inline-flex items-center justify-center px-4 py-2.5 sm:px-6 sm:py-2.5 text-white text-xs sm:text-sm font-bold rounded-2xl bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-400 hover:to-purple-500 transition-all duration-200 shadow-lg shadow-violet-500/25 hover:shadow-violet-500/30 active:scale-[0.98] whitespace-nowrap shrink-0"
+                className="inline-flex items-center justify-center px-4 py-2.5 sm:px-6 sm:py-2.5 text-white text-xs sm:text-sm font-bold rounded-2xl bg-violet-500 hover:bg-violet-600 dark:bg-violet-500 dark:hover:bg-violet-600 transition-all duration-200 shadow-lg shadow-violet-500/25 hover:shadow-violet-500/30 active:scale-[0.98] whitespace-nowrap shrink-0"
               >
                 Sign up free
               </button>
               <button
                 type="button"
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="mobile-menu-button lg:hidden p-2.5 rounded-2xl bg-white/80 dark:bg-stone-800/80 border border-stone-200/60 dark:border-stone-600/50 hover:bg-stone-100 dark:hover:bg-stone-700/80 transition-colors text-stone-600 dark:text-stone-400 shrink-0 shadow-sm"
+                className="mobile-menu-button lg:hidden p-2.5 rounded-2xl bg-violet-500 hover:bg-violet-600 dark:bg-violet-500 dark:hover:bg-violet-600 transition-colors text-white shrink-0 shadow-lg shadow-violet-500/25"
                 aria-label="Toggle menu"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -380,7 +380,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
                 </button>
                 <button 
                   onClick={() => { onNavigate?.('signup'); setIsMobileMenuOpen(false); }} 
-                  className="block text-center px-4 py-3 text-white text-sm font-bold rounded-2xl bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-400 hover:to-purple-500 shadow-lg shadow-violet-500/25 transition-colors"
+                  className="block text-center px-4 py-3 text-white text-sm font-bold rounded-2xl bg-violet-500 hover:bg-violet-600 dark:bg-violet-500 dark:hover:bg-violet-600 shadow-lg shadow-violet-500/25 transition-colors"
                 >
                   Sign up free
                 </button>
@@ -465,10 +465,10 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
               </button>
             </div>
             
-            {/* Saved Materials - purple gradient */}
+            {/* Saved Materials - solid violet to match Sign up */}
             <button 
               onClick={() => onNavigate?.('quiz-history')}
-              className={`ml-3 px-4 py-2.5 text-sm font-bold rounded-2xl transition-all duration-200 flex items-center gap-1.5 bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-400 hover:to-purple-500 text-white shadow-lg shadow-violet-500/25 hover:shadow-violet-500/30 active:scale-[0.98] ${
+              className={`ml-3 px-4 py-2.5 text-sm font-bold rounded-2xl transition-all duration-200 flex items-center gap-1.5 bg-violet-500 hover:bg-violet-600 dark:bg-violet-500 dark:hover:bg-violet-600 text-white shadow-lg shadow-violet-500/25 hover:shadow-violet-500/30 active:scale-[0.98] ${
                 currentPage === 'quiz-history' ? 'ring-2 ring-violet-400 ring-offset-2 ring-offset-white dark:ring-offset-stone-900' : ''
               }`}
             >
@@ -511,13 +511,13 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
               )}
             </button>*/}
 
-            {/* Mobile menu button */}
+            {/* Mobile menu button - solid violet to match Sign up / Saved Materials */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="mobile-menu-button lg:hidden p-2.5 rounded-2xl bg-white/80 dark:bg-stone-800/80 border border-stone-200/60 dark:border-stone-600/50 hover:bg-stone-100 dark:hover:bg-stone-700/80 transition-colors shadow-sm"
+              className="mobile-menu-button lg:hidden p-2.5 rounded-2xl bg-violet-500 hover:bg-violet-600 dark:bg-violet-500 dark:hover:bg-violet-600 transition-colors text-white shadow-lg shadow-violet-500/25"
               aria-label="Toggle menu"
             >
-              <svg className={`w-5 h-5 text-stone-600 dark:text-stone-400 transition-transform duration-200 ${isMobileMenuOpen ? 'rotate-90' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className={`w-5 h-5 text-white transition-transform duration-200 ${isMobileMenuOpen ? 'rotate-90' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 {isMobileMenuOpen ? (
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 ) : (
@@ -748,10 +748,10 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
               </button>
             ))}
             
-            {/* Saved Materials - purple gradient */}
+            {/* Saved Materials - solid violet to match Sign up */}
             <button
               onClick={() => { onNavigate?.('quiz-history'); setIsMobileMenuOpen(false); }}
-              className={`w-full text-left px-4 py-3 rounded-2xl text-sm font-bold transition-all duration-200 flex items-center justify-between bg-gradient-to-r from-violet-500 to-purple-600 text-white shadow-lg shadow-violet-500/25 ${
+              className={`w-full text-left px-4 py-3 rounded-2xl text-sm font-bold transition-all duration-200 flex items-center justify-between bg-violet-500 hover:bg-violet-600 dark:bg-violet-500 dark:hover:bg-violet-600 text-white shadow-lg shadow-violet-500/25 ${
                 currentPage === 'quiz-history' ? 'ring-2 ring-violet-400 ring-offset-2 ring-offset-white dark:ring-offset-stone-900' : ''
               }`}
             >

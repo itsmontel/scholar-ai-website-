@@ -7,7 +7,7 @@ Use this copy when editing your extension's listing in the Chrome Web Store dash
 ## Short Description (max 132 characters)
 
 **Option A:**  
-Block distracting sites until you answer study questions. Earn your screen time. Free: 1 site. Pro: 10.
+Block distracting sites until you answer study questions. Earn your screen time. Free: 3 sites. Pro: 20.
 
 **Option B:**  
 Block sites until you study. Pass a quiz from your notes to unlock. Free to try.
@@ -30,8 +30,8 @@ HOW IT WORKS
 This ties screen time to learning. Every minute of browsing is earned by studying first. Create quizzes and flashcards from your notes at WriteScholar, then use Focus Mode to gate access to distracting sites.
 
 PLANS
-• Free: Block 1 site
-• Pro: Block up to 10 sites
+• Free: Block up to 3 sites
+• Pro: Block up to 20 sites
 • Premium: Unlimited sites
 
 Requires a WriteScholar account. Install the extension, log in at writescholar.com, and add your blocked sites.

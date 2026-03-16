@@ -188,7 +188,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
         '99 combined analyses, study packs & citations/mo',
         '99,999 words Humanizer & Summarizer',
         'All citation styles, PDF/Word export',
-        'Focus Mode (10 sites)',
+        'Focus Mode (20 sites)',
         'Quiz, flashcards, crossword & Crater Blast',
         'Humanizer & Summarizer (all styles & lengths)'
       ],
@@ -238,7 +238,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
     },
     {
       question: "What's the difference between Pro and Premium?",
-      answer: "Pro: 99 combined actions (analyses, study packs & citations)/mo, 99,999 words for Humanizer & Summarizer, all citation styles, Focus Mode (10 sites). Premium gives you 10× the usage: 999 combined actions/mo, 999,999 words, plus unlimited Focus Mode, premium AI model, advanced analysis, and priority support."
+      answer: "Pro: 99 combined actions (analyses, study packs & citations)/mo, 99,999 words for Humanizer & Summarizer, all citation styles, Focus Mode (20 sites). Premium gives you 10× the usage: 999 combined actions/mo, 999,999 words, plus unlimited Focus Mode, premium AI model, advanced analysis, and priority support."
     },
     {
       question: "Can I change my plan after subscribing?",

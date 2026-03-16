@@ -11,7 +11,7 @@ const FOCUS_MODE_FAQ_SCHEMA = {
     { '@type': 'Question', name: 'Does Focus Mode work on mobile?', acceptedAnswer: { '@type': 'Answer', text: 'Focus Mode uses a Chrome extension, so it works in Chrome on desktop. Mobile browsers don\'t support extensions yet. Many students find blocking on desktop alone significantly reduces distraction.' } },
     { '@type': 'Question', name: 'What if I need YouTube for a lecture?', acceptedAnswer: { '@type': 'Answer', text: 'You can temporarily pause Focus Mode or add exceptions. The goal is to reduce mindless scrolling, not block legitimate study resources.' } },
     { '@type': 'Question', name: 'How many questions do I need to answer to unlock?', acceptedAnswer: { '@type': 'Answer', text: 'You can customize the threshold and number of questions in your settings. By default it\'s 4 out of 5 correct. The quiz pulls questions from your own study material.' } },
-    { '@type': 'Question', name: 'Which sites can I block?', acceptedAnswer: { '@type': 'Answer', text: 'Popular presets include YouTube, TikTok, Instagram, Reddit, and Twitter. You can also add any custom domain. Pro: 10 sites. Premium: unlimited.' } },
+    { '@type': 'Question', name: 'Which sites can I block?', acceptedAnswer: { '@type': 'Answer', text: 'Popular presets include YouTube, TikTok, Instagram, Reddit, and Twitter. You can also add any custom domain. Pro: 20 sites. Premium: unlimited.' } },
   ],
 };
 
@@ -48,7 +48,7 @@ const FocusModePage = ({ onNavigate, user, onLogout }: FocusModePageProps) => {
     {
       num: 1,
       title: 'Pick Sites to Block',
-      desc: 'Choose the sites that steal your focus — YouTube, TikTok, Instagram, Reddit, or any custom domain. Pro: 10 sites. Premium: unlimited.',
+      desc: 'Choose the sites that steal your focus — YouTube, TikTok, Instagram, Reddit, or any custom domain. Pro: 20 sites. Premium: unlimited.',
       icon: '🚫',
       gradient: 'from-orange-500 to-amber-600',
       shadow: 'shadow-orange-500/25',
@@ -101,7 +101,7 @@ const FocusModePage = ({ onNavigate, user, onLogout }: FocusModePageProps) => {
     },
     {
       title: 'Block Any Site',
-      desc: 'Popular presets plus add any custom domain. Pro: 10 sites. Premium: unlimited.',
+      desc: 'Popular presets plus add any custom domain. Pro: 20 sites. Premium: unlimited.',
       icon: (
         <svg className="w-6 h-6 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
@@ -368,7 +368,7 @@ const FocusModePage = ({ onNavigate, user, onLogout }: FocusModePageProps) => {
               { q: 'Does Focus Mode work on mobile?', a: 'Focus Mode uses a Chrome extension, so it works in Chrome on desktop. Mobile browsers don\'t support extensions yet. Many students find blocking on desktop alone significantly reduces distraction.' },
               { q: 'What if I need YouTube for a lecture?', a: 'You can temporarily pause Focus Mode or add exceptions. The goal is to reduce mindless scrolling, not block legitimate study resources.' },
               { q: 'How many questions do I need to answer to unlock?', a: 'You can customize the threshold and number of questions in your settings. By default it\'s 4 out of 5 correct. The quiz pulls questions from your own study material.' },
-              { q: 'Which sites can I block?', a: 'Popular presets include YouTube, TikTok, Instagram, Reddit, and Twitter. You can also add any custom domain. Pro: 10 sites. Premium: unlimited.' },
+              { q: 'Which sites can I block?', a: 'Popular presets include YouTube, TikTok, Instagram, Reddit, and Twitter. You can also add any custom domain. Pro: 20 sites. Premium: unlimited.' },
             ].map((faq, i) => (
               <div key={i} className="bg-white dark:bg-stone-800 rounded-2xl p-6 border border-stone-200 dark:border-stone-700">
                 <h3 className="font-bold text-stone-800 dark:text-stone-100 text-lg mb-3">{faq.q}</h3>
@@ -389,7 +389,7 @@ const FocusModePage = ({ onNavigate, user, onLogout }: FocusModePageProps) => {
             Ready to earn your screen time?
           </h2>
           <p className="text-violet-200/90 mb-10 max-w-xl mx-auto">
-            Pro: 10 blocked sites. Premium: unlimited. Install the Chrome extension, add your study material, and start blocking distractions.
+            Pro: 20 blocked sites. Premium: unlimited. Install the Chrome extension, add your study material, and start blocking distractions.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             {user ? (
@@ -410,13 +410,13 @@ const FocusModePage = ({ onNavigate, user, onLogout }: FocusModePageProps) => {
                       onClick={() => onNavigate('account')}
                       className="px-6 py-3 border-2 border-white/40 text-white font-semibold rounded-2xl hover:bg-white/10 transition-colors"
                     >
-                      Try with free plan (1 site)
+                      Try with free plan (3 sites)
                     </button>
                     <button
                       onClick={() => onNavigate('pricing')}
                       className="inline-flex items-center gap-2 px-8 py-4 bg-white text-violet-900 font-bold rounded-2xl hover:bg-violet-50 hover:scale-105 active:scale-95 shadow-2xl shadow-black/25 transition-all"
                     >
-                      Upgrade to Pro (10 sites)
+                      Upgrade to Pro (20 sites)
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                       </svg>
@@ -453,7 +453,7 @@ const FocusModePage = ({ onNavigate, user, onLogout }: FocusModePageProps) => {
             </a>
           </div>
           <p className="mt-8 text-violet-300/80 text-sm">
-            Pro: 10 sites • Premium: unlimited • Chrome extension required
+            Pro: 20 sites • Premium: unlimited • Chrome extension required
           </p>
         </div>
       </section>

@@ -48,7 +48,7 @@ export default function FocusModeSettingsSection({ onBack, embedded = false, isP
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
-  const [maxSites, setMaxSites] = useState(isPaidUser ? 20 : 1);
+  const [maxSites, setMaxSites] = useState(isPaidUser ? 20 : 3);
 
   useEffect(() => {
     const token = localStorage.getItem('authToken');
@@ -136,12 +136,12 @@ export default function FocusModeSettingsSection({ onBack, embedded = false, isP
       return;
     }
     if (maxSites < 99999 && blockedDomains.length >= maxSites && toAdd.length > 0) {
-      setAddError(maxSites === 1 ? 'Free plan: block 1 site only. Upgrade for more.' : `Maximum ${maxSites} sites. Remove one to add another. Upgrade to Premium for unlimited.`);
+      setAddError(maxSites <= 3 ? `Free plan: block up to ${maxSites} sites. Upgrade for more.` : `Maximum ${maxSites} sites. Remove one to add another. Upgrade to Premium for unlimited.`);
       return;
     }
     const unlimited = maxSites >= 99999;
     if (!unlimited && blockedDomains.length + toAdd.length > maxSites) {
-      setAddError(maxSites === 1 ? 'Free plan: block 1 site only. Upgrade for more.' : `Maximum ${maxSites} sites allowed. Upgrade to Premium for unlimited.`);
+      setAddError(maxSites <= 3 ? `Free plan: block up to ${maxSites} sites. Upgrade for more.` : `Maximum ${maxSites} sites allowed. Upgrade to Premium for unlimited.`);
       return;
     }
     const next = [...blockedDomains, ...toAdd].slice(0, maxSites);
@@ -267,8 +267,8 @@ export default function FocusModeSettingsSection({ onBack, embedded = false, isP
                     <h2 className="text-xl sm:text-2xl font-extrabold text-stone-800 dark:text-stone-100 mb-1">Focus Mode</h2>
                     <p className="text-stone-600 dark:text-stone-400 text-sm leading-relaxed mb-3">
                       {isPaidUser
-                        ? 'Block distracting sites until you answer study questions. Pro: 10 sites. Premium: unlimited.'
-                        : 'Block 1 site until you answer study questions. Upgrade for more.'}
+                        ? 'Block distracting sites until you answer study questions. Pro: 20 sites. Premium: unlimited.'
+                        : `Block up to ${maxSites} sites until you answer study questions. Upgrade for more.`}
                     </p>
                     <a
                       href={FOCUS_MODE_CHROME_EXTENSION_URL}
@@ -354,7 +354,7 @@ export default function FocusModeSettingsSection({ onBack, embedded = false, isP
                 Blocked: {blockedDomains.join(', ')}
                 {!isPaidUser && (
                   <span>
-                    {' '}(Free: 1 site. Pro: 10. Premium: unlimited —{' '}
+                    {' '}(Free: 3 sites. Pro: 20. Premium: unlimited —{' '}
                     {onNavigate ? (
                       <button
                         type="button"
@@ -447,5 +447,8 @@ export default function FocusModeSettingsSection({ onBack, embedded = false, isP
         </div>
       </div>
     </div>
+  );
+}
+  </div>
   );
 }
