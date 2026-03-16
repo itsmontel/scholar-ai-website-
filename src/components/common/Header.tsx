@@ -186,8 +186,8 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
   // ── Logged-out (public) header - matches landing page nav ───────────────────
   if (!user) {
     const publicNavItems = [
-      { id: 'focus-mode', label: 'Focus Mode' },
-      { id: 'why-students-choose', label: 'Why Students Choose' },
+      { id: 'features', label: 'Features' },
+      { id: 'pricing', label: 'Pricing' },
       { id: 'blog', label: 'Blog' },
       { id: 'about', label: 'About' },
     ];
@@ -203,7 +203,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
           onNavigate?.(match.page);
         }
       } else {
-        onNavigate?.('focus-mode');
+        onNavigate?.('features');
       }
       setHeaderSearchQuery('');
       setHeaderSearchOpen(false);
@@ -219,42 +219,45 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
       setHeaderSearchOpen(false);
       setIsMobileMenuOpen(false);
     };
+    const publicNavActiveCls = 'bg-white dark:bg-stone-700 text-violet-600 dark:text-violet-400 shadow-sm shadow-violet-500/10';
+    const publicNavInactiveCls = 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-200/50 dark:hover:bg-stone-700/50';
+
     return (
-      <header className={`${sticky ? 'sticky top-0' : ''} left-0 right-0 z-[100] transition-all duration-300 ${
+      <header className={`${sticky ? 'sticky top-0' : ''} left-0 right-0 z-[100] transition-all duration-300 border-b ${
         isScrolled 
-          ? 'bg-white dark:bg-stone-900 border-b border-stone-200/50 dark:border-stone-700/50 shadow-sm' 
-          : 'bg-white dark:bg-stone-900 border-b border-stone-200/30 dark:border-stone-700/30'
+          ? 'bg-white/95 dark:bg-stone-900/95 backdrop-blur-xl shadow-sm border-stone-200/50 dark:border-stone-700/50' 
+          : 'bg-white/80 dark:bg-stone-900/80 backdrop-blur-xl border-stone-200/40 dark:border-stone-700/40'
       }`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:pl-4 lg:pr-8">
-          <div className="flex items-center justify-between h-16 sm:h-[4.5rem]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16 sm:h-20">
             {/* Logo */}
             <button
               onClick={() => onNavigate?.('landing')}
-              className="flex items-center gap-2 sm:gap-2.5 group min-w-0 shrink lg:-ml-4"
+              className="flex items-center gap-2.5 group min-w-0 shrink"
             >
-              <div className="relative w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center group-hover:scale-105 transition-transform duration-300 shrink-0 overflow-hidden">
+              <div className="relative w-12 h-12 flex items-center justify-center group-hover:scale-105 transition-transform duration-300 shrink-0 overflow-hidden">
                 <img src="/mascot.png" alt="WriteScholar mascot" className="w-full h-full object-contain drop-shadow-lg" fetchPriority="high" width="40" height="40" />
               </div>
-              <span className="text-base sm:text-xl font-extrabold tracking-tight text-stone-800 dark:text-stone-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors duration-300 truncate max-w-[110px] sm:max-w-none">
+              <span className="text-base sm:text-xl font-extrabold tracking-tight text-stone-800 dark:text-stone-100 group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors duration-300 truncate max-w-[140px] sm:max-w-none">
                 WriteScholar
               </span>
             </button>
 
             {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center space-x-1 bg-stone-100/50 dark:bg-stone-800/50 backdrop-blur-sm p-1 rounded-full border border-stone-200/50 dark:border-stone-700/50">
-              {publicNavItems.map(({ id, label }) => (
-                <button
-                  key={id}
-                  onClick={() => onNavigate?.(id)}
-                  className={`px-4 py-2 text-sm rounded-full transition-all duration-300 font-medium ${
-                    currentPage === id 
-                      ? 'text-indigo-600 dark:text-indigo-400 bg-white dark:bg-stone-700 shadow-sm' 
-                      : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-200/50 dark:hover:bg-stone-700/50'
-                  }`}
-                >
-                  {label}
-                </button>
-              ))}
+            <nav className="hidden lg:flex items-center">
+              <div className="flex items-center bg-stone-100/50 dark:bg-stone-800/50 backdrop-blur-sm p-1.5 rounded-2xl border border-stone-200/60 dark:border-stone-600/50 shadow-inner">
+                {publicNavItems.map(({ id, label }) => (
+                  <button
+                    key={id}
+                    onClick={() => onNavigate?.(id)}
+                    className={`px-4 py-2.5 text-sm font-semibold rounded-xl transition-all duration-200 ${
+                      currentPage === id ? publicNavActiveCls : publicNavInactiveCls
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
             </nav>
 
             {/* Desktop Search - same line */}
@@ -270,7 +273,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
                   onChange={(e) => setHeaderSearchQuery(e.target.value)}
                   onKeyDown={(e) => e.key === 'Escape' && setHeaderSearchOpen(false)}
                   placeholder="Find tools, features..."
-                  className="w-full pl-9 pr-3 py-2 rounded-lg border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 text-stone-800 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 dark:focus:border-indigo-500 text-sm"
+                  className="w-full pl-9 pr-3 py-2.5 rounded-2xl border border-stone-200/80 dark:border-stone-600/80 bg-white/90 dark:bg-stone-800/90 text-stone-800 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500 focus:outline-none focus:ring-2 focus:ring-violet-400/30 focus:border-violet-400 dark:focus:border-violet-500 text-sm shadow-sm transition-all"
                   aria-label="Search WriteScholar"
                   autoComplete="off"
                 />
@@ -281,20 +284,20 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
             <div className="flex items-center gap-2 sm:gap-3 min-w-0 shrink-0">
               <button 
                 onClick={() => onNavigate?.('login')} 
-                className="hidden sm:inline-flex px-4 py-2 text-sm font-medium text-stone-600 dark:text-stone-400 rounded-full border border-stone-200/50 dark:border-stone-700/50 bg-stone-100/50 dark:bg-stone-800/50 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-200/50 dark:hover:bg-stone-700/50 transition-all duration-300 shrink-0"
+                className="hidden sm:inline-flex px-4 py-2.5 text-sm font-semibold text-stone-600 dark:text-stone-400 rounded-2xl border border-stone-200/70 dark:border-stone-600/50 bg-white/80 dark:bg-stone-800/80 hover:bg-stone-100 dark:hover:bg-stone-700/80 hover:border-stone-300 dark:hover:border-stone-500 transition-all duration-200 shrink-0 shadow-sm"
               >
                 Log in
               </button>
               <button 
                 onClick={() => onNavigate?.('signup')} 
-                className="inline-flex items-center justify-center px-4 py-2 sm:px-6 sm:py-2.5 text-white text-xs sm:text-sm font-bold rounded-full bg-violet-500 hover:bg-violet-600 hover:scale-105 active:scale-95 transition-all duration-300 shadow-lg shadow-violet-500/25 whitespace-nowrap shrink-0"
+                className="inline-flex items-center justify-center px-4 py-2.5 sm:px-6 sm:py-2.5 text-white text-xs sm:text-sm font-bold rounded-2xl bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-400 hover:to-purple-500 transition-all duration-200 shadow-lg shadow-violet-500/25 hover:shadow-violet-500/30 active:scale-[0.98] whitespace-nowrap shrink-0"
               >
                 Sign up free
               </button>
               <button
                 type="button"
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="mobile-menu-button md:hidden p-2 rounded-full hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors text-stone-600 dark:text-stone-400 shrink-0"
+                className="mobile-menu-button lg:hidden p-2.5 rounded-2xl bg-white/80 dark:bg-stone-800/80 border border-stone-200/60 dark:border-stone-600/50 hover:bg-stone-100 dark:hover:bg-stone-700/80 transition-colors text-stone-600 dark:text-stone-400 shrink-0 shadow-sm"
                 aria-label="Toggle menu"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -334,7 +337,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
         )}
         {/* Mobile menu */}
         {isMobileMenuOpen && (
-          <div className="md:hidden border-t border-stone-200/50 dark:border-stone-700/50 bg-white/95 dark:bg-stone-900/95 backdrop-blur-xl">
+          <div className="lg:hidden border-t border-stone-200/50 dark:border-stone-700/50 bg-white/95 dark:bg-stone-900/95 backdrop-blur-xl">
             <div className="px-4 py-3">
               <form onSubmit={handleHeaderSearchSubmit} className="mb-3">
                 <div className="header-search-container relative">
@@ -348,7 +351,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
                     onChange={(e) => setHeaderSearchQuery(e.target.value)}
                     onKeyDown={(e) => e.key === 'Escape' && setHeaderSearchOpen(false)}
                     placeholder="Find tools, features..."
-                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 text-stone-800 dark:text-stone-100 placeholder-stone-400 text-sm"
+                    className="w-full pl-10 pr-4 py-2.5 rounded-2xl border border-stone-200/80 dark:border-stone-600/80 bg-white dark:bg-stone-800 text-stone-800 dark:text-stone-100 placeholder-stone-400 text-sm focus:ring-2 focus:ring-violet-400/30 focus:border-violet-400 dark:focus:border-violet-500"
                     aria-label="Search WriteScholar"
                     autoComplete="off"
                   />
@@ -359,10 +362,10 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
                 <button
                   key={id}
                   onClick={() => { onNavigate?.(id); setIsMobileMenuOpen(false); }}
-                  className={`block w-full text-left px-4 py-3 text-sm font-medium rounded-xl transition-all ${
+                  className={`block w-full text-left px-4 py-3 text-sm font-semibold rounded-2xl transition-all ${
                     currentPage === id 
-                      ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30' 
-                      : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800'
+                      ? 'text-violet-600 dark:text-violet-400 bg-violet-50 dark:bg-violet-900/30' 
+                      : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-800'
                   }`}
                 >
                   {label}
@@ -371,13 +374,13 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
               <div className="pt-2 pb-1 flex flex-col gap-2">
                 <button 
                   onClick={() => { onNavigate?.('login'); setIsMobileMenuOpen(false); }} 
-                  className="block text-center px-4 py-3 text-sm font-medium text-stone-600 dark:text-stone-400 rounded-full border border-stone-200/50 dark:border-stone-700/50 bg-stone-100/50 dark:bg-stone-800/50 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-200/50 dark:hover:bg-stone-700/50 transition-all"
+                  className="block text-center px-4 py-3 text-sm font-semibold text-stone-600 dark:text-stone-400 rounded-2xl border border-stone-200/60 dark:border-stone-600/50 bg-white/80 dark:bg-stone-800/80 hover:bg-stone-100 dark:hover:bg-stone-700/80 transition-all"
                 >
                   Log in
                 </button>
                 <button 
                   onClick={() => { onNavigate?.('signup'); setIsMobileMenuOpen(false); }} 
-                  className="block text-center px-4 py-3 text-white text-sm font-bold rounded-xl bg-violet-500 hover:bg-violet-600 shadow-lg shadow-violet-500/25 transition-colors"
+                  className="block text-center px-4 py-3 text-white text-sm font-bold rounded-2xl bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-400 hover:to-purple-500 shadow-lg shadow-violet-500/25 transition-colors"
                 >
                   Sign up free
                 </button>
@@ -393,11 +396,14 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
   }
 
   // ── Logged-in header ───────────────────────────────────────────────────────
+  const navActiveCls = 'bg-white dark:bg-stone-700 text-violet-600 dark:text-violet-400 shadow-sm shadow-violet-500/10';
+  const navInactiveCls = 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-200/50 dark:hover:bg-stone-700/50';
+
   return (
     <header className={`sticky top-0 left-0 right-0 z-50 transition-all duration-300 border-b ${
       isScrolled 
-        ? 'bg-white/90 dark:bg-stone-900/90 backdrop-blur-xl shadow-sm border-stone-200/50 dark:border-stone-700/50' 
-        : 'bg-white/70 dark:bg-stone-900/70 backdrop-blur-md border-stone-200/30 dark:border-stone-700/30'
+        ? 'bg-white/95 dark:bg-stone-900/95 backdrop-blur-xl shadow-sm border-stone-200/50 dark:border-stone-700/50' 
+        : 'bg-white/80 dark:bg-stone-900/80 backdrop-blur-xl border-stone-200/40 dark:border-stone-700/40'
     }`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 sm:h-20">
@@ -409,84 +415,74 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
             <div className="relative w-12 h-12 flex items-center justify-center group-hover:scale-105 transition-transform duration-300 overflow-hidden">
               <img src="/mascot.png" alt="WriteScholar mascot" className="w-full h-full object-contain drop-shadow-lg" fetchPriority="high" width="40" height="40" />
             </div>
-            <span className="text-base sm:text-xl font-extrabold tracking-tight text-stone-800 dark:text-stone-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors duration-300 truncate max-w-[140px] sm:max-w-none">
+            <span className="text-base sm:text-xl font-extrabold tracking-tight text-stone-800 dark:text-stone-100 group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors duration-300 truncate max-w-[140px] sm:max-w-none">
               WriteScholar
             </span>
           </button>
 
           {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center">
-            <div className="flex items-center bg-stone-100/50 dark:bg-stone-800/50 backdrop-blur-sm p-1 rounded-full border border-stone-200/50 dark:border-stone-700/50">
+            <div className="flex items-center bg-stone-100/50 dark:bg-stone-800/50 backdrop-blur-sm p-1.5 rounded-2xl border border-stone-200/60 dark:border-stone-600/50 shadow-inner">
               <button 
                 onClick={() => onNavigate?.('dashboard')}
-                className={`px-4 py-2 text-sm font-medium rounded-full transition-all duration-300 ${
-                  currentPage === 'dashboard' 
-                    ? 'bg-white dark:bg-stone-700 text-indigo-600 dark:text-indigo-400 shadow-sm' 
-                    : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-200/50 dark:hover:bg-stone-700/50'
+                className={`px-4 py-2.5 text-sm font-semibold rounded-xl transition-all duration-200 ${
+                  currentPage === 'dashboard' ? navActiveCls : navInactiveCls
                 }`}
               >
                 Dashboard
               </button>
               <button 
                 onClick={() => onNavigate?.('library')}
-                className={`px-4 py-2 text-sm font-medium rounded-full transition-all duration-300 ${
-                  currentPage === 'library' 
-                    ? 'bg-white dark:bg-stone-700 text-indigo-600 dark:text-indigo-400 shadow-sm' 
-                    : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-200/50 dark:hover:bg-stone-700/50'
+                className={`px-4 py-2.5 text-sm font-semibold rounded-xl transition-all duration-200 ${
+                  currentPage === 'library' ? navActiveCls : navInactiveCls
                 }`}
               >
                 Library
               </button>
               <button 
                 onClick={() => onNavigate?.('upload')}
-                className={`px-4 py-2 text-sm font-medium rounded-full transition-all duration-300 ${
-                  currentPage === 'upload' 
-                    ? 'bg-white dark:bg-stone-700 text-indigo-600 dark:text-indigo-400 shadow-sm' 
-                    : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-200/50 dark:hover:bg-stone-700/50'
+                className={`px-4 py-2.5 text-sm font-semibold rounded-xl transition-all duration-200 ${
+                  currentPage === 'upload' ? navActiveCls : navInactiveCls
                 }`}
               >
                 Upload
               </button>
               <button 
                 onClick={() => onNavigate?.('analysis')}
-                className={`px-4 py-2 text-sm font-medium rounded-full transition-all duration-300 ${
-                  currentPage === 'analysis' 
-                    ? 'bg-white dark:bg-stone-700 text-indigo-600 dark:text-indigo-400 shadow-sm' 
-                    : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-200/50 dark:hover:bg-stone-700/50'
+                className={`px-4 py-2.5 text-sm font-semibold rounded-xl transition-all duration-200 ${
+                  currentPage === 'analysis' ? navActiveCls : navInactiveCls
                 }`}
               >
                 AI Analysis
               </button>
               <button 
                 onClick={() => onNavigate?.('citation-history')}
-                className={`px-4 py-2 text-sm font-medium rounded-full transition-all duration-300 ${
-                  currentPage === 'citations' 
-                    ? 'bg-white dark:bg-stone-700 text-indigo-600 dark:text-indigo-400 shadow-sm' 
-                    : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-200/50 dark:hover:bg-stone-700/50'
+                className={`px-4 py-2.5 text-sm font-semibold rounded-xl transition-all duration-200 ${
+                  currentPage === 'citations' ? navActiveCls : navInactiveCls
                 }`}
               >
                 Citations
               </button>
             </div>
             
-            {/* Pro button - separate from pill group */}
+            {/* Saved Materials - purple gradient */}
             <button 
               onClick={() => onNavigate?.('quiz-history')}
-              className={`ml-3 px-4 py-2 text-sm font-bold rounded-full transition-all duration-300 flex items-center gap-1.5 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white shadow-lg shadow-violet-500/25 hover:scale-105 active:scale-95 ${
-                currentPage === 'quiz-history' ? 'ring-2 ring-violet-400 ring-offset-2' : ''
+              className={`ml-3 px-4 py-2.5 text-sm font-bold rounded-2xl transition-all duration-200 flex items-center gap-1.5 bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-400 hover:to-purple-500 text-white shadow-lg shadow-violet-500/25 hover:shadow-violet-500/30 active:scale-[0.98] ${
+                currentPage === 'quiz-history' ? 'ring-2 ring-violet-400 ring-offset-2 ring-offset-white dark:ring-offset-stone-900' : ''
               }`}
             >
               <span>Saved Materials</span>
-              <span className="px-1.5 py-0.5 text-[10px] font-bold bg-white/25 text-white rounded-full">PRO</span>
+              <span className="px-1.5 py-0.5 text-[10px] font-bold bg-white/25 text-white rounded-lg">PRO</span>
             </button>
 
-            {/* Friends button */}
+            {/* Friends button - emerald to match dashboard */}
             <button 
               onClick={() => onNavigate?.('friends')}
-              className={`ml-2 px-4 py-2 text-sm font-medium rounded-full transition-all duration-300 flex items-center gap-1.5 ${
+              className={`ml-2 px-4 py-2.5 text-sm font-semibold rounded-2xl transition-all duration-200 flex items-center gap-1.5 border ${
                 currentPage === 'friends' 
-                  ? 'bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 ring-2 ring-purple-400 ring-offset-2' 
-                  : 'bg-stone-100/80 dark:bg-stone-800/80 text-stone-600 dark:text-stone-400 hover:bg-purple-50 dark:hover:bg-purple-900/30 hover:text-purple-700 dark:hover:text-purple-300'
+                  ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 border-emerald-200/80 dark:border-emerald-700/50' 
+                  : 'bg-white/80 dark:bg-stone-800/80 border-stone-200/70 dark:border-stone-600/50 text-stone-600 dark:text-stone-400 hover:border-emerald-200 dark:hover:border-emerald-700/50 hover:bg-emerald-50/50 dark:hover:bg-emerald-900/20 hover:text-emerald-700 dark:hover:text-emerald-300'
               }`}
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -518,7 +514,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
             {/* Mobile menu button */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="mobile-menu-button lg:hidden p-2.5 rounded-xl bg-stone-100/80 dark:bg-stone-800/80 hover:bg-stone-200/80 dark:hover:bg-stone-700/80 transition-colors"
+              className="mobile-menu-button lg:hidden p-2.5 rounded-2xl bg-white/80 dark:bg-stone-800/80 border border-stone-200/60 dark:border-stone-600/50 hover:bg-stone-100 dark:hover:bg-stone-700/80 transition-colors shadow-sm"
               aria-label="Toggle menu"
             >
               <svg className={`w-5 h-5 text-stone-600 dark:text-stone-400 transition-transform duration-200 ${isMobileMenuOpen ? 'rotate-90' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -535,9 +531,9 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
               <div className="relative dropdown-container">
                 <button
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                  className="flex items-center gap-2.5 p-1.5 pr-3 rounded-full bg-stone-100/80 dark:bg-stone-800/80 hover:bg-stone-200/80 dark:hover:bg-stone-700/80 transition-all duration-200"
+                  className="flex items-center gap-2.5 p-1.5 pr-3 rounded-2xl bg-white/80 dark:bg-stone-800/80 border border-stone-200/60 dark:border-stone-600/50 hover:bg-stone-100 dark:hover:bg-stone-700/80 transition-all duration-200 shadow-sm"
                 >
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white font-bold text-sm shadow-inner">
+                  <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-violet-500/20">
                     {(user.username || user.name || user.email) ? (user.username || user.name || user.email).charAt(0).toUpperCase() : 'U'}
                   </div>
                   <div className="hidden md:block text-left">
@@ -556,11 +552,11 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
 
                 {/* Dropdown Menu */}
                 {isDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-72 bg-white dark:bg-stone-800 rounded-2xl shadow-2xl shadow-stone-900/10 dark:shadow-black/30 border border-stone-200/60 dark:border-stone-700/60 z-[60] overflow-hidden">
-                    {/* User Info Section */}
-                    <div className="px-4 py-4 bg-gradient-to-br from-stone-50 to-stone-100/50 dark:from-stone-800 dark:to-stone-800/50">
+                  <div className="absolute right-0 mt-2 w-72 bg-white/95 dark:bg-stone-800/95 backdrop-blur-xl rounded-2xl shadow-2xl shadow-stone-900/10 dark:shadow-black/30 border border-stone-200/60 dark:border-stone-600/60 z-[60] overflow-hidden">
+                    {/* User Info Section - glass style like dashboard greeting */}
+                    <div className="px-4 py-4 bg-gradient-to-br from-stone-50/80 to-white/50 dark:from-stone-800/80 dark:to-stone-800/50">
                       <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-indigo-500/30">
+                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-violet-500/25">
                           {(user.username || user.name || user.email) ? (user.username || user.name || user.email).charAt(0).toUpperCase() : 'U'}
                         </div>
                         <div>
@@ -683,7 +679,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
                     <div className="py-2">
                       <button 
                         onClick={() => { onNavigate?.('pricing'); setIsDropdownOpen(false); }}
-                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-lime-600 dark:text-lime-400 hover:bg-lime-50 dark:hover:bg-lime-900/20 transition-colors"
+                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-semibold text-violet-600 dark:text-violet-400 hover:bg-violet-50 dark:hover:bg-violet-900/20 transition-colors"
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -723,15 +719,15 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
         </div>
       </div>
 
-      {/* Light purple accent line under header */}
-      <div className="h-0.5 bg-gradient-to-r from-violet-400/50 via-violet-500/60 to-purple-400/50" />
+      {/* Rose accent line - matches dashboard hero style */}
+      <div className="h-0.5 bg-gradient-to-r from-violet-400/40 via-purple-400/50 to-violet-400/40" />
 
       {/* Mobile Menu */}
       <div className={`lg:hidden mobile-menu-container overflow-hidden transition-all duration-300 ease-out ${
         isMobileMenuOpen ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
       }`}>
         <div className="px-4 py-4 bg-white/95 dark:bg-stone-900/95 backdrop-blur-xl border-t border-stone-200/60 dark:border-stone-700/60">
-          <div className="space-y-1">
+          <div className="space-y-1.5">
             {[
               { id: 'dashboard', label: 'Dashboard' },
               { id: 'library', label: 'Library' },
@@ -742,9 +738,9 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
               <button 
                 key={id}
                 onClick={() => { onNavigate?.(id); setIsMobileMenuOpen(false); }}
-                className={`w-full text-left px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${
+                className={`w-full text-left px-4 py-3 rounded-2xl text-sm font-semibold transition-all duration-200 ${
                   currentPage === (page || id)
-                    ? 'bg-lime-100 dark:bg-lime-900/30 text-lime-700 dark:text-lime-400' 
+                    ? 'bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300 border border-violet-200/60 dark:border-violet-700/50' 
                     : 'text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800'
                 }`}
               >
@@ -752,24 +748,24 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
               </button>
             ))}
             
-            {/* Pro button */}
+            {/* Saved Materials - purple gradient */}
             <button
               onClick={() => { onNavigate?.('quiz-history'); setIsMobileMenuOpen(false); }}
-              className={`w-full text-left px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200 flex items-center justify-between bg-gradient-to-r from-violet-600 to-purple-600 text-white ${
-                currentPage === 'quiz-history' ? 'ring-2 ring-violet-400 ring-offset-2' : ''
+              className={`w-full text-left px-4 py-3 rounded-2xl text-sm font-bold transition-all duration-200 flex items-center justify-between bg-gradient-to-r from-violet-500 to-purple-600 text-white shadow-lg shadow-violet-500/25 ${
+                currentPage === 'quiz-history' ? 'ring-2 ring-violet-400 ring-offset-2 ring-offset-white dark:ring-offset-stone-900' : ''
               }`}
             >
               <span>Saved Materials</span>
-              <span className="px-2 py-0.5 text-[10px] font-bold bg-white/25 text-white rounded-full">PRO</span>
+              <span className="px-2 py-0.5 text-[10px] font-bold bg-white/25 text-white rounded-lg">PRO</span>
             </button>
 
             {/* Friends button */}
             <button
               onClick={() => { onNavigate?.('friends'); setIsMobileMenuOpen(false); }}
-              className={`w-full text-left px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 flex items-center gap-2 ${
+              className={`w-full text-left px-4 py-3 rounded-2xl text-sm font-semibold transition-all duration-200 flex items-center gap-2 ${
                 currentPage === 'friends' 
-                  ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400' 
-                  : 'text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800'
+                  ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-700/50' 
+                  : 'text-stone-600 dark:text-stone-400 hover:bg-emerald-50/50 dark:hover:bg-emerald-900/10'
               }`}
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -780,9 +776,9 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
 
             <button
               onClick={() => { onNavigate?.('blog'); setIsMobileMenuOpen(false); }}
-              className={`w-full text-left px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${
+              className={`w-full text-left px-4 py-3 rounded-2xl text-sm font-semibold transition-all duration-200 ${
                 currentPage === 'blog' 
-                  ? 'bg-lime-100 dark:bg-lime-900/30 text-lime-700 dark:text-lime-400' 
+                  ? 'bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300' 
                   : 'text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800'
               }`}
             >

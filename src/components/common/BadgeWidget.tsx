@@ -27,11 +27,14 @@ const BadgeWidget = ({ onNavigate, mobileExpanded = false }: BadgeWidgetProps) =
   })();
 
   return (
-    <div className="relative" ref={tooltipRef}>
+    <div
+      className="relative"
+      ref={tooltipRef}
+      onMouseEnter={() => setShowTooltip(true)}
+      onMouseLeave={() => setShowTooltip(false)}
+    >
       <button
         onClick={() => onNavigate('badges')}
-        onMouseEnter={() => setShowTooltip(true)}
-        onMouseLeave={() => setShowTooltip(false)}
         className={`relative flex items-center rounded-2xl bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-amber-900/20 dark:to-yellow-900/20 border border-amber-200/60 dark:border-amber-700/40 hover:shadow-lg hover:shadow-amber-500/15 hover:border-amber-300 dark:hover:border-amber-600 transition-all duration-300 group ${
           mobileExpanded 
             ? 'gap-3 px-4 py-3 w-full min-w-0 flex-row' 
@@ -63,9 +66,9 @@ const BadgeWidget = ({ onNavigate, mobileExpanded = false }: BadgeWidgetProps) =
         </div>
       </button>
 
-      {/* Hover tooltip */}
+      {/* Hover tooltip - above button to avoid parent overflow-hidden clipping */}
       {showTooltip && (
-        <div className="absolute top-full right-0 mt-2 w-56 bg-white dark:bg-stone-800 rounded-2xl shadow-2xl shadow-stone-900/10 dark:shadow-black/30 border border-stone-200/60 dark:border-stone-700/60 p-4 z-50 animate-[tooltip-in_0.2s_ease-out]">
+        <div className="absolute bottom-full right-0 mb-2 w-56 bg-white dark:bg-stone-800 rounded-2xl shadow-2xl shadow-stone-900/10 dark:shadow-black/30 border border-stone-200/60 dark:border-stone-700/60 p-4 z-[100] animate-[tooltip-in_0.2s_ease-out]">
           {/* Level */}
           <div className="flex items-center gap-2 mb-3">
             <div className="w-8 h-8 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-xl flex items-center justify-center text-white font-black text-sm shadow-lg shadow-amber-500/30">

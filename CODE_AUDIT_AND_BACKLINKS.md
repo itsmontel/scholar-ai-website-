@@ -9,45 +9,25 @@
 
 ### 🔴 Critical Issues (Fix First)
 
-#### 1. Missing `pageMeta` for `/tools/analyze` and `/tools/citations`
-**Problem:** When users land on `/tools/analyze` (AI Essay Checker) or `/tools/citations` (Citation Finder), the app falls back to homepage meta. Google and social shares show the wrong title/description.
+#### 1. ~~Missing `pageMeta` for `/tools/analyze` and `/tools/citations`~~ FIXED
+**Problem:** When users land on `/tools/analyze` (AI Essay Checker) or `/tools/citations` (Citation Finder), the app falls back to homepage meta.
 
-**Fix:** Add to `pageMeta` in `CompleteAcademicAIApp.tsx` (around line 269):
-```js
-'analyze': { title: 'AI Essay Checker – Professor-Style Feedback by Grade Level | WriteScholar', description: 'Get AI essay feedback tailored to college, high school, or middle school. Structure, clarity, citations, grammar. Free essay analysis tool for students.' },
-'citations': { title: 'Academic Citation Finder – APA, MLA, Chicago Sources | WriteScholar', description: 'Find peer-reviewed academic sources for your research. Search by topic, get APA, MLA, Chicago citations instantly. Free citation finder for students.' },
-```
+**Status:** Added `analyze` and `citations` to pageMeta. Essay analyzer is now positioned as main asset across SEO.
 
-#### 2. Sitemap: Duplicate `/about` URL
-**Problem:** `sitemap.xml` lists `/about` twice (lines 7 and 13). Duplicate URLs can dilute crawl budget and confuse Google.
+#### 2. ~~Sitemap: Duplicate `/about` URL~~ FIXED
+**Problem:** `sitemap.xml` listed `/about` twice. Duplicate URLs can dilute crawl budget.
 
-**Fix:** Remove the duplicate entry from `public/sitemap.xml`.
+**Status:** Removed duplicate. Added `/tools/analyze` and `/tools/citations` with high priority.
 
-#### 3. Prerender Missing Key SEO Pages
-**Problem:** `scripts/prerender.mjs` does NOT prerender:
-- `/tools/analyze` (AI Essay Checker – high-value keyword)
-- `/tools/citations` (Citation Finder)
-- `/tools/interactive-lesson` (AI lesson generator)
-- `/tools/lightning-reflex-quiz` (Crater Blast alias)
+#### 3. ~~Prerender Missing Key SEO Pages~~ FIXED
+**Problem:** `/tools/analyze` and `/tools/citations` were not prerendered.
 
-Crawlers get the SPA shell; if JS is slow, they may not see full content.
+**Status:** Added `/tools/analyze` and `/tools/citations` to staticRoutes. Essay analyzer prioritized.
 
-**Fix:** Add to `staticRoutes` in `scripts/prerender.mjs`:
-```js
-'/tools/analyze',
-'/tools/citations',
-'/tools/interactive-lesson',
-'/tools/lightning-reflex-quiz',
-```
+#### 4. ~~Sitemap Missing Key Pages~~ FIXED
+**Problem:** Sitemap did not include `/tools/analyze` and `/tools/citations`.
 
-#### 4. Sitemap Missing Key Pages
-**Problem:** Sitemap does not include:
-- `/tools/analyze`
-- `/tools/citations`
-- `/tools/interactive-lesson`
-- `/share-friends` (if you want it indexed)
-
-**Fix:** Add these URLs to `public/sitemap.xml` with appropriate priority/ changefreq.
+**Status:** Added both with priority 0.95 (analyze) and 0.9 (citations). Essay analyzer first in AI tools section.
 
 ---
 
@@ -140,7 +120,7 @@ Prioritized by effort vs. impact. Focus on sites that:
 **Body:**
 > Hi [Name],
 >
-> I noticed [specific page/post] and thought WriteScholar might be a fit. It's a free AI study platform students use for quizzes, flashcards, essay feedback, and citations. No signup for most tools.
+> I noticed [specific page/post] and thought WriteScholar might be a fit. It's a free AI study platform that gives students professor-style essay feedback and grade-level rubrics. Plus quizzes, flashcards, block-websites-until-you-study (Focus Mode), and citations. Essay analysis is our main asset. No signup for most tools.
 >
 > If you're curating resources for students or updating a tools roundup, I'd be happy to provide a short description and any assets you need.
 >

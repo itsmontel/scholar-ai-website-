@@ -149,28 +149,32 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
 
   const faqs = [
     {
+      question: "How does the essay analyzer work?",
+      answer: "Paste your essay (200+ words) or upload a PDF/DOCX/TXT file. Our AI analyzes structure, clarity, argument, citations, and academic tone — like a professor would. You get detailed feedback with specific suggestions in under 60 seconds."
+    },
+    {
+      question: "What kind of feedback will I get on my essay?",
+      answer: "You get section-by-section annotations (green for strong, yellow for improve, red for concerns), an overall grade-level rubric, and actionable improvement suggestions. It covers structure, argument quality, clarity, citations, and academic style."
+    },
+    {
+      question: "How long does essay analysis take?",
+      answer: "Usually under 60 seconds. Paste your essay, click Analyze Text, and you'll see professor-style feedback with a full rubric and improvement tips. Free plan includes 3 analyses per month."
+    },
+    {
+      question: "Can I upload a Word or PDF file?",
+      answer: "Yes. Upload PDF, DOCX, DOC, or TXT files directly. Or paste your text into the box. Both work for analysis. Files are processed securely and never shared."
+    },
+    {
       question: "How does Focus Mode work?",
-      answer: "Focus Mode blocks distracting sites like YouTube, TikTok, and Instagram until you answer quiz questions from your own study notes. Pick the sites to block, add your material, and when you try to visit a blocked site you face a short quiz. Pass it and the site unlocks for 5 minutes to 24 hours. You choose the duration. No scroll until you've studied."
+      answer: "Focus Mode blocks distracting sites like YouTube, TikTok, and Instagram until you answer quiz questions from your own study notes. Pick the sites to block, add your material, and when you try to visit a blocked site you face a short quiz. Pass it and the site unlocks. It's a Chrome extension."
     },
     {
       question: "Can I block YouTube and TikTok until I study?",
-      answer: "Yes! Focus Mode lets you block any sites you choose. Add YouTube, TikTok, Instagram, Reddit, or custom domains. When you try to visit one, you get a quiz from your own notes. Pass the quiz and you earn access. It's a Chrome extension. Install it, connect your WriteScholar account, and start blocking."
-    },
-    {
-      question: "Do I need study material to use Focus Mode?",
-      answer: "Yes. Focus Mode pulls quiz questions from your own flashcards and quizzes in WriteScholar. Create a Study Pack or flashcards from your notes first, then when you're blocked you'll answer questions from that material. This way you're actually reinforcing what you're learning."
-    },
-    {
-      question: "What is the AI Humanizer and how does it work?",
-      answer: "The AI Humanizer transforms text from ChatGPT, Claude, Gemini, and other AI models into natural human-sounding writing. It bypasses AI detection tools like Turnitin and GPTZero while preserving your original meaning. Free users get 5,000 words per month."
+      answer: "Yes! Focus Mode lets you block any sites you choose. When you try to visit one, you get a quiz from your own notes. Pass the quiz and you earn access. Create a Study Pack or flashcards first, then connect the Chrome extension."
     },
     {
       question: "Can I create study quizzes from my notes?",
-      answer: "Yes! The Quiz Generator turns any text into interactive quizzes with multiple choice and true/false questions. Paste your study notes, textbook chapters, or articles and get instant quizzes. Quiz, crossword and Crater Blast are Pro features. Free users get lesson and flashcards with each study pack generation."
-    },
-    {
-      question: "How does the Paper Summarizer work?",
-      answer: "Paste any research paper, article, or document and get concise summaries as bullet points or paragraphs. Choose short, medium, or detailed formats. Perfect for literature reviews and exam prep."
+      answer: "Yes! The Study Pack turns any text into lessons, flashcards, quizzes, crosswords, and Crater Blast. Paste your notes or upload a document. Free users get lesson and flashcards; quiz, crossword and Crater Blast unlock with Pro."
     },
     {
       question: "What citation styles are supported?",
@@ -186,11 +190,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
     },
     {
       question: "How do I add friends and share my study materials?",
-      answer: "Every account gets a unique friend code (e.g. WS-BUDDY-4872). Share your code with friends so they can add you. Once connected, you can share any flashcards, quizzes, crosswords, or notes with one tap. It delivers straight to their WriteScholar. They just tap Accept and it's in their library. Core sharing is free."
-    },
-    {
-      question: "What can I share with my friends?",
-      answer: "You can share flashcards, quizzes, crossword puzzles, and notes. Anything you create in WriteScholar can be sent to a friend instantly. They receive a notification, tap Accept, and it appears in their library. No links to copy, no files to forward. Perfect for study groups and exam prep."
+      answer: "Every account gets a unique friend code. Share your code with friends so they can add you. Once connected, you can share flashcards, quizzes, crosswords, or notes with one tap. They tap Accept and it's in their library. Core sharing is free."
     }
   ];
 
@@ -517,12 +517,12 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
           <div className="max-w-4xl mx-auto text-center">
             {/* Hero headline */}
             <h1 className="text-3xl sm:text-5xl lg:text-6xl xl:text-7xl font-extrabold text-stone-800 dark:text-stone-100 leading-[1.1] mb-6 sm:mb-6 tracking-tight" style={{ letterSpacing: '-0.03em' }}>
-              Block YouTube, TikTok & social media<br />
-              <span className="text-violet-500">until you study</span>
+              Get professor-style feedback<br />
+              <span className="text-violet-500">on every essay you write</span>
             </h1>
 
             <p className="text-base sm:text-xl text-stone-600 dark:text-stone-400 mb-16 sm:mb-14 max-w-2xl mx-auto leading-relaxed px-2">
-              Earn your screen time by answering quiz questions from your own notes. Plus AI flashcards, quizzes and essay feedback. Free to start.
+              Block YouTube, TikTok and social media until you study. Plus quizzes, flashcards & crosswords from your notes. All in one place.
             </p>
             
             {/* Primary CTA - mascot peeking behind button with grip hands */}
@@ -600,10 +600,10 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                     <ellipse className="hand-shine" cx="12" cy="20" rx="10" ry="16" fill="url(#handShineR)" />
                   </svg>
                   <button
-                    onClick={() => onNavigate('login')}
+                    onClick={() => onNavigate('signup')}
                     className="btn-glisten relative z-10 px-10 py-4 bg-violet-500 text-white font-bold rounded-full hover:bg-violet-600 hover:scale-105 active:scale-95 transition-all duration-300 ease-out shadow-xl shadow-violet-500/25 hover:shadow-2xl hover:shadow-violet-500/40 text-lg"
                   >
-                    I'm ready to focus
+                    Get started free
                   </button>
                 </div>
               </div>
@@ -635,11 +635,11 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                 {/* Mobile cards - clean redesign, horizontal scroll */}
                 <div className="flex gap-4 sm:hidden w-max">
                   {[
-                    { title: 'Analyze', desc: 'Get professor-style feedback on your essays', onClick: () => setMode('analyze'), gradient: 'bg-lime-500', accentClasses: { title: 'text-white', orb: 'bg-white/20', iconBg: 'bg-white/90' }, borderColor: 'border-lime-600/50', icon: '📝', mobileContent: (
+                    { title: 'Analyze', desc: 'Get professor-style feedback on your essays', onClick: () => setMode('analyze'), gradient: 'bg-rose-500', accentClasses: { title: 'text-white', orb: 'bg-white/20', iconBg: 'bg-white/90' }, borderColor: 'border-rose-600/50', icon: '📝', mobileContent: (
                       <div className="w-full space-y-2">
-                        <div className="h-2.5 bg-stone-200 dark:bg-stone-600 rounded-full overflow-hidden origin-left"><div className="h-full w-full bg-lime-400 dark:bg-lime-500 rounded-full animate-line-grow" style={{ animationDelay: '0.2s' }} /></div>
-                        <div className="h-2.5 bg-stone-200 dark:bg-stone-600 rounded-full overflow-hidden origin-left"><div className="h-full w-full bg-lime-400 dark:bg-lime-500 rounded-full animate-line-grow" style={{ animationDelay: '0.6s' }} /></div>
-                        <div className="h-2.5 bg-stone-200 dark:bg-stone-600 rounded-full overflow-hidden origin-left"><div className="h-full w-full bg-lime-500 dark:bg-lime-400 rounded-full animate-line-grow" style={{ animationDelay: '1s' }} /></div>
+                        <div className="h-2.5 bg-stone-200 dark:bg-stone-600 rounded-full overflow-hidden origin-left"><div className="h-full w-full bg-rose-400 dark:bg-rose-500 rounded-full animate-line-grow" style={{ animationDelay: '0.2s' }} /></div>
+                        <div className="h-2.5 bg-stone-200 dark:bg-stone-600 rounded-full overflow-hidden origin-left"><div className="h-full w-full bg-rose-400 dark:bg-rose-500 rounded-full animate-line-grow" style={{ animationDelay: '0.6s' }} /></div>
+                        <div className="h-2.5 bg-stone-200 dark:bg-stone-600 rounded-full overflow-hidden origin-left"><div className="h-full w-full bg-rose-500 dark:bg-rose-400 rounded-full animate-line-grow" style={{ animationDelay: '1s' }} /></div>
                       </div>
                     )},
                     { title: 'Citations', desc: 'Find and format academic sources instantly', onClick: () => setMode('citations'), gradient: 'bg-blue-500', accentClasses: { title: 'text-white', orb: 'bg-white/20', iconBg: 'bg-white/90' }, borderColor: 'border-blue-600/50', icon: '🔍', mobileContent: (
@@ -719,11 +719,11 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                 {/* Desktop cards - extra padding-right so last card (Crossword) isn't cut off */}
                 <div className="hidden sm:flex gap-4 sm:transition-transform sm:duration-500 sm:ease-out w-[160%] pr-8 sm:pr-12" style={{ transform: `translateX(-${studyCardsCarouselIndex * 12.5}%)` }}>
                   {[
-                    { title: 'Analyze', desc: 'Get professor-style feedback on your essays', onClick: () => setMode('analyze'), gradient: 'bg-lime-500', accentClasses: { title: 'text-white', orb: 'bg-white/20', iconBg: 'bg-white/90' }, borderColor: 'border-lime-600/50', icon: '📝', inner: (
+                    { title: 'Analyze', desc: 'Get professor-style feedback on your essays', onClick: () => setMode('analyze'), gradient: 'bg-rose-500', accentClasses: { title: 'text-white', orb: 'bg-white/20', iconBg: 'bg-white/90' }, borderColor: 'border-rose-600/50', icon: '📝', inner: (
                       <div className="w-full flex flex-col justify-between flex-1 gap-2">
-                        <div className="w-full h-3 bg-stone-200 dark:bg-stone-600 rounded-full overflow-hidden flex-shrink-0"><div className="h-full w-full bg-lime-400 dark:bg-lime-500 rounded-full animate-line-grow origin-left" style={{ animationDelay: '0.2s' }} /></div>
-                        <div className="w-full h-3 bg-stone-200 dark:bg-stone-600 rounded-full overflow-hidden flex-shrink-0"><div className="h-full w-full bg-lime-400 dark:bg-lime-500 rounded-full animate-line-grow origin-left" style={{ animationDelay: '0.6s' }} /></div>
-                        <div className="w-full h-3 bg-stone-200 dark:bg-stone-600 rounded-full overflow-hidden flex-shrink-0"><div className="h-full w-full bg-lime-500 dark:bg-lime-400 rounded-full animate-line-grow origin-left" style={{ animationDelay: '1s' }} /></div>
+                        <div className="w-full h-3 bg-stone-200 dark:bg-stone-600 rounded-full overflow-hidden flex-shrink-0"><div className="h-full w-full bg-rose-400 dark:bg-rose-500 rounded-full animate-line-grow origin-left" style={{ animationDelay: '0.2s' }} /></div>
+                        <div className="w-full h-3 bg-stone-200 dark:bg-stone-600 rounded-full overflow-hidden flex-shrink-0"><div className="h-full w-full bg-rose-400 dark:bg-rose-500 rounded-full animate-line-grow origin-left" style={{ animationDelay: '0.6s' }} /></div>
+                        <div className="w-full h-3 bg-stone-200 dark:bg-stone-600 rounded-full overflow-hidden flex-shrink-0"><div className="h-full w-full bg-rose-500 dark:bg-rose-400 rounded-full animate-line-grow origin-left" style={{ animationDelay: '1s' }} /></div>
                       </div>
                     )},
                     { title: 'Citations', desc: 'Find and format academic sources instantly', onClick: () => setMode('citations'), gradient: 'bg-blue-500', accentClasses: { title: 'text-white', orb: 'bg-white/20', iconBg: 'bg-white/90' }, borderColor: 'border-blue-600/50', icon: '🔍', inner: (
@@ -834,7 +834,109 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
         </div>
       </section>
 
-      {/* Focus Mode - Earn Your Free Time - Premium Redesign */}
+      {/* H2 #1: Analyze Papers - Professor-style feedback + Rubric */}
+      <section className="relative py-16 sm:py-24 overflow-hidden bg-white dark:bg-stone-900">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-5%,rgba(139,92,246,0.08),transparent_50%)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-5%,rgba(139,92,246,0.05),transparent_50%)]" />
+        <div className="absolute top-20 left-[5%] hidden xl:block text-4xl opacity-30 animate-float">📝</div>
+        <div className="absolute top-32 right-[8%] hidden xl:block text-3xl opacity-25 animate-float-delayed">✨</div>
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          {/* Section header */}
+          <div className="text-center mb-12 sm:mb-16">
+            <span className="inline-block px-4 py-1.5 bg-rose-100 dark:bg-rose-900/50 text-rose-700 dark:text-rose-400 rounded-full text-sm font-semibold mb-4">
+              What Quizlet & Knowt don&apos;t have
+            </span>
+            <h2 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-stone-800 dark:text-stone-100 mb-4 sm:mb-5">
+              Analyze Papers with Feedback <span className="bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 bg-clip-text text-transparent" style={{ WebkitBackgroundClip: 'text' }}>That Thinks Like a Professor</span>
+            </h2>
+            <p className="text-base sm:text-lg text-stone-600 dark:text-stone-400 max-w-2xl mx-auto">
+              Upload your essay or research paper. Our AI evaluates structure, clarity, citations, and academic quality, then gives you actionable feedback to improve before you submit.
+            </p>
+          </div>
+
+          {/* How it works - 3 steps */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 mb-12 sm:mb-16">
+            <div className="relative group">
+              <div className="flex flex-col items-center text-center p-6 rounded-2xl bg-gradient-to-br from-rose-50 to-pink-50/50 dark:from-rose-950/30 dark:to-pink-950/20 border border-rose-200/60 dark:border-rose-800/40 hover:shadow-xl hover:shadow-rose-500/10 transition-all duration-300">
+                <span className="w-12 h-12 rounded-xl bg-rose-500 text-white font-black text-lg flex items-center justify-center mb-4 shadow-lg shadow-rose-500/30">1</span>
+                <h3 className="text-lg font-bold text-stone-800 dark:text-stone-100 mb-2">Upload or paste</h3>
+                <p className="text-sm text-stone-600 dark:text-stone-400">Drop your essay, paper, or paste text. Works with any length.</p>
+              </div>
+            </div>
+            <div className="relative group">
+              <div className="flex flex-col items-center text-center p-6 rounded-2xl bg-gradient-to-br from-rose-50 to-pink-50/50 dark:from-rose-950/30 dark:to-pink-950/20 border border-rose-200/60 dark:border-rose-800/40 hover:shadow-xl hover:shadow-rose-500/10 transition-all duration-300">
+                <span className="w-12 h-12 rounded-xl bg-rose-500 text-white font-black text-lg flex items-center justify-center mb-4 shadow-lg shadow-rose-500/30">2</span>
+                <h3 className="text-lg font-bold text-stone-800 dark:text-stone-100 mb-2">AI analyzes deeply</h3>
+                <p className="text-sm text-stone-600 dark:text-stone-400">Structure, argument, clarity, citations evaluated like a professor would.</p>
+              </div>
+            </div>
+            <div className="relative group">
+              <div className="flex flex-col items-center text-center p-6 rounded-2xl bg-gradient-to-br from-rose-50 to-pink-50/50 dark:from-rose-950/30 dark:to-pink-950/20 border border-rose-200/60 dark:border-rose-800/40 hover:shadow-xl hover:shadow-rose-500/10 transition-all duration-300">
+                <span className="w-12 h-12 rounded-xl bg-rose-500 text-white font-black text-lg flex items-center justify-center mb-4 shadow-lg shadow-rose-500/30">3</span>
+                <h3 className="text-lg font-bold text-stone-800 dark:text-stone-100 mb-2">Get actionable feedback</h3>
+                <p className="text-sm text-stone-600 dark:text-stone-400">Precise suggestions plus a grade-level rubric. Improve before you submit.</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Two capabilities: Precise feedback + Rubric - side by side */}
+          <div className="grid md:grid-cols-2 gap-6 lg:gap-8">
+            {/* Precise feedback */}
+            <div className="group relative">
+              <div className="absolute -inset-1 bg-gradient-to-r from-rose-400 to-pink-500 rounded-3xl blur-xl opacity-20 group-hover:opacity-30 transition-opacity" />
+              <div className="relative bg-white dark:bg-stone-800 rounded-2xl overflow-hidden shadow-xl border border-stone-200/60 dark:border-stone-700">
+                <div className="p-5 sm:p-6 border-b border-stone-200 dark:border-stone-700">
+                  <div className="flex items-center gap-3">
+                    <span className="w-10 h-10 rounded-xl bg-rose-100 dark:bg-rose-900/50 flex items-center justify-center text-lg">📋</span>
+                    <div>
+                      <h3 className="text-lg font-bold text-stone-800 dark:text-stone-100">Precise feedback</h3>
+                      <p className="text-sm text-stone-500 dark:text-stone-400">Section-by-section analysis with specific improvements</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="aspect-video bg-gradient-to-br from-rose-50 to-pink-50 dark:from-rose-950/30 dark:to-pink-950/20 flex items-center justify-center overflow-hidden">
+                  <video autoPlay loop muted playsInline className="w-full h-full object-contain" title="WriteScholar Essay Checker. Professor-style feedback">
+                    <source src="/writescholar-essay-checker-demo.mp4" type="video/mp4" />
+                  </video>
+                </div>
+              </div>
+            </div>
+            {/* Rubric */}
+            <div className="group relative">
+              <div className="absolute -inset-1 bg-gradient-to-r from-violet-400 to-purple-500 rounded-3xl blur-xl opacity-20 group-hover:opacity-30 transition-opacity" />
+              <div className="relative bg-white dark:bg-stone-800 rounded-2xl overflow-hidden shadow-xl border border-stone-200/60 dark:border-stone-700">
+                <div className="p-5 sm:p-6 border-b border-stone-200 dark:border-stone-700">
+                  <div className="flex items-center gap-3">
+                    <span className="w-10 h-10 rounded-xl bg-violet-100 dark:bg-violet-900/50 flex items-center justify-center text-lg">📊</span>
+                    <div>
+                      <h3 className="text-lg font-bold text-stone-800 dark:text-stone-100">Grade-level rubric</h3>
+                      <p className="text-sm text-stone-500 dark:text-stone-400">See exactly how you score, from middle school to grad level</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="aspect-video bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-950/30 dark:to-purple-950/20 flex items-center justify-center overflow-hidden">
+                  <video autoPlay loop muted playsInline className="w-full h-full object-contain" title="WriteScholar Essay Rubric. Grade-level scoring">
+                    <source src="/writescholar-essay-rubric-demo.mp4" type="video/mp4" />
+                  </video>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* CTA */}
+          <div className="text-center mt-10 sm:mt-14">
+            <button
+              onClick={() => onNavigate('signup')}
+              className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-rose-500 to-pink-600 text-white font-bold rounded-2xl hover:from-rose-400 hover:to-pink-500 hover:scale-105 active:scale-95 shadow-xl shadow-rose-500/30 transition-all duration-300 text-lg"
+            >
+              Try essay analysis free
+              <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+            </button>
+            <p className="mt-3 text-sm text-stone-500 dark:text-stone-400">Free plan includes 3 analyses per month</p>
+          </div>
+        </div>
+      </section>
+
+      {/* H2 #2: Focus Mode - Earn Your Screen Time - Block Websites */}
       <section className="relative py-24 sm:py-36 overflow-hidden">
         {/* Layered gradient background */}
         <div className="absolute inset-0 bg-gradient-to-b from-indigo-950 via-violet-900 to-purple-950 dark:from-indigo-950 dark:via-violet-950 dark:to-stone-900" />
@@ -862,14 +964,14 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                 ⚡ Focus Mode
               </span>
             </div>
-            <h2 className="text-4xl sm:text-5xl lg:text-7xl font-black text-white mb-6 tracking-tight leading-[1.1]">
-              Earn Your
+            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-black text-white mb-6 tracking-tight leading-[1.1]">
+              Earn Your Screen Time.
               <span className="block bg-gradient-to-r from-violet-300 via-fuchsia-300 to-pink-300 bg-clip-text text-transparent">
-                Free Time
+                Block Sites Until You Study
               </span>
             </h2>
             <p className="text-lg sm:text-xl text-violet-200/90 max-w-2xl mx-auto leading-relaxed mb-8">
-              Block distracting sites until you answer study questions.
+              Block YouTube, TikTok, Instagram and Reddit until you answer quiz questions from your own notes.
               <span className="block mt-1 text-white/70 font-medium">No scroll until you&apos;ve studied.</span>
             </p>
           </div>
@@ -1066,9 +1168,9 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
         </div>
       </section>
 
-      {/* See WriteScholar in Action - Study Tools Showcase (Turn Your Notes Into) */}
+      {/* H2 #3: Create Study Material - Turn Notes Into Quizzes, Flashcards, Crosswords */}
       <section className="relative py-12 sm:py-28 overflow-hidden bg-stone-50 dark:bg-stone-900">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-10%,rgba(99,102,241,0.06),transparent)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-10%,rgba(139,92,246,0.04),transparent)] lg:bg-[radial-gradient(ellipse_70%_40%_at_50%_10%,rgba(120,113,108,0.05),transparent)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-10%,rgba(245,158,11,0.08),transparent)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-10%,rgba(251,191,36,0.05),transparent)] lg:bg-[radial-gradient(ellipse_70%_40%_at_50%_10%,rgba(120,113,108,0.05),transparent)]" />
         <div className="absolute top-24 left-[5%] hidden xl:block text-5xl opacity-40 animate-float">📚</div>
         <div className="absolute top-40 right-[8%] hidden xl:block text-4xl opacity-35 animate-float-delayed">✏️</div>
         <div className="absolute bottom-40 left-[7%] hidden xl:block text-4xl opacity-35 animate-float" style={{ animationDelay: '0.7s' }}>🎯</div>
@@ -1077,28 +1179,28 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
         <div className="xl:hidden absolute top-32 right-4 text-2xl opacity-45 animate-float-delayed">✏️</div>
         <div className="xl:hidden absolute bottom-64 left-6 text-2xl opacity-45 animate-float" style={{ animationDelay: '0.5s' }}>🎯</div>
         <div className="xl:hidden absolute bottom-48 right-6 text-3xl opacity-50 animate-float-delayed" style={{ animationDelay: '0.3s' }}>🚀</div>
-        <div className="lg:hidden absolute top-1/3 right-8 w-12 h-12 rounded-xl bg-gradient-to-br from-violet-400/25 to-purple-400/15 animate-float" />
-        <div className="lg:hidden absolute bottom-1/3 left-6 w-10 h-10 rounded-full bg-gradient-to-br from-indigo-400/20 to-violet-400/15 animate-float-delayed" style={{ animationDelay: '0.6s' }} />
+        <div className="lg:hidden absolute top-1/3 right-8 w-12 h-12 rounded-xl bg-gradient-to-br from-amber-400/25 to-orange-400/15 animate-float" />
+        <div className="lg:hidden absolute bottom-1/3 left-6 w-10 h-10 rounded-full bg-gradient-to-br from-amber-400/20 to-orange-400/15 animate-float-delayed" style={{ animationDelay: '0.6s' }} />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="relative text-center mb-10 sm:mb-20">
-            <span className="inline-block px-4 py-1.5 bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-400 rounded-full text-sm font-semibold mb-4 animate-notes-fade-in-up opacity-0 max-lg:bg-violet-200/80 max-lg:dark:bg-violet-800/60" style={{ animationDelay: '0.1s', animationFillMode: 'forwards' }}>
-              Study Smarter, Not Harder
+            <span className="inline-block px-4 py-1.5 bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-400 rounded-full text-sm font-semibold mb-4 animate-notes-fade-in-up opacity-0 max-lg:bg-amber-200/80 max-lg:dark:bg-amber-800/60" style={{ animationDelay: '0.1s', animationFillMode: 'forwards' }}>
+              Quizzes, Flashcards & Crosswords
             </span>
             <h2 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-stone-800 dark:text-stone-100 mb-4 sm:mb-5 animate-notes-fade-in-up opacity-0" style={{ animationDelay: '0.2s', animationFillMode: 'forwards' }}>
-              Turn Your Notes Into<br className="hidden sm:block" />
-              <span className="bg-gradient-to-r from-violet-600 to-purple-600 dark:from-violet-400 dark:to-purple-400 bg-clip-text text-transparent inline-block max-lg:from-violet-700 max-lg:to-purple-700 max-lg:dark:from-violet-300 max-lg:dark:to-purple-300">Interactive Study Tools</span>
+              Create Study Material from Any Notes,
+              <span className="block sm:inline bg-gradient-to-r from-amber-600 to-orange-600 dark:from-amber-400 dark:to-orange-400 bg-clip-text text-transparent max-lg:from-amber-700 max-lg:to-orange-700 max-lg:dark:from-amber-300 max-lg:dark:to-orange-300"> in seconds</span>
             </h2>
             <p className="text-base sm:text-xl text-stone-600 dark:text-stone-400 text-center max-w-2xl mx-auto px-2 animate-notes-fade-in-up opacity-0 max-lg:text-stone-700 max-lg:dark:text-stone-300 max-lg:font-medium" style={{ animationDelay: '0.3s', animationFillMode: 'forwards' }}>
-              Paste your notes. Get quizzes, flashcards & crosswords in seconds. It's that easy.
+              Paste your notes. Get quizzes, flashcards & crosswords in seconds. Plus crosswords, a study mode Quizlet and Knowt don&apos;t offer.
             </p>
           </div>
           <div className="mb-12 sm:mb-16 animate-notes-fade-in-up opacity-0" style={{ animationDelay: '0.4s', animationFillMode: 'forwards' }}>
             <div className="relative group">
-              <div className="absolute -inset-1 bg-gradient-to-r from-indigo-400 to-violet-400 rounded-3xl blur-xl opacity-15 group-hover:opacity-25 transition-opacity duration-500 max-lg:from-violet-400 max-lg:to-purple-400 max-lg:opacity-25 max-lg:-inset-2"></div>
-              <div className="relative bg-white dark:bg-stone-800 rounded-3xl overflow-hidden shadow-xl border border-stone-200/50 dark:border-stone-700 group-hover:shadow-indigo-500/10 dark:group-hover:shadow-indigo-900/20 transition-shadow duration-500 max-lg:border-violet-200/60 max-lg:dark:border-violet-900/40 max-lg:shadow-violet-500/15">
+              <div className="absolute -inset-1 bg-gradient-to-r from-amber-400 to-orange-400 rounded-3xl blur-xl opacity-15 group-hover:opacity-25 transition-opacity duration-500 max-lg:from-amber-400 max-lg:to-orange-400 max-lg:opacity-25 max-lg:-inset-2"></div>
+              <div className="relative bg-white dark:bg-stone-800 rounded-3xl overflow-hidden shadow-xl border border-stone-200/50 dark:border-stone-700 group-hover:shadow-amber-500/10 dark:group-hover:shadow-amber-900/20 transition-shadow duration-500 max-lg:border-amber-200/60 max-lg:dark:border-amber-900/40 max-lg:shadow-amber-500/15">
                 <div className="grid lg:grid-cols-[1fr_1.15fr] gap-0">
                   <div className="order-1 lg:order-1 p-5 sm:p-12 lg:p-16 flex flex-col justify-center">
-                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center mb-6 shadow-lg shadow-indigo-500/30 group-hover:scale-110 transition-transform duration-300">
+                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center mb-6 shadow-lg shadow-amber-500/30 group-hover:scale-110 transition-transform duration-300">
                       <span className="text-2xl">📝</span>
                     </div>
                     <h3 className="text-xl sm:text-3xl font-bold text-stone-800 dark:text-stone-100 mb-3 sm:mb-4">Paste Your Notes</h3>
@@ -1107,26 +1209,26 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                     </p>
                     <ul className="space-y-3">
                       <li className="flex items-center gap-3 text-stone-600 dark:text-stone-400">
-                        <span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center flex-shrink-0">
-                          <svg className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>
+                        <span className="w-6 h-6 rounded-full bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center flex-shrink-0">
+                          <svg className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>
                         </span>
                         Works with any subject or topic
                       </li>
                       <li className="flex items-center gap-3 text-stone-600 dark:text-stone-400">
-                        <span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center flex-shrink-0">
-                          <svg className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>
+                        <span className="w-6 h-6 rounded-full bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center flex-shrink-0">
+                          <svg className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>
                         </span>
                         Supports long-form content
                       </li>
                       <li className="flex items-center gap-3 text-stone-600 dark:text-stone-400">
-                        <span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center flex-shrink-0">
-                          <svg className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>
+                        <span className="w-6 h-6 rounded-full bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center flex-shrink-0">
+                          <svg className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>
                         </span>
                         Instant AI processing
                       </li>
                     </ul>
                   </div>
-                  <div className="order-2 lg:order-2 relative overflow-hidden bg-gradient-to-br from-indigo-50 to-violet-50 dark:from-indigo-900/20 dark:to-violet-900/20 min-h-[200px] sm:min-h-[360px] lg:min-h-[400px] flex items-center justify-center p-3 sm:p-4">
+                  <div className="order-2 lg:order-2 relative overflow-hidden bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 min-h-[200px] sm:min-h-[360px] lg:min-h-[400px] flex items-center justify-center p-3 sm:p-4">
                     <video autoPlay loop muted playsInline className="w-full h-full object-contain group-hover:scale-[1.02] transition-transform duration-700" title="WriteScholar — Paste notes to generate quizzes, flashcards and crosswords" aria-label="WriteScholar — Paste notes to generate quizzes, flashcards and crosswords instantly">
                       <source src="/writescholar-notes-study-materials-demo.mp4" type="video/mp4" />
                     </video>
@@ -1139,11 +1241,11 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
             <div className="relative text-center mb-10 sm:mb-12">
               <div className="inline-flex flex-col items-center">
                 <div className="relative">
-                  <div className="absolute -inset-3 bg-gradient-to-r from-violet-400/30 via-purple-400/30 to-fuchsia-400/30 dark:from-violet-500/20 dark:via-purple-500/20 dark:to-fuchsia-500/20 rounded-3xl blur-2xl animate-alive-glow" />
-                  <div className="relative px-10 sm:px-14 py-6 sm:py-7 rounded-2xl bg-white dark:bg-stone-800 shadow-xl border-2 border-violet-200/60 dark:border-violet-700/40 hover:border-violet-300/80 dark:hover:border-violet-600/60 transition-all duration-300">
+                  <div className="absolute -inset-3 bg-gradient-to-r from-amber-400/30 via-orange-400/30 to-amber-500/30 dark:from-amber-500/20 dark:via-orange-500/20 dark:to-amber-500/20 rounded-3xl blur-2xl animate-alive-glow" />
+                  <div className="relative px-10 sm:px-14 py-6 sm:py-7 rounded-2xl bg-white dark:bg-stone-800 shadow-xl border-2 border-amber-200/60 dark:border-amber-700/40 hover:border-amber-300/80 dark:hover:border-amber-600/60 transition-all duration-300">
                     <div className="flex items-center justify-center gap-3 mb-2">
                       <span className="text-2xl sm:text-3xl animate-float">✨</span>
-                      <h3 className="text-xl sm:text-2xl font-extrabold bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 dark:from-violet-400 dark:to-fuchsia-400 bg-clip-text text-transparent">Make it come alive</h3>
+                      <h3 className="text-xl sm:text-2xl font-extrabold bg-gradient-to-r from-amber-600 via-orange-600 to-amber-700 dark:from-amber-400 dark:to-orange-400 bg-clip-text text-transparent">Make it come alive</h3>
                       <span className="text-2xl sm:text-3xl animate-float-delayed" style={{ animationDelay: '0.5s' }}>⚡</span>
                     </div>
                     <p className="text-stone-500 dark:text-stone-400 text-sm sm:text-base">Your notes → quizzes, flashcards, crosswords. In seconds.</p>
@@ -1151,50 +1253,50 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                 </div>
               </div>
               <div className="hidden md:flex absolute left-0 right-0 top-full pt-4 pointer-events-none justify-between max-w-4xl mx-auto px-12">
-                <div className="w-px h-8 bg-gradient-to-b from-violet-300/70 to-transparent dark:from-violet-500/50" />
+                <div className="w-px h-8 bg-gradient-to-b from-amber-300/70 to-transparent dark:from-amber-500/50" />
                 <div className="w-px h-8 bg-gradient-to-b from-emerald-300/70 to-transparent dark:from-emerald-500/50" />
-                <div className="w-px h-8 bg-gradient-to-b from-rose-300/70 to-transparent dark:from-rose-500/50" />
+                <div className="w-px h-8 bg-gradient-to-b from-orange-300/70 to-transparent dark:from-orange-500/50" />
               </div>
             </div>
           </div>
           <div className="grid md:grid-cols-3 gap-6 lg:gap-8 max-md:gap-5">
             <div className="group relative animate-notes-fade-in-up opacity-0" style={{ animationDelay: '0.6s', animationFillMode: 'forwards' }}>
-              <div className="absolute -inset-1 bg-gradient-to-r from-violet-400 to-purple-400 rounded-3xl blur-xl opacity-0 group-hover:opacity-40 transition-all duration-500 max-lg:opacity-25 max-lg:-inset-1.5"></div>
-              <div className="relative bg-white dark:bg-stone-800 rounded-3xl overflow-hidden shadow-xl border-2 border-stone-200/50 dark:border-stone-700 h-full hover:-translate-y-3 hover:scale-[1.02] hover:shadow-2xl hover:border-violet-200/80 dark:hover:border-violet-700/50 transition-all duration-500 max-lg:border-violet-200/50 max-lg:dark:border-violet-900/30 max-lg:shadow-violet-500/10">
-                <div className="relative h-40 sm:h-56 overflow-hidden bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20">
+              <div className="absolute -inset-1 bg-gradient-to-r from-amber-400 to-orange-400 rounded-3xl blur-xl opacity-0 group-hover:opacity-40 transition-all duration-500 max-lg:opacity-25 max-lg:-inset-1.5"></div>
+              <div className="relative bg-white dark:bg-stone-800 rounded-3xl overflow-hidden shadow-xl border-2 border-stone-200/50 dark:border-stone-700 h-full hover:-translate-y-3 hover:scale-[1.02] hover:shadow-2xl hover:border-amber-200/80 dark:hover:border-amber-700/50 transition-all duration-500 max-lg:border-amber-200/50 max-lg:dark:border-amber-900/30 max-lg:shadow-amber-500/10">
+                <div className="relative h-40 sm:h-56 overflow-hidden bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20">
                   <video autoPlay loop muted playsInline className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500" title="WriteScholar AI Quiz Generator — Turn notes into practice tests" aria-label="WriteScholar AI Quiz Generator — Turn notes into practice tests instantly"><source src="/writescholar-quiz-generator-demo.mp4" type="video/mp4" /></video>
                 </div>
                 <div className="p-6">
                   <div className="flex items-center gap-3">
-                    <span className="w-10 h-10 rounded-xl bg-violet-100 dark:bg-violet-900/50 flex items-center justify-center text-lg">📝</span>
+                    <span className="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center text-lg">📝</span>
                     <h3 className="text-xl font-bold text-stone-800 dark:text-stone-100">Generate Quizzes</h3>
                   </div>
                 </div>
               </div>
             </div>
             <div className="group relative animate-notes-fade-in-up opacity-0" style={{ animationDelay: '0.7s', animationFillMode: 'forwards' }}>
-              <div className="absolute -inset-1 bg-gradient-to-r from-emerald-400 to-teal-400 rounded-3xl blur-xl opacity-0 group-hover:opacity-40 transition-all duration-500 max-lg:opacity-25 max-lg:-inset-1.5"></div>
-              <div className="relative bg-white dark:bg-stone-800 rounded-3xl overflow-hidden shadow-xl border-2 border-stone-200/50 dark:border-stone-700 h-full hover:-translate-y-3 hover:scale-[1.02] hover:shadow-2xl hover:border-emerald-200/80 dark:hover:border-emerald-700/50 transition-all duration-500 max-lg:border-emerald-200/50 max-lg:dark:border-emerald-900/30 max-lg:shadow-emerald-500/10">
-                <div className="relative h-40 sm:h-56 overflow-hidden bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20">
+              <div className="absolute -inset-1 bg-gradient-to-r from-amber-400 to-orange-500 rounded-3xl blur-xl opacity-0 group-hover:opacity-40 transition-all duration-500 max-lg:opacity-25 max-lg:-inset-1.5"></div>
+              <div className="relative bg-white dark:bg-stone-800 rounded-3xl overflow-hidden shadow-xl border-2 border-stone-200/50 dark:border-stone-700 h-full hover:-translate-y-3 hover:scale-[1.02] hover:shadow-2xl hover:border-amber-200/80 dark:hover:border-amber-700/50 transition-all duration-500 max-lg:border-amber-200/50 max-lg:dark:border-amber-900/30 max-lg:shadow-amber-500/10">
+                <div className="relative h-40 sm:h-56 overflow-hidden bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20">
                   <video autoPlay loop muted playsInline className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500" title="WriteScholar Study Pack — AI flashcard generator from notes" aria-label="WriteScholar Study Pack — AI flashcard generator from notes"><source src="/writescholar-flashcards-demo.mp4" type="video/mp4" /></video>
                 </div>
                 <div className="p-6">
                   <div className="flex items-center gap-3">
-                    <span className="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center text-lg">🃏</span>
+                    <span className="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center text-lg">🃏</span>
                     <h3 className="text-xl font-bold text-stone-800 dark:text-stone-100">Create Flashcards</h3>
                   </div>
                 </div>
               </div>
             </div>
             <div className="group relative animate-notes-fade-in-up opacity-0" style={{ animationDelay: '0.8s', animationFillMode: 'forwards' }}>
-              <div className="absolute -inset-1 bg-gradient-to-r from-rose-400 to-pink-400 rounded-3xl blur-xl opacity-0 group-hover:opacity-40 transition-all duration-500 max-lg:opacity-25 max-lg:-inset-1.5"></div>
-              <div className="relative bg-white dark:bg-stone-800 rounded-3xl overflow-hidden shadow-xl border-2 border-stone-200/50 dark:border-stone-700 h-full hover:-translate-y-3 hover:scale-[1.02] hover:shadow-2xl hover:border-rose-200/80 dark:hover:border-rose-700/50 transition-all duration-500 max-lg:border-rose-200/50 max-lg:dark:border-rose-900/30 max-lg:shadow-rose-500/10">
-                <div className="relative h-40 sm:h-56 overflow-hidden bg-gradient-to-br from-rose-50 to-pink-50 dark:from-rose-900/20 dark:to-pink-900/20">
+              <div className="absolute -inset-1 bg-gradient-to-r from-orange-400 to-amber-500 rounded-3xl blur-xl opacity-0 group-hover:opacity-40 transition-all duration-500 max-lg:opacity-25 max-lg:-inset-1.5"></div>
+              <div className="relative bg-white dark:bg-stone-800 rounded-3xl overflow-hidden shadow-xl border-2 border-stone-200/50 dark:border-stone-700 h-full hover:-translate-y-3 hover:scale-[1.02] hover:shadow-2xl hover:border-amber-200/80 dark:hover:border-amber-700/50 transition-all duration-500 max-lg:border-amber-200/50 max-lg:dark:border-amber-900/30 max-lg:shadow-amber-500/10">
+                <div className="relative h-40 sm:h-56 overflow-hidden bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20">
                   <video autoPlay loop muted playsInline className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500" title="WriteScholar Crossword Generator — Create study puzzles from notes" aria-label="WriteScholar Crossword Generator — Create study puzzles from notes"><source src="/writescholar-crossword-demo.mp4" type="video/mp4" /></video>
                 </div>
                 <div className="p-6">
                   <div className="flex items-center gap-3">
-                    <span className="w-10 h-10 rounded-xl bg-rose-100 dark:bg-rose-900/50 flex items-center justify-center text-lg">🧩</span>
+                    <span className="w-10 h-10 rounded-xl bg-orange-100 dark:bg-orange-900/50 flex items-center justify-center text-lg">🧩</span>
                     <h3 className="text-xl font-bold text-stone-800 dark:text-stone-100">Build Crosswords</h3>
                   </div>
                 </div>
@@ -1202,7 +1304,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
             </div>
           </div>
           <div className="text-center mt-14 sm:mt-16 animate-notes-fade-in-up opacity-0" style={{ animationDelay: '0.9s', animationFillMode: 'forwards' }}>
-            <button onClick={() => onNavigate('signup')} className="group inline-flex items-center px-8 py-4 text-white font-bold rounded-2xl bg-violet-500 hover:bg-violet-600 hover:scale-105 active:scale-95 shadow-xl shadow-violet-500/30 hover:shadow-violet-500/40 transition-all duration-300 text-lg max-lg:px-10 max-lg:py-4 max-lg:shadow-violet-500/40">
+            <button onClick={() => onNavigate('signup')} className="group inline-flex items-center px-8 py-4 text-white font-bold rounded-2xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 hover:scale-105 active:scale-95 shadow-xl shadow-amber-500/30 hover:shadow-amber-500/40 transition-all duration-300 text-lg max-lg:px-10 max-lg:py-4 max-lg:shadow-amber-500/40">
               Try Study Tools Free
               <svg className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
             </button>
@@ -1375,8 +1477,8 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
         </div>
       </section>
 
-      {/* STUDY YOUR WAY - Tabbed video showcase (redesigned for cohesion) */}
-      <section className="relative py-16 sm:py-24 overflow-hidden bg-white dark:bg-stone-900">
+      {/* STUDY YOUR WAY - Tabbed video showcase (hidden) */}
+      <section className="hidden relative py-16 sm:py-24 overflow-hidden bg-white dark:bg-stone-900">
         {/* Subtle radial gradient - matches Study Better Together / One Code vibe */}
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_60%_at_50%_0%,rgba(99,102,241,0.06),transparent_60%)] dark:bg-[radial-gradient(ellipse_70%_60%_at_50%_0%,rgba(139,92,246,0.05),transparent_60%)]" />
         <div className="absolute bottom-0 left-0 right-0 h-1/2 bg-gradient-to-t from-violet-50/50 to-transparent dark:from-violet-950/20 dark:to-transparent pointer-events-none" />
@@ -1514,7 +1616,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                 onClick={() => { setMode('analyze'); setInputText(''); }}
                 className={`px-4 sm:px-5 py-2.5 rounded-2xl text-sm font-bold transition-all duration-200 hover:scale-105 active:scale-95 ${
                   mode === 'analyze' 
-                    ? 'bg-gradient-to-r from-lime-500 to-emerald-600 text-stone-900 shadow-lg shadow-lime-500/30' 
+                    ? 'bg-gradient-to-r from-rose-500 to-pink-600 text-white shadow-lg shadow-rose-500/30' 
                     : 'text-stone-600 hover:bg-white hover:shadow-md'
                 }`}
               >
@@ -1957,7 +2059,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                     ? mode === 'citations' 
                       ? 'border-cyan-400 shadow-xl shadow-cyan-500/20 ring-4 ring-cyan-400/20'
                       : mode === 'analyze'
-                      ? 'border-lime-400 shadow-xl shadow-lime-500/20 ring-4 ring-lime-400/20'
+                      ? 'border-rose-400 shadow-xl shadow-rose-500/20 ring-4 ring-rose-400/20'
                       : mode === 'humanize'
                       ? 'border-violet-400 shadow-xl shadow-violet-500/20 ring-4 ring-violet-400/20'
                       : mode === 'summarize'
@@ -1988,7 +2090,15 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                     disabled={!inputText.trim()}
                     className={`px-8 py-3.5 rounded-2xl flex items-center justify-center transition-all duration-200 font-bold text-base ${
                       inputText.trim()
-                        ? 'bg-gradient-to-r from-lime-400 to-emerald-500 hover:from-lime-300 hover:to-emerald-400 text-stone-900 shadow-lg shadow-lime-500/30 hover:scale-105 active:scale-95 cursor-pointer'
+                        ? mode === 'analyze'
+                          ? 'bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-400 hover:to-pink-500 text-white shadow-lg shadow-rose-500/30 hover:scale-105 active:scale-95 cursor-pointer'
+                          : mode === 'citations'
+                          ? 'bg-gradient-to-r from-cyan-400 to-teal-500 hover:from-cyan-300 hover:to-teal-400 text-white shadow-lg shadow-cyan-500/30 hover:scale-105 active:scale-95 cursor-pointer'
+                          : mode === 'humanize'
+                          ? 'bg-gradient-to-r from-violet-400 to-purple-500 hover:from-violet-300 hover:to-purple-400 text-white shadow-lg shadow-violet-500/30 hover:scale-105 active:scale-95 cursor-pointer'
+                          : mode === 'summarize'
+                          ? 'bg-gradient-to-r from-emerald-400 to-teal-500 hover:from-emerald-300 hover:to-teal-400 text-white shadow-lg shadow-emerald-500/30 hover:scale-105 active:scale-95 cursor-pointer'
+                          : 'bg-gradient-to-r from-orange-400 to-amber-500 hover:from-orange-300 hover:to-amber-400 text-white shadow-lg shadow-orange-500/30 hover:scale-105 active:scale-95 cursor-pointer'
                         : 'bg-stone-200 dark:bg-stone-700 text-stone-400 dark:text-stone-500 cursor-not-allowed'
                     }`}
                   >
@@ -2202,13 +2312,13 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
           </div>
           
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Essay Analyzer - Lime */}
+            {/* Essay Analyzer - Rose/Pink */}
             <button 
               onClick={() => onNavigate('signup')}
-              className="group relative bg-gradient-to-br from-lime-50 to-emerald-50 dark:from-lime-900/20 dark:to-emerald-900/20 rounded-3xl p-6 text-left hover:shadow-2xl hover:shadow-lime-500/20 hover:-translate-y-2 transition-all duration-300 overflow-hidden border border-lime-100 dark:border-lime-800/50"
+              className="group relative bg-gradient-to-br from-rose-50 to-pink-50 dark:from-rose-900/20 dark:to-pink-900/20 rounded-3xl p-6 text-left hover:shadow-2xl hover:shadow-rose-500/20 hover:-translate-y-2 transition-all duration-300 overflow-hidden border border-rose-100 dark:border-rose-800/50"
             >
-              <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-lime-400/20 to-emerald-400/20 rounded-full -translate-y-1/2 translate-x-1/2" />
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-lime-500 to-emerald-600 flex items-center justify-center mb-4 shadow-lg shadow-lime-500/30">
+              <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-rose-400/20 to-pink-400/20 rounded-full -translate-y-1/2 translate-x-1/2" />
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-rose-500 to-pink-600 flex items-center justify-center mb-4 shadow-lg shadow-rose-500/30">
                 <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
@@ -2320,14 +2430,14 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
           <div className="flex overflow-x-auto scrollbar-hide gap-2.5 sm:gap-3 mb-8 sm:mb-12 sm:mx-0 sm:px-0 sm:flex-wrap sm:justify-center pb-2 sm:pb-0 snap-x snap-mandatory sm:snap-none px-1">
             {helpCategories.map((category) => {
               const gradients: Record<string, string> = {
-                essays: 'from-lime-500 to-emerald-600',
+                essays: 'from-rose-500 to-pink-600',
                 exams: 'from-amber-500 to-orange-600',
                 summarizing: 'from-cyan-500 to-teal-600',
                 citations: 'from-violet-500 to-purple-600',
                 grammar: 'from-emerald-500 to-teal-600',
               };
               const shadowColors: Record<string, string> = {
-                essays: 'shadow-lime-500/30',
+                essays: 'shadow-rose-500/30',
                 exams: 'shadow-amber-500/30',
                 summarizing: 'shadow-cyan-500/30',
                 citations: 'shadow-violet-500/30',

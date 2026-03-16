@@ -9,36 +9,51 @@ interface AboutPageProps {
 }
 
 const AboutPage = ({ onNavigate, user, onLogout }: AboutPageProps) => {
+  const mainFeatures = [
+    { id: 'analyze', title: 'Essay Analyzer', desc: 'Professor-style feedback on structure, clarity, citations. Grade-level rubric.', accent: 'rose', emoji: '📝' },
+    { id: 'citations', title: 'Online Citations', desc: 'Find and format academic sources in APA, MLA, Chicago, Harvard, IEEE, Vancouver.', accent: 'sky', emoji: '📚' },
+    { id: 'dashboard', title: 'Study Packs', desc: 'Quizzes, flashcards, crosswords & lessons from any notes. One paste, five formats.', accent: 'amber', emoji: '📦' },
+    { id: 'focus-mode', title: 'Focus Mode', desc: 'Block YouTube, TikTok until you answer quiz questions from your notes. Earn your screen time.', accent: 'violet', emoji: '🔒' },
+  ];
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50/80 via-stone-50 to-white dark:from-stone-950 dark:via-stone-900 dark:to-stone-900">
+    <div className="min-h-screen relative transition-colors font-sans overflow-x-hidden">
+      {/* Mesh gradient background - matches Dashboard & Landing */}
+      <div className="fixed inset-0 -z-10 bg-[#faf9f7] dark:bg-stone-950" aria-hidden />
+      <div className="fixed inset-0 -z-10 bg-[radial-gradient(ellipse_120%_80%_at_20%_-10%,rgba(251,207,232,0.4),transparent_50%)] dark:bg-[radial-gradient(ellipse_120%_80%_at_20%_-10%,rgba(251,207,232,0.15),transparent_50%)] pointer-events-none" aria-hidden />
+      <div className="fixed inset-0 -z-10 bg-[radial-gradient(ellipse_100%_60%_at_80%_0%,rgba(196,181,253,0.35),transparent_50%)] dark:bg-[radial-gradient(ellipse_100%_60%_at_80%_0%,rgba(196,181,253,0.12),transparent_50%)] pointer-events-none" aria-hidden />
+      <div className="fixed inset-0 -z-10 bg-[radial-gradient(ellipse_80%_50%_at_50%_100%,rgba(254,215,170,0.3),transparent_50%)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_100%,rgba(254,215,170,0.1),transparent_50%)] pointer-events-none" aria-hidden />
+
+      {/* Floating blobs */}
+      <div className="fixed top-[10%] left-[5%] w-72 h-72 rounded-[40%_60%_70%_30%/40%_50%_60%_50%] bg-gradient-to-br from-fuchsia-300/25 to-pink-400/20 dark:from-fuchsia-500/15 dark:to-pink-600/10 blur-3xl animate-blob-float hidden xl:block pointer-events-none" />
+      <div className="fixed top-[20%] right-[10%] w-64 h-64 rounded-[60%_40%_30%_70%/60%_30%_70%_40%] bg-gradient-to-br from-violet-300/25 to-purple-400/20 dark:from-violet-500/15 dark:to-purple-600/10 blur-3xl animate-blob-float hidden xl:block pointer-events-none" style={{ animationDelay: '-2s' }} />
+      <div className="fixed bottom-[25%] left-[15%] w-48 h-48 rounded-[30%_70%_70%_30%/30%_30%_70%_70%] bg-gradient-to-br from-amber-300/20 to-orange-400/15 dark:from-amber-500/10 dark:to-orange-600/8 blur-3xl animate-blob-float hidden lg:block pointer-events-none" style={{ animationDelay: '-4s' }} />
+
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="about" />
 
-      {/* Hero Section - with illustration like landing page */}
-      <section className="relative py-16 sm:py-20 border-b border-stone-200/60 dark:border-stone-700/60 overflow-hidden">
+      {/* Hero Section */}
+      <section className="relative py-16 sm:py-20 overflow-hidden">
         <div className="absolute top-[35%] left-[5%] hidden xl:block text-4xl opacity-50 animate-float">🌍</div>
         <div className="absolute top-[40%] right-[6%] hidden xl:block text-3xl opacity-45 animate-float-delayed">✨</div>
         <div className="absolute bottom-[35%] left-[6%] hidden xl:block text-3xl opacity-45 animate-float">📚</div>
         <div className="absolute bottom-[30%] right-[5%] hidden xl:block text-4xl opacity-50 animate-float-delayed">🎓</div>
+        <div className="hidden lg:block absolute right-4 xl:right-12 top-1/2 -translate-y-1/2 z-10 opacity-90 animate-float">
+          <ScholarMascot size={112} animated={true} pose="default" />
+        </div>
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-center lg:gap-12 xl:gap-16">
-            {/* Mascot - top on mobile, left on desktop */}
-            <div className="flex lg:hidden flex-shrink-0 justify-center mb-2 order-1">
-              <ScholarMascot size={80} animated={true} pose="default" />
-            </div>
-            <div className="hidden lg:flex flex-shrink-0 items-center justify-center order-1">
-              <ScholarMascot size={160} animated={true} pose="default" />
-            </div>
-            <div className="flex-1 text-center lg:text-left max-w-3xl mx-auto lg:mx-0 order-2">
-              <span className="inline-flex items-center px-3 py-1 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-400 rounded-full text-sm font-semibold mb-6">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-10 lg:gap-12">
+            <div className="flex-1 text-center lg:text-left max-w-3xl mx-auto lg:mx-0">
+              <span className="inline-flex items-center px-4 py-1.5 bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-400 rounded-full text-sm font-semibold mb-6">
                 About Us
               </span>
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-stone-800 dark:text-stone-100 mb-6 leading-tight">
-                Empowering academic<br className="hidden sm:block" /> <span className="bg-gradient-to-r from-indigo-500 to-violet-600 bg-clip-text text-transparent">excellence</span> worldwide
+                Empowering academic<br className="hidden sm:block" /> <span className="text-violet-500">excellence</span> worldwide
               </h1>
-              <p className="text-lg text-stone-500 dark:text-stone-400 leading-relaxed">
-                We're building the complete AI toolkit for students: essay analysis, humanizing, summarizing, citation finding, quizzes, flashcards, crosswords, and more.
+              <p className="text-lg text-stone-600 dark:text-stone-400 leading-relaxed">
+                We&apos;re building the complete AI toolkit for students: essay feedback, citations, study packs, focus mode, and more.
               </p>
             </div>
+            <div className="hidden lg:block flex-shrink-0 w-24 h-28 xl:w-28 xl:h-32" />
           </div>
         </div>
       </section>
@@ -46,171 +61,129 @@ const AboutPage = ({ onNavigate, user, onLogout }: AboutPageProps) => {
       {/* Mission Section */}
       <section className="py-16 sm:py-20">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div>
+          <div className="grid lg:grid-cols-2 gap-8 sm:gap-12 items-center">
+            <div className="rounded-2xl sm:rounded-3xl border border-white/60 dark:border-stone-600/50 shadow-xl shadow-stone-900/5 dark:shadow-black/20 backdrop-blur-2xl bg-white/70 dark:bg-stone-800/70 p-6 sm:p-8">
               <h2 className="text-2xl sm:text-3xl font-extrabold text-stone-800 dark:text-stone-100 mb-6">Our mission</h2>
-              <p className="text-stone-500 dark:text-stone-400 leading-relaxed mb-4">
+              <p className="text-stone-600 dark:text-stone-400 leading-relaxed mb-4">
                 At WriteScholar, we believe exceptional academic writing should be accessible to everyone. Our mission is to democratize high-quality feedback by providing intelligent, AI-powered writing assistance.
               </p>
-              <p className="text-stone-500 dark:text-stone-400 leading-relaxed mb-6">
-                We help students, researchers, and academics improve their work and achieve their scholarly goals—whether they're writing their first essay or publishing groundbreaking research.
+              <p className="text-stone-600 dark:text-stone-400 leading-relaxed mb-6">
+                We help students, researchers, and academics improve their work and achieve their scholarly goals—whether they&apos;re writing their first essay or publishing groundbreaking research.
               </p>
               <div className="space-y-3">
-                {['AI essay analysis and feedback', 'Humanizer, summarizer, and citation finder', 'Study tools: quizzes, flashcards, crosswords'].map((item, i) => (
+                {['Essay analysis with professor-style feedback', 'Online citations in 6 styles', 'Study packs: quizzes, flashcards, crosswords'].map((item, i) => (
                   <div key={i} className="flex items-center space-x-3">
-                    <div className="w-6 h-6 bg-indigo-100 dark:bg-indigo-900/50 rounded-full flex items-center justify-center flex-shrink-0">
-                      <svg className="w-4 h-4 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="w-6 h-6 bg-violet-100 dark:bg-violet-900/50 rounded-full flex items-center justify-center flex-shrink-0">
+                      <svg className="w-4 h-4 text-violet-600 dark:text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                       </svg>
                     </div>
-                    <span className="text-stone-700 dark:text-stone-300">{item}</span>
+                    <span className="text-stone-700 dark:text-stone-300 font-medium">{item}</span>
                   </div>
                 ))}
               </div>
             </div>
             
-            <div className="bg-stone-800 dark:bg-stone-900 rounded-2xl p-8 text-white border border-stone-700">
-              <div className="grid grid-cols-2 gap-6">
-                <div className="text-center p-4">
-                  <div className="text-4xl font-bold mb-1 text-indigo-400">50K+</div>
-                  <div className="text-stone-300">Documents Analyzed</div>
-                </div>
-                <div className="text-center p-4">
-                  <div className="text-4xl font-bold mb-1 text-indigo-400">95%</div>
-                  <div className="text-stone-300">Satisfaction Rate</div>
-                </div>
-                <div className="text-center p-4">
-                  <div className="text-4xl font-bold mb-1 text-indigo-400">50+</div>
-                  <div className="text-stone-300">Countries</div>
-                </div>
-                <div className="text-center p-4">
-                  <div className="text-4xl font-bold mb-1 text-indigo-400">24/7</div>
-                  <div className="text-stone-300">Availability</div>
-                </div>
+            <div className="rounded-2xl sm:rounded-3xl overflow-hidden border border-white/60 dark:border-stone-600/50 shadow-xl shadow-stone-900/5 dark:shadow-black/20 backdrop-blur-2xl bg-gradient-to-br from-violet-500/10 via-purple-500/5 to-fuchsia-500/10 dark:from-violet-900/30 dark:via-purple-900/20 dark:to-fuchsia-900/20 p-6 sm:p-8">
+              <div className="grid grid-cols-2 gap-4 sm:gap-6">
+                {[
+                  { value: '38K+', label: 'Students' },
+                  { value: '5+', label: 'AI Tools' },
+                  { value: '6', label: 'Citation Styles' },
+                  { value: '50+', label: 'Countries' },
+                ].map((stat, i) => (
+                  <div key={i} className="text-center p-4 rounded-2xl bg-white/60 dark:bg-stone-800/50">
+                    <div className="text-3xl sm:text-4xl font-bold text-violet-600 dark:text-violet-400">{stat.value}</div>
+                    <div className="text-stone-600 dark:text-stone-400 text-sm font-medium">{stat.label}</div>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* What We Offer Section */}
-      <section className="py-16 sm:py-20 border-b border-stone-200/60 dark:border-stone-700/60">
+      {/* Main Features Section */}
+      <section className="py-16 sm:py-20">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="text-center mb-12">
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-stone-800 dark:text-stone-100 mb-4">What we offer</h2>
-            <p className="text-stone-500 dark:text-stone-400 max-w-xl mx-auto">
-              A complete suite of AI-powered tools for academic success
+          <div className="text-center mb-10">
+            <span className="inline-block px-4 py-1.5 bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-400 rounded-full text-sm font-semibold mb-4">
+              What we offer
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-stone-800 dark:text-stone-100 mb-4">Our main features</h2>
+            <p className="text-stone-600 dark:text-stone-400 max-w-xl mx-auto">
+              Essay feedback, citations, study packs & focus mode
             </p>
           </div>
           
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div className="group relative bg-gradient-to-br from-lime-50 to-emerald-50 dark:from-lime-900/20 dark:to-emerald-900/20 rounded-3xl p-6 text-left hover:shadow-2xl hover:shadow-lime-500/20 hover:-translate-y-2 transition-all duration-300 overflow-hidden border border-lime-100 dark:border-lime-800/50">
-              <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-lime-400/20 to-emerald-400/20 rounded-full -translate-y-1/2 translate-x-1/2" />
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-lime-500 to-emerald-600 flex items-center justify-center mb-4 shadow-lg shadow-lime-500/30 relative z-10">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-              </div>
-              <h3 className="font-bold text-stone-800 dark:text-stone-100 text-base mb-2 relative z-10">AI Essay Analyzer</h3>
-              <p className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed relative z-10">Get detailed feedback on structure, argumentation, grammar, and style. Like having a professor review your work instantly.</p>
-            </div>
-            
-            <div className="group relative bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20 rounded-3xl p-6 text-left hover:shadow-2xl hover:shadow-violet-500/20 hover:-translate-y-2 transition-all duration-300 overflow-hidden border border-violet-100 dark:border-violet-800/50">
-              <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-violet-400/20 to-purple-400/20 rounded-full -translate-y-1/2 translate-x-1/2" />
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center mb-4 shadow-lg shadow-violet-500/30 relative z-10">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
-              </div>
-              <h3 className="font-bold text-stone-800 dark:text-stone-100 text-base mb-2 relative z-10">AI Humanizer</h3>
-              <p className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed relative z-10">Transform AI-generated or stiff text into natural, human-sounding writing that maintains your voice and passes detection tools.</p>
-            </div>
-            
-            <div className="group relative bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 rounded-3xl p-6 text-left hover:shadow-2xl hover:shadow-emerald-500/20 hover:-translate-y-2 transition-all duration-300 overflow-hidden border border-emerald-100 dark:border-emerald-800/50">
-              <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-emerald-400/20 to-teal-400/20 rounded-full -translate-y-1/2 translate-x-1/2" />
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center mb-4 shadow-lg shadow-emerald-500/30 relative z-10">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16m-7 6h7" /></svg>
-              </div>
-              <h3 className="font-bold text-stone-800 dark:text-stone-100 text-base mb-2 relative z-10">AI Summarizer</h3>
-              <p className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed relative z-10">Condense lengthy articles, textbooks, or research papers into clear bullet points, paragraphs, or key takeaways.</p>
-            </div>
-            
-            <div className="group relative bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-3xl p-6 text-left hover:shadow-2xl hover:shadow-amber-500/20 hover:-translate-y-2 transition-all duration-300 overflow-hidden border border-amber-100 dark:border-amber-800/50">
-              <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-amber-400/20 to-orange-400/20 rounded-full -translate-y-1/2 translate-x-1/2" />
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center mb-4 shadow-lg shadow-amber-500/30 relative z-10">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-              </div>
-              <h3 className="font-bold text-stone-800 dark:text-stone-100 text-base mb-2 relative z-10">Citation Finder</h3>
-              <p className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed relative z-10">Find real, verifiable academic sources for any claim. Get properly formatted citations in APA, MLA, Chicago, and Harvard styles.</p>
-            </div>
-            
-            <div className="group relative bg-gradient-to-br from-cyan-50 to-teal-50 dark:from-cyan-900/20 dark:to-teal-900/20 rounded-3xl p-6 text-left hover:shadow-2xl hover:shadow-cyan-500/20 hover:-translate-y-2 transition-all duration-300 overflow-hidden border border-cyan-100 dark:border-cyan-800/50">
-              <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-cyan-400/20 to-teal-400/20 rounded-full -translate-y-1/2 translate-x-1/2" />
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-cyan-500 to-teal-600 flex items-center justify-center mb-4 shadow-lg shadow-cyan-500/30 relative z-10">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg>
-              </div>
-              <h3 className="font-bold text-stone-800 dark:text-stone-100 text-base mb-2 relative z-10">Quiz Generator</h3>
-              <p className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed relative z-10">Turn any notes or text into interactive quizzes. Multiple choice, true/false, and fill-in-the-blank with adjustable difficulty.</p>
-            </div>
-            
-            <div className="group relative bg-gradient-to-br from-indigo-50 to-violet-50 dark:from-indigo-900/20 dark:to-violet-900/20 rounded-3xl p-6 text-left hover:shadow-2xl hover:shadow-indigo-500/20 hover:-translate-y-2 transition-all duration-300 overflow-hidden border border-indigo-100 dark:border-indigo-800/50">
-              <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-indigo-400/20 to-violet-400/20 rounded-full -translate-y-1/2 translate-x-1/2" />
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center mb-4 shadow-lg shadow-indigo-500/30 relative z-10">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
-              </div>
-              <h3 className="font-bold text-stone-800 dark:text-stone-100 text-base mb-2 relative z-10">Flashcard Creator</h3>
-              <p className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed relative z-10">Generate study flashcards from any content. Flip through them in-app or export to PDF for on-the-go studying.</p>
-            </div>
-            
-            <div className="group relative bg-gradient-to-br from-pink-50 to-rose-50 dark:from-pink-900/20 dark:to-rose-900/20 rounded-3xl p-6 text-left hover:shadow-2xl hover:shadow-pink-500/20 hover:-translate-y-2 transition-all duration-300 overflow-hidden border border-pink-100 dark:border-pink-800/50 sm:col-span-2 lg:col-span-1">
-              <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-pink-400/20 to-rose-400/20 rounded-full -translate-y-1/2 translate-x-1/2" />
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-pink-500 to-rose-600 flex items-center justify-center mb-4 shadow-lg shadow-pink-500/30 relative z-10">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z" /></svg>
-              </div>
-              <h3 className="font-bold text-stone-800 dark:text-stone-100 text-base mb-2 relative z-10">Crossword Builder</h3>
-              <p className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed relative z-10">Create fun, interactive crossword puzzles from your study material. An engaging way to learn vocabulary and key concepts.</p>
-            </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
+            {mainFeatures.map((f) => {
+              const borderCls = f.accent === 'rose' ? 'border-rose-200/80 dark:border-rose-700/50 hover:border-rose-300 dark:hover:border-rose-500/60' : f.accent === 'sky' ? 'border-sky-200/80 dark:border-sky-700/50 hover:border-sky-300 dark:hover:border-sky-500/60' : f.accent === 'amber' ? 'border-amber-200/80 dark:border-amber-700/50 hover:border-amber-300 dark:hover:border-amber-500/60' : 'border-violet-200/80 dark:border-violet-700/50 hover:border-violet-300 dark:hover:border-violet-500/60';
+              const titleCls = f.accent === 'rose' ? 'text-rose-700 dark:text-rose-400' : f.accent === 'sky' ? 'text-sky-700 dark:text-sky-400' : f.accent === 'amber' ? 'text-amber-700 dark:text-amber-400' : 'text-violet-700 dark:text-violet-400';
+              const iconBgCls = f.accent === 'rose' ? 'bg-rose-100 dark:bg-rose-900/50' : f.accent === 'sky' ? 'bg-sky-100 dark:bg-sky-900/50' : f.accent === 'amber' ? 'bg-amber-100 dark:bg-amber-900/50' : 'bg-violet-100 dark:bg-violet-900/50';
+              return (
+                <button key={f.id} onClick={() => onNavigate(f.id)} className={`group relative rounded-2xl sm:rounded-3xl overflow-hidden border-2 ${borderCls} shadow-xl shadow-stone-900/5 dark:shadow-black/20 backdrop-blur-2xl bg-white/80 dark:bg-stone-800/80 p-6 hover:shadow-2xl transition-all duration-300 text-left`}>
+                  <div className="relative flex flex-col items-center text-center mb-4">
+                    <div className={`w-14 h-14 rounded-2xl ${iconBgCls} flex items-center justify-center mb-3 text-2xl`}>{f.emoji}</div>
+                    <h3 className={`font-bold ${titleCls} text-lg`}>{f.title}</h3>
+                  </div>
+                  <p className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed text-center">{f.desc}</p>
+                </button>
+              );
+            })}
+          </div>
+          <div className="text-center mt-8">
+            <button onClick={() => onNavigate('features')} className="text-violet-600 dark:text-violet-400 font-semibold hover:text-violet-700 dark:hover:text-violet-300 transition-colors">
+              See all features →
+            </button>
           </div>
         </div>
       </section>
 
       {/* Values Section with Mascot */}
-      <section className="py-16 sm:py-20 bg-white dark:bg-stone-900/50">
+      <section className="py-16 sm:py-20">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="text-center mb-12">
+          <div className="text-center mb-10">
+            <span className="inline-block px-4 py-1.5 bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-400 rounded-full text-sm font-semibold mb-4">
+              Principles
+            </span>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-stone-800 dark:text-stone-100 mb-4">Our values</h2>
-            <p className="text-stone-500 dark:text-stone-400 max-w-xl mx-auto">
+            <p className="text-stone-600 dark:text-stone-400 max-w-xl mx-auto">
               These principles guide everything we build at WriteScholar
             </p>
           </div>
           
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-2xl p-6 text-center hover:shadow-lg hover:border-indigo-300 dark:hover:border-indigo-600 transition-all">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
+            <div className="rounded-2xl sm:rounded-3xl border border-white/60 dark:border-stone-600/50 shadow-xl shadow-stone-900/5 dark:shadow-black/20 backdrop-blur-2xl bg-white/70 dark:bg-stone-800/70 p-6 text-center hover:shadow-2xl hover:border-violet-300 dark:hover:border-violet-500/60 transition-all">
               <div className="flex justify-center mb-4">
                 <ScholarMascot size={64} animated={false} pose="analyzing" />
               </div>
-              <h3 className="font-semibold text-stone-800 dark:text-stone-100 mb-2">Quality</h3>
-              <p className="text-stone-500 dark:text-stone-400 text-sm">Highest standards in AI analysis and feedback</p>
+              <h3 className="font-bold text-stone-800 dark:text-stone-100 mb-2">Quality</h3>
+              <p className="text-stone-600 dark:text-stone-400 text-sm">Highest standards in AI analysis and feedback</p>
             </div>
 
-            <div className="bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-2xl p-6 text-center hover:shadow-lg hover:border-indigo-300 dark:hover:border-indigo-600 transition-all">
+            <div className="rounded-2xl sm:rounded-3xl border border-white/60 dark:border-stone-600/50 shadow-xl shadow-stone-900/5 dark:shadow-black/20 backdrop-blur-2xl bg-white/70 dark:bg-stone-800/70 p-6 text-center hover:shadow-2xl hover:border-violet-300 dark:hover:border-violet-500/60 transition-all">
               <div className="flex justify-center mb-4">
                 <ScholarMascot size={64} animated={false} pose="thinking" />
               </div>
-              <h3 className="font-semibold text-stone-800 dark:text-stone-100 mb-2">Privacy</h3>
-              <p className="text-stone-500 dark:text-stone-400 text-sm">Enterprise-grade security for your documents</p>
+              <h3 className="font-bold text-stone-800 dark:text-stone-100 mb-2">Privacy</h3>
+              <p className="text-stone-600 dark:text-stone-400 text-sm">Enterprise-grade security for your documents</p>
             </div>
 
-            <div className="bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-2xl p-6 text-center hover:shadow-lg hover:border-indigo-300 dark:hover:border-indigo-600 transition-all">
+            <div className="rounded-2xl sm:rounded-3xl border border-white/60 dark:border-stone-600/50 shadow-xl shadow-stone-900/5 dark:shadow-black/20 backdrop-blur-2xl bg-white/70 dark:bg-stone-800/70 p-6 text-center hover:shadow-2xl hover:border-violet-300 dark:hover:border-violet-500/60 transition-all">
               <div className="flex justify-center mb-4">
                 <ScholarMascot size={64} animated={false} pose="pointing" />
               </div>
-              <h3 className="font-semibold text-stone-800 dark:text-stone-100 mb-2">Innovation</h3>
-              <p className="text-stone-500 dark:text-stone-400 text-sm">Continuous improvement of our technology</p>
+              <h3 className="font-bold text-stone-800 dark:text-stone-100 mb-2">Innovation</h3>
+              <p className="text-stone-600 dark:text-stone-400 text-sm">Continuous improvement of our technology</p>
             </div>
 
-            <div className="bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-2xl p-6 text-center hover:shadow-lg hover:border-indigo-300 dark:hover:border-indigo-600 transition-all">
+            <div className="rounded-2xl sm:rounded-3xl border border-white/60 dark:border-stone-600/50 shadow-xl shadow-stone-900/5 dark:shadow-black/20 backdrop-blur-2xl bg-white/70 dark:bg-stone-800/70 p-6 text-center hover:shadow-2xl hover:border-violet-300 dark:hover:border-violet-500/60 transition-all">
               <div className="flex justify-center mb-4">
                 <ScholarMascot size={64} animated={false} pose="waving" />
               </div>
-              <h3 className="font-semibold text-stone-800 dark:text-stone-100 mb-2">Accessibility</h3>
-              <p className="text-stone-500 dark:text-stone-400 text-sm">Tools for the global academic community</p>
+              <h3 className="font-bold text-stone-800 dark:text-stone-100 mb-2">Accessibility</h3>
+              <p className="text-stone-600 dark:text-stone-400 text-sm">Tools for the global academic community</p>
             </div>
           </div>
         </div>
@@ -256,7 +229,7 @@ const AboutPage = ({ onNavigate, user, onLogout }: AboutPageProps) => {
               <>
                 <button 
                   onClick={() => onNavigate('dashboard')}
-                  className="px-6 py-3 bg-gradient-to-r from-indigo-500 to-violet-600 text-white font-bold rounded-2xl hover:from-indigo-400 hover:to-violet-500 shadow-lg shadow-indigo-500/25 transition-all"
+                  className="px-6 py-3 bg-gradient-to-r from-violet-500 to-purple-600 text-white font-bold rounded-2xl hover:from-violet-400 hover:to-purple-500 shadow-lg shadow-violet-500/25 transition-all"
                 >
                   Go to Dashboard
                 </button>
@@ -271,7 +244,7 @@ const AboutPage = ({ onNavigate, user, onLogout }: AboutPageProps) => {
               <>
                 <button 
                   onClick={() => onNavigate('signup')}
-                  className="px-6 py-3 bg-gradient-to-r from-indigo-500 to-violet-600 text-white font-bold rounded-2xl hover:from-indigo-400 hover:to-violet-500 shadow-lg shadow-indigo-500/25 transition-all"
+                  className="px-6 py-3 bg-gradient-to-r from-violet-500 to-purple-600 text-white font-bold rounded-2xl hover:from-violet-400 hover:to-purple-500 shadow-lg shadow-violet-500/25 transition-all"
                 >
                   Try Free
                 </button>

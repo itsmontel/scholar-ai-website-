@@ -173,26 +173,34 @@ export default function FocusModeSettingsSection({ onBack, embedded = false, isP
   if (FOCUS_MODE_COMING_SOON) {
     return (
       <div className="min-h-0 flex-1 overflow-auto">
-        <div className="p-6 sm:p-8 max-w-2xl">
+        <div className="p-6 sm:p-8 max-w-4xl">
           {embedded && onBack && (
             <button
               onClick={onBack}
-              className="mb-6 flex items-center gap-2 text-stone-500 hover:text-stone-700 dark:hover:text-stone-300 text-sm font-medium"
+              className="mb-6 flex items-center gap-2 text-stone-500 hover:text-stone-700 dark:hover:text-stone-300 text-sm font-medium transition-colors"
             >
               ← Back to Dashboard
             </button>
           )}
-          <div className="bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-2xl p-8 sm:p-10 text-center">
-            <span className="inline-flex items-center px-3 py-1 bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-400 rounded-full text-sm font-semibold mb-6">
-              Coming Soon
-            </span>
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center mx-auto mb-6 text-3xl">
-              🔒
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+            <div className="rounded-2xl overflow-hidden bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-950/30 dark:to-purple-950/20 border border-violet-200/60 dark:border-violet-800/40 shadow-lg">
+              <p className="px-4 pt-4 pb-2 text-sm font-bold text-stone-700 dark:text-stone-300">See how it works</p>
+              <div className="aspect-video bg-stone-900">
+                <video autoPlay loop muted playsInline className="w-full h-full object-contain" title="WriteScholar Focus Mode">
+                  <source src="/writescholar-focus-mode-demo.mp4" type="video/mp4" />
+                </video>
+              </div>
             </div>
-            <h2 className="text-xl font-bold text-stone-800 dark:text-stone-100 mb-3">Focus Mode is on its way</h2>
-            <p className="text-stone-500 dark:text-stone-400 text-sm leading-relaxed max-w-md mx-auto">
-              Our Chrome extension is currently under review. Soon you&apos;ll be able to block distracting sites and earn your screen time by studying first. Thanks for your patience.
-            </p>
+            <div className="relative rounded-3xl overflow-hidden p-[1px] bg-gradient-to-br from-violet-400/30 via-purple-400/20 to-rose-400/20 dark:from-violet-600/30 dark:via-purple-600/20 dark:to-rose-600/20">
+              <div className="rounded-[23px] bg-white/90 dark:bg-stone-800/95 backdrop-blur-xl border border-white/60 dark:border-stone-700/50 p-8 sm:p-10 flex flex-col justify-center">
+                <span className="inline-flex items-center px-4 py-1.5 bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 rounded-full text-sm font-bold mb-4 w-fit">Coming Soon</span>
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center mb-4 text-3xl shadow-lg">🔒</div>
+                <h2 className="text-xl font-extrabold text-stone-800 dark:text-stone-100 mb-2">Focus Mode is on its way</h2>
+                <p className="text-stone-600 dark:text-stone-400 text-sm leading-relaxed">
+                  Our Chrome extension is currently under review. Soon you&apos;ll be able to block distracting sites and earn your screen time by studying first. Thanks for your patience.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -202,10 +210,10 @@ export default function FocusModeSettingsSection({ onBack, embedded = false, isP
   if (loading) {
     return (
       <div className="p-6 sm:p-8">
-        <div className="h-8 w-48 bg-stone-200 dark:bg-stone-700 rounded-lg animate-pulse mb-6" />
+        <div className="h-8 w-48 bg-stone-200 dark:bg-stone-700 rounded-xl animate-pulse mb-6" />
         <div className="space-y-4">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="h-10 bg-stone-100 dark:bg-stone-800 rounded-xl animate-pulse" />
+            <div key={i} className="h-12 bg-stone-100 dark:bg-stone-800 rounded-2xl animate-pulse" />
           ))}
         </div>
       </div>
@@ -214,27 +222,72 @@ export default function FocusModeSettingsSection({ onBack, embedded = false, isP
 
   return (
     <div className="min-h-0 flex-1 overflow-auto">
-      <div className="p-6 sm:p-8 max-w-2xl">
+      <div className="p-6 sm:p-8 max-w-6xl">
         {embedded && onBack && (
           <button
             onClick={onBack}
-            className="mb-6 flex items-center gap-2 text-stone-500 hover:text-stone-700 dark:hover:text-stone-300 text-sm font-medium"
+            className="mb-6 flex items-center gap-2 text-stone-500 hover:text-stone-700 dark:hover:text-stone-300 text-sm font-medium transition-colors"
           >
             ← Back to Dashboard
           </button>
         )}
 
-        <div className="bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-2xl p-6 sm:p-8">
-          <h2 className="text-xl font-bold text-stone-800 dark:text-stone-100 mb-2">Focus Mode Settings</h2>
-          <p className="text-stone-600 dark:text-stone-400 text-sm mb-6">
-            {isPaidUser
-              ? 'Block distracting sites until you answer study questions. Pro: 10 sites. Premium: unlimited. Configure questions and unlock duration below.'
-              : 'Block 1 site until you answer study questions. Pro: 10 sites. Premium: unlimited. Upgrade for more.'}
-          </p>
+        {/* Side-by-side: Video left, Settings right (desktop) */}
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] gap-6 lg:gap-8">
+          {/* Video - How Focus Mode works */}
+          <div className="order-2 lg:order-1">
+            <div className="rounded-2xl overflow-hidden bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-950/30 dark:to-purple-950/20 border border-violet-200/60 dark:border-violet-800/40 shadow-lg">
+              <p className="px-4 pt-4 pb-2 text-sm font-bold text-stone-700 dark:text-stone-300">See how it works</p>
+              <div className="aspect-video bg-stone-900 flex items-center justify-center">
+                <video
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  className="w-full h-full object-contain"
+                  title="WriteScholar Focus Mode — Block distractions, answer quiz to unlock"
+                  aria-label="WriteScholar Focus Mode — Block distractions, answer quiz to unlock"
+                >
+                  <source src="/writescholar-focus-mode-demo.mp4" type="video/mp4" />
+                </video>
+              </div>
+            </div>
+          </div>
 
+          {/* Settings column */}
+          <div className="order-1 lg:order-2 min-w-0">
+            {/* Hero header - matches dashboard aesthetic */}
+            <div className="relative rounded-3xl overflow-hidden p-[1px] mb-6" style={{ background: 'linear-gradient(135deg, rgba(139,92,246,0.2) 0%, rgba(168,85,247,0.15) 50%, rgba(236,72,153,0.1) 100%)' }}>
+              <div className="rounded-[23px] bg-white/80 dark:bg-stone-800/90 backdrop-blur-xl border border-white/60 dark:border-stone-700/50 p-6 sm:p-8">
+                <div className="flex items-start gap-4">
+                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-2xl shadow-lg shadow-violet-500/30 flex-shrink-0">
+                    🔒
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <h2 className="text-xl sm:text-2xl font-extrabold text-stone-800 dark:text-stone-100 mb-1">Focus Mode</h2>
+                    <p className="text-stone-600 dark:text-stone-400 text-sm leading-relaxed mb-3">
+                      {isPaidUser
+                        ? 'Block distracting sites until you answer study questions. Pro: 10 sites. Premium: unlimited.'
+                        : 'Block 1 site until you answer study questions. Upgrade for more.'}
+                    </p>
+                    <a
+                      href={FOCUS_MODE_CHROME_EXTENSION_URL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-400 hover:to-purple-500 text-white text-sm font-bold shadow-md shadow-violet-500/30 transition-all hover:scale-[1.02]"
+                    >
+                      Get Chrome Extension →
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Settings card */}
+            <div className="rounded-2xl bg-white dark:bg-stone-800/80 border border-stone-200/80 dark:border-stone-700/50 shadow-sm overflow-hidden">
           {/* Sites to block */}
-          <div className="mb-8">
-            <h3 className="font-semibold text-stone-800 dark:text-stone-200 mb-3">
+          <div className="p-6 sm:p-8 border-b border-stone-100 dark:border-stone-700/50">
+            <h3 className="font-bold text-stone-800 dark:text-stone-100 mb-1">
               Sites to block
               {maxSites >= 99999 ? (
                 <span className="ml-2 text-sm font-normal text-stone-500">({blockedDomains.length} — unlimited)</span>
@@ -242,6 +295,7 @@ export default function FocusModeSettingsSection({ onBack, embedded = false, isP
                 <span className="ml-2 text-sm font-normal text-stone-500">({blockedDomains.length} of {maxSites})</span>
               )}
             </h3>
+            <p className="text-xs text-stone-500 dark:text-stone-400 mb-4">Toggle sites to block until you pass a study quiz</p>
             <div className="flex flex-wrap gap-2 mb-3">
               {presets.map((p) => {
                 const active = blockedDomains.includes(p.domain);
@@ -250,10 +304,10 @@ export default function FocusModeSettingsSection({ onBack, embedded = false, isP
                     key={p.domain}
                     onClick={() => toggleBlockedSite(p.domain)}
                     disabled={saving}
-                    className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
+                    className={`px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 ${
                       active
-                        ? 'bg-violet-600 text-white'
-                        : 'bg-stone-100 dark:bg-stone-700 text-stone-700 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-stone-600'
+                        ? 'bg-gradient-to-r from-violet-600 to-purple-600 text-white shadow-md shadow-violet-500/25'
+                        : 'bg-stone-100 dark:bg-stone-700/80 text-stone-600 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-stone-600 border border-stone-200/50 dark:border-stone-600/50'
                     }`}
                   >
                     {p.label}
@@ -268,26 +322,26 @@ export default function FocusModeSettingsSection({ onBack, embedded = false, isP
                     key={domain}
                     onClick={() => toggleBlockedSite(domain)}
                     disabled={saving}
-                    className="px-4 py-2 rounded-xl text-sm font-medium transition-colors bg-violet-600 text-white hover:bg-violet-500"
+                    className="px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors bg-gradient-to-r from-violet-600 to-purple-600 text-white shadow-md hover:opacity-90"
                   >
                     {domain}
                   </button>
                 ))}
             </div>
-            <div className="flex gap-2 mt-3">
+            <div className="flex gap-2 mt-4">
               <input
                 type="text"
                 value={customDomainInput}
                 onChange={(e) => { setCustomDomainInput(e.target.value); setAddError(''); }}
                 onKeyDown={(e) => e.key === 'Enter' && handleAddCustomDomain()}
                 placeholder="youtube.com, reddit.com..."
-                className="flex-1 px-4 py-2.5 rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 text-stone-800 dark:text-stone-200 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500"
+                className="flex-1 px-4 py-2.5 rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 text-stone-800 dark:text-stone-200 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-violet-400 transition-all"
               />
               <button
                 type="button"
                 onClick={handleAddCustomDomain}
                 disabled={saving || !customDomainInput.trim()}
-                className="px-4 py-2.5 bg-violet-600 text-white rounded-xl font-medium text-sm hover:bg-violet-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-4 py-2.5 bg-gradient-to-r from-violet-600 to-purple-600 text-white rounded-xl font-semibold text-sm hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
               >
                 Add
               </button>
@@ -325,13 +379,14 @@ export default function FocusModeSettingsSection({ onBack, embedded = false, isP
           </div>
 
           {/* Unlock duration */}
-          <div className="mb-8">
-            <h3 className="font-semibold text-stone-800 dark:text-stone-200 mb-3">Unlock duration</h3>
+          <div className="p-6 sm:p-8 border-b border-stone-100 dark:border-stone-700/50">
+            <h3 className="font-bold text-stone-800 dark:text-stone-100 mb-1">Unlock duration</h3>
+            <p className="text-xs text-stone-500 dark:text-stone-400 mb-3">How long sites stay unlocked after you pass the quiz</p>
             <select
               value={unlockDurationMs}
               onChange={(e) => handleUnlockDurationChange(Number(e.target.value))}
               disabled={saving}
-              className="px-4 py-2.5 rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 text-stone-800 dark:text-stone-200 font-medium"
+              className="px-4 py-2.5 rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 text-stone-800 dark:text-stone-200 font-semibold focus:ring-2 focus:ring-violet-400 focus:border-violet-400 transition-all"
             >
               {UNLOCK_DURATION_OPTIONS.map((o) => (
                 <option key={o.value} value={o.value}>
@@ -339,25 +394,24 @@ export default function FocusModeSettingsSection({ onBack, embedded = false, isP
                 </option>
               ))}
             </select>
-            <p className="text-xs text-stone-500 mt-1">How long sites stay unlocked after you pass the quiz</p>
           </div>
 
           {/* Quiz customization */}
-          <div className="mb-8">
-            <h3 className="font-semibold text-stone-800 dark:text-stone-200 mb-3">Unlock quiz rules</h3>
-            <div className="space-y-4">
+          <div className="p-6 sm:p-8">
+            <h3 className="font-bold text-stone-800 dark:text-stone-100 mb-3">Unlock quiz rules</h3>
+            <div className="space-y-5">
               <div>
-                <label className="block text-sm text-stone-600 dark:text-stone-400 mb-2">Number of questions</label>
+                <label className="block text-sm font-medium text-stone-600 dark:text-stone-400 mb-2">Number of questions</label>
                 <div className="flex gap-2">
                   {QUESTION_COUNT_OPTIONS.map((n) => (
                     <button
                       key={n}
                       onClick={() => handleQuestionCountChange(n)}
                       disabled={saving}
-                      className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
+                      className={`px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 ${
                         questionCount === n
-                          ? 'bg-violet-600 text-white'
-                          : 'bg-stone-100 dark:bg-stone-700 text-stone-700 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-stone-600'
+                          ? 'bg-gradient-to-r from-violet-600 to-purple-600 text-white shadow-md shadow-violet-500/25'
+                          : 'bg-stone-100 dark:bg-stone-700/80 text-stone-600 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-stone-600 border border-stone-200/50 dark:border-stone-600/50'
                       }`}
                     >
                       {n}
@@ -366,14 +420,14 @@ export default function FocusModeSettingsSection({ onBack, embedded = false, isP
                 </div>
               </div>
               <div>
-                <label className="block text-sm text-stone-600 dark:text-stone-400 mb-2">
-                  Minimum correct to unlock (e.g. {passThreshold} of {questionCount})
+                <label className="block text-sm font-medium text-stone-600 dark:text-stone-400 mb-2">
+                  Minimum correct to unlock ({passThreshold} of {questionCount})
                 </label>
                 <select
                   value={passThreshold}
                   onChange={(e) => handlePassThresholdChange(Number(e.target.value))}
                   disabled={saving}
-                  className="px-4 py-2.5 rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 text-stone-800 dark:text-stone-200 font-medium"
+                  className="px-4 py-2.5 rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 text-stone-800 dark:text-stone-200 font-semibold focus:ring-2 focus:ring-violet-400 focus:border-violet-400 transition-all"
                 >
                   {passThresholdOptions.map((n) => (
                     <option key={n} value={n}>
@@ -383,20 +437,13 @@ export default function FocusModeSettingsSection({ onBack, embedded = false, isP
                 </select>
               </div>
             </div>
+
+            {saveSuccess && (
+              <p className="text-sm text-emerald-600 dark:text-emerald-400 font-semibold mt-4">✓ Settings saved!</p>
+            )}
           </div>
-
-          {saveSuccess && (
-            <p className="text-sm text-emerald-600 dark:text-emerald-400 font-medium mb-4">Settings saved!</p>
-          )}
-
-          <a
-            href={FOCUS_MODE_CHROME_EXTENSION_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 font-medium text-sm"
-          >
-            Get Chrome Extension →
-          </a>
+        </div>
+          </div>
         </div>
       </div>
     </div>

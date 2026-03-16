@@ -53,15 +53,16 @@ const TermsOfServicePage: React.FC<TermsOfServicePageProps> = ({ onNavigate, use
                   following features, some of which are subject to plan-based usage limits:
                 </p>
                 <ul className="list-disc list-inside space-y-2 ml-4">
-                  <li><strong>Essay Analyzer</strong> — AI feedback on structure, grammar, argument, and citations</li>
+                  <li><strong>Essay Analyzer</strong> — professor-style AI feedback on structure, grammar, argument, citations, and tone</li>
+                  <li><strong>Citation Finder</strong> — discovers and formats academic sources in APA, MLA, Chicago, Harvard, and other styles</li>
+                  <li><strong>Study Pack</strong> — generates interactive lessons, flashcards, quizzes, crosswords, and Crater Blast (quiz game) from your notes in one go</li>
                   <li><strong>AI Humanizer</strong> — rewrites AI-generated text into natural human-sounding writing</li>
                   <li><strong>Paper Summarizer</strong> — condenses documents into bullet points or paragraph summaries</li>
-                  <li><strong>Quiz Generator</strong> — creates multiple choice, true/false, and fill-in-the-blank questions from any text</li>
-                  <li><strong>Flashcard Generator</strong> — creates flashcards from your notes and study materials</li>
-                  <li><strong>Crossword Generator</strong> — turns your content into crossword puzzles for study</li>
-                  <li><strong>Citation Finder</strong> — discovers and formats academic sources in APA, MLA, Chicago, Harvard, and other styles</li>
+                  <li><strong>Focus Mode</strong> — Chrome extension that blocks distracting sites until you complete study goals</li>
+                  <li><strong>Friends &amp; Sharing</strong> — share quizzes, flashcards, and crosswords with friends; add friends via unique codes</li>
                   <li><strong>Document Upload &amp; Library</strong> — upload and manage PDF, DOCX, and TXT files</li>
-                  <li><strong>PDF &amp; DOCX Export</strong> — download quizzes and analyses as formatted documents</li>
+                  <li><strong>PDF &amp; DOCX Export</strong> — download quizzes, flashcards, and analyses as formatted documents</li>
+                  <li><strong>Badges &amp; Achievements</strong> — earn badges for study milestones and usage</li>
                   <li><strong>Free Tools</strong> — word counter, grammar checker, thesis generator, essay outline generator, readability score, citation generator, text case converter, paraphrasing tips, GPA calculator, Pomodoro timer, scientific calculator, and unit converter</li>
                 </ul>
                 <p>
@@ -122,7 +123,7 @@ const TermsOfServicePage: React.FC<TermsOfServicePageProps> = ({ onNavigate, use
                 <p>
                   <strong>Academic Integrity:</strong> WriteScholar's tools are designed to help you learn,
                   improve, and understand your work. You are solely responsible for ensuring that your use of
-                  our service — including the AI Humanizer, Quiz Generator, Flashcard Generator, Crossword Generator, and Essay Analyzer — complies with
+                  our service — including the AI Humanizer, Study Pack (quizzes, flashcards, crosswords, lessons), Essay Analyzer, and Citation Finder — complies with
                   your institution's academic integrity policies. WriteScholar does not encourage or condone
                   academic dishonesty.
                 </p>
@@ -138,8 +139,7 @@ const TermsOfServicePage: React.FC<TermsOfServicePageProps> = ({ onNavigate, use
                   your content solely to provide the service to you.
                 </p>
                 <p>
-                  <strong>AI-generated outputs</strong> (humanized text, summaries, quiz questions, flashcards, crossword puzzles, essay
-                  feedback, citations) are provided for your personal use. We do not claim ownership of
+                  <strong>AI-generated outputs</strong> (essay feedback, citations, lessons, quiz questions, flashcards, crossword puzzles, humanized text, summaries) are provided for your personal use. We do not claim ownership of
                   these outputs, but make no representations about their accuracy, originality, or
                   fitness for any particular purpose.
                 </p>
@@ -175,10 +175,10 @@ const TermsOfServicePage: React.FC<TermsOfServicePageProps> = ({ onNavigate, use
               <h2 className="text-xl sm:text-2xl font-bold text-stone-800 dark:text-stone-100 mb-4">8. AI Processing Disclosure</h2>
               <div className="space-y-4 text-stone-600 dark:text-stone-400">
                 <p>
-                  Our AI features (Humanizer, Summarizer, Quiz Generator, Flashcard Generator, Crossword Generator, Citation Finder, Essay Analyzer)
+                  Our AI features (Essay Analyzer, Citation Finder, Study Pack — lessons, flashcards, quizzes, crosswords — Humanizer, Summarizer)
                   are powered by large language models provided by OpenAI. When you use these features,
                   your submitted text is sent to OpenAI's API for processing. OpenAI's use of this data is
-                  governed by their own Privacy Policy and API usage policies.
+                  governed by their own Privacy Policy and API usage policies. Focus Mode runs as a Chrome extension and processes site-blocking rules locally; no content from blocked sites is sent to our servers.
                 </p>
                 <p>
                   We do not use your submitted content to train our own AI models. However, as an API
@@ -220,7 +220,7 @@ const TermsOfServicePage: React.FC<TermsOfServicePageProps> = ({ onNavigate, use
                 <p>
                   The service is provided "as is" without warranties of any kind, express or implied. We do
                   not guarantee the accuracy, completeness, or reliability of AI-generated outputs including
-                  essay feedback, citations, quiz questions, flashcards, crossword puzzles, humanized text, or summaries. You use the service
+                  essay feedback, citations, lessons, quiz questions, flashcards, crossword puzzles, humanized text, or summaries. You use the service
                   at your own risk.
                 </p>
                 <p>
@@ -240,7 +240,7 @@ const TermsOfServicePage: React.FC<TermsOfServicePageProps> = ({ onNavigate, use
                 </p>
                 <p>
                   Upon termination, your right to use the service ceases immediately. We may delete your
-                  account and associated data, including uploaded documents, quiz/flashcard/crossword history, and analysis history.
+                  account and associated data, including uploaded documents, study pack history (quizzes, flashcards, crosswords, lessons), analysis history, citation history, friends connections, and badge progress.
                 </p>
               </div>
             </section>

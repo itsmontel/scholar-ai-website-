@@ -95,63 +95,60 @@ const StreakWidget = ({ compact = false }: StreakWidgetProps) => {
     );
   }
 
-  // Full streak content (shared by full widget and modal)
-  const fullStreakContent = (
+  // Full streak content (shared by full widget and modal) - compact, clickable to open "How to earn" popup
+  const fullStreakContent = (onClick?: () => void) => (
     <div
-      className="rounded-2xl p-4 border-2 shadow-lg min-w-0 relative overflow-hidden"
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      title={onClick ? 'Click to learn how to earn a streak' : undefined}
+      onKeyDown={onClick ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick(); } } : undefined}
+      onClick={onClick}
+      className={`rounded-xl p-3 border border-violet-200/60 dark:border-violet-700/40 min-w-0 relative overflow-hidden ${onClick ? 'cursor-pointer hover:border-violet-300 dark:hover:border-violet-600 transition-colors' : ''}`}
       style={{
-        background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.12) 0%, rgba(168, 85, 247, 0.06) 100%)',
-        borderColor: 'rgba(139, 92, 246, 0.4)'
+        background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(168, 85, 247, 0.05) 100%)'
       }}
     >
-      <div className="absolute -top-6 -right-6 w-16 h-16 bg-violet-400/20 rounded-full blur-xl" />
-      <div className="absolute -bottom-4 -left-4 w-12 h-12 bg-purple-400/20 rounded-full blur-lg" />
-      <div className="flex items-center justify-center gap-2 mb-3 relative z-10">
-        <span className="text-4xl">🔥</span>
-        <span className="text-4xl font-bold bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">{data.currentStreak}</span>
+      <div className="absolute -top-4 -right-4 w-10 h-10 bg-violet-400/15 rounded-full blur-md" />
+      <div className="flex items-center justify-center gap-1.5 mb-2 relative z-10">
+        <span className="text-2xl">🔥</span>
+        <span className="text-2xl font-bold bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">{data.currentStreak}</span>
       </div>
-      <p className="text-center text-stone-600 font-medium mb-5 relative z-10">
+      <p className="text-center text-stone-600 dark:text-stone-400 text-xs font-medium mb-3 relative z-10">
         {data.currentStreak === 0
-          ? "Start your streak today!"
+          ? "Start today!"
           : data.hasActivityToday
-            ? "Great job! Log in tomorrow to continue your streak!"
-            : "Log in today to keep your streak going!"}
+            ? "Log in tomorrow to continue!"
+            : "Log in today to keep it going!"}
       </p>
-      <div className="bg-white/80 backdrop-blur-sm rounded-xl border border-violet-200/50 p-3 mb-4 min-w-0 relative z-10">
+      <div className="bg-white/70 dark:bg-stone-800/70 backdrop-blur-sm rounded-lg border border-violet-200/40 dark:border-violet-700/30 p-2 min-w-0 relative z-10">
         <div className="grid grid-cols-7 gap-0.5">
           {getWeekDays().map((day, index) => (
-            <div key={index} className="flex flex-col items-center gap-1 min-w-0">
+            <div key={index} className="flex flex-col items-center gap-0.5 min-w-0">
               <div
-                className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 transition-all text-sm ${
-                  day.hasActivity ? '' : 'bg-stone-100'
+                className={`w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0 transition-all text-[10px] ${
+                  day.hasActivity ? '' : 'bg-stone-100 dark:bg-stone-700'
                 } ${day.isToday && !day.hasActivity ? 'ring-2 ring-violet-400 ring-offset-0' : ''}`}
-                style={day.hasActivity ? { backgroundColor: 'rgba(139, 92, 246, 0.2)' } : undefined}
+                style={day.hasActivity ? { backgroundColor: 'rgba(139, 92, 246, 0.25)' } : undefined}
               >
                 {day.hasActivity ? '🔥' : ''}
               </div>
-              <span className={`text-[10px] font-semibold truncate w-full text-center ${day.isToday ? 'text-violet-600' : 'text-stone-500'}`}>
+              <span className={`text-[9px] font-semibold truncate w-full text-center ${day.isToday ? 'text-violet-600 dark:text-violet-400' : 'text-stone-500 dark:text-stone-400'}`}>
                 {day.label}
               </span>
             </div>
           ))}
         </div>
       </div>
-      <button
-        onClick={() => setShowInfoModal(true)}
-        className="w-full py-2.5 px-4 rounded-full border border-violet-200 bg-white/80 text-stone-700 font-medium text-sm hover:bg-violet-50 hover:border-violet-300 transition-all relative z-10"
-      >
-        How to earn a streak
-      </button>
       {longestStreakDisplay > 0 && (
-        <div className="flex items-center justify-center gap-4 mt-4 pt-4 border-t border-violet-200/50 relative z-10">
+        <div className="flex items-center justify-center gap-3 mt-2 pt-2 border-t border-violet-200/40 dark:border-violet-700/30 relative z-10">
           <div className="text-center">
-            <div className="text-lg font-bold text-violet-700">{longestStreakDisplay}</div>
-            <div className="text-xs text-stone-500">Longest streak</div>
+            <div className="text-sm font-bold text-violet-700 dark:text-violet-400">{longestStreakDisplay}</div>
+            <div className="text-[10px] text-stone-500 dark:text-stone-400">Longest</div>
           </div>
-          <div className="w-px h-8 bg-violet-200"></div>
+          <div className="w-px h-5 bg-violet-200 dark:bg-violet-700"></div>
           <div className="text-center">
-            <div className="text-lg font-bold text-violet-700">{data.totalActivityDays}</div>
-            <div className="text-xs text-stone-500">Total days</div>
+            <div className="text-sm font-bold text-violet-700 dark:text-violet-400">{data.totalActivityDays}</div>
+            <div className="text-[10px] text-stone-500 dark:text-stone-400">Total days</div>
           </div>
         </div>
       )}
@@ -190,7 +187,7 @@ const StreakWidget = ({ compact = false }: StreakWidgetProps) => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
-              {fullStreakContent}
+              {fullStreakContent(() => setShowInfoModal(true))}
             </div>
           </div>,
           document.body
@@ -238,30 +235,29 @@ const StreakWidget = ({ compact = false }: StreakWidgetProps) => {
     );
   }
 
-  // Full widget version - show loading skeleton when loading
+  // Full widget version - show loading skeleton when loading (compact)
   if (loading) {
     return (
-      <div className="rounded-2xl p-5 border border-stone-200 bg-stone-50 animate-pulse">
-        <div className="flex items-center justify-center gap-2 mb-3">
-          <span className="w-10 h-10 bg-stone-200 rounded-full"></span>
-          <span className="w-10 h-10 bg-stone-200 rounded"></span>
+      <div className="rounded-xl p-3 border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 animate-pulse">
+        <div className="flex items-center justify-center gap-1.5 mb-2">
+          <span className="w-6 h-6 bg-stone-200 dark:bg-stone-600 rounded-full"></span>
+          <span className="w-6 h-6 bg-stone-200 dark:bg-stone-600 rounded"></span>
         </div>
-        <div className="h-4 bg-stone-200 rounded w-3/4 mx-auto mb-5"></div>
-        <div className="bg-white rounded-xl border border-stone-200 p-4 mb-4">
+        <div className="h-3 bg-stone-200 dark:bg-stone-600 rounded w-2/3 mx-auto mb-3"></div>
+        <div className="bg-white dark:bg-stone-700 rounded-lg border border-stone-200 dark:border-stone-600 p-2">
           <div className="flex justify-between">
             {[1,2,3,4,5,6,7].map(i => (
-              <div key={i} className="w-8 h-8 rounded-full bg-stone-200"></div>
+              <div key={i} className="w-4 h-4 rounded-full bg-stone-200 dark:bg-stone-600"></div>
             ))}
           </div>
         </div>
-        <div className="h-10 bg-stone-200 rounded-full"></div>
       </div>
     );
   }
 
   return (
     <>
-      {fullStreakContent}
+      {fullStreakContent(() => setShowInfoModal(true))}
 
       {/* Info Modal - rendered via portal to avoid layout/z-index issues */}
       {showInfoModal && createPortal(

@@ -1,7 +1,8 @@
 # Chrome Extension Security Audit
 
 **Extension:** WriteScholar Focus Mode  
-**Date:** 2025  
+**Version:** 1.0.1  
+**Date:** March 2026  
 **Manifest:** v3  
 
 ---
@@ -10,65 +11,62 @@
 
 | Severity | Count |
 |----------|-------|
-| High     | 0 (after fixes) |
-| Medium   | 0 (after fixes) |
-| Low      | 2 (addressed)  |
-| Info     | 2 |
+| High     | 0     |
+| Medium   | 0     |
+| Low      | 0     |
+| Info     | 2     |
+
+**Result: No vulnerabilities found.** All previously identified issues have been addressed. Current codebase is secure for production.
 
 ---
 
-## Findings
+## Audit Findings
 
-### 1. [FIXED] Open Redirect via postMessage (Medium)
+### Authentication & Token Handling
+- Auth token stored in `chrome.storage.local` (not page localStorage for extension context)
+- Token never logged or exposed in URLs
+- API calls use `Authorization: Bearer` header only
+- Content script reads token from page localStorage only on writescholar.com (same-origin)
 
-**Location:** `content.js` – `handleUnlockRequest()` → `window.location.replace(redirect)`
+### Input Validation
+- **Redirect validation:** `isValidRedirect()` in content.js enforces HTTPS, validates host matches site domain (no open redirect)
+- **Blocked domains:** `normalizeDomains()` validates format, limits to 500, extracts root domain
+- **UPDATE_BLOCKED_SITES:** `Array.isArray` check before processing
+- **Tab redirect:** `isTabOnBlockedDomain()` validates URL host against blocked list before redirecting
+- **Domain in HTML:** `escapeHtml()` applied to domain and formatted time in unlock timer (XSS prevention)
 
-**Issue:** The `redirect` URL is passed from `postMessage`, `CustomEvent`, or DOM and used directly without validation. A compromised page (e.g. XSS on writescholar.com) could redirect users to a malicious site after they pass the quiz.
+### Dangerous Patterns
+- No `eval()`, `new Function()`, or `document.write`
+- No inline scripts in popup HTML (external script only)
+- No inline event handlers (e.g. onclick="...") in HTML
+- Content script restricted to writescholar.com and localhost
 
-**Fix:** Validate that `redirect` matches the expected pattern: `https://` + validated site hostname only. Reject any redirect that does not match.
+### Message Handling
+- `postMessage` listener checks `e.source === window` (rejects cross-origin)
+- Background validates message types and payload structure
+- UNLOCK_SITE requires `site` parameter; redirect is validated before use
 
----
-
-### 2. [FIXED] Potential XSS in popup unlock timer (Low)
-
-**Location:** `popup.js` – `unlockTimerList.innerHTML = activeUnlocks.map(...)`
-
-**Issue:** The `domain` value is interpolated into HTML. Although domains are normalized when stored, a malformed or future source could inject HTML/script.
-
-**Fix:** Escape domain before inserting: replace `<`, `>`, `&`, `"` with HTML entities.
-
----
-
-### 3. [INFO] Broad host permission `<all_urls>`
-
-**Location:** `manifest.json`
-
-**Note:** Required for `declarativeNetRequest` to block arbitrary sites. The extension only performs redirects to writescholar.com, not arbitrary fetches. Acceptable for stated functionality.
-
----
-
-### 4. [INFO] Console logging in production
-
-**Location:** `background.js`, `content.js`
-
-**Note:** Multiple `console.log` statements. No sensitive data (tokens) are logged. Consider removing or gating behind a debug flag for production to reduce noise.
+### External Resources
+- Google Fonts loaded from fonts.googleapis.com (trusted CDN)
+- API base URL from same-origin api-config.json or stored value
+- No arbitrary script or style injection
 
 ---
 
-## Positive Practices
+## Informational Notes
 
-- ✅ Auth token stored in `chrome.storage.local` (not localStorage)
-- ✅ API calls use Bearer token, no token in URLs
-- ✅ Domain normalization limits to 20, trims, lowercases, extracts root
-- ✅ `Array.isArray` validation for `UPDATE_BLOCKED_SITES`
-- ✅ Content script restricted to writescholar.com and localhost
-- ✅ No `eval()`, `new Function()`, or `document.write`
-- ✅ Manifest v3 (service worker, declarativeNetRequest)
+### 1. Broad host permission `<all_urls>`
+**Location:** `manifest.json`  
+**Note:** Required for `declarativeNetRequest` to block arbitrary user-configured sites. Extension only performs redirects to writescholar.com, not arbitrary fetches or data exfiltration. Acceptable for stated functionality.
+
+### 2. Console logging
+**Location:** `background.js`, `content.js`  
+**Note:** Debug logs present. No sensitive data (tokens, passwords) are logged. Consider gating behind a debug flag for production builds if desired.
 
 ---
 
 ## Recommendations
 
-1. **Content Security Policy:** Manifest v3 enforces a strict CSP; ensure no inline scripts in popup.
-2. **Updates:** Keep dependencies (e.g. Google Fonts) and review new permissions on updates.
-3. **Token handling:** Consider short-lived tokens or refresh flow if backend supports it.
+1. **CSP:** Manifest v3 enforces strict CSP. Current popup uses no inline scripts; maintain this.
+2. **Updates:** Review permission changes on future updates; avoid adding `scripting` or `debugger` unless necessary.
+3. **Token refresh:** Backend supports JWT refresh; extension receives updated token via website dispatch on refresh.

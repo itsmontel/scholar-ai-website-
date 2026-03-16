@@ -17,7 +17,7 @@ const placeholders = [
   "Type your essay question and discover literature..."
 ];
 
-const suggestedTopics = [
+const suggestedTopics: string[] = [
   "Effects of social media on teenagers",
   "Climate change mitigation strategies",
   "AI in healthcare applications",
@@ -34,10 +34,34 @@ const CitationsPage = ({ onNavigate, user, onLogout }: CitationsPageProps) => {
   const [citationYearRange, setCitationYearRange] = useState('all');
   const [showSignupPrompt, setShowSignupPrompt] = useState(false);
   const [teaserTopic, setTeaserTopic] = useState('');
+  const [hasDoneCitation, setHasDoneCitation] = useState(false);
+  const [citationCheckLoaded, setCitationCheckLoaded] = useState(false);
 
   useEffect(() => {
     document.title = 'Find Citations – Academic Sources | WriteScholar';
   }, []);
+
+  useEffect(() => {
+    if (!user) {
+      setCitationCheckLoaded(true);
+      return;
+    }
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+      setCitationCheckLoaded(true);
+      return;
+    }
+    fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/analysis/citation-history`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    })
+      .then((res) => res.ok ? res.json() : { data: [] })
+      .then((json) => {
+        const data = json.data || [];
+        setHasDoneCitation(Array.isArray(data) && data.length > 0);
+      })
+      .catch(() => {})
+      .finally(() => setCitationCheckLoaded(true));
+  }, [user]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -125,131 +149,133 @@ const CitationsPage = ({ onNavigate, user, onLogout }: CitationsPageProps) => {
 
   return (
     <div className="min-h-screen relative transition-colors font-sans bg-stone-50/50 dark:bg-stone-900">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-15%,rgba(148,163,184,0.08),transparent)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-15%,rgba(100,116,139,0.06),transparent)] pointer-events-none" aria-hidden />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-15%,rgba(14,165,233,0.08),transparent)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-15%,rgba(59,130,246,0.06),transparent)] pointer-events-none" aria-hidden />
 
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="citations" />
 
-      <main className="relative max-w-3xl mx-auto px-4 sm:px-6 pt-8 sm:pt-12 pb-24 sm:pb-28">
-        {/* Main content - stacked: form on top, video below */}
+      <main className="relative max-w-7xl mx-auto px-4 sm:px-6 pt-8 sm:pt-12 pb-24 sm:pb-28">
         <div className="flex flex-col gap-8 lg:gap-10">
-          {/* Top: Form - clean minimalist card */}
-          <div className="order-1">
-            <div className="bg-white dark:bg-stone-800 rounded-3xl border border-stone-200 dark:border-stone-600 shadow-sm dark:shadow-stone-900/50 p-6 sm:p-8 space-y-6">
-              {/* Hero */}
-              <div className="flex items-start gap-4">
-                <div className="flex-shrink-0 hidden sm:block">
-                  <ScholarMascot size={72} animated={false} pose="default" />
-                </div>
-                <div>
-                  <h1 className="text-2xl sm:text-3xl font-extrabold text-stone-800 dark:text-stone-100 leading-tight tracking-tight">
-                    Find Citations
-                  </h1>
-                  <p className="text-sm text-stone-500 dark:text-stone-400 mt-1 leading-relaxed">
-                    Enter your research topic to discover relevant academic sources.
-                  </p>
-                </div>
+          {/* Top: Hero card - matches dashboard citations style */}
+          <div className="relative rounded-3xl sm:rounded-[2rem] overflow-hidden p-[2px] shadow-[0_20px_50px_-15px_rgba(14,165,233,0.25)] dark:shadow-[0_20px_50px_-15px_rgba(0,0,0,0.4)]" style={{ background: 'linear-gradient(135deg, rgba(14,165,233,0.2) 0%, rgba(59,130,246,0.15) 50%, rgba(99,102,241,0.1) 100%)' }}>
+            <div className="relative rounded-[22px] sm:rounded-[30px] bg-white/90 dark:bg-stone-800/95 backdrop-blur-2xl border border-white/50 dark:border-stone-700/50 shadow-inner p-6 sm:p-10">
+              <div className="absolute -top-20 -right-20 w-40 h-40 bg-sky-400/20 rounded-full blur-3xl pointer-events-none" />
+              <div className="absolute -bottom-20 -left-20 w-40 h-40 bg-blue-400/20 rounded-full blur-3xl pointer-events-none" />
+              {/* Hero headline - matches dashboard */}
+              <h2 className="relative text-2xl sm:text-3xl md:text-4xl font-extrabold text-stone-900 dark:text-white text-center mb-2 tracking-tight">
+                Find <span className="bg-gradient-to-r from-sky-500 via-blue-500 to-indigo-500 bg-clip-text text-transparent" style={{ WebkitBackgroundClip: 'text' }}>academic sources</span> in seconds
+              </h2>
+              <p className="relative text-stone-600 dark:text-stone-300 text-base sm:text-lg text-center mb-8 max-w-xl mx-auto leading-relaxed">
+                APA, MLA & Chicago. Peer-reviewed sources. Filter by year.
+              </p>
+              {/* Tick boxes - matches dashboard */}
+              <div className="relative grid grid-cols-2 sm:flex sm:flex-wrap justify-center gap-3 sm:gap-6 mb-8">
+                {['APA, MLA & Chicago', 'Peer-reviewed sources', 'Filter by year', 'Export ready'].map((f, i) => (
+                  <span key={i} className="flex items-center gap-2.5 text-stone-600 dark:text-stone-400 text-sm sm:text-base">
+                    <span className="flex-shrink-0 w-5 h-5 rounded-full bg-emerald-500/15 flex items-center justify-center">
+                      <svg className="w-3 h-3 text-emerald-600 dark:text-emerald-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
+                    </span>
+                    {f}
+                  </span>
+                ))}
               </div>
 
-              {/* Citation Options - pill/tag style */}
-              <div className="flex flex-wrap gap-3 justify-center">
-                <div className="inline-flex items-center bg-white dark:bg-stone-700/50 rounded-2xl px-4 py-2.5 border border-stone-200 dark:border-stone-600 shadow-sm">
-                  <span className="text-stone-500 dark:text-stone-400 mr-2 text-xs font-medium">Style:</span>
-                  <select
-                    value={citationStyle}
-                    onChange={(e) => setCitationStyle(e.target.value)}
-                    className="bg-transparent font-semibold text-stone-800 dark:text-stone-200 outline-none cursor-pointer text-sm"
-                  >
-                    <option value="APA">APA 7th</option>
-                    <option value="MLA">MLA 9th</option>
-                    <option value="Chicago">Chicago</option>
-                    <option value="Harvard">Harvard</option>
-                    <option value="IEEE">IEEE</option>
-                    <option value="Vancouver">Vancouver</option>
-                  </select>
-                </div>
-                <div className="inline-flex items-center bg-white dark:bg-stone-700/50 rounded-2xl px-4 py-2.5 border border-stone-200 dark:border-stone-600 shadow-sm">
-                  <span className="text-stone-500 dark:text-stone-400 mr-2 text-xs font-medium">Year:</span>
-                  <select
-                    value={citationYearRange}
-                    onChange={(e) => setCitationYearRange(e.target.value)}
-                    className="bg-transparent font-semibold text-stone-800 dark:text-stone-200 outline-none cursor-pointer text-sm"
-                  >
-                    <option value="all">All Time</option>
-                    <option value="3">Last 3 Years</option>
-                    <option value="5">Last 5 Years</option>
-                    <option value="10">Last 10 Years</option>
-                    <option value="15">Last 15 Years</option>
-                    <option value="20">Last 20 Years</option>
-                  </select>
-                </div>
+              {/* Citation options - style + year */}
+              <div className="flex justify-center gap-3 flex-wrap mb-6">
+                <select value={citationStyle} onChange={(e) => setCitationStyle(e.target.value)} className="px-4 py-2.5 rounded-2xl border border-stone-200/80 dark:border-stone-600/80 bg-white/90 dark:bg-stone-800/90 backdrop-blur-sm text-sm font-semibold shadow-sm focus:ring-2 focus:ring-sky-400 focus:border-sky-400 transition-all">
+                  <option value="APA">APA 7th</option>
+                  <option value="MLA">MLA 9th</option>
+                  <option value="Chicago">Chicago</option>
+                  <option value="Harvard">Harvard</option>
+                  <option value="IEEE">IEEE</option>
+                  <option value="Vancouver">Vancouver</option>
+                </select>
+                <select value={citationYearRange} onChange={(e) => setCitationYearRange(e.target.value)} className="px-4 py-2.5 rounded-2xl border border-stone-200/80 dark:border-stone-600/80 bg-white/90 dark:bg-stone-800/90 backdrop-blur-sm text-sm font-semibold shadow-sm focus:ring-2 focus:ring-sky-400 focus:border-sky-400 transition-all">
+                  <option value="all">All years</option>
+                  <option value="3">Last 3 years</option>
+                  <option value="5">Last 5 years</option>
+                  <option value="10">Last 10 years</option>
+                </select>
               </div>
 
-              {/* Input Area - large white field */}
-              <div className="space-y-3">
-                <div className="relative bg-white dark:bg-stone-700/30 rounded-2xl border border-stone-200 dark:border-stone-600 shadow-sm dark:shadow-inner focus-within:border-sky-400 dark:focus-within:border-sky-500 focus-within:ring-2 focus-within:ring-sky-400/20 transition-all">
-                  <textarea
-                    value={inputText}
-                    onChange={(e) => { setInputText(e.target.value); setShowWordWarning(false); }}
-                    onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey && isTextValid()) { e.preventDefault(); handleSubmit(); }}}
-                    placeholder={placeholders[placeholderIndex]}
-                    className="w-full min-h-[120px] sm:min-h-[140px] p-5 text-stone-800 dark:text-stone-100 text-base border-none outline-none resize-none bg-transparent placeholder-stone-400 dark:placeholder-stone-500 leading-relaxed rounded-2xl"
-                    onInput={(e) => {
-                      const target = e.target as HTMLTextAreaElement;
-                      target.style.height = 'auto';
-                      target.style.height = Math.min(target.scrollHeight, 300) + 'px';
-                    }}
-                  />
-                  <div className="absolute bottom-3 left-5 text-xs text-stone-400 dark:text-stone-500">
-                    {inputText.length} characters
-                  </div>
-                  {showWordWarning && (
-                    <div className="absolute -bottom-6 left-0 right-0 text-center">
-                      <span className="text-xs text-red-500">Please enter a research topic</span>
+              {/* "Start your first citation" callout - shown when user has never done a citation */}
+              {user && citationCheckLoaded && !hasDoneCitation && (
+                <div className="flex flex-col items-center gap-1 mb-4 animate-in fade-in slide-in-from-bottom-2 duration-500">
+                  <span className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-gradient-to-r from-sky-500/15 via-blue-500/15 to-sky-500/15 dark:from-sky-500/25 dark:via-blue-500/25 dark:to-sky-500/25 border border-sky-200/60 dark:border-sky-700/50 text-sky-700 dark:text-sky-200 text-sm font-bold shadow-lg shadow-sky-500/10">
+                    Start your first citation
+                  </span>
+                  <svg className="w-6 h-6 text-sky-500 dark:text-sky-400 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                  </svg>
+                </div>
+              )}
+
+              {/* Typing box - blue gradient like dashboard */}
+              <div className="relative mb-2 max-w-3xl mx-auto">
+                <div className="relative rounded-2xl sm:rounded-3xl p-[2px] bg-gradient-to-br from-sky-400/80 via-blue-400/80 to-indigo-400/80 dark:from-sky-500/60 dark:via-blue-500/60 dark:to-indigo-500/60 shadow-[0_20px_50px_-15px_rgba(14,165,233,0.25)] dark:shadow-[0_20px_50px_-15px_rgba(0,0,0,0.4)]">
+                  <div className="relative rounded-[14px] sm:rounded-[22px] bg-white dark:bg-stone-800/95 backdrop-blur-sm min-h-[140px] sm:min-h-[180px]">
+                    <textarea
+                      value={inputText}
+                      onChange={(e) => { setInputText(e.target.value); setShowWordWarning(false); }}
+                      onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey && isTextValid()) { e.preventDefault(); handleSubmit(); }}}
+                      placeholder={placeholders[placeholderIndex]}
+                      className="relative w-full min-h-[140px] sm:min-h-[180px] p-5 sm:p-6 text-stone-800 dark:text-stone-100 text-base sm:text-lg bg-transparent border-none outline-none resize-none placeholder-stone-400 dark:placeholder-stone-500 leading-relaxed"
+                      onInput={(e) => {
+                        const target = e.target as HTMLTextAreaElement;
+                        target.style.height = 'auto';
+                        target.style.height = Math.min(target.scrollHeight, 320) + 'px';
+                      }}
+                    />
+                    <div className="absolute bottom-4 left-5 text-sm text-stone-400 dark:text-stone-500 font-medium">
+                      {inputText.length} characters
                     </div>
-                  )}
+                    {showWordWarning && (
+                      <div className="absolute -bottom-6 left-0 right-0 text-center">
+                        <span className="text-sm font-medium text-red-500">Please enter a research topic</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
-                <button
-                  type="button"
-                  onClick={handleSubmit}
-                  disabled={!isTextValid() || isSearchingCitations}
-                  className={`w-full px-6 py-3.5 rounded-2xl flex items-center justify-center transition-all font-semibold text-sm shadow-sm ${
-                    isTextValid() && !isSearchingCitations
-                      ? 'bg-sky-500 hover:bg-sky-600 text-white cursor-pointer'
-                      : 'bg-stone-100 dark:bg-stone-700 text-stone-400 dark:text-stone-500 cursor-not-allowed border border-stone-200 dark:border-stone-600'
-                  }`}
-                >
-                  {isSearchingCitations ? (
-                    <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                    </svg>
-                  ) : (
-                    <>Find Sources</>
-                  )}
-                </button>
+                <div className="flex justify-center mt-6">
+                  <button
+                    type="button"
+                    onClick={handleSubmit}
+                    disabled={!isTextValid() || isSearchingCitations}
+                    className={`px-8 sm:px-10 py-3.5 rounded-2xl flex items-center justify-center gap-2 transition-all duration-200 font-bold text-base ${
+                      isTextValid() && !isSearchingCitations
+                        ? 'bg-gradient-to-r from-sky-500 via-blue-500 to-indigo-500 hover:from-sky-400 hover:to-indigo-400 text-white shadow-lg shadow-sky-500/30 hover:shadow-xl hover:shadow-sky-500/40 hover:-translate-y-0.5 active:scale-[0.98] cursor-pointer'
+                        : 'bg-stone-200 dark:bg-stone-700 text-stone-400 cursor-not-allowed'
+                    }`}
+                  >
+                    {isSearchingCitations ? (
+                      <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                      </svg>
+                    ) : (
+                      <>Find Sources</>
+                    )}
+                  </button>
+                </div>
               </div>
 
-              {/* Suggestions */}
-              <div className="pt-2">
-                <p className="text-sm font-medium text-stone-500 dark:text-stone-400 mb-2.5 text-center">Suggestions</p>
-                <div className="flex flex-wrap gap-2 justify-center">
-                  {suggestedTopics.map((topic, idx) => (
-                    <button
-                      key={idx}
-                      type="button"
-                      onClick={() => setInputText(topic)}
-                      className="px-4 py-2 bg-white dark:bg-stone-700/50 rounded-2xl border border-stone-200 dark:border-stone-600 text-stone-700 dark:text-stone-200 text-xs sm:text-sm font-medium hover:border-sky-300 dark:hover:border-sky-600 hover:bg-sky-50 dark:hover:bg-sky-900/20 transition-all shadow-sm"
-                    >
-                      {topic}
-                    </button>
-                  ))}
-                </div>
+              {/* Suggested topics */}
+              <div className="flex flex-wrap justify-center gap-2 pt-4">
+                {suggestedTopics.map((topic, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => setInputText(topic)}
+                    className="px-4 py-2.5 rounded-2xl bg-sky-50/90 dark:bg-sky-900/25 border border-sky-200/80 dark:border-sky-700/50 text-sky-700 dark:text-sky-300 text-sm font-semibold hover:bg-sky-100 dark:hover:bg-sky-900/40 hover:scale-[1.02] hover:border-sky-300 transition-all duration-200"
+                  >
+                    {topic}
+                  </button>
+                ))}
               </div>
             </div>
           </div>
 
           {/* Bottom: Video - See how it works */}
-          <div className="relative order-2">
+          <div className="relative">
             <div className="absolute -inset-2 bg-gradient-to-r from-sky-400/12 via-blue-400/12 to-sky-500/12 rounded-3xl blur-2xl pointer-events-none" />
             <div className="relative">
               <div className="flex items-center gap-2 mb-4">

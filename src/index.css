@@ -286,6 +286,30 @@
   animation: aliveGlow 3s ease-in-out infinite;
 }
 
+/* Gen Z dashboard - blob float, glow pulse, card bounce */
+@keyframes blob-float {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(20px, -15px) scale(1.05); }
+  66% { transform: translate(-10px, 10px) scale(0.95); }
+}
+@keyframes glow-pulse {
+  0%, 100% { opacity: 0.5; filter: blur(40px); }
+  50% { opacity: 0.8; filter: blur(50px); }
+}
+@keyframes card-bounce-in {
+  0% { opacity: 0; transform: translateY(20px) scale(0.95); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+.animate-blob-float {
+  animation: blob-float 8s ease-in-out infinite;
+}
+.animate-glow-pulse {
+  animation: glow-pulse 4s ease-in-out infinite;
+}
+.animate-card-bounce-in {
+  animation: card-bounce-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
 /* Card breathe - subtle scale */
 @keyframes cardBreathe {
   0%, 100% { transform: scale(1); }

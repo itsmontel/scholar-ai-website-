@@ -31,9 +31,10 @@ const PrivacyPolicyPage: React.FC<PrivacyPolicyPageProps> = ({ onNavigate, user,
                 <p>We collect the following types of information:</p>
                 <ul className="list-disc list-inside space-y-2 ml-4">
                   <li><strong>Account Information:</strong> First name, last name, email address, and hashed password when you register. If you sign in via Google, we receive your name and email from Google OAuth.</li>
-                  <li><strong>Text Content You Submit:</strong> Essays, documents, notes, and other text you paste or upload to use our AI tools (Humanizer, Summarizer, Quiz Generator, Flashcard Generator, Crossword Generator, Citation Finder, Essay Analyzer).</li>
+                  <li><strong>Text Content You Submit:</strong> Essays, documents, notes, and other text you paste or upload to use our AI tools (Essay Analyzer, Citation Finder, Study Pack — lessons, flashcards, quizzes, crosswords — Humanizer, Summarizer).</li>
                   <li><strong>Uploaded Documents:</strong> PDF, DOCX, and TXT files you upload for analysis, stored securely in cloud storage.</li>
-                  <li><strong>Usage Data:</strong> Monthly word counts for Humanizer, Summarizer, and study tools; number of analyses, citation searches, and quiz/flashcard/crossword generations performed; feature usage patterns.</li>
+                  <li><strong>Usage Data:</strong> Monthly word counts for Humanizer, Summarizer, and study tools; number of analyses, citation searches, and study pack generations performed; feature usage patterns; Focus Mode usage (sites blocked, unlocks); badges and achievements progress.</li>
+                  <li><strong>Friends &amp; Sharing Data:</strong> Friend connections, shared quizzes/flashcards/crosswords, and friend requests when you use the sharing features.</li>
                   <li><strong>Payment Information:</strong> Billing is processed by Stripe. We do not store your credit card number. We receive and store your Stripe customer ID and subscription status.</li>
                   <li><strong>Email Subscription Status:</strong> Whether you have subscribed to or unsubscribed from marketing communications.</li>
                   <li><strong>Communications:</strong> Messages you send to our support team.</li>
@@ -48,7 +49,7 @@ const PrivacyPolicyPage: React.FC<PrivacyPolicyPageProps> = ({ onNavigate, user,
                 <p>We use the information we collect to:</p>
                 <ul className="list-disc list-inside space-y-2 ml-4">
                   <li>Provide and operate all WriteScholar features and AI tools</li>
-                  <li>Process your text through AI models to deliver Humanizer, Summarizer, Quiz Generator, Flashcard Generator, Crossword Generator, Citation Finder, and Essay Analyzer results</li>
+                  <li>Process your text through AI models to deliver Essay Analyzer, Citation Finder, Study Pack (lessons, flashcards, quizzes, crosswords), Humanizer, and Summarizer results</li>
                   <li>Enforce monthly usage limits according to your subscription plan</li>
                   <li>Send transactional emails: account verification, password reset, and billing notifications</li>
                   <li>Send optional marketing emails about new features and updates (you may unsubscribe at any time)</li>
@@ -67,9 +68,9 @@ const PrivacyPolicyPage: React.FC<PrivacyPolicyPageProps> = ({ onNavigate, user,
                   operate the service. We do not sell your personal data.
                 </p>
                 <ul className="list-disc list-inside space-y-2 ml-4">
-                  <li><strong>OpenAI</strong> — Text you submit to AI-powered features (Humanizer, Summarizer, Quiz Generator, Flashcard Generator, Crossword Generator, Citation Finder, Essay Analyzer) is sent to OpenAI's API for processing. OpenAI's use of API data is governed by their <a href="https://openai.com/policies/privacy-policy" target="_blank" rel="noopener noreferrer" className="text-violet-600 dark:text-violet-400 hover:underline">Privacy Policy</a>.</li>
+                  <li><strong>OpenAI</strong> — Text you submit to AI-powered features (Essay Analyzer, Citation Finder, Study Pack, Humanizer, Summarizer) is sent to OpenAI's API for processing. OpenAI's use of API data is governed by their <a href="https://openai.com/policies/privacy-policy" target="_blank" rel="noopener noreferrer" className="text-violet-600 dark:text-violet-400 hover:underline">Privacy Policy</a>.</li>
                   <li><strong>Stripe</strong> — Payment processing and subscription management. Stripe receives your billing information. See <a href="https://stripe.com/privacy" target="_blank" rel="noopener noreferrer" className="text-violet-600 dark:text-violet-400 hover:underline">Stripe's Privacy Policy</a>.</li>
-                  <li><strong>Supabase</strong> — Our primary database and optional file storage provider, hosting your account data, document metadata, usage records, and quiz history.</li>
+                  <li><strong>Supabase</strong> — Our primary database and optional file storage provider, hosting your account data, document metadata, usage records, study pack history (quizzes, flashcards, crosswords, lessons), friends connections, and badge progress.</li>
                   <li><strong>Amazon Web Services (S3)</strong> — Cloud storage for uploaded document files in production environments.</li>
                   <li><strong>Email Provider (SMTP)</strong> — Transactional and marketing emails are delivered via our configured email service.</li>
                 </ul>
@@ -90,10 +91,9 @@ const PrivacyPolicyPage: React.FC<PrivacyPolicyPageProps> = ({ onNavigate, user,
                   customer, OpenAI's own data handling policies apply to data sent through their API.
                 </p>
                 <p>
-                  AI-generated outputs (humanized text, summaries, quiz questions, flashcards, crossword puzzles, citation suggestions,
-                  essay feedback) are provided as tools to assist your work. We make no warranty that
+                  AI-generated outputs (essay feedback, citations, lessons, quiz questions, flashcards, crossword puzzles, humanized text, summaries) are provided as tools to assist your work. We make no warranty that
                   these outputs are accurate, original, or free from error. You are responsible for
-                  reviewing all AI outputs before use.
+                  reviewing all AI outputs before use. Focus Mode runs as a Chrome extension; site-blocking rules are processed locally and we do not receive content from sites you block.
                 </p>
               </div>
             </section>
@@ -140,7 +140,7 @@ const PrivacyPolicyPage: React.FC<PrivacyPolicyPageProps> = ({ onNavigate, user,
                 <ul className="list-disc list-inside space-y-2 ml-4">
                   <li><strong>Account data:</strong> Retained while your account is active. Deleted upon account deletion.</li>
                   <li><strong>Uploaded documents:</strong> Retained until you delete them or your account.</li>
-                  <li><strong>Quiz, flashcard, and crossword history:</strong> Study materials are automatically deleted after 30 days.</li>
+                  <li><strong>Study pack history (quizzes, flashcards, crosswords, lessons):</strong> Study materials are automatically deleted after 30 days.</li>
                   <li><strong>Citation history and analysis history:</strong> Retained until deleted by you or as part of periodic cleanup.</li>
                   <li><strong>Monthly usage records:</strong> Retained for billing verification and limit enforcement.</li>
                   <li><strong>Email subscription records:</strong> Retained to honour unsubscribe requests; unsubscribing prevents you from being re-added.</li>

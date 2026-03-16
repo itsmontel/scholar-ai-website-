@@ -28,7 +28,7 @@ const STEPS: TutorialStep[] = [
   {
     id: 'welcome',
     title: 'Welcome to WriteScholar!',
-    body: `Hey! I'm ${MASCOT_NAME}, your study sidekick. Let me give you a quick tour so you know exactly where everything is. Ready?`,
+    body: `Hey! I'm ${MASCOT_NAME}, your study sidekick. Quick tour — then we'll get you to analyze your first essay. That's where the magic happens!`,
     emoji: '🎉',
     targetSelector: null,
     mascotPose: 'waving',
@@ -36,26 +36,36 @@ const STEPS: TutorialStep[] = [
   },
   {
     id: 'greeting',
-    title: 'Your personal dashboard',
-    body: "This is your home screen. Every time you open WriteScholar, you'll land right here. It shows your name, quick actions, and everything at a glance.",
+    title: 'Your dashboard',
+    body: "Your home base. Greeting, search, streak, friends, badges. All right here. Everything you create will show up below.",
     emoji: '🏠',
     targetSelector: '[data-tutorial="greeting-area"]',
     mascotPose: 'pointing',
     spotlightPadding: 10,
   },
   {
-    id: 'tool-cards',
-    title: 'All your tools, one tap away',
-    body: "These cards are the heart of WriteScholar. Each one opens a different workspace: essay feedback, citations, study tools, and more. Tap any card to switch instantly.",
-    emoji: '🛠️',
-    targetSelector: '[data-tutorial="tool-cards"]',
+    id: 'feature-cards',
+    title: 'Analyze, Citations, Study Pack & more',
+    body: "Analyze (essay feedback) is our star. Tap it to get professor-style feedback on your writing. Citations, Study Pack, Focus Mode, and More Tools are one tap away.",
+    emoji: '📝',
+    targetSelector: '[data-tutorial="feature-cards"]',
     mascotPose: 'pointing',
     spotlightPadding: 10,
   },
   {
+    id: 'analyze-input',
+    title: 'Your first step: Analyze your essay',
+    body: "Paste your essay here (min 200 words) or upload a PDF, DOCX, or TXT file. Many people prefer uploading. Then hit Analyze Text. You'll get professor-style feedback on structure, clarity, citations, and tone in under 60 seconds.",
+    emoji: '✨',
+    targetSelector: '[data-tutorial-target="essay-input-wrapper"]',
+    mascotPose: 'pointing',
+    spotlightPadding: 12,
+    interactSelector: '[data-tutorial="analyze-feature-card"]',
+  },
+  {
     id: 'recents',
-    title: 'Your recents',
-    body: "Everything you create shows up here—essays, study packs, citations, and more. Quick access to jump back into anything you've been working on.",
+    title: 'Recents',
+    body: "Everything you create (analyses, study packs, citations) shows up here. Quick access to jump back into anything. After your first analysis, something special will appear!",
     emoji: '📂',
     targetSelector: '[data-tutorial="saved-materials"]',
     mascotPose: 'pointing',
@@ -64,7 +74,7 @@ const STEPS: TutorialStep[] = [
   {
     id: 'finale',
     title: "You're ready!",
-    body: `That's the full tour! Pick whichever tool you need and dive in. ${MASCOT_NAME} will be here whenever you need a hand. Go ace this semester!`,
+    body: `Try it now. Paste your essay or upload a file, then hit Analyze Text. Professor-style feedback in under 60 seconds. When you're done, come back for a surprise!`,
     emoji: '🎓',
     targetSelector: null,
     mascotPose: 'celebrating',
@@ -161,7 +171,7 @@ function useConfetti(trigger: number) {
    ──────────────────────────────────────────────────────────────── */
 type Rect = { x: number; y: number; w: number; h: number };
 
-function useSmoothRect(target: Rect | null, duration = 600) {
+function useSmoothRect(target: Rect | null, duration = 900, useExpoEase = true) {
   const displayRef = useRef<Rect | null>(null);
   const fromRef = useRef<Rect | null>(null);
   const targetRef = useRef<Rect | null>(null);
@@ -191,9 +201,9 @@ function useSmoothRect(target: Rect | null, duration = 600) {
 
     const tick = (now: number) => {
       const t = Math.min(1, (now - startRef.current) / duration);
-      const ease = t < 0.5
-        ? 4 * t * t * t
-        : 1 - Math.pow(-2 * t + 2, 3) / 2;
+      const ease = useExpoEase
+        ? 1 - Math.pow(2, -10 * t)
+        : (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 
       const from = fromRef.current!;
       const to = targetRef.current!;
@@ -209,7 +219,7 @@ function useSmoothRect(target: Rect | null, duration = 600) {
     };
     animRef.current = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(animRef.current);
-  }, [target?.x, target?.y, target?.w, target?.h, duration]);
+  }, [target?.x, target?.y, target?.w, target?.h, duration, useExpoEase]);
 
   return displayRef.current;
 }
@@ -278,7 +288,8 @@ const InteractiveTutorial = ({ userName, onComplete }: InteractiveTutorialProps)
   const effectiveSelector = (isMobile && current.mobileTargetSelector) ? current.mobileTargetSelector : current.targetSelector;
 
   const confettiCanvas = useConfetti(confettiTrigger);
-  const smoothRect = useSmoothRect(rawRect, 600);
+  const useSnappyTransitions = step >= 3;
+  const smoothRect = useSmoothRect(rawRect, useSnappyTransitions ? 600 : 900, !useSnappyTransitions);
 
   useEffect(() => { requestAnimationFrame(() => setOverlayReady(true)); }, []);
 
@@ -307,13 +318,18 @@ const InteractiveTutorial = ({ userName, onComplete }: InteractiveTutorialProps)
     }
   }, [effectiveSelector]);
 
+  const isStep4WithInteract = step === 3 && !!current.interactSelector;
   useEffect(() => {
-    updateRect();
-    const timers = [50, 200, 500, 900].map(d => setTimeout(updateRect, d));
+    if (!isStep4WithInteract) {
+      updateRect();
+      const timers = [50, 200, 500, 900].map(d => setTimeout(updateRect, d));
+      return () => timers.forEach(clearTimeout);
+    }
+  }, [updateRect, isStep4WithInteract]);
+  useEffect(() => {
     window.addEventListener('scroll', updateRect, true);
     window.addEventListener('resize', updateRect);
     return () => {
-      timers.forEach(clearTimeout);
       window.removeEventListener('scroll', updateRect, true);
       window.removeEventListener('resize', updateRect);
     };
@@ -322,12 +338,38 @@ const InteractiveTutorial = ({ userName, onComplete }: InteractiveTutorialProps)
   /* ── Scroll into view ── */
   useEffect(() => {
     if (!effectiveSelector) return;
-    const el = document.querySelector(effectiveSelector);
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      [400, 700, 1000].forEach(d => setTimeout(updateRect, d));
+    const scrollToTarget = () => {
+      const el = document.querySelector(effectiveSelector!);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        const delays = step >= 3 ? [400, 700, 1000] : [500, 900, 1400, 1900];
+        delays.forEach(d => setTimeout(updateRect, d));
+      }
+    };
+    if (isStep4WithInteract) {
+      const clickEl = document.querySelector(current.interactSelector!);
+      if (clickEl) (clickEl as HTMLElement).click();
+      const t1 = setTimeout(() => {
+        const el = document.querySelector(effectiveSelector!);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          [250, 550, 900, 1300].forEach(d => setTimeout(updateRect, d));
+        }
+      }, 380);
+      return () => clearTimeout(t1);
     }
-  }, [step, effectiveSelector]);
+    if (step >= 3) {
+      scrollToTarget();
+      if (current.interactSelector) {
+        const t = setTimeout(scrollToTarget, 450);
+        return () => clearTimeout(t);
+      }
+    } else {
+      const initialDelay = current.interactSelector ? 600 : 100;
+      const t = setTimeout(scrollToTarget, initialDelay);
+      return () => clearTimeout(t);
+    }
+  }, [step, effectiveSelector, current.interactSelector, updateRect, isStep4WithInteract]);
 
   /* ── Content key for crossfade ── */
   useEffect(() => { setContentKey(k => k + 1); }, [step]);
@@ -337,16 +379,17 @@ const InteractiveTutorial = ({ userName, onComplete }: InteractiveTutorialProps)
     if (current.confetti) setConfettiTrigger(step);
   }, [step, current.confetti]);
 
-  /* ── Auto-click cards ── */
+  /* ── Auto-click cards (step 4 click is handled in scroll effect) ── */
   useEffect(() => {
-    if (current.interactSelector && prevStepRef.current !== step) {
+    if (current.interactSelector && prevStepRef.current !== step && !isStep4WithInteract) {
+      const delay = step >= 3 ? 120 : 550;
       const t = setTimeout(() => {
         const el = document.querySelector(current.interactSelector!) as HTMLElement | null;
         if (el) el.click();
-      }, 120);
+      }, delay);
       return () => clearTimeout(t);
     }
-  }, [step, current.interactSelector]);
+  }, [step, current.interactSelector, isStep4WithInteract]);
 
   useEffect(() => { prevStepRef.current = step; }, [step]);
 
@@ -369,10 +412,11 @@ const InteractiveTutorial = ({ userName, onComplete }: InteractiveTutorialProps)
     setTimeout(onComplete, 400);
   };
 
-  /* ── Tooltip position — computed from raw target rect (not smooth) for instant placement ── */
+  /* ── Tooltip position — use smoothRect for steps 0–2 (glides with spotlight), rawRect for 3+ (snappier) ── */
+  const rectForTooltip = (step < 3 && smoothRect) ? smoothRect : rawRect;
   const tooltipPos = useMemo(
-    () => computeTooltipPos(rawRect, tooltipH, padding),
-    [rawRect?.x, rawRect?.y, rawRect?.w, rawRect?.h, tooltipH, padding],
+    () => computeTooltipPos(rectForTooltip, tooltipH, padding),
+    [rectForTooltip?.x, rectForTooltip?.y, rectForTooltip?.w, rectForTooltip?.h, tooltipH, padding],
   );
 
   /* ── SVG overlay with smooth cutout ── */
@@ -426,11 +470,12 @@ const InteractiveTutorial = ({ userName, onComplete }: InteractiveTutorialProps)
 
   const progress = ((step + 1) / total) * 100;
 
+  const tooltipUsesSmoothRect = step < 3 && !!smoothRect;
   const tooltipCss: React.CSSProperties = {
     position: 'fixed',
     left: tooltipPos.left,
     width: tooltipPos.width,
-    transition: 'top 0.5s cubic-bezier(0.22,1,0.36,1), bottom 0.5s cubic-bezier(0.22,1,0.36,1), left 0.5s cubic-bezier(0.22,1,0.36,1)',
+    transition: tooltipUsesSmoothRect ? 'none' : 'top 0.5s cubic-bezier(0.22,1,0.36,1), bottom 0.5s cubic-bezier(0.22,1,0.36,1), left 0.5s cubic-bezier(0.22,1,0.36,1)',
     ...(tooltipPos.top !== undefined ? { top: tooltipPos.top } : {}),
     ...(tooltipPos.bottom !== undefined ? { bottom: tooltipPos.bottom } : {}),
     ...(tooltipPos.centered ? { transform: 'none' } : {}),
@@ -452,9 +497,9 @@ const InteractiveTutorial = ({ userName, onComplete }: InteractiveTutorialProps)
         <div className="relative bg-white dark:bg-stone-800 rounded-3xl shadow-2xl shadow-black/18 dark:shadow-black/40 border border-stone-200/80 dark:border-stone-700/60 overflow-hidden">
           {/* Progress bar */}
           <div className="h-1 bg-stone-100 dark:bg-stone-700">
-            <div
-              className="h-full bg-gradient-to-r from-indigo-500 via-violet-500 to-purple-500 rounded-r-full"
-              style={{ width: `${progress}%`, transition: 'width 0.7s cubic-bezier(0.22,1,0.36,1)' }}
+          <div
+            className="h-full bg-gradient-to-r from-indigo-500 via-violet-500 to-purple-500 rounded-r-full"
+            style={{ width: `${progress}%`, transition: 'width 0.9s cubic-bezier(0.22,1,0.36,1)' }}
             />
           </div>
 
@@ -508,7 +553,7 @@ const InteractiveTutorial = ({ userName, onComplete }: InteractiveTutorialProps)
                       width: i === step ? 18 : 5,
                       height: 5,
                       background: i === step ? '#6366f1' : i < step ? '#a5b4fc' : 'rgba(120,113,108,0.18)',
-                      transition: 'all 0.4s cubic-bezier(0.22,1,0.36,1)',
+                      transition: 'all 0.55s cubic-bezier(0.22,1,0.36,1)',
                     }}
                   />
                 ))}
@@ -542,28 +587,28 @@ const InteractiveTutorial = ({ userName, onComplete }: InteractiveTutorialProps)
       <style>{`
         @keyframes tutIn  { from { opacity: 0; } to { opacity: 1; } }
         @keyframes tutOut { from { opacity: 1; } to { opacity: 0; } }
-        .animate-tutIn  { animation: tutIn  0.45s ease-out forwards; }
-        .animate-tutOut { animation: tutOut 0.4s ease-in forwards; }
+        .animate-tutIn  { animation: tutIn  0.5s cubic-bezier(0.22,1,0.36,1) forwards; }
+        .animate-tutOut { animation: tutOut 0.5s cubic-bezier(0.4,0,0.2,1) forwards; }
 
         @keyframes tutContent {
-          0%   { opacity: 0; transform: translateY(6px); }
-          100% { opacity: 1; transform: translateY(0); }
+          0%   { opacity: 0; transform: translateY(8px) scale(0.98); }
+          100% { opacity: 1; transform: translateY(0) scale(1); }
         }
-        .animate-tutContent { animation: tutContent 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+        .animate-tutContent { animation: tutContent 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
 
         @keyframes tutMascot {
-          0%   { opacity: 0; transform: scale(0.8); }
-          60%  { transform: scale(1.04); }
+          0%   { opacity: 0; transform: scale(0.88); }
+          70%  { transform: scale(1.03); }
           100% { opacity: 1; transform: scale(1); }
         }
-        .animate-tutMascot { animation: tutMascot 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+        .animate-tutMascot { animation: tutMascot 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
 
         @keyframes tutEmoji {
-          0%   { opacity: 0; transform: scale(0.4) rotate(-10deg); }
-          60%  { transform: scale(1.15) rotate(3deg); }
+          0%   { opacity: 0; transform: scale(0.5) rotate(-8deg); }
+          70%  { transform: scale(1.08) rotate(2deg); }
           100% { opacity: 1; transform: scale(1) rotate(0deg); }
         }
-        .animate-tutEmoji { animation: tutEmoji 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+        .animate-tutEmoji { animation: tutEmoji 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
 
         @keyframes ringPulse {
           0%, 100% { opacity: 0.6; }

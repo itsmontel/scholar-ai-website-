@@ -10,11 +10,12 @@
   <url><loc>https://writescholar.com/more-tools</loc><lastmod>2026-03-06</lastmod><priority>0.8</priority><changefreq>monthly</changefreq></url>
   <url><loc>https://writescholar.com/help</loc><lastmod>2026-03-06</lastmod><priority>0.7</priority><changefreq>monthly</changefreq></url>
   <url><loc>https://writescholar.com/contact</loc><lastmod>2026-03-06</lastmod><priority>0.5</priority><changefreq>monthly</changefreq></url>
-  <url><loc>https://writescholar.com/about</loc><lastmod>2026-03-06</lastmod><priority>0.6</priority><changefreq>monthly</changefreq></url>
   <url><loc>https://writescholar.com/focus-mode</loc><lastmod>2026-03-15</lastmod><priority>0.9</priority><changefreq>weekly</changefreq></url>
 
-  <!-- AI Tools (free to try with account) -->
-  <url><loc>https://writescholar.com/tools/humanizer</loc><lastmod>2026-03-06</lastmod><priority>0.95</priority><changefreq>weekly</changefreq></url>
+  <!-- AI Tools - Essay Analyzer first (main asset) -->
+  <url><loc>https://writescholar.com/tools/analyze</loc><lastmod>2026-03-16</lastmod><priority>0.95</priority><changefreq>weekly</changefreq></url>
+  <url><loc>https://writescholar.com/tools/citations</loc><lastmod>2026-03-16</lastmod><priority>0.9</priority><changefreq>weekly</changefreq></url>
+  <url><loc>https://writescholar.com/tools/humanizer</loc><lastmod>2026-03-06</lastmod><priority>0.9</priority><changefreq>weekly</changefreq></url>
   <url><loc>https://writescholar.com/tools/summarizer</loc><lastmod>2026-03-06</lastmod><priority>0.9</priority><changefreq>weekly</changefreq></url>
   <url><loc>https://writescholar.com/tools/quiz-generator</loc><lastmod>2026-03-06</lastmod><priority>0.95</priority><changefreq>weekly</changefreq></url>
   <url><loc>https://writescholar.com/tools/create-flashcards</loc><lastmod>2026-03-13</lastmod><priority>0.95</priority><changefreq>weekly</changefreq></url>
