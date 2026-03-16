@@ -461,7 +461,7 @@ const AcademicAIApp = () => {
     }
   }, []);
 
-  // payment=cancelled: clear URL only; user stays on onboarding (hard paywall — must complete trial)
+  // payment=cancelled: clear URL only; user stays on onboarding (hard paywall — must complete purchase)
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get('payment') === 'cancelled') {

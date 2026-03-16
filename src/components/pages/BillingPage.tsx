@@ -424,12 +424,29 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
               
               {/* Price */}
               <div className="text-center mb-6">
-                <span className="text-4xl font-bold text-stone-800">
-                  ${plan.price}
-                </span>
-                <span className="text-stone-500 text-sm">
-                  /{plan.interval}
-                </span>
+                {plan.id !== 'free' && billingCycle === 'monthly' && currentPlan === 'free' && isTrialEligible ? (
+                  <div className="flex flex-col items-center gap-1">
+                    <span className="text-2xl font-semibold text-red-600 line-through decoration-2 decoration-red-500">
+                      ${plan.id === 'pro' ? '19.99' : '39.99'}
+                    </span>
+                    <span className="text-4xl font-bold text-stone-800">
+                      ${plan.id === 'pro' ? '9.99' : '29.99'}
+                    </span>
+                    <span className="text-stone-500 text-sm">
+                      /month <span className="text-rose-600 font-semibold">first month only</span>
+                    </span>
+                    <span className="text-xs text-stone-500">Then ${plan.id === 'pro' ? '19.99' : '39.99'}/mo</span>
+                  </div>
+                ) : (
+                  <>
+                    <span className="text-4xl font-bold text-stone-800">
+                      ${plan.price}
+                    </span>
+                    <span className="text-stone-500 text-sm">
+                      /{plan.interval}
+                    </span>
+                  </>
+                )}
               </div>
 
               {/* Features */}
@@ -445,15 +462,6 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
                   ))}
                 </ul>
               </div>
-
-              {/* Trial badge for paid plans */}
-              {plan.id !== 'free' && currentPlan === 'free' && isTrialEligible && (
-                <div className="mb-4">
-                  <span className="bg-violet-500 text-white px-3 py-1 rounded-full text-xs font-semibold">
-                    7-Day Free Trial
-                  </span>
-                </div>
-              )}
 
               {/* CTA Button */}
               <button
@@ -477,7 +485,7 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
                 ) : plan.id === 'free' ? (
                   'Stay Free'
                 ) : currentPlan === 'free' ? (
-                  isTrialEligible ? 'Try for Free' : `Upgrade to ${plan.name}`
+                  isTrialEligible ? 'Get $10 Off' : `Upgrade to ${plan.name}`
                 ) : (
                   `Switch to ${plan.name}`
                 )}

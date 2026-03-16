@@ -473,8 +473,8 @@ router.delete('/account', authenticateToken, async (req, res) => {
     );
 
     // Note: Deletes from users table only. trial_usage is intentionally NOT deleted —
-    // it tracks emails that have used a free trial, so re-registering with the same
-    // email cannot grant another trial.
+    // it tracks emails that have used the first-time offer, so re-registering with the same
+    // email cannot grant another discount.
     const { error } = await supabase
       .from('users')
       .delete()

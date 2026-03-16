@@ -8,9 +8,10 @@ class DocumentService {
 
   getSupabaseClient() {
     if (!this.supabase) {
+      // Use service role key to bypass RLS (required when documents table has RLS enabled)
       this.supabase = createClient(
         process.env.SUPABASE_URL,
-        process.env.SUPABASE_ANON_KEY
+        process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
       );
     }
     return this.supabase;
@@ -141,13 +142,7 @@ class DocumentService {
    */
   async deleteDocument(documentId, userId) {
     try {
-      // Use service role key for deletion to bypass RLS and trigger issues
-      const supabaseServiceRole = createClient(
-        process.env.SUPABASE_URL,
-        process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
-      );
-
-      const { error } = await supabaseServiceRole
+      const { error } = await this.getSupabaseClient()
         .from('documents')
         .delete()
         .eq('id', documentId)

@@ -457,8 +457,10 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
       <main className="min-h-screen relative transition-colors font-sans overflow-x-hidden" role="main">
       {/* HERO SECTION - Fun, Gen Z, full of energy */}
       <section className="relative min-h-[70vh] sm:min-h-[85vh] flex flex-col overflow-hidden">
-        {/* Background - soft violet tint, ends crisp at white for section break */}
-        <div className="absolute inset-0 bg-gradient-to-b from-violet-100/90 via-violet-50/55 to-white dark:from-stone-950 dark:via-stone-900/95 dark:to-stone-900" />
+        {/* Background - refined gradient: soft lavender to cream with depth */}
+        <div className="absolute inset-0 bg-gradient-to-br from-violet-100/80 via-violet-50/40 to-indigo-50/30 dark:from-stone-950 dark:via-stone-900/98 dark:to-stone-900" />
+        <div className="absolute inset-0 bg-gradient-to-t from-white/60 via-transparent to-violet-100/30 dark:from-stone-900/80 dark:via-transparent dark:to-violet-950/20" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_120%_80%_at_50%_0%,rgba(167,139,250,0.12),transparent_50%)] dark:bg-[radial-gradient(ellipse_120%_80%_at_50%_0%,rgba(139,92,246,0.06),transparent_50%)]" />
         
         {/* Floating shapes for mobile - adds depth like dashboard */}
         <div className="absolute top-[12%] left-[8%] w-12 h-12 rounded-2xl bg-gradient-to-br from-rose-400/20 to-pink-500/20 rotate-12 lg:hidden animate-float pointer-events-none" />
@@ -937,11 +939,11 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
 
       {/* H2 #2: Focus Mode - Earn Your Screen Time - Block Websites */}
       <section className="relative py-24 sm:py-36 overflow-hidden">
-        {/* Layered gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-b from-indigo-950 via-violet-900 to-purple-950 dark:from-indigo-950 dark:via-violet-950 dark:to-stone-900" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-10%,rgba(139,92,246,0.35),transparent_60%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_40%_at_90%_90%,rgba(236,72,153,0.2),transparent_50%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_40%_30%_at_10%_80%,rgba(99,102,241,0.15),transparent_50%)]" />
+        {/* Layered gradient - smoother, more balanced purple */}
+        <div className="absolute inset-0 bg-gradient-to-br from-indigo-950 via-violet-900 to-purple-950 dark:from-indigo-950 dark:via-violet-950 dark:to-stone-900" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_100%_60%_at_50%_-5%,rgba(139,92,246,0.3),transparent_55%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_50%_at_85%_85%,rgba(192,132,252,0.15),transparent_45%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_40%_at_15%_75%,rgba(129,140,248,0.12),transparent_45%)]" />
         
         {/* Floating decorative elements */}
         <div className="absolute top-20 left-[8%] hidden lg:block text-4xl opacity-40 animate-float">🔒</div>

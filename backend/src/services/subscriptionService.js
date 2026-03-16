@@ -401,8 +401,8 @@ const getPlanLimits = async (userId) => {
   }
 };
 
-// Check if an email is eligible for a free trial
-// Returns true if eligible, false if they've already used a trial
+// Check if an email is eligible for the first-time $10 off (OFF10)
+// Returns true if eligible, false if they've already used the offer
 const checkTrialEligibility = async (email) => {
   try {
     const normalizedEmail = email.toLowerCase().trim();
@@ -437,7 +437,7 @@ const checkTrialEligibility = async (email) => {
   }
 };
 
-// Record that an email has used a trial
+// Record that an email has used the first-time offer (prevents OFF10 reuse)
 const recordTrialUsage = async (email, stripeCustomerId, planType) => {
   try {
     const normalizedEmail = email.toLowerCase().trim();
@@ -490,17 +490,8 @@ const createCheckoutSession = async (customerId, planType, billingCycle, userId,
     // Get price ID based on plan and billing cycle
     const priceId = getPriceId(planType, billingCycle);
     
-    // Check if user is eligible for a free trial
-    let applyTrial = false;
-    if (userEmail) {
-      const trialEligibility = await checkTrialEligibility(userEmail);
-      applyTrial = trialEligibility.eligible;
-      
-      if (applyTrial) {
-        // Trial usage is recorded in the webhook (checkout.session.completed) only after
-        // the user actually enters card details and completes checkout — not just by opening it.
-      }
-    }
+    // Check if user is eligible for first-time discount (OFF10) — used for UI/eligibility only.
+    // No trial period; OFF10 is auto-applied for first-time purchasers in the route.
     
     // Use provided URLs or fallback to defaults
     const finalSuccessUrl = successUrl || `${process.env.FRONTEND_URL || 'http://localhost:5173'}/dashboard?payment=success`;
@@ -523,8 +514,7 @@ const createCheckoutSession = async (customerId, planType, billingCycle, userId,
           userId,
           planType,
           billingCycle,
-          source: 'writescholar',
-          hadTrial: applyTrial ? 'true' : 'false'
+          source: 'writescholar'
         }
       },
       metadata: {
@@ -536,11 +526,6 @@ const createCheckoutSession = async (customerId, planType, billingCycle, userId,
       // Allow customers to enter promo codes at checkout
       allow_promotion_codes: true
     };
-    
-    // Only add trial period if user is eligible
-    if (applyTrial) {
-      sessionConfig.subscription_data.trial_period_days = 7;
-    }
 
     // If a specific promo code is provided, apply it directly
     if (promoCode) {

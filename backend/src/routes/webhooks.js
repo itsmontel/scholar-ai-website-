@@ -164,13 +164,13 @@ async function handleCheckoutSessionCompleted(session) {
       console.error('Error recording subscription:', subError);
     }
 
-    // Record trial usage now that checkout is actually complete (card entered & confirmed).
-    // This prevents recording a trial for users who opened Stripe but never paid.
-    if (subscription.trial_end) {
-      try {
-        await subscriptionService.recordTrialUsage(user.email, customerId, plan);
-      } catch (trialError) {
-        console.error('🔥 WEBHOOK: Error recording trial usage (non-fatal):', trialError);
+    // Record first-time discount usage (prevents same email from getting OFF10 again after account deletion).
+    try {
+      await subscriptionService.recordTrialUsage(user.email, customerId, plan);
+    } catch (discountError) {
+      // Duplicate/ignore expected if already recorded
+      if (discountError?.code !== '23505') {
+        console.error('🔥 WEBHOOK: Error recording discount usage (non-fatal):', discountError);
       }
     }
 

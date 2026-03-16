@@ -158,7 +158,7 @@ const SoftPaywall = ({ userName, onStartTrial, onDismiss, onNavigatePricing, onN
 
         <div className="px-6 sm:px-8 pt-6 pb-8">
           {showLastChance ? (
-            /* Last chance - 50% OFF50 offer */
+            /* Last chance - $10 off OFF10 offer */
             <div className="animate-pwIn">
               <div className="text-center mb-6">
                 <span className="inline-block px-3 py-1.5 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 text-xs font-bold uppercase tracking-wider mb-4">
@@ -168,11 +168,11 @@ const SoftPaywall = ({ userName, onStartTrial, onDismiss, onNavigatePricing, onN
                   Wait! Don&apos;t miss out
                 </h3>
                 <p className="text-stone-500 dark:text-stone-400 text-sm mb-6">
-                  Get <span className="font-bold text-amber-600 dark:text-amber-500">50% off</span> your first month with code{' '}
-                  <span className="font-mono font-bold bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 px-2 py-0.5 rounded">OFF50</span>
+                  Get <span className="font-bold text-amber-600 dark:text-amber-500">$10 off</span> your first month with code{' '}
+                  <span className="font-mono font-bold bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 px-2 py-0.5 rounded">OFF10</span>
                 </p>
                 <button
-                  onClick={() => handleStartTrial('OFF50')}
+                  onClick={() => handleStartTrial('OFF10')}
                   disabled={isCheckoutLoading}
                   className="w-full py-4 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 disabled:from-stone-400 disabled:to-stone-500 text-white rounded-2xl font-bold text-base shadow-lg shadow-amber-500/30 transition-all flex items-center justify-center gap-2 disabled:cursor-wait"
                 >
@@ -186,7 +186,7 @@ const SoftPaywall = ({ userName, onStartTrial, onDismiss, onNavigatePricing, onN
                     </>
                   ) : (
                     <>
-                      Claim 50% off with OFF50 →
+                      Claim $10 off with OFF10 →
                     </>
                   )}
                 </button>
@@ -220,7 +220,7 @@ const SoftPaywall = ({ userName, onStartTrial, onDismiss, onNavigatePricing, onN
               Nice work, {firstName}! You're ready.
             </h2>
             <p className="text-stone-500 dark:text-stone-400 text-sm sm:text-base leading-relaxed">
-              Unlock the full power of WriteScholar, free for 7 days.
+              Unlock the full power of WriteScholar. Get $10 off your first month.
             </p>
           </div>
 
@@ -233,11 +233,11 @@ const SoftPaywall = ({ userName, onStartTrial, onDismiss, onNavigatePricing, onN
             </div>
 
             <div className="flex items-baseline gap-1 mb-1">
-              <span className="text-3xl sm:text-4xl font-extrabold text-stone-800 dark:text-stone-100">$0</span>
-              <span className="text-base text-stone-500 dark:text-stone-400 font-medium">for 7 days</span>
+              <span className="text-3xl sm:text-4xl font-extrabold text-stone-800 dark:text-stone-100">$9.99</span>
+              <span className="text-base text-stone-500 dark:text-stone-400 font-medium">first month</span>
             </div>
             <p className="text-xs text-stone-400 dark:text-stone-500 mb-4">
-              Then $19.99/mo for Pro. Cancel anytime, no strings.
+              $10 off Pro. Then $19.99/mo. Cancel anytime.
             </p>
 
             {/* Features checklist */}
@@ -280,7 +280,7 @@ const SoftPaywall = ({ userName, onStartTrial, onDismiss, onNavigatePricing, onN
               </>
             ) : (
               <>
-                Start my free 7-day trial
+                Get $10 Off First Month
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                 </svg>
@@ -300,7 +300,7 @@ const SoftPaywall = ({ userName, onStartTrial, onDismiss, onNavigatePricing, onN
             </span>
             <span className="flex items-center gap-1">
               <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
-              No charge today
+              Money-back guarantee
             </span>
           </div>
 

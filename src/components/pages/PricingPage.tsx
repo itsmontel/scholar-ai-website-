@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import Header from '../common/Header';
 import Footer from '../common/Footer';
-import PaymentModal from '../payment/PaymentModal';
 import ScholarMascot from '../common/ScholarMascot';
 
 interface PricingPageProps {
@@ -14,15 +13,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
   const [billingCycle, setBillingCycle] = useState('monthly');
   const [currentPlan, setCurrentPlan] = useState<string>('free');
   const [isTrialEligible, setIsTrialEligible] = useState<boolean>(true);
-  const [paymentModal, setPaymentModal] = useState<{
-    isOpen: boolean;
-    planType: 'pro' | 'premium';
-    billingCycle: 'monthly' | 'yearly';
-  }>({
-    isOpen: false,
-    planType: 'pro',
-    billingCycle: 'monthly'
-  });
+  const [processingPlan, setProcessingPlan] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchCurrentPlan = async () => {
@@ -83,6 +74,8 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
 
     if (planId === 'free') return;
 
+    setProcessingPlan(planId);
+
     if (currentPlan !== 'free') {
       try {
         const token = localStorage.getItem('authToken');
@@ -108,11 +101,33 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
         console.error('Error opening billing portal:', error);
       }
     } else {
-      setPaymentModal({
-        isOpen: true,
-        planType: planId as 'pro' | 'premium',
-        billingCycle: billingCycle as 'monthly' | 'yearly'
-      });
+      // Free user upgrading: go straight to Stripe checkout
+      try {
+        const token = localStorage.getItem('authToken');
+        const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/subscriptions/create-checkout-session`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            planType: planId as 'pro' | 'premium',
+            billingCycle: billingCycle as 'monthly' | 'yearly',
+            successUrl: `${window.location.origin}/dashboard?payment=success`,
+            cancelUrl: `${window.location.origin}/pricing?payment=cancelled`
+          })
+        });
+
+        const data = await response.json();
+        if (data.success && data.data?.checkoutUrl) {
+          window.location.href = data.data.checkoutUrl;
+        } else {
+          throw new Error(data.message || 'Failed to create checkout session');
+        }
+      } catch (error) {
+        console.error('Error starting checkout:', error);
+        setProcessingPlan(null);
+      }
     }
   };
 
@@ -195,9 +210,9 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
       limitations: [],
       popular: true,
       buttonText: !user 
-        ? 'Try for Free' 
+        ? 'Get $10 Off' 
         : (currentPlan === 'free' 
-          ? (isTrialEligible ? 'Try for Free' : 'Upgrade to Pro') 
+          ? (isTrialEligible ? 'Get $10 Off' : 'Upgrade to Pro') 
           : 'Switch to Pro'),
         buttonAction: () => handlePlanAction('pro')
     },
@@ -219,9 +234,9 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
       limitations: [],
       popular: false,
       buttonText: !user 
-        ? 'Try for Free' 
+        ? 'Get $10 Off' 
         : (currentPlan === 'free' 
-          ? (isTrialEligible ? 'Try for Free' : 'Upgrade to Premium') 
+          ? (isTrialEligible ? 'Get $10 Off' : 'Upgrade to Premium') 
           : 'Switch to Premium'),
       buttonAction: () => handlePlanAction('premium')
     }
@@ -229,8 +244,8 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
 
   const faqs = [
     {
-      question: "How does the 7-day free trial work?",
-      answer: "New users get a 7-day free trial on Pro or Premium plans. Your card is collected at checkout but won't be charged until the trial ends. Cancel anytime during the trial to avoid charges. Each email address can only use one free trial."
+      question: "How does the $10 off work?",
+      answer: "First-time subscribers get $10 off their first month on Pro or Premium. Pro starts at $9.99 (then $19.99/mo) and Premium at $29.99 (then $39.99/mo). The discount is applied automatically at checkout. Each email address can only use the offer once."
     },
     {
       question: "What's included in the free plan?",
@@ -277,11 +292,6 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
       return Math.round((savings / monthlyTotal) * 100);
     }
     return 0;
-  };
-
-  const handlePaymentSuccess = (subscriptionId: string) => {
-    console.log('Payment successful:', subscriptionId);
-    onNavigate('dashboard');
   };
 
   return (
@@ -370,27 +380,37 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
                   </span>
                 </div>
               )}
-              
-              {/* Trial badge for paid plans */}
-              {plan.id !== 'free' && currentPlan === 'free' && isTrialEligible && (
-                <div className="absolute -top-4 right-4">
-                  <span className="bg-violet-500 text-white px-3 py-1 rounded-full text-xs font-semibold">
-                    7-Day Free Trial
-                  </span>
-                </div>
-              )}
 
               <div className="text-center mb-8">
-                <h3 className="text-2xl text-stone-800 mb-2" style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 400 }}>{plan.name}</h3>
+                <h3 className="text-2xl text-stone-800 dark:text-stone-100 mb-2" style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 400 }}>{plan.name}</h3>
                 <p className="text-stone-500 dark:text-stone-400 mb-6">{plan.description}</p>
                 
                 <div className="mb-4">
-                  <span className="text-4xl font-bold text-stone-800 dark:text-stone-100">
-                    ${getPrice(plan)}
-                  </span>
-                  <span className="text-stone-500 dark:text-stone-400 ml-2">
-                    /{billingCycle === 'yearly' ? 'year' : 'month'}
-                  </span>
+                  {plan.id !== 'free' && billingCycle === 'monthly' ? (
+                    <>
+                      <div className="flex flex-col items-center gap-1">
+                        <span className="text-2xl font-semibold text-red-600 dark:text-red-400 line-through decoration-2 decoration-red-500">
+                          ${plan.id === 'pro' ? '19.99' : '39.99'}
+                        </span>
+                        <span className="text-4xl font-bold text-stone-800 dark:text-stone-100">
+                          ${plan.id === 'pro' ? '9.99' : '29.99'}
+                        </span>
+                        <span className="text-stone-500 dark:text-stone-400 text-sm">
+                          /month <span className="text-rose-600 dark:text-rose-400 font-semibold">first month only</span>
+                        </span>
+                        <span className="text-xs text-stone-500 dark:text-stone-400">Then ${plan.id === 'pro' ? '19.99' : '39.99'}/mo</span>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <span className="text-4xl font-bold text-stone-800 dark:text-stone-100">
+                        ${getPrice(plan)}
+                      </span>
+                      <span className="text-stone-500 dark:text-stone-400 ml-2">
+                        /{billingCycle === 'yearly' ? 'year' : 'month'}
+                      </span>
+                    </>
+                  )}
                 </div>
 
                 {getSavings(plan) > 0 && (
@@ -414,9 +434,9 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
               </div>
 
               <button
-                onClick={plan.id === currentPlan ? undefined : plan.buttonAction}
-                disabled={plan.id === currentPlan}
-                className={`w-full py-3 px-6 rounded-2xl font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
+                onClick={plan.id === currentPlan ? undefined : () => plan.buttonAction()}
+                disabled={plan.id === currentPlan || processingPlan !== null}
+                className={`w-full py-3 px-6 rounded-2xl font-bold transition-all duration-150 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 ${
                     plan.id === currentPlan
                     ? 'bg-stone-100 dark:bg-stone-700 text-stone-500 cursor-not-allowed'
                     : plan.popular
@@ -424,7 +444,16 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
                     : 'bg-stone-100 dark:bg-stone-700 hover:bg-stone-200 dark:hover:bg-stone-600 text-stone-800 dark:text-stone-100'
                 }`}
               >
-                {plan.id === currentPlan ? 'Current Plan' : plan.buttonText}
+                {plan.id === currentPlan ? (
+                  'Current Plan'
+                ) : processingPlan === plan.id ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <div className="animate-spin rounded-full h-5 w-5 border-2 border-current border-t-transparent" aria-hidden="true" />
+                    Redirecting…
+                  </span>
+                ) : (
+                  plan.buttonText
+                )}
               </button>
             </div>
           ))}
@@ -451,7 +480,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
           <p className="text-stone-300 mb-6 max-w-xl mx-auto">
             {user 
               ? 'Head to your dashboard to start analyzing documents and finding citations.'
-              : 'Start your 7-day free trial today. No commitment, cancel anytime.'
+              : 'Get $10 off your first month. No commitment, cancel anytime.'
             }
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
@@ -476,7 +505,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
                   onClick={() => onNavigate('signup')}
                   className="bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white px-6 py-3 rounded-2xl font-bold shadow-lg shadow-indigo-500/25 transition-all"
                 >
-                  Start Free Trial
+                  Get $10 Off
                 </button>
                 <button 
                   onClick={() => onNavigate('contact')}
@@ -489,15 +518,6 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
           </div>
         </div>
       </div>
-
-      {/* Payment Modal */}
-      <PaymentModal
-        isOpen={paymentModal.isOpen}
-        onClose={() => setPaymentModal(prev => ({ ...prev, isOpen: false }))}
-        planType={paymentModal.planType}
-        billingCycle={paymentModal.billingCycle}
-        onSuccess={handlePaymentSuccess}
-      />
 
       <Footer onNavigate={onNavigate} />
     </div>

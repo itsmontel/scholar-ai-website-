@@ -51,15 +51,28 @@ router.post('/create-checkout-session', authenticateToken, async (req, res) => {
       }
     }
 
+    // Auto-apply OFF10 for first-time purchasers (never had a subscription before)
+    let effectivePromoCode = promoCode || null;
+    if (!effectivePromoCode) {
+      const { data: existingSubs } = await getSupabase()
+        .from('subscriptions')
+        .select('id')
+        .eq('user_id', userId)
+        .limit(1);
+      if (!existingSubs || existingSubs.length === 0) {
+        effectivePromoCode = 'OFF10';
+      }
+    }
+
     // Create checkout session with optional promo code
-    // Pass user email to check trial eligibility and custom redirect URLs
+    // Pass user email for first-time discount eligibility and custom redirect URLs
     const sessionResult = await subscriptionService.createCheckoutSession(
       customerId,
       planType,
       billingCycle,
       userId,
-      promoCode || null,
-      user.email,  // Pass email for trial eligibility check
+      effectivePromoCode,
+      user.email,  // Pass email for first-time discount eligibility
       successUrl,  // Use URL from request (e.g., from onboarding)
       cancelUrl    // Use URL from request (redirects to dashboard on cancel)
     );
@@ -540,7 +553,7 @@ router.post('/validate-promo-code', authenticateToken, async (req, res) => {
 });
 
 // @route   GET /api/subscriptions/trial-eligibility
-// @desc    Check if user is eligible for a free trial
+// @desc    Check if user is eligible for first-time $10 off (OFF10)
 // @access  Private
 router.get('/trial-eligibility', authenticateToken, async (req, res) => {
   try {

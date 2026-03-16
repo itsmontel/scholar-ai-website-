@@ -285,8 +285,8 @@ export default function FocusModeSettingsSection({ onBack, embedded = false, isP
 
             {/* Settings card */}
             <div className="rounded-2xl bg-white dark:bg-stone-800/80 border border-stone-200/80 dark:border-stone-700/50 shadow-sm overflow-hidden">
-          {/* Sites to block */}
-          <div className="p-6 sm:p-8 border-b border-stone-100 dark:border-stone-700/50">
+              {/* Sites to block */}
+              <div className="p-6 sm:p-8 border-b border-stone-100 dark:border-stone-700/50">
             <h3 className="font-bold text-stone-800 dark:text-stone-100 mb-1">
               Sites to block
               {maxSites >= 99999 ? (
@@ -371,7 +371,6 @@ export default function FocusModeSettingsSection({ onBack, embedded = false, isP
                         Upgrade for more sites
                       </a>
                     )}
-                    )
                   </span>
                 )}
               </p>
@@ -443,12 +442,9 @@ export default function FocusModeSettingsSection({ onBack, embedded = false, isP
             )}
           </div>
         </div>
-          </div>
         </div>
       </div>
     </div>
-  );
-}
-  </div>
+    </div>
   );
 }
