@@ -335,9 +335,9 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
           </div>,
           document.body
         )}
-        {/* Mobile menu */}
+        {/* Mobile menu - mobile-menu-container required so click-outside doesn't close before onClick fires */}
         {isMobileMenuOpen && (
-          <div className="lg:hidden border-t border-stone-200/50 dark:border-stone-700/50 bg-white/95 dark:bg-stone-900/95 backdrop-blur-xl">
+          <div className="lg:hidden mobile-menu-container border-t border-stone-200/50 dark:border-stone-700/50 bg-white/95 dark:bg-stone-900/95 backdrop-blur-xl">
             <div className="px-4 py-3">
               <form onSubmit={handleHeaderSearchSubmit} className="mb-3">
                 <div className="header-search-container relative">

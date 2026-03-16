@@ -1875,7 +1875,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                       : ''}
                     ! <span className="inline-block animate-[wave_1.8s_ease-in-out_infinite]">{greeting.emoji}</span>
                   </h1>
-                  <p className="text-stone-600 dark:text-stone-400 mt-3 text-sm sm:text-base max-w-md sm:max-w-lg leading-relaxed">
+                  <p className="hidden sm:block text-stone-600 dark:text-stone-400 mt-3 text-sm sm:text-base max-w-md sm:max-w-lg leading-relaxed">
                     {mode === 'focus_mode' ? (
                       <><span className="text-violet-600 dark:text-violet-400 font-bold">Block distractions until you study.</span><span className="text-stone-500 dark:text-stone-400"> Study packs, citations & focus mode.</span></>
                     ) : mode === 'quiz' ? (
@@ -1889,24 +1889,35 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                       </>
                     )}
                   </p>
-                  <div className="mt-5 lg:hidden flex flex-wrap gap-2">
-                    <button onClick={() => { setMode('analyze'); setTimeout(() => document.querySelector('[data-tutorial="essay-upload"]')?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100); }} className="flex-1 min-w-[7rem] flex items-center justify-center gap-2 px-3 py-3 bg-gradient-to-r from-rose-500 to-pink-600 rounded-2xl shadow-lg shadow-rose-500/30 text-white font-bold text-sm active:scale-[0.97] hover:shadow-xl hover:scale-[1.02] transition-all">
-                      <span className="text-lg">📝</span> <span>Analyze Essay</span>
-                    </button>
-                    <button onClick={() => onNavigate('friends')} data-tutorial="friends-btn-mobile" className="relative flex-1 min-w-[7rem] flex items-center justify-center gap-2 px-3 py-3 bg-stone-100 dark:bg-stone-700/50 border border-stone-200/80 dark:border-stone-600/80 rounded-2xl font-bold text-sm active:scale-[0.97] hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-all">
-                      <span className="text-lg">👥</span> <span>Friends</span>
-                      {friendNotificationCount > 0 && <span className="absolute -top-1.5 -right-1.5 min-w-[20px] h-5 px-1.5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center shadow-lg">{friendNotificationCount > 9 ? '9+' : friendNotificationCount}</span>}
-                    </button>
-                    <button onClick={() => onNavigate('quiz-history')} data-tutorial="saved-btn-mobile" className="flex-1 min-w-[7rem] flex items-center justify-center gap-2 px-3 py-3 bg-stone-100 dark:bg-stone-700/50 border border-stone-200/80 dark:border-stone-600/80 rounded-2xl font-bold text-sm active:scale-[0.97] hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-all">
-                      <span className="text-lg">📁</span> <span>Saved</span>
-                    </button>
-                  </div>
                 </div>
               </div>
 
-              {/* Row 2: Search + Streak + Friends + Badges */}
+              {/* Row 2: On mobile = subheading + search same line; on desktop = search + streak + friends + badges */}
               <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 pt-4 border-t border-stone-200/60 dark:border-stone-600/40">
-                <div className="relative flex-1 min-w-0 sm:max-w-[400px] sm:flex-shrink-0">
+                {/* Mobile: subheading + search on same line; Desktop: search in slot below */}
+                <div className="sm:hidden flex items-center gap-3 w-full">
+                  <span className="text-stone-600 dark:text-stone-400 text-sm flex-shrink-0">
+                    {mode === 'focus_mode' ? 'Block distractions' : mode === 'quiz' ? 'Study from notes' : mode === 'citations' ? 'Academic sources' : 'Essay feedback'}
+                  </span>
+                  <div className="relative flex-1 min-w-0">
+                    <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400 dark:text-stone-500 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="Search..."
+                      className="w-full pl-10 pr-10 py-2.5 bg-white/90 dark:bg-stone-700/70 border border-stone-200/80 dark:border-stone-600/60 rounded-xl text-sm text-stone-800 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500 outline-none focus:border-rose-300 dark:focus:border-rose-500/60 transition-all"
+                    />
+                    {searchQuery && (
+                      <button onClick={() => setSearchQuery('')} className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 rounded">
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                      </button>
+                    )}
+                  </div>
+                </div>
+                <div className="hidden sm:block relative flex-1 min-w-0 sm:max-w-[400px] sm:flex-shrink-0">
                   <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400 dark:text-stone-500 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                   </svg>
@@ -1924,26 +1935,29 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                   )}
                 </div>
                 <div className="hidden sm:block w-px h-8 bg-stone-200/80 dark:bg-stone-600/80 flex-shrink-0" />
-                <div data-tutorial="streak-widget">
-                  <StreakWidget compact />
+                {/* Mobile: Streak, Friends, Badge on same line; Desktop: inline with search */}
+                <div className="flex flex-row flex-wrap gap-2 sm:contents items-center justify-between sm:justify-start">
+                  <div data-tutorial="streak-widget" className="flex-shrink-0">
+                    <StreakWidget compact />
+                  </div>
+                  <button
+                    onClick={() => onNavigate('friends')}
+                    data-tutorial="friends-btn"
+                    className="relative flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-2 sm:py-2.5 bg-white/80 dark:bg-stone-700/60 border border-stone-200/70 dark:border-stone-600/50 rounded-xl hover:border-emerald-300/80 dark:hover:border-emerald-600/50 hover:bg-emerald-50/50 dark:hover:bg-emerald-900/20 transition-all shadow-sm flex-shrink-0"
+                  >
+                    <span className="text-base">👥</span>
+                    <span className="font-semibold text-stone-700 dark:text-stone-200 text-xs sm:text-sm">Friends</span>
+                    {friendNotificationCount > 0 && (
+                      <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">{friendNotificationCount > 9 ? '9+' : friendNotificationCount}</span>
+                    )}
+                  </button>
+                  <div className="hidden sm:block flex-shrink-0"><BadgeWidget onNavigate={onNavigate} /></div>
+                  <div className="sm:hidden flex-shrink-0"><BadgeWidget onNavigate={onNavigate} mobileExpanded /></div>
                 </div>
                 <div className="w-px h-8 bg-stone-200/80 dark:bg-stone-600/80 flex-shrink-0 hidden sm:block" />
-                <button
-                  onClick={() => onNavigate('friends')}
-                  data-tutorial="friends-btn"
-                  className="relative flex items-center gap-1.5 sm:gap-2 px-3 py-2.5 bg-white/80 dark:bg-stone-700/60 border border-stone-200/70 dark:border-stone-600/50 rounded-xl hover:border-emerald-300/80 dark:hover:border-emerald-600/50 hover:bg-emerald-50/50 dark:hover:bg-emerald-900/20 transition-all shadow-sm"
-                >
-                  <span className="text-base">👥</span>
-                  <span className="font-semibold text-stone-700 dark:text-stone-200 text-xs sm:text-sm">Friends</span>
-                  {friendNotificationCount > 0 && (
-                    <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">{friendNotificationCount > 9 ? '9+' : friendNotificationCount}</span>
-                  )}
-                </button>
-                <div className="hidden sm:block"><BadgeWidget onNavigate={onNavigate} /></div>
-                <div className="sm:hidden"><BadgeWidget onNavigate={onNavigate} mobileExpanded /></div>
                 {showEbookBanner && !ebookBannerDismissed && (
-                  <>
-                    <div className="w-px h-8 bg-stone-200/80 dark:bg-stone-600/80 flex-shrink-0 hidden sm:block" />
+                  <div className="hidden sm:flex items-center shrink-0 gap-0">
+                    <div className="w-px h-8 bg-stone-200/80 dark:bg-stone-600/80 flex-shrink-0" />
                     <div className="relative shrink-0">
                       <a
                         href="/downloads/writescholar-ultimate-study-tips-guide.pdf"
@@ -1968,12 +1982,12 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                         </svg>
                       </button>
                     </div>
-                  </>
+                  </div>
                 )}
                 {usageStats.plan === 'free' && !loadingStats && (
                   <>
                     <div className="w-px h-8 bg-stone-200/80 dark:bg-stone-600/80 flex-shrink-0 hidden sm:block" />
-                    <button onClick={() => onNavigate('pricing')} className="flex items-center gap-1.5 px-3 sm:px-4 py-2.5 bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-400 hover:to-pink-500 text-white text-xs font-bold rounded-xl transition-all shadow-lg shadow-rose-500/25">
+                    <button onClick={() => onNavigate('pricing')} className="w-full sm:w-auto flex items-center justify-center gap-1.5 px-3 sm:px-4 py-2.5 bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-400 hover:to-pink-500 text-white text-xs font-bold rounded-xl transition-all shadow-lg shadow-rose-500/25">
                       <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
                       <span>Upgrade</span>
                     </button>
@@ -2110,7 +2124,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                   <div className="relative grid grid-cols-2 sm:flex sm:flex-wrap justify-center gap-2 sm:gap-6 mb-6 sm:mb-8">
                     {(mode === 'citations' ? ['APA, MLA & Chicago', 'Peer-reviewed sources', 'Filter by year', 'Export ready'] : ['Quick structure analysis', 'Detailed annotations', 'Grade-level rubric', 'Improvement suggestions']).map((f, i) => (
                       <span key={i} className="flex items-center gap-2.5 text-stone-600 dark:text-stone-400 text-sm sm:text-base">
-                        <span className="flex-shrink-0 w-5 h-5 rounded-full bg-emerald-500/15 flex items-center justify-center">
+                        <span className="hidden sm:flex flex-shrink-0 w-5 h-5 rounded-full bg-emerald-500/15 items-center justify-center">
                           <svg className="w-3 h-3 text-emerald-600 dark:text-emerald-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
                         </span>
                         {f}
@@ -2901,7 +2915,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                   <div className="relative grid grid-cols-2 sm:flex sm:flex-wrap justify-center gap-2 sm:gap-6 mb-6 sm:mb-8">
                     {['Lesson', 'Flashcards', 'Quiz', 'Crossword', 'Crater Blast'].map((f) => (
                       <span key={f} className="flex items-center gap-2.5 text-stone-600 dark:text-stone-400 text-sm sm:text-base">
-                        <span className="flex-shrink-0 w-5 h-5 rounded-full bg-emerald-500/15 flex items-center justify-center">
+                        <span className="hidden sm:flex flex-shrink-0 w-5 h-5 rounded-full bg-emerald-500/15 items-center justify-center">
                           <svg className="w-3 h-3 text-emerald-600 dark:text-emerald-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
                         </span>
                         {f}

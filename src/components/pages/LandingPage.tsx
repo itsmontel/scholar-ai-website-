@@ -606,6 +606,16 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   >
                     Get started free
                   </button>
+                  <p className="sm:hidden mt-3 text-sm text-stone-500 dark:text-stone-400">
+                    Already have an account?{' '}
+                    <button
+                      type="button"
+                      onClick={() => onNavigate('login')}
+                      className="text-violet-600 dark:text-violet-400 hover:underline font-medium"
+                    >
+                      Log in
+                    </button>
+                  </p>
                 </div>
               </div>
             </div>
