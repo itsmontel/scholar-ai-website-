@@ -256,6 +256,7 @@ const InteractiveLessonPage = ({ onNavigate, user, onLogout, embedded = false, o
       fetchUsage();
     } catch (err: any) {
       setError(err.message || 'Something went wrong. Please try again.');
+      fetchUsage();
     } finally {
       setIsLoading(false);
     }

@@ -25,7 +25,9 @@ const suggestedTopics: string[] = [
 ];
 
 const CitationsPage = ({ onNavigate, user, onLogout }: CitationsPageProps) => {
-  const [inputText, setInputText] = useState('');
+  const [inputText, setInputText] = useState(() => {
+    try { return sessionStorage.getItem('writescholar_citations_draft') || ''; } catch { return ''; }
+  });
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
   const [showWordWarning, setShowWordWarning] = useState(false);
   const [isSearchingCitations, setIsSearchingCitations] = useState(false);
@@ -215,7 +217,7 @@ const CitationsPage = ({ onNavigate, user, onLogout }: CitationsPageProps) => {
                   <div className="relative rounded-[14px] sm:rounded-[22px] bg-white dark:bg-stone-800/95 backdrop-blur-sm min-h-[140px] sm:min-h-[180px]">
                     <textarea
                       value={inputText}
-                      onChange={(e) => { setInputText(e.target.value); setShowWordWarning(false); }}
+                      onChange={(e) => { const v = e.target.value; setInputText(v); setShowWordWarning(false); try { sessionStorage.setItem('writescholar_citations_draft', v); } catch (_) {} }}
                       onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey && isTextValid()) { e.preventDefault(); handleSubmit(); }}}
                       placeholder={placeholders[placeholderIndex]}
                       className="relative w-full min-h-[140px] sm:min-h-[180px] p-5 sm:p-6 text-stone-800 dark:text-stone-100 text-base sm:text-lg bg-transparent border-none outline-none resize-none placeholder-stone-400 dark:placeholder-stone-500 leading-relaxed"

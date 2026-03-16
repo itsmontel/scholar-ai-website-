@@ -292,41 +292,40 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
     }
   }, []);
 
-  // Fetch quiz usage for logged-in users
-  useEffect(() => {
-    const fetchQuizUsage = async () => {
-      if (!user) return;
-      try {
-        const token = localStorage.getItem('authToken');
-        if (!token) return;
+  const fetchQuizUsage = async () => {
+    if (!user) return;
+    try {
+      const token = localStorage.getItem('authToken');
+      if (!token) return;
 
-        const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/analysis/quiz-usage`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          if (data.success) {
-            setQuizUsage({
-              generationsUsed: data.data.generationsUsed || 0,
-              generationLimit: data.data.generationLimit ?? 2,
-              generationsRemaining: data.data.generationsRemaining ?? 3,
-              maxWordsPerGeneration: data.data.maxWordsPerGeneration || 5000,
-              wordsUsed: data.data.wordsUsed || 0,
-              wordLimit: data.data.wordLimit || 15000,
-              plan: data.data.plan || 'free',
-              daysUntilReset: data.data.daysUntilReset
-            });
-          }
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/analysis/quiz-usage`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
         }
-      } catch (error) {
-        console.error('Error fetching quiz usage:', error);
-      }
-    };
+      });
 
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          setQuizUsage({
+            generationsUsed: data.data.generationsUsed || 0,
+            generationLimit: data.data.generationLimit ?? 2,
+            generationsRemaining: data.data.generationsRemaining ?? 3,
+            maxWordsPerGeneration: data.data.maxWordsPerGeneration || 5000,
+            wordsUsed: data.data.wordsUsed || 0,
+            wordLimit: data.data.wordLimit || 15000,
+            plan: data.data.plan || 'free',
+            daysUntilReset: data.data.daysUntilReset
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching quiz usage:', error);
+    }
+  };
+
+  useEffect(() => {
     fetchQuizUsage();
   }, [user]);
 
@@ -391,6 +390,7 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
       }
     } catch (err: any) {
       setError(err.message || 'Something went wrong. Please try again.');
+      fetchQuizUsage();
     } finally {
       setIsLoading(false);
     }
@@ -416,6 +416,7 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
       if (isFreeUser) setQuizUsage(prev => ({ ...prev, generationsUsed: prev.generationsUsed + 1, generationsRemaining: Math.max(0, prev.generationsRemaining - 1) }));
     } catch (err: any) {
       setError(err.message || 'Flashcard generation failed.');
+      fetchQuizUsage();
     } finally { setIsLoading(false); }
   };
 
@@ -444,6 +445,7 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
       if (isFreeUser) setQuizUsage(prev => ({ ...prev, generationsUsed: prev.generationsUsed + 1, generationsRemaining: Math.max(0, prev.generationsRemaining - 1) }));
     } catch (err: any) {
       setError(err.message || 'Crossword generation failed.');
+      fetchQuizUsage();
     } finally { setIsLoading(false); }
   };
 

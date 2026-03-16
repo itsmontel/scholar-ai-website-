@@ -113,6 +113,20 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
     setMode(initialMode);
   }, [initialMode]);
 
+  // Restore input text when returning from a failed operation (text is preserved across errors/back-navigation)
+  useEffect(() => {
+    try {
+      const fromAnalysis = localStorage.getItem('textAnalysisContent');
+      const fromDraft = sessionStorage.getItem('writescholar_dashboard_draft');
+      const saved = fromAnalysis || fromDraft;
+      if (saved && saved.trim().length > 0) {
+        setInputText(saved);
+        if (fromAnalysis) localStorage.removeItem('textAnalysisContent');
+        if (fromDraft) sessionStorage.removeItem('writescholar_dashboard_draft');
+      }
+    } catch (_) {}
+  }, []);
+
   // Interactive tutorial — triggered from onboarding completion via sessionStorage flag
   const [showInteractiveTutorial, setShowInteractiveTutorial] = useState(false);
   useEffect(() => {
@@ -857,7 +871,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
     try {
       setIsSearchingCitations(true);
       setShowSearchAnimation(true);
-      
+      try { sessionStorage.setItem('writescholar_dashboard_draft', inputText); } catch (_) {}
       const token = localStorage.getItem('authToken');
       if (!token) {
         alert('Please log in to search for citations');
@@ -896,6 +910,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
       }
 
       if (data.success && data.data) {
+        try { sessionStorage.removeItem('writescholar_dashboard_draft'); } catch (_) {}
         localStorage.setItem('citationSearchResults', JSON.stringify(data.data));
         const wasFirst = (getStats().citations_count || 0) === 0;
         trackAction('citations_count');
@@ -907,6 +922,8 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
 
     } catch (error) {
       console.error('Citation search error:', error);
+      try { sessionStorage.setItem('writescholar_dashboard_draft', inputText); } catch (_) {}
+      fetchUsageStats();
       alert(error instanceof Error ? error.message : 'Failed to search for citations. Please try again.');
     } finally {
       setIsSearchingCitations(false);
@@ -1049,6 +1066,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
     setIsGeneratingStudyPack(true);
     setStudyPackError('');
     setStudyPackResult(null);
+    try { sessionStorage.setItem('writescholar_dashboard_draft', inputText); } catch (_) {}
     // Prefetch StudyPackViewerPage chunk so it's ready when we navigate (reduces load failures)
     import('../pages/StudyPackViewerPage').catch(() => {});
     try {
@@ -1068,7 +1086,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
       try {
         sessionStorage.setItem('writescholar_study_pack_viewer', JSON.stringify({ data: data.data, title: packTitle }));
       } catch (_) {}
-      // Pass data via navigation state so viewer doesn't rely on sessionStorage timing
+      try { sessionStorage.removeItem('writescholar_dashboard_draft'); } catch (_) {}
       onNavigate('study-pack-viewer', undefined, { studyPack: { data: data.data, title: packTitle } });
       // Track study pack generation with word count for achievements
       const wordCount = inputText.trim().split(/\s+/).length;
@@ -1076,6 +1094,8 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
       fetchQuizUsage();
     } catch (error: any) {
       setStudyPackError(error.message || 'Study pack generation failed. Please try again.');
+      try { sessionStorage.setItem('writescholar_dashboard_draft', inputText); } catch (_) {}
+      fetchQuizUsage();
     } finally {
       setIsGeneratingStudyPack(false);
     }

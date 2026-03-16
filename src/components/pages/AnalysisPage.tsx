@@ -134,13 +134,11 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
     fetchUserPlan();
     checkTrialEligibility();
     
-    // Check if there's text content from dashboard
+    // Check if there's text content from dashboard (do NOT remove yet – only on success, so it can be restored if user goes back after failure)
     const textContent = localStorage.getItem('textAnalysisContent');
     if (textContent) {
       setPreviewContent(textContent);
       setDocumentContent(textContent);
-      // Clear the stored content after using it
-      localStorage.removeItem('textAnalysisContent');
     }
 
     // Check if we need to load an existing analysis
@@ -884,7 +882,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
 
       const result: AnalysisResult = await response.json();
       setAnalysisResult(result.data.result);
-      
+      try { localStorage.removeItem('textAnalysisContent'); } catch (_) {}
       if (result.data.rubricAlignment) {
         setRubricAlignment(result.data.rubricAlignment);
       }
@@ -969,7 +967,6 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
         if (saveResponse.ok) {
           const saveResult = await saveResponse.json();
           console.log('Analysis automatically saved successfully:', saveResult);
-          
           // Show success message
           setError(''); // Clear any previous errors
           setSuccessMessage('Analysis saved successfully! You can now view it in your Library.');
