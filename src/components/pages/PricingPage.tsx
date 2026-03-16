@@ -242,7 +242,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
     },
     {
       question: "Can I change my plan after subscribing?",
-      answer: "No, plan changes are not available after subscription. Please choose your plan carefully as subscriptions are final and cannot be modified once activated."
+      answer: "Yes, you can switch plans anytime. Upgrade or downgrade through your account settings. Plan changes take effect at your next billing cycle."
     },
     {
       question: "What payment methods do you accept?",
@@ -254,7 +254,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
     },
     {
       question: "Is there a money-back guarantee?",
-      answer: "No, we do not offer a money-back guarantee. All sales are final. Please review the plan features carefully before subscribing."
+      answer: "Yes. We offer a 7-day money-back guarantee. If you're not satisfied, contact support within 7 days of your purchase for a full refund."
     },
     {
       question: "Do you offer team collaboration features?",

@@ -59,10 +59,10 @@ const FeaturesPage = ({ onNavigate, user, onLogout }: FeaturesPageProps) => {
                 Features
               </span>
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-stone-800 dark:text-stone-100 mb-6 leading-tight">
-                Essay feedback, <span className="text-violet-500">citations</span>, study packs & focus mode
+                <span className="text-violet-500">AI essay feedback</span>, <span className="text-violet-500">study packs</span> & <span className="text-violet-500">focus mode</span>
               </h1>
               <p className="text-lg text-stone-600 dark:text-stone-400 leading-relaxed">
-                Our flagship features: professor-style essay feedback, academic citations in 6 styles, study packs (quizzes, flashcards, crosswords from your notes), and Focus Mode to block distractions until you study.
+                The all-in-one study app: professor-style essay feedback on every paper, quizzes and flashcards from your notes, and Focus Mode to block TikTok until you study.
               </p>
             </div>
             <div className="hidden lg:block flex-shrink-0 w-24 h-28 xl:w-28 xl:h-32" />

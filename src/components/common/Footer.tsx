@@ -21,7 +21,7 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
               </span>
             </div>
             <p className="text-stone-400 text-sm leading-relaxed">
-              AI-powered academic writing assistant helping students and researchers achieve excellence.
+              AI essay feedback, study packs & Focus Mode. The all-in-one study app for students.
             </p>
           </div>
           
