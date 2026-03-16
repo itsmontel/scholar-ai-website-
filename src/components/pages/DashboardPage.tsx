@@ -1831,10 +1831,10 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
       )}
 
       {/* Main Content - Gen Z bento layout */}
-      <main className="relative max-w-7xl mx-auto px-4 sm:px-6 pt-4 sm:pt-6 pb-24 sm:pb-16 w-full min-w-0 overflow-x-hidden lg:ml-24 lg:mr-auto">
-        <div className="w-full min-w-0 space-y-5 sm:space-y-6">
+      <main className="relative max-w-7xl mx-auto px-3 sm:px-6 pt-3 sm:pt-6 pb-24 sm:pb-16 w-full min-w-0 overflow-x-hidden lg:ml-24 lg:mr-auto">
+        <div className="w-full min-w-0 space-y-4 sm:space-y-6">
           {/* BENTO HERO - Greeting, then Search, then Streak/Friends/Badges (all stacked) */}
-          <div className="rounded-3xl sm:rounded-[2rem] overflow-hidden border border-white/60 dark:border-stone-600/50 shadow-xl shadow-stone-900/5 dark:shadow-black/20 backdrop-blur-2xl bg-white/70 dark:bg-stone-800/70 p-5 sm:p-8 animate-card-bounce-in" data-tutorial="greeting-area">
+          <div className="rounded-2xl sm:rounded-[2rem] overflow-hidden border border-white/60 dark:border-stone-600/50 shadow-xl shadow-stone-900/5 dark:shadow-black/20 backdrop-blur-2xl bg-white/70 dark:bg-stone-800/70 p-4 sm:p-8 animate-card-bounce-in" data-tutorial="greeting-area">
             <div className="flex flex-col gap-4 w-full">
               {/* Row 1: Greeting + mascot */}
               <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6">
@@ -1845,7 +1845,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                   </div>
                 </div>
                 <div className="flex-1 min-w-0 text-center sm:text-left">
-                  <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-stone-900 dark:text-white leading-[1.1] tracking-tight">
+                  <h1 className="text-2xl sm:text-4xl md:text-5xl font-black text-stone-900 dark:text-white leading-[1.1] tracking-tight">
                     {greeting.greeting}
                     {getDisplayNameForGreeting(user)
                       ? (() => {
@@ -1963,8 +1963,8 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
             </div>
           </div>
 
-          {/* FIVE FEATURE CARDS - Photo style: white bg, accent border, icon, title, description */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4" data-tutorial="feature-cards">
+          {/* FIVE FEATURE CARDS - 2 per row on mobile, 2 on sm, 5 on lg */}
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 gap-2 sm:gap-4" data-tutorial="feature-cards">
             {[
               { id: 'analyze' as const, title: 'Analyze', desc: 'Get professor-style feedback on your essays', emoji: '📝', border: 'border-rose-200/80 dark:border-rose-700/50', iconBg: 'from-rose-500 to-pink-600', glow: 'shadow-rose-500/20', titleClr: 'text-rose-600 dark:text-rose-400', blob: 'from-rose-200/30 to-pink-200/20', badgeText: 'Popular', badgeClr: 'bg-rose-100 text-rose-700 dark:bg-rose-900/50 dark:text-rose-300' },
               { id: 'citations' as const, title: 'Citations', desc: 'Find and format academic sources instantly', emoji: '📚', border: 'border-sky-200/80 dark:border-sky-700/50', iconBg: 'from-sky-500 to-blue-600', glow: 'shadow-sky-500/20', titleClr: 'text-sky-600 dark:text-sky-400', blob: 'from-sky-200/30 to-blue-200/20', badgeText: null, badgeClr: '' },
@@ -1978,23 +1978,23 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                 key={card.id}
                 onClick={() => card.id === 'more-tools' ? onNavigate('more-tools') : (card.id === 'quiz' ? (() => { setMode('quiz'); setInputText(''); setShowWordWarning(false); setShowHumanizeResult(false); setSummaryResult(null); setQuizResult(null); setFlashcardResult(null); setCrosswordResult(null); setStudyPackResult(null); })() : setMode(card.id))}
                 data-tutorial={card.id === 'analyze' ? 'analyze-feature-card' : card.id === 'focus_mode' ? 'focus-card' : card.id === 'quiz' ? 'study-card' : card.id === 'more-tools' ? 'more-tools-card' : undefined}
-                className={`relative overflow-hidden rounded-2xl sm:rounded-3xl p-5 sm:p-6 text-left transition-all duration-200 hover:scale-[1.02] hover:shadow-xl active:scale-[0.98] bg-white dark:bg-stone-800/95 border-2 ${card.border} shadow-lg ${card.glow} dark:shadow-black/10 backdrop-blur-sm group ${isActive ? 'ring-2 ring-offset-2 ring-offset-stone-50 dark:ring-offset-stone-900 ' + (card.id === 'analyze' ? 'ring-rose-500' : card.id === 'citations' ? 'ring-sky-500' : card.id === 'quiz' ? 'ring-amber-500' : card.id === 'focus_mode' ? 'ring-violet-500' : '') : ''}`}
+                className={`relative overflow-hidden rounded-xl sm:rounded-3xl p-3 sm:p-6 text-left transition-all duration-200 hover:scale-[1.02] hover:shadow-xl active:scale-[0.98] bg-white dark:bg-stone-800/95 border-2 ${card.border} shadow-lg ${card.glow} dark:shadow-black/10 backdrop-blur-sm group ${isActive ? 'ring-2 ring-offset-1 sm:ring-offset-2 ring-offset-stone-50 dark:ring-offset-stone-900 ' + (card.id === 'analyze' ? 'ring-rose-500' : card.id === 'citations' ? 'ring-sky-500' : card.id === 'quiz' ? 'ring-amber-500' : card.id === 'focus_mode' ? 'ring-violet-500' : '') : ''}`}
               >
                 {/* Badge - top right */}
                 {card.badgeText && (
-                  <span className={`absolute top-3 right-3 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${card.badgeClr}`}>
+                  <span className={`absolute top-1.5 right-1.5 sm:top-3 sm:right-3 px-2 py-0.5 sm:px-2.5 rounded-full text-[9px] sm:text-[10px] font-bold ${card.badgeClr}`}>
                     {card.badgeText}
                   </span>
                 )}
                 {/* Subtle organic blobs - like photo */}
-                <div className={`absolute -top-8 -right-8 w-24 h-24 rounded-full bg-gradient-to-br ${card.blob} dark:opacity-20 blur-2xl pointer-events-none`} />
-                <div className={`absolute -bottom-6 -left-6 w-20 h-20 rounded-full bg-gradient-to-br ${card.blob} dark:opacity-15 blur-xl pointer-events-none`} />
+                <div className={`absolute -top-6 -right-6 sm:-top-8 sm:-right-8 w-16 h-16 sm:w-24 sm:h-24 rounded-full bg-gradient-to-br ${card.blob} dark:opacity-20 blur-2xl pointer-events-none`} />
+                <div className={`absolute -bottom-4 -left-4 sm:-bottom-6 sm:-left-6 w-14 h-14 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br ${card.blob} dark:opacity-15 blur-xl pointer-events-none`} />
                 <div className="relative z-10">
-                  <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-gradient-to-br ${card.iconBg} flex items-center justify-center text-2xl sm:text-3xl shadow-lg mb-4 group-hover:scale-110 transition-transform`}>
+                  <div className={`w-9 h-9 sm:w-14 sm:h-14 rounded-lg sm:rounded-2xl bg-gradient-to-br ${card.iconBg} flex items-center justify-center text-lg sm:text-3xl shadow-lg mb-2 sm:mb-4 group-hover:scale-110 transition-transform`}>
                     {card.emoji}
                   </div>
-                  <h3 className={`font-bold text-lg sm:text-xl ${card.titleClr} mb-1.5`}>{card.title}</h3>
-                  <p className="text-stone-500 dark:text-stone-400 text-sm leading-snug">{card.desc}</p>
+                  <h3 className={`font-bold text-sm sm:text-xl ${card.titleClr} mb-0.5 sm:mb-1.5`}>{card.title}</h3>
+                  <p className="text-stone-500 dark:text-stone-400 text-[11px] sm:text-sm leading-snug line-clamp-2 sm:line-clamp-none">{card.desc}</p>
                 </div>
               </button>
             );})}
@@ -2057,8 +2057,8 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                     ) : (
             <div className="pt-2 sm:pt-4 pb-4 sm:pb-6 overflow-visible" data-tutorial="tool-cards">
               {/* MAIN FEATURE - Gen Z glass card */}
-              <div data-tutorial="analyze-ready" className="relative rounded-3xl sm:rounded-[2rem] overflow-hidden p-[2px] mb-6 sm:mb-8 border border-white/40 dark:border-stone-600/40 shadow-2xl shadow-stone-900/10 dark:shadow-black/30 scroll-mt-8" style={mode === 'citations' ? { background: 'linear-gradient(135deg, rgba(14,165,233,0.2) 0%, rgba(59,130,246,0.15) 50%, rgba(99,102,241,0.1) 100%)' } : { background: 'linear-gradient(135deg, rgba(251,113,133,0.2) 0%, rgba(236,72,153,0.15) 50%, rgba(219,39,119,0.1) 100%)' }}>
-                <div className="relative rounded-[22px] sm:rounded-[30px] bg-white/90 dark:bg-stone-800/95 backdrop-blur-2xl border border-white/50 dark:border-stone-700/50 shadow-inner p-6 sm:p-10">
+              <div data-tutorial="analyze-ready" className="relative rounded-2xl sm:rounded-[2rem] overflow-hidden p-[2px] mb-4 sm:mb-8 border border-white/40 dark:border-stone-600/40 shadow-2xl shadow-stone-900/10 dark:shadow-black/30 scroll-mt-8" style={mode === 'citations' ? { background: 'linear-gradient(135deg, rgba(14,165,233,0.2) 0%, rgba(59,130,246,0.15) 50%, rgba(99,102,241,0.1) 100%)' } : { background: 'linear-gradient(135deg, rgba(251,113,133,0.2) 0%, rgba(236,72,153,0.15) 50%, rgba(219,39,119,0.1) 100%)' }}>
+                <div className="relative rounded-[14px] sm:rounded-[30px] bg-white/90 dark:bg-stone-800/95 backdrop-blur-2xl border border-white/50 dark:border-stone-700/50 shadow-inner p-4 sm:p-10">
                   {/* Soft glow orbs - Analyze: rose/pink, Citations: sky/blue */}
                   {mode === 'citations' ? (
                     <>
@@ -2073,21 +2073,21 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                   )}
 
                   {/* Hero headline - Analyze vs Citations */}
-                  <h2 className="relative text-2xl sm:text-3xl md:text-4xl font-extrabold text-stone-900 dark:text-white text-center mb-2 tracking-tight">
+                  <h2 className="relative text-xl sm:text-3xl md:text-4xl font-extrabold text-stone-900 dark:text-white text-center mb-2 tracking-tight">
                     {mode === 'citations' ? (
                       <>Find <span className="bg-gradient-to-r from-sky-500 via-blue-500 to-indigo-500 bg-clip-text text-transparent" style={{ WebkitBackgroundClip: 'text' }}>academic sources</span> in seconds</>
                     ) : (
                       <>Enhance your <span className="bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 bg-clip-text text-transparent" style={{ WebkitBackgroundClip: 'text' }}>academic writing</span> with AI</>
                     )}
                   </h2>
-                  <p className="relative text-stone-600 dark:text-stone-300 text-base sm:text-lg text-center mb-8 max-w-xl mx-auto leading-relaxed">
+                  <p className="relative text-stone-600 dark:text-stone-300 text-sm sm:text-lg text-center mb-6 sm:mb-8 max-w-xl mx-auto leading-relaxed">
                     {mode === 'citations' ? (
                       'APA, MLA & Chicago. Peer-reviewed sources. Filter by year.'
                     ) : (
                       'Professor-style feedback on structure, clarity, citations and tone in under 60 seconds'
                     )}
                   </p>
-                  <div className="relative grid grid-cols-2 sm:flex sm:flex-wrap justify-center gap-3 sm:gap-6 mb-8">
+                  <div className="relative grid grid-cols-2 sm:flex sm:flex-wrap justify-center gap-2 sm:gap-6 mb-6 sm:mb-8">
                     {(mode === 'citations' ? ['APA, MLA & Chicago', 'Peer-reviewed sources', 'Filter by year', 'Export ready'] : ['Quick structure analysis', 'Detailed annotations', 'Grade-level rubric', 'Improvement suggestions']).map((f, i) => (
                       <span key={i} className="flex items-center gap-2.5 text-stone-600 dark:text-stone-400 text-sm sm:text-base">
                         <span className="flex-shrink-0 w-5 h-5 rounded-full bg-emerald-500/15 flex items-center justify-center">
@@ -2099,7 +2099,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                           </div>
 
                   {/* Tab switcher */}
-                  <div className="relative flex rounded-2xl bg-stone-100/80 dark:bg-stone-800/80 p-1.5 mb-6 max-w-md mx-auto shadow-inner">
+                  <div className="relative flex rounded-xl sm:rounded-2xl bg-stone-100/80 dark:bg-stone-800/80 p-1 sm:p-1.5 mb-4 sm:mb-6 max-w-md mx-auto shadow-inner">
                     <button
                       onClick={() => { setMode('analyze'); setInputText(''); setShowWordWarning(false); setShowHumanizeResult(false); setSummaryResult(null); setQuizResult(null); setFlashcardResult(null); setCrosswordResult(null); setStudyPackResult(null); }}
                       className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-sm transition-all duration-200 ${mode === 'analyze' ? 'bg-white dark:bg-stone-700 text-rose-600 dark:text-rose-400 shadow-lg shadow-stone-200/50 dark:shadow-stone-900/50' : 'text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200'}`}
@@ -2142,13 +2142,13 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                   {(mode === 'analyze' || mode === 'citations') && (
                     <div className="relative mb-2 max-w-3xl mx-auto">
                       <div className={`relative rounded-2xl sm:rounded-3xl p-[2px] transition-all duration-300 focus-within:scale-[1.005] ${mode === 'citations' ? 'bg-gradient-to-br from-sky-400/80 via-blue-400/80 to-indigo-400/80 dark:from-sky-500/60 dark:via-blue-500/60 dark:to-indigo-500/60 shadow-[0_20px_50px_-15px_rgba(14,165,233,0.25)] dark:shadow-[0_20px_50px_-15px_rgba(0,0,0,0.4)] focus-within:shadow-[0_25px_60px_-15px_rgba(14,165,233,0.35)]' : 'bg-gradient-to-br from-rose-400/80 via-pink-400/80 to-rose-500/80 dark:from-rose-500/60 dark:via-pink-500/60 dark:to-rose-600/60 shadow-[0_20px_50px_-15px_rgba(244,63,94,0.25)] dark:shadow-[0_20px_50px_-15px_rgba(0,0,0,0.4)] focus-within:shadow-[0_25px_60px_-15px_rgba(244,63,94,0.35)]'}`}>
-                        <div className="relative rounded-[14px] sm:rounded-[22px] bg-white dark:bg-stone-800/95 backdrop-blur-sm min-h-[140px] sm:min-h-[180px]">
+                        <div className="relative rounded-[14px] sm:rounded-[22px] bg-white dark:bg-stone-800/95 backdrop-blur-sm min-h-[120px] sm:min-h-[180px]">
                           <textarea
                             value={inputText}
                             onChange={(e) => { setInputText(e.target.value); setShowWordWarning(false); }}
                             onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey && isTextValid()) { e.preventDefault(); handleSubmit(); }}}
                             placeholder={mode === 'analyze' ? 'Paste your essay or paper here (min 200 words)...' : 'Enter your research topic to find academic sources...'}
-                            className="relative w-full min-h-[140px] sm:min-h-[180px] p-5 sm:p-6 text-stone-800 dark:text-stone-100 text-base sm:text-lg bg-transparent border-none outline-none resize-none placeholder-stone-400 dark:placeholder-stone-500 leading-relaxed"
+                            className="relative w-full min-h-[120px] sm:min-h-[180px] p-4 sm:p-6 text-stone-800 dark:text-stone-100 text-[15px] sm:text-lg bg-transparent border-none outline-none resize-none placeholder-stone-400 dark:placeholder-stone-500 leading-relaxed"
                             onInput={(e) => {
                               const target = e.target as HTMLTextAreaElement;
                               target.style.height = 'auto';
@@ -2868,17 +2868,17 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
 
             <div className="pt-2 sm:pt-4 pb-4 sm:pb-6 overflow-visible" data-tutorial="study-pack-input">
               {/* STUDY PACK HERO - same style as Analyze/Citations */}
-              <div className="relative rounded-3xl sm:rounded-[2rem] overflow-hidden p-[2px] mb-6 sm:mb-8 border border-white/40 dark:border-stone-600/40 shadow-2xl shadow-stone-900/10 dark:shadow-black/30" style={{ background: 'linear-gradient(135deg, rgba(251,191,36,0.2) 0%, rgba(245,158,11,0.15) 50%, rgba(234,88,12,0.1) 100%)' }}>
-                <div className="relative rounded-[22px] sm:rounded-[30px] bg-white/90 dark:bg-stone-800/95 backdrop-blur-2xl border border-white/50 dark:border-stone-700/50 shadow-inner p-6 sm:p-10">
+              <div className="relative rounded-2xl sm:rounded-[2rem] overflow-hidden p-[2px] mb-4 sm:mb-8 border border-white/40 dark:border-stone-600/40 shadow-2xl shadow-stone-900/10 dark:shadow-black/30" style={{ background: 'linear-gradient(135deg, rgba(251,191,36,0.2) 0%, rgba(245,158,11,0.15) 50%, rgba(234,88,12,0.1) 100%)' }}>
+                <div className="relative rounded-[14px] sm:rounded-[30px] bg-white/90 dark:bg-stone-800/95 backdrop-blur-2xl border border-white/50 dark:border-stone-700/50 shadow-inner p-4 sm:p-10">
                   <div className="absolute -top-20 -right-20 w-40 h-40 bg-amber-400/20 rounded-full blur-3xl pointer-events-none" />
                   <div className="absolute -bottom-20 -left-20 w-40 h-40 bg-orange-400/20 rounded-full blur-3xl pointer-events-none" />
-                  <h2 className="relative text-2xl sm:text-3xl md:text-4xl font-extrabold text-stone-900 dark:text-white text-center mb-2 tracking-tight">
+                  <h2 className="relative text-xl sm:text-3xl md:text-4xl font-extrabold text-stone-900 dark:text-white text-center mb-2 tracking-tight">
                     Turn your notes into <span className="bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 bg-clip-text text-transparent" style={{ WebkitBackgroundClip: 'text' }}>5 study tools</span>
                   </h2>
-                  <p className="relative text-stone-600 dark:text-stone-300 text-base sm:text-lg text-center mb-8 max-w-xl mx-auto leading-relaxed">
+                  <p className="relative text-stone-600 dark:text-stone-300 text-sm sm:text-lg text-center mb-6 sm:mb-8 max-w-xl mx-auto leading-relaxed">
                     Lesson, flashcards, quiz, crossword & Crater Blast — all from one paste
                   </p>
-                  <div className="relative grid grid-cols-2 sm:flex sm:flex-wrap justify-center gap-3 sm:gap-6 mb-8">
+                  <div className="relative grid grid-cols-2 sm:flex sm:flex-wrap justify-center gap-2 sm:gap-6 mb-6 sm:mb-8">
                     {['Lesson', 'Flashcards', 'Quiz', 'Crossword', 'Crater Blast'].map((f) => (
                       <span key={f} className="flex items-center gap-2.5 text-stone-600 dark:text-stone-400 text-sm sm:text-base">
                         <span className="flex-shrink-0 w-5 h-5 rounded-full bg-emerald-500/15 flex items-center justify-center">
@@ -3824,8 +3824,8 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
 
         {/* Recent Activity - Mobile optimized with horizontal scroll */}
         <div className={isFreeUser && getExpiringSoonCount(recentActivity, 7) > 0 ? 'mt-4' : 'mt-8 sm:mt-10'} data-tutorial="saved-materials">
-          <div className="flex items-center justify-between mb-3 sm:mb-4">
-            <h2 className="text-lg sm:text-xl font-black text-stone-900 dark:text-white flex items-center gap-2 tracking-tight">
+          <div className="flex items-center justify-between mb-2 sm:mb-4">
+            <h2 className="text-base sm:text-xl font-black text-stone-900 dark:text-white flex items-center gap-2 tracking-tight">
               <span className="text-xl sm:text-2xl">📂</span> Recents
             </h2>
             {recentActivity.length > 0 && (
@@ -3850,9 +3850,9 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
           </div>
           
           {(isLoading || isActivityLoading) ? (
-            <div className="flex gap-3 overflow-x-auto pb-2 -mx-3 px-3 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-2 lg:grid-cols-5 sm:gap-4 scrollbar-hide">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 gap-2 sm:gap-4">
               {Array.from({ length: 5 }).map((_, i) => (
-                <div key={i} className="bg-white/80 dark:bg-stone-800/80 backdrop-blur-sm border border-stone-200/40 dark:border-stone-700/40 rounded-2xl sm:rounded-3xl p-3 sm:p-4 animate-pulse flex-shrink-0 w-[160px] sm:w-auto">
+                <div key={i} className="bg-white/80 dark:bg-stone-800/80 backdrop-blur-sm border border-stone-200/40 dark:border-stone-700/40 rounded-xl sm:rounded-3xl p-3 sm:p-4 animate-pulse">
                   <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
                     <div className="w-8 h-8 sm:w-10 sm:h-10 bg-stone-200 dark:bg-stone-700 rounded-lg sm:rounded-xl flex-shrink-0" />
                     <div className="h-4 sm:h-5 bg-stone-200 dark:bg-stone-700 rounded-lg w-12 sm:w-16" />
@@ -3869,7 +3869,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                 return (
                   <div 
                     key={activity.id}
-                    className={`relative overflow-hidden rounded-2xl sm:rounded-3xl p-3 sm:p-4 border ${meta.border} bg-gradient-to-br ${meta.cardBg} backdrop-blur-sm sm:hover:shadow-xl sm:hover:-translate-y-1 sm:hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 cursor-pointer group flex-shrink-0 w-[160px] sm:w-auto snap-start`}
+                    className={`relative overflow-hidden rounded-xl sm:rounded-3xl p-3 sm:p-4 border ${meta.border} bg-gradient-to-br ${meta.cardBg} backdrop-blur-sm sm:hover:shadow-xl sm:hover:-translate-y-1 sm:hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 cursor-pointer group`}
                     onClick={() => handleActivityClick(activity)}
                   >
                     {/* Decorative shapes - hidden on mobile for cleaner look */}

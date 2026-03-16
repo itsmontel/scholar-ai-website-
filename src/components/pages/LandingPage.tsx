@@ -517,12 +517,11 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
           <div className="max-w-4xl mx-auto text-center">
             {/* Hero headline */}
             <h1 className="text-3xl sm:text-5xl lg:text-6xl xl:text-7xl font-extrabold text-stone-800 dark:text-stone-100 leading-[1.1] mb-6 sm:mb-6 tracking-tight" style={{ letterSpacing: '-0.03em' }}>
-              Get professor-style feedback<br />
-              <span className="text-violet-500">on every essay you write</span>
+              Professor-Style Essay Feedback. <span className="text-violet-500">Citations.</span> Study Packs.<br className="sm:hidden" /> Free to Try.
             </h1>
 
             <p className="text-base sm:text-xl text-stone-600 dark:text-stone-400 mb-16 sm:mb-14 max-w-2xl mx-auto leading-relaxed px-2">
-              Block YouTube, TikTok and social media until you study. Plus quizzes, flashcards & crosswords from your notes. All in one place.
+              Essay checker, citation finder, quizzes & flashcards from your notes — plus Focus Mode to block YouTube and TikTok until you study. All in one place.
             </p>
             
             {/* Primary CTA - mascot peeking behind button with grip hands */}

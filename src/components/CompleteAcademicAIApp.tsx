@@ -258,7 +258,7 @@ const AcademicAIApp = () => {
 
   // SEO: dynamic document title and meta description per page (SPA)
   const pageMeta: Record<string, { title: string; description: string }> = {
-    landing: { title: 'Get Professor-Style Feedback on Every Essay | WriteScholar', description: 'Get professor-style feedback on every essay you write. Block YouTube, TikTok until you study. Plus quizzes, flashcards & crosswords from your notes. All in one place. Free to try.' },
+    landing: { title: 'Professor-Style Essay Feedback, Citations & Study Packs | Free to Try | WriteScholar', description: 'Essay checker, citation finder, quizzes & flashcards from your notes — plus Focus Mode to block YouTube and TikTok until you study. Professor-style feedback on every essay. Free to try.' },
     analyze: { title: 'AI Essay Checker. Professor-Style Feedback by Grade Level | WriteScholar', description: 'Get AI essay feedback tailored to college, high school, or middle school. Structure, clarity, citations, grammar. Grade-level rubric. Free essay analysis tool for students.' },
     citations: { title: 'Academic Citation Finder. APA, MLA, Chicago Sources | WriteScholar', description: 'Find peer-reviewed academic sources for your research. Search by topic, get APA, MLA, Chicago citations instantly. Free citation finder for students.' },
     features: { title: 'Essay Analyzer, Quiz Generator, Flashcards, Humanizer | WriteScholar', description: 'Professor-style essay feedback and grade-level rubrics first. Plus AI quiz generator, flashcard maker, crossword builder, humanizer, summarizer, citation finder. The best Quizlet alternative for students.' },
