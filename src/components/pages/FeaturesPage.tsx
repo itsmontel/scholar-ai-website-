@@ -79,7 +79,7 @@ const FeaturesPage = ({ onNavigate, user, onLogout }: FeaturesPageProps) => {
             </span>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-stone-800 dark:text-stone-100">Our four core tools</h2>
           </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6 mb-16">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6 mb-16">
             {/* Essay Analyzer - Flagship */}
             <button onClick={() => onNavigate('analyze')} className="group relative rounded-2xl sm:rounded-3xl overflow-hidden border-2 border-rose-200/80 dark:border-rose-700/50 shadow-xl shadow-rose-500/10 dark:shadow-black/20 backdrop-blur-2xl bg-white/80 dark:bg-stone-800/80 p-6 hover:shadow-2xl hover:border-rose-300 dark:hover:border-rose-500/60 transition-all duration-300 text-left">
               <div className="relative flex flex-col items-center text-center mb-4">
@@ -124,7 +124,7 @@ const FeaturesPage = ({ onNavigate, user, onLogout }: FeaturesPageProps) => {
           {/* More Tools */}
           <div className="pt-8 border-t border-stone-200/60 dark:border-stone-600/40">
             <h3 className="text-lg font-bold text-stone-700 dark:text-stone-300 mb-6">More tools</h3>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
             {/* Document Library */}
             <div className="group relative rounded-2xl sm:rounded-3xl overflow-hidden border border-white/60 dark:border-stone-600/50 shadow-xl shadow-stone-900/5 dark:shadow-black/20 backdrop-blur-2xl bg-white/70 dark:bg-stone-800/70 p-6 hover:shadow-2xl hover:border-stone-300/80 dark:hover:border-stone-500/50 transition-all duration-300">
               <div className="relative flex items-center gap-4 mb-4">

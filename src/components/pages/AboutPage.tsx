@@ -116,7 +116,7 @@ const AboutPage = ({ onNavigate, user, onLogout }: AboutPageProps) => {
             </p>
           </div>
           
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
             {mainFeatures.map((f) => {
               const borderCls = f.accent === 'rose' ? 'border-rose-200/80 dark:border-rose-700/50 hover:border-rose-300 dark:hover:border-rose-500/60' : f.accent === 'sky' ? 'border-sky-200/80 dark:border-sky-700/50 hover:border-sky-300 dark:hover:border-sky-500/60' : f.accent === 'amber' ? 'border-amber-200/80 dark:border-amber-700/50 hover:border-amber-300 dark:hover:border-amber-500/60' : 'border-violet-200/80 dark:border-violet-700/50 hover:border-violet-300 dark:hover:border-violet-500/60';
               const titleCls = f.accent === 'rose' ? 'text-rose-700 dark:text-rose-400' : f.accent === 'sky' ? 'text-sky-700 dark:text-sky-400' : f.accent === 'amber' ? 'text-amber-700 dark:text-amber-400' : 'text-violet-700 dark:text-violet-400';
@@ -153,7 +153,7 @@ const AboutPage = ({ onNavigate, user, onLogout }: AboutPageProps) => {
             </p>
           </div>
           
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
             <div className="rounded-2xl sm:rounded-3xl border border-white/60 dark:border-stone-600/50 shadow-xl shadow-stone-900/5 dark:shadow-black/20 backdrop-blur-2xl bg-white/70 dark:bg-stone-800/70 p-6 text-center hover:shadow-2xl hover:border-violet-300 dark:hover:border-violet-500/60 transition-all">
               <div className="flex justify-center mb-4">
                 <ScholarMascot size={64} animated={false} pose="analyzing" />
