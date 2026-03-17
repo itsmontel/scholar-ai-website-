@@ -1479,10 +1479,17 @@ router.post('/analyze', authenticateToken, validateCreateAnalysis, async (req, r
     let analysisDocumentId = documentId;
 
     if (content && !documentId) {
-      // Text analysis from dashboard (no document ID)
+      // Text analysis from dashboard (pasted content) - create document so it saves to library
       analysisContent = content;
-      analysisDocumentId = null; // No document ID for text analysis
-      console.log('Text analysis from dashboard - no document ID');
+      try {
+        const title = content.trim().slice(0, 80) + (content.trim().length > 80 ? '...' : '');
+        const newDoc = await documentService.createDocumentFromText(userId, content, title || 'Pasted Essay');
+        analysisDocumentId = newDoc.id;
+        console.log('Created document from pasted text for library - documentId:', analysisDocumentId);
+      } catch (createErr) {
+        console.error('Failed to create document from pasted text:', createErr);
+        analysisDocumentId = null; // Fallback: analysis will still run but won't appear in library
+      }
     } else if (documentId) {
       // Document analysis
       const document = await documentService.getDocumentById(documentId, userId);

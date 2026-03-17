@@ -1603,8 +1603,107 @@ CRITICAL REQUIREMENTS:
     console.log(`   Total annotations: ${finalAnnotations.length} (target ${minTotal})`);
     console.log(`   Distribution: ${finalStrongCount} strong, ${finalImproveCount} improve, ${finalConcernCount} concern`);
     console.log(`   Quality-adaptive: Strong ratio ${(finalStrongCount / finalAnnotations.length * 100).toFixed(1)}%`);
-    
-    return finalAnnotations;
+
+    // STEP 3: Ensure no more than 200 words without an annotation (coverage fill-ins)
+    // These are green (strong) annotations; they don't count toward minTotal or scoring
+    const nextId = Math.max(0, ...finalAnnotations.map(a => parseInt(a.id, 10) || 0)) + 1;
+    const withCoverage = this.ensureCoverageAnnotations(finalAnnotations, content, nextId);
+
+    return withCoverage;
+  }
+
+  /**
+   * Ensure no more than 200 words pass without an annotation.
+   * Finds gaps between annotations and adds green (strong) coverage annotations.
+   * These show in export/sidebar but don't count toward minTotal or scoring.
+   */
+  ensureCoverageAnnotations(annotations, content, startId) {
+    const MAX_WORDS = 200;
+    const result = [...annotations].sort((a, b) => a.startIndex - b.startIndex);
+    let annotationId = startId;
+
+    const words = content.split(/\s+/);
+    if (words.length < MAX_WORDS) return result;
+
+    let charPos = 0;
+    const wordBounds = [];
+    for (let i = 0; i < words.length; i++) {
+      const idx = content.indexOf(words[i], charPos);
+      if (idx === -1) break;
+      wordBounds.push({ start: idx, end: idx + words[i].length });
+      charPos = idx + words[i].length;
+    }
+
+    const getWordCountInRange = (charStart, charEnd) => {
+      return wordBounds.filter(w => w.end > charStart && w.start < charEnd).length;
+    };
+
+    const getCharPosOfNthWordFrom = (charStart, n) => {
+      let count = 0;
+      for (const w of wordBounds) {
+        if (w.end <= charStart) continue;
+        count++;
+        if (count >= n) return w.end;
+      }
+      return content.length;
+    };
+
+    const findSentenceInRange = (charStart, charEnd) => {
+      const segment = content.substring(charStart, charEnd);
+      const sentences = segment.split(/[.!?]+/).filter(s => s.trim().length > 10);
+      if (sentences.length === 0) return null;
+      const midIdx = Math.floor(sentences.length / 2);
+      const sentence = sentences[midIdx].trim();
+      if (sentence.length < 15) return null;
+      const absStart = content.indexOf(sentence, charStart);
+      if (absStart === -1 || absStart >= charEnd) return null;
+      return { text: sentence, startIndex: absStart, endIndex: absStart + sentence.length };
+    };
+
+    // Build gaps: regions with no annotation coverage
+    const gaps = [];
+    let lastEnd = 0;
+    for (const a of result) {
+      if (a.startIndex > lastEnd) {
+        gaps.push({ start: lastEnd, end: a.startIndex });
+      }
+      lastEnd = Math.max(lastEnd, a.endIndex);
+    }
+    if (lastEnd < content.length) {
+      gaps.push({ start: lastEnd, end: content.length });
+    }
+
+    for (const gap of gaps) {
+      let gapStart = gap.start;
+      const gapEnd = gap.end;
+
+      while (getWordCountInRange(gapStart, gapEnd) >= MAX_WORDS) {
+        const segEndChar = getCharPosOfNthWordFrom(gapStart, MAX_WORDS);
+        const sent = findSentenceInRange(gapStart, segEndChar);
+        if (!sent) break;
+        if (result.some(a => a.endIndex > sent.startIndex && a.startIndex < sent.endIndex)) break;
+
+        result.push({
+          id: annotationId.toString(),
+          type: 'strong',
+          text: sent.text,
+          startIndex: sent.startIndex,
+          endIndex: sent.endIndex,
+          comment: 'This section demonstrates clear academic writing with appropriate structure and vocabulary.',
+          suggestion: 'Continue using this approach throughout your paper.',
+          isCoverageOnly: true
+        });
+        annotationId++;
+        result.sort((a, b) => a.startIndex - b.startIndex);
+        gapStart = sent.endIndex;
+      }
+    }
+
+    const coverageCount = result.filter(a => a.isCoverageOnly).length;
+    if (coverageCount > 0) {
+      console.log(`📎 Added ${coverageCount} coverage annotations (max 200 words without feedback)`);
+    }
+    return result;
   }
 
   /**
@@ -1691,8 +1790,9 @@ CRITICAL REQUIREMENTS:
     
     console.log(`Fallback annotations created: ${annotations.length}`);
     console.log(`Fallback strong points: ${annotations.filter(a => a.type === 'strong').length}`);
-    
-    return annotations;
+
+    const nextId = Math.max(0, ...annotations.map(a => parseInt(a.id, 10) || 0)) + 1;
+    return this.ensureCoverageAnnotations(annotations, content, nextId);
   }
 
   /**

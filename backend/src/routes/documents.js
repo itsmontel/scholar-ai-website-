@@ -403,7 +403,7 @@ router.get('/:id', authenticateToken, validateDocumentId, async (req, res) => {
 });
 
 // @route   GET /api/documents/:id/download
-// @desc    Get download URL for document
+// @desc    Get download URL for document (or inline content for pasted documents)
 // @access  Private
 router.get('/:id/download', authenticateToken, async (req, res) => {
   try {
@@ -416,6 +416,22 @@ router.get('/:id/download', authenticateToken, async (req, res) => {
       return res.status(404).json({
         success: false,
         message: 'Document not found'
+      });
+    }
+
+    // Pasted documents have no S3 file - return content as download via data URL
+    if (documentService.isPastedDocument(document)) {
+      const content = document.content_text || '';
+      const base64 = Buffer.from(content, 'utf8').toString('base64');
+      const dataUrl = `data:text/plain;base64,${base64}`;
+      return res.json({
+        success: true,
+        data: {
+          downloadUrl: dataUrl,
+          expiresIn: 3600,
+          fileName: document.original_filename,
+          isPastedDocument: true
+        }
       });
     }
 
@@ -498,8 +514,11 @@ router.delete('/:id', authenticateToken, validateDocumentId, async (req, res) =>
       });
     }
 
-    // Delete from storage
-    const storageDeleted = await storageService.deleteFile(document.s3_key);
+    // Delete from storage (skip for pasted documents - they have no S3 file)
+    let storageDeleted = false;
+    if (!documentService.isPastedDocument(document)) {
+      storageDeleted = await storageService.deleteFile(document.s3_key);
+    }
 
     // Delete from database
     await documentService.deleteDocument(id, userId);

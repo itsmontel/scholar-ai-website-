@@ -54,6 +54,41 @@ class DocumentService {
   }
 
   /**
+   * Create a document from pasted text (no file upload).
+   * Used when users paste essay content and analyze - saves to library.
+   * @param {string} userId - User ID
+   * @param {string} content - Pasted text content
+   * @param {string} [title] - Optional title (default: "Pasted Essay")
+   * @returns {Promise<Object>} Created document
+   */
+  async createDocumentFromText(userId, content, title = 'Pasted Essay') {
+    const wordCount = (content || '').trim().split(/\s+/).filter(Boolean).length;
+    const fileSize = Buffer.byteLength(content || '', 'utf8');
+    const documentData = {
+      userId,
+      title: title || 'Pasted Essay',
+      originalFilename: 'Pasted Essay.txt',
+      fileType: 'text/plain',
+      fileSize,
+      s3Key: `pasted/${uuidv4()}.txt`,
+      s3Url: null,
+      contentText: content,
+      wordCount,
+      pageCount: Math.max(1, Math.ceil(wordCount / 250)),
+    };
+    return this.createDocument(documentData);
+  }
+
+  /**
+   * Check if a document is a pasted-text document (no real S3 file)
+   * @param {Object} document - Document object
+   * @returns {boolean}
+   */
+  isPastedDocument(document) {
+    return document?.s3_key?.startsWith?.('pasted/') || false;
+  }
+
+  /**
    * Get documents for a user
    * @param {string} userId - User ID
    * @param {Object} options - Query options
