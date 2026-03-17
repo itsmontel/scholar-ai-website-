@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "WriteScholar Focus Mode",
   "version": "1.0.3",
-  "description": "Block sites until you solve a puzzle or answer study questions. Free: 3 sites. Pro: 20 sites. Premium: unlimited.",
+  "description": "Block sites until you solve a puzzle or answer study questions. Earn your screen time. Free: 3, Pro: 20, Premium: unlimited.",
   "permissions": [
     "storage",
     "declarativeNetRequest",

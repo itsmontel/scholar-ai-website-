@@ -7,10 +7,13 @@ Use this copy when editing your extension's listing in the Chrome Web Store dash
 ## Short Description (max 132 characters)
 
 **Option A:**  
-Block distracting sites until you answer study questions. Earn your screen time. Free: 3 sites. Pro: 20.
+Block distracting sites until you solve a puzzle or answer study questions. No scroll until you've earned it.
 
 **Option B:**  
-Block sites until you study. Pass a quiz from your notes to unlock. Free to try.
+Block sites until you study. Solve a puzzle or pass a quiz to unlock. Free: 3 sites. Pro: 20. Premium: unlimited.
+
+**Option C:**  
+Earn your screen time. Block sites until you solve a puzzle or answer study questions. Free to try.
 
 ---
 
@@ -19,22 +22,27 @@ Block sites until you study. Pass a quiz from your notes to unlock. Free to try.
 **Use this (avoids keyword stuffing):**
 
 ```
-Focus Mode blocks websites you choose until you answer study questions from your own notes. 
+WriteScholar Focus Mode blocks distracting websites until you answer study questions or solve a puzzle. You can't scroll until you've studied.
 
 HOW IT WORKS
-1. Pick which sites to block
-2. When you try to visit one, you get a short quiz from your WriteScholar flashcards or study material
-3. Pass the quiz and the site unlocks for 15 minutes to 24 hours (you choose)
-4. When time runs out, the block returns—no refresh needed
 
-This ties screen time to learning. Every minute of browsing is earned by studying first. Create quizzes and flashcards from your notes at WriteScholar, then use Focus Mode to gate access to distracting sites.
+1. PICK SITES TO BLOCK — Choose any website to block. Free: 3 sites. Pro: 20 sites. Premium: unlimited.
 
-PLANS
-• Free: Block up to 3 sites
-• Pro: Block up to 20 sites
-• Premium: Unlimited sites
+2. ANSWER TO UNLOCK — When you try to visit a blocked site, you're redirected to unlock it. Solve a quick puzzle (Sudoku, Memory, or Pattern) or answer study questions from your own WriteScholar notes. Get enough right to unlock access.
 
-Requires a WriteScholar account. Install the extension, log in at writescholar.com, and add your blocked sites.
+3. ENJOY YOUR BREAK — The site stays unlocked for 5 minutes to 24 hours (you choose). When time's up, study again to earn more. The block returns automatically—no refresh needed.
+
+FEATURES
+• Chrome extension — works directly in your browser
+• Two unlock options — puzzles (no notes needed) or study quiz from your WriteScholar material
+• Custom timer — set unlock duration from 5 minutes to 24 hours
+• Block any site — popular presets plus custom domains
+• Customizable quiz — choose 5, 10, or 15 questions and set your pass threshold
+• Settings sync — when signed in at writescholar.com, your block list and preferences sync across devices
+
+Requires a WriteScholar.com account. Install the extension, log in at writescholar.com, and add your blocked sites.
+
+Perfect for students who want to stay focused and earn their screen time.
 ```
 
 **Avoid:** Do not list "YouTube, TikTok, Instagram, Reddit, Netflix, Discord" or similar brand names in the description. Say "distracting sites" or "sites you choose" instead.

@@ -166,11 +166,11 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
     },
     {
       question: "How does Focus Mode work?",
-      answer: "Focus Mode blocks distracting sites like YouTube, TikTok, and Instagram until you answer quiz questions from your own study notes. Pick the sites to block, add your material, and when you try to visit a blocked site you face a short quiz. Pass it and the site unlocks. It's a Chrome extension."
+      answer: "Focus Mode blocks distracting sites like YouTube, TikTok, and Instagram until you solve a puzzle (Sudoku, Memory, Pattern) or answer quiz questions from your own study notes. Pick the sites to block, add your material, and when you try to visit a blocked site you face a puzzle or short quiz. Pass it and the site unlocks. It's a Chrome extension."
     },
     {
       question: "Can I block YouTube and TikTok until I study?",
-      answer: "Yes! Focus Mode lets you block any sites you choose. When you try to visit one, you get a quiz from your own notes. Pass the quiz and you earn access. Create a Study Pack or flashcards first, then connect the Chrome extension."
+      answer: "Yes! Focus Mode lets you block any sites you choose. When you try to visit one, you solve a puzzle (Sudoku, Memory, Pattern) or answer a quiz from your own notes. Pass the puzzle or quiz and you earn access. Create a Study Pack or flashcards first, then connect the Chrome extension."
     },
     {
       question: "Can I create study quizzes from my notes?",
@@ -982,7 +982,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
               </span>
             </h2>
             <p className="text-lg sm:text-xl text-violet-200/90 max-w-2xl mx-auto leading-relaxed mb-8">
-              Block YouTube, TikTok, Instagram and Reddit until you answer quiz questions from your own notes.
+              Block YouTube, TikTok, Instagram and Reddit until you answer quiz questions from your own notes or solve a quick puzzle (Sudoku, Memory, Pattern).
               <span className="block mt-1 text-white/70 font-medium">No scroll until you&apos;ve studied.</span>
             </p>
           </div>
@@ -993,7 +993,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
               <div className="relative max-w-4xl mx-auto">
                 <div className="absolute -inset-4 bg-gradient-to-r from-violet-500/20 via-fuchsia-500/20 to-pink-500/20 rounded-3xl blur-2xl" />
                 <div className="relative rounded-2xl overflow-hidden ring-2 ring-white/20 shadow-2xl shadow-violet-500/20">
-                  <video autoPlay loop muted playsInline className="w-full aspect-video object-cover" title="WriteScholar Focus Mode — Block distractions, answer quiz to unlock" aria-label="WriteScholar Focus Mode — Block distractions, answer quiz to unlock">
+                  <video autoPlay loop muted playsInline className="w-full aspect-video object-cover" title="WriteScholar Focus Mode — Block distractions, solve puzzle or answer quiz to unlock" aria-label="WriteScholar Focus Mode — Block distractions, solve puzzle or answer quiz to unlock">
                     <source src="/writescholar-focus-mode-demo.mp4" type="video/mp4" />
                   </video>
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none" />
@@ -1051,7 +1051,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                 <div className="absolute -inset-2 bg-gradient-to-br from-purple-500/10 to-fuchsia-500/10 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 <div className="relative flex-1 rounded-3xl overflow-hidden bg-white/5 backdrop-blur-sm border border-white/10 group-hover:border-purple-400/40 group-hover:bg-white/10 transition-all duration-500">
                   <div className="aspect-[5/4] min-h-[220px] flex items-center justify-center bg-gradient-to-b from-purple-500/20 to-transparent overflow-hidden">
-                    <video autoPlay loop muted playsInline className="w-full h-full object-cover" title="WriteScholar Focus Mode Step 2 — Answer quiz to unlock" aria-label="WriteScholar Focus Mode Step 2 — Answer quiz to unlock">
+                    <video autoPlay loop muted playsInline className="w-full h-full object-cover" title="WriteScholar Focus Mode Step 2 — Solve puzzle or answer quiz to unlock" aria-label="WriteScholar Focus Mode Step 2 — Solve puzzle or answer quiz to unlock">
                       <source src="/writescholar-focus-mode-step2-demo.mp4" type="video/mp4" />
                     </video>
                   </div>
@@ -1061,7 +1061,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                       <h4 className="text-xl font-bold text-white">Answer to Unlock</h4>
                     </div>
                     <p className="text-violet-200/80 leading-relaxed">
-                      Try visiting a blocked site → face a quick quiz from your own notes. Knowledge is the key.
+                      Try visiting a blocked site → solve a puzzle (Sudoku, Memory, Pattern) or answer a quick quiz from your own notes. Knowledge is the key.
                     </p>
                   </div>
                 </div>
@@ -1113,7 +1113,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                     </h3>
                     <p className="text-violet-200/90 leading-relaxed mb-6">
                       Most blockers just frustrate you. Focus Mode is different — it ties your screen time to learning. 
-                      Every minute on TikTok is <span className="text-white font-semibold">earned</span> by answering questions from your own notes. 
+                      Every minute on TikTok is <span className="text-white font-semibold">earned</span> by solving a puzzle or answering questions from your own notes. 
                       Your brain starts associating breaks with achievement, not guilt.
                     </p>
                     <div className="flex flex-wrap justify-center lg:justify-start gap-3">
@@ -1158,22 +1158,33 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
 
           {/* CTA - premium */}
           <div className="text-center">
-            <div className="inline-block relative">
-              <div className="absolute -inset-4 bg-gradient-to-r from-violet-500/30 via-fuchsia-500/30 to-pink-500/30 rounded-3xl blur-2xl animate-pulse" />
-              <button
-                onClick={() => onNavigate('focus-mode')}
-                className="relative inline-flex items-center gap-3 px-10 py-5 text-lg font-bold text-violet-900 bg-white rounded-2xl hover:bg-violet-50 hover:scale-105 active:scale-95 shadow-2xl shadow-black/25 transition-all duration-300"
-              >
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <div className="inline-block relative">
+                <div className="absolute -inset-4 bg-gradient-to-r from-violet-500/30 via-fuchsia-500/30 to-pink-500/30 rounded-3xl blur-2xl animate-pulse" />
+                <a
+                  href={FOCUS_MODE_CHROME_EXTENSION_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="relative inline-flex items-center gap-3 px-10 py-5 text-lg font-bold text-violet-900 bg-white rounded-2xl hover:bg-violet-50 hover:scale-105 active:scale-95 shadow-2xl shadow-black/25 transition-all duration-300"
+                >
                 <span>Try Focus Mode Free</span>
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
+                </a>
+              </div>
+              <button
+                onClick={() => onNavigate('focus-mode')}
+                className="inline-flex items-center gap-2 px-8 py-4 text-base font-semibold text-white border-2 border-white/40 rounded-2xl hover:bg-white/10 hover:border-white/60 transition-all duration-300"
+              >
+                <span>Learn More</span>
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                 </svg>
               </button>
             </div>
             <p className="mt-6 text-violet-300/80 text-sm">
-              <a href={FOCUS_MODE_CHROME_EXTENSION_URL} target="_blank" rel="noopener noreferrer" className="underline hover:text-violet-200 transition-colors">
-                Chrome extension required
-              </a>
+              Chrome extension • free to try
             </p>
           </div>
         </div>

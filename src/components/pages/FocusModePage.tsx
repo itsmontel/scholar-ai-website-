@@ -56,7 +56,7 @@ const FocusModePage = ({ onNavigate, user, onLogout }: FocusModePageProps) => {
     {
       num: 2,
       title: 'Answer to Unlock',
-      desc: "Try to visit a blocked site and you'll face a quick quiz from your own study material. Pass your customized threshold to unlock.",
+      desc: "Try to visit a blocked site and you'll solve a puzzle (Sudoku, Memory, Pattern) or answer a quick quiz from your own study material. Pass your customized threshold to unlock.",
       icon: '📝',
       gradient: 'from-violet-500 to-purple-600',
       shadow: 'shadow-violet-500/25',
@@ -64,7 +64,7 @@ const FocusModePage = ({ onNavigate, user, onLogout }: FocusModePageProps) => {
     {
       num: 3,
       title: 'Enjoy Your Break',
-      desc: "Passed the quiz? The site unlocks for 15 minutes to 24 hours — you choose. When time's up, study again to earn more time.",
+      desc: "Passed the quiz or solved the puzzle? The site unlocks for 15 minutes to 24 hours — you choose. When time's up, study again to earn more time.",
       icon: '🎉',
       gradient: 'from-emerald-500 to-teal-600',
       shadow: 'shadow-emerald-500/25',
@@ -224,8 +224,8 @@ const FocusModePage = ({ onNavigate, user, onLogout }: FocusModePageProps) => {
                 muted
                 playsInline
                 className="w-full aspect-video object-cover"
-                title="WriteScholar Focus Mode — Block distractions, answer quiz to unlock"
-                aria-label="WriteScholar Focus Mode — Block distractions, answer quiz to unlock"
+                title="WriteScholar Focus Mode — Block distractions, solve puzzle or answer quiz to unlock"
+                aria-label="WriteScholar Focus Mode — Block distractions, solve puzzle or answer quiz to unlock"
               >
                 <source src="/writescholar-focus-mode-demo.mp4" type="video/mp4" />
               </video>
@@ -299,7 +299,7 @@ const FocusModePage = ({ onNavigate, user, onLogout }: FocusModePageProps) => {
                 Why Focus Mode actually works
               </h2>
               <p className="text-stone-600 dark:text-stone-400 leading-relaxed mb-6">
-                Most blockers just frustrate you. Focus Mode ties screen time to learning. Every minute on TikTok is earned by answering questions from your own notes. Your brain starts associating breaks with achievement, not guilt.
+                Most blockers just frustrate you. Focus Mode ties screen time to learning. Every minute on TikTok is earned by solving a puzzle or answering questions from your own notes. Your brain starts associating breaks with achievement, not guilt.
               </p>
               <div className="flex flex-wrap gap-3 mb-8">
                 <div className="flex items-center gap-2 px-4 py-2 bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 rounded-xl text-sm font-medium">

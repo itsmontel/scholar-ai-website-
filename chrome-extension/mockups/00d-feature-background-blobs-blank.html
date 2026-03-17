@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mockup: Feature Background - Blobs (Blank)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&family=Crimson+Text:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      width: 1280px;
+      height: 800px;
+      overflow: hidden;
+      font-family: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #F8F5F0;
+      padding: 0;
+      margin: 0;
+      position: relative;
+    }
+    .bg-features {
+      position: absolute;
+      inset: 0;
+    }
+    .blob {
+      position: absolute;
+      border-radius: 50%;
+      opacity: 0.12;
+    }
+    .blob-1 {
+      width: 400px;
+      height: 400px;
+      background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
+      top: -100px;
+      right: -80px;
+    }
+    .blob-2 {
+      width: 320px;
+      height: 320px;
+      background: linear-gradient(135deg, #7C3AED 0%, #6d28d9 100%);
+      bottom: -60px;
+      left: -60px;
+    }
+    .blob-3 {
+      width: 200px;
+      height: 200px;
+      background: linear-gradient(135deg, #a78bfa 0%, #8B5CF6 100%);
+      top: 40%;
+      left: 15%;
+    }
+    .blob-4 {
+      width: 160px;
+      height: 160px;
+      background: linear-gradient(135deg, #8B5CF6 0%, #6366f1 100%);
+      bottom: 25%;
+      right: 20%;
+    }
+    .feature-text {
+      position: absolute;
+      font-size: 11px;
+      font-weight: 600;
+      color: #6d28d9;
+      opacity: 0.18;
+    }
+    .feature-text:nth-child(5) { top: 18%; left: 12%; }
+    .feature-text:nth-child(6) { top: 25%; right: 15%; }
+    .feature-text:nth-child(7) { bottom: 35%; left: 18%; }
+    .feature-text:nth-child(8) { bottom: 30%; right: 12%; }
+    .feature-text:nth-child(9) { top: 45%; left: 8%; }
+    .feature-text:nth-child(10) { top: 55%; right: 10%; }
+    .feature-text:nth-child(11) { bottom: 20%; left: 25%; }
+    .feature-text:nth-child(12) { bottom: 15%; right: 22%; }
+  </style>
+</head>
+<body>
+  <div class="bg-features">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+    <div class="blob blob-4"></div>
+    <span class="feature-text">Block any site</span>
+    <span class="feature-text">Solve puzzle</span>
+    <span class="feature-text">Study quiz</span>
+    <span class="feature-text">Custom timer</span>
+    <span class="feature-text">Sudoku · Memory</span>
+    <span class="feature-text">Pattern</span>
+    <span class="feature-text">Earn screen time</span>
+    <span class="feature-text">Notes sync</span>
+  </div>
+</body>
+</html>

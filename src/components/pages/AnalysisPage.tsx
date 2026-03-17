@@ -92,6 +92,7 @@ interface AnalysisResult {
 }
 
 const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout }) => {
+  const analyzingRef = useRef(false);
   const [documents, setDocuments] = useState<Document[]>([]);
   const [analysisTypes, setAnalysisTypes] = useState<AnalysisType[]>([]);
   const [selectedDocument, setSelectedDocument] = useState<string>('');
@@ -283,7 +284,9 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
       }
 
       const data = await response.json();
-      setAnalysisTypes(data.data || []);
+      const allTypes = data.data || [];
+      const comprehensiveOnly = allTypes.filter((t: AnalysisType) => t.id === 'comprehensive');
+      setAnalysisTypes(comprehensiveOnly.length > 0 ? comprehensiveOnly : allTypes);
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Failed to fetch analysis types');
     }
@@ -903,17 +906,20 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
       // Use selected document content
       const token = localStorage.getItem('authToken');
       if (!token) {
+        analyzingRef.current = false;
         setError('Please log in to analyze documents');
         return;
       }
       content = await fetchDocumentContent(selectedDocument);
       if (!content || content.trim().length === 0) {
+        analyzingRef.current = false;
         setError('Document content is empty or unavailable');
         return;
       }
       setDocumentContent(content);
       console.log('Using selected document content, documentId:', selectedDocument);
     } else {
+      analyzingRef.current = false;
       setError('Please select a document or provide text content');
       return;
     }
@@ -929,6 +935,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
     try {
       const token = localStorage.getItem('authToken');
       if (!token) {
+        analyzingRef.current = false;
         throw new Error('Please log in to analyze documents');
       }
 
@@ -1072,6 +1079,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
       setError(error instanceof Error ? error.message : 'Analysis failed');
       setShowAnalysisPopup(false);
     } finally {
+      analyzingRef.current = false;
       setIsAnalyzing(false);
       // Mark analysis as complete and let the popup handle the transition
       setAnalysisComplete(true);
@@ -1593,7 +1601,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                 </div>
               )}
 
-              {/* Analysis Type Selection */}
+              {/* Analysis Type Selection - only comprehensive shown for better UX */}
               <div className="mb-6">
                 <label className="block text-base font-medium text-stone-900 mb-3">
                   Analysis Type

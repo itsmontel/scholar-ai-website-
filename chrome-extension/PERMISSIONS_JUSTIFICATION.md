@@ -6,7 +6,7 @@ Use these when filling out the **Permissions justification** section in the Chro
 
 ## tabs
 
-**Used to detect when the user is on a blocked website whose unlock timer has expired, and redirect that tab to the unlock quiz page.** When the unlock duration ends, the extension checks open tabs and redirects only tabs on blocked domains to the WriteScholar unlock quiz—so the block applies immediately without requiring a page refresh. Without this permission, users would need to refresh the page to be blocked again after their earned time runs out.
+**Used to detect when the user is on a blocked website whose unlock timer has expired, and redirect that tab to the unlock page.** When the unlock duration ends, the extension checks open tabs and redirects only tabs on blocked domains so the block applies immediately without a page refresh. Without this permission, users would need to refresh to be blocked again after their earned time runs out.
 
 ---
 
@@ -18,7 +18,7 @@ Stores user preferences (blocked sites, unlock duration, quiz settings), auth to
 
 ## declarativeNetRequest / declarativeNetRequestWithHostAccess
 
-Used to redirect requests to blocked websites (e.g. social or streaming sites) to the WriteScholar unlock quiz page. Users must pass a study quiz before the site loads. No request modification—only redirects to writescholar.com.
+Used to redirect requests to blocked websites to the WriteScholar unlock page. Users must solve a puzzle or pass a study quiz before the site loads. No request modification—only redirects to writescholar.com. The extension only redirects domains the user has explicitly chosen to block.
 
 ---
 
@@ -30,7 +30,7 @@ Runs a periodic check (every 15 seconds) to detect when unlock timers expire, an
 
 ## host_permissions: `<all_urls>`
 
-Required for `declarativeNetRequest` to block user-configured websites (e.g. youtube.com, tiktok.com). The extension only redirects blocked domains to writescholar.com—it does not fetch or read content from other sites.
+Required for `declarativeNetRequest` to block user-configured websites. The extension only redirects blocked domains to writescholar.com—it does not fetch or read content from other sites.
 
 ---
 

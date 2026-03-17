@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mockup 3: Answer or Solve Puzzle</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Crimson+Text:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      width: 1280px;
+      height: 800px;
+      overflow: hidden;
+      font-family: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #F8F5F0;
+      padding: 0;
+      margin: 0;
+      position: relative;
+    }
+    .bg-blobs {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+    .blob {
+      position: absolute;
+      border-radius: 50%;
+      opacity: 0.12;
+    }
+    .blob-1 {
+      width: 400px;
+      height: 400px;
+      background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
+      top: -100px;
+      right: -80px;
+    }
+    .blob-2 {
+      width: 320px;
+      height: 320px;
+      background: linear-gradient(135deg, #7C3AED 0%, #6d28d9 100%);
+      bottom: -60px;
+      left: -60px;
+    }
+    .blob-3 {
+      width: 200px;
+      height: 200px;
+      background: linear-gradient(135deg, #a78bfa 0%, #8B5CF6 100%);
+      top: 40%;
+      left: 15%;
+    }
+    .blob-4 {
+      width: 160px;
+      height: 160px;
+      background: linear-gradient(135deg, #8B5CF6 0%, #6366f1 100%);
+      bottom: 25%;
+      right: 20%;
+    }
+    .container {
+      position: relative;
+      z-index: 2;
+      width: 1280px;
+      height: 800px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 40px;
+      padding: 40px 56px;
+    }
+    .text-section {
+      flex: 0 1 380px;
+      max-width: 380px;
+    }
+    .heading {
+      font-family: 'Crimson Text', Georgia, serif;
+      font-size: 32px;
+      font-weight: 700;
+      color: #1c1917;
+      line-height: 1.2;
+      margin-bottom: 16px;
+    }
+    .highlight {
+      background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
+      color: white;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    .body-text {
+      font-size: 14px;
+      line-height: 1.5;
+      color: #57534e;
+    }
+    .body-text p { margin-bottom: 8px; }
+    .body-text p:last-child { margin-bottom: 0; }
+    .card-section {
+      flex: 0 0 auto;
+      display: flex;
+      align-items: stretch;
+      max-width: 720px;
+    }
+    .mockup-card {
+      background: white;
+      border-radius: 14px;
+      padding: 14px;
+      box-shadow: 0 10px 32px rgba(0,0,0,0.08), 0 2px 8px rgba(139, 92, 246, 0.1);
+      border: 1px solid #e7e5e4;
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      max-height: 480px;
+    }
+    .mockup-card:nth-child(1) { transform: rotate(-4deg); z-index: 1; }
+    .mockup-card:nth-child(2) { transform: rotate(4deg); margin-left: -85px; z-index: 2; }
+    .mockup-card:nth-child(3) { transform: rotate(-5deg); margin-left: -85px; z-index: 3; }
+    .mode-label {
+      font-size: 9px;
+      font-weight: 700;
+      color: #8B5CF6;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+    /* Study Quiz */
+    .quiz-header {
+      font-size: 10px;
+      color: #78716c;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .quiz-badge {
+      background: #f5f3ff;
+      color: #6d28d9;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+    .quiz-question {
+      font-size: 12px;
+      font-weight: 700;
+      color: #1c1917;
+      margin-bottom: 10px;
+      line-height: 1.35;
+    }
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .quiz-option {
+      padding: 8px 10px;
+      border: 1px solid #e7e5e4;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 500;
+      color: #292524;
+      cursor: default;
+      text-align: left;
+    }
+    .quiz-option.selected {
+      border-color: #8B5CF6;
+      background: #f5f3ff;
+    }
+    .quiz-option .letter {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border-radius: 4px;
+      background: #e7e5e4;
+      color: #78716c;
+      font-size: 10px;
+      font-weight: 700;
+      text-align: center;
+      line-height: 16px;
+      margin-right: 6px;
+    }
+    .quiz-option.selected .letter {
+      background: #8B5CF6;
+      color: white;
+    }
+    /* Sudoku 6x6 */
+    .sudoku-title { font-size: 14px; font-weight: 700; color: #1c1917; margin-bottom: 2px; text-align: center; }
+    .sudoku-subtitle { font-size: 10px; color: #57534e; margin-bottom: 6px; text-align: center; }
+    .sudoku-progress { font-size: 11px; font-weight: 600; color: #8B5CF6; margin-bottom: 8px; text-align: center; }
+    .sudoku-wrapper { flex: 1; min-height: 0; display: flex; flex-direction: column; align-items: center; }
+    .sudoku-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      grid-template-rows: repeat(6, 1fr);
+      gap: 0;
+      width: 118px;
+      height: 118px;
+      border: 2px solid #d6d3d1;
+      border-radius: 8px;
+      overflow: hidden;
+      background: #fafaf9;
+      margin-bottom: 16px;
+      flex-shrink: 0;
+    }
+    .sudoku-cell {
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; font-weight: 700; color: #1c1917;
+      background: white; border: 1px solid #e7e5e4;
+    }
+    .sudoku-cell.blank { color: #a8a29e; background: #f5f5f4; }
+    .sudoku-cell.col2, .sudoku-cell.col5 { border-right-width: 2px; border-right-color: #a8a29e; }
+    .sudoku-cell.row1, .sudoku-cell.row3, .sudoku-cell.row5 { border-bottom-width: 2px; border-bottom-color: #a8a29e; }
+    .sudoku-numrow { display: flex; gap: 8px; justify-content: center; margin-bottom: 14px; }
+    .sudoku-numbtn {
+      width: 24px; height: 24px; border-radius: 6px; border: none;
+      background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%); color: white;
+      font-size: 12px; font-weight: 700; font-family: inherit;
+    }
+    .sudoku-actions { display: flex; gap: 10px; justify-content: center; align-items: center; }
+    .sudoku-clear {
+      padding: 4px 12px; border-radius: 6px; border: none;
+      background: #fecaca; color: #991b1b; font-size: 10px; font-weight: 600; font-family: inherit;
+    }
+    .sudoku-cancel { background: none; border: none; color: #78716c; font-size: 11px; font-family: inherit; }
+    /* Memory 4x4 */
+    .memory-title { font-size: 14px; font-weight: 700; color: #1c1917; margin-bottom: 2px; text-align: center; }
+    .memory-subtitle { font-size: 10px; color: #57534e; margin-bottom: 10px; text-align: center; }
+    .memory-stats { display: flex; gap: 24px; margin-bottom: 10px; justify-content: center; }
+    .memory-stat { text-align: center; }
+    .memory-stat .val { font-size: 16px; font-weight: 700; color: #10b981; }
+    .memory-stat .lbl { font-size: 9px; color: #57534e; }
+    .memory-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      grid-template-rows: repeat(4, 1fr);
+      gap: 4px;
+      width: 118px;
+      height: 118px;
+      margin: 0 auto 10px;
+      flex-shrink: 0;
+    }
+    .memory-card {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 600;
+      border: 1px solid #e7e5e4;
+      border-radius: 6px;
+    }
+    .memory-card.revealed {
+      background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%);
+      border-color: #c4b5fd;
+    }
+    .memory-card.hidden {
+      background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
+      border-color: #6d28d9;
+      color: rgba(255,255,255,0.7);
+      font-size: 14px;
+      font-weight: 700;
+    }
+    .memory-cancel { background: none; border: none; color: #78716c; font-size: 11px; font-family: inherit; display: block; margin: 14px auto 0; }
+  </style>
+</head>
+<body>
+  <div class="bg-blobs">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+    <div class="blob blob-4"></div>
+  </div>
+  <div class="container">
+    <div class="text-section">
+      <h1 class="heading">
+        Answer or <span class="highlight">solve</span>
+      </h1>
+      <div class="body-text">
+        <p>Unlock by solving a quick puzzle (Sudoku, Memory, or Pattern) or answering study questions from your WriteScholar notes.</p>
+        <p>Get enough right to pass. No notes needed for puzzles.</p>
+      </div>
+    </div>
+    <div class="card-section">
+      <div class="mockup-card">
+        <div class="mode-label">Study quiz</div>
+        <div class="quiz-header">
+          <span>Question 3 of 10</span>
+          <span class="quiz-badge">From: Psych 101</span>
+        </div>
+        <div class="quiz-question">In classical conditioning, what term describes a stimulus that naturally triggers a response before any learning?</div>
+        <div class="quiz-options">
+          <div class="quiz-option"><span class="letter">A</span> Conditioned stimulus</div>
+          <div class="quiz-option selected"><span class="letter">B</span> Unconditioned stimulus</div>
+          <div class="quiz-option"><span class="letter">C</span> Neutral stimulus</div>
+          <div class="quiz-option"><span class="letter">D</span> Conditioned response</div>
+        </div>
+      </div>
+      <div class="mockup-card">
+        <div class="sudoku-title">Sudoku 6×6</div>
+        <div class="sudoku-subtitle">Fill all cells with numbers 1-6</div>
+        <div class="sudoku-progress">24 of 36 cells filled</div>
+        <div class="sudoku-wrapper">
+          <div class="sudoku-grid">
+            <div class="sudoku-cell">1</div><div class="sudoku-cell blank"></div><div class="sudoku-cell col2">3</div><div class="sudoku-cell">4</div><div class="sudoku-cell blank"></div><div class="sudoku-cell col5">6</div>
+            <div class="sudoku-cell row1">4</div><div class="sudoku-cell row1 blank"></div><div class="sudoku-cell col2 row1">6</div><div class="sudoku-cell row1">1</div><div class="sudoku-cell row1 blank"></div><div class="sudoku-cell col5 row1">3</div>
+            <div class="sudoku-cell blank"></div><div class="sudoku-cell">3</div><div class="sudoku-cell col2">4</div><div class="sudoku-cell blank"></div><div class="sudoku-cell">6</div><div class="sudoku-cell col5">1</div>
+            <div class="sudoku-cell row3 blank"></div><div class="sudoku-cell row3">6</div><div class="sudoku-cell col2 row3">1</div><div class="sudoku-cell row3">2</div><div class="sudoku-cell row3 blank"></div><div class="sudoku-cell col5 row3">4</div>
+            <div class="sudoku-cell blank"></div><div class="sudoku-cell blank"></div><div class="sudoku-cell col2">5</div><div class="sudoku-cell">6</div><div class="sudoku-cell">1</div><div class="sudoku-cell col5">2</div>
+            <div class="sudoku-cell row5">6</div><div class="sudoku-cell row5 blank"></div><div class="sudoku-cell col2 row5">2</div><div class="sudoku-cell row5">3</div><div class="sudoku-cell row5 blank"></div><div class="sudoku-cell col5 row5">5</div>
+          </div>
+          <div class="sudoku-numrow">
+            <button class="sudoku-numbtn">1</button><button class="sudoku-numbtn">2</button><button class="sudoku-numbtn">3</button>
+            <button class="sudoku-numbtn">4</button><button class="sudoku-numbtn">5</button><button class="sudoku-numbtn">6</button>
+          </div>
+          <div class="sudoku-actions">
+            <button class="sudoku-clear">Clear</button>
+            <button class="sudoku-cancel">Cancel</button>
+          </div>
+        </div>
+      </div>
+      <div class="mockup-card">
+        <div class="memory-title">Memory Match</div>
+        <div class="memory-subtitle">Find all 8 pairs to win</div>
+        <div class="memory-stats">
+          <div class="memory-stat"><div class="val">3</div><div class="lbl">Pairs</div></div>
+          <div class="memory-stat"><div class="val">5</div><div class="lbl">Moves</div></div>
+        </div>
+        <div class="memory-grid">
+          <div class="memory-card revealed">🎯</div>
+          <div class="memory-card revealed">🎯</div>
+          <div class="memory-card revealed">🎨</div>
+          <div class="memory-card hidden">?</div>
+          <div class="memory-card revealed">🎨</div>
+          <div class="memory-card hidden">?</div>
+          <div class="memory-card hidden">?</div>
+          <div class="memory-card revealed">🎭</div>
+          <div class="memory-card revealed">🎭</div>
+          <div class="memory-card hidden">?</div>
+          <div class="memory-card hidden">?</div>
+          <div class="memory-card hidden">?</div>
+          <div class="memory-card hidden">?</div>
+          <div class="memory-card hidden">?</div>
+          <div class="memory-card hidden">?</div>
+          <div class="memory-card hidden">?</div>
+        </div>
+        <button class="memory-cancel">Cancel</button>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
