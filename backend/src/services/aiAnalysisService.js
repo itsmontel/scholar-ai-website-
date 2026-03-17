@@ -170,7 +170,7 @@ class AIAnalysisService {
       // Get user's subscription plan for model and token selection
       let userPlan = 'free';
       let selectedModel = process.env.OPENAI_MODEL || 'gpt-4o-mini';
-      let maxTokens = 4000; // Default for free/pro
+      let maxTokens = 5000; // Default for free
       
       try {
         const { plan } = await subscriptionService.getUserSubscriptionDetails(userId);
@@ -179,13 +179,13 @@ class AIAnalysisService {
         if (plan === 'premium') {
           // Premium users get better model and more tokens
           selectedModel = process.env.OPENAI_PREMIUM_MODEL || 'gpt-5-mini';
-          maxTokens = 8000; // Double tokens for premium
+          maxTokens = 15000;
         } else if (plan === 'pro') {
           selectedModel = process.env.OPENAI_STANDARD_MODEL || 'gpt-4o-mini';
-          maxTokens = 6000; // 50% more tokens for pro
+          maxTokens = 10000;
         } else {
           selectedModel = process.env.OPENAI_STANDARD_MODEL || 'gpt-4o-mini';
-          maxTokens = 4000; // Standard for free
+          maxTokens = 5000;
         }
       } catch (planErr) {
         // If plan lookup fails, keep defaults

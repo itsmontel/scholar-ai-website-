@@ -170,12 +170,6 @@ export default function FocusModeSettingsSection({ onBack, embedded = false, isP
 
   const passThresholdOptions = Array.from({ length: questionCount }, (_, i) => i + 1);
 
-  const handleTestPuzzleUnlock = () => {
-    const search = `?site=youtube.com&redirect=${encodeURIComponent('https://youtube.com')}`;
-    window.history.pushState({}, '', `/unlock-quiz${search}`);
-    onNavigate?.('unlock-quiz');
-  };
-
   if (FOCUS_MODE_COMING_SOON) {
     return (
       <div className="min-h-0 flex-1 overflow-auto">
@@ -189,12 +183,6 @@ export default function FocusModeSettingsSection({ onBack, embedded = false, isP
                 ← Back to Dashboard
               </button>
             )}
-            <button
-              onClick={handleTestPuzzleUnlock}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300 font-semibold text-sm hover:bg-violet-200 dark:hover:bg-violet-800/60 transition-colors"
-            >
-              🧩 Test puzzle unlock
-            </button>
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
             <div className="rounded-2xl overflow-hidden bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-950/30 dark:to-purple-950/20 border border-violet-200/60 dark:border-violet-800/40 shadow-lg">
@@ -246,12 +234,6 @@ export default function FocusModeSettingsSection({ onBack, embedded = false, isP
               ← Back to Dashboard
             </button>
           )}
-          <button
-            onClick={handleTestPuzzleUnlock}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300 font-semibold text-sm hover:bg-violet-200 dark:hover:bg-violet-800/60 transition-colors"
-          >
-            🧩 Test puzzle unlock
-          </button>
         </div>
 
         {/* Side-by-side: Video left, Settings right (desktop) */}

@@ -1926,17 +1926,6 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                 <div className="hidden sm:block w-px h-8 bg-stone-200/80 dark:bg-stone-600/80 flex-shrink-0" />
                 {/* Mobile: Streak, Friends, Badge on same line; Desktop: inline with search */}
                 <div className="flex flex-row flex-wrap gap-2 sm:contents items-center justify-between sm:justify-start">
-                  <button
-                    onClick={() => {
-                      const q = '?site=youtube.com&redirect=' + encodeURIComponent('https://youtube.com');
-                      onNavigate('unlock-quiz', undefined, { unlockQuizQuery: q });
-                    }}
-                    className="flex items-center gap-1.5 px-2.5 sm:px-3 py-2 sm:py-2.5 bg-violet-100 dark:bg-violet-900/50 border border-violet-200/70 dark:border-violet-600/50 rounded-xl hover:bg-violet-200/80 dark:hover:bg-violet-800/60 font-semibold text-violet-700 dark:text-violet-300 text-xs sm:text-sm transition-all flex-shrink-0"
-                    title="Test the Focus Mode puzzle unlock flow"
-                  >
-                    <span className="text-base">🧩</span>
-                    <span className="hidden sm:inline">Test puzzle</span>
-                  </button>
                   <div data-tutorial="streak-widget" className="flex-shrink-0">
                     <StreakWidget compact />
                   </div>
