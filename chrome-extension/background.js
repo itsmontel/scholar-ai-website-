@@ -80,6 +80,19 @@ function normalizeDomains(domains) {
 
 async function syncRules() {
   console.log('[WriteScholar BG] syncRules called');
+  const { authToken } = await chrome.storage.local.get('authToken');
+  if (!authToken || typeof authToken !== 'string' || authToken.trim() === '') {
+    console.log('[WriteScholar BG] No auth token - not blocking anything. Log in to WriteScholar to use Focus Mode.');
+    const existing = await chrome.declarativeNetRequest.getDynamicRules();
+    if (existing.length > 0) {
+      await chrome.declarativeNetRequest.updateDynamicRules({
+        removeRuleIds: existing.map((r) => r.id),
+      });
+      console.log('[WriteScholar BG] Rules cleared (login required)');
+    }
+    return;
+  }
+
   const config = await getStoredConfig();
   const unlocks = await getUnlocks();
   const now = Date.now();
@@ -183,7 +196,9 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     if (msg.apiBase) updates.apiBase = msg.apiBase;
     chrome.storage.local.set(updates, () => {
       console.log('[WriteScholar BG] AUTH_TOKEN stored');
-      syncFromServer().then(() => sendResponse({ ok: true }));
+      syncFromServer()
+        .then(() => syncRules())
+        .then(() => sendResponse({ ok: true }));
     });
     return true;
   }

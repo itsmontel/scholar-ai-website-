@@ -72,7 +72,7 @@ const WhyStudentsChoosePage: React.FC<WhyStudentsChoosePageProps> = ({ onNavigat
                 { feature: 'Essay Structure Analysis', ws: true, grammarly: 'partial', quillbot: false },
                 { feature: 'Grammar & Spelling Check', ws: true, grammarly: true, quillbot: true, alt: true },
                 { feature: 'Academic Source Finder', ws: true, grammarly: true, quillbot: false },
-                { feature: 'AI Text Humanizer', ws: true, grammarly: false, quillbot: false },
+                { feature: 'Focus Mode (Puzzle/Quiz to Unlock)', ws: true, grammarly: false, quillbot: false },
                 { feature: 'Free Tools Available', ws: '8 Tools', grammarly: 'Limited', quillbot: 'Several', alt: true },
                 { feature: 'Starting Price', ws: 'Free / $19.99', grammarly: '$12/mo', quillbot: '$9.95/mo' },
               ].map((row, i) => (

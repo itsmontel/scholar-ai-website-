@@ -543,11 +543,22 @@ const QuickReviewModal = ({ userName, userId, onComplete, onSkip }: QuickReviewM
           <div className="p-4 sm:p-8 text-center overflow-y-auto">
             <div className="mb-3 sm:mb-6 flex justify-center">
               <div className="scale-75 sm:scale-100 origin-center">
-                <ScholarMascot size={120} animated={true} pose={scorePercentage >= 60 ? 'celebrating' : 'default'} />
+                {scorePercentage >= 80 ? (
+                  <video
+                    src="/happymascot.mp4"
+                    autoPlay
+                    muted
+                    playsInline
+                    loop
+                    className="w-28 h-28 object-contain rounded-xl border-2 border-violet-300 dark:border-violet-500 shadow-lg overflow-hidden ring-2 ring-violet-400/30"
+                  />
+                ) : (
+                  <ScholarMascot size={120} animated={true} pose="default" />
+                )}
               </div>
             </div>
             
-            <span className="text-4xl sm:text-5xl mb-2 sm:mb-4 block">{emoji}</span>
+            {scorePercentage < 80 && <span className="text-4xl sm:text-5xl mb-2 sm:mb-4 block">{emoji}</span>}
             <h2 className="text-2xl sm:text-3xl font-bold text-stone-800 mb-2">{message}</h2>
             
             {/* Score display */}

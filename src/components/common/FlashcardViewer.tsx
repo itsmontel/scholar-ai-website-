@@ -788,7 +788,14 @@ const FlashcardViewer = ({
       {/* Summary when all reviewed */}
       {knownCards.size === cards.length && (
         <div className="p-4 sm:p-6 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200 dark:border-green-700 rounded-xl sm:rounded-2xl text-center">
-          <span className="text-3xl sm:text-4xl mb-1 sm:mb-2 block">🎉</span>
+          <video
+            src="/happymascot.mp4"
+            autoPlay
+            muted
+            playsInline
+            loop
+            className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-1 sm:mb-2 object-contain rounded-xl border-2 border-violet-300 dark:border-violet-500 shadow-lg overflow-hidden ring-2 ring-violet-400/30"
+          />
           <h3 className="text-lg sm:text-xl font-bold text-green-800 dark:text-green-300">All cards mastered!</h3>
           <p className="text-green-600 dark:text-green-400 text-xs sm:text-sm mt-1">You've marked all {cards.length} cards as known. Great job!</p>
         </div>

@@ -2822,19 +2822,24 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
       </section>
 
       {/* Final CTA */}
-      <section className="py-12 sm:py-24 bg-gradient-to-b from-indigo-50/50 to-white dark:from-stone-900 dark:to-stone-900 border-t border-stone-200 dark:border-stone-700">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="relative py-12 sm:py-24 overflow-hidden">
+        {/* Dark purple gradient matching Earn Your Screen Time */}
+        <div className="absolute inset-0 bg-gradient-to-br from-indigo-950 via-violet-900 to-purple-950 dark:from-indigo-950 dark:via-violet-950 dark:to-stone-900" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_100%_60%_at_50%_-5%,rgba(139,92,246,0.3),transparent_55%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_50%_at_85%_85%,rgba(192,132,252,0.15),transparent_45%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_40%_at_15%_75%,rgba(129,140,248,0.12),transparent_45%)]" />
+        <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h2 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-stone-800 dark:text-stone-100 mb-4 sm:mb-5">
+            <h2 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-white mb-4 sm:mb-5">
               Ready to ace your classes?
             </h2>
-            <p className="text-base sm:text-lg text-stone-600 dark:text-stone-400 mb-8 sm:mb-10 max-w-xl mx-auto px-2">
+            <p className="text-base sm:text-lg text-violet-200/90 mb-8 sm:mb-10 max-w-xl mx-auto px-2">
               Join 38k+ students using WriteScholar to study smarter. Start for free today.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
               <button
                 onClick={() => onNavigate('signup')}
-                className="inline-flex items-center justify-center px-8 py-4 bg-gradient-to-r from-indigo-500 to-violet-600 text-white font-bold rounded-2xl hover:from-indigo-400 hover:to-violet-500 hover:scale-105 active:scale-95 transition-all shadow-xl shadow-indigo-500/30 text-lg"
+                className="inline-flex items-center justify-center px-8 py-4 bg-white text-violet-900 font-bold rounded-2xl hover:bg-violet-100 hover:scale-105 active:scale-95 transition-all shadow-xl shadow-violet-500/30 text-lg"
               >
                 Get Started Free
                 <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2843,7 +2848,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
               </button>
               <button
                 onClick={() => onNavigate('pricing')}
-                className="inline-flex items-center justify-center px-8 py-4 bg-white dark:bg-stone-800 border-2 border-stone-200 dark:border-stone-600 text-stone-800 dark:text-stone-100 font-bold rounded-2xl hover:bg-stone-50 dark:hover:bg-stone-700 hover:scale-105 active:scale-95 transition-all text-lg"
+                className="inline-flex items-center justify-center px-8 py-4 bg-white/10 backdrop-blur-sm border-2 border-white/30 text-white font-bold rounded-2xl hover:bg-white/20 hover:scale-105 active:scale-95 transition-all text-lg"
               >
                 View Pricing
               </button>

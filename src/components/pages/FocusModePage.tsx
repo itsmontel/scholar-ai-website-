@@ -179,7 +179,7 @@ const FocusModePage = ({ onNavigate, user, onLogout }: FocusModePageProps) => {
               </span>
             </h1>
             <p className="text-lg sm:text-xl text-violet-200/90 max-w-2xl mx-auto leading-relaxed mb-4">
-              Block distracting sites until you answer study questions. No scroll until you&apos;ve studied.
+              Block sites until you solve a puzzle or answer study questions. No scroll until you&apos;ve earned it.
             </p>
             <p className="text-sm text-violet-300/70 mb-10">
               Trusted by 38k+ students

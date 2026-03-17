@@ -1204,13 +1204,14 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
       return (
         <div className="bg-white dark:bg-stone-800 rounded-2xl sm:rounded-3xl shadow-xl shadow-stone-100/50 dark:shadow-none border border-stone-200 dark:border-stone-600 overflow-hidden p-6 sm:p-10 text-center">
           <div className="mb-8">
-            <div className={`w-24 h-24 mx-auto rounded-full flex items-center justify-center mb-4 text-4xl ${
-              score.percentage >= 70 ? 'bg-gradient-to-br from-amber-500 to-orange-600' :
-              score.percentage >= 50 ? 'bg-gradient-to-br from-amber-500 to-orange-600' :
-              'bg-gradient-to-br from-red-500 to-rose-600'
-            }`}>
-              🏆
-            </div>
+            <video
+              src="/happymascot.mp4"
+              autoPlay
+              muted
+              playsInline
+              loop
+              className="w-24 h-24 mx-auto mb-4 object-contain rounded-xl border-2 border-violet-300 dark:border-violet-500 shadow-lg overflow-hidden ring-2 ring-violet-400/30"
+            />
             <h2 className="text-3xl font-extrabold text-stone-800 dark:text-stone-100 mb-2">Quiz Complete!</h2>
             <p className="text-stone-600 dark:text-stone-400">Here's how you did</p>
           </div>
@@ -2145,7 +2146,9 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
                       const notAttempted = crosswordResult.placedWords.length - total;
                       return (
                         <div className={`mb-4 p-4 rounded-2xl text-center ${total === 0 ? 'bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-600' : correct === total ? 'bg-green-50 border border-green-200' : 'bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800'}`}>
-                          <span className="text-3xl mb-1 block">{total === 0 ? '✏️' : correct === total ? '🎉' : '📊'}</span>
+                          {total === 0 ? <span className="text-3xl mb-1 block">✏️</span> : correct === total ? (
+                            <video src="/happymascot.mp4" autoPlay muted playsInline loop className="w-16 h-16 mx-auto mb-1 object-contain rounded-xl border-2 border-violet-300 dark:border-violet-500 shadow-lg overflow-hidden ring-2 ring-violet-400/30" />
+                          ) : <span className="text-3xl mb-1 block">📊</span>}
                           {total === 0 ? (
                             <>
                               <p className="font-bold text-lg">No answers submitted</p>

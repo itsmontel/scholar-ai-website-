@@ -26,7 +26,7 @@ import FocusModeSettingsSection from '../common/FocusModeSettingsSection';
 import { FOCUS_MODE_COMING_SOON, FOCUS_MODE_CHROME_EXTENSION_URL } from '../../constants/focusMode';
 
 interface DashboardProps {
-  onNavigate: (page: string, slug?: string, options?: { studyPack?: { data: any; title?: string } }) => void;
+  onNavigate: (page: string, slug?: string, options?: { studyPack?: { data: any; title?: string }; unlockQuizQuery?: string }) => void;
   user: any;
   onLogout: () => void;
   onUserUpdate?: (updates: { welcomeTutorialCompleted?: boolean }) => void;
@@ -1878,7 +1878,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                   {/* Mobile: full subheading in mode color; Desktop: longer subheading */}
                   <p className="sm:hidden mt-3 text-sm font-semibold leading-relaxed text-center sm:text-left">
                     {mode === 'focus_mode' ? (
-                      <span className="text-violet-600 dark:text-violet-400">Block distractions until you study.</span>
+                      <span className="text-violet-600 dark:text-violet-400">Solve a puzzle or answer study questions to unlock.</span>
                     ) : mode === 'quiz' ? (
                       <span className="text-amber-600 dark:text-amber-400">Quizzes, flashcards, and crosswords from your notes.</span>
                     ) : mode === 'citations' ? (
@@ -1889,7 +1889,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                   </p>
                   <p className="hidden sm:block text-stone-600 dark:text-stone-400 mt-3 text-sm sm:text-base max-w-md sm:max-w-lg leading-relaxed">
                     {mode === 'focus_mode' ? (
-                      <><span className="text-violet-600 dark:text-violet-400 font-bold">Block distractions until you study.</span><span className="text-stone-500 dark:text-stone-400"> Study packs, citations & focus mode.</span></>
+                      <><span className="text-violet-600 dark:text-violet-400 font-bold">Solve a puzzle or answer study questions to unlock.</span><span className="text-stone-500 dark:text-stone-400"> Sudoku, Memory, Pattern & more.</span></>
                     ) : mode === 'quiz' ? (
                       <><span className="text-amber-600 dark:text-amber-400 font-bold">Quizzes, flashcards & crosswords from your notes.</span><span className="text-stone-500 dark:text-stone-400"> Plus essay feedback & citations.</span></>
                     ) : mode === 'citations' ? (
@@ -1926,6 +1926,17 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                 <div className="hidden sm:block w-px h-8 bg-stone-200/80 dark:bg-stone-600/80 flex-shrink-0" />
                 {/* Mobile: Streak, Friends, Badge on same line; Desktop: inline with search */}
                 <div className="flex flex-row flex-wrap gap-2 sm:contents items-center justify-between sm:justify-start">
+                  <button
+                    onClick={() => {
+                      const q = '?site=youtube.com&redirect=' + encodeURIComponent('https://youtube.com');
+                      onNavigate('unlock-quiz', undefined, { unlockQuizQuery: q });
+                    }}
+                    className="flex items-center gap-1.5 px-2.5 sm:px-3 py-2 sm:py-2.5 bg-violet-100 dark:bg-violet-900/50 border border-violet-200/70 dark:border-violet-600/50 rounded-xl hover:bg-violet-200/80 dark:hover:bg-violet-800/60 font-semibold text-violet-700 dark:text-violet-300 text-xs sm:text-sm transition-all flex-shrink-0"
+                    title="Test the Focus Mode puzzle unlock flow"
+                  >
+                    <span className="text-base">🧩</span>
+                    <span className="hidden sm:inline">Test puzzle</span>
+                  </button>
                   <div data-tutorial="streak-widget" className="flex-shrink-0">
                     <StreakWidget compact />
                   </div>
@@ -1992,7 +2003,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
               { id: 'analyze' as const, title: 'Analyze', desc: 'Get professor-style feedback on your essays', emoji: '📝', border: 'border-rose-200/80 dark:border-rose-700/50', iconBg: 'from-rose-500 to-pink-600', glow: 'shadow-rose-500/20', titleClr: 'text-rose-600 dark:text-rose-400', blob: 'from-rose-200/30 to-pink-200/20', badgeText: 'Popular', badgeClr: 'bg-rose-100 text-rose-700 dark:bg-rose-900/50 dark:text-rose-300' },
               { id: 'citations' as const, title: 'Citations', desc: 'Find and format academic sources instantly', emoji: '📚', border: 'border-sky-200/80 dark:border-sky-700/50', iconBg: 'from-sky-500 to-blue-600', glow: 'shadow-sky-500/20', titleClr: 'text-sky-600 dark:text-sky-400', blob: 'from-sky-200/30 to-blue-200/20', badgeText: null, badgeClr: '' },
               { id: 'quiz' as const, title: 'Study Pack', desc: 'Lessons, flashcards, quiz, crossword & Crater Blast from your notes', emoji: '📦', border: 'border-amber-200/80 dark:border-amber-700/50', iconBg: 'from-amber-500 to-orange-500', glow: 'shadow-amber-500/20', titleClr: 'text-amber-600 dark:text-amber-400', blob: 'from-amber-200/30 to-orange-200/20', badgeText: '5-in-1', badgeClr: 'bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300' },
-              { id: 'focus_mode' as const, title: 'Focus Mode', desc: 'Block distractions until you study', emoji: '🔒', border: 'border-violet-200/80 dark:border-violet-700/50', iconBg: 'from-violet-500 to-purple-600', glow: 'shadow-violet-500/20', titleClr: 'text-violet-600 dark:text-violet-400', blob: 'from-violet-200/30 to-purple-200/20', badgeText: FOCUS_MODE_COMING_SOON ? 'Soon' : 'New', badgeClr: FOCUS_MODE_COMING_SOON ? 'bg-amber-200/80 text-amber-800 dark:bg-amber-800/80 dark:text-amber-200' : 'bg-violet-100 text-violet-700 dark:bg-violet-900/50 dark:text-violet-300' },
+              { id: 'focus_mode' as const, title: 'Focus Mode', desc: 'Block sites until you solve a puzzle or answer study questions', emoji: '🔒', border: 'border-violet-200/80 dark:border-violet-700/50', iconBg: 'from-violet-500 to-purple-600', glow: 'shadow-violet-500/20', titleClr: 'text-violet-600 dark:text-violet-400', blob: 'from-violet-200/30 to-purple-200/20', badgeText: FOCUS_MODE_COMING_SOON ? 'Soon' : 'New', badgeClr: FOCUS_MODE_COMING_SOON ? 'bg-amber-200/80 text-amber-800 dark:bg-amber-800/80 dark:text-amber-200' : 'bg-violet-100 text-violet-700 dark:bg-violet-900/50 dark:text-violet-300' },
               { id: 'more-tools' as const, title: 'More Tools', desc: 'Summarizer, humanizer, grammar checker & more', emoji: '🔧', border: 'border-indigo-200/80 dark:border-indigo-700/50', iconBg: 'from-indigo-500 to-slate-600', glow: 'shadow-indigo-500/20', titleClr: 'text-indigo-600 dark:text-indigo-400', blob: 'from-indigo-200/30 to-slate-200/20', badgeText: null, badgeClr: '' },
             ].map((card) => {
               const isActive = (card.id === 'analyze' && mode === 'analyze') || (card.id === 'citations' && mode === 'citations') || (card.id === 'quiz' && mode === 'quiz') || (card.id === 'focus_mode' && mode === 'focus_mode');
@@ -2322,7 +2333,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                           <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center mb-4 text-3xl shadow-lg">🔒</div>
                           <h2 className="text-xl font-extrabold text-stone-800 dark:text-stone-100 mb-2">Desktop only</h2>
                           <p className="text-stone-600 dark:text-stone-400 text-sm mb-4 leading-relaxed">
-                            Focus Mode works with our Chrome extension to block distracting sites until you answer study questions. Extensions aren&apos;t supported on mobile — use a computer with Chrome.
+                            Focus Mode works with our Chrome extension to block sites until you solve a puzzle or answer study questions. Extensions aren&apos;t supported on mobile — use a computer with Chrome.
                       </p>
                       <a
                         href={FOCUS_MODE_CHROME_EXTENSION_URL}
@@ -3005,7 +3016,14 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                     </div>
                     {quizCompleted ? (
                       <div className="p-5 sm:p-8 text-center">
-                        <div className={`w-16 h-16 sm:w-24 sm:h-24 mx-auto rounded-full flex items-center justify-center mb-3 sm:mb-4 text-2xl sm:text-4xl ${userAnswers.filter(a => a.isCorrect).length / userAnswers.length >= 0.7 ? 'bg-gradient-to-br from-green-500 to-emerald-600' : 'bg-gradient-to-br from-amber-500 to-orange-600'}`}>🏆</div>
+                        <video
+                          src="/happymascot.mp4"
+                          autoPlay
+                          muted
+                          playsInline
+                          loop
+                          className="w-16 h-16 sm:w-24 sm:h-24 mx-auto mb-3 sm:mb-4 object-contain rounded-xl border-2 border-violet-300 dark:border-violet-500 shadow-lg overflow-hidden ring-2 ring-violet-400/30"
+                        />
                         <h2 className="text-xl sm:text-3xl font-bold text-stone-900 dark:text-stone-100 mb-2">Quiz Complete!</h2>
                         <div className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent my-3 sm:my-4">
                           {Math.round((userAnswers.filter(a => a.isCorrect).length / userAnswers.length) * 100)}%
@@ -3501,7 +3519,9 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                       
                       return (
                         <div className={`mb-4 p-4 rounded-2xl text-center ${total === 0 ? 'bg-gray-50 border border-gray-200' : correct === total ? 'bg-green-50 border border-green-200' : 'bg-amber-50 border border-lime-200 dark:border-lime-700'}`}>
-                          <span className="text-3xl mb-1 block">{total === 0 ? '✏️' : correct === total ? '🎉' : '📊'}</span>
+                          {total === 0 ? <span className="text-3xl mb-1 block">✏️</span> : correct === total ? (
+                            <video src="/happymascot.mp4" autoPlay muted playsInline loop className="w-16 h-16 mx-auto mb-1 object-contain rounded-xl border-2 border-violet-300 dark:border-violet-500 shadow-lg overflow-hidden ring-2 ring-violet-400/30" />
+                          ) : <span className="text-3xl mb-1 block">📊</span>}
                           {total === 0 ? (
                             <>
                               <p className="font-bold text-lg">No answers submitted</p>

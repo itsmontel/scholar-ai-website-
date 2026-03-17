@@ -170,18 +170,32 @@ export default function FocusModeSettingsSection({ onBack, embedded = false, isP
 
   const passThresholdOptions = Array.from({ length: questionCount }, (_, i) => i + 1);
 
+  const handleTestPuzzleUnlock = () => {
+    const search = `?site=youtube.com&redirect=${encodeURIComponent('https://youtube.com')}`;
+    window.history.pushState({}, '', `/unlock-quiz${search}`);
+    onNavigate?.('unlock-quiz');
+  };
+
   if (FOCUS_MODE_COMING_SOON) {
     return (
       <div className="min-h-0 flex-1 overflow-auto">
         <div className="p-6 sm:p-8 max-w-4xl">
-          {embedded && onBack && (
+          <div className="mb-6 flex flex-wrap items-center gap-3">
+            {embedded && onBack && (
+              <button
+                onClick={onBack}
+                className="flex items-center gap-2 text-stone-500 hover:text-stone-700 dark:hover:text-stone-300 text-sm font-medium transition-colors"
+              >
+                ← Back to Dashboard
+              </button>
+            )}
             <button
-              onClick={onBack}
-              className="mb-6 flex items-center gap-2 text-stone-500 hover:text-stone-700 dark:hover:text-stone-300 text-sm font-medium transition-colors"
+              onClick={handleTestPuzzleUnlock}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300 font-semibold text-sm hover:bg-violet-200 dark:hover:bg-violet-800/60 transition-colors"
             >
-              ← Back to Dashboard
+              🧩 Test puzzle unlock
             </button>
-          )}
+          </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
             <div className="rounded-2xl overflow-hidden bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-950/30 dark:to-purple-950/20 border border-violet-200/60 dark:border-violet-800/40 shadow-lg">
               <p className="px-4 pt-4 pb-2 text-sm font-bold text-stone-700 dark:text-stone-300">See how it works</p>
@@ -223,14 +237,22 @@ export default function FocusModeSettingsSection({ onBack, embedded = false, isP
   return (
     <div className="min-h-0 flex-1 overflow-auto">
       <div className="p-6 sm:p-8 max-w-6xl">
-        {embedded && onBack && (
+        <div className="mb-6 flex flex-wrap items-center gap-3">
+          {embedded && onBack && (
+            <button
+              onClick={onBack}
+              className="flex items-center gap-2 text-stone-500 hover:text-stone-700 dark:hover:text-stone-300 text-sm font-medium transition-colors"
+            >
+              ← Back to Dashboard
+            </button>
+          )}
           <button
-            onClick={onBack}
-            className="mb-6 flex items-center gap-2 text-stone-500 hover:text-stone-700 dark:hover:text-stone-300 text-sm font-medium transition-colors"
+            onClick={handleTestPuzzleUnlock}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300 font-semibold text-sm hover:bg-violet-200 dark:hover:bg-violet-800/60 transition-colors"
           >
-            ← Back to Dashboard
+            🧩 Test puzzle unlock
           </button>
-        )}
+        </div>
 
         {/* Side-by-side: Video left, Settings right (desktop) */}
         <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] gap-6 lg:gap-8">
@@ -267,8 +289,8 @@ export default function FocusModeSettingsSection({ onBack, embedded = false, isP
                     <h2 className="text-xl sm:text-2xl font-extrabold text-stone-800 dark:text-stone-100 mb-1">Focus Mode</h2>
                     <p className="text-stone-600 dark:text-stone-400 text-sm leading-relaxed mb-3">
                       {isPaidUser
-                        ? 'Block distracting sites until you answer study questions. Pro: 20 sites. Premium: unlimited.'
-                        : `Block up to ${maxSites} sites until you answer study questions. Upgrade for more.`}
+                        ? 'Block distracting sites until you solve a puzzle (Sudoku, Memory, Pattern) or answer study questions. Pro: 20 sites. Premium: unlimited.'
+                        : `Block up to ${maxSites} sites until you solve a puzzle or answer study questions. Upgrade for more.`}
                     </p>
                     <a
                       href={FOCUS_MODE_CHROME_EXTENSION_URL}
@@ -295,7 +317,7 @@ export default function FocusModeSettingsSection({ onBack, embedded = false, isP
                 <span className="ml-2 text-sm font-normal text-stone-500">({blockedDomains.length} of {maxSites})</span>
               )}
             </h3>
-            <p className="text-xs text-stone-500 dark:text-stone-400 mb-4">Toggle sites to block until you pass a study quiz</p>
+            <p className="text-xs text-stone-500 dark:text-stone-400 mb-4">Toggle sites to block until you solve a puzzle or pass the study quiz</p>
             <div className="flex flex-wrap gap-2 mb-3">
               {presets.map((p) => {
                 const active = blockedDomains.includes(p.domain);

@@ -590,7 +590,7 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
               ) : (
                 <>
                   <p className="text-stone-600 text-sm mb-6">
-                    Block distracting sites until you answer study questions. Customize question count and pass threshold on the Dashboard.
+                    Block sites until you solve a puzzle or answer study questions. Customize question count and pass threshold on the Dashboard.
                   </p>
                   {focusModeLoading ? (
                     <p className="text-stone-500">Loading...</p>

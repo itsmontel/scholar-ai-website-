@@ -242,6 +242,7 @@
   .line-clamp-2 {
     display: -webkit-box;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
@@ -249,6 +250,7 @@
   .line-clamp-3 {
     display: -webkit-box;
     -webkit-line-clamp: 3;
+    line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
@@ -377,4 +379,14 @@
 }
 .group:hover .mascot-sparkle .sparkle-3 {
   animation: mascot-sparkle 1.2s ease-in-out 0.4s infinite;
+}
+
+/* Pattern puzzle: each symbol pops in so repeating same shape is noticeable */
+@keyframes pattern-symbol-pop {
+  0% { opacity: 0; transform: scale(0.7); }
+  50% { transform: scale(1.08); }
+  100% { opacity: 1; transform: scale(1); }
+}
+.animate-pattern-symbol-pop {
+  animation: pattern-symbol-pop 0.4s ease-out forwards;
 }

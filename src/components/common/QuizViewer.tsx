@@ -131,7 +131,14 @@ const QuizViewer = ({ questions, title, onEnlarge, initialQuestionIndex }: QuizV
           )}
         </div>
         <div className="flex-1 rounded-2xl p-6 bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-600 text-center">
-          <div className="w-16 h-16 mx-auto rounded-full bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-3xl mb-4">🏆</div>
+          <video
+            src="/happymascot.mp4"
+            autoPlay
+            muted
+            playsInline
+            loop
+            className="w-20 h-20 mx-auto mb-4 object-contain rounded-xl border-2 border-violet-300 dark:border-violet-500 shadow-lg overflow-hidden ring-2 ring-violet-400/30"
+          />
           <h3 className="text-xl font-bold text-stone-800 dark:text-stone-100 mb-2">Quiz Complete!</h3>
           <p className="text-4xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent mb-2">{percentage}%</p>
           <p className="text-stone-500 dark:text-stone-400 text-sm mb-6">{correct} out of {total} correct</p>

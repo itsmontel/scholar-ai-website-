@@ -1,6 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import ScholarMascot from '../common/ScholarMascot';
 import { trackFocusModeUnlock } from '../../data/achievements';
+import SudokuPuzzle from '../focus-mode/puzzles/SudokuPuzzle';
+import MemoryPuzzle from '../focus-mode/puzzles/MemoryPuzzle';
+import PatternPuzzle from '../focus-mode/puzzles/PatternPuzzle';
+import { generateSudoku } from '../../utils/puzzles/sudoku';
+import { generateMemoryGame } from '../../utils/puzzles/memory';
+import { generatePattern } from '../../utils/puzzles/pattern';
 
 function getSearchParams() {
   const sp = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
@@ -108,17 +114,38 @@ export default function UnlockQuizPage() {
   }, []);
 
   useEffect(() => {
-    const token = localStorage.getItem('authToken');
-    if (!token) {
-      setError('Please log in to use Focus Mode.');
-      setPhase('results');
-      return;
-    }
     if (!site) {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        setError('Please log in to use Focus Mode.');
+        setPhase('results');
+        return;
+      }
       setPhase('loading');
       fetchQuiz(token);
     }
   }, [site, fetchQuiz]);
+
+  const [unlockMode, setUnlockMode] = useState<'choice' | 'puzzle'>('choice');
+  const [hardMode, setHardMode] = useState(false);
+  const [puzzleType, setPuzzleType] = useState<'sudoku' | 'memory' | 'pattern' | null>(null);
+  const [puzzleData, setPuzzleData] = useState<object | null>(null);
+
+  const startPuzzle = useCallback(() => {
+    const types: Array<'sudoku' | 'memory' | 'pattern'> = ['sudoku', 'memory', 'pattern'];
+    const type = types[Math.floor(Math.random() * types.length)];
+    setPuzzleType(type);
+    if (type === 'sudoku') setPuzzleData(generateSudoku(hardMode));
+    else if (type === 'memory') setPuzzleData(generateMemoryGame(hardMode));
+    else setPuzzleData(generatePattern(hardMode));
+    setUnlockMode('puzzle');
+  }, [hardMode]);
+
+  const cancelPuzzle = useCallback(() => {
+    setUnlockMode('choice');
+    setPuzzleType(null);
+    setPuzzleData(null);
+  }, []);
 
   const handleStartQuiz = () => {
     const token = localStorage.getItem('authToken');
@@ -225,8 +252,63 @@ export default function UnlockQuizPage() {
     window.location.href = FRONTEND_URL;
   };
 
+  const handleCancelQuiz = () => {
+    setPhase('blocked');
+    setQuestions([]);
+    setCurrentIndex(0);
+    setScore(0);
+    setShowResults(false);
+    setAnswered(false);
+    setSelectedAnswer(null);
+    setError(null);
+    setNeedsMoreContent(false);
+  };
+
   if (phase === 'blocked' && site) {
     const siteDisplay = formatSiteName(site);
+    const hasToken = !!localStorage.getItem('authToken');
+
+    if (unlockMode === 'puzzle' && puzzleType && puzzleData) {
+      return (
+        <div className="min-h-screen flex flex-col bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50 dark:from-violet-950/40 dark:via-purple-950/30 dark:to-fuchsia-950/30">
+          {/* Header: top-left badge with mascot + blocked message */}
+          <div className="absolute top-4 left-4 sm:top-6 sm:left-6 flex items-center gap-3 px-4 py-3 rounded-2xl bg-white/90 dark:bg-stone-800/90 backdrop-blur-sm border border-stone-200/60 dark:border-stone-700 shadow-lg z-10">
+            <ScholarMascot size={56} animated />
+            <div>
+              <h1 className="text-base sm:text-lg font-bold text-stone-800 dark:text-stone-100">
+                {siteDisplay} is blocked
+              </h1>
+              <p className="text-xs sm:text-sm text-stone-500 dark:text-stone-400">Solve the puzzle to unlock</p>
+            </div>
+          </div>
+          {/* Puzzle area: full remaining space, centered (pt reduced so Sudoku Cancel is visible) */}
+          <div className="flex-1 flex items-center justify-center p-4 pt-14 sm:pt-16 pb-8 min-h-0 overflow-auto">
+            {puzzleType === 'sudoku' && (
+            <SudokuPuzzle
+              puzzle={puzzleData as import('../../utils/puzzles/sudoku').SudokuPuzzle}
+              onComplete={handleUnlockAndContinue}
+              onCancel={cancelPuzzle}
+            />
+          )}
+          {puzzleType === 'memory' && (
+            <MemoryPuzzle
+              game={puzzleData as import('../../utils/puzzles/memory').MemoryGame}
+              onComplete={handleUnlockAndContinue}
+              onCancel={cancelPuzzle}
+            />
+          )}
+          {puzzleType === 'pattern' && (
+            <PatternPuzzle
+              sequence={puzzleData as import('../../utils/puzzles/pattern').PatternSequence}
+              onComplete={handleUnlockAndContinue}
+              onCancel={cancelPuzzle}
+            />
+          )}
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50 dark:from-violet-950/40 dark:via-purple-950/30 dark:to-fuchsia-950/30 p-4">
         <div className="bg-white dark:bg-stone-800 rounded-2xl p-8 sm:p-10 shadow-xl border border-stone-200/60 dark:border-stone-700 max-w-md w-full text-center">
@@ -239,16 +321,49 @@ export default function UnlockQuizPage() {
           <h1 className="text-2xl sm:text-3xl font-bold text-stone-800 dark:text-stone-100 mb-3">
             {siteDisplay} is blocked
           </h1>
-          <p className="text-stone-600 dark:text-stone-400 mb-8 leading-relaxed">
-            Answer study questions from your own material to unlock access. Or go back to browse elsewhere.
+          <p className="text-stone-600 dark:text-stone-400 mb-6 leading-relaxed">
+            Solve a puzzle to unlock access. No account needed. Or answer study questions if you have material.
           </p>
+
+          <div className="flex justify-center gap-2 mb-6">
+            <span className="text-sm font-medium text-stone-500 dark:text-stone-400">Difficulty:</span>
+            <button
+              onClick={() => setHardMode(false)}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                !hardMode
+                  ? 'bg-violet-600 text-white'
+                  : 'bg-stone-100 dark:bg-stone-700 text-stone-600 dark:text-stone-400 hover:bg-stone-200 dark:hover:bg-stone-600'
+              }`}
+            >
+              Easy
+            </button>
+            <button
+              onClick={() => setHardMode(true)}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                hardMode
+                  ? 'bg-violet-600 text-white'
+                  : 'bg-stone-100 dark:bg-stone-700 text-stone-600 dark:text-stone-400 hover:bg-stone-200 dark:hover:bg-stone-600'
+              }`}
+            >
+              Hard
+            </button>
+          </div>
+
           <div className="space-y-4">
             <button
-              onClick={handleStartQuiz}
+              onClick={startPuzzle}
               className="w-full px-6 py-4 bg-gradient-to-r from-violet-600 to-purple-600 text-white rounded-xl font-semibold hover:from-violet-500 hover:to-purple-500 transition-all shadow-lg shadow-violet-500/25 active:scale-[0.98]"
             >
-              Solve quiz to unlock
+              Solve puzzle to unlock
             </button>
+            {hasToken && (
+              <button
+                onClick={handleStartQuiz}
+                className="w-full px-6 py-3 bg-stone-100 dark:bg-stone-700 text-stone-800 dark:text-stone-200 rounded-xl font-medium hover:bg-stone-200 dark:hover:bg-stone-600 transition-colors"
+              >
+                Answer study quiz instead
+              </button>
+            )}
             <button
               onClick={handleGoBack}
               className="w-full px-6 py-3 text-stone-600 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200 font-medium transition-colors"
@@ -328,9 +443,20 @@ export default function UnlockQuizPage() {
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50 dark:from-violet-950/40 dark:via-purple-950/30 dark:to-fuchsia-950/30 p-4">
         <div className="bg-white dark:bg-stone-800 rounded-2xl p-8 shadow-xl border border-stone-200/60 dark:border-stone-700 max-w-md text-center">
           <div className="flex justify-center mb-4">
-            <ScholarMascot size={120} animated pose={isPassed ? 'celebrating' : 'default'} />
+            {isPassed ? (
+              <video
+                src="/happymascot.mp4"
+                autoPlay
+                muted
+                playsInline
+                loop
+                className="w-28 h-28 object-contain rounded-xl border-2 border-violet-300 dark:border-violet-500 shadow-lg overflow-hidden ring-2 ring-violet-400/30"
+              />
+            ) : (
+              <ScholarMascot size={120} animated pose="default" />
+            )}
           </div>
-          <span className="text-5xl block mb-2">{isPassed ? '🎉' : '📚'}</span>
+          {!isPassed && <span className="text-5xl block mb-2">📚</span>}
           <h1 className="text-2xl font-bold text-stone-800 dark:text-stone-100 mb-2">
             {isPassed ? 'You did it!' : 'Almost there!'}
           </h1>
@@ -401,9 +527,18 @@ export default function UnlockQuizPage() {
             />
           </div>
           <div className="p-6 sm:p-8">
-            <p className="text-sm text-stone-500 mb-2">
-              Question {currentIndex + 1} of {questions.length}
-            </p>
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-sm text-stone-500">
+                Question {currentIndex + 1} of {questions.length}
+              </p>
+              <button
+                type="button"
+                onClick={handleCancelQuiz}
+                className="text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 text-sm font-medium"
+              >
+                Cancel
+              </button>
+            </div>
 
           {currentItem?.type === 'quiz' && (
             <>

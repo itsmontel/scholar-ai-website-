@@ -649,7 +649,7 @@ const AcademicAIApp = () => {
     'study-tools-comparison': '/vs-quizlet-knowt',
   };
 
-  const navigateTo = (page: string, slug?: string, options?: { quizHistoryFilter?: 'all' | 'quiz' | 'flashcards' | 'crossword' | 'crater_blast'; studyPack?: { data: any; title?: string } }) => {
+  const navigateTo = (page: string, slug?: string, options?: { quizHistoryFilter?: 'all' | 'quiz' | 'flashcards' | 'crossword' | 'crater_blast'; studyPack?: { data: any; title?: string }; unlockQuizQuery?: string }) => {
     if (page !== 'study-pack-viewer') setStudyPackInitialData(null);
     if (page === 'study-pack-viewer' && options?.studyPack) setStudyPackInitialData(options.studyPack);
     setCurrentPage(page);
@@ -658,6 +658,8 @@ const AcademicAIApp = () => {
       window.history.pushState({}, '', `/blog/${slug}`);
     } else if (page === 'quiz-history' && options?.quizHistoryFilter) {
       window.history.pushState({}, '', `/quiz-history?filter=${options.quizHistoryFilter}`);
+    } else if (page === 'unlock-quiz' && options?.unlockQuizQuery) {
+      window.history.pushState({}, '', `/unlock-quiz${options.unlockQuizQuery}`);
     } else if (pageUrlMap[page]) {
       window.history.pushState({}, '', pageUrlMap[page]);
     } else {

@@ -155,8 +155,9 @@ const validationSchemas = {
   }),
 
   // Analysis endpoints
+  // documentId is optional: when pasting text from dashboard, we send content without documentId
   createAnalysis: Joi.object({
-    documentId: commonSchemas.uuid,
+    documentId: Joi.string().uuid({ version: 'uuidv4' }).optional().allow(null, ''),
     analysisType: commonSchemas.analysisType,
     citationStyle: commonSchemas.citationStyle,
     content: commonSchemas.content,
@@ -179,10 +180,12 @@ const validationSchemas = {
   }),
 
   saveAnalysis: Joi.object({
-    documentId: commonSchemas.uuid,
+    documentId: Joi.string().uuid({ version: 'uuidv4' }).optional().allow(null, ''),
     analysisType: commonSchemas.analysisType,
     citationStyle: commonSchemas.citationStyle,
-    result: commonSchemas.content
+    content: Joi.string().min(1).max(100000).optional(),
+    analysisResult: commonSchemas.content,
+    annotations: Joi.array().items(Joi.object()).optional(),
   }),
 
   // Query parameters

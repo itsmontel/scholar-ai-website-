@@ -205,7 +205,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   function updateSubtitle() {
     if (subtitleEl) {
       const limitText = maxBlocked >= 99999 ? 'sites (unlimited)' : `${maxBlocked} site${maxBlocked > 1 ? 's' : ''}`;
-      const base = `Block ${limitText} until you answer ${questionCount} study questions (get ${passThreshold}+ correct).`;
+      const base = `Block ${limitText} until you solve a puzzle or answer ${questionCount} study questions (get ${passThreshold}+ correct).`;
       subtitleEl.textContent = isPaid ? base : `${base} Upgrade for more sites.`;
     }
   }

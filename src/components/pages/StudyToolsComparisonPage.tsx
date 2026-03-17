@@ -28,7 +28,7 @@ const StudyToolsComparisonPage: React.FC<StudyToolsComparisonPageProps> = ({ onN
     { feature: 'Built for Academic Writing', ws: true, quizlet: false, knowt: false, highlight: true },
     { feature: 'Essay Analysis & Feedback', ws: true, quizlet: false, knowt: false, highlight: true },
     { feature: 'Citation Finder (APA, MLA, etc.)', ws: true, quizlet: false, knowt: false, highlight: true },
-    { feature: 'AI Humanizer (Bypass Detection)', ws: true, quizlet: false, knowt: false, highlight: true },
+    { feature: 'Focus Mode (Puzzle/Quiz to Unlock)', ws: true, quizlet: false, knowt: false, highlight: true },
     { feature: 'Voice/Lecture Recording → Notes', ws: false, quizlet: false, knowt: true },
     { feature: 'Import Quizlet Sets', ws: false, quizlet: true, knowt: true },
     { feature: 'Community/Shared Study Sets', ws: false, quizlet: true, knowt: true },
@@ -149,7 +149,7 @@ const StudyToolsComparisonPage: React.FC<StudyToolsComparisonPageProps> = ({ onN
             <div className="bg-gradient-to-br from-indigo-50 to-violet-50 dark:from-indigo-900/20 dark:to-violet-900/20 rounded-2xl border border-indigo-200/70 dark:border-indigo-700/40 p-6 shadow-sm">
               <h3 className="font-semibold text-stone-900 dark:text-stone-100 mb-2">WriteScholar</h3>
               <p className="text-stone-600 dark:text-stone-400 text-sm">
-                The only AI study tool that combines quizzes, flashcards, and crosswords with academic writing: essay analysis, citation finder, and AI humanizer. Best for students who need both study and writing support.
+                The only AI study tool that combines quizzes, flashcards, and crosswords with academic writing: essay analysis, citation finder, and Focus Mode. Best for students who need both study and writing support.
               </p>
             </div>
             <div className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-2xl border border-amber-200/70 dark:border-amber-700/40 p-6 shadow-sm">
@@ -172,7 +172,7 @@ const StudyToolsComparisonPage: React.FC<StudyToolsComparisonPageProps> = ({ onN
       <section className="py-16 sm:py-20">
         <div className="max-w-2xl mx-auto px-4 text-center">
           <h2 className="text-2xl sm:text-3xl font-extrabold text-stone-800 dark:text-stone-100 mb-4">Ready to try WriteScholar?</h2>
-          <p className="text-stone-500 dark:text-stone-400 mb-6">Quizzes, flashcards, crosswords—plus essay analysis, citations, and AI humanizer. All in one place.</p>
+          <p className="text-stone-500 dark:text-stone-400 mb-6">Quizzes, flashcards, crosswords—plus essay analysis, citations, and Focus Mode. All in one place.</p>
           <button
             onClick={() => onNavigate('signup')}
             className="px-8 py-4 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white font-bold rounded-2xl transition-all text-lg shadow-lg shadow-indigo-500/25 hover:shadow-xl"
