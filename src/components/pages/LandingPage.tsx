@@ -604,7 +604,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                     onClick={() => onNavigate('signup')}
                     className="btn-glisten relative z-10 px-10 py-4 bg-violet-500 text-white font-bold rounded-full hover:bg-violet-600 hover:scale-105 active:scale-95 transition-all duration-300 ease-out shadow-xl shadow-violet-500/25 hover:shadow-2xl hover:shadow-violet-500/40 text-lg"
                   >
-                    Get started free
+                    Upload your essay — free to try
                   </button>
                 </div>
                 <p className="sm:hidden mt-3 w-full text-center text-sm text-stone-500 dark:text-stone-400">
@@ -2852,7 +2852,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                 onClick={() => onNavigate('signup')}
                 className="inline-flex items-center justify-center px-8 py-4 bg-white text-violet-900 font-bold rounded-2xl hover:bg-violet-100 hover:scale-105 active:scale-95 transition-all shadow-xl shadow-violet-500/30 text-lg"
               >
-                Get Started Free
+                Upload your essay — free to try
                 <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                 </svg>
