@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useTheme } from '../../contexts/ThemeContext';
+import { HIDE_FRIENDS } from '../../config/featureFlags';
 import PromoBanner from './PromoBanner';
 import { getResetsInText } from '../../utils/usageReset';
 import { searchSiteMultiple, SearchItem } from '../../data/searchIndex';
@@ -476,7 +477,8 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
               <span className="px-1.5 py-0.5 text-[10px] font-bold bg-white/25 text-white rounded-lg">PRO</span>
             </button>
 
-            {/* Friends button - emerald to match dashboard */}
+            {/* Friends button - emerald to match dashboard (hidden when HIDE_FRIENDS) */}
+            {!HIDE_FRIENDS && (
             <button 
               onClick={() => onNavigate?.('friends')}
               className={`ml-2 px-4 py-2.5 text-sm font-semibold rounded-2xl transition-all duration-200 flex items-center gap-1.5 border ${
@@ -490,6 +492,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
               </svg>
               <span>Friends</span>
             </button>
+            )}
           </nav>
 
           {/* Right side */}
@@ -759,7 +762,8 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
               <span className="px-2 py-0.5 text-[10px] font-bold bg-white/25 text-white rounded-lg">PRO</span>
             </button>
 
-            {/* Friends button */}
+            {/* Friends button (hidden when HIDE_FRIENDS) */}
+            {!HIDE_FRIENDS && (
             <button
               onClick={() => { onNavigate?.('friends'); setIsMobileMenuOpen(false); }}
               className={`w-full text-left px-4 py-3 rounded-2xl text-sm font-semibold transition-all duration-200 flex items-center gap-2 ${
@@ -773,6 +777,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
               </svg>
               Friends
             </button>
+            )}
 
             <button
               onClick={() => { onNavigate?.('blog'); setIsMobileMenuOpen(false); }}

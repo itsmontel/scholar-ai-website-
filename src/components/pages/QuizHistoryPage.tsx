@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { HIDE_FRIENDS } from '../../config/featureFlags';
 import Header from '../common/Header';
 import Footer from '../common/Footer';
 import { jsPDF } from 'jspdf';
@@ -1770,6 +1771,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                           </button>
                         )}
 
+                        {!HIDE_FRIENDS && (
                         <button
                           onClick={() => openShareModal(tool.id)}
                           className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 sm:py-2.5 rounded-xl bg-purple-500 text-white hover:bg-purple-600 font-medium text-xs sm:text-sm shadow-sm hover:shadow transition-all shrink-0"
@@ -1780,6 +1782,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                           </svg>
                           <span className="hidden sm:inline">Share</span>
                         </button>
+                        )}
 
                         <button
                           onClick={() => handleDeleteClick(tool.id)}
@@ -1988,7 +1991,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
       )}
 
       {/* Share Modal */}
-      {showShareModal && (
+      {!HIDE_FRIENDS && showShareModal && (
         <div className="fixed inset-0 bg-stone-900/40 backdrop-blur-sm flex items-center justify-center z-50 px-4">
           <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 border border-stone-200/80">
             <div className="flex items-start justify-between mb-6">

@@ -4,6 +4,7 @@ import Footer from '../common/Footer';
 import { useTheme } from '../../contexts/ThemeContext';
 import AnalysisAnimation from '../common/AnalysisAnimation';
 import { FOCUS_MODE_CHROME_EXTENSION_URL } from '../../constants/focusMode';
+import { HIDE_FRIENDS } from '../../config/featureFlags';
 import ScholarMascot from '../common/ScholarMascot';
 import DualMascot from '../common/DualMascot';
 // customersImg placeholder - section is hidden
@@ -192,7 +193,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
       question: "How do I add friends and share my study materials?",
       answer: "Every account gets a unique friend code. Share your code with friends so they can add you. Once connected, you can share flashcards, quizzes, crosswords, or notes with one tap. They tap Accept and it's in their library. Core sharing is free."
     }
-  ];
+  ].filter(faq => !HIDE_FRIENDS || !faq.question.toLowerCase().includes('friends'));
 
   const universities = [
     { name: 'Harvard', className: 'university-harvard' },
@@ -1335,7 +1336,8 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
         </div>
       </section>
 
-      {/* Study Better Together — from Share Friends page */}
+      {/* Study Better Together — from Share Friends page (hidden when HIDE_FRIENDS) */}
+      {!HIDE_FRIENDS && (
       <section className="relative py-12 sm:py-20 overflow-hidden bg-white dark:bg-stone-900">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_60%_at_50%_50%,rgba(99,102,241,0.07),transparent)] dark:bg-[radial-gradient(ellipse_70%_60%_at_50%_50%,rgba(139,92,246,0.06),transparent)]" />
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -1452,8 +1454,10 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
           </div>
         </div>
       </section>
+      )}
 
-      {/* One Code. Endless Friends. — from Share Friends page */}
+      {/* One Code. Endless Friends. — from Share Friends page (hidden when HIDE_FRIENDS) */}
+      {!HIDE_FRIENDS && (
       <section className="relative py-16 sm:py-24 bg-gradient-to-b from-white via-indigo-50/40 to-violet-50/30 dark:from-stone-900 dark:via-stone-900 dark:to-stone-900 overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_40%_at_50%_50%,rgba(99,102,241,0.08),transparent)] dark:bg-[radial-gradient(ellipse_60%_40%_at_50%_50%,rgba(139,92,246,0.06),transparent)]" />
         <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -1498,6 +1502,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
           <p className="text-sm text-stone-400 dark:text-stone-500">This is a demo code — sign up to get your own unique code instantly.</p>
         </div>
       </section>
+      )}
 
       {/* STUDY YOUR WAY - Tabbed video showcase (hidden) */}
       <section className="hidden relative py-16 sm:py-24 overflow-hidden bg-white dark:bg-stone-900">

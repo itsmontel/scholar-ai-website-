@@ -1,5 +1,6 @@
 import { useState, useEffect, Suspense } from 'react';
 import { logger } from '../utils/logger';
+import { HIDE_FRIENDS } from '../config/featureFlags';
 import { persistOnboardingToServer } from '../utils/onboarding';
 import { trackEvent } from '../utils/analytics';
 import { lazyWithRetry } from '../utils/lazyWithRetry';
@@ -95,7 +96,8 @@ function getPageFromPath(pathname: string): string {
   if (p === '/citation-results') return 'citation-results';
   if (p === '/citation-history') return 'citation-history';
   if (p === '/quiz-history') return 'quiz-history';
-  if (p === '/friends') return 'friends';
+  if (p === '/friends') return HIDE_FRIENDS ? 'dashboard' : 'friends';
+  if (p === '/share-friends') return HIDE_FRIENDS ? 'dashboard' : 'share-friends';
   if (p === '/upload') return 'upload';
   if (p === '/settings') return 'account';
   if (p === '/unlock-quiz' || p.startsWith('/unlock-quiz?')) return 'unlock-quiz';
@@ -249,6 +251,10 @@ const AcademicAIApp = () => {
   useEffect(() => {
     const path = window.location.pathname;
     if ((path === '/tools/crossword-generator' || path === '/crossword-generator') && currentPage === 'dashboard') {
+      window.history.replaceState({}, '', '/dashboard');
+    }
+    // When friends are hidden, redirect /friends and /share-friends URLs to dashboard
+    if (HIDE_FRIENDS && (path === '/friends' || path === '/share-friends') && currentPage === 'dashboard') {
       window.history.replaceState({}, '', '/dashboard');
     }
   }, [currentPage]);
@@ -873,6 +879,10 @@ const AcademicAIApp = () => {
         return <QuizHistoryPage onNavigate={navigateTo} user={user} onLogout={handleLogout} initialFilter={validFilter} />;
       }
       case 'friends':
+        if (HIDE_FRIENDS) {
+          if (needsOnboarding) return renderOnboarding('dashboard');
+          return <DashboardPage onNavigate={navigateTo} user={user} onLogout={handleLogout} onUserUpdate={handleDashboardUserUpdate} />;
+        }
         return <FriendsPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'upload':
         return <UploadPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
@@ -920,6 +930,10 @@ const AcademicAIApp = () => {
       case 'badges':
         return <BadgesPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'share-friends':
+        if (HIDE_FRIENDS) {
+          if (needsOnboarding) return renderOnboarding('dashboard');
+          return <DashboardPage onNavigate={navigateTo} user={user} onLogout={handleLogout} onUserUpdate={handleDashboardUserUpdate} />;
+        }
         return <ShareFriendsPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       // Free Tools
       case 'word-counter':

@@ -24,6 +24,7 @@ import { trackEvent } from '../../utils/analytics';
 import InteractiveLessonPage from './tools/InteractiveLessonPage';
 import FocusModeSettingsSection from '../common/FocusModeSettingsSection';
 import { FOCUS_MODE_COMING_SOON, FOCUS_MODE_CHROME_EXTENSION_URL } from '../../constants/focusMode';
+import { HIDE_FRIENDS } from '../../config/featureFlags';
 
 interface DashboardProps {
   onNavigate: (page: string, slug?: string, options?: { studyPack?: { data: any; title?: string }; unlockQuizQuery?: string }) => void;
@@ -254,8 +255,9 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
   // Friends notification count (pending requests + incoming shares)
   const [friendNotificationCount, setFriendNotificationCount] = useState(0);
 
-  // Fetch friend notifications count
+  // Fetch friend notifications count (skipped when HIDE_FRIENDS)
   useEffect(() => {
+    if (HIDE_FRIENDS) return;
     const fetchFriendNotifications = async () => {
       const token = localStorage.getItem('authToken');
       if (!token) return;
@@ -1929,6 +1931,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                   <div data-tutorial="streak-widget" className="flex-shrink-0">
                     <StreakWidget compact />
                   </div>
+                  {!HIDE_FRIENDS && (
                   <button
                     onClick={() => onNavigate('friends')}
                     data-tutorial="friends-btn"
@@ -1940,6 +1943,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                       <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">{friendNotificationCount > 9 ? '9+' : friendNotificationCount}</span>
                     )}
                   </button>
+                  )}
                   <div className="hidden sm:block flex-shrink-0"><BadgeWidget onNavigate={onNavigate} /></div>
                   <div className="sm:hidden flex-shrink-0"><BadgeWidget onNavigate={onNavigate} mobileExpanded /></div>
                 </div>
