@@ -18,7 +18,7 @@ const supabaseServiceRole = createClient(
 const PLAN_LIMITS = {
   free: {
     documentsPerMonth: 3,
-    analysesPerMonth: 3,
+    analysesPerMonth: 2,
     citationSearchesPerMonth: 2,
     humanizeWordsPerMonth: 5000,
     summarizeWordsPerMonth: 5000,
@@ -34,13 +34,12 @@ const PLAN_LIMITS = {
     aiModel: 'gpt-4.1-nano',
     maxDocumentSize: 1024 * 1024,
     maxTotalStorage: 1024 * 1024,
-    maxAnalysisPercentage: 50,
     name: 'Free'
   },
   pro: {
     documentsPerMonth: -1,
     combinedActionsPerMonth: 99, // analyses + study packs + citations share this pool
-    combinedWordsPerMonth: 99999, // humanizer + summarizer share this pool
+    combinedWordsPerMonth: 99999, // Paper Summarizer word pool
     analysesPerMonth: 99, // used for combined check
     citationSearchesPerMonth: 99,
     humanizeWordsPerMonth: 99999,
@@ -57,14 +56,13 @@ const PLAN_LIMITS = {
     aiModel: 'gpt-4.1-nano',
     maxDocumentSize: 25 * 1024 * 1024,
     maxTotalStorage: 25 * 1024 * 1024,
-    maxAnalysisPercentage: 100,
     name: 'Pro',
     price: 19.99
   },
   premium: {
     documentsPerMonth: -1,
     combinedActionsPerMonth: 999, // 10x Pro: analyses + study packs + citations
-    combinedWordsPerMonth: 999999, // 10x Pro: humanizer + summarizer
+    combinedWordsPerMonth: 999999, // 10× Pro: Paper Summarizer
     analysesPerMonth: 999,
     citationSearchesPerMonth: 999,
     humanizeWordsPerMonth: 999999,
@@ -81,10 +79,9 @@ const PLAN_LIMITS = {
     aiModel: 'gpt-4.1-nano',
     maxDocumentSize: 1024 * 1024 * 1024,
     maxTotalStorage: 1024 * 1024 * 1024,
-    maxAnalysisPercentage: 100,
     name: 'Premium',
     price: 39.99
-  }
+  },
 };
 
 
@@ -359,7 +356,7 @@ const checkCombinedActionsLimit = async (userId) => {
   }
 };
 
-// For Pro/Premium: combined humanizer + summarizer word pool
+// For Pro/Premium: Paper Summarizer word pool
 const checkCombinedWordsLimit = async (userId, additionalWords = 0) => {
   try {
     const { plan } = await getUserSubscriptionDetails(userId);

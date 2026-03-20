@@ -45,7 +45,7 @@ const BadgeWidget = ({ onNavigate, mobileExpanded = false }: BadgeWidgetProps) =
         <div className="relative flex-shrink-0">
           <span className={`group-hover:animate-[badge-bounce_0.6s_ease-in-out] ${mobileExpanded ? 'text-2xl' : 'text-xl'}`}>🏆</span>
           {unlockedCount > 0 && (
-            <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-violet-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center shadow-sm">
+            <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-rose-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center shadow-sm">
               {unlockedCount}
             </span>
           )}

@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
+import DOMPurify from 'dompurify';
 import Header from '../common/Header';
 import Footer from '../common/Footer';
 import LoadingSpinner from '../common/LoadingSpinner';
@@ -7,6 +8,217 @@ import ScholarMascot from '../common/ScholarMascot';
 import { ExportService, AnalysisData } from '../../services/exportService';
 import { trackAction, getStats } from '../../data/achievements';
 import { trackEvent } from '../../utils/analytics';
+
+/** Simple markdown-to-HTML for analysis result display */
+function simpleMarkdownToHtml(md: string): string {
+  if (!md) return '';
+  const escape = (t: string) => {
+    const div = document.createElement('div');
+    div.textContent = t;
+    return div.innerHTML;
+  };
+  return md
+    .split('\n')
+    .map((line) => {
+      const trimmed = line.trim();
+      const h1 = trimmed.match(/^# (.+)$/);
+      if (h1) return `<h2 class="text-xl font-bold mt-6 mb-2 text-stone-900 dark:text-stone-100">${escape(h1[1])}</h2>`;
+      const h2 = trimmed.match(/^## (.+)$/);
+      if (h2) return `<h3 class="text-lg font-semibold mt-4 mb-2 text-stone-800 dark:text-stone-200">${escape(h2[1])}</h3>`;
+      const h3 = trimmed.match(/^### (.+)$/);
+      if (h3) return `<h4 class="text-base font-semibold mt-3 mb-1 text-stone-700 dark:text-stone-300">${escape(h3[1])}</h4>`;
+      const content = trimmed
+        .replace(/\*\*([^*]+)\*\*/g, (_, m) => `<strong>${escape(m)}</strong>`)
+        .replace(/\*([^*]+)\*/g, (_, m) => `<em>${escape(m)}</em>`)
+        .replace(/`([^`]+)`/g, (_, m) => `<code class="bg-stone-100 dark:bg-stone-700 px-1 rounded text-sm">${escape(m)}</code>`);
+      return content ? `<p class="mb-2 text-stone-700 dark:text-stone-300 leading-relaxed">${content}</p>` : '';
+    })
+    .join('');
+}
+
+function sanitizeAnalysisHtml(html: string): string {
+  return DOMPurify.sanitize(html, {
+    ALLOWED_TAGS: ['h2', 'h3', 'h4', 'p', 'strong', 'em', 'code', 'ul', 'ol', 'li', 'br'],
+    ALLOWED_ATTR: ['class'],
+  });
+}
+
+/** Matches backend comprehensive prompt — shown when grade_rubric is withheld for free users */
+const STANDARD_GRADE_RUBRIC_PREVIEW: { key: string; label: string; maxScore: number }[] = [
+  { key: 'thesis_and_argument', label: 'Thesis & argument', maxScore: 20 },
+  { key: 'response_to_question', label: 'Response to question', maxScore: 20 },
+  { key: 'use_of_evidence_and_textual_support', label: 'Use of evidence & textual support', maxScore: 15 },
+  { key: 'analysis_and_critical_thinking', label: 'Analysis & critical thinking', maxScore: 20 },
+  { key: 'organization_and_structure', label: 'Organization & structure', maxScore: 15 },
+  { key: 'writing_quality_and_clarity', label: 'Writing quality & clarity', maxScore: 10 },
+];
+
+function formatRubricCategoryLabel(key: string): string {
+  return key.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+function parseComprehensiveMarkdownSections(md: string): { title: string; body: string }[] {
+  const stripped = md.replace(/^#\s[^\n]+\n+/, '').trim();
+  if (!stripped) return [];
+  return stripped.split(/\n(?=##\s)/).map((block) => {
+    const lines = block.split('\n');
+    const head = lines[0]?.match(/^##\s+(.+)$/);
+    if (!head) return { title: '', body: block.trim() };
+    return { title: head[1].trim(), body: lines.slice(1).join('\n').trim() };
+  }).filter((s) => s.title);
+}
+
+function splitOverallAssessmentBody(body: string): { main: string; topSuggestionsBlock: string } {
+  const re = /\n###\s*Top Suggestions\b/i;
+  const idx = body.search(re);
+  if (idx === -1) return { main: body.trim(), topSuggestionsBlock: '' };
+  return {
+    main: body.slice(0, idx).trim(),
+    topSuggestionsBlock: body.slice(idx).trim(),
+  };
+}
+
+function splitCategoryBody(body: string): { mainAssessment: string; subsections: string } {
+  const parts = body.split(/\n(?=###\s)/);
+  return {
+    mainAssessment: (parts[0] ?? '').trim(),
+    subsections: parts.slice(1).join('\n\n').trim(),
+  };
+}
+
+function firstLineOf(text: string): { first: string; rest: string } {
+  const t = text.trim();
+  if (!t) return { first: '', rest: '' };
+  const br = t.indexOf('\n');
+  if (br === -1) return { first: t, rest: '' };
+  return { first: t.slice(0, br).trim(), rest: t.slice(br + 1).trim() };
+}
+
+function FreeAnalysisProBlur({
+  children,
+  onUpgrade,
+  dense,
+}: {
+  children: React.ReactNode;
+  onUpgrade: () => void;
+  dense?: boolean;
+}) {
+  return (
+    <div
+      className={`relative rounded-xl overflow-hidden border border-violet-200/70 dark:border-violet-800/50 bg-stone-50/40 dark:bg-stone-800/40 ${
+        dense ? 'my-1' : 'my-2'
+      }`}
+    >
+      <div className="pointer-events-none select-none blur-[6px] opacity-[0.42] px-4 py-3" aria-hidden>
+        {children}
+      </div>
+      <div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5 bg-gradient-to-b from-white/25 via-white/65 to-white/92 dark:from-stone-900/20 dark:via-stone-900/65 dark:to-stone-900/93 px-3">
+        <button
+          type="button"
+          onClick={onUpgrade}
+          className="px-4 py-2 text-sm font-semibold bg-gradient-to-r from-violet-500 to-purple-600 text-white rounded-lg shadow-md hover:from-violet-600 hover:to-purple-700"
+        >
+          Unlock with Pro
+        </button>
+        <span className="text-[11px] text-violet-700/90 dark:text-violet-300/90 text-center max-w-[14rem]">
+          Full section on Pro
+        </span>
+      </div>
+    </div>
+  );
+}
+
+/** Free comprehensive report: show every numbered top suggestion (sidebar may still tease extras). */
+function renderFreeComprehensiveTopSuggestions(block: string): React.ReactNode {
+  const lines = block.split('\n').map((l) => l.trim()).filter(Boolean);
+  const items = lines.filter((l) => /^\d+\.\s/.test(l));
+  if (items.length === 0) return null;
+  return (
+    <ol className="list-decimal list-inside text-sm text-stone-700 dark:text-stone-300 space-y-1.5">
+      {items.map((line, i) => (
+        <li key={i}>{line.replace(/^\d+\.\s*/, '')}</li>
+      ))}
+    </ol>
+  );
+}
+
+function renderFreeTierComprehensiveReport(markdown: string, onUpgrade: () => void): React.ReactNode {
+  const sections = parseComprehensiveMarkdownSections(markdown);
+  if (sections.length === 0) {
+    return (
+      <FreeAnalysisProBlur onUpgrade={onUpgrade}>
+        <div
+          className="prose prose-sm dark:prose-invert max-w-none"
+          dangerouslySetInnerHTML={{ __html: sanitizeAnalysisHtml(simpleMarkdownToHtml(markdown)) }}
+        />
+      </FreeAnalysisProBlur>
+    );
+  }
+
+  return (
+    <>
+      {sections.map((sec, index) => {
+        const topRule = index > 0 ? 'border-t border-stone-200 dark:border-stone-600 pt-5 mt-1' : '';
+        const titleLower = sec.title.toLowerCase();
+        if (titleLower === 'overall assessment') {
+          const { main, topSuggestionsBlock } = splitOverallAssessmentBody(sec.body);
+          return (
+            <div key="overall-assessment" className={`space-y-4 ${topRule}`}>
+              <h3 className="text-lg font-semibold text-stone-900 dark:text-stone-100">Overall Assessment</h3>
+              {main ? (
+                <div
+                  className="prose prose-sm dark:prose-invert max-w-none"
+                  dangerouslySetInnerHTML={{ __html: sanitizeAnalysisHtml(simpleMarkdownToHtml(main)) }}
+                />
+              ) : null}
+              {topSuggestionsBlock ? (
+                <div>
+                  <h4 className="text-base font-semibold text-stone-800 dark:text-stone-200 mb-2">Top suggestions</h4>
+                  {renderFreeComprehensiveTopSuggestions(topSuggestionsBlock)}
+                </div>
+              ) : null}
+            </div>
+          );
+        }
+        if (/priority/i.test(sec.title) && /recommendation/i.test(sec.title)) {
+          return (
+            <div key={`priority-${sec.title}`} className={`space-y-2 ${topRule}`}>
+              <h3 className="text-lg font-semibold text-stone-900 dark:text-stone-100">{sec.title}</h3>
+              <FreeAnalysisProBlur onUpgrade={onUpgrade}>
+                <div
+                  className="prose prose-sm dark:prose-invert max-w-none"
+                  dangerouslySetInnerHTML={{ __html: sanitizeAnalysisHtml(simpleMarkdownToHtml(sec.body)) }}
+                />
+              </FreeAnalysisProBlur>
+            </div>
+          );
+        }
+        const { mainAssessment, subsections } = splitCategoryBody(sec.body);
+        const { first, rest } = firstLineOf(mainAssessment);
+        const blurredMd = [rest, subsections].filter(Boolean).join('\n\n').trim();
+        return (
+          <div key={sec.title} className={`space-y-2 ${topRule}`}>
+            <h3 className="text-lg font-semibold text-stone-900 dark:text-stone-100">{sec.title}</h3>
+            {first ? (
+              <div
+                className="prose prose-sm dark:prose-invert max-w-none"
+                dangerouslySetInnerHTML={{ __html: sanitizeAnalysisHtml(simpleMarkdownToHtml(first)) }}
+              />
+            ) : null}
+            {blurredMd ? (
+              <FreeAnalysisProBlur onUpgrade={onUpgrade}>
+                <div
+                  className="prose prose-sm dark:prose-invert max-w-none"
+                  dangerouslySetInnerHTML={{ __html: sanitizeAnalysisHtml(simpleMarkdownToHtml(blurredMd)) }}
+                />
+              </FreeAnalysisProBlur>
+            ) : null}
+          </div>
+        );
+      })}
+    </>
+  );
+}
 
 interface AnalysisPageProps {
   onNavigate?: (page: string) => void;
@@ -84,8 +296,13 @@ interface AnalysisResult {
     documentId: string;
     timestamp: string;
     annotations?: Annotation[];
-    isContentLimited?: boolean;
-    maxAnalysisPercentage?: number;
+    lockedFeatures?: string[];
+    overall_score?: number | null;
+    grade_estimate?: string | null;
+    clarity_rating?: string | null;
+    top_suggestions?: string[];
+    grade_rubric?: Record<string, { score: number; max_score: number; feedback: string }> | null;
+    specific_rewrites?: Array<{ original: string; rewritten: string; reason: string }> | null;
     rubricAlignment?: RubricAlignment | null;
     savedAnalysisId?: string;
   };
@@ -98,7 +315,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
   const [selectedDocument, setSelectedDocument] = useState<string>('');
   const [selectedAnalysisType, setSelectedAnalysisType] = useState<string>('comprehensive');
   const [selectedCitationStyle, setSelectedCitationStyle] = useState<string>('None');
-  const [selectedEducationLevel, setSelectedEducationLevel] = useState<string>('college');
+  const [selectedGradingStyle, setSelectedGradingStyle] = useState<'us' | 'uk'>('us');
   const [isLoading, setIsLoading] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<string>('');
@@ -109,6 +326,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
   const [hoveredAnnotation, setHoveredAnnotation] = useState<string | null>(null);
   const [selectedAnnotation, setSelectedAnnotation] = useState<string | null>(null);
   const [error, setError] = useState<string>('');
+  const [limitExceededError, setLimitExceededError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string>('');
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
   const [showAnalysisPopup, setShowAnalysisPopup] = useState(false);
@@ -122,8 +340,18 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
   const [isParsingRubric, setIsParsingRubric] = useState(false);
   const [rubricAlignment, setRubricAlignment] = useState<any>(null);
   const [isTrialEligible, setIsTrialEligible] = useState<boolean>(true);
+  const [lockedFeatures, setLockedFeatures] = useState<string[]>([]);
+  const [gradeRubric, setGradeRubric] = useState<Record<string, { score: number; max_score: number; feedback: string }> | null>(null);
+  const [specificRewrites, setSpecificRewrites] = useState<Array<{ original: string; rewritten: string; reason: string }> | null>(null);
+  const [analysisSummary, setAnalysisSummary] = useState<{
+    overall_score: number | null;
+    grade_estimate: string | null;
+    clarity_rating: string | null;
+    top_suggestions: string[];
+  }>({ overall_score: null, grade_estimate: null, clarity_rating: null, top_suggestions: [] });
   const documentRef = useRef<HTMLDivElement>(null);
   const rubricFileInputRef = useRef<HTMLInputElement>(null);
+  const limitBannerRef = useRef<HTMLDivElement>(null);
 
   // Mobile detection utility
   const isMobileDevice = () => {
@@ -163,6 +391,37 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
     }
 
   }, []);
+
+  // When coming from Upload or Library "Analyze", pre-select the document once documents are loaded
+  useEffect(() => {
+    if (documents.length === 0 || selectedDocument !== '') return;
+    const uploadedDocId = localStorage.getItem('selectedDocumentId');
+    if (!uploadedDocId) return;
+    const docExists = documents.some((d) => d.id === uploadedDocId);
+    if (docExists) {
+      setSelectedDocument(uploadedDocId);
+      setIsLoadingPreview(true);
+      fetchDocumentContent(uploadedDocId)
+        .then((content) => {
+          setPreviewContent(content);
+        })
+        .catch((err) => {
+          console.error('Error loading uploaded document preview:', err);
+          setPreviewContent('Failed to load document preview');
+        })
+        .finally(() => setIsLoadingPreview(false));
+      localStorage.removeItem('selectedDocumentId');
+      localStorage.removeItem('selectedDocumentTitle');
+      localStorage.removeItem('selectedDocumentContent');
+    }
+  }, [documents, selectedDocument]);
+
+  // Scroll limit-exceeded banner into view when it appears
+  useEffect(() => {
+    if (limitExceededError && limitBannerRef.current) {
+      limitBannerRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [limitExceededError]);
 
   // Check for plan changes periodically (for automatic unlocking after upgrade)
   useEffect(() => {
@@ -575,6 +834,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
     try {
       console.log('=== LOADING EXISTING ANALYSIS ===');
       console.log('Document ID:', documentId);
+      setSelectedDocument(documentId);
       
       const token = localStorage.getItem('authToken');
       if (!token) {
@@ -731,6 +991,27 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
           
           // Restore rubric alignment from saved analysis (or clear if none)
           setRubricAlignment(analysisResults.rubric_alignment || null);
+          
+          // Restore new-format summary (score, grade, clarity, suggestions)
+          // Score must equal rubric sum — use rubric sum when available to fix any saved mismatches
+          const savedRubric = analysisResults.grade_rubric as Record<string, { score?: number }> | null | undefined;
+          const savedRubricSum = savedRubric && typeof savedRubric === 'object'
+            ? Object.values(savedRubric).reduce((sum: number, e) => sum + (e?.score ?? 0), 0)
+            : 0;
+          const displayScore = savedRubricSum > 0 ? savedRubricSum : (analysisResults.overall_score ?? null);
+          setAnalysisSummary({
+            overall_score: displayScore,
+            grade_estimate: analysisResults.grade_estimate ?? null,
+            clarity_rating: analysisResults.clarity_rating ?? null,
+            top_suggestions: Array.isArray(analysisResults.top_suggestions) ? analysisResults.top_suggestions : []
+          });
+          setGradeRubric(analysisResults.grade_rubric ?? null);
+          setSpecificRewrites(analysisResults.specific_rewrites ?? null);
+          
+          // Set locked features based on current user plan (free users see upgrade prompts)
+          const plan = await fetchUserPlan();
+          const isPaid = plan === 'pro' || plan === 'premium';
+          setLockedFeatures(isPaid ? [] : ['full_annotations', 'grade_rubric', 'specific_rewrites', 'export', 'history']);
           
           console.log('=== ANALYSIS LOADED SUCCESSFULLY ===');
           console.log('Final annotations count:', annotations.length);
@@ -928,9 +1209,14 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
     setShowAnalysisPopup(true);
     setAnalysisComplete(false);
     setError('');
+    setLimitExceededError(null);
     setSuccessMessage('');
     setAnalysisResult('');
     setAnnotations([]);
+    setLockedFeatures([]);
+    setGradeRubric(null);
+    setSpecificRewrites(null);
+    setAnalysisSummary({ overall_score: null, grade_estimate: null, clarity_rating: null, top_suggestions: [] });
 
     try {
       const token = localStorage.getItem('authToken');
@@ -944,7 +1230,6 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
         contentLength: content.length,
         analysisType: selectedAnalysisType,
         citationStyle: selectedCitationStyle,
-        educationLevel: selectedEducationLevel
       });
 
       const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/analysis/analyze`, {
@@ -958,7 +1243,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
           content: content,
           analysisType: selectedAnalysisType,
           citationStyle: selectedCitationStyle,
-          educationLevel: selectedEducationLevel,
+          gradingStyle: selectedGradingStyle,
           rubricContent: rubricContent.trim() || undefined,
         }),
       });
@@ -966,20 +1251,38 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         const errorMessage = errorData.errors?.[0]?.message || errorData.message || 'Analysis failed';
+        const isLimitExceeded = response.status === 403 || response.status === 429;
+        if (isLimitExceeded) {
+          setLimitExceededError(errorMessage);
+          setError(errorMessage);
+          setShowAnalysisPopup(false);
+          analyzingRef.current = false;
+          setIsAnalyzing(false);
+          setAnalysisComplete(true);
+          fetchDocuments();
+          return;
+        }
         throw new Error(errorMessage);
       }
 
       const result: AnalysisResult = await response.json();
       setAnalysisResult(result.data.result);
       try { localStorage.removeItem('textAnalysisContent'); } catch (_) {}
-      if (result.data.rubricAlignment) {
-        setRubricAlignment(result.data.rubricAlignment);
-      }
-      
-      // Check if content was limited by the backend
-      if (result.data.isContentLimited) {
-        console.log(`Content analysis was limited to ${result.data.maxAnalysisPercentage}% for display`);
-      }
+      setRubricAlignment(result.data.rubricAlignment ?? null);
+      setLockedFeatures(result.data.lockedFeatures || []);
+      const rubric = result.data.grade_rubric as Record<string, { score?: number }> | null | undefined;
+      const rubricSum = rubric && typeof rubric === 'object'
+        ? Object.values(rubric).reduce((sum: number, e) => sum + (e?.score ?? 0), 0)
+        : 0;
+      const displayScore = rubricSum > 0 ? rubricSum : (result.data.overall_score ?? null);
+      setAnalysisSummary({
+        overall_score: displayScore,
+        grade_estimate: result.data.grade_estimate ?? null,
+        clarity_rating: result.data.clarity_rating ?? null,
+        top_suggestions: Array.isArray(result.data.top_suggestions) ? result.data.top_suggestions : []
+      });
+      setGradeRubric(result.data.grade_rubric ?? null);
+      setSpecificRewrites(result.data.specific_rewrites ?? null);
       
       // Use annotations from backend if available, otherwise generate fallback
       let finalAnnotations: Annotation[] = [];
@@ -1211,34 +1514,15 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
   };
 
   const getDisplayContent = () => {
-    if (!documentContent) return '';
-    
-    // For free users, only show 50% of the content
-    if (currentPlan === 'free') {
-      const words = documentContent.split(' ');
-      const halfWords = Math.floor(words.length / 2);
-      return words.slice(0, halfWords).join(' ');
-    }
-    
-    return documentContent;
+    return documentContent || '';
   };
 
-  // Helper function to filter annotations based on user plan
+  // Helper function to filter annotations by type (no truncation; backend limits count for free users)
   const getFilteredAnnotations = (type?: string) => {
-    let filtered = annotations;
-    
-    // Filter by type if specified
     if (type) {
-      filtered = filtered.filter(a => a.type === type);
+      return annotations.filter(a => a.type === type);
     }
-    
-    // For free users, only show annotations within the first 50% of the document
-    if (currentPlan === 'free' && documentContent) {
-      const contentLimitIndex = Math.floor(documentContent.length / 2);
-      filtered = filtered.filter(annotation => annotation.startIndex < contentLimitIndex);
-    }
-    
-    return filtered;
+    return annotations;
   };
 
   const renderHighlightedText = () => {
@@ -1247,12 +1531,9 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
     }
 
     const displayContent = getDisplayContent();
-    const contentLimitIndex = currentPlan === 'free' ? Math.floor(documentContent.length / 2) : documentContent.length;
 
     console.log('Rendering text with annotations:', annotations.length);
     console.log('Document content length:', documentContent.length);
-    console.log('Display content length:', displayContent.length);
-    console.log('Content limit index for annotations:', contentLimitIndex);
 
     // Always split content into paragraphs first to preserve formatting
     const paragraphs = displayContent.split(/\n\s*\n/).filter(p => p.trim().length > 0);
@@ -1304,24 +1585,11 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
           return false;
         }
 
-        // For free users, only show annotations within the first 50% of the document
-        if (currentPlan === 'free') {
-          const isWithinLimit = annotation.startIndex < contentLimitIndex;
-          if (!isWithinLimit) {
-            console.log('Annotation filtered out for free user (beyond 50%):', annotation);
-          }
-          return isWithinLimit;
-        }
-        
         return true;
       })
       .sort((a, b) => a.startIndex - b.startIndex);
 
     console.log('Valid annotations for rendering:', sortedAnnotations.length);
-    
-    // Check if there are hidden annotations for free users
-    const hiddenAnnotationsCount = currentPlan === 'free' ? 
-      annotations.filter(annotation => annotation.startIndex >= contentLimitIndex).length : 0;
 
     // Render each paragraph separately to preserve spacing
     return (
@@ -1390,7 +1658,13 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                 onMouseEnter={(e) => handleAnnotationHover(e, annotation.id)}
                 onMouseLeave={() => setHoveredAnnotation(null)}
                 onClick={() => scrollToAnnotation(annotation.id)}
-                title={`${annotation.type.toUpperCase()}: ${annotation.comment}`}
+                title={
+                  lockedFeatures.includes('full_annotations')
+                    ? annotation.type === 'strong'
+                      ? 'Upgrade to Pro to see why this sentence works and what makes it effective'
+                      : 'Upgrade to Pro for concrete feedback on how to improve this sentence'
+                    : `${annotation.type.toUpperCase()}: ${annotation.comment}`
+                }
               >
                 {renderTextWithItalics(actualText, `anno-${annotation.id}`)}
               </span>
@@ -1417,36 +1691,18 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
             </p>
           );
         })}
-        
-        {/* Upgrade prompt for hidden annotations */}
-        {hiddenAnnotationsCount > 0 && (
-            <div className="mt-8 p-6 bg-gradient-to-r from-violet-50 to-indigo-50 border border-violet-200 rounded-lg">
-            <div className="flex items-center space-x-3 mb-3">
-              <div className="p-2 bg-lime-500 rounded-full">
-                <svg className="w-5 h-5 text-stone-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m0 0v2m0-2h2m-2 0H9m12-9V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002-2v-9z" />
-                </svg>
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-stone-900">
-                  {hiddenAnnotationsCount} more annotation{hiddenAnnotationsCount > 1 ? 's' : ''} available
-                </h3>
-                <p className="text-sm text-stone-600">
-                  Upgrade to view all annotations across the full document and unlock complete analysis insights.
-                </p>
-              </div>
-            </div>
-            <button
-              onClick={() => onNavigate?.('billing')}
-              className="px-6 py-2 bg-gradient-to-r from-violet-500 to-purple-600 text-white rounded-lg hover:from-violet-400 hover:to-purple-500 transition-colors font-semibold shadow-lg shadow-violet-500/25"
-            >
-              Upgrade Now
-            </button>
-          </div>
-        )}
       </div>
     );
   };
+
+  const analysisPageTitle = analysisResult ? 'Essay analysis results' : 'Analyze your essay';
+  const analysisPageSubtitle = useMemo(() => {
+    if (!analysisResult) return 'Get comprehensive AI-powered feedback on your academic documents';
+    const docMeta = documents.find((d) => d.id === selectedDocument);
+    const docLabel = docMeta?.title || docMeta?.originalFilename || docMeta?.file_name;
+    if (docLabel) return `Results for: ${docLabel}`;
+    return 'Review annotations, scores, and suggestions below.';
+  }, [analysisResult, documents, selectedDocument]);
 
   const getAnnotationIcon = (type: string) => {
     switch (type) {
@@ -1501,11 +1757,11 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                 <ScholarMascot size={100} animated={true} pose="analyzing" />
               </div>
               <div>
-                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-stone-900">
-                  AI Scholar Analysis
+                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-stone-900 dark:text-stone-50">
+                  {analysisPageTitle}
                 </h1>
-                <p className="mt-3 text-lg text-stone-600">
-                  Get comprehensive AI-powered feedback on your academic documents
+                <p className="mt-3 text-lg text-stone-600 dark:text-stone-400">
+                  {analysisPageSubtitle}
                 </p>
               </div>
             </div>
@@ -1521,8 +1777,36 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
           </div>
         </div>
 
-        {error && (
-          <div className="mb-8 p-5 bg-red-50 border border-red-200 rounded-2xl">
+        {limitExceededError && (
+          <div 
+            ref={limitBannerRef}
+            className="mb-8 p-6 bg-red-50 dark:bg-red-950/40 border-2 border-red-300 dark:border-red-700 rounded-2xl shadow-lg"
+          >
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 bg-red-500 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-red-800 dark:text-red-200">Monthly limit exceeded</h3>
+                  <p className="text-red-700 dark:text-red-300 mt-1">{limitExceededError}</p>
+                  <p className="text-sm text-red-600 dark:text-red-400 mt-2">Upgrade to Pro or Premium for more analyses.</p>
+                </div>
+              </div>
+              <button
+                onClick={() => onNavigate?.('billing')}
+                className="flex-shrink-0 px-5 py-2.5 bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 text-white font-semibold rounded-xl transition-colors shadow-md"
+              >
+                Upgrade for more
+              </button>
+            </div>
+          </div>
+        )}
+
+        {error && !limitExceededError && (
+          <div className="mb-8 p-5 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-2xl">
             <div className="flex items-center">
               <div className="w-10 h-10 bg-red-500 rounded-xl flex items-center justify-center flex-shrink-0">
                 <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1530,7 +1814,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                 </svg>
               </div>
               <div className="ml-4">
-                <p className="text-red-700 font-medium">{error}</p>
+                <p className="text-red-700 dark:text-red-300 font-medium">{error}</p>
               </div>
             </div>
           </div>
@@ -1573,7 +1857,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                   <select
                     value={selectedDocument}
                     onChange={(e) => handleDocumentSelection(e.target.value)}
-                    className="w-full px-4 py-3.5 text-base border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    className="w-full px-4 py-3.5 text-base border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-colors"
                     disabled={isAnalyzing}
                   >
                     <option value="">Choose a document...</option>
@@ -1588,14 +1872,14 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
               
               {/* Text Content Notice */}
               {documentContent && !selectedDocument && (
-                <div className="mb-6 p-4 bg-violet-50 border border-violet-200 rounded-xl">
+                <div className="mb-6 p-4 bg-rose-50 border border-rose-200 rounded-xl">
                   <div className="flex items-center space-x-2">
-                    <svg className="w-5 h-5 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    <span className="font-medium text-violet-800">Text Analysis Mode</span>
+                    <span className="font-medium text-rose-800">Text Analysis Mode</span>
                   </div>
-                  <p className="text-sm text-violet-700 mt-2">
+                  <p className="text-sm text-rose-700 mt-2">
                     Analyzing text content from dashboard. Select citation style and run analysis.
                   </p>
                 </div>
@@ -1612,7 +1896,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                       key={type.id}
                       className={`p-4 border-2 rounded-xl cursor-pointer transition-all ${
                         selectedAnalysisType === type.id
-                          ? 'border-violet-500 bg-violet-50'
+                          ? 'border-rose-500 bg-rose-50'
                           : 'border-stone-200 hover:border-stone-300'
                       }`}
                       onClick={() => setSelectedAnalysisType(type.id)}
@@ -1626,7 +1910,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                         </div>
                         <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
                           selectedAnalysisType === type.id
-                            ? 'border-violet-500 bg-violet-500'
+                            ? 'border-rose-500 bg-rose-500'
                             : 'border-stone-300'
                         }`}>
                           {selectedAnalysisType === type.id && (
@@ -1649,7 +1933,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                 <select
                   value={selectedCitationStyle}
                   onChange={(e) => setSelectedCitationStyle(e.target.value)}
-                  className="w-full px-4 py-3.5 text-base border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  className="w-full px-4 py-3.5 text-base border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-colors"
                   disabled={isAnalyzing}
                 >
                   <option value="None">None (No citations required)</option>
@@ -1665,49 +1949,39 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                 </p>
               </div>
 
-              {/* Education Level Selection */}
+              {/* Grading Style Selection */}
               <div className="mb-6">
-                <label className="block text-base font-medium text-stone-900 mb-2">
-                  Education Level
+                <label className="block text-base font-medium text-stone-900 dark:text-stone-100 mb-2">
+                  Grade format
                 </label>
-                <div className="space-y-2">
-                  {[
-                    { id: 'college', label: 'College / University', description: 'PhD, undergraduate, postgraduate — rigorous academic standard', icon: '🎓' },
-                    { id: 'sixth_form', label: 'High School / Sixth Form', description: 'Ages 16–18 — detailed but approachable feedback', icon: '📚' },
-                    { id: 'middle_school', label: 'Middle School', description: 'Ages 11–15 — encouraging, friendly, and supportive tone', icon: '📝' },
-                  ].map((level) => (
-                    <div
-                      key={level.id}
-                      className={`p-3.5 border-2 rounded-xl cursor-pointer transition-all ${
-                        selectedEducationLevel === level.id
-                          ? 'border-violet-500 bg-violet-50'
-                          : 'border-stone-200 hover:border-stone-300'
-                      }`}
-                      onClick={() => setSelectedEducationLevel(level.id)}
-                    >
-                      <div className="flex items-center space-x-3">
-                        <span className="text-xl">{level.icon}</span>
-                        <div className="flex-1">
-                          <h3 className="font-semibold text-stone-900 text-sm">{level.label}</h3>
-                          <p className="text-xs text-stone-500 mt-0.5">{level.description}</p>
-                        </div>
-                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                          selectedEducationLevel === level.id
-                            ? 'border-violet-500 bg-violet-500'
-                            : 'border-stone-300'
-                        }`}>
-                          {selectedEducationLevel === level.id && (
-                            <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                            </svg>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+                <div className="inline-flex p-1 rounded-xl bg-stone-100 dark:bg-stone-800 border border-stone-200 dark:border-stone-600">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedGradingStyle('us')}
+                    className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+                      selectedGradingStyle === 'us'
+                        ? 'bg-white dark:bg-stone-700 text-rose-700 dark:text-rose-300 shadow-sm'
+                        : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
+                    }`}
+                  >
+                    <span className="font-semibold">Letter grades</span>
+                    <span className="ml-1.5 text-stone-400 dark:text-stone-500 font-normal">A, B+, C</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedGradingStyle('uk')}
+                    className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+                      selectedGradingStyle === 'uk'
+                        ? 'bg-white dark:bg-stone-700 text-rose-700 dark:text-rose-300 shadow-sm'
+                        : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
+                    }`}
+                  >
+                    <span className="font-semibold">Classifications</span>
+                    <span className="ml-1.5 text-stone-400 dark:text-stone-500 font-normal">1st, 2:1, 2:2</span>
+                  </button>
                 </div>
-                <p className="text-sm text-stone-500 mt-2">
-                  Tailors the analysis depth and feedback tone to your level
+                <p className="text-sm text-stone-500 dark:text-stone-400 mt-2">
+                  How your grade will appear in the results
                 </p>
               </div>
 
@@ -1715,7 +1989,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
               <button
                 onClick={handleAnalyze}
                 disabled={(!selectedDocument && !documentContent) || !selectedAnalysisType || isAnalyzing}
-                className="w-full bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white py-3.5 px-4 rounded-xl font-semibold text-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="w-full bg-gradient-to-r from-rose-500 to-red-600 hover:from-rose-400 hover:to-red-500 text-white py-3.5 px-4 rounded-xl font-semibold text-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 {isAnalyzing ? (
                   <LoadingSpinner 
@@ -1810,7 +2084,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                             onClick={() => setRubricInputMode('paste')}
                             className={`flex-1 px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
                               rubricInputMode === 'paste'
-                                ? 'bg-violet-100 text-violet-700 border border-violet-300'
+                                ? 'bg-rose-100 text-rose-700 border border-rose-300'
                                 : 'bg-white text-stone-600 border border-stone-200 hover:bg-stone-100'
                             }`}
                           >
@@ -1821,7 +2095,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                             onClick={() => setRubricInputMode('upload')}
                             className={`flex-1 px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
                               rubricInputMode === 'upload'
-                                ? 'bg-violet-100 text-violet-700 border border-violet-300'
+                                ? 'bg-rose-100 text-rose-700 border border-rose-300'
                                 : 'bg-white text-stone-600 border border-stone-200 hover:bg-stone-100'
                             }`}
                           >
@@ -1834,7 +2108,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                             value={rubricContent}
                             onChange={(e) => setRubricContent(e.target.value)}
                             placeholder="Paste your rubric, essay question, or assignment requirements here..."
-                            className="w-full px-4 py-3 text-sm border-2 border-stone-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-colors resize-y min-h-[120px] bg-white text-stone-900 placeholder-stone-400"
+                            className="w-full px-4 py-3 text-sm border-2 border-stone-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-500/40 focus:border-rose-500 transition-colors resize-y min-h-[120px] bg-white text-stone-900 placeholder-stone-400"
                             rows={5}
                             disabled={isAnalyzing}
                           />
@@ -1852,11 +2126,11 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                               type="button"
                               onClick={() => rubricFileInputRef.current?.click()}
                               disabled={isAnalyzing || isParsingRubric}
-                              className="w-full px-4 py-6 border-2 border-dashed border-stone-300 rounded-xl text-stone-500 hover:border-violet-400 hover:text-violet-600 hover:bg-violet-50 transition-colors disabled:opacity-50"
+                              className="w-full px-4 py-6 border-2 border-dashed border-stone-300 rounded-xl text-stone-500 hover:border-rose-400 hover:text-rose-600 hover:bg-rose-50 transition-colors disabled:opacity-50"
                             >
                               {isParsingRubric ? (
                                 <div className="flex items-center justify-center space-x-2">
-                                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-violet-600"></div>
+                                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-rose-600"></div>
                                   <span className="text-sm">Parsing rubric file...</span>
                                 </div>
                               ) : (
@@ -1981,6 +2255,110 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
               </div>
             </div>
 
+            {/* Grade Breakdown — FIRST: score, grade, and all categories */}
+            <div className="mx-6 mt-6 mb-4 bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-600 overflow-hidden">
+              <div className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white px-6 py-5">
+                <div className="flex flex-wrap items-center gap-6">
+                  <div>
+                    <h2 className="text-xl font-bold">General Academic Assessment</h2>
+                    <p className="text-emerald-100 text-sm mt-0.5">Standard college rubric — thesis, evidence, structure, and clarity</p>
+                  </div>
+                  {(analysisSummary.overall_score != null || analysisSummary.grade_estimate) && (
+                    <div className="flex items-center gap-6 ml-auto">
+                      {analysisSummary.overall_score != null && (
+                        <div className="text-right">
+                          <div className="text-3xl font-extrabold">{Math.round(Number(analysisSummary.overall_score))}/100</div>
+                          <div className="text-emerald-100 text-xs">Score</div>
+                        </div>
+                      )}
+                      {analysisSummary.grade_estimate && (
+                        <div className="text-right">
+                          <div className="text-3xl font-extrabold">{analysisSummary.grade_estimate}</div>
+                          <div className="text-emerald-100 text-xs">Grade</div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div className="p-6">
+                {gradeRubric && Object.keys(gradeRubric).length > 0 && !lockedFeatures.includes('grade_rubric') ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {Object.entries(gradeRubric).map(([key, val]) => (
+                      <div key={key} className="p-4 rounded-xl bg-stone-50 dark:bg-stone-700/50 border border-stone-200 dark:border-stone-600">
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="font-medium text-stone-800 dark:text-stone-200 capitalize">{key.replace(/_/g, ' ')}</span>
+                          <span className="font-bold text-stone-900 dark:text-stone-100">{Math.round(Number(val.score))}/{val.max_score}</span>
+                        </div>
+                        <p className="text-sm text-stone-600 dark:text-stone-400">{val.feedback}</p>
+                      </div>
+                    ))}
+                  </div>
+                ) : lockedFeatures.includes('grade_rubric') ? (
+                  <div className="space-y-4">
+                    <p className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed">
+                      Your essay is graded on six college-style categories (thesis, evidence, analysis, structure, and writing quality). Upgrade to see{' '}
+                      <strong className="text-stone-800 dark:text-stone-200">your</strong> score and feedback in each box below.
+                    </p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {(gradeRubric && Object.keys(gradeRubric).length > 0
+                        ? Object.entries(gradeRubric).map(([key, val]) => ({
+                            key,
+                            label: formatRubricCategoryLabel(key),
+                            maxScore: val.max_score,
+                          }))
+                        : STANDARD_GRADE_RUBRIC_PREVIEW.map((r) => ({
+                            key: r.key,
+                            label: r.label,
+                            maxScore: r.maxScore,
+                          }))
+                      ).map((row) => (
+                        <div
+                          key={row.key}
+                          className="p-4 rounded-xl bg-stone-50 dark:bg-stone-700/50 border border-stone-200 dark:border-stone-600"
+                        >
+                          <div className="flex justify-between items-center gap-2 mb-2">
+                            <span className="font-medium text-stone-800 dark:text-stone-200 text-sm leading-snug">{row.label}</span>
+                            <span className="text-sm font-bold text-stone-400 dark:text-stone-500 tabular-nums flex-shrink-0">
+                              ?/{row.maxScore}
+                            </span>
+                          </div>
+                          <div className="relative min-h-[4.5rem] rounded-lg overflow-hidden bg-stone-100/90 dark:bg-stone-600/25 border border-stone-200/90 dark:border-stone-600/50">
+                            <div
+                              className="absolute inset-0 p-3 text-xs text-stone-600 dark:text-stone-400 select-none blur-[5px] opacity-45 leading-relaxed"
+                              aria-hidden
+                            >
+                              Your personalized feedback for this category—what you did well, what to fix, and how—unlocks on Pro.
+                            </div>
+                            <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-t from-white/75 via-white/40 to-transparent dark:from-stone-900/80 dark:via-stone-900/35">
+                              <span className="text-[10px] font-bold uppercase tracking-wider text-violet-600 dark:text-violet-400">Pro</span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="flex flex-wrap items-center gap-3 pt-1">
+                      <button
+                        type="button"
+                        onClick={() => onNavigate?.('billing')}
+                        className="px-4 py-2 text-sm bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 text-white rounded-lg font-semibold transition-colors"
+                      >
+                        Unlock full rubric
+                      </button>
+                      {isTrialEligible ? (
+                        <span className="text-sm text-violet-700 dark:text-violet-300">
+                          <span className="line-through">$19.99</span>{' '}
+                          <span className="font-bold text-emerald-600">$9.99</span>/mo
+                        </span>
+                      ) : (
+                        <span className="text-sm text-violet-600 dark:text-violet-400">$19.99/mo</span>
+                      )}
+                    </div>
+                  </div>
+                ) : null}
+              </div>
+            </div>
+
             {/* Legend */}
             <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
               <div className="flex flex-wrap items-center gap-6 text-sm">
@@ -2000,84 +2378,30 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
             </div>
 
 
-            {/* Main Content Area */}
+            {/* Document Analysis — Main Content Area */}
             <div className="flex flex-col md:flex-row md:h-[600px]">
               {/* Document Panel */}
               <div className="flex-1 p-4 md:p-6 overflow-y-auto bg-white" ref={documentRef}>
                 <div className="prose max-w-none">
                   <div className="text-sm leading-7">
                     {renderHighlightedText()}
-                    
-                    {/* Permanent Unlock Overlay for Free Users */}
-                    {currentPlan === 'free' && (
-                      <div className="relative mt-8">
-                        {/* Blurred content preview */}
-                        <div className="relative">
-                          <div className="p-6 bg-gradient-to-r from-gray-50 to-gray-100 border-2 border-dashed border-gray-300 rounded-xl">
-                            <div className="text-center">
-                              <div className="w-16 h-16 bg-gradient-to-br from-amber-100 to-orange-100 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
-                                <span className="text-3xl">🔒</span>
-            </div>
-                              <h3 className="text-xl font-bold text-gray-800 mb-2">
-                                Unlock Full Document
-                              </h3>
-                              <p className="text-gray-600 mb-6 max-w-md mx-auto">
-                                You're viewing 50% of your document. Upgrade to Pro or Premium to unlock the remaining content and get full AI analysis.
-                              </p>
-                              
-                              {/* Blurred text preview */}
-                              <div className="bg-white/50 backdrop-blur-sm rounded-lg p-4 mb-6 border border-gray-200">
-                                <div className="text-sm text-gray-500 leading-relaxed">
-                                  {documentContent.split(' ').slice(Math.floor(documentContent.split(' ').length / 2), Math.floor(documentContent.split(' ').length / 2) + 20).join(' ')}...
-                                </div>
-                                <div className="absolute inset-0 bg-gradient-to-t from-white via-white/50 to-transparent rounded-lg"></div>
-                              </div>
-                              
-                              <div className="flex flex-col sm:flex-row justify-center items-center space-y-3 sm:space-y-0 sm:space-x-4">
-                                <button
-                                  onClick={() => onNavigate?.('billing')}
-                                  className="w-full sm:w-auto bg-gradient-to-r from-violet-500 to-purple-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:from-violet-400 hover:to-purple-500 transition-all duration-200 shadow-xl shadow-violet-500/25 hover:shadow-violet-500/30 transform hover:scale-105 flex items-center justify-center space-x-2"
-                                >
-                                  <span>🚀</span>
-                                  <span>Upgrade Now</span>
-                                </button>
-                                <div className="text-center sm:text-left">
-                                  {isTrialEligible ? (
-                                    <>
-                                      <div className="text-sm text-gray-600">
-                                        Starting at <span className="line-through text-gray-400">$19.99</span>{' '}
-                                        <span className="font-semibold text-emerald-600">$9.99</span>/month
-                                      </div>
-                                      <div className="text-xs text-gray-500">First month $10 off · Then $19.99/mo · Cancel anytime</div>
-                                    </>
-                                  ) : (
-                                    <>
-                                      <div className="text-sm text-gray-500">Starting at $19.99/month</div>
-                                      <div className="text-xs text-gray-400">Cancel anytime</div>
-                                    </>
-                                  )}
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-            </div>
+                  </div>
           </div>
         </div>
 
               {/* Annotations Panel */}
               <div className="w-full md:w-96 bg-gray-50 border-t md:border-t-0 md:border-l border-gray-200 overflow-y-auto max-h-[400px] md:max-h-none">
                 <div className="p-5 md:p-6">
-                  <h3 className="text-lg font-bold text-gray-900 mb-5 flex items-center">
-                    <svg className="w-5 h-5 mr-2 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
-                    </svg>
-                    Annotations
-                  </h3>
-
                   <div className="space-y-6">
+                    {/* Annotations — show full list only for paid users */}
+                    {!lockedFeatures.includes('full_annotations') && (
+                    <>
+                    <h3 className="text-lg font-bold text-gray-900 mb-5 flex items-center">
+                      <svg className="w-5 h-5 mr-2 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+                      </svg>
+                      Annotations
+                    </h3>
                     {/* Strong Points */}
                     <div>
                       <div className="flex items-center space-x-2 mb-3">
@@ -2161,28 +2485,150 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                         ))}
                       </div>
                     </div>
-                
-                    {/* Upgrade prompt for hidden annotations */}
-                    {currentPlan === 'free' && annotations.length > getFilteredAnnotations().length && (
-                      <div className="p-5 bg-violet-50 border border-violet-200 rounded-xl">
-                        <div className="text-center">
-                          <div className="w-10 h-10 bg-violet-500 rounded-xl flex items-center justify-center mx-auto mb-3">
+                    </>
+                    )}
+
+                    {/* Free: annotation sidebar preview (structure visible; real comments on Pro) */}
+                    {lockedFeatures.includes('full_annotations') && (
+                      <div className="space-y-5">
+                        <div>
+                          <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-1 flex items-center">
+                            <svg className="w-5 h-5 mr-2 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+                            </svg>
+                            Annotations
+                          </h3>
+                          <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
+                            Colors in your essay match these groups. On Pro, each card shows your real comment and concrete rewrite ideas—click a card to jump to the highlighted sentence.
+                          </p>
+                        </div>
+                        {(
+                          [
+                            { type: 'strong' as const, label: 'Strong points', border: 'border-green-400', iconBg: 'bg-green-100', heading: 'text-green-800 dark:text-green-200' },
+                            { type: 'improve' as const, label: 'Areas to improve', border: 'border-amber-400', iconBg: 'bg-amber-100', heading: 'text-amber-800 dark:text-amber-200' },
+                            { type: 'concern' as const, label: 'Serious concerns', border: 'border-red-400', iconBg: 'bg-red-100', heading: 'text-red-800 dark:text-red-200' },
+                          ] as const
+                        ).map((group) => (
+                          <div key={group.type}>
+                            <div className="flex items-center space-x-2 mb-2">
+                              <div className={`flex items-center justify-center w-8 h-8 rounded-xl ${group.iconBg}`}>
+                                {getAnnotationIcon(group.type)}
+                              </div>
+                              <h4 className={`font-semibold text-sm ${group.heading}`}>{group.label}</h4>
+                            </div>
+                            <div className="space-y-2">
+                              {[0, 1].map((i) => (
+                                <div
+                                  key={i}
+                                  className={`relative rounded-xl p-4 border-l-4 ${group.border} bg-white dark:bg-gray-800/80 shadow-sm overflow-hidden`}
+                                >
+                                  <div className="pointer-events-none select-none blur-[5px] opacity-45 space-y-2 text-sm text-gray-700 dark:text-gray-300" aria-hidden>
+                                    <p className="font-medium">Professor-style feedback for a highlighted sentence in your draft.</p>
+                                    <p className="text-xs italic text-gray-500">Specific rewrite or example would appear here on Pro.</p>
+                                  </div>
+                                  <div className="absolute bottom-2 right-2 text-[10px] font-bold uppercase tracking-wide text-violet-600 dark:text-violet-400">
+                                    Pro
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-3 pt-1">
+                          <button
+                            type="button"
+                            onClick={() => onNavigate?.('billing')}
+                            className="px-5 py-2.5 bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 text-white rounded-xl font-semibold transition-all shadow-lg shadow-violet-500/25 text-sm"
+                          >
+                            Unlock full annotations
+                          </button>
+                          <div className="text-sm text-violet-700 dark:text-violet-300">
+                            {isTrialEligible ? (
+                              <>
+                                <span className="line-through text-violet-500">$19.99</span>{' '}
+                                <span className="font-bold text-emerald-600 dark:text-emerald-400">$9.99</span>/mo
+                              </>
+                            ) : (
+                              <span className="text-violet-600 dark:text-violet-400">$19.99/mo</span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Clarity & top suggestions — below annotations */}
+                    {(analysisSummary.clarity_rating || analysisSummary.top_suggestions.length > 0) && (
+                      <div className="p-4 rounded-2xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800">
+                        {analysisSummary.clarity_rating && (
+                          <p className="text-sm text-stone-600 dark:text-stone-400 mb-2">
+                            Clarity: <span className="font-semibold text-stone-800 dark:text-stone-200">{analysisSummary.clarity_rating}</span>
+                          </p>
+                        )}
+                        {analysisSummary.top_suggestions.length > 0 && (
+                          <div>
+                            <p className="text-sm font-semibold text-stone-800 dark:text-stone-200 mb-1">Top suggestions</p>
+                            {lockedFeatures.includes('full_annotations') ? (
+                              <div className="space-y-2">
+                                <ul className="list-disc list-inside text-sm text-stone-600 dark:text-stone-400">
+                                  <li>{analysisSummary.top_suggestions[0]}</li>
+                                </ul>
+                                {analysisSummary.top_suggestions.length > 1 && (
+                                  <FreeAnalysisProBlur onUpgrade={() => onNavigate?.('billing')} dense>
+                                    <ul className="list-disc list-inside text-sm text-stone-600 dark:text-stone-400 space-y-0.5">
+                                      {analysisSummary.top_suggestions.slice(1).map((s, i) => (
+                                        <li key={i}>{s}</li>
+                                      ))}
+                                    </ul>
+                                  </FreeAnalysisProBlur>
+                                )}
+                              </div>
+                            ) : (
+                              <ul className="list-disc list-inside text-sm text-stone-600 dark:text-stone-400 space-y-0.5">
+                                {analysisSummary.top_suggestions.slice(0, 3).map((s, i) => (
+                                  <li key={i}>{s}</li>
+                                ))}
+                              </ul>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Specific rewrites: show content or locked card */}
+                    {specificRewrites && specificRewrites.length > 0 && (
+                      <div className="mt-6 p-4 bg-white dark:bg-stone-800 rounded-xl border border-stone-200 dark:border-stone-600">
+                        <h4 className="font-semibold text-stone-800 dark:text-stone-200 mb-3">Rewrite Suggestions</h4>
+                        <div className="space-y-3">
+                          {specificRewrites.map((rw, i) => (
+                            <div key={i} className="p-3 rounded-lg bg-stone-50 dark:bg-stone-700/50 space-y-1">
+                              <p className="text-xs text-stone-500 dark:text-stone-400">Original: &quot;{rw.original}&quot;</p>
+                              <p className="text-sm text-emerald-700 dark:text-emerald-400">→ {rw.rewritten}</p>
+                              <p className="text-xs text-stone-600 dark:text-stone-400 italic">{rw.reason}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {lockedFeatures.includes('specific_rewrites') && (!specificRewrites || specificRewrites.length === 0) && (
+                      <div className="mt-6 p-5 bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20 border-2 border-violet-200 dark:border-violet-600/40 rounded-2xl">
+                        <div className="flex items-start gap-4">
+                          <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl flex items-center justify-center">
                             <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m0 0v2m0-2h2m-2 0H9m12-9V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002-2v-9z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                             </svg>
                           </div>
-                          <h4 className="font-semibold text-gray-900 mb-1">
-                            {annotations.length - getFilteredAnnotations().length} more annotation{annotations.length - getFilteredAnnotations().length !== 1 ? 's' : ''}
-                          </h4>
-                          <p className="text-sm text-gray-600 mb-4">
-                            Upgrade to view all insights
-                          </p>
-                          <button
-                            onClick={() => onNavigate?.('billing')}
-                            className="px-4 py-2 text-sm bg-gradient-to-r from-violet-500 to-purple-600 text-white rounded-lg hover:from-violet-400 hover:to-purple-500 transition-colors font-medium shadow-md shadow-violet-500/20"
-                          >
-                            Upgrade
-                          </button>
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-bold text-violet-800 dark:text-violet-200">Unlock rewrite suggestions with Pro</h4>
+                            <p className="text-sm text-violet-700 dark:text-violet-300 mt-0.5">Get 3-5 specific sentence rewrites that improve your grade</p>
+                            <div className="mt-3 flex flex-wrap items-center gap-2">
+                              <button onClick={() => onNavigate?.('billing')} className="px-4 py-2 text-sm bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 text-white rounded-lg font-medium transition-colors">Upgrade</button>
+                              {isTrialEligible ? (
+                                <span className="text-sm text-violet-700 dark:text-violet-300"><span className="line-through">$19.99</span> <span className="font-bold text-emerald-600">$9.99</span>/mo</span>
+                              ) : (
+                                <span className="text-sm text-violet-600">$19.99/mo</span>
+                              )}
+                            </div>
+                          </div>
                         </div>
                       </div>
                     )}
@@ -2190,6 +2636,37 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                 </div>
               </div>
             </div>
+
+            {/* Full Analysis Result - Comprehensive Academic Analysis */}
+            {analysisResult && (
+              <div className="mx-6 mt-8 mb-6 bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-600 overflow-hidden">
+                <div className="bg-gradient-to-r from-indigo-500 to-violet-600 text-white px-6 py-4">
+                  <h2 className="text-xl font-bold">Comprehensive Academic Analysis</h2>
+                  <p className="text-indigo-100 text-sm mt-0.5">
+                    {currentPlan === 'free'
+                      ? 'Preview — overall picture free; depth, strengths & concerns on Pro'
+                      : 'Full analysis report'}
+                  </p>
+                </div>
+                <div className="p-6 prose prose-stone dark:prose-invert max-w-none">
+                  {currentPlan === 'free' ? (
+                    <div className="text-sm leading-relaxed">
+                      {renderFreeTierComprehensiveReport(analysisResult, () => onNavigate?.('billing'))}
+                    </div>
+                  ) : (
+                    <div
+                      className="text-sm leading-relaxed"
+                      dangerouslySetInnerHTML={{
+                        __html: DOMPurify.sanitize(simpleMarkdownToHtml(analysisResult), {
+                          ALLOWED_TAGS: ['h2', 'h3', 'h4', 'p', 'strong', 'em', 'code', 'ul', 'ol', 'li'],
+                          ALLOWED_ATTR: ['class'],
+                        }),
+                      }}
+                    />
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* Summary Footer */}
             <div className="bg-gray-50 border-t border-gray-200 px-6 py-4">
@@ -2213,12 +2690,21 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                     Export Report
                   </button>
                 ) : (
-                  <button 
-                    onClick={() => onNavigate?.('pricing')}
-                    className="px-5 py-2.5 text-sm font-medium text-amber-700 bg-amber-100 rounded-lg hover:bg-amber-200 transition-colors"
-                  >
-                    Upgrade to export
-                  </button>
+                  <div className="flex flex-wrap items-center gap-3">
+                    <button 
+                      onClick={() => onNavigate?.('billing')}
+                      className="px-5 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-violet-500 to-purple-600 rounded-lg hover:from-violet-600 hover:to-purple-700 transition-colors"
+                    >
+                      Upgrade to export
+                    </button>
+                    {isTrialEligible ? (
+                      <span className="text-sm text-stone-600">
+                        <span className="line-through">$19.99</span> <span className="font-bold text-emerald-600">$9.99</span>/mo
+                      </span>
+                    ) : (
+                      <span className="text-sm text-stone-500">$19.99/mo</span>
+                    )}
+                  </div>
                 )}
               </div>
             </div>
@@ -2234,8 +2720,8 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                     <span className="text-xl sm:text-2xl">📋</span>
                   </div>
                   <div>
-                    <h2 className="text-xl font-bold">Rubric Alignment</h2>
-                    <p className="text-rose-100 text-sm mt-0.5">How your essay measures up against the rubric criteria</p>
+                    <h2 className="text-xl font-bold">Your Assignment Rubric</h2>
+                    <p className="text-rose-100 text-sm mt-0.5">Compared against the rubric you uploaded</p>
                   </div>
                 </div>
               </div>
@@ -2314,8 +2800,8 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                           </svg>
                         </div>
                         <div>
-                          <h3 className="text-lg font-semibold text-stone-900 dark:text-stone-100">Want to see the full rubric alignment?</h3>
-                          <p className="text-sm text-stone-600 dark:text-stone-400">Upgrade to view the complete criterion breakdown, evidence quotes, suggestions, missing elements, and priority improvements.</p>
+                          <h3 className="text-lg font-semibold text-stone-900 dark:text-stone-100">Want to see the full assignment rubric analysis?</h3>
+                          <p className="text-sm text-stone-600 dark:text-stone-400">Upgrade to view the complete breakdown against your rubric: evidence quotes, suggestions, missing elements, and priority improvements.</p>
                         </div>
                       </div>
                       <button
@@ -2469,35 +2955,51 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
               if (!annotation) return null;
               
               const typeLabels = {
-                strong: '✓ Strong Point',
-                improve: '⚠ Needs Improvement', 
-                concern: '⚠ Serious Concern'
+                strong: 'Strong point',
+                improve: 'Needs improvement',
+                concern: 'Serious concern'
               };
               
+              const isLimitedTooltip = lockedFeatures.includes('full_annotations');
+              
               return (
-                <div className={`bg-gray-900 text-white rounded-lg px-3 py-2 shadow-xl mb-2 ${
-                  isMobileDevice() 
-                    ? 'text-sm max-w-xs w-72' // Mobile: larger text, fixed width
-                    : 'text-xs max-w-xs'     // Desktop: smaller text, flexible width
-                }`}>
-                  <div className="font-semibold mb-1">
+                <div className={`relative rounded-lg px-3 py-2 shadow-xl mb-2 ${
+                  isLimitedTooltip 
+                    ? annotation.type === 'strong' 
+                      ? 'bg-emerald-600 text-white border-2 border-emerald-400'
+                      : annotation.type === 'improve'
+                        ? 'bg-amber-500 text-white border-2 border-amber-300'
+                        : 'bg-red-600 text-white border-2 border-red-400'
+                    : 'bg-gray-900 text-white'
+                } ${isMobileDevice() ? 'text-sm max-w-xs w-72' : 'text-xs max-w-xs'}`}>
+                  <div className="font-semibold">
                     {typeLabels[annotation.type]}
                   </div>
-                  <div className={`mb-2 text-gray-200 ${isMobileDevice() ? 'text-sm' : 'text-xs'}`}>
-                    "{annotation.text}"
-                  </div>
-                  <div className={`text-gray-100 ${isMobileDevice() ? 'text-sm' : 'text-xs'}`}>
-                    {annotation.comment}
-                  </div>
-                  {annotation.suggestion && (
-                    <div className={`mt-2 text-gray-300 italic ${isMobileDevice() ? 'text-sm' : 'text-xs'}`}>
-                      💡 {annotation.suggestion}
-                    </div>
+                  {!isLimitedTooltip && (
+                    <>
+                      <div className={`mb-2 text-gray-200 ${isMobileDevice() ? 'text-sm' : 'text-xs'}`}>
+                        "{annotation.text}"
+                      </div>
+                      <div className={`text-gray-100 ${isMobileDevice() ? 'text-sm' : 'text-xs'}`}>
+                        {annotation.comment}
+                      </div>
+                      {annotation.suggestion && (
+                        <div className={`mt-2 text-gray-300 italic ${isMobileDevice() ? 'text-sm' : 'text-xs'}`}>
+                          💡 {annotation.suggestion}
+                        </div>
+                      )}
+                    </>
                   )}
-                  {/* Arrow pointer - positioned differently for mobile */}
+                  {isLimitedTooltip && (
+                    <p className="text-white/90 text-xs mt-1 leading-snug">
+                      {annotation.type === 'strong'
+                        ? 'Upgrade to Pro to see why this sentence works well and how to build on it.'
+                        : 'Upgrade to Pro for specific feedback on how to improve this sentence.'}
+                    </p>
+                  )}
                   {!isMobileDevice() && (
                     <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-full">
-                      <div className="border-8 border-transparent border-t-gray-900"></div>
+                      <div className={`border-8 border-transparent ${isLimitedTooltip ? (annotation.type === 'strong' ? 'border-t-emerald-600' : annotation.type === 'improve' ? 'border-t-amber-500' : 'border-t-red-600') : 'border-t-gray-900'}`}></div>
                     </div>
                   )}
                 </div>

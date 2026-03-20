@@ -50,13 +50,13 @@ const WelcomeTutorial = ({ userName, userId, onComplete }: WelcomeTutorialProps)
       mascotPose: 'pointing' as const,
     },
     {
-      title: 'AI Humanizer & Summarizer',
-      subtitle: 'Transform & condense content',
+      title: 'Paper Summarizer',
+      subtitle: 'Condense long readings fast',
       description: '',
       icon: '',
       features: [
-        { emoji: '🤖', text: 'Humanize AI text' },
-        { emoji: '📋', text: 'Smart summaries' },
+        { emoji: '📋', text: 'Key points & bullets' },
+        { emoji: '📄', text: 'Papers & articles' },
       ],
       mascotPose: 'thinking' as const,
     },
@@ -126,10 +126,10 @@ const WelcomeTutorial = ({ userName, userId, onComplete }: WelcomeTutorialProps)
         {isWelcomeStep ? (
           /* Simple Welcome Step */
           <>
-            {/* Slim purple header */}
+            {/* Slim rose header */}
             <div 
               className="relative h-12"
-              style={{ background: 'linear-gradient(135deg, #8B5CF6 0%, #7C3AED 50%, #6D28D9 100%)' }}
+              style={{ background: 'linear-gradient(135deg, #f43f5e 0%, #ec4899 50%, #db2777 100%)' }}
             />
 
             {/* Content - mascot + welcome */}
@@ -156,7 +156,7 @@ const WelcomeTutorial = ({ userName, userId, onComplete }: WelcomeTutorialProps)
 
                 <button
                   onClick={handleNext}
-                  className="px-8 py-3 bg-gradient-to-r from-violet-600 to-purple-600 text-white rounded-full font-semibold text-sm shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all flex items-center gap-2"
+                  className="px-8 py-3 bg-gradient-to-r from-rose-500 to-pink-600 text-white rounded-full font-semibold text-sm shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all flex items-center gap-2"
                 >
                   Let's go!
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -172,7 +172,7 @@ const WelcomeTutorial = ({ userName, userId, onComplete }: WelcomeTutorialProps)
             {/* Header gradient with mascot */}
             <div 
               className="relative h-40 flex items-center justify-center"
-              style={{ background: 'linear-gradient(135deg, #8B5CF6 0%, #7C3AED 50%, #6D28D9 100%)' }}
+              style={{ background: 'linear-gradient(135deg, #f43f5e 0%, #ec4899 50%, #db2777 100%)' }}
             >
               {/* Decorative circles */}
               <div className="absolute top-4 left-4 w-20 h-20 rounded-full bg-white/10 blur-xl" />
@@ -188,10 +188,10 @@ const WelcomeTutorial = ({ userName, userId, onComplete }: WelcomeTutorialProps)
               {/* Progress bar */}
               <div className="flex items-center gap-2 mb-4">
                 <div className="flex-1 h-1.5 bg-stone-100 rounded-full overflow-hidden">
-                  <div 
-                    className="h-full bg-gradient-to-r from-violet-500 to-purple-500 rounded-full transition-all duration-500 ease-out"
-                    style={{ width: `${progress}%` }}
-                  />
+                <div 
+                  className="h-full bg-gradient-to-r from-rose-500 to-pink-600 rounded-full transition-all duration-500 ease-out"
+                  style={{ width: `${progress}%` }}
+                />
                 </div>
                 <span className="text-xs font-medium text-stone-400">
                   {currentStep + 1}/{steps.length}
@@ -251,7 +251,7 @@ const WelcomeTutorial = ({ userName, userId, onComplete }: WelcomeTutorialProps)
 
                 <button
                   onClick={handleNext}
-                  className={`px-8 py-3 bg-gradient-to-r from-violet-600 to-purple-600 text-white rounded-full font-semibold text-sm shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all flex items-center gap-2 ${
+                  className={`px-8 py-3 bg-gradient-to-r from-rose-500 to-pink-600 text-white rounded-full font-semibold text-sm shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all flex items-center gap-2 ${
                     currentStep === steps.length - 1 ? 'px-12' : ''
                   }`}
                 >
@@ -290,9 +290,9 @@ const WelcomeTutorial = ({ userName, userId, onComplete }: WelcomeTutorialProps)
               }}
               className={`w-2 h-2 rounded-full transition-all ${
                 index === currentStep 
-                  ? 'w-6 bg-violet-500' 
+                  ? 'w-6 bg-rose-500' 
                   : index < currentStep 
-                    ? 'bg-violet-300' 
+                    ? 'bg-rose-300' 
                     : 'bg-stone-200'
               }`}
             />

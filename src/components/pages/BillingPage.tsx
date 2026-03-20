@@ -61,8 +61,8 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
       description: 'Perfect for getting started',
       icon: '🆓',
       features: [
-        '3 documents, 3 analyses, 2 study packs/mo',
-        '5k words Humanizer & Summarizer',
+        '3 documents, 2 analyses, 2 study packs/mo',
+        '5k words Paper Summarizer',
         '2 citation searches/mo',
         'Basic grammar check'
       ],
@@ -78,11 +78,11 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
       features: [
         'Unlimited documents',
         '99 combined analyses, study packs & citations/mo',
-        '99,999 words Humanizer & Summarizer',
+        '99,999 words Paper Summarizer',
         'All citation styles, PDF/Word export',
         'Focus Mode (20 sites)',
         'Quiz, flashcards, crossword & Crater Blast',
-        'Humanizer & Summarizer (all styles & lengths)'
+        'Paper Summarizer (long documents)'
       ],
       popular: true,
       stripePriceId: billingCycle === 'monthly' ? 'price_starter_monthly' : 'price_starter_yearly'
@@ -97,7 +97,7 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
       features: [
         'Everything in Pro, 10× usage',
         '999 combined analyses, study packs & citations/mo',
-        '999,999 words Humanizer & Summarizer',
+        '999,999 words Paper Summarizer',
         'Premium AI model, advanced essay analysis',
         'Priority support',
         'Focus Mode (unlimited sites)',
@@ -274,17 +274,18 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
 
   if (loading) {
     return (
-      <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%)' }}>
+      <div className="min-h-screen bg-gradient-to-b from-rose-50/60 via-stone-50 to-white dark:from-stone-950 dark:via-stone-900 dark:to-stone-900">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(251,113,133,0.12),transparent)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(236,72,153,0.08),transparent)] pointer-events-none" aria-hidden />
         <Header 
           onNavigate={onNavigate} 
           user={user} 
           onLogout={onLogout}
           currentPage="billing"
         />
-        <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="flex items-center justify-center min-h-[60vh] relative z-10">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-violet-600 mx-auto mb-4"></div>
-            <p className="text-stone-600">Loading billing information...</p>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-rose-600 mx-auto mb-4"></div>
+            <p className="text-stone-600 dark:text-stone-400">Loading billing information...</p>
           </div>
         </div>
       </div>
@@ -292,7 +293,8 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
   }
 
   return (
-    <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%)' }}>
+    <div className="min-h-screen bg-gradient-to-b from-rose-50/60 via-stone-50 to-white dark:from-stone-950 dark:via-stone-900 dark:to-stone-900">
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(251,113,133,0.12),transparent)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(236,72,153,0.08),transparent)] pointer-events-none" aria-hidden />
       <Header 
         onNavigate={onNavigate} 
         user={user} 
@@ -300,23 +302,23 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
         currentPage="billing"
       />
       
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10 sm:py-14 relative z-10">
         {/* Hero Section */}
         <div className="text-center mb-10">
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl text-stone-800 mb-4" style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 400 }}>
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl text-stone-800 dark:text-stone-100 mb-4" style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 400 }}>
             Billing & Subscription
           </h1>
-          <p className="text-lg text-stone-600 max-w-2xl mx-auto mb-6">
+          <p className="text-lg text-stone-600 dark:text-stone-400 max-w-2xl mx-auto mb-6">
             Manage your subscription and view your usage
           </p>
           
           {/* Current Plan Badge */}
-          <div className="inline-flex items-center bg-stone-50 rounded-xl px-5 py-3 border border-stone-200">
+          <div className="inline-flex items-center bg-stone-50 dark:bg-stone-800/50 rounded-xl px-5 py-3 border border-stone-200 dark:border-stone-600">
             <span className="text-sm font-medium text-stone-600 mr-2">Current Plan:</span>
             <span className={`px-3 py-1 rounded-lg text-sm font-semibold ${
               currentPlan === 'free' 
-                ? 'bg-stone-200 text-stone-800' 
-                : 'bg-violet-100 text-violet-800'
+                ? 'bg-stone-200 dark:bg-stone-700 text-stone-800 dark:text-stone-200' 
+                : 'bg-rose-100 dark:bg-rose-900/50 text-rose-800 dark:text-rose-300'
             }`}>
               {plans.find(p => p.id === currentPlan)?.name}
             </span>
@@ -325,13 +327,13 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
 
         {/* Billing Management */}
         {currentPlan !== 'free' && (
-          <div className="bg-white border border-stone-200 rounded-2xl p-6 sm:p-8 mb-8">
-            <h2 className="text-xl font-bold text-stone-800 mb-4">Billing Management</h2>
-            <p className="text-stone-600 text-sm mb-6">Manage your payment methods, view invoices, and update billing details.</p>
+          <div className="bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-600 rounded-2xl p-6 sm:p-8 mb-8">
+            <h2 className="text-xl font-bold text-stone-800 dark:text-stone-100 mb-4">Billing Management</h2>
+            <p className="text-stone-600 dark:text-stone-400 text-sm mb-6">Manage your payment methods, view invoices, and update billing details.</p>
             <button
               onClick={handleManageBilling}
               disabled={processing === 'billing'}
-              className="bg-stone-800 text-white py-3 px-6 rounded-full font-medium hover:bg-stone-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-400 hover:to-pink-500 text-white py-3 px-6 rounded-full font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {processing === 'billing' ? (
                 <div className="flex items-center justify-center">
@@ -352,13 +354,13 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
 
         {/* Billing Cycle Toggle */}
         <div className="flex items-center justify-center mb-10">
-          <div className="bg-stone-100 rounded-xl p-1.5 flex">
+          <div className="bg-stone-100 dark:bg-stone-700 rounded-xl p-1.5 flex">
             <button
               onClick={() => setBillingCycle('monthly')}
               className={`px-6 py-2.5 rounded-lg text-sm font-semibold transition-all ${
                 billingCycle === 'monthly'
-                  ? 'bg-white text-stone-900 shadow-sm'
-                  : 'text-stone-600 hover:text-stone-900'
+                  ? 'bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 shadow-sm'
+                  : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100'
               }`}
             >
               Bill Monthly
@@ -367,12 +369,12 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
               onClick={() => setBillingCycle('yearly')}
               className={`px-6 py-2.5 rounded-lg text-sm font-semibold transition-all flex items-center ${
                 billingCycle === 'yearly'
-                  ? 'bg-white text-stone-900 shadow-sm'
-                  : 'text-stone-600 hover:text-stone-900'
+                  ? 'bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 shadow-sm'
+                  : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100'
               }`}
             >
               Bill Yearly
-              <span className="ml-2 px-2 py-0.5 bg-violet-100 text-violet-700 text-xs rounded-full font-medium">
+              <span className="ml-2 px-2 py-0.5 bg-rose-100 dark:bg-rose-900/50 text-rose-700 dark:text-rose-300 text-xs rounded-full font-medium">
                 Save 17%
               </span>
             </button>
@@ -395,15 +397,15 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
           {plans.map((plan) => (
             <div
               key={plan.id}
-              className={`relative bg-white border rounded-2xl p-6 transition-all ${
+              className={`relative bg-white dark:bg-stone-800 border rounded-2xl p-6 transition-all ${
                 plan.popular 
-                  ? 'border-violet-500 ring-2 ring-violet-100' 
-                  : 'border-stone-200'
+                  ? 'border-rose-500 dark:border-rose-600 ring-2 ring-rose-100 dark:ring-rose-900/50' 
+                  : 'border-stone-200 dark:border-stone-600'
               }`}
             >
               {plan.popular && (
                 <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                  <span className="bg-gradient-to-r from-indigo-500 to-violet-600 text-white px-4 py-1 rounded-full text-xs font-semibold">
+                  <span className="bg-gradient-to-r from-rose-500 to-pink-600 text-white px-4 py-1 rounded-full text-xs font-semibold">
                     Most Popular
                   </span>
                 </div>
@@ -418,8 +420,8 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
 
               {/* Plan Name & Description */}
               <div className="text-center mb-6 pt-2">
-                <h3 className="text-xl font-bold text-stone-800 mb-1">{plan.name}</h3>
-                <p className="text-stone-500 text-sm">{plan.description}</p>
+                <h3 className="text-xl font-bold text-stone-800 dark:text-stone-100 mb-1">{plan.name}</h3>
+                <p className="text-stone-500 dark:text-stone-400 text-sm">{plan.description}</p>
               </div>
               
               {/* Price */}
@@ -442,7 +444,7 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
                     <span className="text-4xl font-bold text-stone-800">
                       ${plan.price}
                     </span>
-                    <span className="text-stone-500 text-sm">
+                    <span className="text-stone-500 dark:text-stone-400 text-sm">
                       /{plan.interval}
                     </span>
                   </>
@@ -454,10 +456,10 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
                 <ul className="space-y-3">
                   {plan.features.map((feature, index) => (
                     <li key={index} className="flex items-start text-sm">
-                      <svg className="w-5 h-5 text-violet-500 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-5 h-5 text-rose-500 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
-                      <span className="text-stone-600">{feature}</span>
+                      <span className="text-stone-600 dark:text-stone-400">{feature}</span>
                     </li>
                   ))}
                 </ul>
@@ -469,10 +471,10 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
                 disabled={plan.id === currentPlan || processing === plan.id}
                 className={`w-full py-3 px-6 rounded-full font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
                   plan.id === currentPlan
-                    ? 'bg-stone-100 text-stone-500 cursor-not-allowed'
+                    ? 'bg-stone-100 dark:bg-stone-700 text-stone-500 cursor-not-allowed'
                     : plan.popular
-                    ? 'bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white'
-                    : 'bg-stone-100 hover:bg-stone-200 text-stone-900'
+                    ? 'bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-400 hover:to-pink-500 text-white'
+                    : 'bg-stone-100 dark:bg-stone-700 hover:bg-stone-200 dark:hover:bg-stone-600 text-stone-900 dark:text-stone-100'
                 }`}
               >
                 {plan.id === currentPlan ? (
@@ -495,16 +497,16 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
         </div>
 
         {/* Usage Stats Section */}
-        <div className="bg-white border border-stone-200 rounded-2xl p-6 sm:p-8 mb-8">
-          <h2 className="text-xl font-bold text-stone-800 mb-6">Your Usage Overview</h2>
+        <div className="bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-600 rounded-2xl p-6 sm:p-8 mb-8">
+          <h2 className="text-xl font-bold text-stone-800 dark:text-stone-100 mb-6">Your Usage Overview</h2>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Storage Usage */}
-            <div className="bg-violet-50 border border-violet-100 rounded-xl p-5">
+            <div className="bg-rose-50 dark:bg-rose-900/20 border border-rose-100 dark:border-rose-800/50 rounded-xl p-5">
               <div className="flex items-center justify-between mb-3">
-                <h3 className="font-medium text-stone-800 text-sm">Storage Used</h3>
-                <div className="w-8 h-8 bg-violet-100 rounded-lg flex items-center justify-center">
-                  <svg className="w-4 h-4 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <h3 className="font-medium text-stone-800 dark:text-stone-200 text-sm">Storage Used</h3>
+                <div className="w-8 h-8 bg-rose-100 dark:bg-rose-900/50 rounded-lg flex items-center justify-center">
+                  <svg className="w-4 h-4 text-rose-600 dark:text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
                   </svg>
                 </div>
@@ -515,11 +517,11 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
               <div className="text-xs text-stone-500 mb-3">
                 of {formatBytes(usageStats.storageLimit)} used
               </div>
-              <div className="w-full bg-violet-200 rounded-full h-1.5">
+              <div className="w-full bg-rose-200 dark:bg-rose-900/50 rounded-full h-1.5">
                 <div 
                   className={`h-1.5 rounded-full transition-all ${
                     getStoragePercentage() > 90 ? 'bg-red-500' : 
-                    getStoragePercentage() > 70 ? 'bg-amber-500' : 'bg-violet-600'
+                    getStoragePercentage() > 70 ? 'bg-amber-500' : 'bg-rose-600'
                   }`}
                   style={{ width: `${getStoragePercentage()}%` }}
                 ></div>
@@ -527,11 +529,11 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
             </div>
 
             {/* Uploads Remaining */}
-            <div className="bg-violet-50 border border-violet-100 rounded-xl p-5">
+            <div className="bg-rose-50 dark:bg-rose-900/20 border border-rose-100 dark:border-rose-800/50 rounded-xl p-5">
               <div className="flex items-center justify-between mb-3">
-                <h3 className="font-medium text-stone-800 text-sm">Uploads</h3>
-                <div className="w-8 h-8 bg-violet-100 rounded-lg flex items-center justify-center">
-                  <svg className="w-4 h-4 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <h3 className="font-medium text-stone-800 dark:text-stone-200 text-sm">Uploads</h3>
+                <div className="w-8 h-8 bg-rose-100 dark:bg-rose-900/50 rounded-lg flex items-center justify-center">
+                  <svg className="w-4 h-4 text-rose-600 dark:text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                   </svg>
                 </div>
@@ -545,7 +547,7 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
             </div>
 
             {/* Combined Actions (Pro/Premium) or Analyses (Free) */}
-            <div className="bg-stone-50 border border-stone-200 rounded-xl p-5">
+            <div className="bg-stone-50 dark:bg-stone-700/50 border border-stone-200 dark:border-stone-600 rounded-xl p-5">
               <div className="flex items-center justify-between mb-3">
                 <h3 className="font-medium text-stone-800 text-sm">
                   {currentPlan === 'pro' || currentPlan === 'premium' ? 'Combined actions' : 'Analyses'}
@@ -586,33 +588,33 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
 
 
         {/* Trust Indicators */}
-        <div className="bg-stone-50 border border-stone-200 rounded-2xl p-6 sm:p-8">
+        <div className="bg-stone-50 dark:bg-stone-800/50 border border-stone-200 dark:border-stone-600 rounded-2xl p-6 sm:p-8">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
             <div className="flex items-center gap-4">
-              <div className="w-10 h-10 bg-violet-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                <svg className="w-5 h-5 text-violet-600" fill="currentColor" viewBox="0 0 20 20">
+              <div className="w-10 h-10 bg-rose-100 dark:bg-rose-900/50 rounded-xl flex items-center justify-center flex-shrink-0">
+                <svg className="w-5 h-5 text-rose-600 dark:text-rose-400" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
                 </svg>
               </div>
               <div>
-                <h3 className="font-semibold text-stone-800 text-sm">Secure Payments</h3>
-                <p className="text-xs text-stone-500">Processed through Stripe</p>
+                <h3 className="font-semibold text-stone-800 dark:text-stone-200 text-sm">Secure Payments</h3>
+                <p className="text-xs text-stone-500 dark:text-stone-400">Processed through Stripe</p>
               </div>
             </div>
             <div className="flex items-center gap-4">
-              <div className="w-10 h-10 bg-violet-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                <svg className="w-5 h-5 text-violet-600" fill="currentColor" viewBox="0 0 20 20">
+              <div className="w-10 h-10 bg-rose-100 dark:bg-rose-900/50 rounded-xl flex items-center justify-center flex-shrink-0">
+                <svg className="w-5 h-5 text-rose-600 dark:text-rose-400" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                 </svg>
               </div>
               <div>
-                <h3 className="font-semibold text-stone-800 text-sm">Cancel Anytime</h3>
-                <p className="text-xs text-stone-500">No hidden fees</p>
+                <h3 className="font-semibold text-stone-800 dark:text-stone-200 text-sm">Cancel Anytime</h3>
+                <p className="text-xs text-stone-500 dark:text-stone-400">No hidden fees</p>
               </div>
             </div>
             <div className="flex items-center gap-4">
-              <div className="w-10 h-10 bg-violet-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                <svg className="w-5 h-5 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-10 h-10 bg-rose-100 dark:bg-rose-900/50 rounded-xl flex items-center justify-center flex-shrink-0">
+                <svg className="w-5 h-5 text-rose-600 dark:text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
                 </svg>
               </div>

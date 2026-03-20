@@ -3,6 +3,13 @@ import Header from '../common/Header';
 import Footer from '../common/Footer';
 import { getPostBySlug, blogPostList } from '../../data/blogPosts';
 import BlogPostContent from './BlogPostContent';
+import {
+  SITE_ORIGIN,
+  absoluteCanonicalUrl,
+  applyPageSeoTags,
+  injectJsonLd,
+  removeJsonLd,
+} from '../../utils/seo';
 
 interface BlogPostPageProps {
   onNavigate: (page: string, slug?: string) => void;
@@ -46,18 +53,52 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ onNavigate, user, onLogout 
   }, [currentSlug, onNavigate]);
 
   useEffect(() => {
-    if (post) {
-      document.title = `${post.title} | WriteScholar`;
-      let desc = document.querySelector('meta[name="description"]');
-      const content = post.description;
-      if (desc) desc.setAttribute('content', content);
-      else {
-        desc = document.createElement('meta');
-        desc.setAttribute('name', 'description');
-        desc.setAttribute('content', content);
-        document.head.appendChild(desc);
-      }
+    if (!post) {
+      removeJsonLd('blog-post');
+      return;
     }
+
+    const canonicalPath = `/blog/${post.slug}`;
+    const canonicalUrl = absoluteCanonicalUrl(canonicalPath);
+    const title = `${post.title} | WriteScholar`;
+
+    applyPageSeoTags({
+      title,
+      description: post.description,
+      canonicalUrl,
+    });
+
+    const isoDate = `${post.date}T12:00:00.000Z`;
+    injectJsonLd('blog-post', {
+      '@context': 'https://schema.org',
+      '@type': 'BlogPosting',
+      headline: post.title,
+      description: post.description,
+      datePublished: isoDate,
+      dateModified: isoDate,
+      author: {
+        '@type': 'Organization',
+        name: post.author,
+      },
+      publisher: {
+        '@type': 'Organization',
+        name: 'WriteScholar',
+        url: SITE_ORIGIN,
+        logo: {
+          '@type': 'ImageObject',
+          url: `${SITE_ORIGIN}/og-image.png`,
+        },
+      },
+      mainEntityOfPage: {
+        '@type': 'WebPage',
+        '@id': canonicalUrl,
+      },
+      url: canonicalUrl,
+    });
+
+    return () => {
+      removeJsonLd('blog-post');
+    };
   }, [post]);
 
   // Handle navigation to a different blog post
@@ -73,11 +114,11 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ onNavigate, user, onLogout 
       return null; // useEffect will redirect to /blog
     }
     return (
-      <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%)' }}>
+      <div className="min-h-screen bg-[#faf9f7] dark:bg-stone-950">
         <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="blog" />
         <main className="max-w-4xl mx-auto px-4 py-16 text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Post not found</h1>
-          <a href="/blog" onClick={(e) => { e.preventDefault(); onNavigate('blog'); }} className="text-blue-600 hover:underline">
+          <h1 className="text-2xl font-bold text-stone-800 dark:text-stone-100 mb-4">Post not found</h1>
+          <a href="/blog" onClick={(e) => { e.preventDefault(); onNavigate('blog'); }} className="text-violet-600 dark:text-violet-400 hover:underline font-medium">
             ← Back to blog
           </a>
         </main>
@@ -91,7 +132,9 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ onNavigate, user, onLogout 
   const nextPost = currentIndex >= 0 && currentIndex < blogPostList.length - 1 ? blogPostList[currentIndex + 1] : null;
 
   return (
-    <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%)' }}>
+    <div className="min-h-screen bg-[#faf9f7] dark:bg-stone-950">
+      <div className="fixed inset-0 -z-10 bg-[radial-gradient(ellipse_120%_80%_at_20%_-10%,rgba(251,207,232,0.2),transparent_50%)] dark:bg-[radial-gradient(ellipse_120%_80%_at_20%_-10%,rgba(251,207,232,0.06),transparent_50%)] pointer-events-none" aria-hidden />
+      <div className="fixed inset-0 -z-10 bg-[radial-gradient(ellipse_100%_60%_at_80%_0%,rgba(196,181,253,0.2),transparent_50%)] dark:bg-[radial-gradient(ellipse_100%_60%_at_80%_0%,rgba(196,181,253,0.06),transparent_50%)] pointer-events-none" aria-hidden />
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="blog" />
 
       <main className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12 md:py-16">
@@ -99,38 +142,35 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ onNavigate, user, onLogout 
           <a
             href="/blog"
             onClick={(e) => { e.preventDefault(); onNavigate('blog'); }}
-            className="text-gray-500 hover:text-gray-700 text-sm font-medium"
+            className="text-stone-500 dark:text-stone-400 hover:text-violet-600 dark:hover:text-violet-400 text-sm font-medium transition-colors inline-flex items-center gap-1"
           >
             ← Blog
           </a>
         </nav>
 
-        <article>
+        <article className="bg-white dark:bg-stone-800/60 border border-stone-200 dark:border-stone-700 rounded-2xl p-6 sm:p-8 md:p-10 shadow-sm">
           <header className="mb-8">
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-xl">🧊</span>
-              <time dateTime={post.date} className="text-sm text-gray-500 font-medium">
-                {new Date(post.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
-              </time>
-            </div>
-            <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mt-2 mb-4">
+            <time dateTime={post.date} className="text-sm text-stone-500 dark:text-stone-400 font-medium">
+              {new Date(post.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+            </time>
+            <h1 className="text-3xl sm:text-4xl font-extrabold text-stone-800 dark:text-stone-100 mt-2 mb-4 leading-tight">
               {post.title}
             </h1>
-            <p className="text-lg text-gray-600">
+            <p className="text-stone-600 dark:text-stone-400">
               {post.author} · {post.readTime}
             </p>
           </header>
 
-          <div className="prose prose-lg max-w-none text-gray-700">
+          <div className="prose prose-lg max-w-none prose-stone dark:prose-invert prose-headings:text-stone-800 dark:prose-headings:text-stone-100 prose-a:text-violet-600 dark:prose-a:text-violet-400 prose-a:no-underline hover:prose-a:underline">
             <BlogPostContent slug={post.slug} onNavigate={onNavigate} />
           </div>
         </article>
 
-        <nav className="mt-12 pt-8 border-t border-gray-200 flex flex-col sm:flex-row justify-between gap-4" aria-label="Previous and next posts">
+        <nav className="mt-12 pt-8 border-t border-stone-200 dark:border-stone-700 flex flex-col sm:flex-row justify-between gap-4" aria-label="Previous and next posts">
           {prevPost ? (
             <button
               onClick={() => handleNavigateToPost(prevPost.slug)}
-              className="text-blue-600 hover:underline font-medium text-left"
+              className="text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 font-medium text-left transition-colors"
             >
               ← {prevPost.title}
             </button>
@@ -138,7 +178,7 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ onNavigate, user, onLogout 
           {nextPost ? (
             <button
               onClick={() => handleNavigateToPost(nextPost.slug)}
-              className="text-blue-600 hover:underline font-medium sm:text-right"
+              className="text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 font-medium sm:text-right transition-colors"
             >
               {nextPost.title} →
             </button>
@@ -149,7 +189,7 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ onNavigate, user, onLogout 
           <a
             href="/blog"
             onClick={(e) => { e.preventDefault(); onNavigate('blog'); }}
-            className="inline-flex items-center px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors"
+            className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-rose-500 to-pink-600 text-white font-semibold rounded-xl hover:from-indigo-400 hover:to-violet-500 transition-all shadow-lg shadow-rose-500/20"
           >
             All posts
           </a>

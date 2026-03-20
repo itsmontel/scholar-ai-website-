@@ -169,9 +169,9 @@ const PomodoroTimerPage = ({ onNavigate, user, onLogout }: PomodoroTimerPageProp
       case 'focus':
         return { bg: 'from-red-500 to-rose-600', light: 'bg-red-100', text: 'text-red-600', ring: 'ring-red-500' };
       case 'shortBreak':
-        return { bg: 'from-emerald-500 to-teal-600', light: 'bg-emerald-100', text: 'text-emerald-600', ring: 'ring-emerald-500' };
+        return { bg: 'from-rose-500 to-teal-600', light: 'bg-rose-100', text: 'text-rose-600', ring: 'ring-rose-500' };
       case 'longBreak':
-        return { bg: 'from-blue-500 to-indigo-600', light: 'bg-blue-100', text: 'text-blue-600', ring: 'ring-blue-500' };
+        return { bg: 'from-rose-500 to-indigo-600', light: 'bg-rose-100', text: 'text-rose-600', ring: 'ring-rose-500' };
     }
   };
 
@@ -224,7 +224,7 @@ const PomodoroTimerPage = ({ onNavigate, user, onLogout }: PomodoroTimerPageProp
                     onClick={() => switchMode('shortBreak')}
                     className={`px-5 py-2.5 rounded-xl font-medium transition-all ${
                       mode === 'shortBreak' 
-                        ? 'bg-emerald-500 text-white' 
+                        ? 'bg-rose-500 text-white' 
                         : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                     }`}
                   >
@@ -234,7 +234,7 @@ const PomodoroTimerPage = ({ onNavigate, user, onLogout }: PomodoroTimerPageProp
                     onClick={() => switchMode('longBreak')}
                     className={`px-5 py-2.5 rounded-xl font-medium transition-all ${
                       mode === 'longBreak' 
-                        ? 'bg-blue-500 text-white' 
+                        ? 'bg-rose-500 text-white' 
                         : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                     }`}
                   >
@@ -401,7 +401,7 @@ const PomodoroTimerPage = ({ onNavigate, user, onLogout }: PomodoroTimerPageProp
                         setShortBreakDuration(val);
                         if (mode === 'shortBreak' && !isRunning) setTimeLeft(val * 60);
                       }}
-                      className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                      className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500"
                       disabled={isRunning}
                     >
                       {[3, 5, 10, 15].map(n => (
@@ -418,7 +418,7 @@ const PomodoroTimerPage = ({ onNavigate, user, onLogout }: PomodoroTimerPageProp
                         setLongBreakDuration(val);
                         if (mode === 'longBreak' && !isRunning) setTimeLeft(val * 60);
                       }}
-                      className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500"
                       disabled={isRunning}
                     >
                       {[10, 15, 20, 25, 30].map(n => (
@@ -438,11 +438,11 @@ const PomodoroTimerPage = ({ onNavigate, user, onLogout }: PomodoroTimerPageProp
                     <span>Focus for 25 minutes</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="flex-shrink-0 w-5 h-5 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-xs font-bold">2</span>
+                    <span className="flex-shrink-0 w-5 h-5 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center text-xs font-bold">2</span>
                     <span>Take a 5-minute break</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="flex-shrink-0 w-5 h-5 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs font-bold">3</span>
+                    <span className="flex-shrink-0 w-5 h-5 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center text-xs font-bold">3</span>
                     <span>After 4 sessions, take a longer break</span>
                   </li>
                 </ol>
@@ -467,8 +467,8 @@ const PomodoroTimerPage = ({ onNavigate, user, onLogout }: PomodoroTimerPageProp
               <p className="text-gray-600 text-sm">Short, timed sessions help you maintain intense focus without mental fatigue.</p>
             </div>
             <div className="bg-white border border-gray-200 rounded-2xl p-6">
-              <div className="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center mb-4">
-                <svg className="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-12 h-12 bg-rose-50 rounded-xl flex items-center justify-center mb-4">
+                <svg className="w-6 h-6 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
@@ -476,8 +476,8 @@ const PomodoroTimerPage = ({ onNavigate, user, onLogout }: PomodoroTimerPageProp
               <p className="text-gray-600 text-sm">Starting a 25-minute timer is easier than facing hours of work. Just begin.</p>
             </div>
             <div className="bg-white border border-gray-200 rounded-2xl p-6">
-              <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center mb-4">
-                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-12 h-12 bg-rose-50 rounded-xl flex items-center justify-center mb-4">
+                <svg className="w-6 h-6 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>

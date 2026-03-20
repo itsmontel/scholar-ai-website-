@@ -169,7 +169,7 @@ router.post('/humanize', authenticateToken, async (req, res) => {
       if (!combinedCheck.allowed) {
         return res.status(429).json({
           success: false,
-          message: `You've used all ${combinedCheck.limit.toLocaleString()} combined Humanizer & Summarizer words this period. Limit resets when your billing renews.`,
+          message: `You've used all ${combinedCheck.limit.toLocaleString()} Paper Summarizer words this period. Limit resets when your billing renews.`,
           wordsUsed: combinedCheck.usage,
           wordLimit: combinedCheck.limit,
           wordsRemaining: combinedCheck.remaining,
@@ -323,7 +323,7 @@ router.post('/summarize', authenticateToken, async (req, res) => {
       });
     }
 
-    // Check word usage (Pro/Premium: combined humanizer+summarizer pool)
+    // Check word usage (Pro/Premium: Paper Summarizer pool)
     const { createClient } = require('@supabase/supabase-js');
     const supabase = createClient(
       process.env.SUPABASE_URL,
@@ -336,7 +336,7 @@ router.post('/summarize', authenticateToken, async (req, res) => {
       if (!combinedCheck.allowed) {
         return res.status(429).json({
           success: false,
-          message: `You've used all ${combinedCheck.limit.toLocaleString()} combined Humanizer & Summarizer words this period. Limit resets when your billing renews.`,
+          message: `You've used all ${combinedCheck.limit.toLocaleString()} Paper Summarizer words this period. Limit resets when your billing renews.`,
           wordsUsed: combinedCheck.usage,
           wordLimit: combinedCheck.limit,
           wordsRemaining: combinedCheck.remaining,
@@ -811,7 +811,7 @@ router.get('/quiz-usage', authenticateToken, async (req, res) => {
 
 // @route   POST /api/analysis/generate-quiz
 // @desc    Generate quiz questions from text
-// @access  Private (all users - free users limited to 3 generations/month with restrictions)
+// @access  Private (all users - free users limited to plan quiz generations/month with restrictions)
 router.post('/generate-quiz', authenticateToken, async (req, res) => {
   try {
     const { text, quizType, difficulty, questionCount } = req.body;
@@ -1365,7 +1365,7 @@ router.post('/citation-review', authenticateToken, validateCitationReview, async
 // @access  Private
 router.post('/simple-analyze', authenticateToken, async (req, res) => {
   try {
-    const { documentId, content, analysisType, citationStyle, educationLevel } = req.body;
+    const { documentId, content, analysisType, citationStyle, gradingStyle = 'us' } = req.body;
     const userId = req.user.id;
 
     console.log('=== SIMPLE ANALYSIS REQUEST ===');
@@ -1412,7 +1412,7 @@ router.post('/simple-analyze', authenticateToken, async (req, res) => {
         analysisType,
         userId,
         citationStyle,
-        educationLevel || 'college'
+        gradingStyle
       );
 
       console.log('✅ AI analysis completed');
@@ -1452,7 +1452,7 @@ router.post('/simple-analyze', authenticateToken, async (req, res) => {
  */
 router.post('/analyze', authenticateToken, validateCreateAnalysis, async (req, res) => {
   try {
-    const { documentId, content, analysisType, citationStyle, educationLevel, rubricContent } = req.body;
+    const { documentId, content, analysisType, citationStyle, gradingStyle = 'us', rubricContent } = req.body;
     const userId = req.user.id;
 
     if (rubricContent) {
@@ -1547,8 +1547,8 @@ router.post('/analyze', authenticateToken, validateCreateAnalysis, async (req, r
           return res.status(403).json({
             success: false,
             message: useCombined
-              ? `Combined action limit exceeded for this period. You have used ${analysisCheck.usage}/${analysisCheck.limit} (analyses, study packs & citations).`
-              : `Analysis limit exceeded for this period. You have used ${analysisCheck.usage}/${analysisCheck.limit} analyses.`,
+              ? `Combined action limit exceeded for this period. You have used ${analysisCheck.usage}/${analysisCheck.limit} (analyses, study packs & citations). Limit resets when your billing renews.`
+              : `You've exceeded your monthly analysis limit. You have used ${analysisCheck.usage} of ${analysisCheck.limit} analyses this period. Upgrade for more.`,
             usage: {
               limit: analysisCheck.limit,
               used: analysisCheck.usage,
@@ -1562,13 +1562,8 @@ router.post('/analyze', authenticateToken, validateCreateAnalysis, async (req, r
       }
     }
 
-    // Store original content for full analysis, but note the limitation for display
+    // Store original content for full analysis
     const originalContent = analysisContent;
-    const isContentLimited = planLimits.maxAnalysisPercentage < 100;
-    
-    if (isContentLimited) {
-      console.log(`Content will be analyzed in full but display limited to ${planLimits.maxAnalysisPercentage}% for ${planLimits.name} user`);
-    }
 
     // Perform AI analysis
     const analysisResult = await aiAnalysisService.analyzeDocument(
@@ -1577,7 +1572,7 @@ router.post('/analyze', authenticateToken, validateCreateAnalysis, async (req, r
       analysisType,
       userId,
       citationStyle,
-      educationLevel || 'college'
+      gradingStyle
     );
 
     // Run rubric alignment analysis first if rubric content was provided (so we can save it)
@@ -1588,8 +1583,7 @@ router.post('/analyze', authenticateToken, validateCreateAnalysis, async (req, r
         rubricAlignment = await aiAnalysisService.analyzeRubricAlignment(
           analysisContent,
           rubricContent,
-          userId,
-          educationLevel || 'college'
+          userId
         );
         console.log('Rubric alignment analysis completed successfully');
       } catch (rubricError) {
@@ -1605,6 +1599,15 @@ router.post('/analyze', authenticateToken, validateCreateAnalysis, async (req, r
       console.log('analysisType:', analysisType);
       console.log('rubricAlignment:', rubricAlignment ? 'included' : 'none');
       
+      const structuredData = (analysisType === 'comprehensive' || analysisType === 'general') ? {
+        overall_score: analysisResult.overall_score ?? null,
+        grade_estimate: analysisResult.grade_estimate ?? null,
+        clarity_rating: analysisResult.clarity_rating ?? null,
+        top_suggestions: analysisResult.top_suggestions ?? null,
+        grade_rubric: analysisResult.grade_rubric ?? null,
+        specific_rewrites: analysisResult.specific_rewrites ?? null
+      } : null;
+
       const savedAnalysis = await aiAnalysisService.saveAnalysis(
         analysisDocumentId,
         userId,
@@ -1613,7 +1616,8 @@ router.post('/analyze', authenticateToken, validateCreateAnalysis, async (req, r
         originalContent, // Save the full content, not the limited one
         analysisResult.annotations,
         citationStyle,
-        rubricAlignment
+        rubricAlignment,
+        structuredData
       );
       
       console.log('Analysis automatically saved to database:', savedAnalysis.id);
@@ -1625,13 +1629,20 @@ router.post('/analyze', authenticateToken, validateCreateAnalysis, async (req, r
       // Don't fail the request if save fails, just log it
     }
 
+    const isPaidUser = userPlan === 'pro' || userPlan === 'premium';
+
     res.json({
       success: true,
       message: 'Analysis completed successfully',
       data: {
         ...analysisResult,
-        isContentLimited: isContentLimited,
-        maxAnalysisPercentage: planLimits.maxAnalysisPercentage,
+        grade_rubric: isPaidUser ? analysisResult.grade_rubric : null,
+        specific_rewrites: isPaidUser ? analysisResult.specific_rewrites : null,
+        annotations: analysisResult.annotations || [],
+        isContentLimited: false,
+        lockedFeatures: !isPaidUser
+          ? ['full_annotations', 'grade_rubric', 'specific_rewrites', 'export', 'history']
+          : [],
         rubricAlignment: rubricAlignment
       }
     });

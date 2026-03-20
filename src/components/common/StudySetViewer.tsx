@@ -83,16 +83,14 @@ const StudySetViewer = ({ data, title, onClose, onNavigate, userPlan }: StudySet
         onNavigate('crossword-generator');
         break;
       case 'lesson':
-        localStorage.setItem('savedLesson', JSON.stringify({
-          title: d.title || title || 'Lesson',
-          questions: {
-            visual: d,
-            stepByStep: d,
-            story: d,
-          },
-          quiz_type: 'lesson',
-        }));
-        onNavigate('interactive-lesson');
+        try {
+          const packTitle = title || data.quiz?.title || data.flashcards?.title || data.lesson?.title || 'Study Pack';
+          sessionStorage.setItem('writescholar_study_pack_viewer', JSON.stringify({ data, title: packTitle }));
+          sessionStorage.setItem('writescholar_study_pack_return_tab', 'lesson');
+          onNavigate('study-pack-viewer');
+        } catch (_) {
+          onNavigate('study-pack-viewer');
+        }
         break;
       case 'craterBlast':
         localStorage.setItem('savedCraterBlast', JSON.stringify({

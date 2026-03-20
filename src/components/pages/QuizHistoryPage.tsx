@@ -315,8 +315,15 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
       localStorage.setItem('savedCraterBlast', JSON.stringify(tool));
       onNavigate('crater-blast');
     } else if (tool.quiz_type === 'lesson') {
-      localStorage.setItem('savedLesson', JSON.stringify(tool));
-      onNavigate('interactive-lesson');
+      try {
+        const packData = { lesson: { slides: tool.questions || [], title: tool.title || 'Lesson', style: tool.difficulty || 'visual' } };
+        const packTitle = tool.title || 'Lesson';
+        sessionStorage.setItem('writescholar_study_pack_viewer', JSON.stringify({ data: packData, title: packTitle }));
+        sessionStorage.setItem('writescholar_study_pack_return_tab', 'lesson');
+        onNavigate('study-pack-viewer');
+      } catch (_) {
+        onNavigate('study-pack-viewer');
+      }
     } else {
       localStorage.setItem('savedQuiz', JSON.stringify(tool));
       onNavigate('quiz-generator');
@@ -328,7 +335,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
     { id: 'flashcards', label: 'Flashcards', icon: '🃏', page: 'create-flashcards' as const },
     { id: 'crossword', label: 'Crosswords', icon: '🧩', page: 'dashboard' as const },
     { id: 'blast', label: 'Blast', icon: '💥', page: 'crater-blast' as const },
-    { id: 'lessons', label: 'Lessons', icon: '🎓', page: 'interactive-lesson' as const },
+    { id: 'lessons', label: 'Lessons', icon: '🎓', page: 'dashboard' as const },
   ];
 
   const handleDeleteClick = (quizId: string) => {
@@ -1197,7 +1204,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
         <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
           <div className="flex items-center justify-center min-h-64">
             <div className="text-center">
-              <div className="animate-spin w-10 h-10 border-2 border-stone-300 border-t-violet-500 rounded-full mx-auto mb-4"></div>
+              <div className="animate-spin w-10 h-10 border-2 border-stone-300 border-t-rose-500 rounded-full mx-auto mb-4"></div>
               <p className="text-sm text-stone-500">Loading study tools...</p>
             </div>
           </div>
@@ -1221,7 +1228,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
             <p className="text-sm text-stone-500 mb-6">{error}</p>
             <button
               onClick={fetchStudyToolHistory}
-              className="px-5 py-2.5 rounded-xl font-medium text-white bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-sm transition-all"
+              className="px-5 py-2.5 rounded-xl font-medium text-white bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-400 hover:to-pink-500 text-sm transition-all"
             >
               Try Again
             </button>
@@ -1273,7 +1280,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-6 mb-10">
           <div>
             <div className="flex items-center gap-3 mb-2">
-              <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl bg-gradient-to-br from-violet-500 to-purple-600 shadow-lg shadow-violet-500/30">
+              <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl bg-gradient-to-br from-rose-500 to-pink-600 shadow-lg shadow-rose-500/30">
                 🧠
               </div>
               <div>
@@ -1313,7 +1320,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
           <div className="relative w-full sm:w-auto sm:shrink-0" onClick={(e) => e.stopPropagation()}>
             <button
               onClick={() => setCreateDropdownOpen(!createDropdownOpen)}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold text-white bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 transition-all duration-200 hover:shadow-lg hover:shadow-violet-500/25 hover:-translate-y-0.5"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold text-white bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-400 hover:to-pink-500 transition-all duration-200 hover:shadow-lg hover:shadow-rose-500/25 hover:-translate-y-0.5"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -1485,7 +1492,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
             <div className="relative inline-block" onClick={(e) => e.stopPropagation()}>
               <button
                 onClick={() => setCreateDropdownOpen(!createDropdownOpen)}
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-white bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 transition-all hover:shadow-lg hover:shadow-violet-500/25"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-white bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-400 hover:to-pink-500 transition-all hover:shadow-lg hover:shadow-rose-500/25"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -1526,7 +1533,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                       iconText: 'text-violet-600',
                       badge: 'bg-violet-100 text-violet-700',
                       preview: 'bg-violet-50 text-violet-700',
-                      button: 'from-violet-500 to-purple-500 shadow-violet-500/25',
+                      button: 'from-violet-500 to-purple-500 shadow-rose-500/25',
                     };
                   case 'flashcards':
                     return {
@@ -1562,7 +1569,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                       iconText: 'text-violet-600',
                       badge: 'bg-violet-100 text-violet-700',
                       preview: 'bg-violet-50 text-violet-700',
-                      button: 'from-violet-500 to-purple-500 shadow-violet-500/25',
+                      button: 'from-violet-500 to-purple-500 shadow-rose-500/25',
                     };
                   default:
                     return {
@@ -1602,13 +1609,13 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                                     if (e.key === 'Enter') saveRename(tool.id);
                                     if (e.key === 'Escape') cancelRename();
                                   }}
-                                  className="flex-1 min-w-0 px-3 py-1.5 rounded-lg border border-violet-300 dark:border-violet-600 bg-white dark:bg-stone-700 text-stone-900 dark:text-stone-100 text-base font-semibold focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-transparent"
+                                  className="flex-1 min-w-0 px-3 py-1.5 rounded-lg border border-violet-300 dark:border-violet-600 bg-white dark:bg-stone-700 text-stone-900 dark:text-stone-100 text-base font-semibold focus:outline-none focus:ring-2 focus:ring-rose-500/40 focus:border-rose-500"
                                   maxLength={200}
                                 />
                                 <button
                                   onClick={() => saveRename(tool.id)}
                                   disabled={isRenaming || !renameValue.trim()}
-                                  className="p-1.5 rounded-lg bg-violet-600 text-white hover:bg-violet-500 disabled:opacity-50 transition-colors"
+                                  className="p-1.5 rounded-lg bg-rose-600 text-white hover:bg-rose-500 disabled:opacity-50 transition-colors"
                                   title="Save"
                                 >
                                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
@@ -1981,7 +1988,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
               </button>
               <button
                 onClick={() => { setShowUpgradeModal(false); onNavigate('pricing'); }}
-                className="flex-1 px-4 py-2.5 text-white bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 rounded-xl font-medium text-sm transition-all"
+                className="flex-1 px-4 py-2.5 text-white bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-400 hover:to-pink-500 rounded-xl font-medium text-sm transition-all"
               >
                 View Plans
               </button>
@@ -2098,7 +2105,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                         value={shareMessage}
                         onChange={(e) => setShareMessage(e.target.value)}
                         placeholder="e.g. Check out these flashcards!"
-                        className="w-full px-4 py-3 border border-stone-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
+                        className="w-full px-4 py-3 border border-stone-200 rounded-xl focus:ring-2 focus:ring-rose-500/40 focus:border-rose-500 focus:outline-none text-sm"
                         maxLength={200}
                       />
                     </div>

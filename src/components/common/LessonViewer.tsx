@@ -13,7 +13,7 @@ interface LessonSlide {
 interface LessonViewerProps {
   slides: LessonSlide[];
   title?: string;
-  /** When provided, shows an enlarge button to open in full InteractiveLessonPage */
+  /** When provided, shows an enlarge button to open in full-screen view (e.g. study pack viewer) */
   onEnlarge?: (state?: { slideIndex?: number }) => void;
   /** Restore position when returning from full screen */
   initialSlideIndex?: number;
@@ -37,7 +37,7 @@ const getSlideIcon = (type?: LessonSlide['type']) => {
 
 const getSlideColor = (type?: LessonSlide['type']) => {
   switch (type) {
-    case 'intro': return 'from-violet-500 to-purple-600';
+    case 'intro': return 'from-rose-500 to-pink-600';
     case 'concept': return 'from-blue-500 to-cyan-600';
     case 'example': return 'from-amber-500 to-orange-600';
     case 'keypoint': return 'from-emerald-500 to-teal-600';
@@ -107,7 +107,7 @@ const LessonViewer = ({ slides, title, onEnlarge, initialSlideIndex, hasQuiz, on
       <div className="mb-4">
         <div className="h-2 bg-stone-200 dark:bg-stone-700 rounded-full overflow-hidden">
           <div
-            className="h-full bg-gradient-to-r from-violet-500 to-purple-600 rounded-full transition-all duration-300"
+            className="h-full bg-gradient-to-r from-rose-500 to-pink-600 rounded-full transition-all duration-300"
             style={{ width: `${((currentSlide + 1) / slides.length) * 100}%` }}
           />
         </div>
@@ -178,7 +178,7 @@ const LessonViewer = ({ slides, title, onEnlarge, initialSlideIndex, hasQuiz, on
                 >
                   <div className="flex items-start gap-2">
                     <div className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 text-xs ${
-                      isRevealed ? 'bg-violet-500 text-white' : 'bg-stone-300 dark:bg-stone-600 text-stone-600 dark:text-stone-300'
+                      isRevealed ? 'bg-rose-500 text-white' : 'bg-stone-300 dark:bg-stone-600 text-stone-600 dark:text-stone-300'
                     }`}>
                       {isRevealed ? '✓' : idx + 1}
                     </div>

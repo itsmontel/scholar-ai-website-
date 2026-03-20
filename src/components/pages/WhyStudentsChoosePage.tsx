@@ -19,7 +19,7 @@ const WhyStudentsChoosePage: React.FC<WhyStudentsChoosePageProps> = ({ onNavigat
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center max-w-3xl mx-auto">
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-stone-800 dark:text-stone-100 mb-4 leading-tight">
-              Why Students Choose <span className="bg-gradient-to-r from-indigo-500 to-violet-600 bg-clip-text text-transparent">WriteScholar</span>
+              Why Students Choose <span className="bg-gradient-to-r from-rose-500 to-pink-600 bg-clip-text text-transparent">WriteScholar</span>
             </h1>
             <p className="text-lg text-stone-500 dark:text-stone-400">
               See how WriteScholar compares to other popular writing tools
@@ -141,7 +141,7 @@ const WhyStudentsChoosePage: React.FC<WhyStudentsChoosePageProps> = ({ onNavigat
           <p className="text-stone-500 dark:text-stone-400 mb-6">Join thousands of students improving their academic writing.</p>
           <button
             onClick={() => onNavigate('signup')}
-            className="px-8 py-4 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white font-bold rounded-2xl transition-all text-lg shadow-lg shadow-indigo-500/25 hover:shadow-xl"
+            className="px-8 py-4 bg-gradient-to-r from-rose-500 to-pink-600 hover:from-indigo-400 hover:to-violet-500 text-white font-bold rounded-2xl transition-all text-lg shadow-lg shadow-rose-500/25 hover:shadow-xl"
           >
             Try Free
           </button>

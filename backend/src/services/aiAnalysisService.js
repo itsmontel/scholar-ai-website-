@@ -11,6 +11,31 @@ function getExpiresAt30Days() {
   return expiresAt.toISOString();
 }
 
+/** Generic phrases that must never appear in annotation suggestions. Replace with concrete example. */
+const FORBIDDEN_SUGGESTION_PHRASES = [
+  /add a concrete example,?\s*clarify the connection to your argument,?\s*or develop the idea further with specifics/i,
+  /add a specific example or develop the idea further with concrete detail/i,
+  /add a concrete example or specific detail to illustrate your point,?\s*or develop the idea further/i,
+  /add one concrete example or specific detail to illustrate your point/i,
+];
+
+/**
+ * Sanitize suggestion: replace forbidden generic phrases with a concrete template.
+ * Ensures AI analysis never returns "add concrete example" / "develop the idea further" style advice.
+ */
+function sanitizeSuggestion(suggestion, type) {
+  if (!suggestion || typeof suggestion !== 'string') return suggestion;
+  const trimmed = suggestion.trim();
+  for (const pattern of FORBIDDEN_SUGGESTION_PHRASES) {
+    if (pattern.test(trimmed)) {
+      return type === 'improve'
+        ? 'Revise with a concrete example: e.g. "This demonstrates that [X], which matters because [Y]" or add a specific phrase from your argument.'
+        : 'Revise with a concrete rewrite: e.g. "The evidence suggests…" or provide a specific before/after revision.';
+    }
+  }
+  return suggestion;
+}
+
 class AIAnalysisService {
   constructor() {
     this.openai = new OpenAI({
@@ -153,7 +178,7 @@ class AIAnalysisService {
     }
   }
 
-  async analyzeDocument(documentId, content, analysisType, userId, citationStyle = 'None', educationLevel = 'college') {
+  async analyzeDocument(documentId, content, analysisType, userId, citationStyle = 'None', gradingStyle = 'us') {
     try {
       // Handle citation review as a special case (temporary, not saved)
       if (analysisType === 'citation_review') {
@@ -192,7 +217,7 @@ class AIAnalysisService {
         console.log('Could not fetch plan, using defaults');
       }
 
-      const analysisPrompt = this.getAnalysisPrompt(analysisType, content, citationStyle, userPlan, educationLevel);
+      const analysisPrompt = this.getAnalysisPrompt(analysisType, content, citationStyle, userPlan, gradingStyle);
 
       let completion;
       try {
@@ -201,7 +226,7 @@ class AIAnalysisService {
         messages: [
           {
               role: 'system',
-              content: this.getSystemPrompt(analysisType, educationLevel)
+              content: this.getSystemPrompt(analysisType)
           },
           {
               role: 'user',
@@ -221,7 +246,7 @@ class AIAnalysisService {
             messages: [
               {
                 role: 'system',
-                content: this.getSystemPrompt(analysisType, educationLevel)
+                content: this.getSystemPrompt(analysisType)
               },
               {
                 role: 'user',
@@ -238,8 +263,8 @@ class AIAnalysisService {
 
       const analysisResult = completion.choices[0].message.content;
       
-      // Parse structured analysis and extract annotations, passing user plan for scaling
-      const structuredAnalysis = this.parseStructuredAnalysis(analysisResult, content, userPlan);
+      // Parse structured analysis and extract annotations
+      const structuredAnalysis = this.parseStructuredAnalysis(analysisResult, content, userPlan, gradingStyle);
       
       // Save analysis to database (temporarily disabled for demo)
       // await this.saveAnalysis(documentId, userId, analysisType, analysisResult, content);
@@ -251,7 +276,13 @@ class AIAnalysisService {
         annotations: structuredAnalysis.annotations,
         documentId,
         timestamp: new Date().toISOString(),
-        model: selectedModel
+        model: selectedModel,
+        overall_score: structuredAnalysis.overall_score,
+        grade_estimate: structuredAnalysis.grade_estimate,
+        clarity_rating: structuredAnalysis.clarity_rating,
+        top_suggestions: structuredAnalysis.top_suggestions,
+        grade_rubric: structuredAnalysis.grade_rubric,
+        specific_rewrites: structuredAnalysis.specific_rewrites
       };
     } catch (error) {
       console.error('AI Analysis Error:', error);
@@ -263,7 +294,7 @@ class AIAnalysisService {
    * Analyze an essay against a rubric or set of requirements
    * Runs as a separate analysis pass after the standard essay analysis
    */
-  async analyzeRubricAlignment(essayContent, rubricContent, userId, educationLevel = 'college') {
+  async analyzeRubricAlignment(essayContent, rubricContent, userId) {
     try {
       if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY === 'your_openai_api_key_here') {
         console.log('🤖 Using mock rubric analysis (OpenAI API key not configured)');
@@ -286,13 +317,7 @@ class AIAnalysisService {
         console.log('Could not fetch plan for rubric analysis, using defaults');
       }
 
-      const educationGuidance = educationLevel === 'sixth_form'
-        ? 'The student is in sixth form / high school (ages 16-18). Use clear, encouraging language and age-appropriate expectations.'
-        : educationLevel === 'middle_school'
-        ? 'The student is in middle school (ages 11-15). Be very encouraging, use simple language, and focus on foundational skills.'
-        : 'The student is at college/university level. Use rigorous academic standards.';
-
-      const systemPrompt = `You are an expert academic assessor who evaluates essays against rubrics and assignment requirements. You provide clear, actionable feedback that helps students understand exactly where their essay meets, partially meets, or falls short of each rubric criterion. ${educationGuidance}`;
+      const systemPrompt = `You are an expert academic assessor who evaluates essays against rubrics and assignment requirements. You provide clear, actionable feedback that helps students understand exactly where their essay meets, partially meets, or falls short of each rubric criterion. The student is at college/university level. Use rigorous academic standards.`;
 
       const userPrompt = `Below is a student's essay and the rubric/requirements it should be evaluated against.
 
@@ -629,7 +654,7 @@ ${citationStyle === 'None'
   /**
    * Get system prompt based on analysis type
    */
-  getSystemPrompt(analysisType, educationLevel = 'college') {
+  getSystemPrompt(analysisType) {
     const prompts = {
       general: `You are an expert academic writing assistant. Analyze the provided document and give comprehensive feedback on:
       - Overall structure and organization
@@ -638,7 +663,9 @@ ${citationStyle === 'None'
       - Strengths and areas for improvement
       - Specific recommendations for enhancement
 
-      Provide actionable, constructive feedback in a professional tone.`,
+      Provide actionable, constructive feedback in a professional tone.
+
+      CRITICAL: For improvement and concern suggestions, NEVER use generic phrases like "Add a concrete example, clarify the connection to your argument, or develop the idea further with specifics" or "Add a specific example or develop the idea further with concrete detail". Always provide a concrete revision, rewrite, or specific phrase.`,
       
       citation: `You are a citation and referencing expert. Analyze the provided document for:
       - Proper citation format and style
@@ -676,7 +703,9 @@ ${citationStyle === 'None'
       - Originality and integrity
       - Overall assessment and recommendations
 
-      Give detailed feedback across all aspects of academic writing.`,
+      Give detailed feedback across all aspects of academic writing.
+
+      CRITICAL: For "improve" and "concern" suggestions, NEVER use generic phrases like "Add a concrete example, clarify the connection to your argument, or develop the idea further with specifics" or "Add a specific example or develop the idea further with concrete detail". Always provide a concrete revision, rewrite, or specific phrase (e.g. "Revise to: '...'" or "Add: 'For instance, ...'").`,
       
       citation_review: `You are an expert academic citation and referencing specialist with deep knowledge of all major citation styles (APA, MLA, Chicago, Harvard, etc.).
 
@@ -699,26 +728,6 @@ Focus ONLY on citations, references, and bibliography. Do not comment on writing
     };
 
     let basePrompt = prompts[analysisType] || prompts.general;
-
-    if (educationLevel === 'sixth_form') {
-      basePrompt += `\n\nIMPORTANT AUDIENCE CONTEXT: The writer is a high school / sixth form student (ages 16–18). Adjust your analysis accordingly:
-- Use a supportive but honest tone — you can be direct, but frame criticism constructively.
-- Expectations should match A-Level / IB / AP standard, not university-level research.
-- Don't expect PhD-level argumentation or extensive primary research. Focus on clarity of argument, logical structure, use of evidence, and solid essay technique.
-- Use language the student will understand — avoid overly technical academic jargon.
-- Praise genuine effort and good instincts. When something needs work, explain *why* it matters and *how* to improve it.
-- Commentary should feel like guidance from a knowledgeable, encouraging teacher.`;
-    } else if (educationLevel === 'middle_school') {
-      basePrompt += `\n\nIMPORTANT AUDIENCE CONTEXT: The writer is a middle school student (ages 11–15). Adjust your analysis significantly:
-- Use a warm, friendly, and encouraging tone throughout. Think of yourself as a supportive mentor.
-- Keep your language simple and easy to understand — no advanced academic terminology.
-- Expectations should be age-appropriate: focus on basic essay structure (introduction, body, conclusion), clear sentences, staying on topic, and showing their own thinking.
-- Do NOT judge this like a university paper. A middle schooler writing a clear paragraph with a main idea is doing great work.
-- Lead with positivity — always highlight what they did well before suggesting improvements.
-- Frame improvements as helpful tips, not harsh criticism. Use phrases like "Nice work here! One thing that could make this even better is..." or "You've got a great start — try adding..." rather than "This is weak" or "This fails to..."
-- Keep suggestions concrete and actionable — tell them exactly what to do, not abstract concepts.
-- Be generous with encouragement. Building confidence at this age is just as important as the feedback itself.`;
-    }
 
     return basePrompt;
   }
@@ -822,7 +831,7 @@ CRITICAL REQUIREMENTS:
   /**
    * Get analysis prompt with document content
    */
-  getAnalysisPrompt(analysisType, content, citationStyle = 'None', userPlan = 'free', educationLevel = 'college') {
+  getAnalysisPrompt(analysisType, content, citationStyle = 'None', userPlan = 'free', gradingStyle = 'us') {
     const citationInstruction = citationStyle === 'None' 
       ? 'This document does not require citations, so focus on content quality, structure, and clarity.'
       : `using ${citationStyle} citation style standards.`;
@@ -832,85 +841,104 @@ CRITICAL REQUIREMENTS:
     let targetAnnotations = 12; // Default for free/short documents
     
     if (userPlan === 'premium') {
+      if (wordCount > 5000) targetAnnotations = 35;
+      else if (wordCount > 3000) targetAnnotations = 30;
+      else if (wordCount > 1500) targetAnnotations = 25;
+      else targetAnnotations = 20;
+    } else if (userPlan === 'pro') {
       if (wordCount > 5000) targetAnnotations = 30;
       else if (wordCount > 3000) targetAnnotations = 25;
       else if (wordCount > 1500) targetAnnotations = 20;
-      else targetAnnotations = 15;
-    } else if (userPlan === 'pro') {
-      if (wordCount > 5000) targetAnnotations = 25;
-      else if (wordCount > 3000) targetAnnotations = 20;
-      else if (wordCount > 1500) targetAnnotations = 15;
-      else targetAnnotations = 12;
+      else targetAnnotations = 17;
     } else {
-      if (wordCount > 3000) targetAnnotations = 15;
-      else if (wordCount > 1500) targetAnnotations = 12;
-      else targetAnnotations = 10;
+      if (wordCount > 3000) targetAnnotations = 20;
+      else if (wordCount > 1500) targetAnnotations = 17;
+      else targetAnnotations = 15;
     }
 
-    const educationLevelLabels = {
-      college: 'College / University level',
-      sixth_form: 'High School / Sixth Form level (ages 16–18)',
-      middle_school: 'Middle School level (ages 11–15)'
-    };
-    const audienceLabel = educationLevelLabels[educationLevel] || educationLevelLabels.college;
+    // Always grade using US scale (90 = A). UK display conversion happens in parseStructuredAnalysis.
+    const gradingScaleInstruction = `GRADING SCALE — US: Use US college standards. 90+ = A, 80-89 = B, 70-79 = C, 60-69 = D, <60 = F. Score each category using full range: A work = 18-20/20, 14-15/15, 9-10/10.`;
 
-    let educationLevelGuidance = '';
-    if (educationLevel === 'sixth_form') {
-      educationLevelGuidance = `
-EDUCATION LEVEL: ${audienceLabel}
-- Judge this paper by high school / sixth form standards, NOT university standards.
-- Look for clear thesis statements, logical paragraph structure, use of supporting evidence, and coherent conclusions.
-- Don't penalise for lacking advanced academic conventions (e.g. extensive literature reviews, sophisticated theoretical frameworks).
-- Feedback should be direct but constructive — like a good teacher marking their work.
-- Use accessible language in your commentary.
-`;
-    } else if (educationLevel === 'middle_school') {
-      educationLevelGuidance = `
-EDUCATION LEVEL: ${audienceLabel}
-- Judge this paper by middle school standards. This is a young student learning to write.
-- Focus on: Does it have a clear topic? Are the ideas organised? Does it make sense? Is it on topic?
-- Be warm, encouraging, and supportive in ALL feedback — even concerns should be phrased gently.
-- Use simple, friendly language. No jargon. Write as if you're talking to a 12–15 year old.
-- Lean heavily toward strengths and encouragement. Only raise concerns for genuine issues, and always pair them with a positive.
-- Example of good feedback: "Great job explaining your main idea clearly! To make this part even stronger, you could add an example to back it up."
-- Example of bad feedback: "The argument lacks sufficient evidence and theoretical grounding." (too harsh / too academic)
-`;
+    // College / University rubric (100 points total) — always US scale; UK conversion applied after
+    const gradeRubricSection = `  "grade_rubric": {
+    "thesis_and_argument": {
+      "score": <integer 0-20, A = 18-20, B = 16-18, C = 14-16>,
+      "max_score": 20,
+      "feedback": "Specific feedback on thesis clarity and argument strength"
+    },
+    "response_to_question": {
+      "score": <integer 0-20, A = 18-20, B = 16-18, C = 14-16>,
+      "max_score": 20,
+      "feedback": "Specific feedback on how well the essay addresses the question or prompt"
+    },
+    "use_of_evidence_and_textual_support": {
+      "score": <integer 0-15, A = 14-15, B = 12-14, C = 10-12>,
+      "max_score": 15,
+      "feedback": "Specific feedback on use of evidence and textual support"
+    },
+    "analysis_and_critical_thinking": {
+      "score": <integer 0-20, A = 18-20, B = 16-18, C = 14-16>,
+      "max_score": 20,
+      "feedback": "Specific feedback on depth of analysis and critical thinking"
+    },
+    "organization_and_structure": {
+      "score": <integer 0-15, A = 14-15, B = 12-14, C = 10-12>,
+      "max_score": 15,
+      "feedback": "Specific feedback on essay structure, paragraph flow, and transitions"
+    },
+    "writing_quality_and_clarity": {
+      "score": <integer 0-10, A = 9-10, B = 8-9, C = 6-8>,
+      "max_score": 10,
+      "feedback": "Specific feedback on grammar, spelling, sentence structure, and clarity"
     }
+  }`;
     
     return `Please perform a comprehensive academic analysis of the following document ${citationInstruction}
-${educationLevelGuidance}
-IMPORTANT: For each feedback point, you must include the EXACT text from the document that you're referring to, enclosed in double quotes.
+
+IMPORTANT: For each feedback point, you must include the EXACT text from the document that you're referring to, enclosed in double quotes. All quoted text must appear verbatim in the document.
 
 ADAPTIVE ANNOTATION GUIDELINES:
-- Aim for approximately ${targetAnnotations} total feedback annotations
-- **ADAPT YOUR FEEDBACK TO THE ACTUAL QUALITY OF THE WRITING:**
-  
-  **For EXCELLENT papers (well-written, clear, strong arguments):**
-  - Focus primarily on STRENGTHS (60-80% of annotations)
-  - Minor improvements only (20-30% of annotations)  
-  - Few or NO serious concerns (0-10% of annotations)
-  
-  **For GOOD papers (solid writing with room for improvement):**
-  - Balanced mix of strengths (40-50% of annotations)
-  - Areas for improvement (40-50% of annotations)
-  - Some concerns (10-20% of annotations)
-  
-  **For POOR papers (significant issues, unclear writing):**
-  - Some strengths where found (20-30% of annotations)
-  - Many areas for improvement (40-50% of annotations)
-  - Serious concerns for major issues (30-40% of annotations)
+- Aim for approximately ${targetAnnotations} total annotations spread across the essay
+- Adapt feedback ratio to actual writing quality:
 
-- **BE HONEST:** If a paper is genuinely well-written, don't force serious concerns
-- **BE HELPFUL:** Focus on the most important feedback for the paper's actual quality level
-- For longer documents, provide proportionally more feedback to cover all sections thoroughly
+  EXCELLENT papers: 60-80% strengths, 20-30% improvements, 0-10% concerns
+  GOOD papers: 40-50% strengths, 40-50% improvements, 10-20% concerns
+  POOR papers: 20-30% strengths, 40-50% improvements, 30-40% concerns
+
+- Always include at least 2 strengths — never make feedback entirely negative
+- Be honest: do not force concerns onto genuinely good writing
+
+IMPROVEMENT & CONCERN ANNOTATIONS — MUST BE ACTIONABLE:
+- NEVER use vague advice like "consider adding citations", "could be strengthened with more evidence", "ensure proper sentence structure", or "consider rephrasing" without showing HOW.
+- Each improvement/concern "suggestion" MUST give a CONCRETE solution: either (a) a before/after example, (b) a specific phrase or sentence the student could use, or (c) a rewritten version demonstrating the fix.
+- BAD: "Consider adding more academic evidence or research support" — describes the problem only.
+- GOOD: "Add a supporting citation, e.g. 'As Smith (2020) notes, …' — this would ground your claim."
+- BAD: "Ensure proper sentence structure and punctuation" — no solution given.
+- GOOD: "Split this run-on into two sentences: '…' [original]. Try: '…' [rewritten]."
+- The suggestion must SHOW what to do, not just name the problem.
+
+${gradingScaleInstruction}
 
 Document Content (${wordCount} words):
 ${content}
 
-Please provide a detailed analysis in the following JSON format:
+Return ONLY a valid JSON object. No preamble, no markdown, no explanation outside the JSON.
 
 {
-  "overall_assessment": "Brief overall assessment of the document",
+  "overall_assessment": "2-3 sentence professor-style summary. State what the essay does well and its primary weakness. Be direct.",
+
+  "overall_score": <integer 0-100, US scale: A = 90-100, B = 80-89, C = 70-79. NOT multiples of 5>,
+
+  "grade_estimate": "<US letter grade e.g. A, B+, C — backend will convert for UK>",
+
+  "clarity_rating": "<one of: Excellent / Good / Needs Work / Poor>",
+
+  "top_suggestions": [
+    "Most impactful improvement — be specific, reference the essay directly",
+    "Second most impactful improvement",
+    "Third most impactful improvement"
+  ],
+
   "detailed_analysis": {
     "academic_writing_quality": {
       "assessment": "Analysis of clarity, coherence, and academic tone",
@@ -925,14 +953,14 @@ Please provide a detailed analysis in the following JSON format:
         {
           "text": "EXACT quoted text from document",
           "comment": "What needs improvement",
-          "suggestion": "Specific recommendation for improvement"
+          "suggestion": "Concrete fix: show an example rewrite, a phrase to add, or before/after — never generic advice like 'consider adding evidence'"
         }
       ],
       "concerns": [
         {
           "text": "EXACT quoted text from document",
           "comment": "What is problematic",
-          "suggestion": "How to fix this issue"
+          "suggestion": "Concrete fix: show an example rewrite, a phrase to add, or before/after — never generic advice without showing how"
         }
       ]
     },
@@ -943,24 +971,35 @@ Please provide a detailed analysis in the following JSON format:
       "concerns": []
     },
     "argument_structure": {
-      "assessment": "Analysis of logical flow and evidence",
+      "assessment": "Analysis of thesis strength, logical flow, and use of evidence",
       "strengths": [],
       "improvements": [],
       "concerns": []
     },
     "grammar_style": {
-      "assessment": "Analysis of technical writing quality",
+      "assessment": "Analysis of grammar, punctuation, sentence structure, and academic register",
       "strengths": [],
       "improvements": [],
       "concerns": []
     },
     "content_depth": {
-      "assessment": "Analysis of thoroughness and rigor",
+      "assessment": "Analysis of argument depth, originality, and critical thinking",
       "strengths": [],
       "improvements": [],
       "concerns": []
     }
   },
+
+${gradeRubricSection},
+
+  "specific_rewrites": [
+    {
+      "original": "exact sentence or phrase from the essay that needs improving",
+      "rewritten": "improved version that preserves the student voice and intent",
+      "reason": "why this rewrite is stronger"
+    }
+  ],
+
   "recommendations": [
     "Priority recommendation 1",
     "Priority recommendation 2",
@@ -969,11 +1008,16 @@ Please provide a detailed analysis in the following JSON format:
 }
 
 CRITICAL REQUIREMENTS:
-1. Every feedback item MUST include the exact quoted text from the document
-2. Categorize feedback as: strengths (green), improvements (amber), concerns (red)
-3. Provide specific, actionable suggestions for each point
-4. Focus on the most important issues first
-5. Ensure all quoted text is exactly as it appears in the document`;
+1. Every feedback item in detailed_analysis MUST include exact quoted text from the document
+2. Always use US grading scale. overall_score = sum of rubric category scores. A work = 90-100, B = 80-89, C = 70-79. Same essay gets same scores regardless of student's region — UK conversion is applied after.
+3. specific_rewrites: include 3-5 examples targeting the weakest sentences — always preserve the student voice
+4. All quoted text must be verbatim from the document — do not paraphrase or invent quotes
+5. For improvements and concerns: every "suggestion" MUST give a concrete example (rewrite, phrase to add, or before/after) — never generic advice without showing the solution
+6. NEVER use these generic phrases in any suggestion. Always provide a specific revision, rewrite, or concrete example instead:
+   - FORBIDDEN for "improve": "Add a concrete example, clarify the connection to your argument, or develop the idea further with specifics"
+   - FORBIDDEN for "concern": "Add a specific example or develop the idea further with concrete detail"
+   Instead: give a concrete rewrite (e.g. "Revise to: '...'") or a specific phrase to add (e.g. "Add: 'For instance, ...'")
+7. Return ONLY valid JSON — no text before or after the JSON object`;
   }
 
   /**
@@ -1106,7 +1150,7 @@ CRITICAL REQUIREMENTS:
   /**
    * Parse structured analysis response and extract annotations
    */
-  parseStructuredAnalysis(analysisResult, content, userPlan = 'free') {
+  parseStructuredAnalysis(analysisResult, content, userPlan = 'free', gradingStyle = 'us') {
     try {
       console.log('=== BACKEND: STARTING BULLETPROOF ANNOTATION GENERATION ===');
       console.log('Content length:', content.length);
@@ -1119,6 +1163,16 @@ CRITICAL REQUIREMENTS:
       }
 
       const structuredData = JSON.parse(jsonMatch[0]);
+
+      // College grading adjustment: add +1 to each rubric section score (capped at max_score)
+      if (structuredData.grade_rubric && typeof structuredData.grade_rubric === 'object') {
+        for (const key of Object.keys(structuredData.grade_rubric)) {
+          const entry = structuredData.grade_rubric[key];
+          if (entry && typeof entry.score === 'number' && typeof entry.max_score === 'number') {
+            entry.score = Math.min(entry.max_score, entry.score + 1);
+          }
+        }
+      }
       const annotations = [];
       let annotationId = 1;
       const usedTexts = new Set();
@@ -1185,7 +1239,7 @@ CRITICAL REQUIREMENTS:
                   startIndex: textMatch.startIndex,
                   endIndex: textMatch.endIndex,
                   comment: item.comment,
-                  suggestion: item.suggestion || 'Consider enhancing this section with more specific details and supporting evidence.'
+                  suggestion: sanitizeSuggestion(item.suggestion || 'Revise with a concrete example: e.g. "For instance, …" or "This demonstrates that [X], which matters because [Y]."', 'improve')
                 };
                 
                 // Check for overlap with existing annotations
@@ -1214,7 +1268,7 @@ CRITICAL REQUIREMENTS:
                   startIndex: textMatch.startIndex,
                   endIndex: textMatch.endIndex,
                   comment: item.comment,
-                  suggestion: item.suggestion || 'This area needs immediate attention and revision to strengthen your argument.'
+                  suggestion: sanitizeSuggestion(item.suggestion || 'Revise with a concrete rewrite: e.g. "The evidence suggests…" or provide a specific before/after revision.', 'concern')
                 };
                 
                 // Check for overlap with existing annotations
@@ -1235,10 +1289,98 @@ CRITICAL REQUIREMENTS:
       console.log(`Strong points: ${annotations.filter(a => a.type === 'strong').length}`);
 
       // BULLETPROOF APPROACH: Ensure minimum requirements based on plan
-      const finalAnnotations = this.ensureMinimumAnnotations(annotations, content, annotationId, usedTexts, userPlan);
+      let finalAnnotations = this.ensureMinimumAnnotations(annotations, content, annotationId, usedTexts, userPlan);
 
-      // Create formatted result for display
-      const formattedResult = this.formatAnalysisForDisplay(structuredData);
+      // Sanitize: never return forbidden generic phrases in suggestions
+      finalAnnotations = finalAnnotations.map(a => ({
+        ...a,
+        suggestion: sanitizeSuggestion(a.suggestion, a.type)
+      }));
+
+      // CRITICAL: overall_score must equal the sum of rubric scores — compute from grade_rubric when present
+      let overallScore = structuredData.overall_score ?? null;
+      const rubric = structuredData.grade_rubric;
+      if (rubric && typeof rubric === 'object') {
+        let rubricSum = 0;
+        for (const key of Object.keys(rubric)) {
+          const entry = rubric[key];
+          if (entry && typeof entry.score === 'number') {
+            rubricSum += entry.score;
+          }
+        }
+        if (rubricSum > 0) {
+          overallScore = rubricSum;
+          if (structuredData.overall_score != null && structuredData.overall_score !== rubricSum) {
+            console.log(`Corrected overall_score from ${structuredData.overall_score} to rubric sum ${rubricSum}`);
+          }
+        }
+      }
+
+      // UK display conversion: same essay, same US score — convert for UK display (90 US = 70 UK = A/First)
+      let displayScore = overallScore;
+      let displayRubric = structuredData.grade_rubric;
+      if (gradingStyle === 'uk' && overallScore != null && typeof overallScore === 'number') {
+        displayScore = Math.max(0, Math.min(100, Math.floor(overallScore - 20)));
+        if (overallScore > 0 && displayRubric && typeof displayRubric === 'object') {
+          const scale = displayScore / overallScore;
+          const keys = Object.keys(displayRubric);
+          const scaled = {};
+          let rubricSum = 0;
+          for (const key of keys) {
+            const entry = displayRubric[key];
+            if (entry && typeof entry.score === 'number' && typeof entry.max_score === 'number') {
+              const s = Math.floor(Math.max(0, Math.min(entry.max_score, entry.score * scale)));
+              scaled[key] = { ...entry, score: s };
+              rubricSum += s;
+            } else {
+              scaled[key] = entry;
+            }
+          }
+          const diff = displayScore - rubricSum;
+          const scoreKeys = keys.filter(k => scaled[k] && typeof scaled[k].score === 'number');
+          if (diff !== 0 && scoreKeys.length > 0) {
+            const adjustKey = scoreKeys.find(k => {
+              const e = scaled[k];
+              const newScore = e.score + diff;
+              return newScore >= 0 && newScore <= e.max_score;
+            }) || scoreKeys[0];
+            if (adjustKey && scaled[adjustKey]) {
+              const maxScore = scaled[adjustKey].max_score;
+              scaled[adjustKey] = {
+                ...scaled[adjustKey],
+                score: Math.max(0, Math.min(maxScore, scaled[adjustKey].score + diff))
+              };
+            }
+          }
+          displayRubric = scaled;
+          if (overallScore > 0) {
+            const sum = Object.values(displayRubric).reduce((a, e) => a + (e?.score ?? 0), 0);
+            console.log(`UK display conversion: US ${overallScore} → UK ${displayScore} (rubric sum: ${sum})`);
+          }
+        }
+      }
+
+      // Derive grade_estimate from display score (US or UK-converted)
+      let gradeEstimate = structuredData.grade_estimate ?? null;
+      if (displayScore != null && typeof displayScore === 'number') {
+        if (gradingStyle === 'uk') {
+          if (displayScore >= 70) gradeEstimate = '1st (70%+)';
+          else if (displayScore >= 60) gradeEstimate = '2:1 (60-69%)';
+          else if (displayScore >= 50) gradeEstimate = '2:2 (50-59%)';
+          else if (displayScore >= 40) gradeEstimate = '3rd (40-49%)';
+          else gradeEstimate = 'Fail (below 40%)';
+        } else {
+          if (displayScore >= 90) gradeEstimate = 'A (90%+)';
+          else if (displayScore >= 80) gradeEstimate = 'B (80-89%)';
+          else if (displayScore >= 70) gradeEstimate = 'C (70-79%)';
+          else if (displayScore >= 60) gradeEstimate = 'D (60-69%)';
+          else gradeEstimate = 'F (below 60%)';
+        }
+      }
+
+      // Use display score for formatted result
+      const structuredDataForDisplay = { ...structuredData, overall_score: displayScore, grade_estimate: gradeEstimate };
+      const formattedResult = this.formatAnalysisForDisplay(structuredDataForDisplay);
 
       console.log('=== BACKEND: ANNOTATION GENERATION COMPLETE ===');
       console.log(`Final annotations: ${finalAnnotations.length}`);
@@ -1246,7 +1388,13 @@ CRITICAL REQUIREMENTS:
 
       return {
         formattedResult,
-        annotations: finalAnnotations.sort((a, b) => a.startIndex - b.startIndex)
+        annotations: finalAnnotations.sort((a, b) => a.startIndex - b.startIndex),
+        overall_score: displayScore,
+        grade_estimate: gradeEstimate,
+        clarity_rating: structuredData.clarity_rating ?? null,
+        top_suggestions: Array.isArray(structuredData.top_suggestions) ? structuredData.top_suggestions : [],
+        grade_rubric: displayRubric ?? null,
+        specific_rewrites: Array.isArray(structuredData.specific_rewrites) ? structuredData.specific_rewrites : []
       };
 
     } catch (error) {
@@ -1256,7 +1404,13 @@ CRITICAL REQUIREMENTS:
       const fallbackAnnotations = this.generateFallbackAnnotations(content);
       return {
         formattedResult: analysisResult,
-        annotations: fallbackAnnotations
+        annotations: fallbackAnnotations,
+        overall_score: null,
+        grade_estimate: null,
+        clarity_rating: null,
+        top_suggestions: [],
+        grade_rubric: null,
+        specific_rewrites: []
       };
     }
   }
@@ -1273,20 +1427,20 @@ CRITICAL REQUIREMENTS:
     let minTotal = 12;
     
     if (userPlan === 'premium') {
+      if (wordCount > 5000) minTotal = 35;
+      else if (wordCount > 3000) minTotal = 30;
+      else if (wordCount > 1500) minTotal = 25;
+      else minTotal = 20;
+    } else if (userPlan === 'pro') {
       if (wordCount > 5000) minTotal = 30;
       else if (wordCount > 3000) minTotal = 25;
       else if (wordCount > 1500) minTotal = 20;
-      else minTotal = 15;
-    } else if (userPlan === 'pro') {
-      if (wordCount > 5000) minTotal = 25;
-      else if (wordCount > 3000) minTotal = 20;
-      else if (wordCount > 1500) minTotal = 15;
-      else minTotal = 12;
+      else minTotal = 17;
     } else {
       // Free plan: limited scaling
-      if (wordCount > 3000) minTotal = 15;
-      else if (wordCount > 1500) minTotal = 12;
-      else minTotal = 10;
+      if (wordCount > 3000) minTotal = 20;
+      else if (wordCount > 1500) minTotal = 17;
+      else minTotal = 15;
     }
     
     console.log(`Document: ${wordCount} words, Plan: ${userPlan}`);
@@ -1411,48 +1565,40 @@ CRITICAL REQUIREMENTS:
               suggestion = 'The writing style and complexity level are well-suited for academic work.';
             }
           } else if (type === 'improve') {
-            // Generate contextual improvement suggestions based on paper quality
+            // Generate contextual improvement suggestions — always give concrete examples, not generic advice
             if (paperQuality === 'excellent') {
-              // For excellent papers, suggestions should be minor refinements
               if (/\b(however|but|although|while)\b/i.test(sentence)) {
                 comment = 'This effective transition could be enhanced with slightly more explicit connection.';
-                suggestion = 'Consider adding more specific linking language to make the relationship even clearer.';
+                suggestion = 'Add the link explicitly, e.g. "However, [this] directly challenges [that] because…" — spell out the relationship.';
               } else if (sentence.length < 30) {
                 comment = 'This concise sentence could be expanded for even greater impact.';
-                suggestion = 'Consider adding a brief example or elaboration to strengthen this point further.';
+                suggestion = 'Add a brief example: e.g. "For instance, …" or one specific detail to illustrate your point.';
               } else {
                 comment = 'This well-written section could be enhanced with additional supporting detail.';
-                suggestion = 'Consider adding more specific examples or evidence to make this point even stronger.';
+                suggestion = 'Add a brief example: e.g. "For instance, …" or one specific detail from your argument.';
               }
             } else {
-              // For average/poor papers, more substantial improvements needed
               if (/\b(however|but|although|while)\b/i.test(sentence)) {
                 comment = 'This transition could be strengthened with more explicit connection to the previous argument.';
-                suggestion = 'Consider adding more specific linking language to clarify the relationship between ideas.';
+                suggestion = 'Add a connecting phrase: e.g. "This demonstrates that [X], which matters because [Y]." — make the link explicit.';
               } else if (sentence.length < 30) {
-                comment = 'This sentence could benefit from more detailed explanation and supporting evidence.';
-                suggestion = 'Consider expanding this point with specific examples, data, or citations.';
-              } else if (!/\b(research|study|evidence|data|analysis)\b/i.test(sentence)) {
-                comment = 'This section could be strengthened with more academic evidence or research support.';
-                suggestion = 'Consider adding citations or research evidence to support this claim.';
+                comment = 'This sentence could benefit from more detailed explanation.';
+                suggestion = 'Expand with a concrete example or one specific detail: e.g. "For example, …" to illustrate your point.';
               } else {
-            comment = 'This section could be enhanced with more specific details and supporting evidence.';
-            suggestion = 'Consider adding more specific examples, data, or citations to support your point.';
+                comment = 'This section could be enhanced with more specific detail or clearer development.';
+                suggestion = 'Revise with a concrete example: e.g. "This demonstrates that [X], which matters because [Y]" or add a specific phrase from your argument.';
               }
             }
           } else { // concern
             if (sentence.includes('?')) {
               comment = 'Questions in academic writing should typically be rhetorical or immediately answered.';
-              suggestion = 'Consider rephrasing as a statement or providing an immediate answer to strengthen your argument.';
-            } else if (!/[.!?]$/.test(sentence.trim())) {
-              comment = 'This sentence appears incomplete or improperly punctuated.';
-              suggestion = 'Ensure proper sentence structure and punctuation for clarity.';
+              suggestion = 'Rephrase as a statement: e.g. change "Why does X happen?" to "X happens because…" and answer it in the same sentence.';
             } else if (/\b(I think|I believe|I feel)\b/i.test(sentence)) {
               comment = 'Avoid first-person language in academic writing for more objective tone.';
-              suggestion = 'Rephrase using more objective language such as "The evidence suggests" or "Research indicates".';
-          } else {
-            comment = 'This section may need attention to strengthen the argument and provide clearer explanations.';
-            suggestion = 'Consider providing more specific evidence or clarifying your point to strengthen this section.';
+              suggestion = 'Replace "I think" with "The evidence suggests" or "Research indicates" — same meaning, more academic.';
+            } else {
+              comment = 'This section may need attention to strengthen the argument and provide clearer explanations.';
+              suggestion = 'Revise with a concrete rewrite: e.g. "The evidence suggests…" or provide a specific before/after revision.';
             }
           }
           
@@ -1525,11 +1671,11 @@ CRITICAL REQUIREMENTS:
           
           let comment, suggestion;
           if (type === 'improve') {
-            comment = 'This section could benefit from more detailed explanation or supporting evidence.';
-            suggestion = 'Consider expanding this point with specific examples, data, or citations.';
+            comment = 'This section could benefit from more detailed explanation.';
+            suggestion = 'Revise with a concrete example: e.g. "For instance, …" or "This demonstrates that [X], which matters because [Y]."';
           } else {
             comment = 'This section may need attention to strengthen clarity and argument structure.';
-            suggestion = 'Consider revising for clearer expression and stronger supporting evidence.';
+            suggestion = 'Rephrase for clarity: e.g. break long sentences, add transitions like "Therefore" or "This shows that", or add one specific example.';
           }
           
           finalAnnotations.push({
@@ -1559,7 +1705,7 @@ CRITICAL REQUIREMENTS:
         if (improveInFirstHalf) {
           improveInFirstHalf.type = 'concern';
           improveInFirstHalf.comment = improveInFirstHalf.comment || 'This section needs attention to strengthen your argument.';
-          improveInFirstHalf.suggestion = improveInFirstHalf.suggestion || 'Consider revising this section to improve clarity and provide stronger support.';
+          improveInFirstHalf.suggestion = improveInFirstHalf.suggestion || 'Revise with a concrete example: e.g. "As X (Year) notes, …" or "For instance, …" to strengthen your argument.';
           console.log(`🔄 Free user: Converted 1 improve → concern in first 50% for conversion`);
         } else {
           // Add a new concern from an unused sentence in the first half
@@ -1584,7 +1730,7 @@ CRITICAL REQUIREMENTS:
                   startIndex,
                   endIndex: startIndex + trimmed.length,
                   comment: 'This section could be strengthened with clearer structure or additional evidence.',
-                  suggestion: 'Consider revising for clarity and adding supporting details to strengthen your argument.'
+                  suggestion: 'Revise with a concrete transition: e.g. "Therefore, …" or "For instance, …" to clarify and support your point.'
                 });
                 finalAnnotations.sort((a, b) => a.startIndex - b.startIndex);
                 console.log(`🔄 Free user: Added 1 concern in first 50% for conversion`);
@@ -1769,10 +1915,10 @@ CRITICAL REQUIREMENTS:
         let comment, suggestion;
         if (type === 'improve') {
           comment = 'This section could be enhanced with more specific details and supporting evidence.';
-          suggestion = 'Consider adding more specific examples, data, or citations to support your point.';
+          suggestion = 'Revise with a concrete example: e.g. "For instance, …" or "As Smith (2020) notes, …" to support your point.';
         } else {
           comment = 'This section may need attention to strengthen the argument and provide clearer explanations.';
-          suggestion = 'Consider providing more specific evidence or clarifying your point to strengthen this section.';
+          suggestion = 'Revise with a concrete example: e.g. "For instance, …" or "Research shows that …" to clarify and strengthen this section.';
         }
         
         annotations.push({
@@ -1879,9 +2025,26 @@ CRITICAL REQUIREMENTS:
    */
   formatAnalysisForDisplay(structuredData) {
     let formatted = `# Comprehensive Academic Analysis\n\n`;
-    formatted += `## Overall Assessment\n${structuredData.overall_assessment}\n\n`;
+    formatted += `## Overall Assessment\n${structuredData.overall_assessment || ''}\n\n`;
 
-    Object.entries(structuredData.detailed_analysis).forEach(([category, data]) => {
+    if (structuredData.overall_score != null) {
+      formatted += `**Overall Score:** ${Math.round(Number(structuredData.overall_score))}/100\n\n`;
+    }
+    if (structuredData.grade_estimate) {
+      formatted += `**Grade Estimate:** ${structuredData.grade_estimate}\n\n`;
+    }
+    if (structuredData.clarity_rating) {
+      formatted += `**Clarity Rating:** ${structuredData.clarity_rating}\n\n`;
+    }
+    if (structuredData.top_suggestions && structuredData.top_suggestions.length > 0) {
+      formatted += `### Top Suggestions\n`;
+      structuredData.top_suggestions.forEach((s, i) => {
+        formatted += `${i + 1}. ${s}\n`;
+      });
+      formatted += `\n`;
+    }
+
+    Object.entries(structuredData.detailed_analysis || {}).forEach(([category, data]) => {
       const categoryTitle = category.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
       formatted += `## ${categoryTitle}\n${data.assessment}\n\n`;
 
@@ -1932,8 +2095,9 @@ CRITICAL REQUIREMENTS:
   /**
    * Save analysis results to database
    * @param {object|null} rubricAlignment - Optional rubric alignment result to persist
+   * @param {object|null} structuredData - Optional new-format fields: overall_score, grade_estimate, clarity_rating, top_suggestions, grade_rubric, specific_rewrites
    */
-  async saveAnalysis(documentId, userId, analysisType, result, originalContent, annotations = null, citationStyle = null, rubricAlignment = null) {
+  async saveAnalysis(documentId, userId, analysisType, result, originalContent, annotations = null, citationStyle = null, rubricAlignment = null, structuredData = null) {
     try {
       console.log('=== SAVE ANALYSIS DEBUG ===');
       console.log('documentId:', documentId);
@@ -1979,7 +2143,14 @@ CRITICAL REQUIREMENTS:
           areas_to_improve: areasToImprove, // Add the format expected by frontend
           serious_concerns: seriousConcerns, // Add the format expected by frontend
           citation_style: citationStyle,
-          rubric_alignment: rubricAlignment || null // Persist rubric alignment when provided
+          rubric_alignment: rubricAlignment || null, // Persist rubric alignment when provided
+          // New format fields for score/grade UI
+          overall_score: structuredData?.overall_score ?? null,
+          grade_estimate: structuredData?.grade_estimate ?? null,
+          clarity_rating: structuredData?.clarity_rating ?? null,
+          top_suggestions: structuredData?.top_suggestions ?? null,
+          grade_rubric: structuredData?.grade_rubric ?? null,
+          specific_rewrites: structuredData?.specific_rewrites ?? null
         },
         processing_time_ms: Math.floor(Date.now() / 1000), // Convert to seconds
         created_at: new Date().toISOString(),

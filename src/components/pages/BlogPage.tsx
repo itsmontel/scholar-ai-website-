@@ -34,6 +34,23 @@ const BlogPage = ({ onNavigate, user, onLogout }: BlogPageProps) => {
     ];
     const color = colors[index % colors.length];
 
+    if (post.slug.includes('check-essay') || post.slug.includes('professor-style')) {
+      return (
+        <svg viewBox="0 0 200 140" fill="none" className="w-full h-full">
+          <rect width="200" height="140" fill="#F3E8FF" />
+          <rect x="50" y="30" width="55" height="75" rx="4" fill="white" stroke="#8B5CF6" strokeWidth="2" />
+          <line x1="58" y1="45" x2="95" y2="45" stroke="#C4B5FD" strokeWidth="2" />
+          <line x1="58" y1="58" x2="100" y2="58" stroke="#10B981" strokeWidth="2" />
+          <line x1="58" y1="71" x2="92" y2="71" stroke="#C4B5FD" strokeWidth="2" />
+          <line x1="58" y1="84" x2="85" y2="84" stroke="#F59E0B" strokeWidth="2" />
+          <circle cx="135" cy="60" r="18" fill="#8B5CF6" />
+          <path d="M128 60 L132 64 L144 52" stroke="white" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+          <rect x="120" y="95" width="55" height="28" rx="4" fill="white" stroke="#7C3AED" strokeWidth="2" />
+          <text x="147" y="112" textAnchor="middle" fontSize="10" fill="#6D28D9" fontWeight="bold">Rubric</text>
+        </svg>
+      );
+    }
+
     if (post.slug.includes('thesis') || post.slug.includes('structure')) {
       return (
         <svg viewBox="0 0 200 140" fill="none" className="w-full h-full">
@@ -278,7 +295,7 @@ const BlogPage = ({ onNavigate, user, onLogout }: BlogPageProps) => {
               onClick={() => handlePageChange(page as number)}
               className={`w-10 h-10 flex items-center justify-center rounded-lg text-sm font-medium transition-colors ${
                 currentPage === page
-                  ? 'bg-gradient-to-r from-indigo-500 to-violet-600 text-white shadow-lg shadow-indigo-500/25'
+                  ? 'bg-gradient-to-r from-rose-500 to-rose-600 text-white shadow-lg shadow-rose-500/25'
                   : 'text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800'
               }`}
             >
@@ -302,7 +319,9 @@ const BlogPage = ({ onNavigate, user, onLogout }: BlogPageProps) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50/80 via-stone-50 to-white dark:from-stone-950 dark:via-stone-900 dark:to-stone-900">
+    <div className="min-h-screen bg-[#faf9f7] dark:bg-stone-950">
+      <div className="fixed inset-0 -z-10 bg-[radial-gradient(ellipse_120%_80%_at_20%_-10%,rgba(251,207,232,0.25),transparent_50%)] dark:bg-[radial-gradient(ellipse_120%_80%_at_20%_-10%,rgba(251,207,232,0.08),transparent_50%)] pointer-events-none" aria-hidden />
+      <div className="fixed inset-0 -z-10 bg-[radial-gradient(ellipse_100%_60%_at_80%_0%,rgba(196,181,253,0.25),transparent_50%)] dark:bg-[radial-gradient(ellipse_100%_60%_at_80%_0%,rgba(196,181,253,0.08),transparent_50%)] pointer-events-none" aria-hidden />
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="blog" />
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
@@ -323,14 +342,13 @@ const BlogPage = ({ onNavigate, user, onLogout }: BlogPageProps) => {
 
         {/* Page Header */}
         <header className="mb-12">
-          <div className="flex items-center gap-3 mb-3">
-            <span className="text-3xl sm:text-4xl">📚</span>
-            <h1 className="text-4xl sm:text-5xl font-extrabold text-stone-800 dark:text-stone-100">
-              Blog
-            </h1>
-            <span className="text-3xl sm:text-4xl">🧊</span>
-          </div>
-          <p className="text-lg text-stone-500 dark:text-stone-400">
+          <span className="inline-block px-4 py-1.5 bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-300 rounded-full text-sm font-semibold mb-4">
+            Tips & Guides
+          </span>
+          <h1 className="text-4xl sm:text-5xl font-extrabold text-stone-800 dark:text-stone-100 mb-3">
+            Blog
+          </h1>
+          <p className="text-lg text-stone-600 dark:text-stone-400 max-w-2xl">
             Tips, guides, and insights for better academic writing
           </p>
         </header>
@@ -340,26 +358,28 @@ const BlogPage = ({ onNavigate, user, onLogout }: BlogPageProps) => {
           {currentPosts.map((post, idx) => (
             <article
               key={post.slug}
-              className="group cursor-pointer"
+              className="group cursor-pointer bg-white dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg hover:border-rose-300 dark:hover:border-rose-700/50 transition-all duration-300"
               onClick={() => handlePostClick(post.slug)}
             >
               {/* Image Container */}
-              <div className="aspect-[4/3] rounded-2xl overflow-hidden mb-5 bg-stone-100 dark:bg-stone-800">
-                {getIllustration(post, startIndex + idx)}
+              <div className="aspect-[4/3] overflow-hidden bg-stone-100 dark:bg-stone-800/50">
+                <div className="w-full h-full transform group-hover:scale-105 transition-transform duration-300">
+                  {getIllustration(post, startIndex + idx)}
+                </div>
               </div>
               
               {/* Content */}
-              <div>
-                <h2 className="text-xl font-semibold text-stone-800 dark:text-stone-100 mb-3 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors leading-snug line-clamp-2">
+              <div className="p-5 sm:p-6">
+                <h2 className="text-xl font-semibold text-stone-800 dark:text-stone-100 mb-3 group-hover:text-rose-600 dark:group-hover:text-rose-400 transition-colors leading-snug line-clamp-2">
                   {post.title}
                 </h2>
-                <p className="text-stone-500 dark:text-stone-400 text-base leading-relaxed mb-4 line-clamp-2">
+                <p className="text-stone-600 dark:text-stone-400 text-base leading-relaxed mb-4 line-clamp-2">
                   {post.description}
                 </p>
                 
                 {/* Read time badge */}
-                <span className="inline-block px-3 py-1.5 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-400 text-sm font-medium rounded-lg">
-                  {getReadTimeMinutes(post.readTime)} minutes
+                <span className="inline-block px-3 py-1.5 bg-rose-100 dark:bg-rose-900/50 text-rose-700 dark:text-rose-300 text-sm font-medium rounded-xl">
+                  {getReadTimeMinutes(post.readTime)} min read
                 </span>
               </div>
             </article>
@@ -390,15 +410,15 @@ const BlogPage = ({ onNavigate, user, onLogout }: BlogPageProps) => {
               <>
                 <button 
                   onClick={() => onNavigate('dashboard')}
-                  className="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white font-bold rounded-2xl shadow-lg shadow-indigo-500/25 transition-all"
+                  className="w-full sm:w-auto px-6 py-3 bg-white text-rose-900 font-bold rounded-2xl hover:bg-rose-50 shadow-lg transition-all"
                 >
                   Go to Dashboard
                 </button>
                 {user.plan === 'Free' && (
-                  <button 
-                    onClick={() => onNavigate('billing')}
-                    className="w-full sm:w-auto px-6 py-3 border-2 border-stone-500 hover:border-stone-400 text-white font-semibold rounded-2xl transition-colors"
-                  >
+                <button 
+                  onClick={() => onNavigate('billing')}
+                  className="w-full sm:w-auto px-6 py-3 border-2 border-white/40 hover:border-white/60 text-white font-semibold rounded-2xl transition-colors"
+                >
                     Upgrade Plan
                   </button>
                 )}
@@ -407,13 +427,13 @@ const BlogPage = ({ onNavigate, user, onLogout }: BlogPageProps) => {
               <>
                 <button 
                   onClick={() => onNavigate('signup')}
-                  className="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white font-bold rounded-2xl shadow-lg shadow-indigo-500/25 transition-all"
+                  className="w-full sm:w-auto px-6 py-3 bg-white text-rose-900 font-bold rounded-2xl hover:bg-rose-50 shadow-lg transition-all"
                 >
                   Try Free
                 </button>
                 <button 
                   onClick={() => onNavigate('features')}
-                  className="w-full sm:w-auto px-6 py-3 border-2 border-stone-500 hover:border-stone-400 text-white font-semibold rounded-2xl transition-colors"
+                  className="w-full sm:w-auto px-6 py-3 border-2 border-white/40 hover:border-white/60 text-white font-semibold rounded-2xl transition-colors"
                 >
                   Learn More
                 </button>

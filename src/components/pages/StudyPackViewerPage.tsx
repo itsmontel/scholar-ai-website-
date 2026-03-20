@@ -137,21 +137,7 @@ const StudyPackViewerPage = ({ onNavigate, user, onLogout, initialData }: StudyP
         onNavigate('crossword-generator');
         break;
       case 'lesson':
-        // InteractiveLessonPage expects questions = array of slides, not object
-        const slides = d.slides || [];
-        if (slides.length > 0) {
-          localStorage.setItem('savedLesson', JSON.stringify({
-            title: d.title || title,
-            questions: slides,
-            question_count: d.totalSlides ?? slides.length,
-            estimated_read_time: d.estimatedReadTime ?? Math.ceil(slides.length * 1.5),
-            difficulty: d.style || 'visual',
-            quiz_bank: d.quizBank || [],
-            quiz_display_count: d.quizDisplayCount ?? 6,
-            initial_slide_index: state?.slideIndex,
-          }));
-          onNavigate('interactive-lesson');
-        }
+        // Lessons are only available via study pack — no separate full-screen page
         break;
       case 'craterBlast':
         localStorage.setItem('savedCraterBlast', JSON.stringify({
@@ -322,7 +308,6 @@ const StudyPackViewerPage = ({ onNavigate, user, onLogout, initialData }: StudyP
             <LessonViewer
               slides={pack.data.lesson?.slides ?? []}
               title={pack.data.lesson?.title || packTitle}
-              onEnlarge={(state) => handleOpenFull('lesson', state)}
               initialSlideIndex={returnState?.slideIndex}
               hasQuiz={hasData('quiz')}
               onTryQuiz={() => setActiveTab('quiz')}

@@ -409,11 +409,6 @@ class EmailService {
                                     <span style="color: #8b5cf6; margin-right: 8px;">✓</span> Quiz & flashcard generator
                                   </td>
                                 </tr>
-                                <tr>
-                                  <td style="padding: 6px 0; font-size: 14px; color: #57534e;">
-                                    <span style="color: #8b5cf6; margin-right: 8px;">✓</span> Humanize AI-written text
-                                  </td>
-                                </tr>
                               </table>
                             </td>
                           </tr>

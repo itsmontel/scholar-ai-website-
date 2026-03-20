@@ -166,7 +166,7 @@ const LandingPage = ({ onNavigate }) => {
                 <span className="text-green-600 font-bold">3</span>
               </div>
               <h3 className="font-semibold text-gray-900 mb-2">Review Feedback</h3>
-              <p className="text-gray-600">Get detailed, professor-style annotations and suggestions for improvement.</p>
+              <p className="text-gray-600">Get detailed, professor style annotations and suggestions for improvement.</p>
             </div>
             <div className="text-center">
               <div className="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">

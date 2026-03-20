@@ -14,6 +14,14 @@ export interface BlogPostMeta {
 
 export const blogPostList: BlogPostMeta[] = [
   {
+    slug: 'check-essay-with-ai-professor-style-feedback',
+    title: 'Check Your Essay with AI: Get Professor Style Feedback in Seconds',
+    description: 'Get AI-powered essay feedback that feels like a professor read your paper. Grade-level rubrics, inline annotations, and improvement suggestions for students at every level.',
+    date: '2026-03-17',
+    author: 'WriteScholar Team',
+    readTime: '7 min read'
+  },
+  {
     slug: 'block-websites-until-you-study-earn-screen-time',
     title: 'Block Websites Until You Study: How to Earn Your Screen Time',
     description: 'Stop scrolling and start studying. Learn how to block distracting websites until you answer quiz questions. Unlock YouTube, TikTok and social media by studying first. A better approach for students.',

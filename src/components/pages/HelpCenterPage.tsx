@@ -260,20 +260,21 @@ const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
   };
 
   return (
-    <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%)' }}>
+    <div className="min-h-screen bg-gradient-to-b from-rose-50/60 via-stone-50 to-white dark:from-stone-950 dark:via-stone-900 dark:to-stone-900">
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(251,113,133,0.12),transparent)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(236,72,153,0.08),transparent)] pointer-events-none" aria-hidden />
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="help" />
 
       {/* Hero Section */}
-      <section className="py-16 sm:py-20 border-b border-stone-100 bg-gradient-to-br from-violet-50/50 via-white to-stone-50">
+      <section className="py-16 sm:py-20 border-b border-stone-100 dark:border-stone-800 bg-gradient-to-br from-rose-50/50 via-white dark:via-stone-900 to-stone-50 dark:to-stone-900 relative z-10">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center max-w-3xl mx-auto">
-            <span className="inline-flex items-center px-3 py-1 bg-violet-100 text-violet-700 rounded-full text-sm font-medium mb-6">
+            <span className="inline-flex items-center px-3 py-1 bg-rose-100 dark:bg-rose-900/50 text-rose-700 dark:text-rose-300 rounded-full text-sm font-medium mb-6">
               Help Center
             </span>
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl text-stone-800 mb-6 leading-tight" style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 400 }}>
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl text-stone-800 dark:text-stone-100 mb-6 leading-tight" style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 400 }}>
               How can we help you?
             </h1>
-            <p className="text-lg text-stone-500 leading-relaxed mb-8">
+            <p className="text-lg text-stone-500 dark:text-stone-400 leading-relaxed mb-8">
               Find answers to common questions and learn how to make the most of WriteScholar
             </p>
             
@@ -288,7 +289,7 @@ const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
                   placeholder="Search help topics..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-12 pr-6 py-4 text-base border border-stone-200 rounded-2xl focus:ring-2 focus:ring-violet-500 focus:border-violet-500 bg-white shadow-sm transition-all"
+                  className="w-full pl-12 pr-6 py-4 text-base border border-stone-200 dark:border-stone-600 rounded-2xl focus:ring-2 focus:ring-rose-500 focus:border-rose-500 bg-white dark:bg-stone-800 shadow-sm transition-all text-stone-800 dark:text-stone-100"
                 />
               </div>
             </div>
@@ -297,21 +298,21 @@ const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
       </section>
 
       {/* Quick Actions */}
-      <section className="py-12 sm:py-16 bg-stone-50">
+      <section className="py-12 sm:py-16 bg-stone-50 dark:bg-stone-900/50 relative z-10">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <h2 className="text-xl font-bold text-stone-800 mb-6 text-center">Quick Actions</h2>
+          <h2 className="text-xl font-bold text-stone-800 dark:text-stone-100 mb-6 text-center">Quick Actions</h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {quickActions.map((action, index) => (
               <button
                 key={index}
                 onClick={action.action}
-                className="p-6 bg-white border border-stone-200 rounded-2xl hover:shadow-lg hover:border-stone-300 transition-all text-left group"
+                className="p-6 bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-600 rounded-2xl hover:shadow-lg hover:border-rose-300 dark:hover:border-rose-700 transition-all text-left group"
               >
-                <div className="w-14 h-14 rounded-2xl mb-4 flex items-center justify-center overflow-hidden bg-violet-50/50 dark:bg-violet-900/20">
+                <div className="w-14 h-14 rounded-2xl mb-4 flex items-center justify-center overflow-hidden bg-rose-50/50 dark:bg-rose-900/20">
                   {action.icon}
                 </div>
-                <h4 className="font-semibold text-stone-800 mb-1 group-hover:text-violet-600 transition-colors">{action.title}</h4>
-                <p className="text-stone-500 text-sm">{action.description}</p>
+                <h4 className="font-semibold text-stone-800 dark:text-stone-100 mb-1 group-hover:text-rose-600 dark:group-hover:text-rose-400 transition-colors">{action.title}</h4>
+                <p className="text-stone-500 dark:text-stone-400 text-sm">{action.description}</p>
               </button>
             ))}
           </div>
@@ -319,13 +320,13 @@ const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
       </section>
 
       {/* FAQ Section */}
-      <section className="py-12 sm:py-16">
+      <section className="py-12 sm:py-16 relative z-10">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="grid lg:grid-cols-4 gap-8">
             {/* Categories Sidebar */}
             <div className="lg:col-span-1">
-              <div className="bg-white border border-stone-200 rounded-2xl p-5 sticky top-24">
-                <h3 className="font-semibold text-stone-900 mb-4">Browse by Category</h3>
+              <div className="bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-600 rounded-2xl p-5 sticky top-24">
+                <h3 className="font-semibold text-stone-900 dark:text-stone-100 mb-4">Browse by Category</h3>
                 <div className="space-y-1">
                   {categories.map((category) => (
                     <button
@@ -333,8 +334,8 @@ const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
                       onClick={() => setSelectedCategory(category.id)}
                       className={`w-full flex items-center justify-between p-3 rounded-xl text-left transition-all ${
                         selectedCategory === category.id
-                          ? 'bg-violet-50 text-violet-600'
-                          : 'hover:bg-stone-50 text-stone-600'
+                          ? 'bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400'
+                          : 'hover:bg-stone-50 dark:hover:bg-stone-700/50 text-stone-600 dark:text-stone-400'
                       }`}
                     >
                       <div className="flex items-center space-x-3">
@@ -343,8 +344,8 @@ const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
                       </div>
                       <span className={`text-xs px-2 py-0.5 rounded-full ${
                         selectedCategory === category.id
-                          ? 'bg-violet-100 text-violet-600'
-                          : 'bg-stone-100 text-stone-400'
+                          ? 'bg-rose-100 dark:bg-rose-900/50 text-rose-600 dark:text-rose-400'
+                          : 'bg-stone-100 dark:bg-stone-700 text-stone-400 dark:text-stone-500'
                       }`}>
                         {category.count}
                       </span>
@@ -353,7 +354,7 @@ const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
                 </div>
 
                 {/* Contact Support Card */}
-                <div className="mt-6 p-5 bg-gradient-to-r from-indigo-500 to-violet-600 rounded-xl">
+                <div className="mt-6 p-5 bg-gradient-to-r from-rose-500 to-pink-600 rounded-xl">
                   <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mb-3">
                     <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
@@ -363,7 +364,7 @@ const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
                   <p className="text-white/90 text-sm mb-4">Our support team is here to assist you.</p>
                   <button 
                     onClick={() => onNavigate?.('contact')}
-                    className="w-full bg-white text-violet-600 py-2.5 rounded-xl text-sm font-medium hover:bg-stone-100 transition-colors"
+                    className="w-full bg-white text-rose-600 dark:text-rose-400 py-2.5 rounded-xl text-sm font-medium hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
                   >
                     Contact Support
                   </button>
@@ -386,17 +387,17 @@ const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
 
               {/* FAQ List */}
               {filteredFAQs.length === 0 ? (
-                <div className="bg-white border border-stone-200 rounded-2xl p-12 text-center">
-                  <div className="w-16 h-16 bg-violet-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <svg className="w-8 h-8 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-600 rounded-2xl p-12 text-center">
+                  <div className="w-16 h-16 bg-rose-100 dark:bg-rose-900/50 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <svg className="w-8 h-8 text-rose-600 dark:text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
                   </div>
-                  <h3 className="text-xl font-semibold text-stone-900 mb-2">No articles found</h3>
-                  <p className="text-stone-500 mb-6">Try adjusting your search terms or browse a different category</p>
+                  <h3 className="text-xl font-semibold text-stone-900 dark:text-stone-100 mb-2">No articles found</h3>
+                  <p className="text-stone-500 dark:text-stone-400 mb-6">Try adjusting your search terms or browse a different category</p>
                   <button 
                     onClick={() => { setSearchQuery(''); setSelectedCategory('all'); }}
-                    className="bg-gradient-to-r from-indigo-500 to-violet-600 text-white px-6 py-3 rounded-xl font-medium hover:from-indigo-400 hover:to-violet-500 transition-colors"
+                    className="bg-gradient-to-r from-rose-500 to-pink-600 text-white px-6 py-3 rounded-xl font-medium hover:from-rose-400 hover:to-pink-500 transition-colors"
                   >
                     Clear Filters
                   </button>
@@ -404,10 +405,10 @@ const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
               ) : (
                 <div className="space-y-3">
                   {filteredFAQs.map((faq) => (
-                    <div key={faq.id} className="bg-white border border-stone-200 rounded-2xl overflow-hidden hover:border-stone-300 transition-all">
+                    <div key={faq.id} className="bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-600 rounded-2xl overflow-hidden hover:border-rose-300 dark:hover:border-rose-700 transition-all">
                       <button
                         onClick={() => toggleFAQ(faq.id)}
-                        className="w-full p-6 text-left hover:bg-stone-50 transition-colors"
+                        className="w-full p-6 text-left hover:bg-stone-50 dark:hover:bg-stone-700/50 transition-colors"
                       >
                         <div className="flex items-start justify-between">
                           <div className="flex-1 pr-4">
@@ -422,7 +423,7 @@ const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
                             </div>
                           </div>
                           <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 transition-all ${
-                            openFAQ === faq.id ? 'bg-violet-100 text-violet-600' : 'bg-stone-100 text-stone-400'
+                            openFAQ === faq.id ? 'bg-rose-100 dark:bg-rose-900/50 text-rose-600 dark:text-rose-400' : 'bg-stone-100 dark:bg-stone-700 text-stone-400 dark:text-stone-500'
                           }`}>
                             <svg 
                               className={`w-4 h-4 transform transition-transform ${
@@ -467,7 +468,7 @@ const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
             {user ? (
               <button 
                 onClick={() => onNavigate?.('dashboard')}
-                className="px-6 py-3 bg-gradient-to-r from-indigo-500 to-violet-600 text-white font-semibold rounded-full hover:from-indigo-400 hover:to-violet-500 transition-colors"
+                className="px-6 py-3 bg-gradient-to-r from-rose-500 to-pink-600 text-white font-semibold rounded-full hover:from-rose-400 hover:to-pink-500 transition-colors"
               >
                 Go to Dashboard
               </button>
@@ -475,7 +476,7 @@ const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
               <>
                 <button 
                   onClick={() => onNavigate?.('signup')}
-                  className="px-6 py-3 bg-gradient-to-r from-indigo-500 to-violet-600 text-white font-semibold rounded-full hover:from-indigo-400 hover:to-violet-500 transition-colors"
+                  className="px-6 py-3 bg-gradient-to-r from-rose-500 to-pink-600 text-white font-semibold rounded-full hover:from-rose-400 hover:to-pink-500 transition-colors"
                 >
                   Try Free
                 </button>

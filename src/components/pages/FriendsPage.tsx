@@ -560,7 +560,7 @@ const FriendsPage = ({ onNavigate, user, onLogout }: FriendsPageProps) => {
               value={addFriendCode}
               onChange={(e) => setAddFriendCode(e.target.value.toUpperCase())}
               placeholder="Enter friend code (e.g. ABC12345)"
-              className="flex-1 px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent font-mono text-lg tracking-wider uppercase"
+              className="flex-1 px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-rose-500/40 focus:border-rose-500 focus:outline-none font-mono text-lg tracking-wider uppercase"
               maxLength={12}
             />
             <button

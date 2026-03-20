@@ -24,8 +24,8 @@ const FeaturesPage = ({ onNavigate, user, onLogout }: FeaturesPageProps) => {
     { label: "Online Citations", description: "Find and format academic sources in APA, MLA, Chicago, Harvard, IEEE, Vancouver" },
     { label: "Study Packs", description: "Quizzes, flashcards, crosswords & lessons from any notes. One paste, five formats" },
     { label: "Focus Mode", description: "Block websites until you study, earn your screen time" },
-    { label: "AI Humanizer", description: "Bypass AI detectors with natural text" },
-    { label: "Paper Summarizer", description: "Condense articles into key points" }
+    { label: "Paper Summarizer", description: "Condense articles and papers into key points" },
+    { label: "Badges & achievements", description: "Earn milestones as you study and use the app" }
   ];
 
   return (
@@ -38,7 +38,7 @@ const FeaturesPage = ({ onNavigate, user, onLogout }: FeaturesPageProps) => {
 
       {/* Floating blobs - playful like Dashboard */}
       <div className="fixed top-[10%] left-[5%] w-72 h-72 rounded-[40%_60%_70%_30%/40%_50%_60%_50%] bg-gradient-to-br from-fuchsia-300/25 to-pink-400/20 dark:from-fuchsia-500/15 dark:to-pink-600/10 blur-3xl animate-blob-float hidden xl:block pointer-events-none" />
-      <div className="fixed top-[20%] right-[10%] w-64 h-64 rounded-[60%_40%_30%_70%/60%_30%_70%_40%] bg-gradient-to-br from-violet-300/25 to-purple-400/20 dark:from-violet-500/15 dark:to-purple-600/10 blur-3xl animate-blob-float hidden xl:block pointer-events-none" style={{ animationDelay: '-2s' }} />
+      <div className="fixed top-[20%] right-[10%] w-64 h-64 rounded-[60%_40%_30%_70%/60%_30%_70%_40%] bg-gradient-to-br from-rose-300/25 to-red-400/20 dark:from-rose-500/15 dark:to-red-600/10 blur-3xl animate-blob-float hidden xl:block pointer-events-none" style={{ animationDelay: '-2s' }} />
       <div className="fixed bottom-[25%] left-[15%] w-48 h-48 rounded-[30%_70%_70%_30%/30%_30%_70%_70%] bg-gradient-to-br from-amber-300/20 to-orange-400/15 dark:from-amber-500/10 dark:to-orange-600/8 blur-3xl animate-blob-float hidden lg:block pointer-events-none" style={{ animationDelay: '-4s' }} />
 
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="features" />
@@ -55,11 +55,11 @@ const FeaturesPage = ({ onNavigate, user, onLogout }: FeaturesPageProps) => {
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-10 lg:gap-12">
             <div className="flex-1 text-center lg:text-left max-w-3xl mx-auto lg:mx-0">
-              <span className="inline-flex items-center px-4 py-1.5 bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-400 rounded-full text-sm font-semibold mb-6">
+              <span className="inline-flex items-center px-4 py-1.5 bg-rose-100 dark:bg-rose-900/50 text-rose-700 dark:text-rose-400 rounded-full text-sm font-semibold mb-6">
                 Features
               </span>
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-stone-800 dark:text-stone-100 mb-6 leading-tight">
-                <span className="text-violet-500">AI essay feedback</span>, <span className="text-violet-500">study packs</span> & <span className="text-violet-500">focus mode</span>
+                <span className="text-rose-500">AI essay feedback</span>, <span className="text-rose-500">study packs</span> & <span className="text-rose-500">focus mode</span>
               </h1>
               <p className="text-lg text-stone-600 dark:text-stone-400 leading-relaxed">
                 The all-in-one study app: professor-style essay feedback on every paper, quizzes and flashcards from your notes, and Focus Mode to block TikTok until you study.
@@ -112,10 +112,10 @@ const FeaturesPage = ({ onNavigate, user, onLogout }: FeaturesPageProps) => {
             </button>
 
             {/* Focus Mode - Flagship */}
-            <button onClick={() => onNavigate('focus-mode')} className="group relative rounded-2xl sm:rounded-3xl overflow-hidden border-2 border-violet-200/80 dark:border-violet-700/50 shadow-xl shadow-violet-500/10 dark:shadow-black/20 backdrop-blur-2xl bg-white/80 dark:bg-stone-800/80 p-6 hover:shadow-2xl hover:border-violet-300 dark:hover:border-violet-500/60 transition-all duration-300 text-left">
+            <button onClick={() => onNavigate('focus-mode')} className="group relative rounded-2xl sm:rounded-3xl overflow-hidden border-2 border-rose-200/80 dark:border-rose-700/50 shadow-xl shadow-rose-500/10 dark:shadow-black/20 backdrop-blur-2xl bg-white/80 dark:bg-stone-800/80 p-6 hover:shadow-2xl hover:border-rose-300 dark:hover:border-rose-500/60 transition-all duration-300 text-left">
               <div className="relative flex flex-col items-center text-center mb-4">
-                <div className="w-14 h-14 rounded-2xl bg-violet-100 dark:bg-violet-900/50 flex items-center justify-center mb-3 text-2xl">🔒</div>
-                <h3 className="font-bold text-violet-700 dark:text-violet-400 text-lg">Focus Mode</h3>
+                <div className="w-14 h-14 rounded-2xl bg-rose-100 dark:bg-rose-900/50 flex items-center justify-center mb-3 text-2xl">🔒</div>
+                <h3 className="font-bold text-rose-700 dark:text-rose-400 text-lg">Focus Mode</h3>
               </div>
               <p className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed text-center">Block YouTube, TikTok until you answer quiz questions from your notes. Earn your screen time.</p>
             </button>
@@ -136,16 +136,6 @@ const FeaturesPage = ({ onNavigate, user, onLogout }: FeaturesPageProps) => {
               <p className="text-xs sm:text-sm text-stone-600 dark:text-stone-400 leading-relaxed line-clamp-3 sm:line-clamp-none">Organize and manage your academic documents with our intuitive library system and cloud storage.</p>
             </div>
 
-            {/* AI Humanizer */}
-            <button onClick={() => onNavigate('humanizer')} className="group relative rounded-2xl sm:rounded-3xl overflow-hidden border border-white/60 dark:border-stone-600/50 shadow-xl shadow-stone-900/5 dark:shadow-black/20 backdrop-blur-2xl bg-white/70 dark:bg-stone-800/70 p-4 sm:p-6 hover:shadow-2xl hover:border-purple-300/80 dark:hover:border-purple-600/50 transition-all duration-300 text-left min-w-0">
-              <div className="absolute -inset-1 bg-gradient-to-br from-purple-400/0 to-fuchsia-500/0 group-hover:from-purple-400/10 group-hover:to-fuchsia-500/10 rounded-2xl sm:rounded-3xl blur-xl transition-all duration-300" />
-              <div className="relative flex items-center gap-2 sm:gap-4 mb-2 sm:mb-4 min-w-0">
-                <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-purple-100 dark:bg-purple-900/50 flex items-center justify-center flex-shrink-0 text-lg sm:text-2xl">✨</div>
-                <h3 className="font-bold text-purple-700 dark:text-purple-400 text-sm sm:text-lg truncate min-w-0">AI Humanizer</h3>
-              </div>
-              <p className="text-xs sm:text-sm text-stone-600 dark:text-stone-400 leading-relaxed line-clamp-3 sm:line-clamp-none">Transform ChatGPT, Claude, Gemini text into natural human writing. Bypass AI detectors. 5,000 free words/month.</p>
-            </button>
-
             {/* Text Summarizer */}
             <button onClick={() => onNavigate('summarizer')} className="group relative rounded-2xl sm:rounded-3xl overflow-hidden border border-white/60 dark:border-stone-600/50 shadow-xl shadow-stone-900/5 dark:shadow-black/20 backdrop-blur-2xl bg-white/70 dark:bg-stone-800/70 p-4 sm:p-6 hover:shadow-2xl hover:border-teal-300/80 dark:hover:border-teal-600/50 transition-all duration-300 text-left min-w-0">
               <div className="absolute -inset-1 bg-gradient-to-br from-teal-400/0 to-emerald-500/0 group-hover:from-teal-400/10 group-hover:to-emerald-500/10 rounded-2xl sm:rounded-3xl blur-xl transition-all duration-300" />
@@ -157,11 +147,11 @@ const FeaturesPage = ({ onNavigate, user, onLogout }: FeaturesPageProps) => {
             </button>
 
             {/* Citation Generator */}
-            <button onClick={() => onNavigate('citation-generator-tool')} className="group relative rounded-2xl sm:rounded-3xl overflow-hidden border border-white/60 dark:border-stone-600/50 shadow-xl shadow-stone-900/5 dark:shadow-black/20 backdrop-blur-2xl bg-white/70 dark:bg-stone-800/70 p-4 sm:p-6 hover:shadow-2xl hover:border-sky-300/80 dark:hover:border-sky-600/50 transition-all duration-300 text-left min-w-0">
-              <div className="absolute -inset-1 bg-gradient-to-br from-sky-400/0 to-blue-500/0 group-hover:from-sky-400/10 group-hover:to-blue-500/10 rounded-2xl sm:rounded-3xl blur-xl transition-all duration-300" />
+            <button onClick={() => onNavigate('citation-generator-tool')} className="group relative rounded-2xl sm:rounded-3xl overflow-hidden border border-white/60 dark:border-stone-600/50 shadow-xl shadow-stone-900/5 dark:shadow-black/20 backdrop-blur-2xl bg-white/70 dark:bg-stone-800/70 p-4 sm:p-6 hover:shadow-2xl hover:border-rose-300/80 dark:hover:border-rose-600/50 transition-all duration-300 text-left min-w-0">
+              <div className="absolute -inset-1 bg-gradient-to-br from-rose-400/0 to-red-500/0 group-hover:from-rose-400/10 group-hover:to-red-500/10 rounded-2xl sm:rounded-3xl blur-xl transition-all duration-300" />
               <div className="relative flex items-center gap-2 sm:gap-4 mb-2 sm:mb-4 min-w-0">
-                <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-sky-100 dark:bg-sky-900/50 flex items-center justify-center flex-shrink-0 text-lg sm:text-2xl">📋</div>
-                <h3 className="font-bold text-sky-700 dark:text-sky-400 text-sm sm:text-lg truncate min-w-0">Citation Generator</h3>
+                <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-rose-100 dark:bg-rose-900/50 flex items-center justify-center flex-shrink-0 text-lg sm:text-2xl">📋</div>
+                <h3 className="font-bold text-rose-700 dark:text-rose-400 text-sm sm:text-lg truncate min-w-0">Citation Generator</h3>
               </div>
               <p className="text-xs sm:text-sm text-stone-600 dark:text-stone-400 leading-relaxed line-clamp-3 sm:line-clamp-none">Generate perfectly formatted citations from a URL, book, or journal. APA, MLA, Chicago, Harvard, and more.</p>
             </button>
@@ -184,7 +174,7 @@ const FeaturesPage = ({ onNavigate, user, onLogout }: FeaturesPageProps) => {
       <section className="py-16 sm:py-20">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-12">
-            <span className="inline-block px-4 py-1.5 bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-400 rounded-full text-sm font-semibold mb-4">
+            <span className="inline-block px-4 py-1.5 bg-rose-100 dark:bg-rose-900/50 text-rose-700 dark:text-rose-400 rounded-full text-sm font-semibold mb-4">
               Simple
             </span>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-stone-800 dark:text-stone-100 mb-4">How it works</h2>
@@ -200,8 +190,8 @@ const FeaturesPage = ({ onNavigate, user, onLogout }: FeaturesPageProps) => {
               { num: 3, title: 'Get results', desc: 'Instant results you can copy, study from, or submit with confidence' },
             ].map((step) => (
               <div key={step.num} className="relative group">
-                <div className="flex flex-col items-center text-center p-6 sm:p-8 rounded-2xl sm:rounded-3xl border border-white/60 dark:border-stone-600/50 shadow-xl shadow-stone-900/5 dark:shadow-black/20 backdrop-blur-2xl bg-white/70 dark:bg-stone-800/70 hover:shadow-2xl hover:border-violet-300/60 dark:hover:border-violet-600/40 transition-all duration-300">
-                  <span className="w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br from-violet-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4 text-white font-bold text-xl shadow-lg shadow-violet-500/30">
+                <div className="flex flex-col items-center text-center p-6 sm:p-8 rounded-2xl sm:rounded-3xl border border-white/60 dark:border-stone-600/50 shadow-xl shadow-stone-900/5 dark:shadow-black/20 backdrop-blur-2xl bg-white/70 dark:bg-stone-800/70 hover:shadow-2xl hover:border-rose-300/60 dark:hover:border-rose-600/40 transition-all duration-300">
+                  <span className="w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br from-rose-500 to-red-600 rounded-2xl flex items-center justify-center mx-auto mb-4 text-white font-bold text-xl shadow-lg shadow-rose-500/30">
                     {step.num}
                   </span>
                   <h3 className="text-lg font-bold text-stone-800 dark:text-stone-100 mb-2">{step.title}</h3>
@@ -222,8 +212,8 @@ const FeaturesPage = ({ onNavigate, user, onLogout }: FeaturesPageProps) => {
               <div className="space-y-4">
                 {benefits.map((benefit, index) => (
                   <div key={index} className="flex items-start space-x-3">
-                    <div className="w-6 h-6 bg-violet-100 dark:bg-violet-900/50 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <svg className="w-4 h-4 text-violet-600 dark:text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="w-6 h-6 bg-rose-100 dark:bg-rose-900/50 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <svg className="w-4 h-4 text-rose-600 dark:text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                       </svg>
                     </div>
@@ -236,16 +226,16 @@ const FeaturesPage = ({ onNavigate, user, onLogout }: FeaturesPageProps) => {
               </div>
             </div>
             
-            <div className="rounded-2xl sm:rounded-3xl overflow-hidden border border-white/60 dark:border-stone-600/50 shadow-xl shadow-stone-900/5 dark:shadow-black/20 backdrop-blur-2xl bg-gradient-to-br from-violet-500/10 via-purple-500/5 to-fuchsia-500/10 dark:from-violet-900/30 dark:via-purple-900/20 dark:to-fuchsia-900/20 p-6 sm:p-8">
+            <div className="rounded-2xl sm:rounded-3xl overflow-hidden border border-white/60 dark:border-stone-600/50 shadow-xl shadow-stone-900/5 dark:shadow-black/20 backdrop-blur-2xl bg-gradient-to-br from-rose-500/10 via-red-500/5 to-fuchsia-500/10 dark:from-rose-900/30 dark:via-red-900/20 dark:to-fuchsia-900/20 p-6 sm:p-8">
               <div className="grid grid-cols-2 gap-4 sm:gap-6">
                 {[
                   { value: '5+', label: 'AI Tools' },
-                  { value: '38K+', label: 'Students' },
+                  { value: '50K+', label: 'Students' },
                   { value: '6', label: 'Citation Styles' },
                   { value: 'Free', label: 'to Start' },
                 ].map((stat, i) => (
                   <div key={i} className="text-center p-4 rounded-2xl bg-white/60 dark:bg-stone-800/50">
-                    <div className="text-3xl sm:text-4xl font-bold text-violet-600 dark:text-violet-400">{stat.value}</div>
+                    <div className="text-3xl sm:text-4xl font-bold text-rose-600 dark:text-rose-400">{stat.value}</div>
                     <div className="text-stone-600 dark:text-stone-400 text-sm font-medium">{stat.label}</div>
                   </div>
                 ))}
@@ -272,7 +262,7 @@ const FeaturesPage = ({ onNavigate, user, onLogout }: FeaturesPageProps) => {
               <>
                 <button 
                   onClick={() => onNavigate('dashboard')}
-                  className="px-6 py-3 bg-gradient-to-r from-violet-500 to-purple-600 text-white font-bold rounded-2xl hover:from-violet-400 hover:to-violet-500 shadow-lg shadow-violet-500/25 transition-all"
+                  className="px-6 py-3 bg-gradient-to-r from-rose-500 to-red-600 text-white font-bold rounded-2xl hover:from-rose-400 hover:to-rose-500 shadow-lg shadow-rose-500/25 transition-all"
                 >
                   Go to Dashboard
                 </button>
@@ -289,7 +279,7 @@ const FeaturesPage = ({ onNavigate, user, onLogout }: FeaturesPageProps) => {
               <>
                 <button 
                   onClick={() => onNavigate('signup')}
-                  className="px-6 py-3 bg-gradient-to-r from-violet-500 to-purple-600 text-white font-bold rounded-2xl hover:from-violet-400 hover:to-violet-500 shadow-lg shadow-violet-500/25 transition-all"
+                  className="px-6 py-3 bg-gradient-to-r from-rose-500 to-red-600 text-white font-bold rounded-2xl hover:from-rose-400 hover:to-rose-500 shadow-lg shadow-rose-500/25 transition-all"
                 >
                   Try Free
                 </button>

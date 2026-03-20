@@ -1142,6 +1142,34 @@ function getCreatureSVG(id: string, alive: boolean) {
       );
 
     // ═══════════════════════════════════════
+    // TOOLS & LIBRARY (replaces calendar & friends)
+    // ═══════════════════════════════════════
+    case 'tool_tryer':
+      return getCreatureSVG('planner', alive);
+    case 'tool_explorer':
+      return getCreatureSVG('organized_scholar', alive);
+    case 'tool_adventurer':
+      return getCreatureSVG('time_master', alive);
+    case 'library_keeper':
+      return getCreatureSVG('schedule_sensei', alive);
+    case 'library_builder':
+      return getCreatureSVG('calendar_king', alive);
+    case 'library_hoarder':
+      return getCreatureSVG('friendly_scholar', alive);
+    case 'citation_collector':
+      return getCreatureSVG('social_butterfly', alive);
+    case 'citation_archivist':
+      return getCreatureSVG('popular_kid', alive);
+    case 'analysis_ace':
+      return getCreatureSVG('generous_genius', alive);
+    case 'analysis_titan':
+      return getCreatureSVG('sharing_star', alive);
+    case 'streak_champion':
+      return getCreatureSVG('knowledge_spreader', alive);
+    case 'streak_titan':
+      return getCreatureSVG('study_influencer', alive);
+
+    // ═══════════════════════════════════════
     // QUICK REVIEW (8 creatures)
     // ═══════════════════════════════════════
 

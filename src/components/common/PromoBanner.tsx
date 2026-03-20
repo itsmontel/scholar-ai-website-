@@ -10,18 +10,18 @@ const PromoBanner: React.FC<PromoBannerProps> = ({ embedded = false }) => {
   if (isDismissed) return null;
 
   return (
-    <div className={`sticky top-0 left-0 right-0 text-white py-2 sm:py-2.5 px-2 sm:px-4 z-30 bg-gradient-to-r from-indigo-600 to-violet-600`}>
+    <div className={`sticky top-0 left-0 right-0 text-white py-2 sm:py-2.5 px-2 sm:px-4 z-30 bg-gradient-to-r from-rose-600 to-pink-600`}>
       <div className="max-w-7xl mx-auto flex items-center justify-center gap-2 sm:gap-4">
         <div className="flex items-center justify-center gap-2 sm:gap-3 text-center flex-wrap">
           <span className="text-xs sm:text-sm font-medium sm:hidden">
-            <span className="font-semibold text-indigo-200">$10 off</span> first month <span className="text-indigo-200/70">•</span> Code: <span className="font-semibold text-indigo-200">OFF10</span>
+            <span className="font-semibold text-rose-200">$10 off</span> first month <span className="text-rose-200/70">•</span> Code: <span className="font-semibold text-rose-200">OFF10</span>
           </span>
           <span className="text-xs sm:text-sm font-medium hidden sm:inline">
-            Hurry! Get <span className="font-semibold text-indigo-200">$10 off</span> your first month on any plan
+            Hurry! Get <span className="font-semibold text-rose-200">$10 off</span> your first month on any plan
           </span>
-          <span className="text-indigo-200/70 hidden sm:inline">•</span>
+          <span className="text-rose-200/70 hidden sm:inline">•</span>
           <span className="bg-white/15 text-white px-2.5 sm:px-3 py-1 rounded-md font-medium text-xs sm:text-sm hidden sm:inline-flex">
-            Code: <span className="text-indigo-200 font-bold">OFF10</span>
+            Code: <span className="text-rose-200 font-bold">OFF10</span>
           </span>
         </div>
         
@@ -30,7 +30,7 @@ const PromoBanner: React.FC<PromoBannerProps> = ({ embedded = false }) => {
           className="flex-shrink-0 p-1 hover:bg-white/15 rounded transition-colors ml-2"
           aria-label="Close banner"
         >
-          <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-indigo-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-rose-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>

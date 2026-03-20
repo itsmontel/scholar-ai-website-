@@ -149,8 +149,7 @@ async function fetchConfig(token) {
     const data = await res.json();
     if (data.success && data.data) {
       const cfg = data.data;
-      const { unlockDurationMs: existing } = await chrome.storage.local.get('unlockDurationMs');
-      if (cfg.unlock_duration_ms && existing == null) {
+      if (cfg.unlock_duration_ms) {
         await chrome.storage.local.set({ unlockDurationMs: cfg.unlock_duration_ms });
       }
       return cfg;
@@ -172,7 +171,6 @@ async function syncFromServer() {
 
 chrome.runtime.onInstalled.addListener(async () => {
   await syncRules();
-  await checkUnlockExpiryAndRedirect();
 });
 
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
@@ -297,62 +295,9 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   }
 });
 
-/** Check interval for unlock expiry (ms) */
-const UNLOCK_EXPIRY_CHECK_MS = 15000;
-
-function isTabOnBlockedDomain(tabUrl, blockedDomains) {
-  if (!tabUrl || !blockedDomains.length) return false;
-  try {
-    const host = new URL(tabUrl).hostname.toLowerCase();
-    return blockedDomains.some((d) => host === d || host.endsWith('.' + d));
-  } catch (_) {
-    return false;
-  }
-}
-
-/**
- * Check for expired unlocks, sync rules, and redirect only tabs on blocked domains that expired.
- * Called every 15s so when timer hits zero, user gets blocked immediately (no refresh needed).
- */
-async function checkUnlockExpiryAndRedirect() {
-  const config = await getStoredConfig();
-  const unlocks = await getUnlocks();
-  const now = Date.now();
-  const blocked = config.blockedDomains || [];
-
-  const expiredDomains = blocked.filter((d) => unlocks[d] && unlocks[d] < now);
-  if (expiredDomains.length === 0) return;
-
-  console.log('[WriteScholar BG] Unlock(s) expired for:', expiredDomains);
-  await syncRules();
-
-  const base = getScholarBase();
-  for (const domain of expiredDomains) {
-    const redirectUrl = `${base}/unlock-quiz?site=${encodeURIComponent(domain)}&redirect=${encodeURIComponent(`https://${domain}`)}`;
-    try {
-      const tabs = await chrome.tabs.query({ url: [`*://*.${domain}/*`, `*://${domain}/*`] });
-      for (const tab of tabs) {
-        if (!tab.id || !tab.url || tab.url.includes('/unlock-quiz')) continue;
-        if (!isTabOnBlockedDomain(tab.url, blocked)) continue;
-        await chrome.tabs.update(tab.id, { url: redirectUrl });
-        console.log('[WriteScholar BG] Redirected tab', tab.id, 'to unlock quiz (unlock expired)');
-      }
-    } catch (e) {
-      console.error('[WriteScholar BG] Failed to redirect tabs for', domain, e);
-    }
-  }
-}
-
-function scheduleUnlockExpiryCheck() {
-  chrome.alarms.create('unlockExpiryCheck', { when: Date.now() + UNLOCK_EXPIRY_CHECK_MS });
-}
-
 chrome.alarms.create('focusModeSync', { periodInMinutes: 5 });
-scheduleUnlockExpiryCheck();
 chrome.alarms.onAlarm.addListener((alarm) => {
   if (alarm.name === 'focusModeSync') {
     syncFromServer();
-  } else if (alarm.name === 'unlockExpiryCheck') {
-    checkUnlockExpiryAndRedirect().then(scheduleUnlockExpiryCheck);
   }
 });

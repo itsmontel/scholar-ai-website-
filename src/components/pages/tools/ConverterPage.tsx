@@ -190,7 +190,7 @@ const ConverterPage = ({ onNavigate, user, onLogout }: ConverterPageProps) => {
       <section className="py-12 sm:py-16">
         <div className="max-w-2xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-8">
-            <span className="inline-flex items-center px-4 py-1.5 bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 rounded-full text-sm font-semibold mb-4">
+            <span className="inline-flex items-center px-4 py-1.5 bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-300 rounded-full text-sm font-semibold mb-4">
               Free Tool
             </span>
             <h1 className="text-3xl sm:text-4xl font-bold text-stone-800 dark:text-stone-100 mb-2">
@@ -210,7 +210,7 @@ const ConverterPage = ({ onNavigate, user, onLogout }: ConverterPageProps) => {
                   onClick={() => handleCategoryChange(id)}
                   className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
                     category === id
-                      ? 'bg-amber-500 text-white shadow-md'
+                      ? 'bg-rose-500 text-white shadow-md'
                       : 'bg-white dark:bg-stone-700 text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-600'
                   }`}
                 >
@@ -231,7 +231,7 @@ const ConverterPage = ({ onNavigate, user, onLogout }: ConverterPageProps) => {
                     value={fromValue}
                     onChange={(e) => setFromValue(e.target.value)}
                     placeholder="0"
-                    className="flex-1 px-4 py-3 rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 text-stone-800 dark:text-stone-100 text-lg font-mono focus:ring-2 focus:ring-amber-400 focus:border-transparent"
+                    className="flex-1 px-4 py-3 rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 text-stone-800 dark:text-stone-100 text-lg font-mono focus:ring-2 focus:ring-rose-400 focus:border-transparent"
                   />
                   <select
                     value={fromUnit}

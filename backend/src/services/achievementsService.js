@@ -64,7 +64,7 @@ async function upsertAchievements(userId, { stats = {}, unlockedBadges = {} }) {
 
 function mergeStats(existing, incoming) {
   const numericKeys = [
-    'uploads_count', 'analyses_count', 'humanize_count', 'summaries_count',
+    'uploads_count', 'analyses_count', 'summaries_count',
     'quizzes_count', 'flashcards_count', 'crosswords_count', 'citations_count',
     'lessons_count',
     'longest_streak', 'current_streak', 'tools_used_session', 'study_tools_session',

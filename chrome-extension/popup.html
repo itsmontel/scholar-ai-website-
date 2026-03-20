@@ -3,325 +3,874 @@
 <head>
   <meta charset="UTF-8">
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Crimson+Text:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --bg: #faf9f7;
+      --surface: #ffffff;
+      --surface-hover: #fefefe;
+      --text: #1a1918;
+      --text-muted: #78716c;
+      --text-subtle: #a8a29e;
+      --primary: #6d28d9;
+      --primary-hover: #5b21b6;
+      --primary-muted: #ede9fe;
+      --success: #059669;
+      --success-muted: #d1fae5;
+      --warning: #d97706;
+      --warning-muted: #fef3c7;
+      --error: #dc2626;
+      --error-muted: #fee2e2;
+      --border: rgba(0,0,0,0.06);
+      --border-strong: rgba(0,0,0,0.1);
+      --radius: 14px;
+      --radius-sm: 10px;
+      --shadow: 0 1px 3px rgba(0,0,0,0.05);
+      --shadow-lg: 0 4px 12px rgba(0,0,0,0.08);
+    }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      width: 380px;
-      min-height: 320px;
-      padding: 20px;
-      font-family: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif;
+      width: 420px;
+      min-height: 300px;
+      max-height: 520px;
+      overflow-y: auto;
+      padding: 24px;
+      font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
       font-size: 14px;
-      color: #292524;
-      background: linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%);
+      color: var(--text);
+      background: var(--bg);
+      -webkit-font-smoothing: antialiased;
     }
+    .popup-view { min-height: 200px; }
     .header {
       display: flex;
       align-items: center;
-      gap: 12px;
-      margin-bottom: 16px;
+      gap: 14px;
+      margin-bottom: 20px;
     }
     .header img {
       width: 44px;
       height: 44px;
       border-radius: 12px;
+      object-fit: cover;
+      box-shadow: var(--shadow);
     }
     .header h1 {
-      font-family: 'Crimson Text', Georgia, serif;
-      font-size: 20px;
-      font-weight: 600;
-      color: #1c1917;
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: 22px;
+      font-weight: 400;
+      color: var(--text);
+      letter-spacing: -0.02em;
     }
-    .header .badge {
-      font-size: 11px;
-      font-weight: 700;
-      color: #4f46e5;
-      background: #eef2ff;
-      padding: 4px 10px;
-      border-radius: 8px;
+    .badge {
       margin-left: auto;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--primary);
+      background: var(--primary-muted);
+      padding: 5px 10px;
+      border-radius: 20px;
+    }
+    .user-email {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin: -12px 0 16px 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
     .subtitle {
-      color: #57534e;
+      color: var(--text-muted);
       font-size: 13px;
-      line-height: 1.5;
-      margin-bottom: 16px;
+      line-height: 1.55;
+      margin-bottom: 18px;
     }
-    .card {
-      background: white;
-      border: 1px solid #e7e5e4;
-      border-radius: 16px;
-      padding: 16px;
-      margin-bottom: 12px;
+    .main-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      margin-bottom: 14px;
+      box-shadow: var(--shadow);
     }
-    .status {
-      padding: 12px 14px;
-      border-radius: 12px;
-      margin-bottom: 16px;
-      font-size: 13px;
-      font-weight: 500;
+    .main-section-title {
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: 16px;
+      font-weight: 400;
+      color: var(--text);
+      margin-bottom: 6px;
     }
-    .status.inactive {
-      background: #fef3c7;
-      color: #92400e;
-      border: 1px solid #fde68a;
-    }
-    .status.active {
-      background: #d1fae5;
-      color: #065f46;
-      border: 1px solid #a7f3d0;
-    }
-    .status.error {
-      background: #fee2e2;
-      color: #991b1b;
-      border: 1px solid #fecaca;
-    }
-    button {
-      width: 100%;
-      padding: 12px 16px;
-      border: none;
-      border-radius: 12px;
-      font-size: 14px;
-      font-weight: 600;
-      font-family: inherit;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    button:disabled { opacity: 0.6; cursor: not-allowed; }
-    .btn-primary {
-      background: #8B5CF6;
-      color: white;
-      margin-bottom: 8px;
-    }
-    .btn-primary:hover:not(:disabled) {
-      background: #7C3AED;
-      box-shadow: 0 2px 8px rgba(139, 92, 246, 0.4);
-    }
-    .btn-secondary {
-      background: #f5f5f4;
-      color: #44403c;
-      border: 1px solid #e7e5e4;
-    }
-    .btn-secondary:hover:not(:disabled) {
-      background: #e7e5e4;
-    }
-    a {
-      color: #6366f1;
-      text-decoration: none;
-      font-weight: 600;
-    }
-    a:hover { text-decoration: underline; }
-    .footer {
-      margin-top: 16px;
-      padding-top: 12px;
-      border-top: 1px solid #e7e5e4;
+    .main-section-desc {
       font-size: 12px;
-      color: #78716c;
+      color: var(--text-muted);
+      margin-bottom: 14px;
+      line-height: 1.5;
     }
-    .sites-label {
-      font-size: 13px;
-      font-weight: 700;
-      color: #292524;
-      margin-bottom: 10px;
+    .main-inner {
+      background: var(--primary-muted);
+      border: 1px solid rgba(109,40,217,0.2);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
     }
-    .sites-grid {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-    .site-btn {
-      width: auto !important;
-      padding: 8px 14px !important;
-      border-radius: 10px;
-      font-size: 12px !important;
-      font-weight: 600;
-      background: #f5f5f4;
-      color: #57534e;
-      border: 1px solid #e7e5e4;
-    }
-    .site-btn.blocked {
-      background: #8B5CF6;
-      color: white;
-      border: none;
-    }
-    .site-btn:hover:not(:disabled) {
-      opacity: 0.9;
-    }
-    .sites-section { display: none; }
-    .sites-section.visible { display: block; }
-    .add-domain {
-      display: flex;
-      gap: 10px;
-      margin-top: 12px;
-    }
-    .add-domain input {
-      flex: 1;
-      padding: 10px 14px;
-      border: 1px solid #e7e5e4;
-      border-radius: 12px;
-      font-size: 13px;
-      font-family: inherit;
-    }
-    .add-domain input:focus {
-      outline: none;
-      border-color: #6366f1;
-      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
-    }
-    .add-domain input::placeholder {
-      color: #a8a29e;
-    }
-    .add-domain button {
-      width: auto !important;
-      padding: 10px 18px !important;
-    }
-    .btn-mascot {
-      background: #8B5CF6 !important;
-      color: white !important;
-    }
-    .btn-mascot:hover:not(:disabled) {
-      background: #7C3AED !important;
-      box-shadow: 0 2px 8px rgba(139, 92, 246, 0.4);
-    }
-    .actions {
-      display: flex;
-      gap: 10px;
-      margin-top: 12px;
-    }
-    .actions button { flex: 1; }
-    .toast {
-      position: fixed;
-      bottom: 24px;
-      left: 50%;
-      transform: translateX(-50%);
-      padding: 10px 18px;
-      border-radius: 12px;
-      font-size: 13px;
-      font-weight: 600;
-      z-index: 100;
-    }
-    .toast.success {
-      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-      color: white;
-    }
-    .toast.error { background: #dc2626; color: white; }
-    .setting-row {
+    .toggle-row {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 12px;
+      padding: 14px 16px;
     }
-    .setting-label {
-      font-size: 13px;
+    .toggle-row .toggle-label {
+      font-size: 14px;
       font-weight: 600;
-      color: #292524;
+      color: var(--text);
     }
-    select {
-      padding: 8px 12px;
-      border: 1px solid #e7e5e4;
-      border-radius: 10px;
-      font-size: 13px;
-      font-family: inherit;
-      background: white;
-      color: #292524;
+    .toggle-switch {
+      position: relative;
+      width: 48px;
+      height: 28px;
+      background: #e7e5e4;
+      border-radius: 14px;
       cursor: pointer;
-      min-width: 140px;
+      transition: background 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    select:focus {
-      outline: none;
-      border-color: #6366f1;
-      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+    .toggle-switch.on { background: var(--primary); }
+    .toggle-switch::after {
+      content: '';
+      position: absolute;
+      width: 22px;
+      height: 22px;
+      top: 3px;
+      left: 3px;
+      background: white;
+      border-radius: 50%;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .toggle-switch.on::after { transform: translateX(20px); }
+    .status {
+      padding: 14px 16px;
+      border-radius: var(--radius-sm);
+      margin-bottom: 14px;
+      font-size: 13px;
+      font-weight: 500;
+      line-height: 1.4;
+      transition: all 0.2s ease;
+    }
+    .main-section .status {
+      margin-bottom: 0;
+    }
+    .status.inactive {
+      background: var(--warning-muted);
+      color: #92400e;
+      border: 1px solid rgba(217,119,6,0.3);
+    }
+    .status.active {
+      background: var(--success-muted);
+      color: #065f46;
+      border: 1px solid rgba(5,150,105,0.3);
+    }
+    .status.error {
+      background: var(--error-muted);
+      color: var(--error);
+      border: 1px solid rgba(220,38,38,0.3);
     }
     .unlock-timer {
-      background: #f0fdf4;
-      border: 1px solid #bbf7d0;
-      border-radius: 12px;
-      padding: 12px;
-      margin-bottom: 12px;
+      background: var(--success-muted);
+      border: 1px solid rgba(5,150,105,0.25);
+      border-radius: var(--radius-sm);
+      padding: 14px 16px;
+      margin-bottom: 14px;
       font-size: 12px;
+      display: none;
     }
+    .unlock-timer.visible { display: block; }
     .unlock-timer-title {
       font-weight: 700;
-      color: #166534;
-      margin-bottom: 8px;
-      font-size: 13px;
+      color: #065f46;
+      margin-bottom: 10px;
+      font-size: 12px;
     }
     .unlock-item {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 6px 0;
-      border-bottom: 1px solid #d1fae5;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(5,150,105,0.15);
     }
-    .unlock-item:last-child {
-      border-bottom: none;
-    }
-    .unlock-domain {
-      font-weight: 600;
-      color: #292524;
-    }
+    .unlock-item:last-child { border-bottom: none; }
+    .unlock-domain { font-weight: 600; color: var(--text); }
     .unlock-time {
-      color: #059669;
+      color: var(--success);
       font-weight: 600;
-      font-family: 'Courier New', monospace;
+      font-variant-numeric: tabular-nums;
     }
-    .unlock-time.expired {
-      color: #dc2626;
-    }
-    .quiz-settings { margin-top: 8px; padding-top: 12px; border-top: 1px solid #e7e5e4; }
-    .quiz-count-btns { display: flex; gap: 8px; }
-    .quiz-count-btn {
-      width: auto !important;
-      padding: 6px 14px !important;
-      border-radius: 10px;
-      font-size: 13px !important;
+    .unlock-time.expired { color: var(--error); }
+    .sites-section { display: none; }
+    .sites-section.visible { display: block; }
+    .sites-section.disabled { opacity: 0.5; pointer-events: none; }
+    .section-label {
+      font-size: 11px;
       font-weight: 600;
-      background: #f5f5f4;
-      color: #57534e;
-      border: 1px solid #e7e5e4;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-subtle);
+      margin-bottom: 10px;
+    }
+    .main-inner .sites-grid {
+      padding: 12px 14px;
+      margin-bottom: 0;
+    }
+    .main-inner .add-row {
+      margin: 0;
+      padding: 12px 14px;
+      border-top: 1px solid rgba(109,40,217,0.15);
+    }
+    .add-domain-hint {
+      font-size: 11px;
+      color: var(--text-subtle);
+      margin-top: 6px;
+      line-height: 1.35;
+    }
+    .sites-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .site-btn {
+      padding: 10px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 600;
+      background: var(--surface);
+      color: var(--text-muted);
+      border: 1.5px solid var(--border);
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .site-btn:hover:not(:disabled) {
+      background: var(--surface-hover);
+      border-color: var(--border-strong);
+      color: var(--text);
+      transform: translateY(-1px);
+    }
+    .site-btn:active:not(:disabled) { transform: translateY(0); }
+    .site-btn.blocked {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+      box-shadow: 0 2px 8px rgba(109,40,217,0.25);
+    }
+    .site-btn.blocked:hover:not(:disabled) {
+      background: var(--primary-hover);
+      box-shadow: 0 4px 12px rgba(109,40,217,0.3);
+    }
+    .add-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+    .settings-inner .add-row {
+      margin-bottom: 0;
+    }
+    .add-row input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 12px 16px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-family: inherit;
+      background: var(--surface);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .add-row input::placeholder { color: var(--text-subtle); }
+    .add-row input:hover { border-color: var(--border-strong); }
+    .add-row input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(109,40,217,0.12);
+    }
+    .add-row .add-btn {
+      flex-shrink: 0;
+      padding: 10px 16px;
+      height: 42px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .add-row .add-btn:hover {
+      background: var(--primary-hover);
+      box-shadow: 0 2px 8px rgba(109,40,217,0.3);
+    }
+    .settings-row { margin-bottom: 18px; }
+    .main-settings-row {
+      padding: 14px 16px;
+      border-top: 1px solid rgba(109,40,217,0.15);
+    }
+    .main-settings-row .settings-hint {
+      margin-bottom: 10px;
+    }
+    .settings-hint {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      line-height: 1.4;
+    }
+    .main-settings-row .btn-settings {
+      margin-bottom: 0;
+    }
+    .btn-settings {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      padding: 14px 18px;
+      margin-bottom: 0;
+      background: var(--surface);
+      color: var(--primary);
+      border: 2px solid var(--primary-muted);
+      border-radius: var(--radius);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .btn-settings:hover {
+      background: var(--primary-muted);
+      border-color: var(--primary);
+      color: var(--primary-hover);
+    }
+    .actions {
+      display: flex;
+      gap: 10px;
+    }
+    .actions button {
+      flex: 1;
+      padding: 12px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 600;
+      border: 1.5px solid var(--border);
+      background: var(--surface);
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .actions button:hover {
+      background: var(--surface-hover);
+      color: var(--text);
+      border-color: var(--border-strong);
+    }
+    .actions .btn-primary {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+    .actions .btn-primary:hover {
+      background: var(--primary-hover);
+      box-shadow: 0 4px 12px rgba(109,40,217,0.25);
+    }
+    .footer {
+      margin-top: 20px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+    .footer a {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    .footer a:hover { color: var(--primary); }
+    button:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px;
+      margin-top: 14px;
+      box-shadow: var(--shadow);
+    }
+    .login-input {
+      width: 100%;
+      padding: 12px 16px;
+      margin-bottom: 12px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-family: inherit;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .login-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(109,40,217,0.12);
+    }
+    .auth-buttons { display: flex; gap: 10px; }
+    .auth-btn {
+      flex: 1;
+      padding: 12px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: none;
+      font-family: inherit;
+    }
+    .auth-btn.primary {
+      background: var(--primary);
+      color: white;
+    }
+    .auth-btn.primary:hover { background: var(--primary-hover); box-shadow: 0 4px 12px rgba(109,40,217,0.25); }
+    .auth-btn.secondary {
+      background: var(--surface);
+      color: var(--text);
+      border: 1.5px solid var(--border);
+    }
+    .auth-btn.secondary:hover { border-color: var(--border-strong); background: var(--surface-hover); }
+    .google-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      padding: 12px 16px;
+      margin-bottom: 12px;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.2s ease;
+    }
+    .google-btn:hover { border-color: var(--border-strong); background: var(--surface-hover); }
+    .main-section .auth-buttons { margin-top: 4px; }
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      padding: 12px 20px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 600;
+      z-index: 100;
+      box-shadow: var(--shadow-lg);
+      animation: toastIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+    .toast.success { background: var(--primary); color: white; }
+    .toast.error { background: var(--error); color: white; }
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateX(-50%) translateY(16px) scale(0.95); }
+      to { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+    }
+    @keyframes toastOut {
+      from { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+      to { opacity: 0; transform: translateX(-50%) translateY(-8px) scale(0.98); }
+    }
+    .back-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 0 0 16px;
+      margin-bottom: 0;
+      font-family: inherit;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: color 0.2s;
+    }
+    .back-btn:hover { color: var(--primary); }
+    .settings-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 18px;
+      margin-bottom: 14px;
+      box-shadow: var(--shadow);
+    }
+    .settings-title {
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: 16px;
+      font-weight: 400;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+    .settings-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+      line-height: 1.5;
+    }
+    .settings-inner {
+      background: var(--primary-muted);
+      border: 1px solid rgba(109,40,217,0.2);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+    }
+    .site-row,
+    .setting-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 12px 14px;
+      border-bottom: 1px solid rgba(109,40,217,0.15);
+    }
+    .site-row:last-child,
+    .setting-row:last-child { border-bottom: none; }
+    .site-name {
+      flex: 1;
+      min-width: 80px;
+      font-weight: 600;
+      font-size: 13px;
+      color: var(--text);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .site-mode-wrap { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; flex-shrink: 0; }
+    .site-mode-wrap select {
+      padding: 8px 10px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      font-family: inherit;
+      background: var(--surface);
+      min-width: 95px;
       cursor: pointer;
     }
-    .quiz-count-btn.active {
-      background: #8B5CF6;
-      color: white;
-      border-color: #8B5CF6;
+    .site-mode-wrap select:focus {
+      outline: none;
+      border-color: var(--primary);
     }
-    .quiz-count-btn:hover:not(.active) { background: #e7e5e4; }
+    .site-remaining { font-size: 11px; color: var(--text-muted); font-weight: 600; }
+    .site-remaining.limit-reached { color: var(--error); }
+    .remove-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      padding: 0;
+      color: var(--text-muted);
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: all 0.2s;
+    }
+    .remove-btn svg {
+      display: block;
+    }
+    .remove-btn:hover {
+      color: var(--error);
+      border-color: #fecaca;
+      background: var(--error-muted);
+    }
+    .setting-row .setting-label { font-size: 13px; font-weight: 600; color: var(--text); }
+    .setting-select-wrap {
+      position: relative;
+      min-width: 110px;
+    }
+    .setting-select-wrap .setting-select-chevron {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 10px;
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+    .setting-select {
+      width: 100%;
+      padding: 10px 32px 10px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 600;
+      font-family: inherit;
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+      appearance: none;
+      -webkit-appearance: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .setting-select:hover { border-color: var(--primary); }
+    .setting-select:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(109,40,217,0.15);
+    }
+    .unlock-duration-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 14px 16px;
+      background: var(--primary-muted);
+      border: 1px solid rgba(109,40,217,0.2);
+      border-radius: var(--radius-sm);
+      margin-top: 8px;
+    }
+    .unlock-duration-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .unlock-duration-select-wrap {
+      position: relative;
+      flex: 1;
+      max-width: 160px;
+    }
+    .unlock-duration-select-wrap .unlock-duration-chevron {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 10px;
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+    .unlock-duration-select {
+      width: 100%;
+      padding: 12px 36px 12px 16px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-weight: 600;
+      font-family: inherit;
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+      appearance: none;
+      -webkit-appearance: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .unlock-duration-select:hover {
+      border-color: var(--primary);
+    }
+    .unlock-duration-select:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(109,40,217,0.15);
+    }
+    .quiz-count-btns { display: flex; gap: 8px; }
+    .quiz-count-btn {
+      padding: 8px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 600;
+      background: var(--surface);
+      color: var(--text-muted);
+      border: 1.5px solid var(--border);
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.2s;
+    }
+    .quiz-count-btn.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+      box-shadow: 0 2px 6px rgba(109,40,217,0.2);
+    }
+    .quiz-count-btn:hover:not(.active) {
+      background: var(--surface-hover);
+      border-color: var(--border-strong);
+      color: var(--text);
+    }
+    .quiz-count-btn.locked,
+    .quiz-count-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      color: var(--text-subtle);
+    }
+    .setting-select:disabled {
+      opacity: 0.8;
+      cursor: not-allowed;
+    }
+    .pro-badge {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--primary);
+      background: var(--primary-muted);
+      padding: 2px 6px;
+      border-radius: 6px;
+      margin-left: 6px;
+    }
+    .settings-upgrade-link {
+      margin-left: auto;
+      font-size: 12px;
+      font-weight: 600;
+      color: white;
+      background: var(--primary);
+      padding: 8px 14px;
+      border-radius: var(--radius-sm);
+      text-decoration: none;
+      transition: background 0.2s, box-shadow 0.2s;
+    }
+    .settings-upgrade-link:hover {
+      background: var(--primary-hover);
+      box-shadow: 0 4px 12px rgba(109,40,217,0.3);
+    }
+    .empty-sites {
+      text-align: center;
+      padding: 24px 16px;
+      color: var(--text-muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
   </style>
 </head>
 <body>
-  <div class="header">
-    <img src="mascot.png" alt="WriteScholar" />
-    <h1>Focus Mode</h1>
-    <span id="planBadge" class="badge" style="display:none"></span>
-  </div>
-  <p class="subtitle" id="subtitle">Block sites until you solve a puzzle or answer study questions.</p>
-  <div id="status" class="status inactive">Checking status...</div>
-  <button id="loginBtn" class="btn-primary" style="display:none">Log in at WriteScholar</button>
-  <div id="sitesSection" class="sites-section">
-    <div id="unlockTimer" class="unlock-timer" style="display:none">
-      <div class="unlock-timer-title">🔓 Currently Unlocked</div>
+  <div id="mainView" class="popup-view">
+    <div class="header">
+      <img src="mascot.png" alt="WriteScholar" />
+      <h1>Focus Mode</h1>
+      <span id="planBadge" class="badge" style="display:none"></span>
+    </div>
+    <p id="userEmail" class="user-email" style="display:none"></p>
+    <div class="main-section">
+      <h2 class="main-section-title">Extension</h2>
+      <p class="main-section-desc">Turn Focus Mode on or off.</p>
+      <div class="main-inner">
+        <div id="toggleRow" class="toggle-row">
+          <span class="toggle-label">Enabled</span>
+          <div id="toggleSwitch" class="toggle-switch on" title="Turn on or off"></div>
+        </div>
+      </div>
+    </div>
+    <div id="statusSection" class="main-section" style="padding:12px 20px">
+      <div id="status" class="status inactive">Checking status...</div>
+    </div>
+    <div id="unlockTimer" class="unlock-timer">
+      <div class="unlock-timer-title">🔓 Currently unlocked</div>
       <div id="unlockTimerList"></div>
     </div>
-    <div class="card">
-      <div class="setting-row">
-        <label class="setting-label" for="unlockDuration">Unlock duration:</label>
-        <select id="unlockDuration" style="display:none">
-          <option value="300000">5 minutes</option>
-          <option value="900000">15 minutes</option>
-          <option value="1800000" selected>30 minutes</option>
-          <option value="3600000">1 hour</option>
-          <option value="7200000">2 hours</option>
-          <option value="10800000">3 hours</option>
-          <option value="14400000">4 hours</option>
-          <option value="21600000">6 hours</option>
-          <option value="28800000">8 hours</option>
-          <option value="43200000">12 hours</option>
-          <option value="86400000">24 hours</option>
-        </select>
+    <div id="loggedOutSection" style="display:none">
+      <div class="main-section">
+        <h2 class="main-section-title">Get started</h2>
+        <p class="main-section-desc">Create a free account at WriteScholar to use the extension.</p>
+        <button id="googleBtn" class="google-btn">
+          <svg width="20" height="20" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+          Continue with Google
+        </button>
+        <div id="loggedOutButtons" class="auth-buttons">
+          <button id="signUpBtn" class="auth-btn primary">Sign up (free)</button>
+          <button id="loginBtn" class="auth-btn secondary">Log in</button>
+        </div>
+        <div id="inlineLoginForm" class="card" style="display:none">
+          <p class="main-section-desc" style="margin-bottom:12px;font-weight:600">Log in</p>
+          <input id="loginEmail" type="email" placeholder="Email" class="login-input" />
+          <input id="loginPassword" type="password" placeholder="Password" class="login-input" style="margin-bottom:0" />
+          <p id="loginError" style="display:none;color:var(--error);font-size:12px;margin:10px 0"></p>
+          <div class="auth-buttons" style="margin-top:14px">
+            <button id="loginSubmitBtn" class="auth-btn primary">Log in</button>
+            <button id="loginBackBtn" class="auth-btn secondary">Back</button>
+          </div>
+        </div>
       </div>
-      <div class="quiz-settings" id="quizSettings" style="display:none">
-        <div class="setting-row" style="margin-top:12px">
-          <span class="setting-label">Quiz: questions</span>
+    </div>
+    <div id="sitesSection" class="sites-section">
+      <div class="main-section">
+        <h2 class="main-section-title">Blocked sites</h2>
+        <p class="main-section-desc">Block or limit distracting sites. Tap to toggle, add below.</p>
+        <div class="main-inner">
+          <div id="sitesGrid" class="sites-grid"></div>
+          <div class="add-row">
+            <div class="add-row-input-wrap">
+              <input id="customDomain" type="text" placeholder="youtube.com" maxlength="100" />
+              <p class="add-domain-hint">Use full domain (e.g. youtube.com). Include .com — www is optional.</p>
+            </div>
+            <button id="addDomainBtn" class="add-btn">Add</button>
+          </div>
+          <div class="main-settings-row">
+            <p class="settings-hint">Set daily limits, unlock duration & quiz per site</p>
+            <button id="openSettingsBtn" class="btn-settings">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+              Limits & settings
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="actionsRow" class="actions" style="display:none">
+      <button id="upgradeBtn" class="btn-primary" style="display:none">Upgrade</button>
+      <button id="signOutBtn">Sign out</button>
+      <button id="syncBtn">Sync</button>
+    </div>
+    <div class="footer">
+      <a href="https://writescholar.com/account" target="_blank">Account settings</a>
+    </div>
+  </div>
+
+  <div id="settingsView" class="popup-view" style="display:none">
+    <button id="backBtn" class="back-btn">← Back</button>
+    <div class="header" style="margin-bottom:18px">
+      <img src="mascot.png" alt="WriteScholar" />
+      <h1>Limits & settings</h1>
+      <a id="settingsUpgradeLink" href="https://writescholar.com/pricing" target="_blank" class="settings-upgrade-link" style="display:none">Upgrade</a>
+    </div>
+    <div class="settings-section">
+      <h2 class="settings-title">Sites & limits</h2>
+      <p class="settings-desc">Set Block (always) or daily time limits per site. When you hit the limit, pass a quiz to unlock.</p>
+      <div class="settings-inner">
+        <div id="settingsSitesList"></div>
+        <div class="add-row" style="margin:0;padding:12px 14px;border-top:1px solid rgba(109,40,217,0.15)">
+          <div class="add-row-input-wrap">
+            <input id="settingsCustomDomain" type="text" placeholder="youtube.com" maxlength="100" />
+            <p class="add-domain-hint">Use full domain (e.g. youtube.com). Include .com — www is optional.</p>
+          </div>
+          <button id="settingsAddBtn" class="add-btn">Add</button>
+        </div>
+      </div>
+    </div>
+    <div class="settings-section">
+      <h2 class="settings-title">Unlock duration</h2>
+      <p class="settings-desc">How long can you access the site after passing the quiz?</p>
+      <div class="unlock-duration-wrap">
+        <div class="unlock-duration-label">Duration</div>
+        <div class="unlock-duration-select-wrap">
+          <select id="unlockDuration" class="unlock-duration-select">
+            <option value="300000">5 minutes</option>
+            <option value="900000">15 minutes</option>
+            <option value="1800000" selected>30 minutes</option>
+            <option value="3600000">1 hour</option>
+            <option value="7200000">2 hours</option>
+            <option value="10800000">3 hours</option>
+            <option value="14400000">4 hours</option>
+            <option value="21600000">6 hours</option>
+            <option value="28800000">8 hours</option>
+            <option value="43200000">12 hours</option>
+            <option value="86400000">24 hours</option>
+          </select>
+          <span class="unlock-duration-chevron">▼</span>
+        </div>
+      </div>
+    </div>
+    <div class="settings-section">
+      <h2 class="settings-title">Quiz</h2>
+      <p class="settings-desc">Number of questions and minimum correct to unlock.</p>
+      <div class="settings-inner">
+        <div class="setting-row">
+          <span class="setting-label">Questions</span>
           <div class="quiz-count-btns">
             <button type="button" class="quiz-count-btn" data-val="5">5</button>
             <button type="button" class="quiz-count-btn" data-val="10">10</button>
@@ -330,25 +879,15 @@
         </div>
         <div class="setting-row">
           <span class="setting-label">Pass threshold</span>
-          <select id="passThreshold">
-          </select>
+          <div class="setting-select-wrap">
+            <select id="passThreshold" class="setting-select"></select>
+            <span class="setting-select-chevron">▼</span>
+          </div>
         </div>
-      </div>
-      <div class="sites-label">Sites to block</div>
-      <div id="sitesGrid" class="sites-grid"></div>
-      <div class="add-domain">
-        <input id="customDomain" type="text" placeholder="youtube.com, instagram.com..." maxlength="100" />
-        <button id="addDomainBtn" class="btn-primary btn-mascot">Add</button>
       </div>
     </div>
   </div>
-  <div id="actionsRow" class="actions" style="display:none">
-    <button id="accountBtn" class="btn-secondary">Account</button>
-    <button id="syncBtn" class="btn-secondary">Sync</button>
-  </div>
-  <div class="footer">
-    <a href="https://writescholar.com/account" target="_blank">Account settings</a>
-  </div>
+
   <script src="popup.js"></script>
 </body>
 </html>

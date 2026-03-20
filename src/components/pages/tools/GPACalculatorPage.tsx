@@ -223,7 +223,7 @@ const GPACalculatorPage = ({ onNavigate, user, onLogout }: GPACalculatorPageProp
             {/* GPA Results Panel */}
             <div className="space-y-6">
               {/* Main GPA Display */}
-              <div className="bg-gradient-to-br from-emerald-600 to-teal-600 rounded-2xl p-6 text-white text-center">
+              <div className="bg-gradient-to-br from-rose-600 to-red-600 rounded-2xl p-6 text-white text-center">
                 <h3 className="text-lg font-semibold mb-2 opacity-90">Your GPA</h3>
                 <div className={`text-6xl font-bold mb-2`}>
                   {gpa.toFixed(2)}
@@ -321,8 +321,8 @@ const GPACalculatorPage = ({ onNavigate, user, onLogout }: GPACalculatorPageProp
               <p className="text-gray-600 text-sm">It&apos;s easier to maintain a high GPA than to raise a low one. Begin each term with focus.</p>
             </div>
             <div className="bg-white border border-gray-200 rounded-2xl p-6">
-              <div className="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center mb-4">
-                <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-12 h-12 bg-red-50 rounded-xl flex items-center justify-center mb-4">
+                <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
               </div>

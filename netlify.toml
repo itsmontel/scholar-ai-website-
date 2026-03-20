@@ -10,6 +10,265 @@
   status = 301
   force = true
 
+# Canonical URL aliases (301 before SPA) — matches src/utils/seo.ts PATH_ALIASES
+[[redirects]]
+  from = "/compare"
+  to = "/why-students-choose"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/study-tools-comparison"
+  to = "/vs-quizlet-knowt"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/compare-study-tools"
+  to = "/vs-quizlet-knowt"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/focus"
+  to = "/focus-mode"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/help-center"
+  to = "/help"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/privacy-policy"
+  to = "/privacy"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/terms-of-service"
+  to = "/terms"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/word-counter"
+  to = "/tools/word-counter"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/citation-generator-tool"
+  to = "/tools/citation-generator"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/readability-score"
+  to = "/tools/readability-score"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/paraphrasing-tips"
+  to = "/tools/paraphrasing-tips"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/essay-outline"
+  to = "/tools/essay-outline"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/text-case-converter"
+  to = "/tools/text-case-converter"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/thesis-generator"
+  to = "/tools/thesis-generator"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/grammar-checker"
+  to = "/tools/grammar-checker"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/summarizer"
+  to = "/tools/summarizer"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/quiz-generator"
+  to = "/tools/quiz-generator"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/flashcard-generator"
+  to = "/tools/create-flashcards"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/create-flashcards"
+  to = "/tools/create-flashcards"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/crossword-generator"
+  to = "/tools/crossword-generator"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/gpa-calculator"
+  to = "/tools/gpa-calculator"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/pomodoro-timer"
+  to = "/tools/pomodoro-timer"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/calculator"
+  to = "/tools/calculator"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/converter"
+  to = "/tools/converter"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/crater-blast"
+  to = "/tools/crater-blast"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/lightning-reflex-quiz"
+  to = "/tools/crater-blast"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/tools/lightning-reflex-quiz"
+  to = "/tools/crater-blast"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/analyze"
+  to = "/tools/analyze"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/citations"
+  to = "/tools/citations"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/view-more-tools"
+  to = "/more-tools"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/tools/more"
+  to = "/more-tools"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/achievements"
+  to = "/badges"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/tools/study-pack-viewer"
+  to = "/study-pack-viewer"
+  status = 301
+  force = true
+
+# Trailing slash → no trailing slash (avoids duplicate URLs vs sitemap)
+[[redirects]]
+  from = "/blog/"
+  to = "/blog"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/blog/:slug/"
+  to = "/blog/:slug"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/tools/:tool/"
+  to = "/tools/:tool"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/features/"
+  to = "/features"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/pricing/"
+  to = "/pricing"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/about/"
+  to = "/about"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/why-students-choose/"
+  to = "/why-students-choose"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/vs-quizlet-knowt/"
+  to = "/vs-quizlet-knowt"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/more-tools/"
+  to = "/more-tools"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/help/"
+  to = "/help"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/contact/"
+  to = "/contact"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/focus-mode/"
+  to = "/focus-mode"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/login/"
+  to = "/login"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/signup/"
+  to = "/signup"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/privacy/"
+  to = "/privacy"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/terms/"
+  to = "/terms"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/study-pack-viewer/"
+  to = "/study-pack-viewer"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/badges/"
+  to = "/badges"
+  status = 301
+  force = true
+
 # SPA fallback - serve index.html for all routes, let React handle routing
 [[redirects]]
   from = "/*"

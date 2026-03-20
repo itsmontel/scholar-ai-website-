@@ -6,14 +6,14 @@ Use this copy when editing your extension's listing in the Chrome Web Store dash
 
 ## Short Description (max 132 characters)
 
-**Option A:**  
-Block distracting sites until you solve a puzzle or answer study questions. No scroll until you've earned it.
+**Primary (CSO-optimized, broad appeal):**  
+Block websites & stay focused. Unlock with a puzzle or quiz. Daily limits per site. Free: 3 sites. Paid: unlimited.
 
-**Option B:**  
-Block sites until you study. Solve a puzzle or pass a quiz to unlock. Free: 3 sites. Pro: 20. Premium: unlimited.
+**Alternative A:**  
+Block distracting websites. Solve a puzzle or pass a quiz to unlock. Daily limits. Free: 3 sites. Paid: unlimited.
 
-**Option C:**  
-Earn your screen time. Block sites until you solve a puzzle or answer study questions. Free to try.
+**Alternative B:**  
+Website blocker for focus & productivity. Puzzle or quiz to unlock. Daily limits. Free: 3 sites. Paid: unlimited.
 
 ---
 
@@ -26,7 +26,7 @@ WriteScholar Focus Mode blocks distracting websites until you answer study quest
 
 HOW IT WORKS
 
-1. PICK SITES TO BLOCK — Choose any website to block. Free: 3 sites. Pro: 20 sites. Premium: unlimited.
+1. PICK SITES TO BLOCK — Choose any website to block. Free: 3 sites. Paid: unlimited.
 
 2. ANSWER TO UNLOCK — When you try to visit a blocked site, you're redirected to unlock it. Solve a quick puzzle (Sudoku, Memory, or Pattern) or answer study questions from your own WriteScholar notes. Get enough right to unlock access.
 
@@ -42,7 +42,7 @@ FEATURES
 
 Requires a WriteScholar.com account. Install the extension, log in at writescholar.com, and add your blocked sites.
 
-Perfect for students who want to stay focused and earn their screen time.
+Perfect for students, professionals, and anyone who wants to stay focused and earn their screen time.
 ```
 
 **Avoid:** Do not list "YouTube, TikTok, Instagram, Reddit, Netflix, Discord" or similar brand names in the description. Say "distracting sites" or "sites you choose" instead.

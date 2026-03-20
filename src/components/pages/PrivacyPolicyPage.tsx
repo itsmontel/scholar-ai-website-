@@ -10,7 +10,7 @@ interface PrivacyPolicyPageProps {
 
 const PrivacyPolicyPage: React.FC<PrivacyPolicyPageProps> = ({ onNavigate, user, onLogout }) => {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-stone-900 dark:to-stone-800">
+    <div className="min-h-screen bg-gradient-to-b from-rose-50/80 via-stone-50 to-white dark:from-stone-900 dark:to-stone-800">
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="privacy" />
       
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
@@ -31,10 +31,10 @@ const PrivacyPolicyPage: React.FC<PrivacyPolicyPageProps> = ({ onNavigate, user,
                 <p>We collect the following types of information:</p>
                 <ul className="list-disc list-inside space-y-2 ml-4">
                   <li><strong>Account Information:</strong> First name, last name, email address, and hashed password when you register. If you sign in via Google, we receive your name and email from Google OAuth.</li>
-                  <li><strong>Text Content You Submit:</strong> Essays, documents, notes, and other text you paste or upload to use our AI tools (Essay Analyzer, Citation Finder, Study Pack — lessons, flashcards, quizzes, crosswords — Humanizer, Summarizer).</li>
+                  <li><strong>Text Content You Submit:</strong> Essays, documents, notes, and other text you paste or upload to use our AI tools (Essay Analyzer, Citation Finder, Study Pack — lessons, flashcards, quizzes, crosswords — and Paper Summarizer).</li>
                   <li><strong>Uploaded Documents:</strong> PDF, DOCX, and TXT files you upload for analysis, stored securely in cloud storage.</li>
-                  <li><strong>Usage Data:</strong> Monthly word counts for Humanizer, Summarizer, and study tools; number of analyses, citation searches, and study pack generations performed; feature usage patterns; Focus Mode usage (sites blocked, unlocks); badges and achievements progress.</li>
-                  <li><strong>Friends &amp; Sharing Data:</strong> Friend connections, shared quizzes/flashcards/crosswords, and friend requests when you use the sharing features.</li>
+                  <li><strong>Usage Data:</strong> Monthly word counts for the Paper Summarizer and study tools; number of analyses, citation searches, and study pack generations performed; feature usage patterns; Focus Mode usage (sites blocked, unlocks); badges and achievements progress.</li>
+                  <li><strong>Social &amp; Sharing Data (when available):</strong> If you use optional sharing features in the app, we may store friend connections, shared quizzes/flashcards/crosswords, and friend requests.</li>
                   <li><strong>Payment Information:</strong> Billing is processed by Stripe. We do not store your credit card number. We receive and store your Stripe customer ID and subscription status.</li>
                   <li><strong>Email Subscription Status:</strong> Whether you have subscribed to or unsubscribed from marketing communications.</li>
                   <li><strong>Communications:</strong> Messages you send to our support team.</li>
@@ -49,7 +49,7 @@ const PrivacyPolicyPage: React.FC<PrivacyPolicyPageProps> = ({ onNavigate, user,
                 <p>We use the information we collect to:</p>
                 <ul className="list-disc list-inside space-y-2 ml-4">
                   <li>Provide and operate all WriteScholar features and AI tools</li>
-                  <li>Process your text through AI models to deliver Essay Analyzer, Citation Finder, Study Pack (lessons, flashcards, quizzes, crosswords), Humanizer, and Summarizer results</li>
+                  <li>Process your text through AI models to deliver Essay Analyzer, Citation Finder, Study Pack (lessons, flashcards, quizzes, crosswords), and Paper Summarizer results</li>
                   <li>Enforce monthly usage limits according to your subscription plan</li>
                   <li>Send transactional emails: account verification, password reset, and billing notifications</li>
                   <li>Send optional marketing emails about new features and updates (you may unsubscribe at any time)</li>
@@ -68,9 +68,9 @@ const PrivacyPolicyPage: React.FC<PrivacyPolicyPageProps> = ({ onNavigate, user,
                   operate the service. We do not sell your personal data.
                 </p>
                 <ul className="list-disc list-inside space-y-2 ml-4">
-                  <li><strong>OpenAI</strong> — Text you submit to AI-powered features (Essay Analyzer, Citation Finder, Study Pack, Humanizer, Summarizer) is sent to OpenAI's API for processing. OpenAI's use of API data is governed by their <a href="https://openai.com/policies/privacy-policy" target="_blank" rel="noopener noreferrer" className="text-violet-600 dark:text-violet-400 hover:underline">Privacy Policy</a>.</li>
-                  <li><strong>Stripe</strong> — Payment processing and subscription management. Stripe receives your billing information. See <a href="https://stripe.com/privacy" target="_blank" rel="noopener noreferrer" className="text-violet-600 dark:text-violet-400 hover:underline">Stripe's Privacy Policy</a>.</li>
-                  <li><strong>Supabase</strong> — Our primary database and optional file storage provider, hosting your account data, document metadata, usage records, study pack history (quizzes, flashcards, crosswords, lessons), friends connections, and badge progress.</li>
+                  <li><strong>OpenAI</strong> — Text you submit to AI-powered features (Essay Analyzer, Citation Finder, Study Pack, Paper Summarizer) is sent to OpenAI's API for processing. OpenAI's use of API data is governed by their <a href="https://openai.com/policies/privacy-policy" target="_blank" rel="noopener noreferrer" className="text-rose-600 dark:text-rose-400 hover:underline">Privacy Policy</a>.</li>
+                  <li><strong>Stripe</strong> — Payment processing and subscription management. Stripe receives your billing information. See <a href="https://stripe.com/privacy" target="_blank" rel="noopener noreferrer" className="text-rose-600 dark:text-rose-400 hover:underline">Stripe's Privacy Policy</a>.</li>
+                  <li><strong>Supabase</strong> — Our primary database and optional file storage provider, hosting your account data, document metadata, usage records, study pack history (quizzes, flashcards, crosswords, lessons), optional social/sharing data when those features are in use, and badge progress.</li>
                   <li><strong>Amazon Web Services (S3)</strong> — Cloud storage for uploaded document files in production environments.</li>
                   <li><strong>Email Provider (SMTP)</strong> — Transactional and marketing emails are delivered via our configured email service.</li>
                 </ul>
@@ -91,7 +91,7 @@ const PrivacyPolicyPage: React.FC<PrivacyPolicyPageProps> = ({ onNavigate, user,
                   customer, OpenAI's own data handling policies apply to data sent through their API.
                 </p>
                 <p>
-                  AI-generated outputs (essay feedback, citations, lessons, quiz questions, flashcards, crossword puzzles, humanized text, summaries) are provided as tools to assist your work. We make no warranty that
+                  AI-generated outputs (essay feedback, citations, lessons, quiz questions, flashcards, crossword puzzles, summaries) are provided as tools to assist your work. We make no warranty that
                   these outputs are accurate, original, or free from error. You are responsible for
                   reviewing all AI outputs before use. Focus Mode runs as a Chrome extension; site-blocking rules are processed locally and we do not receive content from sites you block.
                 </p>
@@ -221,7 +221,7 @@ const PrivacyPolicyPage: React.FC<PrivacyPolicyPageProps> = ({ onNavigate, user,
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button
                 onClick={() => onNavigate('dashboard')}
-                className="px-8 py-3 rounded-xl font-semibold text-white bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 shadow-lg shadow-violet-500/25 transition-all duration-200"
+                className="px-8 py-3 rounded-xl font-semibold text-white bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 hover:to-pink-500 shadow-lg shadow-rose-500/25 transition-all duration-200"
               >
                 Back to Dashboard
               </button>

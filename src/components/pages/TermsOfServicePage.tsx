@@ -19,7 +19,7 @@ interface TermsOfServicePageProps {
 
 const TermsOfServicePage: React.FC<TermsOfServicePageProps> = ({ onNavigate, user, onLogout }) => {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-stone-900 dark:to-stone-800">
+    <div className="min-h-screen bg-gradient-to-b from-rose-50/80 via-stone-50 to-white dark:from-stone-900 dark:to-stone-800">
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="terms" />
       
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
@@ -56,17 +56,15 @@ const TermsOfServicePage: React.FC<TermsOfServicePageProps> = ({ onNavigate, use
                   <li><strong>Essay Analyzer</strong> — professor-style AI feedback on structure, grammar, argument, citations, and tone</li>
                   <li><strong>Citation Finder</strong> — discovers and formats academic sources in APA, MLA, Chicago, Harvard, and other styles</li>
                   <li><strong>Study Pack</strong> — generates interactive lessons, flashcards, quizzes, crosswords, and Crater Blast (quiz game) from your notes in one go</li>
-                  <li><strong>AI Humanizer</strong> — rewrites AI-generated text into natural human-sounding writing</li>
                   <li><strong>Paper Summarizer</strong> — condenses documents into bullet points or paragraph summaries</li>
                   <li><strong>Focus Mode</strong> — Chrome extension that blocks distracting sites until you complete study goals</li>
-                  <li><strong>Friends &amp; Sharing</strong> — share quizzes, flashcards, and crosswords with friends; add friends via unique codes</li>
                   <li><strong>Document Upload &amp; Library</strong> — upload and manage PDF, DOCX, and TXT files</li>
                   <li><strong>PDF &amp; DOCX Export</strong> — download quizzes, flashcards, and analyses as formatted documents</li>
                   <li><strong>Badges &amp; Achievements</strong> — earn badges for study milestones and usage</li>
                   <li><strong>Free Tools</strong> — word counter, grammar checker, thesis generator, essay outline generator, readability score, citation generator, text case converter, paraphrasing tips, GPA calculator, Pomodoro timer, scientific calculator, and unit converter</li>
                 </ul>
                 <p>
-                  Features and limits vary by plan. We reserve the right to modify, add, or remove features
+                  Optional social features (such as sharing study materials with other users) may be offered in some versions of the app. Features and limits vary by plan. We reserve the right to modify, add, or remove features
                   at any time with reasonable notice.
                 </p>
               </div>
@@ -77,9 +75,9 @@ const TermsOfServicePage: React.FC<TermsOfServicePageProps> = ({ onNavigate, use
               <div className="space-y-4 text-stone-600 dark:text-stone-400">
                 <p>WriteScholar offers the following plans:</p>
                 <ul className="list-disc list-inside space-y-2 ml-4">
-                  <li><strong>Free</strong> — 3 documents per month, 3 AI essay analyses per month, 5,000 words for Humanizer and Summarizer, 2 study pack generations (lesson, flashcards & quiz — crossword & Crater Blast unlock with Pro), 2 citation searches per month</li>
-                  <li><strong>Pro ($19.99/month)</strong> — unlimited documents, 99 combined actions per month (analyses, study packs & citations), 99,999 words/month for Humanizer and Summarizer; all Humanizer & Summarizer styles and lengths; quiz, flashcards, crossword & Crater Blast (mixed type, medium difficulty)</li>
-                  <li><strong>Premium ($39.99/month)</strong> — all Pro features plus 10× usage: 999 combined actions per month (analyses, study packs & citations), 999,999 words/month for Humanizer and Summarizer; our top-tier premium AI model, all summarizer styles and lengths, advanced essay analysis, priority support, and larger document uploads (up to 1GB)</li>
+                  <li><strong>Free</strong> — 3 documents per month, 2 AI essay analyses per month, 5,000 words/month for the Paper Summarizer, 2 study pack generations (lesson, flashcards & quiz — crossword & Crater Blast unlock with Pro), 2 citation searches per month</li>
+                  <li><strong>Pro ($19.99/month)</strong> — unlimited documents, 99 combined actions per month (analyses, study packs & citations), 99,999 words/month for the Paper Summarizer; quiz, flashcards, crossword & Crater Blast (mixed type, medium difficulty)</li>
+                  <li><strong>Premium ($39.99/month)</strong> — all Pro features plus 10× usage: 999 combined actions per month (analyses, study packs & citations), 999,999 words/month for the Paper Summarizer; our top-tier premium AI model, advanced essay analysis, priority support, and larger document uploads (up to 1GB)</li>
                 </ul>
                 <p>
                   Usage limits reset based on your plan: paid subscribers' limits reset at the start of each billing period; free users' limits reset on rolling 30-day periods from signup. Unused allowances do not carry
@@ -123,7 +121,7 @@ const TermsOfServicePage: React.FC<TermsOfServicePageProps> = ({ onNavigate, use
                 <p>
                   <strong>Academic Integrity:</strong> WriteScholar's tools are designed to help you learn,
                   improve, and understand your work. You are solely responsible for ensuring that your use of
-                  our service — including the AI Humanizer, Study Pack (quizzes, flashcards, crosswords, lessons), Essay Analyzer, and Citation Finder — complies with
+                  our service — including the Study Pack (quizzes, flashcards, crosswords, lessons), Essay Analyzer, Paper Summarizer, and Citation Finder — complies with
                   your institution's academic integrity policies. WriteScholar does not encourage or condone
                   academic dishonesty.
                 </p>
@@ -139,7 +137,7 @@ const TermsOfServicePage: React.FC<TermsOfServicePageProps> = ({ onNavigate, use
                   your content solely to provide the service to you.
                 </p>
                 <p>
-                  <strong>AI-generated outputs</strong> (essay feedback, citations, lessons, quiz questions, flashcards, crossword puzzles, humanized text, summaries) are provided for your personal use. We do not claim ownership of
+                  <strong>AI-generated outputs</strong> (essay feedback, citations, lessons, quiz questions, flashcards, crossword puzzles, summaries) are provided for your personal use. We do not claim ownership of
                   these outputs, but make no representations about their accuracy, originality, or
                   fitness for any particular purpose.
                 </p>
@@ -175,7 +173,7 @@ const TermsOfServicePage: React.FC<TermsOfServicePageProps> = ({ onNavigate, use
               <h2 className="text-xl sm:text-2xl font-bold text-stone-800 dark:text-stone-100 mb-4">8. AI Processing Disclosure</h2>
               <div className="space-y-4 text-stone-600 dark:text-stone-400">
                 <p>
-                  Our AI features (Essay Analyzer, Citation Finder, Study Pack — lessons, flashcards, quizzes, crosswords — Humanizer, Summarizer)
+                  Our AI features (Essay Analyzer, Citation Finder, Study Pack — lessons, flashcards, quizzes, crosswords — and Paper Summarizer)
                   are powered by large language models provided by OpenAI. When you use these features,
                   your submitted text is sent to OpenAI's API for processing. OpenAI's use of this data is
                   governed by their own Privacy Policy and API usage policies. Focus Mode runs as a Chrome extension and processes site-blocking rules locally; no content from blocked sites is sent to our servers.
@@ -207,7 +205,7 @@ const TermsOfServicePage: React.FC<TermsOfServicePageProps> = ({ onNavigate, use
               <div className="space-y-4 text-stone-600 dark:text-stone-400">
                 <p>
                   Your privacy is important to us. Please review our{' '}
-                  <button onClick={() => onNavigate('privacy')} className="text-violet-600 dark:text-violet-400 hover:underline font-medium">Privacy Policy</button>{' '}
+                  <button onClick={() => onNavigate('privacy')} className="text-rose-600 dark:text-rose-400 hover:underline font-medium">Privacy Policy</button>{' '}
                   to understand how we collect, use, and protect your information, including how your
                   content is processed by third-party AI providers.
                 </p>
@@ -220,7 +218,7 @@ const TermsOfServicePage: React.FC<TermsOfServicePageProps> = ({ onNavigate, use
                 <p>
                   The service is provided "as is" without warranties of any kind, express or implied. We do
                   not guarantee the accuracy, completeness, or reliability of AI-generated outputs including
-                  essay feedback, citations, lessons, quiz questions, flashcards, crossword puzzles, humanized text, or summaries. You use the service
+                  essay feedback, citations, lessons, quiz questions, flashcards, crossword puzzles, or summaries. You use the service
                   at your own risk.
                 </p>
                 <p>
@@ -240,7 +238,7 @@ const TermsOfServicePage: React.FC<TermsOfServicePageProps> = ({ onNavigate, use
                 </p>
                 <p>
                   Upon termination, your right to use the service ceases immediately. We may delete your
-                  account and associated data, including uploaded documents, study pack history (quizzes, flashcards, crosswords, lessons), analysis history, citation history, friends connections, and badge progress.
+                  account and associated data, including uploaded documents, study pack history (quizzes, flashcards, crosswords, lessons), analysis history, citation history, optional social or sharing data if applicable, and badge progress.
                 </p>
               </div>
             </section>
@@ -283,7 +281,7 @@ const TermsOfServicePage: React.FC<TermsOfServicePageProps> = ({ onNavigate, use
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button
                 onClick={() => onNavigate('dashboard')}
-                className="px-8 py-3 rounded-xl font-semibold text-white bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 shadow-lg shadow-violet-500/25 transition-all duration-200"
+                className="px-8 py-3 rounded-xl font-semibold text-white bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 hover:to-pink-500 shadow-lg shadow-rose-500/25 transition-all duration-200"
               >
                 Back to Dashboard
               </button>

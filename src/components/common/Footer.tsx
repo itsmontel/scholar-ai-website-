@@ -158,18 +158,6 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
               </li>
               {/* Violets/Purples */}
               <li>
-                <a href="/tools/humanizer" onClick={(e) => { e.preventDefault(); onNavigate?.('humanizer'); }} className="text-violet-400 hover:text-violet-300 text-sm font-medium transition-colors flex items-center gap-1.5">
-                  AI Humanizer
-                  <span className="text-xs opacity-75">✨</span>
-                </a>
-              </li>
-              <li>
-                <a href="/tools/interactive-lesson" onClick={(e) => { e.preventDefault(); onNavigate?.('interactive-lesson'); }} className="text-violet-400 hover:text-violet-300 text-sm font-medium transition-colors flex items-center gap-1.5">
-                  Interactive Lesson
-                  <span className="text-xs opacity-75">🎓</span>
-                </a>
-              </li>
-              <li>
                 <a href="/tools/crater-blast" onClick={(e) => { e.preventDefault(); onNavigate?.('crater-blast'); }} className="text-indigo-400 hover:text-indigo-300 text-sm font-medium transition-colors flex items-center gap-1.5">
                   Crater Blast
                   <span className="text-xs opacity-75">💥</span>

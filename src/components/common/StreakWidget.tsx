@@ -103,15 +103,15 @@ const StreakWidget = ({ compact = false }: StreakWidgetProps) => {
       title={onClick ? 'Click to learn how to earn a streak' : undefined}
       onKeyDown={onClick ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick(); } } : undefined}
       onClick={onClick}
-      className={`rounded-xl p-3 border border-violet-200/60 dark:border-violet-700/40 min-w-0 relative overflow-hidden ${onClick ? 'cursor-pointer hover:border-violet-300 dark:hover:border-violet-600 transition-colors' : ''}`}
+      className={`rounded-xl p-3 border border-rose-200/60 dark:border-rose-700/40 min-w-0 relative overflow-hidden ${onClick ? 'cursor-pointer hover:border-rose-300 dark:hover:border-rose-600 transition-colors' : ''}`}
       style={{
-        background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(168, 85, 247, 0.05) 100%)'
+        background: 'linear-gradient(135deg, rgba(244, 63, 94, 0.1) 0%, rgba(236, 72, 153, 0.05) 100%)'
       }}
     >
-      <div className="absolute -top-4 -right-4 w-10 h-10 bg-violet-400/15 rounded-full blur-md" />
+      <div className="absolute -top-4 -right-4 w-10 h-10 bg-rose-400/15 rounded-full blur-md" />
       <div className="flex items-center justify-center gap-1.5 mb-2 relative z-10">
         <span className="text-2xl">🔥</span>
-        <span className="text-2xl font-bold bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">{data.currentStreak}</span>
+        <span className="text-2xl font-bold bg-gradient-to-r from-rose-600 to-pink-600 bg-clip-text text-transparent">{data.currentStreak}</span>
       </div>
       <p className="text-center text-stone-600 dark:text-stone-400 text-xs font-medium mb-3 relative z-10">
         {data.currentStreak === 0
@@ -120,19 +120,19 @@ const StreakWidget = ({ compact = false }: StreakWidgetProps) => {
             ? "Log in tomorrow to continue!"
             : "Log in today to keep it going!"}
       </p>
-      <div className="bg-white/70 dark:bg-stone-800/70 backdrop-blur-sm rounded-lg border border-violet-200/40 dark:border-violet-700/30 p-2 min-w-0 relative z-10">
+      <div className="bg-white/70 dark:bg-stone-800/70 backdrop-blur-sm rounded-lg border border-rose-200/40 dark:border-rose-700/30 p-2 min-w-0 relative z-10">
         <div className="grid grid-cols-7 gap-0.5">
           {getWeekDays().map((day, index) => (
             <div key={index} className="flex flex-col items-center gap-0.5 min-w-0">
               <div
                 className={`w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0 transition-all text-[10px] ${
                   day.hasActivity ? '' : 'bg-stone-100 dark:bg-stone-700'
-                } ${day.isToday && !day.hasActivity ? 'ring-2 ring-violet-400 ring-offset-0' : ''}`}
-                style={day.hasActivity ? { backgroundColor: 'rgba(139, 92, 246, 0.25)' } : undefined}
+                } ${day.isToday && !day.hasActivity ? 'ring-2 ring-rose-400 ring-offset-0' : ''}`}
+                style={day.hasActivity ? { backgroundColor: 'rgba(244, 63, 94, 0.25)' } : undefined}
               >
                 {day.hasActivity ? '🔥' : ''}
               </div>
-              <span className={`text-[9px] font-semibold truncate w-full text-center ${day.isToday ? 'text-violet-600 dark:text-violet-400' : 'text-stone-500 dark:text-stone-400'}`}>
+              <span className={`text-[9px] font-semibold truncate w-full text-center ${day.isToday ? 'text-rose-600 dark:text-rose-400' : 'text-stone-500 dark:text-stone-400'}`}>
                 {day.label}
               </span>
             </div>
@@ -140,14 +140,14 @@ const StreakWidget = ({ compact = false }: StreakWidgetProps) => {
         </div>
       </div>
       {longestStreakDisplay > 0 && (
-        <div className="flex items-center justify-center gap-3 mt-2 pt-2 border-t border-violet-200/40 dark:border-violet-700/30 relative z-10">
+        <div className="flex items-center justify-center gap-3 mt-2 pt-2 border-t border-rose-200/40 dark:border-rose-700/30 relative z-10">
           <div className="text-center">
-            <div className="text-sm font-bold text-violet-700 dark:text-violet-400">{longestStreakDisplay}</div>
+            <div className="text-sm font-bold text-rose-700 dark:text-rose-400">{longestStreakDisplay}</div>
             <div className="text-[10px] text-stone-500 dark:text-stone-400">Longest</div>
           </div>
-          <div className="w-px h-5 bg-violet-200 dark:bg-violet-700"></div>
+          <div className="w-px h-5 bg-rose-200 dark:bg-rose-700"></div>
           <div className="text-center">
-            <div className="text-sm font-bold text-violet-700 dark:text-violet-400">{data.totalActivityDays}</div>
+            <div className="text-sm font-bold text-rose-700 dark:text-rose-400">{data.totalActivityDays}</div>
             <div className="text-[10px] text-stone-500 dark:text-stone-400">Total days</div>
           </div>
         </div>
@@ -162,7 +162,7 @@ const StreakWidget = ({ compact = false }: StreakWidgetProps) => {
         <button
           onClick={() => setShowFullStreakModal(true)}
           className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl transition-all hover:scale-105 flex-shrink-0 self-stretch"
-          style={{ backgroundColor: 'rgba(139, 92, 246, 0.15)' }}
+          style={{ backgroundColor: 'rgba(244, 63, 94, 0.15)' }}
           title="View your streak"
         >
           <span className="text-base sm:text-lg">🔥</span>
@@ -223,7 +223,7 @@ const StreakWidget = ({ compact = false }: StreakWidgetProps) => {
               </div>
               <button
                 onClick={() => setShowInfoModal(false)}
-                className="w-full mt-6 py-3 rounded-full font-semibold text-white transition-all bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 shadow-lg shadow-violet-500/25"
+                className="w-full mt-6 py-3 rounded-full font-semibold text-white transition-all bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 hover:to-pink-500 shadow-lg shadow-rose-500/25"
               >
                 Got it!
               </button>
@@ -291,7 +291,7 @@ const StreakWidget = ({ compact = false }: StreakWidgetProps) => {
 
             <button
               onClick={() => setShowInfoModal(false)}
-              className="w-full mt-6 py-3 rounded-full font-semibold text-white transition-all bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 shadow-lg shadow-violet-500/25"
+              className="w-full mt-6 py-3 rounded-full font-semibold text-white transition-all bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 hover:to-pink-500 shadow-lg shadow-rose-500/25"
             >
               Got it!
             </button>

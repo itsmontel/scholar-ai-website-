@@ -46,7 +46,7 @@ const STEPS: TutorialStep[] = [
   {
     id: 'feature-cards',
     title: 'Analyze, Citations, Study Pack & more',
-    body: "Analyze (essay feedback) is our star. Tap it to get professor-style feedback on your writing. Citations, Study Pack, Focus Mode, and More Tools are one tap away.",
+    body: "Analyze (essay feedback) is our star. Tap it to get professor style feedback on your writing. Citations, Study Pack, Focus Mode, and More Tools are one tap away.",
     emoji: '📝',
     targetSelector: '[data-tutorial="feature-cards"]',
     mascotPose: 'pointing',
@@ -55,7 +55,7 @@ const STEPS: TutorialStep[] = [
   {
     id: 'analyze-input',
     title: 'Your first step: Analyze your essay',
-    body: "Paste your essay here (min 200 words) or upload a PDF, DOCX, or TXT file. Many people prefer uploading. Then hit Analyze Text. You'll get professor-style feedback on structure, clarity, citations, and tone in under 60 seconds.",
+    body: "Paste your essay here (min 200 words) or upload a PDF, DOCX, or TXT file. Many people prefer uploading. Then hit Analyze Text. You'll get professor style feedback on structure, clarity, citations, and tone in under 60 seconds.",
     emoji: '✨',
     targetSelector: '[data-tutorial-target="essay-input-wrapper"]',
     mascotPose: 'pointing',
@@ -446,9 +446,9 @@ const InteractiveTutorial = ({ userName, onComplete }: InteractiveTutorialProps)
             <rect x={sl} y={st} width={sw} height={sh} rx={r} ry={r} fill="black" />
           </mask>
           <linearGradient id="tut-ring-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#818cf8" />
-            <stop offset="50%" stopColor="#c084fc" />
-            <stop offset="100%" stopColor="#818cf8" />
+            <stop offset="0%" stopColor="#f43f5e" />
+            <stop offset="50%" stopColor="#ec4899" />
+            <stop offset="100%" stopColor="#f43f5e" />
           </linearGradient>
         </defs>
         <rect width={vw} height={vh} fill="rgba(0,0,0,0.58)" mask="url(#tut-mask)" />
@@ -461,7 +461,7 @@ const InteractiveTutorial = ({ userName, onComplete }: InteractiveTutorialProps)
         <rect
           x={sl - 5} y={st - 5} width={sw + 10} height={sh + 10}
           rx={r + 4} ry={r + 4}
-          fill="none" stroke="rgba(129,140,248,0.15)" strokeWidth="6"
+          fill="none" stroke="rgba(244,63,94,0.15)" strokeWidth="6"
           className="animate-ringGlow"
         />
       </svg>
@@ -498,7 +498,7 @@ const InteractiveTutorial = ({ userName, onComplete }: InteractiveTutorialProps)
           {/* Progress bar */}
           <div className="h-1 bg-stone-100 dark:bg-stone-700">
           <div
-            className="h-full bg-gradient-to-r from-indigo-500 via-violet-500 to-purple-500 rounded-r-full"
+            className="h-full bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 rounded-r-full"
             style={{ width: `${progress}%`, transition: 'width 0.9s cubic-bezier(0.22,1,0.36,1)' }}
             />
           </div>
@@ -552,7 +552,7 @@ const InteractiveTutorial = ({ userName, onComplete }: InteractiveTutorialProps)
                     style={{
                       width: i === step ? 18 : 5,
                       height: 5,
-                      background: i === step ? '#6366f1' : i < step ? '#a5b4fc' : 'rgba(120,113,108,0.18)',
+                      background: i === step ? '#f43f5e' : i < step ? '#fb7185' : 'rgba(120,113,108,0.18)',
                       transition: 'all 0.55s cubic-bezier(0.22,1,0.36,1)',
                     }}
                   />
@@ -565,7 +565,7 @@ const InteractiveTutorial = ({ userName, onComplete }: InteractiveTutorialProps)
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" /></svg>
                   </button>
                 )}
-                <button onClick={goNext} className="h-8 px-3.5 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 text-white rounded-lg font-bold text-xs shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 transition-all active:scale-95 flex items-center gap-1.5">
+                <button onClick={goNext} className="h-8 px-3.5 bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 text-white rounded-lg font-bold text-xs shadow-lg shadow-rose-500/25 hover:shadow-rose-500/40 transition-all active:scale-95 flex items-center gap-1.5">
                   {isLast ? 'Get started' : (
                     <>Next <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" /></svg></>
                   )}

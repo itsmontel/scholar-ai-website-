@@ -21,7 +21,6 @@ import { trackAction, syncFromAPIData, trackExport, trackCopy, trackStudyPackGen
 import { getResetsInText, getExpiringSoonCount, getExpiringSoonUrgencyText, getDaysUntilExpiration } from '../../utils/usageReset';
 import { persistTutorialToServer } from '../../utils/onboarding';
 import { trackEvent } from '../../utils/analytics';
-import InteractiveLessonPage from './tools/InteractiveLessonPage';
 import FocusModeSettingsSection from '../common/FocusModeSettingsSection';
 import { FOCUS_MODE_COMING_SOON, FOCUS_MODE_CHROME_EXTENSION_URL } from '../../constants/focusMode';
 import { HIDE_FRIENDS } from '../../config/featureFlags';
@@ -31,7 +30,7 @@ interface DashboardProps {
   user: any;
   onLogout: () => void;
   onUserUpdate?: (updates: { welcomeTutorialCompleted?: boolean }) => void;
-  initialMode?: 'analyze' | 'citations' | 'humanize' | 'summarize' | 'quiz' | 'lesson' | 'focus_mode';
+  initialMode?: 'analyze' | 'citations' | 'summarize' | 'quiz' | 'lesson' | 'focus_mode';
 }
 
 const getTimeGreeting = (): { greeting: string; emoji: string } => {
@@ -90,7 +89,7 @@ const activityMeta: Record<ActivityItem['type'], { emoji: string; bg: string; la
   flashcard: { emoji: '🃏', bg: 'bg-violet-100 dark:bg-violet-900/30', label: 'Flashcards', cardBg: 'from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20', border: 'border-violet-200/70 dark:border-violet-700/40', accent: 'text-violet-700 dark:text-violet-300', shape: 'diamond' },
   crossword: { emoji: '🧩', bg: 'bg-orange-100 dark:bg-orange-900/30', label: 'Crossword', cardBg: 'from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20', border: 'border-orange-200/70 dark:border-orange-700/40', accent: 'text-orange-700 dark:text-orange-300', shape: 'square' },
   lesson: { emoji: '🎓', bg: 'bg-violet-100 dark:bg-violet-900/30', label: 'Lesson', cardBg: 'from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20', border: 'border-violet-200/70 dark:border-violet-700/40', accent: 'text-violet-700 dark:text-violet-300', shape: 'circle' },
-  humanize: { emoji: '✨', bg: 'bg-purple-100 dark:bg-purple-900/30', label: 'Humanized', cardBg: 'from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20', border: 'border-violet-200/70 dark:border-violet-700/40', accent: 'text-violet-700 dark:text-violet-300', shape: 'circle' },
+  humanize: { emoji: '✨', bg: 'bg-fuchsia-100 dark:bg-fuchsia-900/30', label: 'Humanized', cardBg: 'from-fuchsia-50 to-pink-50 dark:from-fuchsia-900/20 dark:to-pink-900/20', border: 'border-fuchsia-200/70 dark:border-fuchsia-700/40', accent: 'text-fuchsia-700 dark:text-fuchsia-300', shape: 'diamond' },
   summary: { emoji: '📋', bg: 'bg-teal-100 dark:bg-teal-900/30', label: 'Summary', cardBg: 'from-teal-50 to-cyan-50 dark:from-teal-900/20 dark:to-cyan-900/20', border: 'border-teal-200/70 dark:border-teal-700/40', accent: 'text-teal-700 dark:text-teal-300', shape: 'square' },
   citation: { emoji: '📚', bg: 'bg-sky-100 dark:bg-sky-900/30', label: 'Citations', cardBg: 'from-sky-50 to-blue-50 dark:from-sky-900/20 dark:to-blue-900/20', border: 'border-sky-200/70 dark:border-sky-700/40', accent: 'text-sky-700 dark:text-sky-300', shape: 'diamond' },
 };
@@ -107,7 +106,8 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
   const [isActivityLoading, setIsActivityLoading] = useState(true);
   const [showAnalysisPopup, setShowAnalysisPopup] = useState(false);
   const [analysisComplete, setAnalysisComplete] = useState(false);
-  const [mode, setMode] = useState<'analyze' | 'citations' | 'humanize' | 'summarize' | 'quiz' | 'lesson' | 'focus_mode'>(initialMode);
+  type DashboardMode = NonNullable<DashboardProps['initialMode']>;
+  const [mode, setMode] = useState<DashboardMode>(initialMode);
 
   // Sync tab when navigating to dashboard via footer (e.g. "Analyze Essay" or "Citations")
   useEffect(() => {
@@ -140,7 +140,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
   }, []);
 
   const [showSoftPaywall, setShowSoftPaywall] = useState(false);
-  const [showFirstActionPrompt, setShowFirstActionPrompt] = useState(false);
+  const [dismissedFirstAnalysisBanner, setDismissedFirstAnalysisBanner] = useState(false);
   const handleInteractiveTutorialComplete = async () => {
     setShowInteractiveTutorial(false);
     try {
@@ -154,7 +154,6 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
         localStorage.setItem(`writescholar_paywall_deferred_${user.id}`, 'true');
       }
     } catch (_) {}
-    setShowFirstActionPrompt(true);
     setMode('analyze');
     setTimeout(() => {
       document.querySelector('[data-tutorial="analyze-ready"]')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -187,14 +186,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
   const [citationYearRange, setCitationYearRange] = useState('all');
   const [isSearchingCitations, setIsSearchingCitations] = useState(false);
   const [showSearchAnimation, setShowSearchAnimation] = useState(false);
-  const [humanizeMode, setHumanizeMode] = useState<'standard' | 'academic' | 'casual' | 'creative'>('standard');
-  const [humanizeIntensity, setHumanizeIntensity] = useState<'light' | 'medium' | 'aggressive'>('medium');
-  const [isHumanizing, setIsHumanizing] = useState(false);
-  const [humanizedResult, setHumanizedResult] = useState('');
-  const [showHumanizeResult, setShowHumanizeResult] = useState(false);
-  const [humanizeCopied, setHumanizeCopied] = useState(false);
-  const [showHighlights, setShowHighlights] = useState(false);
-  
+
   // Summarizer state
   const [summaryStyle, setSummaryStyle] = useState<'bullet' | 'paragraph' | 'tldr' | 'detailed'>('bullet');
   const [summaryLength, setSummaryLength] = useState<'short' | 'medium' | 'long'>('medium');
@@ -237,6 +229,11 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
   // Document upload for study tools (quiz, flashcards, crossword)
   const studyToolsFileInputRef = useRef<HTMLInputElement>(null);
   const [isParsingStudyDoc, setIsParsingStudyDoc] = useState(false);
+
+  // Inline analyze: parse file into essay textarea (same API as study pack)
+  const analyzeFileInputRef = useRef<HTMLInputElement>(null);
+  const [isParsingAnalyzeDoc, setIsParsingAnalyzeDoc] = useState(false);
+  const [analyzeUploadError, setAnalyzeUploadError] = useState('');
 
   // Crossword state
   const [crosswordResult, setCrosswordResult] = useState<any>(null);
@@ -348,12 +345,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
     (user as any).welcomeTutorialCompleted !== true
   );
 
-  // Quick Review modal - disabled (Quick Review removed from UI)
   const [showQuickReview, setShowQuickReview] = useState(false);
-
-  useEffect(() => {
-    if (showFirstActionPrompt) trackEvent('first_action_prompt_view');
-  }, [showFirstActionPrompt]);
 
   // Deferred paywall: show after first success (recentActivity) or return visit — not immediately after tutorial
   useEffect(() => {
@@ -392,7 +384,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
     daysUntilReset: 30,
     planLimits: {
       documentsPerMonth: 3,
-      analysesPerMonth: 3,
+      analysesPerMonth: 2,
       citationSearchesPerMonth: 2,
       studyPackGenerationsPerMonth: 2,
       maxDocumentSize: 1024 * 1024,
@@ -400,6 +392,16 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
     }
   });
   const [loadingStats, setLoadingStats] = useState(true);
+
+  const hasCompletedFirstAnalysis =
+    (usageStats.documentsAnalyzed ?? 0) > 0 ||
+    recentActivity.some((a) => a.type === 'analysis');
+  const showFirstAnalysisOnboarding =
+    Boolean(user) && !hasCompletedFirstAnalysis && !loadingStats && !isActivityLoading;
+
+  useEffect(() => {
+    if (showFirstAnalysisOnboarding) trackEvent('first_action_prompt_view');
+  }, [showFirstAnalysisOnboarding]);
 
   const analyzePlaceholders = [
     "Paste your essay or research paper here...",
@@ -411,12 +413,6 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
     "Enter your research topic to find citations...",
     "What are you researching? Find sources instantly...",
     "Type your essay question and discover literature..."
-  ];
-
-  const humanizePlaceholders = [
-    "Paste your AI-generated text here to humanize it...",
-    "Transform AI text into natural human writing...",
-    "Make your text undetectable by AI checkers..."
   ];
 
   const summarizePlaceholders = [
@@ -431,8 +427,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
     "Test your knowledge with AI-generated questions..."
   ];
 
-  const placeholders = mode === 'humanize' ? humanizePlaceholders 
-    : mode === 'summarize' ? summarizePlaceholders 
+  const placeholders = mode === 'summarize' ? summarizePlaceholders 
     : mode === 'quiz' ? quizPlaceholders 
     : mode === 'analyze' ? analyzePlaceholders 
     : citationPlaceholders;
@@ -688,7 +683,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                   flashcards: 'create-flashcards',
                   crossword: 'crossword-generator',
                   crater_blast: 'crater-blast',
-                  lesson: 'interactive-lesson',
+                  lesson: 'study-pack-viewer',
                 };
                 const navigateTo = navMap[tool.quiz_type] || 'quiz-generator';
                 activities.push({
@@ -737,13 +732,14 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
     buildActivity();
   }, [documents]);
 
+  const activityWithoutHumanize = recentActivity.filter(a => a.type !== 'humanize');
   const filteredActivity = searchQuery.trim()
-    ? recentActivity.filter(a =>
+    ? activityWithoutHumanize.filter(a =>
         a.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         a.subtitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        activityMeta[a.type].label.toLowerCase().includes(searchQuery.toLowerCase())
+        (activityMeta[a.type]?.label ?? '').toLowerCase().includes(searchQuery.toLowerCase())
       )
-    : recentActivity;
+    : activityWithoutHumanize;
 
   const handleActivityClick = (activity: ActivityItem) => {
     if (activity.toolData) {
@@ -773,8 +769,15 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
           localStorage.setItem('savedCraterBlast', JSON.stringify(t));
           onNavigate('crater-blast');
         } else if (t.quiz_type === 'lesson') {
-          localStorage.setItem('savedLesson', JSON.stringify(t));
-          onNavigate('interactive-lesson');
+          try {
+            const packData = { lesson: { slides: t.questions || [], title: t.title || 'Lesson', style: t.difficulty || 'visual' } };
+            const packTitle = t.title || 'Lesson';
+            sessionStorage.setItem('writescholar_study_pack_viewer', JSON.stringify({ data: packData, title: packTitle }));
+            sessionStorage.setItem('writescholar_study_pack_return_tab', 'lesson');
+            onNavigate('study-pack-viewer', undefined, { studyPack: { data: packData, title: packTitle } });
+          } catch (_) {
+            onNavigate('study-pack-viewer');
+          }
         } else {
           localStorage.setItem('savedQuiz', JSON.stringify(t));
           onNavigate('quiz-generator');
@@ -827,12 +830,6 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
     onNavigate('crossword-generator');
   };
 
-  const handleEnlargeHumanize = () => {
-    if (!showHumanizeResult || !humanizedResult) return;
-    localStorage.setItem('humanizerOpenData', JSON.stringify({ inputText, humanizedResult, humanizeMode, humanizeIntensity }));
-    onNavigate('humanizer');
-  };
-
   const handleEnlargeSummarize = () => {
     if (!summaryResult) return;
     localStorage.setItem('summarizerOpenData', JSON.stringify({ inputText, summaryResult, summaryStyle, summaryLength }));
@@ -853,7 +850,6 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
 
   const isTextValid = () => {
     if (mode === 'citations') return inputText.trim().length > 0;
-    if (mode === 'humanize') return inputText.trim().length > 0 && getWordCount(inputText) <= humanizeSummarizeMaxWords;
     if (mode === 'summarize') return getWordCount(inputText) >= 50 && getWordCount(inputText) <= humanizeSummarizeMaxWords;
     if (mode === 'quiz') {
       const wordCount = getWordCount(inputText);
@@ -955,84 +951,8 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
     }, 4000);
   };
 
-  const [humanizeWordsUsed, setHumanizeWordsUsed] = useState(0);
-  const [humanizeWordLimit, setHumanizeWordLimit] = useState(1000);
-  const [humanizeDaysUntilReset, setHumanizeDaysUntilReset] = useState<number | undefined>(undefined);
-  const [humanizeError, setHumanizeError] = useState('');
   const [isParsingDoc, setIsParsingDoc] = useState(false);
   const parseFileInputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    if (mode === 'humanize') {
-      const token = localStorage.getItem('authToken');
-      if (token) {
-        fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/analysis/humanize-usage`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        })
-          .then(r => r.json())
-          .then(data => {
-            if (data.success) {
-              setHumanizeWordsUsed(data.data.wordsUsed);
-              setHumanizeWordLimit(data.data.wordLimit);
-              setHumanizeDaysUntilReset(data.data.daysUntilReset);
-            }
-          })
-          .catch(() => {});
-      }
-    }
-  }, [mode, showHumanizeResult]);
-
-  const handleHumanize = async () => {
-    if (inputText.trim().length === 0) return;
-
-    setIsHumanizing(true);
-    setHumanizedResult('');
-    setShowHumanizeResult(false);
-    setHumanizeError('');
-
-    try {
-      const token = localStorage.getItem('authToken');
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/analysis/humanize`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          text: inputText,
-          mode: humanizeMode,
-          intensity: humanizeIntensity
-        })
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        if (response.status === 429 && data.upgrade) {
-          setHumanizeError(data.message);
-        } else if (response.status === 429) {
-          setHumanizeError(data.message);
-        } else {
-          throw new Error(data.message || 'Humanization failed');
-        }
-        return;
-      }
-
-      setHumanizedResult(data.data.humanizedText);
-      setShowHumanizeResult(true);
-      trackAction('humanize_count');
-      if (data.data.wordsUsed !== undefined) {
-        setHumanizeWordsUsed(data.data.wordsUsed);
-        setHumanizeWordLimit(data.data.wordLimit);
-        setHumanizeDaysUntilReset(data.data.daysUntilReset);
-      }
-    } catch (error: any) {
-      console.error('Humanize error:', error);
-      setHumanizeError(error.message || 'Humanization failed. Please try again.');
-    } finally {
-      setIsHumanizing(false);
-    }
-  };
 
   const handleSummarize = async () => {
     setIsSummarizing(true);
@@ -1130,6 +1050,37 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
       setQuizError(err.message || 'Failed to parse document');
     } finally {
       setIsParsingStudyDoc(false);
+    }
+  };
+
+  const handleAnalyzeFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    e.target.value = '';
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+      onNavigate?.('signup');
+      return;
+    }
+    setIsParsingAnalyzeDoc(true);
+    setAnalyzeUploadError('');
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+      const formData = new FormData();
+      formData.append('file', file);
+      const res = await fetch(`${apiUrl}/analysis/parse-document`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Failed to parse document');
+      setInputText(data.data.content || '');
+      setShowWordWarning(false);
+    } catch (err: any) {
+      setAnalyzeUploadError(err.message || 'Failed to parse document');
+    } finally {
+      setIsParsingAnalyzeDoc(false);
     }
   };
 
@@ -1697,7 +1648,6 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
     const token = localStorage.getItem('authToken');
     if (!token) return;
     setIsParsingDoc(true);
-    setHumanizeError('');
     setSummaryError('');
     try {
       const formData = new FormData();
@@ -1711,17 +1661,14 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
       if (!res.ok) throw new Error(data.message || 'Failed to parse document');
       setInputText(data.data.content || '');
     } catch (err: any) {
-      if (mode === 'humanize') setHumanizeError(err.message || 'Failed to parse document');
-      else setSummaryError(err.message || 'Failed to parse document');
+      setSummaryError(err.message || 'Failed to parse document');
     } finally {
       setIsParsingDoc(false);
     }
   };
 
   const handleSubmit = () => {
-    if (mode === 'humanize') {
-      handleHumanize();
-    } else if (mode === 'citations') {
+    if (mode === 'citations') {
       handleCitationSearch();
     } else if (mode === 'summarize') {
       handleSummarize();
@@ -1760,7 +1707,6 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                 localStorage.setItem(`writescholar_paywall_deferred_${user.id}`, 'true');
               }
             } catch (_) {}
-            setShowFirstActionPrompt(true);
             setMode('analyze');
             setTimeout(() => {
               document.querySelector('[data-tutorial="analyze-ready"]')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -1769,30 +1715,30 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
         />
       )}
 
-      {/* First Action Prompt - explicit next step for new users after tutorial */}
-      {showFirstActionPrompt && !showSoftPaywall && !showInteractiveTutorial && !showWelcomeTutorial && (
+      {/* First analysis onboarding banner — dismissible; upload/library nudges use showFirstAnalysisOnboarding only */}
+      {showFirstAnalysisOnboarding && !dismissedFirstAnalysisBanner && !showSoftPaywall && !showInteractiveTutorial && !showWelcomeTutorial && (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:ml-24 lg:mr-auto mb-4">
           <div className="bg-gradient-to-r from-fuchsia-500 via-pink-500 to-rose-500 rounded-3xl p-5 sm:p-6 shadow-2xl shadow-fuchsia-500/30 border border-white/20 relative overflow-hidden backdrop-blur-sm">
             <button
+              type="button"
               onClick={() => {
-                setShowFirstActionPrompt(false);
+                setDismissedFirstAnalysisBanner(true);
                 trackEvent('first_action_prompt_dismiss');
               }}
-              className="absolute top-3 right-3 p-1.5 text-white/80 hover:text-white hover:bg-white/20 rounded-lg transition-colors"
+              className="absolute top-3 right-3 p-1.5 text-white/80 hover:text-white hover:bg-white/20 rounded-lg transition-colors z-10"
               aria-label="Dismiss"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 pr-10 sm:pr-0">
               <div className="flex-1 min-w-0">
                 <h3 className="text-lg sm:text-xl font-bold text-white mb-1">Analyze your first essay</h3>
-                <p className="text-violet-100 text-sm sm:text-base">Paste 200+ words and get professor-style feedback on structure, clarity, and tone. It's the best way to see what WriteScholar can do. When you're done, come back for a surprise!</p>
+                <p className="text-violet-100 text-sm sm:text-base">Upload essay or Paste 200+ words and get professor-style feedback on structure, clarity, and tone. It&apos;s the best way to see what WriteScholar can do. When you&apos;re done, come back for a surprise!</p>
               </div>
               <div className="flex flex-wrap gap-2 w-full sm:w-auto">
                 <button
                   onClick={() => {
                     setMode('analyze');
-                    setShowFirstActionPrompt(false);
                     trackEvent('first_action_prompt_cta_click', { cta: 'analyze' });
                     setTimeout(() => {
                       document.querySelector('[data-tutorial-target="essay-input-wrapper"]')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -1805,7 +1751,6 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                 <button
                   onClick={() => {
                     setMode('quiz');
-                    setShowFirstActionPrompt(false);
                     trackEvent('first_action_prompt_cta_click', { cta: 'study_pack' });
                     setTimeout(() => {
                       document.querySelector('[data-tutorial="study-pack-input"]')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -1944,6 +1889,13 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                     )}
                   </button>
                   )}
+                  <button
+                    onClick={() => setShowQuickReview(true)}
+                    className="flex items-center gap-2 px-3 py-2 rounded-xl bg-violet-50/80 dark:bg-violet-900/20 border border-violet-200/60 dark:border-violet-700/40 hover:shadow-lg hover:shadow-violet-500/15 hover:border-violet-300 dark:hover:border-violet-600 transition-all duration-300 group flex-shrink-0"
+                  >
+                    <span className="text-lg group-hover:animate-pulse">⚡</span>
+                    <span className="font-semibold text-violet-600 dark:text-violet-400 text-xs sm:text-sm hidden sm:inline">Quick Review</span>
+                  </button>
                   <div className="hidden sm:block flex-shrink-0"><BadgeWidget onNavigate={onNavigate} /></div>
                   <div className="sm:hidden flex-shrink-0"><BadgeWidget onNavigate={onNavigate} mobileExpanded /></div>
                 </div>
@@ -1997,13 +1949,13 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
               { id: 'citations' as const, title: 'Citations', desc: 'Find and format academic sources instantly', emoji: '📚', border: 'border-sky-200/80 dark:border-sky-700/50', iconBg: 'from-sky-500 to-blue-600', glow: 'shadow-sky-500/20', titleClr: 'text-sky-600 dark:text-sky-400', blob: 'from-sky-200/30 to-blue-200/20', badgeText: null, badgeClr: '' },
               { id: 'quiz' as const, title: 'Study Pack', desc: 'Lessons, flashcards, quiz, crossword & Crater Blast from your notes', emoji: '📦', border: 'border-amber-200/80 dark:border-amber-700/50', iconBg: 'from-amber-500 to-orange-500', glow: 'shadow-amber-500/20', titleClr: 'text-amber-600 dark:text-amber-400', blob: 'from-amber-200/30 to-orange-200/20', badgeText: '5-in-1', badgeClr: 'bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300' },
               { id: 'focus_mode' as const, title: 'Focus Mode', desc: 'Block sites until you solve a puzzle or answer study questions', emoji: '🔒', border: 'border-violet-200/80 dark:border-violet-700/50', iconBg: 'from-violet-500 to-purple-600', glow: 'shadow-violet-500/20', titleClr: 'text-violet-600 dark:text-violet-400', blob: 'from-violet-200/30 to-purple-200/20', badgeText: FOCUS_MODE_COMING_SOON ? 'Soon' : 'New', badgeClr: FOCUS_MODE_COMING_SOON ? 'bg-amber-200/80 text-amber-800 dark:bg-amber-800/80 dark:text-amber-200' : 'bg-violet-100 text-violet-700 dark:bg-violet-900/50 dark:text-violet-300' },
-              { id: 'more-tools' as const, title: 'More Tools', desc: 'Summarizer, humanizer, grammar checker & more', emoji: '🔧', border: 'border-indigo-200/80 dark:border-indigo-700/50', iconBg: 'from-indigo-500 to-slate-600', glow: 'shadow-indigo-500/20', titleClr: 'text-indigo-600 dark:text-indigo-400', blob: 'from-indigo-200/30 to-slate-200/20', badgeText: null, badgeClr: '' },
+              { id: 'more-tools' as const, title: 'More Tools', desc: 'Summarizer, grammar checker & more', emoji: '🔧', border: 'border-indigo-200/80 dark:border-indigo-700/50', iconBg: 'from-indigo-500 to-slate-600', glow: 'shadow-indigo-500/20', titleClr: 'text-indigo-600 dark:text-indigo-400', blob: 'from-indigo-200/30 to-slate-200/20', badgeText: null, badgeClr: '' },
             ].map((card) => {
               const isActive = (card.id === 'analyze' && mode === 'analyze') || (card.id === 'citations' && mode === 'citations') || (card.id === 'quiz' && mode === 'quiz') || (card.id === 'focus_mode' && mode === 'focus_mode');
               return (
               <button
                 key={card.id}
-                onClick={() => card.id === 'more-tools' ? onNavigate('more-tools') : (card.id === 'quiz' ? (() => { setMode('quiz'); setInputText(''); setShowWordWarning(false); setShowHumanizeResult(false); setSummaryResult(null); setQuizResult(null); setFlashcardResult(null); setCrosswordResult(null); setStudyPackResult(null); })() : setMode(card.id))}
+                onClick={() => card.id === 'more-tools' ? onNavigate('more-tools') : (card.id === 'quiz' ? (() => { setMode('quiz'); setShowWordWarning(false); setSummaryResult(null); setQuizResult(null); setFlashcardResult(null); setCrosswordResult(null); setStudyPackResult(null); })() : setMode(card.id))}
                 data-tutorial={card.id === 'analyze' ? 'analyze-feature-card' : card.id === 'focus_mode' ? 'focus-card' : card.id === 'quiz' ? 'study-card' : card.id === 'more-tools' ? 'more-tools-card' : undefined}
                 className={`relative overflow-hidden rounded-xl sm:rounded-3xl p-3 sm:p-6 text-left transition-all duration-200 hover:scale-[1.02] hover:shadow-xl active:scale-[0.98] bg-white dark:bg-stone-800/95 border-2 ${card.border} shadow-lg ${card.glow} dark:shadow-black/10 backdrop-blur-sm group ${isActive ? 'ring-2 ring-offset-1 sm:ring-offset-2 ring-offset-stone-50 dark:ring-offset-stone-900 ' + (card.id === 'analyze' ? 'ring-rose-500' : card.id === 'citations' ? 'ring-sky-500' : card.id === 'quiz' ? 'ring-amber-500' : card.id === 'focus_mode' ? 'ring-violet-500' : '') : ''}`}
               >
@@ -2099,23 +2051,23 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                     </>
                   )}
 
-                  {/* Hero headline - Analyze vs Citations */}
-                  <h2 className="relative text-xl sm:text-3xl md:text-4xl font-extrabold text-stone-900 dark:text-white text-center mb-2 tracking-tight">
+                  {/* Hero headline - Analyze vs Citations (H1 for a11y / SEO) */}
+                  <h1 className="relative text-xl sm:text-3xl md:text-4xl font-extrabold text-stone-900 dark:text-white text-center mb-2 tracking-tight">
                     {mode === 'citations' ? (
                       <>Find <span className="bg-gradient-to-r from-sky-500 via-blue-500 to-indigo-500 bg-clip-text text-transparent" style={{ WebkitBackgroundClip: 'text' }}>academic sources</span> in seconds</>
                     ) : (
-                      <>Enhance your <span className="bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 bg-clip-text text-transparent" style={{ WebkitBackgroundClip: 'text' }}>academic writing</span> with AI</>
+                      <><span className="bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 bg-clip-text text-transparent" style={{ WebkitBackgroundClip: 'text' }}>Paste</span> or <span className="bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 bg-clip-text text-transparent" style={{ WebkitBackgroundClip: 'text' }}>upload</span> your essay, get feedback in seconds</>
                     )}
-                  </h2>
+                  </h1>
                   <p className="relative text-stone-600 dark:text-stone-300 text-sm sm:text-lg text-center mb-6 sm:mb-8 max-w-xl mx-auto leading-relaxed">
                     {mode === 'citations' ? (
                       'APA, MLA & Chicago. Peer-reviewed sources. Filter by year.'
                     ) : (
-                      'Professor-style feedback on structure, clarity, citations and tone in under 60 seconds'
+                      <>Upload your essay, get <span className="text-red-600 dark:text-red-500">professor</span><span className="text-amber-600 dark:text-amber-500">-style</span> <span className="text-green-600 dark:text-green-500">feedback</span></>
                     )}
                   </p>
-                  <div className="relative sm:hidden grid grid-cols-2 justify-center gap-2 mb-6 sm:mb-8">
-                    {(mode === 'citations' ? ['APA, MLA & Chicago', 'Peer-reviewed sources', 'Filter by year', 'Export ready'] : ['Quick structure analysis', 'Detailed annotations', 'Grade-level rubric', 'Improvement suggestions']).map((f, i) => (
+                  <div className="relative flex flex-wrap justify-center gap-x-4 sm:gap-x-6 gap-y-2 mb-6 sm:mb-8">
+                    {(mode === 'citations' ? ['APA, MLA & Chicago', 'Peer-reviewed sources', 'Filter by year', 'Export ready'] : ['In-depth structure analysis', 'Detailed annotations', 'Grade-level rubric', 'Improvement suggestions']).map((f, i) => (
                       <span key={i} className="flex items-center gap-2.5 text-stone-600 dark:text-stone-400 text-sm">
                         <span className="flex-shrink-0 w-5 h-5 rounded-full bg-emerald-500/15 flex items-center justify-center">
                           <svg className="w-3 h-3 text-emerald-600 dark:text-emerald-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
@@ -2123,29 +2075,35 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                         {f}
                       </span>
                     ))}
-                          </div>
+                  </div>
 
                   {/* Tab switcher */}
-                  <div className="relative flex rounded-xl sm:rounded-2xl bg-stone-100/80 dark:bg-stone-800/80 p-1 sm:p-1.5 mb-4 sm:mb-6 max-w-md mx-auto shadow-inner">
+                  <div className="relative flex rounded-xl sm:rounded-2xl bg-stone-100/80 dark:bg-stone-800/80 p-1 sm:p-1.5 mb-4 sm:mb-6 max-w-lg mx-auto shadow-inner">
                     <button
-                      onClick={() => { setMode('analyze'); setInputText(''); setShowWordWarning(false); setShowHumanizeResult(false); setSummaryResult(null); setQuizResult(null); setFlashcardResult(null); setCrosswordResult(null); setStudyPackResult(null); }}
+                      onClick={() => { setMode('analyze'); setShowWordWarning(false); setAnalyzeUploadError(''); setSummaryResult(null); setQuizResult(null); setFlashcardResult(null); setCrosswordResult(null); setStudyPackResult(null); }}
                       className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-sm transition-all duration-200 ${mode === 'analyze' ? 'bg-white dark:bg-stone-700 text-rose-600 dark:text-rose-400 shadow-lg shadow-stone-200/50 dark:shadow-stone-900/50' : 'text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200'}`}
                     >
                       <span className="text-lg">📝</span> Analyze Text
                     </button>
                     <button
-                      onClick={() => { setMode('citations'); setInputText(''); setShowWordWarning(false); setShowHumanizeResult(false); setSummaryResult(null); }}
+                      onClick={() => { setMode('citations'); setShowWordWarning(false); setAnalyzeUploadError(''); setSummaryResult(null); }}
                       className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-sm transition-all duration-200 ${mode === 'citations' ? 'bg-white dark:bg-stone-700 text-sky-600 dark:text-sky-400 shadow-lg shadow-stone-200/50 dark:shadow-stone-900/50' : 'text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200'}`}
                     >
                       <span className="text-lg">📚</span> Citations
                     </button>
-                          </div>
+                    <button
+                      onClick={() => { setMode('quiz'); setShowWordWarning(false); setAnalyzeUploadError(''); setSummaryResult(null); setQuizResult(null); setFlashcardResult(null); setCrosswordResult(null); setStudyPackResult(null); }}
+                      className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-sm transition-all duration-200 text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200"
+                    >
+                      <span className="text-lg">📦</span> Study Pack
+                    </button>
+                  </div>
 
-                  {/* "Start your first analysis or upload file below" callout - shown after tutorial */}
-                  {showFirstActionPrompt && mode === 'analyze' && (
+                  {/* First analysis — nudge with arrow until at least one completed analysis */}
+                  {showFirstAnalysisOnboarding && mode === 'analyze' && (
                     <div className="flex flex-col items-center gap-1 mb-4 animate-in fade-in slide-in-from-bottom-2 duration-500">
                       <span className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-gradient-to-r from-rose-500/15 via-pink-500/15 to-rose-500/15 dark:from-rose-500/25 dark:via-pink-500/25 dark:to-rose-500/25 border border-rose-200/60 dark:border-rose-700/50 text-rose-700 dark:text-rose-200 text-sm font-bold shadow-lg shadow-rose-500/10">
-                        Start your first analysis or upload file below
+                        Start your first analysis — paste text or upload a file below, then Analyze Text
                       </span>
                       <svg className="w-6 h-6 text-rose-500 dark:text-rose-400 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
@@ -2172,7 +2130,11 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                         <div className="relative rounded-[14px] sm:rounded-[22px] bg-white dark:bg-stone-800/95 backdrop-blur-sm min-h-[120px] sm:min-h-[180px]">
                           <textarea
                             value={inputText}
-                            onChange={(e) => { setInputText(e.target.value); setShowWordWarning(false); }}
+                            onChange={(e) => {
+                              setInputText(e.target.value);
+                              setShowWordWarning(false);
+                              if (mode === 'analyze') setAnalyzeUploadError('');
+                            }}
                             onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey && isTextValid()) { e.preventDefault(); handleSubmit(); }}}
                             placeholder={mode === 'analyze' ? 'Paste your essay or paper here (min 200 words)...' : 'Enter your research topic to find academic sources...'}
                             className="relative w-full min-h-[120px] sm:min-h-[180px] p-4 sm:p-6 text-stone-800 dark:text-stone-100 text-[15px] sm:text-lg bg-transparent border-none outline-none resize-none placeholder-stone-400 dark:placeholder-stone-500 leading-relaxed"
@@ -2194,36 +2156,90 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                           )}
                       </div>
                       </div>
-                      <div className="flex justify-center mt-6">
-                      <button
-                          data-tutorial-target="essay-analyze-btn"
-                          onClick={handleSubmit}
-                          disabled={!isTextValid() || (mode === 'citations' && isSearchingCitations)}
-                          className={`px-8 sm:px-10 py-3.5 rounded-2xl flex items-center justify-center gap-2 transition-all duration-200 font-bold text-base ${
-                            isTextValid() && !(mode === 'citations' && isSearchingCitations)
-                              ? mode === 'citations'
-                                ? 'bg-gradient-to-r from-sky-500 via-blue-500 to-indigo-500 hover:from-sky-400 hover:to-indigo-400 text-white shadow-lg shadow-sky-500/30 hover:shadow-xl hover:shadow-sky-500/40 hover:-translate-y-0.5 active:scale-[0.98] cursor-pointer'
-                                : 'bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 hover:from-rose-400 hover:to-pink-500 text-white shadow-lg shadow-rose-500/30 hover:shadow-xl hover:shadow-rose-500/40 hover:-translate-y-0.5 active:scale-[0.98] cursor-pointer'
-                              : 'bg-stone-200 dark:bg-stone-700 text-stone-400 cursor-not-allowed'
-                          }`}
-                        >
-                          {mode === 'citations' && isSearchingCitations ? (
-                            <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
-                          ) : mode === 'analyze' ? (
-                            <>Analyze Text</>
-                          ) : (
-                            <>Find Sources</>
+                      {mode === 'analyze' && (
+                        <>
+                          <input
+                            ref={analyzeFileInputRef}
+                            type="file"
+                            accept=".pdf,.doc,.docx,.txt,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"
+                            onChange={handleAnalyzeFileUpload}
+                            className="hidden"
+                            aria-hidden
+                          />
+                          {analyzeUploadError && (
+                            <div className="mt-3 px-2 text-center">
+                              <p className="text-sm font-medium text-red-600 dark:text-red-400">{analyzeUploadError}</p>
+                            </div>
                           )}
-                      </button>
-                    </div>
+                          <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 mt-4">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <button
+                                type="button"
+                                onClick={() => analyzeFileInputRef.current?.click()}
+                                disabled={isParsingAnalyzeDoc}
+                                className={`flex items-center gap-2.5 px-5 py-3.5 rounded-2xl font-bold text-sm transition-all disabled:opacity-50 ${showFirstAnalysisOnboarding ? 'bg-gradient-to-r from-rose-500/[0.245] to-pink-500/[0.245] dark:from-rose-500/[0.343] dark:to-pink-500/[0.343] text-rose-800 dark:text-rose-200 border-2 border-rose-400/[0.784] dark:border-rose-500/[0.686] shadow-[0_0_25px_8px_rgba(244,63,94,0.343)] dark:shadow-[0_0_25px_8px_rgba(244,63,94,0.245)] ring-2 ring-rose-400/[0.392] dark:ring-rose-500/[0.294] hover:from-rose-500/[0.294] hover:to-pink-500/[0.294] dark:hover:from-rose-500/[0.392] dark:hover:to-pink-500/[0.392]' : 'bg-gradient-to-r from-rose-500/15 to-pink-500/15 dark:from-rose-500/25 dark:to-pink-500/25 text-rose-700 dark:text-rose-300 hover:from-rose-500/25 hover:to-pink-500/25 dark:hover:from-rose-500/35 dark:hover:to-pink-500/35 border-2 border-rose-300/80 dark:border-rose-600/60 shadow-md shadow-rose-500/15 hover:shadow-lg hover:shadow-rose-500/25'}`}
+                              >
+                                {isParsingAnalyzeDoc ? (
+                                  <span className="w-5 h-5 border-2 border-rose-500 border-t-transparent rounded-full animate-spin" />
+                                ) : (
+                                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>
+                                )}
+                                {isParsingAnalyzeDoc ? 'Uploading...' : 'Upload file'}
+                              </button>
+                              {inputText.trim() && (
+                                <button
+                                  type="button"
+                                  onClick={() => { setInputText(''); setAnalyzeUploadError(''); }}
+                                  className="px-3 py-2 text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-700/50 text-xs font-medium transition-colors"
+                                >
+                                  Clear
+                                </button>
+                              )}
+                            </div>
+                            <button
+                              type="button"
+                              data-tutorial-target="essay-analyze-btn"
+                              onClick={handleSubmit}
+                              disabled={!isTextValid()}
+                              className={`px-8 sm:px-10 py-3.5 rounded-2xl flex items-center justify-center gap-2 transition-all duration-200 font-bold text-base ${
+                                isTextValid()
+                                  ? 'bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 hover:from-rose-400 hover:to-pink-500 text-white shadow-lg shadow-rose-500/30 hover:shadow-xl hover:shadow-rose-500/40 hover:-translate-y-0.5 active:scale-[0.98] cursor-pointer'
+                                  : 'bg-stone-200 dark:bg-stone-700 text-stone-400 cursor-not-allowed'
+                              }`}
+                            >
+                              Analyze Text
+                            </button>
+                          </div>
+                        </>
+                      )}
+                      {mode === 'citations' && (
+                        <div className="flex justify-center mt-6">
+                          <button
+                            data-tutorial-target="essay-analyze-btn"
+                            onClick={handleSubmit}
+                            disabled={!isTextValid() || isSearchingCitations}
+                            className={`px-8 sm:px-10 py-3.5 rounded-2xl flex items-center justify-center gap-2 transition-all duration-200 font-bold text-base ${
+                              isTextValid() && !isSearchingCitations
+                                ? 'bg-gradient-to-r from-sky-500 via-blue-500 to-indigo-500 hover:from-sky-400 hover:to-indigo-400 text-white shadow-lg shadow-sky-500/30 hover:shadow-xl hover:shadow-sky-500/40 hover:-translate-y-0.5 active:scale-[0.98] cursor-pointer'
+                                : 'bg-stone-200 dark:bg-stone-700 text-stone-400 cursor-not-allowed'
+                            }`}
+                          >
+                            {isSearchingCitations ? (
+                              <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
+                            ) : (
+                              <>Find Sources</>
+                            )}
+                          </button>
+                        </div>
+                      )}
                 </div>
                   )}
 
-                {/* Upload your essay card - Analyze only, below typing area */}
+                {/* Library upload card - Analyze only, below typing area (inline Upload file fills textarea) */}
                 {mode === 'analyze' && (
                   <div
                     onClick={() => onNavigate('upload')}
-                    className={`relative mt-8 rounded-2xl sm:rounded-[1.75rem] overflow-hidden backdrop-blur-xl cursor-pointer transition-all hover:shadow-[0_25px_50px_-12px_rgba(236,72,153,0.2)] hover:scale-[1.01] active:scale-[0.99] group ${showFirstActionPrompt ? 'bg-white dark:bg-stone-800/95 border-2 border-rose-400/80 dark:border-rose-500/60 shadow-[0_0_40px_15px_rgba(244,63,94,0.25)] dark:shadow-[0_0_40px_15px_rgba(244,63,94,0.2)] ring-4 ring-rose-400/30 dark:ring-rose-500/20' : 'bg-white/90 dark:bg-stone-800/95 border border-white/50 dark:border-stone-600/50 shadow-2xl shadow-stone-900/10 dark:shadow-black/20'}`}
+                    className={`relative mt-8 rounded-2xl sm:rounded-[1.75rem] overflow-hidden backdrop-blur-xl cursor-pointer transition-all hover:shadow-[0_25px_50px_-12px_rgba(236,72,153,0.2)] hover:scale-[1.01] active:scale-[0.99] group ${showFirstAnalysisOnboarding ? 'bg-white dark:bg-stone-800/95 border-2 border-rose-400/68 dark:border-rose-500/55 shadow-[0_0_36px_12px_rgba(244,63,94,0.22)] dark:shadow-[0_0_36px_12px_rgba(244,63,94,0.17)] ring-4 ring-rose-400/25 dark:ring-rose-500/20' : 'bg-white/90 dark:bg-stone-800/95 border border-white/50 dark:border-stone-600/50 shadow-2xl shadow-stone-900/10 dark:shadow-black/20'}`}
                     data-tutorial="essay-upload"
                   >
                     <div className="absolute top-0 left-0 w-16 h-16 rounded-2xl bg-rose-200/40 dark:bg-rose-500/20 blur-2xl pointer-events-none" />
@@ -2235,11 +2251,11 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
                       </div>
-                      <h3 className="text-lg sm:text-xl font-bold text-stone-800 dark:text-stone-100 mb-2">Upload your essay</h3>
-                      <p className="text-stone-500 dark:text-stone-400 text-sm sm:text-base mb-6 max-w-sm mx-auto">Get professor-style feedback on structure, clarity, and tone</p>
-                      <div className={`inline-flex items-center gap-2 px-6 py-3.5 rounded-2xl bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-400 hover:to-pink-500 text-white font-semibold transition-all group-hover:shadow-xl group-hover:scale-[1.02] ${showFirstActionPrompt ? 'shadow-[0_0_25px_8px_rgba(244,63,94,0.4)] ring-2 ring-white/50' : 'shadow-lg shadow-rose-500/25'}`}>
+                      <h3 className="text-lg sm:text-xl font-bold text-stone-800 dark:text-stone-100 mb-2">Save to your library</h3>
+                      <p className="text-stone-500 dark:text-stone-400 text-sm sm:text-base mb-6 max-w-sm mx-auto">Save work in your library. Use Upload file above to load a PDF or Word file into the box.</p>
+                      <div className={`inline-flex items-center gap-2 px-6 py-3.5 rounded-2xl bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-400 hover:to-pink-500 text-white font-semibold transition-all group-hover:shadow-xl group-hover:scale-[1.02] ${showFirstAnalysisOnboarding ? 'shadow-[0_0_25px_8px_rgba(244,63,94,0.392)] ring-2 ring-white/[0.49]' : 'shadow-lg shadow-rose-500/25'}`}>
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>
-                        Upload File
+                        Library upload
                       </div>
                       <div className="flex flex-wrap justify-center gap-2 mt-4">
                         {['PDF', 'DOCX', 'TXT'].map((fmt) => (
@@ -2276,17 +2292,17 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                 </div>
               </div>
               )}
+                {/* Uploading overlay - hides card content during file parse to prevent flash/layout shift */}
+                {mode === 'analyze' && isParsingAnalyzeDoc && (
+                  <div className="absolute inset-0 rounded-[14px] sm:rounded-[30px] bg-white/95 dark:bg-stone-800/95 backdrop-blur-sm flex items-center justify-center gap-3 z-20 pointer-events-auto" aria-live="polite" aria-busy="true">
+                    <span className="w-8 h-8 border-2 border-rose-500 border-t-transparent rounded-full animate-spin" />
+                    <span className="font-semibold text-stone-700 dark:text-stone-200">Uploading...</span>
+                  </div>
+                )}
             </div>
                   </div>
             </div>
             ))}
-
-        {/* LESSON MODE - Interactive Lesson Generator inline */}
-        {mode === 'lesson' && (
-          <div className="min-h-0 flex-1 overflow-auto">
-            <InteractiveLessonPage onNavigate={onNavigate} user={user} onLogout={onLogout} embedded onBack={() => setMode('analyze')} />
-          </div>
-        )}
 
         {/* FOCUS MODE - Settings section for paid users; on mobile show desktop-only info (or Coming Soon when extension pending) */}
         {mode === 'focus_mode' && (
@@ -2344,274 +2360,6 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                 </div>
                 </div>
           )
-        )}
-
-        {/* HUMANIZE MODE - new website style */}
-        {mode === 'humanize' && (
-          <>
-            <div className="relative rounded-2xl sm:rounded-3xl shadow-xl overflow-hidden mb-6 min-w-0">
-              <div className="absolute top-4 right-4 w-12 h-12 rounded-xl bg-gradient-to-br from-violet-400 to-purple-500 opacity-20 rotate-12 pointer-events-none" />
-              <div className="absolute bottom-4 left-4 w-16 h-16 rounded-full bg-violet-400/10 pointer-events-none" />
-              <div className="absolute top-1/2 right-8 w-8 h-8 rounded-lg bg-purple-400/15 -rotate-12 hidden sm:block pointer-events-none" />
-              <div className="bg-white dark:bg-stone-800 rounded-2xl sm:rounded-3xl border border-violet-200/60 dark:border-violet-700/40 shadow-inner">
-              {/* Toolbar */}
-              <div className="bg-gradient-to-r from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20 border-b border-violet-200/60 dark:border-violet-700/40 px-3 sm:px-5 py-3 sm:py-4">
-                <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center justify-between gap-3 sm:gap-4">
-                  <div className="flex flex-wrap items-center gap-2 sm:gap-3 min-w-0 overflow-x-auto sm:overflow-visible">
-                    <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
-                      <span className="text-xs font-medium text-stone-500 dark:text-stone-400 flex-shrink-0">Mode:</span>
-                      <div className="flex items-center bg-white dark:bg-stone-700 rounded-xl px-0.5 sm:px-1 py-1 shadow-sm border border-stone-200 dark:border-stone-600">
-                      {([
-                        { id: 'standard', label: 'Standard', tooltip: 'Natural college-student writing, clear and slightly informal' },
-                        { id: 'academic', label: 'Academic', tooltip: 'Formal academic tone with technical terms, keeps citations' },
-                        { id: 'casual', label: 'Casual', tooltip: 'Conversational tone, like explaining to a friend' },
-                        { id: 'creative', label: 'Creative', tooltip: 'Personal essay style with varied rhythm' }
-                      ] as const).map((m) => (
-                        <button
-                          key={m.id}
-                          onClick={() => setHumanizeMode(m.id)}
-                          title={m.tooltip}
-                          className={`px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all whitespace-nowrap ${
-                            humanizeMode === m.id ? 'bg-violet-600 text-white shadow-sm' : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-600'
-                          }`}
-                        >
-                          {m.label}
-                        </button>
-                      ))}
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
-                      <span className="text-xs font-medium text-stone-500 dark:text-stone-400 flex-shrink-0">Intensity:</span>
-                      <div className="flex items-center bg-white dark:bg-stone-700 rounded-xl px-0.5 sm:px-1 py-1 shadow-sm border border-stone-200 dark:border-stone-600">
-                      {([
-                        { id: 'light', label: 'Light', tooltip: 'Minimal changes (~15-20%), fixes obvious AI phrases' },
-                        { id: 'medium', label: 'Medium', tooltip: 'Balanced rewrite (~40-50%), adds natural variation' },
-                        { id: 'aggressive', label: 'Heavy', tooltip: 'Full rewrite, completely different wording, same meaning' }
-                      ] as const).map((intensity) => (
-                        <button
-                          key={intensity.id}
-                          onClick={() => setHumanizeIntensity(intensity.id)}
-                          title={intensity.tooltip}
-                          className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all whitespace-nowrap ${
-                            humanizeIntensity === intensity.id ? 'bg-violet-600 text-white shadow-sm' : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-600'
-                          }`}
-                        >
-                          {intensity.label}
-                        </button>
-                      ))}
-                      </div>
-                    </div>
-                  </div>
-                  <button
-                    data-tutorial-target="humanizer-btn"
-                    onClick={handleSubmit}
-                    disabled={!isTextValid() || isHumanizing}
-                    className={`w-full sm:w-auto px-6 py-2.5 rounded-xl flex items-center justify-center transition-all font-semibold text-sm flex-shrink-0 ${
-                      isTextValid() && !isHumanizing
-                        ? 'bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white shadow-lg shadow-violet-200/50 dark:shadow-violet-900/30 cursor-pointer transform hover:-translate-y-0.5'
-                        : 'bg-stone-200 dark:bg-stone-600 text-stone-400 dark:text-stone-500 cursor-not-allowed'
-                    }`}
-                  >
-                    {isHumanizing ? (
-                      <>
-                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        Humanizing...
-                      </>
-                    ) : (
-                      <>
-                        <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                        </svg>
-                        Humanize
-                      </>
-                    )}
-                  </button>
-                </div>
-              </div>
-
-              {/* Editor Panels */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-stone-200 dark:divide-stone-600 min-w-0">
-                {/* Left Panel */}
-                <div className="flex flex-col min-w-0" data-tutorial-target="humanizer-input">
-                  <div className="flex items-center justify-between px-3 sm:px-5 py-2.5 sm:py-3 bg-stone-50 dark:bg-stone-800/50 border-b border-stone-200 dark:border-stone-600 gap-2 min-w-0">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <div className="w-2 h-2 rounded-full bg-stone-400 dark:bg-stone-500 flex-shrink-0"></div>
-                      <span className="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider truncate">Original</span>
-                    </div>
-                    <div className="flex items-center gap-2 flex-shrink-0">
-                      <input ref={parseFileInputRef} type="file" accept=".pdf,.doc,.docx,.txt,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain" onChange={handleParseDocument} className="hidden" />
-                      <button onClick={() => parseFileInputRef.current?.click()} disabled={isParsingDoc} className="flex items-center gap-2 px-3 py-2 rounded-xl bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300 hover:bg-violet-200 dark:hover:bg-violet-800/50 font-semibold text-sm transition-colors disabled:opacity-50 border border-violet-200 dark:border-violet-700">
-                        {isParsingDoc ? <span className="w-4 h-4 border-2 border-violet-400 border-t-transparent rounded-full animate-spin" /> : <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>}
-                        {isParsingDoc ? 'Parsing...' : 'Upload Document'}
-                      </button>
-                      <button onClick={() => navigator.clipboard.readText().then(text => setInputText(text))} className="flex items-center gap-1.5 px-2 py-1.5 text-xs text-stone-600 dark:text-stone-400 hover:text-violet-600 dark:hover:text-violet-400 hover:bg-violet-50 dark:hover:bg-violet-900/30 rounded-lg transition-colors">
-                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
-                        Paste
-                      </button>
-                      <button onClick={() => setInputText('')} className={`flex items-center gap-1.5 px-2 py-1.5 text-xs text-stone-600 dark:text-stone-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors ${!inputText ? 'invisible' : ''}`}>Clear</button>
-                    </div>
-                  </div>
-                  <textarea
-                    value={inputText}
-                    onChange={(e) => { setInputText(e.target.value); setShowWordWarning(false); }}
-                    onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey && isTextValid()) { e.preventDefault(); handleSubmit(); }}}
-                    placeholder={placeholders[placeholderIndex]}
-                    disabled={isHumanizing}
-                    className="w-full min-w-0 min-h-[240px] sm:min-h-[280px] md:min-h-[350px] p-3 sm:p-5 text-stone-800 dark:text-stone-100 text-[15px] border-none outline-none resize-none bg-transparent placeholder-stone-400 dark:placeholder-stone-500 leading-relaxed"
-                  />
-                  <div className="flex items-center justify-between px-3 sm:px-5 py-2.5 sm:py-3 bg-stone-50/50 dark:bg-stone-800/30 border-t border-stone-200 dark:border-stone-600">
-                    <span className={`text-xs font-medium ${getWordCount(inputText) > humanizeSummarizeMaxWords ? 'text-red-600' : 'text-stone-500 dark:text-stone-400'}`}>
-                      {getWordCount(inputText)} words / {humanizeSummarizeMaxWords.toLocaleString()} max
-                      {getWordCount(inputText) > humanizeSummarizeMaxWords && isFreeUser && ' — Upgrade for 5,000'}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Right Panel */}
-                <div className="flex flex-col bg-gradient-to-br from-violet-50/30 to-purple-50/30 dark:from-violet-900/10 dark:to-purple-900/10 min-w-0">
-                  <div className="flex flex-wrap items-center justify-between gap-2 px-3 sm:px-5 py-2.5 sm:py-3 bg-violet-50/50 dark:bg-violet-900/20 border-b border-violet-100/50 dark:border-violet-800/30 min-w-0">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <div className="w-2 h-2 rounded-full bg-violet-500 flex-shrink-0"></div>
-                      <span className="text-xs font-semibold text-violet-700 dark:text-violet-400 uppercase tracking-wider">Humanized</span>
-                    </div>
-                    <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-                      {showHumanizeResult && humanizedResult && (
-                        <>
-                          <button
-                            onClick={() => setShowHighlights(!showHighlights)}
-                            className={`flex items-center gap-1 sm:gap-1.5 text-xs font-medium transition-all px-1.5 sm:px-2 py-1 rounded-lg ${
-                              showHighlights ? 'bg-violet-100 dark:bg-violet-800/50 text-violet-700 dark:text-violet-300' : 'text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-700'
-                            }`}
-                          >
-                            <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
-                            </svg>
-                            <span className="hidden sm:inline">Highlights</span>
-                          </button>
-                          <button
-                            onClick={() => { navigator.clipboard.writeText(humanizedResult); setHumanizeCopied(true); setTimeout(() => setHumanizeCopied(false), 2000); trackCopy(); }}
-                            className={`flex items-center gap-1 text-xs font-medium transition-all ${humanizeCopied ? 'text-green-600' : 'text-violet-600 hover:text-violet-700'}`}
-                          >
-                            {humanizeCopied ? (<> <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg> Copied! </>) : (<> <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg> Copy All </>)}
-                          </button>
-                          <button onClick={handleEnlargeHumanize} className="p-1.5 text-sky-600 dark:text-sky-400 hover:bg-sky-50 dark:hover:bg-sky-900/20 rounded-lg transition-colors" title="Open in full page">
-                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" /></svg>
-                          </button>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex-1 min-h-[240px] sm:min-h-[280px] md:min-h-[350px] max-h-[260px] sm:max-h-[280px] md:max-h-[350px] overflow-y-auto overflow-x-hidden min-w-0">
-                    {showHumanizeResult && humanizedResult ? (
-                      <div className="p-3 sm:p-5 text-stone-800 dark:text-stone-100 text-[15px] leading-relaxed break-words">
-                        {showHighlights ? (
-                          (() => {
-                            // Build a Set of normalized original words for O(1) lookup
-                            const normalize = (word: string) => word.toLowerCase().replace(/[^\w]/g, '');
-                            const originalWordSet = new Set(inputText.split(/\s+/).filter(Boolean).map(normalize));
-                            const humanizedTokens = humanizedResult.split(/(\s+)/);
-                            
-                            return humanizedTokens.map((token, idx) => {
-                              if (/^\s+$/.test(token)) {
-                                return <span key={idx}>{token}</span>;
-                              }
-                              const existsInOriginal = originalWordSet.has(normalize(token));
-                              if (!existsInOriginal) {
-                                return <span key={idx} className="bg-violet-100/80 dark:bg-violet-800/50 text-violet-900 dark:text-violet-200 underline decoration-violet-400/60 decoration-2 underline-offset-2 rounded-sm px-0.5">{token}</span>;
-                              }
-                              return <span key={idx}>{token}</span>;
-                            });
-                          })()
-                        ) : (
-                          humanizedResult
-                        )}
-                      </div>
-                    ) : (
-                      <div className="flex items-center justify-center h-full text-stone-400 dark:text-stone-500 p-5">
-                        {isHumanizing ? (
-                          <div className="flex flex-col items-center gap-4">
-                            <div className="relative">
-                              <div className="w-12 h-12 border-4 border-violet-200 dark:border-violet-800 rounded-full"></div>
-                              <div className="absolute top-0 left-0 w-12 h-12 border-4 border-violet-600 rounded-full border-t-transparent animate-spin"></div>
-                            </div>
-                            <div className="text-center">
-                              <p className="text-sm font-medium text-stone-600 dark:text-stone-400">Humanizing your text...</p>
-                              <p className="text-xs text-stone-500 dark:text-stone-500 mt-1">This usually takes 5-10 seconds</p>
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="text-center">
-                            <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-violet-100/50 dark:bg-violet-900/30 flex items-center justify-center">
-                              <svg className="w-8 h-8 text-violet-300 dark:text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                              </svg>
-                            </div>
-                            <p className="text-sm text-stone-500 dark:text-stone-400">Your humanized text will appear here</p>
-                            <p className="text-xs text-stone-400 dark:text-stone-500 mt-1">Paste text on the left and click Humanize</p>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex items-center justify-between px-3 sm:px-5 py-2.5 sm:py-3 bg-violet-50/30 dark:bg-violet-900/10 border-t border-violet-100/50 dark:border-violet-800/30">
-                    <span className="text-xs text-stone-500 dark:text-stone-400 font-medium">{showHumanizeResult ? `${humanizedResult.split(/\s+/).filter(Boolean).length} words` : ''}</span>
-                    {showHumanizeResult && humanizedResult && (
-                      <button onClick={() => { setShowHumanizeResult(false); setHumanizedResult(''); }} className="text-xs text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 transition-colors">Clear result</button>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Usage Bar */}
-              <div className="px-3 sm:px-5 py-3 sm:py-4 bg-stone-50 dark:bg-stone-800/50 border-t border-stone-200 dark:border-stone-600">
-                <div className="flex flex-wrap items-center justify-center gap-x-4 sm:gap-x-6 gap-y-2">
-                  <div className="flex items-center gap-3">
-                    <span className="text-xs text-stone-500 dark:text-stone-400">Monthly usage:</span>
-                    {humanizeWordLimit >= 999999 ? (
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-semibold text-stone-700 dark:text-stone-300">{humanizeWordsUsed.toLocaleString()} words used</span>
-                        <span className="px-2 py-0.5 bg-gradient-to-r from-violet-100 to-purple-100 dark:from-violet-900/50 dark:to-purple-900/50 text-violet-700 dark:text-violet-300 text-[10px] font-bold rounded-full">UNLIMITED</span>
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-2">
-                        <div className="w-32 h-1.5 bg-stone-200 dark:bg-stone-600 rounded-full overflow-hidden">
-                          <div
-                            className={`h-full rounded-full transition-all ${humanizeWordsUsed / humanizeWordLimit > 0.9 ? 'bg-red-500' : 'bg-gradient-to-r from-violet-500 to-purple-500'}`}
-                            style={{ width: `${Math.min(100, (humanizeWordsUsed / humanizeWordLimit) * 100)}%` }}
-                          />
-                        </div>
-                        <span className="text-xs font-semibold text-stone-700 dark:text-stone-300">{humanizeWordsUsed.toLocaleString()} / {humanizeWordLimit.toLocaleString()}</span>
-                      </div>
-                    )}
-                  </div>
-                  {humanizeWordLimit < 999999 && (
-                    <button onClick={() => onNavigate('pricing')} className="text-xs text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 font-semibold flex items-center gap-1 transition-colors">
-                      Upgrade for unlimited
-                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
-                    </button>
-                  )}
-                </div>
-              </div>
-              </div>
-            </div>
-
-            {humanizeError && (
-              <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl text-center">
-                <p className="text-red-700 dark:text-red-400 text-sm font-medium">{humanizeError}</p>
-                {humanizeWordLimit < 999999 && (
-                  <>
-                    <p className="text-red-600 dark:text-red-500 text-xs mt-1">{getResetsInText(humanizeDaysUntilReset)}</p>
-                    <button onClick={() => onNavigate('pricing')} className="mt-2 px-4 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold rounded-lg transition-colors">
-                      Upgrade for unlimited words/month
-                    </button>
-                  </>
-                )}
-              </div>
-            )}
-          </>
         )}
 
         {/* SUMMARIZE MODE */}
@@ -2905,7 +2653,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                   <p className="relative text-stone-600 dark:text-stone-300 text-sm sm:text-lg text-center mb-6 sm:mb-8 max-w-xl mx-auto leading-relaxed">
                     Lesson, flashcards, quiz, crossword & Crater Blast — all from one paste
                   </p>
-                  <div className="relative sm:hidden grid grid-cols-2 justify-center gap-2 mb-6 sm:mb-8">
+                  <div className="relative flex flex-wrap justify-center gap-x-4 sm:gap-x-6 gap-y-2 mb-6 sm:mb-8">
                     {['Lesson', 'Flashcards', 'Quiz', 'Crossword', 'Crater Blast'].map((f) => (
                       <span key={f} className="flex items-center gap-2.5 text-stone-600 dark:text-stone-400 text-sm">
                         <span className="flex-shrink-0 w-5 h-5 rounded-full bg-emerald-500/15 flex items-center justify-center">
@@ -2914,6 +2662,27 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                         {f}
                       </span>
                     ))}
+                  </div>
+                  {/* Tab switcher - same as Analyze/Citations (Study Pack section: Analyze/Citations inactive, Study Pack active) */}
+                  <div className="relative flex rounded-xl sm:rounded-2xl bg-stone-100/80 dark:bg-stone-800/80 p-1 sm:p-1.5 mb-4 sm:mb-6 max-w-lg mx-auto shadow-inner">
+                    <button
+                      onClick={() => { setMode('analyze'); setShowWordWarning(false); setAnalyzeUploadError(''); setSummaryResult(null); setQuizResult(null); setFlashcardResult(null); setCrosswordResult(null); setStudyPackResult(null); }}
+                      className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-sm transition-all duration-200 text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200"
+                    >
+                      <span className="text-lg">📝</span> Analyze Text
+                    </button>
+                    <button
+                      onClick={() => { setMode('citations'); setShowWordWarning(false); setAnalyzeUploadError(''); setSummaryResult(null); }}
+                      className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-sm transition-all duration-200 text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200"
+                    >
+                      <span className="text-lg">📚</span> Citations
+                    </button>
+                    <button
+                      onClick={() => { setMode('quiz'); setShowWordWarning(false); setAnalyzeUploadError(''); setSummaryResult(null); setQuizResult(null); setFlashcardResult(null); setCrosswordResult(null); setStudyPackResult(null); }}
+                      className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-sm transition-all duration-200 bg-white dark:bg-stone-700 text-amber-600 dark:text-amber-400 shadow-lg shadow-stone-200/50 dark:shadow-stone-900/50"
+                    >
+                      <span className="text-lg">📦</span> Study Pack
+                    </button>
                   </div>
                   {/* Create Cards button - inline */}
                   {!loadingStats && (
@@ -2968,7 +2737,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                           ) : (
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>
                           )}
-                          {isParsingStudyDoc ? 'Parsing...' : 'Upload file'}
+                          {isParsingStudyDoc ? 'Uploading...' : 'Upload file'}
                         </button>
                         {inputText.trim() && (
                           <button onClick={() => setInputText('')} className="px-3 py-2 text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-700/50 text-xs font-medium transition-colors">
@@ -2992,6 +2761,13 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                       </button>
                     </div>
                   </div>
+                  {/* Uploading overlay - hides card content during file parse to prevent flash/layout shift */}
+                  {isParsingStudyDoc && (
+                    <div className="absolute inset-0 rounded-[14px] sm:rounded-[30px] bg-white/95 dark:bg-stone-800/95 backdrop-blur-sm flex items-center justify-center gap-3 z-20 pointer-events-auto" aria-live="polite" aria-busy="true">
+                      <span className="w-8 h-8 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
+                      <span className="font-semibold text-stone-700 dark:text-stone-200">Uploading...</span>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -3249,7 +3025,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                               </svg>
                             )}
-                            {isParsingStudyDoc ? 'Parsing...' : 'Upload Document'}
+                            {isParsingStudyDoc ? 'Uploading...' : 'Upload Document'}
                           </button>
                           <button onClick={() => setInputText('')} className={`text-xs text-gray-400 hover:text-gray-600 ${!inputText ? 'invisible' : ''}`}>Clear</button>
                           <button onClick={() => navigator.clipboard.readText().then(text => setInputText(text))} className="text-xs text-amber-600 hover:text-amber-700 font-medium">Paste</button>
@@ -3396,7 +3172,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                               </svg>
                             )}
-                            {isParsingStudyDoc ? 'Parsing...' : 'Upload Document'}
+                            {isParsingStudyDoc ? 'Uploading...' : 'Upload Document'}
                           </button>
                           <button onClick={() => setInputText('')} className={`text-xs text-stone-400 hover:text-emerald-600 dark:hover:text-emerald-400 ${!inputText ? 'invisible' : ''}`}>Clear</button>
                           <button onClick={() => navigator.clipboard.readText().then(text => setInputText(text))} className="text-xs text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 font-medium">Paste</button>
@@ -3536,7 +3312,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                       {/* Crossword Grid - Now Interactive */}
                       <div 
-                        className="bg-white rounded-2xl border border-gray-200 p-4 overflow-x-auto focus:outline-none focus:ring-2 focus:ring-violet-400"
+                        className="bg-white rounded-2xl border border-gray-200 p-4 overflow-x-auto focus:outline-none focus:ring-2 focus:ring-rose-400"
                         tabIndex={0}
                         onKeyDown={handleCrosswordKeyDown}
                       >
@@ -3751,7 +3527,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                               </svg>
                             )}
-                            {isParsingStudyDoc ? 'Parsing...' : 'Upload Document'}
+                            {isParsingStudyDoc ? 'Uploading...' : 'Upload Document'}
                           </button>
                           <button onClick={() => setInputText('')} className={`text-xs text-stone-400 hover:text-orange-600 dark:hover:text-orange-400 ${!inputText ? 'invisible' : ''}`}>Clear</button>
                           <button onClick={() => navigator.clipboard.readText().then(text => setInputText(text))} className="text-xs text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 font-medium">Paste</button>

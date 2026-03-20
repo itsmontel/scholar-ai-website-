@@ -52,7 +52,7 @@ Focus on expanding the content on these tool pages. Each should have:
 | `/tools/gpa-calculator` | "GPA calculator" |
 | `/tools/pomodoro-timer` | "Pomodoro timer online" |
 | `/tools/grammar-checker` | "grammar checker for essays" |
-| `/analysis` (AI Scholar Analysis) | "AI essay checker" / "essay feedback tool" / "essay analysis for students" |
+| `/analysis` (WriteScholar Analysis) | "AI essay checker" / "essay feedback tool" / "essay analysis for students" |
 | `/tools/interactive-lesson` | "AI lesson generator" / "study lesson from notes" |
 
 ### Blog

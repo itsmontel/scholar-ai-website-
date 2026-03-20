@@ -80,29 +80,34 @@ function normalizeDomains(domains) {
 
 async function syncRules() {
   console.log('[WriteScholar BG] syncRules called');
-  const { authToken } = await chrome.storage.local.get('authToken');
-  if (!authToken || typeof authToken !== 'string' || authToken.trim() === '') {
-    console.log('[WriteScholar BG] No auth token - not blocking anything. Log in to WriteScholar to use Focus Mode.');
+  const { authToken, extensionEnabled } = await chrome.storage.local.get(['authToken', 'extensionEnabled']);
+
+  // Don't block when logged out or when extension is explicitly off
+  if (!authToken || typeof authToken !== 'string' || authToken.trim() === '' || extensionEnabled === false) {
     const existing = await chrome.declarativeNetRequest.getDynamicRules();
     if (existing.length > 0) {
       await chrome.declarativeNetRequest.updateDynamicRules({
         removeRuleIds: existing.map((r) => r.id),
       });
-      console.log('[WriteScholar BG] Rules cleared (login required)');
     }
     return;
   }
 
   const config = await getStoredConfig();
   const unlocks = await getUnlocks();
+  const domainSettings = config?.domainSettings || {};
   const now = Date.now();
   
   console.log('[WriteScholar BG] Config blockedDomains:', config.blockedDomains);
   console.log('[WriteScholar BG] Current unlocks:', unlocks);
 
-  const toBlock = (config.blockedDomains || []).filter(
-    (d) => !unlocks[d] || unlocks[d] < now
-  );
+  // Daily-limit sites: don't redirect - let usageTracker handle when limit is reached
+  // Block-mode sites: redirect unless user has active unlock
+  const toBlock = (config.blockedDomains || []).filter((d) => {
+    const settings = domainSettings[d];
+    if (settings?.mode === 'daily_limit') return false;
+    return !unlocks[d] || unlocks[d] < now;
+  });
   
   console.log('[WriteScholar BG] Domains to block (after unlock filter):', toBlock);
 
@@ -162,9 +167,12 @@ async function fetchConfig(token) {
     const data = await res.json();
     if (data.success && data.data) {
       const cfg = data.data;
-      const { unlockDurationMs: existing } = await chrome.storage.local.get('unlockDurationMs');
-      if (cfg.unlock_duration_ms && existing == null) {
+      // Always sync unlock duration from server so website changes propagate to extension
+      if (cfg.unlock_duration_ms) {
         await chrome.storage.local.set({ unlockDurationMs: cfg.unlock_duration_ms });
+      }
+      if (cfg.domainSettings) {
+        cfg.domainSettings = cfg.domainSettings || {};
       }
       return cfg;
     }
@@ -174,13 +182,91 @@ async function fetchConfig(token) {
   return null;
 }
 
+async function refreshAuthToken() {
+  const { authToken, lastTokenRefresh } = await chrome.storage.local.get(['authToken', 'lastTokenRefresh']);
+  if (!authToken || typeof authToken !== 'string' || authToken.trim() === '') return;
+  // Throttle: don't refresh more than once per 24 hours
+  const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+  if (lastTokenRefresh && Date.now() - lastTokenRefresh < ONE_DAY_MS) return;
+  try {
+    const apiBase = await getApiBase();
+    const res = await fetch(`${apiBase}/auth/refresh`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${authToken}` },
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.success && data.data?.token) {
+        await chrome.storage.local.set({
+          authToken: data.data.token,
+          lastTokenRefresh: Date.now(),
+        });
+        console.log('[WriteScholar BG] Token refreshed successfully');
+        return true;
+      }
+    }
+  } catch (e) {
+    console.error('[WriteScholar BG] Token refresh failed:', e);
+  }
+  return false;
+}
+
+async function persistBlockedSitesToServer(blockedDomains, domainSettings) {
+  const { authToken } = await chrome.storage.local.get('authToken');
+  if (!authToken) return false;
+  try {
+    const apiBase = await getApiBase();
+    const res = await fetch(`${apiBase}/focus-mode/blocked-sites`, {
+      method: 'PUT',
+      headers: { Authorization: `Bearer ${authToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ blockedDomains, domainSettings }),
+    });
+    if (!res.headers.get('content-type')?.includes('application/json')) return false;
+    const data = await res.json();
+    return !!(data.success);
+  } catch (e) {
+    console.error('Focus mode persist blocked sites:', e);
+    return false;
+  }
+}
+
 async function syncFromServer() {
   const { authToken } = await chrome.storage.local.get('authToken');
-  const config = await fetchConfig(authToken);
-  if (config) {
-    await chrome.storage.local.set({ config });
-    await syncRules();
+  const serverConfig = await fetchConfig(authToken);
+  if (!serverConfig) return;
+
+  const localConfig = await getStoredConfig();
+  const serverSettings = serverConfig.domainSettings || {};
+  const localSettings = localConfig?.domainSettings || {};
+  const serverDomains = serverConfig.blockedDomains || [];
+
+  // Merge: if local has daily_limit for a domain but server has block/missing, keep local
+  // (handles PUT failure or race where server has stale data)
+  let mergedSettings = { ...serverSettings };
+  let needsRepersist = false;
+  for (const d of serverDomains) {
+    const localS = localSettings[d];
+    const serverS = serverSettings[d];
+    if (localS?.mode === 'daily_limit' && (!serverS || serverS.mode === 'block')) {
+      mergedSettings[d] = { mode: 'daily_limit', dailyLimitMinutes: localS.dailyLimitMinutes || 60 };
+      needsRepersist = true;
+    }
   }
+
+  const config = {
+    ...serverConfig,
+    domainSettings: mergedSettings,
+  };
+
+  if (needsRepersist) {
+    const normalized = normalizeDomains(serverDomains);
+    const ok = await persistBlockedSitesToServer(normalized, mergedSettings);
+    if (ok) console.log('[WriteScholar BG] Repersisted domain settings to server');
+  }
+
+  await chrome.storage.local.set({ config });
+  await syncRules();
+  refreshAuthToken();
 }
 
 chrome.runtime.onInstalled.addListener(async () => {
@@ -192,14 +278,30 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   console.log('[WriteScholar BG] Message received:', msg.type, 'from:', sender?.url);
   
   if (msg.type === 'AUTH_TOKEN') {
-    const updates = { authToken: msg.token };
-    if (msg.apiBase) updates.apiBase = msg.apiBase;
-    chrome.storage.local.set(updates, () => {
-      console.log('[WriteScholar BG] AUTH_TOKEN stored');
-      syncFromServer()
-        .then(() => syncRules())
-        .then(() => sendResponse({ ok: true }));
+    chrome.storage.local.get('authToken', async (stored) => {
+      const existingToken = stored?.authToken;
+      // Don't overwrite extension token with empty when page has no token - user may be logged in only in extension
+      const shouldUpdate = msg.token || !existingToken;
+      if (!shouldUpdate) {
+        sendResponse({ ok: true });
+        return;
+      }
+      const updates = { authToken: msg.token };
+      if (msg.apiBase) updates.apiBase = msg.apiBase;
+      chrome.storage.local.set(updates, async () => {
+        console.log('[WriteScholar BG] AUTH_TOKEN stored');
+        if (!msg.token) {
+          await syncRules(); // Logged out - clear blocking immediately
+        } else {
+          await syncFromServer();
+        }
+        sendResponse({ ok: true });
+      });
     });
+    return true;
+  }
+  if (msg.type === 'SYNC_RULES') {
+    syncRules().then(() => sendResponse({ ok: true }));
     return true;
   }
   if (msg.type === 'UNLOCK_SITE') {
@@ -238,6 +340,63 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     getApiBase().then(apiBase => sendResponse({ apiBase }));
     return true;
   }
+  if (msg.type === 'ADD_DAILY_USAGE') {
+    const { domain, currentUrl } = msg;
+    if (!domain) {
+      sendResponse({ limitReached: false });
+      return true;
+    }
+    (async () => {
+      const today = new Date().toDateString();
+      const { dailyUsage = {}, config, unlocks } = await chrome.storage.local.get(['dailyUsage', 'config', 'unlocks']);
+      const domainSettings = config?.domainSettings || {};
+      const settings = domainSettings[domain];
+      if (!settings || settings.mode !== 'daily_limit') {
+        sendResponse({ limitReached: false });
+        return;
+      }
+      const now = Date.now();
+      const isUnlocked = unlocks?.[domain] && unlocks[domain] > now;
+      if (isUnlocked) {
+        sendResponse({ limitReached: false });
+        return;
+      }
+      const limitMins = settings.dailyLimitMinutes || 60;
+      if (!dailyUsage[domain]) dailyUsage[domain] = {};
+      const used = dailyUsage[domain][today] || 0;
+      const next = used + 1;
+      dailyUsage[domain][today] = next;
+      await chrome.storage.local.set({ dailyUsage });
+      const limitReached = next >= limitMins;
+      if (limitReached) {
+        const base = getScholarBase();
+        const redirectBack = (currentUrl && currentUrl.startsWith('http') && currentUrl.includes(domain)) ? currentUrl : `https://${domain}`;
+        const redirectUrl = `${base}/unlock-quiz?site=${encodeURIComponent(domain)}&redirect=${encodeURIComponent(redirectBack)}`;
+        sendResponse({ limitReached: true, redirectUrl });
+      } else {
+        sendResponse({ limitReached: false });
+      }
+    })();
+    return true;
+  }
+  if (msg.type === 'CHECK_DAILY_LIMIT') {
+    const { site } = msg;
+    if (!site) {
+      sendResponse({ underLimit: false, usageToday: 0, limit: 0 });
+      return true;
+    }
+    (async () => {
+      const today = new Date().toDateString();
+      const { dailyUsage = {}, config } = await chrome.storage.local.get(['dailyUsage', 'config']);
+      const domainSettings = config?.domainSettings || {};
+      const settings = domainSettings[site];
+      const used = (dailyUsage[site] || {})[today] || 0;
+      const limitMins = (settings?.mode === 'daily_limit' ? (settings.dailyLimitMinutes || 60) : 0);
+      const underLimit = limitMins > 0 && used < limitMins;
+      sendResponse({ underLimit, usageToday: used, limit: limitMins });
+    })();
+    return true;
+  }
   if (msg.type === 'FETCH_PRESETS') {
     getApiBase().then(async (apiBase) => {
       try {
@@ -251,12 +410,13 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     return true;
   }
   if (msg.type === 'UPDATE_BLOCKED_SITES') {
-    const { blockedDomains } = msg;
+    const { blockedDomains, domainSettings } = msg;
     if (!Array.isArray(blockedDomains)) {
       sendResponse({ ok: false, error: 'Invalid input' });
       return true;
     }
     const normalized = normalizeDomains(blockedDomains);
+    const settings = (domainSettings && typeof domainSettings === 'object') ? domainSettings : {};
     (async () => {
       let replied = false;
       const reply = (r) => {
@@ -272,24 +432,26 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
           const res = await fetch(`${apiBase}/focus-mode/blocked-sites`, {
             method: 'PUT',
             headers: { Authorization: `Bearer ${authToken}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ blockedDomains: normalized }),
+            body: JSON.stringify({ blockedDomains: normalized, domainSettings: settings }),
           });
           const ct = res.headers.get('content-type') || '';
           if (ct.includes('application/json')) {
             const data = await res.json();
             if (data.success) {
               const serverDomains = data.data?.blockedDomains || normalized;
+              const serverSettings = data.data?.domainSettings || settings;
               const config = await getStoredConfig();
               await chrome.storage.local.set({
                 config: {
                   ...config,
                   blockedDomains: serverDomains,
+                  domainSettings: serverSettings,
                   plan: config.plan || 'free',
                   enabled: serverDomains.length > 0
                 }
               });
               await syncRules();
-              reply({ ok: true, blockedDomains: serverDomains, savedToServer: true });
+              reply({ ok: true, blockedDomains: serverDomains, domainSettings: serverSettings, savedToServer: true });
               return;
             }
           }
@@ -302,11 +464,12 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         config: {
           ...config,
           blockedDomains: normalized,
+          domainSettings: settings,
           enabled: normalized.length > 0
         }
       });
       await syncRules();
-      reply({ ok: true, blockedDomains: normalized, savedToServer: false });
+      reply({ ok: true, blockedDomains: normalized, domainSettings: settings, savedToServer: false });
     })();
     return true;
   }
@@ -362,12 +525,21 @@ function scheduleUnlockExpiryCheck() {
   chrome.alarms.create('unlockExpiryCheck', { when: Date.now() + UNLOCK_EXPIRY_CHECK_MS });
 }
 
+chrome.storage.onChanged.addListener((changes, area) => {
+  if (area === 'local' && (changes.extensionEnabled || changes.authToken)) {
+    syncRules();
+  }
+});
+
 chrome.alarms.create('focusModeSync', { periodInMinutes: 5 });
+chrome.alarms.create('authTokenRefresh', { periodInMinutes: 60 * 24 * 7 }); // Every 7 days
 scheduleUnlockExpiryCheck();
 chrome.alarms.onAlarm.addListener((alarm) => {
   if (alarm.name === 'focusModeSync') {
     syncFromServer();
   } else if (alarm.name === 'unlockExpiryCheck') {
     checkUnlockExpiryAndRedirect().then(scheduleUnlockExpiryCheck);
+  } else if (alarm.name === 'authTokenRefresh') {
+    refreshAuthToken();
   }
 });

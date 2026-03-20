@@ -56,7 +56,10 @@ const StudyToolsComparisonPage: React.FC<StudyToolsComparisonPageProps> = ({ onN
         </span>
       );
     }
-    const badgeClass = isWs && (value.includes('Free') || value.includes('3/mo')) ? 'bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300' : 'bg-stone-100 dark:bg-stone-700/50 text-stone-700 dark:text-stone-300';
+    const badgeClass =
+      isWs && (value.includes('Free') || value.includes('2/mo') || value.includes('packs/mo'))
+        ? 'bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300'
+        : 'bg-stone-100 dark:bg-stone-700/50 text-stone-700 dark:text-stone-300';
     const isLimited = value.includes('Limited') || value.includes('ads');
     return (
       <span className={`text-sm sm:text-base inline-flex items-center justify-center px-3 py-1 rounded-full text-xs font-semibold ${isLimited ? 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300' : badgeClass}`}>
@@ -74,7 +77,7 @@ const StudyToolsComparisonPage: React.FC<StudyToolsComparisonPageProps> = ({ onN
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center max-w-3xl mx-auto">
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-stone-800 dark:text-stone-100 mb-4 leading-tight">
-              <span className="bg-gradient-to-r from-indigo-500 to-violet-600 bg-clip-text text-transparent">WriteScholar</span> vs Quizlet vs Knowt
+              <span className="bg-gradient-to-r from-rose-500 to-pink-600 bg-clip-text text-transparent">WriteScholar</span> vs Quizlet vs Knowt
             </h1>
             <p className="text-lg text-stone-500 dark:text-stone-400">
               See how WriteScholar compares to Quizlet and Knowt for AI study tools. Flashcards, quizzes, and more—plus academic writing features you won&apos;t find elsewhere.
@@ -175,7 +178,7 @@ const StudyToolsComparisonPage: React.FC<StudyToolsComparisonPageProps> = ({ onN
           <p className="text-stone-500 dark:text-stone-400 mb-6">Quizzes, flashcards, crosswords—plus essay analysis, citations, and Focus Mode. All in one place.</p>
           <button
             onClick={() => onNavigate('signup')}
-            className="px-8 py-4 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white font-bold rounded-2xl transition-all text-lg shadow-lg shadow-indigo-500/25 hover:shadow-xl"
+            className="px-8 py-4 bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-400 hover:to-pink-500 text-white font-bold rounded-2xl transition-all text-lg shadow-lg shadow-rose-500/25 hover:shadow-xl"
           >
             Try Free
           </button>

@@ -31,7 +31,7 @@
 
 | Feature | Free | Pro | Premium |
 |---------|------|-----|---------|
-| Combined (analyses + study packs + citations) | 3 analyses, 2 study packs, 2 citations | 99 shared | 999 shared |
+| Combined (analyses + study packs + citations) | 2 analyses, 2 study packs, 2 citations | 99 shared | 999 shared |
 | Humanize words | 5,000 | 99,999 | 999,999 |
 | Summarize words | 5,000 | 99,999 | 999,999 |
 
@@ -45,7 +45,7 @@
 
 | Feature | Usage | Cost |
 |---------|-------|------|
-| Essay analyses | 3 | 3 × $0.0034 = $0.010 |
+| Essay analyses | 2 | 2 × $0.0034 = $0.0068 |
 | Citation searches | 2 | 2 × $0.0016 = $0.003 |
 | Study packs | 2 | 2 × $0.0089 = $0.018 |
 | Humanize | 5,000 words | 5 × $0.0007 = $0.004 |

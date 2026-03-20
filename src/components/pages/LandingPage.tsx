@@ -7,6 +7,7 @@ import { FOCUS_MODE_CHROME_EXTENSION_URL } from '../../constants/focusMode';
 import { HIDE_FRIENDS } from '../../config/featureFlags';
 import ScholarMascot from '../common/ScholarMascot';
 import DualMascot from '../common/DualMascot';
+import InteractiveDocumentAnalysis from '../landing/InteractiveDocumentAnalysis';
 // customersImg placeholder - section is hidden
 const customersImg = '';
 
@@ -22,18 +23,15 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
   const [isFocused, setIsFocused] = useState(false);
   const [openFAQ, setOpenFAQ] = useState<number | null>(null);
-  const [mode, setMode] = useState<'analyze' | 'citations' | 'humanize' | 'summarize' | 'quiz'>('analyze');
+  const [mode, setMode] = useState<'analyze' | 'citations' | 'summarize' | 'quiz'>('analyze');
   const [studyToolMode, setStudyToolMode] = useState<'quiz' | 'flashcards' | 'crossword'>('quiz');
   const [citationStyle, setCitationStyle] = useState('APA');
   const [citationYearRange, setCitationYearRange] = useState('all');
   const [showFakeAnimation, setShowFakeAnimation] = useState(false);
   const [showFakeResults, setShowFakeResults] = useState(false);
   const [showFakeCitationResults, setShowFakeCitationResults] = useState(false);
-  const [showFakeHumanizeResults, setShowFakeHumanizeResults] = useState(false);
   const [showFakeSummaryResults, setShowFakeSummaryResults] = useState(false);
   const [showFakeQuizResults, setShowFakeQuizResults] = useState(false);
-  const [humanizeMode, setHumanizeMode] = useState<'standard' | 'academic' | 'casual' | 'creative'>('standard');
-  const [humanizeIntensity, setHumanizeIntensity] = useState<'light' | 'medium' | 'aggressive'>('medium');
   const [summaryStyle, setSummaryStyle] = useState<'bullet' | 'paragraph' | 'tldr' | 'detailed'>('bullet');
   const [summaryLength, setSummaryLength] = useState<'short' | 'medium' | 'long'>('medium');
   const [quizType, setQuizType] = useState<'mixed' | 'multiple_choice' | 'true_false' | 'fill_blank'>('mixed');
@@ -90,12 +88,6 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
     "Type your essay question and discover literature..."
   ];
 
-  const humanizePlaceholders = [
-    "Paste your AI-generated text here to humanize it...",
-    "Transform your text into natural human writing...",
-    "Make AI text undetectable — paste it here..."
-  ];
-
   const summarizePlaceholders = [
     "Paste your article, paper, or document to summarize...",
     "Transform lengthy content into key points...",
@@ -126,13 +118,12 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
     return quizPlaceholders;
   };
 
-  const placeholders = mode === 'humanize' ? humanizePlaceholders
-    : mode === 'summarize' ? summarizePlaceholders
+  const placeholders = mode === 'summarize' ? summarizePlaceholders
     : mode === 'quiz' ? getStudyToolPlaceholders()
     : mode === 'analyze' ? analyzePlaceholders
     : citationPlaceholders;
 
-  const suggestedTopics = mode === 'humanize' ? [] : mode === 'analyze' ? [
+  const suggestedTopics = mode === 'analyze' ? [
     "The impact of social media on student mental health",
     "Climate change effects on global agriculture",
     "Artificial intelligence in healthcare",
@@ -159,7 +150,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
     },
     {
       question: "How long does essay analysis take?",
-      answer: "Usually under 60 seconds. Paste your essay, click Analyze Text, and you'll see professor-style feedback with a full rubric and improvement tips. Free plan includes 3 analyses per month."
+      answer: "Usually under 60 seconds. Paste your essay, click Analyze Text, and you'll see professor-style feedback with a full rubric and improvement tips. Free plan includes 2 analyses per month."
     },
     {
       question: "Can I upload a Word or PDF file?",
@@ -187,7 +178,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
     },
     {
       question: "What's the difference between Free, Pro, and Premium?",
-      answer: "Free: 3 documents, 3 analyses, 2 study packs, 5k words, 2 citations per month. Pro: 99 combined analyses, study packs and citations per month, 99,999 words, all citation styles, PDF/Word export, Focus Mode (20 sites). Premium: 10× usage with 999 combined per month, 999,999 words, larger document uploads (1GB), premium AI, Focus Mode unlimited, priority support."
+      answer: "Free: 3 documents, 2 analyses, 2 study packs, 5k words, 2 citations per month, Focus Mode (3 sites). Pro: 99 combined analyses, study packs and citations per month, 99,999 words, all citation styles, PDF/Word export, Focus Mode (20 sites). Premium: 10× usage with 999 combined per month, 999,999 words, larger document uploads (1GB), premium AI, Focus Mode unlimited, priority support."
     },
     {
       question: "How do I add friends and share my study materials?",
@@ -217,17 +208,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
   const handleSubmit = () => {
     if (!inputText.trim()) return;
     setShowFakeAnimation(true);
-    if (mode === 'humanize') {
-      localStorage.setItem('pendingHumanize', JSON.stringify({
-        text: inputText,
-        mode: humanizeMode,
-        intensity: humanizeIntensity
-      }));
-      setTimeout(() => {
-        setShowFakeAnimation(false);
-        setShowFakeHumanizeResults(true);
-      }, 8000);
-    } else if (mode === 'citations') {
+    if (mode === 'citations') {
       localStorage.setItem('pendingCitationSearch', JSON.stringify({
         topic: inputText,
         style: citationStyle,
@@ -272,7 +253,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
 
   const handleContinueToSignup = () => {
     setShowFakeResults(false);
-    setShowFakeHumanizeResults(false);
+    setShowFakeCitationResults(false);
     setShowFakeSummaryResults(false);
     setShowFakeQuizResults(false);
     onNavigate('signup');
@@ -459,24 +440,24 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
       {/* HERO SECTION - Fun, Gen Z, full of energy */}
       <section className="relative min-h-[70vh] sm:min-h-[85vh] flex flex-col overflow-hidden">
         {/* Background - refined gradient: soft lavender to cream with depth */}
-        <div className="absolute inset-0 bg-gradient-to-br from-violet-100/80 via-violet-50/40 to-indigo-50/30 dark:from-stone-950 dark:via-stone-900/98 dark:to-stone-900" />
-        <div className="absolute inset-0 bg-gradient-to-t from-white/60 via-transparent to-violet-100/30 dark:from-stone-900/80 dark:via-transparent dark:to-violet-950/20" />
+        <div className="absolute inset-0 bg-gradient-to-br from-rose-100/80 via-rose-50/40 to-rose-50/30 dark:from-stone-950 dark:via-stone-900/98 dark:to-stone-900" />
+        <div className="absolute inset-0 bg-gradient-to-t from-white/60 via-transparent to-rose-100/30 dark:from-stone-900/80 dark:via-transparent dark:to-rose-950/20" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_120%_80%_at_50%_0%,rgba(167,139,250,0.12),transparent_50%)] dark:bg-[radial-gradient(ellipse_120%_80%_at_50%_0%,rgba(139,92,246,0.06),transparent_50%)]" />
         
         {/* Floating shapes for mobile - adds depth like dashboard */}
         <div className="absolute top-[12%] left-[8%] w-12 h-12 rounded-2xl bg-gradient-to-br from-rose-400/20 to-pink-500/20 rotate-12 lg:hidden animate-float pointer-events-none" />
-        <div className="absolute top-[22%] right-[10%] w-10 h-10 rounded-full bg-gradient-to-br from-violet-400/20 to-purple-500/20 lg:hidden animate-float-delayed pointer-events-none" />
+        <div className="absolute top-[22%] right-[10%] w-10 h-10 rounded-full bg-gradient-to-br from-rose-400/20 to-pink-500/20 lg:hidden animate-float-delayed pointer-events-none" />
         <div className="absolute top-[45%] left-[6%] w-8 h-8 rounded-lg bg-gradient-to-br from-sky-400/20 to-blue-500/20 -rotate-12 lg:hidden animate-float pointer-events-none" style={{ animationDelay: '1s' }} />
         <div className="absolute top-[55%] right-[8%] w-11 h-11 rounded-2xl bg-gradient-to-br from-emerald-400/20 to-teal-500/20 rotate-6 lg:hidden animate-float-delayed pointer-events-none" />
         <div className="absolute bottom-[35%] left-[10%] w-9 h-9 rounded-full bg-gradient-to-br from-amber-400/20 to-orange-500/20 lg:hidden animate-float pointer-events-none" style={{ animationDelay: '0.5s' }} />
-        <div className="absolute bottom-[25%] right-[12%] w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-400/20 to-violet-500/20 -rotate-6 lg:hidden animate-float-delayed pointer-events-none" style={{ animationDelay: '0.8s' }} />
+        <div className="absolute bottom-[25%] right-[12%] w-10 h-10 rounded-lg bg-gradient-to-br from-rose-400/20 to-rose-500/20 -rotate-6 lg:hidden animate-float-delayed pointer-events-none" style={{ animationDelay: '0.8s' }} />
         
         {/* Floating tool mockups - scattered around hero */}
         <div className="absolute top-[18%] left-[10%] xl:left-[12%] hidden lg:block animate-float">
-          <div className="bg-white dark:bg-stone-800 rounded-2xl p-3 shadow-xl border border-violet-200/60 dark:border-violet-800/40 rotate-[-6deg] hover:rotate-0 transition-transform">
+          <div className="bg-white dark:bg-stone-800 rounded-2xl p-3 shadow-xl border border-rose-200/60 dark:border-rose-800/40 rotate-[-6deg] hover:rotate-0 transition-transform">
             <span className="text-2xl block mb-1">📝</span>
-            <span className="text-xs font-bold text-violet-600 dark:text-violet-400">Quiz</span>
-            <div className="mt-1.5 h-1.5 bg-violet-100 dark:bg-violet-900/50 rounded-full w-12" />
+            <span className="text-xs font-bold text-rose-600 dark:text-rose-400">Quiz</span>
+            <div className="mt-1.5 h-1.5 bg-rose-100 dark:bg-rose-900/50 rounded-full w-12" />
           </div>
         </div>
         <div className="absolute top-[25%] right-[12%] hidden lg:block animate-float-delayed">
@@ -520,7 +501,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
           <div className="max-w-4xl mx-auto text-center">
             {/* Hero headline */}
             <h1 className="text-3xl sm:text-5xl lg:text-6xl xl:text-7xl font-extrabold text-stone-800 dark:text-stone-100 leading-[1.1] mb-6 sm:mb-6 tracking-tight" style={{ letterSpacing: '-0.03em' }}>
-              Check my essay with AI, get <span className="text-violet-500">professor-style feedback</span> in seconds
+              Check my essay with AI, get <span className="text-red-600 dark:text-red-500">professor</span><span className="text-amber-600 dark:text-amber-500">-style</span> <span className="text-green-600 dark:text-green-500">feedback</span> in seconds
             </h1>
 
             <p className="text-base sm:text-xl text-stone-600 dark:text-stone-400 mb-16 sm:mb-14 max-w-2xl mx-auto leading-relaxed px-2">
@@ -603,9 +584,9 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   </svg>
                   <button
                     onClick={() => onNavigate('signup')}
-                    className="btn-glisten relative z-10 px-10 py-4 bg-violet-500 text-white font-bold rounded-full hover:bg-violet-600 hover:scale-105 active:scale-95 transition-all duration-300 ease-out shadow-xl shadow-violet-500/25 hover:shadow-2xl hover:shadow-violet-500/40 text-lg"
+                    className="btn-glisten relative z-10 px-10 py-4 bg-rose-500 text-white font-bold rounded-full hover:bg-rose-600 hover:scale-105 active:scale-95 transition-all duration-300 ease-out shadow-xl shadow-rose-500/25 hover:shadow-2xl hover:shadow-rose-500/40 text-lg"
                   >
-                    Upload your essay — free to try
+                    Check my essay
                   </button>
                 </div>
                 <p className="sm:hidden mt-3 w-full text-center text-sm text-stone-500 dark:text-stone-400">
@@ -613,7 +594,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   <button
                     type="button"
                     onClick={() => onNavigate('login')}
-                    className="text-violet-600 dark:text-violet-400 hover:underline font-medium"
+                    className="text-rose-600 dark:text-rose-400 hover:underline font-medium"
                   >
                     Log in
                   </button>
@@ -622,7 +603,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
             </div>
             
             <p className="text-sm text-stone-500 dark:text-stone-400 mb-12">
-              Trusted by 38k+ students
+              Trusted by 50k+ students
             </p>
             
             {/* Hero cards carousel - scrollable on mobile, arrow-nav on desktop */}
@@ -684,18 +665,6 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                         <div className="absolute inset-0 flex flex-col justify-center animate-quiz-hide">
                           <div className="text-[10px] text-stone-500 dark:text-stone-400 mb-1">Correct!</div>
                           <div className="text-orange-600 dark:text-orange-400 font-bold text-sm">✓ 4</div>
-                        </div>
-                      </div>
-                    )},
-                    { title: 'Humanize', desc: 'Transform AI text into natural human writing', onClick: () => setMode('humanize'), gradient: 'bg-violet-500', accentClasses: { title: 'text-white', orb: 'bg-white/20', iconBg: 'bg-white/90' }, borderColor: 'border-violet-600/50', icon: '✨', mobileContent: (
-                      <div className="relative w-full h-full min-h-[80px] text-left">
-                        <div className="absolute inset-0 animate-humanize-before">
-                          <div className="text-[10px] text-stone-500 dark:text-stone-400">Before</div>
-                          <div className="text-stone-600 dark:text-stone-400 text-xs truncate">Utilize the methodology...</div>
-                        </div>
-                        <div className="absolute inset-0 flex flex-col justify-center animate-humanize-after">
-                          <div className="text-[10px] text-violet-600 dark:text-violet-400">After</div>
-                          <div className="text-violet-700 dark:text-violet-300 text-xs truncate">Use the method...</div>
                         </div>
                       </div>
                     )},
@@ -778,18 +747,6 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                         </div>
                       </div>
                     )},
-                    { title: 'Humanize', desc: 'Transform AI text into natural human writing', onClick: () => setMode('humanize'), gradient: 'bg-violet-500', accentClasses: { title: 'text-white', orb: 'bg-white/20', iconBg: 'bg-white/90' }, borderColor: 'border-violet-600/50', icon: '✨', inner: (
-                      <div className="relative w-full h-12 overflow-hidden">
-                        <div className="absolute inset-0 animate-humanize-before w-full">
-                          <div className="text-[10px] text-stone-500 mb-1">Before</div>
-                          <div className="text-stone-600 dark:text-stone-400 text-xs truncate">Utilize the methodology...</div>
-                        </div>
-                        <div className="absolute inset-0 animate-humanize-after w-full">
-                          <div className="text-[10px] text-violet-600 mb-1">After</div>
-                          <div className="text-violet-700 dark:text-violet-300 text-xs truncate">Use the method...</div>
-                        </div>
-                      </div>
-                    )},
                     { title: 'Summarize', desc: 'Turn long papers into concise bullet points', onClick: () => setMode('summarize'), gradient: 'bg-emerald-500', accentClasses: { title: 'text-white', orb: 'bg-white/20', iconBg: 'bg-white/90' }, borderColor: 'border-emerald-600/50', icon: '📝', inner: (
                       <div className="w-full space-y-2 overflow-hidden">
                         <div className="flex gap-1.5 items-center w-full">
@@ -838,7 +795,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
               </div>
               <div className="hidden sm:flex justify-center gap-2 mt-6">
                 {[0, 1, 2, 3].map((i) => (
-                  <button key={i} onClick={() => setStudyCardsCarouselIndex(i)} className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${studyCardsCarouselIndex === i ? 'bg-violet-500 w-8' : 'bg-stone-300 dark:bg-stone-600 hover:bg-stone-400'}`} aria-label={`Slide ${i + 1}`} />
+                  <button key={i} onClick={() => setStudyCardsCarouselIndex(i)} className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${studyCardsCarouselIndex === i ? 'bg-rose-500 w-8' : 'bg-stone-300 dark:bg-stone-600 hover:bg-stone-400'}`} aria-label={`Slide ${i + 1}`} />
                 ))}
               </div>
             </div>
@@ -855,7 +812,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
           {/* Section header */}
           <div className="text-center mb-12 sm:mb-16">
             <span className="inline-block px-4 py-1.5 bg-rose-100 dark:bg-rose-900/50 text-rose-700 dark:text-rose-400 rounded-full text-sm font-semibold mb-4">
-              What Quizlet & Knowt don&apos;t have
+              Feedback that grades like a professor
             </span>
             <h2 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-stone-800 dark:text-stone-100 mb-4 sm:mb-5">
               Analyze Papers with Feedback <span className="bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 bg-clip-text text-transparent" style={{ WebkitBackgroundClip: 'text' }}>That Thinks Like a Professor</span>
@@ -890,48 +847,12 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
             </div>
           </div>
 
-          {/* Two capabilities: Precise feedback + Rubric - side by side */}
-          <div className="grid md:grid-cols-2 gap-6 lg:gap-8">
-            {/* Precise feedback */}
-            <div className="group relative">
-              <div className="absolute -inset-1 bg-gradient-to-r from-rose-400 to-pink-500 rounded-3xl blur-xl opacity-20 group-hover:opacity-30 transition-opacity" />
-              <div className="relative bg-white dark:bg-stone-800 rounded-2xl overflow-hidden shadow-xl border border-stone-200/60 dark:border-stone-700">
-                <div className="p-5 sm:p-6 border-b border-stone-200 dark:border-stone-700">
-                  <div className="flex items-center gap-3">
-                    <span className="w-10 h-10 rounded-xl bg-rose-100 dark:bg-rose-900/50 flex items-center justify-center text-lg">📋</span>
-                    <div>
-                      <h3 className="text-lg font-bold text-stone-800 dark:text-stone-100">Precise feedback</h3>
-                      <p className="text-sm text-stone-500 dark:text-stone-400">Section-by-section analysis with specific improvements</p>
-                    </div>
-                  </div>
-                </div>
-                <div className="aspect-video bg-gradient-to-br from-rose-50 to-pink-50 dark:from-rose-950/30 dark:to-pink-950/20 flex items-center justify-center overflow-hidden">
-                  <video autoPlay loop muted playsInline className="w-full h-full object-contain" title="WriteScholar Essay Checker. Professor-style feedback">
-                    <source src="/writescholar-essay-checker-demo.mp4" type="video/mp4" />
-                  </video>
-                </div>
-              </div>
-            </div>
-            {/* Rubric */}
-            <div className="group relative">
-              <div className="absolute -inset-1 bg-gradient-to-r from-violet-400 to-purple-500 rounded-3xl blur-xl opacity-20 group-hover:opacity-30 transition-opacity" />
-              <div className="relative bg-white dark:bg-stone-800 rounded-2xl overflow-hidden shadow-xl border border-stone-200/60 dark:border-stone-700">
-                <div className="p-5 sm:p-6 border-b border-stone-200 dark:border-stone-700">
-                  <div className="flex items-center gap-3">
-                    <span className="w-10 h-10 rounded-xl bg-violet-100 dark:bg-violet-900/50 flex items-center justify-center text-lg">📊</span>
-                    <div>
-                      <h3 className="text-lg font-bold text-stone-800 dark:text-stone-100">Grade-level rubric</h3>
-                      <p className="text-sm text-stone-500 dark:text-stone-400">See exactly how you score, from middle school to grad level</p>
-                    </div>
-                  </div>
-                </div>
-                <div className="aspect-video bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-950/30 dark:to-purple-950/20 flex items-center justify-center overflow-hidden">
-                  <video autoPlay loop muted playsInline className="w-full h-full object-contain" title="WriteScholar Essay Rubric. Grade-level scoring">
-                    <source src="/writescholar-essay-rubric-demo.mp4" type="video/mp4" />
-                  </video>
-                </div>
-              </div>
-            </div>
+          {/* See a real analysis in action */}
+          <div className="mt-12 sm:mt-16">
+            <h3 className="text-xl sm:text-2xl font-bold text-stone-800 dark:text-stone-100 mb-6 text-center">
+              See a real analysis in action
+            </h3>
+            <InteractiveDocumentAnalysis onNavigate={onNavigate} />
           </div>
 
           {/* CTA */}
@@ -940,258 +861,15 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
               onClick={() => onNavigate('signup')}
               className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-rose-500 to-pink-600 text-white font-bold rounded-2xl hover:from-rose-400 hover:to-pink-500 hover:scale-105 active:scale-95 shadow-xl shadow-rose-500/30 transition-all duration-300 text-lg"
             >
-              Try essay analysis free
+              Try your first analysis
               <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
             </button>
-            <p className="mt-3 text-sm text-stone-500 dark:text-stone-400">Free plan includes 3 analyses per month</p>
+            <p className="mt-3 text-sm text-stone-500 dark:text-stone-400">No credit card required • Free plan includes 2 analyses per month</p>
           </div>
         </div>
       </section>
 
-      {/* H2 #2: Focus Mode - Earn Your Screen Time - Block Websites */}
-      <section className="relative py-24 sm:py-36 overflow-hidden">
-        {/* Layered gradient - smoother, more balanced purple */}
-        <div className="absolute inset-0 bg-gradient-to-br from-indigo-950 via-violet-900 to-purple-950 dark:from-indigo-950 dark:via-violet-950 dark:to-stone-900" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_100%_60%_at_50%_-5%,rgba(139,92,246,0.3),transparent_55%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_50%_at_85%_85%,rgba(192,132,252,0.15),transparent_45%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_40%_at_15%_75%,rgba(129,140,248,0.12),transparent_45%)]" />
-        
-        {/* Floating decorative elements */}
-        <div className="absolute top-20 left-[8%] hidden lg:block text-4xl opacity-40 animate-float">🔒</div>
-        <div className="absolute top-32 right-[10%] hidden lg:block text-3xl opacity-35 animate-float-delayed">📵</div>
-        <div className="absolute bottom-40 left-[12%] hidden lg:block text-3xl opacity-35 animate-float">🎯</div>
-        <div className="absolute bottom-32 right-[8%] hidden lg:block text-4xl opacity-40 animate-float-delayed">✨</div>
-        <div className="absolute top-1/2 left-[5%] hidden xl:block text-2xl opacity-30 animate-float">🧠</div>
-        <div className="absolute top-1/3 right-[5%] hidden xl:block text-2xl opacity-30 animate-float-delayed">⏰</div>
-
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Hero - centered, bold with mascot */}
-          <div className="text-center mb-16 sm:mb-20">
-            <div className="inline-flex items-center gap-3 mb-8">
-              <div className="relative">
-                <div className="absolute -inset-2 bg-violet-400/20 rounded-full blur-xl animate-pulse" />
-                <ScholarMascot size={72} animated={true} pose="pointing" />
-              </div>
-              <span className="px-5 py-2 bg-white/10 backdrop-blur-md text-violet-200 rounded-full text-sm font-bold border border-white/20 shadow-lg shadow-violet-500/10">
-                ⚡ Focus Mode
-              </span>
-            </div>
-            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-black text-white mb-6 tracking-tight leading-[1.1]">
-              Earn Your Screen Time.
-              <span className="block bg-gradient-to-r from-violet-300 via-fuchsia-300 to-pink-300 bg-clip-text text-transparent">
-                Block Sites Until You Study
-              </span>
-            </h2>
-            <p className="text-lg sm:text-xl text-violet-200/90 max-w-2xl mx-auto leading-relaxed mb-8">
-              Block YouTube, TikTok, Instagram and Reddit until you answer quiz questions from your own notes or solve a quick puzzle (Sudoku, Memory, Pattern).
-              <span className="block mt-1 text-white/70 font-medium">No scroll until you&apos;ve studied.</span>
-            </p>
-          </div>
-
-          {/* Video - hero showcase (non-paid only) */}
-          {!(user && ['pro', 'premium'].includes((user.plan || user.subscription_plan || '').toLowerCase())) && (
-            <div className="mb-24">
-              <div className="relative max-w-4xl mx-auto">
-                <div className="absolute -inset-4 bg-gradient-to-r from-violet-500/20 via-fuchsia-500/20 to-pink-500/20 rounded-3xl blur-2xl" />
-                <div className="relative rounded-2xl overflow-hidden ring-2 ring-white/20 shadow-2xl shadow-violet-500/20">
-                  <video autoPlay loop muted playsInline className="w-full aspect-video object-cover" title="WriteScholar Focus Mode — Block distractions, solve puzzle or answer quiz to unlock" aria-label="WriteScholar Focus Mode — Block distractions, solve puzzle or answer quiz to unlock">
-                    <source src="/writescholar-focus-mode-demo.mp4" type="video/mp4" />
-                  </video>
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none" />
-                  <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between">
-                    <span className="px-3 py-1.5 bg-black/50 backdrop-blur-sm text-white/90 rounded-lg text-sm font-medium">
-                      See it in action
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* How it works - premium timeline */}
-          <div className="mb-24">
-            <div className="text-center mb-12">
-              <span className="inline-block px-4 py-1.5 bg-white/10 backdrop-blur-sm text-violet-300 rounded-full text-xs font-bold uppercase tracking-wider mb-4">
-                Simple as 1-2-3
-              </span>
-              <h3 className="text-2xl sm:text-3xl font-bold text-white">How Focus Mode works</h3>
-            </div>
-            
-            {/* Desktop timeline connector */}
-            <div className="hidden lg:block absolute left-1/2 -translate-x-1/2 w-[60%] h-0.5 bg-gradient-to-r from-violet-500/0 via-violet-500/50 to-violet-500/0 top-[calc(50%+2rem)]" style={{ zIndex: 0 }} />
-            
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-6 relative">
-              {/* Step 1 */}
-              <div className="group relative flex flex-col">
-                <div className="absolute -inset-2 bg-gradient-to-br from-violet-500/10 to-purple-500/10 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                <div className="relative flex-1 rounded-3xl overflow-hidden bg-white/5 backdrop-blur-sm border border-white/10 group-hover:border-violet-400/40 group-hover:bg-white/10 transition-all duration-500">
-                  <div className="aspect-[5/4] min-h-[220px] flex items-center justify-center bg-gradient-to-b from-violet-500/20 to-transparent overflow-hidden">
-                    <video autoPlay loop muted playsInline className="w-full h-full object-cover" title="WriteScholar Focus Mode Step 1 — Pick sites to block" aria-label="WriteScholar Focus Mode Step 1 — Pick sites to block">
-                      <source src="/writescholar-focus-mode-step1-demo.mp4" type="video/mp4" />
-                    </video>
-                  </div>
-                  <div className="p-6 sm:p-8">
-                    <div className="flex items-center gap-2 mb-3">
-                      <span className="w-10 h-10 rounded-xl bg-violet-500/90 backdrop-blur-sm flex items-center justify-center text-white font-black text-lg shadow-lg flex-shrink-0">1</span>
-                      <h4 className="text-xl font-bold text-white">Pick Sites to Block</h4>
-                    </div>
-                    <p className="text-violet-200/80 leading-relaxed">
-                      YouTube, TikTok, Instagram, Reddit — or add any custom domain. You&apos;re in control.
-                    </p>
-                  </div>
-                </div>
-                <div className="hidden lg:flex absolute top-1/2 -right-4 z-20 w-8 h-8 rounded-full bg-violet-500 items-center justify-center shadow-lg shadow-violet-500/30" aria-hidden>
-                  <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 5l7 7-7 7" />
-                  </svg>
-                </div>
-              </div>
-
-              {/* Step 2 */}
-              <div className="group relative flex flex-col">
-                <div className="absolute -inset-2 bg-gradient-to-br from-purple-500/10 to-fuchsia-500/10 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                <div className="relative flex-1 rounded-3xl overflow-hidden bg-white/5 backdrop-blur-sm border border-white/10 group-hover:border-purple-400/40 group-hover:bg-white/10 transition-all duration-500">
-                  <div className="aspect-[5/4] min-h-[220px] flex items-center justify-center bg-gradient-to-b from-purple-500/20 to-transparent overflow-hidden">
-                    <video autoPlay loop muted playsInline className="w-full h-full object-cover" title="WriteScholar Focus Mode Step 2 — Solve puzzle or answer quiz to unlock" aria-label="WriteScholar Focus Mode Step 2 — Solve puzzle or answer quiz to unlock">
-                      <source src="/writescholar-focus-mode-step2-demo.mp4" type="video/mp4" />
-                    </video>
-                  </div>
-                  <div className="p-6 sm:p-8">
-                    <div className="flex items-center gap-2 mb-3">
-                      <span className="w-10 h-10 rounded-xl bg-purple-500/90 backdrop-blur-sm flex items-center justify-center text-white font-black text-lg shadow-lg flex-shrink-0">2</span>
-                      <h4 className="text-xl font-bold text-white">Answer to Unlock</h4>
-                    </div>
-                    <p className="text-violet-200/80 leading-relaxed">
-                      Try visiting a blocked site → solve a puzzle (Sudoku, Memory, Pattern) or answer a quick quiz from your own notes. Knowledge is the key.
-                    </p>
-                  </div>
-                </div>
-                <div className="hidden lg:flex absolute top-1/2 -right-4 z-20 w-8 h-8 rounded-full bg-purple-500 items-center justify-center shadow-lg shadow-purple-500/30" aria-hidden>
-                  <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 5l7 7-7 7" />
-                  </svg>
-                </div>
-              </div>
-
-              {/* Step 3 */}
-              <div className="group relative flex flex-col">
-                <div className="absolute -inset-2 bg-gradient-to-br from-fuchsia-500/10 to-pink-500/10 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                <div className="relative flex-1 rounded-3xl overflow-hidden bg-white/5 backdrop-blur-sm border border-white/10 group-hover:border-fuchsia-400/40 group-hover:bg-white/10 transition-all duration-500">
-                  <div className="aspect-[5/4] min-h-[220px] flex items-center justify-center bg-gradient-to-b from-fuchsia-500/20 to-transparent overflow-hidden">
-                    <video autoPlay loop muted playsInline className="w-full h-full object-cover" title="WriteScholar Focus Mode Step 3 — Enjoy your earned break" aria-label="WriteScholar Focus Mode Step 3 — Enjoy your earned break">
-                      <source src="/writescholar-focus-mode-step3-demo.mp4" type="video/mp4" />
-                    </video>
-                  </div>
-                  <div className="p-6 sm:p-8">
-                    <div className="flex items-center gap-2 mb-3">
-                      <span className="w-10 h-10 rounded-xl bg-fuchsia-500/90 backdrop-blur-sm flex items-center justify-center text-white font-black text-lg shadow-lg flex-shrink-0">3</span>
-                      <h4 className="text-xl font-bold text-white">Enjoy Your Break</h4>
-                    </div>
-                    <p className="text-violet-200/80 leading-relaxed">
-                      Site unlocks for 15 min to 24 hours — you choose. Time&apos;s up? Study again to earn more.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Why it works - psychology section */}
-          <div className="mb-24">
-            <div className="relative max-w-4xl mx-auto">
-              <div className="absolute -inset-4 bg-gradient-to-r from-violet-500/10 via-fuchsia-500/10 to-violet-500/10 rounded-3xl blur-2xl" />
-              <div className="relative bg-white/5 backdrop-blur-sm rounded-3xl border border-white/10 p-8 sm:p-12">
-                <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-12">
-                  <div className="flex-shrink-0">
-                    <div className="relative">
-                      <div className="absolute -inset-4 bg-violet-400/20 rounded-full blur-xl" />
-                      <ScholarMascot size={100} animated={true} pose="thinking" />
-                    </div>
-                  </div>
-                  <div className="text-center lg:text-left">
-                    <h3 className="text-2xl sm:text-3xl font-bold text-white mb-4">
-                      Why it actually works
-                    </h3>
-                    <p className="text-violet-200/90 leading-relaxed mb-6">
-                      Most blockers just frustrate you. Focus Mode is different — it ties your screen time to learning. 
-                      Every minute on TikTok is <span className="text-white font-semibold">earned</span> by solving a puzzle or answering questions from your own notes. 
-                      Your brain starts associating breaks with achievement, not guilt.
-                    </p>
-                    <div className="flex flex-wrap justify-center lg:justify-start gap-3">
-                      <div className="flex items-center gap-2 px-4 py-2 bg-white/10 rounded-xl text-sm text-violet-200">
-                        <span className="text-green-400">✓</span> Guilt-free scrolling
-                      </div>
-                      <div className="flex items-center gap-2 px-4 py-2 bg-white/10 rounded-xl text-sm text-violet-200">
-                        <span className="text-green-400">✓</span> Reinforces learning
-                      </div>
-                      <div className="flex items-center gap-2 px-4 py-2 bg-white/10 rounded-xl text-sm text-violet-200">
-                        <span className="text-green-400">✓</span> Builds habits
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Testimonial */}
-          <div className="mb-16">
-            <div className="max-w-2xl mx-auto text-center">
-              <div className="relative inline-block mb-6">
-                <svg className="w-12 h-12 text-violet-400/30" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
-                </svg>
-              </div>
-              <blockquote className="text-xl sm:text-2xl text-white/90 font-medium leading-relaxed mb-6">
-                I used to waste 3+ hours on TikTok every day. Now I actually look forward to studying because it means I&apos;ve earned my break. My grades went up a full letter.
-              </blockquote>
-              <div className="flex items-center justify-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-violet-400 to-fuchsia-500 flex items-center justify-center text-white font-bold">
-                  M
-                </div>
-                <div className="text-left">
-                  <div className="text-white font-semibold">Maya S.</div>
-                  <div className="text-violet-300/70 text-sm">Pre-Med Student</div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* CTA - premium */}
-          <div className="text-center">
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <div className="inline-block relative">
-                <div className="absolute -inset-4 bg-gradient-to-r from-violet-500/30 via-fuchsia-500/30 to-pink-500/30 rounded-3xl blur-2xl animate-pulse" />
-                <a
-                  href={FOCUS_MODE_CHROME_EXTENSION_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="relative inline-flex items-center gap-3 px-10 py-5 text-lg font-bold text-violet-900 bg-white rounded-2xl hover:bg-violet-50 hover:scale-105 active:scale-95 shadow-2xl shadow-black/25 transition-all duration-300"
-                >
-                <span>Try Focus Mode Free</span>
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                </svg>
-                </a>
-              </div>
-              <button
-                onClick={() => onNavigate('focus-mode')}
-                className="inline-flex items-center gap-2 px-8 py-4 text-base font-semibold text-white border-2 border-white/40 rounded-2xl hover:bg-white/10 hover:border-white/60 transition-all duration-300"
-              >
-                <span>Learn More</span>
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                </svg>
-              </button>
-            </div>
-            <p className="mt-6 text-violet-300/80 text-sm">
-              Chrome extension • free to try
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* H2 #3: Create Study Material - Turn Notes Into Quizzes, Flashcards, Crosswords */}
+      {/* H2 #2: Create Study Material - Turn Notes Into Quizzes, Flashcards, Crosswords */}
       <section className="relative py-12 sm:py-28 overflow-hidden bg-stone-50 dark:bg-stone-900">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-10%,rgba(245,158,11,0.08),transparent)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-10%,rgba(251,191,36,0.05),transparent)] lg:bg-[radial-gradient(ellipse_70%_40%_at_50%_10%,rgba(120,113,108,0.05),transparent)]" />
         <div className="absolute top-24 left-[5%] hidden xl:block text-5xl opacity-40 animate-float">📚</div>
@@ -1336,6 +1014,248 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
         </div>
       </section>
 
+      {/* H2 #3: Focus Mode - Earn Your Screen Time - Block Websites */}
+      <section className="relative py-24 sm:py-36 overflow-hidden bg-stone-200 dark:bg-stone-950">
+        {/* Light background with subtle rose accents */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_100%_60%_at_50%_-5%,rgba(251,207,232,0.25),transparent_55%)] dark:bg-[radial-gradient(ellipse_100%_60%_at_50%_-5%,rgba(251,207,232,0.08),transparent_55%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_50%_at_85%_85%,rgba(251,113,133,0.12),transparent_45%)] dark:bg-[radial-gradient(ellipse_70%_50%_at_85%_85%,rgba(251,113,133,0.06),transparent_45%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_40%_at_15%_75%,rgba(244,114,182,0.1),transparent_45%)] dark:bg-[radial-gradient(ellipse_60%_40%_at_15%_75%,rgba(244,114,182,0.05),transparent_45%)]" />
+        
+        {/* Floating decorative elements */}
+        <div className="absolute top-20 left-[8%] hidden lg:block text-4xl opacity-40 animate-float">🔒</div>
+        <div className="absolute top-32 right-[10%] hidden lg:block text-3xl opacity-35 animate-float-delayed">📵</div>
+        <div className="absolute bottom-40 left-[12%] hidden lg:block text-3xl opacity-35 animate-float">🎯</div>
+        <div className="absolute bottom-32 right-[8%] hidden lg:block text-4xl opacity-40 animate-float-delayed">✨</div>
+        <div className="absolute top-1/2 left-[5%] hidden xl:block text-2xl opacity-30 animate-float">🧠</div>
+        <div className="absolute top-1/3 right-[5%] hidden xl:block text-2xl opacity-30 animate-float-delayed">⏰</div>
+
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Hero - centered, bold with mascot */}
+          <div className="text-center mb-16 sm:mb-20">
+            <div className="inline-flex items-center gap-3 mb-8">
+              <div className="relative">
+                <div className="absolute -inset-2 bg-rose-400/20 rounded-full blur-xl animate-pulse" />
+                <ScholarMascot size={72} animated={true} pose="pointing" />
+              </div>
+              <span className="px-5 py-2 bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-300 rounded-full text-sm font-bold border border-rose-200/60 dark:border-rose-700/40 shadow-lg shadow-rose-500/10">
+                ⚡ Focus Mode
+              </span>
+            </div>
+            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-black text-stone-900 dark:text-white mb-6 tracking-tight leading-[1.1]">
+              Earn Your Screen Time.
+              <span className="block bg-gradient-to-r from-rose-600 via-pink-600 to-rose-600 dark:from-rose-400 dark:via-pink-400 dark:to-rose-400 bg-clip-text text-transparent">
+                Block Sites Until You Study
+              </span>
+            </h2>
+            <p className="text-lg sm:text-xl text-stone-600 dark:text-stone-300 max-w-2xl mx-auto leading-relaxed mb-8">
+              Block YouTube, TikTok, Instagram and Reddit until you answer quiz questions from your own notes or solve a quick puzzle (Sudoku, Memory, Pattern).
+              <span className="block mt-1 text-stone-700 dark:text-stone-200 font-medium">No scroll until you&apos;ve studied.</span>
+            </p>
+          </div>
+
+          {/* Video - hero showcase (non-paid only) */}
+          {!(user && ['pro', 'premium'].includes((user.plan || user.subscription_plan || '').toLowerCase())) && (
+            <div className="mb-24">
+              <div className="relative max-w-4xl mx-auto">
+                <div className="absolute -inset-4 bg-gradient-to-r from-rose-500/20 via-pink-500/20 to-pink-500/20 rounded-3xl blur-2xl" />
+                <div className="relative rounded-2xl overflow-hidden ring-2 ring-rose-200/60 dark:ring-rose-700/40 shadow-2xl shadow-rose-500/20">
+                  <video autoPlay loop muted playsInline className="w-full aspect-video object-cover" title="WriteScholar Focus Mode — Block distractions, solve puzzle or answer quiz to unlock" aria-label="WriteScholar Focus Mode — Block distractions, solve puzzle or answer quiz to unlock">
+                    <source src="/writescholar-focus-mode-demo.mp4" type="video/mp4" />
+                  </video>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none" />
+                  <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between">
+                    <span className="px-3 py-1.5 bg-black/50 backdrop-blur-sm text-white/90 rounded-lg text-sm font-medium">
+                      See it in action
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* How it works - premium timeline */}
+          <div className="mb-24">
+            <div className="text-center mb-12">
+              <span className="inline-block px-4 py-1.5 bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-300 rounded-full text-xs font-bold uppercase tracking-wider mb-4">
+                Simple as 1-2-3
+              </span>
+              <h3 className="text-2xl sm:text-3xl font-bold text-stone-900 dark:text-white">How Focus Mode works</h3>
+            </div>
+            
+            {/* Desktop timeline connector */}
+            <div className="hidden lg:block absolute left-1/2 -translate-x-1/2 w-[60%] h-0.5 bg-gradient-to-r from-rose-500/0 via-rose-500/50 to-rose-500/0 top-[calc(50%+2rem)]" style={{ zIndex: 0 }} />
+            
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-6 relative">
+              {/* Step 1 */}
+              <div className="group relative flex flex-col">
+                <div className="absolute -inset-2 bg-gradient-to-br from-rose-500/10 to-pink-500/10 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <div className="relative flex-1 rounded-3xl overflow-hidden bg-white dark:bg-stone-800/80 backdrop-blur-sm border border-stone-200 dark:border-stone-600/50 shadow-xl group-hover:border-rose-400/60 group-hover:shadow-rose-500/10 transition-all duration-500">
+                  <div className="aspect-[5/4] min-h-[220px] flex items-center justify-center bg-gradient-to-b from-rose-500/10 to-transparent overflow-hidden">
+                    <video autoPlay loop muted playsInline className="w-full h-full object-cover" title="WriteScholar Focus Mode Step 1 — Pick sites to block" aria-label="WriteScholar Focus Mode Step 1 — Pick sites to block">
+                      <source src="/writescholar-focus-mode-step1-demo.mp4" type="video/mp4" />
+                    </video>
+                  </div>
+                  <div className="p-6 sm:p-8">
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="w-10 h-10 rounded-xl bg-rose-500 flex items-center justify-center text-white font-black text-lg shadow-lg flex-shrink-0">1</span>
+                      <h4 className="text-xl font-bold text-stone-900 dark:text-white">Pick Sites to Block</h4>
+                    </div>
+                    <p className="text-stone-600 dark:text-stone-400 leading-relaxed">
+                      YouTube, TikTok, Instagram, Reddit — or add any custom domain. You&apos;re in control.
+                    </p>
+                  </div>
+                </div>
+                <div className="hidden lg:flex absolute top-1/2 -right-4 z-20 w-8 h-8 rounded-full bg-rose-500 items-center justify-center shadow-lg shadow-rose-500/30" aria-hidden>
+                  <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 5l7 7-7 7" />
+                  </svg>
+                </div>
+              </div>
+
+              {/* Step 2 */}
+              <div className="group relative flex flex-col">
+                <div className="absolute -inset-2 bg-gradient-to-br from-pink-500/10 to-pink-500/10 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <div className="relative flex-1 rounded-3xl overflow-hidden bg-white dark:bg-stone-800/80 backdrop-blur-sm border border-stone-200 dark:border-stone-600/50 shadow-xl group-hover:border-pink-400/60 group-hover:shadow-pink-500/10 transition-all duration-500">
+                  <div className="aspect-[5/4] min-h-[220px] flex items-center justify-center bg-gradient-to-b from-pink-500/10 to-transparent overflow-hidden">
+                    <video autoPlay loop muted playsInline className="w-full h-full object-cover" title="WriteScholar Focus Mode Step 2 — Solve puzzle or answer quiz to unlock" aria-label="WriteScholar Focus Mode Step 2 — Solve puzzle or answer quiz to unlock">
+                      <source src="/writescholar-focus-mode-step2-demo.mp4" type="video/mp4" />
+                    </video>
+                  </div>
+                  <div className="p-6 sm:p-8">
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="w-10 h-10 rounded-xl bg-pink-500 flex items-center justify-center text-white font-black text-lg shadow-lg flex-shrink-0">2</span>
+                      <h4 className="text-xl font-bold text-stone-900 dark:text-white">Answer to Unlock</h4>
+                    </div>
+                    <p className="text-stone-600 dark:text-stone-400 leading-relaxed">
+                      Try visiting a blocked site → solve a puzzle (Sudoku, Memory, Pattern) or answer a quick quiz from your own notes. Knowledge is the key.
+                    </p>
+                  </div>
+                </div>
+                <div className="hidden lg:flex absolute top-1/2 -right-4 z-20 w-8 h-8 rounded-full bg-pink-500 items-center justify-center shadow-lg shadow-pink-500/30" aria-hidden>
+                  <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 5l7 7-7 7" />
+                  </svg>
+                </div>
+              </div>
+
+              {/* Step 3 */}
+              <div className="group relative flex flex-col">
+                <div className="absolute -inset-2 bg-gradient-to-br from-pink-500/10 to-pink-500/10 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <div className="relative flex-1 rounded-3xl overflow-hidden bg-white dark:bg-stone-800/80 backdrop-blur-sm border border-stone-200 dark:border-stone-600/50 shadow-xl group-hover:border-pink-400/60 group-hover:shadow-pink-500/10 transition-all duration-500">
+                  <div className="aspect-[5/4] min-h-[220px] flex items-center justify-center bg-gradient-to-b from-pink-500/10 to-transparent overflow-hidden">
+                    <video autoPlay loop muted playsInline className="w-full h-full object-cover" title="WriteScholar Focus Mode Step 3 — Enjoy your earned break" aria-label="WriteScholar Focus Mode Step 3 — Enjoy your earned break">
+                      <source src="/writescholar-focus-mode-step3-demo.mp4" type="video/mp4" />
+                    </video>
+                  </div>
+                  <div className="p-6 sm:p-8">
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="w-10 h-10 rounded-xl bg-pink-500 flex items-center justify-center text-white font-black text-lg shadow-lg flex-shrink-0">3</span>
+                      <h4 className="text-xl font-bold text-stone-900 dark:text-white">Enjoy Your Break</h4>
+                    </div>
+                    <p className="text-stone-600 dark:text-stone-400 leading-relaxed">
+                      Site unlocks for 15 min to 24 hours — you choose. Time&apos;s up? Study again to earn more.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Why it works - psychology section */}
+          <div className="mb-24">
+            <div className="relative max-w-4xl mx-auto">
+              <div className="absolute -inset-4 bg-gradient-to-r from-rose-500/10 via-pink-500/10 to-rose-500/10 rounded-3xl blur-2xl" />
+              <div className="relative bg-white dark:bg-stone-800/80 backdrop-blur-sm rounded-3xl border border-stone-200 dark:border-stone-600/50 shadow-xl p-8 sm:p-12">
+                <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-12">
+                  <div className="flex-shrink-0">
+                    <div className="relative">
+                      <div className="absolute -inset-4 bg-rose-400/20 rounded-full blur-xl" />
+                      <ScholarMascot size={100} animated={true} pose="thinking" />
+                    </div>
+                  </div>
+                  <div className="text-center lg:text-left">
+                    <h3 className="text-2xl sm:text-3xl font-bold text-stone-900 dark:text-white mb-4">
+                      Why it actually works
+                    </h3>
+                    <p className="text-stone-600 dark:text-stone-400 leading-relaxed mb-6">
+                      Most blockers just frustrate you. Focus Mode is different — it ties your screen time to learning. 
+                      Every minute on TikTok is <span className="text-stone-900 dark:text-white font-semibold">earned</span> by solving a puzzle or answering questions from your own notes. 
+                      Your brain starts associating breaks with achievement, not guilt.
+                    </p>
+                    <div className="flex flex-wrap justify-center lg:justify-start gap-3">
+                      <div className="flex items-center gap-2 px-4 py-2 bg-rose-50 dark:bg-rose-900/20 rounded-xl text-sm text-stone-700 dark:text-stone-300">
+                        <span className="text-emerald-500">✓</span> Guilt-free scrolling
+                      </div>
+                      <div className="flex items-center gap-2 px-4 py-2 bg-rose-50 dark:bg-rose-900/20 rounded-xl text-sm text-stone-700 dark:text-stone-300">
+                        <span className="text-emerald-500">✓</span> Reinforces learning
+                      </div>
+                      <div className="flex items-center gap-2 px-4 py-2 bg-rose-50 dark:bg-rose-900/20 rounded-xl text-sm text-stone-700 dark:text-stone-300">
+                        <span className="text-emerald-500">✓</span> Builds habits
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Testimonial */}
+          <div className="mb-16">
+            <div className="max-w-2xl mx-auto text-center">
+              <div className="relative inline-block mb-6">
+                <svg className="w-12 h-12 text-rose-400/40" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
+                </svg>
+              </div>
+              <blockquote className="text-xl sm:text-2xl text-stone-700 dark:text-stone-200 font-medium leading-relaxed mb-6">
+                I used to waste 3+ hours on TikTok every day. Now I actually look forward to studying because it means I&apos;ve earned my break. My grades went up a full letter.
+              </blockquote>
+              <div className="flex items-center justify-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-rose-400 to-pink-500 flex items-center justify-center text-white font-bold">
+                  M
+                </div>
+                <div className="text-left">
+                  <div className="text-stone-900 dark:text-white font-semibold">Maya S.</div>
+                  <div className="text-stone-500 dark:text-stone-400 text-sm">Pre-Med Student</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* CTA - premium */}
+          <div className="text-center">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <div className="inline-block relative">
+                <div className="absolute -inset-4 bg-gradient-to-r from-rose-500/30 via-pink-500/30 to-pink-500/30 rounded-3xl blur-2xl animate-pulse" />
+                <a
+                  href={FOCUS_MODE_CHROME_EXTENSION_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="relative inline-flex items-center gap-3 px-10 py-5 text-lg font-bold text-white bg-rose-600 rounded-2xl hover:bg-rose-500 hover:scale-105 active:scale-95 shadow-2xl shadow-rose-500/30 transition-all duration-300"
+                >
+                <span>Try Focus Mode Free</span>
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
+                </a>
+              </div>
+              <button
+                onClick={() => onNavigate('focus-mode')}
+                className="inline-flex items-center gap-2 px-8 py-4 text-base font-semibold text-stone-900 dark:text-white border-2 border-stone-300 dark:border-stone-500 rounded-2xl hover:bg-stone-100 dark:hover:bg-stone-700/50 hover:border-stone-400 dark:hover:border-stone-400 transition-all duration-300"
+              >
+                <span>Learn More</span>
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
+              </button>
+            </div>
+            <p className="mt-6 text-stone-500 dark:text-stone-400 text-sm">
+              Chrome extension • free to try
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* Study Better Together — from Share Friends page (hidden when HIDE_FRIENDS) */}
       {!HIDE_FRIENDS && (
       <section className="relative py-12 sm:py-20 overflow-hidden bg-white dark:bg-stone-900">
@@ -1343,13 +1263,13 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Mobile layout — badge, title, video, share instructions */}
           <div className="lg:hidden flex flex-col items-center text-center">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 rounded-full text-sm font-semibold mb-4">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-rose-100 dark:bg-rose-900/50 text-rose-700 dark:text-rose-300 rounded-full text-sm font-semibold mb-4">
               <span>👫</span>
               <span>Social Study, Levelled Up</span>
             </div>
             <h2 className="text-2xl font-extrabold text-stone-900 dark:text-stone-50 leading-tight mb-2">
               Study Better,{' '}
-              <span className="text-violet-500">
+              <span className="text-rose-500">
                 Together
               </span>
             </h2>
@@ -1357,7 +1277,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
               Add friends with your unique code and share flashcards, quizzes, crosswords & notes in one tap.
             </p>
             <div className="relative flex items-center justify-center mb-4 w-full max-w-[280px]">
-              <div className="absolute inset-0 bg-gradient-to-r from-indigo-400/10 to-violet-400/10 rounded-3xl blur-3xl" />
+              <div className="absolute inset-0 bg-gradient-to-r from-rose-400/10 to-rose-400/10 rounded-3xl blur-3xl" />
               <DualMascot size={200} />
             </div>
             <div className="relative w-full max-w-[360px] rounded-2xl overflow-hidden border-2 border-stone-200/80 dark:border-stone-700/60 shadow-xl mb-6 bg-stone-900">
@@ -1379,7 +1299,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
             <div className="flex flex-col gap-3 w-full max-w-xs">
               <button
                 onClick={() => onNavigate('signup')}
-                className="w-full px-6 py-3.5 bg-violet-500 hover:bg-violet-600 text-white font-bold rounded-2xl shadow-lg shadow-violet-500/25 active:scale-[0.98] text-sm flex items-center justify-center gap-2"
+                className="w-full px-6 py-3.5 bg-rose-500 hover:bg-rose-600 text-white font-bold rounded-2xl shadow-lg shadow-rose-500/25 active:scale-[0.98] text-sm flex items-center justify-center gap-2"
               >
                 <span>Start sharing free</span>
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1398,13 +1318,13 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
           {/* Desktop layout — text left, video right */}
           <div className="hidden lg:grid lg:grid-cols-2 gap-8 items-center">
             <div className="text-center lg:text-left order-2 lg:order-1 pb-8 lg:pb-0">
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 rounded-full text-sm font-semibold mb-5">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-rose-100 dark:bg-rose-900/50 text-rose-700 dark:text-rose-300 rounded-full text-sm font-semibold mb-5">
                 <span>👫</span>
                 <span>Social Study, Levelled Up</span>
               </div>
               <h2 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-stone-900 dark:text-stone-50 leading-tight mb-5">
                 Study Better,{' '}
-                <span className="text-violet-500">
+                <span className="text-rose-500">
                   Together
                 </span>
               </h2>
@@ -1417,7 +1337,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
               <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
                 <button
                   onClick={() => onNavigate('signup')}
-                  className="px-7 py-3.5 bg-violet-500 hover:bg-violet-600 text-white font-bold rounded-2xl shadow-lg shadow-violet-500/25 hover:shadow-xl hover:shadow-violet-500/40 transition-all duration-200 hover:-translate-y-0.5 text-base flex items-center justify-center gap-2"
+                  className="px-7 py-3.5 bg-rose-500 hover:bg-rose-600 text-white font-bold rounded-2xl shadow-lg shadow-rose-500/25 hover:shadow-xl hover:shadow-rose-500/40 transition-all duration-200 hover:-translate-y-0.5 text-base flex items-center justify-center gap-2"
                 >
                   <span>Start sharing free</span>
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1426,7 +1346,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                 </button>
                 <button
                   onClick={() => onNavigate('features')}
-                  className="px-7 py-3.5 bg-white dark:bg-stone-800 text-stone-700 dark:text-stone-200 font-semibold rounded-2xl border border-stone-200 dark:border-stone-700 hover:border-violet-300 dark:hover:border-violet-700 hover:shadow-md transition-all duration-200 hover:-translate-y-0.5 text-base"
+                  className="px-7 py-3.5 bg-white dark:bg-stone-800 text-stone-700 dark:text-stone-200 font-semibold rounded-2xl border border-stone-200 dark:border-stone-700 hover:border-rose-300 dark:hover:border-rose-700 hover:shadow-md transition-all duration-200 hover:-translate-y-0.5 text-base"
                 >
                   See all features
                 </button>
@@ -1434,7 +1354,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
             </div>
             <div className="relative flex flex-col items-center justify-center order-1 lg:order-2 gap-6">
               <div className="relative flex items-center justify-center">
-                <div className="absolute inset-0 bg-gradient-to-r from-indigo-400/10 to-violet-400/10 rounded-3xl blur-3xl" />
+                <div className="absolute inset-0 bg-gradient-to-r from-rose-400/10 to-rose-400/10 rounded-3xl blur-3xl" />
                 <DualMascot size={280} />
               </div>
               <div className="relative w-full max-w-lg rounded-2xl overflow-hidden border-2 border-stone-200/80 dark:border-stone-700/60 shadow-xl bg-stone-900">
@@ -1458,15 +1378,15 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
 
       {/* One Code. Endless Friends. — from Share Friends page (hidden when HIDE_FRIENDS) */}
       {!HIDE_FRIENDS && (
-      <section className="relative py-16 sm:py-24 bg-gradient-to-b from-white via-indigo-50/40 to-violet-50/30 dark:from-stone-900 dark:via-stone-900 dark:to-stone-900 overflow-hidden">
+      <section className="relative py-16 sm:py-24 bg-gradient-to-b from-white via-rose-50/40 to-rose-50/30 dark:from-stone-900 dark:via-stone-900 dark:to-stone-900 overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_40%_at_50%_50%,rgba(99,102,241,0.08),transparent)] dark:bg-[radial-gradient(ellipse_60%_40%_at_50%_50%,rgba(139,92,246,0.06),transparent)]" />
         <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <span className="inline-block px-4 py-1.5 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 rounded-full text-sm font-semibold mb-4">
+          <span className="inline-block px-4 py-1.5 bg-rose-100 dark:bg-rose-900/50 text-rose-700 dark:text-rose-300 rounded-full text-sm font-semibold mb-4">
             Your Identity on WriteScholar
           </span>
           <h2 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-stone-800 dark:text-stone-100 mb-4">
             One Code.{' '}
-            <span className="text-violet-500">
+            <span className="text-rose-500">
               Endless Friends.
             </span>
           </h2>
@@ -1474,16 +1394,16 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
             Every account gets a permanent, human-readable friend code. No emails, no usernames to remember. Just drop the code, accept the friend request and you're connected.
           </p>
           <div className="relative inline-block group mb-10">
-            <div className="absolute -inset-1 bg-gradient-to-r from-indigo-400 to-violet-500 rounded-3xl blur-xl opacity-30 group-hover:opacity-50 transition-opacity duration-500" />
-            <div className="relative bg-white dark:bg-stone-800 rounded-3xl px-8 sm:px-14 py-8 shadow-2xl border border-indigo-200/60 dark:border-indigo-800/40">
+            <div className="absolute -inset-1 bg-gradient-to-r from-rose-400 to-rose-500 rounded-3xl blur-xl opacity-30 group-hover:opacity-50 transition-opacity duration-500" />
+            <div className="relative bg-white dark:bg-stone-800 rounded-3xl px-8 sm:px-14 py-8 shadow-2xl border border-rose-200/60 dark:border-rose-800/40">
               <p className="text-xs sm:text-sm font-semibold text-stone-400 dark:text-stone-500 uppercase tracking-widest mb-3">Your unique friend code</p>
               <div className="flex items-center justify-center gap-3 sm:gap-5 flex-wrap">
-                <span className="text-3xl sm:text-5xl font-black tracking-widest bg-gradient-to-r from-indigo-600 to-violet-600 dark:from-indigo-400 dark:to-violet-400 bg-clip-text text-transparent font-mono">
+                <span className="text-3xl sm:text-5xl font-black tracking-widest bg-gradient-to-r from-rose-600 to-rose-600 dark:from-rose-400 dark:to-rose-400 bg-clip-text text-transparent font-mono">
                   WS-BUDDY-4872
                 </span>
                 <button
                   type="button"
-                  className="flex items-center gap-2 px-4 py-2 bg-indigo-100 dark:bg-indigo-900/50 hover:bg-indigo-200 dark:hover:bg-indigo-800/60 text-indigo-700 dark:text-indigo-300 font-semibold rounded-xl text-sm transition-colors"
+                  className="flex items-center gap-2 px-4 py-2 bg-rose-100 dark:bg-rose-900/50 hover:bg-rose-200 dark:hover:bg-rose-800/60 text-rose-700 dark:text-rose-300 font-semibold rounded-xl text-sm transition-colors"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
                   Copy code
@@ -1492,7 +1412,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
               <div className="flex flex-wrap items-center justify-center gap-3 mt-5">
                 {['Easy to remember', 'Shareable anywhere', 'Yours forever'].map((tag) => (
                   <span key={tag} className="flex items-center gap-1.5 text-xs sm:text-sm font-medium text-stone-500 dark:text-stone-400">
-                    <svg className="w-4 h-4 text-indigo-500 dark:text-indigo-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
+                    <svg className="w-4 h-4 text-rose-500 dark:text-rose-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
                     {tag}
                   </span>
                 ))}
@@ -1508,15 +1428,15 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
       <section className="hidden relative py-16 sm:py-24 overflow-hidden bg-white dark:bg-stone-900">
         {/* Subtle radial gradient - matches Study Better Together / One Code vibe */}
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_60%_at_50%_0%,rgba(99,102,241,0.06),transparent_60%)] dark:bg-[radial-gradient(ellipse_70%_60%_at_50%_0%,rgba(139,92,246,0.05),transparent_60%)]" />
-        <div className="absolute bottom-0 left-0 right-0 h-1/2 bg-gradient-to-t from-violet-50/50 to-transparent dark:from-violet-950/20 dark:to-transparent pointer-events-none" />
+        <div className="absolute bottom-0 left-0 right-0 h-1/2 bg-gradient-to-t from-rose-50/50 to-transparent dark:from-rose-950/20 dark:to-transparent pointer-events-none" />
         {/* Minimal accent - single soft blob */}
-        <div className="absolute top-0 right-1/4 w-96 h-96 bg-violet-200/30 dark:bg-violet-500/5 rounded-full blur-3xl -translate-y-1/2 pointer-events-none" />
-        <div className="absolute bottom-0 left-1/4 w-80 h-80 bg-indigo-200/20 dark:bg-indigo-500/5 rounded-full blur-3xl translate-y-1/2 pointer-events-none" />
+        <div className="absolute top-0 right-1/4 w-96 h-96 bg-rose-200/30 dark:bg-rose-500/5 rounded-full blur-3xl -translate-y-1/2 pointer-events-none" />
+        <div className="absolute bottom-0 left-1/4 w-80 h-80 bg-rose-200/20 dark:bg-rose-500/5 rounded-full blur-3xl translate-y-1/2 pointer-events-none" />
 
         <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header - centered, clean hierarchy */}
           <div className="text-center mb-12 sm:mb-16">
-            <span className="inline-block px-4 py-1.5 bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-400 rounded-full text-sm font-semibold mb-5">
+            <span className="inline-block px-4 py-1.5 bg-rose-100 dark:bg-rose-900/50 text-rose-700 dark:text-rose-400 rounded-full text-sm font-semibold mb-5">
               Every tool in one place
             </span>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-8 mb-6">
@@ -1537,7 +1457,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
             </div>
           </div>
 
-          {/* Tabs - unified violet theme */}
+          {/* Tabs - unified rose theme */}
           {(() => {
             const tabs = [
               { id: 'analyse', label: 'Analyse', icon: '📝', desc: 'Upload your paper and get professor-style feedback on structure, clarity, and how to improve.' },
@@ -1546,7 +1466,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
               { id: 'summarise', label: 'Summarise', icon: '📋', desc: 'Upload documents or copy and paste text to get concise bullet points or summaries in seconds.' },
               { id: 'crossword', label: 'Crosswords', icon: '🧩', desc: 'Paste key terms or notes to create an interactive crossword puzzle and test your vocabulary.' },
               { id: 'games', label: 'Games', icon: '🎮', desc: 'Play Crater Blast — blast the correct falling answer before it lands. Turn your study material into an addictive quiz shooter game.' },
-              { id: 'humanise', label: 'Humanise', icon: '✨', desc: 'Paste AI-generated text to transform it into natural, human-sounding writing that bypasses detectors.' },
+              { id: 'focus', label: 'Focus', icon: '🔒', desc: 'Block distracting sites until you finish a study goal. Earn your screen time with our Chrome extension.' },
             ];
             const activeTab = tabs.find(t => t.id === activeStudyTab);
             return (
@@ -1560,8 +1480,8 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                         onClick={() => setActiveStudyTab(tab.id)}
                         className={`flex items-center gap-2 px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl font-semibold text-sm sm:text-base transition-all duration-200 flex-shrink-0 snap-start whitespace-nowrap
                           ${isActive
-                            ? 'bg-violet-500 text-white shadow-lg shadow-violet-500/25 scale-[1.02]'
-                            : 'bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400 border border-stone-200 dark:border-stone-700 hover:border-violet-300 dark:hover:border-violet-700 hover:text-violet-600 dark:hover:text-violet-400'
+                            ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/25 scale-[1.02]'
+                            : 'bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400 border border-stone-200 dark:border-stone-700 hover:border-rose-300 dark:hover:border-rose-700 hover:text-rose-600 dark:hover:text-rose-400'
                           }`}
                       >
                         <span className="text-base sm:text-lg">{tab.icon}</span>
@@ -1581,9 +1501,9 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
 
           {/* Video container - clean card matching Study Smarter section */}
           <div className="relative group">
-            <div className="absolute -inset-1 bg-gradient-to-r from-violet-400 to-purple-400 rounded-3xl blur-xl opacity-15 group-hover:opacity-25 transition-opacity duration-500" />
-            <div className="relative bg-white dark:bg-stone-800 rounded-2xl sm:rounded-3xl overflow-hidden shadow-xl border border-stone-200/60 dark:border-stone-700 group-hover:shadow-2xl group-hover:border-violet-200/60 dark:group-hover:border-violet-800/40 transition-all duration-300">
-              <div className="bg-gradient-to-br from-violet-50/30 to-indigo-50/20 dark:from-violet-950/30 dark:to-indigo-950/20 flex items-center justify-center min-h-[200px] sm:min-h-[380px]">
+            <div className="absolute -inset-1 bg-gradient-to-r from-rose-400 to-pink-400 rounded-3xl blur-xl opacity-15 group-hover:opacity-25 transition-opacity duration-500" />
+            <div className="relative bg-white dark:bg-stone-800 rounded-2xl sm:rounded-3xl overflow-hidden shadow-xl border border-stone-200/60 dark:border-stone-700 group-hover:shadow-2xl group-hover:border-rose-200/60 dark:group-hover:border-rose-800/40 transition-all duration-300">
+              <div className="bg-gradient-to-br from-rose-50/30 to-rose-50/20 dark:from-rose-950/30 dark:to-rose-950/20 flex items-center justify-center min-h-[200px] sm:min-h-[380px]">
                 {[
                   { id: 'analyse', src: '/writescholar-essay-checker-demo.mp4', title: 'WriteScholar Essay Checker — Professor-style feedback on your writing' },
                   { id: 'flashcards', src: '/writescholar-flashcards-demo.mp4', title: 'WriteScholar Study Pack — AI flashcard generator from notes' },
@@ -1591,7 +1511,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   { id: 'summarise', src: '/writescholar-summarizer-demo.mp4', title: 'WriteScholar AI Summarizer — Condense papers into key points' },
                   { id: 'crossword', src: '/writescholar-crossword-demo.mp4', title: 'WriteScholar Crossword Generator — Create study puzzles from notes' },
                   { id: 'games', src: '/writescholar-crater-blast-demo.mp4', title: 'WriteScholar Crater Blast — Quiz game study mode' },
-                  { id: 'humanise', src: '/writescholar-humanizer-demo.mp4', title: 'WriteScholar AI Humanizer — Bypass AI detection naturally' },
+                  { id: 'focus', src: '/writescholar-focus-mode-demo.mp4', title: 'WriteScholar Focus Mode — Block sites until you study' },
                 ].map((vid) => (
                   activeStudyTab === vid.id && (
                     <video
@@ -1616,7 +1536,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
           <div className="text-center mt-10 sm:mt-12">
             <button
               onClick={() => onNavigate('signup')}
-              className="group inline-flex items-center gap-2 px-8 py-4 bg-violet-500 hover:bg-violet-600 text-white font-bold rounded-2xl hover:scale-105 active:scale-95 transition-all shadow-xl shadow-violet-500/25 hover:shadow-violet-500/35 text-base sm:text-lg"
+              className="group inline-flex items-center gap-2 px-8 py-4 bg-rose-500 hover:bg-rose-600 text-white font-bold rounded-2xl hover:scale-105 active:scale-95 transition-all shadow-xl shadow-rose-500/25 hover:shadow-rose-500/35 text-base sm:text-lg"
             >
               Try it free
               <svg className="w-5 h-5 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1658,16 +1578,6 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                 }`}
               >
                 Find Citations
-              </button>
-              <button
-                onClick={() => { setMode('humanize'); setInputText(''); }}
-                className={`px-4 sm:px-5 py-2.5 rounded-2xl text-sm font-bold transition-all duration-200 hover:scale-105 active:scale-95 relative ${
-                  mode === 'humanize' 
-                    ? 'bg-gradient-to-r from-violet-500 to-purple-600 text-white shadow-lg shadow-violet-500/30' 
-                    : 'text-stone-600 hover:bg-white hover:shadow-md'
-                }`}
-              >
-                Humanize
               </button>
               <button
                 onClick={() => { setMode('summarize'); setInputText(''); }}
@@ -1729,118 +1639,6 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                         <option value="20">Last 20 Years</option>
                       </select>
                     </div>
-                </div>
-              </div>
-            )}
-
-              {/* HUMANIZE MODE - Split Panel Design - Gen Z violet gradient */}
-            {mode === 'humanize' && (
-              <div className="bg-white dark:bg-stone-800 rounded-2xl sm:rounded-3xl shadow-xl shadow-violet-200/50 dark:shadow-violet-900/20 border-2 border-violet-200 dark:border-violet-800 overflow-hidden mb-6">
-                {/* Toolbar */}
-                <div className="bg-gradient-to-r from-violet-50 to-purple-50 border-b border-violet-100 px-3 sm:px-5 py-3 sm:py-4">
-                  <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center justify-between gap-3 sm:gap-4">
-                    <div className="flex flex-wrap items-center gap-2 sm:gap-3 overflow-x-auto sm:overflow-visible">
-                      <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
-                        <span className="text-xs font-medium text-stone-500 flex-shrink-0">Mode:</span>
-                        <div className="flex items-center bg-white rounded-xl px-0.5 sm:px-1 py-1 shadow-sm border border-stone-200">
-                          {(['standard', 'academic', 'casual', 'creative'] as const).map((m) => (
-                            <button
-                              key={m}
-                              onClick={() => setHumanizeMode(m)}
-                              className={`px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all whitespace-nowrap ${
-                                humanizeMode === m ? 'bg-violet-600 text-white shadow-sm' : 'text-stone-600 hover:text-stone-800 hover:bg-stone-50'
-                              }`}
-                            >
-                              {m.charAt(0).toUpperCase() + m.slice(1)}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
-                        <span className="text-xs font-medium text-stone-500 flex-shrink-0">Intensity:</span>
-                        <div className="flex items-center bg-white rounded-xl px-0.5 sm:px-1 py-1 shadow-sm border border-stone-200">
-                          {([
-                            { id: 'light', label: 'Light' },
-                            { id: 'medium', label: 'Medium' },
-                            { id: 'aggressive', label: 'Heavy' }
-                          ] as const).map((intensity) => (
-                            <button
-                              key={intensity.id}
-                              onClick={() => setHumanizeIntensity(intensity.id)}
-                              className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all whitespace-nowrap ${
-                                humanizeIntensity === intensity.id ? 'bg-violet-600 text-white shadow-sm' : 'text-stone-600 hover:text-stone-800 hover:bg-stone-50'
-                              }`}
-                            >
-                              {intensity.label}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                    <button
-                      onClick={handleSubmit}
-                      disabled={!inputText.trim()}
-                      className={`w-full sm:w-auto px-6 py-2.5 rounded-xl flex items-center justify-center transition-all font-semibold text-sm flex-shrink-0 ${
-                        inputText.trim()
-                          ? 'bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white shadow-lg shadow-violet-200 cursor-pointer'
-                          : 'bg-stone-200 text-stone-400 cursor-not-allowed'
-                      }`}
-                    >
-                      <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                      </svg>
-                      Free humanise
-                    </button>
-                  </div>
-                </div>
-
-                {/* Editor Panels */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-stone-100">
-                  {/* Left Panel - Original */}
-                  <div className="flex flex-col">
-                    <div className="flex items-center justify-between px-3 sm:px-5 py-2.5 sm:py-3 bg-stone-50/50 border-b border-stone-100">
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-stone-300"></div>
-                        <span className="text-xs font-semibold text-stone-500 uppercase tracking-wider">Original</span>
-                      </div>
-                      <button onClick={() => navigator.clipboard.readText().then(text => setInputText(text))} className="flex items-center gap-1 text-xs text-violet-600 hover:text-violet-700 font-medium transition-colors">
-                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
-                        Paste
-                      </button>
-                    </div>
-                    <textarea
-                      value={inputText}
-                      onChange={(e) => setInputText(e.target.value)}
-                      onFocus={() => setIsFocused(true)}
-                      onBlur={() => setIsFocused(false)}
-                      placeholder="Transform AI text into natural human writing..."
-                      className="w-full min-h-[200px] sm:min-h-[280px] p-3 sm:p-5 text-stone-800 text-[15px] border-none outline-none resize-none bg-transparent placeholder-stone-400 leading-relaxed"
-                    />
-                    <div className="flex items-center px-3 sm:px-5 py-2.5 sm:py-3 bg-stone-50/30 border-t border-stone-100">
-                      <span className="text-xs text-stone-400 font-medium">{inputText.split(/\s+/).filter(Boolean).length} words</span>
-                    </div>
-                  </div>
-
-                  {/* Right Panel - Humanized */}
-                  <div className="flex flex-col bg-gradient-to-br from-violet-50/30 to-purple-50/30">
-                    <div className="flex items-center px-3 sm:px-5 py-2.5 sm:py-3 bg-violet-50/50 border-b border-violet-100/50">
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-violet-400"></div>
-                        <span className="text-xs font-semibold text-violet-600 uppercase tracking-wider">Humanized</span>
-                      </div>
-                    </div>
-                    <div className="flex-1 min-h-[200px] sm:min-h-[280px] flex items-center justify-center p-5">
-                      <div className="text-center">
-                        <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-violet-100/50 flex items-center justify-center">
-                          <svg className="w-8 h-8 text-violet-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                          </svg>
-                        </div>
-                        <p className="text-sm text-stone-500">Your humanized text will appear here</p>
-                        <p className="text-xs text-stone-400 mt-1">Paste text on the left and click Humanize</p>
-                      </div>
-                    </div>
-                  </div>
                 </div>
               </div>
             )}
@@ -2087,8 +1885,6 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                       ? 'border-cyan-400 shadow-xl shadow-cyan-500/20 ring-4 ring-cyan-400/20'
                       : mode === 'analyze'
                       ? 'border-rose-400 shadow-xl shadow-rose-500/20 ring-4 ring-rose-400/20'
-                      : mode === 'humanize'
-                      ? 'border-violet-400 shadow-xl shadow-violet-500/20 ring-4 ring-violet-400/20'
                       : mode === 'summarize'
                       ? 'border-emerald-400 shadow-xl shadow-emerald-500/20 ring-4 ring-emerald-400/20'
                       : 'border-orange-400 shadow-xl shadow-orange-500/20 ring-4 ring-orange-400/20'
@@ -2121,15 +1917,13 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                           ? 'bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-400 hover:to-pink-500 text-white shadow-lg shadow-rose-500/30 hover:scale-105 active:scale-95 cursor-pointer'
                           : mode === 'citations'
                           ? 'bg-gradient-to-r from-cyan-400 to-teal-500 hover:from-cyan-300 hover:to-teal-400 text-white shadow-lg shadow-cyan-500/30 hover:scale-105 active:scale-95 cursor-pointer'
-                          : mode === 'humanize'
-                          ? 'bg-gradient-to-r from-violet-400 to-purple-500 hover:from-violet-300 hover:to-purple-400 text-white shadow-lg shadow-violet-500/30 hover:scale-105 active:scale-95 cursor-pointer'
                           : mode === 'summarize'
                           ? 'bg-gradient-to-r from-emerald-400 to-teal-500 hover:from-emerald-300 hover:to-teal-400 text-white shadow-lg shadow-emerald-500/30 hover:scale-105 active:scale-95 cursor-pointer'
                           : 'bg-gradient-to-r from-orange-400 to-amber-500 hover:from-orange-300 hover:to-amber-400 text-white shadow-lg shadow-orange-500/30 hover:scale-105 active:scale-95 cursor-pointer'
                         : 'bg-stone-200 dark:bg-stone-700 text-stone-400 dark:text-stone-500 cursor-not-allowed'
                     }`}
                   >
-                    {mode === 'analyze' ? 'Get free feedback ✨' : mode === 'citations' ? 'Find sources for free 🔍' : mode === 'humanize' ? 'Humanize it ✨' : mode === 'summarize' ? 'Summarize 📝' : 'Generate study tools 🎯'}
+                    {mode === 'analyze' ? 'Get free feedback ✨' : mode === 'citations' ? 'Find sources for free 🔍' : mode === 'summarize' ? 'Summarize 📝' : 'Generate study tools 🎯'}
                   </button>
                   
                   {/* Upload file option - only for analyze mode */}
@@ -2206,8 +2000,8 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
         </div>
       </section>
 
-      {/* Try Our Free Writing Tools - prominently features Citation Generator (top performer) */}
-      <section className="py-12 sm:py-20 bg-white dark:bg-stone-900">
+      {/* Try Our Free Writing Tools - prominently features Citation Generator (top performer) - hidden */}
+      <section className="hidden py-12 sm:py-20 bg-white dark:bg-stone-900">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="relative text-center mb-8 sm:mb-14">
             <span className="inline-block px-4 py-1.5 bg-lime-100 dark:bg-lime-900/50 text-lime-700 dark:text-lime-400 rounded-full text-sm font-semibold mb-4">100% Free</span>
@@ -2220,9 +2014,9 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
-            <button onClick={() => onNavigate('citation-generator-tool')} className="group relative bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20 rounded-3xl p-5 sm:p-6 text-left hover:shadow-2xl hover:shadow-violet-500/20 hover:-translate-y-2 transition-all duration-300 overflow-hidden border border-violet-100 dark:border-violet-800/50">
-              <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-violet-400/20 to-purple-400/20 rounded-full -translate-y-1/2 translate-x-1/2" />
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center mb-4 shadow-lg shadow-violet-500/30 relative z-10">
+            <button onClick={() => onNavigate('citation-generator-tool')} className="group relative bg-gradient-to-br from-rose-50 to-pink-50 dark:from-rose-900/20 dark:to-pink-900/20 rounded-3xl p-5 sm:p-6 text-left hover:shadow-2xl hover:shadow-rose-500/20 hover:-translate-y-2 transition-all duration-300 overflow-hidden border border-rose-100 dark:border-rose-800/50">
+              <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-rose-400/20 to-pink-400/20 rounded-full -translate-y-1/2 translate-x-1/2" />
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-rose-500 to-pink-600 flex items-center justify-center mb-4 shadow-lg shadow-rose-500/30 relative z-10">
                 <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
               </div>
               <h3 className="font-bold text-stone-800 dark:text-stone-100 text-base mb-1 relative z-10">Citation Generator</h3>
@@ -2265,9 +2059,9 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
               <p className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed relative z-10">Create strong thesis statements</p>
             </button>
 
-            <button onClick={() => onNavigate('essay-outline')} className="group relative bg-gradient-to-br from-indigo-50 to-violet-50 dark:from-indigo-900/20 dark:to-violet-900/20 rounded-3xl p-5 sm:p-6 text-left hover:shadow-2xl hover:shadow-indigo-500/20 hover:-translate-y-2 transition-all duration-300 overflow-hidden border border-indigo-100 dark:border-indigo-800/50">
-              <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-indigo-400/20 to-violet-400/20 rounded-full -translate-y-1/2 translate-x-1/2" />
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center mb-4 shadow-lg shadow-indigo-500/30 relative z-10">
+            <button onClick={() => onNavigate('essay-outline')} className="group relative bg-gradient-to-br from-rose-50 to-rose-50 dark:from-rose-900/20 dark:to-rose-900/20 rounded-3xl p-5 sm:p-6 text-left hover:shadow-2xl hover:shadow-rose-500/20 hover:-translate-y-2 transition-all duration-300 overflow-hidden border border-rose-100 dark:border-rose-800/50">
+              <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-rose-400/20 to-rose-400/20 rounded-full -translate-y-1/2 translate-x-1/2" />
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-rose-500 to-rose-600 flex items-center justify-center mb-4 shadow-lg shadow-rose-500/30 relative z-10">
                 <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" /></svg>
               </div>
               <h3 className="font-bold text-stone-800 dark:text-stone-100 text-base mb-1 relative z-10">Essay Outline</h3>
@@ -2369,19 +2163,19 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
               <p className="text-stone-600 dark:text-stone-400 text-sm leading-relaxed relative z-10">Search millions of sources with auto-formatted citations.</p>
             </button>
             
-            {/* AI Humanizer - Violet */}
+            {/* Focus Mode */}
             <button 
               onClick={() => onNavigate('signup')}
-              className="group relative bg-gradient-to-br from-violet-50 to-purple-50 rounded-3xl p-6 text-left hover:shadow-2xl hover:shadow-violet-500/20 hover:-translate-y-2 transition-all duration-300 overflow-hidden border border-violet-100"
+              className="group relative bg-gradient-to-br from-violet-50 to-indigo-50 dark:from-violet-900/20 dark:to-indigo-900/20 rounded-3xl p-6 text-left hover:shadow-2xl hover:shadow-violet-500/20 hover:-translate-y-2 transition-all duration-300 overflow-hidden border border-violet-100 dark:border-violet-800/50"
             >
-              <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-violet-400/20 to-purple-400/20 rounded-full -translate-y-1/2 translate-x-1/2" />
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center mb-4 shadow-lg shadow-violet-500/30">
+              <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-violet-400/20 to-indigo-400/20 rounded-full -translate-y-1/2 translate-x-1/2" />
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center mb-4 shadow-lg shadow-violet-500/30">
                 <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                 </svg>
               </div>
-              <h3 className="font-bold text-stone-800 dark:text-stone-100 text-lg mb-2 relative z-10">AI Humanizer</h3>
-              <p className="text-stone-600 dark:text-stone-400 text-sm leading-relaxed relative z-10">Transform AI text into natural, human-sounding writing.</p>
+              <h3 className="font-bold text-stone-800 dark:text-stone-100 text-lg mb-2 relative z-10">Focus Mode</h3>
+              <p className="text-stone-600 dark:text-stone-400 text-sm leading-relaxed relative z-10">Block distracting sites until you complete a study goal.</p>
             </button>
             
             {/* Summarizer - Emerald */}
@@ -2433,7 +2227,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
       </section>
 
       {/* What WriteScholar Can Help You With - hidden */}
-      <section className="hidden relative py-12 sm:py-24 bg-white dark:bg-stone-900 max-lg:bg-gradient-to-b max-lg:from-indigo-50/30 max-lg:via-white max-lg:to-stone-50 dark:max-lg:from-indigo-950/15 dark:max-lg:via-stone-900 dark:max-lg:to-stone-900 overflow-hidden">
+      <section className="hidden relative py-12 sm:py-24 bg-white dark:bg-stone-900 max-lg:bg-gradient-to-b max-lg:from-rose-50/30 max-lg:via-white max-lg:to-stone-50 dark:max-lg:from-rose-950/15 dark:max-lg:via-stone-900 dark:max-lg:to-stone-900 overflow-hidden">
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="absolute top-0 left-[3%] hidden xl:block text-4xl opacity-20 animate-float">📖</div>
           <div className="absolute top-8 right-[3%] hidden xl:block text-4xl opacity-20 animate-float-delayed">✍️</div>
@@ -2441,10 +2235,10 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
           <div className="xl:hidden absolute top-20 left-4 text-3xl opacity-50 animate-float">📖</div>
           <div className="xl:hidden absolute top-32 right-4 text-2xl opacity-45 animate-float-delayed">✍️</div>
           <div className="xl:hidden absolute bottom-64 left-6 text-2xl opacity-45 animate-float" style={{ animationDelay: '0.5s' }}>✨</div>
-          <div className="lg:hidden absolute top-1/3 right-8 w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-400/25 to-violet-400/15 animate-float" />
-          <div className="lg:hidden absolute bottom-1/3 left-6 w-10 h-10 rounded-full bg-gradient-to-br from-violet-400/20 to-indigo-400/15 animate-float-delayed" style={{ animationDelay: '0.6s' }} />
+          <div className="lg:hidden absolute top-1/3 right-8 w-12 h-12 rounded-xl bg-gradient-to-br from-rose-400/25 to-rose-400/15 animate-float" />
+          <div className="lg:hidden absolute bottom-1/3 left-6 w-10 h-10 rounded-full bg-gradient-to-br from-rose-400/20 to-rose-400/15 animate-float-delayed" style={{ animationDelay: '0.6s' }} />
           <div className="relative text-center mb-12">
-            <span className="inline-block px-4 py-1.5 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-400 rounded-full text-sm font-semibold mb-4">Your Academic Toolkit</span>
+            <span className="inline-block px-4 py-1.5 bg-rose-100 dark:bg-rose-900/50 text-rose-700 dark:text-rose-400 rounded-full text-sm font-semibold mb-4">Your Academic Toolkit</span>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-stone-800 dark:text-stone-100">
               What WriteScholar Can Help You With
             </h2>
@@ -2460,14 +2254,14 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                 essays: 'from-rose-500 to-pink-600',
                 exams: 'from-amber-500 to-orange-600',
                 summarizing: 'from-cyan-500 to-teal-600',
-                citations: 'from-violet-500 to-purple-600',
+                citations: 'from-rose-500 to-pink-600',
                 grammar: 'from-emerald-500 to-teal-600',
               };
               const shadowColors: Record<string, string> = {
                 essays: 'shadow-rose-500/30',
                 exams: 'shadow-amber-500/30',
                 summarizing: 'shadow-cyan-500/30',
-                citations: 'shadow-violet-500/30',
+                citations: 'shadow-rose-500/30',
                 grammar: 'shadow-emerald-500/30',
               };
               const isActive = activeHelpCategory === category.id;
@@ -2477,7 +2271,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   onClick={() => setActiveHelpCategory(category.id)}
                   className={`px-5 sm:px-6 py-2.5 rounded-2xl text-sm sm:text-base font-bold transition-all duration-200 hover:scale-105 active:scale-95 flex-shrink-0 snap-start whitespace-nowrap ${
                     isActive
-                      ? `bg-gradient-to-r ${gradients[category.id] || 'from-indigo-500 to-violet-600'} text-white shadow-lg ${shadowColors[category.id] || 'shadow-indigo-500/30'}`
+                      ? `bg-gradient-to-r ${gradients[category.id] || 'from-rose-500 to-rose-600'} text-white shadow-lg ${shadowColors[category.id] || 'shadow-rose-500/30'}`
                       : 'bg-white dark:bg-stone-800 text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-700 border-2 border-stone-200 dark:border-stone-600 max-lg:border-stone-300 max-lg:dark:border-stone-500'
                   }`}
                 >
@@ -2488,8 +2282,8 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
           </div>
                   
           {/* Content Area - Gradient card style */}
-          <div className="relative bg-gradient-to-br from-stone-50 to-white dark:from-stone-800/50 dark:to-stone-900 rounded-2xl sm:rounded-3xl p-5 sm:p-12 lg:p-16 border border-stone-200 dark:border-stone-700 shadow-xl overflow-hidden max-lg:border-indigo-200/40 max-lg:dark:border-indigo-800/30 max-lg:shadow-indigo-500/10">
-            <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-br from-indigo-400/10 to-violet-400/10 rounded-full -translate-y-1/2 translate-x-1/2 max-lg:from-indigo-400/20 max-lg:to-violet-400/15" aria-hidden />
+          <div className="relative bg-gradient-to-br from-stone-50 to-white dark:from-stone-800/50 dark:to-stone-900 rounded-2xl sm:rounded-3xl p-5 sm:p-12 lg:p-16 border border-stone-200 dark:border-stone-700 shadow-xl overflow-hidden max-lg:border-rose-200/40 max-lg:dark:border-rose-800/30 max-lg:shadow-rose-500/10">
+            <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-br from-rose-400/10 to-rose-400/10 rounded-full -translate-y-1/2 translate-x-1/2 max-lg:from-rose-400/20 max-lg:to-rose-400/15" aria-hidden />
             <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center relative z-10">
               {/* Text Content */}
               <div className="order-2 lg:order-1">
@@ -2501,7 +2295,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                 </p>
                 <button
                   onClick={() => onNavigate('signup')}
-                  className="inline-flex items-center px-6 py-3 text-white font-bold rounded-2xl bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 hover:scale-105 active:scale-95 hover:shadow-xl shadow-indigo-500/30 transition-all duration-200"
+                  className="inline-flex items-center px-6 py-3 text-white font-bold rounded-2xl bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-400 hover:to-rose-500 hover:scale-105 active:scale-95 hover:shadow-xl shadow-rose-500/30 transition-all duration-200"
                 >
                   Start for free
                 </button>
@@ -2797,9 +2591,9 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
       </section>
 
       {/* FAQ Section - Purple tint */}
-      <section className="relative py-12 sm:py-24 bg-gradient-to-b from-violet-50/60 via-purple-50/30 to-white dark:from-violet-950/30 dark:via-stone-900 dark:to-stone-900 overflow-hidden">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-violet-200/20 dark:bg-violet-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-        <div className="absolute bottom-0 left-0 w-72 h-72 bg-purple-200/20 dark:bg-purple-500/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
+      <section className="relative py-12 sm:py-24 bg-gradient-to-b from-rose-50/60 via-pink-50/30 to-white dark:from-rose-950/30 dark:via-stone-900 dark:to-stone-900 overflow-hidden">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-rose-200/20 dark:bg-rose-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+        <div className="absolute bottom-0 left-0 w-72 h-72 bg-pink-200/20 dark:bg-pink-500/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
         <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-center gap-4 sm:gap-6 mb-8 sm:mb-12">
             <div className="text-center lg:text-left flex-1">
@@ -2818,10 +2612,10 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
 
           <div className="max-w-3xl mx-auto space-y-4">
             {faqs.map((faq, idx) => (
-              <div key={idx} className="bg-white/70 dark:bg-stone-800/80 rounded-2xl border border-violet-200/60 dark:border-violet-800/40 overflow-hidden hover:border-violet-300 dark:hover:border-violet-600 hover:shadow-lg hover:shadow-violet-500/15 transition-all duration-200 backdrop-blur-sm">
+              <div key={idx} className="bg-white/70 dark:bg-stone-800/80 rounded-2xl border border-rose-200/60 dark:border-rose-800/40 overflow-hidden hover:border-rose-300 dark:hover:border-rose-600 hover:shadow-lg hover:shadow-rose-500/15 transition-all duration-200 backdrop-blur-sm">
                 <button
                   onClick={() => setOpenFAQ(openFAQ === idx ? null : idx)}
-                  className="w-full px-6 py-5 text-left flex items-center justify-between hover:bg-violet-50/50 dark:hover:bg-violet-900/20 transition-all duration-200"
+                  className="w-full px-6 py-5 text-left flex items-center justify-between hover:bg-rose-50/50 dark:hover:bg-rose-900/20 transition-all duration-200"
                 >
                   <span className="font-bold text-stone-800 dark:text-stone-100 text-base sm:text-lg pr-4">{faq.question}</span>
                   <svg className={`w-5 h-5 text-stone-400 flex-shrink-0 transition-transform ${openFAQ === idx ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2838,33 +2632,31 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
       </section>
 
       {/* Final CTA */}
-      <section className="relative py-12 sm:py-24 overflow-hidden">
-        {/* Dark purple gradient matching Earn Your Screen Time */}
-        <div className="absolute inset-0 bg-gradient-to-br from-indigo-950 via-violet-900 to-purple-950 dark:from-indigo-950 dark:via-violet-950 dark:to-stone-900" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_100%_60%_at_50%_-5%,rgba(139,92,246,0.3),transparent_55%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_50%_at_85%_85%,rgba(192,132,252,0.15),transparent_45%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_40%_at_15%_75%,rgba(129,140,248,0.12),transparent_45%)]" />
+      <section className="relative py-12 sm:py-24 overflow-hidden bg-stone-200 dark:bg-stone-950">
+        {/* Light background with subtle rose accents */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_100%_60%_at_50%_-5%,rgba(251,207,232,0.25),transparent_55%)] dark:bg-[radial-gradient(ellipse_100%_60%_at_50%_-5%,rgba(251,207,232,0.08),transparent_55%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_50%_at_85%_85%,rgba(251,113,133,0.12),transparent_45%)] dark:bg-[radial-gradient(ellipse_70%_50%_at_85%_85%,rgba(251,113,133,0.06),transparent_45%)]" />
         <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h2 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-white mb-4 sm:mb-5">
+            <h2 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-stone-900 dark:text-white mb-4 sm:mb-5">
               Ready to ace your classes?
             </h2>
-            <p className="text-base sm:text-lg text-violet-200/90 mb-8 sm:mb-10 max-w-xl mx-auto px-2">
-              Join 38k+ students using WriteScholar to study smarter. Start for free today.
+            <p className="text-base sm:text-lg text-stone-600 dark:text-stone-300 mb-8 sm:mb-10 max-w-xl mx-auto px-2">
+              Join 50k+ students using WriteScholar to study smarter. Start for free today.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
               <button
                 onClick={() => onNavigate('signup')}
-                className="inline-flex items-center justify-center px-8 py-4 bg-white text-violet-900 font-bold rounded-2xl hover:bg-violet-100 hover:scale-105 active:scale-95 transition-all shadow-xl shadow-violet-500/30 text-lg"
+                className="inline-flex items-center justify-center px-8 py-4 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-2xl hover:scale-105 active:scale-95 transition-all shadow-xl shadow-rose-500/30 text-lg"
               >
-                Upload your essay — free to try
+                Let's get started
                 <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                 </svg>
               </button>
               <button
                 onClick={() => onNavigate('pricing')}
-                className="inline-flex items-center justify-center px-8 py-4 bg-white/10 backdrop-blur-sm border-2 border-white/30 text-white font-bold rounded-2xl hover:bg-white/20 hover:scale-105 active:scale-95 transition-all text-lg"
+                className="inline-flex items-center justify-center px-8 py-4 bg-white dark:bg-stone-800 border-2 border-stone-300 dark:border-stone-600 text-stone-900 dark:text-white font-bold rounded-2xl hover:bg-stone-100 dark:hover:bg-stone-700 hover:scale-105 active:scale-95 transition-all text-lg"
               >
                 View Pricing
               </button>
@@ -2886,10 +2678,6 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
 
       {showFakeAnimation && mode === 'analyze' && (
         <AnalysisAnimation isPopup={true} text="Analyzing your writing" isComplete={false} />
-      )}
-
-      {showFakeAnimation && mode === 'humanize' && (
-        <AnalysisAnimation isPopup={true} text="Humanizing your text" isComplete={false} />
       )}
 
       {showFakeAnimation && mode === 'summarize' && (
@@ -3031,88 +2819,6 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
             </button>
           </div>
           </div>
-      )}
-
-      {/* Fake Humanize Results Modal */}
-      {showFakeHumanizeResults && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 backdrop-blur-sm p-4">
-          <div className="relative bg-white rounded-2xl p-6 sm:p-8 max-w-4xl w-full mx-4 shadow-2xl animate-fade-in">
-            <button type="button" onClick={() => setShowFakeHumanizeResults(false)} className="absolute top-4 right-4 p-1.5 text-stone-400 hover:text-stone-600 hover:bg-stone-100 rounded-lg transition-colors z-10" aria-label="Close">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-            </button>
-            
-            <div className="text-center mb-6">
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-violet-100 text-violet-700 rounded-full text-sm font-medium mb-3">
-                <span>✨</span> Text Humanized Successfully
-              </div>
-              <h3 className="text-xl font-bold text-stone-800">Your AI text has been transformed</h3>
-            </div>
-
-            {/* Side by Side Panels */}
-            <div className="grid md:grid-cols-2 gap-4 mb-6">
-              {/* Original Panel */}
-              <div className="bg-stone-50 rounded-xl border border-stone-200 overflow-hidden">
-                <div className="px-4 py-2.5 bg-stone-100 border-b border-stone-200">
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-stone-400"></div>
-                    <span className="text-xs font-semibold text-stone-600 uppercase tracking-wider">Original</span>
-                  </div>
-                </div>
-                <div className="p-4 max-h-48 overflow-y-auto">
-                  <p className="text-sm text-stone-600 leading-relaxed whitespace-pre-wrap">{inputText.slice(0, 500)}{inputText.length > 500 ? '...' : ''}</p>
-                </div>
-              </div>
-
-              {/* Humanized Panel */}
-              <div className="bg-gradient-to-br from-violet-50 to-purple-50 rounded-xl border border-violet-200 overflow-hidden">
-                <div className="px-4 py-2.5 bg-violet-100/50 border-b border-violet-200">
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-violet-400"></div>
-                    <span className="text-xs font-semibold text-violet-600 uppercase tracking-wider">Humanized</span>
-                  </div>
-                </div>
-                <div className="p-4 max-h-48 overflow-y-auto relative">
-                  <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-white/90 pointer-events-none"></div>
-                  <p className="text-sm text-violet-900 leading-relaxed blur-[2px]">
-                    The concepts presented demonstrate a nuanced understanding of the subject matter. Through careful analysis, we can observe that the underlying principles support a comprehensive framework for interpretation...
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Features */}
-            <div className="flex flex-wrap gap-3 justify-center mb-6">
-              <div className="flex items-center gap-2 px-3 py-1.5 bg-green-50 rounded-full border border-green-200">
-                <svg className="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                </svg>
-                <span className="text-green-700 text-sm font-medium">AI detection bypassed</span>
-              </div>
-              <div className="flex items-center gap-2 px-3 py-1.5 bg-violet-50 rounded-full border border-violet-200">
-                <svg className="w-4 h-4 text-violet-600" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                </svg>
-                <span className="text-violet-700 text-sm font-medium">Meaning preserved</span>
-              </div>
-            </div>
-
-            <div className="bg-stone-50 rounded-xl p-3.5 mb-6">
-              <p className="text-stone-600 text-sm text-center leading-relaxed">
-                <span className="font-semibold text-stone-800">Sign up to reveal your full humanized text.</span> Copy it, use it with all modes and intensity levels.
-              </p>
-            </div>
-
-            <button 
-              onClick={handleContinueToSignup}
-              className="w-full py-3.5 bg-violet-500 hover:bg-violet-600 text-white font-semibold rounded-xl transition-all duration-200 hover:shadow-lg flex items-center justify-center"
-            >
-              Get my humanized text — sign up free
-              <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-              </svg>
-            </button>
-          </div>
-        </div>
       )}
 
       {/* Fake Summary Results Modal */}

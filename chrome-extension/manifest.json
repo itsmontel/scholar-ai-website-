@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "WriteScholar Focus Mode",
-  "version": "1.0.3",
-  "description": "Block sites until you solve a puzzle or answer study questions. Earn your screen time. Free: 3, Pro: 20, Premium: unlimited.",
+  "name": "WriteScholar Focus - Top website blocker",
+  "version": "1.0.6",
+  "description": "Block websites & stay focused. Unlock with a puzzle or quiz. Daily limits per site. Free: 3 sites. Paid: unlimited.",
   "permissions": [
     "storage",
     "declarativeNetRequest",
@@ -30,6 +30,11 @@
       ],
       "js": ["content.js"],
       "run_at": "document_end"
+    },
+    {
+      "matches": ["<all_urls>"],
+      "js": ["usageTracker.js"],
+      "run_at": "document_idle"
     }
   ],
   "action": {

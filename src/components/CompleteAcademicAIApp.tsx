@@ -1,4 +1,4 @@
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, useLayoutEffect, Suspense } from 'react';
 import { logger } from '../utils/logger';
 import { HIDE_FRIENDS } from '../config/featureFlags';
 import { persistOnboardingToServer } from '../utils/onboarding';
@@ -52,7 +52,6 @@ const EssayOutlineGeneratorPage = lazyWithRetry(() => import('./pages/tools/Essa
 const TextCaseConverterPage = lazyWithRetry(() => import('./pages/tools/TextCaseConverterPage'));
 const ThesisGeneratorPage = lazyWithRetry(() => import('./pages/tools/ThesisGeneratorPage'));
 const GrammarCheckerPage = lazyWithRetry(() => import('./pages/tools/GrammarCheckerPage'));
-const HumanizerPage = lazyWithRetry(() => import('./pages/tools/HumanizerPage'));
 const SummarizerPage = lazyWithRetry(() => import('./pages/tools/SummarizerPage'));
 const QuizGeneratorPage = lazyWithRetry(() => import('./pages/tools/QuizGeneratorPage'));
 const GPACalculatorPage = lazyWithRetry(() => import('./pages/tools/GPACalculatorPage'));
@@ -60,7 +59,6 @@ const PomodoroTimerPage = lazyWithRetry(() => import('./pages/tools/PomodoroTime
 const CalculatorPage = lazyWithRetry(() => import('./pages/tools/CalculatorPage'));
 const ConverterPage = lazyWithRetry(() => import('./pages/tools/ConverterPage'));
 const LightningReflexQuizPage = lazyWithRetry(() => import('./pages/tools/LightningReflexQuizPage'));
-const InteractiveLessonPage = lazyWithRetry(() => import('./pages/tools/InteractiveLessonPage'));
 const CreateFlashcardsPage = lazyWithRetry(() => import('./pages/tools/CreateFlashcardsPage'));
 const StudyPackViewerPage = lazyWithRetry(() => import('./pages/StudyPackViewerPage'));
 const AnalyzeEssayPage = lazyWithRetry(() => import('./pages/AnalyzeEssayPage'));
@@ -73,6 +71,12 @@ import PageErrorBoundary from './common/PageErrorBoundary';
 import BadgeNotificationToast from './common/BadgeNotificationToast';
 import StudyTimerWidget from './common/StudyTimerWidget';
 import MobileGoogleSignInPopup from './common/MobileGoogleSignInPopup';
+import {
+  absoluteCanonicalUrl,
+  applyPageSeoTags,
+  getCanonicalPathname,
+  syncBrowserUrlToCanonical,
+} from '../utils/seo';
 
 /** Derive page from pathname - used for initial state and URL sync */
 function getPageFromPath(pathname: string): string {
@@ -122,7 +126,7 @@ function getPageFromPath(pathname: string): string {
   if (p === '/tools/text-case-converter' || p === '/text-case-converter') return 'text-case-converter';
   if (p === '/tools/thesis-generator' || p === '/thesis-generator') return 'thesis-generator';
   if (p === '/tools/grammar-checker' || p === '/grammar-checker') return 'grammar-checker';
-  if (p === '/tools/humanizer' || p === '/humanizer') return 'humanizer';
+  if (p === '/tools/humanizer' || p === '/humanizer') return 'dashboard';
   if (p === '/tools/summarizer' || p === '/summarizer') return 'summarizer';
   if (p === '/tools/quiz-generator' || p === '/quiz-generator') return 'quiz-generator';
   if (p === '/tools/flashcard-generator' || p === '/flashcard-generator') return 'create-flashcards';
@@ -142,7 +146,7 @@ function getPageFromPath(pathname: string): string {
   if (p === '/tools/calculator' || p === '/calculator') return 'calculator';
   if (p === '/tools/converter' || p === '/converter') return 'converter';
   if (p === '/tools/crater-blast' || p === '/crater-blast' || p === '/tools/lightning-reflex-quiz' || p === '/lightning-reflex-quiz') return 'crater-blast';
-  if (p === '/tools/interactive-lesson' || p === '/interactive-lesson' || p === '/lesson-generator') return 'interactive-lesson';
+  if (p === '/tools/interactive-lesson' || p === '/interactive-lesson' || p === '/lesson-generator') return 'dashboard';
   if (p === '/study-pack-viewer' || p === '/tools/study-pack-viewer') return 'study-pack-viewer';
   if (p === '/tools/more' || p === '/more-tools' || p === '/view-more-tools') return 'more-tools';
   if (p === '/badges' || p === '/achievements') return 'badges';
@@ -264,23 +268,23 @@ const AcademicAIApp = () => {
 
   // SEO: dynamic document title and meta description per page (SPA)
   const pageMeta: Record<string, { title: string; description: string }> = {
-    landing: { title: 'Check My Essay with AI | Professor-Style Feedback | WriteScholar', description: 'Check your essay with AI, get professor-style feedback in seconds. Plus citations, quizzes and flashcards from your notes, and Focus Mode to block distractions. Free to try.' },
-    analyze: { title: 'AI Essay Checker. Professor-Style Feedback by Grade Level | WriteScholar', description: 'Get AI essay feedback tailored to college, high school, or middle school. Structure, clarity, citations, grammar. Grade-level rubric. Free essay analysis tool for students.' },
+    landing: { title: 'Check My Essay with AI | Get Professor-Style Feedback | WriteScholar', description: 'Check your essay with AI: get professor-style feedback and a grade-level rubric in seconds. Plus citations, quizzes and flashcards from your notes, and Focus Mode. Free to try.' },
+    analyze: { title: 'Check My Essay with AI | Get Professor-Style Rubric & Feedback | WriteScholar', description: 'Paste or upload your essay to get professor-style feedback on structure, argument, clarity, citations, and grammar. Pick middle school, high school, college, or grad for a grade-level rubric. Free essay checker for students.' },
     citations: { title: 'Academic Citation Finder. APA, MLA, Chicago Sources | WriteScholar', description: 'Find peer-reviewed academic sources for your research. Search by topic, get APA, MLA, Chicago citations instantly. Free citation finder for students.' },
-    features: { title: 'Essay Analyzer, Quiz Generator, Flashcards, Humanizer | WriteScholar', description: 'Professor-style essay feedback and grade-level rubrics first. Plus AI quiz generator, flashcard maker, crossword builder, humanizer, summarizer, citation finder. The best Quizlet alternative for students.' },
-    'focus-mode': { title: 'Block Distracting Websites Until You Answer Study Questions | Focus Mode', description: 'Block YouTube, TikTok, Instagram and Reddit until you answer quiz questions from your own notes. Study before social media. Earn your screen time. Pro: 20 sites. Premium: unlimited.' },
-    pricing: { title: 'Pricing. Free Plan, Pro & Premium | WriteScholar', description: 'Start free with essay analysis, AI quizzes, flashcards, humanizer, and 10+ writing tools. Upgrade for unlimited usage. Better value than Quizlet Plus or Knowt premium.' },
-    about: { title: 'About WriteScholar. Professor-Style Essay Feedback & Study Tools', description: 'WriteScholar gives you professor-style feedback on every essay you write. Plus block websites until you study, create quizzes and flashcards from notes, humanizer, summarizer, citations. Everything students need in one place.' },
-    'why-students-choose': { title: 'WriteScholar vs Grammarly vs QuillBot: Honest Comparison 2026', description: 'See how WriteScholar compares to Grammarly and QuillBot. Professor-style essay feedback, citation finder, AI humanizer, and more. Built for academic writing.' },
-    'study-tools-comparison': { title: 'WriteScholar vs Quizlet vs Knowt. Essay Feedback First | 2026', description: 'Why students switch from Quizlet and Knowt to WriteScholar. Professor-style essay analysis and rubrics first. Plus AI quizzes, flashcards, crosswords, humanizer, citations. Compare features side by side.' },
+    features: { title: 'Get Professor-Style Essay Feedback, Quizzes & Flashcards | WriteScholar', description: 'Lead feature: check my essay with AI and get professor-style feedback plus a rubric by education level. Plus AI quiz generator, flashcards, crosswords, summarizer, citation finder. The best Quizlet alternative for students.' },
+    'focus-mode': { title: 'Block Distracting Websites Until You Answer Study Questions | Focus Mode', description: 'Block distracting sites until you solve a puzzle or answer quiz questions. Earn your screen time. Free: 3 sites. Paid: unlimited.' },
+    pricing: { title: 'Pricing | Get Professor-Style Essay Analysis & Study Tools | WriteScholar', description: 'Free plan includes limited monthly essay analysis so you get professor-style feedback, plus AI quizzes, flashcards, and 10+ writing tools. Upgrade for higher limits. Compare value vs Quizlet Plus or Knowt premium.' },
+    about: { title: 'About WriteScholar | Get Professor-Style Essay Feedback & Study Tools', description: 'WriteScholar helps you get professor-style feedback on every essay you write. Plus block websites until you study, create quizzes and flashcards from notes, summarizer, citations. Everything students need in one place.' },
+    'why-students-choose': { title: 'WriteScholar vs Grammarly vs QuillBot: Honest Comparison 2026', description: 'See how WriteScholar compares to Grammarly and QuillBot. Get professor-style essay feedback, citation finder, and more. Built for academic writing.' },
+    'study-tools-comparison': { title: 'WriteScholar vs Quizlet vs Knowt. Get Professor-Style Essay Feedback First | 2026', description: 'Why students switch from Quizlet and Knowt to WriteScholar. Get professor-style essay analysis and rubrics first. Plus AI quizzes, flashcards, crosswords, citations. Compare features side by side.' },
     'share-friends': { title: 'Study Together. Add Friends & Share Study Tools | WriteScholar', description: 'Add friends with your unique code and share flashcards, quizzes, crosswords and notes instantly. Delivers straight to their device, they just tap accept.' },
-    help: { title: 'Help & FAQ: Essay Analyzer, Quiz Generator & More | WriteScholar', description: 'Get help with the Essay Analyzer (professor-style feedback), AI Humanizer, Quiz Generator, Paper Summarizer, Citation Finder. Supported citation styles: APA, Harvard, MLA, Chicago.' },
-    contact: { title: 'Contact WriteScholar Support | Get Help Fast', description: 'Contact WriteScholar support for help with AI tools for students.' },
+    help: { title: 'Help & FAQ: Essay Analyzer, Quiz Generator & More | WriteScholar', description: 'Get help with the Essay Analyzer, Quiz Generator, Paper Summarizer, Citation Finder—including how to get professor-style essay feedback. Supported citation styles: APA, Harvard, MLA, Chicago.' },
+    contact: { title: 'Contact WriteScholar | Get Professor-Style Feedback & Study Help', description: 'Reach WriteScholar support for help getting professor-style essay feedback, rubrics, quizzes, flashcards, Focus Mode, and billing.' },
     privacy: { title: 'Privacy Policy | WriteScholar', description: 'WriteScholar privacy policy and data handling.' },
     terms: { title: 'Terms of Service | WriteScholar', description: 'WriteScholar terms of service.' },
-    login: { title: 'Log In | WriteScholar', description: 'Log in to access essay analysis, AI Humanizer, Quiz Generator, Summarizer, and more.' },
-    signup: { title: 'Sign Up Free | WriteScholar', description: 'Create your free account. Get professor-style essay feedback, Paper Summarizer, Citation Finder, and AI Humanizer.' },
-    blog: { title: 'Study Tips & Academic Writing Guides | WriteScholar Blog', description: 'Guides on essay feedback, professor-style analysis, creating study quizzes, summarizing research papers, APA/MLA citations, and academic writing tips.' },
+    login: { title: 'Log In | WriteScholar', description: 'Log in to get professor-style essay feedback, study packs, Paper Summarizer, Citation Finder, and more.' },
+    signup: { title: 'Sign Up Free | WriteScholar', description: 'Create your free account. Get professor-style essay feedback, Paper Summarizer, Citation Finder, and more.' },
+    blog: { title: 'Study Tips & Academic Writing Guides | WriteScholar Blog', description: 'Guides on how to get professor-style essay feedback, study quizzes, summarizing research papers, APA/MLA citations, and academic writing tips.' },
     'word-counter': { title: 'Free Word Counter Tool – Count Words & Characters Instantly | WriteScholar', description: 'Count words, characters, sentences, and paragraphs instantly. Free online word counter for essays, academic papers, and assignments with word limits.' },
     'citation-generator-tool': { title: 'Free Citation Generator – APA, MLA, Chicago, Harvard | WriteScholar', description: 'Free online citation generator. Create APA, MLA, Chicago, Harvard citations for books, journals, websites. Generate citations instantly—no signup. Trusted by students.' },
     'readability-score': { title: 'Free Readability Score Calculator – Flesch-Kincaid & More | WriteScholar', description: 'Check your text readability with Flesch-Kincaid scores. Free readability checker shows grade level and reading ease for academic writing.' },
@@ -289,7 +293,6 @@ const AcademicAIApp = () => {
     'text-case-converter': { title: 'Free Text Case Converter – UPPERCASE, lowercase, Title Case | WriteScholar', description: 'Convert text to UPPERCASE, lowercase, Title Case, Sentence case, and more. Perfect for formatting titles, headings, and fixing caps lock mistakes.' },
     'thesis-generator': { title: 'Free Thesis Statement Generator – Create Strong Thesis Statements | WriteScholar', description: 'Create strong thesis statements for argumentative, expository, analytical, and compare-contrast essays. Template-based thesis builder.' },
     'grammar-checker': { title: 'Free Grammar Checker – Fix Spelling & Grammar Errors | WriteScholar', description: 'Check your writing for common spelling mistakes, grammar errors, punctuation issues, and style suggestions. Quick client-side grammar check.' },
-    'humanizer': { title: 'AI Humanizer. Bypass AI Detection Free | WriteScholar', description: 'Transform AI-generated text from ChatGPT, Claude, Gemini into undetectable human writing. Bypass Turnitin, GPTZero, and other AI detectors. A tool Quizlet and Knowt don\'t offer. Free to try.' },
     'summarizer': { title: 'AI Summarizer. Condense Papers & Articles Free | WriteScholar', description: 'Summarize research papers, articles, and textbooks into key points. Bullet points or paragraphs. Better than Quizlet for literature reviews. Free to try.' },
     'quiz-generator': { title: 'AI Quiz Generator from Text – Pro Study Tool | WriteScholar', description: 'Generate quizzes from your notes or articles. Multiple-choice, true/false, fill-in-the-blank questions in seconds. Quiz generation is a Pro feature. Best Quizlet alternative.' },
     'create-flashcards': { title: 'Create Flashcards – Custom Deck Builder | WriteScholar', description: 'Build and customize your own flashcard deck, or use Study Pack to generate from notes. Themes, labels, font size. Edit, reorder, duplicate. Like Anki, but simpler.' },
@@ -300,41 +303,23 @@ const AcademicAIApp = () => {
     'calculator': { title: 'Free Scientific Calculator – Trig, Log, Powers | WriteScholar', description: 'Free online scientific calculator for students. Trigonometry (sin, cos, tan), logarithms, square root, powers, and more. Works in degrees or radians. No signup required.' },
     'converter': { title: 'Free Unit Converter – Length, Weight, Temperature & More | WriteScholar', description: 'Free online unit converter for students. Length, weight, temperature, volume, area, time, speed, energy. Meters to feet, m/s to mph & more. No signup required.' },
     'crater-blast': { title: 'Crater Blast – AI Quiz Shooter Game | WriteScholar', description: 'Blast the correct falling crater before it lands! AI generates quiz questions as craters. Aim your cannon, build streaks, and beat your high score.' },
-    'more-tools': { title: 'More Tools. Lessons, Summarize, Humanize & Utilities | WriteScholar', description: 'Lessons, summarize, humanize, plus word counter, citation generator, calculator, converter, essay outline, thesis generator, grammar checker, and more.' },
-    'interactive-lesson': { title: 'Interactive Lesson Generator – Turn Text into Fun Lessons | WriteScholar', description: 'Transform boring study material into engaging, interactive lessons. Break down complex topics into digestible slides with key concepts, examples, and fun facts. Learn before you quiz!' },
+    'more-tools': { title: 'More Tools. Lessons, Summarize & Utilities | WriteScholar', description: 'Lessons, summarize, plus word counter, citation generator, calculator, converter, essay outline, thesis generator, grammar checker, and more.' },
     'badges': { title: 'Achievements & Badges | WriteScholar', description: 'Collect badges, earn XP, and level up your scholar journey. Unlock cute monster companions by using WriteScholar tools.' },
     'friends': { title: 'Friends | WriteScholar', description: 'Connect with friends to share quizzes, flashcards, and crosswords. Add friends by code and collaborate on studying.' }
   };
+  useLayoutEffect(() => {
+    syncBrowserUrlToCanonical();
+  }, []);
+
   useEffect(() => {
     const meta = pageMeta[currentPage];
     if (meta) {
-      document.title = meta.title;
-      const setMeta = (selector: string, attr: string, value: string) => {
-        let el = document.querySelector(selector);
-        if (el) el.setAttribute(attr, value);
-        else {
-          el = document.createElement('meta');
-          const isProperty = selector.includes('property=');
-          if (isProperty) {
-            const prop = selector.match(/property="([^"]+)"/)?.[1];
-            if (prop) el.setAttribute('property', prop);
-          } else {
-            const name = selector.match(/name="([^"]+)"/)?.[1];
-            if (name) el.setAttribute('name', name);
-          }
-          el.setAttribute(attr, value);
-          document.head.appendChild(el);
-        }
-      };
-      setMeta('meta[name="description"]', 'content', meta.description);
-      setMeta('meta[property="og:title"]', 'content', meta.title);
-      setMeta('meta[property="og:description"]', 'content', meta.description);
-      setMeta('meta[name="twitter:title"]', 'content', meta.title);
-      setMeta('meta[name="twitter:description"]', 'content', meta.description);
-
-      const canonical = document.querySelector('link[rel="canonical"]');
-      if (canonical) canonical.setAttribute('href', `https://writescholar.com${window.location.pathname}`);
-      setMeta('meta[property="og:url"]', 'content', `https://writescholar.com${window.location.pathname}`);
+      const canonicalUrl = absoluteCanonicalUrl(getCanonicalPathname(window.location.pathname));
+      applyPageSeoTags({
+        title: meta.title,
+        description: meta.description,
+        canonicalUrl,
+      });
     }
   }, [currentPage]);
 
@@ -491,6 +476,7 @@ const AcademicAIApp = () => {
     
     // Listen for browser back/forward button
     const handlePopState = () => {
+      syncBrowserUrlToCanonical();
       const newPath = window.location.pathname;
       const newPage = getPageFromPath(newPath);
       logger.log('Browser navigation detected, changing page to:', newPage);
@@ -630,7 +616,6 @@ const AcademicAIApp = () => {
   // Canonical URL map – pages whose URL differs from /${page}
   const pageUrlMap: Record<string, string> = {
     landing: '/',
-    humanizer: '/tools/humanizer',
     summarizer: '/tools/summarizer',
     'quiz-generator': '/tools/quiz-generator',
     'create-flashcards': '/tools/create-flashcards',
@@ -952,8 +937,6 @@ const AcademicAIApp = () => {
         return <ThesisGeneratorPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'grammar-checker':
         return <GrammarCheckerPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
-      case 'humanizer':
-        return <HumanizerPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'summarizer':
         return <SummarizerPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'quiz-generator':
@@ -972,8 +955,6 @@ const AcademicAIApp = () => {
         return <ConverterPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'crater-blast':
         return <LightningReflexQuizPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
-      case 'interactive-lesson':
-        return <InteractiveLessonPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'study-pack-viewer':
         return <StudyPackViewerPage onNavigate={navigateTo} user={user} onLogout={handleLogout} initialData={studyPackInitialData || undefined} />;
       case 'admin':

@@ -162,10 +162,10 @@ const CitationsPage = ({ onNavigate, user, onLogout }: CitationsPageProps) => {
             <div className="relative rounded-[22px] sm:rounded-[30px] bg-white/90 dark:bg-stone-800/95 backdrop-blur-2xl border border-white/50 dark:border-stone-700/50 shadow-inner p-6 sm:p-10">
               <div className="absolute -top-20 -right-20 w-40 h-40 bg-sky-400/20 rounded-full blur-3xl pointer-events-none" />
               <div className="absolute -bottom-20 -left-20 w-40 h-40 bg-blue-400/20 rounded-full blur-3xl pointer-events-none" />
-              {/* Hero headline - matches dashboard */}
-              <h2 className="relative text-2xl sm:text-3xl md:text-4xl font-extrabold text-stone-900 dark:text-white text-center mb-2 tracking-tight">
+              {/* Hero headline - matches dashboard (H1 for a11y / SEO) */}
+              <h1 className="relative text-2xl sm:text-3xl md:text-4xl font-extrabold text-stone-900 dark:text-white text-center mb-2 tracking-tight">
                 Find <span className="bg-gradient-to-r from-sky-500 via-blue-500 to-indigo-500 bg-clip-text text-transparent" style={{ WebkitBackgroundClip: 'text' }}>academic sources</span> in seconds
-              </h2>
+              </h1>
               <p className="relative text-stone-600 dark:text-stone-300 text-base sm:text-lg text-center mb-8 max-w-xl mx-auto leading-relaxed">
                 APA, MLA & Chicago. Peer-reviewed sources. Filter by year.
               </p>

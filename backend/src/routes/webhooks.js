@@ -128,6 +128,8 @@ async function handleCheckoutSessionCompleted(session) {
       plan = 'pro';
     } else if (priceId === process.env.STRIPE_PREMIUM_MONTHLY_PRICE_ID || priceId === process.env.STRIPE_PREMIUM_YEARLY_PRICE_ID) {
       plan = 'premium';
+    } else if (priceId === process.env.STRIPE_FOCUS_MONTHLY_PRICE_ID || priceId === process.env.STRIPE_FOCUS_YEARLY_PRICE_ID || priceId === 'price_focus_monthly' || priceId === 'price_focus_yearly') {
+      plan = 'focus';
     }
 
     // Update user's subscription plan and mark onboarding complete (they subscribed = past onboarding)
@@ -203,6 +205,8 @@ async function handleSubscriptionCreated(subscription) {
       plan = 'pro';
     } else if (priceId === process.env.STRIPE_PREMIUM_MONTHLY_PRICE_ID || priceId === process.env.STRIPE_PREMIUM_YEARLY_PRICE_ID) {
       plan = 'premium';
+    } else if (priceId === process.env.STRIPE_FOCUS_MONTHLY_PRICE_ID || priceId === process.env.STRIPE_FOCUS_YEARLY_PRICE_ID || priceId === 'price_focus_monthly' || priceId === 'price_focus_yearly') {
+      plan = 'focus';
     }
 
     // Update user's subscription plan using PostgreSQL
@@ -240,6 +244,8 @@ async function handleSubscriptionUpdated(subscription) {
       plan = 'pro';
     } else if (priceId === process.env.STRIPE_PREMIUM_MONTHLY_PRICE_ID || priceId === process.env.STRIPE_PREMIUM_YEARLY_PRICE_ID) {
       plan = 'premium';
+    } else if (priceId === process.env.STRIPE_FOCUS_MONTHLY_PRICE_ID || priceId === process.env.STRIPE_FOCUS_YEARLY_PRICE_ID || priceId === 'price_focus_monthly' || priceId === 'price_focus_yearly') {
+      plan = 'focus';
     }
 
     // Update subscription in database using PostgreSQL

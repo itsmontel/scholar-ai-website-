@@ -6,22 +6,22 @@ interface BlogPostContentProps {
   onNavigate?: (page: string) => void;
 }
 
-const p = 'mb-4 text-gray-600 leading-relaxed';
-const h2 = 'text-xl font-bold text-gray-900 mt-8 mb-3';
-const h3 = 'text-lg font-semibold text-gray-900 mt-6 mb-2';
-const internalLink = 'text-indigo-600 hover:text-indigo-800 underline';
-const ctaButton = 'inline-block mt-8 mb-4 px-6 py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors';
-const faqQuestion = 'font-semibold text-gray-900 mt-4 mb-2';
+const p = 'mb-4 text-stone-600 dark:text-stone-400 leading-relaxed';
+const h2 = 'text-xl font-bold text-stone-800 dark:text-stone-100 mt-8 mb-3';
+const h3 = 'text-lg font-semibold text-stone-800 dark:text-stone-100 mt-6 mb-2';
+const internalLink = 'text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 underline';
+const ctaButton = 'inline-block mt-8 mb-4 px-6 py-3 bg-gradient-to-r from-indigo-500 to-violet-600 text-white font-semibold rounded-xl hover:from-indigo-400 hover:to-violet-500 transition-colors shadow-lg shadow-violet-500/20';
+const faqQuestion = 'font-semibold text-stone-800 dark:text-stone-100 mt-4 mb-2';
 
 // Reusable illustration components for blog posts
-const IllustrationWrapper: React.FC<{ children: React.ReactNode; bgColor?: string }> = ({ children, bgColor = 'bg-gray-50' }) => (
+const IllustrationWrapper: React.FC<{ children: React.ReactNode; bgColor?: string }> = ({ children, bgColor = 'bg-stone-100 dark:bg-stone-800/50' }) => (
   <div className={`my-8 p-6 ${bgColor} rounded-2xl flex items-center justify-center`}>
     {children}
   </div>
 );
 
 const WritingIllustration = () => (
-  <IllustrationWrapper bgColor="bg-indigo-50">
+  <IllustrationWrapper bgColor="bg-violet-50 dark:bg-violet-900/20">
     <svg viewBox="0 0 280 160" fill="none" className="w-full max-w-xs h-auto">
       {/* Desk */}
       <rect x="40" y="120" width="200" height="8" rx="2" fill="#D1D5DB" />
@@ -364,6 +364,24 @@ const StudyToolsHeroIllustration = () => (
   </IllustrationWrapper>
 );
 
+const EssayAnalysisIllustration = () => (
+  <IllustrationWrapper bgColor="bg-violet-50 dark:bg-violet-900/20">
+    <svg viewBox="0 0 280 160" fill="none" className="w-full max-w-xs h-auto">
+      <rect x="50" y="25" width="100" height="110" rx="4" fill="white" stroke="#8B5CF6" strokeWidth="2" />
+      <line x1="65" y1="45" x2="135" y2="45" stroke="#C4B5FD" strokeWidth="2" />
+      <line x1="65" y1="60" x2="130" y2="60" stroke="#10B981" strokeWidth="2" />
+      <line x1="65" y1="75" x2="140" y2="75" stroke="#C4B5FD" strokeWidth="2" />
+      <line x1="65" y1="90" x2="95" y2="90" stroke="#F59E0B" strokeWidth="2" />
+      <line x1="65" y1="105" x2="125" y2="105" stroke="#C4B5FD" strokeWidth="2" />
+      <circle cx="180" cy="50" r="22" fill="#8B5CF6" />
+      <path d="M172 50 L176 54 L188 42" stroke="white" strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+      <rect x="165" y="90" width="60" height="35" rx="4" fill="#F5F3FF" stroke="#8B5CF6" strokeWidth="2" />
+      <text x="195" y="108" textAnchor="middle" fontSize="9" fill="#6D28D9" fontWeight="bold">Rubric</text>
+      <line x1="170" y1="115" x2="220" y2="115" stroke="#C4B5FD" strokeWidth="1" />
+    </svg>
+  </IllustrationWrapper>
+);
+
 const PlagiarismIllustration = () => (
   <IllustrationWrapper bgColor="bg-emerald-50">
     <svg viewBox="0 0 280 160" fill="none" className="w-full max-w-xs h-auto">
@@ -396,6 +414,102 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
   };
 
   switch (slug) {
+    case 'check-essay-with-ai-professor-style-feedback':
+      return (
+        <>
+          <p className={p}>
+            You finish your essay and hit submit. A week later your professor returns it covered in red. The thesis needs work. Your argument drifts in paragraph three. The conclusion does not quite land. You wish someone had caught these issues before you turned it in.
+          </p>
+          <p className={p}>
+            An AI essay checker does exactly that. Paste your draft, click analyze, and get professor-style feedback in seconds. Not generic corrections. Targeted comments on structure, clarity, argument strength, and academic tone. The kind of feedback that used to require office hours or a writing center appointment. <a href="/dashboard" onClick={handleNavigate('dashboard')} className={internalLink}>WriteScholar&apos;s dashboard</a> gives you one-click access to the analyzer: paste your text and get results in under a minute.
+          </p>
+
+          <EssayAnalysisIllustration />
+
+          <h2 className={h2}>What makes essay feedback useful</h2>
+          <p className={p}>
+            Good feedback tells you what works and what does not. It points to specific sentences. It explains why something is strong or weak. It suggests concrete fixes. Generic advice like "improve your thesis" is not enough. You need to know which part of the thesis is fuzzy and how to tighten it. If you are still drafting, a <a href="/tools/thesis-generator" onClick={handleNavigate('thesis-generator')} className={internalLink}>thesis generator</a> can help you craft a clear, arguable claim before you expand it into a full essay.
+          </p>
+          <p className={p}>
+            AI essay analysis tools now deliver that level of detail. They read your full essay. They identify strengths, improvement areas, and concerns. They attach comments to the exact phrases that need attention. The result feels less like a grammar check and more like a fast first read from a teaching assistant who actually cares about your grade.
+          </p>
+
+          <h2 className={h2}>Inline annotations instead of vague notes</h2>
+          <p className={p}>
+            Annotations are the core of useful essay feedback. Green highlights show where you are doing something well. Amber flags spots that could be stronger. Red calls out problems that will cost you points. Each highlight links to a comment explaining the issue and often a suggestion for how to fix it.
+          </p>
+          <p className={p}>
+            This is a huge step up from a single paragraph of feedback at the end. With inline annotations you see exactly where your argument wobbles, where your evidence could be sharper, or where your transitions fall flat. You can click through each note and revise in context. No more guessing which sentence your professor meant. See our <a href="/features" onClick={handleNavigate('features')} className={internalLink}>features page</a> for a full overview of how the annotation system works.
+          </p>
+
+          <h2 className={h2}>Grade-level rubrics that match your assignment</h2>
+          <p className={p}>
+            Many professors grade with rubrics. Criteria like thesis clarity, argument development, evidence use, organization, and style. Each criterion gets a score. A strong essay meets most of them. A weak one misses several.
+          </p>
+          <p className={p}>
+            The best AI essay analyzers use the same framework. They score your work against rubric criteria. They tell you which criteria you met, which you partially met, and which need work. Some tools even let you paste your own assignment rubric. The AI compares your essay against your professor's exact requirements. That alignment matters. Feedback that matches the grading criteria helps you improve in the ways that actually affect your score.
+          </p>
+
+          <h2 className={h2}>Professor-style feedback in under a minute</h2>
+          <p className={p}>
+            Speed matters when you are on a deadline. You cannot wait days for a draft review. AI essay feedback typically returns in under 60 seconds. Paste your text or upload your file. The system analyzes structure, argument, clarity, citations, and tone. You get a full report with annotations and rubric scores before you close the tab.
+          </p>
+          <p className={p}>
+            That speed does not mean shallow feedback. Modern models are trained on academic writing. They understand thesis statements, evidence integration, and formal tone. They catch logical gaps and weak transitions. The output is not perfect, but it is often as useful as a first pass from a human reader. And you can run it as many times as you need while you revise.
+          </p>
+
+          <h2 className={h2}>Designed for college and university students</h2>
+          <p className={p}>
+            WriteScholar&apos;s essay analyzer is built for undergraduate and postgraduate writing. It assumes you know the basics and focuses on higher-order concerns: thesis strength, argument structure, use of evidence, and academic style. Whether you&apos;re revising a seminar paper or a dissertation chapter, the feedback is calibrated to rigorous academic standards.
+          </p>
+
+          <h2 className={h2}>What the analysis covers</h2>
+          <p className={p}>
+            Comprehensive essay analysis looks at more than grammar. It evaluates your thesis: Is it clear? Arguable? Focused? It checks your argument: Do your claims follow from your evidence? Are your transitions smooth? It assesses structure: Does each paragraph do its job? Does the conclusion wrap things up? For help mapping your argument before you write, try an <a href="/tools/essay-outline" onClick={handleNavigate('essay-outline')} className={internalLink}>essay outline generator</a>. A clear structure makes the drafting and revising process much easier.
+          </p>
+          <p className={p}>
+            It also reviews citations and academic style. Are your in-text citations formatted correctly? Does your tone match academic conventions? Is your vocabulary precise without being needlessly complex? A full analysis touches all of these. Pair the analyzer with our <a href="/tools/citation-generator" onClick={handleNavigate('citation-generator-tool')} className={internalLink}>citation generator</a> for properly formatted references, and use the <a href="/citations" onClick={handleNavigate('citations')} className={internalLink}>citation finder</a> to discover relevant sources. A holistic view of your essay's strengths and weaknesses, before you submit.
+          </p>
+
+          <h2 className={h2}>Rubric alignment with your assignment</h2>
+          <p className={p}>
+            When your professor hands out a rubric, every criterion on that rubric affects your grade. The ideal scenario is feedback that speaks directly to those criteria. Did you meet the thesis requirement? The evidence requirement? The organization requirement?
+          </p>
+          <p className={p}>
+            Some essay analyzers let you paste your assignment rubric or requirements. The AI compares your draft to those criteria and reports back. It flags missing elements. It prioritizes improvements that will matter most for your grade. That level of alignment is rare in generic writing tools. It is what makes rubric-based analysis genuinely useful for students who want to improve their scores.
+          </p>
+
+          <h2 className={h2}>Frequently asked questions</h2>
+          <p className={faqQuestion}>How accurate is AI essay feedback?</p>
+          <p className={p}>
+            AI feedback is not infallible. It can miss nuance or occasionally misread intent. But for structure, clarity, argument flow, and common academic conventions, it is often reliable. Use it as a first pass. Incorporate what resonates. If something seems off, trust your judgment or get a second opinion from a tutor or professor.
+          </p>
+          <p className={faqQuestion}>Can I use this for research papers and theses?</p>
+          <p className={p}>
+            Yes. The same analysis works for shorter essays and longer papers. Upload or paste your draft. Add your rubric if you have one. The tool scales to different lengths and formats. Longer documents may take a bit longer to process.
+          </p>
+          <p className={faqQuestion}>What file formats are supported?</p>
+          <p className={p}>
+            Most tools accept pasted text, PDF, DOCX, and TXT. Upload or paste. The content is processed and returned with annotations and feedback. Files are handled securely and not shared or stored for training.
+          </p>
+          <p className={faqQuestion}>Is this the same as a plagiarism checker?</p>
+          <p className={p}>
+            No. Essay analysis focuses on feedback: structure, argument, clarity, style. It does not compare your text to the internet or a database. If you need plagiarism detection, use a dedicated plagiarism checker. For grammar and style specifically, a <a href="/tools/grammar-checker" onClick={handleNavigate('grammar-checker')} className={internalLink}>grammar checker for academic writing</a> can catch errors the essay analyzer may not flag. Many students use several tools: grammar pass first, then full feedback analysis to improve the draft.
+          </p>
+
+          <h2 className={h2}>Try it before you submit</h2>
+          <p className={p}>
+            The biggest mistake students make is turning in first drafts. A single pass with an AI essay checker catches issues you would have missed. Weak thesis. Flabby transitions. Missing evidence. Citation errors. The fixes are usually quick. A stronger draft goes in. Better feedback comes back from your professor. Need to stay focused while you revise? <a href="/focus-mode" onClick={handleNavigate('focus-mode')} className={internalLink}>Focus Mode</a> blocks distracting sites until you study or solve a puzzle. Fewer tabs, fewer rabbit holes.
+          </p>
+          <p className={p}>
+            <a href="/analysis" onClick={handleNavigate('analysis')} className={internalLink}>WriteScholar&apos;s essay analyzer</a> gives you professor-style feedback in seconds. Inline annotations mark strengths, improvements, and concerns. The grade-level rubric scores your work against academic criteria. Add your assignment rubric and the analysis aligns to your professor&apos;s expectations. Built for college and university students. See our <a href="/pricing" onClick={handleNavigate('pricing')} className={internalLink}>pricing</a> for details. Free plan includes 2 analyses per month.
+          </p>
+          <a href="/signup" onClick={handleNavigate('signup')} className={ctaButton}>
+            Check your essay free →
+          </a>
+        </>
+      );
+
     case 'block-websites-until-you-study-earn-screen-time':
       return (
         <>

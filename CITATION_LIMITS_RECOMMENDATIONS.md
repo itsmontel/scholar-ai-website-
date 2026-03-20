@@ -15,7 +15,7 @@ This document provides recommendations for citation search limits across subscri
   - Abstract/description
 
 ### Current Subscription Limits (Analyses)
-- **Free**: 3 analyses per month
+- **Free**: 2 analyses per month
 - **Pro ($19.99/month)**: 999 analyses per month
 - **Premium ($39.99/month)**: 999 analyses per month
 
@@ -52,7 +52,7 @@ Treat citations as a separate feature with its own limits:
 Count citations against the same analysis quota:
 
 #### **Free Tier**
-- 3 total actions per month (mix of analyses OR citations)
+- 2 total actions per month (mix of analyses OR citations) — *not current product; free tier uses 2 analyses/mo + 2 citations/mo separately*
 - **Rationale**: Simpler to understand, but less flexible
 
 #### **Paid Tiers**
@@ -68,7 +68,7 @@ Count citations against the same analysis quota:
 const PLAN_LIMITS = {
   free: {
     documentsPerMonth: 3,
-    analysesPerMonth: 3,
+    analysesPerMonth: 2,
     citationSearchesPerMonth: 2,  // NEW
     citationsPerSearch: 5,         // NEW
     maxDocumentSize: 1024 * 1024,

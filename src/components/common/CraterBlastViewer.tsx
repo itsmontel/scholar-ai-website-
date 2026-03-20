@@ -90,7 +90,7 @@ const CraterBlastViewer = ({ questions, onEnlarge }: CraterBlastViewerProps) => 
           )}
         </div>
         <div className="flex-1 rounded-2xl p-6 bg-slate-800/90 text-white text-center">
-          <div className="w-16 h-16 mx-auto rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-3xl mb-4">💥</div>
+          <div className="w-16 h-16 mx-auto rounded-full bg-gradient-to-br from-rose-500 to-pink-600 flex items-center justify-center text-3xl mb-4">💥</div>
           <h3 className="text-xl font-bold mb-2">Nice work!</h3>
           <p className="text-4xl font-bold text-violet-300 mb-2">{percentage}%</p>
           <p className="text-slate-300 text-sm mb-6">{correct} out of {total} correct</p>
@@ -99,7 +99,7 @@ const CraterBlastViewer = ({ questions, onEnlarge }: CraterBlastViewerProps) => 
               🔄 Retry
             </button>
             {onEnlarge && (
-              <button onClick={onEnlarge} className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-violet-500 to-purple-600 text-white font-medium hover:from-violet-600 hover:to-purple-700">
+              <button onClick={onEnlarge} className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-rose-500 to-pink-600 text-white font-medium hover:from-rose-600 hover:to-pink-700">
                 Play full arcade game
               </button>
             )}
@@ -126,7 +126,7 @@ const CraterBlastViewer = ({ questions, onEnlarge }: CraterBlastViewerProps) => 
         )}
       </div>
       <div className="h-2 bg-stone-200 dark:bg-stone-700 rounded-full mb-4">
-        <div className="h-full bg-gradient-to-r from-violet-500 to-purple-600 rounded-full transition-all" style={{ width: `${((currentQuestion + 1) / displayedQuestions.length) * 100}%` }} />
+        <div className="h-full bg-gradient-to-r from-rose-500 to-pink-600 rounded-full transition-all" style={{ width: `${((currentQuestion + 1) / displayedQuestions.length) * 100}%` }} />
       </div>
       <div className="flex-1 rounded-2xl p-4 sm:p-6 bg-slate-800/95 text-white overflow-auto border border-slate-700">
         <div className="bg-slate-700/50 rounded-xl px-4 py-3 mb-6">
@@ -161,14 +161,14 @@ const CraterBlastViewer = ({ questions, onEnlarge }: CraterBlastViewerProps) => 
             <button
               onClick={handleSubmit}
               disabled={!selectedAnswer}
-              className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-violet-500 to-purple-600 text-white font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-rose-500 to-pink-600 text-white font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Check
             </button>
           ) : (
             <button
               onClick={handleNext}
-              className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-violet-500 to-purple-600 text-white font-semibold"
+              className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-rose-500 to-pink-600 text-white font-semibold"
             >
               {currentQuestion < displayedQuestions.length - 1 ? 'Next →' : 'See Results'}
             </button>

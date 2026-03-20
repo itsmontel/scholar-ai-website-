@@ -29,7 +29,7 @@ const BadgeNotificationToast = ({ onNavigate }: BadgeNotificationToastProps) => 
     <div className="fixed left-3 right-3 sm:left-auto sm:right-6 z-[9999] animate-[badge-toast-in_0.5s_ease-out] bottom-[calc(5rem+env(safe-area-inset-bottom,0px))] sm:bottom-[calc(1.5rem+env(safe-area-inset-bottom,0px))]">
       <button
         onClick={() => { setNotification(null); onNavigate('badges'); }}
-        className="w-full sm:w-auto flex items-center gap-3 px-4 sm:px-5 py-3.5 sm:py-4 min-h-[44px] sm:min-h-0 bg-white dark:bg-stone-800 rounded-xl sm:rounded-2xl shadow-2xl shadow-violet-500/20 border-2 border-violet-300 dark:border-violet-600 active:scale-[0.98] sm:hover:shadow-violet-500/30 sm:hover:scale-[1.02] transition-all touch-manipulation"
+        className="w-full sm:w-auto flex items-center gap-3 px-4 sm:px-5 py-3.5 sm:py-4 min-h-[44px] sm:min-h-0 bg-white dark:bg-stone-800 rounded-xl sm:rounded-2xl shadow-2xl shadow-rose-500/20 border-2 border-rose-300 dark:border-rose-600 active:scale-[0.98] sm:hover:shadow-rose-500/30 sm:hover:scale-[1.02] transition-all touch-manipulation"
       >
         <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-lg sm:rounded-xl flex items-center justify-center shadow-lg shadow-amber-500/30 animate-[badge-icon-pop_0.6s_ease-out] flex-shrink-0">
           <span className="text-xl sm:text-2xl">🏆</span>

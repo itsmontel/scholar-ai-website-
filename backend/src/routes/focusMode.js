@@ -46,10 +46,10 @@ const UNLOCK_DURATION_OPTIONS = [
   { value: 24 * 60 * 60 * 1000, label: '24 hours' },
 ];
 
-// Pro: 20 sites, Premium: unlimited, Free: 3 sites
+// Free: 3 sites. Pro: 20 sites. Premium: unlimited. (focus: legacy, treat as unlimited)
 function getMaxSites(plan) {
   const p = (plan || 'free').toLowerCase();
-  if (p === 'premium') return 99999;
+  if (p === 'premium' || p === 'focus') return 99999; // focus = legacy, backward compat
   if (p === 'pro') return 20;
   return 3;
 }
@@ -64,7 +64,7 @@ function clampSettings(settings) {
 }
 
 // @route   GET /api/focus-mode/settings
-// @desc    Get full Focus Mode settings (free: 1, pro: 10, premium: unlimited)
+// @desc    Get full Focus Mode settings (free: 3, paid: unlimited)
 router.get('/settings', authenticateToken, async (req, res) => {
   try {
     const userId = req.user.id;
@@ -73,7 +73,7 @@ router.get('/settings', authenticateToken, async (req, res) => {
     const supabase = getSupabase();
     const { data, error } = await supabase
       .from('focus_mode_settings')
-      .select('blocked_domains, question_count, pass_threshold, unlock_duration_ms')
+      .select('blocked_domains, question_count, pass_threshold, unlock_duration_ms, domain_settings')
       .eq('user_id', userId)
       .maybeSingle();
     if (error) throw error;
@@ -82,10 +82,12 @@ router.get('/settings', authenticateToken, async (req, res) => {
     const passThreshold = typeof data?.pass_threshold === 'number' && data.pass_threshold >= 1 && data.pass_threshold <= questionCount
       ? data.pass_threshold : Math.max(1, Math.floor(questionCount * 0.8));
     const unlockMs = data?.unlock_duration_ms || DEFAULT_UNLOCK_MS;
+    const domainSettings = data?.domain_settings || {};
     res.json({
       success: true,
       data: {
         blockedDomains: domains,
+        domainSettings: domainSettings,
         question_count: questionCount,
         pass_threshold: passThreshold,
         unlock_duration_ms: unlockMs,
@@ -99,13 +101,13 @@ router.get('/settings', authenticateToken, async (req, res) => {
 });
 
 // @route   PUT /api/focus-mode/settings
-// @desc    Update Focus Mode settings (free: 3, pro: 20, premium: unlimited)
+// @desc    Update Focus Mode settings (free: 3, paid: unlimited)
 router.put('/settings', authenticateToken, async (req, res) => {
   try {
     const userId = req.user.id;
     const plan = req.user.subscription_plan || 'free';
     const maxSites = getMaxSites(plan);
-    const { blockedDomains, question_count, pass_threshold, unlock_duration_ms } = req.body;
+    const { blockedDomains, domainSettings, question_count, pass_threshold, unlock_duration_ms } = req.body;
     const supabase = getSupabase();
 
     let finalDomains = [];
@@ -132,11 +134,35 @@ router.put('/settings', authenticateToken, async (req, res) => {
       unlock_duration_ms
     });
 
+    const { data: existingSettings } = await supabase
+      .from('focus_mode_settings')
+      .select('domain_settings')
+      .eq('user_id', userId)
+      .maybeSingle();
+    let finalDomainSettings = existingSettings?.domain_settings || {};
+    if (domainSettings && typeof domainSettings === 'object') {
+      const validModes = ['block', 'daily_limit'];
+      for (const d of finalDomains) {
+        const s = domainSettings[d];
+        if (s && validModes.includes(s.mode || 'block')) {
+          finalDomainSettings[d] = { mode: s.mode };
+          if (s.mode === 'daily_limit') {
+            const mins = typeof s.dailyLimitMinutes === 'number' ? s.dailyLimitMinutes : 60;
+            finalDomainSettings[d].dailyLimitMinutes = Math.min(480, Math.max(15, mins));
+          }
+        }
+      }
+      finalDomainSettings = Object.fromEntries(
+        Object.entries(finalDomainSettings).filter(([k]) => finalDomains.includes(k))
+      );
+    }
+
     const { error } = await supabase
       .from('focus_mode_settings')
       .upsert({
         user_id: userId,
         blocked_domains: finalDomains,
+        domain_settings: Object.keys(finalDomainSettings).length ? finalDomainSettings : {},
         question_count: qc,
         pass_threshold: pt,
         unlock_duration_ms: ums,
@@ -149,6 +175,7 @@ router.put('/settings', authenticateToken, async (req, res) => {
       success: true,
       data: {
         blockedDomains: finalDomains,
+        domainSettings: finalDomainSettings,
         question_count: qc,
         pass_threshold: pt,
         unlock_duration_ms: ums
@@ -161,7 +188,7 @@ router.put('/settings', authenticateToken, async (req, res) => {
 });
 
 // @route   GET /api/focus-mode/blocked-sites
-// @desc    Get user's blocked sites (free: 3, pro: 20, premium: unlimited)
+// @desc    Get user's blocked sites (free: 3, paid: unlimited)
 router.get('/blocked-sites', authenticateToken, async (req, res) => {
   try {
     const userId = req.user.id;
@@ -171,7 +198,7 @@ router.get('/blocked-sites', authenticateToken, async (req, res) => {
 
     const { data, error } = await supabase
       .from('focus_mode_settings')
-      .select('blocked_domains')
+      .select('blocked_domains, domain_settings')
       .eq('user_id', userId)
       .maybeSingle();
 
@@ -179,7 +206,8 @@ router.get('/blocked-sites', authenticateToken, async (req, res) => {
 
     const allDomains = data?.blocked_domains || [];
     const domains = allDomains.slice(0, maxSites);
-    res.json({ success: true, data: { blockedDomains: domains, maxSites } });
+    const domainSettings = data?.domain_settings || {};
+    res.json({ success: true, data: { blockedDomains: domains, domainSettings, maxSites } });
   } catch (err) {
     console.error('Focus mode get blocked sites:', err);
     res.status(500).json({
@@ -191,13 +219,13 @@ router.get('/blocked-sites', authenticateToken, async (req, res) => {
 });
 
 // @route   PUT /api/focus-mode/blocked-sites
-// @desc    Update blocked sites (free: 3, pro: 20, premium: unlimited)
+// @desc    Update blocked sites (free: 3, paid: unlimited)
 router.put('/blocked-sites', authenticateToken, async (req, res) => {
   try {
     const userId = req.user.id;
     const plan = req.user.subscription_plan || 'free';
     const maxSites = getMaxSites(plan);
-    const { blockedDomains } = req.body;
+    const { blockedDomains, domainSettings } = req.body;
 
     if (!Array.isArray(blockedDomains)) {
       return res.status(400).json({ success: false, message: 'blockedDomains must be an array' });
@@ -210,7 +238,6 @@ router.put('/blocked-sites', authenticateToken, async (req, res) => {
         .map(d => String(d).toLowerCase().trim())
         .filter(d => d.length > 0)
         .map(d => {
-          // Extract base domain (youtube.com from www.youtube.com)
           const parts = d.replace(/^https?:\/\//, '').split('/')[0].split('.');
           if (parts.length >= 2) {
             return parts.slice(-2).join('.');
@@ -219,12 +246,39 @@ router.put('/blocked-sites', authenticateToken, async (req, res) => {
         })
     )];
 
+    let finalDomainSettings = {};
+    if (domainSettings && typeof domainSettings === 'object') {
+      const validModes = ['block', 'daily_limit'];
+      for (const d of normalized) {
+        const s = domainSettings[d];
+        if (s && validModes.includes(s.mode || 'block')) {
+          finalDomainSettings[d] = { mode: s.mode };
+          if (s.mode === 'daily_limit') {
+            const mins = typeof s.dailyLimitMinutes === 'number' ? s.dailyLimitMinutes : 60;
+            finalDomainSettings[d].dailyLimitMinutes = Math.min(480, Math.max(15, mins));
+          }
+        }
+      }
+    }
+
     const supabase = getSupabase();
+    const { data: existing } = await supabase
+      .from('focus_mode_settings')
+      .select('domain_settings')
+      .eq('user_id', userId)
+      .maybeSingle();
+    const mergedDomainSettings = Object.keys(finalDomainSettings).length
+      ? finalDomainSettings
+      : Object.fromEntries(
+          Object.entries(existing?.domain_settings || {}).filter(([k]) => normalized.includes(k))
+        );
+
     const { error } = await supabase
       .from('focus_mode_settings')
       .upsert({
         user_id: userId,
         blocked_domains: normalized,
+        domain_settings: mergedDomainSettings,
         updated_at: new Date().toISOString()
       }, { onConflict: 'user_id' });
 
@@ -235,7 +289,14 @@ router.put('/blocked-sites', authenticateToken, async (req, res) => {
       stats: { focus_mode_sites_blocked: normalized.length }
     }).catch(() => { /* ignore */ });
 
-    res.json({ success: true, data: { blockedDomains: normalized, maxSites } });
+    res.json({
+      success: true,
+      data: {
+        blockedDomains: normalized,
+        domainSettings: mergedDomainSettings,
+        maxSites
+      }
+    });
   } catch (err) {
     console.error('Focus mode update blocked sites:', err);
     res.status(500).json({
@@ -405,7 +466,7 @@ router.get('/unlock-quiz', authenticateToken, async (req, res) => {
 
 // @route   GET /api/focus-mode/config
 // @desc    Extension: get blocked domains + plan (requires token for sync)
-// Free: 3, Pro: 20, Premium: unlimited
+// Free: 3 sites. Paid: unlimited
 router.get('/config', authenticateToken, async (req, res) => {
   try {
     const userId = req.user.id;
@@ -415,7 +476,7 @@ router.get('/config', authenticateToken, async (req, res) => {
     const supabase = getSupabase();
     const { data } = await supabase
       .from('focus_mode_settings')
-      .select('blocked_domains, question_count, pass_threshold, unlock_duration_ms')
+      .select('blocked_domains, domain_settings, question_count, pass_threshold, unlock_duration_ms')
       .eq('user_id', userId)
       .maybeSingle();
 
@@ -430,6 +491,7 @@ router.get('/config', authenticateToken, async (req, res) => {
       success: true,
       data: {
         blockedDomains: domains,
+        domainSettings: data?.domain_settings || {},
         plan,
         enabled: domains.length > 0,
         question_count: questionCount,

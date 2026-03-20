@@ -58,24 +58,23 @@ const TextCaseConverterPage = ({ onNavigate, user, onLogout }: TextCaseConverter
   };
 
   const caseOptions = [
-    { type: 'uppercase' as CaseType, label: 'UPPERCASE', description: 'ALL CAPS', icon: 'AA', color: 'blue' },
+    { type: 'uppercase' as CaseType, label: 'UPPERCASE', description: 'ALL CAPS', icon: 'AA', color: 'rose' },
     { type: 'lowercase' as CaseType, label: 'lowercase', description: 'all lower', icon: 'aa', color: 'green' },
-    { type: 'titlecase' as CaseType, label: 'Title Case', description: 'First Letter Cap', icon: 'Aa', color: 'purple' },
+    { type: 'titlecase' as CaseType, label: 'Title Case', description: 'First Letter Cap', icon: 'Aa', color: 'rose' },
     { type: 'sentencecase' as CaseType, label: 'Sentence case', description: 'Start of sentences', icon: 'Aa.', color: 'orange' },
     { type: 'capitalizewords' as CaseType, label: 'Capitalize Words', description: 'Every Word', icon: 'Aw', color: 'pink' },
-    { type: 'inverse' as CaseType, label: 'InVeRsE', description: 'Swap cases', icon: 'aA', color: 'indigo' },
+    { type: 'inverse' as CaseType, label: 'InVeRsE', description: 'Swap cases', icon: 'aA', color: 'red' },
   ];
 
   const getColorClasses = (color: string) => {
     const colors: Record<string, string> = {
-      blue: 'bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200',
+      rose: 'bg-rose-50 hover:bg-rose-100 text-rose-700 border-rose-200',
       green: 'bg-green-50 hover:bg-green-100 text-green-700 border-green-200',
-      purple: 'bg-purple-50 hover:bg-purple-100 text-purple-700 border-purple-200',
       orange: 'bg-orange-50 hover:bg-orange-100 text-orange-700 border-orange-200',
-      pink: 'bg-pink-50 hover:bg-pink-100 text-pink-700 border-pink-200',
+      pink: 'bg-pink-50 hover:bg-rose-100 text-rose-700 border-pink-200',
       indigo: 'bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border-indigo-200',
     };
-    return colors[color] || colors.blue;
+    return colors[color] || colors.rose;
   };
 
   return (
@@ -83,13 +82,13 @@ const TextCaseConverterPage = ({ onNavigate, user, onLogout }: TextCaseConverter
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="text-case-converter" />
 
       {/* Hero Section */}
-      <section className="py-16 sm:py-20 bg-gradient-to-b from-pink-50/50 to-white">
+      <section className="py-16 sm:py-20 bg-gradient-to-b from-rose-50/50 to-white">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center max-w-3xl mx-auto">
             <div className="inline-flex items-center justify-center mb-6">
               <ScholarMascot size={80} animated={false} pose="default" />
             </div>
-            <span className="inline-flex items-center px-4 py-1.5 bg-pink-100 text-pink-700 rounded-full text-sm font-semibold mb-5">
+            <span className="inline-flex items-center px-4 py-1.5 bg-rose-100 text-rose-700 rounded-full text-sm font-semibold mb-5">
               Free Tool
             </span>
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-5 leading-tight">
@@ -132,7 +131,7 @@ const TextCaseConverterPage = ({ onNavigate, user, onLogout }: TextCaseConverter
               value={text}
               onChange={(e) => setText(e.target.value)}
               placeholder="Type or paste your text here, then click a conversion button below..."
-              className="w-full h-48 p-4 text-gray-700 bg-gray-50 border-0 rounded-xl outline-none resize-none placeholder-gray-400 focus:ring-2 focus:ring-pink-500 focus:bg-white transition-all text-lg"
+              className="w-full h-48 p-4 text-gray-700 bg-gray-50 border-0 rounded-xl outline-none resize-none placeholder-gray-400 focus:ring-2 focus:ring-rose-500 focus:bg-white transition-all text-lg"
             />
           </div>
 
@@ -159,8 +158,8 @@ const TextCaseConverterPage = ({ onNavigate, user, onLogout }: TextCaseConverter
           <h2 className="text-2xl font-bold text-gray-900 mb-8 text-center">Common Uses</h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             <div className="bg-white border border-gray-200 rounded-2xl p-6">
-              <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center mb-4">
-                <span className="text-blue-600 font-bold text-lg">H1</span>
+              <div className="w-12 h-12 bg-rose-50 rounded-xl flex items-center justify-center mb-4">
+                <span className="text-rose-600 font-bold text-lg">H1</span>
               </div>
               <h3 className="font-semibold text-gray-900 mb-2">Headings & Titles</h3>
               <p className="text-gray-600 text-sm">Convert to Title Case for professional-looking headings and document titles.</p>
@@ -173,8 +172,8 @@ const TextCaseConverterPage = ({ onNavigate, user, onLogout }: TextCaseConverter
               <p className="text-gray-600 text-sm">Quickly convert text for variable names in different coding conventions.</p>
             </div>
             <div className="bg-white border border-gray-200 rounded-2xl p-6">
-              <div className="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center mb-4">
-                <span className="text-purple-600 font-bold text-lg">Aa</span>
+              <div className="w-12 h-12 bg-rose-50 rounded-xl flex items-center justify-center mb-4">
+                <span className="text-rose-600 font-bold text-lg">Aa</span>
               </div>
               <h3 className="font-semibold text-gray-900 mb-2">Fix Caps Lock</h3>
               <p className="text-gray-600 text-sm">Typed with caps lock on? Quickly convert to proper sentence case.</p>

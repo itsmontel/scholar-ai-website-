@@ -404,17 +404,18 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
   };
 
   return (
-    <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%)' }}>
+    <div className="min-h-screen bg-gradient-to-b from-rose-50/60 via-stone-50 to-white dark:from-stone-950 dark:via-stone-900 dark:to-stone-900">
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(251,113,133,0.12),transparent)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(236,72,153,0.08),transparent)] pointer-events-none" aria-hidden />
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="account" />
 
       {/* Main Content */}
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 py-10 sm:py-14 relative z-10">
         {/* Page Header */}
         <div className="text-center mb-10">
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl text-stone-800 mb-4" style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 400 }}>
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl text-stone-800 dark:text-stone-100 mb-4" style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 400 }}>
             Account Settings
           </h1>
-          <p className="text-lg text-stone-600">
+          <p className="text-lg text-stone-600 dark:text-stone-400">
             Manage your profile, subscription, and security settings.
           </p>
         </div>
@@ -422,16 +423,16 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
         {/* Settings List */}
         <div className="space-y-6">
           {/* Profile Information */}
-          <div className="bg-white border border-stone-200 rounded-2xl p-6 sm:p-8">
-            <h2 className="text-xl font-bold text-stone-800 mb-6">Profile Information</h2>
+          <div className="bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-600 rounded-2xl p-6 sm:p-8">
+            <h2 className="text-xl font-bold text-stone-800 dark:text-stone-100 mb-6">Profile Information</h2>
             <div className="space-y-4">
-              <div className="flex items-center justify-between py-3 border-b border-stone-200">
+              <div className="flex items-center justify-between py-3 border-b border-stone-200 dark:border-stone-600">
                 <div>
-                  <div className="font-semibold text-stone-800">Email</div>
-                  <div className="text-stone-600 flex items-center">
+                  <div className="font-semibold text-stone-800 dark:text-stone-100">Email</div>
+                  <div className="text-stone-600 dark:text-stone-400 flex items-center">
                     {displayUser?.email ? displayUser.email : (displayUser ? 'Email not available' : 'Loading...')}
                     {userStats.emailVerified && (
-                      <span className="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-violet-100 text-violet-800">
+                      <span className="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-rose-100 dark:bg-rose-900/50 text-rose-800 dark:text-rose-300">
                         <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                         </svg>
@@ -441,52 +442,52 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
                   </div>
                 </div>
               </div>
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 py-3 border-b border-stone-200">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 py-3 border-b border-stone-200 dark:border-stone-600">
                 <div className="flex-1">
-                  <div className="font-semibold text-stone-800 mb-1">Name</div>
+                  <div className="font-semibold text-stone-800 dark:text-stone-100 mb-1">Name</div>
                   <input
                     type="text"
                     value={displayName}
                     onChange={(e) => setDisplayName(e.target.value)}
                     placeholder="Your display name"
-                    className="w-full sm:max-w-xs px-4 py-2.5 border border-stone-200 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-all text-stone-800"
+                    className="w-full sm:max-w-xs px-4 py-2.5 border border-stone-200 dark:border-stone-600 rounded-xl focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-all text-stone-800 dark:text-stone-100 bg-white dark:bg-stone-700/50"
                   />
                   {nameError && <p className="text-red-600 text-sm mt-1">{nameError}</p>}
-                  {nameSuccess && <p className="text-violet-600 text-sm mt-1">{nameSuccess}</p>}
+                  {nameSuccess && <p className="text-rose-600 dark:text-rose-400 text-sm mt-1">{nameSuccess}</p>}
                 </div>
                 <button
                   onClick={handleSaveName}
                   disabled={nameLoading || !displayName.trim()}
-                  className="bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 disabled:bg-stone-300 text-white px-5 py-2.5 rounded-full font-medium transition-colors shrink-0"
+                  className="bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-400 hover:to-pink-500 disabled:bg-stone-300 dark:disabled:bg-stone-600 text-white px-5 py-2.5 rounded-full font-medium transition-colors shrink-0"
                 >
                   {nameLoading ? 'Saving...' : 'Save'}
                 </button>
               </div>
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 py-3 border-b border-stone-200">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 py-3 border-b border-stone-200 dark:border-stone-600">
                 <div className="flex-1">
-                  <div className="font-semibold text-stone-800 mb-1">Username</div>
+                  <div className="font-semibold text-stone-800 dark:text-stone-100 mb-1">Username</div>
                   <input
                     type="text"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     placeholder="Enter username"
-                    className="w-full sm:max-w-xs px-4 py-2.5 border border-stone-200 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-all text-stone-800"
+                    className="w-full sm:max-w-xs px-4 py-2.5 border border-stone-200 dark:border-stone-600 rounded-xl focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-all text-stone-800 dark:text-stone-100 bg-white dark:bg-stone-700/50"
                   />
                   {usernameError && <p className="text-red-600 text-sm mt-1">{usernameError}</p>}
-                  {usernameSuccess && <p className="text-violet-600 text-sm mt-1">{usernameSuccess}</p>}
+                  {usernameSuccess && <p className="text-rose-600 dark:text-rose-400 text-sm mt-1">{usernameSuccess}</p>}
                 </div>
                 <button
                   onClick={handleSaveUsername}
                   disabled={usernameLoading || !username.trim()}
-                  className="bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 disabled:bg-stone-300 text-white px-5 py-2.5 rounded-full font-medium transition-colors shrink-0"
+                  className="bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-400 hover:to-pink-500 disabled:bg-stone-300 dark:disabled:bg-stone-600 text-white px-5 py-2.5 rounded-full font-medium transition-colors shrink-0"
                 >
                   {usernameLoading ? 'Saving...' : 'Save'}
                 </button>
               </div>
               <div className="flex items-center justify-between py-3">
                 <div>
-                  <div className="font-semibold text-stone-800">Member Since</div>
-                  <div className="text-stone-600">{loading ? 'Loading...' : userStats.memberSince}</div>
+                  <div className="font-semibold text-stone-800 dark:text-stone-100">Member Since</div>
+                  <div className="text-stone-600 dark:text-stone-400">{loading ? 'Loading...' : userStats.memberSince}</div>
                 </div>
               </div>
             </div>
@@ -494,18 +495,18 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
 
 
           {/* Subscription */}
-          <div className="bg-white border border-stone-200 rounded-2xl p-6 sm:p-8">
-            <h2 className="text-xl font-bold text-stone-800 mb-6">Subscription</h2>
+          <div className="bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-600 rounded-2xl p-6 sm:p-8">
+            <h2 className="text-xl font-bold text-stone-800 dark:text-stone-100 mb-6">Subscription</h2>
             <div className="space-y-4">
-              <div className="flex items-center justify-between py-3 border-b border-stone-200">
+              <div className="flex items-center justify-between py-3 border-b border-stone-200 dark:border-stone-600">
                 <div>
-                  <div className="font-semibold text-stone-800">Current Plan</div>
-                  <div className="text-stone-600 flex items-center">
+                  <div className="font-semibold text-stone-800 dark:text-stone-100">Current Plan</div>
+                  <div className="text-stone-600 dark:text-stone-400 flex items-center">
                     <span className="capitalize">{userStats.subscriptionPlan}</span>
                     <span className={`ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
                       userStats.subscriptionStatus === 'active'
-                        ? 'bg-violet-100 text-violet-800'
-                        : 'bg-yellow-100 text-yellow-800'
+                        ? 'bg-rose-100 dark:bg-rose-900/50 text-rose-800 dark:text-rose-300'
+                        : 'bg-yellow-100 dark:bg-yellow-900/50 text-yellow-800 dark:text-yellow-300'
                     }`}>
                       {userStats.subscriptionStatus}
                     </span>
@@ -514,7 +515,7 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
                 {userStats.subscriptionPlan === 'free' && (
                   <button 
                     onClick={() => onNavigate('pricing')}
-                    className="bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white px-5 py-2.5 rounded-full font-medium transition-colors"
+                    className="bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-400 hover:to-pink-500 text-white px-5 py-2.5 rounded-full font-medium transition-colors"
                   >
                     Upgrade
                   </button>
@@ -522,10 +523,10 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
               </div>
               <div className="flex items-center justify-between py-3">
                 <div>
-                  <div className="font-semibold text-stone-800">Plan Features</div>
-                  <div className="text-stone-600">
+                  <div className="font-semibold text-stone-800 dark:text-stone-100">Plan Features</div>
+                  <div className="text-stone-600 dark:text-stone-400">
                     {userStats.subscriptionPlan === 'free'
-                      ? '3 documents, 3 analyses per month, 2 citation searches'
+                      ? '3 documents, 2 analyses per month, 2 citation searches'
                       : userStats.subscriptionPlan === 'pro'
                       ? 'Unlimited documents, 99 combined/mo (analyses, study packs & citations)'
                       : userStats.subscriptionPlan === 'premium'
@@ -537,15 +538,15 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
               </div>
               
               {/* Plan Details */}
-              <div className="mt-4 p-4 bg-stone-50 rounded-xl border border-stone-200">
-                <div className="text-sm font-semibold text-stone-800 mb-3">What's included:</div>
-                <div className="space-y-2 text-sm text-stone-600">
+              <div className="mt-4 p-4 bg-stone-50 dark:bg-stone-700/50 rounded-xl border border-stone-200 dark:border-stone-600">
+                <div className="text-sm font-semibold text-stone-800 dark:text-stone-100 mb-3">What's included:</div>
+                <div className="space-y-2 text-sm text-stone-600 dark:text-stone-400">
                   {userStats.subscriptionPlan === 'free' && (
                     <>
                       <div>• 3 documents per month</div>
-                      <div>• 3 AI essay analyses per month</div>
+                      <div>• 2 AI essay analyses per month</div>
                       <div>• 2 citation searches per month</div>
-                      <div>• 5,000 Humanizer/Summarizer words</div>
+                      <div>• 5,000 Paper Summarizer words</div>
                       <div>• 2 study packs (lesson & flashcards — quiz, crossword & Crater Blast with Pro)</div>
                       <div className="text-stone-400 text-xs">Crossword & Crater Blast unlock with Pro</div>
                     </>
@@ -554,8 +555,8 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
                     <>
                       <div>• Unlimited document uploads</div>
                       <div>• 99 combined (analyses, study packs & citations) per month</div>
-                      <div>• 99,999 Humanizer/Summarizer words</div>
-                      <div>• All Humanizer & Summarizer styles & lengths</div>
+                      <div>• 99,999 Paper Summarizer words</div>
+                      <div>• Long-document summarization</div>
                       <div>• PDF & Word export</div>
                     </>
                   )}
@@ -563,7 +564,7 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
                     <>
                       <div>• Everything in Pro — 10× usage</div>
                       <div>• 999 combined (analyses, study packs & citations) per month</div>
-                      <div>• 999,999 Humanizer/Summarizer words</div>
+                      <div>• 999,999 Paper Summarizer words</div>
                       <div>• Top-tier premium AI model</div>
                       <div>• All quiz types & difficulty levels</div>
                       <div>• Advanced essay analysis</div>
@@ -579,7 +580,7 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
           {/* Focus Mode - Block websites (paid only) */}
           {isPaidUser && (
             <div className="bg-white border border-stone-200 rounded-2xl p-6 sm:p-8">
-              <h2 className="text-xl font-bold text-stone-800 mb-2">Focus Mode</h2>
+              <h2 className="text-xl font-bold text-stone-800 dark:text-stone-100 mb-2">Focus Mode</h2>
               {FOCUS_MODE_COMING_SOON ? (
                 <>
                   <span className="inline-flex items-center px-3 py-1 bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-400 rounded-full text-sm font-semibold mb-4">Coming Soon</span>
@@ -606,8 +607,8 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
                               disabled={focusModeSaving}
                               className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
                                 active
-                                  ? 'bg-violet-600 text-white'
-                                  : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
+                                  ? 'bg-rose-600 text-white'
+                                  : 'bg-stone-100 dark:bg-stone-700 text-stone-700 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-stone-600'
                               }`}
                             >
                               {p.label}
@@ -624,13 +625,13 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
                         href={FOCUS_MODE_CHROME_EXTENSION_URL}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 mt-4 text-violet-600 hover:text-violet-700 font-medium text-sm"
+                        className="inline-flex items-center gap-2 mt-4 text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 font-medium text-sm"
                       >
                         Get Chrome Extension →
                       </a>
                       <button
                         onClick={() => onNavigate('focus-mode')}
-                        className="block mt-2 text-violet-600 hover:text-violet-700 font-medium text-sm"
+                        className="block mt-2 text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 font-medium text-sm"
                       >
                         Configure quiz rules on Dashboard →
                       </button>
@@ -642,16 +643,16 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
           )}
 
           {/* Security */}
-          <div className="bg-white border border-stone-200 rounded-2xl p-6 sm:p-8">
-            <h2 className="text-xl font-bold text-stone-800 mb-6">Security</h2>
+          <div className="bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-600 rounded-2xl p-6 sm:p-8">
+            <h2 className="text-xl font-bold text-stone-800 dark:text-stone-100 mb-6">Security</h2>
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 py-3">
               <div>
-                <div className="font-semibold text-stone-800">Password</div>
-                <div className="text-stone-500 text-sm">Last changed: Recently</div>
+                <div className="font-semibold text-stone-800 dark:text-stone-100">Password</div>
+                <div className="text-stone-500 dark:text-stone-400 text-sm">Last changed: Recently</div>
               </div>
               <button 
                 onClick={() => setShowPasswordModal(true)}
-                className="bg-stone-800 hover:bg-stone-700 text-white px-5 py-2.5 rounded-full font-medium transition-colors"
+                className="bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-400 hover:to-pink-500 text-white px-5 py-2.5 rounded-full font-medium transition-colors"
               >
                 Change Password
               </button>
@@ -659,7 +660,7 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
           </div>
 
           {/* Danger Zone */}
-          <div className="bg-red-50 border border-red-200 rounded-2xl p-6 sm:p-8">
+          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/50 rounded-2xl p-6 sm:p-8">
             <h2 className="text-xl font-bold text-red-900 mb-6">Danger Zone</h2>
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 py-3">
               <div>
@@ -692,7 +693,7 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
                   type="password"
                   value={passwordData.currentPassword}
                   onChange={(e) => setPasswordData(prev => ({ ...prev, currentPassword: e.target.value }))}
-                  className="w-full px-4 py-3 border border-stone-200 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-all"
+                  className="w-full px-4 py-3 border border-stone-200 dark:border-stone-600 rounded-xl focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-all bg-white dark:bg-stone-700/50 text-stone-800 dark:text-stone-100"
                   placeholder="Enter current password"
                 />
               </div>
@@ -705,7 +706,7 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
                   type="password"
                   value={passwordData.newPassword}
                   onChange={(e) => setPasswordData(prev => ({ ...prev, newPassword: e.target.value }))}
-                  className="w-full px-4 py-3 border border-stone-200 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-all"
+                  className="w-full px-4 py-3 border border-stone-200 dark:border-stone-600 rounded-xl focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-all bg-white dark:bg-stone-700/50 text-stone-800 dark:text-stone-100"
                   placeholder="Enter new password"
                 />
               </div>
@@ -718,7 +719,7 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
                   type="password"
                   value={passwordData.confirmPassword}
                   onChange={(e) => setPasswordData(prev => ({ ...prev, confirmPassword: e.target.value }))}
-                  className="w-full px-4 py-3 border border-stone-200 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-all"
+                  className="w-full px-4 py-3 border border-stone-200 dark:border-stone-600 rounded-xl focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-all bg-white dark:bg-stone-700/50 text-stone-800 dark:text-stone-100"
                   placeholder="Confirm new password"
                 />
               </div>
@@ -731,7 +732,7 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
             )}
 
             {passwordSuccess && (
-              <div className="mt-4 p-4 bg-violet-50 border border-violet-200 text-violet-700 rounded-xl text-sm">
+              <div className="mt-4 p-4 bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800/50 text-rose-700 dark:text-rose-300 rounded-xl text-sm">
                 {passwordSuccess}
               </div>
             )}
@@ -751,7 +752,7 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
               <button
                 onClick={handlePasswordChange}
                 disabled={passwordLoading || !passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword}
-                className="bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 disabled:bg-stone-300 text-white px-5 py-2.5 rounded-full font-medium transition-colors"
+                className="bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-400 hover:to-pink-500 disabled:bg-stone-300 dark:disabled:bg-stone-600 text-white px-5 py-2.5 rounded-full font-medium transition-colors"
               >
                 {passwordLoading ? 'Changing...' : 'Change Password'}
               </button>

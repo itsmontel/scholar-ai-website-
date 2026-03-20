@@ -1,7 +1,25 @@
 /**
- * Content script on WriteScholar - syncs auth token, API base URL, and listens for unlock success
+ * Content script on WriteScholar - syncs auth token, API base URL, listens for unlock success,
+ * and checks daily limit for unlock-quiz (redirect if under limit)
  */
 console.log('[WriteScholar Content] Script loaded on:', window.location.href);
+
+function checkDailyLimitAndRedirect() {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const site = params.get('site');
+    const redirect = params.get('redirect');
+    if (!site || !redirect || !window.location.pathname.includes('unlock-quiz')) return;
+    chrome.runtime.sendMessage({ type: 'CHECK_DAILY_LIMIT', site }, (r) => {
+      if (chrome.runtime.lastError) return;
+      if (r?.underLimit) {
+        window.location.replace(redirect);
+      }
+    });
+  } catch (_e) {}
+}
+
+checkDailyLimitAndRedirect();
 
 function syncAuthToken() {
   try {

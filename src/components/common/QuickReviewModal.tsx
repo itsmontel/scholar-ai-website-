@@ -352,7 +352,7 @@ const QuickReviewModal = ({ userName, userId, onComplete, onSkip }: QuickReviewM
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-stone-900/60 backdrop-blur-sm animate-smoothFadeIn">
         <div className="relative w-full max-w-md max-h-[90vh] overflow-y-auto bg-white rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden animate-smoothSlideUp">
-          <div className="h-3 bg-gradient-to-r from-violet-500 via-purple-500 to-fuchsia-500" />
+          <div className="h-3 bg-gradient-to-r from-rose-500 via-pink-500 to-fuchsia-500" />
           <div className="p-4 sm:p-8 text-center">
             <div className="mb-3 sm:mb-4">
               <ScholarMascot size={100} animated={true} />
@@ -380,7 +380,7 @@ const QuickReviewModal = ({ userName, userId, onComplete, onSkip }: QuickReviewM
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-stone-900/60 backdrop-blur-sm animate-smoothFadeIn">
         <div className="relative w-full max-w-md bg-white rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden animate-smoothSlideUp">
-          <div className="h-3 bg-gradient-to-r from-violet-500 via-purple-500 to-fuchsia-500" />
+          <div className="h-3 bg-gradient-to-r from-rose-500 via-pink-500 to-fuchsia-500" />
           <div className="p-6 sm:p-8 text-center">
             <div className="mb-4 sm:mb-6 flex justify-center">
               <ScholarMascot size={120} animated={true} pose="waving" />
@@ -428,7 +428,7 @@ const QuickReviewModal = ({ userName, userId, onComplete, onSkip }: QuickReviewM
       return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-stone-900/60 backdrop-blur-sm animate-smoothFadeIn overflow-y-auto">
           <div className="relative w-full max-w-lg max-h-[min(calc(100vh-1rem),90vh)] sm:max-h-[calc(100vh-2rem)] bg-white rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden overflow-y-auto my-auto animate-smoothSlideUp">
-            <div className="h-3 bg-gradient-to-r from-violet-500 via-purple-500 to-fuchsia-500" />
+            <div className="h-3 bg-gradient-to-r from-rose-500 via-pink-500 to-fuchsia-500" />
             <div className="p-4 sm:p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-bold text-stone-800">Review Questions</h2>
@@ -538,7 +538,7 @@ const QuickReviewModal = ({ userName, userId, onComplete, onSkip }: QuickReviewM
             </>
           )}
           
-          <div className="h-3 bg-gradient-to-r from-violet-500 via-purple-500 to-fuchsia-500" />
+          <div className="h-3 bg-gradient-to-r from-rose-500 via-pink-500 to-fuchsia-500" />
           
           <div className="p-4 sm:p-8 text-center overflow-y-auto">
             <div className="mb-3 sm:mb-6 flex justify-center">

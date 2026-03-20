@@ -217,7 +217,7 @@ const GrammarCheckerPage = ({ onNavigate, user, onLogout }: GrammarCheckerPagePr
     switch (type) {
       case 'error': return 'bg-red-50 border-red-200 text-red-700';
       case 'warning': return 'bg-yellow-50 border-yellow-200 text-yellow-700';
-      case 'suggestion': return 'bg-blue-50 border-blue-200 text-blue-700';
+      case 'suggestion': return 'bg-rose-50 border-rose-200 text-rose-700';
     }
   };
 
@@ -296,7 +296,7 @@ const GrammarCheckerPage = ({ onNavigate, user, onLogout }: GrammarCheckerPagePr
                       <span className="text-gray-600">{warningCount} warnings</span>
                     </span>
                     <span className="flex items-center space-x-1.5">
-                      <span className="w-3 h-3 bg-blue-500 rounded-full"></span>
+                      <span className="w-3 h-3 bg-rose-500 rounded-full"></span>
                       <span className="text-gray-600">{suggestionCount} suggestions</span>
                     </span>
                   </div>
@@ -386,15 +386,15 @@ const GrammarCheckerPage = ({ onNavigate, user, onLogout }: GrammarCheckerPagePr
               <p className="text-gray-600 text-sm">Subject-verb agreement, commonly confused words (your/you're, its/it's, etc.).</p>
             </div>
             <div className="bg-white border border-gray-200 rounded-2xl p-6">
-              <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center mb-4">
-                <span className="text-blue-600 font-bold text-lg">"</span>
+              <div className="w-12 h-12 bg-rose-50 rounded-xl flex items-center justify-center mb-4">
+                <span className="text-rose-600 font-bold text-lg">"</span>
               </div>
               <h3 className="font-semibold text-gray-900 mb-2">Word Choice</h3>
               <p className="text-gray-600 text-sm">Common malapropisms like "for all intensive purposes" or "escape goat".</p>
             </div>
             <div className="bg-white border border-gray-200 rounded-2xl p-6">
-              <div className="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center mb-4">
-                <span className="text-purple-600 font-bold text-lg">✂</span>
+              <div className="w-12 h-12 bg-red-50 rounded-xl flex items-center justify-center mb-4">
+                <span className="text-red-600 font-bold text-lg">✂</span>
               </div>
               <h3 className="font-semibold text-gray-900 mb-2">Style & Conciseness</h3>
               <p className="text-gray-600 text-sm">Wordy phrases, redundancies, and filler words that weaken your writing.</p>

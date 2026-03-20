@@ -19,6 +19,13 @@ router.post('/create-checkout-session', authenticateToken, async (req, res) => {
       });
     }
 
+    if (!['pro', 'premium'].includes(planType)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid plan type. Must be pro or premium.'
+      });
+    }
+
     // Get user details from the authenticated user (already available from auth middleware)
     const user = req.user;
     let customerId = user.stripe_customer_id;
@@ -51,7 +58,7 @@ router.post('/create-checkout-session', authenticateToken, async (req, res) => {
       }
     }
 
-    // Auto-apply OFF10 for first-time purchasers (never had a subscription before)
+    // Auto-apply OFF10 for first-time purchasers (Pro/Premium)
     let effectivePromoCode = promoCode || null;
     if (!effectivePromoCode) {
       const { data: existingSubs } = await getSupabase()

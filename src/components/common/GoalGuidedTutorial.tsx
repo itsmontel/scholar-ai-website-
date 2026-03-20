@@ -1,14 +1,14 @@
 import { useState, useEffect, useCallback } from 'react';
 import ScholarMascot from './ScholarMascot';
 
-export type OnboardingGoal = 'essay' | 'humanizer' | 'citations' | 'study';
+export type OnboardingGoal = 'essay' | 'citations' | 'study';
 
 interface GoalGuidedTutorialProps {
   goal: OnboardingGoal;
   onComplete: () => void;
   /** For essay: word count - auto-advance step 1 when >= 200 */
   essayWordCount?: number;
-  /** For humanizer/citations/study: whether they've entered text */
+  /** For summarizer/citations/study: whether they've entered text */
   hasInput?: boolean;
 }
 
@@ -28,13 +28,6 @@ const GOAL_CONFIG: Record<OnboardingGoal, { title: string; steps: TutorialStep[]
     steps: [
       { instruction: 'Paste your essay here', detail: 'Drop it in the box below — at least 200 words for professor-style feedback', emoji: '📝', targetSelector: '[data-tutorial-target="essay-input-wrapper"]' },
       { instruction: 'Click Analyze', detail: "Hit 'Analyze Text' when you're ready — we'll break down structure, clarity & tone", emoji: '✨', targetSelector: '[data-tutorial-target="essay-analyze-btn"]', requireAction: true },
-    ],
-  },
-  humanizer: {
-    title: "Let's humanize your AI text",
-    steps: [
-      { instruction: 'Paste your text', detail: 'Drop AI-written content in the box — any length works', emoji: '🤖', targetSelector: '[data-tutorial-target="humanizer-input"]' },
-      { instruction: 'Choose mode & humanize', detail: 'Pick Standard, Academic, or Casual — then click Humanize', emoji: '✨', targetSelector: '[data-tutorial-target="humanizer-btn"]', requireAction: true },
     ],
   },
   citations: {
@@ -134,7 +127,7 @@ const GoalGuidedTutorial = ({ goal, onComplete, essayWordCount = 0, hasInput = f
           aria-hidden
         >
           <div
-            className="absolute rounded-2xl border-4 border-indigo-500 shadow-[0_0_0_9999px_rgba(0,0,0,0.55)]"
+            className="absolute rounded-2xl border-4 border-rose-500 shadow-[0_0_0_9999px_rgba(0,0,0,0.55)]"
             style={{
               left: targetRect.left - 12,
               top: targetRect.top - 12,
@@ -154,7 +147,7 @@ const GoalGuidedTutorial = ({ goal, onComplete, essayWordCount = 0, hasInput = f
           {/* Progress bar */}
           <div className="h-1 bg-stone-100 dark:bg-stone-700">
             <div
-              className="h-full bg-gradient-to-r from-indigo-500 to-violet-600 transition-all duration-500"
+              className="h-full bg-gradient-to-r from-rose-500 to-pink-600 transition-all duration-500"
               style={{ width: `${((currentStep + 1) / config.steps.length) * 100}%` }}
             />
           </div>
@@ -177,7 +170,7 @@ const GoalGuidedTutorial = ({ goal, onComplete, essayWordCount = 0, hasInput = f
                     <>
                       <button
                         onClick={handleTryIt}
-                        className="px-5 py-2.5 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-500/90 hover:to-violet-600/90 text-white rounded-xl font-bold text-sm shadow-lg shadow-indigo-500/30 transition-all flex items-center gap-2"
+                        className="px-5 py-2.5 bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-500/90 hover:to-pink-600/90 text-white rounded-xl font-bold text-sm shadow-lg shadow-rose-500/30 transition-all flex items-center gap-2"
                       >
                         <span className="text-lg">{step.emoji}</span>
                         Try it now →
@@ -190,14 +183,14 @@ const GoalGuidedTutorial = ({ goal, onComplete, essayWordCount = 0, hasInput = f
                     <>
                       <button
                         onClick={handleTryIt}
-                        className="px-5 py-2.5 bg-indigo-100 dark:bg-violet-900/50 text-indigo-700 dark:text-violet-300 hover:bg-indigo-200 dark:hover:bg-violet-800/50 rounded-xl font-bold text-sm transition-all flex items-center gap-2"
+                        className="px-5 py-2.5 bg-rose-100 dark:bg-rose-900/50 text-rose-700 dark:text-rose-300 hover:bg-rose-200 dark:hover:bg-rose-800/50 rounded-xl font-bold text-sm transition-all flex items-center gap-2"
                       >
                         <span className="text-lg">{step.emoji}</span>
                         Focus & try
                       </button>
                       <button
                         onClick={handleNext}
-                        className="px-5 py-2.5 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-500/90 hover:to-violet-600/90 text-white rounded-xl font-bold text-sm shadow-lg shadow-indigo-500/30 transition-all"
+                        className="px-5 py-2.5 bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-500/90 hover:to-pink-600/90 text-white rounded-xl font-bold text-sm shadow-lg shadow-rose-500/30 transition-all"
                       >
                         {isLastStep ? "I'm ready!" : 'Next'}
                       </button>
@@ -216,7 +209,7 @@ const GoalGuidedTutorial = ({ goal, onComplete, essayWordCount = 0, hasInput = f
                   <div
                     key={i}
                     className={`h-2 rounded-full transition-all ${
-                      i === currentStep ? 'w-6 bg-indigo-500' : i < currentStep ? 'w-2 bg-indigo-300 dark:bg-indigo-600' : 'w-2 bg-stone-200 dark:bg-stone-600'
+                      i === currentStep ? 'w-6 bg-rose-500' : i < currentStep ? 'w-2 bg-rose-300 dark:bg-rose-600' : 'w-2 bg-stone-200 dark:bg-stone-600'
                     }`}
                   />
                 ))}

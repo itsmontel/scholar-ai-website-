@@ -17,7 +17,7 @@ const SignUpPage = ({ onNavigate, onSignUp }: SignUpPageProps) => {
   const [success, setSuccess] = useState(false);
 
   const animatedTexts = [
-    "Summarise, humanise & analyse",
+    "Summarise, cite & analyse",
     "Powerful study tools for students",
     "Paper analysis & so much more",
     "Your all-in-one academic AI"
@@ -83,7 +83,7 @@ const SignUpPage = ({ onNavigate, onSignUp }: SignUpPageProps) => {
   };
 
   return (
-    <div className="min-h-screen flex bg-gradient-to-b from-blue-50/80 via-stone-50 to-white dark:from-stone-950 dark:via-stone-900 dark:to-stone-900">
+    <div className="min-h-screen flex bg-gradient-to-b from-rose-50/80 via-stone-50 to-white dark:from-stone-950 dark:via-stone-900 dark:to-stone-900">
       {/* Back Button */}
       <button
         onClick={() => onNavigate('landing')}
@@ -101,10 +101,10 @@ const SignUpPage = ({ onNavigate, onSignUp }: SignUpPageProps) => {
         {/* Header */}
         <div className="p-6 pt-20 sm:pt-6">
           <div className="flex items-center space-x-2.5">
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center overflow-hidden shadow-lg shadow-indigo-500/30">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center overflow-hidden shadow-lg shadow-rose-500/30">
               <img src="/mascot.png" alt="WriteScholar" className="w-full h-full object-contain" loading="eager" width="120" height="120" />
             </div>
-            <span className="text-xl font-extrabold tracking-tight text-indigo-600 dark:text-indigo-400">WriteScholar</span>
+            <span className="text-xl font-extrabold tracking-tight text-rose-600 dark:text-rose-400">WriteScholar</span>
           </div>
         </div>
 
@@ -116,15 +116,15 @@ const SignUpPage = ({ onNavigate, onSignUp }: SignUpPageProps) => {
               <p className="text-stone-500 dark:text-stone-400">Unlock your full academic toolkit</p>
             </div>
 
-            <div className="mb-6 p-3 bg-gradient-to-r from-indigo-50 to-violet-50 dark:from-indigo-900/20 dark:to-violet-900/20 border border-indigo-100 dark:border-indigo-800/50 rounded-xl flex items-center gap-3">
-              <div className="w-9 h-9 bg-indigo-100 dark:bg-indigo-900/50 rounded-lg flex items-center justify-center flex-shrink-0">
-                <svg className="w-5 h-5 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="mb-6 p-3 bg-gradient-to-r from-rose-50 to-red-50 dark:from-rose-900/20 dark:to-red-900/20 border border-rose-100 dark:border-rose-800/50 rounded-xl flex items-center gap-3">
+              <div className="w-9 h-9 bg-rose-100 dark:bg-rose-900/50 rounded-lg flex items-center justify-center flex-shrink-0">
+                <svg className="w-5 h-5 text-rose-600 dark:text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                 </svg>
               </div>
               <div>
                 <p className="text-sm font-semibold text-stone-800 dark:text-stone-100">Free study tips guide</p>
-                <p className="text-xs text-indigo-600 dark:text-indigo-400">Get our 10-page PDF guide on signup</p>
+                <p className="text-xs text-rose-600 dark:text-rose-400">Get our 10-page PDF guide on signup</p>
               </div>
             </div>
 
@@ -159,7 +159,7 @@ const SignUpPage = ({ onNavigate, onSignUp }: SignUpPageProps) => {
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   onKeyDown={handleKeyDown}
                   placeholder="you@example.com"
-                  className="w-full px-4 py-3 bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent focus:bg-white dark:focus:bg-stone-800 transition-all text-sm text-stone-800 dark:text-stone-100"
+                  className="w-full px-4 py-3 bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-600 rounded-xl focus:ring-2 focus:ring-rose-500 focus:border-transparent focus:bg-white dark:focus:bg-stone-800 transition-all text-sm text-stone-800 dark:text-stone-100"
                 />
               </div>
               
@@ -171,7 +171,7 @@ const SignUpPage = ({ onNavigate, onSignUp }: SignUpPageProps) => {
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                   onKeyDown={handleKeyDown}
                   placeholder="••••••••"
-                  className="w-full px-4 py-3 bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent focus:bg-white dark:focus:bg-stone-800 transition-all text-sm text-stone-800 dark:text-stone-100"
+                  className="w-full px-4 py-3 bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-600 rounded-xl focus:ring-2 focus:ring-rose-500 focus:border-transparent focus:bg-white dark:focus:bg-stone-800 transition-all text-sm text-stone-800 dark:text-stone-100"
                 />
                 <p className="mt-1.5 text-xs text-stone-400 dark:text-stone-500">
                   At least 8 characters with uppercase, lowercase, number, and special character
@@ -186,14 +186,14 @@ const SignUpPage = ({ onNavigate, onSignUp }: SignUpPageProps) => {
                   onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
                   onKeyDown={handleKeyDown}
                   placeholder="••••••••"
-                  className="w-full px-4 py-3 bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent focus:bg-white dark:focus:bg-stone-800 transition-all text-sm text-stone-800 dark:text-stone-100"
+                  className="w-full px-4 py-3 bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-600 rounded-xl focus:ring-2 focus:ring-rose-500 focus:border-transparent focus:bg-white dark:focus:bg-stone-800 transition-all text-sm text-stone-800 dark:text-stone-100"
                 />
               </div>
 
               <button
                 onClick={handleSubmit}
                 disabled={isLoading || success}
-                className="w-full bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white py-3.5 rounded-2xl font-bold shadow-lg shadow-indigo-500/25 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-gradient-to-r from-rose-500 to-red-600 hover:from-rose-400 hover:to-red-500 text-white py-3.5 rounded-2xl font-bold shadow-lg shadow-rose-500/25 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isLoading ? (
                   <div className="flex items-center justify-center">
@@ -214,7 +214,7 @@ const SignUpPage = ({ onNavigate, onSignUp }: SignUpPageProps) => {
                   <div className="w-full border-t border-stone-200"></div>
                 </div>
                 <div className="relative flex justify-center text-sm">
-                  <span className="px-3 bg-gradient-to-b from-blue-50/80 via-stone-50 to-white dark:from-stone-950 dark:via-stone-900 dark:to-stone-900 text-stone-400">or</span>
+                  <span className="px-3 bg-gradient-to-b from-rose-50/80 via-stone-50 to-white dark:from-stone-950 dark:via-stone-900 dark:to-stone-900 text-stone-400">or</span>
                 </div>
               </div>
             </div>
@@ -239,7 +239,7 @@ const SignUpPage = ({ onNavigate, onSignUp }: SignUpPageProps) => {
               Already have an account?{' '}
               <button
                 onClick={() => onNavigate('login')}
-                className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-semibold"
+                className="text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 font-semibold"
               >
                 Sign in
               </button>
@@ -247,11 +247,11 @@ const SignUpPage = ({ onNavigate, onSignUp }: SignUpPageProps) => {
 
             <p className="text-center text-xs text-stone-400 dark:text-stone-500 mt-4">
               By creating an account, you agree to our{' '}
-              <button onClick={() => onNavigate('terms')} className="text-indigo-600 dark:text-indigo-400 hover:underline">
+              <button onClick={() => onNavigate('terms')} className="text-rose-600 dark:text-rose-400 hover:underline">
                 Terms
               </button>{' '}
               and{' '}
-              <button onClick={() => onNavigate('privacy')} className="text-indigo-600 dark:text-indigo-400 hover:underline">
+              <button onClick={() => onNavigate('privacy')} className="text-rose-600 dark:text-rose-400 hover:underline">
                 Privacy Policy
               </button>
             </p>
@@ -260,13 +260,13 @@ const SignUpPage = ({ onNavigate, onSignUp }: SignUpPageProps) => {
       </div>
 
       {/* Right Side - Animated Design */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-indigo-50/80 via-violet-50/50 to-stone-100 dark:from-stone-900 dark:via-indigo-950/30 dark:to-stone-900 flex-col items-center justify-center p-8 relative overflow-hidden rounded-l-3xl">
+      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-rose-50/80 via-red-50/50 to-stone-100 dark:from-stone-900 dark:via-rose-950/30 dark:to-stone-900 flex-col items-center justify-center p-8 relative overflow-hidden rounded-l-3xl">
         {/* Background blur effect */}
-        <div className="absolute inset-0 bg-gradient-to-br from-indigo-200/20 via-violet-100/20 to-stone-200/30 dark:from-indigo-900/20 dark:via-violet-900/10 dark:to-transparent backdrop-blur-sm rounded-l-3xl"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-rose-200/20 via-red-100/20 to-stone-200/30 dark:from-rose-900/20 dark:via-red-900/10 dark:to-transparent backdrop-blur-sm rounded-l-3xl"></div>
         
         {/* Central input container */}
         <div className="relative z-10 max-w-lg w-full">
-          <div className="bg-gradient-to-r from-white/70 to-white/40 dark:from-stone-800/70 dark:to-stone-800/40 backdrop-blur-xl rounded-3xl p-10 border border-indigo-100/50 dark:border-stone-700 shadow-2xl shadow-indigo-500/10">
+          <div className="bg-gradient-to-r from-white/70 to-white/40 dark:from-stone-800/70 dark:to-stone-800/40 backdrop-blur-xl rounded-3xl p-10 border border-rose-100/50 dark:border-stone-700 shadow-2xl shadow-rose-500/10">
             <div className="flex items-center space-x-5">
               {/* Animated text */}
               <span className="text-2xl font-semibold text-stone-700 dark:text-stone-200 flex-1 transition-all duration-700 ease-in-out">
@@ -274,10 +274,10 @@ const SignUpPage = ({ onNavigate, onSignUp }: SignUpPageProps) => {
               </span>
               
               {/* Cursor pipe */}
-              <div className="w-0.5 h-8 bg-indigo-500 animate-pulse rounded-full"></div>
+              <div className="w-0.5 h-8 bg-rose-500 animate-pulse rounded-full"></div>
               
               {/* Arrow button */}
-              <button className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 rounded-xl flex items-center justify-center transition-all duration-300 hover:scale-110 shadow-xl shadow-indigo-500/30">
+              <button className="w-10 h-10 bg-gradient-to-br from-rose-500 to-red-600 hover:from-rose-400 hover:to-red-500 rounded-xl flex items-center justify-center transition-all duration-300 hover:scale-110 shadow-xl shadow-rose-500/30">
                 <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M7 17L17 7M17 7H7M17 7V17" />
                 </svg>
@@ -360,13 +360,13 @@ const SignUpPage = ({ onNavigate, onSignUp }: SignUpPageProps) => {
         </div>
         
         {/* Enhanced floating elements */}
-        <div className="absolute top-16 left-16 w-32 h-32 bg-gradient-to-br from-indigo-300/25 to-violet-300/20 rounded-full animate-bounce" style={{animationDuration: '6s'}}></div>
-        <div className="absolute bottom-20 right-20 w-24 h-24 bg-gradient-to-br from-violet-300/25 to-indigo-300/20 rounded-full animate-bounce" style={{animationDuration: '8s', animationDelay: '2s'}}></div>
-        <div className="absolute top-1/3 right-12 w-20 h-20 bg-gradient-to-br from-indigo-200/20 to-violet-200/15 rounded-full animate-bounce" style={{animationDuration: '7s', animationDelay: '1s'}}></div>
+        <div className="absolute top-16 left-16 w-32 h-32 bg-gradient-to-br from-rose-300/25 to-red-300/20 rounded-full animate-bounce" style={{animationDuration: '6s'}}></div>
+        <div className="absolute bottom-20 right-20 w-24 h-24 bg-gradient-to-br from-red-300/25 to-rose-300/20 rounded-full animate-bounce" style={{animationDuration: '8s', animationDelay: '2s'}}></div>
+        <div className="absolute top-1/3 right-12 w-20 h-20 bg-gradient-to-br from-rose-200/20 to-red-200/15 rounded-full animate-bounce" style={{animationDuration: '7s', animationDelay: '1s'}}></div>
         
         {/* Additional subtle elements */}
-        <div className="absolute top-1/4 left-1/4 w-16 h-16 bg-gradient-to-br from-indigo-200/15 to-violet-200/10 rounded-full animate-bounce" style={{animationDuration: '5s', animationDelay: '0.5s'}}></div>
-        <div className="absolute bottom-1/3 left-1/3 w-12 h-12 bg-gradient-to-br from-violet-200/15 to-indigo-200/10 rounded-full animate-bounce" style={{animationDuration: '4s', animationDelay: '1.5s'}}></div>
+        <div className="absolute top-1/4 left-1/4 w-16 h-16 bg-gradient-to-br from-rose-200/15 to-red-200/10 rounded-full animate-bounce" style={{animationDuration: '5s', animationDelay: '0.5s'}}></div>
+        <div className="absolute bottom-1/3 left-1/3 w-12 h-12 bg-gradient-to-br from-red-200/15 to-rose-200/10 rounded-full animate-bounce" style={{animationDuration: '4s', animationDelay: '1.5s'}}></div>
       </div>
     </div>
   );

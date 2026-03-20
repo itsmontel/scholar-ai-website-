@@ -4,6 +4,7 @@ import { FOCUS_MODE_COMING_SOON, FOCUS_MODE_CHROME_EXTENSION_URL } from '../../c
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
 const UNLOCK_DURATION_OPTIONS = [
+  { value: 5 * 60 * 1000, label: '5 minutes' },
   { value: 15 * 60 * 1000, label: '15 minutes' },
   { value: 30 * 60 * 1000, label: '30 minutes' },
   { value: 60 * 60 * 1000, label: '1 hour' },
@@ -48,7 +49,7 @@ export default function FocusModeSettingsSection({ onBack, embedded = false, isP
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
-  const [maxSites, setMaxSites] = useState(isPaidUser ? 20 : 3);
+  const [maxSites, setMaxSites] = useState(isPaidUser ? 99999 : 3);
 
   useEffect(() => {
     const token = localStorage.getItem('authToken');
@@ -61,7 +62,7 @@ export default function FocusModeSettingsSection({ onBack, embedded = false, isP
       .then(([r1, r2]) => Promise.all([r1.json(), r2.json()]))
       .then(([d1, d2]) => {
         if (d1.success) {
-          setMaxSites(d1.data.maxSites ?? (isPaidUser ? 20 : 1));
+          setMaxSites(d1.data.maxSites ?? (isPaidUser ? 99999 : 3));
           setBlockedDomains(d1.data.blockedDomains || []);
           setQuestionCount(d1.data.question_count ?? 5);
           setPassThreshold(d1.data.pass_threshold ?? 4);
@@ -136,12 +137,12 @@ export default function FocusModeSettingsSection({ onBack, embedded = false, isP
       return;
     }
     if (maxSites < 99999 && blockedDomains.length >= maxSites && toAdd.length > 0) {
-      setAddError(maxSites <= 3 ? `Free plan: block up to ${maxSites} sites. Upgrade for more.` : `Maximum ${maxSites} sites. Remove one to add another. Upgrade to Premium for unlimited.`);
+      setAddError(`Free plan: block up to ${maxSites} sites. Upgrade for unlimited.`);
       return;
     }
     const unlimited = maxSites >= 99999;
     if (!unlimited && blockedDomains.length + toAdd.length > maxSites) {
-      setAddError(maxSites <= 3 ? `Free plan: block up to ${maxSites} sites. Upgrade for more.` : `Maximum ${maxSites} sites allowed. Upgrade to Premium for unlimited.`);
+      setAddError(`Free plan: block up to ${maxSites} sites. Upgrade for unlimited.`);
       return;
     }
     const next = [...blockedDomains, ...toAdd].slice(0, maxSites);
@@ -271,7 +272,7 @@ export default function FocusModeSettingsSection({ onBack, embedded = false, isP
                     <h2 className="text-xl sm:text-2xl font-extrabold text-stone-800 dark:text-stone-100 mb-1">Focus Mode</h2>
                     <p className="text-stone-600 dark:text-stone-400 text-sm leading-relaxed mb-3">
                       {isPaidUser
-                        ? 'Block distracting sites until you solve a puzzle (Sudoku, Memory, Pattern) or answer study questions. Pro: 20 sites. Premium: unlimited.'
+                        ? 'Block distracting sites until you solve a puzzle (Sudoku, Memory, Pattern) or answer study questions. Paid: unlimited sites.'
                         : `Block up to ${maxSites} sites until you solve a puzzle or answer study questions. Upgrade for more.`}
                     </p>
                     <a
@@ -339,7 +340,7 @@ export default function FocusModeSettingsSection({ onBack, embedded = false, isP
                 onChange={(e) => { setCustomDomainInput(e.target.value); setAddError(''); }}
                 onKeyDown={(e) => e.key === 'Enter' && handleAddCustomDomain()}
                 placeholder="youtube.com, reddit.com..."
-                className="flex-1 px-4 py-2.5 rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 text-stone-800 dark:text-stone-200 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-violet-400 transition-all"
+                className="flex-1 px-4 py-2.5 rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 text-stone-800 dark:text-stone-200 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-rose-500/40 focus:border-rose-500 transition-all"
               />
               <button
                 type="button"
@@ -358,7 +359,7 @@ export default function FocusModeSettingsSection({ onBack, embedded = false, isP
                 Blocked: {blockedDomains.join(', ')}
                 {!isPaidUser && (
                   <span>
-                    {' '}(Free: 3 sites. Pro: 20. Premium: unlimited —{' '}
+                    {' '}(Free: 3 sites. Paid: unlimited —{' '}
                     {onNavigate ? (
                       <button
                         type="button"
@@ -389,7 +390,7 @@ export default function FocusModeSettingsSection({ onBack, embedded = false, isP
               value={unlockDurationMs}
               onChange={(e) => handleUnlockDurationChange(Number(e.target.value))}
               disabled={saving}
-              className="px-4 py-2.5 rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 text-stone-800 dark:text-stone-200 font-semibold focus:ring-2 focus:ring-violet-400 focus:border-violet-400 transition-all"
+              className="px-4 py-2.5 rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 text-stone-800 dark:text-stone-200 font-semibold focus:ring-2 focus:ring-rose-500/40 focus:border-rose-500 focus:outline-none transition-all"
             >
               {UNLOCK_DURATION_OPTIONS.map((o) => (
                 <option key={o.value} value={o.value}>
@@ -430,7 +431,7 @@ export default function FocusModeSettingsSection({ onBack, embedded = false, isP
                   value={passThreshold}
                   onChange={(e) => handlePassThresholdChange(Number(e.target.value))}
                   disabled={saving}
-                  className="px-4 py-2.5 rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 text-stone-800 dark:text-stone-200 font-semibold focus:ring-2 focus:ring-violet-400 focus:border-violet-400 transition-all"
+                  className="px-4 py-2.5 rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 text-stone-800 dark:text-stone-200 font-semibold focus:ring-2 focus:ring-rose-500/40 focus:border-rose-500 focus:outline-none transition-all"
                 >
                   {passThresholdOptions.map((n) => (
                     <option key={n} value={n}>

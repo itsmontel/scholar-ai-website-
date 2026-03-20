@@ -1,7 +1,6 @@
 export interface AchievementStats {
   uploads_count: number;
   analyses_count: number;
-  humanize_count: number;
   summaries_count: number;
   quizzes_count: number;
   flashcards_count: number;
@@ -99,7 +98,6 @@ export const BADGES: Badge[] = [
   { id: 'first_login', name: 'Welcome!', creatureName: 'Greenie', description: 'Log in for the first time', xp: 5, category: 'getting-started', rarity: 'common', condition: (s) => s.first_login, conditionText: 'Log in to WriteScholar' },
   { id: 'first_steps', name: 'First Steps', creatureName: 'Blobby', description: 'Upload your first document', xp: 10, category: 'getting-started', rarity: 'common', condition: (s) => s.uploads_count >= 1, conditionText: 'Upload 1 document' },
   { id: 'brain_spark', name: 'Brain Spark', creatureName: 'Sparky', description: 'Analyze your first paper', xp: 15, category: 'getting-started', rarity: 'common', condition: (s) => s.analyses_count >= 1, conditionText: 'Analyze 1 paper' },
-  { id: 'word_wizard', name: 'Word Wizard', creatureName: 'Mystiq', description: 'Humanize your first text', xp: 15, category: 'getting-started', rarity: 'common', condition: (s) => s.humanize_count >= 1, conditionText: 'Humanize 1 text' },
   { id: 'citation_hunter', name: 'Citation Hunter', creatureName: 'Snoop', description: 'Find your first citation', xp: 10, category: 'getting-started', rarity: 'common', condition: (s) => s.citations_count >= 1, conditionText: 'Find 1 citation' },
   { id: 'summary_sage', name: 'Summary Sage', creatureName: 'Scrollie', description: 'Summarize your first paper', xp: 10, category: 'getting-started', rarity: 'common', condition: (s) => s.summaries_count >= 1, conditionText: 'Summarize 1 paper' },
   { id: 'explorer', name: 'Badge Explorer', creatureName: 'Peeker', description: 'Visit the badges page', xp: 5, category: 'getting-started', rarity: 'common', condition: (s) => s.visited_badges, conditionText: 'Visit the Badges page' },
@@ -122,8 +120,6 @@ export const BADGES: Badge[] = [
   { id: 'paper_shredder', name: 'Paper Shredder', creatureName: 'Shredz', description: 'Analyze 5 papers', xp: 25, category: 'mastery', rarity: 'rare', condition: (s) => s.analyses_count >= 5, conditionText: 'Analyze 5 papers' },
   { id: 'analysis_master', name: 'Analysis Master', creatureName: 'Analytix', description: 'Analyze 10 papers', xp: 40, category: 'mastery', rarity: 'epic', condition: (s) => s.analyses_count >= 10, conditionText: 'Analyze 10 papers' },
   { id: 'analysis_legend', name: 'Analysis Legend', creatureName: 'Analytor', description: 'Analyze 25 papers', xp: 75, category: 'mastery', rarity: 'legendary', condition: (s) => s.analyses_count >= 25, conditionText: 'Analyze 25 papers' },
-  { id: 'humanize_hero', name: 'Humanize Hero', creatureName: 'Morpher', description: 'Humanize 5 texts', xp: 25, category: 'mastery', rarity: 'rare', condition: (s) => s.humanize_count >= 5, conditionText: 'Humanize 5 texts' },
-  { id: 'humanize_legend', name: 'Humanize Legend', creatureName: 'Metamorph', description: 'Humanize 15 texts', xp: 50, category: 'mastery', rarity: 'epic', condition: (s) => s.humanize_count >= 15, conditionText: 'Humanize 15 texts' },
   { id: 'citation_master', name: 'Citation Master', creatureName: 'Bookwyrm', description: 'Find 10 citations', xp: 30, category: 'mastery', rarity: 'epic', condition: (s) => s.citations_count >= 10, conditionText: 'Find 10 citations' },
   { id: 'citation_legend', name: 'Citation Legend', creatureName: 'Librax', description: 'Find 25 citations', xp: 50, category: 'mastery', rarity: 'legendary', condition: (s) => s.citations_count >= 25, conditionText: 'Find 25 citations' },
   { id: 'summary_scholar', name: 'Summary Scholar', creatureName: 'Sage', description: 'Summarize 5 papers', xp: 25, category: 'mastery', rarity: 'rare', condition: (s) => s.summaries_count >= 5, conditionText: 'Summarize 5 papers' },
@@ -158,24 +154,20 @@ export const BADGES: Badge[] = [
   { id: 'social_scholar', name: 'Social Scholar', creatureName: 'Sharky', description: 'Copy a result to clipboard', xp: 10, category: 'special', rarity: 'common', condition: (s) => s.copies_count >= 1, conditionText: 'Copy a result' },
 
   // ═══════════════════════════════════════════════
-  // CALENDAR & PLANNING (5 badges)
+  // TOOLS & LIBRARY (replaces calendar & friends)
   // ═══════════════════════════════════════════════
-  { id: 'planner', name: 'Planner', creatureName: 'Calendex', description: 'Schedule your first study event', xp: 10, category: 'special', rarity: 'common', condition: (s) => s.calendar_events_count >= 1, conditionText: 'Schedule 1 calendar event' },
-  { id: 'organized_scholar', name: 'Organized Scholar', creatureName: 'Plannerina', description: 'Schedule 5 study events', xp: 25, category: 'special', rarity: 'uncommon', condition: (s) => s.calendar_events_count >= 5, conditionText: 'Schedule 5 calendar events' },
-  { id: 'time_master', name: 'Time Master', creatureName: 'Chronos', description: 'Schedule 15 study events', xp: 40, category: 'special', rarity: 'rare', condition: (s) => s.calendar_events_count >= 15, conditionText: 'Schedule 15 calendar events' },
-  { id: 'schedule_sensei', name: 'Schedule Sensei', creatureName: 'Tempus', description: 'Schedule 30 study events', xp: 60, category: 'special', rarity: 'epic', condition: (s) => s.calendar_events_count >= 30, conditionText: 'Schedule 30 calendar events' },
-  { id: 'calendar_king', name: 'Calendar King', creatureName: 'Agendor', description: 'Schedule 50 study events', xp: 100, category: 'special', rarity: 'legendary', condition: (s) => s.calendar_events_count >= 50, conditionText: 'Schedule 50 calendar events' },
-
-  // ═══════════════════════════════════════════════
-  // FRIENDS & SOCIAL (7 badges)
-  // ═══════════════════════════════════════════════
-  { id: 'friendly_scholar', name: 'Friendly Scholar', creatureName: 'Buddy', description: 'Send your first friend request', xp: 10, category: 'special', rarity: 'common', condition: (s) => s.friend_requests_sent >= 1, conditionText: 'Send 1 friend request' },
-  { id: 'social_butterfly', name: 'Social Butterfly', creatureName: 'Flutter', description: 'Add 5 friends', xp: 30, category: 'special', rarity: 'uncommon', condition: (s) => s.friends_count >= 5, conditionText: 'Have 5 friends' },
-  { id: 'popular_kid', name: 'Popular Kid', creatureName: 'Celeb', description: 'Add 10 friends', xp: 50, category: 'special', rarity: 'rare', condition: (s) => s.friends_count >= 10, conditionText: 'Have 10 friends' },
-  { id: 'generous_genius', name: 'Generous Genius', creatureName: 'Giver', description: 'Share a study tool with a friend', xp: 15, category: 'special', rarity: 'common', condition: (s) => s.shares_count >= 1, conditionText: 'Share 1 study tool' },
-  { id: 'sharing_star', name: 'Sharing Star', creatureName: 'Starshare', description: 'Share with 5 different friends', xp: 40, category: 'special', rarity: 'rare', condition: (s) => (s.unique_friends_shared_with || []).length >= 5, conditionText: 'Share with 5 different friends' },
-  { id: 'knowledge_spreader', name: 'Knowledge Spreader', creatureName: 'Broadcaster', description: 'Share 10 study tools total', xp: 50, category: 'special', rarity: 'epic', condition: (s) => s.shares_count >= 10, conditionText: 'Share 10 study tools' },
-  { id: 'study_influencer', name: 'Study Influencer', creatureName: 'Influex', description: 'Share 25 study tools total', xp: 100, category: 'special', rarity: 'legendary', condition: (s) => s.shares_count >= 25, conditionText: 'Share 25 study tools' },
+  { id: 'tool_tryer', name: 'Tool Tryer', creatureName: 'Calendex', description: 'Use 2 different tool types', xp: 10, category: 'special', rarity: 'common', condition: (s) => (s.tools_used_ever || []).length >= 2, conditionText: 'Use 2 tool types' },
+  { id: 'tool_explorer', name: 'Tool Explorer', creatureName: 'Plannerina', description: 'Use 4 different tool types', xp: 25, category: 'special', rarity: 'uncommon', condition: (s) => (s.tools_used_ever || []).length >= 4, conditionText: 'Use 4 tool types' },
+  { id: 'tool_adventurer', name: 'Tool Adventurer', creatureName: 'Chronos', description: 'Use 6 different tool types', xp: 40, category: 'special', rarity: 'rare', condition: (s) => (s.tools_used_ever || []).length >= 6, conditionText: 'Use 6 tool types' },
+  { id: 'library_keeper', name: 'Library Keeper', creatureName: 'Tempus', description: 'Have 5 documents in your library', xp: 15, category: 'special', rarity: 'common', condition: (s) => s.uploads_count >= 5, conditionText: '5 documents in library' },
+  { id: 'library_builder', name: 'Library Builder', creatureName: 'Agendor', description: 'Have 20 documents in your library', xp: 40, category: 'special', rarity: 'rare', condition: (s) => s.uploads_count >= 20, conditionText: '20 documents in library' },
+  { id: 'library_hoarder', name: 'Library Hoarder', creatureName: 'Buddy', description: 'Have 50 documents in your library', xp: 75, category: 'special', rarity: 'epic', condition: (s) => s.uploads_count >= 50, conditionText: '50 documents in library' },
+  { id: 'citation_collector', name: 'Citation Collector', creatureName: 'Flutter', description: 'Find 50 citations', xp: 60, category: 'mastery', rarity: 'epic', condition: (s) => s.citations_count >= 50, conditionText: 'Find 50 citations' },
+  { id: 'citation_archivist', name: 'Citation Archivist', creatureName: 'Celeb', description: 'Find 100 citations', xp: 100, category: 'mastery', rarity: 'legendary', condition: (s) => s.citations_count >= 100, conditionText: 'Find 100 citations' },
+  { id: 'analysis_ace', name: 'Analysis Ace', creatureName: 'Giver', description: 'Analyze 50 papers', xp: 60, category: 'mastery', rarity: 'epic', condition: (s) => s.analyses_count >= 50, conditionText: 'Analyze 50 papers' },
+  { id: 'analysis_titan', name: 'Analysis Titan', creatureName: 'Starshare', description: 'Analyze 100 papers', xp: 125, category: 'mastery', rarity: 'legendary', condition: (s) => s.analyses_count >= 100, conditionText: 'Analyze 100 papers' },
+  { id: 'streak_champion', name: 'Streak Champion', creatureName: 'Broadcaster', description: 'Achieve a 21-day streak', xp: 75, category: 'streak', rarity: 'epic', condition: (s) => s.longest_streak >= 21, conditionText: '21-day streak' },
+  { id: 'streak_titan', name: 'Streak Titan', creatureName: 'Influex', description: 'Achieve a 45-day streak', xp: 125, category: 'streak', rarity: 'legendary', condition: (s) => s.longest_streak >= 45, conditionText: '45-day streak' },
 
   // ═══════════════════════════════════════════════
   // QUICK REVIEW (8 badges)
@@ -241,7 +233,6 @@ function defaultStats(): AchievementStats {
   return {
     uploads_count: 0,
     analyses_count: 0,
-    humanize_count: 0,
     summaries_count: 0,
     quizzes_count: 0,
     flashcards_count: 0,
@@ -337,7 +328,7 @@ export function mergeFromServer(serverStats: Record<string, unknown>, serverBadg
   const localBadges = getUnlockedBadges();
 
   const numericKeys = [
-    'uploads_count', 'analyses_count', 'humanize_count', 'summaries_count',
+    'uploads_count', 'analyses_count', 'summaries_count',
     'quizzes_count', 'flashcards_count', 'crosswords_count', 'citations_count',
     'lessons_count',
     'longest_streak', 'current_streak', 'tools_used_session', 'study_tools_session',
@@ -421,7 +412,6 @@ function checkAndUnlockBadges(stats: AchievementStats): string[] {
 
 const TOOL_TYPE_MAP: Record<string, string> = {
   analyses_count: 'analyze',
-  humanize_count: 'humanize',
   summaries_count: 'summarize',
   quizzes_count: 'quiz',
   flashcards_count: 'flashcard',

@@ -160,8 +160,8 @@ const validationSchemas = {
     documentId: Joi.string().uuid({ version: 'uuidv4' }).optional().allow(null, ''),
     analysisType: commonSchemas.analysisType,
     citationStyle: commonSchemas.citationStyle,
+    gradingStyle: Joi.string().valid('us', 'uk').optional().default('us'),
     content: commonSchemas.content,
-    educationLevel: Joi.string().valid('college', 'sixth_form', 'middle_school').optional().default('college'),
     rubricContent: Joi.string().max(100000).optional().allow('').messages({
       'string.max': 'Rubric content is too long (max 100,000 characters)'
     })

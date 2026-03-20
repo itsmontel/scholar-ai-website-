@@ -197,7 +197,6 @@ const BadgesPage = ({ onNavigate, user, onLogout }: BadgesPageProps) => {
               { label: 'Documents', value: stats.uploads_count, icon: '📄' },
               { label: 'Analyses', value: stats.analyses_count, icon: '🔍' },
               { label: 'Study Packs', value: (stats as any).study_packs_count || 0, icon: '📚' },
-              { label: 'Humanized', value: stats.humanize_count, icon: '✨' },
               { label: 'Summaries', value: stats.summaries_count, icon: '📋' },
               { label: 'Citations', value: stats.citations_count, icon: '🔗' },
             ].map(stat => (

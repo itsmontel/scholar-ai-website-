@@ -16,7 +16,6 @@ const TOOL_ITEMS: SearchItem[] = [
   { page: 'quiz-generator', label: 'Quiz Generator', keywords: ['quiz', 'quizzes', 'practice', 'test', 'questions'] },
   { page: 'create-flashcards', label: 'Flashcards', keywords: ['flashcard', 'flashcards', 'cards', 'study cards'] },
   { page: 'dashboard', label: 'Study Pack (Quiz, Crossword)', keywords: ['crossword', 'crosswords', 'puzzle', 'study pack'] },
-  { page: 'humanizer', label: 'AI Humanizer', keywords: ['humanizer', 'humanize', 'ai detection', 'bypass'] },
   { page: 'summarizer', label: 'Summarizer', keywords: ['summarize', 'summarizer', 'summary', 'tldr'] },
   { page: 'analyze', label: 'Essay Analyzer', keywords: ['analyze', 'analysis', 'essay', 'feedback'] },
   { page: 'citations', label: 'Citation Finder', keywords: ['citation', 'citations', 'sources', 'apa', 'mla', 'references'] },

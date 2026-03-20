@@ -13,7 +13,7 @@
 
 | Feature | Free | Pro | Premium |
 |---------|------|-----|---------|
-| Document analyses | 3 | 99 | 199 |
+| Document analyses | 2 | 99 | 199 |
 | Citation searches | 2 | 99 | 199 |
 | Humanize words | 5,000 | 99,999 | 999,999 |
 | Summarize words | 5,000 | 99,999 | 999,999 |
