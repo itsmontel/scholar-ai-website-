@@ -439,18 +439,18 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
       <main className="min-h-screen relative transition-colors font-sans overflow-x-hidden" role="main">
       {/* HERO SECTION - Fun, Gen Z, full of energy */}
       <section className="relative min-h-[70vh] sm:min-h-[85vh] flex flex-col overflow-hidden">
-        {/* Background - refined gradient: soft lavender to cream with depth */}
-        <div className="absolute inset-0 bg-gradient-to-br from-rose-100/80 via-rose-50/40 to-rose-50/30 dark:from-stone-950 dark:via-stone-900/98 dark:to-stone-900" />
-        <div className="absolute inset-0 bg-gradient-to-t from-white/60 via-transparent to-rose-100/30 dark:from-stone-900/80 dark:via-transparent dark:to-rose-950/20" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_120%_80%_at_50%_0%,rgba(167,139,250,0.12),transparent_50%)] dark:bg-[radial-gradient(ellipse_120%_80%_at_50%_0%,rgba(139,92,246,0.06),transparent_50%)]" />
+        {/* Background: soft cream with a bit more rose + lavender presence */}
+        <div className="absolute inset-0 bg-gradient-to-br from-rose-50/90 via-rose-50/55 to-amber-50/40 dark:from-stone-950 dark:via-stone-900/95 dark:to-stone-950" />
+        <div className="absolute inset-0 bg-gradient-to-t from-white/65 via-rose-50/35 to-rose-100/28 dark:from-stone-900/78 dark:via-stone-900/35 dark:to-violet-950/25" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_125%_85%_at_50%_-5%,rgba(196,181,253,0.09),transparent_56%)] dark:bg-[radial-gradient(ellipse_125%_85%_at_50%_-5%,rgba(139,92,246,0.055),transparent_56%)]" />
         
-        {/* Floating shapes for mobile - adds depth like dashboard */}
-        <div className="absolute top-[12%] left-[8%] w-12 h-12 rounded-2xl bg-gradient-to-br from-rose-400/20 to-pink-500/20 rotate-12 lg:hidden animate-float pointer-events-none" />
-        <div className="absolute top-[22%] right-[10%] w-10 h-10 rounded-full bg-gradient-to-br from-rose-400/20 to-pink-500/20 lg:hidden animate-float-delayed pointer-events-none" />
-        <div className="absolute top-[45%] left-[6%] w-8 h-8 rounded-lg bg-gradient-to-br from-sky-400/20 to-blue-500/20 -rotate-12 lg:hidden animate-float pointer-events-none" style={{ animationDelay: '1s' }} />
-        <div className="absolute top-[55%] right-[8%] w-11 h-11 rounded-2xl bg-gradient-to-br from-emerald-400/20 to-teal-500/20 rotate-6 lg:hidden animate-float-delayed pointer-events-none" />
-        <div className="absolute bottom-[35%] left-[10%] w-9 h-9 rounded-full bg-gradient-to-br from-amber-400/20 to-orange-500/20 lg:hidden animate-float pointer-events-none" style={{ animationDelay: '0.5s' }} />
-        <div className="absolute bottom-[25%] right-[12%] w-10 h-10 rounded-lg bg-gradient-to-br from-rose-400/20 to-rose-500/20 -rotate-6 lg:hidden animate-float-delayed pointer-events-none" style={{ animationDelay: '0.8s' }} />
+        {/* Floating shapes for mobile */}
+        <div className="absolute top-[12%] left-[8%] w-12 h-12 rounded-2xl bg-gradient-to-br from-rose-300/16 to-pink-400/16 rotate-12 lg:hidden animate-float pointer-events-none" />
+        <div className="absolute top-[22%] right-[10%] w-10 h-10 rounded-full bg-gradient-to-br from-rose-300/16 to-pink-400/16 lg:hidden animate-float-delayed pointer-events-none" />
+        <div className="absolute top-[45%] left-[6%] w-8 h-8 rounded-lg bg-gradient-to-br from-sky-300/16 to-blue-400/16 -rotate-12 lg:hidden animate-float pointer-events-none" style={{ animationDelay: '1s' }} />
+        <div className="absolute top-[55%] right-[8%] w-11 h-11 rounded-2xl bg-gradient-to-br from-emerald-300/16 to-teal-400/16 rotate-6 lg:hidden animate-float-delayed pointer-events-none" />
+        <div className="absolute bottom-[35%] left-[10%] w-9 h-9 rounded-full bg-gradient-to-br from-amber-300/16 to-orange-400/16 lg:hidden animate-float pointer-events-none" style={{ animationDelay: '0.5s' }} />
+        <div className="absolute bottom-[25%] right-[12%] w-10 h-10 rounded-lg bg-gradient-to-br from-rose-300/16 to-rose-400/16 -rotate-6 lg:hidden animate-float-delayed pointer-events-none" style={{ animationDelay: '0.8s' }} />
         
         {/* Floating tool mockups - scattered around hero */}
         <div className="absolute top-[18%] left-[10%] xl:left-[12%] hidden lg:block animate-float">
@@ -483,10 +483,10 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
             <div className="mt-1.5 flex gap-1"><div className="w-2 h-2 rounded-full bg-emerald-400"/><div className="w-3 h-2 rounded-full bg-emerald-300/60"/></div>
           </div>
         </div>
-        <div className="absolute top-[35%] left-[5%] hidden xl:block text-4xl opacity-60 animate-float">🔥</div>
-        <div className="absolute top-[40%] right-[6%] hidden xl:block text-3xl opacity-50 animate-float-delayed">⚡</div>
-        <div className="absolute bottom-[35%] left-[6%] hidden xl:block text-3xl opacity-50 animate-float">💡</div>
-        <div className="absolute bottom-[30%] right-[5%] hidden xl:block text-4xl opacity-60 animate-float-delayed">🎯</div>
+        <div className="absolute top-[35%] left-[5%] hidden xl:block text-4xl opacity-45 animate-float">🔥</div>
+        <div className="absolute top-[40%] right-[6%] hidden xl:block text-3xl opacity-40 animate-float-delayed">⚡</div>
+        <div className="absolute bottom-[35%] left-[6%] hidden xl:block text-3xl opacity-40 animate-float">💡</div>
+        <div className="absolute bottom-[30%] right-[5%] hidden xl:block text-4xl opacity-45 animate-float-delayed">🎯</div>
 
         {/* Hero Content - Centered, flows into page */}
         <div className="relative flex-1 flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8 pt-12 sm:pt-14 lg:pt-12 pb-10 sm:pb-16 lg:pb-24">
