@@ -586,7 +586,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                     onClick={() => onNavigate('signup')}
                     className="btn-glisten relative z-10 px-10 py-4 bg-rose-500 text-white font-bold rounded-full hover:bg-rose-600 hover:scale-105 active:scale-95 transition-all duration-300 ease-out shadow-xl shadow-rose-500/25 hover:shadow-2xl hover:shadow-rose-500/40 text-lg"
                   >
-                    Check my essay — it&apos;s free
+                    Let&apos;s get started
                   </button>
                 </div>
                 <p className="sm:hidden mt-3 w-full text-center text-sm text-stone-500 dark:text-stone-400">
