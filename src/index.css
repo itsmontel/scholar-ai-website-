@@ -14,7 +14,7 @@
   }
 }
 
-/* University Carousel Animation - 3 sets; w-max makes track width = content so -33.33% = one set; 8s = fast scroll */
+/* University Carousel Animation - 3 sets; w-max makes track width = content so -33.33% = one set */
 @keyframes scroll-slow {
   0% {
     transform: translateX(0);
@@ -25,12 +25,19 @@
 }
 
 .animate-scroll-slow {
-  animation: scroll-slow 14s linear infinite;
+  animation: scroll-slow 22s linear infinite;
 }
 
 /* Pause animation on hover */
 .animate-scroll-slow:hover {
   animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-scroll-slow {
+    animation: none;
+    transform: none;
+  }
 }
 
 /* University-specific font styles */
@@ -83,10 +90,42 @@
   text-transform: uppercase;
 }
 
+.university-berkeley {
+  font-family: 'Source Sans Pro', 'Helvetica Neue', sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #6b7280;
+  text-transform: uppercase;
+}
+
+.university-ucla {
+  font-family: 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: #6b7280;
+  text-transform: uppercase;
+}
+
 .university-princeton {
   font-family: 'EB Garamond', 'Garamond', 'Times New Roman', serif;
   font-weight: 600;
   letter-spacing: 0.08em;
+  color: #6b7280;
+  text-transform: uppercase;
+}
+
+.university-florida-state {
+  font-family: 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #6b7280;
+  text-transform: uppercase;
+}
+
+.university-columbia {
+  font-family: 'Crimson Text', 'Times New Roman', serif;
+  font-weight: 700;
+  letter-spacing: 0.06em;
   color: #6b7280;
   text-transform: uppercase;
 }

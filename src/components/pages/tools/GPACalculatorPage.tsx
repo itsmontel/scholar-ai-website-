@@ -37,7 +37,7 @@ const GPACalculatorPage = ({ onNavigate, user, onLogout }: GPACalculatorPageProp
   const [totalPoints, setTotalPoints] = useState<number>(0);
 
   useEffect(() => {
-    document.title = 'Free GPA Calculator - Calculate Your Grade Point Average | WriteScholar';
+    document.title = 'Free GPA Calculator — College & University Grades | WriteScholar';
     const metaDescription = document.querySelector('meta[name="description"]');
     if (metaDescription) {
       metaDescription.setAttribute('content', 'Free GPA calculator for college and high school students. Calculate your semester or cumulative GPA instantly. Add courses, credits, and grades. No signup required.');

@@ -10,7 +10,7 @@ const PromoBanner: React.FC<PromoBannerProps> = ({ embedded = false }) => {
   if (isDismissed) return null;
 
   return (
-    <div className={`sticky top-0 left-0 right-0 text-white py-2 sm:py-2.5 px-2 sm:px-4 z-30 bg-violet-600 hover:bg-violet-500`}>
+    <div className="relative left-0 right-0 w-full text-white py-2 sm:py-2.5 px-2 sm:px-4 bg-violet-700 shadow-sm shadow-violet-900/20 hover:bg-violet-600 transition-colors border-b border-violet-800/30">
       <div className="max-w-7xl mx-auto flex items-center justify-center gap-2 sm:gap-4">
         <div className="flex items-center justify-center gap-2 sm:gap-3 text-center flex-wrap">
           <span className="text-xs sm:text-sm font-medium sm:hidden">

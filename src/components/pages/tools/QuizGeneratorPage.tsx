@@ -174,7 +174,7 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
   }, [quiz, retakeKey]);
 
   useEffect(() => {
-    document.title = 'Quiz Generator from Text – Free AI Quiz Maker | WriteScholar';
+    document.title = 'AI Quiz Generator from Notes — College Exam Prep | WriteScholar';
     const metaDescription = document.querySelector('meta[name="description"]');
     if (metaDescription) {
       metaDescription.setAttribute('content', 'Free quiz generator from text: paste notes or articles and get multiple-choice, true/false, fill-in-the-blank quizzes in seconds. Best free Quizlet alternative. No signup to start.');

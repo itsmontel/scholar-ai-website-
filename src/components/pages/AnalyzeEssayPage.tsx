@@ -35,7 +35,7 @@ const AnalyzeEssayPage = ({ onNavigate, user, onLogout }: AnalyzeEssayPageProps)
   const [analyzeUploadError, setAnalyzeUploadError] = useState('');
 
   useEffect(() => {
-    document.title = 'Analyze Essay – Get Professor-Style Feedback | WriteScholar';
+    document.title = 'College Essay Checker — Professor-Style Feedback | WriteScholar';
   }, []);
 
   useEffect(() => {

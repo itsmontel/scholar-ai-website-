@@ -129,7 +129,7 @@ const WelcomeTutorial = ({ userName, userId, onComplete }: WelcomeTutorialProps)
             {/* Slim violet header */}
             <div 
               className="relative h-12"
-              style={{ background: 'linear-gradient(135deg, #f43f5e 0%, #ec4899 50%, #db2777 100%)' }}
+              style={{ background: 'linear-gradient(135deg, #7c3aed 0%, #a855f7 50%, #6d28d9 100%)' }}
             />
 
             {/* Content - mascot + welcome */}
@@ -172,7 +172,7 @@ const WelcomeTutorial = ({ userName, userId, onComplete }: WelcomeTutorialProps)
             {/* Header gradient with mascot */}
             <div 
               className="relative h-40 flex items-center justify-center"
-              style={{ background: 'linear-gradient(135deg, #f43f5e 0%, #ec4899 50%, #db2777 100%)' }}
+              style={{ background: 'linear-gradient(135deg, #7c3aed 0%, #a855f7 50%, #6d28d9 100%)' }}
             >
               {/* Decorative circles */}
               <div className="absolute top-4 left-4 w-20 h-20 rounded-full bg-white/10 blur-xl" />

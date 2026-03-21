@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useTheme } from '../../contexts/ThemeContext';
 import { HIDE_FRIENDS } from '../../config/featureFlags';
+import PromoBanner from './PromoBanner';
 import { getResetsInText } from '../../utils/usageReset';
 import { searchSiteMultiple, SearchItem } from '../../data/searchIndex';
 
@@ -92,7 +93,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Update search results when query changes
+  // Update search results when query changes (debounced to avoid work every keystroke)
   useEffect(() => {
     const q = headerSearchQuery.trim();
     if (!q) {
@@ -101,8 +102,11 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
       setSearchDropdownRect(null);
       return;
     }
-    setHeaderSearchResults(searchSiteMultiple(headerSearchQuery));
-    setHeaderSearchOpen(true);
+    const t = window.setTimeout(() => {
+      setHeaderSearchResults(searchSiteMultiple(headerSearchQuery));
+      setHeaderSearchOpen(true);
+    }, 120);
+    return () => window.clearTimeout(t);
   }, [headerSearchQuery]);
 
   // Position dropdown via portal - update rect when open
@@ -221,8 +225,11 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
     };
     const publicNavActiveCls = 'bg-white dark:bg-stone-700 text-violet-600 dark:text-violet-400 shadow-sm shadow-violet-500/10';
     const publicNavInactiveCls = 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-200/50 dark:hover:bg-stone-700/50';
+    const promoBannerHiddenPages = new Set(['login', 'signup']);
+    const showPromoBanner = !promoBannerHiddenPages.has(currentPage || '');
 
     return (
+      <>
       <header className={`${sticky ? 'sticky top-0' : ''} left-0 right-0 z-[100] transition-all duration-300 border-b ${
         isScrolled 
           ? 'bg-white/95 dark:bg-stone-900/95 backdrop-blur-xl shadow-sm border-stone-200/50 dark:border-stone-700/50' 
@@ -391,6 +398,8 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
         {/* Soft pink accent line under header */}
         <div className="h-0.5 bg-gradient-to-r from-violet-400/35 via-violet-500/45 to-fuchsia-400/35" />
       </header>
+      {showPromoBanner && <PromoBanner />}
+      </>
     );
   }
 

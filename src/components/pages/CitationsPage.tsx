@@ -40,7 +40,7 @@ const CitationsPage = ({ onNavigate, user, onLogout }: CitationsPageProps) => {
   const [citationCheckLoaded, setCitationCheckLoaded] = useState(false);
 
   useEffect(() => {
-    document.title = 'Find Citations – Academic Sources | WriteScholar';
+    document.title = 'Citation Finder for College Papers — APA, MLA, Chicago | WriteScholar';
   }, []);
 
   useEffect(() => {

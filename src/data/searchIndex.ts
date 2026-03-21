@@ -13,12 +13,12 @@ export interface SearchItem {
 }
 
 const TOOL_ITEMS: SearchItem[] = [
-  { page: 'quiz-generator', label: 'Quiz Generator', keywords: ['quiz', 'quizzes', 'practice', 'test', 'questions'] },
-  { page: 'create-flashcards', label: 'Flashcards', keywords: ['flashcard', 'flashcards', 'cards', 'study cards'] },
-  { page: 'dashboard', label: 'Study Pack (Quiz, Crossword)', keywords: ['crossword', 'crosswords', 'puzzle', 'study pack'] },
-  { page: 'summarizer', label: 'Summarizer', keywords: ['summarize', 'summarizer', 'summary', 'tldr'] },
-  { page: 'analyze', label: 'Essay Analyzer', keywords: ['analyze', 'analysis', 'essay', 'feedback'] },
-  { page: 'citations', label: 'Citation Finder', keywords: ['citation', 'citations', 'sources', 'apa', 'mla', 'references'] },
+  { page: 'quiz-generator', label: 'Quiz Generator', keywords: ['quiz', 'quizzes', 'practice', 'test', 'questions', 'college', 'exam', 'midterm'] },
+  { page: 'create-flashcards', label: 'Flashcards', keywords: ['flashcard', 'flashcards', 'cards', 'study cards', 'college', 'undergrad'] },
+  { page: 'dashboard', label: 'Study Pack (Quiz, Crossword)', keywords: ['crossword', 'crosswords', 'puzzle', 'study pack', 'university'] },
+  { page: 'summarizer', label: 'Summarizer', keywords: ['summarize', 'summarizer', 'summary', 'tldr', 'college reading'] },
+  { page: 'analyze', label: 'Essay Analyzer', keywords: ['analyze', 'analysis', 'essay', 'feedback', 'college essay', 'undergraduate', 'us college'] },
+  { page: 'citations', label: 'Citation Finder', keywords: ['citation', 'citations', 'sources', 'apa', 'mla', 'references', 'research paper', 'bibliography'] },
   { page: 'word-counter', label: 'Word Counter', keywords: ['word count', 'word counter', 'characters'] },
   { page: 'citation-generator-tool', label: 'Citation Generator', keywords: ['citation generator', 'citation', 'apa', 'mla', 'chicago', 'harvard', 'ieee', 'vancouver', 'format', 'bibliography', 'references', 'cite'] },
   { page: 'grammar-checker', label: 'Grammar Checker', keywords: ['grammar', 'spell', 'spelling'] },
@@ -32,15 +32,15 @@ const TOOL_ITEMS: SearchItem[] = [
 ];
 
 const PAGE_ITEMS: SearchItem[] = [
-  { page: 'features', label: 'Features', keywords: ['features', 'what we offer'] },
-  { page: 'focus-mode', label: 'Focus Mode', keywords: ['focus mode', 'block websites', 'earn screen time', 'block distracting sites', 'study before social media', 'block youtube', 'block tiktok'] },
-  { page: 'pricing', label: 'Pricing', keywords: ['pricing', 'price', 'plans', 'subscription'] },
-  { page: 'about', label: 'About', keywords: ['about', 'who we are'] },
-  { page: 'blog', label: 'Blog', keywords: ['blog', 'articles'] },
+  { page: 'features', label: 'Features', keywords: ['features', 'what we offer', 'college students', 'study app'] },
+  { page: 'focus-mode', label: 'Focus Mode', keywords: ['focus mode', 'block websites', 'earn screen time', 'block distracting sites', 'study before social media', 'block youtube', 'block tiktok', 'college'] },
+  { page: 'pricing', label: 'Pricing', keywords: ['pricing', 'price', 'plans', 'subscription', 'student discount'] },
+  { page: 'about', label: 'About', keywords: ['about', 'who we are', 'us students'] },
+  { page: 'blog', label: 'Blog', keywords: ['blog', 'articles', 'college tips', 'writing'] },
   { page: 'help', label: 'Help Center', keywords: ['help', 'faq', 'support'] },
   { page: 'contact', label: 'Contact', keywords: ['contact', 'support'] },
-  { page: 'why-students-choose', label: 'Why Students Choose', keywords: ['why', 'students', 'choose'] },
-  { page: 'study-tools-comparison', label: 'vs Quizlet & Knowt', keywords: ['quizlet', 'knowt', 'comparison'] },
+  { page: 'why-students-choose', label: 'Why Students Choose', keywords: ['why', 'students', 'choose', 'grammarly', 'college'] },
+  { page: 'study-tools-comparison', label: 'vs Quizlet & Knowt', keywords: ['quizlet', 'knowt', 'comparison', 'us college'] },
 ];
 
 function getBlogSearchItems(): SearchItem[] {

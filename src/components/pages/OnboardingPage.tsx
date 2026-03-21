@@ -183,7 +183,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate }: OnboardingPageProps)
   /* ──────────── PROFILE FORM ──────────── */
   return (
     <div className="min-h-screen flex flex-col relative font-sans bg-gradient-to-b from-violet-50/60 via-stone-50 to-white dark:from-stone-950 dark:via-stone-900 dark:to-stone-900">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(251,113,133,0.12),transparent)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(236,72,153,0.08),transparent)] pointer-events-none" aria-hidden />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(139,92,246,0.14),transparent)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(124,58,237,0.1),transparent)] pointer-events-none" aria-hidden />
 
       {/* Floating shapes */}
       <div className="absolute top-24 left-8 w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-400/20 to-fuchsia-500/20 rotate-12 hidden lg:block animate-float pointer-events-none" />
@@ -236,12 +236,12 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate }: OnboardingPageProps)
                   placeholder="e.g. alex_student"
                   className={`w-full px-5 py-4 rounded-2xl border-2 bg-stone-50 dark:bg-stone-700/50 focus:ring-2 transition-all text-base text-stone-800 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500 ${
                     usernameError
-                      ? 'border-red-400 dark:border-red-500 focus:border-red-500 focus:ring-red-500/40 focus:outline-none'
+                      ? 'border-violet-500 dark:border-violet-400 focus:border-violet-600 focus:ring-violet-500/40 focus:outline-none'
                       : 'border-stone-200 dark:border-stone-600 focus:border-violet-500 dark:focus:border-violet-500 focus:ring-violet-500/40 focus:outline-none'
                   }`}
                   onKeyDown={(e) => { if (e.key === 'Enter' && displayName.trim() && username.trim() && !usernameError) handleContinue(); }}
                 />
-                {usernameError && <p className="mt-1.5 text-sm text-red-600 dark:text-red-400">{usernameError}</p>}
+                {usernameError && <p className="mt-1.5 text-sm text-violet-700 dark:text-violet-300">{usernameError}</p>}
                 <p className="mt-1 text-xs text-stone-400 dark:text-stone-500">You can change this later in settings</p>
               </div>
             </div>

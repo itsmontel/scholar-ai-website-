@@ -102,7 +102,7 @@ function useConfetti(trigger: number) {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
-    const colors = ['#818cf8', '#a78bfa', '#f472b6', '#fb923c', '#34d399', '#38bdf8', '#facc15', '#c084fc', '#fb7185'];
+    const colors = ['#818cf8', '#a78bfa', '#8b5cf6', '#fb923c', '#34d399', '#38bdf8', '#facc15', '#c084fc', '#9333ea'];
 
     type P = {
       x: number; y: number; vx: number; vy: number;
@@ -446,9 +446,9 @@ const InteractiveTutorial = ({ userName, onComplete }: InteractiveTutorialProps)
             <rect x={sl} y={st} width={sw} height={sh} rx={r} ry={r} fill="black" />
           </mask>
           <linearGradient id="tut-ring-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#f43f5e" />
-            <stop offset="50%" stopColor="#ec4899" />
-            <stop offset="100%" stopColor="#f43f5e" />
+            <stop offset="0%" stopColor="#7c3aed" />
+            <stop offset="50%" stopColor="#a855f7" />
+            <stop offset="100%" stopColor="#8b5cf6" />
           </linearGradient>
         </defs>
         <rect width={vw} height={vh} fill="rgba(0,0,0,0.58)" mask="url(#tut-mask)" />
@@ -461,7 +461,7 @@ const InteractiveTutorial = ({ userName, onComplete }: InteractiveTutorialProps)
         <rect
           x={sl - 5} y={st - 5} width={sw + 10} height={sh + 10}
           rx={r + 4} ry={r + 4}
-          fill="none" stroke="rgba(244,63,94,0.15)" strokeWidth="6"
+          fill="none" stroke="rgba(139,92,246,0.22)" strokeWidth="6"
           className="animate-ringGlow"
         />
       </svg>
@@ -552,7 +552,7 @@ const InteractiveTutorial = ({ userName, onComplete }: InteractiveTutorialProps)
                     style={{
                       width: i === step ? 18 : 5,
                       height: 5,
-                      background: i === step ? '#f43f5e' : i < step ? '#fb7185' : 'rgba(120,113,108,0.18)',
+                      background: i === step ? '#7c3aed' : i < step ? '#a78bfa' : 'rgba(120,113,108,0.18)',
                       transition: 'all 0.55s cubic-bezier(0.22,1,0.36,1)',
                     }}
                   />
