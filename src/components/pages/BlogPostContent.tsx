@@ -1,5 +1,21 @@
 import React from 'react';
 import NewsletterSubscription from '../common/NewsletterSubscription';
+import {
+  ExpandedAiStudyTools,
+  ExpandedAiWritingAssistant,
+  ExpandedApaResearchPaper,
+  ExpandedBestAcademicTools,
+  ExpandedCheckEssayAI,
+  ExpandedCitationChecker,
+  ExpandedFocusBlocker,
+  ExpandedFreeWritingTools,
+  ExpandedGrammarAcademic,
+  ExpandedMlaApaChicago,
+  ExpandedPlagiarism,
+  ExpandedStraightAs,
+  ExpandedStudyEffectively,
+  ExpandedThesisStatement
+} from './blogPostExpandedSections';
 
 interface BlogPostContentProps {
   slug: string;
@@ -405,7 +421,7 @@ const PlagiarismIllustration = () => (
 
 /**
  * Renders full article body per slug for SEO and readability.
- * Content is 1,500+ words with internal links and CTAs.
+ * Core content plus expanded sections target roughly 2,500–3,000 words with internal links and CTAs.
  */
 const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) => {
   const handleNavigate = (page: string) => (e: React.MouseEvent) => {
@@ -478,6 +494,8 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
           <p className={p}>
             Some essay analyzers let you paste your assignment rubric or requirements. The AI compares your draft to those criteria and reports back. It flags missing elements. It prioritizes improvements that will matter most for your grade. That level of alignment is rare in generic writing tools. It is what makes rubric-based analysis genuinely useful for students who want to improve their scores.
           </p>
+
+          <ExpandedCheckEssayAI handleNavigate={handleNavigate} />
 
           <h2 className={h2}>Frequently asked questions</h2>
           <p className={faqQuestion}>How accurate is AI essay feedback?</p>
@@ -562,6 +580,8 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
           <p className={p}>
             WriteScholar&apos;s <a href="/focus-mode" onClick={handleNavigate('focus-mode')} className={internalLink}>Focus Mode</a> does exactly this. You pick the sites to block. You connect your study material. When you try to visit a blocked site, you get a quiz from your own notes. Pass it and the site unlocks for your chosen duration. The <a href="/tools/quiz-generator" onClick={handleNavigate('quiz-generator')} className={internalLink}>quiz generator</a> and <a href="/tools/flashcard-generator" onClick={handleNavigate('flashcard-generator')} className={internalLink}>flashcards</a> feed into it, so your study tools and your screen time gate work together.
           </p>
+
+          <ExpandedFocusBlocker handleNavigate={handleNavigate} />
 
           <h2 className={h2}>Frequently asked questions</h2>
           <p className={faqQuestion}>Does this work on mobile?</p>
@@ -660,6 +680,8 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
             If you are running behind, talk to your professor. Many will grant extensions if you ask in advance. Failing an assignment is better than facing an integrity violation. Do not copy, do not buy a paper, and do not submit AI-generated text as your own. The consequences are not worth it.
           </p>
 
+          <ExpandedPlagiarism handleNavigate={handleNavigate} />
+
           <h2 className={h2}>Frequently asked questions</h2>
           <p className={faqQuestion}>Is it plagiarism if I use a citation but copy the words exactly?</p>
           <p className={p}>
@@ -711,7 +733,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
             Cognitive scientists have a name for the illusion that rereading creates: fluency. When you read something multiple times, it becomes easier to process. Your brain mistakes that ease for mastery. You think you know the material because it feels familiar. But familiarity is not the same as understanding, and it is certainly not the same as being able to recall the information when you need it.
           </p>
           <p className={p}>
-            A classic study by Roediger and Karpicke showed that students who took a practice test after reading retained significantly more information a week later than students who simply reread the material. The act of trying to retrieve information from memory strengthens the memory itself. Reading does not do that. It just makes the text easier to read the next time.
+            In controlled experiments, Roediger and Karpicke (2006) found that students who took a short recall test after reading a passage did better on later retention tests than students who reread the passage multiple times. Retrieval practice (forcing yourself to recall) improved retention more than extra study time alone. Rereading mainly increases fluency; it does not guarantee you can recall the material when it counts.
           </p>
           <p className={p}>
             Highlighting falls into the same trap. It feels active. You are making decisions about what matters. But highlighting does not require you to generate anything or test yourself. It is still passive consumption. The only way to know if you actually know something is to try to recall it without looking.
@@ -767,7 +789,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
             Consistency helps. Try to study at roughly the same time each day. Your brain gets into a rhythm. You spend less energy deciding when to start and more energy actually learning. It does not have to be the same exact time, but a general window (e.g., mornings before class or evenings after dinner) creates a habit.
           </p>
           <p className={p}>
-            Put your phone away. Not face down. Not on silent. In another room or in a drawer. Every notification is a decision point. Every time you check, you break your focus and have to rebuild it. The cost adds up. One study found that even having a phone visible (face down) reduced cognitive capacity. Out of sight is better.
+            Put your phone away. Not face down. Not on silent. In another room or in a drawer. Every notification is a decision point. Every time you check, you break your focus and have to rebuild it. The cost adds up. Ward et al. (2017) reported that even having a smartphone nearby (face down and silent) was linked to lower available cognitive capacity on attention tasks in their experiments. If you need focus, another room beats the desk edge.
           </p>
 
           <QuizIllustration />
@@ -787,6 +809,8 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
           <p className={p}>
             WriteScholar is built for this workflow. You can generate a <a href="/tools/quiz-generator" onClick={handleNavigate('quiz-generator')} className={internalLink}>quiz</a> from your notes, create <a href="/tools/flashcard-generator" onClick={handleNavigate('flashcard-generator')} className={internalLink}>flashcards</a> from a textbook chapter, and even build <a href="/tools/crossword-generator" onClick={handleNavigate('crossword-generator')} className={internalLink}>crossword puzzles</a> to reinforce vocabulary. All of it is saved to your account. You can return to any of it for spaced review. And the <a href="/tools/pomodoro-timer" onClick={handleNavigate('pomodoro-timer')} className={internalLink}>Pomodoro timer</a> keeps your sessions focused.
           </p>
+
+          <ExpandedStudyEffectively handleNavigate={handleNavigate} />
 
           <h2 className={h2}>Frequently asked questions</h2>
           <p className={faqQuestion}>How many hours per day should I study?</p>
@@ -836,7 +860,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
             Decades of cognitive science research have established a clear finding: actively retrieving information from memory strengthens that memory far more than passively reviewing it. This phenomenon, known as the &quot;testing effect&quot; or &quot;retrieval practice,&quot; is one of the most robust findings in learning science. When you force your brain to recall information, whether through a quiz question, a flashcard prompt, or filling in a crossword clue, you&apos;re strengthening the neural pathways that store that knowledge.
           </p>
           <p className={p}>
-            A landmark study by Roediger and Karpicke (2006) demonstrated that students who took practice tests retained 50% more information after one week compared to students who simply re-read the material. The act of retrieval itself, even when you get the answer wrong initially, creates stronger and more durable memories than passive study methods. This is why flashcards, quizzes, and crosswords are so effective: they force active engagement with the material.
+            Roediger and Karpicke&apos;s (2006) results helped popularize retrieval practice: students who practiced recall after reading tended to outperform peers who only reread, especially on delayed tests. Getting an item wrong once and then correcting it can still strengthen memory, which is why low-stakes quizzes and flashcards help more than passive review. Flashcards, quizzes, and puzzles all force you to retrieve, not just recognize.
           </p>
           <p className={p}>
             The challenge has always been creating these study materials. Manually writing flashcards takes hours. Designing quizzes requires careful thought about question types and difficulty levels. Building crossword puzzles from scratch is tedious and time-consuming. This is exactly where AI changes the game: it can generate high-quality study materials from your own notes, textbooks, or lecture content in seconds rather than hours.
@@ -867,13 +891,13 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
           <QuizIllustration />
 
           <p className={p}>
-            Research shows that the format of practice testing matters. Multiple-choice questions that include plausible distractors (wrong answers that seem reasonable) are particularly effective because they force you to think carefully about why the correct answer is right and why the alternatives are wrong. True/false questions test your ability to evaluate statements critically. Short-answer questions require you to generate responses from memory without any cues.
+            The format of practice matters. Multiple-choice items with plausible distractors push you to discriminate between similar ideas, not just pick the only option you recognize. True/false items can train quick evaluation of claims. Short-answer and free-recall items demand generation from memory, which tends to be harder and more diagnostic than recognition alone.
           </p>
           <p className={p}>
             WriteScholar&apos;s <a href="/tools/quiz-generator" onClick={handleNavigate('quiz-generator')} className={internalLink}>AI quiz generator</a> creates all these question types automatically from your source material. You can choose the difficulty level: easy questions for initial learning, medium for consolidation, hard for exam preparation. You can specify how many questions you want and what mix of question types works best for your learning style. The AI generates questions that test comprehension, not just memorization.
           </p>
           <p className={p}>
-            One of the most valuable features is immediate feedback. When you take a WriteScholar quiz, you see not just whether you got each question right or wrong, but explanations for the correct answers. This feedback loop is crucial for learning: it helps you identify gaps in your understanding and correct misconceptions before they become ingrained. Studies show that delayed feedback is less effective than immediate feedback, which is why real-time quiz results are so powerful for learning.
+            One of the most valuable features is immediate feedback. When you take a WriteScholar quiz, you see not just whether you got each question right or wrong, but explanations for the correct answers. This feedback loop is crucial for learning: it helps you identify gaps in your understanding and correct misconceptions before they become ingrained. Timely, specific feedback generally supports learning better than vague comments long after the attempt, which is why on-quiz explanations matter when they are accurate and clear.
           </p>
 
           <h2 className={h2}>The surprising power of crossword puzzles for learning</h2>
@@ -895,13 +919,13 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
 
           <h2 className={h2}>Combining study tools for maximum retention</h2>
           <p className={p}>
-            The most effective study strategies don&apos;t rely on a single tool. They combine multiple approaches to attack learning from different angles. Research on &quot;interleaving&quot; shows that mixing different types of practice leads to better long-term retention than focusing on one approach. This is why WriteScholar offers flashcards, quizzes, and crosswords as complementary tools rather than alternatives.
+            The most effective study strategies don&apos;t rely on a single tool. They combine multiple approaches to attack learning from different angles. Interleaved practice (mixing problem types or topics rather than blocking one kind at a time) often helps on later tests in many domains, though the benefit depends on the subject and schedule. WriteScholar offers flashcards, quizzes, and crosswords as complementary tools rather than mutually exclusive alternatives.
           </p>
           <p className={p}>
             A powerful study workflow might look like this: First, use flashcards for initial exposure to new material. The simple question-answer format helps you identify what you know and what you don&apos;t. Next, take a quiz to test deeper understanding and identify misconceptions. The multiple-choice format forces you to think critically about why answers are right or wrong. Finally, solve a crossword to reinforce vocabulary and make connections between concepts. Each tool strengthens different aspects of your knowledge.
           </p>
           <p className={p}>
-            Spacing is another crucial factor. The &quot;spacing effect&quot; demonstrates that distributed practice over time leads to better retention than massed practice (cramming). Instead of studying everything the night before an exam, use WriteScholar&apos;s tools throughout the semester. Generate a quiz after each lecture. Create flashcards for each chapter. Build crosswords for each unit. This distributed approach builds stronger, more durable memories.
+            Spacing is another crucial factor. The spacing effect (distributing study over time instead of massing it) is one of the most replicated results in learning research: spaced practice usually beats cramming for long-term retention. Instead of studying everything the night before an exam, use WriteScholar&apos;s tools throughout the semester. Generate a quiz after each lecture, flashcards for each chapter, and crosswords for units where they fit your goals. Distributed practice typically builds more durable memories than one marathon block.
           </p>
 
           <AIAssistantIllustration />
@@ -947,6 +971,8 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
           <p className={p}>
             The best part? You can try all of these tools for free. WriteScholar offers a generous free tier that lets you experience the power of AI-generated study materials before committing to a subscription. See our <a href="/pricing" onClick={handleNavigate('pricing')} className={internalLink}>pricing page</a> for details on what&apos;s included at each level.
           </p>
+
+          <ExpandedAiStudyTools handleNavigate={handleNavigate} />
 
           <h2 className={h2}>Frequently asked questions</h2>
           <p className={faqQuestion}>How accurate are AI-generated study materials?</p>
@@ -1204,6 +1230,8 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
             Then watch what happens to your results.
           </p>
 
+          <ExpandedStraightAs handleNavigate={handleNavigate} />
+
           <h2 className={h2}>Frequently asked questions</h2>
           <p className={faqQuestion}>What is the testing effect?</p>
           <p className={p}>
@@ -1425,6 +1453,8 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
             Use these tools as supplements to your own skills, not replacements. The goal is to become a better writer over time, not to rely on tools forever.
           </p>
 
+          <ExpandedFreeWritingTools handleNavigate={handleNavigate} />
+
           <h2 className={h2}>Frequently asked questions</h2>
           <p className={faqQuestion}>Are these tools really free?</p>
           <p className={p}>
@@ -1607,6 +1637,8 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
             Tools like WriteScholar analyze your thesis statement in context, checking whether your body paragraphs actually support the claim you&apos;ve made. This kind of structural feedback helps you catch misalignment between your thesis and your argument before you submit. You can learn more about how AI-powered feedback works on our <a href="/features" onClick={handleNavigate('features')} className={internalLink}>features page</a>.
           </p>
 
+          <ExpandedThesisStatement handleNavigate={handleNavigate} />
+
           <h2 className={h2}>Frequently asked questions</h2>
           <p className={faqQuestion}>How long should a thesis statement be?</p>
           <p className={p}>
@@ -1786,6 +1818,8 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
           <p className={p}>
             <strong>Block quotes without page numbers:</strong> For quotes of 40+ words, use block format (indented, no quotation marks) and include the page number.
           </p>
+
+          <ExpandedApaResearchPaper handleNavigate={handleNavigate} />
 
           <h2 className={h2}>Frequently asked questions</h2>
           <p className={faqQuestion}>What font should I use for APA format?</p>
@@ -1967,6 +2001,8 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
           <p className={p}>
             <strong>Clear explanations:</strong> Good tools explain why something is flagged, not just that it&apos;s wrong. This helps you learn the rules.
           </p>
+
+          <ExpandedCitationChecker handleNavigate={handleNavigate} />
 
           <h2 className={h2}>Frequently asked questions</h2>
           <p className={faqQuestion}>Can I trust citation checkers completely?</p>
@@ -2156,6 +2192,8 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
             <strong>Price:</strong> Is it affordable for a student budget? Is there a free tier to start?
           </p>
 
+          <ExpandedBestAcademicTools handleNavigate={handleNavigate} />
+
           <h2 className={h2}>Frequently asked questions</h2>
           <p className={faqQuestion}>Is using a grammar checker cheating?</p>
           <p className={p}>
@@ -2331,6 +2369,8 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
           <p className={p}>
             <strong>Word choice:</strong> Suggestions for more natural phrasing when your sentence is grammatically correct but sounds awkward to native speakers.
           </p>
+
+          <ExpandedGrammarAcademic handleNavigate={handleNavigate} />
 
           <h2 className={h2}>Frequently asked questions</h2>
           <p className={faqQuestion}>Is using a grammar checker cheating?</p>
@@ -2547,6 +2587,8 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
             <strong>Use a citation checker.</strong> Tools like WriteScholar can verify your formatting against style rules and catch inconsistencies. Check our <a href="/features" onClick={handleNavigate('features')} className={internalLink}>features page</a> to see which citation styles we support.
           </p>
 
+          <ExpandedMlaApaChicago handleNavigate={handleNavigate} />
+
           <h2 className={h2}>Frequently asked questions</h2>
           <p className={faqQuestion}>What if I&apos;m taking classes in different departments?</p>
           <p className={p}>
@@ -2726,6 +2768,8 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
           <p className={p}>
             <strong>Apply lessons to exams.</strong> You can&apos;t use AI on most exams, so you need to internalize what you&apos;re learning. If AI helps you understand that your transitions are weak, work on transitions until you can write strong ones without help.
           </p>
+
+          <ExpandedAiWritingAssistant handleNavigate={handleNavigate} />
 
           <h2 className={h2}>Frequently asked questions</h2>
           <p className={faqQuestion}>Can my professor tell if I used AI?</p>
