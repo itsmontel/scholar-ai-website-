@@ -11,29 +11,86 @@ function getExpiresAt30Days() {
   return expiresAt.toISOString();
 }
 
-/** Generic phrases that must never appear in annotation suggestions. Replace with concrete example. */
+/** Generic / placeholder phrases: never show these to users; prefer comment or quote-anchored fallback. */
 const FORBIDDEN_SUGGESTION_PHRASES = [
   /add a concrete example,?\s*clarify the connection to your argument,?\s*or develop the idea further with specifics/i,
   /add a specific example or develop the idea further with concrete detail/i,
   /add a concrete example or specific detail to illustrate your point,?\s*or develop the idea further/i,
   /add one concrete example or specific detail to illustrate your point/i,
+  /this demonstrates that \[X\].*which matters because \[Y\]/i,
+  /\[X\].*\[Y\]/,
+  /revise with a concrete example:\s*e\.g\./i,
+];
+
+const FORBIDDEN_COMMENT_PHRASES = [
+  /well-?suited for academic work/i,
+  /appropriate complexity/i,
+  /sophisticated academic discourse/i,
+  /complexity level/i,
+  /excellent for academic discourse/i,
 ];
 
 /**
- * Sanitize suggestion: replace forbidden generic phrases with a concrete template.
- * Ensures AI analysis never returns "add concrete example" / "develop the idea further" style advice.
+ * If suggestion is generic or placeholder, prefer the analytical comment; else a quote-anchored nudge.
  */
-function sanitizeSuggestion(suggestion, type) {
-  if (!suggestion || typeof suggestion !== 'string') return suggestion;
-  const trimmed = suggestion.trim();
+function sanitizeSuggestion(suggestion, type, comment = '', quotedText = '') {
+  if (!suggestion || typeof suggestion !== 'string') {
+    return fallbackSuggestion(type, comment, quotedText);
+  }
+  let trimmed = suggestion.trim();
   for (const pattern of FORBIDDEN_SUGGESTION_PHRASES) {
     if (pattern.test(trimmed)) {
-      return type === 'improve'
-        ? 'Revise with a concrete example: e.g. "This demonstrates that [X], which matters because [Y]" or add a specific phrase from your argument.'
-        : 'Revise with a concrete rewrite: e.g. "The evidence suggests…" or provide a specific before/after revision.';
+      return pickBetterSuggestion(trimmed, type, comment, quotedText);
     }
   }
-  return suggestion;
+  for (const pattern of FORBIDDEN_COMMENT_PHRASES) {
+    if (pattern.test(trimmed)) {
+      return pickBetterSuggestion(trimmed, type, comment, quotedText);
+    }
+  }
+  return trimmed;
+}
+
+function pickBetterSuggestion(original, type, comment, quotedText) {
+  const c = (comment && String(comment).trim().length > 15) ? String(comment).trim() : '';
+  if (c && !FORBIDDEN_COMMENT_PHRASES.some((p) => p.test(c)) && c !== original) {
+    return c;
+  }
+  return fallbackSuggestion(type, c || original, quotedText);
+}
+
+function fallbackSuggestion(type, comment, quotedText) {
+  const q = (quotedText && String(quotedText).trim().length > 0)
+    ? String(quotedText).trim().slice(0, 120) + (String(quotedText).length > 120 ? '…' : '')
+    : '';
+  if (type === 'strong') {
+    return q
+      ? `Keep this pattern: the idea in "${q}" already works. Extend the same clarity to adjacent paragraphs.`
+      : 'Keep this pattern in the next section: same clarity and one idea per sentence.';
+  }
+  if (type === 'improve' || type === 'concern') {
+    return q
+      ? `Edit the highlighted words above. Add one real example, source, or definition that appears elsewhere in your draft and tie it to this sentence.`
+      : 'Edit the highlighted passage: add one concrete detail from your own paper (a name, number, or quote you already use).';
+  }
+  return comment || 'See the feedback above the highlight.';
+}
+
+/** Strip boilerplate praise from strength comments; re-anchor to the student's words. */
+function sanitizeStrengthComment(comment, quotedText) {
+  if (!comment || typeof comment !== 'string') return comment;
+  const t = comment.trim();
+  for (const pattern of FORBIDDEN_COMMENT_PHRASES) {
+    if (pattern.test(t)) {
+      const preview = quotedText && String(quotedText).trim().length
+        ? String(quotedText).trim().slice(0, 100) + (String(quotedText).length > 100 ? '…' : '')
+        : '';
+      return preview
+        ? `Strong use of language here: "${preview}" — carry this specificity forward where you summarize or conclude.`
+        : 'Strong passage — name what works (your claim, a defined term, or evidence) in your next revision pass.';
+    }
+  }
+  return t;
 }
 
 class AIAnalysisService {
@@ -665,7 +722,9 @@ ${citationStyle === 'None'
 
       Provide actionable, constructive feedback in a professional tone.
 
-      CRITICAL: For improvement and concern suggestions, NEVER use generic phrases like "Add a concrete example, clarify the connection to your argument, or develop the idea further with specifics" or "Add a specific example or develop the idea further with concrete detail". Always provide a concrete revision, rewrite, or specific phrase.`,
+      CRITICAL — INLINE ANNOTATIONS:
+      - Strengths: Say what works in the quoted words (logic, evidence, clarity), not stock praise. Do not repeat the same phrase across items. Avoid filler like "appropriate complexity", "well suited for academic work", "sophisticated academic discourse" as the main point.
+      - Improvements/concerns: Tie every suggestion to this document. No [X]/[Y] placeholders. Give a revision, a sentence to add, or before/after using their topic — never generic "add evidence" without naming what claim.`,
       
       citation: `You are a citation and referencing expert. Analyze the provided document for:
       - Proper citation format and style
@@ -705,7 +764,9 @@ ${citationStyle === 'None'
 
       Give detailed feedback across all aspects of academic writing.
 
-      CRITICAL: For "improve" and "concern" suggestions, NEVER use generic phrases like "Add a concrete example, clarify the connection to your argument, or develop the idea further with specifics" or "Add a specific example or develop the idea further with concrete detail". Always provide a concrete revision, rewrite, or specific phrase (e.g. "Revise to: '...'" or "Add: 'For instance, ...'").`,
+      CRITICAL — INLINE ANNOTATIONS:
+      - Strengths: Each strength must describe what is strong in that exact quote (word choice, structure, evidence). Do not reuse boilerplate across strengths. Ban empty praise: "appropriate complexity", "well suited for academic work", "sophisticated academic discourse" as filler.
+      - Improvements/concerns: Every suggestion must reference their draft — revised wording, a clause to insert, or a named element from their essay. Never [X]/[Y] placeholders or template advice without a concrete fix.`,
       
       citation_review: `You are an expert academic citation and referencing specialist with deep knowledge of all major citation styles (APA, MLA, Chicago, Harvard, etc.).
 
@@ -908,14 +969,17 @@ ADAPTIVE ANNOTATION GUIDELINES:
 - Always include at least 2 strengths — never make feedback entirely negative
 - Be honest: do not force concerns onto genuinely good writing
 
-IMPROVEMENT & CONCERN ANNOTATIONS — MUST BE ACTIONABLE:
-- NEVER use vague advice like "consider adding citations", "could be strengthened with more evidence", "ensure proper sentence structure", or "consider rephrasing" without showing HOW.
-- Each improvement/concern "suggestion" MUST give a CONCRETE solution: either (a) a before/after example, (b) a specific phrase or sentence the student could use, or (c) a rewritten version demonstrating the fix.
-- BAD: "Consider adding more academic evidence or research support" — describes the problem only.
-- GOOD: "Add a supporting citation, e.g. 'As Smith (2020) notes, …' — this would ground your claim."
-- BAD: "Ensure proper sentence structure and punctuation" — no solution given.
-- GOOD: "Split this run-on into two sentences: '…' [original]. Try: '…' [rewritten]."
-- The suggestion must SHOW what to do, not just name the problem.
+STRENGTH ANNOTATIONS (green):
+- "comment" must say what works **in the quoted text itself** (e.g. a strong verb, a clear causal link, a defined term, a specific piece of evidence). Not generic praise.
+- Do NOT repeat the same wording across strengths. Forbidden stock phrases: "well suited for academic work", "appropriate complexity", "sophisticated academic discourse", "complexity level" as filler.
+- "suggestion" = one sentence on how to repeat this strength elsewhere in *this* paper (same topic), not "continue good writing."
+
+IMPROVEMENT & CONCERN ANNOTATIONS — MUST BE ACTIONABLE AND PAPER-SPECIFIC:
+- NEVER use placeholders like [X] and [Y]. Rewrite using the essay's actual subject, or give a before/after using words from their paragraph.
+- NEVER use vague advice like "consider adding citations" without naming what claim needs support.
+- Each improvement/concern "suggestion" MUST reference their draft: either (a) a before/after line using their wording, (b) one sentence they could add that names a source/example from their text, or (c) a concrete revision of the quoted line.
+- BAD: "Revise with a concrete example: This demonstrates that [X], which matters because [Y]."
+- GOOD: "After this sentence, add one clause that names the study you mention in paragraph 2, e.g. 'As the 2021 campus survey showed, …'"
 
 ${gradingScaleInstruction}
 
@@ -945,22 +1009,22 @@ Return ONLY a valid JSON object. No preamble, no markdown, no explanation outsid
       "strengths": [
         {
           "text": "EXACT quoted text from document",
-          "comment": "Why this is a strength",
-          "suggestion": "How to maintain this quality"
+          "comment": "What in THIS quote works (word choice, logic, evidence) — not generic praise",
+          "suggestion": "How to extend this strength elsewhere in this same essay (one sentence, topic-specific)"
         }
       ],
       "improvements": [
         {
           "text": "EXACT quoted text from document",
-          "comment": "What needs improvement",
-          "suggestion": "Concrete fix: show an example rewrite, a phrase to add, or before/after — never generic advice like 'consider adding evidence'"
+          "comment": "What is weak in this quote for this assignment",
+          "suggestion": "Concrete fix using their topic: revised sentence, or named addition from their paper — no [X]/[Y] placeholders"
         }
       ],
       "concerns": [
         {
           "text": "EXACT quoted text from document",
-          "comment": "What is problematic",
-          "suggestion": "Concrete fix: show an example rewrite, a phrase to add, or before/after — never generic advice without showing how"
+          "comment": "Why this undermines the argument here",
+          "suggestion": "Concrete fix tied to their wording — no template phrases"
         }
       ]
     },
@@ -1013,10 +1077,7 @@ CRITICAL REQUIREMENTS:
 3. specific_rewrites: include 3-5 examples targeting the weakest sentences — always preserve the student voice
 4. All quoted text must be verbatim from the document — do not paraphrase or invent quotes
 5. For improvements and concerns: every "suggestion" MUST give a concrete example (rewrite, phrase to add, or before/after) — never generic advice without showing the solution
-6. NEVER use these generic phrases in any suggestion. Always provide a specific revision, rewrite, or concrete example instead:
-   - FORBIDDEN for "improve": "Add a concrete example, clarify the connection to your argument, or develop the idea further with specifics"
-   - FORBIDDEN for "concern": "Add a specific example or develop the idea further with concrete detail"
-   Instead: give a concrete rewrite (e.g. "Revise to: '...'") or a specific phrase to add (e.g. "Add: 'For instance, ...'")
+6. NEVER use placeholder brackets [X] [Y] or the phrases listed in the user prompt as filler. Every suggestion must use the student's topic or quote.
 7. Return ONLY valid JSON — no text before or after the JSON object`;
   }
 
@@ -1209,8 +1270,13 @@ CRITICAL REQUIREMENTS:
                   text: textMatch.text,
                   startIndex: textMatch.startIndex,
                   endIndex: textMatch.endIndex,
-                  comment: item.comment,
-                  suggestion: item.suggestion || 'This demonstrates strong academic writing. Continue using this approach.'
+                  comment: sanitizeStrengthComment(item.comment, textMatch.text),
+                  suggestion: sanitizeSuggestion(
+                    item.suggestion || '',
+                    'strong',
+                    item.comment,
+                    textMatch.text
+                  ) || fallbackSuggestion('strong', item.comment, textMatch.text)
                 };
                 
                 // Check for overlap with existing annotations
@@ -1239,7 +1305,12 @@ CRITICAL REQUIREMENTS:
                   startIndex: textMatch.startIndex,
                   endIndex: textMatch.endIndex,
                   comment: item.comment,
-                  suggestion: sanitizeSuggestion(item.suggestion || 'Revise with a concrete example: e.g. "For instance, …" or "This demonstrates that [X], which matters because [Y]."', 'improve')
+                  suggestion: sanitizeSuggestion(
+                    item.suggestion || '',
+                    'improve',
+                    item.comment,
+                    textMatch.text
+                  ) || fallbackSuggestion('improve', item.comment, textMatch.text)
                 };
                 
                 // Check for overlap with existing annotations
@@ -1268,7 +1339,12 @@ CRITICAL REQUIREMENTS:
                   startIndex: textMatch.startIndex,
                   endIndex: textMatch.endIndex,
                   comment: item.comment,
-                  suggestion: sanitizeSuggestion(item.suggestion || 'Revise with a concrete rewrite: e.g. "The evidence suggests…" or provide a specific before/after revision.', 'concern')
+                  suggestion: sanitizeSuggestion(
+                    item.suggestion || '',
+                    'concern',
+                    item.comment,
+                    textMatch.text
+                  ) || fallbackSuggestion('concern', item.comment, textMatch.text)
                 };
                 
                 // Check for overlap with existing annotations
@@ -1294,7 +1370,7 @@ CRITICAL REQUIREMENTS:
       // Sanitize: never return forbidden generic phrases in suggestions
       finalAnnotations = finalAnnotations.map(a => ({
         ...a,
-        suggestion: sanitizeSuggestion(a.suggestion, a.type)
+        suggestion: sanitizeSuggestion(a.suggestion || '', a.type, a.comment, a.text)
       }));
 
       // CRITICAL: overall_score must equal the sum of rubric scores — compute from grade_rubric when present
@@ -1495,7 +1571,6 @@ CRITICAL REQUIREMENTS:
       const currentStrong = finalAnnotations.filter(a => a.type === 'strong').length;
       const currentImprove = finalAnnotations.filter(a => a.type === 'improve').length;
       const currentConcern = finalAnnotations.filter(a => a.type === 'concern').length;
-    const currentTotal = finalAnnotations.length;
       
       console.log(`Current distribution: ${currentStrong} strong, ${currentImprove} improve, ${currentConcern} concern`);
       
@@ -1535,70 +1610,48 @@ CRITICAL REQUIREMENTS:
           const type = types[i % types.length];
           usedTexts.add(sentence.toLowerCase());
           
-          let comment, suggestion;
+          const preview = sentence.length > 140 ? `${sentence.slice(0, 137)}…` : sentence;
+          let comment;
+          let suggestion;
           if (type === 'strong') {
-            // Generate contextual comments for strong points based on paper quality
+            // Quote-anchored only — no repeated "academic discourse" / "complexity level" boilerplate
             if (/\b(research|study|analysis|findings|results|evidence|data)\b/i.test(sentence)) {
-              comment = paperQuality === 'excellent' 
-                ? 'Excellent use of research terminology that demonstrates sophisticated academic discourse.'
-                : 'This sentence effectively incorporates research terminology and demonstrates strong academic writing.';
-              suggestion = 'Continue using precise academic language and research-based terminology throughout your work.';
+              comment = `You foreground evidence here: "${preview}" — that helps readers trust the claim.`;
+              suggestion = 'Reuse this pattern: after a similar claim elsewhere, name one source or number you already cite in your draft.';
             } else if (/\b(however|furthermore|moreover|therefore|consequently|nevertheless)\b/i.test(sentence)) {
-              comment = paperQuality === 'excellent'
-                ? 'Outstanding transitional language that creates seamless logical flow between complex ideas.'
-                : 'Excellent use of transitional language that creates logical flow between ideas.';
-              suggestion = 'This type of clear logical connection strengthens your argument structure.';
+              comment = `The transition in "${preview}" signals how this sentence relates to the last one.`;
+              suggestion = 'When you revise the next section, match this clarity: say what changed from the previous idea.';
             } else if (/\b(demonstrates|indicates|suggests|reveals|shows|establishes)\b/i.test(sentence)) {
-              comment = paperQuality === 'excellent'
-                ? 'Sophisticated analytical language that presents clear, nuanced interpretation of evidence.'
-                : 'Strong analytical language that clearly presents your interpretation of the evidence.';
-              suggestion = 'This analytical approach effectively connects evidence to conclusions.';
+              comment = `Interpretive verbs in "${preview}" spell out what you think the material means.`;
+              suggestion = 'Keep tying evidence to meaning like this; add one more clause that names your main thesis term.';
             } else if (sentence.includes(',') && (sentence.includes('that') || sentence.includes('which'))) {
-              comment = paperQuality === 'excellent'
-                ? 'Expertly crafted complex sentence that demonstrates mastery of academic writing conventions.'
-                : 'Well-structured complex sentence that demonstrates sophisticated academic writing.';
-              suggestion = 'This sentence complexity and structure are excellent for academic discourse.';
+              comment = `This sentence packs a subordinate clause: "${preview}" — good density for your argument.`;
+              suggestion = 'If a reader gets lost, break one long sentence into two, but keep this level of detail.';
             } else {
-              comment = paperQuality === 'excellent'
-                ? 'This sentence exemplifies clear, professional academic writing with excellent structure and vocabulary.'
-                : 'This sentence demonstrates clear academic writing with appropriate vocabulary and structure.';
-              suggestion = 'The writing style and complexity level are well-suited for academic work.';
+              comment = `Clear line in your draft: "${preview}" — it states something a reader can check.`;
+              suggestion = 'Mirror this: one claim + one reason in the same breath in your topic sentences.';
             }
           } else if (type === 'improve') {
-            // Generate contextual improvement suggestions — always give concrete examples, not generic advice
-            if (paperQuality === 'excellent') {
-              if (/\b(however|but|although|while)\b/i.test(sentence)) {
-                comment = 'This effective transition could be enhanced with slightly more explicit connection.';
-                suggestion = 'Add the link explicitly, e.g. "However, [this] directly challenges [that] because…" — spell out the relationship.';
-              } else if (sentence.length < 30) {
-                comment = 'This concise sentence could be expanded for even greater impact.';
-                suggestion = 'Add a brief example: e.g. "For instance, …" or one specific detail to illustrate your point.';
-              } else {
-                comment = 'This well-written section could be enhanced with additional supporting detail.';
-                suggestion = 'Add a brief example: e.g. "For instance, …" or one specific detail from your argument.';
-              }
+            if (/\b(however|but|although|while)\b/i.test(sentence)) {
+              comment = `Reader may not see how "${preview}" connects to the sentence before it.`;
+              suggestion = 'Add a short bridge using your own topic words: repeat one keyword from the prior sentence, then finish this thought.';
+            } else if (sentence.length < 30) {
+              comment = `"${preview}" is very short — the idea may need one more beat.`;
+              suggestion = 'Add one new sentence after this that names an example from your paper (a person, study, or date you already mention).';
             } else {
-              if (/\b(however|but|although|while)\b/i.test(sentence)) {
-                comment = 'This transition could be strengthened with more explicit connection to the previous argument.';
-                suggestion = 'Add a connecting phrase: e.g. "This demonstrates that [X], which matters because [Y]." — make the link explicit.';
-              } else if (sentence.length < 30) {
-                comment = 'This sentence could benefit from more detailed explanation.';
-                suggestion = 'Expand with a concrete example or one specific detail: e.g. "For example, …" to illustrate your point.';
-              } else {
-                comment = 'This section could be enhanced with more specific detail or clearer development.';
-                suggestion = 'Revise with a concrete example: e.g. "This demonstrates that [X], which matters because [Y]" or add a specific phrase from your argument.';
-              }
+              comment = `"${preview}" could carry more support for the claim you are making.`;
+              suggestion = 'Insert one sentence after this that cites a passage, statistic, or definition already in your draft.';
             }
-          } else { // concern
+          } else {
             if (sentence.includes('?')) {
-              comment = 'Questions in academic writing should typically be rhetorical or immediately answered.';
-              suggestion = 'Rephrase as a statement: e.g. change "Why does X happen?" to "X happens because…" and answer it in the same sentence.';
+              comment = `Academic body paragraphs often work better as statements: "${preview}"`;
+              suggestion = 'Rewrite as a claim and answer it in the next clause, using vocabulary from your introduction.';
             } else if (/\b(I think|I believe|I feel)\b/i.test(sentence)) {
-              comment = 'Avoid first-person language in academic writing for more objective tone.';
-              suggestion = 'Replace "I think" with "The evidence suggests" or "Research indicates" — same meaning, more academic.';
+              comment = `"${preview}" uses first person; some instructors prefer an objective voice.`;
+              suggestion = 'Try leading with your evidence: paste your best fact from this paragraph first, then your interpretation.';
             } else {
-              comment = 'This section may need attention to strengthen the argument and provide clearer explanations.';
-              suggestion = 'Revise with a concrete rewrite: e.g. "The evidence suggests…" or provide a specific before/after revision.';
+              comment = `Strengthen this stretch: "${preview}" — make the claim and its warrant explicit.`;
+              suggestion = 'Rewrite once: first half = claim in your words, second half = one reason drawn from your sources.';
             }
           }
           
