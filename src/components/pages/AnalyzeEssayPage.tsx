@@ -136,13 +136,13 @@ const AnalyzeEssayPage = ({ onNavigate, user, onLogout }: AnalyzeEssayPageProps)
       <main className="relative max-w-7xl mx-auto px-4 sm:px-6 pt-8 sm:pt-12 pb-24 sm:pb-28">
         <div className="flex flex-col gap-8 lg:gap-10">
           {/* Top: Hero card - matches dashboard style */}
-          <div className="relative rounded-3xl sm:rounded-[2rem] overflow-hidden p-[2px] bg-gradient-to-br from-violet-400/80 via-fuchsia-400/80 to-violet-500/80 dark:from-violet-500/60 dark:via-fuchsia-500/60 dark:to-violet-600/60 shadow-[0_20px_50px_-15px_rgba(244,63,94,0.25)] dark:shadow-[0_20px_50px_-15px_rgba(0,0,0,0.4)]">
+          <div className="relative rounded-3xl sm:rounded-[2rem] overflow-hidden p-[2px] bg-rose-500 dark:bg-rose-600 shadow-[0_20px_50px_-15px_rgba(244,63,94,0.25)] dark:shadow-[0_20px_50px_-15px_rgba(0,0,0,0.4)]">
             <div className="relative rounded-[22px] sm:rounded-[30px] bg-white/90 dark:bg-stone-800/95 backdrop-blur-2xl border border-white/50 dark:border-stone-700/50 shadow-inner p-6 sm:p-10">
-              <div className="absolute -top-20 -right-20 w-40 h-40 bg-violet-400/25 rounded-full blur-3xl pointer-events-none" />
-              <div className="absolute -bottom-20 -left-20 w-40 h-40 bg-fuchsia-400/20 rounded-full blur-3xl pointer-events-none" />
-              {/* Hero headline - matches dashboard */}
+              <div className="absolute -top-20 -right-20 w-40 h-40 bg-rose-400/25 rounded-full blur-3xl pointer-events-none" />
+              <div className="absolute -bottom-20 -left-20 w-40 h-40 bg-pink-400/20 rounded-full blur-3xl pointer-events-none" />
+              {/* Hero headline — rose/pink accent (red theme) */}
               <h1 className="relative text-2xl sm:text-3xl md:text-4xl font-extrabold text-stone-900 dark:text-white text-center mb-2 tracking-tight">
-                <span className="bg-violet-600 bg-clip-text text-transparent" style={{ WebkitBackgroundClip: 'text' }}>Paste</span> or <span className="bg-violet-600 bg-clip-text text-transparent" style={{ WebkitBackgroundClip: 'text' }}>upload</span> your essay, get feedback in seconds
+                <span className="text-rose-600 dark:text-rose-400">Paste</span> or <span className="text-rose-600 dark:text-rose-400">upload</span> your essay, get feedback in seconds
               </h1>
               <p className="relative text-stone-600 dark:text-stone-300 text-base sm:text-lg text-center mb-8 max-w-xl mx-auto leading-relaxed">
                 Upload your essay, get <span className="text-red-600 dark:text-red-500">professor</span><span className="text-amber-600 dark:text-amber-500">-style</span> <span className="text-green-600 dark:text-green-500">feedback</span>
@@ -168,10 +168,10 @@ const AnalyzeEssayPage = ({ onNavigate, user, onLogout }: AnalyzeEssayPageProps)
                 aria-hidden
               />
 
-              {/* Paste essay + Analyze - gradient border like dashboard */}
+              {/* Paste essay + Analyze — rose ring (red theme) */}
               {!(!user && uploadedFileName) && (
                 <div className="relative mb-2 max-w-3xl mx-auto">
-                  <div className="relative rounded-2xl sm:rounded-3xl p-[2px] bg-gradient-to-br from-violet-400/80 via-fuchsia-400/80 to-violet-500/80 dark:from-violet-500/60 dark:via-fuchsia-500/60 dark:to-violet-600/60 shadow-[0_20px_50px_-15px_rgba(244,63,94,0.25)]">
+                  <div className="relative rounded-2xl sm:rounded-3xl p-[2px] bg-rose-500 dark:bg-rose-600 shadow-[0_20px_50px_-15px_rgba(244,63,94,0.25)]">
                     <div className="relative rounded-[14px] sm:rounded-[22px] bg-white dark:bg-stone-800/95 backdrop-blur-sm min-h-[140px] sm:min-h-[180px]">
                       <textarea
                         value={inputText}
@@ -211,10 +211,10 @@ const AnalyzeEssayPage = ({ onNavigate, user, onLogout }: AnalyzeEssayPageProps)
                         type="button"
                         onClick={() => analyzeFileInputRef.current?.click()}
                         disabled={!!user && isParsingAnalyzeDoc}
-                        className="flex items-center gap-2.5 px-5 py-3.5 rounded-2xl font-bold text-sm transition-all disabled:opacity-50 bg-gradient-to-r from-violet-500/15 to-fuchsia-500/15 dark:from-violet-500/25 dark:to-fuchsia-500/25 text-violet-700 dark:text-violet-300 dark:hover:from-violet-500/35 dark:hover:to-fuchsia-500/35 border-2 border-violet-300/80 dark:border-violet-600/60 shadow-md shadow-violet-500/15 hover:shadow-lg hover:shadow-violet-500/25"
+                        className="flex items-center gap-2.5 px-5 py-3.5 rounded-2xl font-bold text-sm transition-all disabled:opacity-50 bg-rose-500/15 dark:bg-rose-500/25 text-rose-700 dark:text-rose-300 hover:bg-rose-500/25 dark:hover:bg-rose-500/35 border-2 border-rose-300/80 dark:border-rose-600/60 shadow-md shadow-rose-500/15 hover:shadow-lg hover:shadow-rose-500/25"
                       >
                         {user && isParsingAnalyzeDoc ? (
-                          <span className="w-5 h-5 border-2 border-violet-500 border-t-transparent rounded-full animate-spin" />
+                          <span className="w-5 h-5 border-2 border-rose-500 border-t-transparent rounded-full animate-spin" />
                         ) : (
                           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>
                         )}
@@ -240,7 +240,7 @@ const AnalyzeEssayPage = ({ onNavigate, user, onLogout }: AnalyzeEssayPageProps)
                       disabled={!isTextValid()}
                       className={`px-8 sm:px-10 py-3.5 rounded-2xl flex items-center justify-center gap-2 transition-all duration-200 font-bold text-base ${
                         isTextValid()
-                          ? 'bg-violet-600 hover:bg-violet-500 text-white shadow-lg shadow-violet-500/30 hover:shadow-xl hover:shadow-violet-500/40 hover:-translate-y-0.5 active:scale-[0.98] cursor-pointer'
+                          ? 'bg-rose-600 hover:bg-rose-500 text-white shadow-lg shadow-rose-500/30 hover:shadow-xl hover:shadow-rose-500/40 hover:-translate-y-0.5 active:scale-[0.98] cursor-pointer'
                           : 'bg-stone-200 dark:bg-stone-700 text-stone-400 cursor-not-allowed'
                       }`}
                     >
@@ -258,10 +258,10 @@ const AnalyzeEssayPage = ({ onNavigate, user, onLogout }: AnalyzeEssayPageProps)
                 }}
                 className="relative mt-8 rounded-2xl sm:rounded-[1.75rem] overflow-hidden bg-white/90 dark:bg-stone-800/95 backdrop-blur-xl border border-white/50 dark:border-stone-600/50 shadow-2xl shadow-stone-900/10 dark:shadow-black/20 cursor-pointer transition-all hover:shadow-[0_25px_50px_-12px_rgba(236,72,153,0.2)] hover:scale-[1.01] active:scale-[0.99] group"
               >
-                <div className="absolute top-0 left-0 w-16 h-16 rounded-2xl bg-violet-200/40 dark:bg-violet-500/20 blur-2xl pointer-events-none" />
-                <div className="absolute top-0 right-0 w-16 h-16 rounded-2xl bg-sky-200/40 dark:bg-sky-500/20 blur-2xl pointer-events-none" />
+                <div className="absolute top-0 left-0 w-16 h-16 rounded-2xl bg-rose-200/40 dark:bg-rose-500/20 blur-2xl pointer-events-none" />
+                <div className="absolute top-0 right-0 w-16 h-16 rounded-2xl bg-pink-200/40 dark:bg-pink-500/20 blur-2xl pointer-events-none" />
                 <div className="relative p-6 sm:p-8 text-center">
-                  <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-violet-600 hover:bg-violet-500 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-violet-500/25 text-white">
+                  <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-rose-600 hover:bg-rose-500 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-rose-500/25 text-white">
                     <svg className="w-7 h-7 sm:w-8 sm:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
@@ -272,7 +272,7 @@ const AnalyzeEssayPage = ({ onNavigate, user, onLogout }: AnalyzeEssayPageProps)
                       ? 'Save work in your library. Use Upload file above to load a PDF or Word file into the box.'
                       : 'Pick a file to run the preview flow, or paste 200+ words above'}
                   </p>
-                  <div className="inline-flex items-center gap-2 px-6 py-3.5 rounded-2xl bg-violet-600 hover:bg-violet-500 text-white font-semibold shadow-lg shadow-violet-500/25 transition-all group-hover:shadow-xl group-hover:scale-[1.02]">
+                  <div className="inline-flex items-center gap-2 px-6 py-3.5 rounded-2xl bg-rose-600 hover:bg-rose-500 text-white font-semibold shadow-lg shadow-rose-500/25 transition-all group-hover:shadow-xl group-hover:scale-[1.02]">
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>
                     {user ? 'Library upload' : 'Choose file'}
                   </div>
@@ -299,7 +299,7 @@ const AnalyzeEssayPage = ({ onNavigate, user, onLogout }: AnalyzeEssayPageProps)
                     onClick={handleSubmit}
                     disabled={!isTextValid()}
                     className={`px-8 py-3.5 rounded-2xl font-bold text-base ${
-                      isTextValid() ? 'bg-violet-600 hover:bg-violet-500 text-white shadow-lg' : 'bg-stone-200 text-stone-400 cursor-not-allowed'
+                      isTextValid() ? 'bg-rose-600 hover:bg-rose-500 text-white shadow-lg shadow-rose-500/20' : 'bg-stone-200 text-stone-400 cursor-not-allowed'
                     }`}
                   >
                     Analyze Text
@@ -311,11 +311,11 @@ const AnalyzeEssayPage = ({ onNavigate, user, onLogout }: AnalyzeEssayPageProps)
 
           {/* Bottom: Real demo result */}
           <div className="relative">
-            <div className="absolute -inset-2 bg-gradient-to-r from-violet-400/12 via-fuchsia-400/12 to-violet-500/12 rounded-3xl blur-2xl pointer-events-none" />
+            <div className="absolute -inset-2 bg-rose-500/15 rounded-3xl blur-2xl pointer-events-none" />
             <div className="relative">
               <div className="flex items-center gap-2 mb-4">
                 <h2 className="text-lg font-bold text-stone-800 dark:text-stone-100">See a real analysis in action</h2>
-                <span className="h-px flex-1 max-w-32 bg-gradient-to-r from-violet-300/60 to-transparent dark:from-violet-500/40 rounded-full" />
+                <span className="h-px flex-1 max-w-32 bg-rose-300/70 dark:bg-rose-500/40 rounded-full" />
               </div>
               <InteractiveDocumentAnalysis onNavigate={onNavigate} />
             </div>
@@ -339,7 +339,7 @@ const AnalyzeEssayPage = ({ onNavigate, user, onLogout }: AnalyzeEssayPageProps)
       {showRevealAnimation && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4">
           <div className="animate-in zoom-in-95 fade-in duration-500 text-center max-w-lg">
-            <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-violet-600 shadow-2xl shadow-violet-500/40 mb-6 animate-in zoom-in duration-300" style={{ animationDelay: '100ms' }}>
+            <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-rose-600 shadow-2xl shadow-rose-500/40 mb-6 animate-in zoom-in duration-300" style={{ animationDelay: '100ms' }}>
               <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
@@ -365,7 +365,7 @@ const AnalyzeEssayPage = ({ onNavigate, user, onLogout }: AnalyzeEssayPageProps)
               </svg>
             </button>
 
-            <div className="w-20 h-20 bg-gradient-to-br from-violet-100 to-fuchsia-100 dark:from-violet-900/40 dark:to-fuchsia-900/40 rounded-2xl flex items-center justify-center mx-auto mb-6">
+            <div className="w-20 h-20 bg-rose-100 dark:bg-rose-900/40 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-rose-200/60 dark:border-rose-800/50">
               <span className="text-4xl">📋</span>
             </div>
 
@@ -378,7 +378,7 @@ const AnalyzeEssayPage = ({ onNavigate, user, onLogout }: AnalyzeEssayPageProps)
               <button
                 type="button"
                 onClick={() => onNavigate('signup')}
-                className="w-full px-6 py-3.5 bg-violet-600 hover:bg-violet-500 text-white font-semibold rounded-2xl transition-all shadow-lg shadow-violet-500/25"
+                className="w-full px-6 py-3.5 bg-rose-600 hover:bg-rose-500 text-white font-semibold rounded-2xl transition-all shadow-lg shadow-rose-500/25"
               >
                 Create Account
               </button>

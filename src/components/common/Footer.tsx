@@ -138,7 +138,7 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
             <ul className="space-y-3">
               {/* Rose/Pink */}
               <li>
-                <a href="/tools/analyze" onClick={(e) => { e.preventDefault(); onNavigate?.('analyze'); }} className="text-sm font-medium transition-colors flex items-center gap-1.5 text-violet-400 hover:text-violet-300">
+                <a href="/tools/analyze" onClick={(e) => { e.preventDefault(); onNavigate?.('analyze'); }} className="text-sm font-medium transition-colors flex items-center gap-1.5 text-rose-400 hover:text-rose-300">
                   Analyze Essay
                   <span className="text-xs opacity-75">📊</span>
                 </a>
