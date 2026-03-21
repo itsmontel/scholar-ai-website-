@@ -182,7 +182,7 @@ const StudySetViewer = ({ data, title, onClose, onNavigate, userPlan }: StudySet
                     <div className={`font-bold text-sm flex items-center gap-2 ${locked ? 'text-stone-500 dark:text-stone-400' : 'text-stone-800 dark:text-stone-100'}`}>
                       {tab.label}
                       {locked && (
-                        <span className="px-1.5 py-0.5 text-[10px] font-bold rounded bg-gradient-to-r from-violet-500 to-purple-500 text-white">
+                        <span className="px-1.5 py-0.5 text-[10px] font-bold rounded bg-violet-600 text-white">
                           PRO
                         </span>
                       )}
@@ -223,7 +223,7 @@ const StudySetViewer = ({ data, title, onClose, onNavigate, userPlan }: StudySet
             <div className="flex flex-col gap-2.5">
               <button
                 onClick={() => { setShowUpgradePrompt(null); onClose(); onNavigate('pricing'); }}
-                className="w-full py-3 px-4 bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 text-white font-bold rounded-xl shadow-lg shadow-violet-500/25 transition-all active:scale-[0.98]"
+                className="w-full py-3 px-4 bg-violet-600 hover:bg-violet-700 text-white font-bold rounded-xl shadow-lg shadow-violet-500/25 transition-all active:scale-[0.98]"
               >
                 Upgrade to Pro
               </button>

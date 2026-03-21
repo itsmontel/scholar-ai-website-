@@ -176,7 +176,7 @@ const StripeCheckout: React.FC<StripeCheckoutProps> = ({
           <button
             onClick={handleCheckout}
             disabled={isLoading}
-            className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:from-gray-400 disabled:to-gray-500 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 disabled:transform-none disabled:cursor-not-allowed"
+            className="flex-1 bg-violet-600 hover:bg-violet-700 disabled:from-gray-400 disabled:to-gray-500 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 disabled:transform-none disabled:cursor-not-allowed"
           >
             {isLoading ? 'Redirecting...' : `Continue to Checkout`}
           </button>

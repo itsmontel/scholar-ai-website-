@@ -99,7 +99,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate }: OnboardingPageProps)
     const mascotPose: 'waving' | 'studying' | 'celebrating' = transText >= 4 ? 'celebrating' : transText >= 2 ? 'studying' : 'waving';
 
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-rose-600 via-pink-600 to-rose-700 overflow-hidden animate-transBgIn">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-violet-600 via-fuchsia-600 to-violet-700 overflow-hidden animate-transBgIn">
         {/* Slow-moving ambient particles */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden>
           {Array.from({ length: 14 }).map((_, i) => (
@@ -182,23 +182,23 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate }: OnboardingPageProps)
 
   /* ──────────── PROFILE FORM ──────────── */
   return (
-    <div className="min-h-screen flex flex-col relative font-sans bg-gradient-to-b from-rose-50/60 via-stone-50 to-white dark:from-stone-950 dark:via-stone-900 dark:to-stone-900">
+    <div className="min-h-screen flex flex-col relative font-sans bg-gradient-to-b from-violet-50/60 via-stone-50 to-white dark:from-stone-950 dark:via-stone-900 dark:to-stone-900">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(251,113,133,0.12),transparent)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(236,72,153,0.08),transparent)] pointer-events-none" aria-hidden />
 
       {/* Floating shapes */}
-      <div className="absolute top-24 left-8 w-16 h-16 rounded-2xl bg-gradient-to-br from-rose-400/20 to-pink-500/20 rotate-12 hidden lg:block animate-float pointer-events-none" />
-      <div className="absolute top-40 right-12 w-12 h-12 rounded-full bg-gradient-to-br from-rose-400/20 to-pink-500/20 hidden lg:block animate-float-delayed pointer-events-none" />
-      <div className="absolute top-64 left-16 w-10 h-10 rounded-lg bg-gradient-to-br from-pink-400/20 to-rose-500/20 -rotate-12 hidden xl:block animate-float pointer-events-none" style={{ animationDelay: '1s' }} />
-      <div className="absolute top-[12%] left-[8%] w-12 h-12 rounded-2xl bg-gradient-to-br from-rose-400/20 to-pink-500/20 rotate-12 lg:hidden animate-float pointer-events-none" />
-      <div className="absolute top-[22%] right-[10%] w-10 h-10 rounded-full bg-gradient-to-br from-rose-400/20 to-pink-500/20 lg:hidden animate-float-delayed pointer-events-none" />
+      <div className="absolute top-24 left-8 w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-400/20 to-fuchsia-500/20 rotate-12 hidden lg:block animate-float pointer-events-none" />
+      <div className="absolute top-40 right-12 w-12 h-12 rounded-full bg-gradient-to-br from-violet-400/20 to-fuchsia-500/20 hidden lg:block animate-float-delayed pointer-events-none" />
+      <div className="absolute top-64 left-16 w-10 h-10 rounded-lg bg-gradient-to-br from-fuchsia-400/20 to-violet-500/20 -rotate-12 hidden xl:block animate-float pointer-events-none" style={{ animationDelay: '1s' }} />
+      <div className="absolute top-[12%] left-[8%] w-12 h-12 rounded-2xl bg-gradient-to-br from-violet-400/20 to-fuchsia-500/20 rotate-12 lg:hidden animate-float pointer-events-none" />
+      <div className="absolute top-[22%] right-[10%] w-10 h-10 rounded-full bg-gradient-to-br from-violet-400/20 to-fuchsia-500/20 lg:hidden animate-float-delayed pointer-events-none" />
 
       {/* Header */}
       <div className="relative z-10 px-6 pt-6 pb-2 flex items-center">
         <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center overflow-hidden shadow-lg shadow-rose-500/30">
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center overflow-hidden shadow-lg shadow-violet-500/30">
             <img src="/mascot.png" alt="WriteScholar" className="w-full h-full object-contain" loading="eager" width="120" height="120" />
           </div>
-          <span className="text-xl font-extrabold tracking-tight text-rose-600 dark:text-rose-400">WriteScholar</span>
+          <span className="text-xl font-extrabold tracking-tight text-violet-600 dark:text-violet-400">WriteScholar</span>
         </div>
       </div>
 
@@ -223,7 +223,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate }: OnboardingPageProps)
                     value={displayName}
                     onChange={(e) => setDisplayName(e.target.value)}
                     placeholder="e.g. Alex or Jordan"
-                  className="w-full px-5 py-4 rounded-2xl border-2 border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-700/50 focus:border-rose-500 dark:focus:border-rose-500 focus:ring-2 focus:ring-rose-500/40 focus:outline-none transition-all text-base text-stone-800 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500"
+                  className="w-full px-5 py-4 rounded-2xl border-2 border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-700/50 focus:border-violet-500 dark:focus:border-violet-500 focus:ring-2 focus:ring-violet-500/40 focus:outline-none transition-all text-base text-stone-800 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500"
                   autoFocus
                   />
                 </div>
@@ -237,7 +237,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate }: OnboardingPageProps)
                   className={`w-full px-5 py-4 rounded-2xl border-2 bg-stone-50 dark:bg-stone-700/50 focus:ring-2 transition-all text-base text-stone-800 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500 ${
                     usernameError
                       ? 'border-red-400 dark:border-red-500 focus:border-red-500 focus:ring-red-500/40 focus:outline-none'
-                      : 'border-stone-200 dark:border-stone-600 focus:border-rose-500 dark:focus:border-rose-500 focus:ring-rose-500/40 focus:outline-none'
+                      : 'border-stone-200 dark:border-stone-600 focus:border-violet-500 dark:focus:border-violet-500 focus:ring-violet-500/40 focus:outline-none'
                   }`}
                   onKeyDown={(e) => { if (e.key === 'Enter' && displayName.trim() && username.trim() && !usernameError) handleContinue(); }}
                 />
@@ -250,7 +250,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate }: OnboardingPageProps)
               <button
                 onClick={handleContinue}
                 disabled={!displayName.trim() || !username.trim() || !!usernameError || isSaving}
-                className="w-full sm:w-auto px-10 py-3.5 bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-500/90 hover:to-pink-600/90 text-white rounded-2xl font-bold text-base shadow-lg shadow-rose-500/25 transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full sm:w-auto px-10 py-3.5 bg-violet-600 hover:bg-violet-500 text-white rounded-2xl font-bold text-base shadow-lg shadow-violet-500/25 transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {isSaving ? (
                   <>

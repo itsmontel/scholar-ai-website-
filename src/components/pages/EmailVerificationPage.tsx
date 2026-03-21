@@ -83,7 +83,7 @@ const EmailVerificationPage = ({ onNavigate }: EmailVerificationPageProps) => {
             <div className="space-y-3">
               <button
                 onClick={() => onNavigate('signup')}
-                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 rounded-lg font-semibold hover:shadow-lg transform hover:scale-[1.02] transition-all duration-300"
+                className="w-full bg-violet-600 hover:bg-violet-700 text-white py-3 rounded-lg font-semibold hover:shadow-lg transform hover:scale-[1.02] transition-all duration-300"
               >
                 Try Again
               </button>

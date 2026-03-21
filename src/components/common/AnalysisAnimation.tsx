@@ -175,7 +175,7 @@ const AnalysisAnimation: React.FC<AnalysisAnimationProps> = ({
               <div 
                 className={`h-full rounded-full transition-all duration-300 ease-out ${
                   variant === 'studyPack'
-                    ? 'bg-gradient-to-r from-amber-500 to-orange-500'
+                    ? 'bg-amber-600'
                     : 'bg-gradient-to-r from-blue-500 to-indigo-500'
                 } ${isCycling ? 'animate-pulse' : ''}`}
                 style={{ width: `${Math.min(progress, 100)}%` }}

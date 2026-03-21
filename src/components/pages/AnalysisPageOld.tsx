@@ -896,7 +896,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
         <div className="mb-8">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              <h1 className="text-3xl font-bold text-gray-900 bg-violet-600 hover:bg-violet-700 bg-clip-text text-transparent">
                 WriteScholar Analysis
               </h1>
               <p className="mt-2 text-gray-600">
@@ -905,7 +905,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
             </div>
           <button 
               onClick={() => onNavigate?.('analysis-history')}
-              className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:from-indigo-700 hover:to-purple-700 transition-all duration-200 transform hover:scale-[1.02] shadow-lg"
+              className="flex items-center space-x-2 px-4 py-2 bg-violet-600 hover:bg-violet-500 text-white rounded-lg transition-all duration-200 transform hover:scale-[1.02] shadow-lg"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
@@ -1066,7 +1066,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                 className={`w-full text-white py-3 px-4 rounded-lg font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all transform ${
                   isAnalyzing 
                     ? 'bg-gradient-to-r from-blue-500 to-purple-500 cursor-not-allowed animate-pulse' 
-                    : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 hover:scale-[1.02] active:scale-[0.98]'
+                    : 'bg-violet-600 hover:bg-violet-700 hover:scale-[1.02] active:scale-[0.98]'
                 } disabled:opacity-50 disabled:cursor-not-allowed`}
               >
                 {isAnalyzing ? (
@@ -1149,7 +1149,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
           /* Premium Analysis Results Display */
           <div className="bg-white rounded-xl shadow-2xl overflow-hidden">
             {/* Results Header */}
-            <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-4">
+            <div className="bg-violet-600 hover:bg-violet-700 text-white px-6 py-4">
             <div className="flex items-center justify-between">
               <div>
                   <h2 className="text-xl font-semibold">

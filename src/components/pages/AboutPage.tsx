@@ -25,8 +25,8 @@ const AboutPage = ({ onNavigate, user, onLogout }: AboutPageProps) => {
       <div className="fixed inset-0 -z-10 bg-[radial-gradient(ellipse_80%_50%_at_50%_100%,rgba(254,215,170,0.3),transparent_50%)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_100%,rgba(254,215,170,0.1),transparent_50%)] pointer-events-none" aria-hidden />
 
       {/* Floating blobs */}
-      <div className="fixed top-[10%] left-[5%] w-72 h-72 rounded-[40%_60%_70%_30%/40%_50%_60%_50%] bg-gradient-to-br from-fuchsia-300/25 to-pink-400/20 dark:from-fuchsia-500/15 dark:to-pink-600/10 blur-3xl animate-blob-float hidden xl:block pointer-events-none" />
-      <div className="fixed top-[20%] right-[10%] w-64 h-64 rounded-[60%_40%_30%_70%/60%_30%_70%_40%] bg-gradient-to-br from-rose-300/25 to-red-400/20 dark:from-rose-500/15 dark:to-red-600/10 blur-3xl animate-blob-float hidden xl:block pointer-events-none" style={{ animationDelay: '-2s' }} />
+      <div className="fixed top-[10%] left-[5%] w-72 h-72 rounded-[40%_60%_70%_30%/40%_50%_60%_50%] bg-gradient-to-br from-fuchsia-300/25 to-fuchsia-400/20 dark:from-fuchsia-500/15 dark:to-fuchsia-600/10 blur-3xl animate-blob-float hidden xl:block pointer-events-none" />
+      <div className="fixed top-[20%] right-[10%] w-64 h-64 rounded-[60%_40%_30%_70%/60%_30%_70%_40%] bg-gradient-to-br from-violet-300/25 to-red-400/20 dark:from-violet-500/15 dark:to-red-600/10 blur-3xl animate-blob-float hidden xl:block pointer-events-none" style={{ animationDelay: '-2s' }} />
       <div className="fixed bottom-[25%] left-[15%] w-48 h-48 rounded-[30%_70%_70%_30%/30%_30%_70%_70%] bg-gradient-to-br from-amber-300/20 to-orange-400/15 dark:from-amber-500/10 dark:to-orange-600/8 blur-3xl animate-blob-float hidden lg:block pointer-events-none" style={{ animationDelay: '-4s' }} />
 
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="about" />
@@ -43,11 +43,11 @@ const AboutPage = ({ onNavigate, user, onLogout }: AboutPageProps) => {
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-10 lg:gap-12">
             <div className="flex-1 text-center lg:text-left max-w-3xl mx-auto lg:mx-0">
-              <span className="inline-flex items-center px-4 py-1.5 bg-rose-100 dark:bg-rose-900/50 text-rose-700 dark:text-rose-400 rounded-full text-sm font-semibold mb-6">
+              <span className="inline-flex items-center px-4 py-1.5 bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-400 rounded-full text-sm font-semibold mb-6">
                 About Us
               </span>
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-stone-800 dark:text-stone-100 mb-6 leading-tight">
-                Empowering academic<br className="hidden sm:block" /> <span className="text-rose-500">excellence</span> worldwide
+                Empowering academic<br className="hidden sm:block" /> <span className="text-violet-500">excellence</span> worldwide
               </h1>
               <p className="text-lg text-stone-600 dark:text-stone-400 leading-relaxed">
                 We&apos;re building the complete AI toolkit for students: essay feedback, citations, study packs, focus mode, and more.
@@ -73,8 +73,8 @@ const AboutPage = ({ onNavigate, user, onLogout }: AboutPageProps) => {
               <div className="space-y-3">
                 {['Essay analysis with professor-style feedback', 'Online citations in 6 styles', 'Study packs: quizzes, flashcards, crosswords'].map((item, i) => (
                   <div key={i} className="flex items-center space-x-3">
-                    <div className="w-6 h-6 bg-rose-100 dark:bg-rose-900/50 rounded-full flex items-center justify-center flex-shrink-0">
-                      <svg className="w-4 h-4 text-rose-600 dark:text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="w-6 h-6 bg-violet-100 dark:bg-violet-900/50 rounded-full flex items-center justify-center flex-shrink-0">
+                      <svg className="w-4 h-4 text-violet-600 dark:text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                       </svg>
                     </div>
@@ -84,7 +84,7 @@ const AboutPage = ({ onNavigate, user, onLogout }: AboutPageProps) => {
               </div>
             </div>
             
-            <div className="rounded-2xl sm:rounded-3xl overflow-hidden border border-white/60 dark:border-stone-600/50 shadow-xl shadow-stone-900/5 dark:shadow-black/20 backdrop-blur-2xl bg-gradient-to-br from-rose-500/10 via-red-500/5 to-fuchsia-500/10 dark:from-rose-900/30 dark:via-red-900/20 dark:to-fuchsia-900/20 p-6 sm:p-8">
+            <div className="rounded-2xl sm:rounded-3xl overflow-hidden border border-white/60 dark:border-stone-600/50 shadow-xl shadow-stone-900/5 dark:shadow-black/20 backdrop-blur-2xl bg-gradient-to-br from-violet-500/10 via-red-500/5 to-fuchsia-500/10 dark:from-violet-900/30 dark:via-red-900/20 dark:to-fuchsia-900/20 p-6 sm:p-8">
               <div className="grid grid-cols-2 gap-4 sm:gap-6">
                 {[
                   { value: '50K+', label: 'Students' },
@@ -93,7 +93,7 @@ const AboutPage = ({ onNavigate, user, onLogout }: AboutPageProps) => {
                   { value: '50+', label: 'Countries' },
                 ].map((stat, i) => (
                   <div key={i} className="text-center p-4 rounded-2xl bg-white/60 dark:bg-stone-800/50">
-                    <div className="text-3xl sm:text-4xl font-bold text-rose-600 dark:text-rose-400">{stat.value}</div>
+                    <div className="text-3xl sm:text-4xl font-bold text-violet-600 dark:text-violet-400">{stat.value}</div>
                     <div className="text-stone-600 dark:text-stone-400 text-sm font-medium">{stat.label}</div>
                   </div>
                 ))}
@@ -107,7 +107,7 @@ const AboutPage = ({ onNavigate, user, onLogout }: AboutPageProps) => {
       <section className="py-16 sm:py-20">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-10">
-            <span className="inline-block px-4 py-1.5 bg-rose-100 dark:bg-rose-900/50 text-rose-700 dark:text-rose-400 rounded-full text-sm font-semibold mb-4">
+            <span className="inline-block px-4 py-1.5 bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-400 rounded-full text-sm font-semibold mb-4">
               What we offer
             </span>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-stone-800 dark:text-stone-100 mb-4">Our main features</h2>
@@ -118,9 +118,9 @@ const AboutPage = ({ onNavigate, user, onLogout }: AboutPageProps) => {
           
           <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
             {mainFeatures.map((f) => {
-              const borderCls = f.accent === 'rose' ? 'border-rose-200/80 dark:border-rose-700/50 hover:border-rose-300 dark:hover:border-rose-500/60' : f.accent === 'sky' ? 'border-sky-200/80 dark:border-sky-700/50 hover:border-sky-300 dark:hover:border-sky-500/60' : f.accent === 'amber' ? 'border-amber-200/80 dark:border-amber-700/50 hover:border-amber-300 dark:hover:border-amber-500/60' : 'border-rose-200/80 dark:border-rose-700/50 hover:border-rose-300 dark:hover:border-rose-500/60';
-              const titleCls = f.accent === 'rose' ? 'text-rose-700 dark:text-rose-400' : f.accent === 'sky' ? 'text-sky-700 dark:text-sky-400' : f.accent === 'amber' ? 'text-amber-700 dark:text-amber-400' : 'text-rose-700 dark:text-rose-400';
-              const iconBgCls = f.accent === 'rose' ? 'bg-rose-100 dark:bg-rose-900/50' : f.accent === 'sky' ? 'bg-sky-100 dark:bg-sky-900/50' : f.accent === 'amber' ? 'bg-amber-100 dark:bg-amber-900/50' : 'bg-rose-100 dark:bg-rose-900/50';
+              const borderCls = f.accent === 'rose' ? 'border-violet-200/80 dark:border-violet-700/50 hover:border-violet-300 dark:hover:border-violet-500/60' : f.accent === 'sky' ? 'border-sky-200/80 dark:border-sky-700/50 hover:border-sky-300 dark:hover:border-sky-500/60' : f.accent === 'amber' ? 'border-amber-200/80 dark:border-amber-700/50 hover:border-amber-300 dark:hover:border-amber-500/60' : 'border-violet-200/80 dark:border-violet-700/50 hover:border-violet-300 dark:hover:border-violet-500/60';
+              const titleCls = f.accent === 'rose' ? 'text-violet-700 dark:text-violet-400' : f.accent === 'sky' ? 'text-sky-700 dark:text-sky-400' : f.accent === 'amber' ? 'text-amber-700 dark:text-amber-400' : 'text-violet-700 dark:text-violet-400';
+              const iconBgCls = f.accent === 'rose' ? 'bg-violet-100 dark:bg-violet-900/50' : f.accent === 'sky' ? 'bg-sky-100 dark:bg-sky-900/50' : f.accent === 'amber' ? 'bg-amber-100 dark:bg-amber-900/50' : 'bg-violet-100 dark:bg-violet-900/50';
               return (
                 <button key={f.id} onClick={() => onNavigate(f.id)} className={`group relative rounded-2xl sm:rounded-3xl overflow-hidden border-2 ${borderCls} shadow-xl shadow-stone-900/5 dark:shadow-black/20 backdrop-blur-2xl bg-white/80 dark:bg-stone-800/80 p-6 hover:shadow-2xl transition-all duration-300 text-left`}>
                   <div className="relative flex flex-col items-center text-center mb-4">
@@ -133,7 +133,7 @@ const AboutPage = ({ onNavigate, user, onLogout }: AboutPageProps) => {
             })}
           </div>
           <div className="text-center mt-8">
-            <button onClick={() => onNavigate('features')} className="text-rose-600 dark:text-rose-400 font-semibold hover:text-rose-700 dark:hover:text-rose-300 transition-colors">
+            <button onClick={() => onNavigate('features')} className="text-violet-600 dark:text-violet-400 font-semibold hover:text-violet-700 dark:hover:text-violet-300 transition-colors">
               See all features →
             </button>
           </div>
@@ -144,7 +144,7 @@ const AboutPage = ({ onNavigate, user, onLogout }: AboutPageProps) => {
       <section className="py-16 sm:py-20">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-10">
-            <span className="inline-block px-4 py-1.5 bg-rose-100 dark:bg-rose-900/50 text-rose-700 dark:text-rose-400 rounded-full text-sm font-semibold mb-4">
+            <span className="inline-block px-4 py-1.5 bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-400 rounded-full text-sm font-semibold mb-4">
               Principles
             </span>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-stone-800 dark:text-stone-100 mb-4">Our values</h2>
@@ -154,7 +154,7 @@ const AboutPage = ({ onNavigate, user, onLogout }: AboutPageProps) => {
           </div>
           
           <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
-            <div className="rounded-2xl sm:rounded-3xl border border-white/60 dark:border-stone-600/50 shadow-xl shadow-stone-900/5 dark:shadow-black/20 backdrop-blur-2xl bg-white/70 dark:bg-stone-800/70 p-6 text-center hover:shadow-2xl hover:border-rose-300 dark:hover:border-rose-500/60 transition-all">
+            <div className="rounded-2xl sm:rounded-3xl border border-white/60 dark:border-stone-600/50 shadow-xl shadow-stone-900/5 dark:shadow-black/20 backdrop-blur-2xl bg-white/70 dark:bg-stone-800/70 p-6 text-center hover:shadow-2xl hover:border-violet-300 dark:hover:border-violet-500/60 transition-all">
               <div className="flex justify-center mb-4">
                 <ScholarMascot size={64} animated={false} pose="analyzing" />
               </div>
@@ -162,7 +162,7 @@ const AboutPage = ({ onNavigate, user, onLogout }: AboutPageProps) => {
               <p className="text-stone-600 dark:text-stone-400 text-sm">Highest standards in AI analysis and feedback</p>
             </div>
 
-            <div className="rounded-2xl sm:rounded-3xl border border-white/60 dark:border-stone-600/50 shadow-xl shadow-stone-900/5 dark:shadow-black/20 backdrop-blur-2xl bg-white/70 dark:bg-stone-800/70 p-6 text-center hover:shadow-2xl hover:border-rose-300 dark:hover:border-rose-500/60 transition-all">
+            <div className="rounded-2xl sm:rounded-3xl border border-white/60 dark:border-stone-600/50 shadow-xl shadow-stone-900/5 dark:shadow-black/20 backdrop-blur-2xl bg-white/70 dark:bg-stone-800/70 p-6 text-center hover:shadow-2xl hover:border-violet-300 dark:hover:border-violet-500/60 transition-all">
               <div className="flex justify-center mb-4">
                 <ScholarMascot size={64} animated={false} pose="thinking" />
               </div>
@@ -170,7 +170,7 @@ const AboutPage = ({ onNavigate, user, onLogout }: AboutPageProps) => {
               <p className="text-stone-600 dark:text-stone-400 text-sm">Enterprise-grade security for your documents</p>
             </div>
 
-            <div className="rounded-2xl sm:rounded-3xl border border-white/60 dark:border-stone-600/50 shadow-xl shadow-stone-900/5 dark:shadow-black/20 backdrop-blur-2xl bg-white/70 dark:bg-stone-800/70 p-6 text-center hover:shadow-2xl hover:border-rose-300 dark:hover:border-rose-500/60 transition-all">
+            <div className="rounded-2xl sm:rounded-3xl border border-white/60 dark:border-stone-600/50 shadow-xl shadow-stone-900/5 dark:shadow-black/20 backdrop-blur-2xl bg-white/70 dark:bg-stone-800/70 p-6 text-center hover:shadow-2xl hover:border-violet-300 dark:hover:border-violet-500/60 transition-all">
               <div className="flex justify-center mb-4">
                 <ScholarMascot size={64} animated={false} pose="pointing" />
               </div>
@@ -178,7 +178,7 @@ const AboutPage = ({ onNavigate, user, onLogout }: AboutPageProps) => {
               <p className="text-stone-600 dark:text-stone-400 text-sm">Continuous improvement of our technology</p>
             </div>
 
-            <div className="rounded-2xl sm:rounded-3xl border border-white/60 dark:border-stone-600/50 shadow-xl shadow-stone-900/5 dark:shadow-black/20 backdrop-blur-2xl bg-white/70 dark:bg-stone-800/70 p-6 text-center hover:shadow-2xl hover:border-rose-300 dark:hover:border-rose-500/60 transition-all">
+            <div className="rounded-2xl sm:rounded-3xl border border-white/60 dark:border-stone-600/50 shadow-xl shadow-stone-900/5 dark:shadow-black/20 backdrop-blur-2xl bg-white/70 dark:bg-stone-800/70 p-6 text-center hover:shadow-2xl hover:border-violet-300 dark:hover:border-violet-500/60 transition-all">
               <div className="flex justify-center mb-4">
                 <ScholarMascot size={64} animated={false} pose="waving" />
               </div>
@@ -229,7 +229,7 @@ const AboutPage = ({ onNavigate, user, onLogout }: AboutPageProps) => {
               <>
                 <button 
                   onClick={() => onNavigate('dashboard')}
-                  className="px-6 py-3 bg-gradient-to-r from-rose-500 to-pink-600 text-white font-bold rounded-2xl hover:from-rose-400 hover:to-pink-500 shadow-lg shadow-rose-500/25 transition-all"
+                  className="px-6 py-3 bg-violet-600 hover:bg-violet-500 text-white font-bold rounded-2xl hover:bg-violet-500 shadow-lg shadow-violet-500/25 transition-all"
                 >
                   Go to Dashboard
                 </button>
@@ -244,7 +244,7 @@ const AboutPage = ({ onNavigate, user, onLogout }: AboutPageProps) => {
               <>
                 <button 
                   onClick={() => onNavigate('signup')}
-                  className="px-6 py-3 bg-gradient-to-r from-rose-500 to-pink-600 text-white font-bold rounded-2xl hover:from-rose-400 hover:to-pink-500 shadow-lg shadow-rose-500/25 transition-all"
+                  className="px-6 py-3 bg-violet-600 hover:bg-violet-500 text-white font-bold rounded-2xl hover:bg-violet-500 shadow-lg shadow-violet-500/25 transition-all"
                 >
                   Try Free
                 </button>

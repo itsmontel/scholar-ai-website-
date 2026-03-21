@@ -352,7 +352,7 @@ const QuickReviewModal = ({ userName, userId, onComplete, onSkip }: QuickReviewM
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-stone-900/60 backdrop-blur-sm animate-smoothFadeIn">
         <div className="relative w-full max-w-md max-h-[90vh] overflow-y-auto bg-white rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden animate-smoothSlideUp">
-          <div className="h-3 bg-gradient-to-r from-rose-500 via-pink-500 to-fuchsia-500" />
+          <div className="h-3 bg-violet-600" />
           <div className="p-4 sm:p-8 text-center">
             <div className="mb-3 sm:mb-4">
               <ScholarMascot size={100} animated={true} />
@@ -365,7 +365,7 @@ const QuickReviewModal = ({ userName, userId, onComplete, onSkip }: QuickReviewM
             </p>
             <button
               onClick={handleClose}
-              className="px-8 py-3 bg-gradient-to-r from-violet-600 to-purple-600 text-white rounded-full font-semibold shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all"
+              className="px-8 py-3 bg-violet-600 hover:bg-violet-500 text-white rounded-full font-semibold shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all"
             >
               Got it!
             </button>
@@ -380,7 +380,7 @@ const QuickReviewModal = ({ userName, userId, onComplete, onSkip }: QuickReviewM
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-stone-900/60 backdrop-blur-sm animate-smoothFadeIn">
         <div className="relative w-full max-w-md bg-white rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden animate-smoothSlideUp">
-          <div className="h-3 bg-gradient-to-r from-rose-500 via-pink-500 to-fuchsia-500" />
+          <div className="h-3 bg-violet-600" />
           <div className="p-6 sm:p-8 text-center">
             <div className="mb-4 sm:mb-6 flex justify-center">
               <ScholarMascot size={120} animated={true} pose="waving" />
@@ -404,7 +404,7 @@ const QuickReviewModal = ({ userName, userId, onComplete, onSkip }: QuickReviewM
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <button
                 onClick={() => setShowWelcome(false)}
-                className="px-8 py-3.5 bg-gradient-to-r from-violet-600 to-purple-600 text-white rounded-full font-semibold text-lg shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all"
+                className="px-8 py-3.5 bg-violet-600 hover:bg-violet-500 text-white rounded-full font-semibold text-lg shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all"
               >
                 Let's Go! 🚀
               </button>
@@ -428,7 +428,7 @@ const QuickReviewModal = ({ userName, userId, onComplete, onSkip }: QuickReviewM
       return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-stone-900/60 backdrop-blur-sm animate-smoothFadeIn overflow-y-auto">
           <div className="relative w-full max-w-lg max-h-[min(calc(100vh-1rem),90vh)] sm:max-h-[calc(100vh-2rem)] bg-white rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden overflow-y-auto my-auto animate-smoothSlideUp">
-            <div className="h-3 bg-gradient-to-r from-rose-500 via-pink-500 to-fuchsia-500" />
+            <div className="h-3 bg-violet-600" />
             <div className="p-4 sm:p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-bold text-stone-800">Review Questions</h2>
@@ -532,13 +532,13 @@ const QuickReviewModal = ({ userName, userId, onComplete, onSkip }: QuickReviewM
           {scorePercentage >= 60 && (
             <>
               <div className="absolute top-10 left-10 w-3 h-3 bg-yellow-400 rounded-full animate-bounce" style={{ animationDelay: '0s' }} />
-              <div className="absolute top-16 right-12 w-2 h-2 bg-pink-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }} />
+              <div className="absolute top-16 right-12 w-2 h-2 bg-fuchsia-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }} />
               <div className="absolute top-8 right-24 w-2.5 h-2.5 bg-violet-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
               <div className="absolute top-20 left-20 w-2 h-2 bg-emerald-400 rounded-full animate-bounce" style={{ animationDelay: '0.15s' }} />
             </>
           )}
           
-          <div className="h-3 bg-gradient-to-r from-rose-500 via-pink-500 to-fuchsia-500" />
+          <div className="h-3 bg-violet-600" />
           
           <div className="p-4 sm:p-8 text-center overflow-y-auto">
             <div className="mb-3 sm:mb-6 flex justify-center">
@@ -565,14 +565,14 @@ const QuickReviewModal = ({ userName, userId, onComplete, onSkip }: QuickReviewM
             <div className="my-4 sm:my-6">
               <div className="inline-flex flex-wrap items-center justify-center gap-2 sm:gap-3 px-4 sm:px-6 py-3 sm:py-4 bg-gradient-to-r from-violet-50 to-purple-50 rounded-xl sm:rounded-2xl border border-violet-100">
                 <div className="text-center">
-                  <div className="text-2xl sm:text-4xl font-bold bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">
+                  <div className="text-2xl sm:text-4xl font-bold bg-violet-600 hover:bg-violet-500 bg-clip-text text-transparent">
                     {score}/{reviewItems.length}
                   </div>
                   <div className="text-[10px] sm:text-xs text-stone-500 font-medium">CORRECT</div>
                 </div>
                 <div className="w-px h-8 sm:h-12 bg-violet-200 hidden sm:block" />
                 <div className="text-center">
-                  <div className="text-2xl sm:text-4xl font-bold bg-gradient-to-r from-amber-500 to-orange-500 bg-clip-text text-transparent">
+                  <div className="text-2xl sm:text-4xl font-bold bg-amber-600 bg-clip-text text-transparent">
                     {scorePercentage}%
                   </div>
                   <div className="text-[10px] sm:text-xs text-stone-500 font-medium">SCORE</div>
@@ -613,7 +613,7 @@ const QuickReviewModal = ({ userName, userId, onComplete, onSkip }: QuickReviewM
               )}
               <button
                 onClick={handleClose}
-                className="px-6 sm:px-10 py-3 sm:py-4 bg-gradient-to-r from-violet-600 to-purple-600 text-white rounded-full font-semibold text-base sm:text-lg shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all"
+                className="px-6 sm:px-10 py-3 sm:py-4 bg-violet-600 hover:bg-violet-500 text-white rounded-full font-semibold text-base sm:text-lg shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all"
               >
                 Continue to Dashboard
               </button>
@@ -791,7 +791,7 @@ const QuickReviewModal = ({ userName, userId, onComplete, onSkip }: QuickReviewM
                 <div className="flex justify-center pt-1 sm:pt-2 flex-shrink-0">
                   <button
                     onClick={goToNext}
-                    className="px-6 sm:px-8 py-2.5 sm:py-3 bg-gradient-to-r from-violet-600 to-purple-600 text-white rounded-full font-semibold text-sm sm:text-base shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-2"
+                    className="px-6 sm:px-8 py-2.5 sm:py-3 bg-violet-600 hover:bg-violet-500 text-white rounded-full font-semibold text-sm sm:text-base shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-2"
                   >
                     {currentIndex === reviewItems.length - 1 ? 'See Results' : 'Next Question'}
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

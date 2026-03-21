@@ -113,13 +113,13 @@ const ThesisGeneratorPage = ({ onNavigate, user, onLogout }: ThesisGeneratorPage
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="thesis-generator" />
 
       {/* Hero Section */}
-      <section className="py-16 sm:py-20 bg-gradient-to-b from-rose-50/50 to-white">
+      <section className="py-16 sm:py-20 bg-gradient-to-b from-violet-50/50 to-white">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center max-w-3xl mx-auto">
             <div className="inline-flex items-center justify-center mb-6">
               <ScholarMascot size={80} animated={false} pose="default" />
             </div>
-            <span className="inline-flex items-center px-4 py-1.5 bg-rose-100 text-rose-700 rounded-full text-sm font-semibold mb-5">
+            <span className="inline-flex items-center px-4 py-1.5 bg-violet-100 text-violet-700 rounded-full text-sm font-semibold mb-5">
               Free Tool
             </span>
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-5 leading-tight">
@@ -146,7 +146,7 @@ const ThesisGeneratorPage = ({ onNavigate, user, onLogout }: ThesisGeneratorPage
                     onClick={() => setEssayType(type.value as EssayType)}
                     className={`p-3 rounded-xl text-left transition-all border-2 ${
                       essayType === type.value
-                        ? 'bg-rose-50 border-rose-500 text-rose-700'
+                        ? 'bg-violet-50 border-violet-500 text-violet-700'
                         : 'bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100'
                     }`}
                   >
@@ -166,7 +166,7 @@ const ThesisGeneratorPage = ({ onNavigate, user, onLogout }: ThesisGeneratorPage
                   value={topic}
                   onChange={(e) => setTopic(e.target.value)}
                   placeholder="e.g., social media usage among teenagers"
-                  className="w-full px-4 py-3 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-rose-500 focus:bg-white outline-none transition-all"
+                  className="w-full px-4 py-3 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
                 />
               </div>
 
@@ -179,7 +179,7 @@ const ThesisGeneratorPage = ({ onNavigate, user, onLogout }: ThesisGeneratorPage
                       value={subject1}
                       onChange={(e) => setSubject1(e.target.value)}
                       placeholder="e.g., traditional education"
-                      className="w-full px-4 py-3 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-rose-500 focus:bg-white outline-none transition-all"
+                      className="w-full px-4 py-3 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
                     />
                   </div>
                   <div>
@@ -189,7 +189,7 @@ const ThesisGeneratorPage = ({ onNavigate, user, onLogout }: ThesisGeneratorPage
                       value={subject2}
                       onChange={(e) => setSubject2(e.target.value)}
                       placeholder="e.g., online learning"
-                      className="w-full px-4 py-3 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-rose-500 focus:bg-white outline-none transition-all"
+                      className="w-full px-4 py-3 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
                     />
                   </div>
                 </div>
@@ -208,7 +208,7 @@ const ThesisGeneratorPage = ({ onNavigate, user, onLogout }: ThesisGeneratorPage
                       ? "e.g., has negative effects on mental health" 
                       : "e.g., reveals underlying themes of isolation"
                     }
-                    className="w-full px-4 py-3 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-rose-500 focus:bg-white outline-none transition-all"
+                    className="w-full px-4 py-3 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
                   />
                 </div>
               )}
@@ -226,28 +226,28 @@ const ThesisGeneratorPage = ({ onNavigate, user, onLogout }: ThesisGeneratorPage
                     value={reason1}
                     onChange={(e) => setReason1(e.target.value)}
                     placeholder={essayType === 'expository' ? "Point 1" : "Reason / Element 1"}
-                    className="w-full px-4 py-3 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-rose-500 focus:bg-white outline-none transition-all"
+                    className="w-full px-4 py-3 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
                   />
                   <input
                     type="text"
                     value={reason2}
                     onChange={(e) => setReason2(e.target.value)}
                     placeholder={essayType === 'expository' ? "Point 2" : "Reason / Element 2"}
-                    className="w-full px-4 py-3 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-rose-500 focus:bg-white outline-none transition-all"
+                    className="w-full px-4 py-3 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
                   />
                   <input
                     type="text"
                     value={reason3}
                     onChange={(e) => setReason3(e.target.value)}
                     placeholder={essayType === 'expository' ? "Point 3 (optional)" : "Reason / Element 3 (optional)"}
-                    className="w-full px-4 py-3 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-rose-500 focus:bg-white outline-none transition-all"
+                    className="w-full px-4 py-3 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
                   />
                 </div>
               </div>
 
               <button
                 onClick={generateThesis}
-                className="w-full py-3.5 bg-gradient-to-r from-rose-600 to-red-600 text-white font-semibold rounded-xl hover:shadow-lg transition-all"
+                className="w-full py-3.5 bg-violet-600 hover:bg-violet-500 text-white font-semibold rounded-xl hover:shadow-lg transition-all"
               >
                 Generate Thesis Statement
               </button>
@@ -255,7 +255,7 @@ const ThesisGeneratorPage = ({ onNavigate, user, onLogout }: ThesisGeneratorPage
 
             {/* Generated Thesis */}
             {thesis && (
-              <div className="mt-8 p-6 bg-gradient-to-r from-rose-50 to-red-50 rounded-xl border border-rose-200">
+              <div className="mt-8 p-6 bg-gradient-to-r from-violet-50 to-red-50 rounded-xl border border-violet-200">
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="font-semibold text-gray-900">Your Thesis Statement</h3>
                   <button
@@ -282,8 +282,8 @@ const ThesisGeneratorPage = ({ onNavigate, user, onLogout }: ThesisGeneratorPage
           <h2 className="text-2xl font-bold text-gray-900 mb-8 text-center">What Makes a Strong Thesis?</h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             <div className="bg-white border border-gray-200 rounded-2xl p-6">
-              <div className="w-12 h-12 bg-rose-50 rounded-xl flex items-center justify-center mb-4">
-                <svg className="w-6 h-6 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-12 h-12 bg-violet-50 rounded-xl flex items-center justify-center mb-4">
+                <svg className="w-6 h-6 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>

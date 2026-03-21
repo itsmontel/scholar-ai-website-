@@ -1004,7 +1004,7 @@ const AdminDashboard = ({ onNavigate, user: _user }: UserProps) => (
     <nav className="bg-white border-b border-gray-200 px-8 py-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2">
-          <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+          <div className="w-8 h-8 bg-violet-600 hover:bg-violet-700 rounded-lg flex items-center justify-center">
             <span className="text-white font-bold text-sm">A</span>
           </div>
           <span className="text-xl font-bold text-gray-900">AcademicAI Admin</span>
@@ -1093,7 +1093,7 @@ const CollaborationPage = ({ onNavigate, user: _user }: UserProps) => (
     <nav className="bg-white border-b border-gray-200 px-8 py-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2">
-          <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+          <div className="w-8 h-8 bg-violet-600 hover:bg-violet-700 rounded-lg flex items-center justify-center">
             <span className="text-white font-bold text-sm">A</span>
           </div>
           <span className="text-xl font-bold text-gray-900">AcademicAI</span>
@@ -1141,7 +1141,7 @@ const CollaborationPage = ({ onNavigate, user: _user }: UserProps) => (
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center">
+                <div className="w-10 h-10 bg-violet-600 hover:bg-violet-700 rounded-full flex items-center justify-center">
                   <span className="text-white font-bold text-sm">DJ</span>
                 </div>
                 <div>

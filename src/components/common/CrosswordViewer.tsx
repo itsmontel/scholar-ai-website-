@@ -264,7 +264,7 @@ const CrosswordViewer = ({ grid, placedWords, title, onEnlarge }: CrosswordViewe
             <div className="flex gap-2 pt-2">
               <button
                 onClick={() => setChecked(true)}
-                className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 text-white font-semibold text-sm"
+                className="px-4 py-2 rounded-xl bg-amber-600 text-white font-semibold text-sm"
               >
                 Check Answers
               </button>

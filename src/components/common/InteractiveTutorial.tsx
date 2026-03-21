@@ -498,7 +498,7 @@ const InteractiveTutorial = ({ userName, onComplete }: InteractiveTutorialProps)
           {/* Progress bar */}
           <div className="h-1 bg-stone-100 dark:bg-stone-700">
           <div
-            className="h-full bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 rounded-r-full"
+            className="h-full bg-violet-600 rounded-r-full"
             style={{ width: `${progress}%`, transition: 'width 0.9s cubic-bezier(0.22,1,0.36,1)' }}
             />
           </div>
@@ -565,7 +565,7 @@ const InteractiveTutorial = ({ userName, onComplete }: InteractiveTutorialProps)
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" /></svg>
                   </button>
                 )}
-                <button onClick={goNext} className="h-8 px-3.5 bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 text-white rounded-lg font-bold text-xs shadow-lg shadow-rose-500/25 hover:shadow-rose-500/40 transition-all active:scale-95 flex items-center gap-1.5">
+                <button onClick={goNext} className="h-8 px-3.5 bg-violet-600 hover:bg-violet-700 text-white rounded-lg font-bold text-xs shadow-lg shadow-violet-500/25 hover:shadow-violet-500/40 transition-all active:scale-95 flex items-center gap-1.5">
                   {isLast ? 'Get started' : (
                     <>Next <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" /></svg></>
                   )}

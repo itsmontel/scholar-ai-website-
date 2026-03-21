@@ -334,13 +334,13 @@ const EssayOutlineGeneratorPage = ({ onNavigate, user, onLogout }: EssayOutlineG
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="essay-outline" />
 
       {/* Hero Section */}
-      <section className="py-16 sm:py-20 bg-gradient-to-b from-rose-50/50 to-white">
+      <section className="py-16 sm:py-20 bg-gradient-to-b from-violet-50/50 to-white">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center max-w-3xl mx-auto">
             <div className="inline-flex items-center justify-center mb-6">
               <ScholarMascot size={80} animated={false} pose="default" />
             </div>
-            <span className="inline-flex items-center px-4 py-1.5 bg-rose-100 text-rose-700 rounded-full text-sm font-semibold mb-5">
+            <span className="inline-flex items-center px-4 py-1.5 bg-violet-100 text-violet-700 rounded-full text-sm font-semibold mb-5">
               Free Tool
             </span>
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-5 leading-tight">
@@ -371,7 +371,7 @@ const EssayOutlineGeneratorPage = ({ onNavigate, user, onLogout }: EssayOutlineG
                       onClick={() => setEssayType(type.value as EssayType)}
                       className={`p-3 rounded-xl text-left transition-all ${
                         essayType === type.value
-                          ? 'bg-rose-600 text-white'
+                          ? 'bg-violet-600 text-white'
                           : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
                       }`}
                     >
@@ -393,7 +393,7 @@ const EssayOutlineGeneratorPage = ({ onNavigate, user, onLogout }: EssayOutlineG
                   value={topic}
                   onChange={(e) => setTopic(e.target.value)}
                   placeholder="e.g., Climate Change and Its Effects"
-                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-rose-500 focus:border-transparent outline-none"
+                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-transparent outline-none"
                 />
               </div>
 
@@ -404,7 +404,7 @@ const EssayOutlineGeneratorPage = ({ onNavigate, user, onLogout }: EssayOutlineG
                   value={thesis}
                   onChange={(e) => setThesis(e.target.value)}
                   placeholder="e.g., Climate change poses significant threats to global ecosystems and requires immediate action..."
-                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-rose-500 focus:border-transparent outline-none resize-none h-20"
+                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-transparent outline-none resize-none h-20"
                 />
               </div>
 
@@ -419,7 +419,7 @@ const EssayOutlineGeneratorPage = ({ onNavigate, user, onLogout }: EssayOutlineG
                         onClick={() => setNumBodyParagraphs(num)}
                         className={`w-12 h-12 rounded-xl font-medium transition-all ${
                           numBodyParagraphs === num
-                            ? 'bg-rose-600 text-white'
+                            ? 'bg-violet-600 text-white'
                             : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                         }`}
                       >
@@ -432,7 +432,7 @@ const EssayOutlineGeneratorPage = ({ onNavigate, user, onLogout }: EssayOutlineG
 
               <button
                 onClick={generateOutline}
-                className="w-full px-6 py-3 bg-gradient-to-r from-rose-600 to-red-600 text-white font-semibold rounded-xl hover:shadow-lg transition-all"
+                className="w-full px-6 py-3 bg-violet-600 hover:bg-violet-500 text-white font-semibold rounded-xl hover:shadow-lg transition-all"
               >
                 Generate Outline
               </button>
@@ -458,17 +458,17 @@ const EssayOutlineGeneratorPage = ({ onNavigate, user, onLogout }: EssayOutlineG
                   
                   <div className="space-y-6">
                     {outline.map((section, index) => (
-                      <div key={index} className="border-l-4 border-rose-500 pl-4">
+                      <div key={index} className="border-l-4 border-violet-500 pl-4">
                         <h4 className="font-semibold text-gray-900 mb-2">{section.title}</h4>
                         <ul className="space-y-1.5 mb-2">
                           {section.points.map((point, pIndex) => (
                             <li key={pIndex} className="text-sm text-gray-600 flex items-start">
-                              <span className="text-rose-500 mr-2">•</span>
+                              <span className="text-violet-500 mr-2">•</span>
                               <span>{point}</span>
                             </li>
                           ))}
                         </ul>
-                        <p className="text-xs text-rose-600 bg-rose-50 px-2 py-1 rounded inline-block">
+                        <p className="text-xs text-violet-600 bg-violet-50 px-2 py-1 rounded inline-block">
                           💡 {section.tips}
                         </p>
                       </div>
@@ -477,8 +477,8 @@ const EssayOutlineGeneratorPage = ({ onNavigate, user, onLogout }: EssayOutlineG
                 </div>
               ) : (
                 <div className="bg-gray-50 border border-gray-200 rounded-2xl p-8 text-center h-full flex flex-col items-center justify-center">
-                  <div className="w-16 h-16 bg-rose-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <svg className="w-8 h-8 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="w-16 h-16 bg-violet-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg className="w-8 h-8 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
                   </div>

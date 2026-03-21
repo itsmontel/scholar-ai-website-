@@ -82,14 +82,14 @@ interface ActivityItem {
 }
 
 const activityMeta: Record<ActivityItem['type'], { emoji: string; bg: string; label: string; cardBg: string; border: string; accent: string; shape: 'circle' | 'square' | 'diamond' }> = {
-  document: { emoji: '📄', bg: 'bg-rose-100 dark:bg-rose-900/30', label: 'Uploaded', cardBg: 'from-rose-50 to-pink-50 dark:from-rose-900/20 dark:to-pink-900/20', border: 'border-rose-200/70 dark:border-rose-700/40', accent: 'text-rose-700 dark:text-rose-300', shape: 'circle' },
-  analysis: { emoji: '🔍', bg: 'bg-rose-100 dark:bg-rose-900/30', label: 'Analyzed', cardBg: 'from-rose-50 to-pink-50 dark:from-rose-900/20 dark:to-pink-900/20', border: 'border-rose-200/70 dark:border-rose-700/40', accent: 'text-rose-700 dark:text-rose-300', shape: 'square' },
+  document: { emoji: '📄', bg: 'bg-violet-100 dark:bg-violet-900/30', label: 'Uploaded', cardBg: 'from-violet-50 to-fuchsia-50 dark:from-violet-900/20 dark:to-fuchsia-900/20', border: 'border-violet-200/70 dark:border-violet-700/40', accent: 'text-violet-700 dark:text-violet-300', shape: 'circle' },
+  analysis: { emoji: '🔍', bg: 'bg-violet-100 dark:bg-violet-900/30', label: 'Analyzed', cardBg: 'from-violet-50 to-fuchsia-50 dark:from-violet-900/20 dark:to-fuchsia-900/20', border: 'border-violet-200/70 dark:border-violet-700/40', accent: 'text-violet-700 dark:text-violet-300', shape: 'square' },
   quiz: { emoji: '🎯', bg: 'bg-amber-100 dark:bg-amber-900/30', label: 'Quiz', cardBg: 'from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20', border: 'border-amber-200/70 dark:border-amber-700/40', accent: 'text-amber-700 dark:text-amber-300', shape: 'circle' },
   study_pack: { emoji: '📦', bg: 'bg-amber-100 dark:bg-amber-900/30', label: 'Study Pack', cardBg: 'from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20', border: 'border-amber-200/70 dark:border-amber-700/40', accent: 'text-amber-700 dark:text-amber-300', shape: 'diamond' },
   flashcard: { emoji: '🃏', bg: 'bg-violet-100 dark:bg-violet-900/30', label: 'Flashcards', cardBg: 'from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20', border: 'border-violet-200/70 dark:border-violet-700/40', accent: 'text-violet-700 dark:text-violet-300', shape: 'diamond' },
   crossword: { emoji: '🧩', bg: 'bg-orange-100 dark:bg-orange-900/30', label: 'Crossword', cardBg: 'from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20', border: 'border-orange-200/70 dark:border-orange-700/40', accent: 'text-orange-700 dark:text-orange-300', shape: 'square' },
   lesson: { emoji: '🎓', bg: 'bg-violet-100 dark:bg-violet-900/30', label: 'Lesson', cardBg: 'from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20', border: 'border-violet-200/70 dark:border-violet-700/40', accent: 'text-violet-700 dark:text-violet-300', shape: 'circle' },
-  humanize: { emoji: '✨', bg: 'bg-fuchsia-100 dark:bg-fuchsia-900/30', label: 'Humanized', cardBg: 'from-fuchsia-50 to-pink-50 dark:from-fuchsia-900/20 dark:to-pink-900/20', border: 'border-fuchsia-200/70 dark:border-fuchsia-700/40', accent: 'text-fuchsia-700 dark:text-fuchsia-300', shape: 'diamond' },
+  humanize: { emoji: '✨', bg: 'bg-fuchsia-100 dark:bg-fuchsia-900/30', label: 'Humanized', cardBg: 'from-fuchsia-50 to-fuchsia-50 dark:from-fuchsia-900/20 dark:to-fuchsia-900/20', border: 'border-fuchsia-200/70 dark:border-fuchsia-700/40', accent: 'text-fuchsia-700 dark:text-fuchsia-300', shape: 'diamond' },
   summary: { emoji: '📋', bg: 'bg-teal-100 dark:bg-teal-900/30', label: 'Summary', cardBg: 'from-teal-50 to-cyan-50 dark:from-teal-900/20 dark:to-cyan-900/20', border: 'border-teal-200/70 dark:border-teal-700/40', accent: 'text-teal-700 dark:text-teal-300', shape: 'square' },
   citation: { emoji: '📚', bg: 'bg-sky-100 dark:bg-sky-900/30', label: 'Citations', cardBg: 'from-sky-50 to-blue-50 dark:from-sky-900/20 dark:to-blue-900/20', border: 'border-sky-200/70 dark:border-sky-700/40', accent: 'text-sky-700 dark:text-sky-300', shape: 'diamond' },
 };
@@ -1688,10 +1688,10 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
       <div className="fixed inset-0 -z-10 bg-[radial-gradient(ellipse_80%_50%_at_50%_100%,rgba(254,215,170,0.3),transparent_50%)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_100%,rgba(254,215,170,0.1),transparent_50%)] pointer-events-none" aria-hidden />
 
       {/* Floating blobs - playful Gen Z shapes */}
-      <div className="fixed top-[10%] left-[5%] w-72 h-72 rounded-[40%_60%_70%_30%/40%_50%_60%_50%] bg-gradient-to-br from-fuchsia-300/25 to-pink-400/20 dark:from-fuchsia-500/15 dark:to-pink-600/10 blur-3xl animate-blob-float hidden xl:block pointer-events-none" />
+      <div className="fixed top-[10%] left-[5%] w-72 h-72 rounded-[40%_60%_70%_30%/40%_50%_60%_50%] bg-gradient-to-br from-fuchsia-300/25 to-fuchsia-400/20 dark:from-fuchsia-500/15 dark:to-fuchsia-600/10 blur-3xl animate-blob-float hidden xl:block pointer-events-none" />
       <div className="fixed top-[20%] right-[10%] w-64 h-64 rounded-[60%_40%_30%_70%/60%_30%_70%_40%] bg-gradient-to-br from-violet-300/25 to-purple-400/20 dark:from-violet-500/15 dark:to-purple-600/10 blur-3xl animate-blob-float hidden xl:block pointer-events-none" style={{ animationDelay: '-2s' }} />
       <div className="fixed bottom-[25%] left-[15%] w-48 h-48 rounded-[30%_70%_70%_30%/30%_30%_70%_70%] bg-gradient-to-br from-amber-300/20 to-orange-400/15 dark:from-amber-500/10 dark:to-orange-600/8 blur-3xl animate-blob-float hidden lg:block pointer-events-none" style={{ animationDelay: '-4s' }} />
-      <div className="fixed top-[60%] right-[20%] w-40 h-40 rounded-full bg-gradient-to-br from-rose-300/20 to-pink-400/15 dark:from-rose-500/10 dark:to-pink-600/8 blur-2xl animate-float hidden lg:block pointer-events-none" style={{ animationDelay: '1s' }} />
+      <div className="fixed top-[60%] right-[20%] w-40 h-40 rounded-full bg-gradient-to-br from-violet-300/20 to-fuchsia-400/15 dark:from-violet-500/10 dark:to-fuchsia-600/8 blur-2xl animate-float hidden lg:block pointer-events-none" style={{ animationDelay: '1s' }} />
       
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="dashboard" />
 
@@ -1718,7 +1718,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
       {/* First analysis onboarding banner — dismissible; upload/library nudges use showFirstAnalysisOnboarding only */}
       {showFirstAnalysisOnboarding && !dismissedFirstAnalysisBanner && !showSoftPaywall && !showInteractiveTutorial && !showWelcomeTutorial && (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:ml-24 lg:mr-auto mb-4">
-          <div className="bg-gradient-to-r from-fuchsia-500 via-pink-500 to-rose-500 rounded-3xl p-5 sm:p-6 shadow-2xl shadow-fuchsia-500/30 border border-white/20 relative overflow-hidden backdrop-blur-sm">
+          <div className="bg-gradient-to-r from-fuchsia-500 via-fuchsia-500 to-violet-500 rounded-3xl p-5 sm:p-6 shadow-2xl shadow-fuchsia-500/30 border border-white/20 relative overflow-hidden backdrop-blur-sm">
             <button
               type="button"
               onClick={() => {
@@ -1806,7 +1806,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
               {/* Row 1: Greeting + mascot */}
               <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6">
                 <div className="hidden sm:block flex-shrink-0 relative group">
-                  <div className="absolute -inset-3 rounded-3xl bg-gradient-to-br from-rose-400/30 via-pink-400/20 to-fuchsia-400/20 dark:from-rose-600/20 dark:via-pink-600/15 dark:to-fuchsia-600/15 blur-2xl group-hover:blur-3xl transition-all duration-500" />
+                  <div className="absolute -inset-3 rounded-3xl bg-gradient-to-br from-violet-400/30 via-fuchsia-400/20 to-fuchsia-400/20 dark:from-violet-600/20 dark:via-fuchsia-600/15 dark:to-fuchsia-600/15 blur-2xl group-hover:blur-3xl transition-all duration-500" />
                   <div className="relative ring-4 ring-white/50 dark:ring-stone-700/50 rounded-3xl overflow-hidden">
                     <ScholarMascot size={96} animated={false} pose="default" />
                   </div>
@@ -1831,7 +1831,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                     ) : mode === 'citations' ? (
                       <span className="text-sky-600 dark:text-sky-400">Citations via academic sources in seconds.</span>
                     ) : (
-                      <span className="text-rose-600 dark:text-rose-400">Professor-style feedback on every essay.</span>
+                      <span className="text-violet-600 dark:text-violet-400">Professor-style feedback on every essay.</span>
                     )}
                   </p>
                   <p className="hidden sm:block text-stone-600 dark:text-stone-400 mt-3 text-sm sm:text-base max-w-md sm:max-w-lg leading-relaxed">
@@ -1843,7 +1843,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                       <><span className="text-sky-600 dark:text-sky-400 font-bold">Citations via academic sources in seconds.</span><span className="text-stone-500 dark:text-stone-400"> Plus essay feedback, study tools & focus mode.</span></>
                     ) : (
                       <>
-                        <span className="text-rose-600 dark:text-rose-400 font-bold">Professor-style feedback on every essay.</span>
+                        <span className="text-violet-600 dark:text-violet-400 font-bold">Professor-style feedback on every essay.</span>
                         <span className="text-stone-500 dark:text-stone-400"> Plus study tools, citations & focus mode.</span>
                       </>
                     )}
@@ -1862,7 +1862,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Search documents, quizzes..."
-                    className="w-full pl-11 pr-11 py-2.5 sm:py-3 bg-white/90 dark:bg-stone-700/70 border border-stone-200/80 dark:border-stone-600/60 rounded-2xl text-sm text-stone-800 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500 outline-none focus:border-rose-300 dark:focus:border-rose-500/60 focus:ring-2 focus:ring-rose-200/40 dark:focus:ring-rose-500/20 transition-all shadow-sm"
+                    className="w-full pl-11 pr-11 py-2.5 sm:py-3 bg-white/90 dark:bg-stone-700/70 border border-stone-200/80 dark:border-stone-600/60 rounded-2xl text-sm text-stone-800 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500 outline-none focus:border-violet-300 dark:focus:border-violet-500/60 focus:ring-2 focus:ring-violet-200/40 dark:focus:ring-violet-500/20 transition-all shadow-sm"
                   />
                   {searchQuery && (
                     <button onClick={() => setSearchQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 rounded-lg hover:bg-stone-200/60 dark:hover:bg-stone-600/50 transition-colors">
@@ -1932,7 +1932,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                 {usageStats.plan === 'free' && !loadingStats && (
                   <>
                     <div className="w-px h-8 bg-stone-200/80 dark:bg-stone-600/80 flex-shrink-0 hidden sm:block" />
-                    <button onClick={() => onNavigate('pricing')} className="w-full sm:w-auto flex items-center justify-center gap-1.5 px-3 sm:px-4 py-2.5 bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-400 hover:to-pink-500 text-white text-xs font-bold rounded-xl transition-all shadow-lg shadow-rose-500/25">
+                    <button onClick={() => onNavigate('pricing')} className="w-full sm:w-auto flex items-center justify-center gap-1.5 px-3 sm:px-4 py-2.5 bg-violet-600 hover:bg-violet-500 text-white text-xs font-bold rounded-xl transition-all shadow-lg shadow-violet-500/25">
                       <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
                       <span>Upgrade</span>
                     </button>
@@ -1945,7 +1945,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
           {/* FIVE FEATURE CARDS - 2 per row on mobile, 2 on sm, 5 on lg */}
           <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 gap-2 sm:gap-4" data-tutorial="feature-cards">
             {[
-              { id: 'analyze' as const, title: 'Analyze', desc: 'Get professor-style feedback on your essays', emoji: '📝', border: 'border-rose-200/80 dark:border-rose-700/50', iconBg: 'from-rose-500 to-pink-600', glow: 'shadow-rose-500/20', titleClr: 'text-rose-600 dark:text-rose-400', blob: 'from-rose-200/30 to-pink-200/20', badgeText: 'Popular', badgeClr: 'bg-rose-100 text-rose-700 dark:bg-rose-900/50 dark:text-rose-300' },
+              { id: 'analyze' as const, title: 'Analyze', desc: 'Get professor-style feedback on your essays', emoji: '📝', border: 'border-violet-200/80 dark:border-violet-700/50', iconBg: 'from-violet-500 to-fuchsia-600', glow: 'shadow-violet-500/20', titleClr: 'text-violet-600 dark:text-violet-400', blob: 'from-violet-200/30 to-fuchsia-200/20', badgeText: 'Popular', badgeClr: 'bg-violet-100 text-violet-700 dark:bg-violet-900/50 dark:text-violet-300' },
               { id: 'citations' as const, title: 'Citations', desc: 'Find and format academic sources instantly', emoji: '📚', border: 'border-sky-200/80 dark:border-sky-700/50', iconBg: 'from-sky-500 to-blue-600', glow: 'shadow-sky-500/20', titleClr: 'text-sky-600 dark:text-sky-400', blob: 'from-sky-200/30 to-blue-200/20', badgeText: null, badgeClr: '' },
               { id: 'quiz' as const, title: 'Study Pack', desc: 'Lessons, flashcards, quiz, crossword & Crater Blast from your notes', emoji: '📦', border: 'border-amber-200/80 dark:border-amber-700/50', iconBg: 'from-amber-500 to-orange-500', glow: 'shadow-amber-500/20', titleClr: 'text-amber-600 dark:text-amber-400', blob: 'from-amber-200/30 to-orange-200/20', badgeText: '5-in-1', badgeClr: 'bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300' },
               { id: 'focus_mode' as const, title: 'Focus Mode', desc: 'Block sites until you solve a puzzle or answer study questions', emoji: '🔒', border: 'border-violet-200/80 dark:border-violet-700/50', iconBg: 'from-violet-500 to-purple-600', glow: 'shadow-violet-500/20', titleClr: 'text-violet-600 dark:text-violet-400', blob: 'from-violet-200/30 to-purple-200/20', badgeText: FOCUS_MODE_COMING_SOON ? 'Soon' : 'New', badgeClr: FOCUS_MODE_COMING_SOON ? 'bg-amber-200/80 text-amber-800 dark:bg-amber-800/80 dark:text-amber-200' : 'bg-violet-100 text-violet-700 dark:bg-violet-900/50 dark:text-violet-300' },
@@ -1957,7 +1957,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                 key={card.id}
                 onClick={() => card.id === 'more-tools' ? onNavigate('more-tools') : (card.id === 'quiz' ? (() => { setMode('quiz'); setShowWordWarning(false); setSummaryResult(null); setQuizResult(null); setFlashcardResult(null); setCrosswordResult(null); setStudyPackResult(null); })() : setMode(card.id))}
                 data-tutorial={card.id === 'analyze' ? 'analyze-feature-card' : card.id === 'focus_mode' ? 'focus-card' : card.id === 'quiz' ? 'study-card' : card.id === 'more-tools' ? 'more-tools-card' : undefined}
-                className={`relative overflow-hidden rounded-xl sm:rounded-3xl p-3 sm:p-6 text-left transition-all duration-200 hover:scale-[1.02] hover:shadow-xl active:scale-[0.98] bg-white dark:bg-stone-800/95 border-2 ${card.border} shadow-lg ${card.glow} dark:shadow-black/10 backdrop-blur-sm group ${isActive ? 'ring-2 ring-offset-1 sm:ring-offset-2 ring-offset-stone-50 dark:ring-offset-stone-900 ' + (card.id === 'analyze' ? 'ring-rose-500' : card.id === 'citations' ? 'ring-sky-500' : card.id === 'quiz' ? 'ring-amber-500' : card.id === 'focus_mode' ? 'ring-violet-500' : '') : ''}`}
+                className={`relative overflow-hidden rounded-xl sm:rounded-3xl p-3 sm:p-6 text-left transition-all duration-200 hover:scale-[1.02] hover:shadow-xl active:scale-[0.98] bg-white dark:bg-stone-800/95 border-2 ${card.border} shadow-lg ${card.glow} dark:shadow-black/10 backdrop-blur-sm group ${isActive ? 'ring-2 ring-offset-1 sm:ring-offset-2 ring-offset-stone-50 dark:ring-offset-stone-900 ' + (card.id === 'analyze' ? 'ring-violet-500' : card.id === 'citations' ? 'ring-sky-500' : card.id === 'quiz' ? 'ring-amber-500' : card.id === 'focus_mode' ? 'ring-violet-500' : '') : ''}`}
               >
                 {/* Badge - top right */}
                 {card.badgeText && (
@@ -2038,7 +2038,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
               {/* MAIN FEATURE - Gen Z glass card */}
               <div data-tutorial="analyze-ready" className="relative rounded-2xl sm:rounded-[2rem] overflow-hidden p-[2px] mb-4 sm:mb-8 border border-white/40 dark:border-stone-600/40 shadow-2xl shadow-stone-900/10 dark:shadow-black/30 scroll-mt-8" style={mode === 'citations' ? { background: 'linear-gradient(135deg, rgba(14,165,233,0.2) 0%, rgba(59,130,246,0.15) 50%, rgba(99,102,241,0.1) 100%)' } : { background: 'linear-gradient(135deg, rgba(251,113,133,0.2) 0%, rgba(236,72,153,0.15) 50%, rgba(219,39,119,0.1) 100%)' }}>
                 <div className="relative rounded-[14px] sm:rounded-[30px] bg-white/90 dark:bg-stone-800/95 backdrop-blur-2xl border border-white/50 dark:border-stone-700/50 shadow-inner p-4 sm:p-10">
-                  {/* Soft glow orbs - Analyze: rose/pink, Citations: sky/blue */}
+                  {/* Soft glow orbs - Analyze: violet/fuchsia, Citations: sky/blue */}
                   {mode === 'citations' ? (
                     <>
                       <div className="absolute -top-20 -right-20 w-40 h-40 bg-sky-400/20 rounded-full blur-3xl pointer-events-none" />
@@ -2046,17 +2046,17 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                     </>
                   ) : (
                     <>
-                      <div className="absolute -top-20 -right-20 w-40 h-40 bg-rose-400/25 rounded-full blur-3xl pointer-events-none" />
-                      <div className="absolute -bottom-20 -left-20 w-40 h-40 bg-pink-400/20 rounded-full blur-3xl pointer-events-none" />
+                      <div className="absolute -top-20 -right-20 w-40 h-40 bg-violet-400/25 rounded-full blur-3xl pointer-events-none" />
+                      <div className="absolute -bottom-20 -left-20 w-40 h-40 bg-fuchsia-400/20 rounded-full blur-3xl pointer-events-none" />
                     </>
                   )}
 
                   {/* Hero headline - Analyze vs Citations (H1 for a11y / SEO) */}
                   <h1 className="relative text-xl sm:text-3xl md:text-4xl font-extrabold text-stone-900 dark:text-white text-center mb-2 tracking-tight">
                     {mode === 'citations' ? (
-                      <>Find <span className="bg-gradient-to-r from-sky-500 via-blue-500 to-indigo-500 bg-clip-text text-transparent" style={{ WebkitBackgroundClip: 'text' }}>academic sources</span> in seconds</>
+                      <>Find <span className="text-sky-600 dark:text-sky-400" style={{ WebkitBackgroundClip: 'text' }}>academic sources</span> in seconds</>
                     ) : (
-                      <><span className="bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 bg-clip-text text-transparent" style={{ WebkitBackgroundClip: 'text' }}>Paste</span> or <span className="bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 bg-clip-text text-transparent" style={{ WebkitBackgroundClip: 'text' }}>upload</span> your essay, get feedback in seconds</>
+                      <><span className="bg-violet-600 bg-clip-text text-transparent" style={{ WebkitBackgroundClip: 'text' }}>Paste</span> or <span className="bg-violet-600 bg-clip-text text-transparent" style={{ WebkitBackgroundClip: 'text' }}>upload</span> your essay, get feedback in seconds</>
                     )}
                   </h1>
                   <p className="relative text-stone-600 dark:text-stone-300 text-sm sm:text-lg text-center mb-6 sm:mb-8 max-w-xl mx-auto leading-relaxed">
@@ -2081,7 +2081,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                   <div className="relative flex rounded-xl sm:rounded-2xl bg-stone-100/80 dark:bg-stone-800/80 p-1 sm:p-1.5 mb-4 sm:mb-6 max-w-lg mx-auto shadow-inner">
                     <button
                       onClick={() => { setMode('analyze'); setShowWordWarning(false); setAnalyzeUploadError(''); setSummaryResult(null); setQuizResult(null); setFlashcardResult(null); setCrosswordResult(null); setStudyPackResult(null); }}
-                      className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-sm transition-all duration-200 ${mode === 'analyze' ? 'bg-white dark:bg-stone-700 text-rose-600 dark:text-rose-400 shadow-lg shadow-stone-200/50 dark:shadow-stone-900/50' : 'text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200'}`}
+                      className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-sm transition-all duration-200 ${mode === 'analyze' ? 'bg-white dark:bg-stone-700 text-violet-600 dark:text-violet-400 shadow-lg shadow-stone-200/50 dark:shadow-stone-900/50' : 'text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200'}`}
                     >
                       <span className="text-lg">📝</span> Analyze Text
                     </button>
@@ -2102,10 +2102,10 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                   {/* First analysis — nudge with arrow until at least one completed analysis */}
                   {showFirstAnalysisOnboarding && mode === 'analyze' && (
                     <div className="flex flex-col items-center gap-1 mb-4 animate-in fade-in slide-in-from-bottom-2 duration-500">
-                      <span className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-gradient-to-r from-rose-500/15 via-pink-500/15 to-rose-500/15 dark:from-rose-500/25 dark:via-pink-500/25 dark:to-rose-500/25 border border-rose-200/60 dark:border-rose-700/50 text-rose-700 dark:text-rose-200 text-sm font-bold shadow-lg shadow-rose-500/10">
+                      <span className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-gradient-to-r from-violet-500/15 via-fuchsia-500/15 to-violet-500/15 dark:from-violet-500/25 dark:via-fuchsia-500/25 dark:to-violet-500/25 border border-violet-200/60 dark:border-violet-700/50 text-violet-700 dark:text-violet-200 text-sm font-bold shadow-lg shadow-violet-500/10">
                         Start your first analysis — paste text or upload a file below, then Analyze Text
                       </span>
-                      <svg className="w-6 h-6 text-rose-500 dark:text-rose-400 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                      <svg className="w-6 h-6 text-violet-500 dark:text-violet-400 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
                       </svg>
                     </div>
@@ -2126,7 +2126,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                   {/* Typing box */}
                   {(mode === 'analyze' || mode === 'citations') && (
                     <div className="relative mb-2 max-w-3xl mx-auto">
-                      <div className={`relative rounded-2xl sm:rounded-3xl p-[2px] transition-all duration-300 focus-within:scale-[1.005] ${mode === 'citations' ? 'bg-gradient-to-br from-sky-400/80 via-blue-400/80 to-indigo-400/80 dark:from-sky-500/60 dark:via-blue-500/60 dark:to-indigo-500/60 shadow-[0_20px_50px_-15px_rgba(14,165,233,0.25)] dark:shadow-[0_20px_50px_-15px_rgba(0,0,0,0.4)] focus-within:shadow-[0_25px_60px_-15px_rgba(14,165,233,0.35)]' : 'bg-gradient-to-br from-rose-400/80 via-pink-400/80 to-rose-500/80 dark:from-rose-500/60 dark:via-pink-500/60 dark:to-rose-600/60 shadow-[0_20px_50px_-15px_rgba(244,63,94,0.25)] dark:shadow-[0_20px_50px_-15px_rgba(0,0,0,0.4)] focus-within:shadow-[0_25px_60px_-15px_rgba(244,63,94,0.35)]'}`}>
+                      <div className={`relative rounded-2xl sm:rounded-3xl p-[2px] transition-all duration-300 focus-within:scale-[1.005] ${mode === 'citations' ? 'bg-gradient-to-br from-sky-400/80 via-blue-400/80 to-indigo-400/80 dark:from-sky-500/60 dark:via-blue-500/60 dark:to-indigo-500/60 shadow-[0_20px_50px_-15px_rgba(14,165,233,0.25)] dark:shadow-[0_20px_50px_-15px_rgba(0,0,0,0.4)] focus-within:shadow-[0_25px_60px_-15px_rgba(14,165,233,0.35)]' : 'bg-gradient-to-br from-violet-400/80 via-fuchsia-400/80 to-violet-500/80 dark:from-violet-500/60 dark:via-fuchsia-500/60 dark:to-violet-600/60 shadow-[0_20px_50px_-15px_rgba(244,63,94,0.25)] dark:shadow-[0_20px_50px_-15px_rgba(0,0,0,0.4)] focus-within:shadow-[0_25px_60px_-15px_rgba(244,63,94,0.35)]'}`}>
                         <div className="relative rounded-[14px] sm:rounded-[22px] bg-white dark:bg-stone-800/95 backdrop-blur-sm min-h-[120px] sm:min-h-[180px]">
                           <textarea
                             value={inputText}
@@ -2177,10 +2177,10 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                                 type="button"
                                 onClick={() => analyzeFileInputRef.current?.click()}
                                 disabled={isParsingAnalyzeDoc}
-                                className={`flex items-center gap-2.5 px-5 py-3.5 rounded-2xl font-bold text-sm transition-all disabled:opacity-50 ${showFirstAnalysisOnboarding ? 'bg-gradient-to-r from-rose-500/[0.245] to-pink-500/[0.245] dark:from-rose-500/[0.343] dark:to-pink-500/[0.343] text-rose-800 dark:text-rose-200 border-2 border-rose-400/[0.784] dark:border-rose-500/[0.686] shadow-[0_0_25px_8px_rgba(244,63,94,0.343)] dark:shadow-[0_0_25px_8px_rgba(244,63,94,0.245)] ring-2 ring-rose-400/[0.392] dark:ring-rose-500/[0.294] hover:from-rose-500/[0.294] hover:to-pink-500/[0.294] dark:hover:from-rose-500/[0.392] dark:hover:to-pink-500/[0.392]' : 'bg-gradient-to-r from-rose-500/15 to-pink-500/15 dark:from-rose-500/25 dark:to-pink-500/25 text-rose-700 dark:text-rose-300 hover:from-rose-500/25 hover:to-pink-500/25 dark:hover:from-rose-500/35 dark:hover:to-pink-500/35 border-2 border-rose-300/80 dark:border-rose-600/60 shadow-md shadow-rose-500/15 hover:shadow-lg hover:shadow-rose-500/25'}`}
+                                className={`flex items-center gap-2.5 px-5 py-3.5 rounded-2xl font-bold text-sm transition-all disabled:opacity-50 ${showFirstAnalysisOnboarding ? 'bg-gradient-to-r from-violet-500/[0.245] to-fuchsia-500/[0.245] dark:from-violet-500/[0.343] dark:to-fuchsia-500/[0.343] text-violet-800 dark:text-violet-200 border-2 border-violet-400/[0.784] dark:border-violet-500/[0.686] shadow-[0_0_25px_8px_rgba(244,63,94,0.343)] dark:shadow-[0_0_25px_8px_rgba(244,63,94,0.245)] ring-2 ring-violet-400/[0.392] dark:ring-violet-500/[0.294] hover:from-violet-500/[0.294] hover:to-fuchsia-500/[0.294] dark:hover:from-violet-500/[0.392] dark:hover:to-fuchsia-500/[0.392]' : 'bg-gradient-to-r from-violet-500/15 to-fuchsia-500/15 dark:from-violet-500/25 dark:to-fuchsia-500/25 text-violet-700 dark:text-violet-300 dark:hover:from-violet-500/35 dark:hover:to-fuchsia-500/35 border-2 border-violet-300/80 dark:border-violet-600/60 shadow-md shadow-violet-500/15 hover:shadow-lg hover:shadow-violet-500/25'}`}
                               >
                                 {isParsingAnalyzeDoc ? (
-                                  <span className="w-5 h-5 border-2 border-rose-500 border-t-transparent rounded-full animate-spin" />
+                                  <span className="w-5 h-5 border-2 border-violet-500 border-t-transparent rounded-full animate-spin" />
                                 ) : (
                                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>
                                 )}
@@ -2203,7 +2203,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                               disabled={!isTextValid()}
                               className={`px-8 sm:px-10 py-3.5 rounded-2xl flex items-center justify-center gap-2 transition-all duration-200 font-bold text-base ${
                                 isTextValid()
-                                  ? 'bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 hover:from-rose-400 hover:to-pink-500 text-white shadow-lg shadow-rose-500/30 hover:shadow-xl hover:shadow-rose-500/40 hover:-translate-y-0.5 active:scale-[0.98] cursor-pointer'
+                                  ? 'bg-violet-600 hover:bg-violet-500 text-white shadow-lg shadow-violet-500/30 hover:shadow-xl hover:shadow-violet-500/40 hover:-translate-y-0.5 active:scale-[0.98] cursor-pointer'
                                   : 'bg-stone-200 dark:bg-stone-700 text-stone-400 cursor-not-allowed'
                               }`}
                             >
@@ -2220,7 +2220,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                             disabled={!isTextValid() || isSearchingCitations}
                             className={`px-8 sm:px-10 py-3.5 rounded-2xl flex items-center justify-center gap-2 transition-all duration-200 font-bold text-base ${
                               isTextValid() && !isSearchingCitations
-                                ? 'bg-gradient-to-r from-sky-500 via-blue-500 to-indigo-500 hover:from-sky-400 hover:to-indigo-400 text-white shadow-lg shadow-sky-500/30 hover:shadow-xl hover:shadow-sky-500/40 hover:-translate-y-0.5 active:scale-[0.98] cursor-pointer'
+                                ? 'bg-sky-600 hover:bg-sky-500 text-white shadow-lg shadow-sky-500/30 hover:shadow-xl hover:shadow-sky-500/40 hover:-translate-y-0.5 active:scale-[0.98] cursor-pointer'
                                 : 'bg-stone-200 dark:bg-stone-700 text-stone-400 cursor-not-allowed'
                             }`}
                           >
@@ -2239,21 +2239,21 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                 {mode === 'analyze' && (
                   <div
                     onClick={() => onNavigate('upload')}
-                    className={`relative mt-8 rounded-2xl sm:rounded-[1.75rem] overflow-hidden backdrop-blur-xl cursor-pointer transition-all hover:shadow-[0_25px_50px_-12px_rgba(236,72,153,0.2)] hover:scale-[1.01] active:scale-[0.99] group ${showFirstAnalysisOnboarding ? 'bg-white dark:bg-stone-800/95 border-2 border-rose-400/68 dark:border-rose-500/55 shadow-[0_0_36px_12px_rgba(244,63,94,0.22)] dark:shadow-[0_0_36px_12px_rgba(244,63,94,0.17)] ring-4 ring-rose-400/25 dark:ring-rose-500/20' : 'bg-white/90 dark:bg-stone-800/95 border border-white/50 dark:border-stone-600/50 shadow-2xl shadow-stone-900/10 dark:shadow-black/20'}`}
+                    className={`relative mt-8 rounded-2xl sm:rounded-[1.75rem] overflow-hidden backdrop-blur-xl cursor-pointer transition-all hover:shadow-[0_25px_50px_-12px_rgba(236,72,153,0.2)] hover:scale-[1.01] active:scale-[0.99] group ${showFirstAnalysisOnboarding ? 'bg-white dark:bg-stone-800/95 border-2 border-violet-400/68 dark:border-violet-500/55 shadow-[0_0_36px_12px_rgba(244,63,94,0.22)] dark:shadow-[0_0_36px_12px_rgba(244,63,94,0.17)] ring-4 ring-violet-400/25 dark:ring-violet-500/20' : 'bg-white/90 dark:bg-stone-800/95 border border-white/50 dark:border-stone-600/50 shadow-2xl shadow-stone-900/10 dark:shadow-black/20'}`}
                     data-tutorial="essay-upload"
                   >
-                    <div className="absolute top-0 left-0 w-16 h-16 rounded-2xl bg-rose-200/40 dark:bg-rose-500/20 blur-2xl pointer-events-none" />
+                    <div className="absolute top-0 left-0 w-16 h-16 rounded-2xl bg-violet-200/40 dark:bg-violet-500/20 blur-2xl pointer-events-none" />
                     <div className="absolute top-0 right-0 w-16 h-16 rounded-2xl bg-sky-200/40 dark:bg-sky-500/20 blur-2xl pointer-events-none" />
-                    <div className="absolute bottom-0 right-0 w-20 h-20 rounded-full bg-rose-300/20 dark:bg-rose-500/10 blur-2xl pointer-events-none" />
+                    <div className="absolute bottom-0 right-0 w-20 h-20 rounded-full bg-violet-300/20 dark:bg-violet-500/10 blur-2xl pointer-events-none" />
                     <div className="relative p-6 sm:p-8 text-center">
-                      <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br from-rose-500 to-pink-600 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-rose-500/25 text-white">
+                      <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-violet-600 hover:bg-violet-500 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-violet-500/25 text-white">
                         <svg className="w-7 h-7 sm:w-8 sm:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
                       </div>
                       <h3 className="text-lg sm:text-xl font-bold text-stone-800 dark:text-stone-100 mb-2">Save to your library</h3>
                       <p className="text-stone-500 dark:text-stone-400 text-sm sm:text-base mb-6 max-w-sm mx-auto">Save work in your library. Use Upload file above to load a PDF or Word file into the box.</p>
-                      <div className={`inline-flex items-center gap-2 px-6 py-3.5 rounded-2xl bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-400 hover:to-pink-500 text-white font-semibold transition-all group-hover:shadow-xl group-hover:scale-[1.02] ${showFirstAnalysisOnboarding ? 'shadow-[0_0_25px_8px_rgba(244,63,94,0.392)] ring-2 ring-white/[0.49]' : 'shadow-lg shadow-rose-500/25'}`}>
+                      <div className={`inline-flex items-center gap-2 px-6 py-3.5 rounded-2xl bg-violet-600 hover:bg-violet-500 text-white font-semibold transition-all group-hover:shadow-xl group-hover:scale-[1.02] ${showFirstAnalysisOnboarding ? 'shadow-[0_0_25px_8px_rgba(244,63,94,0.392)] ring-2 ring-white/[0.49]' : 'shadow-lg shadow-violet-500/25'}`}>
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>
                         Library upload
                       </div>
@@ -2295,7 +2295,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                 {/* Uploading overlay - hides card content during file parse to prevent flash/layout shift */}
                 {mode === 'analyze' && isParsingAnalyzeDoc && (
                   <div className="absolute inset-0 rounded-[14px] sm:rounded-[30px] bg-white/95 dark:bg-stone-800/95 backdrop-blur-sm flex items-center justify-center gap-3 z-20 pointer-events-auto" aria-live="polite" aria-busy="true">
-                    <span className="w-8 h-8 border-2 border-rose-500 border-t-transparent rounded-full animate-spin" />
+                    <span className="w-8 h-8 border-2 border-violet-500 border-t-transparent rounded-full animate-spin" />
                     <span className="font-semibold text-stone-700 dark:text-stone-200">Uploading...</span>
                   </div>
                 )}
@@ -2318,7 +2318,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                   ← Back to Dashboard
                 </button>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                  <div className="rounded-2xl overflow-hidden bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-950/30 dark:to-purple-950/20 border border-violet-200/60 dark:border-violet-800/40 shadow-lg">
+                  <div className="rounded-2xl overflow-hidden bg-violet-50 dark:from-violet-950/30 dark:to-purple-950/20 border border-violet-200/60 dark:border-violet-800/40 shadow-lg">
                     <p className="px-4 pt-4 pb-2 text-sm font-bold text-stone-700 dark:text-stone-300">See how it works</p>
                     <div className="aspect-video bg-stone-900">
                       <video autoPlay loop muted playsInline className="w-full h-full object-contain" title="WriteScholar Focus Mode">
@@ -2326,12 +2326,12 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                       </video>
                     </div>
                   </div>
-                  <div className="relative rounded-3xl overflow-hidden p-[1px] bg-gradient-to-br from-violet-400/30 via-purple-400/20 to-rose-400/20 dark:from-violet-600/30 dark:via-purple-600/20 dark:to-rose-600/20">
+                  <div className="relative rounded-3xl overflow-hidden p-[1px] bg-gradient-to-br from-violet-400/30 via-purple-400/20 to-violet-400/20 dark:from-violet-600/30 dark:via-purple-600/20 dark:to-violet-600/20">
                     <div className="rounded-[23px] bg-white/90 dark:bg-stone-800/95 backdrop-blur-xl border border-white/60 dark:border-stone-700/50 p-6 sm:p-8 h-full flex flex-col justify-center">
                   {FOCUS_MODE_COMING_SOON ? (
                     <>
                           <span className="inline-flex items-center px-4 py-1.5 bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 rounded-full text-sm font-bold mb-4 w-fit">Coming Soon</span>
-                          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center mb-4 text-3xl shadow-lg">🔒</div>
+                          <div className="w-16 h-16 rounded-2xl bg-violet-600 hover:bg-violet-500 flex items-center justify-center mb-4 text-3xl shadow-lg">🔒</div>
                           <h2 className="text-xl font-extrabold text-stone-800 dark:text-stone-100 mb-2">Focus Mode is on its way</h2>
                           <p className="text-stone-600 dark:text-stone-400 text-sm leading-relaxed">
                             Our Chrome extension is currently under review. Soon you&apos;ll be able to block distracting sites and earn your screen time by studying first.
@@ -2339,7 +2339,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                     </>
                   ) : (
                     <>
-                          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center mb-4 text-3xl shadow-lg">🔒</div>
+                          <div className="w-16 h-16 rounded-2xl bg-violet-600 hover:bg-violet-500 flex items-center justify-center mb-4 text-3xl shadow-lg">🔒</div>
                           <h2 className="text-xl font-extrabold text-stone-800 dark:text-stone-100 mb-2">Desktop only</h2>
                           <p className="text-stone-600 dark:text-stone-400 text-sm mb-4 leading-relaxed">
                             Focus Mode works with our Chrome extension to block sites until you solve a puzzle or answer study questions. Extensions aren&apos;t supported on mobile — use a computer with Chrome.
@@ -2348,7 +2348,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                         href={FOCUS_MODE_CHROME_EXTENSION_URL}
                         target="_blank"
                         rel="noopener noreferrer"
-                            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-violet-500 to-purple-600 text-white text-sm font-bold shadow-md shadow-violet-500/30 transition-all hover:opacity-90 w-fit"
+                            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-sm font-bold shadow-md shadow-violet-500/30 transition-all hover:opacity-90 w-fit"
                       >
                         Get Chrome Extension (desktop) →
                       </a>
@@ -2441,7 +2441,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                     disabled={!isTextValid() || isSummarizing}
                     className={`w-full sm:w-auto px-6 py-2.5 rounded-xl flex items-center justify-center transition-all font-semibold text-sm flex-shrink-0 ${
                       isTextValid() && !isSummarizing
-                        ? 'bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-500 hover:to-cyan-500 text-white shadow-lg shadow-teal-200/50 dark:shadow-teal-900/30 cursor-pointer'
+                        ? 'bg-teal-600 hover:bg-teal-500 text-white shadow-lg shadow-teal-200/50 dark:shadow-teal-900/30 cursor-pointer'
                         : 'bg-stone-200 dark:bg-stone-600 text-stone-400 dark:text-stone-500 cursor-not-allowed'
                     }`}
                   >
@@ -2596,7 +2596,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
 
             {/* Exhausted generations banner — above hero */}
             {quizExhausted && (
-              <div className="mb-4 sm:mb-6 bg-gradient-to-r from-amber-500 to-orange-600 dark:from-amber-600 dark:to-orange-700 rounded-xl sm:rounded-2xl p-4 sm:p-6 text-white text-center shadow-lg shadow-amber-500/25">
+              <div className="mb-4 sm:mb-6 bg-amber-600 dark:from-amber-600 dark:to-orange-700 rounded-xl sm:rounded-2xl p-4 sm:p-6 text-white text-center shadow-lg shadow-amber-500/25">
                 <span className="text-3xl sm:text-4xl mb-2 sm:mb-3 block">🔒</span>
                 <h3 className="text-lg sm:text-xl font-bold mb-1 sm:mb-2">Monthly Limit Reached</h3>
                 <p className="text-amber-100 dark:text-amber-100/90 mb-1 text-sm sm:text-base">You've used all {quizUsage.generationLimit} study pack generations this period. Upgrade for more!</p>
@@ -2628,7 +2628,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                     )}
                   </div>
                 </div>
-                <button onClick={() => onNavigate('pricing')} className="w-full sm:w-auto px-3 sm:px-4 py-1.5 bg-gradient-to-r from-amber-500 to-orange-600 text-white text-xs font-semibold rounded-lg sm:rounded-xl active:from-amber-600 active:to-orange-700 sm:hover:from-amber-400 sm:hover:to-orange-500 transition-all flex-shrink-0">
+                <button onClick={() => onNavigate('pricing')} className="w-full sm:w-auto px-3 sm:px-4 py-1.5 bg-amber-600 text-white text-xs font-semibold rounded-lg sm:rounded-xl active:bg-amber-700 sm:hover:bg-amber-500 transition-all flex-shrink-0">
                   Upgrade
                 </button>
               </div>
@@ -2730,7 +2730,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                         <button
                           onClick={() => studyToolsFileInputRef.current?.click()}
                           disabled={isParsingStudyDoc || isGeneratingStudyPack}
-                          className={`flex items-center gap-2.5 px-5 py-3.5 rounded-2xl font-bold text-sm transition-all disabled:opacity-50 ${showFirstStudyPackPrompt ? 'bg-gradient-to-r from-amber-500/25 to-orange-500/25 dark:from-amber-500/35 dark:to-orange-500/35 text-amber-800 dark:text-amber-200 border-2 border-amber-400/80 dark:border-amber-500/70 shadow-[0_0_25px_8px_rgba(245,158,11,0.35)] dark:shadow-[0_0_25px_8px_rgba(245,158,11,0.25)] ring-2 ring-amber-400/40 dark:ring-amber-500/30 hover:from-amber-500/30 hover:to-orange-500/30 dark:hover:from-amber-500/40 dark:hover:to-orange-500/40' : 'bg-gradient-to-r from-amber-500/15 to-orange-500/15 dark:from-amber-500/25 dark:to-orange-500/25 text-amber-700 dark:text-amber-300 hover:from-amber-500/25 hover:to-orange-500/25 dark:hover:from-amber-500/35 dark:hover:to-orange-500/35 border-2 border-amber-300/80 dark:border-amber-600/60 shadow-md shadow-amber-500/15 hover:shadow-lg hover:shadow-amber-500/25'}`}
+                          className={`flex items-center gap-2.5 px-5 py-3.5 rounded-2xl font-bold text-sm transition-all disabled:opacity-50 ${showFirstStudyPackPrompt ? 'bg-gradient-to-r from-amber-500/25 to-orange-500/25 dark:from-amber-500/35 dark:to-orange-500/35 text-amber-800 dark:text-amber-200 border-2 border-amber-400/80 dark:border-amber-500/70 shadow-[0_0_25px_8px_rgba(245,158,11,0.35)] dark:shadow-[0_0_25px_8px_rgba(245,158,11,0.25)] ring-2 ring-amber-400/40 dark:ring-amber-500/30 dark:hover:from-amber-500/40 dark:hover:to-orange-500/40' : 'bg-gradient-to-r from-amber-500/15 to-orange-500/15 dark:from-amber-500/25 dark:to-orange-500/25 text-amber-700 dark:text-amber-300 dark:hover:from-amber-500/35 dark:hover:to-orange-500/35 border-2 border-amber-300/80 dark:border-amber-600/60 shadow-md shadow-amber-500/15 hover:shadow-lg hover:shadow-amber-500/25'}`}
                         >
                           {isParsingStudyDoc ? (
                             <span className="w-5 h-5 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
@@ -2748,7 +2748,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                       <button
                         onClick={handleGenerateStudyPack}
                         disabled={isGeneratingStudyPack || quizExhausted || getWordCount(inputText) < 50}
-                        className="px-8 sm:px-10 py-3.5 rounded-2xl flex items-center justify-center gap-2 transition-all duration-200 font-bold text-base bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-400 hover:to-orange-400 disabled:from-stone-400 disabled:to-stone-500 text-white shadow-lg shadow-amber-500/30 hover:shadow-xl hover:shadow-amber-500/40 hover:-translate-y-0.5 active:scale-[0.98] disabled:hover:translate-y-0 disabled:cursor-not-allowed"
+                        className="px-8 sm:px-10 py-3.5 rounded-2xl flex items-center justify-center gap-2 transition-all duration-200 font-bold text-base bg-amber-600 hover:bg-amber-500 disabled:bg-stone-400 dark:disabled:bg-stone-600 text-white shadow-lg shadow-amber-500/30 hover:shadow-xl hover:shadow-amber-500/40 hover:-translate-y-0.5 active:scale-[0.98] disabled:hover:translate-y-0 disabled:cursor-not-allowed"
                       >
                         {isGeneratingStudyPack ? (
                           <>
@@ -2794,7 +2794,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                           className="w-16 h-16 sm:w-24 sm:h-24 mx-auto mb-3 sm:mb-4 object-contain rounded-xl border-2 border-violet-300 dark:border-violet-500 shadow-lg overflow-hidden ring-2 ring-violet-400/30"
                         />
                         <h2 className="text-xl sm:text-3xl font-bold text-stone-900 dark:text-stone-100 mb-2">Quiz Complete!</h2>
-                        <div className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent my-3 sm:my-4">
+                        <div className="text-4xl sm:text-5xl font-bold bg-amber-600 hover:bg-amber-500 bg-clip-text text-transparent my-3 sm:my-4">
                           {Math.round((userAnswers.filter(a => a.isCorrect).length / userAnswers.length) * 100)}%
                         </div>
                         <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">{userAnswers.filter(a => a.isCorrect).length} out of {userAnswers.length} correct</p>
@@ -2827,12 +2827,12 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                         </div>
                         <div className="flex flex-col-reverse sm:flex-row justify-center gap-2 sm:gap-3">
                           <button onClick={() => { setQuizRetakeKey(k => k + 1); setCurrentQuestion(0); setUserAnswers([]); setQuizCompleted(false); setSelectedAnswer(''); setShowQuizResult(false); }} className="px-5 sm:px-6 py-2.5 sm:py-3 bg-gray-100 dark:bg-stone-700 text-gray-700 dark:text-stone-300 font-semibold rounded-xl text-sm sm:text-base">Try Again</button>
-                          <button onClick={() => { setQuizResult(null); setIsQuizMode(false); }} className="px-5 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-amber-600 to-orange-600 text-white font-semibold rounded-xl text-sm sm:text-base">New Quiz</button>
+                          <button onClick={() => { setQuizResult(null); setIsQuizMode(false); }} className="px-5 sm:px-6 py-2.5 sm:py-3 bg-amber-600 hover:bg-amber-500 text-white font-semibold rounded-xl text-sm sm:text-base">New Quiz</button>
                         </div>
                       </div>
                     ) : (
                       <>
-                        <div className="h-1.5 sm:h-2 bg-stone-200 dark:bg-stone-600"><div className="h-full bg-gradient-to-r from-amber-500 to-orange-500 transition-all duration-300" style={{ width: `${((currentQuestion + 1) / dashboardDisplayedQuestions.length) * 100}%` }}></div></div>
+                        <div className="h-1.5 sm:h-2 bg-stone-200 dark:bg-stone-600"><div className="h-full bg-amber-600 transition-all duration-300" style={{ width: `${((currentQuestion + 1) / dashboardDisplayedQuestions.length) * 100}%` }}></div></div>
                         <div className="p-4 sm:p-6">
                           <div className="flex justify-between items-center mb-3 sm:mb-4">
                             <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Q{currentQuestion + 1}/{dashboardDisplayedQuestions.length}</span>
@@ -2898,12 +2898,12 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                                 const correct = ans === q.correctAnswer;
                                 setUserAnswers([...userAnswers, { questionId: q.id, answer: ans, isCorrect: correct }]);
                                 setShowQuizResult(true);
-                              }} disabled={!selectedAnswer} className="px-5 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-amber-600 to-orange-600 text-white font-semibold rounded-xl disabled:opacity-50 text-sm sm:text-base active:scale-95 transition-transform">Submit</button>
+                              }} disabled={!selectedAnswer} className="px-5 sm:px-6 py-2.5 sm:py-3 bg-amber-600 hover:bg-amber-500 text-white font-semibold rounded-xl disabled:opacity-50 text-sm sm:text-base active:scale-95 transition-transform">Submit</button>
                             ) : (
                               <button onClick={() => {
                                 if (currentQuestion + 1 >= dashboardDisplayedQuestions.length) { setQuizCompleted(true); }
                                 else { setCurrentQuestion(currentQuestion + 1); setSelectedAnswer(''); setShowQuizResult(false); }
-                              }} className="px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-amber-600 to-orange-600 text-white font-semibold rounded-xl text-sm sm:text-base active:scale-95 transition-transform">
+                              }} className="px-4 sm:px-6 py-2.5 sm:py-3 bg-amber-600 hover:bg-amber-500 text-white font-semibold rounded-xl text-sm sm:text-base active:scale-95 transition-transform">
                                 {currentQuestion + 1 >= dashboardDisplayedQuestions.length ? '🏆 Results' : 'Next →'}
                               </button>
                             )}
@@ -2934,7 +2934,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                                   <button key={t} onClick={() => !locked && setQuizType(t)} disabled={locked} title={locked ? 'Premium only' : ''}
                                     className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all whitespace-nowrap ${
                                       locked ? 'text-stone-400 cursor-not-allowed' :
-                                      quizType === t ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-sm' : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-amber-50 dark:hover:bg-stone-600'
+                                      quizType === t ? 'bg-amber-600 text-white shadow-sm' : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-amber-50 dark:hover:bg-stone-600'
                                     }`}
                                   >
                                     {t === 'mixed' ? 'Mixed' : t === 'multiple_choice' ? 'MCQ' : t === 'true_false' ? 'T/F' : 'Fill'}
@@ -2953,7 +2953,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                                   <button key={d} onClick={() => !locked && setQuizDifficulty(d)} disabled={locked} title={locked ? 'Premium only' : ''}
                                     className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all whitespace-nowrap ${
                                       locked ? 'text-stone-400 cursor-not-allowed' :
-                                      quizDifficulty === d ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-sm' : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-amber-50 dark:hover:bg-stone-600'
+                                      quizDifficulty === d ? 'bg-amber-600 text-white shadow-sm' : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-amber-50 dark:hover:bg-stone-600'
                                     }`}
                                   >
                                     {d.charAt(0).toUpperCase() + d.slice(1)}
@@ -2987,7 +2987,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                           disabled={!isTextValid() || isGeneratingQuiz || !canUseQuiz}
                           className={`w-full sm:w-auto px-6 py-2.5 rounded-xl flex items-center justify-center transition-all font-semibold text-sm flex-shrink-0 ${
                             isTextValid() && !isGeneratingQuiz && canUseQuiz
-                              ? 'bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white shadow-lg shadow-amber-200 cursor-pointer'
+                              ? 'bg-amber-600 hover:bg-amber-500 text-white shadow-lg shadow-amber-200 cursor-pointer'
                               : 'bg-gray-200 text-gray-400 cursor-not-allowed'
                           }`}
                         >
@@ -3133,7 +3133,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                             disabled={!isTextValid() || isGeneratingFlashcards || !canUseQuiz}
                             className={`w-full sm:w-auto px-6 py-2.5 rounded-xl flex items-center justify-center transition-all font-semibold text-sm flex-shrink-0 ${
                               isTextValid() && !isGeneratingFlashcards && canUseQuiz
-                                ? 'bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white shadow-lg shadow-emerald-500/25 cursor-pointer'
+                                ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-500/25 cursor-pointer'
                                 : 'bg-stone-200 dark:bg-stone-600 text-stone-400 dark:text-stone-500 cursor-not-allowed'
                             }`}
                           >
@@ -3262,7 +3262,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                               Hint {hintsUsed > 0 && <span className="text-xs bg-purple-200 text-purple-800 rounded-full px-1.5 py-0.5 font-bold">{hintsUsed}</span>}
                             </button>
                             <button onClick={() => setCrosswordChecked(true)}
-                              className="px-4 py-2 text-sm font-semibold bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-lg hover:from-amber-700 hover:to-orange-700">
+                              className="px-4 py-2 text-sm font-semibold bg-amber-600 hover:bg-amber-500 text-white rounded-lg">
                               Check Answers
                             </button>
                           </>
@@ -3312,7 +3312,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                       {/* Crossword Grid - Now Interactive */}
                       <div 
-                        className="bg-white rounded-2xl border border-gray-200 p-4 overflow-x-auto focus:outline-none focus:ring-2 focus:ring-rose-400"
+                        className="bg-white rounded-2xl border border-gray-200 p-4 overflow-x-auto focus:outline-none focus:ring-2 focus:ring-violet-400"
                         tabIndex={0}
                         onKeyDown={handleCrosswordKeyDown}
                       >
@@ -3489,7 +3489,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                           disabled={!isTextValid() || isGeneratingCrossword || !canUseQuiz}
                           className={`w-full sm:w-auto px-6 py-2.5 rounded-xl flex items-center justify-center transition-all font-semibold text-sm flex-shrink-0 ${
                             isTextValid() && !isGeneratingCrossword && canUseQuiz
-                              ? 'bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-400 hover:to-amber-500 text-white shadow-lg shadow-orange-500/25 cursor-pointer'
+                              ? 'bg-orange-600 hover:bg-orange-500 text-white shadow-lg shadow-orange-500/25 cursor-pointer'
                               : 'bg-stone-200 dark:bg-stone-600 text-stone-400 dark:text-stone-500 cursor-not-allowed'
                           }`}
                         >
@@ -3577,7 +3577,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                 <div className="p-8 sm:p-10 text-center relative overflow-hidden">
                   <div className="absolute -top-8 -right-8 w-24 h-24 rounded-full bg-violet-500/20 blur-2xl" />
                   <div className="absolute -bottom-4 -left-4 w-16 h-16 rounded-lg bg-purple-500/10 rotate-12" />
-                  <div className="relative z-10 inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4 bg-gradient-to-br from-violet-600 to-purple-700 shadow-lg shadow-violet-500/30">
+                  <div className="relative z-10 inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4 bg-violet-600 shadow-lg shadow-violet-500/30">
                     <span className="text-3xl">💥</span>
                   </div>
                   <h3 className="text-xl font-bold text-stone-900 dark:text-stone-100 mb-2">Crater Blast</h3>
@@ -3586,7 +3586,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                   </p>
                   <button
                     onClick={() => onNavigate('crater-blast')}
-                    className="px-6 py-3 rounded-xl font-semibold text-white transition-all hover:shadow-lg bg-gradient-to-r from-violet-600 to-purple-700 hover:from-violet-500 hover:to-purple-600 shadow-violet-500/25"
+                    className="px-6 py-3 rounded-xl font-semibold text-white transition-all hover:shadow-lg bg-violet-600 hover:bg-violet-500 shadow-violet-500/25"
                   >
                     Play Crater Blast →
                   </button>
@@ -3751,7 +3751,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                     setMode('analyze');
                     setTimeout(() => document.querySelector('[data-tutorial="essay-upload"]')?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 150);
                   }}
-                  className="inline-flex items-center gap-2 px-4 sm:px-5 py-2.5 bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-400 hover:to-pink-500 text-white font-semibold rounded-xl transition-all shadow-md shadow-rose-500/20 hover:shadow-lg text-sm"
+                  className="inline-flex items-center gap-2 px-4 sm:px-5 py-2.5 bg-violet-600 hover:bg-violet-500 text-white font-semibold rounded-xl transition-all shadow-md shadow-violet-500/20 hover:shadow-lg text-sm"
                 >
                   <span>📝</span>
                   Analyze an Essay
@@ -3761,14 +3761,14 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                     setMode('quiz');
                     setTimeout(() => document.querySelector('[data-tutorial="study-pack-input"]')?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 150);
                   }}
-                  className="inline-flex items-center gap-2 px-4 sm:px-5 py-2.5 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-white font-semibold rounded-xl transition-all shadow-md shadow-amber-500/20 hover:shadow-lg text-sm"
+                  className="inline-flex items-center gap-2 px-4 sm:px-5 py-2.5 bg-amber-600 hover:bg-amber-500 text-white font-semibold rounded-xl transition-all shadow-md shadow-amber-500/20 hover:shadow-lg text-sm"
                 >
                   <span>📦</span>
                   Generate Study Pack
                 </button>
                 <button
                   onClick={() => setMode('citations')}
-                  className="inline-flex items-center gap-2 px-4 sm:px-5 py-2.5 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-semibold rounded-xl transition-all shadow-md shadow-sky-500/20 hover:shadow-lg text-sm"
+                  className="inline-flex items-center gap-2 px-4 sm:px-5 py-2.5 bg-sky-600 hover:bg-sky-500 text-white font-semibold rounded-xl transition-all shadow-md shadow-sky-500/20 hover:shadow-lg text-sm"
                 >
                   <span>📚</span>
                   Find Citations
@@ -3933,7 +3933,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
               </p>
             </div>
             
-            <div className="bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20 rounded-xl p-3.5 sm:p-4 mb-5 sm:mb-6">
+            <div className="bg-violet-50 dark:from-violet-900/20 dark:to-purple-900/20 rounded-xl p-3.5 sm:p-4 mb-5 sm:mb-6">
               <h4 className="font-semibold text-violet-900 dark:text-violet-100 mb-2.5 sm:mb-3 text-sm sm:text-base">Paid Plan Benefits:</h4>
               <ul className="space-y-2 text-xs sm:text-sm text-violet-800 dark:text-violet-200">
                 <li className="flex items-center gap-2">
@@ -3966,7 +3966,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
               </button>
               <button
                 onClick={() => { setShowExportUpgradeModal(false); onNavigate('pricing'); }}
-                className="flex-1 px-4 py-3 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-xl active:from-amber-700 active:to-orange-700 sm:hover:from-amber-700 sm:hover:to-orange-700 transition-all font-medium text-sm sm:text-base"
+                className="flex-1 px-4 py-3 bg-amber-600 hover:bg-amber-500 text-white rounded-xl active:from-amber-700 active:to-orange-700 sm:hover:from-amber-700 sm:hover:to-orange-700 transition-all font-medium text-sm sm:text-base"
               >
                 View Plans
               </button>

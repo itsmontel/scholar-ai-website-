@@ -294,7 +294,7 @@ const StudyTimerWidget = ({ currentPage = '' }: StudyTimerWidgetProps) => {
                       onKeyDown={(e) => e.key === 'Enter' && handleCustomApply()}
                       placeholder="Minutes"
                       disabled={isRunning}
-                      className="flex-1 px-3 py-2 rounded-lg border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 text-sm focus:ring-2 focus:ring-rose-500/40 focus:border-rose-500 focus:outline-none"
+                      className="flex-1 px-3 py-2 rounded-lg border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 text-sm focus:ring-2 focus:ring-violet-500/40 focus:border-violet-500 focus:outline-none"
                     />
                     <button
                       onClick={handleCustomApply}

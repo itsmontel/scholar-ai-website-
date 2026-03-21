@@ -222,7 +222,7 @@ const CitationHistoryPage = ({ onNavigate, user, onLogout }: CitationHistoryProp
             <p className="text-stone-600 mb-6">{error}</p>
             <button
               onClick={fetchCitationHistory}
-              className="px-6 py-3 bg-gradient-to-r from-sky-500 to-blue-600 text-white rounded-xl font-medium hover:from-sky-600 hover:to-blue-700 transition-colors"
+              className="px-6 py-3 bg-sky-600 hover:bg-sky-500 text-white rounded-xl font-medium transition-colors"
             >
               Try Again
             </button>
@@ -300,7 +300,7 @@ const CitationHistoryPage = ({ onNavigate, user, onLogout }: CitationHistoryProp
 
           <button
             onClick={startNewSearch}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold text-white bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-500 hover:to-blue-500 transition-all duration-200 hover:shadow-lg hover:shadow-sky-500/25 hover:-translate-y-0.5"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold text-white bg-sky-600 hover:bg-sky-500 transition-all duration-200 hover:shadow-lg hover:shadow-sky-500/25 hover:-translate-y-0.5"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -464,7 +464,7 @@ const CitationHistoryPage = ({ onNavigate, user, onLogout }: CitationHistoryProp
             <p className="text-stone-600 mb-6">Start your first citation search to build your research library</p>
             <button
               onClick={startNewSearch}
-              className="px-6 py-3 bg-gradient-to-r from-sky-500 to-blue-600 text-white font-semibold rounded-xl hover:from-sky-600 hover:to-blue-700 transition-colors"
+              className="px-6 py-3 bg-sky-600 hover:bg-sky-500 text-white font-semibold rounded-xl transition-colors"
             >
               Find Citations Now
             </button>
@@ -486,7 +486,7 @@ const CitationHistoryPage = ({ onNavigate, user, onLogout }: CitationHistoryProp
             </button>
             <button
               onClick={startNewSearch}
-              className="px-6 py-3 bg-gradient-to-r from-sky-500 to-blue-600 text-white font-semibold rounded-xl hover:from-sky-600 hover:to-blue-700 transition-colors"
+              className="px-6 py-3 bg-sky-600 hover:bg-sky-500 text-white font-semibold rounded-xl transition-colors"
             >
               Find Citations Now
             </button>
@@ -538,7 +538,7 @@ const CitationHistoryPage = ({ onNavigate, user, onLogout }: CitationHistoryProp
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => viewSearchResults(search)}
-                      className="px-4 py-2.5 bg-gradient-to-r from-sky-500 to-blue-600 text-white rounded-xl hover:from-sky-600 hover:to-blue-700 transition-colors font-medium text-sm"
+                      className="px-4 py-2.5 bg-sky-600 hover:bg-sky-500 text-white rounded-xl transition-colors font-medium text-sm"
                     >
                       View Results
                     </button>
@@ -598,7 +598,7 @@ const CitationHistoryPage = ({ onNavigate, user, onLogout }: CitationHistoryProp
                     onClick={() => setCurrentPage(page)}
                     className={`w-10 h-10 rounded-lg font-medium transition-colors ${
                       currentPage === page
-                        ? 'bg-gradient-to-r from-sky-500 to-blue-600 text-white shadow-md'
+                        ? 'bg-sky-600 hover:bg-sky-500 text-white shadow-md'
                         : 'bg-white border border-stone-200 text-stone-600 hover:bg-stone-50'
                     }`}
                   >

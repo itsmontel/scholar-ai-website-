@@ -164,7 +164,7 @@ const CitationsPage = ({ onNavigate, user, onLogout }: CitationsPageProps) => {
               <div className="absolute -bottom-20 -left-20 w-40 h-40 bg-blue-400/20 rounded-full blur-3xl pointer-events-none" />
               {/* Hero headline - matches dashboard (H1 for a11y / SEO) */}
               <h1 className="relative text-2xl sm:text-3xl md:text-4xl font-extrabold text-stone-900 dark:text-white text-center mb-2 tracking-tight">
-                Find <span className="bg-gradient-to-r from-sky-500 via-blue-500 to-indigo-500 bg-clip-text text-transparent" style={{ WebkitBackgroundClip: 'text' }}>academic sources</span> in seconds
+                Find <span className="text-sky-600 dark:text-sky-400" style={{ WebkitBackgroundClip: 'text' }}>academic sources</span> in seconds
               </h1>
               <p className="relative text-stone-600 dark:text-stone-300 text-base sm:text-lg text-center mb-8 max-w-xl mx-auto leading-relaxed">
                 APA, MLA & Chicago. Peer-reviewed sources. Filter by year.
@@ -244,7 +244,7 @@ const CitationsPage = ({ onNavigate, user, onLogout }: CitationsPageProps) => {
                     disabled={!isTextValid() || isSearchingCitations}
                     className={`px-8 sm:px-10 py-3.5 rounded-2xl flex items-center justify-center gap-2 transition-all duration-200 font-bold text-base ${
                       isTextValid() && !isSearchingCitations
-                        ? 'bg-gradient-to-r from-sky-500 via-blue-500 to-indigo-500 hover:from-sky-400 hover:to-indigo-400 text-white shadow-lg shadow-sky-500/30 hover:shadow-xl hover:shadow-sky-500/40 hover:-translate-y-0.5 active:scale-[0.98] cursor-pointer'
+                        ? 'bg-sky-600 hover:bg-sky-500 text-white shadow-lg shadow-sky-500/30 hover:shadow-xl hover:shadow-sky-500/40 hover:-translate-y-0.5 active:scale-[0.98] cursor-pointer'
                         : 'bg-stone-200 dark:bg-stone-700 text-stone-400 cursor-not-allowed'
                     }`}
                   >
@@ -348,7 +348,7 @@ const CitationsPage = ({ onNavigate, user, onLogout }: CitationsPageProps) => {
               <button
                 type="button"
                 onClick={() => onNavigate('signup')}
-                className="w-full px-6 py-3.5 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-semibold rounded-2xl transition-all shadow-lg shadow-sky-500/25"
+                className="w-full px-6 py-3.5 bg-sky-600 hover:bg-sky-500 text-white font-semibold rounded-2xl transition-all shadow-lg shadow-sky-500/25"
               >
                 Sign Up to See Full List
               </button>

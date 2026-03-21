@@ -235,7 +235,7 @@ const SummarizerPage = ({ onNavigate, user, onLogout }: SummarizerPageProps) => 
         <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="summarizer" />
         <main className="flex-1 flex items-center justify-center px-4">
           <div className="max-w-md w-full bg-white dark:bg-stone-800 rounded-2xl shadow-xl border border-stone-200 dark:border-stone-600 p-8 text-center">
-            <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-rose-500 to-red-600 rounded-2xl flex items-center justify-center shadow-lg shadow-rose-500/30">
+            <div className="w-16 h-16 mx-auto mb-4 bg-violet-600 hover:bg-violet-500 rounded-2xl flex items-center justify-center shadow-lg shadow-violet-500/30">
               <span className="text-3xl">📝</span>
             </div>
             <h2 className="text-2xl font-extrabold text-stone-800 dark:text-stone-100 mb-2">Sign Up to Continue</h2>
@@ -243,7 +243,7 @@ const SummarizerPage = ({ onNavigate, user, onLogout }: SummarizerPageProps) => 
             <div className="space-y-3">
               <button
                 onClick={() => onNavigate('signup')}
-                className="w-full py-3 px-4 bg-rose-500 hover:bg-rose-600 text-white font-semibold rounded-2xl transition-all shadow-lg shadow-rose-500/25"
+                className="w-full py-3 px-4 bg-violet-500 hover:bg-violet-600 text-white font-semibold rounded-2xl transition-all shadow-lg shadow-violet-500/25"
               >
                 Sign Up Free
               </button>
@@ -281,15 +281,15 @@ const SummarizerPage = ({ onNavigate, user, onLogout }: SummarizerPageProps) => 
               </div>
               <div className="flex-1 text-center sm:text-left">
                 <div className="flex items-center justify-center sm:justify-start gap-2 sm:gap-3 mb-3 sm:mb-4 flex-wrap">
-                  <span className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full bg-gradient-to-r from-rose-500 to-red-600 text-white text-xs font-semibold shadow-lg shadow-rose-500/30">
+                  <span className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full bg-violet-600 hover:bg-violet-500 text-white text-xs font-semibold shadow-lg shadow-violet-500/30">
                     👑 Premium Tool
                   </span>
-                  <span className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-300 text-xs font-semibold">
+                  <span className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300 text-xs font-semibold">
                     ✨ AI-Powered
                   </span>
                 </div>
                 <h1 className="text-2xl sm:text-4xl lg:text-5xl text-stone-800 dark:text-stone-100 mb-3 sm:mb-4 leading-tight" style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 400 }}>
-                  AI <span className="text-rose-600 dark:text-rose-400 italic">Summarizer</span>
+                  AI <span className="text-violet-600 dark:text-violet-400 italic">Summarizer</span>
                 </h1>
                 <p className="text-sm sm:text-lg text-stone-600 max-w-2xl leading-relaxed">
                   Transform lengthy papers, articles, and documents into concise key points. 
@@ -305,7 +305,7 @@ const SummarizerPage = ({ onNavigate, user, onLogout }: SummarizerPageProps) => 
           <div className="max-w-6xl mx-auto">
             <div className="bg-white dark:bg-stone-800 rounded-2xl sm:rounded-3xl shadow-xl shadow-stone-100/50 dark:shadow-none border border-stone-200 dark:border-stone-600 overflow-hidden min-w-0">
               {/* Toolbar */}
-              <div className="border-b border-stone-200 dark:border-stone-600 bg-gradient-to-r from-rose-50 to-red-50 dark:from-rose-900/20 dark:to-red-900/20 px-3 sm:px-5 py-3 sm:py-4">
+              <div className="border-b border-stone-200 dark:border-stone-600 bg-gradient-to-r from-violet-50 to-red-50 dark:from-violet-900/20 dark:to-red-900/20 px-3 sm:px-5 py-3 sm:py-4">
                 <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center justify-between gap-3 sm:gap-4">
                   <div className="flex flex-wrap items-center gap-2 sm:gap-3 min-w-0 overflow-x-auto sm:overflow-visible">
                     <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
@@ -321,7 +321,7 @@ const SummarizerPage = ({ onNavigate, user, onLogout }: SummarizerPageProps) => 
                               title={locked ? 'Pro or Premium' : opt.description}
                               className={`px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all whitespace-nowrap ${
                                 locked ? 'text-stone-400 dark:text-stone-500 cursor-not-allowed' :
-                                style === opt.value ? 'bg-rose-600 text-white shadow-sm' : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-600'
+                                style === opt.value ? 'bg-violet-600 text-white shadow-sm' : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-600'
                               }`}
                             >
                               {opt.label}
@@ -344,7 +344,7 @@ const SummarizerPage = ({ onNavigate, user, onLogout }: SummarizerPageProps) => 
                               title={locked ? 'Pro or Premium' : opt.description}
                               className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all whitespace-nowrap ${
                                 locked ? 'text-stone-400 dark:text-stone-500 cursor-not-allowed' :
-                                length === opt.value ? 'bg-rose-600 text-white shadow-sm' : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-600'
+                                length === opt.value ? 'bg-violet-600 text-white shadow-sm' : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-600'
                               }`}
                             >
                               {opt.label}
@@ -360,7 +360,7 @@ const SummarizerPage = ({ onNavigate, user, onLogout }: SummarizerPageProps) => 
                     disabled={isLoading || !inputText.trim() || wordCount < 50 || wordCount > maxWords}
                     className={`w-full sm:w-auto px-6 py-2.5 rounded-xl flex items-center justify-center transition-all font-semibold text-sm flex-shrink-0 ${
                       !isLoading && inputText.trim() && wordCount >= 50 && wordCount <= maxWords
-                        ? 'bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white shadow-lg shadow-rose-200/50 dark:shadow-rose-900/30 cursor-pointer'
+                        ? 'bg-violet-600 hover:bg-violet-500 text-white shadow-lg shadow-violet-200/50 dark:shadow-violet-900/30 cursor-pointer'
                         : 'bg-stone-200 dark:bg-stone-600 text-stone-400 dark:text-stone-500 cursor-not-allowed'
                     }`}
                   >
@@ -403,11 +403,11 @@ const SummarizerPage = ({ onNavigate, user, onLogout }: SummarizerPageProps) => 
                       <button
                         onClick={() => fileInputRef.current?.click()}
                         disabled={isParsing}
-                        className="flex items-center gap-2 px-3 py-2 rounded-lg bg-rose-100 dark:bg-rose-900/50 text-rose-700 dark:text-rose-300 hover:bg-rose-200 dark:hover:bg-rose-800/50 font-semibold text-sm transition-colors disabled:opacity-50 border border-rose-200 dark:border-rose-700"
+                        className="flex items-center gap-2 px-3 py-2 rounded-lg bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300 hover:bg-violet-200 dark:hover:bg-violet-800/50 font-semibold text-sm transition-colors disabled:opacity-50 border border-violet-200 dark:border-violet-700"
                         title="Upload PDF, Word, or TXT"
                       >
                         {isParsing ? (
-                          <span className="w-4 h-4 border-2 border-rose-500 border-t-transparent rounded-full animate-spin" />
+                          <span className="w-4 h-4 border-2 border-violet-500 border-t-transparent rounded-full animate-spin" />
                         ) : (
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
@@ -417,7 +417,7 @@ const SummarizerPage = ({ onNavigate, user, onLogout }: SummarizerPageProps) => 
                       </button>
                       <button
                         onClick={handlePaste}
-                        className="flex items-center gap-1.5 px-2 py-1.5 text-xs text-stone-600 dark:text-stone-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded-lg transition-colors"
+                        className="flex items-center gap-1.5 px-2 py-1.5 text-xs text-stone-600 dark:text-stone-400 hover:text-violet-600 dark:hover:text-violet-400 hover:bg-violet-50 dark:hover:bg-violet-900/30 rounded-lg transition-colors"
                         title="Paste from clipboard"
                       >
                         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -455,13 +455,13 @@ const SummarizerPage = ({ onNavigate, user, onLogout }: SummarizerPageProps) => 
                 </div>
 
                 {/* Right Panel: Summary */}
-                <div className="flex flex-col bg-gradient-to-br from-rose-50/30 to-red-50/30 dark:from-rose-900/10 dark:to-red-900/10">
-                  <div className="flex items-center justify-between px-3 sm:px-5 py-2.5 sm:py-3 bg-rose-50/50 dark:bg-rose-900/20 border-b border-rose-100/50 dark:border-rose-800/30">
+                <div className="flex flex-col bg-gradient-to-br from-violet-50/30 to-red-50/30 dark:from-violet-900/10 dark:to-red-900/10">
+                  <div className="flex items-center justify-between px-3 sm:px-5 py-2.5 sm:py-3 bg-violet-50/50 dark:bg-violet-900/20 border-b border-violet-100/50 dark:border-violet-800/30">
                     <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full bg-rose-500"></div>
-                      <span className="text-xs font-semibold text-rose-700 dark:text-rose-400 uppercase tracking-wider">Summary</span>
+                      <div className="w-2 h-2 rounded-full bg-violet-500"></div>
+                      <span className="text-xs font-semibold text-violet-700 dark:text-violet-400 uppercase tracking-wider">Summary</span>
                       {summaryResult && (
-                        <span className="px-2 py-0.5 bg-rose-100 dark:bg-rose-800/50 text-rose-700 dark:text-rose-300 text-[10px] font-bold rounded-full">
+                        <span className="px-2 py-0.5 bg-violet-100 dark:bg-violet-800/50 text-violet-700 dark:text-violet-300 text-[10px] font-bold rounded-full">
                           {Math.round((1 - summaryResult.summaryWordCount / summaryResult.originalWordCount) * 100)}% shorter
                         </span>
                       )}
@@ -470,11 +470,11 @@ const SummarizerPage = ({ onNavigate, user, onLogout }: SummarizerPageProps) => 
                       <div className="flex items-center gap-1">
                         <button
                           onClick={handleCopy}
-                          className="p-1.5 text-stone-400 dark:text-stone-500 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded-lg transition-colors"
+                          className="p-1.5 text-stone-400 dark:text-stone-500 hover:text-violet-600 dark:hover:text-violet-400 hover:bg-violet-50 dark:hover:bg-violet-900/30 rounded-lg transition-colors"
                           title="Copy to clipboard"
                         >
                           {copied ? (
-                            <svg className="w-4 h-4 text-rose-600 dark:text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-4 h-4 text-violet-600 dark:text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                             </svg>
                           ) : (
@@ -485,7 +485,7 @@ const SummarizerPage = ({ onNavigate, user, onLogout }: SummarizerPageProps) => 
                         </button>
                         <button
                           onClick={handleDownload}
-                          className="p-1.5 text-stone-400 dark:text-stone-500 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded-lg transition-colors"
+                          className="p-1.5 text-stone-400 dark:text-stone-500 hover:text-violet-600 dark:hover:text-violet-400 hover:bg-violet-50 dark:hover:bg-violet-900/30 rounded-lg transition-colors"
                           title="Download summary"
                         >
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -501,7 +501,7 @@ const SummarizerPage = ({ onNavigate, user, onLogout }: SummarizerPageProps) => 
                         <AnalysisAnimation message="Analyzing and summarizing..." />
                       </div>
                     ) : summaryResult ? (
-                      <div className="prose prose-sm sm:prose max-w-none text-gray-700 whitespace-pre-wrap break-words">
+                      <div className="prose pviolet-sm sm:prose max-w-none text-gray-700 whitespace-pre-wrap break-words">
                         {summaryResult.summary}
                       </div>
                     ) : (
@@ -536,7 +536,7 @@ const SummarizerPage = ({ onNavigate, user, onLogout }: SummarizerPageProps) => 
                       <p className="text-red-600 dark:text-red-400 text-xs mt-1">{getResetsInText()}</p>
                       <button
                         onClick={() => onNavigate('pricing')}
-                        className="mt-2 px-4 py-1.5 bg-gradient-to-r from-rose-600 to-red-600 text-white text-sm font-medium rounded-lg hover:from-rose-500 hover:to-red-500 transition-all inline-flex items-center gap-2"
+                        className="mt-2 px-4 py-1.5 bg-violet-600 hover:bg-violet-500 text-white text-sm font-medium rounded-lg hover:bg-violet-500 transition-all inline-flex items-center gap-2"
                       >
                         👑 Upgrade Now
                       </button>
@@ -549,19 +549,19 @@ const SummarizerPage = ({ onNavigate, user, onLogout }: SummarizerPageProps) => 
             {/* Plan Info for non-premium users */}
             {user && !isPremiumUser && (
               <div className="mt-6 mx-3 sm:mx-0">
-                <div className="bg-gradient-to-r from-rose-50 to-red-50 dark:from-rose-900/20 dark:to-red-900/20 border border-rose-200 dark:border-rose-700/50 rounded-2xl p-5 flex items-center justify-between flex-wrap gap-3">
+                <div className="bg-gradient-to-r from-violet-50 to-red-50 dark:from-violet-900/20 dark:to-red-900/20 border border-violet-200 dark:border-violet-700/50 rounded-2xl p-5 flex items-center justify-between flex-wrap gap-3">
                   <div className="flex items-center gap-3">
                     <span className="text-2xl">📝</span>
                     <div>
-                      <p className="text-rose-800 dark:text-rose-200 font-medium text-sm">
+                      <p className="text-violet-800 dark:text-violet-200 font-medium text-sm">
                         {userPlan === 'free' ? `Free plan: 5,000 words/month • Bullet + Medium only • ${getResetsInText(daysUntilReset)}` : userPlan === 'premium' ? 'Premium: 999,999 words/month • All styles & lengths' : 'Pro: 99,999 words/month • All styles & lengths'}
                       </p>
-                      <p className="text-rose-600 dark:text-rose-400 text-xs mt-0.5">Upgrade to Premium for all styles, lengths, and our premium AI model</p>
+                      <p className="text-violet-600 dark:text-violet-400 text-xs mt-0.5">Upgrade to Premium for all styles, lengths, and our premium AI model</p>
                     </div>
                   </div>
                   <button
                     onClick={() => onNavigate('pricing')}
-                    className="px-4 py-1.5 bg-gradient-to-r from-rose-600 to-red-600 text-white text-xs font-semibold rounded-lg hover:from-rose-500 hover:to-red-500 transition-all"
+                    className="px-4 py-1.5 bg-violet-600 hover:bg-violet-500 text-white text-xs font-semibold rounded-lg hover:bg-violet-500 transition-all"
                   >
                     👑 View Plans
                   </button>
@@ -573,10 +573,10 @@ const SummarizerPage = ({ onNavigate, user, onLogout }: SummarizerPageProps) => 
             <div className="mt-8 sm:mt-10">
               <div className="flex items-center gap-2 mb-4">
                 <h2 className="text-lg font-bold text-stone-800 dark:text-stone-100">See how it works</h2>
-                <span className="h-px flex-1 max-w-32 bg-gradient-to-r from-rose-300/60 to-transparent dark:from-rose-500/40 rounded-full" />
+                <span className="h-px flex-1 max-w-32 bg-gradient-to-r from-violet-300/60 to-transparent dark:from-violet-500/40 rounded-full" />
               </div>
               <div className="relative bg-white dark:bg-stone-800 rounded-2xl overflow-hidden shadow-xl shadow-stone-200/50 dark:shadow-stone-900/50 border border-stone-200/60 dark:border-stone-600/50 max-w-3xl mx-auto">
-                <div className="bg-gradient-to-br from-rose-50/50 to-red-50/50 dark:from-rose-900/20 dark:to-red-900/20 flex items-center justify-center aspect-video min-h-[200px] sm:min-h-[320px]">
+                <div className="bg-gradient-to-br from-violet-50/50 to-red-50/50 dark:from-violet-900/20 dark:to-red-900/20 flex items-center justify-center aspect-video min-h-[200px] sm:min-h-[320px]">
                   <video autoPlay loop muted playsInline className="w-full h-full object-contain" title="WriteScholar AI Summarizer — Condense papers into key points" aria-label="WriteScholar AI Summarizer — Condense papers into key points">
                     <source src="/writescholar-summarizer-demo.mp4" type="video/mp4" />
                   </video>
@@ -594,7 +594,7 @@ const SummarizerPage = ({ onNavigate, user, onLogout }: SummarizerPageProps) => 
         <div className="py-12 sm:py-16 px-4 sm:px-6 lg:px-8 bg-white border-t border-stone-100">
           <div className="max-w-5xl mx-auto">
             <h2 className="text-2xl sm:text-3xl font-extrabold text-center text-stone-800 dark:text-stone-100 mb-8 sm:mb-12">
-              Why Use Our <span className="text-rose-600 dark:text-rose-400 italic">AI Summarizer</span>?
+              Why Use Our <span className="text-violet-600 dark:text-violet-400 italic">AI Summarizer</span>?
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
               {[
@@ -614,8 +614,8 @@ const SummarizerPage = ({ onNavigate, user, onLogout }: SummarizerPageProps) => 
                   description: 'Reduce a 20-page paper to key insights in under a minute. Focus on what matters most.'
                 }
               ].map((feature, idx) => (
-                <div key={idx} className="bg-gradient-to-br from-rose-50 to-red-50 dark:from-rose-900/20 dark:to-red-900/20 p-6 rounded-2xl border border-rose-200/70 dark:border-rose-700/40 hover:shadow-lg hover:shadow-rose-100/50 dark:hover:shadow-rose-900/20 transition-all">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-rose-500 to-red-600 flex items-center justify-center mb-4 shadow-lg shadow-rose-500/30 text-2xl">
+                <div key={idx} className="bg-gradient-to-br from-violet-50 to-red-50 dark:from-violet-900/20 dark:to-red-900/20 p-6 rounded-2xl border border-violet-200/70 dark:border-violet-700/40 hover:shadow-lg hover:shadow-violet-100/50 dark:hover:shadow-violet-900/20 transition-all">
+                  <div className="w-12 h-12 rounded-xl bg-violet-600 hover:bg-violet-500 flex items-center justify-center mb-4 shadow-lg shadow-violet-500/30 text-2xl">
                     {feature.icon}
                   </div>
                   <h3 className="text-lg font-semibold text-stone-800 dark:text-stone-100 mb-2">{feature.title}</h3>

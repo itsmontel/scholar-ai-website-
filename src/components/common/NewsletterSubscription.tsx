@@ -76,7 +76,7 @@ const NewsletterSubscription: React.FC<NewsletterSubscriptionProps> = ({ variant
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Enter your email"
-                  className="flex-1 px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-500/40 focus:border-rose-500 text-sm"
+                  className="flex-1 px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500/40 focus:border-violet-500 text-sm"
                   disabled={status === 'loading'}
                 />
                 <button

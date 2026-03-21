@@ -314,7 +314,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8 lg:gap-12">
             <div className="flex-1 text-center lg:text-left max-w-3xl mx-auto lg:mx-0">
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-stone-800 dark:text-stone-100 mb-4">
-                Simple, <span className="bg-gradient-to-r from-rose-500 to-rose-600 bg-clip-text text-transparent">transparent</span> pricing
+                Simple, <span className="bg-violet-600 hover:bg-violet-500 bg-clip-text text-transparent">transparent</span> pricing
               </h1>
               <p className="text-lg text-stone-500 dark:text-stone-400 max-w-2xl mx-auto lg:mx-0">
                 Choose the plan that fits your needs. Upgrade anytime.
@@ -349,7 +349,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
                 }`}
               >
                 Bill Yearly
-                <span className="ml-2 px-2 py-1 bg-rose-100 dark:bg-rose-900/50 text-rose-700 dark:text-rose-400 text-xs font-semibold rounded-full">
+                <span className="ml-2 px-2 py-1 bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-400 text-xs font-semibold rounded-full">
                   Save 17%
                 </span>
               </button>
@@ -364,20 +364,20 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
               key={plan.id}
               className={`relative rounded-2xl p-8 hover:shadow-lg transition-all ${
                 plan.popular 
-                  ? 'bg-white dark:bg-stone-800 border border-rose-500 ring-2 ring-rose-200 dark:ring-rose-800'
+                  ? 'bg-white dark:bg-stone-800 border border-violet-500 ring-2 ring-violet-200 dark:ring-violet-800'
                   : 'bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700'
               }`}
             >
               {plan.popular && (
                 <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                  <span className="bg-gradient-to-r from-rose-500 to-rose-600 text-white px-4 py-1 rounded-full text-sm font-bold shadow-lg shadow-rose-500/25">
+                  <span className="bg-violet-600 hover:bg-violet-500 text-white px-4 py-1 rounded-full text-sm font-bold shadow-lg shadow-violet-500/25">
                     Most Popular
                   </span>
                 </div>
               )}
               {plan.id === 'premium' && (
                 <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                  <span className="bg-gradient-to-r from-amber-500 to-orange-600 text-white px-4 py-1 rounded-full text-sm font-bold shadow-lg shadow-amber-500/25">
+                  <span className="bg-amber-600 text-white px-4 py-1 rounded-full text-sm font-bold shadow-lg shadow-amber-500/25">
                     10× Usage
                   </span>
                 </div>
@@ -398,7 +398,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
                           ${plan.id === 'pro' ? '9.99' : '29.99'}
                         </span>
                         <span className="text-stone-500 dark:text-stone-400 text-sm">
-                          /month <span className="text-rose-600 dark:text-rose-400 font-semibold">first month only</span>
+                          /month <span className="text-violet-600 dark:text-violet-400 font-semibold">first month only</span>
                         </span>
                         <span className="text-xs text-stone-500 dark:text-stone-400">Then ${plan.id === 'pro' ? '19.99' : '39.99'}/mo</span>
                       </div>
@@ -416,7 +416,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
                 </div>
 
                 {getSavings(plan) > 0 && (
-                  <div className="text-rose-600 dark:text-rose-400 text-sm font-medium mb-4">
+                  <div className="text-violet-600 dark:text-violet-400 text-sm font-medium mb-4">
                     Save {getSavings(plan)}% with yearly billing
                   </div>
                 )}
@@ -426,7 +426,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
                 <ul className="space-y-3">
                   {plan.features.map((feature, index) => (
                     <li key={index} className="flex items-start">
-                      <svg className="w-5 h-5 mr-3 mt-0.5 flex-shrink-0 text-rose-500 dark:text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-5 h-5 mr-3 mt-0.5 flex-shrink-0 text-violet-500 dark:text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
                       <span className="text-stone-600 dark:text-stone-400">{feature}</span>
@@ -452,7 +452,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
                     plan.id === currentPlan
                     ? 'bg-stone-100 dark:bg-stone-700 text-stone-500 cursor-not-allowed'
                     : plan.popular
-                    ? 'bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-400 hover:to-rose-500 text-white shadow-lg shadow-rose-500/25'
+                    ? 'bg-violet-600 hover:bg-violet-500 text-white shadow-lg shadow-violet-500/25'
                     : 'bg-stone-100 dark:bg-stone-700 hover:bg-stone-200 dark:hover:bg-stone-600 text-stone-800 dark:text-stone-100'
                 }`}
               >
@@ -500,7 +500,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
               <>
                 <button 
                   onClick={() => onNavigate('dashboard')}
-                  className="bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-400 hover:to-rose-500 text-white px-6 py-3 rounded-2xl font-bold shadow-lg shadow-rose-500/25 transition-all"
+                  className="bg-violet-600 hover:bg-violet-500 text-white px-6 py-3 rounded-2xl font-bold shadow-lg shadow-violet-500/25 transition-all"
                 >
                   Go to Dashboard
                 </button>
@@ -515,7 +515,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
               <>
                 <button 
                   onClick={() => onNavigate('signup')}
-                  className="bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-400 hover:to-rose-500 text-white px-6 py-3 rounded-2xl font-bold shadow-lg shadow-rose-500/25 transition-all"
+                  className="bg-violet-600 hover:bg-violet-500 text-white px-6 py-3 rounded-2xl font-bold shadow-lg shadow-violet-500/25 transition-all"
                 >
                   Get $10 Off
                 </button>

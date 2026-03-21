@@ -315,7 +315,7 @@ export default function UnlockQuizPage() {
           <div className="flex justify-center mb-6">
             <ScholarMascot size={100} animated />
           </div>
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center mx-auto mb-6 text-2xl">
+          <div className="w-14 h-14 rounded-2xl bg-violet-600 hover:bg-violet-500 flex items-center justify-center mx-auto mb-6 text-2xl">
             🔒
           </div>
           <h1 className="text-2xl sm:text-3xl font-bold text-stone-800 dark:text-stone-100 mb-3">
@@ -352,7 +352,7 @@ export default function UnlockQuizPage() {
           <div className="space-y-4">
             <button
               onClick={startPuzzle}
-              className="w-full px-6 py-4 bg-gradient-to-r from-violet-600 to-purple-600 text-white rounded-xl font-semibold hover:from-violet-500 hover:to-purple-500 transition-all shadow-lg shadow-violet-500/25 active:scale-[0.98]"
+              className="w-full px-6 py-4 bg-violet-600 hover:bg-violet-500 text-white rounded-xl font-semibold hover:bg-violet-500 transition-all shadow-lg shadow-violet-500/25 active:scale-[0.98]"
             >
               Solve puzzle to unlock
             </button>
@@ -413,7 +413,7 @@ export default function UnlockQuizPage() {
             </div>
             <button
               onClick={() => { window.location.href = `${FRONTEND_URL}/tools/quiz-generator`; }}
-              className="w-full px-6 py-4 bg-gradient-to-r from-violet-600 to-purple-600 text-white rounded-xl font-semibold hover:from-violet-500 hover:to-purple-500 transition-all shadow-lg shadow-violet-500/25"
+              className="w-full px-6 py-4 bg-violet-600 hover:bg-violet-500 text-white rounded-xl font-semibold hover:bg-violet-500 transition-all shadow-lg shadow-violet-500/25"
             >
               Create quiz or flashcards →
             </button>
@@ -468,7 +468,7 @@ export default function UnlockQuizPage() {
               <button
                 onClick={handleUnlockAndContinue}
                 disabled={isRedirecting}
-                className="w-full px-6 py-4 bg-gradient-to-r from-violet-600 to-purple-600 text-white rounded-xl font-semibold hover:opacity-90 transition-opacity disabled:opacity-70 disabled:cursor-wait"
+                className="w-full px-6 py-4 bg-violet-600 hover:bg-violet-500 text-white rounded-xl font-semibold hover:opacity-90 transition-opacity disabled:opacity-70 disabled:cursor-wait"
               >
                 {isRedirecting ? 'Redirecting...' : `Continue to ${site ? formatSiteName(site) : 'site'}`}
               </button>
@@ -522,7 +522,7 @@ export default function UnlockQuizPage() {
         <div className="w-full max-w-lg bg-white dark:bg-stone-800 rounded-2xl shadow-xl border border-stone-200/60 dark:border-stone-700 overflow-hidden">
           <div className="h-1 bg-stone-100">
             <div
-              className="h-full bg-gradient-to-r from-violet-500 to-purple-500 transition-all duration-300"
+              className="h-full bg-violet-600 transition-all duration-300"
               style={{ width: `${progress}%` }}
             />
           </div>
@@ -643,7 +643,7 @@ export default function UnlockQuizPage() {
             <div>
               <div
                 onClick={() => !answered && setIsFlipped((f) => !f)}
-                className="min-h-[200px] flex flex-col items-center justify-center p-6 bg-gradient-to-br from-violet-50 to-purple-50 rounded-2xl border-2 border-violet-200 cursor-pointer"
+                className="min-h-[200px] flex flex-col items-center justify-center p-6 bg-violet-50 rounded-2xl border-2 border-violet-200 cursor-pointer"
               >
                 <p className="text-lg font-semibold text-stone-800 text-center">
                   {isFlipped ? currentItem.data.back : currentItem.data.front}

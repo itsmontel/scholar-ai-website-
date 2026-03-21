@@ -141,7 +141,7 @@ const SoftPaywall = ({ userName, onStartTrial, onDismiss, onNavigatePricing, onN
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={handleDismiss} aria-hidden="true" />
 
       {/* Modal */}
-      <div className="relative w-full max-w-lg max-h-[92vh] overflow-y-auto rounded-3xl bg-white dark:bg-stone-800 shadow-2xl shadow-rose-500/10 dark:shadow-black/40 border border-stone-200/80 dark:border-stone-700/60">
+      <div className="relative w-full max-w-lg max-h-[92vh] overflow-y-auto rounded-3xl bg-white dark:bg-stone-800 shadow-2xl shadow-violet-500/10 dark:shadow-black/40 border border-stone-200/80 dark:border-stone-700/60">
         {/* Dismiss X */}
         <button
           onClick={handleDismiss}
@@ -154,27 +154,27 @@ const SoftPaywall = ({ userName, onStartTrial, onDismiss, onNavigatePricing, onN
         </button>
 
         {/* Top gradient accent */}
-        <div className="h-1.5 bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 rounded-t-3xl" />
+        <div className="h-1.5 bg-violet-600 rounded-t-3xl" />
 
         <div className="px-6 sm:px-8 pt-6 pb-8">
           {showLastChance ? (
             /* Last chance - $10 off OFF10 offer */
             <div className="animate-pwIn">
               <div className="text-center mb-6">
-                <span className="inline-block px-3 py-1.5 rounded-full bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-300 text-xs font-bold uppercase tracking-wider mb-4">
+                <span className="inline-block px-3 py-1.5 rounded-full bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300 text-xs font-bold uppercase tracking-wider mb-4">
                   Last chance
                 </span>
                 <h3 className="text-xl font-bold text-stone-800 dark:text-stone-100 mb-2" style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}>
                   Wait! Don&apos;t miss out
                 </h3>
                 <p className="text-stone-500 dark:text-stone-400 text-sm mb-6">
-                  Get <span className="font-bold text-rose-600 dark:text-rose-500">$10 off</span> your first month with code{' '}
-                  <span className="font-mono font-bold bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-300 px-2 py-0.5 rounded">OFF10</span>
+                  Get <span className="font-bold text-violet-600 dark:text-violet-500">$10 off</span> your first month with code{' '}
+                  <span className="font-mono font-bold bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300 px-2 py-0.5 rounded">OFF10</span>
                 </p>
                 <button
                   onClick={() => handleStartTrial('OFF10')}
                   disabled={isCheckoutLoading}
-                  className="w-full py-4 bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 disabled:from-stone-400 disabled:to-stone-500 text-white rounded-2xl font-bold text-base shadow-lg shadow-rose-500/30 transition-all flex items-center justify-center gap-2 disabled:cursor-wait"
+                  className="w-full py-4 bg-violet-600 hover:bg-violet-700 disabled:from-stone-400 disabled:to-stone-500 text-white rounded-2xl font-bold text-base shadow-lg shadow-violet-500/30 transition-all flex items-center justify-center gap-2 disabled:cursor-wait"
                 >
                   {isCheckoutLoading ? (
                     <>
@@ -225,9 +225,9 @@ const SoftPaywall = ({ userName, onStartTrial, onDismiss, onNavigatePricing, onN
           </div>
 
           {/* Price card */}
-          <div className="relative bg-gradient-to-br from-rose-50 via-pink-50/50 to-rose-50 dark:from-rose-900/30 dark:via-pink-900/20 dark:to-rose-900/20 rounded-2xl p-5 sm:p-6 border border-rose-200/60 dark:border-rose-700/40 mb-5">
+          <div className="relative bg-gradient-to-br from-violet-50 via-fuchsia-50/50 to-violet-50 dark:from-violet-900/30 dark:via-fuchsia-900/20 dark:to-violet-900/20 rounded-2xl p-5 sm:p-6 border border-violet-200/60 dark:border-violet-700/40 mb-5">
             <div className="absolute top-3 right-3">
-              <span className="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider bg-gradient-to-r from-rose-500 to-pink-600 text-white rounded-full shadow-sm">
+              <span className="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider bg-violet-600 hover:bg-violet-500 text-white rounded-full shadow-sm">
                 Most popular
               </span>
             </div>
@@ -268,7 +268,7 @@ const SoftPaywall = ({ userName, onStartTrial, onDismiss, onNavigatePricing, onN
           <button
             onClick={handleStartTrial}
             disabled={isCheckoutLoading}
-            className="w-full py-3.5 sm:py-4 bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 disabled:from-stone-400 disabled:to-stone-500 text-white rounded-2xl font-bold text-base shadow-lg shadow-rose-500/30 hover:shadow-xl hover:shadow-rose-500/40 transition-all active:scale-[0.98] disabled:active:scale-100 flex items-center justify-center gap-2 disabled:cursor-wait"
+            className="w-full py-3.5 sm:py-4 bg-violet-600 hover:bg-violet-700 disabled:from-stone-400 disabled:to-stone-500 text-white rounded-2xl font-bold text-base shadow-lg shadow-violet-500/30 hover:shadow-xl hover:shadow-violet-500/40 transition-all active:scale-[0.98] disabled:active:scale-100 flex items-center justify-center gap-2 disabled:cursor-wait"
           >
             {isCheckoutLoading ? (
               <>
@@ -308,11 +308,11 @@ const SoftPaywall = ({ userName, onStartTrial, onDismiss, onNavigatePricing, onN
           {onNavigate && (
             <p className="mt-2 text-center text-[11px] text-stone-400 dark:text-stone-500">
               By continuing, you agree to our{' '}
-              <button onClick={() => onNavigate('terms')} className="text-rose-500 dark:text-rose-400 hover:underline font-medium">
+              <button onClick={() => onNavigate('terms')} className="text-violet-500 dark:text-violet-400 hover:underline font-medium">
                 Terms
               </button>{' '}
               and{' '}
-              <button onClick={() => onNavigate('privacy')} className="text-rose-500 dark:text-rose-400 hover:underline font-medium">
+              <button onClick={() => onNavigate('privacy')} className="text-violet-500 dark:text-violet-400 hover:underline font-medium">
                 Privacy Policy
               </button>
               .
@@ -323,7 +323,7 @@ const SoftPaywall = ({ userName, onStartTrial, onDismiss, onNavigatePricing, onN
           <div className="mt-4 text-center h-5 overflow-hidden">
             <p
               key={socialIndex}
-              className="text-xs text-rose-500 dark:text-rose-400 font-semibold animate-pwSocialIn"
+              className="text-xs text-violet-500 dark:text-violet-400 font-semibold animate-pwSocialIn"
             >
               {SOCIAL_PROOF[socialIndex]}
             </p>
@@ -340,7 +340,7 @@ const SoftPaywall = ({ userName, onStartTrial, onDismiss, onNavigatePricing, onN
             <span className="text-stone-200 dark:text-stone-700">|</span>
             <button
               onClick={() => { setExiting(true); setTimeout(onNavigatePricing, 200); }}
-              className="text-xs text-rose-500 dark:text-rose-400 hover:text-rose-600 dark:hover:text-rose-300 transition-colors font-medium"
+              className="text-xs text-violet-500 dark:text-violet-400 hover:text-violet-600 dark:hover:text-violet-300 transition-colors font-medium"
             >
               Compare all plans
             </button>

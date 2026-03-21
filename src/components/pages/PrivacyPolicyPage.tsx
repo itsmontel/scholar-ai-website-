@@ -10,7 +10,7 @@ interface PrivacyPolicyPageProps {
 
 const PrivacyPolicyPage: React.FC<PrivacyPolicyPageProps> = ({ onNavigate, user, onLogout }) => {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-rose-50/80 via-stone-50 to-white dark:from-stone-900 dark:to-stone-800">
+    <div className="min-h-screen bg-gradient-to-b from-violet-50/80 via-stone-50 to-white dark:from-stone-900 dark:to-stone-800">
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="privacy" />
       
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
@@ -24,7 +24,7 @@ const PrivacyPolicyPage: React.FC<PrivacyPolicyPageProps> = ({ onNavigate, user,
             </p>
           </div>
 
-          <div className="prose prose-lg max-w-none prose-stone dark:prose-invert">
+          <div className="prose pviolet-lg max-w-none pviolet-stone dark:pviolet-invert">
             <section className="mb-8">
               <h2 className="text-xl sm:text-2xl font-bold text-stone-800 dark:text-stone-100 mb-4">1. Information We Collect</h2>
               <div className="space-y-4 text-stone-600 dark:text-stone-400">
@@ -68,8 +68,8 @@ const PrivacyPolicyPage: React.FC<PrivacyPolicyPageProps> = ({ onNavigate, user,
                   operate the service. We do not sell your personal data.
                 </p>
                 <ul className="list-disc list-inside space-y-2 ml-4">
-                  <li><strong>OpenAI</strong> — Text you submit to AI-powered features (Essay Analyzer, Citation Finder, Study Pack, Paper Summarizer) is sent to OpenAI's API for processing. OpenAI's use of API data is governed by their <a href="https://openai.com/policies/privacy-policy" target="_blank" rel="noopener noreferrer" className="text-rose-600 dark:text-rose-400 hover:underline">Privacy Policy</a>.</li>
-                  <li><strong>Stripe</strong> — Payment processing and subscription management. Stripe receives your billing information. See <a href="https://stripe.com/privacy" target="_blank" rel="noopener noreferrer" className="text-rose-600 dark:text-rose-400 hover:underline">Stripe's Privacy Policy</a>.</li>
+                  <li><strong>OpenAI</strong> — Text you submit to AI-powered features (Essay Analyzer, Citation Finder, Study Pack, Paper Summarizer) is sent to OpenAI's API for processing. OpenAI's use of API data is governed by their <a href="https://openai.com/policies/privacy-policy" target="_blank" rel="noopener noreferrer" className="text-violet-600 dark:text-violet-400 hover:underline">Privacy Policy</a>.</li>
+                  <li><strong>Stripe</strong> — Payment processing and subscription management. Stripe receives your billing information. See <a href="https://stripe.com/privacy" target="_blank" rel="noopener noreferrer" className="text-violet-600 dark:text-violet-400 hover:underline">Stripe's Privacy Policy</a>.</li>
                   <li><strong>Supabase</strong> — Our primary database and optional file storage provider, hosting your account data, document metadata, usage records, study pack history (quizzes, flashcards, crosswords, lessons), optional social/sharing data when those features are in use, and badge progress.</li>
                   <li><strong>Amazon Web Services (S3)</strong> — Cloud storage for uploaded document files in production environments.</li>
                   <li><strong>Email Provider (SMTP)</strong> — Transactional and marketing emails are delivered via our configured email service.</li>
@@ -221,7 +221,7 @@ const PrivacyPolicyPage: React.FC<PrivacyPolicyPageProps> = ({ onNavigate, user,
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button
                 onClick={() => onNavigate('dashboard')}
-                className="px-8 py-3 rounded-xl font-semibold text-white bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 hover:to-pink-500 shadow-lg shadow-rose-500/25 transition-all duration-200"
+                className="px-8 py-3 rounded-xl font-semibold text-white bg-violet-600 hover:bg-violet-500 shadow-lg shadow-violet-500/25 transition-all duration-200"
               >
                 Back to Dashboard
               </button>

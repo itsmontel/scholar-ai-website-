@@ -55,7 +55,7 @@ const LandingPage = ({ onNavigate }) => {
       {/* Navigation */}
       <nav className="flex items-center justify-between px-8 py-6">
         <div className="flex items-center space-x-2">
-          <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+          <div className="w-8 h-8 bg-violet-600 hover:bg-violet-700 rounded-lg flex items-center justify-center">
             <span className="text-white font-bold text-sm">A</span>
           </div>
           <span className="text-xl font-bold text-gray-900">AcademicAI</span>
@@ -85,7 +85,7 @@ const LandingPage = ({ onNavigate }) => {
       <div className="max-w-6xl mx-auto px-8 py-20">
         <div className="text-center mb-16">
           <h1 className="text-6xl font-bold text-gray-900 mb-6 leading-tight">
-            Enhance your academic<br />writing with <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">AI</span>
+            Enhance your academic<br />writing with <span className="bg-violet-600 hover:bg-violet-700 bg-clip-text text-transparent">AI</span>
           </h1>
           <p className="text-xl text-gray-600 mb-12 max-w-2xl mx-auto">
             Get detailed feedback on your research papers, essays, and academic work with AI-powered analysis that helps you write like a scholar.
@@ -104,7 +104,7 @@ const LandingPage = ({ onNavigate }) => {
                 <span className="text-sm text-gray-400">AI-powered academic feedback</span>
                 <button
                   onClick={handleSubmit}
-                  className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2 rounded-lg hover:shadow-lg transition-all duration-300 flex items-center space-x-2"
+                  className="bg-violet-600 hover:bg-violet-700 text-white px-6 py-2 rounded-lg hover:shadow-lg transition-all duration-300 flex items-center space-x-2"
                 >
                   <span>Analyze</span>
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -122,7 +122,7 @@ const LandingPage = ({ onNavigate }) => {
           <div className="max-w-4xl mx-auto">
             <div className="bg-white rounded-2xl shadow-xl p-12 border border-gray-200">
               <div className="flex justify-center mb-6">
-                <div className="w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center">
+                <div className="w-16 h-16 bg-violet-600 hover:bg-violet-700 rounded-full flex items-center justify-center">
                   <span className="text-white font-bold text-2xl">S</span>
                 </div>
               </div>
@@ -179,12 +179,12 @@ const LandingPage = ({ onNavigate }) => {
         </div>
 
         {/* CTA Section */}
-        <div className="bg-gradient-to-r from-gray-900 to-gray-800 rounded-2xl p-12 text-center">
+        <div className="bg-gray-900 hover:bg-gray-800 rounded-2xl p-12 text-center">
           <h2 className="text-3xl font-bold text-white mb-4">Ready to enhance your academic writing?</h2>
           <p className="text-gray-300 mb-8">Join thousands of students and researchers who trust AcademicAI for their writing success.</p>
           <button 
             onClick={() => onNavigate('signup')}
-            className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-lg text-lg font-semibold hover:shadow-lg transition-all duration-300"
+            className="bg-violet-600 hover:bg-violet-700 text-white px-8 py-3 rounded-lg text-lg font-semibold hover:shadow-lg transition-all duration-300"
           >
             Start Writing Better →
           </button>
@@ -197,7 +197,7 @@ const LandingPage = ({ onNavigate }) => {
           <div className="grid md:grid-cols-4 gap-8">
             <div>
               <div className="flex items-center space-x-2 mb-4">
-                <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+                <div className="w-8 h-8 bg-violet-600 hover:bg-violet-700 rounded-lg flex items-center justify-center">
                   <span className="text-white font-bold text-sm">A</span>
                 </div>
                 <span className="text-xl font-bold text-gray-900">AcademicAI</span>

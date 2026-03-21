@@ -219,7 +219,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
       setHeaderSearchOpen(false);
       setIsMobileMenuOpen(false);
     };
-    const publicNavActiveCls = 'bg-white dark:bg-stone-700 text-rose-600 dark:text-rose-400 shadow-sm shadow-rose-500/10';
+    const publicNavActiveCls = 'bg-white dark:bg-stone-700 text-violet-600 dark:text-violet-400 shadow-sm shadow-violet-500/10';
     const publicNavInactiveCls = 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-200/50 dark:hover:bg-stone-700/50';
 
     return (
@@ -238,7 +238,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
               <div className="relative w-12 h-12 flex items-center justify-center group-hover:scale-105 transition-transform duration-300 shrink-0 overflow-hidden">
                 <img src="/mascot.png" alt="WriteScholar mascot" className="w-full h-full object-contain drop-shadow-lg" fetchPriority="high" width="40" height="40" />
               </div>
-              <span className="text-base sm:text-xl font-extrabold tracking-tight text-stone-800 dark:text-stone-100 group-hover:text-rose-600 dark:group-hover:text-rose-400 transition-colors duration-300 truncate max-w-[140px] sm:max-w-none">
+              <span className="text-base sm:text-xl font-extrabold tracking-tight text-stone-800 dark:text-stone-100 group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors duration-300 truncate max-w-[140px] sm:max-w-none">
                 WriteScholar
               </span>
             </button>
@@ -273,7 +273,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
                   onChange={(e) => setHeaderSearchQuery(e.target.value)}
                   onKeyDown={(e) => e.key === 'Escape' && setHeaderSearchOpen(false)}
                   placeholder="Find tools, features..."
-                  className="w-full pl-9 pr-3 py-2.5 rounded-2xl border border-stone-200/80 dark:border-stone-600/80 bg-white/90 dark:bg-stone-800/90 text-stone-800 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500 focus:outline-none focus:ring-2 focus:ring-rose-400/30 focus:border-rose-400 dark:focus:border-rose-500 text-sm shadow-sm transition-all"
+                  className="w-full pl-9 pr-3 py-2.5 rounded-2xl border border-stone-200/80 dark:border-stone-600/80 bg-white/90 dark:bg-stone-800/90 text-stone-800 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500 focus:outline-none focus:ring-2 focus:ring-violet-400/30 focus:border-violet-400 dark:focus:border-violet-500 text-sm shadow-sm transition-all"
                   aria-label="Search WriteScholar"
                   autoComplete="off"
                 />
@@ -290,14 +290,14 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
               </button>
               <button 
                 onClick={() => onNavigate?.('signup')} 
-                className="inline-flex items-center justify-center px-4 py-2.5 sm:px-6 sm:py-2.5 text-white text-xs sm:text-sm font-bold rounded-2xl bg-rose-500 hover:bg-rose-600 dark:bg-rose-500 dark:hover:bg-rose-600 transition-all duration-200 shadow-lg shadow-rose-500/25 hover:shadow-rose-500/30 active:scale-[0.98] whitespace-nowrap shrink-0"
+                className="inline-flex items-center justify-center px-4 py-2.5 sm:px-6 sm:py-2.5 text-white text-xs sm:text-sm font-bold rounded-2xl bg-violet-500 hover:bg-violet-600 dark:bg-violet-500 dark:hover:bg-violet-600 transition-all duration-200 shadow-lg shadow-violet-500/25 hover:shadow-violet-500/30 active:scale-[0.98] whitespace-nowrap shrink-0"
               >
                 Sign up free
               </button>
               <button
                 type="button"
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="mobile-menu-button lg:hidden p-2.5 rounded-2xl bg-rose-500 hover:bg-rose-600 dark:bg-rose-500 dark:hover:bg-rose-600 transition-colors text-white shrink-0 shadow-lg shadow-rose-500/25"
+                className="mobile-menu-button lg:hidden p-2.5 rounded-2xl bg-violet-500 hover:bg-violet-600 dark:bg-violet-500 dark:hover:bg-violet-600 transition-colors text-white shrink-0 shadow-lg shadow-violet-500/25"
                 aria-label="Toggle menu"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -350,7 +350,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
                     onChange={(e) => setHeaderSearchQuery(e.target.value)}
                     onKeyDown={(e) => e.key === 'Escape' && setHeaderSearchOpen(false)}
                     placeholder="Find tools, features..."
-                    className="w-full pl-10 pr-4 py-2.5 rounded-2xl border border-stone-200/80 dark:border-stone-600/80 bg-white dark:bg-stone-800 text-stone-800 dark:text-stone-100 placeholder-stone-400 text-sm focus:ring-2 focus:ring-rose-400/30 focus:border-rose-400 dark:focus:border-rose-500"
+                    className="w-full pl-10 pr-4 py-2.5 rounded-2xl border border-stone-200/80 dark:border-stone-600/80 bg-white dark:bg-stone-800 text-stone-800 dark:text-stone-100 placeholder-stone-400 text-sm focus:ring-2 focus:ring-violet-400/30 focus:border-violet-400 dark:focus:border-violet-500"
                     aria-label="Search WriteScholar"
                     autoComplete="off"
                   />
@@ -363,7 +363,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
                   onClick={() => { onNavigate?.(id); setIsMobileMenuOpen(false); }}
                   className={`block w-full text-left px-4 py-3 text-sm font-semibold rounded-2xl transition-all ${
                     currentPage === id 
-                      ? 'text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-900/30' 
+                      ? 'text-violet-600 dark:text-violet-400 bg-violet-50 dark:bg-violet-900/30' 
                       : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-800'
                   }`}
                 >
@@ -379,7 +379,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
                 </button>
                 <button 
                   onClick={() => { onNavigate?.('signup'); setIsMobileMenuOpen(false); }} 
-                  className="block text-center px-4 py-3 text-white text-sm font-bold rounded-2xl bg-rose-500 hover:bg-rose-600 dark:bg-rose-500 dark:hover:bg-rose-600 shadow-lg shadow-rose-500/25 transition-colors"
+                  className="block text-center px-4 py-3 text-white text-sm font-bold rounded-2xl bg-violet-500 hover:bg-violet-600 dark:bg-violet-500 dark:hover:bg-violet-600 shadow-lg shadow-violet-500/25 transition-colors"
                 >
                   Sign up free
                 </button>
@@ -389,13 +389,13 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
           </div>
         )}
         {/* Soft pink accent line under header */}
-        <div className="h-0.5 bg-gradient-to-r from-rose-400/35 via-rose-500/45 to-pink-400/35" />
+        <div className="h-0.5 bg-gradient-to-r from-violet-400/35 via-violet-500/45 to-fuchsia-400/35" />
       </header>
     );
   }
 
   // ── Logged-in header ───────────────────────────────────────────────────────
-  const navActiveCls = 'bg-white dark:bg-stone-700 text-rose-600 dark:text-rose-400 shadow-sm shadow-rose-500/10';
+  const navActiveCls = 'bg-white dark:bg-stone-700 text-violet-600 dark:text-violet-400 shadow-sm shadow-violet-500/10';
   const navInactiveCls = 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-200/50 dark:hover:bg-stone-700/50';
 
   return (
@@ -414,7 +414,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
             <div className="relative w-12 h-12 flex items-center justify-center group-hover:scale-105 transition-transform duration-300 overflow-hidden">
               <img src="/mascot.png" alt="WriteScholar mascot" className="w-full h-full object-contain drop-shadow-lg" fetchPriority="high" width="40" height="40" />
             </div>
-            <span className="text-base sm:text-xl font-extrabold tracking-tight text-stone-800 dark:text-stone-100 group-hover:text-rose-600 dark:group-hover:text-rose-400 transition-colors duration-300 truncate max-w-[140px] sm:max-w-none">
+            <span className="text-base sm:text-xl font-extrabold tracking-tight text-stone-800 dark:text-stone-100 group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors duration-300 truncate max-w-[140px] sm:max-w-none">
               WriteScholar
             </span>
           </button>
@@ -464,11 +464,11 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
               </button>
             </div>
             
-            {/* Saved Materials - solid rose to match Sign up */}
+            {/* Saved Materials - solid violet to match Sign up */}
             <button 
               onClick={() => onNavigate?.('quiz-history')}
-              className={`ml-3 px-4 py-2.5 text-sm font-bold rounded-2xl transition-all duration-200 flex items-center gap-1.5 bg-rose-500 hover:bg-rose-600 dark:bg-rose-500 dark:hover:bg-rose-600 text-white shadow-lg shadow-rose-500/25 hover:shadow-rose-500/30 active:scale-[0.98] ${
-                currentPage === 'quiz-history' ? 'ring-2 ring-rose-400 ring-offset-2 ring-offset-white dark:ring-offset-stone-900' : ''
+              className={`ml-3 px-4 py-2.5 text-sm font-bold rounded-2xl transition-all duration-200 flex items-center gap-1.5 bg-violet-500 hover:bg-violet-600 dark:bg-violet-500 dark:hover:bg-violet-600 text-white shadow-lg shadow-violet-500/25 hover:shadow-violet-500/30 active:scale-[0.98] ${
+                currentPage === 'quiz-history' ? 'ring-2 ring-violet-400 ring-offset-2 ring-offset-white dark:ring-offset-stone-900' : ''
               }`}
             >
               <span>Saved Materials</span>
@@ -512,10 +512,10 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
               )}
             </button>*/}
 
-            {/* Mobile menu button - solid rose to match Sign up / Saved Materials */}
+            {/* Mobile menu button - solid violet to match Sign up / Saved Materials */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="mobile-menu-button lg:hidden p-2.5 rounded-2xl bg-rose-500 hover:bg-rose-600 dark:bg-rose-500 dark:hover:bg-rose-600 transition-colors text-white shadow-lg shadow-rose-500/25"
+              className="mobile-menu-button lg:hidden p-2.5 rounded-2xl bg-violet-500 hover:bg-violet-600 dark:bg-violet-500 dark:hover:bg-violet-600 transition-colors text-white shadow-lg shadow-violet-500/25"
               aria-label="Toggle menu"
             >
               <svg className={`w-5 h-5 text-white transition-transform duration-200 ${isMobileMenuOpen ? 'rotate-90' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -534,7 +534,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                   className="flex items-center gap-2.5 p-1.5 pr-3 rounded-2xl bg-white/80 dark:bg-stone-800/80 border border-stone-200/60 dark:border-stone-600/50 hover:bg-stone-100 dark:hover:bg-stone-700/80 transition-all duration-200 shadow-sm"
                 >
-                  <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-rose-500 to-pink-600 flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-rose-500/20">
+                  <div className="w-8 h-8 rounded-xl bg-violet-600 hover:bg-violet-500 flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-violet-500/20">
                     {(user.username || user.name || user.email) ? (user.username || user.name || user.email).charAt(0).toUpperCase() : 'U'}
                   </div>
                   <div className="hidden md:block text-left">
@@ -557,7 +557,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
                     {/* User Info Section - glass style like dashboard greeting */}
                     <div className="px-4 py-4 bg-gradient-to-br from-stone-50/80 to-white/50 dark:from-stone-800/80 dark:to-stone-800/50">
                       <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-rose-500 to-pink-600 flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-rose-500/25">
+                        <div className="w-12 h-12 rounded-xl bg-violet-600 hover:bg-violet-500 flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-violet-500/25">
                           {(user.username || user.name || user.email) ? (user.username || user.name || user.email).charAt(0).toUpperCase() : 'U'}
                         </div>
                         <div>
@@ -567,7 +567,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
                           <div className="flex items-center gap-1.5 mt-0.5">
                             <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
                               usageStats?.plan === 'premium' 
-                                ? 'bg-gradient-to-r from-amber-400 to-orange-500 text-stone-900' 
+                                ? 'bg-amber-500 text-stone-900' 
                                 : usageStats?.plan === 'pro' 
                                   ? 'bg-lime-100 dark:bg-lime-900/50 text-lime-700 dark:text-lime-400' 
                                   : 'bg-stone-200 dark:bg-stone-700 text-stone-600 dark:text-stone-400'
@@ -680,7 +680,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
                     <div className="py-2">
                       <button 
                         onClick={() => { onNavigate?.('pricing'); setIsDropdownOpen(false); }}
-                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors"
+                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-semibold text-violet-600 dark:text-violet-400 hover:bg-violet-50 dark:hover:bg-violet-900/20 transition-colors"
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -721,7 +721,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
       </div>
 
       {/* Rose accent line - matches dashboard hero style */}
-      <div className="h-0.5 bg-gradient-to-r from-rose-400/40 via-pink-400/50 to-rose-400/40" />
+      <div className="h-0.5 bg-gradient-to-r from-violet-400/40 via-fuchsia-400/50 to-violet-400/40" />
 
       {/* Mobile Menu */}
       <div className={`lg:hidden mobile-menu-container overflow-hidden transition-all duration-300 ease-out ${
@@ -741,7 +741,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
                 onClick={() => { onNavigate?.(id); setIsMobileMenuOpen(false); }}
                 className={`w-full text-left px-4 py-3 rounded-2xl text-sm font-semibold transition-all duration-200 ${
                   currentPage === (page || id)
-                    ? 'bg-rose-50 dark:bg-rose-900/20 text-rose-700 dark:text-rose-300 border border-rose-200/60 dark:border-rose-700/50' 
+                    ? 'bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300 border border-violet-200/60 dark:border-violet-700/50' 
                     : 'text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800'
                 }`}
               >
@@ -749,11 +749,11 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
               </button>
             ))}
             
-            {/* Saved Materials - solid rose to match Sign up */}
+            {/* Saved Materials - solid violet to match Sign up */}
             <button
               onClick={() => { onNavigate?.('quiz-history'); setIsMobileMenuOpen(false); }}
-              className={`w-full text-left px-4 py-3 rounded-2xl text-sm font-bold transition-all duration-200 flex items-center justify-between bg-rose-500 hover:bg-rose-600 dark:bg-rose-500 dark:hover:bg-rose-600 text-white shadow-lg shadow-rose-500/25 ${
-                currentPage === 'quiz-history' ? 'ring-2 ring-rose-400 ring-offset-2 ring-offset-white dark:ring-offset-stone-900' : ''
+              className={`w-full text-left px-4 py-3 rounded-2xl text-sm font-bold transition-all duration-200 flex items-center justify-between bg-violet-500 hover:bg-violet-600 dark:bg-violet-500 dark:hover:bg-violet-600 text-white shadow-lg shadow-violet-500/25 ${
+                currentPage === 'quiz-history' ? 'ring-2 ring-violet-400 ring-offset-2 ring-offset-white dark:ring-offset-stone-900' : ''
               }`}
             >
               <span>Saved Materials</span>
@@ -781,7 +781,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
               onClick={() => { onNavigate?.('blog'); setIsMobileMenuOpen(false); }}
               className={`w-full text-left px-4 py-3 rounded-2xl text-sm font-semibold transition-all duration-200 ${
                 currentPage === 'blog' 
-                  ? 'bg-rose-50 dark:bg-rose-900/20 text-rose-700 dark:text-rose-300' 
+                  ? 'bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300' 
                   : 'text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800'
               }`}
             >

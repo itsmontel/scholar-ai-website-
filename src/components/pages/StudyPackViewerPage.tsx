@@ -171,7 +171,7 @@ const StudyPackViewerPage = ({ onNavigate, user, onLogout, initialData }: StudyP
           <p className="text-stone-500 dark:text-stone-400 mt-2">Open a study pack from your Recents or generate one from the dashboard.</p>
           <button
             onClick={() => onNavigate('dashboard')}
-            className="mt-6 px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white font-semibold rounded-xl hover:from-amber-400 hover:to-orange-500 transition-all shadow-lg shadow-amber-500/25"
+            className="mt-6 px-6 py-3 bg-amber-600 text-white font-semibold rounded-xl transition-all shadow-lg shadow-amber-500/25"
           >
             Go to Dashboard
           </button>
@@ -276,7 +276,7 @@ const StudyPackViewerPage = ({ onNavigate, user, onLogout, initialData }: StudyP
                 disabled={!has}
                 className={`flex-shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium text-sm transition-all ${
                   active
-                    ? 'bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-lg shadow-amber-500/25'
+                    ? 'bg-amber-600 text-white shadow-lg shadow-amber-500/25'
                     : has
                       ? 'bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-700 dark:text-stone-300 hover:border-amber-300'
                       : 'bg-stone-100 dark:bg-stone-800 text-stone-400 cursor-not-allowed'
@@ -378,7 +378,7 @@ const StudyPackViewerPage = ({ onNavigate, user, onLogout, initialData }: StudyP
                   <p className="text-stone-500 dark:text-stone-400 text-sm mb-6">Upgrade to unlock crosswords and Crater Blast.</p>
                   <button
                     onClick={() => onNavigate('pricing')}
-                    className="px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white font-semibold rounded-xl hover:from-amber-400 hover:to-orange-500 transition-all shadow-lg shadow-amber-500/25"
+                    className="px-6 py-3 bg-amber-600 text-white font-semibold rounded-xl transition-all shadow-lg shadow-amber-500/25"
                   >
                     Upgrade to Pro
                   </button>
@@ -417,7 +417,7 @@ const StudyPackViewerPage = ({ onNavigate, user, onLogout, initialData }: StudyP
                   </p>
                   <button
                     onClick={() => handleOpenFull(activeTab)}
-                    className="px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white font-semibold rounded-xl hover:from-amber-400 hover:to-orange-500 transition-all shadow-lg shadow-amber-500/25 flex items-center gap-2"
+                    className="px-6 py-3 bg-amber-600 text-white font-semibold rounded-xl transition-all shadow-lg shadow-amber-500/25 flex items-center gap-2"
                   >
                     <span>Open {TABS.find(t => t.key === activeTab)?.label}</span>
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>

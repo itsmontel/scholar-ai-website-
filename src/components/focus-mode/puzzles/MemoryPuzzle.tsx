@@ -82,7 +82,7 @@ export default function MemoryPuzzle({ game, onComplete, onCancel }: MemoryPuzzl
               aspect-square flex items-center justify-center rounded-xl font-bold text-2xl sm:text-3xl md:text-4xl
               transition-all duration-300 min-w-0
               ${card.isMatched ? 'bg-emerald-100 dark:bg-emerald-900/40' : ''}
-              ${isFlipped(idx) ? 'bg-white dark:bg-stone-200 shadow-inner' : 'bg-gradient-to-br from-violet-500 to-purple-600 text-white/70'}
+              ${isFlipped(idx) ? 'bg-white dark:bg-stone-200 shadow-inner' : 'bg-violet-600 hover:bg-violet-500 text-white/70'}
               ${!card.isMatched && !isFlipped(idx) ? 'hover:from-violet-400 hover:to-purple-500' : ''}
             `}
           >

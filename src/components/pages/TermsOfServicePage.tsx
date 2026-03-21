@@ -19,7 +19,7 @@ interface TermsOfServicePageProps {
 
 const TermsOfServicePage: React.FC<TermsOfServicePageProps> = ({ onNavigate, user, onLogout }) => {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-rose-50/80 via-stone-50 to-white dark:from-stone-900 dark:to-stone-800">
+    <div className="min-h-screen bg-gradient-to-b from-violet-50/80 via-stone-50 to-white dark:from-stone-900 dark:to-stone-800">
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="terms" />
       
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
@@ -33,7 +33,7 @@ const TermsOfServicePage: React.FC<TermsOfServicePageProps> = ({ onNavigate, use
             </p>
           </div>
 
-          <div className="prose prose-lg max-w-none prose-stone dark:prose-invert">
+          <div className="prose pviolet-lg max-w-none pviolet-stone dark:pviolet-invert">
             <section className="mb-8">
               <h2 className="text-xl sm:text-2xl font-bold text-stone-800 dark:text-stone-100 mb-4">1. Acceptance of Terms</h2>
               <div className="space-y-4 text-stone-600 dark:text-stone-400">
@@ -205,7 +205,7 @@ const TermsOfServicePage: React.FC<TermsOfServicePageProps> = ({ onNavigate, use
               <div className="space-y-4 text-stone-600 dark:text-stone-400">
                 <p>
                   Your privacy is important to us. Please review our{' '}
-                  <button onClick={() => onNavigate('privacy')} className="text-rose-600 dark:text-rose-400 hover:underline font-medium">Privacy Policy</button>{' '}
+                  <button onClick={() => onNavigate('privacy')} className="text-violet-600 dark:text-violet-400 hover:underline font-medium">Privacy Policy</button>{' '}
                   to understand how we collect, use, and protect your information, including how your
                   content is processed by third-party AI providers.
                 </p>
@@ -281,7 +281,7 @@ const TermsOfServicePage: React.FC<TermsOfServicePageProps> = ({ onNavigate, use
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button
                 onClick={() => onNavigate('dashboard')}
-                className="px-8 py-3 rounded-xl font-semibold text-white bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 hover:to-pink-500 shadow-lg shadow-rose-500/25 transition-all duration-200"
+                className="px-8 py-3 rounded-xl font-semibold text-white bg-violet-600 hover:bg-violet-500 shadow-lg shadow-violet-500/25 transition-all duration-200"
               >
                 Back to Dashboard
               </button>

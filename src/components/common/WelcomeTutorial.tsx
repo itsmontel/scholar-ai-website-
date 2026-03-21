@@ -126,7 +126,7 @@ const WelcomeTutorial = ({ userName, userId, onComplete }: WelcomeTutorialProps)
         {isWelcomeStep ? (
           /* Simple Welcome Step */
           <>
-            {/* Slim rose header */}
+            {/* Slim violet header */}
             <div 
               className="relative h-12"
               style={{ background: 'linear-gradient(135deg, #f43f5e 0%, #ec4899 50%, #db2777 100%)' }}
@@ -156,7 +156,7 @@ const WelcomeTutorial = ({ userName, userId, onComplete }: WelcomeTutorialProps)
 
                 <button
                   onClick={handleNext}
-                  className="px-8 py-3 bg-gradient-to-r from-rose-500 to-pink-600 text-white rounded-full font-semibold text-sm shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all flex items-center gap-2"
+                  className="px-8 py-3 bg-violet-600 hover:bg-violet-500 text-white rounded-full font-semibold text-sm shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all flex items-center gap-2"
                 >
                   Let's go!
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -189,7 +189,7 @@ const WelcomeTutorial = ({ userName, userId, onComplete }: WelcomeTutorialProps)
               <div className="flex items-center gap-2 mb-4">
                 <div className="flex-1 h-1.5 bg-stone-100 rounded-full overflow-hidden">
                 <div 
-                  className="h-full bg-gradient-to-r from-rose-500 to-pink-600 rounded-full transition-all duration-500 ease-out"
+                  className="h-full bg-violet-600 hover:bg-violet-500 rounded-full transition-all duration-500 ease-out"
                   style={{ width: `${progress}%` }}
                 />
                 </div>
@@ -251,7 +251,7 @@ const WelcomeTutorial = ({ userName, userId, onComplete }: WelcomeTutorialProps)
 
                 <button
                   onClick={handleNext}
-                  className={`px-8 py-3 bg-gradient-to-r from-rose-500 to-pink-600 text-white rounded-full font-semibold text-sm shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all flex items-center gap-2 ${
+                  className={`px-8 py-3 bg-violet-600 hover:bg-violet-500 text-white rounded-full font-semibold text-sm shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all flex items-center gap-2 ${
                     currentStep === steps.length - 1 ? 'px-12' : ''
                   }`}
                 >
@@ -290,9 +290,9 @@ const WelcomeTutorial = ({ userName, userId, onComplete }: WelcomeTutorialProps)
               }}
               className={`w-2 h-2 rounded-full transition-all ${
                 index === currentStep 
-                  ? 'w-6 bg-rose-500' 
+                  ? 'w-6 bg-violet-500' 
                   : index < currentStep 
-                    ? 'bg-rose-300' 
+                    ? 'bg-violet-300' 
                     : 'bg-stone-200'
               }`}
             />

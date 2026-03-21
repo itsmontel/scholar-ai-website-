@@ -161,7 +161,7 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ onNavigate, user, onLogout 
             </p>
           </header>
 
-          <div className="prose prose-lg max-w-none prose-stone dark:prose-invert prose-headings:text-stone-800 dark:prose-headings:text-stone-100 prose-a:text-violet-600 dark:prose-a:text-violet-400 prose-a:no-underline hover:prose-a:underline">
+          <div className="prose pviolet-lg max-w-none pviolet-stone dark:pviolet-invert pviolet-headings:text-stone-800 dark:pviolet-headings:text-stone-100 pviolet-a:text-violet-600 dark:pviolet-a:text-violet-400 pviolet-a:no-underline hover:pviolet-a:underline">
             <BlogPostContent slug={post.slug} onNavigate={onNavigate} />
           </div>
         </article>
@@ -189,7 +189,7 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ onNavigate, user, onLogout 
           <a
             href="/blog"
             onClick={(e) => { e.preventDefault(); onNavigate('blog'); }}
-            className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-rose-500 to-pink-600 text-white font-semibold rounded-xl hover:from-indigo-400 hover:to-violet-500 transition-all shadow-lg shadow-rose-500/20"
+            className="inline-flex items-center px-6 py-3 bg-violet-600 hover:bg-violet-500 text-white font-semibold rounded-xl transition-all shadow-lg shadow-violet-500/20"
           >
             All posts
           </a>

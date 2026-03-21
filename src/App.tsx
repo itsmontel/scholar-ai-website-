@@ -21,7 +21,7 @@ const LandingPage: React.FC<NavigationProps> = ({ onNavigate }) => {
       {/* Navigation */}
       <nav className="flex items-center justify-between px-8 py-6">
         <div className="flex items-center space-x-2">
-          <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+          <div className="w-8 h-8 bg-violet-600 hover:bg-violet-700 rounded-lg flex items-center justify-center">
             <span className="text-white font-bold text-sm">A</span>
           </div>
           <span className="text-xl font-bold text-gray-900">AcademicAI</span>
@@ -51,7 +51,7 @@ const LandingPage: React.FC<NavigationProps> = ({ onNavigate }) => {
       <div className="max-w-6xl mx-auto px-8 py-20">
         <div className="text-center mb-16">
           <h1 className="text-6xl font-bold text-gray-900 mb-6 leading-tight">
-            Enhance your academic<br />writing with <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">AI</span>
+            Enhance your academic<br />writing with <span className="bg-violet-600 hover:bg-violet-700 bg-clip-text text-transparent">AI</span>
           </h1>
           <p className="text-xl text-gray-600 mb-12 max-w-2xl mx-auto">
             Get detailed feedback on your research papers, essays, and academic work with AI-powered analysis that helps you write like a scholar.
@@ -70,7 +70,7 @@ const LandingPage: React.FC<NavigationProps> = ({ onNavigate }) => {
                 <span className="text-sm text-gray-400">AI-powered academic feedback</span>
                 <button
                   onClick={handleSubmit}
-                  className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2 rounded-lg hover:shadow-lg transform hover:scale-105 transition-all duration-300 flex items-center space-x-2"
+                  className="bg-violet-600 hover:bg-violet-700 text-white px-6 py-2 rounded-lg hover:shadow-lg transform hover:scale-105 transition-all duration-300 flex items-center space-x-2"
                 >
                   <span>Analyze</span>
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -88,7 +88,7 @@ const LandingPage: React.FC<NavigationProps> = ({ onNavigate }) => {
           <div className="max-w-4xl mx-auto">
             <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl p-12 border border-white/20">
               <div className="flex justify-center mb-6">
-                <div className="w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center">
+                <div className="w-16 h-16 bg-violet-600 hover:bg-violet-700 rounded-full flex items-center justify-center">
                   <span className="text-white font-bold text-2xl">S</span>
                 </div>
               </div>
@@ -146,7 +146,7 @@ const LandingPage: React.FC<NavigationProps> = ({ onNavigate }) => {
             <p className="text-gray-300 mb-8">Join thousands of students and researchers who trust AcademicAI.</p>
             <button 
               onClick={() => onNavigate('signup')}
-              className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-lg text-lg font-semibold hover:shadow-2xl transform hover:scale-105 transition-all duration-300"
+              className="bg-violet-600 hover:bg-violet-700 text-white px-8 py-3 rounded-lg text-lg font-semibold hover:shadow-2xl transform hover:scale-105 transition-all duration-300"
             >
               Start Writing Better →
             </button>
@@ -160,7 +160,7 @@ const LandingPage: React.FC<NavigationProps> = ({ onNavigate }) => {
           <div className="grid md:grid-cols-4 gap-8">
             <div>
               <div className="flex items-center space-x-2 mb-4">
-                <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+                <div className="w-8 h-8 bg-violet-600 hover:bg-violet-700 rounded-lg flex items-center justify-center">
                   <span className="text-white font-bold text-sm">A</span>
                 </div>
                 <span className="text-xl font-bold text-gray-900">AcademicAI</span>
@@ -277,7 +277,7 @@ const Dashboard: React.FC<NavigationProps> = ({ onNavigate }) => (
         <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
         <button 
           onClick={() => onNavigate('upload')}
-          className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2 rounded-lg"
+          className="bg-violet-600 hover:bg-violet-700 text-white px-6 py-2 rounded-lg"
         >
           Upload Document
         </button>
@@ -318,7 +318,7 @@ const UploadPage: React.FC<NavigationProps> = ({ onNavigate }) => (
         <p className="text-gray-500 mb-4">or click to browse</p>
         <button 
           onClick={() => onNavigate('analysis')}
-          className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2 rounded-lg"
+          className="bg-violet-600 hover:bg-violet-700 text-white px-6 py-2 rounded-lg"
         >
           Start Analysis
         </button>
@@ -394,7 +394,7 @@ const SettingsPage: React.FC<NavigationProps> = ({ onNavigate }) => (
           </div>
         </div>
         <div className="mt-8 pt-6 border-t border-gray-200">
-          <button className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2 rounded-lg">
+          <button className="bg-violet-600 hover:bg-violet-700 text-white px-6 py-2 rounded-lg">
             Save Changes
           </button>
         </div>

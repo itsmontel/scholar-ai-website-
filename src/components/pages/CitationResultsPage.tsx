@@ -254,7 +254,7 @@ const CitationResultsPage = ({
         <div className="flex justify-end mb-6">
           <button
             onClick={copyAllCitations}
-            className="flex items-center px-5 py-2.5 bg-gradient-to-r from-indigo-500 to-violet-600 text-white rounded-xl hover:from-indigo-600 hover:to-violet-700 transition-colors font-medium"
+            className="flex items-center px-5 py-2.5 bg-violet-600 hover:bg-violet-500 text-white rounded-xl transition-colors font-medium"
           >
             {copiedIndex === -1 ? (
               <>

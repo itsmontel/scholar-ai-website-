@@ -404,7 +404,7 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-rose-50/60 via-stone-50 to-white dark:from-stone-950 dark:via-stone-900 dark:to-stone-900">
+    <div className="min-h-screen bg-gradient-to-b from-violet-50/60 via-stone-50 to-white dark:from-stone-950 dark:via-stone-900 dark:to-stone-900">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(251,113,133,0.12),transparent)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(236,72,153,0.08),transparent)] pointer-events-none" aria-hidden />
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="account" />
 
@@ -432,7 +432,7 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
                   <div className="text-stone-600 dark:text-stone-400 flex items-center">
                     {displayUser?.email ? displayUser.email : (displayUser ? 'Email not available' : 'Loading...')}
                     {userStats.emailVerified && (
-                      <span className="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-rose-100 dark:bg-rose-900/50 text-rose-800 dark:text-rose-300">
+                      <span className="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-violet-100 dark:bg-violet-900/50 text-violet-800 dark:text-violet-300">
                         <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                         </svg>
@@ -450,15 +450,15 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
                     value={displayName}
                     onChange={(e) => setDisplayName(e.target.value)}
                     placeholder="Your display name"
-                    className="w-full sm:max-w-xs px-4 py-2.5 border border-stone-200 dark:border-stone-600 rounded-xl focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-all text-stone-800 dark:text-stone-100 bg-white dark:bg-stone-700/50"
+                    className="w-full sm:max-w-xs px-4 py-2.5 border border-stone-200 dark:border-stone-600 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-all text-stone-800 dark:text-stone-100 bg-white dark:bg-stone-700/50"
                   />
                   {nameError && <p className="text-red-600 text-sm mt-1">{nameError}</p>}
-                  {nameSuccess && <p className="text-rose-600 dark:text-rose-400 text-sm mt-1">{nameSuccess}</p>}
+                  {nameSuccess && <p className="text-violet-600 dark:text-violet-400 text-sm mt-1">{nameSuccess}</p>}
                 </div>
                 <button
                   onClick={handleSaveName}
                   disabled={nameLoading || !displayName.trim()}
-                  className="bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-400 hover:to-pink-500 disabled:bg-stone-300 dark:disabled:bg-stone-600 text-white px-5 py-2.5 rounded-full font-medium transition-colors shrink-0"
+                  className="bg-violet-600 hover:bg-violet-500 disabled:bg-stone-300 dark:disabled:bg-stone-600 text-white px-5 py-2.5 rounded-full font-medium transition-colors shrink-0"
                 >
                   {nameLoading ? 'Saving...' : 'Save'}
                 </button>
@@ -471,15 +471,15 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     placeholder="Enter username"
-                    className="w-full sm:max-w-xs px-4 py-2.5 border border-stone-200 dark:border-stone-600 rounded-xl focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-all text-stone-800 dark:text-stone-100 bg-white dark:bg-stone-700/50"
+                    className="w-full sm:max-w-xs px-4 py-2.5 border border-stone-200 dark:border-stone-600 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-all text-stone-800 dark:text-stone-100 bg-white dark:bg-stone-700/50"
                   />
                   {usernameError && <p className="text-red-600 text-sm mt-1">{usernameError}</p>}
-                  {usernameSuccess && <p className="text-rose-600 dark:text-rose-400 text-sm mt-1">{usernameSuccess}</p>}
+                  {usernameSuccess && <p className="text-violet-600 dark:text-violet-400 text-sm mt-1">{usernameSuccess}</p>}
                 </div>
                 <button
                   onClick={handleSaveUsername}
                   disabled={usernameLoading || !username.trim()}
-                  className="bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-400 hover:to-pink-500 disabled:bg-stone-300 dark:disabled:bg-stone-600 text-white px-5 py-2.5 rounded-full font-medium transition-colors shrink-0"
+                  className="bg-violet-600 hover:bg-violet-500 disabled:bg-stone-300 dark:disabled:bg-stone-600 text-white px-5 py-2.5 rounded-full font-medium transition-colors shrink-0"
                 >
                   {usernameLoading ? 'Saving...' : 'Save'}
                 </button>
@@ -505,7 +505,7 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
                     <span className="capitalize">{userStats.subscriptionPlan}</span>
                     <span className={`ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
                       userStats.subscriptionStatus === 'active'
-                        ? 'bg-rose-100 dark:bg-rose-900/50 text-rose-800 dark:text-rose-300'
+                        ? 'bg-violet-100 dark:bg-violet-900/50 text-violet-800 dark:text-violet-300'
                         : 'bg-yellow-100 dark:bg-yellow-900/50 text-yellow-800 dark:text-yellow-300'
                     }`}>
                       {userStats.subscriptionStatus}
@@ -515,7 +515,7 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
                 {userStats.subscriptionPlan === 'free' && (
                   <button 
                     onClick={() => onNavigate('pricing')}
-                    className="bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-400 hover:to-pink-500 text-white px-5 py-2.5 rounded-full font-medium transition-colors"
+                    className="bg-violet-600 hover:bg-violet-500 text-white px-5 py-2.5 rounded-full font-medium transition-colors"
                   >
                     Upgrade
                   </button>
@@ -607,7 +607,7 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
                               disabled={focusModeSaving}
                               className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
                                 active
-                                  ? 'bg-rose-600 text-white'
+                                  ? 'bg-violet-600 text-white'
                                   : 'bg-stone-100 dark:bg-stone-700 text-stone-700 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-stone-600'
                               }`}
                             >
@@ -625,13 +625,13 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
                         href={FOCUS_MODE_CHROME_EXTENSION_URL}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 mt-4 text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 font-medium text-sm"
+                        className="inline-flex items-center gap-2 mt-4 text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 font-medium text-sm"
                       >
                         Get Chrome Extension →
                       </a>
                       <button
                         onClick={() => onNavigate('focus-mode')}
-                        className="block mt-2 text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 font-medium text-sm"
+                        className="block mt-2 text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 font-medium text-sm"
                       >
                         Configure quiz rules on Dashboard →
                       </button>
@@ -652,7 +652,7 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
               </div>
               <button 
                 onClick={() => setShowPasswordModal(true)}
-                className="bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-400 hover:to-pink-500 text-white px-5 py-2.5 rounded-full font-medium transition-colors"
+                className="bg-violet-600 hover:bg-violet-500 text-white px-5 py-2.5 rounded-full font-medium transition-colors"
               >
                 Change Password
               </button>
@@ -693,7 +693,7 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
                   type="password"
                   value={passwordData.currentPassword}
                   onChange={(e) => setPasswordData(prev => ({ ...prev, currentPassword: e.target.value }))}
-                  className="w-full px-4 py-3 border border-stone-200 dark:border-stone-600 rounded-xl focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-all bg-white dark:bg-stone-700/50 text-stone-800 dark:text-stone-100"
+                  className="w-full px-4 py-3 border border-stone-200 dark:border-stone-600 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-all bg-white dark:bg-stone-700/50 text-stone-800 dark:text-stone-100"
                   placeholder="Enter current password"
                 />
               </div>
@@ -706,7 +706,7 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
                   type="password"
                   value={passwordData.newPassword}
                   onChange={(e) => setPasswordData(prev => ({ ...prev, newPassword: e.target.value }))}
-                  className="w-full px-4 py-3 border border-stone-200 dark:border-stone-600 rounded-xl focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-all bg-white dark:bg-stone-700/50 text-stone-800 dark:text-stone-100"
+                  className="w-full px-4 py-3 border border-stone-200 dark:border-stone-600 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-all bg-white dark:bg-stone-700/50 text-stone-800 dark:text-stone-100"
                   placeholder="Enter new password"
                 />
               </div>
@@ -719,7 +719,7 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
                   type="password"
                   value={passwordData.confirmPassword}
                   onChange={(e) => setPasswordData(prev => ({ ...prev, confirmPassword: e.target.value }))}
-                  className="w-full px-4 py-3 border border-stone-200 dark:border-stone-600 rounded-xl focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-all bg-white dark:bg-stone-700/50 text-stone-800 dark:text-stone-100"
+                  className="w-full px-4 py-3 border border-stone-200 dark:border-stone-600 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-all bg-white dark:bg-stone-700/50 text-stone-800 dark:text-stone-100"
                   placeholder="Confirm new password"
                 />
               </div>
@@ -732,7 +732,7 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
             )}
 
             {passwordSuccess && (
-              <div className="mt-4 p-4 bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800/50 text-rose-700 dark:text-rose-300 rounded-xl text-sm">
+              <div className="mt-4 p-4 bg-violet-50 dark:bg-violet-900/20 border border-violet-200 dark:border-violet-800/50 text-violet-700 dark:text-violet-300 rounded-xl text-sm">
                 {passwordSuccess}
               </div>
             )}
@@ -752,7 +752,7 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
               <button
                 onClick={handlePasswordChange}
                 disabled={passwordLoading || !passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword}
-                className="bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-400 hover:to-pink-500 disabled:bg-stone-300 dark:disabled:bg-stone-600 text-white px-5 py-2.5 rounded-full font-medium transition-colors"
+                className="bg-violet-600 hover:bg-violet-500 disabled:bg-stone-300 dark:disabled:bg-stone-600 text-white px-5 py-2.5 rounded-full font-medium transition-colors"
               >
                 {passwordLoading ? 'Changing...' : 'Change Password'}
               </button>

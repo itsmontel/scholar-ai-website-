@@ -8,33 +8,33 @@ interface MoreToolsPageProps {
 }
 
 const moreTools = [
-  { id: 'summarizer', icon: '📋', title: 'Summarizer', desc: 'Condense papers and articles into key points', gradient: 'from-rose-400 to-red-500', page: 'summarizer', free: true },
-  { id: 'citation-generator-tool', icon: '📚', title: 'Citation Generator', desc: 'Format citations in APA, MLA, Chicago, Harvard', gradient: 'from-rose-400 to-red-500', page: 'citation-generator-tool', free: true },
-  { id: 'word-counter', icon: '📊', title: 'Word Counter', desc: 'Count words, characters, sentences & reading time', gradient: 'from-rose-400 to-red-500', page: 'word-counter', free: true },
-  { id: 'essay-outline', icon: '📋', title: 'Essay Outline', desc: 'Generate structured outlines for any essay type', gradient: 'from-rose-400 to-red-500', page: 'essay-outline', free: true },
-  { id: 'thesis-generator', icon: '🎯', title: 'Thesis Generator', desc: 'Create strong thesis statements for your essays', gradient: 'from-rose-400 to-red-500', page: 'thesis-generator', free: true },
-  { id: 'grammar-checker', icon: '✏️', title: 'Grammar Checker', desc: 'Fix spelling, grammar & punctuation errors', gradient: 'from-rose-400 to-red-500', page: 'grammar-checker', free: true },
-  { id: 'readability-score', icon: '📖', title: 'Readability Score', desc: 'Check Flesch-Kincaid grade level & reading ease', gradient: 'from-rose-400 to-red-500', page: 'readability-score', free: true },
-  { id: 'paraphrasing-tips', icon: '🔄', title: 'Paraphrasing Tips', desc: 'Find overused words & get synonym suggestions', gradient: 'from-rose-400 to-red-500', page: 'paraphrasing-tips', free: true },
-  { id: 'text-case-converter', icon: 'Aa', title: 'Text Case Converter', desc: 'UPPERCASE, lowercase, Title Case & more', gradient: 'from-rose-400 to-red-500', page: 'text-case-converter', free: true },
-  { id: 'gpa-calculator', icon: '📚', title: 'GPA Calculator', desc: 'Calculate semester or cumulative GPA', gradient: 'from-rose-400 to-red-500', page: 'gpa-calculator', free: true },
-  { id: 'pomodoro-timer', icon: '⏱️', title: 'Pomodoro Timer', desc: 'Focus timer with work & break intervals', gradient: 'from-rose-400 to-red-500', page: 'pomodoro-timer', free: true },
-  { id: 'calculator', icon: '🧮', title: 'Scientific Calculator', desc: 'Trig, log, powers & more for math & science', gradient: 'from-rose-400 to-red-500', page: 'calculator', free: true },
-  { id: 'converter', icon: '📐', title: 'Unit Converter', desc: 'Length, weight, temp, volume, speed & energy', gradient: 'from-rose-400 to-red-500', page: 'converter', free: true },
+  { id: 'summarizer', icon: '📋', title: 'Summarizer', desc: 'Condense papers and articles into key points', gradient: 'from-violet-400 to-red-500', page: 'summarizer', free: true },
+  { id: 'citation-generator-tool', icon: '📚', title: 'Citation Generator', desc: 'Format citations in APA, MLA, Chicago, Harvard', gradient: 'from-violet-400 to-red-500', page: 'citation-generator-tool', free: true },
+  { id: 'word-counter', icon: '📊', title: 'Word Counter', desc: 'Count words, characters, sentences & reading time', gradient: 'from-violet-400 to-red-500', page: 'word-counter', free: true },
+  { id: 'essay-outline', icon: '📋', title: 'Essay Outline', desc: 'Generate structured outlines for any essay type', gradient: 'from-violet-400 to-red-500', page: 'essay-outline', free: true },
+  { id: 'thesis-generator', icon: '🎯', title: 'Thesis Generator', desc: 'Create strong thesis statements for your essays', gradient: 'from-violet-400 to-red-500', page: 'thesis-generator', free: true },
+  { id: 'grammar-checker', icon: '✏️', title: 'Grammar Checker', desc: 'Fix spelling, grammar & punctuation errors', gradient: 'from-violet-400 to-red-500', page: 'grammar-checker', free: true },
+  { id: 'readability-score', icon: '📖', title: 'Readability Score', desc: 'Check Flesch-Kincaid grade level & reading ease', gradient: 'from-violet-400 to-red-500', page: 'readability-score', free: true },
+  { id: 'paraphrasing-tips', icon: '🔄', title: 'Paraphrasing Tips', desc: 'Find overused words & get synonym suggestions', gradient: 'from-violet-400 to-red-500', page: 'paraphrasing-tips', free: true },
+  { id: 'text-case-converter', icon: 'Aa', title: 'Text Case Converter', desc: 'UPPERCASE, lowercase, Title Case & more', gradient: 'from-violet-400 to-red-500', page: 'text-case-converter', free: true },
+  { id: 'gpa-calculator', icon: '📚', title: 'GPA Calculator', desc: 'Calculate semester or cumulative GPA', gradient: 'from-violet-400 to-red-500', page: 'gpa-calculator', free: true },
+  { id: 'pomodoro-timer', icon: '⏱️', title: 'Pomodoro Timer', desc: 'Focus timer with work & break intervals', gradient: 'from-violet-400 to-red-500', page: 'pomodoro-timer', free: true },
+  { id: 'calculator', icon: '🧮', title: 'Scientific Calculator', desc: 'Trig, log, powers & more for math & science', gradient: 'from-violet-400 to-red-500', page: 'calculator', free: true },
+  { id: 'converter', icon: '📐', title: 'Unit Converter', desc: 'Length, weight, temp, volume, speed & energy', gradient: 'from-violet-400 to-red-500', page: 'converter', free: true },
 ];
 
 
 const MoreToolsPage = ({ onNavigate, user, onLogout }: MoreToolsPageProps) => {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-rose-50/60 via-stone-50 to-white dark:bg-stone-900">
-      <div className="h-1 bg-gradient-to-r from-rose-500 via-pink-500 to-red-500" />
+    <div className="min-h-screen bg-gradient-to-b from-violet-50/60 via-stone-50 to-white dark:bg-stone-900">
+      <div className="h-1 bg-gradient-to-r from-violet-500 via-fuchsia-500 to-red-500" />
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="more-tools" />
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         {/* Back button */}
         <button
           onClick={() => onNavigate('dashboard')}
-          className="flex items-center gap-2 text-stone-600 dark:text-stone-400 hover:text-rose-600 dark:hover:text-rose-400 hover:underline mb-8 text-sm font-medium transition-colors"
+          className="flex items-center gap-2 text-stone-600 dark:text-stone-400 hover:text-violet-600 dark:hover:text-violet-400 hover:underline mb-8 text-sm font-medium transition-colors"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -58,7 +58,7 @@ const MoreToolsPage = ({ onNavigate, user, onLogout }: MoreToolsPageProps) => {
             <button
               key={tool.id}
               onClick={() => onNavigate(tool.page)}
-              className="relative p-5 rounded-3xl border bg-white dark:bg-stone-800 text-left transition-all duration-300 group hover:shadow-2xl hover:-translate-y-1 overflow-hidden border-stone-200/80 dark:border-stone-700/50 hover:border-rose-300 dark:hover:border-rose-600"
+              className="relative p-5 rounded-3xl border bg-white dark:bg-stone-800 text-left transition-all duration-300 group hover:shadow-2xl hover:-translate-y-1 overflow-hidden border-stone-200/80 dark:border-stone-700/50 hover:border-violet-300 dark:hover:border-violet-600"
             >
               <div className={`absolute top-0 right-0 w-24 h-24 rounded-full -translate-y-1/2 translate-x-1/2 bg-gradient-to-br ${tool.gradient} opacity-60`} />
               <div className={`relative z-10 w-12 h-12 bg-gradient-to-br ${tool.gradient} rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-lg`}>
@@ -98,7 +98,7 @@ const MoreToolsPage = ({ onNavigate, user, onLogout }: MoreToolsPageProps) => {
           </p>
           <button
             onClick={() => onNavigate('dashboard')}
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl font-semibold text-white bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 shadow-lg shadow-violet-500/25 hover:shadow-violet-500/40 transition-all"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl font-semibold text-white bg-violet-600 hover:bg-violet-500 shadow-lg shadow-violet-500/25 hover:shadow-violet-500/40 transition-all"
           >
             Go to Dashboard
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

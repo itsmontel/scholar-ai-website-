@@ -186,7 +186,7 @@ export default function FocusModeSettingsSection({ onBack, embedded = false, isP
             )}
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
-            <div className="rounded-2xl overflow-hidden bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-950/30 dark:to-purple-950/20 border border-violet-200/60 dark:border-violet-800/40 shadow-lg">
+            <div className="rounded-2xl overflow-hidden bg-violet-50 dark:from-violet-950/30 dark:to-purple-950/20 border border-violet-200/60 dark:border-violet-800/40 shadow-lg">
               <p className="px-4 pt-4 pb-2 text-sm font-bold text-stone-700 dark:text-stone-300">See how it works</p>
               <div className="aspect-video bg-stone-900">
                 <video autoPlay loop muted playsInline className="w-full h-full object-contain" title="WriteScholar Focus Mode">
@@ -194,10 +194,10 @@ export default function FocusModeSettingsSection({ onBack, embedded = false, isP
                 </video>
               </div>
             </div>
-            <div className="relative rounded-3xl overflow-hidden p-[1px] bg-gradient-to-br from-violet-400/30 via-purple-400/20 to-rose-400/20 dark:from-violet-600/30 dark:via-purple-600/20 dark:to-rose-600/20">
+            <div className="relative rounded-3xl overflow-hidden p-[1px] bg-gradient-to-br from-violet-400/30 via-purple-400/20 to-violet-400/20 dark:from-violet-600/30 dark:via-purple-600/20 dark:to-violet-600/20">
               <div className="rounded-[23px] bg-white/90 dark:bg-stone-800/95 backdrop-blur-xl border border-white/60 dark:border-stone-700/50 p-8 sm:p-10 flex flex-col justify-center">
                 <span className="inline-flex items-center px-4 py-1.5 bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 rounded-full text-sm font-bold mb-4 w-fit">Coming Soon</span>
-                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center mb-4 text-3xl shadow-lg">🔒</div>
+                <div className="w-16 h-16 rounded-2xl bg-violet-600 hover:bg-violet-500 flex items-center justify-center mb-4 text-3xl shadow-lg">🔒</div>
                 <h2 className="text-xl font-extrabold text-stone-800 dark:text-stone-100 mb-2">Focus Mode is on its way</h2>
                 <p className="text-stone-600 dark:text-stone-400 text-sm leading-relaxed">
                   Our Chrome extension is currently under review. Soon you&apos;ll be able to block distracting sites and earn your screen time by studying first. Thanks for your patience.
@@ -241,7 +241,7 @@ export default function FocusModeSettingsSection({ onBack, embedded = false, isP
         <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] gap-6 lg:gap-8">
           {/* Video - How Focus Mode works */}
           <div className="order-2 lg:order-1">
-            <div className="rounded-2xl overflow-hidden bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-950/30 dark:to-purple-950/20 border border-violet-200/60 dark:border-violet-800/40 shadow-lg">
+            <div className="rounded-2xl overflow-hidden bg-violet-50 dark:from-violet-950/30 dark:to-purple-950/20 border border-violet-200/60 dark:border-violet-800/40 shadow-lg">
               <p className="px-4 pt-4 pb-2 text-sm font-bold text-stone-700 dark:text-stone-300">See how it works</p>
               <div className="aspect-video bg-stone-900 flex items-center justify-center">
                 <video
@@ -265,7 +265,7 @@ export default function FocusModeSettingsSection({ onBack, embedded = false, isP
             <div className="relative rounded-3xl overflow-hidden p-[1px] mb-6" style={{ background: 'linear-gradient(135deg, rgba(139,92,246,0.2) 0%, rgba(168,85,247,0.15) 50%, rgba(236,72,153,0.1) 100%)' }}>
               <div className="rounded-[23px] bg-white/80 dark:bg-stone-800/90 backdrop-blur-xl border border-white/60 dark:border-stone-700/50 p-6 sm:p-8">
                 <div className="flex items-start gap-4">
-                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-2xl shadow-lg shadow-violet-500/30 flex-shrink-0">
+                  <div className="w-14 h-14 rounded-2xl bg-violet-600 hover:bg-violet-500 flex items-center justify-center text-2xl shadow-lg shadow-violet-500/30 flex-shrink-0">
                     🔒
                   </div>
                   <div className="min-w-0 flex-1">
@@ -279,7 +279,7 @@ export default function FocusModeSettingsSection({ onBack, embedded = false, isP
                       href={FOCUS_MODE_CHROME_EXTENSION_URL}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-400 hover:to-purple-500 text-white text-sm font-bold shadow-md shadow-violet-500/30 transition-all hover:scale-[1.02]"
+                      className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-sm font-bold shadow-md shadow-violet-500/30 transition-all hover:scale-[1.02]"
                     >
                       Get Chrome Extension →
                     </a>
@@ -311,7 +311,7 @@ export default function FocusModeSettingsSection({ onBack, embedded = false, isP
                     disabled={saving}
                     className={`px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 ${
                       active
-                        ? 'bg-gradient-to-r from-violet-600 to-purple-600 text-white shadow-md shadow-violet-500/25'
+                        ? 'bg-violet-600 hover:bg-violet-500 text-white shadow-md shadow-violet-500/25'
                         : 'bg-stone-100 dark:bg-stone-700/80 text-stone-600 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-stone-600 border border-stone-200/50 dark:border-stone-600/50'
                     }`}
                   >
@@ -327,7 +327,7 @@ export default function FocusModeSettingsSection({ onBack, embedded = false, isP
                     key={domain}
                     onClick={() => toggleBlockedSite(domain)}
                     disabled={saving}
-                    className="px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors bg-gradient-to-r from-violet-600 to-purple-600 text-white shadow-md hover:opacity-90"
+                    className="px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors bg-violet-600 hover:bg-violet-500 text-white shadow-md hover:opacity-90"
                   >
                     {domain}
                   </button>
@@ -340,13 +340,13 @@ export default function FocusModeSettingsSection({ onBack, embedded = false, isP
                 onChange={(e) => { setCustomDomainInput(e.target.value); setAddError(''); }}
                 onKeyDown={(e) => e.key === 'Enter' && handleAddCustomDomain()}
                 placeholder="youtube.com, reddit.com..."
-                className="flex-1 px-4 py-2.5 rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 text-stone-800 dark:text-stone-200 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-rose-500/40 focus:border-rose-500 transition-all"
+                className="flex-1 px-4 py-2.5 rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 text-stone-800 dark:text-stone-200 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-violet-500/40 focus:border-violet-500 transition-all"
               />
               <button
                 type="button"
                 onClick={handleAddCustomDomain}
                 disabled={saving || !customDomainInput.trim()}
-                className="px-4 py-2.5 bg-gradient-to-r from-violet-600 to-purple-600 text-white rounded-xl font-semibold text-sm hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                className="px-4 py-2.5 bg-violet-600 hover:bg-violet-500 text-white rounded-xl font-semibold text-sm hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
               >
                 Add
               </button>
@@ -390,7 +390,7 @@ export default function FocusModeSettingsSection({ onBack, embedded = false, isP
               value={unlockDurationMs}
               onChange={(e) => handleUnlockDurationChange(Number(e.target.value))}
               disabled={saving}
-              className="px-4 py-2.5 rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 text-stone-800 dark:text-stone-200 font-semibold focus:ring-2 focus:ring-rose-500/40 focus:border-rose-500 focus:outline-none transition-all"
+              className="px-4 py-2.5 rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 text-stone-800 dark:text-stone-200 font-semibold focus:ring-2 focus:ring-violet-500/40 focus:border-violet-500 focus:outline-none transition-all"
             >
               {UNLOCK_DURATION_OPTIONS.map((o) => (
                 <option key={o.value} value={o.value}>
@@ -414,7 +414,7 @@ export default function FocusModeSettingsSection({ onBack, embedded = false, isP
                       disabled={saving}
                       className={`px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 ${
                         questionCount === n
-                          ? 'bg-gradient-to-r from-violet-600 to-purple-600 text-white shadow-md shadow-violet-500/25'
+                          ? 'bg-violet-600 hover:bg-violet-500 text-white shadow-md shadow-violet-500/25'
                           : 'bg-stone-100 dark:bg-stone-700/80 text-stone-600 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-stone-600 border border-stone-200/50 dark:border-stone-600/50'
                       }`}
                     >
@@ -431,7 +431,7 @@ export default function FocusModeSettingsSection({ onBack, embedded = false, isP
                   value={passThreshold}
                   onChange={(e) => handlePassThresholdChange(Number(e.target.value))}
                   disabled={saving}
-                  className="px-4 py-2.5 rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 text-stone-800 dark:text-stone-200 font-semibold focus:ring-2 focus:ring-rose-500/40 focus:border-rose-500 focus:outline-none transition-all"
+                  className="px-4 py-2.5 rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 text-stone-800 dark:text-stone-200 font-semibold focus:ring-2 focus:ring-violet-500/40 focus:border-violet-500 focus:outline-none transition-all"
                 >
                   {passThresholdOptions.map((n) => (
                     <option key={n} value={n}>

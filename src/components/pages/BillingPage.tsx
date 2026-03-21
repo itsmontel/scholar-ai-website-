@@ -274,7 +274,7 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-rose-50/60 via-stone-50 to-white dark:from-stone-950 dark:via-stone-900 dark:to-stone-900">
+      <div className="min-h-screen bg-gradient-to-b from-violet-50/60 via-stone-50 to-white dark:from-stone-950 dark:via-stone-900 dark:to-stone-900">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(251,113,133,0.12),transparent)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(236,72,153,0.08),transparent)] pointer-events-none" aria-hidden />
         <Header 
           onNavigate={onNavigate} 
@@ -284,7 +284,7 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
         />
         <div className="flex items-center justify-center min-h-[60vh] relative z-10">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-rose-600 mx-auto mb-4"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-violet-600 mx-auto mb-4"></div>
             <p className="text-stone-600 dark:text-stone-400">Loading billing information...</p>
           </div>
         </div>
@@ -293,7 +293,7 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-rose-50/60 via-stone-50 to-white dark:from-stone-950 dark:via-stone-900 dark:to-stone-900">
+    <div className="min-h-screen bg-gradient-to-b from-violet-50/60 via-stone-50 to-white dark:from-stone-950 dark:via-stone-900 dark:to-stone-900">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(251,113,133,0.12),transparent)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(236,72,153,0.08),transparent)] pointer-events-none" aria-hidden />
       <Header 
         onNavigate={onNavigate} 
@@ -318,7 +318,7 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
             <span className={`px-3 py-1 rounded-lg text-sm font-semibold ${
               currentPlan === 'free' 
                 ? 'bg-stone-200 dark:bg-stone-700 text-stone-800 dark:text-stone-200' 
-                : 'bg-rose-100 dark:bg-rose-900/50 text-rose-800 dark:text-rose-300'
+                : 'bg-violet-100 dark:bg-violet-900/50 text-violet-800 dark:text-violet-300'
             }`}>
               {plans.find(p => p.id === currentPlan)?.name}
             </span>
@@ -333,7 +333,7 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
             <button
               onClick={handleManageBilling}
               disabled={processing === 'billing'}
-              className="bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-400 hover:to-pink-500 text-white py-3 px-6 rounded-full font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-violet-600 hover:bg-violet-500 text-white py-3 px-6 rounded-full font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {processing === 'billing' ? (
                 <div className="flex items-center justify-center">
@@ -374,7 +374,7 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
               }`}
             >
               Bill Yearly
-              <span className="ml-2 px-2 py-0.5 bg-rose-100 dark:bg-rose-900/50 text-rose-700 dark:text-rose-300 text-xs rounded-full font-medium">
+              <span className="ml-2 px-2 py-0.5 bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300 text-xs rounded-full font-medium">
                 Save 17%
               </span>
             </button>
@@ -399,20 +399,20 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
               key={plan.id}
               className={`relative bg-white dark:bg-stone-800 border rounded-2xl p-6 transition-all ${
                 plan.popular 
-                  ? 'border-rose-500 dark:border-rose-600 ring-2 ring-rose-100 dark:ring-rose-900/50' 
+                  ? 'border-violet-500 dark:border-violet-600 ring-2 ring-violet-100 dark:ring-violet-900/50' 
                   : 'border-stone-200 dark:border-stone-600'
               }`}
             >
               {plan.popular && (
                 <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                  <span className="bg-gradient-to-r from-rose-500 to-pink-600 text-white px-4 py-1 rounded-full text-xs font-semibold">
+                  <span className="bg-violet-600 hover:bg-violet-500 text-white px-4 py-1 rounded-full text-xs font-semibold">
                     Most Popular
                   </span>
                 </div>
               )}
               {plan.id === 'premium' && (
                 <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                  <span className="bg-gradient-to-r from-amber-500 to-orange-600 text-white px-4 py-1 rounded-full text-xs font-semibold shadow-md shadow-amber-500/20">
+                  <span className="bg-amber-600 text-white px-4 py-1 rounded-full text-xs font-semibold shadow-md shadow-amber-500/20">
                     10× Usage
                   </span>
                 </div>
@@ -435,7 +435,7 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
                       ${plan.id === 'pro' ? '9.99' : '29.99'}
                     </span>
                     <span className="text-stone-500 text-sm">
-                      /month <span className="text-rose-600 font-semibold">first month only</span>
+                      /month <span className="text-violet-600 font-semibold">first month only</span>
                     </span>
                     <span className="text-xs text-stone-500">Then ${plan.id === 'pro' ? '19.99' : '39.99'}/mo</span>
                   </div>
@@ -456,7 +456,7 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
                 <ul className="space-y-3">
                   {plan.features.map((feature, index) => (
                     <li key={index} className="flex items-start text-sm">
-                      <svg className="w-5 h-5 text-rose-500 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-5 h-5 text-violet-500 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
                       <span className="text-stone-600 dark:text-stone-400">{feature}</span>
@@ -473,7 +473,7 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
                   plan.id === currentPlan
                     ? 'bg-stone-100 dark:bg-stone-700 text-stone-500 cursor-not-allowed'
                     : plan.popular
-                    ? 'bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-400 hover:to-pink-500 text-white'
+                    ? 'bg-violet-600 hover:bg-violet-500 text-white'
                     : 'bg-stone-100 dark:bg-stone-700 hover:bg-stone-200 dark:hover:bg-stone-600 text-stone-900 dark:text-stone-100'
                 }`}
               >
@@ -502,11 +502,11 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
           
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Storage Usage */}
-            <div className="bg-rose-50 dark:bg-rose-900/20 border border-rose-100 dark:border-rose-800/50 rounded-xl p-5">
+            <div className="bg-violet-50 dark:bg-violet-900/20 border border-violet-100 dark:border-violet-800/50 rounded-xl p-5">
               <div className="flex items-center justify-between mb-3">
                 <h3 className="font-medium text-stone-800 dark:text-stone-200 text-sm">Storage Used</h3>
-                <div className="w-8 h-8 bg-rose-100 dark:bg-rose-900/50 rounded-lg flex items-center justify-center">
-                  <svg className="w-4 h-4 text-rose-600 dark:text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-8 h-8 bg-violet-100 dark:bg-violet-900/50 rounded-lg flex items-center justify-center">
+                  <svg className="w-4 h-4 text-violet-600 dark:text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
                   </svg>
                 </div>
@@ -517,11 +517,11 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
               <div className="text-xs text-stone-500 mb-3">
                 of {formatBytes(usageStats.storageLimit)} used
               </div>
-              <div className="w-full bg-rose-200 dark:bg-rose-900/50 rounded-full h-1.5">
+              <div className="w-full bg-violet-200 dark:bg-violet-900/50 rounded-full h-1.5">
                 <div 
                   className={`h-1.5 rounded-full transition-all ${
                     getStoragePercentage() > 90 ? 'bg-red-500' : 
-                    getStoragePercentage() > 70 ? 'bg-amber-500' : 'bg-rose-600'
+                    getStoragePercentage() > 70 ? 'bg-amber-500' : 'bg-violet-600'
                   }`}
                   style={{ width: `${getStoragePercentage()}%` }}
                 ></div>
@@ -529,11 +529,11 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
             </div>
 
             {/* Uploads Remaining */}
-            <div className="bg-rose-50 dark:bg-rose-900/20 border border-rose-100 dark:border-rose-800/50 rounded-xl p-5">
+            <div className="bg-violet-50 dark:bg-violet-900/20 border border-violet-100 dark:border-violet-800/50 rounded-xl p-5">
               <div className="flex items-center justify-between mb-3">
                 <h3 className="font-medium text-stone-800 dark:text-stone-200 text-sm">Uploads</h3>
-                <div className="w-8 h-8 bg-rose-100 dark:bg-rose-900/50 rounded-lg flex items-center justify-center">
-                  <svg className="w-4 h-4 text-rose-600 dark:text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-8 h-8 bg-violet-100 dark:bg-violet-900/50 rounded-lg flex items-center justify-center">
+                  <svg className="w-4 h-4 text-violet-600 dark:text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                   </svg>
                 </div>
@@ -591,8 +591,8 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
         <div className="bg-stone-50 dark:bg-stone-800/50 border border-stone-200 dark:border-stone-600 rounded-2xl p-6 sm:p-8">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
             <div className="flex items-center gap-4">
-              <div className="w-10 h-10 bg-rose-100 dark:bg-rose-900/50 rounded-xl flex items-center justify-center flex-shrink-0">
-                <svg className="w-5 h-5 text-rose-600 dark:text-rose-400" fill="currentColor" viewBox="0 0 20 20">
+              <div className="w-10 h-10 bg-violet-100 dark:bg-violet-900/50 rounded-xl flex items-center justify-center flex-shrink-0">
+                <svg className="w-5 h-5 text-violet-600 dark:text-violet-400" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
                 </svg>
               </div>
@@ -602,8 +602,8 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
               </div>
             </div>
             <div className="flex items-center gap-4">
-              <div className="w-10 h-10 bg-rose-100 dark:bg-rose-900/50 rounded-xl flex items-center justify-center flex-shrink-0">
-                <svg className="w-5 h-5 text-rose-600 dark:text-rose-400" fill="currentColor" viewBox="0 0 20 20">
+              <div className="w-10 h-10 bg-violet-100 dark:bg-violet-900/50 rounded-xl flex items-center justify-center flex-shrink-0">
+                <svg className="w-5 h-5 text-violet-600 dark:text-violet-400" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                 </svg>
               </div>
@@ -613,8 +613,8 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
               </div>
             </div>
             <div className="flex items-center gap-4">
-              <div className="w-10 h-10 bg-rose-100 dark:bg-rose-900/50 rounded-xl flex items-center justify-center flex-shrink-0">
-                <svg className="w-5 h-5 text-rose-600 dark:text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-10 h-10 bg-violet-100 dark:bg-violet-900/50 rounded-xl flex items-center justify-center flex-shrink-0">
+                <svg className="w-5 h-5 text-violet-600 dark:text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
                 </svg>
               </div>

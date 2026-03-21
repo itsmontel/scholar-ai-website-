@@ -138,41 +138,41 @@ const CalculatorPage = ({ onNavigate, user, onLogout }: CalculatorPageProps) => 
     { label: 'C', onClick: handleClear, className: 'bg-red-500 hover:bg-red-600 text-white' },
     { label: '⌫', onClick: handleBackspace, className: 'bg-stone-400 hover:bg-stone-500 text-white' },
     { label: '%', onClick: () => handleInput('%'), className: 'bg-stone-300 hover:bg-stone-400 dark:bg-stone-600 dark:hover:bg-stone-500' },
-    { label: '÷', onClick: () => handleInput('/'), className: 'bg-rose-500 hover:bg-rose-600 text-white' },
+    { label: '÷', onClick: () => handleInput('/'), className: 'bg-violet-500 hover:bg-violet-600 text-white' },
     { label: '7', onClick: () => handleInput('7'), className: 'bg-white dark:bg-stone-700 hover:bg-stone-100 dark:hover:bg-stone-600 border border-stone-200 dark:border-stone-600' },
     { label: '8', onClick: () => handleInput('8'), className: 'bg-white dark:bg-stone-700 hover:bg-stone-100 dark:hover:bg-stone-600 border border-stone-200 dark:border-stone-600' },
     { label: '9', onClick: () => handleInput('9'), className: 'bg-white dark:bg-stone-700 hover:bg-stone-100 dark:hover:bg-stone-600 border border-stone-200 dark:border-stone-600' },
-    { label: '×', onClick: () => handleInput('*'), className: 'bg-rose-500 hover:bg-rose-600 text-white' },
+    { label: '×', onClick: () => handleInput('*'), className: 'bg-violet-500 hover:bg-violet-600 text-white' },
     { label: '4', onClick: () => handleInput('4'), className: 'bg-white dark:bg-stone-700 hover:bg-stone-100 dark:hover:bg-stone-600 border border-stone-200 dark:border-stone-600' },
     { label: '5', onClick: () => handleInput('5'), className: 'bg-white dark:bg-stone-700 hover:bg-stone-100 dark:hover:bg-stone-600 border border-stone-200 dark:border-stone-600' },
     { label: '6', onClick: () => handleInput('6'), className: 'bg-white dark:bg-stone-700 hover:bg-stone-100 dark:hover:bg-stone-600 border border-stone-200 dark:border-stone-600' },
-    { label: '−', onClick: () => handleInput('-'), className: 'bg-rose-500 hover:bg-rose-600 text-white' },
+    { label: '−', onClick: () => handleInput('-'), className: 'bg-violet-500 hover:bg-violet-600 text-white' },
     { label: '1', onClick: () => handleInput('1'), className: 'bg-white dark:bg-stone-700 hover:bg-stone-100 dark:hover:bg-stone-600 border border-stone-200 dark:border-stone-600' },
     { label: '2', onClick: () => handleInput('2'), className: 'bg-white dark:bg-stone-700 hover:bg-stone-100 dark:hover:bg-stone-600 border border-stone-200 dark:border-stone-600' },
     { label: '3', onClick: () => handleInput('3'), className: 'bg-white dark:bg-stone-700 hover:bg-stone-100 dark:hover:bg-stone-600 border border-stone-200 dark:border-stone-600' },
-    { label: '+', onClick: () => handleInput('+'), className: 'bg-rose-500 hover:bg-rose-600 text-white' },
+    { label: '+', onClick: () => handleInput('+'), className: 'bg-violet-500 hover:bg-violet-600 text-white' },
     { label: '0', onClick: () => handleInput('0'), className: 'bg-white dark:bg-stone-700 hover:bg-stone-100 dark:hover:bg-stone-600 border border-stone-200 dark:border-stone-600 col-span-2' },
     { label: '.', onClick: () => handleInput('.'), className: 'bg-white dark:bg-stone-700 hover:bg-stone-100 dark:hover:bg-stone-600 border border-stone-200 dark:border-stone-600' },
     { label: '=', onClick: handleEquals, className: 'bg-emerald-500 hover:bg-emerald-600 text-white' },
   ];
 
   const scientificButtons = [
-    { label: 'sin', onClick: () => handleFunction('sin'), className: 'bg-rose-100 dark:bg-rose-900/50 hover:bg-rose-200 dark:hover:bg-rose-800 text-rose-800 dark:text-rose-200 text-sm' },
-    { label: 'cos', onClick: () => handleFunction('cos'), className: 'bg-rose-100 dark:bg-rose-900/50 hover:bg-rose-200 dark:hover:bg-rose-800 text-rose-800 dark:text-rose-200 text-sm' },
-    { label: 'tan', onClick: () => handleFunction('tan'), className: 'bg-rose-100 dark:bg-rose-900/50 hover:bg-rose-200 dark:hover:bg-rose-800 text-rose-800 dark:text-rose-200 text-sm' },
+    { label: 'sin', onClick: () => handleFunction('sin'), className: 'bg-violet-100 dark:bg-violet-900/50 hover:bg-violet-200 dark:hover:bg-violet-800 text-violet-800 dark:text-violet-200 text-sm' },
+    { label: 'cos', onClick: () => handleFunction('cos'), className: 'bg-violet-100 dark:bg-violet-900/50 hover:bg-violet-200 dark:hover:bg-violet-800 text-violet-800 dark:text-violet-200 text-sm' },
+    { label: 'tan', onClick: () => handleFunction('tan'), className: 'bg-violet-100 dark:bg-violet-900/50 hover:bg-violet-200 dark:hover:bg-violet-800 text-violet-800 dark:text-violet-200 text-sm' },
     { label: '(', onClick: () => handleInput('('), className: 'bg-stone-200 dark:bg-stone-600 hover:bg-stone-300 dark:hover:bg-stone-500' },
     { label: ')', onClick: () => handleInput(')'), className: 'bg-stone-200 dark:bg-stone-600 hover:bg-stone-300 dark:hover:bg-stone-500' },
-    { label: 'asin', onClick: () => handleFunction('asin'), className: 'bg-rose-100 dark:bg-rose-900/50 hover:bg-rose-200 dark:hover:bg-rose-800 text-rose-800 dark:text-rose-200 text-xs' },
-    { label: 'acos', onClick: () => handleFunction('acos'), className: 'bg-rose-100 dark:bg-rose-900/50 hover:bg-rose-200 dark:hover:bg-rose-800 text-rose-800 dark:text-rose-200 text-xs' },
-    { label: 'atan', onClick: () => handleFunction('atan'), className: 'bg-rose-100 dark:bg-rose-900/50 hover:bg-rose-200 dark:hover:bg-rose-800 text-rose-800 dark:text-rose-200 text-xs' },
+    { label: 'asin', onClick: () => handleFunction('asin'), className: 'bg-violet-100 dark:bg-violet-900/50 hover:bg-violet-200 dark:hover:bg-violet-800 text-violet-800 dark:text-violet-200 text-xs' },
+    { label: 'acos', onClick: () => handleFunction('acos'), className: 'bg-violet-100 dark:bg-violet-900/50 hover:bg-violet-200 dark:hover:bg-violet-800 text-violet-800 dark:text-violet-200 text-xs' },
+    { label: 'atan', onClick: () => handleFunction('atan'), className: 'bg-violet-100 dark:bg-violet-900/50 hover:bg-violet-200 dark:hover:bg-violet-800 text-violet-800 dark:text-violet-200 text-xs' },
     { label: 'x²', onClick: () => handleInput('^2'), className: 'bg-amber-100 dark:bg-amber-900/50 hover:bg-amber-200 dark:hover:bg-amber-800 text-amber-800 dark:text-amber-200' },
     { label: 'xʸ', onClick: () => handleInput('^'), className: 'bg-amber-100 dark:bg-amber-900/50 hover:bg-amber-200 dark:hover:bg-amber-800 text-amber-800 dark:text-amber-200' },
     { label: 'ln', onClick: () => handleFunction('ln'), className: 'bg-red-100 dark:bg-red-900/50 hover:bg-red-200 dark:hover:bg-red-800 text-red-800 dark:text-red-200' },
     { label: 'log', onClick: () => handleFunction('log'), className: 'bg-red-100 dark:bg-red-900/50 hover:bg-red-200 dark:hover:bg-red-800 text-red-800 dark:text-red-200' },
     { label: '√', onClick: () => handleFunction('sqrt', '√('), className: 'bg-red-100 dark:bg-red-900/50 hover:bg-red-200 dark:hover:bg-red-800 text-red-800 dark:text-red-200' },
-    { label: 'n!', onClick: handleFactorial, className: 'bg-rose-100 dark:bg-rose-900/50 hover:bg-rose-200 dark:hover:bg-rose-800 text-rose-800 dark:text-rose-200' },
-    { label: 'π', onClick: () => handleConstant('π', 'π'), className: 'bg-rose-100 dark:bg-rose-900/50 hover:bg-rose-200 dark:hover:bg-rose-800 text-rose-800 dark:text-rose-200' },
-    { label: 'e', onClick: () => handleConstant('e', 'e'), className: 'bg-rose-100 dark:bg-rose-900/50 hover:bg-rose-200 dark:hover:bg-rose-800 text-rose-800 dark:text-rose-200' },
+    { label: 'n!', onClick: handleFactorial, className: 'bg-violet-100 dark:bg-violet-900/50 hover:bg-violet-200 dark:hover:bg-violet-800 text-violet-800 dark:text-violet-200' },
+    { label: 'π', onClick: () => handleConstant('π', 'π'), className: 'bg-violet-100 dark:bg-violet-900/50 hover:bg-violet-200 dark:hover:bg-violet-800 text-violet-800 dark:text-violet-200' },
+    { label: 'e', onClick: () => handleConstant('e', 'e'), className: 'bg-violet-100 dark:bg-violet-900/50 hover:bg-violet-200 dark:hover:bg-violet-800 text-violet-800 dark:text-violet-200' },
   ];
 
   return (
@@ -182,7 +182,7 @@ const CalculatorPage = ({ onNavigate, user, onLogout }: CalculatorPageProps) => 
       <section className="py-12 sm:py-16">
         <div className="max-w-2xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-8">
-            <span className="inline-flex items-center px-4 py-1.5 bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-300 rounded-full text-sm font-semibold mb-4">
+            <span className="inline-flex items-center px-4 py-1.5 bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300 rounded-full text-sm font-semibold mb-4">
               Free Tool
             </span>
             <h1 className="text-3xl sm:text-4xl font-bold text-stone-800 dark:text-stone-100 mb-2">
@@ -221,7 +221,7 @@ const CalculatorPage = ({ onNavigate, user, onLogout }: CalculatorPageProps) => 
             <div className="sm:hidden px-4 py-2 border-b border-stone-200 dark:border-stone-700">
               <button
                 onClick={() => setShowScientific(!showScientific)}
-                className="w-full py-2 text-sm font-medium text-rose-600 dark:text-rose-400"
+                className="w-full py-2 text-sm font-medium text-violet-600 dark:text-violet-400"
               >
                 {showScientific ? 'Hide scientific' : 'Show scientific'} ⌄
               </button>

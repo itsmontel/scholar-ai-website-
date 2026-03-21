@@ -167,11 +167,11 @@ const PomodoroTimerPage = ({ onNavigate, user, onLogout }: PomodoroTimerPageProp
   const getModeColor = () => {
     switch (mode) {
       case 'focus':
-        return { bg: 'from-red-500 to-rose-600', light: 'bg-red-100', text: 'text-red-600', ring: 'ring-red-500' };
+        return { bg: 'bg-red-600 hover:bg-red-500', panel: 'bg-red-600', light: 'bg-red-100', text: 'text-red-600', ring: 'ring-red-500' };
       case 'shortBreak':
-        return { bg: 'from-rose-500 to-teal-600', light: 'bg-rose-100', text: 'text-rose-600', ring: 'ring-rose-500' };
+        return { bg: 'bg-violet-600 hover:bg-violet-500', panel: 'bg-violet-600', light: 'bg-violet-100', text: 'text-violet-600', ring: 'ring-violet-500' };
       case 'longBreak':
-        return { bg: 'from-rose-500 to-indigo-600', light: 'bg-rose-100', text: 'text-rose-600', ring: 'ring-rose-500' };
+        return { bg: 'bg-violet-600 hover:bg-violet-500', panel: 'bg-violet-600', light: 'bg-violet-100', text: 'text-violet-600', ring: 'ring-violet-500' };
     }
   };
 
@@ -182,13 +182,13 @@ const PomodoroTimerPage = ({ onNavigate, user, onLogout }: PomodoroTimerPageProp
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="pomodoro-timer" />
 
       {/* Hero Section */}
-      <section className="py-16 sm:py-20 bg-gradient-to-b from-rose-50/50 to-white">
+      <section className="py-16 sm:py-20 bg-gradient-to-b from-violet-50/50 to-white">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center max-w-3xl mx-auto">
             <div className="inline-flex items-center justify-center mb-6">
               <ScholarMascot size={80} animated={false} pose="default" />
             </div>
-            <span className="inline-flex items-center px-4 py-1.5 bg-rose-100 text-rose-700 rounded-full text-sm font-semibold mb-5">
+            <span className="inline-flex items-center px-4 py-1.5 bg-violet-100 text-violet-700 rounded-full text-sm font-semibold mb-5">
               Free Tool
             </span>
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-5 leading-tight">
@@ -224,7 +224,7 @@ const PomodoroTimerPage = ({ onNavigate, user, onLogout }: PomodoroTimerPageProp
                     onClick={() => switchMode('shortBreak')}
                     className={`px-5 py-2.5 rounded-xl font-medium transition-all ${
                       mode === 'shortBreak' 
-                        ? 'bg-rose-500 text-white' 
+                        ? 'bg-violet-500 text-white' 
                         : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                     }`}
                   >
@@ -234,7 +234,7 @@ const PomodoroTimerPage = ({ onNavigate, user, onLogout }: PomodoroTimerPageProp
                     onClick={() => switchMode('longBreak')}
                     className={`px-5 py-2.5 rounded-xl font-medium transition-all ${
                       mode === 'longBreak' 
-                        ? 'bg-rose-500 text-white' 
+                        ? 'bg-violet-500 text-white' 
                         : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                     }`}
                   >
@@ -308,7 +308,7 @@ const PomodoroTimerPage = ({ onNavigate, user, onLogout }: PomodoroTimerPageProp
                 <div className="flex justify-center gap-4">
                   <button
                     onClick={toggleTimer}
-                    className={`px-8 py-3 bg-gradient-to-r ${colors.bg} text-white font-semibold rounded-xl hover:opacity-90 transition-all shadow-lg`}
+                    className={`px-8 py-3 ${colors.bg} text-white font-semibold rounded-xl transition-all shadow-lg`}
                   >
                     {isRunning ? 'Pause' : 'Start'}
                   </button>
@@ -347,7 +347,7 @@ const PomodoroTimerPage = ({ onNavigate, user, onLogout }: PomodoroTimerPageProp
             {/* Settings & Stats Panel */}
             <div className="space-y-6">
               {/* Session Stats */}
-              <div className={`bg-gradient-to-br ${colors.bg} rounded-2xl p-4 sm:p-6 text-white overflow-hidden`}>
+              <div className={`${colors.panel} rounded-2xl p-4 sm:p-6 text-white overflow-hidden`}>
                 <h3 className="text-lg font-semibold mb-4 opacity-90">Today&apos;s Progress</h3>
                 <div className="space-y-4">
                   <div className="flex justify-between items-center gap-3 min-w-0">
@@ -401,7 +401,7 @@ const PomodoroTimerPage = ({ onNavigate, user, onLogout }: PomodoroTimerPageProp
                         setShortBreakDuration(val);
                         if (mode === 'shortBreak' && !isRunning) setTimeLeft(val * 60);
                       }}
-                      className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500"
+                      className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500"
                       disabled={isRunning}
                     >
                       {[3, 5, 10, 15].map(n => (
@@ -418,7 +418,7 @@ const PomodoroTimerPage = ({ onNavigate, user, onLogout }: PomodoroTimerPageProp
                         setLongBreakDuration(val);
                         if (mode === 'longBreak' && !isRunning) setTimeLeft(val * 60);
                       }}
-                      className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500"
+                      className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500"
                       disabled={isRunning}
                     >
                       {[10, 15, 20, 25, 30].map(n => (
@@ -438,11 +438,11 @@ const PomodoroTimerPage = ({ onNavigate, user, onLogout }: PomodoroTimerPageProp
                     <span>Focus for 25 minutes</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="flex-shrink-0 w-5 h-5 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center text-xs font-bold">2</span>
+                    <span className="flex-shrink-0 w-5 h-5 bg-violet-100 text-violet-600 rounded-full flex items-center justify-center text-xs font-bold">2</span>
                     <span>Take a 5-minute break</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="flex-shrink-0 w-5 h-5 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center text-xs font-bold">3</span>
+                    <span className="flex-shrink-0 w-5 h-5 bg-violet-100 text-violet-600 rounded-full flex items-center justify-center text-xs font-bold">3</span>
                     <span>After 4 sessions, take a longer break</span>
                   </li>
                 </ol>
@@ -467,8 +467,8 @@ const PomodoroTimerPage = ({ onNavigate, user, onLogout }: PomodoroTimerPageProp
               <p className="text-gray-600 text-sm">Short, timed sessions help you maintain intense focus without mental fatigue.</p>
             </div>
             <div className="bg-white border border-gray-200 rounded-2xl p-6">
-              <div className="w-12 h-12 bg-rose-50 rounded-xl flex items-center justify-center mb-4">
-                <svg className="w-6 h-6 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-12 h-12 bg-violet-50 rounded-xl flex items-center justify-center mb-4">
+                <svg className="w-6 h-6 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
@@ -476,8 +476,8 @@ const PomodoroTimerPage = ({ onNavigate, user, onLogout }: PomodoroTimerPageProp
               <p className="text-gray-600 text-sm">Starting a 25-minute timer is easier than facing hours of work. Just begin.</p>
             </div>
             <div className="bg-white border border-gray-200 rounded-2xl p-6">
-              <div className="w-12 h-12 bg-rose-50 rounded-xl flex items-center justify-center mb-4">
-                <svg className="w-6 h-6 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-12 h-12 bg-violet-50 rounded-xl flex items-center justify-center mb-4">
+                <svg className="w-6 h-6 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>

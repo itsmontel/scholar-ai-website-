@@ -26,7 +26,7 @@ const ShareFriendsPage = ({ onNavigate, user, onLogout }: ShareFriendsPageProps)
       icon: '🪪',
       title: 'Get Your Unique Code',
       desc: 'Every WriteScholar account comes with a personal friend code. Share it anywhere — text, DM, or email.',
-      color: 'from-indigo-500 to-violet-600',
+      color: 'bg-violet-600',
       bg: 'bg-indigo-50 dark:bg-indigo-950/40',
       border: 'border-indigo-100 dark:border-indigo-900/50',
       accent: 'text-indigo-600 dark:text-indigo-400',
@@ -48,7 +48,7 @@ const ShareFriendsPage = ({ onNavigate, user, onLogout }: ShareFriendsPageProps)
       icon: '🚀',
       title: 'Share — They Accept',
       desc: 'Hit share, pick your friend, and it delivers straight to their WriteScholar. One tap to accept.',
-      color: 'from-purple-500 to-fuchsia-600',
+      color: 'bg-violet-600',
       bg: 'bg-purple-50 dark:bg-purple-950/40',
       border: 'border-purple-100 dark:border-purple-900/50',
       accent: 'text-purple-600 dark:text-purple-400',
@@ -61,7 +61,7 @@ const ShareFriendsPage = ({ onNavigate, user, onLogout }: ShareFriendsPageProps)
       icon: '🃏',
       title: 'Flashcard Decks',
       desc: 'Share entire decks of study cards. Your friend gets them instantly in their library.',
-      gradient: 'from-indigo-50 to-blue-50 dark:from-indigo-950/30 dark:to-blue-950/30',
+      gradient: 'bg-indigo-50 dark:bg-indigo-950/30',
       border: 'border-indigo-100 dark:border-indigo-900/40',
       accent: 'text-indigo-600 dark:text-indigo-400',
     },
@@ -77,7 +77,7 @@ const ShareFriendsPage = ({ onNavigate, user, onLogout }: ShareFriendsPageProps)
       icon: '🧩',
       title: 'Crossword Puzzles',
       desc: 'Crosswords are way more fun with friends. Share yours and see who finishes first.',
-      gradient: 'from-purple-50 to-fuchsia-50 dark:from-purple-950/30 dark:to-fuchsia-950/30',
+      gradient: 'bg-purple-50 dark:bg-purple-950/30',
       border: 'border-purple-100 dark:border-purple-900/40',
       accent: 'text-purple-600 dark:text-purple-400',
     },
@@ -85,7 +85,7 @@ const ShareFriendsPage = ({ onNavigate, user, onLogout }: ShareFriendsPageProps)
       icon: '📒',
       title: 'Notes & Summaries',
       desc: 'Share your condensed notes and AI summaries so your whole group is on the same page.',
-      gradient: 'from-fuchsia-50 to-pink-50 dark:from-fuchsia-950/30 dark:to-pink-950/30',
+      gradient: 'from-fuchsia-50 to-fuchsia-50 dark:from-fuchsia-950/30 dark:to-fuchsia-950/30',
       border: 'border-fuchsia-100 dark:border-fuchsia-900/40',
       accent: 'text-fuchsia-600 dark:text-fuchsia-400',
     },
@@ -111,7 +111,7 @@ const ShareFriendsPage = ({ onNavigate, user, onLogout }: ShareFriendsPageProps)
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_55%_at_50%_-15%,rgba(99,102,241,0.18),transparent)] dark:bg-[radial-gradient(ellipse_80%_55%_at_50%_-15%,rgba(139,92,246,0.14),transparent)]" />
 
           {/* Floating blobs */}
-          <FloatingShape className="top-[8%] left-[5%] w-14 h-14 bg-gradient-to-br from-rose-400/20 to-pink-500/20 rotate-12 lg:hidden animate-float" />
+          <FloatingShape className="top-[8%] left-[5%] w-14 h-14 bg-gradient-to-br from-violet-400/20 to-fuchsia-500/20 rotate-12 lg:hidden animate-float" />
           <FloatingShape className="top-[18%] right-[7%] w-12 h-12 bg-gradient-to-br from-violet-400/20 to-purple-500/20 lg:hidden animate-float-delayed" />
           <FloatingShape className="bottom-[30%] left-[8%] w-10 h-10 bg-gradient-to-br from-indigo-400/20 to-blue-500/20 lg:hidden animate-float" />
           <FloatingShape className="top-[25%] left-[4%] w-16 h-16 hidden lg:block bg-gradient-to-br from-violet-400/15 to-purple-500/10 animate-float rounded-2xl" />
@@ -148,7 +148,7 @@ const ShareFriendsPage = ({ onNavigate, user, onLogout }: ShareFriendsPageProps)
                 <div className="flex flex-wrap justify-center lg:justify-start gap-4 sm:gap-6 mb-8">
                   {stats.map((s) => (
                     <div key={s.label} className="text-center">
-                      <div className="text-xl sm:text-2xl font-extrabold bg-gradient-to-r from-indigo-600 to-violet-600 dark:from-indigo-400 dark:to-violet-400 bg-clip-text text-transparent">{s.value}</div>
+                      <div className="text-xl sm:text-2xl font-extrabold text-violet-600 dark:text-violet-400">{s.value}</div>
                       <div className="text-xs sm:text-sm text-stone-500 dark:text-stone-400 font-medium">{s.label}</div>
                     </div>
                   ))}
@@ -209,7 +209,7 @@ const ShareFriendsPage = ({ onNavigate, user, onLogout }: ShareFriendsPageProps)
               <div className="relative bg-white dark:bg-stone-800 rounded-3xl px-8 sm:px-14 py-8 shadow-2xl border border-indigo-200/60 dark:border-indigo-800/40">
                 <p className="text-xs sm:text-sm font-semibold text-stone-400 dark:text-stone-500 uppercase tracking-widest mb-3">Your unique friend code</p>
                 <div className="flex items-center justify-center gap-3 sm:gap-5 flex-wrap">
-                  <span className="text-3xl sm:text-5xl font-black tracking-widest bg-gradient-to-r from-indigo-600 to-violet-600 dark:from-indigo-400 dark:to-violet-400 bg-clip-text text-transparent font-mono">
+                  <span className="text-3xl sm:text-5xl font-black tracking-widest text-violet-600 dark:text-violet-400 font-mono">
                     {demoCode}
                   </span>
                   <button
@@ -256,7 +256,7 @@ const ShareFriendsPage = ({ onNavigate, user, onLogout }: ShareFriendsPageProps)
               </span>
               <h2 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-stone-800 dark:text-stone-100 mb-4">
                 How It Works —{' '}
-                <span className="bg-gradient-to-r from-violet-600 to-purple-600 dark:from-violet-400 dark:to-purple-400 bg-clip-text text-transparent">
+                <span className="text-violet-600 dark:text-violet-400">
                   3 Steps Flat
                 </span>
               </h2>
@@ -302,7 +302,7 @@ const ShareFriendsPage = ({ onNavigate, user, onLogout }: ShareFriendsPageProps)
               </span>
               <h2 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-stone-800 dark:text-stone-100 mb-4">
                 Share{' '}
-                <span className="bg-gradient-to-r from-purple-600 to-fuchsia-600 dark:from-purple-400 dark:to-fuchsia-400 bg-clip-text text-transparent">
+                <span className="text-violet-600 dark:text-violet-400">
                   Any Study Tool
                 </span>
               </h2>
@@ -315,7 +315,7 @@ const ShareFriendsPage = ({ onNavigate, user, onLogout }: ShareFriendsPageProps)
               {shareables.map((item) => (
                 <div
                   key={item.title}
-                  className={`group bg-gradient-to-br ${item.gradient} border ${item.border} rounded-3xl p-6 sm:p-7 hover:shadow-xl hover:-translate-y-2 transition-all duration-300`}
+                  className={`group ${item.gradient} border ${item.border} rounded-3xl p-6 sm:p-7 hover:shadow-xl hover:-translate-y-2 transition-all duration-300`}
                 >
                   <div className="text-4xl mb-4">{item.icon}</div>
                   <h3 className={`text-lg font-bold mb-2 ${item.accent}`}>{item.title}</h3>
@@ -339,7 +339,7 @@ const ShareFriendsPage = ({ onNavigate, user, onLogout }: ShareFriendsPageProps)
                 <div className="grid lg:grid-cols-2 gap-0">
                   {/* Left: text */}
                   <div className="p-8 sm:p-12 lg:p-16 flex flex-col justify-center">
-                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center mb-6 shadow-lg shadow-indigo-500/30 group-hover:scale-110 transition-transform duration-300 text-2xl">
+                    <div className="w-14 h-14 rounded-2xl bg-violet-600 flex items-center justify-center mb-6 shadow-lg shadow-violet-500/30 group-hover:scale-110 transition-transform duration-300 text-2xl">
                       ⚡
                     </div>
                     <h3 className="text-2xl sm:text-3xl font-bold text-stone-800 dark:text-stone-100 mb-4">
@@ -367,7 +367,7 @@ const ShareFriendsPage = ({ onNavigate, user, onLogout }: ShareFriendsPageProps)
                     </ul>
                     <button
                       onClick={() => onNavigate('signup')}
-                      className="mt-8 self-start px-6 py-3 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 text-white font-bold rounded-2xl shadow-lg shadow-indigo-500/25 hover:shadow-xl transition-all duration-200 hover:-translate-y-0.5 flex items-center gap-2"
+                      className="mt-8 self-start px-6 py-3 bg-violet-600 hover:bg-violet-700 text-white font-bold rounded-2xl shadow-lg shadow-indigo-500/25 hover:shadow-xl transition-all duration-200 hover:-translate-y-0.5 flex items-center gap-2"
                     >
                       Get started free
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -388,14 +388,14 @@ const ShareFriendsPage = ({ onNavigate, user, onLogout }: ShareFriendsPageProps)
                       {/* Incoming notification */}
                       <div className="bg-white dark:bg-stone-700 rounded-2xl p-4 shadow-lg border border-indigo-100 dark:border-indigo-900/40 animate-[card-breathe_4s_ease-in-out_infinite]">
                         <div className="flex items-start gap-3">
-                          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-lg flex-shrink-0">🃏</div>
+                          <div className="w-10 h-10 rounded-xl bg-violet-600 flex items-center justify-center text-lg flex-shrink-0">🃏</div>
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-bold text-stone-800 dark:text-stone-100 truncate">Alex shared "Bio Exam Deck"</p>
                             <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">48 flashcards · Just now</p>
                           </div>
                         </div>
                         <div className="flex gap-2 mt-3">
-                          <button className="flex-1 py-2 bg-gradient-to-r from-indigo-500 to-violet-600 text-white text-xs font-bold rounded-xl hover:opacity-90 transition-opacity">
+                          <button className="flex-1 py-2 bg-violet-600 hover:bg-violet-500 text-white text-xs font-bold rounded-xl hover:opacity-90 transition-opacity">
                             Accept
                           </button>
                           <button className="px-4 py-2 bg-stone-100 dark:bg-stone-600 text-stone-500 dark:text-stone-300 text-xs font-semibold rounded-xl hover:bg-stone-200 dark:hover:bg-stone-500 transition-colors">
@@ -407,14 +407,14 @@ const ShareFriendsPage = ({ onNavigate, user, onLogout }: ShareFriendsPageProps)
                       {/* Second notification */}
                       <div className="bg-white dark:bg-stone-700 rounded-2xl p-4 shadow-md border border-violet-100 dark:border-violet-900/40 opacity-75">
                         <div className="flex items-start gap-3">
-                          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-fuchsia-600 flex items-center justify-center text-lg flex-shrink-0">🧩</div>
+                          <div className="w-10 h-10 rounded-xl bg-violet-600 flex items-center justify-center text-lg flex-shrink-0">🧩</div>
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-bold text-stone-800 dark:text-stone-100 truncate">Jordan shared "Chem Crossword"</p>
                             <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">22 words · 2 min ago</p>
                           </div>
                         </div>
                         <div className="flex gap-2 mt-3">
-                          <button className="flex-1 py-2 bg-gradient-to-r from-purple-500 to-fuchsia-600 text-white text-xs font-bold rounded-xl hover:opacity-90 transition-opacity">
+                          <button className="flex-1 py-2 bg-violet-600 hover:bg-violet-500 text-white text-xs font-bold rounded-xl hover:opacity-90 transition-opacity">
                             Accept
                           </button>
                           <button className="px-4 py-2 bg-stone-100 dark:bg-stone-600 text-stone-500 dark:text-stone-300 text-xs font-semibold rounded-xl">

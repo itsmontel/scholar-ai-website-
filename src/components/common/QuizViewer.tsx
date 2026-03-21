@@ -140,14 +140,14 @@ const QuizViewer = ({ questions, title, onEnlarge, initialQuestionIndex }: QuizV
             className="w-20 h-20 mx-auto mb-4 object-contain rounded-xl border-2 border-violet-300 dark:border-violet-500 shadow-lg overflow-hidden ring-2 ring-violet-400/30"
           />
           <h3 className="text-xl font-bold text-stone-800 dark:text-stone-100 mb-2">Quiz Complete!</h3>
-          <p className="text-4xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent mb-2">{percentage}%</p>
+          <p className="text-4xl font-bold bg-amber-600 hover:bg-amber-500 bg-clip-text text-transparent mb-2">{percentage}%</p>
           <p className="text-stone-500 dark:text-stone-400 text-sm mb-6">{correct} out of {total} correct</p>
           <div className="flex flex-wrap justify-center gap-2">
             <button onClick={resetQuiz} className="px-4 py-2.5 rounded-xl bg-stone-100 dark:bg-stone-700 text-stone-700 dark:text-stone-200 font-medium hover:bg-stone-200 dark:hover:bg-stone-600">
               🔄 Retake
             </button>
             {onEnlarge && (
-              <button onClick={() => onEnlarge?.({ questionIndex: currentQuestion })} className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-violet-500 to-purple-600 text-white font-medium hover:from-violet-600 hover:to-purple-700">
+              <button onClick={() => onEnlarge?.({ questionIndex: currentQuestion })} className="px-4 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-medium hover:bg-violet-700">
                 Open full screen
               </button>
             )}
@@ -180,7 +180,7 @@ const QuizViewer = ({ questions, title, onEnlarge, initialQuestionIndex }: QuizV
         )}
       </div>
       <div className="h-2 bg-stone-200 dark:bg-stone-700 rounded-full mb-4">
-        <div className="h-full bg-gradient-to-r from-amber-500 to-orange-600 rounded-full transition-all" style={{ width: `${((currentQuestion + 1) / displayedQuestions.length) * 100}%` }} />
+        <div className="h-full bg-amber-600 rounded-full transition-all" style={{ width: `${((currentQuestion + 1) / displayedQuestions.length) * 100}%` }} />
       </div>
       <div className="flex-1 rounded-2xl p-4 sm:p-6 bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-600 overflow-auto">
         <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold mb-3 ${
@@ -285,14 +285,14 @@ const QuizViewer = ({ questions, title, onEnlarge, initialQuestionIndex }: QuizV
             <button
               onClick={handleSubmit}
               disabled={!selectedAnswer}
-              className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 text-white font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-2.5 rounded-xl bg-amber-600 text-white font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Check Answer
             </button>
           ) : (
             <button
               onClick={handleNext}
-              className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-violet-500 to-purple-600 text-white font-semibold"
+              className="px-4 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-semibold"
             >
               {currentQuestion < displayedQuestions.length - 1 ? 'Next →' : 'See Results'}
             </button>

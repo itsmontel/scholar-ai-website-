@@ -162,8 +162,8 @@ const ReadabilityScorePage = ({ onNavigate, user, onLogout }: ReadabilityScorePa
   const getReadingEaseLabel = (score: number): { label: string; color: string; audience: string } => {
     if (score >= 90) return { label: 'Very Easy', color: 'text-green-600', audience: 'Average 5th grader' };
     if (score >= 80) return { label: 'Easy', color: 'text-green-500', audience: 'Average 6th grader' };
-    if (score >= 70) return { label: 'Fairly Easy', color: 'text-rose-500', audience: '7th grader' };
-    if (score >= 60) return { label: 'Standard', color: 'text-rose-600', audience: '8th-9th grader' };
+    if (score >= 70) return { label: 'Fairly Easy', color: 'text-violet-500', audience: '7th grader' };
+    if (score >= 60) return { label: 'Standard', color: 'text-violet-600', audience: '8th-9th grader' };
     if (score >= 50) return { label: 'Fairly Difficult', color: 'text-yellow-600', audience: 'High school student' };
     if (score >= 30) return { label: 'Difficult', color: 'text-orange-500', audience: 'College student' };
     return { label: 'Very Difficult', color: 'text-red-500', audience: 'College graduate' };
@@ -171,14 +171,14 @@ const ReadabilityScorePage = ({ onNavigate, user, onLogout }: ReadabilityScorePa
 
   const getProgressColor = (score: number): string => {
     if (score >= 70) return 'bg-green-500';
-    if (score >= 50) return 'bg-rose-500';
+    if (score >= 50) return 'bg-violet-500';
     if (score >= 30) return 'bg-yellow-500';
     return 'bg-red-500';
   };
 
   const getGradeLevelColor = (grade: number): string => {
     if (grade <= 8) return 'text-green-600';
-    if (grade <= 12) return 'text-rose-600';
+    if (grade <= 12) return 'text-violet-600';
     if (grade <= 16) return 'text-yellow-600';
     return 'text-red-600';
   };
@@ -188,13 +188,13 @@ const ReadabilityScorePage = ({ onNavigate, user, onLogout }: ReadabilityScorePa
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="readability-score" />
 
       {/* Hero Section */}
-      <section className="py-16 sm:py-20 bg-gradient-to-b from-rose-50/50 to-white">
+      <section className="py-16 sm:py-20 bg-gradient-to-b from-violet-50/50 to-white">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center max-w-3xl mx-auto">
             <div className="inline-flex items-center justify-center mb-6">
               <ScholarMascot size={80} animated={false} pose="default" />
             </div>
-            <span className="inline-flex items-center px-4 py-1.5 bg-rose-100 text-rose-700 rounded-full text-sm font-semibold mb-5">
+            <span className="inline-flex items-center px-4 py-1.5 bg-violet-100 text-violet-700 rounded-full text-sm font-semibold mb-5">
               Free Tool
             </span>
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-5 leading-tight">
@@ -227,7 +227,7 @@ const ReadabilityScorePage = ({ onNavigate, user, onLogout }: ReadabilityScorePa
                   value={text}
                   onChange={(e) => setText(e.target.value)}
                   placeholder="Paste or type your text here to analyze its readability. For best results, use at least 100 words..."
-                  className="w-full h-80 p-4 text-gray-700 bg-gray-50 border-0 rounded-xl outline-none resize-none placeholder-gray-400 focus:ring-2 focus:ring-rose-500 focus:bg-white transition-all"
+                  className="w-full h-80 p-4 text-gray-700 bg-gray-50 border-0 rounded-xl outline-none resize-none placeholder-gray-400 focus:ring-2 focus:ring-violet-500 focus:bg-white transition-all"
                 />
                 
                 {/* Quick Stats */}
@@ -259,7 +259,7 @@ const ReadabilityScorePage = ({ onNavigate, user, onLogout }: ReadabilityScorePa
               {scores ? (
                 <>
                   {/* Main Score */}
-                  <div className="bg-gradient-to-br from-rose-600 to-indigo-600 rounded-2xl p-6 text-white">
+                  <div className="bg-violet-600 rounded-2xl p-6 text-white">
                     <h3 className="text-lg font-semibold mb-2 opacity-90">Flesch Reading Ease</h3>
                     <div className="text-5xl font-bold mb-1">{Math.round(scores.fleschReadingEase)}</div>
                     <div className={`text-lg font-medium text-white/90`}>
@@ -283,7 +283,7 @@ const ReadabilityScorePage = ({ onNavigate, user, onLogout }: ReadabilityScorePa
                       <div className={`text-4xl font-bold ${getGradeLevelColor(scores.averageGradeLevel)}`}>
                         {scores.averageGradeLevel.toFixed(1)}
                       </div>
-                      <div className="text-rose-600 font-medium mt-1">{scores.gradeLevel}</div>
+                      <div className="text-violet-600 font-medium mt-1">{scores.gradeLevel}</div>
                       <p className="text-xs text-gray-500 mt-2">Average across 5 readability formulas</p>
                     </div>
                   </div>
@@ -298,7 +298,7 @@ const ReadabilityScorePage = ({ onNavigate, user, onLogout }: ReadabilityScorePa
                           <span className={`font-bold ${getGradeLevelColor(scores.fleschKincaid)}`}>{scores.fleschKincaid.toFixed(1)}</span>
                         </div>
                         <div className="bg-gray-100 rounded-full h-2 overflow-hidden">
-                          <div className="h-full bg-rose-500 transition-all" style={{ width: `${Math.min(100, (scores.fleschKincaid / 20) * 100)}%` }} />
+                          <div className="h-full bg-violet-500 transition-all" style={{ width: `${Math.min(100, (scores.fleschKincaid / 20) * 100)}%` }} />
                         </div>
                       </div>
                       <div>
@@ -307,7 +307,7 @@ const ReadabilityScorePage = ({ onNavigate, user, onLogout }: ReadabilityScorePa
                           <span className={`font-bold ${getGradeLevelColor(scores.gunningFog)}`}>{scores.gunningFog.toFixed(1)}</span>
                         </div>
                         <div className="bg-gray-100 rounded-full h-2 overflow-hidden">
-                          <div className="h-full bg-rose-500 transition-all" style={{ width: `${Math.min(100, (scores.gunningFog / 20) * 100)}%` }} />
+                          <div className="h-full bg-violet-500 transition-all" style={{ width: `${Math.min(100, (scores.gunningFog / 20) * 100)}%` }} />
                         </div>
                       </div>
                       <div>
@@ -334,7 +334,7 @@ const ReadabilityScorePage = ({ onNavigate, user, onLogout }: ReadabilityScorePa
                           <span className={`font-bold ${getGradeLevelColor(scores.automatedReadability)}`}>{scores.automatedReadability.toFixed(1)}</span>
                         </div>
                         <div className="bg-gray-100 rounded-full h-2 overflow-hidden">
-                          <div className="h-full bg-pink-500 transition-all" style={{ width: `${Math.min(100, (scores.automatedReadability / 20) * 100)}%` }} />
+                          <div className="h-full bg-fuchsia-500 transition-all" style={{ width: `${Math.min(100, (scores.automatedReadability / 20) * 100)}%` }} />
                         </div>
                       </div>
                     </div>
@@ -377,8 +377,8 @@ const ReadabilityScorePage = ({ onNavigate, user, onLogout }: ReadabilityScorePa
                 </>
               ) : (
                 <div className="bg-gray-50 border border-gray-200 rounded-2xl p-8 text-center">
-                  <div className="w-16 h-16 bg-rose-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <svg className="w-8 h-8 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="w-16 h-16 bg-violet-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg className="w-8 h-8 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
                   </div>
@@ -397,15 +397,15 @@ const ReadabilityScorePage = ({ onNavigate, user, onLogout }: ReadabilityScorePa
           <h2 className="text-2xl font-bold text-gray-900 mb-8 text-center">Understanding Readability Formulas</h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             <div className="bg-white border border-gray-200 rounded-2xl p-6">
-              <div className="w-12 h-12 bg-rose-50 rounded-xl flex items-center justify-center mb-4">
-                <span className="text-rose-600 font-bold">FK</span>
+              <div className="w-12 h-12 bg-violet-50 rounded-xl flex items-center justify-center mb-4">
+                <span className="text-violet-600 font-bold">FK</span>
               </div>
               <h3 className="font-semibold text-gray-900 mb-2">Flesch-Kincaid</h3>
               <p className="text-gray-600 text-sm">Based on sentence length and syllables per word. The most widely used formula, especially in education.</p>
             </div>
             <div className="bg-white border border-gray-200 rounded-2xl p-6">
-              <div className="w-12 h-12 bg-rose-50 rounded-xl flex items-center justify-center mb-4">
-                <span className="text-rose-600 font-bold">GF</span>
+              <div className="w-12 h-12 bg-violet-50 rounded-xl flex items-center justify-center mb-4">
+                <span className="text-violet-600 font-bold">GF</span>
               </div>
               <h3 className="font-semibold text-gray-900 mb-2">Gunning Fog</h3>
               <p className="text-gray-600 text-sm">Estimates years of formal education needed. Focuses on complex words (3+ syllables) and sentence length.</p>
@@ -425,8 +425,8 @@ const ReadabilityScorePage = ({ onNavigate, user, onLogout }: ReadabilityScorePa
               <p className="text-gray-600 text-sm">Uses characters per word instead of syllables. More reliable for machine-processed text.</p>
             </div>
             <div className="bg-white border border-gray-200 rounded-2xl p-6">
-              <div className="w-12 h-12 bg-pink-50 rounded-xl flex items-center justify-center mb-4">
-                <span className="text-pink-600 font-bold">AR</span>
+              <div className="w-12 h-12 bg-fuchsia-50 rounded-xl flex items-center justify-center mb-4">
+                <span className="text-fuchsia-600 font-bold">AR</span>
               </div>
               <h3 className="font-semibold text-gray-900 mb-2">Automated Readability</h3>
               <p className="text-gray-600 text-sm">Uses character count and sentence length. Good for real-time text analysis.</p>
@@ -448,8 +448,8 @@ const ReadabilityScorePage = ({ onNavigate, user, onLogout }: ReadabilityScorePa
           <h2 className="text-2xl font-bold text-gray-900 mb-8 text-center">Tips to Improve Readability</h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             <div className="bg-white border border-gray-200 rounded-2xl p-6">
-              <div className="w-12 h-12 bg-rose-50 rounded-xl flex items-center justify-center mb-4">
-                <svg className="w-6 h-6 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-12 h-12 bg-violet-50 rounded-xl flex items-center justify-center mb-4">
+                <svg className="w-6 h-6 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h8m-8 6h16" />
                 </svg>
               </div>
@@ -457,8 +457,8 @@ const ReadabilityScorePage = ({ onNavigate, user, onLogout }: ReadabilityScorePa
               <p className="text-gray-600 text-sm">Aim for 15-20 words per sentence. Break long sentences into smaller ones.</p>
             </div>
             <div className="bg-white border border-gray-200 rounded-2xl p-6">
-              <div className="w-12 h-12 bg-rose-50 rounded-xl flex items-center justify-center mb-4">
-                <svg className="w-6 h-6 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-12 h-12 bg-violet-50 rounded-xl flex items-center justify-center mb-4">
+                <svg className="w-6 h-6 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
                 </svg>
               </div>
@@ -504,8 +504,8 @@ const ReadabilityScorePage = ({ onNavigate, user, onLogout }: ReadabilityScorePa
               <tbody className="divide-y divide-gray-100">
                 <tr><td className="px-6 py-3 text-green-600 font-medium">90-100</td><td className="px-6 py-3 text-gray-700">Very Easy</td><td className="px-6 py-3 text-gray-700">5th grade</td><td className="px-6 py-3 text-gray-500 hidden sm:table-cell">Comics, children's books</td></tr>
                 <tr><td className="px-6 py-3 text-green-500 font-medium">80-89</td><td className="px-6 py-3 text-gray-700">Easy</td><td className="px-6 py-3 text-gray-700">6th grade</td><td className="px-6 py-3 text-gray-500 hidden sm:table-cell">Consumer ads, tabloids</td></tr>
-                <tr><td className="px-6 py-3 text-rose-500 font-medium">70-79</td><td className="px-6 py-3 text-gray-700">Fairly Easy</td><td className="px-6 py-3 text-gray-700">7th grade</td><td className="px-6 py-3 text-gray-500 hidden sm:table-cell">Movie reviews, sports news</td></tr>
-                <tr><td className="px-6 py-3 text-rose-600 font-medium">60-69</td><td className="px-6 py-3 text-gray-700">Standard</td><td className="px-6 py-3 text-gray-700">8-9th grade</td><td className="px-6 py-3 text-gray-500 hidden sm:table-cell">Time, Newsweek</td></tr>
+                <tr><td className="px-6 py-3 text-violet-500 font-medium">70-79</td><td className="px-6 py-3 text-gray-700">Fairly Easy</td><td className="px-6 py-3 text-gray-700">7th grade</td><td className="px-6 py-3 text-gray-500 hidden sm:table-cell">Movie reviews, sports news</td></tr>
+                <tr><td className="px-6 py-3 text-violet-600 font-medium">60-69</td><td className="px-6 py-3 text-gray-700">Standard</td><td className="px-6 py-3 text-gray-700">8-9th grade</td><td className="px-6 py-3 text-gray-500 hidden sm:table-cell">Time, Newsweek</td></tr>
                 <tr><td className="px-6 py-3 text-yellow-600 font-medium">50-59</td><td className="px-6 py-3 text-gray-700">Fairly Difficult</td><td className="px-6 py-3 text-gray-700">High school</td><td className="px-6 py-3 text-gray-500 hidden sm:table-cell">Wall Street Journal</td></tr>
                 <tr><td className="px-6 py-3 text-orange-500 font-medium">30-49</td><td className="px-6 py-3 text-gray-700">Difficult</td><td className="px-6 py-3 text-gray-700">College</td><td className="px-6 py-3 text-gray-500 hidden sm:table-cell">Academic papers</td></tr>
                 <tr><td className="px-6 py-3 text-red-500 font-medium">0-29</td><td className="px-6 py-3 text-gray-700">Very Difficult</td><td className="px-6 py-3 text-gray-700">Graduate</td><td className="px-6 py-3 text-gray-500 hidden sm:table-cell">Scientific journals, legal docs</td></tr>

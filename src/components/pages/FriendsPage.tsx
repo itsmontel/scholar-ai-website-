@@ -560,7 +560,7 @@ const FriendsPage = ({ onNavigate, user, onLogout }: FriendsPageProps) => {
               value={addFriendCode}
               onChange={(e) => setAddFriendCode(e.target.value.toUpperCase())}
               placeholder="Enter friend code (e.g. ABC12345)"
-              className="flex-1 px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-rose-500/40 focus:border-rose-500 focus:outline-none font-mono text-lg tracking-wider uppercase"
+              className="flex-1 px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-violet-500/40 focus:border-violet-500 focus:outline-none font-mono text-lg tracking-wider uppercase"
               maxLength={12}
             />
             <button
@@ -729,7 +729,7 @@ const FriendsPage = ({ onNavigate, user, onLogout }: FriendsPageProps) => {
                                 {(friend.first_name?.[0] || friend.email?.[0] || '?').toUpperCase()}
                               </span>
                               {friend.currentStreak != null && friend.currentStreak > 0 && (
-                                <span className="absolute -bottom-1 -right-1 flex items-center gap-0.5 px-1.5 py-0.5 bg-gradient-to-r from-orange-400 to-amber-500 text-white text-[10px] font-bold rounded-full shadow-sm leading-none">
+                                <span className="absolute -bottom-1 -right-1 flex items-center gap-0.5 px-1.5 py-0.5 bg-amber-500 text-white text-[10px] font-bold rounded-full shadow-sm leading-none">
                                   <span className="text-[9px]">🔥</span>{friend.currentStreak}
                                 </span>
                               )}

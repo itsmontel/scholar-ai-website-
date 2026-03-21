@@ -29,14 +29,14 @@ export default function GameOverScreen({
       </p>
       <button
         onClick={onRestart}
-        className="px-7 py-3.5 text-base font-semibold rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 transition-all"
+        className="px-7 py-3.5 text-base font-semibold rounded-xl bg-sky-600 hover:bg-sky-500 text-white transition-all"
       >
         New Game
       </button>
       {hasQuestions && (
         <button
           onClick={onPlayAgain}
-          className="ml-3 px-7 py-3.5 text-base font-semibold rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 text-white hover:from-amber-600 hover:to-orange-600 transition-all"
+          className="ml-3 px-7 py-3.5 text-base font-semibold rounded-xl bg-amber-600 hover:bg-amber-500 text-white transition-all"
         >
           Play Again (same questions)
         </button>

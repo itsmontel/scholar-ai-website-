@@ -223,7 +223,7 @@ const GPACalculatorPage = ({ onNavigate, user, onLogout }: GPACalculatorPageProp
             {/* GPA Results Panel */}
             <div className="space-y-6">
               {/* Main GPA Display */}
-              <div className="bg-gradient-to-br from-rose-600 to-red-600 rounded-2xl p-6 text-white text-center">
+              <div className="bg-violet-600 rounded-2xl p-6 text-white text-center">
                 <h3 className="text-lg font-semibold mb-2 opacity-90">Your GPA</h3>
                 <div className={`text-6xl font-bold mb-2`}>
                   {gpa.toFixed(2)}

@@ -490,7 +490,7 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
             onClick={() => setMobileView('list')}
             className={`flex-1 py-3.5 text-sm font-medium transition-colors ${
               mobileView === 'list'
-                ? 'text-rose-600 border-b-2 border-rose-600 bg-rose-50/50'
+                ? 'text-violet-600 border-b-2 border-violet-600 bg-violet-50/50'
                 : 'text-stone-500 hover:text-stone-700 hover:bg-stone-50'
             }`}
           >
@@ -500,7 +500,7 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
             onClick={() => setMobileView('document')}
             className={`flex-1 py-3.5 text-sm font-medium transition-colors ${
               mobileView === 'document'
-                ? 'text-rose-600 border-b-2 border-rose-600 bg-rose-50/50'
+                ? 'text-violet-600 border-b-2 border-violet-600 bg-violet-50/50'
                 : 'text-stone-500 hover:text-stone-700 hover:bg-stone-50'
             }`}
             disabled={!selectedDocument}
@@ -511,7 +511,7 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
             onClick={() => setMobileView('analysis')}
             className={`flex-1 py-3.5 text-sm font-medium transition-colors ${
               mobileView === 'analysis'
-                ? 'text-rose-600 border-b-2 border-rose-600 bg-rose-50/50'
+                ? 'text-violet-600 border-b-2 border-violet-600 bg-violet-50/50'
                 : 'text-stone-500 hover:text-stone-700 hover:bg-stone-50'
             }`}
             disabled={!selectedDocument}
@@ -539,7 +539,7 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Search documents..."
-                className="w-full pl-10 pr-4 py-2.5 text-sm bg-stone-50 border border-stone-200 rounded-xl focus:ring-2 focus:ring-rose-500 focus:border-rose-500 focus:bg-white transition-all"
+                className="w-full pl-10 pr-4 py-2.5 text-sm bg-stone-50 border border-stone-200 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-violet-500 focus:bg-white transition-all"
               />
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <svg className="h-5 w-5 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -554,7 +554,7 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
                 onClick={() => setTimeFilter('all')}
                 className={`px-3 py-1.5 text-xs md:text-sm rounded-lg font-medium transition-all ${
                   timeFilter === 'all' 
-                    ? 'bg-gradient-to-r from-rose-500 to-rose-600 text-white' 
+                    ? 'bg-violet-600 hover:bg-violet-500 text-white' 
                     : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
                 }`}
               >
@@ -564,7 +564,7 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
                 onClick={() => setTimeFilter('last7days')}
                 className={`px-3 py-1.5 text-xs md:text-sm rounded-lg font-medium transition-all ${
                   timeFilter === 'last7days' 
-                    ? 'bg-gradient-to-r from-rose-500 to-rose-600 text-white' 
+                    ? 'bg-violet-600 hover:bg-violet-500 text-white' 
                     : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
                 }`}
               >
@@ -574,7 +574,7 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
                 onClick={() => setTimeFilter('lastmonth')}
                 className={`px-3 py-1.5 text-xs md:text-sm rounded-lg font-medium transition-all ${
                   timeFilter === 'lastmonth' 
-                    ? 'bg-gradient-to-r from-rose-500 to-rose-600 text-white' 
+                    ? 'bg-violet-600 hover:bg-violet-500 text-white' 
                     : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
                 }`}
               >
@@ -590,7 +590,7 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
                   onClick={() => setViewMode('grid')}
                   className={`p-2 rounded-lg transition-all ${
                     viewMode === 'grid'
-                      ? 'bg-white text-rose-600 shadow-sm'
+                      ? 'bg-white text-violet-600 shadow-sm'
                       : 'text-stone-500 hover:text-stone-700'
                   }`}
                   title="Grid View"
@@ -603,7 +603,7 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
                   onClick={() => setViewMode('list')}
                   className={`p-2 rounded-lg transition-all ${
                     viewMode === 'list'
-                      ? 'bg-white text-rose-600 shadow-sm'
+                      ? 'bg-white text-violet-600 shadow-sm'
                       : 'text-stone-500 hover:text-stone-700'
                   }`}
                   title="List View"
@@ -633,7 +633,7 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
                 {searchTerm && (
                   <button 
                     onClick={() => setSearchTerm('')}
-                    className="text-rose-600 hover:text-rose-700 font-medium text-sm"
+                    className="text-violet-600 hover:text-violet-700 font-medium text-sm"
                   >
                     Clear search
                   </button>
@@ -647,12 +647,12 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
                     className={`${viewMode === 'grid' 
                       ? `p-4 rounded-xl transition-all duration-200 border-2 hover:shadow-md ${
                           selectedDocument?.id === document.id
-                            ? 'bg-rose-50 border-rose-500'
+                            ? 'bg-violet-50 border-violet-500'
                             : 'bg-white border-stone-200 hover:border-stone-300'
                         }`
                       : `py-2 px-3 rounded-xl transition-all duration-150 cursor-pointer border ${
                           selectedDocument?.id === document.id
-                            ? 'bg-rose-50 border-rose-500'
+                            ? 'bg-violet-50 border-violet-500'
                             : 'bg-white border-stone-200 hover:bg-stone-50 hover:border-stone-300'
                         }`
                     }`}
@@ -668,7 +668,7 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
                                 e.stopPropagation();
                                 startEditing(document);
                               }}
-                              className="p-1 text-stone-400 hover:text-rose-600"
+                              className="p-1 text-stone-400 hover:text-violet-600"
                               title="Rename"
                             >
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -712,8 +712,8 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
                       <div>{document.wordCount} words</div>
                       <div>{formatDate(document.createdAt)}</div>
                       {(document.analysisStatus?.hasAnalysis || document.hasAnalysis) && (
-                        <div className="flex items-center text-rose-600">
-                          <div className="w-1.5 h-1.5 bg-rose-500 rounded-full mr-1"></div>
+                        <div className="flex items-center text-violet-600">
+                          <div className="w-1.5 h-1.5 bg-violet-500 rounded-full mr-1"></div>
                           Analyzed
                         </div>
                       )}
@@ -757,7 +757,7 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
                                 />
                                 <button
                                   onClick={() => handleRenameDocument(document.id, editTitle)}
-                                  className="px-1.5 py-0.5 text-[10px] bg-rose-600 text-white rounded hover:bg-rose-700"
+                                  className="px-1.5 py-0.5 text-[10px] bg-violet-600 text-white rounded hover:bg-violet-700"
                                 >
                                   ✓
                                 </button>
@@ -784,7 +784,7 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
                                       {formatFileSize(document.fileSize)}
                                     </span>
                                     {(document.analysisStatus?.hasAnalysis || document.hasAnalysis) && (
-                                      <div className="w-1.5 h-1.5 bg-rose-500 rounded-full"></div>
+                                      <div className="w-1.5 h-1.5 bg-violet-500 rounded-full"></div>
                                     )}
                                   </div>
                                 </div>
@@ -899,7 +899,7 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
                           localStorage.setItem('viewAnalysisType', 'comprehensive');
                           localStorage.setItem('cameFromLibrary', 'true');
                         }}
-                        className="flex-1 min-w-[200px] bg-gradient-to-r from-emerald-500 to-green-600 text-white px-4 py-3 rounded-xl hover:from-emerald-600 hover:to-green-700 transition-colors font-medium flex items-center justify-center space-x-2 text-sm"
+                        className="flex-1 min-w-[200px] bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-3 rounded-xl hover:bg-emerald-700 transition-colors font-medium flex items-center justify-center space-x-2 text-sm"
                       >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -917,7 +917,7 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
                           localStorage.setItem('viewAnalysisType', 'citation');
                           localStorage.setItem('cameFromLibrary', 'true');
                         }}
-                        className="flex-1 min-w-[200px] bg-gradient-to-r from-emerald-500 to-green-600 text-white px-4 py-3 rounded-xl hover:from-emerald-600 hover:to-green-700 transition-colors font-medium flex items-center justify-center space-x-2 text-sm"
+                        className="flex-1 min-w-[200px] bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-3 rounded-xl hover:bg-emerald-700 transition-colors font-medium flex items-center justify-center space-x-2 text-sm"
                       >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
@@ -1008,7 +1008,7 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
                     localStorage.setItem('selectedDocumentTitle', selectedDocument.title);
                     onNavigate('analysis');
                   }}
-                  className="bg-gradient-to-r from-rose-500 to-rose-600 text-white px-5 py-2.5 rounded-xl hover:from-rose-600 hover:to-rose-700 transition-colors font-medium text-sm"
+                  className="bg-violet-600 hover:bg-violet-500 text-white px-5 py-2.5 rounded-xl transition-colors font-medium text-sm"
                 >
                   Analyze Document
                 </button>
@@ -1048,7 +1048,7 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
                             <span className={`inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-semibold ${
                               mostRecentAnalysis.analysis_type === 'citation_review' 
                                 ? 'bg-purple-100 text-purple-700' 
-                                : 'bg-rose-100 text-rose-700'
+                                : 'bg-violet-100 text-violet-700'
                             }`}>
                               {analysisType} Analysis
                             </span>
@@ -1086,7 +1086,7 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
                                 Overall Assessment
                               </h4>
                               <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
-                                <div className="prose prose-sm max-w-none">
+                                <div className="prose pviolet-sm max-w-none">
                                   <div className="whitespace-pre-wrap text-gray-700 leading-relaxed text-sm">
                                     {results.result
                                       .replace(/#{1,6}\s*/g, '')
@@ -1101,7 +1101,7 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
                                 {results.result.length > 500 && (
                                   <button
                                     onClick={() => onNavigate('analysis-history')}
-                                    className="mt-3 w-full py-2.5 px-4 text-sm font-medium text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 rounded-xl transition-colors flex items-center justify-center gap-2"
+                                    className="mt-3 w-full py-2.5 px-4 text-sm font-medium text-violet-600 hover:text-violet-700 bg-violet-50 hover:bg-violet-100 rounded-xl transition-colors flex items-center justify-center gap-2"
                                   >
                                     <span>View full analysis</span>
                                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -45,7 +45,7 @@ const BadgeWidget = ({ onNavigate, mobileExpanded = false }: BadgeWidgetProps) =
         <div className="relative flex-shrink-0">
           <span className={`group-hover:animate-[badge-bounce_0.6s_ease-in-out] ${mobileExpanded ? 'text-2xl' : 'text-xl'}`}>🏆</span>
           {unlockedCount > 0 && (
-            <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-rose-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center shadow-sm">
+            <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-violet-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center shadow-sm">
               {unlockedCount}
             </span>
           )}
@@ -71,7 +71,7 @@ const BadgeWidget = ({ onNavigate, mobileExpanded = false }: BadgeWidgetProps) =
         <div className="absolute bottom-full right-0 mb-2 w-56 bg-white dark:bg-stone-800 rounded-2xl shadow-2xl shadow-stone-900/10 dark:shadow-black/30 border border-stone-200/60 dark:border-stone-700/60 p-4 z-[100] animate-[tooltip-in_0.2s_ease-out]">
           {/* Level */}
           <div className="flex items-center gap-2 mb-3">
-            <div className="w-8 h-8 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-xl flex items-center justify-center text-white font-black text-sm shadow-lg shadow-amber-500/30">
+            <div className="w-8 h-8 bg-amber-500 rounded-xl flex items-center justify-center text-white font-black text-sm shadow-lg shadow-amber-500/30">
               {levelInfo.level}
             </div>
             <div>

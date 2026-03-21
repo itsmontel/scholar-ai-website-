@@ -1217,7 +1217,7 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
           </div>
 
           <div className="bg-gradient-to-br from-stone-50 to-white dark:from-stone-800 dark:to-stone-700 rounded-2xl p-6 mb-8 max-w-md mx-auto border border-stone-200 dark:border-stone-600">
-            <div className="text-6xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent mb-2">
+            <div className="text-6xl font-bold bg-amber-600 hover:bg-amber-500 bg-clip-text text-transparent mb-2">
               {score.percentage}%
             </div>
             <p className="text-stone-600 dark:text-stone-400 text-lg">
@@ -1226,9 +1226,9 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
             <div className="w-full bg-stone-200 dark:bg-stone-600 rounded-full h-3 mt-4">
               <div 
                 className={`h-3 rounded-full transition-all duration-500 ${
-                  score.percentage >= 70 ? 'bg-gradient-to-r from-amber-500 to-orange-600' :
-                  score.percentage >= 50 ? 'bg-gradient-to-r from-amber-500 to-orange-600' :
-                  'bg-gradient-to-r from-red-500 to-rose-600'
+                  score.percentage >= 70 ? 'bg-amber-600' :
+                  score.percentage >= 50 ? 'bg-amber-600' :
+                  'bg-gradient-to-r from-red-500 to-violet-600'
                 }`}
                 style={{ width: `${score.percentage}%` }}
               ></div>
@@ -1288,7 +1288,7 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
             </button>
             <button
               onClick={() => { setQuiz(null); setIsQuizMode(false); setShowQuizReview(false); }}
-              className="px-6 py-3 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-semibold rounded-xl transition-all flex items-center justify-center gap-2"
+              className="px-6 py-3 bg-amber-600 hover:bg-amber-500 text-white font-semibold rounded-xl transition-all flex items-center justify-center gap-2"
             >
               ✨ New Quiz
             </button>
@@ -1304,7 +1304,7 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
         {/* Progress bar */}
         <div className="h-2 bg-stone-200 dark:bg-stone-600">
           <div 
-            className="h-full bg-gradient-to-r from-amber-500 to-orange-500 transition-all duration-300"
+            className="h-full bg-amber-600 transition-all duration-300"
             style={{ width: `${((currentQuestion + 1) / displayedQuestions.length) * 100}%` }}
           ></div>
         </div>
@@ -1472,14 +1472,14 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
               <button
                 onClick={submitAnswer}
                 disabled={!selectedAnswer}
-                className="px-6 py-3 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-semibold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                className="px-6 py-3 bg-amber-600 hover:bg-amber-500 text-white font-semibold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
                 🎯 Submit Answer
               </button>
             ) : (
               <button
                 onClick={nextQuestion}
-                className="px-6 py-3 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-semibold rounded-xl transition-all flex items-center gap-2"
+                className="px-6 py-3 bg-amber-600 hover:bg-amber-500 text-white font-semibold rounded-xl transition-all flex items-center gap-2"
               >
                 {currentQuestion + 1 >= displayedQuestions.length ? (
                   <>🏆 See Results</>
@@ -1512,7 +1512,7 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
               <div className="flex gap-2 flex-wrap">
                 <button
                   onClick={startQuiz}
-                  className="px-5 py-2.5 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-semibold rounded-xl transition-all flex items-center gap-2"
+                  className="px-5 py-2.5 bg-amber-600 hover:bg-amber-500 text-white font-semibold rounded-xl transition-all flex items-center gap-2"
                 >
                   🧠 Start Quiz
                 </button>
@@ -1645,7 +1645,7 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
               </div>
               <div className="flex-1 text-center sm:text-left">
                 <div className="flex items-center justify-center sm:justify-start gap-2 sm:gap-3 mb-3 sm:mb-4 flex-wrap">
-                  <span className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-semibold shadow-lg shadow-amber-200/50 dark:shadow-amber-900/30">
+                  <span className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full bg-amber-600 text-white text-xs font-semibold shadow-lg shadow-amber-200/50 dark:shadow-amber-900/30">
                     👑 Premium Tool
                   </span>
                   <span className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 text-xs font-semibold">
@@ -1653,7 +1653,7 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
                   </span>
                 </div>
                 <h1 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-stone-800 dark:text-stone-100 mb-3 sm:mb-4 leading-tight">
-                  AI <span className="bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
+                  AI <span className="bg-amber-600 hover:bg-amber-500 bg-clip-text text-transparent">
                     {studyToolMode === 'flashcards' ? 'Flashcard Generator' : studyToolMode === 'crossword' ? 'Crossword Generator' : 'Quiz Generator'}
                   </span>
                 </h1>
@@ -1719,7 +1719,7 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
                         </div>
                         <div>
                           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-stone-800 dark:text-stone-100 leading-tight tracking-tight">
-                            AI <span className="bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
+                            AI <span className="bg-amber-600 hover:bg-amber-500 bg-clip-text text-transparent">
                               {studyToolMode === 'flashcards' ? 'Flashcard Generator' : studyToolMode === 'crossword' ? 'Crossword Generator' : 'Quiz Generator'}
                             </span>
                           </h1>
@@ -1775,7 +1775,7 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
                           {user != null && isFreeUser && <span className="text-[9px]">🔒</span>}
                         </div>
                         <button onClick={handleGenerate} disabled={isLoading || !inputText.trim() || wordCount < 100 || wordCount > quizUsage.maxWordsPerGeneration || quizExhausted}
-                          className="w-full sm:w-auto sm:ml-auto px-4 sm:px-6 py-2 sm:py-2.5 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-semibold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-amber-200/50 dark:shadow-amber-900/30 text-sm">
+                          className="w-full sm:w-auto sm:ml-auto px-4 sm:px-6 py-2 sm:py-2.5 bg-amber-600 hover:bg-amber-500 text-white font-semibold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-amber-200/50 dark:shadow-amber-900/30 text-sm">
                           {isLoading ? (<><svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><span>Generating...</span></>) : (<><span>✨</span><span>Generate Quiz</span><span>→</span></>)}
                         </button>
                       </div>
@@ -1821,7 +1821,7 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
                         </div>
                         <div className="flex items-center gap-2 w-full sm:w-auto sm:ml-auto">
                           <button onClick={() => setFlashcardResult({ title: 'My Flashcards', cards: [] })} className="flex-1 sm:flex-none px-4 py-2 sm:py-2.5 bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-400 font-semibold rounded-xl transition-all hover:bg-violet-200 dark:hover:bg-violet-900/50 flex items-center justify-center gap-2 text-sm">✏️ Create from Scratch</button>
-                          <button onClick={handleGenerate} disabled={isLoading || !inputText.trim() || wordCount < 50 || wordCount > quizUsage.maxWordsPerGeneration || quizExhausted} className="flex-1 sm:flex-none px-4 sm:px-6 py-2 sm:py-2.5 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-semibold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-amber-200/50 dark:shadow-amber-900/30 text-sm">
+                          <button onClick={handleGenerate} disabled={isLoading || !inputText.trim() || wordCount < 50 || wordCount > quizUsage.maxWordsPerGeneration || quizExhausted} className="flex-1 sm:flex-none px-4 sm:px-6 py-2 sm:py-2.5 bg-amber-600 hover:bg-amber-500 text-white font-semibold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-amber-200/50 dark:shadow-amber-900/30 text-sm">
                             {isLoading ? (<><svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><span>Generating...</span></>) : (<>🃏 Generate with AI →</>)}
                           </button>
                         </div>
@@ -1863,7 +1863,7 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
                             {[6, 8, 10, 12, 15].map(n => <option key={n} value={n}>{n}</option>)}
                           </select>
                         </div>
-                        <button onClick={handleGenerate} disabled={isLoading || !inputText.trim() || wordCount < 50 || wordCount > quizUsage.maxWordsPerGeneration || quizExhausted} className="w-full sm:w-auto sm:ml-auto px-4 sm:px-6 py-2 sm:py-2.5 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-semibold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-amber-200/50 dark:shadow-amber-900/30 text-sm">
+                        <button onClick={handleGenerate} disabled={isLoading || !inputText.trim() || wordCount < 50 || wordCount > quizUsage.maxWordsPerGeneration || quizExhausted} className="w-full sm:w-auto sm:ml-auto px-4 sm:px-6 py-2 sm:py-2.5 bg-amber-600 hover:bg-amber-500 text-white font-semibold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-amber-200/50 dark:shadow-amber-900/30 text-sm">
                           {isLoading ? (<><svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><span>Generating...</span></>) : (<>🧩 Generate Crossword →</>)}
                         </button>
                       </div>
@@ -1971,7 +1971,7 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
                           {user != null && isFreeUser && <span className="text-[9px]">🔒</span>}
                         </div>
                         <button onClick={handleGenerate} disabled={isLoading || !inputText.trim() || wordCount < 100 || wordCount > quizUsage.maxWordsPerGeneration || quizExhausted}
-                          className="w-full sm:w-auto sm:ml-auto px-4 sm:px-6 py-2 sm:py-2.5 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-semibold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-amber-200/50 dark:shadow-amber-900/30 text-sm">
+                          className="w-full sm:w-auto sm:ml-auto px-4 sm:px-6 py-2 sm:py-2.5 bg-amber-600 hover:bg-amber-500 text-white font-semibold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-amber-200/50 dark:shadow-amber-900/30 text-sm">
                           {isLoading ? (<><svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><span>Generating...</span></>) : (<><span>✨</span><span>Generate Quiz</span><span>→</span></>)}
                         </button>
                       </div>
@@ -2057,7 +2057,7 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
                             ✏️ Create from Scratch
                           </button>
                           <button onClick={handleGenerate} disabled={isLoading || !inputText.trim() || wordCount < 50 || wordCount > quizUsage.maxWordsPerGeneration || quizExhausted}
-                            className="flex-1 sm:flex-none px-4 sm:px-6 py-2 sm:py-2.5 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-semibold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-amber-200/50 dark:shadow-amber-900/30 text-sm">
+                            className="flex-1 sm:flex-none px-4 sm:px-6 py-2 sm:py-2.5 bg-amber-600 hover:bg-amber-500 text-white font-semibold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-amber-200/50 dark:shadow-amber-900/30 text-sm">
                             {isLoading ? (<><svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><span>Generating...</span></>) : (<>🃏 Generate with AI →</>)}
                           </button>
                         </div>
@@ -2133,7 +2133,7 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
                               Hint {hintsUsed > 0 && <span className="text-xs bg-purple-200 text-purple-800 rounded-full px-1.5 py-0.5 font-bold">{hintsUsed}</span>}
                             </button>
-                            <button onClick={() => setCrosswordChecked(true)} className="px-4 py-2 text-sm font-semibold bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-lg hover:from-amber-500 hover:to-orange-500">Check Answers</button>
+                            <button onClick={() => setCrosswordChecked(true)} className="px-4 py-2 text-sm font-semibold bg-amber-600 hover:bg-amber-500 text-white rounded-lg">Check Answers</button>
                           </>
                         )}
                         <button onClick={() => { setCrosswordResult(null); setCrosswordAnswers({}); setCrosswordChecked(false); setSelectedClue(null); setSelectedCell(null); setSelectedDirection('across'); setHintsUsed(0); }} className="px-4 py-2 text-sm text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-900/30 rounded-lg hover:bg-amber-100 dark:hover:bg-amber-800/50 font-medium">New Puzzle</button>
@@ -2319,7 +2319,7 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
                           {user != null && isFreeUser && <span className="text-[9px]">🔒</span>}
                         </div>
                         <button onClick={handleGenerate} disabled={isLoading || !inputText.trim() || wordCount < 50 || wordCount > quizUsage.maxWordsPerGeneration || quizExhausted}
-                          className="w-full sm:w-auto sm:ml-auto px-4 sm:px-6 py-2 sm:py-2.5 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-semibold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-amber-200/50 dark:shadow-amber-900/30 text-sm">
+                          className="w-full sm:w-auto sm:ml-auto px-4 sm:px-6 py-2 sm:py-2.5 bg-amber-600 hover:bg-amber-500 text-white font-semibold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-amber-200/50 dark:shadow-amber-900/30 text-sm">
                           {isLoading ? (<><svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><span>Generating...</span></>) : (<>🧩 Generate Crossword →</>)}
                         </button>
                       </div>
@@ -2366,7 +2366,7 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
                       <p className="text-red-600 dark:text-red-400 text-xs mt-1">{getResetsInText(quizUsage.daysUntilReset)}</p>
                       <button
                         onClick={() => onNavigate('pricing')}
-                        className="mt-2 px-4 py-1.5 bg-gradient-to-r from-amber-600 to-orange-600 text-white text-sm font-medium rounded-lg hover:from-amber-500 hover:to-orange-500 transition-all inline-flex items-center gap-2"
+                        className="mt-2 px-4 py-1.5 bg-amber-600 hover:bg-amber-500 text-white text-sm font-medium rounded-lg transition-all inline-flex items-center gap-2"
                       >
                         👑 View Plans
                       </button>
@@ -2379,7 +2379,7 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
             {/* Lock Overlay for Free Users who exhausted their limit */}
             {user && quizExhausted && !quiz && !flashcardResult && !crosswordResult && (
               <div className="mt-6 mx-3 sm:mx-0">
-                <div className="bg-gradient-to-r from-amber-600 to-orange-600 rounded-2xl p-6 text-white text-center">
+                <div className="bg-amber-600 hover:bg-amber-500 rounded-2xl p-6 text-white text-center">
                   <span className="text-4xl mb-3 block">🔒</span>
                   <h3 className="text-xl font-bold mb-2">Monthly Limit Reached</h3>
                   <p className="text-amber-100 mb-1">You've used all your quiz generations this period. Upgrade to Pro for more!</p>
@@ -2507,7 +2507,7 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
               </p>
             </div>
             
-            <div className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-xl p-4 mb-6 border border-amber-200 dark:border-amber-800">
+            <div className="bg-amber-50 dark:bg-amber-900/20 rounded-xl p-4 mb-6 border border-amber-200 dark:border-amber-800">
               <h4 className="font-semibold text-amber-900 dark:text-amber-200 mb-3">Paid Plan Benefits:</h4>
               <ul className="space-y-2 text-sm text-amber-800 dark:text-amber-300">
                 <li className="flex items-center gap-2">
@@ -2546,7 +2546,7 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
               </button>
               <button
                 onClick={() => { setShowExportUpgradeModal(false); onNavigate('pricing'); }}
-                className="flex-1 px-4 py-3 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-xl hover:from-amber-500 hover:to-orange-500 transition-all font-medium"
+                className="flex-1 px-4 py-3 bg-amber-600 hover:bg-amber-500 text-white rounded-xl transition-all font-medium"
               >
                 View Plans
               </button>

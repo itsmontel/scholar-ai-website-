@@ -699,7 +699,7 @@ const ParaphrasingTipsPage = ({ onNavigate, user, onLogout }: ParaphrasingTipsPa
                           <span className="text-gray-600">Medium</span>
                           <span className="font-medium">{analysis.sentenceVariety.medium}</span>
                         </div>
-                        <div className="bg-gray-100 rounded-full h-2"><div className="bg-rose-500 h-full rounded-full" style={{ width: `${Math.min(100, (analysis.sentenceVariety.medium / (analysis.sentenceVariety.short + analysis.sentenceVariety.medium + analysis.sentenceVariety.long)) * 100)}%` }} /></div>
+                        <div className="bg-gray-100 rounded-full h-2"><div className="bg-violet-500 h-full rounded-full" style={{ width: `${Math.min(100, (analysis.sentenceVariety.medium / (analysis.sentenceVariety.short + analysis.sentenceVariety.medium + analysis.sentenceVariety.long)) * 100)}%` }} /></div>
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center justify-between mb-1">
@@ -782,7 +782,7 @@ const ParaphrasingTipsPage = ({ onNavigate, user, onLogout }: ParaphrasingTipsPa
                         </h3>
                         <div className="space-y-1">
                           {analysis.cliches.map((cliche, index) => (
-                            <div key={index} className="text-sm text-rose-700 bg-rose-50 px-2 py-1 rounded">
+                            <div key={index} className="text-sm text-violet-700 bg-violet-50 px-2 py-1 rounded">
                               "{cliche}"
                             </div>
                           ))}
@@ -877,8 +877,8 @@ const ParaphrasingTipsPage = ({ onNavigate, user, onLogout }: ParaphrasingTipsPa
               <p className="text-gray-600 text-sm">Rearrange clauses, switch from active to passive (or vice versa), or combine/split sentences.</p>
             </div>
             <div className="bg-white border border-gray-200 rounded-2xl p-6">
-              <div className="w-12 h-12 bg-rose-50 rounded-xl flex items-center justify-center mb-4">
-                <svg className="w-6 h-6 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-12 h-12 bg-violet-50 rounded-xl flex items-center justify-center mb-4">
+                <svg className="w-6 h-6 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
                 </svg>
               </div>
@@ -904,8 +904,8 @@ const ParaphrasingTipsPage = ({ onNavigate, user, onLogout }: ParaphrasingTipsPa
               <p className="text-gray-600 text-sm">Read and understand the original text fully before attempting to paraphrase it in your own words.</p>
             </div>
             <div className="bg-white border border-gray-200 rounded-2xl p-6">
-              <div className="w-12 h-12 bg-pink-50 rounded-xl flex items-center justify-center mb-4">
-                <svg className="w-6 h-6 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-12 h-12 bg-fuchsia-50 rounded-xl flex items-center justify-center mb-4">
+                <svg className="w-6 h-6 text-fuchsia-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                 </svg>
               </div>
@@ -913,8 +913,8 @@ const ParaphrasingTipsPage = ({ onNavigate, user, onLogout }: ParaphrasingTipsPa
               <p className="text-gray-600 text-sm">Paraphrased content still requires citation. The ideas belong to the original author.</p>
             </div>
             <div className="bg-white border border-gray-200 rounded-2xl p-6">
-              <div className="w-12 h-12 bg-rose-50 rounded-xl flex items-center justify-center mb-4">
-                <svg className="w-6 h-6 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-12 h-12 bg-violet-50 rounded-xl flex items-center justify-center mb-4">
+                <svg className="w-6 h-6 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                 </svg>
               </div>

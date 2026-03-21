@@ -127,7 +127,7 @@ const GoalGuidedTutorial = ({ goal, onComplete, essayWordCount = 0, hasInput = f
           aria-hidden
         >
           <div
-            className="absolute rounded-2xl border-4 border-rose-500 shadow-[0_0_0_9999px_rgba(0,0,0,0.55)]"
+            className="absolute rounded-2xl border-4 border-violet-500 shadow-[0_0_0_9999px_rgba(0,0,0,0.55)]"
             style={{
               left: targetRect.left - 12,
               top: targetRect.top - 12,
@@ -147,7 +147,7 @@ const GoalGuidedTutorial = ({ goal, onComplete, essayWordCount = 0, hasInput = f
           {/* Progress bar */}
           <div className="h-1 bg-stone-100 dark:bg-stone-700">
             <div
-              className="h-full bg-gradient-to-r from-rose-500 to-pink-600 transition-all duration-500"
+              className="h-full bg-violet-600 hover:bg-violet-500 transition-all duration-500"
               style={{ width: `${((currentStep + 1) / config.steps.length) * 100}%` }}
             />
           </div>
@@ -170,7 +170,7 @@ const GoalGuidedTutorial = ({ goal, onComplete, essayWordCount = 0, hasInput = f
                     <>
                       <button
                         onClick={handleTryIt}
-                        className="px-5 py-2.5 bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-500/90 hover:to-pink-600/90 text-white rounded-xl font-bold text-sm shadow-lg shadow-rose-500/30 transition-all flex items-center gap-2"
+                        className="px-5 py-2.5 bg-violet-600 hover:bg-violet-500 text-white rounded-xl font-bold text-sm shadow-lg shadow-violet-500/30 transition-all flex items-center gap-2"
                       >
                         <span className="text-lg">{step.emoji}</span>
                         Try it now →
@@ -183,14 +183,14 @@ const GoalGuidedTutorial = ({ goal, onComplete, essayWordCount = 0, hasInput = f
                     <>
                       <button
                         onClick={handleTryIt}
-                        className="px-5 py-2.5 bg-rose-100 dark:bg-rose-900/50 text-rose-700 dark:text-rose-300 hover:bg-rose-200 dark:hover:bg-rose-800/50 rounded-xl font-bold text-sm transition-all flex items-center gap-2"
+                        className="px-5 py-2.5 bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300 hover:bg-violet-200 dark:hover:bg-violet-800/50 rounded-xl font-bold text-sm transition-all flex items-center gap-2"
                       >
                         <span className="text-lg">{step.emoji}</span>
                         Focus & try
                       </button>
                       <button
                         onClick={handleNext}
-                        className="px-5 py-2.5 bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-500/90 hover:to-pink-600/90 text-white rounded-xl font-bold text-sm shadow-lg shadow-rose-500/30 transition-all"
+                        className="px-5 py-2.5 bg-violet-600 hover:bg-violet-500 text-white rounded-xl font-bold text-sm shadow-lg shadow-violet-500/30 transition-all"
                       >
                         {isLastStep ? "I'm ready!" : 'Next'}
                       </button>
@@ -209,7 +209,7 @@ const GoalGuidedTutorial = ({ goal, onComplete, essayWordCount = 0, hasInput = f
                   <div
                     key={i}
                     className={`h-2 rounded-full transition-all ${
-                      i === currentStep ? 'w-6 bg-rose-500' : i < currentStep ? 'w-2 bg-rose-300 dark:bg-rose-600' : 'w-2 bg-stone-200 dark:bg-stone-600'
+                      i === currentStep ? 'w-6 bg-violet-500' : i < currentStep ? 'w-2 bg-violet-300 dark:bg-violet-600' : 'w-2 bg-stone-200 dark:bg-stone-600'
                     }`}
                   />
                 ))}

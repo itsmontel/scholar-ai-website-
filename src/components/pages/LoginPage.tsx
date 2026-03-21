@@ -149,7 +149,7 @@ const LoginPage = ({ onNavigate, onLogin }: LoginPageProps) => {
   };
 
   return (
-    <div className="min-h-screen flex bg-gradient-to-b from-rose-50/80 via-stone-50 to-white dark:from-stone-950 dark:via-stone-900 dark:to-stone-900">
+    <div className="min-h-screen flex bg-gradient-to-b from-violet-50/80 via-stone-50 to-white dark:from-stone-950 dark:via-stone-900 dark:to-stone-900">
       {/* Back Button */}
       <button
         onClick={() => onNavigate('landing')}
@@ -167,10 +167,10 @@ const LoginPage = ({ onNavigate, onLogin }: LoginPageProps) => {
         {/* Header */}
         <div className="p-6 pt-20 sm:pt-6">
           <div className="flex items-center space-x-2.5">
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center overflow-hidden shadow-lg shadow-rose-500/30">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center overflow-hidden shadow-lg shadow-violet-500/30">
               <img src="/mascot.png" alt="WriteScholar" className="w-full h-full object-contain" loading="eager" width="120" height="120" />
             </div>
-            <span className="text-xl font-extrabold tracking-tight text-rose-600 dark:text-rose-400">WriteScholar</span>
+            <span className="text-xl font-extrabold tracking-tight text-violet-600 dark:text-violet-400">WriteScholar</span>
           </div>
         </div>
 
@@ -195,7 +195,7 @@ const LoginPage = ({ onNavigate, onLogin }: LoginPageProps) => {
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   onKeyDown={handleKeyDown}
                   placeholder="you@example.com"
-                  className="w-full px-4 py-3 bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-600 rounded-xl focus:ring-2 focus:ring-rose-500 focus:border-transparent focus:bg-white dark:focus:bg-stone-800 transition-all text-sm text-stone-800 dark:text-stone-100"
+                  className="w-full px-4 py-3 bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-600 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-transparent focus:bg-white dark:focus:bg-stone-800 transition-all text-sm text-stone-800 dark:text-stone-100"
                 />
               </div>
               
@@ -208,7 +208,7 @@ const LoginPage = ({ onNavigate, onLogin }: LoginPageProps) => {
                       setShowForgotPassword(true);
                       setForgotPasswordEmail(formData.email);
                     }}
-                    className="text-sm text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 font-medium"
+                    className="text-sm text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 font-medium"
                   >
                     Forgot?
                   </button>
@@ -219,14 +219,14 @@ const LoginPage = ({ onNavigate, onLogin }: LoginPageProps) => {
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                   onKeyDown={handleKeyDown}
                   placeholder="••••••••"
-                  className="w-full px-4 py-3 bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-600 rounded-xl focus:ring-2 focus:ring-rose-500 focus:border-transparent focus:bg-white dark:focus:bg-stone-800 transition-all text-sm text-stone-800 dark:text-stone-100"
+                  className="w-full px-4 py-3 bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-600 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-transparent focus:bg-white dark:focus:bg-stone-800 transition-all text-sm text-stone-800 dark:text-stone-100"
                 />
               </div>
 
               <button
                 onClick={handleSubmit}
                 disabled={isLoading}
-                className="w-full bg-gradient-to-r from-rose-500 to-red-600 hover:from-rose-400 hover:to-red-500 text-white py-3.5 rounded-2xl font-bold shadow-lg shadow-rose-500/25 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-violet-600 hover:bg-violet-500 text-white py-3.5 rounded-2xl font-bold shadow-lg shadow-violet-500/25 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isLoading ? (
                   <div className="flex items-center justify-center">
@@ -245,7 +245,7 @@ const LoginPage = ({ onNavigate, onLogin }: LoginPageProps) => {
                   <div className="w-full border-t border-stone-200"></div>
                 </div>
                 <div className="relative flex justify-center text-sm">
-                  <span className="px-3 bg-gradient-to-b from-rose-50/80 via-stone-50 to-white dark:from-stone-950 dark:via-stone-900 dark:to-stone-900 text-stone-400">or</span>
+                  <span className="px-3 bg-gradient-to-b from-violet-50/80 via-stone-50 to-white dark:from-stone-950 dark:via-stone-900 dark:to-stone-900 text-stone-400">or</span>
                 </div>
               </div>
             </div>
@@ -270,7 +270,7 @@ const LoginPage = ({ onNavigate, onLogin }: LoginPageProps) => {
               Don't have an account?{' '}
               <button
                 onClick={() => onNavigate('signup')}
-                className="text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 font-semibold"
+                className="text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 font-semibold"
               >
                 Sign up
               </button>
@@ -280,13 +280,13 @@ const LoginPage = ({ onNavigate, onLogin }: LoginPageProps) => {
       </div>
 
       {/* Right Side - Animated Design */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-rose-50/80 via-red-50/50 to-stone-100 dark:from-stone-900 dark:via-rose-950/30 dark:to-stone-900 flex-col items-center justify-center p-8 relative overflow-hidden rounded-l-3xl">
+      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-violet-50/80 via-red-50/50 to-stone-100 dark:from-stone-900 dark:via-violet-950/30 dark:to-stone-900 flex-col items-center justify-center p-8 relative overflow-hidden rounded-l-3xl">
         {/* Background blur effect */}
-        <div className="absolute inset-0 bg-gradient-to-br from-rose-200/20 via-red-100/20 to-stone-200/30 dark:from-rose-900/20 dark:via-red-900/10 dark:to-transparent backdrop-blur-sm rounded-l-3xl"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-violet-200/20 via-red-100/20 to-stone-200/30 dark:from-violet-900/20 dark:via-red-900/10 dark:to-transparent backdrop-blur-sm rounded-l-3xl"></div>
         
         {/* Central input container */}
         <div className="relative z-10 max-w-lg w-full">
-          <div className="bg-gradient-to-r from-white/70 to-white/40 dark:from-stone-800/70 dark:to-stone-800/40 backdrop-blur-xl rounded-3xl p-10 border border-rose-100/50 dark:border-stone-700 shadow-2xl shadow-rose-500/10">
+          <div className="bg-gradient-to-r from-white/70 to-white/40 dark:from-stone-800/70 dark:to-stone-800/40 backdrop-blur-xl rounded-3xl p-10 border border-violet-100/50 dark:border-stone-700 shadow-2xl shadow-violet-500/10">
             <div className="flex items-center space-x-5">
               {/* Animated text */}
               <span className="text-2xl font-semibold text-stone-700 dark:text-stone-200 flex-1 transition-all duration-700 ease-in-out">
@@ -294,10 +294,10 @@ const LoginPage = ({ onNavigate, onLogin }: LoginPageProps) => {
               </span>
               
               {/* Cursor pipe */}
-              <div className="w-0.5 h-8 bg-rose-500 animate-pulse rounded-full"></div>
+              <div className="w-0.5 h-8 bg-violet-500 animate-pulse rounded-full"></div>
               
               {/* Arrow button */}
-              <button className="w-10 h-10 bg-gradient-to-br from-rose-500 to-red-600 hover:from-rose-400 hover:to-red-500 rounded-xl flex items-center justify-center transition-all duration-300 hover:scale-110 shadow-xl shadow-rose-500/30">
+              <button className="w-10 h-10 bg-violet-600 hover:bg-violet-500 rounded-xl flex items-center justify-center transition-all duration-300 hover:scale-110 shadow-xl shadow-violet-500/30">
                 <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M7 17L17 7M17 7H7M17 7V17" />
                 </svg>
@@ -380,13 +380,13 @@ const LoginPage = ({ onNavigate, onLogin }: LoginPageProps) => {
         </div>
         
         {/* Enhanced floating elements */}
-        <div className="absolute top-16 left-16 w-32 h-32 bg-gradient-to-br from-rose-300/25 to-red-300/20 rounded-full animate-bounce" style={{animationDuration: '6s'}}></div>
-        <div className="absolute bottom-20 right-20 w-24 h-24 bg-gradient-to-br from-red-300/25 to-rose-300/20 rounded-full animate-bounce" style={{animationDuration: '8s', animationDelay: '2s'}}></div>
-        <div className="absolute top-1/3 right-12 w-20 h-20 bg-gradient-to-br from-rose-200/20 to-red-200/15 rounded-full animate-bounce" style={{animationDuration: '7s', animationDelay: '1s'}}></div>
+        <div className="absolute top-16 left-16 w-32 h-32 bg-gradient-to-br from-violet-300/25 to-red-300/20 rounded-full animate-bounce" style={{animationDuration: '6s'}}></div>
+        <div className="absolute bottom-20 right-20 w-24 h-24 bg-gradient-to-br from-red-300/25 to-violet-300/20 rounded-full animate-bounce" style={{animationDuration: '8s', animationDelay: '2s'}}></div>
+        <div className="absolute top-1/3 right-12 w-20 h-20 bg-gradient-to-br from-violet-200/20 to-red-200/15 rounded-full animate-bounce" style={{animationDuration: '7s', animationDelay: '1s'}}></div>
         
         {/* Additional subtle elements */}
-        <div className="absolute top-1/4 left-1/4 w-16 h-16 bg-gradient-to-br from-rose-200/15 to-red-200/10 rounded-full animate-bounce" style={{animationDuration: '5s', animationDelay: '0.5s'}}></div>
-        <div className="absolute bottom-1/3 left-1/3 w-12 h-12 bg-gradient-to-br from-red-200/15 to-rose-200/10 rounded-full animate-bounce" style={{animationDuration: '4s', animationDelay: '1.5s'}}></div>
+        <div className="absolute top-1/4 left-1/4 w-16 h-16 bg-gradient-to-br from-violet-200/15 to-red-200/10 rounded-full animate-bounce" style={{animationDuration: '5s', animationDelay: '0.5s'}}></div>
+        <div className="absolute bottom-1/3 left-1/3 w-12 h-12 bg-gradient-to-br from-red-200/15 to-violet-200/10 rounded-full animate-bounce" style={{animationDuration: '4s', animationDelay: '1.5s'}}></div>
       </div>
 
       {/* Forgot Password Modal */}
@@ -421,8 +421,8 @@ const LoginPage = ({ onNavigate, onLogin }: LoginPageProps) => {
             )}
 
             {forgotPasswordMessage && (
-              <div className="mb-4 p-3 bg-rose-50 dark:bg-rose-900/30 border border-rose-200 dark:border-rose-700 rounded-xl">
-                <p className="text-rose-700 dark:text-rose-300 text-sm">{forgotPasswordMessage}</p>
+              <div className="mb-4 p-3 bg-violet-50 dark:bg-violet-900/30 border border-violet-200 dark:border-violet-700 rounded-xl">
+                <p className="text-violet-700 dark:text-violet-300 text-sm">{forgotPasswordMessage}</p>
               </div>
             )}
 
@@ -434,7 +434,7 @@ const LoginPage = ({ onNavigate, onLogin }: LoginPageProps) => {
                   value={forgotPasswordEmail}
                   onChange={(e) => setForgotPasswordEmail(e.target.value)}
                   placeholder="you@example.com"
-                  className="w-full px-4 py-3 bg-stone-50 dark:bg-stone-700 border border-stone-200 dark:border-stone-600 rounded-xl focus:ring-2 focus:ring-rose-500 focus:border-transparent text-sm text-stone-800 dark:text-stone-100"
+                  className="w-full px-4 py-3 bg-stone-50 dark:bg-stone-700 border border-stone-200 dark:border-stone-600 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-transparent text-sm text-stone-800 dark:text-stone-100"
                 />
               </div>
 
@@ -453,7 +453,7 @@ const LoginPage = ({ onNavigate, onLogin }: LoginPageProps) => {
                 <button
                   onClick={handleForgotPassword}
                   disabled={forgotPasswordLoading}
-                  className="flex-1 bg-gradient-to-r from-rose-500 to-red-600 hover:from-rose-400 hover:to-red-500 text-white py-3 rounded-2xl font-bold shadow-lg shadow-rose-500/25 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 bg-violet-600 hover:bg-violet-500 text-white py-3 rounded-2xl font-bold shadow-lg shadow-violet-500/25 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {forgotPasswordLoading ? (
                     <div className="flex items-center justify-center">

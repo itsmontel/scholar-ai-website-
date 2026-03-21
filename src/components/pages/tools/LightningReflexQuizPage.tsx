@@ -856,7 +856,7 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
   const renderLoading = () => (
     <div className="flex-1 flex items-center justify-center px-4 py-20" style={{ background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%)' }}>
       <div className="text-center">
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 mb-5 shadow-lg shadow-blue-600/20">
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-violet-600 mb-5 shadow-lg shadow-blue-600/20">
           <span className="text-3xl animate-pulse">⚡</span>
         </div>
         <h2 className="text-lg font-bold text-stone-800 mb-1">Generating Craters...</h2>
@@ -1269,7 +1269,7 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
               <div className="flex flex-col gap-3 pt-1">
                 <div className="flex gap-3">
                   <button onClick={handlePlayAgain}
-                    className="flex-1 py-3.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold shadow-md shadow-blue-600/20 active:scale-[0.98] transition-all">
+                    className="flex-1 py-3.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-bold shadow-md shadow-blue-600/20 active:scale-[0.98] transition-all">
                     💥 Play Again
                   </button>
                   <button onClick={handleNewTopic}

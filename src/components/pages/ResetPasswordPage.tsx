@@ -102,7 +102,7 @@ const ResetPasswordPage = ({ onNavigate }: ResetPasswordPageProps) => {
             </p>
             <button
               onClick={() => onNavigate('login')}
-              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 rounded-lg font-semibold hover:shadow-lg transform hover:scale-[1.02] transition-all duration-300"
+              className="w-full bg-violet-600 hover:bg-violet-700 text-white py-3 rounded-lg font-semibold hover:shadow-lg transform hover:scale-[1.02] transition-all duration-300"
             >
               Back to Login
             </button>
@@ -186,7 +186,7 @@ const ResetPasswordPage = ({ onNavigate }: ResetPasswordPageProps) => {
             <button
               onClick={handleSubmit}
               disabled={isLoading}
-              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 rounded-lg font-semibold hover:shadow-lg transform hover:scale-[1.02] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+              className="w-full bg-violet-600 hover:bg-violet-700 text-white py-3 rounded-lg font-semibold hover:shadow-lg transform hover:scale-[1.02] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
             >
               {isLoading ? (
                 <div className="flex items-center justify-center">

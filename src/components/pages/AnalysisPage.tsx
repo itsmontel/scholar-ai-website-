@@ -116,7 +116,7 @@ function FreeAnalysisProBlur({
         <button
           type="button"
           onClick={onUpgrade}
-          className="px-4 py-2 text-sm font-semibold bg-gradient-to-r from-violet-500 to-purple-600 text-white rounded-lg shadow-md hover:from-violet-600 hover:to-purple-700"
+          className="px-4 py-2 text-sm font-semibold bg-violet-600 hover:bg-violet-500 text-white rounded-lg shadow-md hover:bg-violet-700"
         >
           Unlock with Pro
         </button>
@@ -148,7 +148,7 @@ function renderFreeTierComprehensiveReport(markdown: string, onUpgrade: () => vo
     return (
       <FreeAnalysisProBlur onUpgrade={onUpgrade}>
         <div
-          className="prose prose-sm dark:prose-invert max-w-none"
+          className="prose pviolet-sm dark:pviolet-invert max-w-none"
           dangerouslySetInnerHTML={{ __html: sanitizeAnalysisHtml(simpleMarkdownToHtml(markdown)) }}
         />
       </FreeAnalysisProBlur>
@@ -167,7 +167,7 @@ function renderFreeTierComprehensiveReport(markdown: string, onUpgrade: () => vo
               <h3 className="text-lg font-semibold text-stone-900 dark:text-stone-100">Overall Assessment</h3>
               {main ? (
                 <div
-                  className="prose prose-sm dark:prose-invert max-w-none"
+                  className="prose pviolet-sm dark:pviolet-invert max-w-none"
                   dangerouslySetInnerHTML={{ __html: sanitizeAnalysisHtml(simpleMarkdownToHtml(main)) }}
                 />
               ) : null}
@@ -186,7 +186,7 @@ function renderFreeTierComprehensiveReport(markdown: string, onUpgrade: () => vo
               <h3 className="text-lg font-semibold text-stone-900 dark:text-stone-100">{sec.title}</h3>
               <FreeAnalysisProBlur onUpgrade={onUpgrade}>
                 <div
-                  className="prose prose-sm dark:prose-invert max-w-none"
+                  className="prose pviolet-sm dark:pviolet-invert max-w-none"
                   dangerouslySetInnerHTML={{ __html: sanitizeAnalysisHtml(simpleMarkdownToHtml(sec.body)) }}
                 />
               </FreeAnalysisProBlur>
@@ -201,14 +201,14 @@ function renderFreeTierComprehensiveReport(markdown: string, onUpgrade: () => vo
             <h3 className="text-lg font-semibold text-stone-900 dark:text-stone-100">{sec.title}</h3>
             {first ? (
               <div
-                className="prose prose-sm dark:prose-invert max-w-none"
+                className="prose pviolet-sm dark:pviolet-invert max-w-none"
                 dangerouslySetInnerHTML={{ __html: sanitizeAnalysisHtml(simpleMarkdownToHtml(first)) }}
               />
             ) : null}
             {blurredMd ? (
               <FreeAnalysisProBlur onUpgrade={onUpgrade}>
                 <div
-                  className="prose prose-sm dark:prose-invert max-w-none"
+                  className="prose pviolet-sm dark:pviolet-invert max-w-none"
                   dangerouslySetInnerHTML={{ __html: sanitizeAnalysisHtml(simpleMarkdownToHtml(blurredMd)) }}
                 />
               </FreeAnalysisProBlur>
@@ -1562,7 +1562,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
               </div>
               <button
                 onClick={() => onNavigate?.('billing')}
-                className="px-6 py-2 bg-gradient-to-r from-violet-500 to-purple-600 text-white rounded-lg hover:from-violet-400 hover:to-purple-500 transition-colors font-semibold shadow-lg shadow-violet-500/25"
+                className="px-6 py-2 bg-violet-600 hover:bg-violet-500 text-white rounded-lg transition-colors font-semibold shadow-lg shadow-violet-500/25"
               >
                 Upgrade Now
               </button>
@@ -1750,7 +1750,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="flex items-center gap-4">
               {/* Mascot with analytical pose - glasses, clipboard, magnifying glass */}
-              <div className="relative p-2 sm:p-3 bg-gradient-to-br from-violet-50 to-purple-50 rounded-2xl border border-violet-100 shadow-sm">
+              <div className="relative p-2 sm:p-3 bg-violet-50 rounded-2xl border border-violet-100 shadow-sm">
                 <div className="absolute -top-1 -right-1 w-6 h-6 bg-violet-500 rounded-full flex items-center justify-center">
                   <span className="text-white text-xs">🔍</span>
                 </div>
@@ -1797,7 +1797,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
               </div>
               <button
                 onClick={() => onNavigate?.('billing')}
-                className="flex-shrink-0 px-5 py-2.5 bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 text-white font-semibold rounded-xl transition-colors shadow-md"
+                className="flex-shrink-0 px-5 py-2.5 bg-violet-600 hover:bg-violet-700 text-white font-semibold rounded-xl transition-colors shadow-md"
               >
                 Upgrade for more
               </button>
@@ -1832,7 +1832,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                 <p className="text-violet-700 font-medium">{successMessage}</p>
                 <button
                   onClick={() => onNavigate?.('library')}
-                  className="mt-3 px-4 py-2 bg-gradient-to-r from-indigo-500 to-violet-600 text-white text-sm font-medium rounded-lg hover:from-indigo-600 hover:to-violet-700 transition-colors"
+                  className="mt-3 px-4 py-2 bg-violet-600 hover:bg-violet-500 text-white text-sm font-medium rounded-lg transition-colors"
                 >
                   View in Library
                 </button>
@@ -1857,7 +1857,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                   <select
                     value={selectedDocument}
                     onChange={(e) => handleDocumentSelection(e.target.value)}
-                    className="w-full px-4 py-3.5 text-base border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-colors"
+                    className="w-full px-4 py-3.5 text-base border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-colors"
                     disabled={isAnalyzing}
                   >
                     <option value="">Choose a document...</option>
@@ -1872,14 +1872,14 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
               
               {/* Text Content Notice */}
               {documentContent && !selectedDocument && (
-                <div className="mb-6 p-4 bg-rose-50 border border-rose-200 rounded-xl">
+                <div className="mb-6 p-4 bg-violet-50 border border-violet-200 rounded-xl">
                   <div className="flex items-center space-x-2">
-                    <svg className="w-5 h-5 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    <span className="font-medium text-rose-800">Text Analysis Mode</span>
+                    <span className="font-medium text-violet-800">Text Analysis Mode</span>
                   </div>
-                  <p className="text-sm text-rose-700 mt-2">
+                  <p className="text-sm text-violet-700 mt-2">
                     Analyzing text content from dashboard. Select citation style and run analysis.
                   </p>
                 </div>
@@ -1896,7 +1896,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                       key={type.id}
                       className={`p-4 border-2 rounded-xl cursor-pointer transition-all ${
                         selectedAnalysisType === type.id
-                          ? 'border-rose-500 bg-rose-50'
+                          ? 'border-violet-500 bg-violet-50'
                           : 'border-stone-200 hover:border-stone-300'
                       }`}
                       onClick={() => setSelectedAnalysisType(type.id)}
@@ -1910,7 +1910,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                         </div>
                         <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
                           selectedAnalysisType === type.id
-                            ? 'border-rose-500 bg-rose-500'
+                            ? 'border-violet-500 bg-violet-500'
                             : 'border-stone-300'
                         }`}>
                           {selectedAnalysisType === type.id && (
@@ -1933,7 +1933,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                 <select
                   value={selectedCitationStyle}
                   onChange={(e) => setSelectedCitationStyle(e.target.value)}
-                  className="w-full px-4 py-3.5 text-base border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-colors"
+                  className="w-full px-4 py-3.5 text-base border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-colors"
                   disabled={isAnalyzing}
                 >
                   <option value="None">None (No citations required)</option>
@@ -1960,7 +1960,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                     onClick={() => setSelectedGradingStyle('us')}
                     className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
                       selectedGradingStyle === 'us'
-                        ? 'bg-white dark:bg-stone-700 text-rose-700 dark:text-rose-300 shadow-sm'
+                        ? 'bg-white dark:bg-stone-700 text-violet-700 dark:text-violet-300 shadow-sm'
                         : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
                     }`}
                   >
@@ -1972,7 +1972,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                     onClick={() => setSelectedGradingStyle('uk')}
                     className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
                       selectedGradingStyle === 'uk'
-                        ? 'bg-white dark:bg-stone-700 text-rose-700 dark:text-rose-300 shadow-sm'
+                        ? 'bg-white dark:bg-stone-700 text-violet-700 dark:text-violet-300 shadow-sm'
                         : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
                     }`}
                   >
@@ -1989,7 +1989,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
               <button
                 onClick={handleAnalyze}
                 disabled={(!selectedDocument && !documentContent) || !selectedAnalysisType || isAnalyzing}
-                className="w-full bg-gradient-to-r from-rose-500 to-red-600 hover:from-rose-400 hover:to-red-500 text-white py-3.5 px-4 rounded-xl font-semibold text-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="w-full bg-violet-600 hover:bg-violet-500 text-white py-3.5 px-4 rounded-xl font-semibold text-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 {isAnalyzing ? (
                   <LoadingSpinner 
@@ -2084,7 +2084,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                             onClick={() => setRubricInputMode('paste')}
                             className={`flex-1 px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
                               rubricInputMode === 'paste'
-                                ? 'bg-rose-100 text-rose-700 border border-rose-300'
+                                ? 'bg-violet-100 text-violet-700 border border-violet-300'
                                 : 'bg-white text-stone-600 border border-stone-200 hover:bg-stone-100'
                             }`}
                           >
@@ -2095,7 +2095,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                             onClick={() => setRubricInputMode('upload')}
                             className={`flex-1 px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
                               rubricInputMode === 'upload'
-                                ? 'bg-rose-100 text-rose-700 border border-rose-300'
+                                ? 'bg-violet-100 text-violet-700 border border-violet-300'
                                 : 'bg-white text-stone-600 border border-stone-200 hover:bg-stone-100'
                             }`}
                           >
@@ -2108,7 +2108,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                             value={rubricContent}
                             onChange={(e) => setRubricContent(e.target.value)}
                             placeholder="Paste your rubric, essay question, or assignment requirements here..."
-                            className="w-full px-4 py-3 text-sm border-2 border-stone-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-500/40 focus:border-rose-500 transition-colors resize-y min-h-[120px] bg-white text-stone-900 placeholder-stone-400"
+                            className="w-full px-4 py-3 text-sm border-2 border-stone-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500/40 focus:border-violet-500 transition-colors resize-y min-h-[120px] bg-white text-stone-900 placeholder-stone-400"
                             rows={5}
                             disabled={isAnalyzing}
                           />
@@ -2126,11 +2126,11 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                               type="button"
                               onClick={() => rubricFileInputRef.current?.click()}
                               disabled={isAnalyzing || isParsingRubric}
-                              className="w-full px-4 py-6 border-2 border-dashed border-stone-300 rounded-xl text-stone-500 hover:border-rose-400 hover:text-rose-600 hover:bg-rose-50 transition-colors disabled:opacity-50"
+                              className="w-full px-4 py-6 border-2 border-dashed border-stone-300 rounded-xl text-stone-500 hover:border-violet-400 hover:text-violet-600 hover:bg-violet-50 transition-colors disabled:opacity-50"
                             >
                               {isParsingRubric ? (
                                 <div className="flex items-center justify-center space-x-2">
-                                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-rose-600"></div>
+                                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-violet-600"></div>
                                   <span className="text-sm">Parsing rubric file...</span>
                                 </div>
                               ) : (
@@ -2341,7 +2341,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                       <button
                         type="button"
                         onClick={() => onNavigate?.('billing')}
-                        className="px-4 py-2 text-sm bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 text-white rounded-lg font-semibold transition-colors"
+                        className="px-4 py-2 text-sm bg-violet-600 hover:bg-violet-700 text-white rounded-lg font-semibold transition-colors"
                       >
                         Unlock full rubric
                       </button>
@@ -2538,7 +2538,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                           <button
                             type="button"
                             onClick={() => onNavigate?.('billing')}
-                            className="px-5 py-2.5 bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 text-white rounded-xl font-semibold transition-all shadow-lg shadow-violet-500/25 text-sm"
+                            className="px-5 py-2.5 bg-violet-600 hover:bg-violet-700 text-white rounded-xl font-semibold transition-all shadow-lg shadow-violet-500/25 text-sm"
                           >
                             Unlock full annotations
                           </button>
@@ -2610,9 +2610,9 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                       </div>
                     )}
                     {lockedFeatures.includes('specific_rewrites') && (!specificRewrites || specificRewrites.length === 0) && (
-                      <div className="mt-6 p-5 bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20 border-2 border-violet-200 dark:border-violet-600/40 rounded-2xl">
+                      <div className="mt-6 p-5 bg-violet-50 dark:from-violet-900/20 dark:to-purple-900/20 border-2 border-violet-200 dark:border-violet-600/40 rounded-2xl">
                         <div className="flex items-start gap-4">
-                          <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl flex items-center justify-center">
+                          <div className="flex-shrink-0 w-10 h-10 bg-violet-600 hover:bg-violet-500 rounded-xl flex items-center justify-center">
                             <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                             </svg>
@@ -2621,7 +2621,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                             <h4 className="font-bold text-violet-800 dark:text-violet-200">Unlock rewrite suggestions with Pro</h4>
                             <p className="text-sm text-violet-700 dark:text-violet-300 mt-0.5">Get 3-5 specific sentence rewrites that improve your grade</p>
                             <div className="mt-3 flex flex-wrap items-center gap-2">
-                              <button onClick={() => onNavigate?.('billing')} className="px-4 py-2 text-sm bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 text-white rounded-lg font-medium transition-colors">Upgrade</button>
+                              <button onClick={() => onNavigate?.('billing')} className="px-4 py-2 text-sm bg-violet-600 hover:bg-violet-700 text-white rounded-lg font-medium transition-colors">Upgrade</button>
                               {isTrialEligible ? (
                                 <span className="text-sm text-violet-700 dark:text-violet-300"><span className="line-through">$19.99</span> <span className="font-bold text-emerald-600">$9.99</span>/mo</span>
                               ) : (
@@ -2640,7 +2640,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
             {/* Full Analysis Result - Comprehensive Academic Analysis */}
             {analysisResult && (
               <div className="mx-6 mt-8 mb-6 bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-600 overflow-hidden">
-                <div className="bg-gradient-to-r from-indigo-500 to-violet-600 text-white px-6 py-4">
+                <div className="bg-violet-600 hover:bg-violet-500 text-white px-6 py-4">
                   <h2 className="text-xl font-bold">Comprehensive Academic Analysis</h2>
                   <p className="text-indigo-100 text-sm mt-0.5">
                     {currentPlan === 'free'
@@ -2648,7 +2648,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                       : 'Full analysis report'}
                   </p>
                 </div>
-                <div className="p-6 prose prose-stone dark:prose-invert max-w-none">
+                <div className="p-6 prose pviolet-stone dark:pviolet-invert max-w-none">
                   {currentPlan === 'free' ? (
                     <div className="text-sm leading-relaxed">
                       {renderFreeTierComprehensiveReport(analysisResult, () => onNavigate?.('billing'))}
@@ -2693,7 +2693,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                   <div className="flex flex-wrap items-center gap-3">
                     <button 
                       onClick={() => onNavigate?.('billing')}
-                      className="px-5 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-violet-500 to-purple-600 rounded-lg hover:from-violet-600 hover:to-purple-700 transition-colors"
+                      className="px-5 py-2.5 text-sm font-semibold text-white bg-violet-600 hover:bg-violet-500 rounded-lg hover:bg-violet-700 transition-colors"
                     >
                       Upgrade to export
                     </button>
@@ -2714,14 +2714,14 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
           {rubricAlignment && (
             <div className="mt-8 bg-white dark:bg-stone-800 rounded-2xl sm:rounded-3xl border border-stone-200/60 dark:border-stone-700/40 shadow-lg shadow-stone-200/50 dark:shadow-stone-900/50 overflow-hidden">
               {/* Rubric Header - matches dashboard Analyze tool style */}
-              <div className="bg-gradient-to-r from-rose-500 to-pink-600 text-white px-6 py-5 shadow-lg shadow-rose-500/25">
+              <div className="bg-violet-600 hover:bg-violet-500 text-white px-6 py-5 shadow-lg shadow-violet-500/25">
                 <div className="flex items-center space-x-3">
                   <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
                     <span className="text-xl sm:text-2xl">📋</span>
                   </div>
                   <div>
                     <h2 className="text-xl font-bold">Your Assignment Rubric</h2>
-                    <p className="text-rose-100 text-sm mt-0.5">Compared against the rubric you uploaded</p>
+                    <p className="text-violet-100 text-sm mt-0.5">Compared against the rubric you uploaded</p>
                   </div>
                 </div>
               </div>
@@ -2731,8 +2731,8 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                 <div className="p-6 relative">
                   {/* Overall Assessment - truncated to 50% */}
                   {rubricAlignment.overallAssessment && (
-                    <div className="mb-6 p-4 sm:p-5 bg-gradient-to-br from-rose-50 to-pink-50 dark:from-rose-900/20 dark:to-pink-900/20 border border-rose-200/70 dark:border-rose-700/40 rounded-2xl shadow-sm">
-                      <h3 className="font-semibold text-rose-700 dark:text-rose-300 mb-2">Overall Assessment</h3>
+                    <div className="mb-6 p-4 sm:p-5 bg-violet-50 dark:bg-violet-900/20 border border-violet-200/70 dark:border-violet-700/40 rounded-2xl shadow-sm">
+                      <h3 className="font-semibold text-violet-700 dark:text-violet-300 mb-2">Overall Assessment</h3>
                       <p className="text-sm text-stone-700 dark:text-stone-300 leading-relaxed">
                         {rubricAlignment.overallAssessment.length > 1
                           ? rubricAlignment.overallAssessment.substring(0, Math.floor(rubricAlignment.overallAssessment.length / 2)) + '...'
@@ -2744,17 +2744,17 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                   {/* Score Summary */}
                   {rubricAlignment.criteria && rubricAlignment.criteria.length > 0 && (
                     <div className="flex flex-wrap gap-4 mb-6">
-                      <div className="flex-1 min-w-[100px] p-3 bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 border border-emerald-200/70 dark:border-emerald-700/40 rounded-2xl text-center shadow-sm">
+                      <div className="flex-1 min-w-[100px] p-3 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200/70 dark:border-emerald-700/40 rounded-2xl text-center shadow-sm">
                         <span className="text-xl font-bold text-emerald-700 dark:text-emerald-300">{rubricAlignment.criteria.filter((c: any) => c.status === 'met').length}</span>
                         <p className="text-xs text-emerald-600 dark:text-emerald-400 font-medium mt-1">Criteria Met</p>
                       </div>
-                      <div className="flex-1 min-w-[100px] p-3 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border border-amber-200/70 dark:border-amber-700/40 rounded-2xl text-center shadow-sm">
+                      <div className="flex-1 min-w-[100px] p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200/70 dark:border-amber-700/40 rounded-2xl text-center shadow-sm">
                         <span className="text-xl font-bold text-amber-700 dark:text-amber-300">{rubricAlignment.criteria.filter((c: any) => c.status === 'partially_met').length}</span>
                         <p className="text-xs text-amber-600 dark:text-amber-400 font-medium mt-1">Partially Met</p>
                       </div>
-                      <div className="flex-1 min-w-[100px] p-3 bg-gradient-to-br from-rose-50 to-red-50 dark:from-rose-900/20 dark:to-red-900/20 border border-rose-200/70 dark:border-rose-700/40 rounded-2xl text-center shadow-sm">
-                        <span className="text-xl font-bold text-rose-700 dark:text-rose-300">{rubricAlignment.criteria.filter((c: any) => c.status === 'not_met').length}</span>
-                        <p className="text-xs text-rose-600 dark:text-rose-400 font-medium mt-1">Not Met</p>
+                      <div className="flex-1 min-w-[100px] p-3 bg-gradient-to-br from-violet-50 to-red-50 dark:from-violet-900/20 dark:to-red-900/20 border border-violet-200/70 dark:border-violet-700/40 rounded-2xl text-center shadow-sm">
+                        <span className="text-xl font-bold text-violet-700 dark:text-violet-300">{rubricAlignment.criteria.filter((c: any) => c.status === 'not_met').length}</span>
+                        <p className="text-xs text-violet-600 dark:text-violet-400 font-medium mt-1">Not Met</p>
                       </div>
                     </div>
                   )}
@@ -2768,7 +2768,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                           const statusConfig: Record<string, { bg: string; border: string; icon: string; label: string; textColor: string }> = {
                             met: { bg: 'from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20', border: 'border-emerald-200/70 dark:border-emerald-700/40', icon: '✅', label: 'Met', textColor: 'text-emerald-700 dark:text-emerald-300' },
                             partially_met: { bg: 'from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20', border: 'border-amber-200/70 dark:border-amber-700/40', icon: '⚠️', label: 'Partially Met', textColor: 'text-amber-700 dark:text-amber-300' },
-                            not_met: { bg: 'from-rose-50 to-red-50 dark:from-rose-900/20 dark:to-red-900/20', border: 'border-rose-200/70 dark:border-rose-700/40', icon: '❌', label: 'Not Met', textColor: 'text-rose-700 dark:text-rose-300' }
+                            not_met: { bg: 'from-violet-50 to-red-50 dark:from-violet-900/20 dark:to-red-900/20', border: 'border-violet-200/70 dark:border-violet-700/40', icon: '❌', label: 'Not Met', textColor: 'text-violet-700 dark:text-violet-300' }
                           };
                           const config = statusConfig[criterion.status] || statusConfig.partially_met;
                           const truncatedAssessment = criterion.assessment ? criterion.assessment.substring(0, Math.floor(criterion.assessment.length / 2)) + '...' : criterion.assessment;
@@ -2794,7 +2794,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                     <div className="absolute inset-0 bg-gradient-to-t from-white dark:from-stone-800 via-white/90 dark:via-stone-800/90 to-transparent pointer-events-none" style={{ marginTop: '-120px', height: '140px' }} />
                     <div className="relative p-6 bg-gradient-to-r from-violet-50 to-indigo-50 dark:from-violet-900/20 dark:to-indigo-900/20 border border-violet-200/70 dark:border-violet-700/40 rounded-2xl">
                       <div className="flex items-center space-x-3 mb-3">
-                        <div className="p-2 bg-gradient-to-br from-violet-500 to-purple-600 rounded-full">
+                        <div className="p-2 bg-violet-600 hover:bg-violet-500 rounded-full">
                           <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m0 0v2m0-2h2m-2 0H9m12-9V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-9z" />
                           </svg>
@@ -2806,7 +2806,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                       </div>
                       <button
                         onClick={() => onNavigate?.('billing')}
-                        className="px-6 py-2.5 bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-400 hover:to-purple-500 text-white rounded-xl font-semibold transition-all shadow-lg shadow-violet-500/25 hover:shadow-violet-500/30"
+                        className="px-6 py-2.5 bg-violet-600 hover:bg-violet-500 text-white rounded-xl font-semibold transition-all shadow-lg shadow-violet-500/25 hover:shadow-violet-500/30"
                       >
                         Upgrade to View Full Analysis
                       </button>
@@ -2825,8 +2825,8 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                 <div className="p-6">
                   {/* Overall Assessment - dashboard card style */}
                   {rubricAlignment.overallAssessment && (
-                    <div className="mb-6 p-4 sm:p-5 bg-gradient-to-br from-rose-50 to-pink-50 dark:from-rose-900/20 dark:to-pink-900/20 border border-rose-200/70 dark:border-rose-700/40 rounded-2xl shadow-sm">
-                      <h3 className="font-semibold text-rose-700 dark:text-rose-300 mb-2">Overall Assessment</h3>
+                    <div className="mb-6 p-4 sm:p-5 bg-violet-50 dark:bg-violet-900/20 border border-violet-200/70 dark:border-violet-700/40 rounded-2xl shadow-sm">
+                      <h3 className="font-semibold text-violet-700 dark:text-violet-300 mb-2">Overall Assessment</h3>
                       <p className="text-sm text-stone-700 dark:text-stone-300 leading-relaxed">{rubricAlignment.overallAssessment}</p>
                     </div>
                   )}
@@ -2834,17 +2834,17 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                   {/* Score Summary - dashboard card style */}
                   {rubricAlignment.criteria && rubricAlignment.criteria.length > 0 && (
                     <div className="flex flex-wrap gap-4 mb-6">
-                      <div className="flex-1 min-w-[120px] p-4 bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 border border-emerald-200/70 dark:border-emerald-700/40 rounded-2xl text-center shadow-sm">
+                      <div className="flex-1 min-w-[120px] p-4 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200/70 dark:border-emerald-700/40 rounded-2xl text-center shadow-sm">
                         <span className="text-2xl font-bold text-emerald-700 dark:text-emerald-300">{rubricAlignment.criteria.filter((c: any) => c.status === 'met').length}</span>
                         <p className="text-sm text-emerald-600 dark:text-emerald-400 font-medium mt-1">Criteria Met</p>
                       </div>
-                      <div className="flex-1 min-w-[120px] p-4 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border border-amber-200/70 dark:border-amber-700/40 rounded-2xl text-center shadow-sm">
+                      <div className="flex-1 min-w-[120px] p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200/70 dark:border-amber-700/40 rounded-2xl text-center shadow-sm">
                         <span className="text-2xl font-bold text-amber-700 dark:text-amber-300">{rubricAlignment.criteria.filter((c: any) => c.status === 'partially_met').length}</span>
                         <p className="text-sm text-amber-600 dark:text-amber-400 font-medium mt-1">Partially Met</p>
                       </div>
-                      <div className="flex-1 min-w-[120px] p-4 bg-gradient-to-br from-rose-50 to-red-50 dark:from-rose-900/20 dark:to-red-900/20 border border-rose-200/70 dark:border-rose-700/40 rounded-2xl text-center shadow-sm">
-                        <span className="text-2xl font-bold text-rose-700 dark:text-rose-300">{rubricAlignment.criteria.filter((c: any) => c.status === 'not_met').length}</span>
-                        <p className="text-sm text-rose-600 dark:text-rose-400 font-medium mt-1">Not Met</p>
+                      <div className="flex-1 min-w-[120px] p-4 bg-gradient-to-br from-violet-50 to-red-50 dark:from-violet-900/20 dark:to-red-900/20 border border-violet-200/70 dark:border-violet-700/40 rounded-2xl text-center shadow-sm">
+                        <span className="text-2xl font-bold text-violet-700 dark:text-violet-300">{rubricAlignment.criteria.filter((c: any) => c.status === 'not_met').length}</span>
+                        <p className="text-sm text-violet-600 dark:text-violet-400 font-medium mt-1">Not Met</p>
                       </div>
                     </div>
                   )}
@@ -2858,7 +2858,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                           const statusConfig = {
                             met: { bg: 'from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20', border: 'border-emerald-200/70 dark:border-emerald-700/40', icon: '✅', label: 'Met', textColor: 'text-emerald-700 dark:text-emerald-300' },
                             partially_met: { bg: 'from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20', border: 'border-amber-200/70 dark:border-amber-700/40', icon: '⚠️', label: 'Partially Met', textColor: 'text-amber-700 dark:text-amber-300' },
-                            not_met: { bg: 'from-rose-50 to-red-50 dark:from-rose-900/20 dark:to-red-900/20', border: 'border-rose-200/70 dark:border-rose-700/40', icon: '❌', label: 'Not Met', textColor: 'text-rose-700 dark:text-rose-300' }
+                            not_met: { bg: 'from-violet-50 to-red-50 dark:from-violet-900/20 dark:to-red-900/20', border: 'border-violet-200/70 dark:border-violet-700/40', icon: '❌', label: 'Not Met', textColor: 'text-violet-700 dark:text-violet-300' }
                           };
                           const config = statusConfig[criterion.status as keyof typeof statusConfig] || statusConfig.partially_met;
 
@@ -2889,7 +2889,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                                   <ul className="space-y-1">
                                     {criterion.suggestions.map((suggestion: string, sIdx: number) => (
                                       <li key={sIdx} className="text-sm text-stone-600 dark:text-stone-400 flex items-start space-x-2">
-                                        <span className="text-rose-500 dark:text-rose-400 mt-0.5">•</span>
+                                        <span className="text-violet-500 dark:text-violet-400 mt-0.5">•</span>
                                         <span>{suggestion}</span>
                                       </li>
                                     ))}
@@ -2905,13 +2905,13 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
 
                   {/* Missing Elements - dashboard card style */}
                   {rubricAlignment.missingElements && rubricAlignment.missingElements.length > 0 && (
-                    <div className="mb-6 p-4 sm:p-5 bg-gradient-to-br from-rose-50 to-red-50 dark:from-rose-900/20 dark:to-red-900/20 border border-rose-200/70 dark:border-rose-700/40 rounded-2xl shadow-sm">
-                      <h3 className="font-semibold text-rose-700 dark:text-rose-300 mb-3">Missing Elements</h3>
+                    <div className="mb-6 p-4 sm:p-5 bg-gradient-to-br from-violet-50 to-red-50 dark:from-violet-900/20 dark:to-red-900/20 border border-violet-200/70 dark:border-violet-700/40 rounded-2xl shadow-sm">
+                      <h3 className="font-semibold text-violet-700 dark:text-violet-300 mb-3">Missing Elements</h3>
                       <p className="text-sm text-stone-700 dark:text-stone-300 mb-2">The following rubric requirements are not addressed in your essay:</p>
                       <ul className="space-y-2">
                         {rubricAlignment.missingElements.map((element: string, index: number) => (
                           <li key={index} className="flex items-start space-x-2 text-sm text-stone-700 dark:text-stone-300">
-                            <span className="mt-0.5 text-rose-500">❌</span>
+                            <span className="mt-0.5 text-violet-500">❌</span>
                             <span>{element}</span>
                           </li>
                         ))}
@@ -2921,12 +2921,12 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
 
                   {/* Priority Improvements - dashboard card style */}
                   {rubricAlignment.priorityImprovements && rubricAlignment.priorityImprovements.length > 0 && (
-                    <div className="p-4 sm:p-5 bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20 border border-violet-200/70 dark:border-violet-700/40 rounded-2xl shadow-sm">
+                    <div className="p-4 sm:p-5 bg-violet-50 dark:from-violet-900/20 dark:to-purple-900/20 border border-violet-200/70 dark:border-violet-700/40 rounded-2xl shadow-sm">
                       <h3 className="font-semibold text-violet-700 dark:text-violet-300 mb-3">Priority Improvements</h3>
                       <ol className="space-y-2">
                         {rubricAlignment.priorityImprovements.map((improvement: string, index: number) => (
                           <li key={index} className="flex items-start space-x-3 text-sm text-stone-700 dark:text-stone-300">
-                            <span className="flex-shrink-0 w-6 h-6 bg-gradient-to-br from-violet-400 to-purple-500 text-white rounded-full flex items-center justify-center text-xs font-bold shadow-sm">{index + 1}</span>
+                            <span className="flex-shrink-0 w-6 h-6 bg-violet-600 hover:bg-violet-500 text-white rounded-full flex items-center justify-center text-xs font-bold shadow-sm">{index + 1}</span>
                             <span>{improvement}</span>
                           </li>
                         ))}

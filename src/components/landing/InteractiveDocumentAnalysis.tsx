@@ -132,7 +132,7 @@ export default function InteractiveDocumentAnalysis({ onNavigate }: InteractiveD
 
   const renderGradeBreakdown = () => (
     <div className="mx-4 sm:mx-6 mt-6 mb-4 rounded-2xl border border-gray-200 dark:border-stone-600 overflow-hidden">
-      <div className="bg-gradient-to-r from-teal-500 to-emerald-600 text-white px-6 py-5">
+      <div className="bg-teal-600 text-white px-6 py-5">
         <div className="flex flex-wrap items-center gap-6">
           <div>
             <h2 className="text-xl font-bold">General Academic Assessment</h2>
@@ -381,7 +381,7 @@ export default function InteractiveDocumentAnalysis({ onNavigate }: InteractiveD
           onClick={() => setMobileTab('document')}
           className={`flex-1 py-3 px-2 sm:px-3 text-xs sm:text-sm font-semibold transition-colors ${
             mobileTab === 'document'
-              ? 'text-rose-600 dark:text-rose-400 border-b-2 border-rose-500 bg-white dark:bg-stone-900'
+              ? 'text-violet-600 dark:text-violet-400 border-b-2 border-violet-500 bg-white dark:bg-stone-900'
               : 'text-gray-600 dark:text-stone-400 hover:text-gray-900 dark:hover:text-stone-200'
           }`}
         >
@@ -392,7 +392,7 @@ export default function InteractiveDocumentAnalysis({ onNavigate }: InteractiveD
           onClick={() => setMobileTab('feedback')}
           className={`flex-1 py-3 px-2 sm:px-3 text-xs sm:text-sm font-semibold transition-colors ${
             mobileTab === 'feedback'
-              ? 'text-rose-600 dark:text-rose-400 border-b-2 border-rose-500 bg-white dark:bg-stone-900'
+              ? 'text-violet-600 dark:text-violet-400 border-b-2 border-violet-500 bg-white dark:bg-stone-900'
               : 'text-gray-600 dark:text-stone-400 hover:text-gray-900 dark:hover:text-stone-200'
           }`}
         >
@@ -403,7 +403,7 @@ export default function InteractiveDocumentAnalysis({ onNavigate }: InteractiveD
           onClick={() => setMobileTab('analysis')}
           className={`flex-1 py-3 px-2 sm:px-3 text-xs sm:text-sm font-semibold transition-colors ${
             mobileTab === 'analysis'
-              ? 'text-rose-600 dark:text-rose-400 border-b-2 border-rose-500 bg-white dark:bg-stone-900'
+              ? 'text-violet-600 dark:text-violet-400 border-b-2 border-violet-500 bg-white dark:bg-stone-900'
               : 'text-gray-600 dark:text-stone-400 hover:text-gray-900 dark:hover:text-stone-200'
           }`}
         >

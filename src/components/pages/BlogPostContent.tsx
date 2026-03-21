@@ -26,7 +26,7 @@ const p = 'mb-4 text-stone-600 dark:text-stone-400 leading-relaxed';
 const h2 = 'text-xl font-bold text-stone-800 dark:text-stone-100 mt-8 mb-3';
 const h3 = 'text-lg font-semibold text-stone-800 dark:text-stone-100 mt-6 mb-2';
 const internalLink = 'text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 underline';
-const ctaButton = 'inline-block mt-8 mb-4 px-6 py-3 bg-gradient-to-r from-indigo-500 to-violet-600 text-white font-semibold rounded-xl hover:from-indigo-400 hover:to-violet-500 transition-colors shadow-lg shadow-violet-500/20';
+const ctaButton = 'inline-block mt-8 mb-4 px-6 py-3 bg-violet-600 hover:bg-violet-500 text-white font-semibold rounded-xl transition-colors shadow-lg shadow-violet-500/20';
 const faqQuestion = 'font-semibold text-stone-800 dark:text-stone-100 mt-4 mb-2';
 
 // Reusable illustration components for blog posts
@@ -175,7 +175,7 @@ const AIAssistantIllustration = () => (
 );
 
 const ToolsIllustration = () => (
-  <IllustrationWrapper bgColor="bg-rose-50">
+  <IllustrationWrapper bgColor="bg-violet-50">
     <svg viewBox="0 0 280 160" fill="none" className="w-full max-w-xs h-auto">
       {/* Toolbox */}
       <rect x="90" y="70" width="100" height="60" rx="4" fill="#FEE2E2" stroke="#F87171" strokeWidth="2" />
@@ -298,7 +298,7 @@ const CrosswordIllustration = () => (
 );
 
 const PomodoroTimerIllustration = () => (
-  <IllustrationWrapper bgColor="bg-rose-50">
+  <IllustrationWrapper bgColor="bg-violet-50">
     <svg viewBox="0 0 280 160" fill="none" className="w-full max-w-xs h-auto">
       {/* Tomato/timer body */}
       <ellipse cx="140" cy="95" rx="55" ry="45" fill="#FEE2E2" stroke="#F87171" strokeWidth="2" />

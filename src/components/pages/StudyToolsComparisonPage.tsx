@@ -77,7 +77,7 @@ const StudyToolsComparisonPage: React.FC<StudyToolsComparisonPageProps> = ({ onN
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center max-w-3xl mx-auto">
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-stone-800 dark:text-stone-100 mb-4 leading-tight">
-              <span className="bg-gradient-to-r from-rose-500 to-pink-600 bg-clip-text text-transparent">WriteScholar</span> vs Quizlet vs Knowt
+              <span className="bg-violet-600 hover:bg-violet-500 bg-clip-text text-transparent">WriteScholar</span> vs Quizlet vs Knowt
             </h1>
             <p className="text-lg text-stone-500 dark:text-stone-400">
               See how WriteScholar compares to Quizlet and Knowt for AI study tools. Flashcards, quizzes, and more—plus academic writing features you won&apos;t find elsewhere.
@@ -155,7 +155,7 @@ const StudyToolsComparisonPage: React.FC<StudyToolsComparisonPageProps> = ({ onN
                 The only AI study tool that combines quizzes, flashcards, and crosswords with academic writing: essay analysis, citation finder, and Focus Mode. Best for students who need both study and writing support.
               </p>
             </div>
-            <div className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-2xl border border-amber-200/70 dark:border-amber-700/40 p-6 shadow-sm">
+            <div className="bg-amber-50 dark:bg-amber-900/20 rounded-2xl border border-amber-200/70 dark:border-amber-700/40 p-6 shadow-sm">
               <h3 className="font-semibold text-stone-900 dark:text-stone-100 mb-2">Quizlet</h3>
               <p className="text-stone-600 dark:text-stone-400 text-sm">
                 The classic study platform with Magic Notes (AI from notes), Brain Beats, and millions of community sets. Strong for memorization and shared content. Free tier is limited; Learn mode largely requires Plus.
@@ -178,7 +178,7 @@ const StudyToolsComparisonPage: React.FC<StudyToolsComparisonPageProps> = ({ onN
           <p className="text-stone-500 dark:text-stone-400 mb-6">Quizzes, flashcards, crosswords—plus essay analysis, citations, and Focus Mode. All in one place.</p>
           <button
             onClick={() => onNavigate('signup')}
-            className="px-8 py-4 bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-400 hover:to-pink-500 text-white font-bold rounded-2xl transition-all text-lg shadow-lg shadow-rose-500/25 hover:shadow-xl"
+            className="px-8 py-4 bg-violet-600 hover:bg-violet-500 text-white font-bold rounded-2xl transition-all text-lg shadow-lg shadow-violet-500/25 hover:shadow-xl"
           >
             Try Free
           </button>

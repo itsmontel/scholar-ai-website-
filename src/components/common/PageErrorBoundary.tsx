@@ -48,7 +48,7 @@ class PageErrorBoundary extends Component<PageErrorBoundaryProps, State> {
             <div className="flex flex-col sm:flex-row gap-3">
               <button
                 onClick={() => window.location.reload()}
-                className="flex-1 px-5 py-3 bg-rose-500 hover:bg-rose-600 text-white font-semibold rounded-xl transition-colors"
+                className="flex-1 px-5 py-3 bg-violet-500 hover:bg-violet-600 text-white font-semibold rounded-xl transition-colors"
               >
                 Reload page
               </button>

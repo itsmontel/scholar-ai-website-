@@ -37,25 +37,25 @@ const getSlideIcon = (type?: LessonSlide['type']) => {
 
 const getSlideColor = (type?: LessonSlide['type']) => {
   switch (type) {
-    case 'intro': return 'from-rose-500 to-pink-600';
-    case 'concept': return 'from-blue-500 to-cyan-600';
-    case 'example': return 'from-amber-500 to-orange-600';
-    case 'keypoint': return 'from-emerald-500 to-teal-600';
-    case 'funfact': return 'from-pink-500 to-rose-600';
-    case 'summary': return 'from-indigo-500 to-violet-600';
-    default: return 'from-stone-500 to-stone-600';
+    case 'intro': return 'bg-violet-600';
+    case 'concept': return 'bg-sky-600';
+    case 'example': return 'bg-amber-600';
+    case 'keypoint': return 'bg-emerald-600';
+    case 'funfact': return 'bg-fuchsia-600';
+    case 'summary': return 'bg-indigo-600';
+    default: return 'bg-stone-600';
   }
 };
 
 const getSlideBackground = (type?: LessonSlide['type']) => {
   switch (type) {
-    case 'intro': return 'from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20 border-violet-200 dark:border-violet-700/50';
-    case 'concept': return 'from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 border-blue-200 dark:border-blue-700/50';
-    case 'example': return 'from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border-amber-200 dark:border-amber-700/50';
-    case 'keypoint': return 'from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 border-emerald-200 dark:border-emerald-700/50';
-    case 'funfact': return 'from-pink-50 to-rose-50 dark:from-pink-900/20 dark:to-rose-900/20 border-pink-200 dark:border-pink-700/50';
-    case 'summary': return 'from-indigo-50 to-violet-50 dark:from-indigo-900/20 dark:to-violet-900/20 border-indigo-200 dark:border-indigo-700/50';
-    default: return 'from-stone-50 to-stone-100 dark:from-stone-800/50 dark:to-stone-700/50 border-stone-200 dark:border-stone-600';
+    case 'intro': return 'bg-violet-50 dark:bg-violet-900/20 border border-violet-200 dark:border-violet-700/50';
+    case 'concept': return 'bg-sky-50 dark:bg-sky-900/20 border border-sky-200 dark:border-sky-700/50';
+    case 'example': return 'bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/50';
+    case 'keypoint': return 'bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-700/50';
+    case 'funfact': return 'bg-fuchsia-50 dark:bg-fuchsia-900/20 border border-fuchsia-200 dark:border-fuchsia-700/50';
+    case 'summary': return 'bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-700/50';
+    default: return 'bg-stone-50 dark:bg-stone-800/50 border border-stone-200 dark:border-stone-600';
   }
 };
 
@@ -107,7 +107,7 @@ const LessonViewer = ({ slides, title, onEnlarge, initialSlideIndex, hasQuiz, on
       <div className="mb-4">
         <div className="h-2 bg-stone-200 dark:bg-stone-700 rounded-full overflow-hidden">
           <div
-            className="h-full bg-gradient-to-r from-rose-500 to-pink-600 rounded-full transition-all duration-300"
+            className="h-full bg-violet-600 hover:bg-violet-500 rounded-full transition-all duration-300"
             style={{ width: `${((currentSlide + 1) / slides.length) * 100}%` }}
           />
         </div>
@@ -121,7 +121,7 @@ const LessonViewer = ({ slides, title, onEnlarge, initialSlideIndex, hasQuiz, on
             onClick={() => setCurrentSlide(index)}
             className={`w-3 h-3 rounded-full transition-all ${
               index === currentSlide
-                ? `bg-gradient-to-r ${getSlideColor(s.type)} scale-125 shadow-lg`
+                ? `${getSlideColor(s.type)} scale-125 shadow-lg`
                 : index < currentSlide
                   ? 'bg-violet-300 dark:bg-violet-600'
                   : 'bg-stone-300 dark:bg-stone-600 hover:bg-stone-400 dark:hover:bg-stone-500'
@@ -138,7 +138,7 @@ const LessonViewer = ({ slides, title, onEnlarge, initialSlideIndex, hasQuiz, on
             {slide.emoji || getSlideIcon(slide.type)}
           </div>
           <div className="flex-1 min-w-0">
-            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-gradient-to-r ${getSlideColor(slide.type)} text-white`}>
+            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${getSlideColor(slide.type)} text-white`}>
               {slide.type || 'slide'}
             </span>
             <h3 className="text-lg sm:text-xl font-bold text-stone-800 dark:text-stone-100 mt-2">
@@ -178,7 +178,7 @@ const LessonViewer = ({ slides, title, onEnlarge, initialSlideIndex, hasQuiz, on
                 >
                   <div className="flex items-start gap-2">
                     <div className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 text-xs ${
-                      isRevealed ? 'bg-rose-500 text-white' : 'bg-stone-300 dark:bg-stone-600 text-stone-600 dark:text-stone-300'
+                      isRevealed ? 'bg-violet-500 text-white' : 'bg-stone-300 dark:bg-stone-600 text-stone-600 dark:text-stone-300'
                     }`}>
                       {isRevealed ? '✓' : idx + 1}
                     </div>
@@ -213,7 +213,7 @@ const LessonViewer = ({ slides, title, onEnlarge, initialSlideIndex, hasQuiz, on
         {currentSlide === slides.length - 1 && hasQuiz && onTryQuiz ? (
           <button
             onClick={onTryQuiz}
-            className="px-4 py-2.5 rounded-xl font-semibold text-sm bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-white shadow-lg shadow-amber-500/25 transition-all flex items-center gap-2"
+            className="px-4 py-2.5 rounded-xl font-semibold text-sm bg-amber-600 hover:bg-amber-500 text-white shadow-lg shadow-amber-500/25 transition-all flex items-center gap-2"
           >
             <span>Try Quiz</span>
             <span>🎯</span>
@@ -225,7 +225,7 @@ const LessonViewer = ({ slides, title, onEnlarge, initialSlideIndex, hasQuiz, on
             className={`px-4 py-2.5 rounded-xl font-semibold text-sm transition-all flex items-center gap-2 ${
               currentSlide === slides.length - 1
                 ? 'bg-stone-100 dark:bg-stone-800 text-stone-400 cursor-not-allowed'
-                : 'bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-white shadow-lg shadow-amber-500/25'
+                : 'bg-amber-600 hover:bg-amber-500 text-white shadow-lg shadow-amber-500/25'
             }`}
           >
             Next <span>→</span>
