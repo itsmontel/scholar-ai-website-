@@ -505,7 +505,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
             </h1>
 
             <p className="text-base sm:text-xl text-stone-600 dark:text-stone-400 mb-16 sm:mb-14 max-w-2xl mx-auto leading-relaxed px-2">
-              Essay feedback, quizzes and flashcards from your notes, plus Focus Mode to block distractions until you&apos;re done studying.
+              Get feedback on your argument, structure, citations and grammar before you submit.
             </p>
             
             {/* Primary CTA - mascot peeking behind button with grip hands */}
