@@ -13,15 +13,10 @@ const PromoBanner: React.FC<PromoBannerProps> = ({ embedded = false }) => {
     <div className="relative left-0 right-0 w-full text-white py-2 sm:py-2.5 px-2 sm:px-4 bg-violet-700 shadow-sm shadow-violet-900/20 hover:bg-violet-600 transition-colors border-b border-violet-800/30">
       <div className="max-w-7xl mx-auto flex items-center justify-center gap-2 sm:gap-4">
         <div className="flex items-center justify-center gap-2 sm:gap-3 text-center flex-wrap">
-          <span className="text-xs sm:text-sm font-medium sm:hidden">
-            <span className="font-semibold text-violet-200">$10 off</span> first month <span className="text-violet-200/70">•</span> Code: <span className="font-semibold text-violet-200">OFF10</span>
-          </span>
-          <span className="text-xs sm:text-sm font-medium hidden sm:inline">
-            Hurry! Get <span className="font-semibold text-violet-200">$10 off</span> your first month on any plan
-          </span>
-          <span className="text-violet-200/70 hidden sm:inline">•</span>
-          <span className="bg-white/15 text-white px-2.5 sm:px-3 py-1 rounded-md font-medium text-xs sm:text-sm hidden sm:inline-flex">
-            Code: <span className="text-violet-200 font-bold">OFF10</span>
+          <span className="text-xs sm:text-sm font-medium">
+            New users: Get <span className="font-semibold text-violet-200">$10 off</span> your first month.{' '}
+            <span className="text-violet-200/90">code</span>{' '}
+            <span className="font-semibold text-violet-200">OFF10</span>
           </span>
         </div>
         

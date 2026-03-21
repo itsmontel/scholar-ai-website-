@@ -17,7 +17,7 @@ export interface BlogPostMeta {
 export const blogPostList: BlogPostMeta[] = [
   {
     slug: 'check-essay-with-ai-professor-style-feedback',
-    title: 'Check Your Essay with AI: Get Professor Style Feedback in Seconds',
+    title: 'Check Your Essay with AI: Get Professor-Style Feedback in Seconds',
     description: 'Get AI-powered essay feedback that feels like a professor read your paper. Grade-level rubrics, inline annotations, and improvement suggestions for students at every level.',
     date: '2026-03-17',
     author: 'WriteScholar Team',

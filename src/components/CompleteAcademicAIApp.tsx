@@ -268,8 +268,8 @@ const AcademicAIApp = () => {
 
   // SEO: dynamic document title and meta description per page (SPA)
   const pageMeta: Record<string, { title: string; description: string }> = {
-    landing: { title: 'College Essay Checker | Professor Style-Feedback | WriteScholar', description: 'Check your essay with AI—professor-style feedback in seconds. APA, MLA, Chicago & Harvard citations, study packs, quizzes, flashcards, and Focus Mode. Free to try.' },
-    analyze: { title: 'College Essay Checker — Professor-Style Feedback & Rubric | WriteScholar', description: 'Paste or upload your paper for professor-style feedback on thesis, evidence, structure, and citations. Choose your education level for rubrics that match your course. Free to try.' },
+    landing: { title: 'AI College Essay Checker | Professor-Style Feedback | WriteScholar', description: 'Professor-style feedback on college papers and essays, plus quizzes and flashcards from your notes and Focus Mode to block distractions. Free to try.' },
+    analyze: { title: 'AI College Essay Checker — Professor-Style Feedback & Rubric | WriteScholar', description: 'Paste or upload your paper for professor-style feedback on thesis, evidence, structure, and citations. Choose your education level for rubrics that match your course. Free to try.' },
     citations: { title: 'Citation Finder for College Papers — APA, MLA, Chicago | WriteScholar', description: 'Find peer-reviewed sources for research papers. Search by topic; export APA, MLA, Chicago, or Harvard citations. Built for bibliographies and lit reviews.' },
     features: { title: 'AI Study Tools & Essay Feedback for College Students | WriteScholar', description: 'Essay analysis with rubrics, AI quizzes and flashcards from your notes, summarizer, citation finder, and Focus Mode—one workspace for college coursework.' },
     'focus-mode': { title: 'Focus Mode — Block Sites Until You Study (Chrome) | WriteScholar', description: 'Block TikTok, YouTube, and distracting sites until you answer questions from your own notes. Free: 3 sites; Pro: unlimited.' },
