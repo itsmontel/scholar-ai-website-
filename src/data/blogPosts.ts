@@ -132,3 +132,8 @@ export const blogPostList: BlogPostMeta[] = [
 export function getPostBySlug(slug: string): BlogPostMeta | null {
   return blogPostList.find(p => p.slug === slug) ?? null;
 }
+
+/** Newest first (by `date` ISO string). Use for blog index, pagination, and prev/next so order does not depend on array order in this file. */
+export function getBlogPostsSortedDesc(): BlogPostMeta[] {
+  return [...blogPostList].sort((a, b) => b.date.localeCompare(a.date));
+}

@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import Header from '../common/Header';
 import Footer from '../common/Footer';
-import { getPostBySlug, blogPostList } from '../../data/blogPosts';
+import { getPostBySlug, getBlogPostsSortedDesc } from '../../data/blogPosts';
 import BlogPostContent from './BlogPostContent';
 import {
   SITE_ORIGIN,
@@ -24,6 +24,7 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ onNavigate, user, onLogout 
   });
   
   const post = currentSlug ? getPostBySlug(currentSlug) : null;
+  const sortedPosts = useMemo(() => getBlogPostsSortedDesc(), []);
 
   // Update slug when URL changes (for prev/next navigation)
   useEffect(() => {
@@ -127,9 +128,9 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ onNavigate, user, onLogout 
     );
   }
 
-  const currentIndex = blogPostList.findIndex(p => p.slug === currentSlug);
-  const prevPost = currentIndex > 0 ? blogPostList[currentIndex - 1] : null;
-  const nextPost = currentIndex >= 0 && currentIndex < blogPostList.length - 1 ? blogPostList[currentIndex + 1] : null;
+  const currentIndex = sortedPosts.findIndex(p => p.slug === currentSlug);
+  const prevPost = currentIndex > 0 ? sortedPosts[currentIndex - 1] : null;
+  const nextPost = currentIndex >= 0 && currentIndex < sortedPosts.length - 1 ? sortedPosts[currentIndex + 1] : null;
 
   return (
     <div className="min-h-screen bg-[#faf9f7] dark:bg-stone-950">

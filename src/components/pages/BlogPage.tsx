@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import Header from '../common/Header';
 import Footer from '../common/Footer';
 import NewsletterSubscription from '../common/NewsletterSubscription';
-import { blogPostList, BlogPostMeta } from '../../data/blogPosts';
+import { getBlogPostsSortedDesc, BlogPostMeta } from '../../data/blogPosts';
+import { SITE_ORIGIN, injectJsonLd, removeJsonLd } from '../../utils/seo';
 
 interface BlogPageProps {
   onNavigate: (page: string, slug?: string) => void;
@@ -14,10 +15,27 @@ const POSTS_PER_PAGE = 6;
 
 const BlogPage = ({ onNavigate, user, onLogout }: BlogPageProps) => {
   const [currentPage, setCurrentPage] = useState(1);
-  
-  const totalPages = Math.ceil(blogPostList.length / POSTS_PER_PAGE);
+
+  const sortedPosts = useMemo(() => getBlogPostsSortedDesc(), []);
+
+  useEffect(() => {
+    injectJsonLd('blog-index', {
+      '@context': 'https://schema.org',
+      '@type': 'ItemList',
+      numberOfItems: sortedPosts.length,
+      itemListElement: sortedPosts.map((post, i) => ({
+        '@type': 'ListItem',
+        position: i + 1,
+        name: post.title,
+        url: `${SITE_ORIGIN}/blog/${post.slug}`,
+      })),
+    });
+    return () => removeJsonLd('blog-index');
+  }, [sortedPosts]);
+
+  const totalPages = Math.ceil(sortedPosts.length / POSTS_PER_PAGE);
   const startIndex = (currentPage - 1) * POSTS_PER_PAGE;
-  const currentPosts = blogPostList.slice(startIndex, startIndex + POSTS_PER_PAGE);
+  const currentPosts = sortedPosts.slice(startIndex, startIndex + POSTS_PER_PAGE);
 
   const handlePostClick = (slug: string) => {
     onNavigate('blog-post', slug);

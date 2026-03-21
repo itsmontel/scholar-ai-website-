@@ -107,13 +107,28 @@ async function prerender() {
     }
   }
 
+  async function waitForRouteContent(page, route) {
+    if (route === '/blog') {
+      await page.waitForSelector('section[aria-label="Blog posts"] article', { timeout: 25000 });
+      return;
+    }
+    if (route.startsWith('/blog/')) {
+      await page.waitForSelector('article h1', { timeout: 25000 });
+    }
+  }
+
   for (const route of allRoutes) {
     const url = `http://localhost:${PORT}${route}`;
     console.log(`Prerendering: ${route}`);
 
     const page = await browser.newPage();
-    await page.goto(url, { waitUntil: 'networkidle0', timeout: 15000 });
-    await new Promise((r) => setTimeout(r, 2000));
+    await page.goto(url, { waitUntil: 'networkidle0', timeout: 60000 });
+    try {
+      await waitForRouteContent(page, route);
+    } catch (e) {
+      console.warn(`  ⚠️ Content wait for ${route}: ${e.message}`);
+    }
+    await new Promise((r) => setTimeout(r, 800));
 
     let html = await page.content();
     html = html.replace(/http:\/\/localhost:\d+/g, 'https://writescholar.com');
