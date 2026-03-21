@@ -2,13 +2,11 @@ import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useTheme } from '../../contexts/ThemeContext';
 import { HIDE_FRIENDS } from '../../config/featureFlags';
-import PromoBanner from './PromoBanner';
 import { getResetsInText } from '../../utils/usageReset';
 import { searchSiteMultiple, SearchItem } from '../../data/searchIndex';
 
 interface HeaderProps {
   onNavigate?: (page: string, slug?: string) => void;
-  showPromoBanner?: boolean;
   sticky?: boolean;
   user?: {
     id?: string;
@@ -53,7 +51,7 @@ interface UsageStats {
   daysUntilReset?: number;
 }
 
-const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage, showPromoBanner = true, sticky = true }) => {
+const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage, sticky = true }) => {
   const { theme, toggleTheme } = useTheme();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -313,7 +311,6 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
             </div>
           </div>
         </div>
-        {showPromoBanner && (!user || !['pro', 'premium'].includes((user?.plan || user?.subscription_plan || '').toLowerCase())) && <PromoBanner embedded />}
         {/* Search dropdown portal - renders above all content */}
         {headerSearchOpen && headerSearchQuery.trim() && searchDropdownRect && createPortal(
           <div
