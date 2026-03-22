@@ -567,7 +567,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
             The same logic applies to social media. Instagram, TikTok, Snapchat, whatever pulls you in. Block them. When you try to open one, you get a quiz. Pass the quiz and you earn access. The questions are from your own study material, so every time you want to scroll you are nudged to reinforce what you are learning.
           </p>
           <p className={p}>
-            Some tools let you block any custom domain. If you have a specific site that derails you, add it. Pro plans typically support 10 blocked sites. Premium plans often support unlimited. Start with the worst offenders and add more if you need to.
+            Some tools let you block any custom domain. If you have a specific site that derails you, add it. On WriteScholar, Pro includes unlimited blocked sites in Focus Mode. Start with the worst offenders and add more if you need to.
           </p>
 
           <h2 className={h2}>Study before social media</h2>

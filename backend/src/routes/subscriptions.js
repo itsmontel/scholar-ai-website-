@@ -654,7 +654,7 @@ router.get('/usage', authenticateToken, async (req, res) => {
     const studyPacksGenerated = studyPacks ? studyPacks.length : 0;
     const storageUsed = currentDocuments ? currentDocuments.reduce((total, doc) => total + (doc.file_size || 0), 0) : 0;
 
-    const isPaid = subscriptionDetails.plan === 'pro' || subscriptionDetails.plan === 'premium';
+    const isPaid = subscriptionService.normalizePlanForLimits(subscriptionDetails.plan) === 'pro';
 
     // Pro/Premium: combined pool (analyses + citations + study packs) and combined words (humanize + summarize)
     let combinedActionsUsed, combinedActionsRemaining, combinedWordsUsed, combinedWordsRemaining;

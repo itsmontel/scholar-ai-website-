@@ -1,5 +1,4 @@
-import HeroEssayPreviewCard from './HeroEssayPreviewCard';
-import { DEMO_B_RUBRIC, DEMO_HERO_AFTER_PAPER, DEMO_PAPERS } from '../../data/landingPageDemoAnalysis';
+import { DEMO_B_RUBRIC } from '../../data/landingPageDemoAnalysis';
 
 /** Slightly higher rubric lines for “after” mock (same categories as B demo) */
 const AFTER_RUBRIC_HIGHLIGHTS: { name: string; score: number; maxScore: number; feedback: string }[] = [
@@ -241,16 +240,10 @@ function SupplementalTextMock({ kind }: { kind: 'citations' | 'legend' | 'inline
   );
 }
 
-interface LandingBeforeAfterSectionProps {
-  onOpenDemo: () => void;
-}
-
 /**
- * Before/after: interactive text mock-ups + hoverable essay cards (no tiny screenshots).
+ * Before/after: report mocks + citations/sentence examples (no tiny screenshots).
  */
-export default function LandingBeforeAfterSection({ onOpenDemo }: LandingBeforeAfterSectionProps) {
-  const beforePaper = DEMO_PAPERS.find((p) => p.id === 'b') ?? DEMO_PAPERS[0];
-
+export default function LandingBeforeAfterSection() {
   return (
     <section
       id="before-after"
@@ -280,7 +273,7 @@ export default function LandingBeforeAfterSection({ onOpenDemo }: LandingBeforeA
             Turn a Mid-B Essay Into an A
           </h2>
           <p className="text-base sm:text-lg text-stone-600 dark:text-stone-400 leading-relaxed">
-            Real improvements based on structure, argument, and clarity. Below: report-style summaries and hoverable draft previews—rubrics, citations, and inline notes aligned with how professors grade.
+            Real improvements based on structure, argument, and clarity. Below: report-style summaries, rubric lines, and citation-aligned feedback—how professors actually grade.
           </p>
         </div>
 
@@ -299,46 +292,9 @@ export default function LandingBeforeAfterSection({ onOpenDemo }: LandingBeforeA
               <AnalysisReportMock variant="after" />
             </div>
           </div>
-
-          <div>
-            <div className="mb-6 sm:mb-8 text-center sm:text-left max-w-2xl mx-auto sm:mx-0">
-              <h3 className="text-lg sm:text-xl font-semibold text-stone-900 dark:text-stone-100 mb-1" style={{ fontFamily: "'EB Garamond', Georgia, serif" }}>
-                Rubric + annotated draft
-              </h3>
-              <p className="text-sm sm:text-base text-stone-600 dark:text-stone-400">
-                Green, amber, and red highlights with scores. Hover any span for professor-style comments.
-              </p>
-            </div>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10 items-start justify-items-center max-w-4xl xl:max-w-5xl mx-auto">
-              <div className="w-full max-w-[280px] flex flex-col items-center gap-2">
-                <div className="text-center">
-                  <p className="text-[11px] font-bold uppercase tracking-wide text-amber-800 dark:text-amber-300">Before</p>
-                  <p className="text-[10px] text-stone-500 dark:text-stone-500 mt-0.5">82/100 · more amber &amp; red</p>
-                </div>
-                <div className="rounded-2xl border border-amber-200/80 dark:border-amber-900/40 bg-white/85 dark:bg-stone-900/50 p-1 shadow-lg ring-1 ring-amber-200/50 dark:ring-amber-900/30 w-full">
-                  <HeroEssayPreviewCard paper={beforePaper} rotate="left" variant="before" onOpenDemo={onOpenDemo} />
-                </div>
-              </div>
-              <div className="w-full max-w-[280px] flex flex-col items-center gap-2">
-                <div className="text-center">
-                  <p className="text-[11px] font-bold uppercase tracking-wide text-emerald-800 dark:text-emerald-300">After</p>
-                  <p className="text-[10px] text-stone-500 dark:text-stone-500 mt-0.5">90/100 · more green</p>
-                </div>
-                <div className="rounded-2xl border border-emerald-200/70 dark:border-emerald-900/40 bg-white/90 dark:bg-stone-900/50 p-1 shadow-lg ring-1 ring-emerald-200/40 dark:ring-emerald-900/30 w-full">
-                  <HeroEssayPreviewCard
-                    paper={DEMO_HERO_AFTER_PAPER}
-                    rotate="right"
-                    variant="after"
-                    legendPlacement="top"
-                    maxExcerptChars={720}
-                    onOpenDemo={onOpenDemo}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
 
+        {/* Citations & sentence work */}
         <div className="mt-16 sm:mt-20 pt-12 sm:pt-14 border-t border-stone-200/90 dark:border-stone-800/80">
           <h3 className="text-center text-sm font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400 mb-2">
             Citations &amp; sentence work

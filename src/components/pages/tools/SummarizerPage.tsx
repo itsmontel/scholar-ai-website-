@@ -46,7 +46,7 @@ const SummarizerPage = ({ onNavigate, user, onLogout }: SummarizerPageProps) => 
     document.title = 'AI Summarizer – Condense Papers & Articles | WriteScholar';
     const metaDescription = document.querySelector('meta[name="description"]');
     if (metaDescription) {
-      metaDescription.setAttribute('content', 'Transform lengthy papers, articles, and research documents into concise key points. Perfect for literature reviews and quick comprehension. Premium AI tool.');
+      metaDescription.setAttribute('content', 'Transform lengthy papers, articles, and research documents into concise key points. Perfect for literature reviews and quick comprehension. Pro unlocks all styles and limits.');
     }
   }, []);
 
@@ -243,7 +243,7 @@ const SummarizerPage = ({ onNavigate, user, onLogout }: SummarizerPageProps) => 
               <span className="text-3xl">📝</span>
             </div>
             <h2 className="text-2xl font-extrabold text-stone-800 dark:text-stone-100 mb-2">Sign Up to Continue</h2>
-            <p className="text-stone-600 dark:text-stone-400 mb-6">Create a free account to access the AI Summarizer and other premium tools.</p>
+            <p className="text-stone-600 dark:text-stone-400 mb-6">Create a free account to access the AI Summarizer and other study tools.</p>
             <div className="space-y-3">
               <button
                 onClick={() => onNavigate('signup')}
@@ -287,7 +287,7 @@ const SummarizerPage = ({ onNavigate, user, onLogout }: SummarizerPageProps) => 
               <div className="flex-1 text-center sm:text-left">
                 <div className="flex items-center justify-center sm:justify-start gap-2 sm:gap-3 mb-3 sm:mb-4 flex-wrap">
                   <span className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full bg-violet-600 hover:bg-violet-500 text-white text-xs font-semibold shadow-lg shadow-violet-500/30">
-                    👑 Premium Tool
+                    Pro tool
                   </span>
                   <span className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300 text-xs font-semibold">
                     ✨ AI-Powered
@@ -323,7 +323,7 @@ const SummarizerPage = ({ onNavigate, user, onLogout }: SummarizerPageProps) => 
                               key={opt.value}
                               onClick={() => !locked && setStyle(opt.value as any)}
                               disabled={locked}
-                              title={locked ? 'Pro or Premium' : opt.description}
+                              title={locked ? 'Upgrade to Pro' : opt.description}
                               className={`px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all whitespace-nowrap ${
                                 locked ? 'text-stone-400 dark:text-stone-500 cursor-not-allowed' :
                                 style === opt.value ? 'bg-violet-600 text-white shadow-sm' : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-600'
@@ -346,7 +346,7 @@ const SummarizerPage = ({ onNavigate, user, onLogout }: SummarizerPageProps) => 
                               key={opt.value}
                               onClick={() => !locked && setLength(opt.value as any)}
                               disabled={locked}
-                              title={locked ? 'Pro or Premium' : opt.description}
+                              title={locked ? 'Upgrade to Pro' : opt.description}
                               className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all whitespace-nowrap ${
                                 locked ? 'text-stone-400 dark:text-stone-500 cursor-not-allowed' :
                                 length === opt.value ? 'bg-violet-600 text-white shadow-sm' : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-600'
@@ -551,7 +551,7 @@ const SummarizerPage = ({ onNavigate, user, onLogout }: SummarizerPageProps) => 
               </div>
             )}
 
-            {/* Plan Info for non-premium users */}
+            {/* Plan Info for free users */}
             {user && isFreeUser && (
               <div className="mt-6 mx-3 sm:mx-0">
                 <div className="bg-gradient-to-r from-violet-50 to-red-50 dark:from-violet-900/20 dark:to-red-900/20 border border-violet-200 dark:border-violet-700/50 rounded-2xl p-5 flex items-center justify-between flex-wrap gap-3">
@@ -561,7 +561,7 @@ const SummarizerPage = ({ onNavigate, user, onLogout }: SummarizerPageProps) => 
                       <p className="text-violet-800 dark:text-violet-200 font-medium text-sm">
                         {userPlan === 'free' ? `Free plan: 5,000 words/month • Bullet + Medium only • ${getResetsInText(daysUntilReset)}` : 'Pro: 999,999 words/month • All styles & lengths'}
                       </p>
-                      <p className="text-violet-600 dark:text-violet-400 text-xs mt-0.5">Upgrade to Premium for all styles, lengths, and our premium AI model</p>
+                      <p className="text-violet-600 dark:text-violet-400 text-xs mt-0.5">Upgrade to Pro for all styles, lengths, and higher limits</p>
                     </div>
                   </div>
                   <button

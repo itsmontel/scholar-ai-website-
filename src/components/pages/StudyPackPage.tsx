@@ -6,7 +6,14 @@ import { FeatureTickRow } from '../common/FeatureTickRow';
 import InteractiveStudyPackDemo from '../landing/InteractiveStudyPackDemo';
 import { trackStudyPackGenerated, getStats } from '../../data/achievements';
 import { trackEvent } from '../../utils/analytics';
+import { applyPageSeoTags, absoluteCanonicalUrl, injectJsonLd, removeJsonLd } from '../../utils/seo';
 import { getResetsInText } from '../../utils/usageReset';
+
+const STUDY_PACK_PAGE_SEO = {
+  title: 'AI Study Pack — Lesson, Flashcards, Quiz, Crossword & More | WriteScholar',
+  description:
+    'Turn notes into a lesson, flashcards, quiz, crossword, and Crater Blast from one paste. Same study pack flow as the dashboard.',
+};
 
 type NavigateFn = (
   page: string,
@@ -56,7 +63,21 @@ const StudyPackPage = ({ onNavigate, user, onLogout }: StudyPackPageProps) => {
   });
 
   useEffect(() => {
-    document.title = 'AI Study Pack — Lesson, Flashcards, Quiz & More | WriteScholar';
+    const canonicalUrl = absoluteCanonicalUrl('/tools/study-pack');
+    applyPageSeoTags({
+      title: STUDY_PACK_PAGE_SEO.title,
+      description: STUDY_PACK_PAGE_SEO.description,
+      canonicalUrl,
+    });
+    injectJsonLd('study-pack-page', {
+      '@context': 'https://schema.org',
+      '@type': 'WebPage',
+      name: STUDY_PACK_PAGE_SEO.title.replace(/\s*\|\s*WriteScholar\s*$/, ''),
+      description: STUDY_PACK_PAGE_SEO.description,
+      url: canonicalUrl,
+      isPartOf: { '@type': 'WebSite', name: 'WriteScholar', url: 'https://writescholar.com/' },
+    });
+    return () => removeJsonLd('study-pack-page');
   }, []);
 
   useEffect(() => {

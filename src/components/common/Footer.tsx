@@ -67,62 +67,122 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
             <h4 className="font-semibold text-white mb-4 text-sm">Free Tools</h4>
             <ul className="space-y-3">
               <li>
-                <a href="/tools/citation-generator" onClick={(e) => { e.preventDefault(); onNavigate?.('citation-generator-tool'); }} className="text-stone-400 hover:text-white text-sm transition-colors">
+                <a
+                  href="/tools/citation-generator"
+                  title="Free APA, MLA, Chicago & Harvard citation generator for research papers"
+                  onClick={(e) => { e.preventDefault(); onNavigate?.('citation-generator-tool'); }}
+                  className="text-stone-400 hover:text-white text-sm transition-colors"
+                >
                   Citation Generator
                 </a>
               </li>
               <li>
-                <a href="/tools/word-counter" onClick={(e) => { e.preventDefault(); onNavigate?.('word-counter'); }} className="text-stone-400 hover:text-white text-sm transition-colors">
+                <a
+                  href="/tools/word-counter"
+                  title="Free word counter for essays — characters, reading time, word limits"
+                  onClick={(e) => { e.preventDefault(); onNavigate?.('word-counter'); }}
+                  className="text-stone-400 hover:text-white text-sm transition-colors"
+                >
                   Word Counter
                 </a>
               </li>
               <li>
-                <a href="/tools/grammar-checker" onClick={(e) => { e.preventDefault(); onNavigate?.('grammar-checker'); }} className="text-stone-400 hover:text-white text-sm transition-colors">
+                <a
+                  href="/tools/grammar-checker"
+                  title="Free grammar and spelling checker for college papers and assignments"
+                  onClick={(e) => { e.preventDefault(); onNavigate?.('grammar-checker'); }}
+                  className="text-stone-400 hover:text-white text-sm transition-colors"
+                >
                   Grammar Checker
                 </a>
               </li>
               <li>
-                <a href="/tools/readability-score" onClick={(e) => { e.preventDefault(); onNavigate?.('readability-score'); }} className="text-stone-400 hover:text-white text-sm transition-colors">
+                <a
+                  href="/tools/readability-score"
+                  title="Readability checker — Flesch-Kincaid and grade level for academic writing"
+                  onClick={(e) => { e.preventDefault(); onNavigate?.('readability-score'); }}
+                  className="text-stone-400 hover:text-white text-sm transition-colors"
+                >
                   Readability Checker
                 </a>
               </li>
               <li>
-                <a href="/tools/thesis-generator" onClick={(e) => { e.preventDefault(); onNavigate?.('thesis-generator'); }} className="text-stone-400 hover:text-white text-sm transition-colors">
+                <a
+                  href="/tools/thesis-generator"
+                  title="Thesis statement generator for argumentative and analytical essays"
+                  onClick={(e) => { e.preventDefault(); onNavigate?.('thesis-generator'); }}
+                  className="text-stone-400 hover:text-white text-sm transition-colors"
+                >
                   Thesis Generator
                 </a>
               </li>
               <li>
-                <a href="/tools/essay-outline" onClick={(e) => { e.preventDefault(); onNavigate?.('essay-outline'); }} className="text-stone-400 hover:text-white text-sm transition-colors">
+                <a
+                  href="/tools/essay-outline"
+                  title="Essay outline generator — argumentative, research, and compare-contrast papers"
+                  onClick={(e) => { e.preventDefault(); onNavigate?.('essay-outline'); }}
+                  className="text-stone-400 hover:text-white text-sm transition-colors"
+                >
                   Essay Outline
                 </a>
               </li>
               <li>
-                <a href="/tools/text-case-converter" onClick={(e) => { e.preventDefault(); onNavigate?.('text-case-converter'); }} className="text-stone-400 hover:text-white text-sm transition-colors">
+                <a
+                  href="/tools/text-case-converter"
+                  title="Text case converter — Title Case, sentence case, uppercase for headings"
+                  onClick={(e) => { e.preventDefault(); onNavigate?.('text-case-converter'); }}
+                  className="text-stone-400 hover:text-white text-sm transition-colors"
+                >
                   Case Converter
                 </a>
               </li>
               <li>
-                <a href="/tools/paraphrasing-tips" onClick={(e) => { e.preventDefault(); onNavigate?.('paraphrasing-tips'); }} className="text-stone-400 hover:text-white text-sm transition-colors">
+                <a
+                  href="/tools/paraphrasing-tips"
+                  title="Paraphrasing tips and wordiness checker for academic writing"
+                  onClick={(e) => { e.preventDefault(); onNavigate?.('paraphrasing-tips'); }}
+                  className="text-stone-400 hover:text-white text-sm transition-colors"
+                >
                   Paraphrasing Tips
                 </a>
               </li>
               <li>
-                <a href="/tools/gpa-calculator" onClick={(e) => { e.preventDefault(); onNavigate?.('gpa-calculator'); }} className="text-stone-400 hover:text-white text-sm transition-colors">
+                <a
+                  href="/tools/gpa-calculator"
+                  title="College GPA calculator — semester and cumulative on a 4.0 scale"
+                  onClick={(e) => { e.preventDefault(); onNavigate?.('gpa-calculator'); }}
+                  className="text-stone-400 hover:text-white text-sm transition-colors"
+                >
                   GPA Calculator
                 </a>
               </li>
               <li>
-                <a href="/tools/pomodoro-timer" onClick={(e) => { e.preventDefault(); onNavigate?.('pomodoro-timer'); }} className="text-stone-400 hover:text-white text-sm transition-colors">
+                <a
+                  href="/tools/pomodoro-timer"
+                  title="Pomodoro timer for focused study sessions and exam prep"
+                  onClick={(e) => { e.preventDefault(); onNavigate?.('pomodoro-timer'); }}
+                  className="text-stone-400 hover:text-white text-sm transition-colors"
+                >
                   Pomodoro Timer
                 </a>
               </li>
               <li>
-                <a href="/tools/calculator" onClick={(e) => { e.preventDefault(); onNavigate?.('calculator'); }} className="text-stone-400 hover:text-white text-sm transition-colors">
+                <a
+                  href="/tools/calculator"
+                  title="Free online scientific calculator — trig, logs, powers for STEM homework"
+                  onClick={(e) => { e.preventDefault(); onNavigate?.('calculator'); }}
+                  className="text-stone-400 hover:text-white text-sm transition-colors"
+                >
                   Scientific Calculator
                 </a>
               </li>
               <li>
-                <a href="/tools/converter" onClick={(e) => { e.preventDefault(); onNavigate?.('converter'); }} className="text-stone-400 hover:text-white text-sm transition-colors">
+                <a
+                  href="/tools/converter"
+                  title="Unit converter — length, weight, temperature, volume for labs and problem sets"
+                  onClick={(e) => { e.preventDefault(); onNavigate?.('converter'); }}
+                  className="text-stone-400 hover:text-white text-sm transition-colors"
+                >
                   Unit Converter
                 </a>
               </li>

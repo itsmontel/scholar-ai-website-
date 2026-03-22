@@ -8,6 +8,7 @@ const { authenticateToken, requireSubscription } = require('../middleware/auth')
 const { createClient } = require('@supabase/supabase-js');
 const aiAnalysisService = require('../services/aiAnalysisService');
 const achievementsService = require('../services/achievementsService');
+const subscriptionService = require('../services/subscriptionService');
 
 const getSupabase = () => createClient(
   process.env.SUPABASE_URL,
@@ -46,11 +47,9 @@ const UNLOCK_DURATION_OPTIONS = [
   { value: 24 * 60 * 60 * 1000, label: '24 hours' },
 ];
 
-// Free: 3 sites. Pro (and legacy premium): unlimited blocked sites.
+// Free: 3 sites. Any paid SKU (pro, premium, focus, starter, …): unlimited blocked sites.
 function getMaxSites(plan) {
-  const p = (plan || 'free').toLowerCase();
-  if (p === 'pro' || p === 'premium' || p === 'focus') return 99999;
-  return 3;
+  return subscriptionService.normalizePlanForLimits(plan) === 'pro' ? 99999 : 3;
 }
 
 function clampSettings(settings) {
@@ -318,8 +317,6 @@ router.get('/presets', (req, res) => {
 router.get('/unlock-quiz', authenticateToken, async (req, res) => {
   try {
     const userId = req.user.id;
-    const plan = (req.user.subscription_plan || 'free').toLowerCase();
-    const isPaid = plan === 'pro' || plan === 'premium';
     const limit = 30;
 
     const supabase = getSupabase();

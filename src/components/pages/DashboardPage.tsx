@@ -173,10 +173,6 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
     trackEvent('paywall_dismiss');
     setShowSoftPaywall(false);
   };
-  const handlePaywallNavigatePricing = () => {
-    setShowSoftPaywall(false);
-    onNavigate('pricing');
-  };
 
   // Detect desktop for Focus Mode (Chrome extension only works on desktop)
   const [isDesktop, setIsDesktop] = useState(true);
@@ -403,6 +399,15 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
     recentActivity.some((a) => a.type === 'analysis');
   const showFirstAnalysisOnboarding =
     Boolean(user) && !hasCompletedFirstAnalysis && !loadingStats && !isActivityLoading;
+
+  const showTutorialOverlay =
+    showInteractiveTutorial ||
+    showWelcomeTutorial;
+
+  const showFirstAnalysisBanner =
+    (showFirstAnalysisOnboarding && !dismissedFirstAnalysisBanner) &&
+    !showSoftPaywall &&
+    !showTutorialOverlay;
 
   useEffect(() => {
     if (showFirstAnalysisOnboarding) trackEvent('first_action_prompt_view');
@@ -1724,10 +1729,14 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="dashboard" />
 
       {/* Interactive Tutorial - comprehensive product tour after onboarding */}
-      {(showInteractiveTutorial || showWelcomeTutorial) && (
+      {showTutorialOverlay && (
         <InteractiveTutorial
-          userName={getDisplayNameForGreeting(user)}
-          onComplete={showInteractiveTutorial ? handleInteractiveTutorialComplete : async () => {
+          userName={getDisplayNameForGreeting(user) || 'there'}
+          onComplete={async () => {
+            if (showInteractiveTutorial) {
+              await handleInteractiveTutorialComplete();
+              return;
+            }
             onUserUpdate?.({ welcomeTutorialCompleted: true });
             trackEvent('tutorial_complete');
             try {
@@ -1744,7 +1753,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
       )}
 
       {/* First analysis onboarding banner — dismissible; upload/library nudges use showFirstAnalysisOnboarding only */}
-      {showFirstAnalysisOnboarding && !dismissedFirstAnalysisBanner && !showSoftPaywall && !showInteractiveTutorial && !showWelcomeTutorial && (
+      {showFirstAnalysisBanner && (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:ml-24 lg:mr-auto mb-4">
           <div className="rounded-2xl border border-stone-200/90 dark:border-stone-700 bg-white/90 dark:bg-stone-900/70 p-5 sm:p-6 shadow-[0_12px_40px_-12px_rgba(15,23,42,0.1)] dark:shadow-[0_12px_40px_-12px_rgba(0,0,0,0.4)] relative overflow-hidden backdrop-blur-sm ring-1 ring-white/50 dark:ring-white/5">
             <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-emerald-500 via-amber-400 to-red-500 opacity-80" aria-hidden />
@@ -1762,7 +1771,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 pr-10 sm:pr-0">
               <div className="flex-1 min-w-0">
                 <h3 className="text-lg sm:text-xl font-semibold text-stone-900 dark:text-stone-50 mb-1" style={{ fontFamily: "'EB Garamond', Georgia, serif" }}>Analyze your first essay</h3>
-                <p className="text-stone-600 dark:text-stone-400 text-sm sm:text-base leading-relaxed">Upload or paste 200+ words for professor-style feedback on structure, clarity, and tone—the fastest way to see what WriteScholar can do.</p>
+                <p className="text-stone-600 dark:text-stone-400 text-sm sm:text-base leading-relaxed">Upload or paste 200+ words for professor-style feedback on structure, clarity, and tone. It&apos;s the fastest way to see what WriteScholar can do.</p>
               </div>
               <div className="flex flex-wrap gap-2 w-full sm:w-auto">
                 <button
@@ -1801,7 +1810,6 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
           userName={getDisplayNameForGreeting(user)}
           onStartTrial={handlePaywallStartTrial}
           onDismiss={handlePaywallDismiss}
-          onNavigatePricing={handlePaywallNavigatePricing}
           onNavigate={onNavigate}
         />
       )}
@@ -1817,22 +1825,27 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
       )}
 
       {/* Main Content */}
-      <main className="relative max-w-7xl mx-auto px-3 sm:px-6 pt-3 sm:pt-6 pb-24 sm:pb-16 w-full min-w-0 overflow-x-hidden lg:ml-24 lg:mr-auto">
-        <div className="w-full min-w-0 space-y-4 sm:space-y-6">
+      <main className="relative max-w-7xl mx-auto px-4 sm:px-6 pt-4 sm:pt-6 pb-28 sm:pb-16 w-full min-w-0 overflow-x-hidden lg:ml-24 lg:mr-auto">
+        <div className="w-full min-w-0 space-y-5 sm:space-y-6">
           {/* Greeting strip */}
           <div className="rounded-2xl overflow-hidden border border-stone-200/90 dark:border-stone-800 shadow-[0_12px_40px_-12px_rgba(15,23,42,0.08)] dark:shadow-[0_12px_40px_-12px_rgba(0,0,0,0.35)] backdrop-blur-md bg-white/80 dark:bg-stone-900/55 p-4 sm:p-5 md:p-6 ring-1 ring-white/50 dark:ring-white/5 animate-card-bounce-in" data-tutorial="greeting-area">
-            <div className="flex flex-col gap-2 sm:gap-3 w-full">
+            <div className="flex flex-col gap-3 sm:gap-3 w-full">
               {/* Greeting + tagline (left) · Search + streak/badges (right), no divider lines */}
               <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3 sm:gap-3">
-                <div className="flex gap-3 sm:gap-4 min-w-0 flex-1">
+                <div className="flex gap-3 sm:gap-4 min-w-0 flex-1 items-center sm:items-start">
                   <div className="hidden sm:block flex-shrink-0 relative group">
                     <div className="absolute -inset-2 rounded-2xl bg-violet-500/10 dark:bg-violet-500/15 blur-xl group-hover:opacity-100 transition-opacity" />
                     <div className="relative rounded-2xl border border-stone-200/90 dark:border-stone-700 bg-white dark:bg-stone-900/50 p-1 shadow-sm overflow-hidden">
                       <ScholarMascot size={88} animated={false} pose="default" />
                     </div>
                   </div>
+                  <div className="flex sm:hidden flex-shrink-0 items-start pt-0.5">
+                    <div className="rounded-xl border border-stone-200/90 dark:border-stone-700 bg-white dark:bg-stone-900/50 p-0.5 shadow-sm overflow-hidden">
+                      <ScholarMascot size={52} animated={false} pose="default" />
+                    </div>
+                  </div>
                   <div className="min-w-0 flex-1 flex flex-col gap-1 sm:gap-1.5">
-                    <h1 className="text-2xl sm:text-3xl md:text-[2.15rem] font-semibold text-stone-900 dark:text-stone-50 leading-[1.15] tracking-tight text-center sm:text-left" style={{ fontFamily: "'EB Garamond', Georgia, serif" }}>
+                    <h1 className="text-xl sm:text-3xl md:text-[2.15rem] font-semibold text-stone-900 dark:text-stone-50 leading-[1.2] sm:leading-[1.15] tracking-tight text-left" style={{ fontFamily: "'EB Garamond', Georgia, serif" }}>
                       {greeting.greeting}
                       {getDisplayNameForGreeting(user)
                         ? (() => {
@@ -1842,42 +1855,30 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                         : ''}
                       ! <span className="inline-block text-lg sm:text-xl align-middle opacity-90" aria-hidden>{greeting.emoji}</span>
                     </h1>
-                    <div className="flex flex-col gap-0.5 max-w-xl text-center sm:text-left">
+                    <div className="max-w-xl text-left">
                       {mode === 'focus_mode' ? (
-                        <>
-                          <span className="block text-sm sm:text-[0.9375rem] leading-snug font-bold text-rose-600 dark:text-rose-400">Solve a puzzle or answer study questions to unlock.</span>
-                          <span className="block text-sm sm:text-[0.9375rem] leading-snug text-stone-500 dark:text-stone-400">Sudoku, Memory, Pattern & more.</span>
-                        </>
+                        <span className="block text-[0.9375rem] sm:text-[1.0625rem] leading-snug font-bold text-rose-600 dark:text-rose-400">Solve a puzzle or answer study questions to unlock.</span>
                       ) : mode === 'quiz' ? (
-                        <>
-                          <span className="block text-sm sm:text-[0.9375rem] leading-snug font-bold text-amber-600 dark:text-amber-400">Quizzes, flashcards & crosswords from your notes.</span>
-                          <span className="block text-sm sm:text-[0.9375rem] leading-snug text-stone-500 dark:text-stone-400">Plus essay feedback & citations.</span>
-                        </>
+                        <span className="block text-[0.9375rem] sm:text-[1.0625rem] leading-snug font-bold text-amber-600 dark:text-amber-400">Quizzes, flashcards & crosswords from your notes.</span>
                       ) : mode === 'citations' ? (
-                        <>
-                          <span className="block text-sm sm:text-[0.9375rem] leading-snug font-bold text-sky-600 dark:text-sky-400">Citations via academic sources in seconds.</span>
-                          <span className="block text-sm sm:text-[0.9375rem] leading-snug text-stone-500 dark:text-stone-400">Plus essay feedback, study tools & focus mode.</span>
-                        </>
+                        <span className="block text-[0.9375rem] sm:text-[1.0625rem] leading-snug font-bold text-sky-600 dark:text-sky-400">Citations via academic sources in seconds.</span>
                       ) : (
-                        <>
-                          <span className="block text-sm sm:text-[0.9375rem] leading-snug font-bold text-rose-600 dark:text-rose-400">Professor-style feedback on every essay.</span>
-                          <span className="block text-sm sm:text-[0.9375rem] leading-snug text-stone-500 dark:text-stone-400">Plus study tools, citations & focus mode.</span>
-                        </>
+                        <span className="block text-[0.9375rem] sm:text-[1.0625rem] leading-snug font-bold text-rose-600 dark:text-rose-400">Professor-style feedback on every essay.</span>
                       )}
                     </div>
                   </div>
                 </div>
-                <div className="flex flex-col gap-2 w-full lg:w-auto lg:min-w-[280px] lg:max-w-lg flex-shrink-0 lg:items-end">
+                <div className="flex flex-col gap-2.5 w-full lg:w-auto lg:min-w-[280px] lg:max-w-lg flex-shrink-0 lg:items-end">
                   <div className="relative w-full">
-                    <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-violet-500/80 dark:text-violet-400/90 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="absolute left-3.5 sm:left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-violet-500/80 dark:text-violet-400/90 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
                     <input
                       type="text"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      placeholder="Search documents, quizzes…"
-                      className="w-full pl-11 pr-11 py-2.5 sm:py-3 bg-white dark:bg-stone-900/50 rounded-lg text-sm text-stone-800 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500 outline-none border border-violet-400/75 dark:border-violet-500/55 ring-2 ring-violet-500/18 shadow-sm shadow-violet-500/10 transition-all focus:border-violet-500 dark:focus:border-violet-400 focus:ring-4 focus:ring-violet-500/30 focus:shadow-md focus:shadow-violet-500/25"
+                      placeholder="Search activity…"
+                      className="w-full pl-10 sm:pl-11 pr-10 sm:pr-11 py-2.5 sm:py-3 bg-white dark:bg-stone-900/50 rounded-xl sm:rounded-lg text-sm text-stone-800 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500 outline-none border border-violet-400/75 dark:border-violet-500/55 ring-2 ring-violet-500/18 shadow-sm shadow-violet-500/10 transition-all focus:border-violet-500 dark:focus:border-violet-400 focus:ring-4 focus:ring-violet-500/30 focus:shadow-md focus:shadow-violet-500/25"
                     />
                     {searchQuery && (
                       <button onClick={() => setSearchQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 rounded-lg hover:bg-stone-200/60 dark:hover:bg-stone-600/50 transition-colors">
@@ -1902,8 +1903,29 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                         )}
                       </button>
                     )}
-                    <div className="hidden sm:block flex-shrink-0"><BadgeWidget onNavigate={onNavigate} /></div>
-                    <div className="sm:hidden flex-shrink-0"><BadgeWidget onNavigate={onNavigate} mobileExpanded /></div>
+                    <div className="flex-shrink-0"><BadgeWidget onNavigate={onNavigate} /></div>
+                  </div>
+                  {/* Mobile: streak + friends + badges were previously inside a sm-only row and never showed */}
+                  <div className="flex sm:hidden items-center gap-2 w-full overflow-x-auto scrollbar-hide pb-0.5 -mx-0.5 px-0.5">
+                    <div data-tutorial="streak-widget" className="flex-shrink-0">
+                      <StreakWidget compact />
+                    </div>
+                    {!HIDE_FRIENDS && (
+                      <button
+                        onClick={() => onNavigate('friends')}
+                        data-tutorial="friends-btn"
+                        className="relative flex items-center gap-1.5 px-2.5 py-2 bg-white/80 dark:bg-stone-700/60 border border-stone-200/70 dark:border-stone-600/50 rounded-xl active:bg-emerald-50/80 dark:active:bg-emerald-900/20 transition-all shadow-sm flex-shrink-0"
+                      >
+                        <span className="text-base">👥</span>
+                        <span className="font-semibold text-stone-700 dark:text-stone-200 text-xs whitespace-nowrap">Friends</span>
+                        {friendNotificationCount > 0 && (
+                          <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">{friendNotificationCount > 9 ? '9+' : friendNotificationCount}</span>
+                        )}
+                      </button>
+                    )}
+                    <div className="flex-shrink-0 min-w-0">
+                      <BadgeWidget onNavigate={onNavigate} />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1962,13 +1984,14 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                 ))}
                       </div>
                     ) : (
-            <div className="pt-1 sm:pt-2 pb-3 sm:pb-5 overflow-visible" data-tutorial="feature-cards">
+            <div className="pt-1 sm:pt-2 pb-3 sm:pb-5 overflow-visible">
               <div data-tutorial="analyze-ready" className="relative rounded-2xl sm:rounded-2xl overflow-hidden mb-3 sm:mb-4 border border-stone-200/90 dark:border-stone-700/90 bg-white/85 dark:bg-stone-900/55 shadow-[0_16px_50px_-16px_rgba(15,23,42,0.12)] dark:shadow-[0_16px_50px_-16px_rgba(0,0,0,0.45)] backdrop-blur-sm ring-1 ring-white/40 dark:ring-white/5 scroll-mt-8">
                 <div className="h-0.5 w-full bg-gradient-to-r from-emerald-500 via-amber-400 to-red-500 opacity-75 dark:opacity-80" aria-hidden />
-                <div className="relative rounded-b-2xl bg-white/95 dark:bg-stone-900/70 p-4 sm:p-8">
+                <div className="relative rounded-b-2xl bg-white/95 dark:bg-stone-900/70 p-5 sm:p-8">
                   <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(91,33,182,0.04),transparent_55%)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-15%,rgba(109,40,217,0.08),transparent_55%)] pointer-events-none rounded-b-2xl" aria-hidden />
 
                   {mode === 'analyze' ? (
+                    <div data-tutorial="analyze-essay-input-cluster" className="flex flex-col">
                     <div className="relative lg:grid lg:grid-cols-[minmax(0,220px)_minmax(0,48rem)_minmax(0,220px)] lg:gap-8 xl:gap-10 lg:items-start">
                       <div className="hidden lg:block relative self-start justify-self-start w-[236px] xl:w-[248px] pointer-events-auto -rotate-[15deg] origin-bottom-left drop-shadow-lg z-[5] lg:mt-5 xl:mt-6" aria-label="Sample before feedback">
                         <p className="text-center mb-2">
@@ -1986,45 +2009,48 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                           />
                   </div>
                       </div>
-                      <div className="min-w-0">
-                        <h1 className="relative text-2xl sm:text-3xl md:text-[2rem] lg:text-[2.125rem] font-semibold text-stone-900 dark:text-stone-50 text-center mb-1.5 sm:mb-2 tracking-tight leading-snug px-1" style={{ fontFamily: "'EB Garamond', Georgia, serif" }}>
+                      <div className="min-w-0" data-tutorial="dashboard-tool-tabs-hero">
+                        <h1 className="relative text-lg sm:text-2xl md:text-[2rem] lg:text-[2.125rem] font-semibold text-stone-900 dark:text-stone-50 text-center mb-2 sm:mb-2 tracking-tight leading-snug px-0.5 sm:px-1" style={{ fontFamily: "'EB Garamond', Georgia, serif" }}>
                           <span className="text-emerald-700 dark:text-emerald-400">Paste</span>
                           {' '}or{' '}
                           <span className="text-sky-700 dark:text-sky-400">upload</span>
                           {' '}your essay, get <span className="text-violet-800 dark:text-violet-300">feedback</span> in seconds
                         </h1>
-                        <p className="relative text-stone-600 dark:text-stone-300 text-sm sm:text-base text-center mb-2 sm:mb-2.5 max-w-xl mx-auto leading-relaxed">
+                        <p className="relative text-stone-600 dark:text-stone-300 text-[13px] sm:text-base text-center mb-3 sm:mb-2.5 max-w-xl mx-auto leading-relaxed">
                           Upload your essay, get <span className="text-red-600 dark:text-red-500">professor</span><span className="text-amber-600 dark:text-amber-500">-style</span> <span className="text-green-600 dark:text-green-500">feedback</span>
                         </p>
                         <div className="hidden sm:block">
                           <FeatureTickRow className="relative mb-1 sm:mb-1.5" items={['Structure', 'Annotations', 'Rubric', 'Suggestions']} />
                         </div>
-                        <div className="relative flex rounded-xl border border-stone-200/90 dark:border-stone-700 bg-stone-100/60 dark:bg-stone-800/50 p-1 mb-1 sm:mb-1.5 max-w-lg mx-auto shadow-sm">
+                        <div className="relative flex rounded-xl border border-stone-200/90 dark:border-stone-700 bg-stone-100/60 dark:bg-stone-800/50 p-0.5 sm:p-1 mb-2 sm:mb-1.5 w-full max-w-lg mx-auto shadow-sm">
                     <button
                             type="button"
                             data-tutorial="analyze-feature-card"
                       onClick={() => { setMode('analyze'); setShowWordWarning(false); setAnalyzeUploadError(''); setSummaryResult(null); setQuizResult(null); setFlashcardResult(null); setCrosswordResult(null); setStudyPackResult(null); }}
-                            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 bg-white dark:bg-stone-900 text-violet-800 dark:text-violet-300 shadow-sm border border-stone-200/80 dark:border-stone-600"
+                            className="flex-1 flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-2 py-2 sm:py-2.5 rounded-lg font-medium text-[11px] sm:text-sm transition-all duration-200 bg-white dark:bg-stone-900 text-violet-800 dark:text-violet-300 shadow-sm border border-stone-200/80 dark:border-stone-600 min-h-[2.75rem] sm:min-h-0"
                     >
-                            <span className="text-base" aria-hidden>📝</span> Analyze
+                            <span className="text-sm sm:text-base leading-none" aria-hidden>📝</span>
+                            <span className="leading-tight">Analyze</span>
                     </button>
                     <button
                       onClick={() => { setMode('citations'); setShowWordWarning(false); setAnalyzeUploadError(''); setSummaryResult(null); }}
-                            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200"
+                            className="flex-1 flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-2 py-2 sm:py-2.5 rounded-lg font-medium text-[11px] sm:text-sm transition-all duration-200 text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200 min-h-[2.75rem] sm:min-h-0"
                     >
-                            <span className="text-base" aria-hidden>📚</span> Citations
+                            <span className="text-sm sm:text-base leading-none" aria-hidden>📚</span>
+                            <span className="leading-tight">Citations</span>
                     </button>
                     <button
                       onClick={() => { setMode('quiz'); setShowWordWarning(false); setAnalyzeUploadError(''); setSummaryResult(null); setQuizResult(null); setFlashcardResult(null); setCrosswordResult(null); setStudyPackResult(null); }}
-                            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200"
+                            className="flex-1 flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-2 py-2 sm:py-2.5 rounded-lg font-medium text-[11px] sm:text-sm transition-all duration-200 text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200 min-h-[2.75rem] sm:min-h-0"
                     >
-                            <span className="text-base" aria-hidden>📦</span> Study Pack
+                            <span className="text-sm sm:text-base leading-none" aria-hidden>📦</span>
+                            <span className="leading-tight"><span className="sm:hidden">Study</span><span className="hidden sm:inline">Study Pack</span></span>
                     </button>
                   </div>
                         {showFirstAnalysisOnboarding && (
                           <div className="flex flex-col items-center gap-1 mb-1.5 animate-in fade-in slide-in-from-bottom-2 duration-500">
                             <span className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-stone-50 dark:bg-stone-800/80 border border-stone-200/90 dark:border-stone-600 text-stone-800 dark:text-stone-200 text-sm font-medium shadow-sm">
-                              Start your first analysis — paste text or upload below, then run Analyze
+                              Start your first analysis: paste text or upload below, then run Analyze
                       </span>
                             <svg className="w-5 h-5 text-violet-600 dark:text-violet-400 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
@@ -2049,125 +2075,8 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                         </div>
                       </div>
                     </div>
-                  ) : (
-                    <>
-                      <div className="relative lg:grid lg:grid-cols-[minmax(0,220px)_minmax(0,48rem)_minmax(0,220px)] lg:gap-8 xl:gap-10 lg:items-stretch">
-                        <div className="hidden lg:block relative self-end justify-self-start w-[236px] xl:w-[248px] pointer-events-auto -rotate-[11deg] origin-bottom-left drop-shadow-lg z-[5]" aria-label="Sample sources preview">
-                          <p className="text-center mb-2">
-                            <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-sky-800/95 dark:text-sky-300/95">Sources</span>
-                            <span className="block text-[10px] text-stone-500 dark:text-stone-400 mt-0.5">Peer-reviewed picks</span>
-                          </p>
-                          <InteractiveCitationsDemo variant="side-left" />
-                        </div>
-                        <div className="min-w-0 self-start">
-                          <h1 className="relative text-xl sm:text-2xl md:text-3xl font-semibold text-stone-900 dark:text-stone-50 text-center mb-1.5 tracking-tight" style={{ fontFamily: "'EB Garamond', Georgia, serif" }}>
-                            Find <span className="text-sky-700 dark:text-sky-400">academic sources</span> in seconds
-                          </h1>
-                          <p className="relative text-stone-600 dark:text-stone-300 text-sm sm:text-base text-center mb-2 sm:mb-2.5 max-w-xl mx-auto leading-relaxed">
-                            APA, MLA & Chicago. Peer-reviewed sources. Filter by year.
-                          </p>
-                          <div className="hidden sm:block">
-                            <FeatureTickRow
-                              className="relative mb-1 sm:mb-1.5"
-                              items={['APA', 'MLA', 'Chicago', 'Peer-reviewed', 'Export-ready']}
-                            />
-                          </div>
-                          <div className="relative flex rounded-xl border border-stone-200/90 dark:border-stone-700 bg-stone-100/60 dark:bg-stone-800/50 p-1 mb-1 sm:mb-1.5 max-w-lg mx-auto shadow-sm">
-                            <button
-                              onClick={() => { setMode('analyze'); setShowWordWarning(false); setAnalyzeUploadError(''); setSummaryResult(null); setQuizResult(null); setFlashcardResult(null); setCrosswordResult(null); setStudyPackResult(null); }}
-                              className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200"
-                            >
-                              <span className="text-base" aria-hidden>📝</span> Analyze
-                            </button>
-                            <button
-                              onClick={() => { setMode('citations'); setShowWordWarning(false); setAnalyzeUploadError(''); setSummaryResult(null); }}
-                              className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 ${mode === 'citations' ? 'bg-white dark:bg-stone-900 text-violet-800 dark:text-violet-300 shadow-sm border border-stone-200/80 dark:border-stone-600' : 'text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200'}`}
-                            >
-                              <span className="text-base" aria-hidden>📚</span> Citations
-                            </button>
-                            <button
-                              onClick={() => { setMode('quiz'); setShowWordWarning(false); setAnalyzeUploadError(''); setSummaryResult(null); setQuizResult(null); setFlashcardResult(null); setCrosswordResult(null); setStudyPackResult(null); }}
-                              className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200"
-                            >
-                              <span className="text-base" aria-hidden>📦</span> Study Pack
-                            </button>
-                          </div>
-                  {showFirstCitationPrompt && mode === 'citations' && (
-                            <div className="flex flex-col items-center gap-1 mb-1.5 animate-in fade-in slide-in-from-bottom-2 duration-500">
-                              <span className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-stone-50 dark:bg-stone-800/80 border border-stone-200/90 dark:border-stone-600 text-stone-800 dark:text-stone-200 text-sm font-medium shadow-sm">
-                        Start your first citation
-                      </span>
-                              <svg className="w-5 h-5 text-violet-600 dark:text-violet-400 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-                      </svg>
-                    </div>
-                          )}
-                        </div>
-                        <div className="hidden lg:block relative self-end justify-self-end w-[236px] xl:w-[248px] pointer-events-auto rotate-[11deg] origin-bottom-right drop-shadow-lg z-[5]" aria-label="Sample citation export preview">
-                          <p className="text-center mb-2">
-                            <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-violet-800/95 dark:text-violet-300/95">Export</span>
-                            <span className="block text-[10px] text-stone-500 dark:text-stone-400 mt-0.5">APA · MLA · Chicago</span>
-                          </p>
-                          <InteractiveCitationsDemo variant="side-right" />
-                        </div>
-                      </div>
-                    </>
-                  )}
-
-                  {mode === 'citations' && (
-                    <div className="relative mb-2 max-w-3xl mx-auto mt-2 sm:mt-0 lg:-mt-14 xl:-mt-16 z-20">
-                      <div className="relative rounded-xl sm:rounded-2xl border transition-all duration-300 shadow-sm focus-within:shadow-md focus-within:ring-2 focus-within:ring-violet-500/25 border-sky-200/90 dark:border-sky-800/60 bg-white dark:bg-stone-900/40 focus-within:border-sky-400/60">
-                        <div className="relative rounded-[12px] sm:rounded-[18px] bg-white/98 dark:bg-stone-800/95 backdrop-blur-sm min-h-[120px] sm:min-h-[160px]">
-                          <textarea
-                            value={inputText}
-                            onChange={(e) => {
-                              setInputText(e.target.value);
-                              setShowWordWarning(false);
-                            }}
-                            onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey && isTextValid()) { e.preventDefault(); handleSubmit(); }}}
-                            placeholder="Enter your research topic to find academic sources..."
-                            className="relative w-full min-h-[120px] sm:min-h-[160px] max-h-[220px] overflow-y-auto p-4 sm:p-6 text-stone-800 dark:text-stone-100 text-[15px] sm:text-lg bg-transparent border-none outline-none resize-none placeholder-stone-400 dark:placeholder-stone-500 leading-relaxed"
-                            onInput={(e) => {
-                              const target = e.target as HTMLTextAreaElement;
-                              target.style.height = 'auto';
-                              target.style.height = Math.min(target.scrollHeight, 220) + 'px';
-                            }}
-                            data-tutorial-target="essay-input-wrapper"
-                          />
-                          <div className="absolute bottom-4 left-5 text-sm text-stone-400 dark:text-stone-500 font-medium">
-                            {inputText.length} characters
-                        </div>
-                          {showWordWarning && (
-                            <div className="absolute -bottom-6 left-0 right-0 text-center">
-                              <span className="text-sm font-medium text-red-500">Please enter a research topic</span>
-                          </div>
-                          )}
-                      </div>
-                      </div>
-                      <div className="flex justify-center mt-6">
-                        <button
-                          data-tutorial-target="essay-analyze-btn"
-                          onClick={handleSubmit}
-                          disabled={!isTextValid() || isSearchingCitations}
-                          className={`px-8 sm:px-10 py-3.5 rounded-xl flex items-center justify-center gap-2 transition-all duration-200 font-semibold text-base ${
-                            isTextValid() && !isSearchingCitations
-                              ? 'bg-violet-700 hover:bg-violet-800 dark:bg-violet-600 dark:hover:bg-violet-500 text-white shadow-md shadow-violet-900/15 ring-1 ring-violet-900/10 hover:-translate-y-0.5 active:scale-[0.98] cursor-pointer'
-                              : 'bg-stone-200 dark:bg-stone-700 text-stone-400 cursor-not-allowed'
-                          }`}
-                        >
-                          {isSearchingCitations ? (
-                            <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
-                          ) : (
-                            <>Find Sources</>
-                          )}
-                        </button>
-                      </div>
-                    </div>
-                  )}
-
-                      {mode === 'analyze' && (
-                    <div className="relative w-full mb-2">
-                      {/* Essay input — negative margin on lg+ only (desktop mockups); mobile stays flush */}
+                      <div className="relative w-full mb-2">
+                      {/* Essay input, drop zone, and demo (same column as last release) */}
                       <div className="min-w-0 relative z-20 w-full max-w-3xl mx-auto space-y-3 sm:space-y-4 mt-0 lg:-mt-32 xl:-mt-36">
                           <div className="relative rounded-2xl border transition-all duration-300 bg-white dark:bg-stone-900/40 border-violet-400/75 dark:border-violet-500/55 ring-2 ring-violet-500/18 shadow-sm shadow-violet-500/10 focus-within:border-violet-500 dark:focus-within:border-violet-400 focus-within:ring-4 focus-within:ring-violet-500/30 focus-within:shadow-md focus-within:shadow-violet-500/25">
                             <div className="relative rounded-[14px] sm:rounded-[20px] bg-white/98 dark:bg-stone-800/95 backdrop-blur-sm min-h-[140px] sm:min-h-[200px]">
@@ -2302,7 +2211,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                                   Drop your document here
                                 </p>
                                 <p className="text-sm sm:text-[0.9375rem] text-stone-600 dark:text-stone-300 mt-2 leading-relaxed">
-                                  Or click to browse — <span className="font-semibold text-violet-700 dark:text-violet-400">PDF</span>,{' '}
+                                  Or click to browse: <span className="font-semibold text-violet-700 dark:text-violet-400">PDF</span>,{' '}
                                   <span className="font-semibold text-emerald-700 dark:text-emerald-400">Word</span>, or{' '}
                                   <span className="font-semibold text-sky-700 dark:text-sky-400">TXT</span>. We&apos;ll load the text into the box above (same as Upload file).
                                 </p>
@@ -2314,7 +2223,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                             <div className="absolute inset-0 rounded-2xl bg-white/90 dark:bg-stone-900/90 backdrop-blur-sm flex items-center justify-center gap-3 z-30 pointer-events-auto" aria-live="polite" aria-busy="true">
                               <span className="w-8 h-8 border-2 border-violet-600 border-t-transparent rounded-full animate-spin" />
                               <span className="font-semibold text-stone-700 dark:text-stone-200">Uploading...</span>
-                      </div>
+                            </div>
                           )}
                       </div>
 
@@ -2324,11 +2233,129 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                               See a real analysis in action
                             </h2>
                             <span className="h-px flex-1 max-w-32 bg-stone-300/80 dark:bg-stone-600/60 rounded-full" />
-                    </div>
+                          </div>
                           <InteractiveDocumentAnalysis onNavigate={onNavigate} />
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="relative lg:grid lg:grid-cols-[minmax(0,220px)_minmax(0,48rem)_minmax(0,220px)] lg:gap-8 xl:gap-10 lg:items-stretch">
+                        <div className="hidden lg:block relative self-end justify-self-start w-[236px] xl:w-[248px] pointer-events-auto -rotate-[11deg] origin-bottom-left drop-shadow-lg z-[5]" aria-label="Sample sources preview">
+                          <p className="text-center mb-2">
+                            <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-sky-800/95 dark:text-sky-300/95">Sources</span>
+                            <span className="block text-[10px] text-stone-500 dark:text-stone-400 mt-0.5">Peer-reviewed picks</span>
+                          </p>
+                          <InteractiveCitationsDemo variant="side-left" />
+                        </div>
+                        <div className="min-w-0 self-start" data-tutorial="dashboard-tool-tabs-hero">
+                          <h1 className="relative text-lg sm:text-2xl md:text-3xl font-semibold text-stone-900 dark:text-stone-50 text-center mb-2 tracking-tight leading-snug px-0.5" style={{ fontFamily: "'EB Garamond', Georgia, serif" }}>
+                            Find <span className="text-sky-700 dark:text-sky-400">academic sources</span> in seconds
+                          </h1>
+                          <p className="relative text-stone-600 dark:text-stone-300 text-[13px] sm:text-base text-center mb-3 sm:mb-2.5 max-w-xl mx-auto leading-relaxed">
+                            APA, MLA & Chicago. Peer-reviewed sources. Filter by year.
+                          </p>
+                          <div className="hidden sm:block">
+                            <FeatureTickRow
+                              className="relative mb-1 sm:mb-1.5"
+                              items={['APA', 'MLA', 'Chicago', 'Peer-reviewed', 'Export-ready']}
+                            />
+                          </div>
+                          <div className="relative flex rounded-xl border border-stone-200/90 dark:border-stone-700 bg-stone-100/60 dark:bg-stone-800/50 p-0.5 sm:p-1 mb-2 sm:mb-1.5 w-full max-w-lg mx-auto shadow-sm">
+                            <button
+                              onClick={() => { setMode('analyze'); setShowWordWarning(false); setAnalyzeUploadError(''); setSummaryResult(null); setQuizResult(null); setFlashcardResult(null); setCrosswordResult(null); setStudyPackResult(null); }}
+                              className="flex-1 flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-2 py-2 sm:py-2.5 rounded-lg font-medium text-[11px] sm:text-sm transition-all duration-200 text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200 min-h-[2.75rem] sm:min-h-0"
+                            >
+                              <span className="text-sm sm:text-base leading-none" aria-hidden>📝</span>
+                              <span className="leading-tight">Analyze</span>
+                            </button>
+                            <button
+                              onClick={() => { setMode('citations'); setShowWordWarning(false); setAnalyzeUploadError(''); setSummaryResult(null); }}
+                              className={`flex-1 flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-2 py-2 sm:py-2.5 rounded-lg font-medium text-[11px] sm:text-sm transition-all duration-200 min-h-[2.75rem] sm:min-h-0 ${mode === 'citations' ? 'bg-white dark:bg-stone-900 text-violet-800 dark:text-violet-300 shadow-sm border border-stone-200/80 dark:border-stone-600' : 'text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200'}`}
+                            >
+                              <span className="text-sm sm:text-base leading-none" aria-hidden>📚</span>
+                              <span className="leading-tight">Citations</span>
+                            </button>
+                            <button
+                              onClick={() => { setMode('quiz'); setShowWordWarning(false); setAnalyzeUploadError(''); setSummaryResult(null); setQuizResult(null); setFlashcardResult(null); setCrosswordResult(null); setStudyPackResult(null); }}
+                              className="flex-1 flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-2 py-2 sm:py-2.5 rounded-lg font-medium text-[11px] sm:text-sm transition-all duration-200 text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200 min-h-[2.75rem] sm:min-h-0"
+                            >
+                              <span className="text-sm sm:text-base leading-none" aria-hidden>📦</span>
+                              <span className="leading-tight"><span className="sm:hidden">Study</span><span className="hidden sm:inline">Study Pack</span></span>
+                            </button>
+                          </div>
+                  {showFirstCitationPrompt && mode === 'citations' && (
+                            <div className="flex flex-col items-center gap-1 mb-1.5 animate-in fade-in slide-in-from-bottom-2 duration-500">
+                              <span className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-stone-50 dark:bg-stone-800/80 border border-stone-200/90 dark:border-stone-600 text-stone-800 dark:text-stone-200 text-sm font-medium shadow-sm">
+                        Start your first citation
+                      </span>
+                              <svg className="w-5 h-5 text-violet-600 dark:text-violet-400 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                      </svg>
+                    </div>
+                          )}
+                        </div>
+                        <div className="hidden lg:block relative self-end justify-self-end w-[236px] xl:w-[248px] pointer-events-auto rotate-[11deg] origin-bottom-right drop-shadow-lg z-[5]" aria-label="Sample citation export preview">
+                          <p className="text-center mb-2">
+                            <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-violet-800/95 dark:text-violet-300/95">Export</span>
+                            <span className="block text-[10px] text-stone-500 dark:text-stone-400 mt-0.5">APA · MLA · Chicago</span>
+                          </p>
+                          <InteractiveCitationsDemo variant="side-right" />
+                        </div>
+                      </div>
+                    </>
+                  )}
+
+                  {mode === 'citations' && (
+                    <div className="relative mb-2 max-w-3xl mx-auto mt-2 sm:mt-0 lg:-mt-14 xl:-mt-16 z-20">
+                      <div className="relative rounded-xl sm:rounded-2xl border transition-all duration-300 shadow-sm focus-within:shadow-md focus-within:ring-2 focus-within:ring-violet-500/25 border-sky-200/90 dark:border-sky-800/60 bg-white dark:bg-stone-900/40 focus-within:border-sky-400/60">
+                        <div className="relative rounded-[12px] sm:rounded-[18px] bg-white/98 dark:bg-stone-800/95 backdrop-blur-sm min-h-[120px] sm:min-h-[160px]">
+                          <textarea
+                            value={inputText}
+                            onChange={(e) => {
+                              setInputText(e.target.value);
+                              setShowWordWarning(false);
+                            }}
+                            onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey && isTextValid()) { e.preventDefault(); handleSubmit(); }}}
+                            placeholder="Enter your research topic to find academic sources..."
+                            className="relative w-full min-h-[120px] sm:min-h-[160px] max-h-[220px] overflow-y-auto p-4 sm:p-6 text-stone-800 dark:text-stone-100 text-[15px] sm:text-lg bg-transparent border-none outline-none resize-none placeholder-stone-400 dark:placeholder-stone-500 leading-relaxed"
+                            onInput={(e) => {
+                              const target = e.target as HTMLTextAreaElement;
+                              target.style.height = 'auto';
+                              target.style.height = Math.min(target.scrollHeight, 220) + 'px';
+                            }}
+                            data-tutorial-target="essay-input-wrapper"
+                          />
+                          <div className="absolute bottom-4 left-5 text-sm text-stone-400 dark:text-stone-500 font-medium">
+                            {inputText.length} characters
+                        </div>
+                          {showWordWarning && (
+                            <div className="absolute -bottom-6 left-0 right-0 text-center">
+                              <span className="text-sm font-medium text-red-500">Please enter a research topic</span>
+                          </div>
+                          )}
                       </div>
                       </div>
-                )}
+                      <div className="flex justify-center mt-6">
+                        <button
+                          data-tutorial-target="essay-analyze-btn"
+                          onClick={handleSubmit}
+                          disabled={!isTextValid() || isSearchingCitations}
+                          className={`px-8 sm:px-10 py-3.5 rounded-xl flex items-center justify-center gap-2 transition-all duration-200 font-semibold text-base ${
+                            isTextValid() && !isSearchingCitations
+                              ? 'bg-violet-700 hover:bg-violet-800 dark:bg-violet-600 dark:hover:bg-violet-500 text-white shadow-md shadow-violet-900/15 ring-1 ring-violet-900/10 hover:-translate-y-0.5 active:scale-[0.98] cursor-pointer'
+                              : 'bg-stone-200 dark:bg-stone-700 text-stone-400 cursor-not-allowed'
+                          }`}
+                        >
+                          {isSearchingCitations ? (
+                            <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
+                          ) : (
+                            <>Find Sources</>
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  )}
 
                 {mode === 'citations' && (
                     <>
@@ -2775,10 +2802,10 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                       <InteractiveStudyPackDemo variant="side-left" />
                     </div>
                     <div className="min-w-0 self-start">
-                      <h2 className="relative text-2xl sm:text-3xl md:text-[2rem] lg:text-[2.125rem] font-semibold text-stone-900 dark:text-stone-50 text-center mb-1.5 sm:mb-2 tracking-tight leading-snug px-1" style={{ fontFamily: "'EB Garamond', Georgia, serif" }}>
+                      <h2 className="relative text-lg sm:text-2xl md:text-[2rem] lg:text-[2.125rem] font-semibold text-stone-900 dark:text-stone-50 text-center mb-2 sm:mb-2 tracking-tight leading-snug px-0.5 sm:px-1" style={{ fontFamily: "'EB Garamond', Georgia, serif" }}>
                         Turn your notes into <span className="text-violet-800 dark:text-violet-300">5 study tools</span>
                   </h2>
-                  <p className="relative text-stone-600 dark:text-stone-300 text-sm sm:text-base text-center mb-3 sm:mb-8 max-w-xl mx-auto leading-relaxed">
+                  <p className="relative text-stone-600 dark:text-stone-300 text-[13px] sm:text-base text-center mb-4 sm:mb-8 max-w-xl mx-auto leading-relaxed">
                     Lesson, flashcards, quiz, crossword & Crater Blast — all from one paste
                   </p>
                       <div className="hidden sm:block">
@@ -2789,24 +2816,27 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                         />
                       </div>
                   {/* Tab switcher - same as Analyze/Citations (Study Pack section: Analyze/Citations inactive, Study Pack active) */}
-                      <div className="relative flex rounded-xl bg-stone-100/90 dark:bg-stone-800/80 p-1 mb-2 sm:mb-3 max-w-lg mx-auto border border-stone-200/80 dark:border-stone-700/60">
+                      <div className="relative flex rounded-xl bg-stone-100/90 dark:bg-stone-800/80 p-0.5 sm:p-1 mb-3 sm:mb-3 w-full max-w-lg mx-auto border border-stone-200/80 dark:border-stone-700/60">
                     <button
                       onClick={() => { setMode('analyze'); setShowWordWarning(false); setAnalyzeUploadError(''); setSummaryResult(null); setQuizResult(null); setFlashcardResult(null); setCrosswordResult(null); setStudyPackResult(null); }}
-                          className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200"
+                          className="flex-1 flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-2 py-2 sm:py-2.5 rounded-lg font-medium text-[11px] sm:text-sm transition-all duration-200 text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200 min-h-[2.75rem] sm:min-h-0"
                     >
-                      <span className="text-lg">📝</span> Analyze Text
+                      <span className="text-sm sm:text-lg leading-none">📝</span>
+                      <span className="leading-tight text-center"><span className="sm:hidden">Analyze</span><span className="hidden sm:inline">Analyze Text</span></span>
                     </button>
                     <button
                       onClick={() => { setMode('citations'); setShowWordWarning(false); setAnalyzeUploadError(''); setSummaryResult(null); }}
-                          className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200"
+                          className="flex-1 flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-2 py-2 sm:py-2.5 rounded-lg font-medium text-[11px] sm:text-sm transition-all duration-200 text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200 min-h-[2.75rem] sm:min-h-0"
                     >
-                      <span className="text-lg">📚</span> Citations
+                      <span className="text-sm sm:text-lg leading-none">📚</span>
+                      <span className="leading-tight">Citations</span>
                     </button>
                     <button
                       onClick={() => { setMode('quiz'); setShowWordWarning(false); setAnalyzeUploadError(''); setSummaryResult(null); setQuizResult(null); setFlashcardResult(null); setCrosswordResult(null); setStudyPackResult(null); }}
-                          className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 bg-white dark:bg-stone-700 text-violet-800 dark:text-violet-200 shadow-sm ring-1 ring-stone-200/80 dark:ring-stone-600/80"
+                          className="flex-1 flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-2 py-2 sm:py-2.5 rounded-lg font-medium text-[11px] sm:text-sm transition-all duration-200 bg-white dark:bg-stone-700 text-violet-800 dark:text-violet-200 shadow-sm ring-1 ring-stone-200/80 dark:ring-stone-600/80 min-h-[2.75rem] sm:min-h-0"
                     >
-                      <span className="text-lg">📦</span> Study Pack
+                      <span className="text-sm sm:text-lg leading-none">📦</span>
+                      <span className="leading-tight"><span className="sm:hidden">Study</span><span className="hidden sm:inline">Study Pack</span></span>
                     </button>
                   </div>
                   {/* Create Cards button - inline */}
@@ -3809,13 +3839,13 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
               ))}
             </div>
           ) : filteredActivity.length > 0 ? (
-            <div className="flex gap-3 overflow-x-auto pb-2 -mx-3 px-3 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-2 lg:grid-cols-5 sm:gap-4 scrollbar-hide snap-x snap-mandatory">
+            <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-2 lg:grid-cols-5 sm:gap-4 scrollbar-hide snap-x snap-mandatory scroll-pl-4 sm:scroll-pl-0">
               {filteredActivity.slice(0, 7).map((activity) => {
                 const meta = activityMeta[activity.type];
                 return (
                   <div 
                     key={activity.id}
-                    className={`relative overflow-hidden rounded-xl sm:rounded-3xl p-3 sm:p-4 border ${meta.border} bg-gradient-to-br ${meta.cardBg} backdrop-blur-sm sm:hover:shadow-xl sm:hover:-translate-y-1 sm:hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 cursor-pointer group`}
+                    className={`relative overflow-hidden rounded-xl sm:rounded-3xl p-3.5 sm:p-4 border ${meta.border} bg-gradient-to-br ${meta.cardBg} backdrop-blur-sm w-[min(292px,calc(100vw-2rem))] flex-shrink-0 snap-start sm:w-auto sm:min-w-0 sm:flex-shrink sm:hover:shadow-xl sm:hover:-translate-y-1 sm:hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 cursor-pointer group`}
                     onClick={() => handleActivityClick(activity)}
                   >
                     {/* Decorative shapes - hidden on mobile for cleaner look */}
@@ -4028,8 +4058,8 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
 
           {/* Full tool cards — moved below main flows so the hero stays prominent */}
           <div id="dashboard-all-tools" className="mt-8 pt-6 border-t border-stone-200/60 dark:border-stone-700/50 scroll-mt-8">
-            <p className="text-[11px] sm:text-xs font-medium text-stone-500 dark:text-stone-400 mb-3">All tools</p>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3 opacity-90">
+            <p className="text-xs sm:text-xs font-medium text-stone-600 dark:text-stone-400 mb-3.5">All tools</p>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-3 opacity-90">
               {[
                 { id: 'analyze' as const, title: 'Analyze', desc: 'Professor-style essay feedback', emoji: '📝', iconWrap: 'bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/70 dark:border-emerald-800/50', titleClr: 'text-stone-900 dark:text-stone-50', badgeText: 'Popular', badgeClr: 'bg-stone-100 text-stone-700 dark:bg-stone-800 dark:text-stone-200 border border-stone-200/80 dark:border-stone-600' },
                 { id: 'citations' as const, title: 'Citations', desc: 'Academic sources, formatted', emoji: '📚', iconWrap: 'bg-sky-50 dark:bg-sky-950/35 border border-sky-200/70 dark:border-sky-800/50', titleClr: 'text-stone-900 dark:text-stone-50', badgeText: undefined as string | undefined, badgeClr: '' },
@@ -4043,7 +4073,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                     key={card.id}
                     type="button"
                     onClick={() => card.id === 'more-tools' ? onNavigate('more-tools') : (card.id === 'quiz' ? (() => { setMode('quiz'); setShowWordWarning(false); setSummaryResult(null); setQuizResult(null); setFlashcardResult(null); setCrosswordResult(null); setStudyPackResult(null); })() : setMode(card.id))}
-                    className={`relative overflow-hidden rounded-xl p-3 sm:p-4 text-left transition-all duration-200 hover:shadow-md bg-white dark:bg-stone-900/60 border border-stone-200/90 dark:border-stone-700/90 shadow-sm dark:shadow-black/20 ${isActive ? 'ring-2 ring-violet-600 dark:ring-violet-500 ring-offset-1 ring-offset-stone-50 dark:ring-offset-stone-950' : ''}`}
+                    className={`relative overflow-hidden rounded-xl p-3.5 sm:p-4 text-left transition-all duration-200 hover:shadow-md bg-white dark:bg-stone-900/60 border border-stone-200/90 dark:border-stone-700/90 shadow-sm dark:shadow-black/20 min-h-[5.5rem] sm:min-h-0 ${isActive ? 'ring-2 ring-violet-600 dark:ring-violet-500 ring-offset-1 ring-offset-stone-50 dark:ring-offset-stone-950' : ''}`}
                   >
                     {card.badgeText && (
                       <span className={`absolute top-1.5 right-1.5 px-1.5 py-0.5 rounded text-[8px] font-semibold uppercase tracking-wide ${card.badgeClr}`}>

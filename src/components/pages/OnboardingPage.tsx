@@ -100,55 +100,53 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate }: OnboardingPageProps)
     const mascotPose: 'waving' | 'studying' | 'celebrating' = transText >= 4 ? 'celebrating' : transText >= 2 ? 'studying' : 'waving';
 
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-violet-600 via-fuchsia-600 to-violet-700 overflow-hidden animate-transBgIn">
-        {/* Slow-moving ambient particles */}
+      <>
+      <WriteScholarEditorialBackgroundLayers position="fixed" />
+      <div className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden animate-transBgIn bg-gradient-to-b from-stone-100/95 via-violet-50/50 to-stone-200/90 dark:from-stone-950/95 dark:via-violet-950/35 dark:to-stone-900 backdrop-blur-[2px]">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_90%_60%_at_50%_-10%,rgba(91,33,182,0.12),transparent_55%)] dark:bg-[radial-gradient(ellipse_90%_60%_at_50%_-10%,rgba(109,40,217,0.2),transparent_55%)] pointer-events-none" aria-hidden />
+        {/* Soft particles — stone/violet, editorial */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden>
-          {Array.from({ length: 14 }).map((_, i) => (
+          {Array.from({ length: 12 }).map((_, i) => (
             <div
               key={i}
-              className="absolute rounded-full"
+              className="absolute rounded-full bg-violet-400/10 dark:bg-violet-400/5"
               style={{
-                width: `${10 + (i % 5) * 8}px`,
-                height: `${10 + (i % 5) * 8}px`,
-                left: `${(i * 7.3) % 100}%`,
-                top: `${(i * 13.7) % 100}%`,
-                background: 'rgba(255,255,255,0.06)',
-                animation: `transFloat ${6 + (i % 4) * 2}s ease-in-out infinite`,
-                animationDelay: `${(i * 0.7) % 4}s`,
+                width: `${8 + (i % 4) * 6}px`,
+                height: `${8 + (i % 4) * 6}px`,
+                left: `${(i * 8.1) % 100}%`,
+                top: `${(i * 11.3) % 100}%`,
+                animation: `transFloat ${7 + (i % 3) * 2}s ease-in-out infinite`,
+                animationDelay: `${(i * 0.5) % 3}s`,
               }}
             />
           ))}
         </div>
 
-        {/* Soft radial glow */}
-        <div className="absolute w-[500px] h-[500px] bg-white/8 rounded-full blur-[120px]" />
-
-        <div className="relative z-10 flex flex-col items-center text-center px-6">
-          {/* Mascot with smooth scale transition */}
+        <div className="relative z-10 flex flex-col items-center text-center px-6 max-w-lg">
           <div
-            className="mb-10"
+            className="mb-8 sm:mb-10"
             style={{
-              transform: `scale(${1 + transText * 0.025})`,
+              transform: `scale(${1 + transText * 0.02})`,
               transition: 'transform 1.2s cubic-bezier(0.22, 1, 0.36, 1)',
             }}
           >
-            <ScholarMascot size={150} animated={true} pose={mascotPose} />
+            <div className="rounded-2xl border border-stone-200/80 dark:border-stone-600/60 bg-white/60 dark:bg-stone-900/40 p-2 shadow-lg shadow-stone-900/5 ring-1 ring-white/60 dark:ring-white/5">
+              <ScholarMascot size={140} animated={true} pose={mascotPose} />
+            </div>
           </div>
 
-          {/* Text — crossfade, no emojis */}
-          <div className="relative h-16 sm:h-20 flex items-center justify-center overflow-hidden">
+          <div className="relative min-h-[4.5rem] sm:min-h-[5.5rem] flex items-center justify-center overflow-hidden">
             <h1
               key={transText}
-              className="animate-transLine text-2xl sm:text-4xl font-extrabold text-white tracking-tight"
-              style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}
+              className="animate-transLine text-2xl sm:text-[2rem] font-semibold text-stone-900 dark:text-stone-50 tracking-tight leading-snug"
+              style={{ fontFamily: "'EB Garamond', Georgia, serif" }}
             >
               {line.text}
             </h1>
           </div>
 
-          {/* Thin progress bar — smoothly fills over 8.4s */}
-          <div className="mt-10 w-48 sm:w-64 h-1 bg-white/15 rounded-full overflow-hidden">
-            <div className="h-full bg-white/80 rounded-full animate-progressFill" />
+          <div className="mt-8 sm:mt-10 w-52 sm:w-64 h-1.5 bg-stone-200/90 dark:bg-stone-700/80 rounded-full overflow-hidden ring-1 ring-stone-300/30 dark:ring-stone-600/30">
+            <div className="h-full bg-gradient-to-r from-violet-600 to-violet-500 dark:from-violet-500 dark:to-violet-400 rounded-full animate-progressFill" />
           </div>
         </div>
 
@@ -178,6 +176,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate }: OnboardingPageProps)
           }
         `}</style>
       </div>
+      </>
     );
   }
 
@@ -186,34 +185,34 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate }: OnboardingPageProps)
     <div className="relative min-h-screen flex flex-col font-sans overflow-x-hidden">
       <WriteScholarEditorialBackgroundLayers position="fixed" />
 
-      {/* Floating shapes */}
-      <div className="absolute top-24 left-8 w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-400/20 to-fuchsia-500/20 rotate-12 hidden lg:block animate-float pointer-events-none" />
-      <div className="absolute top-40 right-12 w-12 h-12 rounded-full bg-gradient-to-br from-violet-400/20 to-fuchsia-500/20 hidden lg:block animate-float-delayed pointer-events-none" />
-      <div className="absolute top-64 left-16 w-10 h-10 rounded-lg bg-gradient-to-br from-fuchsia-400/20 to-violet-500/20 -rotate-12 hidden xl:block animate-float pointer-events-none" style={{ animationDelay: '1s' }} />
-      <div className="absolute top-[12%] left-[8%] w-12 h-12 rounded-2xl bg-gradient-to-br from-violet-400/20 to-fuchsia-500/20 rotate-12 lg:hidden animate-float pointer-events-none" />
-      <div className="absolute top-[22%] right-[10%] w-10 h-10 rounded-full bg-gradient-to-br from-violet-400/20 to-fuchsia-500/20 lg:hidden animate-float-delayed pointer-events-none" />
+      {/* Subtle accents — match dashboard editorial */}
+      <div className="absolute top-24 left-8 w-14 h-14 rounded-2xl bg-violet-500/5 dark:bg-violet-500/10 border border-stone-200/40 dark:border-stone-700/40 rotate-12 hidden lg:block animate-float pointer-events-none" />
+      <div className="absolute top-40 right-12 w-11 h-11 rounded-full bg-stone-400/10 dark:bg-stone-500/10 hidden lg:block animate-float-delayed pointer-events-none" />
 
       {/* Header */}
-      <div className="relative z-10 px-6 pt-6 pb-2 flex items-center">
+      <div className="relative z-10 px-5 sm:px-6 pt-5 sm:pt-6 pb-2 flex items-center">
         <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center overflow-hidden shadow-lg shadow-violet-500/30">
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center overflow-hidden border border-stone-200/80 dark:border-stone-600 bg-white/80 dark:bg-stone-800/80 shadow-sm ring-1 ring-white/50 dark:ring-white/5">
             <img src="/mascot.png" alt="WriteScholar" className="w-full h-full object-contain" loading="eager" width="120" height="120" />
           </div>
-          <span className="text-xl font-extrabold tracking-tight text-violet-600 dark:text-violet-400">WriteScholar</span>
+          <span className="text-lg sm:text-xl font-semibold tracking-tight text-stone-900 dark:text-stone-100" style={{ fontFamily: "'EB Garamond', Georgia, serif" }}>WriteScholar</span>
         </div>
       </div>
 
-      <div className="relative z-10 flex-1 flex items-center justify-center px-4 sm:px-6 py-6 sm:py-8">
+      <div className="relative z-10 flex-1 flex items-center justify-center px-4 sm:px-6 py-6 sm:py-10">
         <div className="w-full max-w-md animate-fadeIn">
-          <div className="bg-white dark:bg-stone-800 rounded-3xl border border-stone-200 dark:border-stone-600 shadow-xl dark:shadow-stone-900/50 p-6 sm:p-8">
-              <div className="flex justify-center mb-6">
-              <ScholarMascot size={110} animated={true} pose="waving" />
+          <div className="rounded-2xl border border-stone-200/90 dark:border-stone-700/80 bg-white/90 dark:bg-stone-900/70 backdrop-blur-md shadow-[0_12px_40px_-12px_rgba(15,23,42,0.1)] dark:shadow-[0_12px_40px_-12px_rgba(0,0,0,0.4)] p-6 sm:p-8 ring-1 ring-white/50 dark:ring-white/5">
+            <div className="h-0.5 w-full bg-gradient-to-r from-emerald-500 via-violet-500 to-amber-500 opacity-80 rounded-full mb-6 -mt-1" aria-hidden />
+              <div className="flex justify-center mb-5">
+              <div className="rounded-2xl border border-stone-200/70 dark:border-stone-600/60 p-1.5 bg-stone-50/80 dark:bg-stone-800/50">
+                <ScholarMascot size={100} animated={true} pose="waving" />
+              </div>
               </div>
             <div className="text-center mb-6">
-              <h1 className="text-2xl sm:text-3xl text-stone-800 dark:text-stone-100 mb-2" style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 400 }}>
-                Hey there! Let's get started
+              <h1 className="text-2xl sm:text-[1.75rem] text-stone-900 dark:text-stone-50 mb-2 font-semibold leading-tight" style={{ fontFamily: "'EB Garamond', Georgia, serif" }}>
+                Hey there! Let&apos;s get started
                 </h1>
-              <p className="text-stone-500 dark:text-stone-400 text-base">Just two things and you're in</p>
+              <p className="text-stone-600 dark:text-stone-400 text-sm sm:text-base">Just two things and you&apos;re in</p>
               </div>
 
               <div className="space-y-4">
@@ -224,7 +223,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate }: OnboardingPageProps)
                     value={displayName}
                     onChange={(e) => setDisplayName(e.target.value)}
                     placeholder="e.g. Alex or Jordan"
-                  className="w-full px-5 py-4 rounded-2xl border-2 border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-700/50 focus:border-violet-500 dark:focus:border-violet-500 focus:ring-2 focus:ring-violet-500/40 focus:outline-none transition-all text-base text-stone-800 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500"
+                  className="w-full px-4 py-3.5 rounded-xl border border-stone-200/90 dark:border-stone-600 bg-white dark:bg-stone-900/50 focus:border-violet-500 dark:focus:border-violet-400 focus:ring-2 focus:ring-violet-500/25 focus:outline-none transition-all text-base text-stone-800 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500"
                   autoFocus
                   />
                 </div>
@@ -235,15 +234,15 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate }: OnboardingPageProps)
                     value={username}
                     onChange={(e) => { setUsername(e.target.value); setUsernameError(null); }}
                   placeholder="e.g. alex_student"
-                  className={`w-full px-5 py-4 rounded-2xl border-2 bg-stone-50 dark:bg-stone-700/50 focus:ring-2 transition-all text-base text-stone-800 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500 ${
+                  className={`w-full px-4 py-3.5 rounded-xl border bg-white dark:bg-stone-900/50 focus:ring-2 transition-all text-base text-stone-800 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500 ${
                     usernameError
-                      ? 'border-violet-500 dark:border-violet-400 focus:border-violet-600 focus:ring-violet-500/40 focus:outline-none'
-                      : 'border-stone-200 dark:border-stone-600 focus:border-violet-500 dark:focus:border-violet-500 focus:ring-violet-500/40 focus:outline-none'
+                      ? 'border-rose-400 dark:border-rose-500 focus:border-rose-500 focus:ring-rose-500/25 focus:outline-none'
+                      : 'border-stone-200/90 dark:border-stone-600 focus:border-violet-500 dark:focus:border-violet-400 focus:ring-violet-500/25 focus:outline-none'
                   }`}
                   onKeyDown={(e) => { if (e.key === 'Enter' && displayName.trim() && username.trim() && !usernameError) handleContinue(); }}
                 />
-                {usernameError && <p className="mt-1.5 text-sm text-violet-700 dark:text-violet-300">{usernameError}</p>}
-                <p className="mt-1 text-xs text-stone-400 dark:text-stone-500">You can change this later in settings</p>
+                {usernameError && <p className="mt-1.5 text-sm text-rose-600 dark:text-rose-400">{usernameError}</p>}
+                <p className="mt-1 text-xs text-stone-500 dark:text-stone-500">You can change this later in settings</p>
               </div>
             </div>
 
@@ -251,7 +250,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate }: OnboardingPageProps)
               <button
                 onClick={handleContinue}
                 disabled={!displayName.trim() || !username.trim() || !!usernameError || isSaving}
-                className="w-full sm:w-auto px-10 py-3.5 bg-violet-600 hover:bg-violet-500 text-white rounded-2xl font-bold text-base shadow-lg shadow-violet-500/25 transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full px-8 py-3.5 bg-violet-700 hover:bg-violet-800 dark:bg-violet-600 dark:hover:bg-violet-500 text-white rounded-xl font-semibold text-base shadow-md shadow-violet-900/15 ring-1 ring-violet-900/10 transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {isSaving ? (
                   <>

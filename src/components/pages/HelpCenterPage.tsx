@@ -32,6 +32,11 @@ const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
       mainEntity: [
         {
           '@type': 'Question',
+          name: 'What kind of feedback will I get on my essay?',
+          acceptedAnswer: { '@type': 'Answer', text: 'Section-by-section annotations (strengths, improvements, concerns), a grade-level rubric, and actionable suggestions covering structure, argument, clarity, citations, and academic style.' }
+        },
+        {
+          '@type': 'Question',
           name: 'Which citation styles does WriteScholar support?',
           acceptedAnswer: { '@type': 'Answer', text: 'WriteScholar supports APA, Harvard, Chicago, MLA, IEEE, and Vancouver citation styles.' }
         },
@@ -74,6 +79,13 @@ const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
   ];
 
   const faqs = [
+    {
+      id: 13,
+      category: 'analysis',
+      question: 'What kind of feedback will I get on my essay?',
+      answer: 'You get section-by-section annotations (green for strengths, yellow for improvements, red for concerns), an overall grade-level rubric, and concrete suggestions. Feedback covers structure, argument quality, clarity, citations, and academic style—so you know what to revise before you submit.',
+      tags: ['feedback', 'analysis', 'essay', 'rubric', 'annotations']
+    },
     {
       id: 1,
       category: 'getting-started',

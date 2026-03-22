@@ -256,15 +256,13 @@ class AIAnalysisService {
       
       try {
         const { plan } = await subscriptionService.getUserSubscriptionDetails(userId);
-        userPlan = plan;
-        
-        if (plan === 'premium') {
-          // Premium users get better model and more tokens
+        // focus / starter / legacy premium → same limits as Pro (single paid analysis tier)
+        const effPlan = subscriptionService.normalizePlanForLimits(plan);
+        userPlan = effPlan === 'pro' ? 'pro' : 'free';
+
+        if (effPlan === 'pro') {
           selectedModel = process.env.OPENAI_PREMIUM_MODEL || 'gpt-5-mini';
           maxTokens = 15000;
-        } else if (plan === 'pro') {
-          selectedModel = process.env.OPENAI_STANDARD_MODEL || 'gpt-4o-mini';
-          maxTokens = 10000;
         } else {
           selectedModel = process.env.OPENAI_STANDARD_MODEL || 'gpt-4o-mini';
           maxTokens = 5000;
@@ -363,12 +361,9 @@ class AIAnalysisService {
 
       try {
         const { plan } = await subscriptionService.getUserSubscriptionDetails(userId);
-        if (plan === 'premium') {
+        if (subscriptionService.normalizePlanForLimits(plan) === 'pro') {
           selectedModel = process.env.OPENAI_PREMIUM_MODEL || 'gpt-5-mini';
           maxTokens = 8000;
-        } else if (plan === 'pro') {
-          selectedModel = process.env.OPENAI_STANDARD_MODEL || 'gpt-4o-mini';
-          maxTokens = 6000;
         }
       } catch (planErr) {
         console.log('Could not fetch plan for rubric analysis, using defaults');
@@ -901,16 +896,11 @@ CRITICAL REQUIREMENTS:
     const wordCount = content.split(/\s+/).length;
     let targetAnnotations = 12; // Default for free/short documents
     
-    if (userPlan === 'premium') {
+    if (subscriptionService.normalizePlanForLimits(userPlan || 'free') === 'pro') {
       if (wordCount > 5000) targetAnnotations = 35;
       else if (wordCount > 3000) targetAnnotations = 30;
       else if (wordCount > 1500) targetAnnotations = 25;
       else targetAnnotations = 20;
-    } else if (userPlan === 'pro') {
-      if (wordCount > 5000) targetAnnotations = 30;
-      else if (wordCount > 3000) targetAnnotations = 25;
-      else if (wordCount > 1500) targetAnnotations = 20;
-      else targetAnnotations = 17;
     } else {
       if (wordCount > 3000) targetAnnotations = 20;
       else if (wordCount > 1500) targetAnnotations = 17;
@@ -1502,16 +1492,11 @@ CRITICAL REQUIREMENTS:
     const wordCount = content.split(/\s+/).length;
     let minTotal = 12;
     
-    if (userPlan === 'premium') {
+    if (subscriptionService.normalizePlanForLimits(userPlan || 'free') === 'pro') {
       if (wordCount > 5000) minTotal = 35;
       else if (wordCount > 3000) minTotal = 30;
       else if (wordCount > 1500) minTotal = 25;
       else minTotal = 20;
-    } else if (userPlan === 'pro') {
-      if (wordCount > 5000) minTotal = 30;
-      else if (wordCount > 3000) minTotal = 25;
-      else if (wordCount > 1500) minTotal = 20;
-      else minTotal = 17;
     } else {
       // Free plan: limited scaling
       if (wordCount > 3000) minTotal = 20;
@@ -3070,7 +3055,7 @@ IMPORTANT REQUIREMENTS:
       );
 
       // Free users: expires 30 days after creation; Paid users (pro/premium): no expiration (null)
-      const isPaidUser = userPlan === 'pro' || userPlan === 'premium';
+      const isPaidUser = subscriptionService.normalizePlanForLimits(userPlan || 'free') === 'pro';
       const expiresAt = isPaidUser ? null : getExpiresAt30Days();
 
       // Note: yearRange is already included in searchResults.yearRange
@@ -3191,7 +3176,7 @@ IMPORTANT REQUIREMENTS:
       );
 
       // Free users: expires 30 days after creation; Paid users (pro/premium): no expiration (null)
-      const isPaidUser = userPlan === 'pro' || userPlan === 'premium';
+      const isPaidUser = subscriptionService.normalizePlanForLimits(userPlan || 'free') === 'pro';
       const expiresAt = isPaidUser ? null : getExpiresAt30Days();
 
       const quizData = {
@@ -3239,7 +3224,7 @@ IMPORTANT REQUIREMENTS:
       );
 
       // Free users: expires 30 days after creation; Paid users (pro/premium): no expiration (null)
-      const isPaidUser = userPlan === 'pro' || userPlan === 'premium';
+      const isPaidUser = subscriptionService.normalizePlanForLimits(userPlan || 'free') === 'pro';
       const expiresAt = isPaidUser ? null : getExpiresAt30Days();
 
       const flashcardData = {
@@ -3287,7 +3272,7 @@ IMPORTANT REQUIREMENTS:
       );
 
       // Free users: expires 30 days after creation; Paid users (pro/premium): no expiration (null)
-      const isPaidUser = userPlan === 'pro' || userPlan === 'premium';
+      const isPaidUser = subscriptionService.normalizePlanForLimits(userPlan || 'free') === 'pro';
       const expiresAt = isPaidUser ? null : getExpiresAt30Days();
 
       // Build clues object from placedWords for display in history
@@ -3349,7 +3334,7 @@ IMPORTANT REQUIREMENTS:
         process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
       );
 
-      const isPaidUser = userPlan === 'pro' || userPlan === 'premium';
+      const isPaidUser = subscriptionService.normalizePlanForLimits(userPlan || 'free') === 'pro';
       const expiresAt = isPaidUser ? null : getExpiresAt30Days();
 
       const title = (payload.title || payload.sourceText || 'Crater Blast Game').toString().slice(0, 200);
@@ -3569,7 +3554,7 @@ IMPORTANT REQUIREMENTS:
       );
 
       // Free users: expires 30 days after creation; Paid users (pro/premium): no expiration (null)
-      const isPaidUser = userPlan === 'pro' || userPlan === 'premium';
+      const isPaidUser = subscriptionService.normalizePlanForLimits(userPlan || 'free') === 'pro';
       const expiresAt = isPaidUser ? null : getExpiresAt30Days();
 
       const lessonData = {

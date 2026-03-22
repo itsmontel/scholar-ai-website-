@@ -17,7 +17,6 @@ interface TutorialStep {
   targetSelector: string | null;
   mobileTargetSelector?: string;
   mascotPose: MascotPose;
-  interactSelector?: string;
   spotlightPadding?: number;
   confetti?: boolean;
 }
@@ -28,7 +27,7 @@ const STEPS: TutorialStep[] = [
   {
     id: 'welcome',
     title: 'Welcome to WriteScholar!',
-    body: `Hey! I'm ${MASCOT_NAME}, your study sidekick. Quick tour — then we'll get you to analyze your first essay. That's where the magic happens!`,
+    body: `Hey! I'm ${MASCOT_NAME}, your study sidekick. Quick tour, then we'll get you to analyze your first essay. That's where the magic happens!`,
     emoji: '🎉',
     targetSelector: null,
     mascotPose: 'waving',
@@ -37,7 +36,7 @@ const STEPS: TutorialStep[] = [
   {
     id: 'greeting',
     title: 'Your dashboard',
-    body: "Your home base. Greeting, search, streak, friends, badges. All right here. Everything you create will show up below.",
+    body: "Your home base: greeting, search, streak, badges, and quick access to your tools. Everything you create shows up below.",
     emoji: '🏠',
     targetSelector: '[data-tutorial="greeting-area"]',
     mascotPose: 'pointing',
@@ -48,19 +47,9 @@ const STEPS: TutorialStep[] = [
     title: 'Analyze, Citations, Study Pack & more',
     body: "Analyze (essay feedback) is our star. Tap it to get professor style feedback on your writing. Citations, Study Pack, Focus Mode, and More Tools are one tap away.",
     emoji: '📝',
-    targetSelector: '[data-tutorial="feature-cards"]',
+    targetSelector: '[data-tutorial="dashboard-tool-tabs-hero"]',
     mascotPose: 'pointing',
     spotlightPadding: 10,
-  },
-  {
-    id: 'analyze-input',
-    title: 'Your first step: Analyze your essay',
-    body: "Paste your essay here (min 200 words) or upload a PDF, DOCX, or TXT file. Many people prefer uploading. Then hit Analyze Text. You'll get professor style feedback on structure, clarity, citations, and tone in under 60 seconds.",
-    emoji: '✨',
-    targetSelector: '[data-tutorial-target="essay-input-wrapper"]',
-    mascotPose: 'pointing',
-    spotlightPadding: 12,
-    interactSelector: '[data-tutorial="analyze-feature-card"]',
   },
   {
     id: 'recents',
@@ -82,9 +71,7 @@ const STEPS: TutorialStep[] = [
   },
 ];
 
-/* ────────────────────────────────────────────────────────────────
-   CONFETTI
-   ──────────────────────────────────────────────────────────────── */
+/* --- Confetti --- */
 function useConfetti(trigger: number) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const animRef = useRef(0);
@@ -224,9 +211,7 @@ function useSmoothRect(target: Rect | null, duration = 900, useExpoEase = true) 
   return displayRef.current;
 }
 
-/* ────────────────────────────────────────────────────────────────
-   TOOLTIP POSITION — immediate calculation, no lag
-   ──────────────────────────────────────────────────────────────── */
+/* --- Tooltip position (immediate calculation) --- */
 function computeTooltipPos(
   spotlight: Rect | null,
   tooltipH: number,
@@ -269,7 +254,6 @@ const InteractiveTutorial = ({ userName, onComplete }: InteractiveTutorialProps)
   const [confettiTrigger, setConfettiTrigger] = useState(-1);
   const [tooltipH, setTooltipH] = useState(260);
   const [isMobile, setIsMobile] = useState(false);
-  const prevStepRef = useRef(-1);
   const tooltipRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -295,7 +279,7 @@ const InteractiveTutorial = ({ userName, onComplete }: InteractiveTutorialProps)
 
   useEffect(() => { trackEvent('tutorial_start'); }, []);
 
-  /* ── Measure tooltip each step ── */
+  /* Measure tooltip each step */
   useEffect(() => {
     const t = setTimeout(() => {
       if (tooltipRef.current) {
@@ -306,7 +290,7 @@ const InteractiveTutorial = ({ userName, onComplete }: InteractiveTutorialProps)
     return () => clearTimeout(t);
   }, [step]);
 
-  /* ── Track target element rect ── */
+  /* Track target element rect */
   const updateRect = useCallback(() => {
     if (!effectiveSelector) { setRawRect(null); return; }
     const el = document.querySelector(effectiveSelector);
@@ -318,14 +302,11 @@ const InteractiveTutorial = ({ userName, onComplete }: InteractiveTutorialProps)
     }
   }, [effectiveSelector]);
 
-  const isStep4WithInteract = step === 3 && !!current.interactSelector;
   useEffect(() => {
-    if (!isStep4WithInteract) {
-      updateRect();
-      const timers = [50, 200, 500, 900].map(d => setTimeout(updateRect, d));
-      return () => timers.forEach(clearTimeout);
-    }
-  }, [updateRect, isStep4WithInteract]);
+    updateRect();
+    const timers = [50, 200, 500, 900].map(d => setTimeout(updateRect, d));
+    return () => timers.forEach(clearTimeout);
+  }, [updateRect]);
   useEffect(() => {
     window.addEventListener('scroll', updateRect, true);
     window.addEventListener('resize', updateRect);
@@ -335,7 +316,7 @@ const InteractiveTutorial = ({ userName, onComplete }: InteractiveTutorialProps)
     };
   }, [updateRect]);
 
-  /* ── Scroll into view ── */
+  /* Scroll spotlight target into view */
   useEffect(() => {
     if (!effectiveSelector) return;
     const scrollToTarget = () => {
@@ -346,54 +327,24 @@ const InteractiveTutorial = ({ userName, onComplete }: InteractiveTutorialProps)
         delays.forEach(d => setTimeout(updateRect, d));
       }
     };
-    if (isStep4WithInteract) {
-      const clickEl = document.querySelector(current.interactSelector!);
-      if (clickEl) (clickEl as HTMLElement).click();
-      const t1 = setTimeout(() => {
-        const el = document.querySelector(effectiveSelector!);
-        if (el) {
-          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          [250, 550, 900, 1300].forEach(d => setTimeout(updateRect, d));
-        }
-      }, 380);
-      return () => clearTimeout(t1);
-    }
     if (step >= 3) {
       scrollToTarget();
-      if (current.interactSelector) {
-        const t = setTimeout(scrollToTarget, 450);
-        return () => clearTimeout(t);
-      }
     } else {
-      const initialDelay = current.interactSelector ? 600 : 100;
-      const t = setTimeout(scrollToTarget, initialDelay);
+      const t = setTimeout(scrollToTarget, 100);
       return () => clearTimeout(t);
     }
-  }, [step, effectiveSelector, current.interactSelector, updateRect, isStep4WithInteract]);
+  }, [step, effectiveSelector, updateRect]);
 
-  /* ── Content key for crossfade ── */
+  /* Content key for crossfade */
   useEffect(() => { setContentKey(k => k + 1); }, [step]);
 
-  /* ── Confetti ── */
+  /* Confetti */
   useEffect(() => {
     if (current.confetti) setConfettiTrigger(step);
   }, [step, current.confetti]);
 
-  /* ── Auto-click cards (step 4 click is handled in scroll effect) ── */
-  useEffect(() => {
-    if (current.interactSelector && prevStepRef.current !== step && !isStep4WithInteract) {
-      const delay = step >= 3 ? 120 : 550;
-      const t = setTimeout(() => {
-        const el = document.querySelector(current.interactSelector!) as HTMLElement | null;
-        if (el) el.click();
-      }, delay);
-      return () => clearTimeout(t);
-    }
-  }, [step, current.interactSelector, isStep4WithInteract]);
 
-  useEffect(() => { prevStepRef.current = step; }, [step]);
-
-  /* ── Keyboard nav ── */
+  /* Keyboard nav */
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === 'ArrowRight' || e.key === 'Enter') { e.preventDefault(); goNext(); }
@@ -412,7 +363,7 @@ const InteractiveTutorial = ({ userName, onComplete }: InteractiveTutorialProps)
     setTimeout(onComplete, 400);
   };
 
-  /* ── Tooltip position — use smoothRect for steps 0–2 (glides with spotlight), rawRect for 3+ (snappier) ── */
+  /* Tooltip: smoothRect for steps 0–2, rawRect for 3+ (snappier) */
   const rectForTooltip = (step < 3 && smoothRect) ? smoothRect : rawRect;
   const tooltipPos = useMemo(
     () => computeTooltipPos(rectForTooltip, tooltipH, padding),
@@ -427,7 +378,7 @@ const InteractiveTutorial = ({ userName, onComplete }: InteractiveTutorialProps)
     if (!smoothRect) {
       return (
         <svg className="fixed inset-0 w-full h-full">
-          <rect width={vw} height={vh} fill="rgba(0,0,0,0.58)" />
+          <rect width={vw} height={vh} fill="rgba(15,23,42,0.52)" />
         </svg>
       );
     }
@@ -451,7 +402,7 @@ const InteractiveTutorial = ({ userName, onComplete }: InteractiveTutorialProps)
             <stop offset="100%" stopColor="#8b5cf6" />
           </linearGradient>
         </defs>
-        <rect width={vw} height={vh} fill="rgba(0,0,0,0.58)" mask="url(#tut-mask)" />
+        <rect width={vw} height={vh} fill="rgba(15,23,42,0.52)" mask="url(#tut-mask)" />
         <rect
           x={sl - 2} y={st - 2} width={sw + 4} height={sh + 4}
           rx={r + 2} ry={r + 2}
@@ -494,11 +445,11 @@ const InteractiveTutorial = ({ userName, onComplete }: InteractiveTutorialProps)
 
       {/* Tooltip */}
       <div ref={tooltipRef} style={tooltipCss} className="z-[72] pointer-events-auto">
-        <div className="relative bg-white dark:bg-stone-800 rounded-3xl shadow-2xl shadow-black/18 dark:shadow-black/40 border border-stone-200/80 dark:border-stone-700/60 overflow-hidden">
+        <div className="relative bg-white/95 dark:bg-stone-900/90 backdrop-blur-md rounded-2xl shadow-[0_16px_50px_-16px_rgba(15,23,42,0.12)] dark:shadow-[0_16px_50px_-16px_rgba(0,0,0,0.45)] border border-stone-200/90 dark:border-stone-700/80 overflow-hidden ring-1 ring-white/50 dark:ring-white/5">
           {/* Progress bar */}
-          <div className="h-1 bg-stone-100 dark:bg-stone-700">
+          <div className="h-1 bg-stone-200/80 dark:bg-stone-700">
           <div
-            className="h-full bg-violet-600 rounded-r-full"
+            className="h-full bg-violet-700 dark:bg-violet-600 rounded-r-full"
             style={{ width: `${progress}%`, transition: 'width 0.9s cubic-bezier(0.22,1,0.36,1)' }}
             />
           </div>
@@ -510,7 +461,7 @@ const InteractiveTutorial = ({ userName, onComplete }: InteractiveTutorialProps)
                   <ScholarMascot size={100} animated pose={current.mascotPose} />
                 </div>
                 <span className="text-3xl mb-2 block animate-tutEmoji">{current.emoji}</span>
-                <h2 className="text-lg sm:text-xl font-extrabold text-stone-800 dark:text-stone-100 mb-2 leading-tight" style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}>
+                <h2 className="text-lg sm:text-xl font-semibold text-stone-800 dark:text-stone-100 mb-2 leading-tight" style={{ fontFamily: "'EB Garamond', Georgia, serif" }}>
                   {current.id === 'welcome' && userName
                     ? `Welcome, ${userName.split(' ')[0]}!`
                     : current.title}
@@ -527,7 +478,7 @@ const InteractiveTutorial = ({ userName, onComplete }: InteractiveTutorialProps)
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-lg animate-tutEmoji">{current.emoji}</span>
-                    <h2 className="text-base sm:text-lg font-extrabold text-stone-800 dark:text-stone-100 leading-tight" style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}>
+                    <h2 className="text-base sm:text-lg font-semibold text-stone-800 dark:text-stone-100 leading-tight" style={{ fontFamily: "'EB Garamond', Georgia, serif" }}>
                       {current.title}
                     </h2>
                   </div>
@@ -565,7 +516,7 @@ const InteractiveTutorial = ({ userName, onComplete }: InteractiveTutorialProps)
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" /></svg>
                   </button>
                 )}
-                <button onClick={goNext} className="h-8 px-3.5 bg-violet-600 hover:bg-violet-700 text-white rounded-lg font-bold text-xs shadow-lg shadow-violet-500/25 hover:shadow-violet-500/40 transition-all active:scale-95 flex items-center gap-1.5">
+                <button onClick={goNext} className="h-8 px-3.5 bg-violet-700 hover:bg-violet-800 dark:bg-violet-600 dark:hover:bg-violet-500 text-white rounded-xl font-semibold text-xs shadow-md shadow-violet-900/15 ring-1 ring-violet-900/10 transition-all active:scale-95 flex items-center gap-1.5">
                   {isLast ? 'Get started' : (
                     <>Next <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" /></svg></>
                   )}

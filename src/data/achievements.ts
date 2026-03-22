@@ -130,7 +130,7 @@ export const BADGES: Badge[] = [
   // ═══════════════════════════════════════════════
   // SUBSCRIPTION (4 badges) — drives revenue!
   // ═══════════════════════════════════════════════
-  { id: 'premium_pioneer', name: 'Premium Pioneer', creatureName: 'Goldie', description: 'Become a paid subscriber', xp: 50, category: 'subscription', rarity: 'epic', condition: (s) => s.is_paid_user, conditionText: 'Subscribe to a paid plan' },
+  { id: 'premium_pioneer', name: 'Pro Pioneer', creatureName: 'Goldie', description: 'Become a Pro subscriber', xp: 50, category: 'subscription', rarity: 'epic', condition: (s) => s.is_paid_user, conditionText: 'Subscribe to Pro' },
   { id: 'loyal_learner', name: 'Loyal Learner', creatureName: 'Loyalist', description: '3 months as a paid subscriber', xp: 75, category: 'subscription', rarity: 'epic', condition: (s) => s.is_paid_user && monthsSincePaid(s) >= 3, conditionText: '3 months as paid subscriber' },
   { id: 'dedicated_scholar', name: 'Dedicated Scholar', creatureName: 'Devotion', description: '6 months as a paid subscriber', xp: 100, category: 'subscription', rarity: 'legendary', condition: (s) => s.is_paid_user && monthsSincePaid(s) >= 6, conditionText: '6 months as paid subscriber' },
   { id: 'scholar_supreme', name: 'Scholar Supreme', creatureName: 'Eternia', description: '1 year as a paid subscriber', xp: 200, category: 'subscription', rarity: 'legendary', condition: (s) => s.is_paid_user && monthsSincePaid(s) >= 12, conditionText: '1 year as paid subscriber' },

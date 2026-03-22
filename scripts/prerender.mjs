@@ -33,6 +33,7 @@ const staticRoutes = [
   // AI tools (essay analyzer first)
   '/tools/analyze',
   '/tools/citations',
+  '/tools/study-pack',
   '/tools/summarizer',
   '/tools/quiz-generator',
   '/tools/create-flashcards',

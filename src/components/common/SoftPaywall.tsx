@@ -5,7 +5,6 @@ interface SoftPaywallProps {
   userName: string;
   onStartTrial: () => void;
   onDismiss: () => void;
-  onNavigatePricing: () => void;
   onNavigate?: (page: string) => void;
 }
 
@@ -13,12 +12,11 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
 const FEATURES = [
   { text: '99 combined analyses, study packs & citations per month', icon: '📝' },
-  { text: 'Focus Mode — block websites, unlock by studying', icon: '🔒' },
-  { text: 'Quizzes, flashcards & crosswords', icon: '🎯' },
+  { text: 'Unlimited Focus Mode sites — block distractions until you study', icon: '🔒' },
+  { text: 'Full study tools: quiz, flashcards, crossword & Crater Blast', icon: '🎯' },
   { text: '999,999 Paper Summarizer words per month', icon: '📚' },
   { text: 'Export to PDF & Word', icon: '📄' },
-  { text: 'All citation styles (APA, MLA, Chicago...)', icon: '✅' },
-  { text: 'Priority AI model', icon: '⚡' },
+  { text: '100MB uploads, long summarizer docs & priority AI', icon: '⚡' },
 ];
 
 const SOCIAL_PROOF = [
@@ -29,7 +27,7 @@ const SOCIAL_PROOF = [
 
 const TOTAL_SECONDS = 10 * 60; // 10 minutes
 
-const SoftPaywall = ({ userName, onStartTrial, onDismiss, onNavigatePricing, onNavigate }: SoftPaywallProps) => {
+const SoftPaywall = ({ userName, onStartTrial, onDismiss, onNavigate }: SoftPaywallProps) => {
   const [visible, setVisible] = useState(false);
   const [exiting, setExiting] = useState(false);
   const [isCheckoutLoading, setIsCheckoutLoading] = useState(false);
@@ -140,12 +138,12 @@ const SoftPaywall = ({ userName, onStartTrial, onDismiss, onNavigatePricing, onN
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={handleDismiss} aria-hidden="true" />
 
-      {/* Modal */}
-      <div className="relative w-full max-w-lg max-h-[92vh] overflow-y-auto rounded-3xl bg-white dark:bg-stone-800 shadow-2xl shadow-violet-500/10 dark:shadow-black/40 border border-stone-200/80 dark:border-stone-700/60">
+      {/* Modal — matches dashboard editorial cards */}
+      <div className="relative w-full max-w-lg max-h-[92vh] overflow-y-auto rounded-2xl bg-white/95 dark:bg-stone-900/90 backdrop-blur-md shadow-[0_20px_50px_-12px_rgba(15,23,42,0.15)] dark:shadow-[0_20px_50px_-12px_rgba(0,0,0,0.45)] border border-stone-200/90 dark:border-stone-700/80 ring-1 ring-white/50 dark:ring-white/5">
         {/* Dismiss X */}
         <button
           onClick={handleDismiss}
-          className="absolute top-4 right-4 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-stone-100 dark:bg-stone-700 text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 hover:bg-stone-200 dark:hover:bg-stone-600 transition-all"
+          className="absolute top-4 right-4 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-stone-100/90 dark:bg-stone-800 text-stone-500 hover:text-stone-700 dark:hover:text-stone-200 hover:bg-stone-200 dark:hover:bg-stone-700 transition-all"
           aria-label="Close"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -153,8 +151,8 @@ const SoftPaywall = ({ userName, onStartTrial, onDismiss, onNavigatePricing, onN
           </svg>
         </button>
 
-        {/* Top gradient accent */}
-        <div className="h-1.5 bg-violet-600 rounded-t-3xl" />
+        {/* Top accent */}
+        <div className="h-1 bg-gradient-to-r from-emerald-500 via-violet-600 to-amber-500 rounded-t-2xl opacity-90" />
 
         <div className="px-6 sm:px-8 pt-6 pb-8">
           {showLastChance ? (
@@ -164,7 +162,7 @@ const SoftPaywall = ({ userName, onStartTrial, onDismiss, onNavigatePricing, onN
                 <span className="inline-block px-3 py-1.5 rounded-full bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300 text-xs font-bold uppercase tracking-wider mb-4">
                   Last chance
                 </span>
-                <h3 className="text-xl font-bold text-stone-800 dark:text-stone-100 mb-2" style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}>
+                <h3 className="text-xl font-semibold text-stone-800 dark:text-stone-100 mb-2" style={{ fontFamily: "'EB Garamond', Georgia, serif" }}>
                   Wait! Don&apos;t miss out
                 </h3>
                 <p className="text-stone-500 dark:text-stone-400 text-sm mb-6">
@@ -174,7 +172,7 @@ const SoftPaywall = ({ userName, onStartTrial, onDismiss, onNavigatePricing, onN
                 <button
                   onClick={() => handleStartTrial('OFF10')}
                   disabled={isCheckoutLoading}
-                  className="w-full py-4 bg-violet-600 hover:bg-violet-700 disabled:from-stone-400 disabled:to-stone-500 text-white rounded-2xl font-bold text-base shadow-lg shadow-violet-500/30 transition-all flex items-center justify-center gap-2 disabled:cursor-wait"
+                  className="w-full py-4 bg-violet-700 hover:bg-violet-800 disabled:from-stone-400 disabled:to-stone-500 text-white rounded-xl font-semibold text-base shadow-md shadow-violet-900/20 ring-1 ring-violet-900/10 transition-all flex items-center justify-center gap-2 disabled:cursor-wait"
                 >
                   {isCheckoutLoading ? (
                     <>
@@ -214,21 +212,24 @@ const SoftPaywall = ({ userName, onStartTrial, onDismiss, onNavigatePricing, onN
           {/* Header */}
           <div className="text-center mb-6">
             <h2
-              className="text-xl sm:text-2xl font-extrabold text-stone-800 dark:text-stone-100 mb-1.5 leading-tight"
-              style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}
+              className="text-xl sm:text-2xl font-semibold text-stone-800 dark:text-stone-100 mb-1.5 leading-tight"
+              style={{ fontFamily: "'EB Garamond', Georgia, serif" }}
             >
               Nice work, {firstName}! You're ready.
             </h2>
-            <p className="text-stone-500 dark:text-stone-400 text-sm sm:text-base leading-relaxed">
-              Unlock the full power of WriteScholar. Get $10 off your first month.
+            <p className="text-stone-500 dark:text-stone-400 text-[11px] sm:text-xs leading-tight tracking-tight">
+              Unlock the full power of WriteScholar.{' '}
+              <span className="font-semibold text-emerald-600 dark:text-emerald-400">
+                Get $10 off your first month.
+              </span>
             </p>
           </div>
 
           {/* Price card */}
-          <div className="relative bg-gradient-to-br from-violet-50 via-fuchsia-50/50 to-violet-50 dark:from-violet-900/30 dark:via-fuchsia-900/20 dark:to-violet-900/20 rounded-2xl p-5 sm:p-6 border border-violet-200/60 dark:border-violet-700/40 mb-5">
+          <div className="relative bg-gradient-to-br from-stone-50 via-violet-50/60 to-stone-100/80 dark:from-stone-900/80 dark:via-violet-950/40 dark:to-stone-900/60 rounded-2xl p-5 sm:p-6 border border-stone-200/80 dark:border-stone-600/50 mb-5 ring-1 ring-violet-500/10">
             <div className="absolute top-3 right-3">
-              <span className="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider bg-violet-600 hover:bg-violet-500 text-white rounded-full shadow-sm">
-                Most popular
+              <span className="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider bg-violet-700 dark:bg-violet-600 text-white rounded-full shadow-sm ring-1 ring-violet-900/10">
+                Pro
               </span>
             </div>
 
@@ -237,7 +238,9 @@ const SoftPaywall = ({ userName, onStartTrial, onDismiss, onNavigatePricing, onN
               <span className="text-base text-stone-500 dark:text-stone-400 font-medium">first month</span>
             </div>
             <p className="text-xs text-stone-400 dark:text-stone-500 mb-4">
-              $10 off Pro. Then $19.99/mo. Cancel anytime.
+              <span className="font-semibold text-emerald-600 dark:text-emerald-400">$10 off Pro.</span>
+              {' '}
+              Then $19.99/mo. Cancel anytime.
             </p>
 
             {/* Features checklist */}
@@ -268,7 +271,7 @@ const SoftPaywall = ({ userName, onStartTrial, onDismiss, onNavigatePricing, onN
           <button
             onClick={handleStartTrial}
             disabled={isCheckoutLoading}
-            className="w-full py-3.5 sm:py-4 bg-violet-600 hover:bg-violet-700 disabled:from-stone-400 disabled:to-stone-500 text-white rounded-2xl font-bold text-base shadow-lg shadow-violet-500/30 hover:shadow-xl hover:shadow-violet-500/40 transition-all active:scale-[0.98] disabled:active:scale-100 flex items-center justify-center gap-2 disabled:cursor-wait"
+            className="w-full py-3.5 sm:py-4 bg-violet-700 hover:bg-violet-800 dark:bg-violet-600 dark:hover:bg-violet-500 disabled:from-stone-400 disabled:to-stone-500 text-white rounded-xl font-semibold text-base shadow-md shadow-violet-900/20 ring-1 ring-violet-900/10 hover:shadow-lg transition-all active:scale-[0.98] disabled:active:scale-100 flex items-center justify-center gap-2 disabled:cursor-wait"
           >
             {isCheckoutLoading ? (
               <>
@@ -329,20 +332,13 @@ const SoftPaywall = ({ userName, onStartTrial, onDismiss, onNavigatePricing, onN
             </p>
           </div>
 
-          {/* Secondary actions */}
-          <div className="flex items-center justify-center gap-4 mt-4 pt-4 border-t border-stone-100 dark:border-stone-700/50">
+          {/* Secondary action */}
+          <div className="flex items-center justify-center mt-4 pt-4 border-t border-stone-100 dark:border-stone-700/50">
             <button
               onClick={handleDismiss}
               className="text-xs text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 transition-colors font-medium"
             >
               Maybe later
-            </button>
-            <span className="text-stone-200 dark:text-stone-700">|</span>
-            <button
-              onClick={() => { setExiting(true); setTimeout(onNavigatePricing, 200); }}
-              className="text-xs text-violet-500 dark:text-violet-400 hover:text-violet-600 dark:hover:text-violet-300 transition-colors font-medium"
-            >
-              Compare all plans
             </button>
           </div>
             </>

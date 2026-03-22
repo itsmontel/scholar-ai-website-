@@ -1,4 +1,4 @@
-import { useState, useEffect, type ReactNode } from 'react';
+import { useState, useEffect, useMemo, type ReactNode } from 'react';
 import Header from '../common/Header';
 import Footer from '../common/Footer';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -20,6 +20,58 @@ interface LandingPageProps {
   onNavigate: (page: string, slug?: string) => void;
   user?: { plan?: string; subscription_plan?: string } | null;
 }
+
+/** Source list for landing FAQ UI + FAQPage JSON-LD (order must match). */
+const LANDING_FAQ_ITEMS: { question: string; answer: string }[] = [
+  {
+    question: "What kind of feedback will I get on my essay?",
+    answer: "You get section-by-section annotations (green for strong, yellow for improve, red for concerns), an overall grade-level rubric, and actionable improvement suggestions. It covers structure, argument quality, clarity, citations, and academic style."
+  },
+  {
+    question: "How does the essay analyzer work?",
+    answer: "Paste your essay (200+ words) or upload a PDF/DOCX/TXT file. Our AI analyzes structure, clarity, argument, citations, and academic tone the way a professor would. You get detailed feedback with specific suggestions in under 60 seconds."
+  },
+  {
+    question: "Is WriteScholar for college and university students?",
+    answer: "Yes. WriteScholar is for undergrads and postgrads worldwide, whether you're writing essays in the UK, the US, or elsewhere. Set your education level in the analyzer for feedback that fits your course. We support major citation styles (APA, MLA, Chicago, Harvard, and more). High school options are available too."
+  },
+  {
+    question: "How long does essay analysis take?",
+    answer: "Usually under 60 seconds. Paste your essay, click Analyze Text, and you'll see professor-style feedback with a full rubric and improvement tips. Free plan includes 2 analyses per month."
+  },
+  {
+    question: "Can I upload a Word or PDF file?",
+    answer: "Yes. Upload PDF, DOCX, DOC, or TXT files directly. Or paste your text into the box. Both work for analysis. Files are processed securely and never shared."
+  },
+  {
+    question: "How does Focus Mode work?",
+    answer: "Focus Mode blocks distracting sites like YouTube, TikTok, and Instagram until you solve a puzzle (Sudoku, Memory, Pattern) or answer quiz questions from your own study notes. Pick the sites to block, add your material, and when you try to visit a blocked site you face a puzzle or short quiz. Pass it and the site unlocks. It's a Chrome extension."
+  },
+  {
+    question: "Can I block YouTube and TikTok until I study?",
+    answer: "Yes! Focus Mode lets you block any sites you choose. When you try to visit one, you solve a puzzle (Sudoku, Memory, Pattern) or answer a quiz from your own notes. Pass the puzzle or quiz and you earn access. Create a Study Pack or flashcards first, then connect the Chrome extension."
+  },
+  {
+    question: "Can I create study quizzes from my notes?",
+    answer: "Yes! The Study Pack turns any text into lessons, flashcards, quizzes, crosswords, and Crater Blast. Paste your notes or upload a document. Free users get lesson and flashcards; quiz, crossword and Crater Blast unlock with Pro."
+  },
+  {
+    question: "What citation styles are supported?",
+    answer: "We support APA 7th edition, MLA 9th edition, Chicago (notes-bibliography and author-date), Harvard, IEEE, and Vancouver. The citation finder searches academic databases for relevant sources."
+  },
+  {
+    question: "Is my content private and secure?",
+    answer: "Yes. We use enterprise-grade encryption. Your content is never shared with third parties or used to train AI models. You can delete your documents at any time."
+  },
+  {
+    question: "What's the difference between Free and Pro?",
+    answer: "Free: 3 documents, 2 analyses, 2 study packs, 5k words, 2 citations per month, Focus Mode (3 sites). Pro: 99 combined analyses, study packs and citations per month, 999,999 words for the Paper Summarizer, all citation styles, PDF/Word export, Focus Mode with unlimited blocked sites, uploads up to 100MB per file, and full quiz & study tools."
+  },
+  {
+    question: "How do I add friends and share my study materials?",
+    answer: "Every account gets a unique friend code. Share your code with friends so they can add you. Once connected, you can share flashcards, quizzes, crosswords, or notes with one tap. They tap Accept and it's in their library. Core sharing is free."
+  }
+];
 
 const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -143,56 +195,32 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
     "Blockchain in supply chain"
   ];
 
-  const faqs = [
-    {
-      question: "Is WriteScholar for college and university students?",
-      answer: "Yes. WriteScholar is for undergrads and postgrads worldwide, whether you're writing essays in the UK, the US, or elsewhere. Set your education level in the analyzer for feedback that fits your course. We support major citation styles (APA, MLA, Chicago, Harvard, and more). High school options are available too."
-    },
-    {
-      question: "How does the essay analyzer work?",
-      answer: "Paste your essay (200+ words) or upload a PDF/DOCX/TXT file. Our AI analyzes structure, clarity, argument, citations, and academic tone the way a professor would. You get detailed feedback with specific suggestions in under 60 seconds."
-    },
-    {
-      question: "What kind of feedback will I get on my essay?",
-      answer: "You get section-by-section annotations (green for strong, yellow for improve, red for concerns), an overall grade-level rubric, and actionable improvement suggestions. It covers structure, argument quality, clarity, citations, and academic style."
-    },
-    {
-      question: "How long does essay analysis take?",
-      answer: "Usually under 60 seconds. Paste your essay, click Analyze Text, and you'll see professor-style feedback with a full rubric and improvement tips. Free plan includes 2 analyses per month."
-    },
-    {
-      question: "Can I upload a Word or PDF file?",
-      answer: "Yes. Upload PDF, DOCX, DOC, or TXT files directly. Or paste your text into the box. Both work for analysis. Files are processed securely and never shared."
-    },
-    {
-      question: "How does Focus Mode work?",
-      answer: "Focus Mode blocks distracting sites like YouTube, TikTok, and Instagram until you solve a puzzle (Sudoku, Memory, Pattern) or answer quiz questions from your own study notes. Pick the sites to block, add your material, and when you try to visit a blocked site you face a puzzle or short quiz. Pass it and the site unlocks. It's a Chrome extension."
-    },
-    {
-      question: "Can I block YouTube and TikTok until I study?",
-      answer: "Yes! Focus Mode lets you block any sites you choose. When you try to visit one, you solve a puzzle (Sudoku, Memory, Pattern) or answer a quiz from your own notes. Pass the puzzle or quiz and you earn access. Create a Study Pack or flashcards first, then connect the Chrome extension."
-    },
-    {
-      question: "Can I create study quizzes from my notes?",
-      answer: "Yes! The Study Pack turns any text into lessons, flashcards, quizzes, crosswords, and Crater Blast. Paste your notes or upload a document. Free users get lesson and flashcards; quiz, crossword and Crater Blast unlock with Pro."
-    },
-    {
-      question: "What citation styles are supported?",
-      answer: "We support APA 7th edition, MLA 9th edition, Chicago (notes-bibliography and author-date), Harvard, IEEE, and Vancouver. The citation finder searches academic databases for relevant sources."
-    },
-    {
-      question: "Is my content private and secure?",
-      answer: "Yes. We use enterprise-grade encryption. Your content is never shared with third parties or used to train AI models. You can delete your documents at any time."
-    },
-    {
-      question: "What's the difference between Free and Pro?",
-      answer: "Free: 3 documents, 2 analyses, 2 study packs, 5k words, 2 citations per month, Focus Mode (3 sites). Pro: 99 combined analyses, study packs and citations per month, 999,999 words for the Paper Summarizer, all citation styles, PDF/Word export, Focus Mode with unlimited blocked sites, uploads up to 100MB per file, and full quiz & study tools."
-    },
-    {
-      question: "How do I add friends and share my study materials?",
-      answer: "Every account gets a unique friend code. Share your code with friends so they can add you. Once connected, you can share flashcards, quizzes, crosswords, or notes with one tap. They tap Accept and it's in their library. Core sharing is free."
-    }
-  ].filter(faq => !HIDE_FRIENDS || !faq.question.toLowerCase().includes('friends'));
+  const faqs = useMemo(
+    () => LANDING_FAQ_ITEMS.filter(faq => !HIDE_FRIENDS || !faq.question.toLowerCase().includes('friends')),
+    [HIDE_FRIENDS]
+  );
+
+  /* FAQPage JSON-LD — matches visible FAQ list for rich results */
+  useEffect(() => {
+    const faqSchema = {
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: faqs.map(faq => ({
+        '@type': 'Question',
+        name: faq.question,
+        acceptedAnswer: { '@type': 'Answer', text: faq.answer }
+      }))
+    };
+    const script = document.createElement('script');
+    script.type = 'application/ld+json';
+    script.textContent = JSON.stringify(faqSchema);
+    script.id = 'faq-schema-landing-writescholar';
+    document.head.appendChild(script);
+    return () => {
+      const el = document.getElementById('faq-schema-landing-writescholar');
+      if (el) el.remove();
+    };
+  }, [faqs]);
 
   const universities = [
     { name: 'Harvard', className: 'university-harvard' },
@@ -625,8 +653,8 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
           aria-hidden
         />
 
-        <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8 pt-14 sm:pt-16 lg:pt-10 pb-0">
-          <div className="w-full max-w-[1240px] xl:mx-auto">
+        <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8 pt-14 sm:pt-16 lg:pt-10 pb-0 min-w-0">
+          <div className="w-full min-w-0 max-w-[1240px] xl:mx-auto">
             <div className="lg:grid lg:grid-cols-[minmax(0,220px)_minmax(0,1fr)_minmax(0,220px)] xl:grid-cols-[minmax(0,248px)_minmax(0,1fr)_minmax(0,248px)] lg:gap-8 xl:gap-10 lg:items-start">
             <aside
                 className="hidden lg:flex lg:flex-col gap-0 pointer-events-auto lg:justify-self-end lg:items-end lg:pt-1 xl:pt-2 lg:min-w-0 w-full max-w-[248px]"
@@ -660,7 +688,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   aria-hidden
                 />
                 <h1
-                  className="text-[1.65rem] sm:text-4xl lg:text-[2.65rem] xl:text-[2.75rem] font-semibold tracking-tight leading-[1.15] mb-4 text-center px-0.5"
+                  className="text-[1.5rem] sm:text-4xl lg:text-[2.65rem] xl:text-[2.75rem] font-semibold tracking-tight leading-[1.15] mb-4 text-center px-0.5 break-words text-balance"
                   style={{ fontFamily: "'EB Garamond', Georgia, 'Times New Roman', serif" }}
                 >
                   <span className="text-stone-900 dark:text-stone-50">AI Essay Checker with </span>
@@ -674,11 +702,11 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   <span className="font-semibold text-stone-800 dark:text-stone-200">Better Essays. Higher Grades. Instantly. </span>
                   See exactly what to fix before you submit.
                 </p>
-                <p className="flex flex-wrap items-center justify-center gap-2 text-sm text-stone-600 dark:text-stone-400 mb-6">
+                <p className="flex flex-wrap items-center justify-center gap-2 text-xs sm:text-sm text-stone-600 dark:text-stone-400 mb-6 text-center px-1 max-w-full">
                   <svg className="w-4 h-4 text-violet-600 dark:text-violet-400 shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
                     <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z" />
                   </svg>
-                  <span className="font-medium text-stone-800 dark:text-stone-200">Trusted by 50,000+ students worldwide</span>
+                  <span className="font-medium text-stone-800 dark:text-stone-200 leading-snug break-words">Trusted by 50,000+ students worldwide</span>
                 </p>
                 <div
                   className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 mb-8 text-[11px] sm:text-xs text-stone-500 dark:text-stone-500"
@@ -754,7 +782,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                 >
                   See a real B → A transformation →
                 </button>
-                <p className="mt-5 text-xs text-stone-500 dark:text-stone-500 text-center leading-relaxed">
+                <p className="mt-5 text-[11px] sm:text-xs text-stone-500 dark:text-stone-500 text-center leading-relaxed max-w-full px-0.5">
                   Free plan includes 2 essay analyses per month · Encrypted in transit · Cancel anytime
             </p>
           </div>
@@ -785,6 +813,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
             </aside>
           </div>
 
+            {/* Before/after essay cards on mobile/tablet (desktop: side columns). No citation mini-demos here — keeps mobile layout simple */}
             <div
               className="lg:hidden w-full mt-8 sm:mt-10 pb-6 sm:pb-8 px-1"
               aria-label="Before and after essay preview mock-ups"
@@ -806,13 +835,6 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                       onOpenDemo={scrollToBeforeAfter}
                     />
                   </div>
-                  <div className="w-full max-w-[260px] rotate-[8deg] origin-bottom-right drop-shadow-lg pointer-events-auto mt-16 -translate-x-3 self-start">
-                    <p className="text-center mb-1.5">
-                      <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-sky-800/95 dark:text-sky-300/95">Sources</span>
-                      <span className="block text-[9px] text-stone-500 dark:text-stone-400 mt-0.5">Peer-reviewed picks</span>
-                    </p>
-                    <InteractiveCitationsDemo variant="side-left" />
-                  </div>
                 </div>
                 <div className="w-full max-w-[280px] flex flex-col items-center gap-3">
                   <div className="text-center">
@@ -828,13 +850,6 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                       maxExcerptChars={720}
                       onOpenDemo={scrollToBeforeAfter}
                     />
-                  </div>
-                  <div className="w-full max-w-[260px] -rotate-[8deg] origin-bottom-left drop-shadow-lg pointer-events-auto mt-16 translate-x-3 self-end">
-                    <p className="text-center mb-1.5">
-                      <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-violet-800/95 dark:text-violet-300/95">Export</span>
-                      <span className="block text-[9px] text-stone-500 dark:text-stone-400 mt-0.5">APA · MLA · Chicago</span>
-                    </p>
-                    <InteractiveCitationsDemo variant="side-right" />
                   </div>
                 </div>
               </div>
@@ -901,9 +916,9 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
               </p>
             </div>
 
-            {/* Trust band: testimonial + university marquee */}
+            {/* Trust band: full-bleed via ml calc(50% - 50vw) — avoids w-screen + translate overflow on mobile */}
             <div
-              className="w-screen max-w-[100vw] relative left-1/2 -translate-x-1/2 mt-12 sm:mt-16 mb-0 overflow-hidden
+              className="relative w-screen mt-12 sm:mt-16 mb-0 ml-[calc(50%-50vw)] overflow-hidden
                 border-y border-stone-200/90 dark:border-stone-800
                 bg-[#fafafa] dark:bg-stone-950
                 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.9)] dark:shadow-none"
@@ -914,15 +929,15 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                 aria-hidden
               />
               <div className="relative z-10 pt-7 pb-6 sm:pt-8 sm:pb-7">
-                <div className="max-w-6xl mx-auto px-4 sm:px-6">
-                  <figure className="rounded-2xl border border-violet-200/70 dark:border-violet-800/40 bg-white/80 dark:bg-stone-900/50 px-6 py-6 sm:px-10 sm:py-8 text-center max-w-2xl mx-auto ring-1 ring-violet-900/5 dark:ring-violet-400/10 mb-8 sm:mb-10 shadow-sm">
-                    <blockquote>
-                      <p className="text-stone-800 dark:text-stone-100 text-base sm:text-lg leading-relaxed italic">
+                <div className="max-w-6xl mx-auto px-3 sm:px-6">
+                  <figure className="rounded-2xl border border-violet-200/70 dark:border-violet-800/40 bg-white/80 dark:bg-stone-900/50 px-4 py-5 sm:px-10 sm:py-8 w-full max-w-2xl min-w-0 mx-auto ring-1 ring-violet-900/5 dark:ring-violet-400/10 mb-8 sm:mb-10 shadow-sm">
+                    <blockquote className="m-0 border-0 p-0 w-full">
+                      <p className="text-stone-800 dark:text-stone-100 text-[0.9375rem] sm:text-lg leading-snug sm:leading-relaxed italic text-center break-words px-0.5">
                         &ldquo;Went from a B to an A in one submission. The feedback was exactly what my professor wanted.&rdquo;
                       </p>
                     </blockquote>
                   </figure>
-                <div className="mx-auto max-w-xl text-center mb-6 sm:mb-7">
+                <div className="w-full max-w-xl mx-auto text-center mb-6 sm:mb-7 px-1">
                     <h3 className="text-base sm:text-lg md:text-xl font-semibold text-stone-800 dark:text-stone-100 tracking-tight leading-snug">
                       Students at leading universities use WriteScholar
                   </h3>
@@ -974,7 +989,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
               </div>
             </div>
 
-          <LandingBeforeAfterSection onOpenDemo={scrollToLandingTools} />
+          <LandingBeforeAfterSection />
 
           {/* Analyze Papers: full-bleed vs hero padding so side margins match section (not violet hero wash) */}
           <section
@@ -2662,9 +2677,9 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                 <button
                   type="button"
                   onClick={() => setOpenFAQ(openFAQ === idx ? null : idx)}
-                  className="w-full px-5 sm:px-6 py-4 sm:py-5 text-left flex items-center justify-between gap-4 hover:bg-stone-50/90 dark:hover:bg-stone-800/50 transition-colors duration-200"
+                  className="w-full min-w-0 px-5 sm:px-6 py-4 sm:py-5 text-left flex items-center justify-between gap-3 sm:gap-4 hover:bg-stone-50/90 dark:hover:bg-stone-800/50 transition-colors duration-200"
                 >
-                  <span className="font-semibold text-stone-900 dark:text-stone-100 text-base sm:text-[1.05rem] leading-snug pr-2">{faq.question}</span>
+                  <span className="font-semibold text-stone-900 dark:text-stone-100 text-base sm:text-[1.05rem] leading-snug pr-2 min-w-0 flex-1 text-left">{faq.question}</span>
                   <svg
                     className={`w-5 h-5 flex-shrink-0 transition-transform duration-200 ${openFAQ === idx ? 'rotate-180 text-violet-600 dark:text-violet-400' : 'text-stone-400 dark:text-stone-500'}`}
                     fill="none"
