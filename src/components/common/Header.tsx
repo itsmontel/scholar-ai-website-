@@ -235,10 +235,10 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
     const publicHeaderBg = opaqueHeader
       ? isScrolled
         ? 'bg-white dark:bg-stone-950 shadow-[0_10px_40px_-12px_rgba(15,23,42,0.1)] dark:shadow-[0_10px_40px_-12px_rgba(0,0,0,0.4)] border-stone-200/90 dark:border-stone-800'
-        : 'bg-[#f8fafc] dark:bg-stone-950 border-stone-200/80 dark:border-stone-800/90'
+        : 'bg-[#f9f9fb] dark:bg-stone-950 border-stone-200/80 dark:border-stone-800/90'
       : isScrolled
         ? 'bg-white/93 dark:bg-stone-950/93 shadow-[0_10px_40px_-12px_rgba(15,23,42,0.1)] dark:shadow-[0_10px_40px_-12px_rgba(0,0,0,0.4)] border-stone-200/90 dark:border-stone-800'
-        : 'bg-[#f8fafc]/92 dark:bg-stone-950/90 border-stone-200/80 dark:border-stone-800/90';
+        : 'bg-[#f9f9fb]/92 dark:bg-stone-950/90 border-stone-200/80 dark:border-stone-800/90';
 
     return (
       <>
@@ -361,7 +361,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
         {isMobileMenuOpen && (
           <div
             className={`lg:hidden mobile-menu-container border-t border-stone-200/80 dark:border-stone-800 ${
-              opaqueHeader ? 'bg-[#f8fafc] dark:bg-stone-950' : 'bg-[#f8fafc] dark:bg-stone-950/98 backdrop-blur-md'
+              opaqueHeader ? 'bg-[#f9f9fb] dark:bg-stone-950' : 'bg-[#f9f9fb] dark:bg-stone-950/98 backdrop-blur-md'
             }`}
           >
             <div className="px-4 py-3 max-w-7xl mx-auto">
@@ -416,7 +416,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
           </div>
         )}
         <div
-          className="h-0.5 bg-gradient-to-r from-emerald-500 via-amber-400 to-red-500 opacity-[0.65] dark:opacity-75"
+          className="h-px bg-gradient-to-r from-transparent via-violet-400/25 to-transparent dark:via-violet-500/18"
           aria-hidden
         />
       </header>
@@ -434,10 +434,10 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
   const loggedInHeaderBg = opaqueHeader
     ? isScrolled
       ? 'bg-white dark:bg-stone-950 shadow-[0_10px_40px_-12px_rgba(15,23,42,0.1)] dark:shadow-[0_10px_40px_-12px_rgba(0,0,0,0.4)] border-stone-200/90 dark:border-stone-800'
-      : 'bg-[#f8fafc] dark:bg-stone-950 border-stone-200/80 dark:border-stone-800/90'
+      : 'bg-[#f9f9fb] dark:bg-stone-950 border-stone-200/80 dark:border-stone-800/90'
     : isScrolled
       ? 'bg-white/93 dark:bg-stone-950/93 shadow-[0_10px_40px_-12px_rgba(15,23,42,0.1)] dark:shadow-[0_10px_40px_-12px_rgba(0,0,0,0.4)] border-stone-200/90 dark:border-stone-800'
-      : 'bg-[#f8fafc]/92 dark:bg-stone-950/90 border-stone-200/80 dark:border-stone-800/90';
+      : 'bg-[#f9f9fb]/92 dark:bg-stone-950/90 border-stone-200/80 dark:border-stone-800/90';
 
   return (
     <header
@@ -511,7 +511,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
             <button
               onClick={() => onNavigate?.('quiz-history')}
               className={`ml-1 px-3.5 py-2 text-sm font-semibold rounded-lg transition-all duration-200 flex items-center gap-1.5 bg-violet-700 hover:bg-violet-800 dark:bg-violet-600 dark:hover:bg-violet-500 text-white shadow-md shadow-violet-900/15 dark:shadow-violet-950/25 ring-1 ring-violet-900/10 dark:ring-white/10 ${
-                currentPage === 'quiz-history' ? 'ring-2 ring-amber-400/90 ring-offset-2 ring-offset-[#f8fafc] dark:ring-offset-stone-950' : ''
+                currentPage === 'quiz-history' ? 'ring-2 ring-amber-400/90 ring-offset-2 ring-offset-[#f9f9fb] dark:ring-offset-stone-950' : ''
               }`}
             >
               <span>Saved Materials</span>
@@ -764,7 +764,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
       </div>
 
       <div
-        className="h-0.5 bg-gradient-to-r from-emerald-500 via-amber-400 to-red-500 opacity-[0.65] dark:opacity-75"
+        className="h-px bg-gradient-to-r from-transparent via-violet-400/25 to-transparent dark:via-violet-500/18"
         aria-hidden
       />
 
@@ -774,7 +774,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
       }`}>
         <div
           className={`px-4 py-4 border-t border-stone-200/80 dark:border-stone-800 max-w-7xl mx-auto ${
-            opaqueHeader ? 'bg-[#f8fafc] dark:bg-stone-950' : 'bg-[#f8fafc] dark:bg-stone-950/98 backdrop-blur-md'
+            opaqueHeader ? 'bg-[#f9f9fb] dark:bg-stone-950' : 'bg-[#f9f9fb] dark:bg-stone-950/98 backdrop-blur-md'
           }`}
         >
           <div className="space-y-1">
@@ -801,7 +801,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
             <button
               onClick={() => { onNavigate?.('quiz-history'); setIsMobileMenuOpen(false); }}
               className={`w-full text-left px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 flex items-center justify-between bg-violet-700 hover:bg-violet-800 dark:bg-violet-600 dark:hover:bg-violet-500 text-white shadow-md ${
-                currentPage === 'quiz-history' ? 'ring-2 ring-amber-400/90 ring-offset-2 ring-offset-[#f8fafc] dark:ring-offset-stone-950' : ''
+                currentPage === 'quiz-history' ? 'ring-2 ring-amber-400/90 ring-offset-2 ring-offset-[#f9f9fb] dark:ring-offset-stone-950' : ''
               }`}
             >
               <span>Saved Materials</span>

@@ -66,6 +66,8 @@ module.exports = {
         'tool-show-3': 'toolShow3 4.5s ease-in-out infinite',
         'notes-fade-in-up': 'notesFadeInUp 0.7s ease-out forwards',
         'notes-glow-pulse': 'notesGlowPulse 4s ease-in-out infinite',
+        'landing-hero-blob': 'landingHeroBlob 18s ease-in-out infinite',
+        'landing-hero-blob-delayed': 'landingHeroBlob 22s ease-in-out infinite reverse',
       },
       keyframes: {
         fadeIn: {
@@ -164,6 +166,11 @@ module.exports = {
         notesGlowPulse: {
           '0%, 100%': { opacity: '0.25', transform: 'scale(1)' },
           '50%': { opacity: '0.4', transform: 'scale(1.02)' },
+        },
+        landingHeroBlob: {
+          '0%, 100%': { transform: 'translate(0, 0) scale(1)' },
+          '33%': { transform: 'translate(2%, -3%) scale(1.03)' },
+          '66%': { transform: 'translate(-2%, 2%) scale(0.98)' },
         },
       },
       backgroundImage: {

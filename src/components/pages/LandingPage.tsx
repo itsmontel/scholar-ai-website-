@@ -644,16 +644,29 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
       <Header onNavigate={onNavigate} user={user} sticky={true} currentPage="landing" opaqueHeader />
       <main className="min-h-screen relative transition-colors font-sans overflow-x-hidden xl:overflow-x-visible" role="main">
       {/* HERO: formal, conversion-focused */}
-      <section className="relative min-h-[72vh] sm:min-h-[80vh] flex flex-col overflow-hidden border-b border-stone-200/90 dark:border-stone-800 xl:overflow-visible">
-        <div className="absolute inset-0 bg-[#f8fafc] dark:bg-[#0c0a09]" />
-        <div className="absolute inset-0 bg-gradient-to-b from-white via-[#f8fafc] to-[#f1f5f9] dark:from-stone-950 dark:via-stone-950 dark:to-stone-950 pointer-events-none" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_90%_60%_at_50%_-15%,rgba(91,33,182,0.07),transparent_55%)] dark:bg-[radial-gradient(ellipse_90%_55%_at_50%_-10%,rgba(109,40,217,0.12),transparent_58%)] pointer-events-none" />
+      <section className="relative flex flex-col overflow-hidden border-b border-stone-200/90 dark:border-stone-800 xl:overflow-visible">
+        <div className="absolute inset-0 bg-[#f9f9fb] dark:bg-[#0c0a09]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-white via-[#f7f7fa] to-[#f3f4f8] dark:from-stone-950 dark:via-stone-950 dark:to-stone-950 pointer-events-none" />
+        {/* Ambient depth — single brand wash + soft lift (no competing emerald/amber) */}
         <div
-          className="absolute inset-0 opacity-[0.4] dark:opacity-[0.15] pointer-events-none bg-[length:32px_32px] bg-[linear-gradient(to_right,rgba(148,163,184,0.07)_1px,transparent_1px),linear-gradient(to_bottom,rgba(148,163,184,0.07)_1px,transparent_1px)]"
+          className="pointer-events-none absolute -top-32 -left-[15%] h-[min(95vw,34rem)] w-[min(95vw,34rem)] rounded-full bg-violet-500/[0.11] blur-[110px] dark:bg-violet-600/[0.14] animate-landing-hero-blob"
+          aria-hidden
+        />
+        <div
+          className="pointer-events-none absolute top-[20%] -right-[20%] h-[min(85vw,24rem)] w-[min(85vw,24rem)] rounded-full bg-slate-400/[0.07] blur-[100px] dark:bg-stone-600/[0.12] animate-landing-hero-blob-delayed"
+          aria-hidden
+        />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_100%_60%_at_50%_-25%,rgba(91,33,182,0.055),transparent_58%)] dark:bg-[radial-gradient(ellipse_95%_55%_at_50%_-15%,rgba(109,40,217,0.09),transparent_58%)] pointer-events-none" />
+        <div
+          className="absolute inset-0 opacity-[0.28] dark:opacity-[0.12] pointer-events-none bg-[length:32px_32px] bg-[linear-gradient(to_right,rgba(148,163,184,0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgba(148,163,184,0.05)_1px,transparent_1px)]"
+          aria-hidden
+        />
+        <div
+          className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-violet-400/20 to-transparent dark:via-violet-500/15"
           aria-hidden
         />
 
-        <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8 pt-14 sm:pt-16 lg:pt-10 pb-0 min-w-0">
+        <div className="relative z-10 flex flex-col items-center justify-start px-4 sm:px-6 lg:px-8 pt-10 sm:pt-12 lg:pt-8 pb-0 min-w-0">
           <div className="w-full min-w-0 max-w-[1240px] xl:mx-auto">
             <div className="lg:grid lg:grid-cols-[minmax(0,220px)_minmax(0,1fr)_minmax(0,220px)] xl:grid-cols-[minmax(0,248px)_minmax(0,1fr)_minmax(0,248px)] lg:gap-8 xl:gap-10 lg:items-start">
             <aside
@@ -679,112 +692,154 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
             </aside>
 
               <div className="min-w-0 flex flex-col items-center w-full max-w-2xl lg:max-w-none mx-auto">
-              <div className="w-full max-w-[36.5rem] mx-auto rounded-2xl border border-stone-200/90 dark:border-stone-800/90 bg-white/75 dark:bg-stone-900/50 px-5 py-7 sm:px-9 sm:py-9 shadow-[0_12px_40px_-12px_rgba(15,23,42,0.12)] dark:shadow-[0_12px_40px_-12px_rgba(0,0,0,0.45)] backdrop-blur-[8px] ring-1 ring-white/50 dark:ring-white/5">
-                <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-violet-800/90 dark:text-violet-300/95 mb-3 text-center">
-                  Essay feedback &amp; aligned citations
-                </p>
+              <div className="relative w-full max-w-[36.5rem] mx-auto rounded-[1.35rem] sm:rounded-3xl border border-white/90 dark:border-stone-700/70 bg-white/[0.92] dark:bg-stone-900/60 px-6 py-7 sm:px-10 sm:py-9 shadow-[0_2px_8px_-2px_rgba(15,23,42,0.06),0_20px_44px_-16px_rgba(91,33,182,0.09),0_8px_16px_-6px_rgba(15,23,42,0.05)] dark:shadow-[0_24px_60px_-16px_rgba(0,0,0,0.5)] backdrop-blur-[14px] ring-1 ring-stone-200/60 dark:ring-stone-700/50 animate-fade-in">
                 <div
-                  className="mx-auto mb-5 h-0.5 w-16 rounded-full bg-gradient-to-r from-emerald-500 via-amber-400 to-red-500 opacity-90 dark:opacity-85"
+                  className="pointer-events-none absolute -inset-px rounded-[1.35rem] sm:rounded-3xl bg-gradient-to-b from-violet-100/[0.22] via-transparent to-transparent dark:from-violet-950/35 dark:via-transparent dark:to-transparent opacity-100 dark:opacity-90"
                   aria-hidden
                 />
+                <div className="relative flex flex-col items-center text-center">
                 <h1
-                  className="text-[1.5rem] sm:text-4xl lg:text-[2.65rem] xl:text-[2.75rem] font-semibold tracking-tight leading-[1.15] mb-4 text-center px-0.5 break-words text-balance"
+                  className="text-[1.6rem] sm:text-[2.1rem] lg:text-[2.65rem] xl:text-[2.8rem] font-semibold tracking-[-0.02em] leading-[1.18] mb-6 sm:mb-7 max-w-[22rem] sm:max-w-none mx-auto text-balance"
                   style={{ fontFamily: "'EB Garamond', Georgia, 'Times New Roman', serif" }}
                 >
-                  <span className="text-violet-700 dark:text-violet-300">WriteScholar:</span>{' '}
-                  <span className="text-stone-900 dark:text-stone-50">Turn Your Essay from a </span>
-                  <span className="text-amber-700 dark:text-amber-400">B</span>
-                  <span className="text-stone-900 dark:text-stone-50"> to an </span>
-                  <span className="text-emerald-700 dark:text-emerald-400">A</span>
+                  <span className="bg-gradient-to-r from-violet-700 via-violet-600 to-violet-700 dark:from-violet-300 dark:via-violet-200 dark:to-violet-300 bg-clip-text text-transparent">WriteScholar</span>
+                  <span className="text-stone-900 dark:text-stone-50">:</span>
+                  <span className="text-stone-900 dark:text-stone-50 tracking-[0.01em]">
+                    {' '}Turn your essay from{' '}
+                  </span>
+                  <span className="inline-flex align-middle justify-center mt-3 sm:mt-1.5 sm:ml-1">
+                    <span
+                      className="inline-flex items-center gap-2.5 sm:gap-3 rounded-2xl border border-stone-200/90 dark:border-stone-600/80 bg-gradient-to-b from-white to-stone-50/95 dark:from-stone-800/95 dark:to-stone-900/90 px-3.5 py-2.5 sm:px-4 sm:py-3 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.95),0_2px_8px_-2px_rgba(15,23,42,0.08)] ring-1 ring-stone-200/70 dark:ring-stone-700/60 dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04),0_4px_16px_-6px_rgba(0,0,0,0.45)]"
+                      aria-label="Grade improvement from B to A"
+                    >
+                      <span className="text-[1.4rem] sm:text-[1.7rem] lg:text-[1.85rem] font-bold tabular-nums leading-none text-amber-800 dark:text-amber-200 px-0.5">
+                        B
+                      </span>
+                      <span className="text-stone-400 dark:text-stone-500 text-xl sm:text-2xl font-light leading-none select-none px-0.5" aria-hidden>
+                        →
+                      </span>
+                      <span className="text-[1.4rem] sm:text-[1.7rem] lg:text-[1.85rem] font-bold tabular-nums leading-none text-emerald-800 dark:text-emerald-300 px-0.5">
+                        A
+                      </span>
+                    </span>
+                  </span>
                 </h1>
-                <p className="text-base sm:text-[1.05rem] text-stone-600 dark:text-stone-400 mb-4 max-w-xl mx-auto text-center leading-relaxed">
-                  <span className="font-semibold text-stone-800 dark:text-stone-200">Better Essays. Higher Grades. Instantly. </span>
-                  See exactly what to fix before you submit.
-                </p>
-                <p className="flex flex-wrap items-center justify-center gap-2 text-xs sm:text-sm text-stone-600 dark:text-stone-400 mb-6 text-center px-1 max-w-full">
-                  <svg className="w-4 h-4 text-violet-600 dark:text-violet-400 shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
-                    <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z" />
-                  </svg>
-                  <span className="font-medium text-stone-800 dark:text-stone-200 leading-snug break-words">Trusted by 50,000+ students worldwide</span>
-                </p>
-                <div
-                  className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 mb-8 text-[11px] sm:text-xs text-stone-500 dark:text-stone-500"
-                  aria-label="Annotation legend: strong, revise, concern"
-                >
-                  <span className="inline-flex items-center gap-1.5 rounded-full border border-stone-200/90 dark:border-stone-700 bg-stone-50/90 dark:bg-stone-800/60 px-2.5 py-1">
-                    <span className="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_0_1px_rgba(16,185,129,0.35)]" aria-hidden />
-                    Strong
-                  </span>
-                  <span className="inline-flex items-center gap-1.5 rounded-full border border-stone-200/90 dark:border-stone-700 bg-stone-50/90 dark:bg-stone-800/60 px-2.5 py-1">
-                    <span className="h-2 w-2 rounded-full bg-amber-400 shadow-[0_0_0_1px_rgba(251,191,36,0.4)]" aria-hidden />
-                    Revise
-                  </span>
-                  <span className="inline-flex items-center gap-1.5 rounded-full border border-stone-200/90 dark:border-stone-700 bg-stone-50/90 dark:bg-stone-800/60 px-2.5 py-1">
-                    <span className="h-2 w-2 rounded-full bg-red-500 shadow-[0_0_0_1px_rgba(239,68,68,0.35)]" aria-hidden />
-                    Concern
-                  </span>
-          </div>
+                <div className="mb-7 sm:mb-8 max-w-[22rem] sm:max-w-xl mx-auto space-y-2.5 sm:space-y-3 text-stone-600 dark:text-stone-400">
+                  <p className="text-[1.02rem] sm:text-lg font-semibold text-stone-800 dark:text-stone-100 leading-snug tracking-[0.01em]">
+                    Professor-style feedback in under a minute.
+                  </p>
+                  <p className="text-[0.95rem] sm:text-[1.0625rem] leading-relaxed tracking-[0.015em] text-stone-600 dark:text-stone-400">
+                    Know what to fix before you hit submit.
+                  </p>
+                </div>
 
-                <ul className="flex flex-col sm:flex-row sm:flex-wrap justify-center gap-x-6 gap-y-2.5 mb-9 text-sm text-stone-600 dark:text-stone-400 w-full">
-                  <li className="flex items-center justify-center sm:justify-start gap-2.5">
-                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-emerald-100 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400" aria-hidden>
-                      <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
-                    </span>
-                    <span>APA, MLA, Chicago &amp; more</span>
-                  </li>
-                  <li className="flex items-center justify-center sm:justify-start gap-2.5">
-                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-emerald-100 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400" aria-hidden>
-                      <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                    </span>
-                    <span>Green, amber &amp; red annotations</span>
-                  </li>
-                  <li className="flex items-center justify-center sm:justify-start gap-2.5">
-                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-emerald-100 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400" aria-hidden>
-                      <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                    </span>
-                    <span>Aligned citations for your bibliography</span>
-                  </li>
-                </ul>
-
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 sm:gap-4 w-full sm:w-auto mb-5 sm:mb-6">
                   <button
                     type="button"
                     onClick={() => onNavigate('signup')}
-                    className="group/btn inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-violet-700 hover:bg-violet-800 dark:bg-violet-600 dark:hover:bg-violet-500 text-white font-semibold rounded-xl shadow-md shadow-violet-900/15 dark:shadow-violet-950/40 ring-1 ring-violet-900/10 dark:ring-white/10 transition-all duration-200 hover:shadow-lg hover:shadow-violet-900/25 hover:-translate-y-0.5 active:translate-y-0 text-base"
+                    className="group/btn relative inline-flex items-center justify-center gap-2 overflow-hidden px-8 py-3.5 sm:px-9 sm:py-4 bg-gradient-to-b from-violet-600 to-violet-800 hover:from-violet-500 hover:to-violet-700 dark:from-violet-500 dark:to-violet-700 dark:hover:from-violet-400 dark:hover:to-violet-600 text-white font-semibold rounded-2xl shadow-lg shadow-violet-500/25 dark:shadow-violet-950/50 ring-1 ring-violet-400/40 dark:ring-violet-400/25 transition-all duration-200 hover:shadow-xl hover:shadow-violet-500/35 hover:-translate-y-0.5 active:translate-y-0 text-[0.97rem] sm:text-[1.02rem] tracking-wide"
                   >
-                    Check My Essay Free
-                    <svg className="w-4 h-4 group-hover/btn:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                    <span className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 opacity-0 transition-opacity duration-300 group-hover/btn:opacity-100 pointer-events-none" aria-hidden />
+                    <span className="relative">Check my essay free</span>
+                    <svg className="relative w-4 h-4 group-hover/btn:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
                   </button>
                   <button
                     type="button"
                     onClick={() => onNavigate('login')}
-                    className="inline-flex items-center justify-center px-7 py-3.5 border border-stone-300/95 dark:border-stone-600 bg-white/80 dark:bg-stone-900/50 text-stone-800 dark:text-stone-200 font-medium rounded-xl hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors text-base shadow-sm"
+                    className="inline-flex items-center justify-center px-7 py-3.5 sm:px-8 sm:py-4 border-2 border-stone-200/95 dark:border-stone-600 bg-white/90 dark:bg-stone-900/60 text-stone-800 dark:text-stone-200 font-semibold rounded-2xl hover:bg-stone-50 dark:hover:bg-stone-800 hover:border-stone-300 dark:hover:border-stone-500 transition-colors text-[0.97rem] sm:text-[1.02rem] shadow-sm tracking-wide"
                   >
                     Log in
                   </button>
               </div>
-                <p className="mt-3 text-center text-[11px] sm:text-xs text-stone-500 dark:text-stone-400">
-                  Takes 30 seconds • No credit card required
+                <p className="mb-6 sm:mb-7 flex flex-col sm:flex-row sm:flex-wrap items-center justify-center gap-y-1.5 sm:gap-x-3 sm:gap-y-0 text-center text-[12px] sm:text-sm text-stone-500 dark:text-stone-400 tracking-[0.03em]">
+                  <span>About 30 seconds to get started.</span>
+                  <span className="hidden sm:inline text-stone-300 dark:text-stone-600 select-none" aria-hidden>
+                    ·
+                  </span>
+                  <span>No credit card required.</span>
                 </p>
-                <button
-                  type="button"
-                  onClick={scrollToBeforeAfter}
-                  className="mt-4 w-full text-center text-sm font-medium text-violet-800 dark:text-violet-300 hover:underline"
-                >
-                  See a real B → A transformation →
-                </button>
-                <p className="mt-5 text-[11px] sm:text-xs text-stone-500 dark:text-stone-500 text-center leading-relaxed max-w-full px-0.5">
-                  Free plan includes 2 essay analyses per month · Encrypted in transit · Cancel anytime
-            </p>
+
+                <div className="flex justify-center w-full">
+                  <div className="inline-flex items-center gap-2.5 rounded-full border border-stone-200/95 bg-white/90 py-2 pl-2.5 pr-4 text-[12px] sm:text-sm text-stone-700 shadow-sm dark:border-stone-600 dark:bg-stone-800/70 dark:text-stone-200 max-w-full">
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-violet-100 text-violet-700 dark:bg-violet-950/80 dark:text-violet-300" aria-hidden>
+                      <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
+                      </svg>
+                    </span>
+                    <span className="font-semibold leading-snug text-left sm:text-center">
+                      Trusted by <span className="text-violet-800 dark:text-violet-300 tabular-nums">50,000+</span> students worldwide
+                    </span>
+                  </div>
+                </div>
+                </div>
           </div>
+
+              <section
+                id="hero-feedback-details"
+                className="w-full max-w-[36.5rem] mx-auto mt-6 sm:mt-7 px-1 sm:px-0 scroll-mt-24"
+                aria-labelledby="hero-feedback-details-heading"
+              >
+                <h2
+                  id="hero-feedback-details-heading"
+                  className="text-center text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-500 mb-4"
+                >
+                  How your draft is reviewed
+                </h2>
+                <div
+                  className="flex flex-wrap items-center justify-center gap-x-2.5 gap-y-2 mb-5 text-[11px] sm:text-xs text-stone-600 dark:text-stone-400"
+                  aria-label="Annotation legend: strong, revise, concern"
+                >
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-stone-200/90 dark:border-stone-600 bg-stone-50/95 dark:bg-stone-800/70 px-2.5 py-1 shadow-sm">
+                    <span className="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_0_1px_rgba(16,185,129,0.35)]" aria-hidden />
+                    Strong
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-stone-200/90 dark:border-stone-600 bg-stone-50/95 dark:bg-stone-800/70 px-2.5 py-1 shadow-sm">
+                    <span className="h-2 w-2 rounded-full bg-amber-400 shadow-[0_0_0_1px_rgba(251,191,36,0.4)]" aria-hidden />
+                    Revise
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-stone-200/90 dark:border-stone-600 bg-stone-50/95 dark:bg-stone-800/70 px-2.5 py-1 shadow-sm">
+                    <span className="h-2 w-2 rounded-full bg-red-500 shadow-[0_0_0_1px_rgba(239,68,68,0.35)]" aria-hidden />
+                    Concern
+                  </span>
+                </div>
+                <ul className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-5 text-left sm:text-center text-sm text-stone-600 dark:text-stone-400 w-full">
+                  <li className="flex items-center gap-2.5 sm:flex-col sm:gap-2 rounded-xl border border-stone-100/90 bg-stone-50/50 px-3 py-3 dark:border-stone-700/60 dark:bg-stone-800/30">
+                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-emerald-100 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400" aria-hidden>
+                      <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    </span>
+                    <span className="leading-snug">
+                      <span className="font-medium text-stone-800 dark:text-stone-200">Citation styles</span> — APA, MLA, Chicago &amp; more
+                    </span>
+                  </li>
+                  <li className="flex items-center gap-2.5 sm:flex-col sm:gap-2 rounded-xl border border-stone-100/90 bg-stone-50/50 px-3 py-3 dark:border-stone-700/60 dark:bg-stone-800/30">
+                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-emerald-100 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400" aria-hidden>
+                      <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    </span>
+                    <span className="leading-snug">
+                      <span className="font-medium text-stone-800 dark:text-stone-200">Inline annotations</span> — green, amber &amp; red
+                    </span>
+                  </li>
+                  <li className="flex items-center gap-2.5 sm:flex-col sm:gap-2 rounded-xl border border-stone-100/90 bg-stone-50/50 px-3 py-3 dark:border-stone-700/60 dark:bg-stone-800/30">
+                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-emerald-100 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400" aria-hidden>
+                      <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    </span>
+                    <span className="leading-snug">
+                      <span className="font-medium text-stone-800 dark:text-stone-200">Sources</span> — aligned for your bibliography
+                    </span>
+                  </li>
+                </ul>
+                <p className="text-center text-[11px] sm:text-xs text-stone-500 dark:text-stone-500 leading-relaxed max-w-2xl mx-auto px-1">
+                  Free plan includes 2 essay analyses per month · Encrypted in transit · Cancel anytime
+                </p>
+              </section>
             </div>
 
             <aside
@@ -797,7 +852,6 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                     paper={DEMO_HERO_AFTER_PAPER}
                     rotate="right"
                     variant="after"
-                    legendPlacement="top"
                     maxExcerptChars={720}
                     onOpenDemo={scrollToBeforeAfter}
                   />
@@ -845,7 +899,6 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                       paper={DEMO_HERO_AFTER_PAPER}
                       rotate="right"
                       variant="after"
-                      legendPlacement="top"
                       maxExcerptChars={720}
                       onOpenDemo={scrollToBeforeAfter}
                     />
@@ -2634,6 +2687,141 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   </div>
                   </div>
                   </div>
+      </section>
+
+      {/* Pricing — above FAQ, aligned with Pricing page */}
+      <section className="relative py-16 sm:py-24 overflow-hidden border-t border-stone-200/90 dark:border-stone-800" aria-labelledby="landing-pricing-heading">
+        <div className="absolute inset-0 bg-[#f8fafc] dark:bg-[#0c0a09]" aria-hidden />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#f1f5f9] via-white to-[#f8fafc] dark:from-stone-950 dark:via-stone-950 dark:to-stone-900 pointer-events-none" aria-hidden />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_85%_55%_at_50%_-12%,rgba(91,33,182,0.08),transparent_55%)] dark:bg-[radial-gradient(ellipse_85%_50%_at_50%_-8%,rgba(109,40,217,0.12),transparent_58%)] pointer-events-none" aria-hidden />
+        <div
+          className="absolute inset-0 opacity-[0.4] dark:opacity-[0.15] pointer-events-none bg-[length:32px_32px] bg-[linear-gradient(to_right,rgba(148,163,184,0.07)_1px,transparent_1px),linear-gradient(to_bottom,rgba(148,163,184,0.07)_1px,transparent_1px)]"
+          aria-hidden
+        />
+        <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-2xl mx-auto mb-10 sm:mb-14">
+            <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-violet-800/90 dark:text-violet-300/95 mb-3">
+              Pricing
+            </p>
+            <div className="mx-auto mb-4 h-0.5 w-16 rounded-full bg-gradient-to-r from-emerald-500 via-amber-400 to-red-500 opacity-90 dark:opacity-85" aria-hidden />
+            <h2
+              id="landing-pricing-heading"
+              className="text-2xl sm:text-3xl lg:text-[2.35rem] font-semibold text-stone-900 dark:text-stone-100 mb-4 tracking-tight leading-tight"
+              style={{ fontFamily: "'EB Garamond', Georgia, serif" }}
+            >
+              Simple plans for coursework
+            </h2>
+            <p className="text-base sm:text-lg text-stone-600 dark:text-stone-400 leading-relaxed">
+              Start free, upgrade when you need more analyses, citations, and study tools.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-6 lg:gap-8 max-w-4xl mx-auto">
+            <div className="rounded-2xl border border-stone-200/90 dark:border-stone-700/90 bg-white/80 dark:bg-stone-900/50 p-6 sm:p-8 shadow-[0_12px_40px_-12px_rgba(15,23,42,0.1)] dark:shadow-[0_12px_40px_-12px_rgba(0,0,0,0.4)] ring-1 ring-white/50 dark:ring-white/5 flex flex-col">
+              <h3 className="font-semibold text-xl text-stone-900 dark:text-stone-100 mb-1">Free</h3>
+              <p className="text-sm text-stone-500 dark:text-stone-400 mb-6">Perfect for getting started</p>
+              <div className="mb-6">
+                <span className="text-4xl font-bold text-stone-900 dark:text-stone-50">$0</span>
+                <span className="text-stone-500 dark:text-stone-400 ml-1">/month</span>
+              </div>
+              <ul className="space-y-2.5 mb-8 flex-1 text-sm sm:text-[0.9375rem] text-stone-600 dark:text-stone-400">
+                <li className="flex gap-2">
+                  <svg className="w-5 h-5 flex-shrink-0 text-violet-500 dark:text-violet-400 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span>3 documents, 2 analyses, 2 study packs per month</span>
+                </li>
+                <li className="flex gap-2">
+                  <svg className="w-5 h-5 flex-shrink-0 text-violet-500 dark:text-violet-400 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span>5,000 words Paper Summarizer, 2 citation searches</span>
+                </li>
+                <li className="flex gap-2">
+                  <svg className="w-5 h-5 flex-shrink-0 text-violet-500 dark:text-violet-400 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span>Focus Mode (3 blocked sites)</span>
+                </li>
+                <li className="flex gap-2">
+                  <svg className="w-5 h-5 flex-shrink-0 text-violet-500 dark:text-violet-400 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span>Basic grammar and citation styles</span>
+                </li>
+              </ul>
+              <button
+                type="button"
+                onClick={() => onNavigate('signup')}
+                className="w-full py-3 px-6 rounded-xl font-semibold bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-900 dark:text-stone-100 transition-colors ring-1 ring-stone-200/80 dark:ring-stone-600/80"
+              >
+                Start free
+              </button>
+            </div>
+
+            <div className="relative rounded-2xl border border-violet-500/90 dark:border-violet-500/70 bg-white/85 dark:bg-stone-900/55 p-6 sm:p-8 shadow-[0_12px_40px_-12px_rgba(91,33,182,0.18)] dark:shadow-[0_12px_40px_-12px_rgba(0,0,0,0.45)] ring-2 ring-violet-200/80 dark:ring-violet-800/60 flex flex-col">
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                <span className="bg-violet-600 text-white px-3 py-1 rounded-full text-xs font-bold shadow-md shadow-violet-500/25">
+                  Most popular
+                </span>
+              </div>
+              <h3 className="font-semibold text-xl text-stone-900 dark:text-stone-100 mb-1 pt-1">Pro</h3>
+              <p className="text-sm text-stone-500 dark:text-stone-400 mb-6">Most popular for students</p>
+              <div className="mb-1 flex flex-col items-start">
+                <span className="text-lg font-semibold text-red-600 dark:text-red-400 line-through">$19.99</span>
+                <div className="flex items-baseline flex-wrap gap-x-2 gap-y-1">
+                  <span className="text-4xl font-bold text-stone-900 dark:text-stone-50">$9.99</span>
+                  <span className="text-stone-500 dark:text-stone-400 text-sm">/month <span className="text-violet-600 dark:text-violet-400 font-semibold">first month</span></span>
+                </div>
+                <span className="text-xs text-stone-500 dark:text-stone-500 mt-1">Then $19.99/mo, or $199.99/year (save 17%)</span>
+              </div>
+              <ul className="space-y-2.5 mb-8 mt-5 flex-1 text-sm sm:text-[0.9375rem] text-stone-600 dark:text-stone-400">
+                <li className="flex gap-2">
+                  <svg className="w-5 h-5 flex-shrink-0 text-violet-500 dark:text-violet-400 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span>Unlimited documents; 99 combined analyses, study packs &amp; citations/mo</span>
+                </li>
+                <li className="flex gap-2">
+                  <svg className="w-5 h-5 flex-shrink-0 text-violet-500 dark:text-violet-400 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span>999,999 words Paper Summarizer; uploads up to 100MB</span>
+                </li>
+                <li className="flex gap-2">
+                  <svg className="w-5 h-5 flex-shrink-0 text-violet-500 dark:text-violet-400 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span>Quiz, flashcards, crossword &amp; Crater Blast</span>
+                </li>
+                <li className="flex gap-2">
+                  <svg className="w-5 h-5 flex-shrink-0 text-violet-500 dark:text-violet-400 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span>All citation styles, PDF/Word export, unlimited Focus Mode sites</span>
+                </li>
+              </ul>
+              <button
+                type="button"
+                onClick={() => onNavigate('pricing')}
+                className="w-full py-3 px-6 rounded-xl font-semibold bg-violet-700 hover:bg-violet-800 dark:bg-violet-600 dark:hover:bg-violet-500 text-white shadow-md shadow-violet-900/15 dark:shadow-violet-950/40 ring-1 ring-violet-900/10 dark:ring-white/10 transition-colors"
+              >
+                Get $10 off Pro
+              </button>
+            </div>
+          </div>
+
+          <p className="text-center text-sm text-stone-500 dark:text-stone-500 mt-8 max-w-xl mx-auto">
+            First-time subscribers get $10 off the first month on Pro (applied at checkout).{' '}
+            <button
+              type="button"
+              onClick={() => onNavigate('pricing')}
+              className="text-violet-700 dark:text-violet-400 font-medium underline underline-offset-2 hover:text-violet-800 dark:hover:text-violet-300"
+            >
+              Full pricing &amp; billing options
+            </button>
+          </p>
+        </div>
       </section>
 
       {/* FAQ — matches hero editorial theme */}

@@ -15,7 +15,7 @@
     <link rel="preload" href="/mascot.png" as="image" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
-    <!-- PRIMARY SEO META TAGS -->
+    <!-- PRIMARY SEO META TAGS (sync: src/constants/landingSeo.ts) -->
     <title>AI Essay Checker | Turn Essay from B to an A | WriteScholar</title>
     <meta name="description" content="Let our advanced AI check your essay and get professor-style feedback in seconds. Improve your grade instantly." />
 
@@ -80,7 +80,7 @@
     }
     </script>
 
-    <!-- FAQPage JSON-LD is injected once on the landing page (LandingPage.tsx) to match visible FAQ order. -->
+    <!-- WebPage JSON-LD is injected on the landing page (LandingPage.tsx). FAQ remains visible only (no FAQPage schema on /) to favor meta description in snippets. -->
 
     <!-- Fonts: async load to avoid render-blocking (saves ~1s on mobile LCP) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">

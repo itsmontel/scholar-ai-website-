@@ -38,6 +38,10 @@
     animation: none;
     transform: none;
   }
+  .animate-landing-hero-blob,
+  .animate-landing-hero-blob-delayed {
+    animation: none !important;
+  }
 }
 
 /* University-specific font styles */

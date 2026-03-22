@@ -5,6 +5,7 @@ import { HIDE_FRIENDS } from '../config/featureFlags';
 import { persistOnboardingToServer } from '../utils/onboarding';
 import { trackEvent } from '../utils/analytics';
 import { lazyWithRetry } from '../utils/lazyWithRetry';
+import { LANDING_META_DESCRIPTION, LANDING_PAGE_TITLE } from '../constants/landingSeo';
 
 // Eager: landing, login, signup (critical for first paint)
 import LandingPage from './pages/LandingPage';
@@ -275,7 +276,7 @@ const AcademicAIApp = () => {
     string,
     { title: string; description: string; ogImage?: string; ogImageAlt?: string }
   > = {
-    landing: { title: 'AI Essay Checker | Turn Essay from B to an A | WriteScholar', description: 'Let our advanced AI check your essay and get professor-style feedback in seconds. Improve your grade instantly.' },
+    landing: { title: LANDING_PAGE_TITLE, description: LANDING_META_DESCRIPTION },
     analyze: { title: 'AI Essay Checker — Professor-Level Feedback in Seconds | WriteScholar', description: 'Paste or upload your paper for professor-level feedback on thesis, evidence, structure, and citations. Choose your education level for rubrics that match your course. Free to try.' },
     citations: { title: 'Citation Finder for College Papers — APA, MLA, Chicago | WriteScholar', description: 'Find peer-reviewed sources for research papers. Search by topic; export APA, MLA, Chicago, or Harvard citations. Built for bibliographies and lit reviews.' },
     'study-pack': { title: 'AI Study Pack — Lesson, Flashcards, Quiz, Crossword & More | WriteScholar', description: 'Turn notes into a lesson, flashcards, quiz, crossword, and Crater Blast from one paste. Same study pack flow as the dashboard.' },
