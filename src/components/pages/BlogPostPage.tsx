@@ -93,7 +93,7 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ onNavigate, user, onLogout 
         url: SITE_ORIGIN,
         logo: {
           '@type': 'ImageObject',
-          url: `${SITE_ORIGIN}/og/landing.png`,
+          url: `${SITE_ORIGIN}/og-image.png`,
         },
       },
       mainEntityOfPage: {

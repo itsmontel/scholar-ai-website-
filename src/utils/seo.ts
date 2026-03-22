@@ -5,8 +5,8 @@
 
 export const SITE_ORIGIN = 'https://writescholar.com';
 
-/** Fallback share image (1200×630). Prefer `/og/landing.png` or per-route `/og/*.png` from `ogImageUrls`. */
-export const DEFAULT_OG_IMAGE = `${SITE_ORIGIN}/og/landing.png`;
+/** Social share image — single branded asset (`public/og-image.png`); used for all routes and blog posts. */
+export const DEFAULT_OG_IMAGE = `${SITE_ORIGIN}/og-image.png`;
 
 function deriveOgImageAlt(title: string): string {
   const stripped = title.replace(/\s*\|\s*WriteScholar\s*$/i, '').trim();
