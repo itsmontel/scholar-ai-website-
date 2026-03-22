@@ -15,7 +15,7 @@ export interface OgRouteSpec {
 
 /** One card per `pageMeta` route in CompleteAcademicAIApp (excluding blog-post; blog uses per-slug files). */
 export const ogRoutes: OgRouteSpec[] = [
-  { pageKey: 'landing', file: 'landing', headline: 'AI Essay Checker', sub: 'Professor-level feedback in seconds', hue: 232 },
+  { pageKey: 'landing', file: 'landing', headline: 'Turn Your Essay from a B to an A', sub: 'WriteScholar — professor-style AI feedback', hue: 232 },
   { pageKey: 'analyze', file: 'analyze', headline: 'AI Essay Checker', sub: 'Professor-level feedback on your draft', hue: 238 },
   { pageKey: 'citations', file: 'citations', headline: 'Citation Finder', sub: 'APA, MLA, Chicago & more', hue: 200 },
   { pageKey: 'study-pack', file: 'study-pack', headline: 'AI Study Pack', sub: 'Lesson, flashcards, quiz & crossword', hue: 168 },

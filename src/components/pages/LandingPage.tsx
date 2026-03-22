@@ -691,13 +691,12 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   className="text-[1.5rem] sm:text-4xl lg:text-[2.65rem] xl:text-[2.75rem] font-semibold tracking-tight leading-[1.15] mb-4 text-center px-0.5 break-words text-balance"
                   style={{ fontFamily: "'EB Garamond', Georgia, 'Times New Roman', serif" }}
                 >
-                  <span className="text-stone-900 dark:text-stone-50">AI Essay Checker with </span>
-                  <span className="text-emerald-800 dark:text-emerald-400">Professor</span>
-                  <span className="text-stone-900 dark:text-stone-50">-</span>
-                  <span className="text-amber-700 dark:text-amber-400">Level</span>{' '}
-                  <span className="text-red-700 dark:text-red-400">Feedback</span>
-                  <span className="text-stone-900 dark:text-stone-50"> in Seconds</span>
-            </h1>
+                  <span className="text-violet-700 dark:text-violet-300">WriteScholar:</span>{' '}
+                  <span className="text-stone-900 dark:text-stone-50">Turn Your Essay from a </span>
+                  <span className="text-amber-700 dark:text-amber-400">B</span>
+                  <span className="text-stone-900 dark:text-stone-50"> to an </span>
+                  <span className="text-emerald-700 dark:text-emerald-400">A</span>
+                </h1>
                 <p className="text-base sm:text-[1.05rem] text-stone-600 dark:text-stone-400 mb-4 max-w-xl mx-auto text-center leading-relaxed">
                   <span className="font-semibold text-stone-800 dark:text-stone-200">Better Essays. Higher Grades. Instantly. </span>
                   See exactly what to fix before you submit.

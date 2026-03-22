@@ -275,7 +275,7 @@ const AcademicAIApp = () => {
     string,
     { title: string; description: string; ogImage?: string; ogImageAlt?: string }
   > = {
-    landing: { title: 'AI Essay Checker — Professor-Level Feedback in Seconds | WriteScholar', description: 'Professor-level essay feedback in seconds—structure, argument, citations, and clarity. Plus study packs, quizzes, and Focus Mode. Free to try.' },
+    landing: { title: 'WriteScholar: Turn Your Essay from a B to an A', description: 'Let our advanced AI check your essay and get professor-style feedback in seconds. Improve your grade instantly.' },
     analyze: { title: 'AI Essay Checker — Professor-Level Feedback in Seconds | WriteScholar', description: 'Paste or upload your paper for professor-level feedback on thesis, evidence, structure, and citations. Choose your education level for rubrics that match your course. Free to try.' },
     citations: { title: 'Citation Finder for College Papers — APA, MLA, Chicago | WriteScholar', description: 'Find peer-reviewed sources for research papers. Search by topic; export APA, MLA, Chicago, or Harvard citations. Built for bibliographies and lit reviews.' },
     'study-pack': { title: 'AI Study Pack — Lesson, Flashcards, Quiz, Crossword & More | WriteScholar', description: 'Turn notes into a lesson, flashcards, quiz, crossword, and Crater Blast from one paste. Same study pack flow as the dashboard.' },
