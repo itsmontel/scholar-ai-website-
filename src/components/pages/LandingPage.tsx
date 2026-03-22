@@ -726,7 +726,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                 </h1>
                 <div className="mb-7 sm:mb-8 max-w-[22rem] sm:max-w-xl mx-auto space-y-2.5 sm:space-y-3 text-stone-600 dark:text-stone-400">
                   <p className="text-[1.02rem] sm:text-lg font-semibold text-stone-800 dark:text-stone-100 leading-snug tracking-[0.01em]">
-                    Professor-style feedback in under a minute.
+                    AI-powered, professor-style feedback in under a minute.
                   </p>
                   <p className="text-[0.95rem] sm:text-[1.0625rem] leading-relaxed tracking-[0.015em] text-stone-600 dark:text-stone-400">
                     Know what to fix before you hit submit.
