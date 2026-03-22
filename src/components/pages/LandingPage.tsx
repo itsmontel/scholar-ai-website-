@@ -485,8 +485,8 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
 
   const heroFeatureCards = [
     {
-      title: 'Analyze',
-      desc: 'Get professor-style feedback on your essays',
+      title: 'Essay feedback',
+      desc: 'Paste or upload a draft—line-level notes on thesis, evidence, and citations',
       onClick: () => {
         setMode('analyze');
         scrollToLandingTools();
@@ -709,16 +709,16 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   </span>
                   <span className="inline-flex align-middle justify-center mt-3 sm:mt-1.5 sm:ml-1">
                     <span
-                      className="inline-flex items-center gap-2.5 sm:gap-3 rounded-2xl border border-stone-200/90 dark:border-stone-600/80 bg-gradient-to-b from-white to-stone-50/95 dark:from-stone-800/95 dark:to-stone-900/90 px-3.5 py-2.5 sm:px-4 sm:py-3 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.95),0_2px_8px_-2px_rgba(15,23,42,0.08)] ring-1 ring-stone-200/70 dark:ring-stone-700/60 dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04),0_4px_16px_-6px_rgba(0,0,0,0.45)]"
+                      className="inline-flex items-center gap-2.5 sm:gap-3 rounded-2xl border border-stone-200/90 dark:border-stone-600/80 bg-white dark:bg-stone-800/90 px-3.5 py-2.5 sm:px-4 sm:py-3 shadow-sm"
                       aria-label="Grade improvement from B to A"
                     >
-                      <span className="text-[1.4rem] sm:text-[1.7rem] lg:text-[1.85rem] font-bold tabular-nums leading-none text-amber-800 dark:text-amber-200 px-0.5">
+                      <span className="text-[1.4rem] sm:text-[1.7rem] lg:text-[1.85rem] font-bold tabular-nums leading-none px-0.5 text-amber-600 dark:text-amber-400">
                         B
                       </span>
-                      <span className="text-stone-400 dark:text-stone-500 text-xl sm:text-2xl font-light leading-none select-none px-0.5" aria-hidden>
+                      <span className="text-stone-500 dark:text-stone-400 text-xl sm:text-2xl font-medium leading-none select-none px-0.5" aria-hidden>
                         →
                       </span>
-                      <span className="text-[1.4rem] sm:text-[1.7rem] lg:text-[1.85rem] font-bold tabular-nums leading-none text-emerald-800 dark:text-emerald-300 px-0.5">
+                      <span className="text-[1.4rem] sm:text-[1.7rem] lg:text-[1.85rem] font-bold tabular-nums leading-none px-0.5 text-emerald-600 dark:text-emerald-400">
                         A
                       </span>
                     </span>

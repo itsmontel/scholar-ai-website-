@@ -1828,7 +1828,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
       <main className="relative max-w-7xl mx-auto px-4 sm:px-6 pt-4 sm:pt-6 pb-28 sm:pb-16 w-full min-w-0 overflow-x-hidden lg:ml-24 lg:mr-auto">
         <div className="w-full min-w-0 space-y-5 sm:space-y-6">
           {/* Greeting strip */}
-          <div className="rounded-2xl overflow-hidden border border-stone-200/90 dark:border-stone-800 shadow-[0_12px_40px_-12px_rgba(15,23,42,0.08)] dark:shadow-[0_12px_40px_-12px_rgba(0,0,0,0.35)] backdrop-blur-md bg-white/80 dark:bg-stone-900/55 p-4 sm:p-5 md:p-6 ring-1 ring-white/50 dark:ring-white/5 animate-card-bounce-in" data-tutorial="greeting-area">
+          <div className="rounded-2xl overflow-visible border border-stone-200/90 dark:border-stone-800 shadow-[0_12px_40px_-12px_rgba(15,23,42,0.08)] dark:shadow-[0_12px_40px_-12px_rgba(0,0,0,0.35)] backdrop-blur-md bg-white/80 dark:bg-stone-900/55 p-4 sm:p-5 md:p-6 ring-1 ring-white/50 dark:ring-white/5 animate-card-bounce-in" data-tutorial="greeting-area">
             <div className="flex flex-col gap-3 sm:gap-3 w-full">
               {/* Greeting + tagline (left) · Search + streak/badges (right), no divider lines */}
               <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3 sm:gap-3">
@@ -1868,7 +1868,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                     </div>
                   </div>
                 </div>
-                <div className="flex flex-col gap-2.5 w-full lg:w-auto lg:min-w-[280px] lg:max-w-lg flex-shrink-0 lg:items-end">
+                <div className="flex flex-col gap-2.5 w-full lg:w-auto lg:min-w-[280px] lg:max-w-lg flex-shrink-0 lg:items-end relative z-20">
                   <div className="relative w-full">
                     <svg className="absolute left-3.5 sm:left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-violet-500/80 dark:text-violet-400/90 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -1878,7 +1878,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       placeholder="Search activity…"
-                      className="w-full pl-10 sm:pl-11 pr-10 sm:pr-11 py-2.5 sm:py-3 bg-white dark:bg-stone-900/50 rounded-xl sm:rounded-lg text-sm text-stone-800 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500 outline-none border border-violet-400/75 dark:border-violet-500/55 ring-2 ring-violet-500/18 shadow-sm shadow-violet-500/10 transition-all focus:border-violet-500 dark:focus:border-violet-400 focus:ring-4 focus:ring-violet-500/30 focus:shadow-md focus:shadow-violet-500/25"
+                      className="w-full pl-10 sm:pl-11 pr-10 sm:pr-11 py-2.5 sm:py-3 bg-white dark:bg-stone-900/50 rounded-xl sm:rounded-lg text-sm text-stone-800 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500 outline-none border border-stone-200/90 dark:border-stone-600/75 shadow-sm transition-all focus:border-violet-500 dark:focus:border-violet-400 focus:ring-4 focus:ring-violet-500/25 focus:shadow-md focus:shadow-violet-500/15 focus-visible:outline-none"
                     />
                     {searchQuery && (
                       <button onClick={() => setSearchQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 rounded-lg hover:bg-stone-200/60 dark:hover:bg-stone-600/50 transition-colors">
