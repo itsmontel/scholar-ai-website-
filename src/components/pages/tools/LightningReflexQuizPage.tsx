@@ -819,10 +819,10 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
 
         {/* How to play */}
         <div className="mt-8 bg-white/70 backdrop-blur-sm rounded-2xl border border-stone-200/60 p-6 shadow-sm">
-          <h3 className="font-semibold text-stone-800 mb-4 flex items-center gap-2">
+          <h2 className="font-semibold text-stone-800 mb-4 flex items-center gap-2">
             <span className="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center text-sm">?</span>
             How to Play
-          </h3>
+          </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {[
               { step: 1, text: 'Answer craters fall from the sky', icon: '🌑' },

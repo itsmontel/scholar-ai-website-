@@ -7,6 +7,7 @@ import InteractiveStudyPackDemo from '../landing/InteractiveStudyPackDemo';
 import { trackStudyPackGenerated, getStats } from '../../data/achievements';
 import { trackEvent } from '../../utils/analytics';
 import { applyPageSeoTags, absoluteCanonicalUrl, injectJsonLd, removeJsonLd } from '../../utils/seo';
+import { ogImageUrlForPage } from '../../utils/ogImageUrls';
 import { getResetsInText } from '../../utils/usageReset';
 
 const STUDY_PACK_PAGE_SEO = {
@@ -68,6 +69,8 @@ const StudyPackPage = ({ onNavigate, user, onLogout }: StudyPackPageProps) => {
       title: STUDY_PACK_PAGE_SEO.title,
       description: STUDY_PACK_PAGE_SEO.description,
       canonicalUrl,
+      ogImage: ogImageUrlForPage('study-pack'),
+      ogImageAlt: 'AI Study Pack — lesson, flashcards, quiz, crossword from your notes | WriteScholar',
     });
     injectJsonLd('study-pack-page', {
       '@context': 'https://schema.org',

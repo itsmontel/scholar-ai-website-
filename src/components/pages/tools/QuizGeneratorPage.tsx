@@ -1325,10 +1325,10 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
             </span>
           </div>
 
-          {/* Question */}
-          <h3 className="text-xl sm:text-2xl font-semibold text-stone-800 dark:text-stone-100 mb-6 leading-relaxed break-words">
+          {/* Question (h2: primary content under page h1) */}
+          <h2 className="text-xl sm:text-2xl font-semibold text-stone-800 dark:text-stone-100 mb-6 leading-relaxed break-words">
             {question.question}
-          </h3>
+          </h2>
 
           {/* Answer options */}
           <div className="space-y-3 mb-8">
@@ -1620,7 +1620,16 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
         />
         {/* Hero Section - minimal bar when loaded from recents; hide when locked-out layout (hero in grid) */}
         {showMinimalUI ? (
-          <div className="sticky top-0 z-10 flex items-center gap-3 px-4 sm:px-6 py-4 bg-white/95 dark:bg-stone-800/95 backdrop-blur border-b border-stone-200 dark:border-stone-700">
+          <>
+            <h1 className="sr-only">
+              AI{' '}
+              {studyToolMode === 'flashcards'
+                ? 'Flashcard Generator'
+                : studyToolMode === 'crossword'
+                  ? 'Crossword Generator'
+                  : 'Quiz Generator'}
+            </h1>
+            <div className="sticky top-0 z-10 flex items-center gap-3 px-4 sm:px-6 py-4 bg-white/95 dark:bg-stone-800/95 backdrop-blur border-b border-stone-200 dark:border-stone-700">
             <button onClick={() => {
               if (openedFromStudyPackViewer) {
                 sessionStorage.removeItem('writescholar_return_to_study_pack_viewer');
@@ -1636,6 +1645,7 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
               {studyToolMode === 'quiz' ? 'Quiz' : studyToolMode === 'flashcards' ? 'Flashcards' : 'Crossword'}
             </span>
           </div>
+          </>
         ) : !showLockedOutLayout ? (
         <div className="pt-8 sm:pt-12 pb-6 sm:pb-10 px-4 sm:px-6 lg:px-8">
           <div className="max-w-6xl mx-auto">
@@ -2098,7 +2108,7 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
                 {crosswordResult && crosswordResult.placedWords?.length > 0 ? (
                   <div className="min-w-0 w-full overflow-x-hidden">
                     <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
-                      <h3 className="text-lg font-bold text-stone-800 dark:text-stone-100">{crosswordResult.title}</h3>
+                      <h2 className="text-lg font-bold text-stone-800 dark:text-stone-100">{crosswordResult.title}</h2>
                       <div className="flex items-center gap-2 flex-wrap">
                         {isPaidUser ? (
                           <>

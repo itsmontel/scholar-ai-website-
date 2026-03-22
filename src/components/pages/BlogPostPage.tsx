@@ -11,6 +11,7 @@ import {
   injectJsonLd,
   removeJsonLd,
 } from '../../utils/seo';
+import { ogImageUrlForBlogPost } from '../../utils/ogImageUrls';
 
 interface BlogPostPageProps {
   onNavigate: (page: string, slug?: string) => void;
@@ -64,10 +65,13 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ onNavigate, user, onLogout 
     const canonicalUrl = absoluteCanonicalUrl(canonicalPath);
     const title = `${post.title} | WriteScholar`;
 
+    const ogImage = ogImageUrlForBlogPost(post.slug);
     applyPageSeoTags({
       title,
       description: post.description,
       canonicalUrl,
+      ogImage,
+      ogImageAlt: `${post.title} — WriteScholar blog`,
     });
 
     const isoDate = `${post.date}T12:00:00.000Z`;
@@ -76,6 +80,7 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ onNavigate, user, onLogout 
       '@type': 'BlogPosting',
       headline: post.title,
       description: post.description,
+      image: ogImage,
       datePublished: isoDate,
       dateModified: isoDate,
       author: {
@@ -88,7 +93,7 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ onNavigate, user, onLogout 
         url: SITE_ORIGIN,
         logo: {
           '@type': 'ImageObject',
-          url: `${SITE_ORIGIN}/og-image.png`,
+          url: `${SITE_ORIGIN}/og/landing.png`,
         },
       },
       mainEntityOfPage: {

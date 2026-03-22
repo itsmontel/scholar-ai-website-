@@ -79,6 +79,7 @@ import {
   getCanonicalPathname,
   syncBrowserUrlToCanonical,
 } from '../utils/seo';
+import { ogImageUrlForPage } from '../utils/ogImageUrls';
 
 /** Derive page from pathname - used for initial state and URL sync */
 function getPageFromPath(pathname: string): string {
@@ -269,8 +270,11 @@ const AcademicAIApp = () => {
   // Route protection for authenticated pages
   const protectedRoutes = ['dashboard', 'analysis', 'analysis-history', 'citation-results', 'citation-history', 'quiz-history', 'friends', 'upload', 'profile', 'library', 'account', 'billing', 'badges'];
 
-  // SEO: dynamic document title and meta description per page (SPA)
-  const pageMeta: Record<string, { title: string; description: string }> = {
+  // SEO: dynamic title, description, canonical, and OG/Twitter per page (SPA)
+  const pageMeta: Record<
+    string,
+    { title: string; description: string; ogImage?: string; ogImageAlt?: string }
+  > = {
     landing: { title: 'AI Essay Checker — Professor-Level Feedback in Seconds | WriteScholar', description: 'Professor-level essay feedback in seconds—structure, argument, citations, and clarity. Plus study packs, quizzes, and Focus Mode. Free to try.' },
     analyze: { title: 'AI Essay Checker — Professor-Level Feedback in Seconds | WriteScholar', description: 'Paste or upload your paper for professor-level feedback on thesis, evidence, structure, and citations. Choose your education level for rubrics that match your course. Free to try.' },
     citations: { title: 'Citation Finder for College Papers — APA, MLA, Chicago | WriteScholar', description: 'Find peer-reviewed sources for research papers. Search by topic; export APA, MLA, Chicago, or Harvard citations. Built for bibliographies and lit reviews.' },
@@ -324,6 +328,8 @@ const AcademicAIApp = () => {
         title: meta.title,
         description: meta.description,
         canonicalUrl,
+        ogImage: meta.ogImage ?? ogImageUrlForPage(currentPage),
+        ogImageAlt: meta.ogImageAlt,
       });
     }
   }, [currentPage]);

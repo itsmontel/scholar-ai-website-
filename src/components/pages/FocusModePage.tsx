@@ -327,7 +327,7 @@ const FocusModePage = ({ onNavigate, user, onLogout }: FocusModePageProps) => {
                   <div className="w-12 h-12 rounded-xl bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center mb-3">
                     {f.icon}
                   </div>
-                  <h4 className="font-bold text-stone-800 dark:text-stone-100 mb-1">{f.title}</h4>
+                  <h3 className="font-bold text-stone-800 dark:text-stone-100 mb-1">{f.title}</h3>
                   <p className="text-sm text-stone-500 dark:text-stone-400 leading-relaxed">{f.desc}</p>
                 </div>
               ))}

@@ -5,6 +5,15 @@
 
 export const SITE_ORIGIN = 'https://writescholar.com';
 
+/** Fallback share image (1200×630). Prefer `/og/landing.png` or per-route `/og/*.png` from `ogImageUrls`. */
+export const DEFAULT_OG_IMAGE = `${SITE_ORIGIN}/og/landing.png`;
+
+function deriveOgImageAlt(title: string): string {
+  const stripped = title.replace(/\s*\|\s*WriteScholar\s*$/i, '').trim();
+  if (!stripped) return 'WriteScholar — AI essay feedback and study tools for students';
+  return `${stripped} — WriteScholar`;
+}
+
 /** Alternate public paths → single canonical path (matches sitemap / internal links). */
 const PATH_ALIASES: Record<string, string> = {
   '/compare': '/why-students-choose',
@@ -104,16 +113,23 @@ function ensureCanonicalLink(): HTMLLinkElement {
 }
 
 /**
- * Sets document title, meta description, canonical, og:url, og:title/description, twitter:title/description.
+ * Sets document title, meta description, canonical, Open Graph, and Twitter Card tags (including image + alt).
  */
 export function applyPageSeoTags(opts: {
   title: string;
   description: string;
   /** Full URL; if omitted, derived from current location. */
   canonicalUrl?: string;
+  /** Absolute image URL for og:image / twitter:image. Defaults to site OG asset. */
+  ogImage?: string;
+  /** Shown in link previews; defaults from title. */
+  ogImageAlt?: string;
 }): void {
   const canonicalUrl =
     opts.canonicalUrl ?? absoluteCanonicalUrl(window.location.pathname);
+
+  const ogImage = opts.ogImage ?? DEFAULT_OG_IMAGE;
+  const ogImageAlt = opts.ogImageAlt ?? deriveOgImageAlt(opts.title);
 
   document.title = opts.title;
   ensureCanonicalLink().setAttribute('href', canonicalUrl);
@@ -124,6 +140,13 @@ export function applyPageSeoTags(opts: {
   setOrCreateMeta('meta[property="og:url"]', 'content', canonicalUrl);
   setOrCreateMeta('meta[name="twitter:title"]', 'content', opts.title);
   setOrCreateMeta('meta[name="twitter:description"]', 'content', opts.description);
+
+  setOrCreateMeta('meta[property="og:image"]', 'content', ogImage);
+  setOrCreateMeta('meta[name="twitter:image"]', 'content', ogImage);
+  setOrCreateMeta('meta[property="og:image:width"]', 'content', '1200');
+  setOrCreateMeta('meta[property="og:image:height"]', 'content', '630');
+  setOrCreateMeta('meta[property="og:image:alt"]', 'content', ogImageAlt);
+  setOrCreateMeta('meta[name="twitter:image:alt"]', 'content', ogImageAlt);
 }
 
 const LD_NS = 'writescholar-structured-data';

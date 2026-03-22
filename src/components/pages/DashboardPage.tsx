@@ -2010,12 +2010,12 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                   </div>
                       </div>
                       <div className="min-w-0" data-tutorial="dashboard-tool-tabs-hero">
-                        <h1 className="relative text-lg sm:text-2xl md:text-[2rem] lg:text-[2.125rem] font-semibold text-stone-900 dark:text-stone-50 text-center mb-2 sm:mb-2 tracking-tight leading-snug px-0.5 sm:px-1" style={{ fontFamily: "'EB Garamond', Georgia, serif" }}>
+                        <h2 className="relative text-lg sm:text-2xl md:text-[2rem] lg:text-[2.125rem] font-semibold text-stone-900 dark:text-stone-50 text-center mb-2 sm:mb-2 tracking-tight leading-snug px-0.5 sm:px-1" style={{ fontFamily: "'EB Garamond', Georgia, serif" }}>
                           <span className="text-emerald-700 dark:text-emerald-400">Paste</span>
                           {' '}or{' '}
                           <span className="text-sky-700 dark:text-sky-400">upload</span>
                           {' '}your essay, get <span className="text-violet-800 dark:text-violet-300">feedback</span> in seconds
-                        </h1>
+                        </h2>
                         <p className="relative text-stone-600 dark:text-stone-300 text-[13px] sm:text-base text-center mb-3 sm:mb-2.5 max-w-xl mx-auto leading-relaxed">
                           Upload your essay, get <span className="text-red-600 dark:text-red-500">professor</span><span className="text-amber-600 dark:text-amber-500">-style</span> <span className="text-green-600 dark:text-green-500">feedback</span>
                         </p>
@@ -2249,9 +2249,9 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                           <InteractiveCitationsDemo variant="side-left" />
                         </div>
                         <div className="min-w-0 self-start" data-tutorial="dashboard-tool-tabs-hero">
-                          <h1 className="relative text-lg sm:text-2xl md:text-3xl font-semibold text-stone-900 dark:text-stone-50 text-center mb-2 tracking-tight leading-snug px-0.5" style={{ fontFamily: "'EB Garamond', Georgia, serif" }}>
+                          <h2 className="relative text-lg sm:text-2xl md:text-3xl font-semibold text-stone-900 dark:text-stone-50 text-center mb-2 tracking-tight leading-snug px-0.5" style={{ fontFamily: "'EB Garamond', Georgia, serif" }}>
                             Find <span className="text-sky-700 dark:text-sky-400">academic sources</span> in seconds
-                          </h1>
+                          </h2>
                           <p className="relative text-stone-600 dark:text-stone-300 text-[13px] sm:text-base text-center mb-3 sm:mb-2.5 max-w-xl mx-auto leading-relaxed">
                             APA, MLA & Chicago. Peer-reviewed sources. Filter by year.
                           </p>
