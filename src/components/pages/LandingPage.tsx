@@ -606,41 +606,6 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
       ),
     },
     {
-      title: 'Humanize',
-      desc: 'Transform AI text into natural human writing',
-      onClick: () => {
-        onNavigate('signup');
-      },
-      gradient: 'from-violet-100 to-purple-100 dark:from-violet-950/45 dark:to-purple-950/45',
-      accentClasses: { title: 'text-violet-900 dark:text-violet-300', orb: 'bg-violet-500/35', iconBg: 'bg-violet-200 dark:bg-violet-900/60' },
-      borderColor: 'border-violet-300/80 dark:border-violet-700/60',
-      icon: '✨',
-      inner: (
-        <div className="relative h-12">
-          <div className="absolute inset-0 animate-humanize-before">
-            <div className="text-[10px] text-stone-700 dark:text-stone-300 mb-1 font-semibold">Before</div>
-            <div className="text-stone-800 dark:text-stone-200 text-xs font-medium">Utilize the methodology...</div>
-          </div>
-          <div className="absolute inset-0 animate-humanize-after">
-            <div className="text-[10px] text-violet-900 dark:text-violet-200 mb-1 font-bold">After</div>
-            <div className="text-violet-950 dark:text-violet-100 text-xs font-semibold">Use the method...</div>
-          </div>
-        </div>
-      ),
-      mobileContent: (
-        <div className="relative h-12 w-full">
-          <div className="absolute inset-0 animate-humanize-before">
-            <div className="text-[10px] text-stone-600 dark:text-stone-400 mb-1 font-semibold">Before</div>
-            <div className="text-stone-800 dark:text-stone-200 text-xs font-medium truncate">Utilize the methodology...</div>
-          </div>
-          <div className="absolute inset-0 animate-humanize-after">
-            <div className="text-[10px] text-violet-900 dark:text-violet-200 mb-1 font-bold">After</div>
-            <div className="text-violet-950 dark:text-violet-100 text-xs font-semibold truncate">Use the method...</div>
-          </div>
-        </div>
-      ),
-    },
-    {
       title: 'Summarize',
       desc: 'Turn long papers into concise bullet points',
       onClick: () => {
@@ -788,8 +753,10 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
     },
   ];
 
-  /** 8 cards × 12.5% width; 4 slides (indices 0–3) */
+  /** 7 cards × (100/7)% width; 4 slides (indices 0–3) */
   const heroCarouselMaxIndex = 3;
+  const heroCarouselCardBasis = `${100 / 7}%`;
+  const heroCarouselTranslateStep = 100 / 7;
 
   return (
     <>
@@ -849,24 +816,24 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
 
         {/* Hero Content — z-10 so text/sections stack above decorative floating mockups (z-1) */}
         <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8 pt-12 sm:pt-14 lg:pt-12 pb-0">
-          {/* Side mascots — hidden xl+ where essay preview panels sit */}
-          <div className="hidden lg:block xl:hidden absolute left-0 xl:left-4 top-[25%] -translate-y-1/2 z-10">
+          {/* Side mascots — hidden xl+ where essay preview panels sit; ~10% zoom-out matches hero headline */}
+          <div className="hidden lg:block xl:hidden absolute left-0 xl:left-4 top-[25%] -translate-y-1/2 z-10 lg:scale-[0.9] lg:origin-center">
             <ScholarMascot size={140} animated={true} pose="waving" />
           </div>
-          <div className="hidden lg:block xl:hidden absolute right-2 xl:right-6 top-[22%] -translate-y-1/2 z-10 opacity-90">
+          <div className="hidden lg:block xl:hidden absolute right-2 xl:right-6 top-[22%] -translate-y-1/2 z-10 opacity-90 lg:scale-[0.9] lg:origin-center">
             <ScholarMascot size={112} animated={true} pose="studying" />
           </div>
 
           <div className="w-full max-w-[1320px] xl:mx-auto xl:grid xl:grid-cols-[minmax(0,252px)_minmax(0,1fr)_minmax(0,252px)] xl:gap-5 xl:items-start xl:justify-center">
             <aside
-              className="hidden xl:block pointer-events-none xl:pointer-events-auto xl:justify-self-end xl:pt-1 xl:min-w-0"
+              className="hidden xl:block pointer-events-none xl:pointer-events-auto xl:justify-self-end xl:pt-1 xl:min-w-0 xl:scale-[0.9] xl:origin-top-right"
               aria-label="Sample essay with professor-style annotations"
             >
               <HeroEssayPreviewCard paper={DEMO_PAPERS[0]} rotate="left" onOpenDemo={scrollToLandingTools} />
             </aside>
 
             <div className="min-w-0 flex flex-col items-center w-full">
-          <div className="max-w-4xl mx-auto text-center">
+          <div className="max-w-4xl mx-auto text-center w-full lg:scale-[0.9] lg:origin-top">
             {/* Hero headline */}
             <h1 className="text-3xl sm:text-5xl lg:text-6xl xl:text-7xl font-extrabold text-[#8447e8] dark:text-violet-400 leading-[1.15] mb-6 sm:mb-6 tracking-tight" style={{ letterSpacing: '-0.03em' }}>
               <span className="block sm:inline">Check my essay with AI, </span>
@@ -884,7 +851,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
             </p>
           </div>
 
-          <div className="max-w-4xl mx-auto text-center">
+          <div className="max-w-4xl mx-auto text-center w-full">
             {/* Primary CTA - mascot peeking behind button with grip hands */}
             <div className="flex justify-center mb-2 sm:mb-3">
               <div className="relative inline-flex flex-col items-center">
@@ -986,7 +953,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
             </div>
 
             <aside
-              className="hidden xl:block pointer-events-none xl:pointer-events-auto xl:justify-self-start xl:pt-1 xl:min-w-0"
+              className="hidden xl:block pointer-events-none xl:pointer-events-auto xl:justify-self-start xl:pt-1 xl:min-w-0 xl:scale-[0.9] xl:origin-top-left"
               aria-label="Sample essay with professor-style annotations"
             >
               <HeroEssayPreviewCard paper={DEMO_PAPERS[1]} rotate="right" onOpenDemo={scrollToLandingTools} />
@@ -1032,11 +999,11 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   ))}
                 </div>
                 <div
-                  className="hidden sm:flex gap-4 sm:transition-transform sm:duration-500 sm:ease-out w-[160%] pr-8 sm:pr-12"
-                  style={{ transform: `translateX(-${studyCardsCarouselIndex * 12.5}%)` }}
+                  className="hidden sm:flex gap-4 sm:transition-transform sm:duration-500 sm:ease-out w-[140%] pr-8 sm:pr-12"
+                  style={{ transform: `translateX(-${studyCardsCarouselIndex * heroCarouselTranslateStep}%)` }}
                 >
                   {heroFeatureCards.map((card) => (
-                    <div key={card.title} className="flex-shrink-0 flex-[0_0_12.5%] w-[12.5%] max-w-[12.5%]">
+                    <div key={card.title} className="flex-shrink-0 max-w-none" style={{ flex: `0 0 ${heroCarouselCardBasis}` }}>
                       <StudyCard
                         title={card.title}
                         desc={card.desc}
