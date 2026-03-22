@@ -611,6 +611,60 @@ export interface DemoPaper {
   comprehensiveAnalysis: typeof DEMO_COMPREHENSIVE_ANALYSIS;
 }
 
+/** Short excerpt for landing hero “After” mock-up (revised draft, ~A range) — same topic as B demo */
+export const DEMO_HERO_AFTER_TITLE = 'Is There a Way Out? Race, Control, and Illusion in Jordan Peele\'s Get Out';
+
+export const DEMO_HERO_AFTER_CONTENT = `Is There a Way Out? Race, Control, and Illusion in Jordan Peele's Get Out
+
+Jordan Peele's Get Out (2017) examines how liberal racism and bodily coercion sustain white supremacy. Rather than portraying racism as overt hostility alone, Peele exposes its subtler forms—embedded within liberal discourse and social interaction.
+
+The film critiques race relations by showing both covert and overt ways white supremacy maintains power. This idea resonates with Bonilla-Silva's argument that modern racism lives in everyday systems rather than only as slurs or open hostility (3). Peele's ending—in which Chris is arrested—underscores that the horror lies not only in the act but in its familiarity.`;
+
+export const DEMO_HERO_AFTER_ANNOTATIONS: DemoAnnotation[] = [
+  {
+    id: 'ha-1',
+    type: 'strong',
+    text: 'Rather than portraying racism as overt hostility alone, Peele exposes its subtler forms—embedded within liberal discourse and social interaction.',
+    comment: 'Clear analytical claim: you name what the film does (expose) and where it operates (discourse and interaction).',
+    suggestion: 'Use this pattern in each body paragraph: one claim + where it shows up in the film.',
+  },
+  {
+    id: 'ha-2',
+    type: 'strong',
+    text: 'The film critiques race relations by showing both covert and overt ways white supremacy maintains power.',
+    comment: 'Strong thesis-adjacent sentence: covert/overt maps cleanly onto Peele’s plot and imagery.',
+    suggestion: 'Mirror this structure in topic sentences so each paragraph advances the same analytical frame.',
+  },
+  {
+    id: 'ha-3',
+    type: 'strong',
+    text: 'This idea resonates with Bonilla-Silva\'s argument that modern racism lives in everyday systems rather than only as slurs or open hostility (3).',
+    comment: 'Effective synthesis: you connect the film to scholarship and MLA in-text citation is in place.',
+    suggestion: 'Keep pairing one scene with one theoretical anchor per section.',
+  },
+  {
+    id: 'ha-4',
+    type: 'strong',
+    text: 'Peele\'s ending—in which Chris is arrested—underscores that the horror lies not only in the act but in its familiarity.',
+    comment: 'Strong close: you connect plot to theme—the horror is systemic, not only visceral.',
+    suggestion: 'Optional trim: "Peele\'s ending, with Chris arrested, underscores that the horror lies in the act and in its familiarity."',
+  },
+];
+
+/** Landing hero only — not listed in interactive demo switcher */
+export const DEMO_HERO_AFTER_PAPER: DemoPaper = {
+  id: 'hero-after',
+  label: 'After · revised draft',
+  title: DEMO_HERO_AFTER_TITLE,
+  content: DEMO_HERO_AFTER_CONTENT,
+  annotations: DEMO_HERO_AFTER_ANNOTATIONS,
+  rubric: DEMO_B_RUBRIC,
+  overallScore: 90,
+  grade: 'A (90%+)',
+  wordCount: 420,
+  comprehensiveAnalysis: DEMO_B_COMPREHENSIVE_ANALYSIS,
+};
+
 export const DEMO_PAPERS: DemoPaper[] = [
   {
     id: 'c',
@@ -637,3 +691,18 @@ export const DEMO_PAPERS: DemoPaper[] = [
     comprehensiveAnalysis: DEMO_B_COMPREHENSIVE_ANALYSIS,
   },
 ];
+
+/** Dashboard analyze previews: mostly amber + rose (no strong/green in excerpt) */
+export const DEMO_DASHBOARD_BEFORE_PAPER: DemoPaper = {
+  ...DEMO_PAPERS[0],
+  id: 'dashboard-before',
+  label: 'Before · draft',
+  annotations: DEMO_ANNOTATIONS.filter((a) => a.type === 'improve' || a.type === 'concern'),
+};
+
+/** Dashboard: same “after” excerpt, all highlights read as strong (green) in the mock-up */
+export const DEMO_DASHBOARD_AFTER_PAPER: DemoPaper = {
+  ...DEMO_HERO_AFTER_PAPER,
+  id: 'dashboard-after',
+  label: 'After · revised',
+};

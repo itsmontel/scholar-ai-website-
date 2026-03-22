@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import Header from '../../common/Header';
+import { WriteScholarEditorialBackgroundLayers } from '../../common/WriteScholarEditorialBackground';
 import Footer from '../../common/Footer';
 import FlashcardViewer from '../../common/FlashcardViewer';
 
@@ -267,7 +268,8 @@ const CreateFlashcardsPage = ({ onNavigate, user, onLogout }: CreateFlashcardsPa
   // Study mode: show FlashcardViewer (same layout as Create page)
   if (studyMode) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-stone-50 to-white dark:from-stone-900 dark:to-stone-900">
+      <div className="relative min-h-screen overflow-x-hidden">
+        <WriteScholarEditorialBackgroundLayers position="fixed" />
         <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="create-flashcards" sticky />
         <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
           <div className="flex items-center justify-between mb-6">
@@ -293,7 +295,8 @@ const CreateFlashcardsPage = ({ onNavigate, user, onLogout }: CreateFlashcardsPa
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-stone-50 to-white dark:from-stone-900 dark:to-stone-900">
+    <div className="relative min-h-screen overflow-x-hidden">
+      <WriteScholarEditorialBackgroundLayers position="fixed" />
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="create-flashcards" sticky />
 
       {/* Hero */}

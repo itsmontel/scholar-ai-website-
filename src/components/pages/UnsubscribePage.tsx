@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import Footer from '../common/Footer';
+import { WriteScholarEditorialBackgroundLayers } from '../common/WriteScholarEditorialBackground';
 
 interface UnsubscribePageProps {
   onNavigate: (page: string) => void;
@@ -56,7 +57,8 @@ const UnsubscribePage = ({ onNavigate }: UnsubscribePageProps) => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%)' }}>
+    <div className="relative min-h-screen flex flex-col overflow-x-hidden">
+      <WriteScholarEditorialBackgroundLayers position="fixed" />
       {/* Navigation */}
       <nav className="relative z-10 flex items-center justify-between px-2 sm:px-8 md:px-16 py-4 sm:py-6 backdrop-blur-sm bg-white/80 border-b border-white/20">
         <div className="flex items-center space-x-2 sm:space-x-3">

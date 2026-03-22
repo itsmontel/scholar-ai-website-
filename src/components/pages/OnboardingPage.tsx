@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import ScholarMascot from '../common/ScholarMascot';
+import { WriteScholarEditorialBackgroundLayers } from '../common/WriteScholarEditorialBackground';
 
 interface OnboardingPageProps {
   onNavigate: (page: string) => void;
@@ -182,8 +183,8 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate }: OnboardingPageProps)
 
   /* ──────────── PROFILE FORM ──────────── */
   return (
-    <div className="min-h-screen flex flex-col relative font-sans bg-gradient-to-b from-violet-50/60 via-stone-50 to-white dark:from-stone-950 dark:via-stone-900 dark:to-stone-900">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(139,92,246,0.14),transparent)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(124,58,237,0.1),transparent)] pointer-events-none" aria-hidden />
+    <div className="relative min-h-screen flex flex-col font-sans overflow-x-hidden">
+      <WriteScholarEditorialBackgroundLayers position="fixed" />
 
       {/* Floating shapes */}
       <div className="absolute top-24 left-8 w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-400/20 to-fuchsia-500/20 rotate-12 hidden lg:block animate-float pointer-events-none" />

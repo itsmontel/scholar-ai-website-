@@ -15,7 +15,7 @@ const FEATURES = [
   { text: '99 combined analyses, study packs & citations per month', icon: '📝' },
   { text: 'Focus Mode — block websites, unlock by studying', icon: '🔒' },
   { text: 'Quizzes, flashcards & crosswords', icon: '🎯' },
-  { text: '99,999 Paper Summarizer words per month', icon: '📚' },
+  { text: '999,999 Paper Summarizer words per month', icon: '📚' },
   { text: 'Export to PDF & Word', icon: '📄' },
   { text: 'All citation styles (APA, MLA, Chicago...)', icon: '✅' },
   { text: 'Priority AI model', icon: '⚡' },

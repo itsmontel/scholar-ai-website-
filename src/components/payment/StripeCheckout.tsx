@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 interface StripeCheckoutProps {
-  planType: 'pro' | 'premium';
+  planType: 'pro';
   billingCycle: 'monthly' | 'yearly';
   onError: (error: string) => void;
   onCancel: () => void;

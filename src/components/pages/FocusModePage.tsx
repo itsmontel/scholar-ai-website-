@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import Header from '../common/Header';
+import { WriteScholarEditorialBackgroundLayers } from '../common/WriteScholarEditorialBackground';
 import Footer from '../common/Footer';
 import ScholarMascot from '../common/ScholarMascot';
 import { FOCUS_MODE_COMING_SOON, FOCUS_MODE_CHROME_EXTENSION_URL } from '../../constants/focusMode';
@@ -111,7 +112,8 @@ const FocusModePage = ({ onNavigate, user, onLogout }: FocusModePageProps) => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-violet-50/80 via-stone-50 to-white dark:from-stone-950 dark:via-stone-900 dark:to-stone-900">
+    <div className="relative min-h-screen overflow-x-hidden">
+      <WriteScholarEditorialBackgroundLayers position="fixed" />
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="focus-mode" />
 
       {FOCUS_MODE_COMING_SOON ? (
@@ -194,7 +196,7 @@ const FocusModePage = ({ onNavigate, user, onLogout }: FocusModePageProps) => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                 </svg>
               </button>
-              {user && ['pro', 'premium'].includes((user.plan || user.subscription_plan || '').toLowerCase()) && (
+              {user && ['pro', 'premium', 'focus'].includes((user.plan || user.subscription_plan || '').toLowerCase()) && (
                 <button
                   onClick={() => onNavigate('account')}
                   className="px-6 py-3 border-2 border-white/40 text-white font-semibold rounded-2xl hover:bg-white/10 transition-colors"
@@ -389,12 +391,12 @@ const FocusModePage = ({ onNavigate, user, onLogout }: FocusModePageProps) => {
             Ready to earn your screen time?
           </h2>
           <p className="text-violet-200/90 mb-10 max-w-xl mx-auto">
-            Pro: 20 blocked sites. Premium: unlimited. Install the Chrome extension, add your study material, and start blocking distractions.
+            Pro includes unlimited blocked sites in Focus Mode. Install the Chrome extension, add your study material, and start blocking distractions.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             {user ? (
               <>
-                {['pro', 'premium'].includes((user.plan || user.subscription_plan || '').toLowerCase()) ? (
+                {['pro', 'premium', 'focus'].includes((user.plan || user.subscription_plan || '').toLowerCase()) ? (
                   <button
                     onClick={() => onNavigate('account')}
                     className="inline-flex items-center gap-2 px-8 py-4 bg-white text-violet-900 font-bold rounded-2xl hover:bg-violet-50 hover:scale-105 active:scale-95 shadow-2xl shadow-black/25 transition-all"

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import Header from '../common/Header';
+import { WriteScholarEditorialBackgroundLayers } from '../common/WriteScholarEditorialBackground';
 import Footer from '../common/Footer';
 import { getExpiringSoonCount, getExpiringSoonUrgencyText, getDaysUntilExpiration } from '../../utils/usageReset';
 
@@ -193,7 +194,8 @@ const CitationHistoryPage = ({ onNavigate, user, onLogout }: CitationHistoryProp
 
   if (isLoading) {
     return (
-      <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%)' }}>
+      <div className="relative min-h-screen overflow-x-hidden">
+        <WriteScholarEditorialBackgroundLayers position="fixed" />
         <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="citations" />
         <main className="max-w-5xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
           <div className="flex items-center justify-center min-h-64">
@@ -209,7 +211,8 @@ const CitationHistoryPage = ({ onNavigate, user, onLogout }: CitationHistoryProp
 
   if (error) {
     return (
-      <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%)' }}>
+      <div className="relative min-h-screen overflow-x-hidden">
+        <WriteScholarEditorialBackgroundLayers position="fixed" />
         <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="citations" />
         <main className="max-w-5xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
           <div className="text-center py-16">
@@ -276,7 +279,8 @@ const CitationHistoryPage = ({ onNavigate, user, onLogout }: CitationHistoryProp
   ];
 
   return (
-    <div className="min-h-screen overflow-x-hidden" style={{ background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%)' }}>
+    <div className="relative min-h-screen overflow-x-hidden">
+      <WriteScholarEditorialBackgroundLayers position="fixed" />
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="citations" />
 
       <main className="max-w-6xl mx-auto px-3 sm:px-6 py-8 sm:py-12 w-full min-w-0 overflow-x-hidden">

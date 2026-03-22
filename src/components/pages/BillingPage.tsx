@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Header from '../common/Header';
+import { WriteScholarEditorialBackgroundLayers } from '../common/WriteScholarEditorialBackground';
 import Footer from '../common/Footer';
 
 interface BillingPageProps {
@@ -78,32 +79,15 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
       features: [
         'Unlimited documents',
         '99 combined analyses, study packs & citations/mo',
-        '99,999 words Paper Summarizer',
+        '999,999 words Paper Summarizer',
         'All citation styles, PDF/Word export',
-        'Focus Mode (20 sites)',
+        'Focus Mode (unlimited blocked sites)',
         'Quiz, flashcards, crossword & Crater Blast',
+        'Uploads up to 100MB per document',
         'Paper Summarizer (long documents)'
       ],
       popular: true,
       stripePriceId: billingCycle === 'monthly' ? 'price_starter_monthly' : 'price_starter_yearly'
-    },
-    {
-      id: 'premium',
-      name: 'Premium',
-      price: billingCycle === 'monthly' ? 39.99 : 399.99,
-      interval: billingCycle === 'monthly' ? 'month' : 'year',
-      description: 'For researchers and institutions',
-      icon: '⭐',
-      features: [
-        'Everything in Pro, 10× usage',
-        '999 combined analyses, study packs & citations/mo',
-        '999,999 words Paper Summarizer',
-        'Premium AI model, advanced essay analysis',
-        'Priority support',
-        'Focus Mode (unlimited sites)',
-        'Larger document uploads (up to 1GB)'
-      ],
-      stripePriceId: billingCycle === 'monthly' ? 'price_premium_monthly' : 'price_premium_yearly'
     }
   ];
 
@@ -274,8 +258,8 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-violet-50/60 via-stone-50 to-white dark:from-stone-950 dark:via-stone-900 dark:to-stone-900">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(251,113,133,0.12),transparent)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(236,72,153,0.08),transparent)] pointer-events-none" aria-hidden />
+      <div className="relative min-h-screen overflow-x-hidden">
+        <WriteScholarEditorialBackgroundLayers position="fixed" />
         <Header 
           onNavigate={onNavigate} 
           user={user} 
@@ -292,9 +276,14 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
     );
   }
 
+  const displayPlanId = currentPlan === 'premium' ? 'pro' : currentPlan;
+  const isBillingCurrentPlan = (id: string) =>
+    (id === 'free' && currentPlan === 'free') ||
+    (id === 'pro' && (currentPlan === 'pro' || currentPlan === 'premium'));
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-violet-50/60 via-stone-50 to-white dark:from-stone-950 dark:via-stone-900 dark:to-stone-900">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(251,113,133,0.12),transparent)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(236,72,153,0.08),transparent)] pointer-events-none" aria-hidden />
+    <div className="relative min-h-screen overflow-x-hidden">
+      <WriteScholarEditorialBackgroundLayers position="fixed" />
       <Header 
         onNavigate={onNavigate} 
         user={user} 
@@ -305,7 +294,7 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10 sm:py-14 relative z-10">
         {/* Hero Section */}
         <div className="text-center mb-10">
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl text-stone-800 dark:text-stone-100 mb-4" style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 400 }}>
+          <h1 className="font-display text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight text-stone-800 dark:text-stone-100 mb-4">
             Billing & Subscription
           </h1>
           <p className="text-lg text-stone-600 dark:text-stone-400 max-w-2xl mx-auto mb-6">
@@ -320,7 +309,7 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
                 ? 'bg-stone-200 dark:bg-stone-700 text-stone-800 dark:text-stone-200' 
                 : 'bg-violet-100 dark:bg-violet-900/50 text-violet-800 dark:text-violet-300'
             }`}>
-              {plans.find(p => p.id === currentPlan)?.name}
+              {plans.find(p => p.id === displayPlanId)?.name ?? (currentPlan === 'premium' ? 'Pro' : currentPlan)}
             </span>
           </div>
         </div>
@@ -393,7 +382,7 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
         )}
 
         {/* Pricing Cards */}
-        <div className="grid md:grid-cols-3 gap-6 mb-12">
+        <div className="grid md:grid-cols-2 gap-6 mb-12 max-w-4xl mx-auto">
           {plans.map((plan) => (
             <div
               key={plan.id}
@@ -410,14 +399,6 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
                   </span>
                 </div>
               )}
-              {plan.id === 'premium' && (
-                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                  <span className="bg-amber-600 text-white px-4 py-1 rounded-full text-xs font-semibold shadow-md shadow-amber-500/20">
-                    10× Usage
-                  </span>
-                </div>
-              )}
-
               {/* Plan Name & Description */}
               <div className="text-center mb-6 pt-2">
                 <h3 className="text-xl font-bold text-stone-800 dark:text-stone-100 mb-1">{plan.name}</h3>
@@ -429,15 +410,15 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
                 {plan.id !== 'free' && billingCycle === 'monthly' && currentPlan === 'free' && isTrialEligible ? (
                   <div className="flex flex-col items-center gap-1">
                     <span className="text-2xl font-semibold text-red-600 line-through decoration-2 decoration-red-500">
-                      ${plan.id === 'pro' ? '19.99' : '39.99'}
+                      $19.99
                     </span>
                     <span className="text-4xl font-bold text-stone-800">
-                      ${plan.id === 'pro' ? '9.99' : '29.99'}
+                      $9.99
                     </span>
                     <span className="text-stone-500 text-sm">
                       /month <span className="text-violet-600 font-semibold">first month only</span>
                     </span>
-                    <span className="text-xs text-stone-500">Then ${plan.id === 'pro' ? '19.99' : '39.99'}/mo</span>
+                    <span className="text-xs text-stone-500">Then $19.99/mo</span>
                   </div>
                 ) : (
                   <>
@@ -468,16 +449,16 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
               {/* CTA Button */}
               <button
                 onClick={() => handleUpgrade(plan.id)}
-                disabled={plan.id === currentPlan || processing === plan.id}
-                className={`w-full py-3 px-6 rounded-full font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-                  plan.id === currentPlan
+                disabled={isBillingCurrentPlan(plan.id) || processing === plan.id}
+                className={`w-full py-3 px-6 rounded-xl font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+                  isBillingCurrentPlan(plan.id)
                     ? 'bg-stone-100 dark:bg-stone-700 text-stone-500 cursor-not-allowed'
                     : plan.popular
-                    ? 'bg-violet-600 hover:bg-violet-500 text-white'
+                    ? 'bg-violet-700 hover:bg-violet-800 dark:bg-violet-600 dark:hover:bg-violet-500 text-white shadow-md shadow-violet-900/15 ring-1 ring-violet-900/10'
                     : 'bg-stone-100 dark:bg-stone-700 hover:bg-stone-200 dark:hover:bg-stone-600 text-stone-900 dark:text-stone-100'
                 }`}
               >
-                {plan.id === currentPlan ? (
+                {isBillingCurrentPlan(plan.id) ? (
                   'Current Plan'
                 ) : processing === plan.id ? (
                   <div className="flex items-center justify-center">
@@ -564,7 +545,7 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
                   : (usageStats.analysesRemaining === -1 ? '∞' : usageStats.analysesRemaining)}
               </div>
               <div className="text-xs text-stone-500">
-                {currentPlan === 'free' ? 'analyses remaining' : currentPlan === 'pro' ? '99 combined/month' : '999 combined/month (10× Pro)'}
+                {currentPlan === 'free' ? 'analyses remaining' : (currentPlan === 'pro' || currentPlan === 'premium') ? '99 combined/month' : 'combined/month'}
               </div>
             </div>
 

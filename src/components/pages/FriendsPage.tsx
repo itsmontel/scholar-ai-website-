@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import Header from '../common/Header';
+import { WriteScholarEditorialBackgroundLayers } from '../common/WriteScholarEditorialBackground';
 import Footer from '../common/Footer';
 
 interface FriendsPageProps {
@@ -499,7 +500,8 @@ const FriendsPage = ({ onNavigate, user, onLogout }: FriendsPageProps) => {
   const pendingCount = pendingRequests.length + incomingShares.length;
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%)' }}>
+    <div className="relative min-h-screen flex flex-col overflow-x-hidden">
+      <WriteScholarEditorialBackgroundLayers position="fixed" />
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="friends" />
 
       <main className="flex-1 max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12 w-full">

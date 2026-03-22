@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import Header from '../../common/Header';
+import { WriteScholarEditorialBackgroundLayers } from '../../common/WriteScholarEditorialBackground';
 import Footer from '../../common/Footer';
 import { CRATER_BLAST_WORD_BANK } from '../../../data/craterBlastWordBank';
 import { CRATER_BLAST_MENTAL_MATH_BANK } from '../../../data/craterBlastMentalMathBank';
@@ -670,12 +671,8 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
   /* ═══════════════════ RENDER ═══════════════════ */
 
   const renderMenu = () => (
-    <div className="relative flex-1 min-h-[calc(100vh-200px)]" style={{ background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 50%, #EDEBE8 100%)' }}>
-      {/* Subtle dot pattern */}
-      <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{
-        backgroundImage: 'radial-gradient(circle at 1px 1px, #78716c 1px, transparent 0)',
-        backgroundSize: '24px 24px',
-      }} />
+    <div className="relative flex-1 min-h-[calc(100vh-200px)] overflow-hidden">
+      <WriteScholarEditorialBackgroundLayers position="absolute" />
 
       <div className="relative max-w-2xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
         {/* Hero */}
@@ -854,8 +851,9 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
   );
 
   const renderLoading = () => (
-    <div className="flex-1 flex items-center justify-center px-4 py-20" style={{ background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%)' }}>
-      <div className="text-center">
+    <div className="relative flex-1 flex items-center justify-center px-4 py-20 overflow-hidden">
+      <WriteScholarEditorialBackgroundLayers position="absolute" />
+      <div className="relative text-center">
         <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-violet-600 mb-5 shadow-lg shadow-blue-600/20">
           <span className="text-3xl animate-pulse">⚡</span>
         </div>
@@ -871,8 +869,9 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
   );
 
   const renderReady = () => (
-    <div className="relative flex-1 min-h-[calc(100vh-200px)] flex items-center justify-center px-4" style={{ background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 50%, #EDEBE8 100%)' }}>
-      <div className="w-full max-w-md text-center">
+    <div className="relative flex-1 min-h-[calc(100vh-200px)] flex items-center justify-center px-4 overflow-hidden">
+      <WriteScholarEditorialBackgroundLayers position="absolute" />
+      <div className="relative w-full max-w-md text-center">
         <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl mb-6 shadow-xl"
           style={{ background: 'linear-gradient(145deg, #4f46e5 0%, #6366f1 50%, #8b5cf6 100%)' }}>
           <span className="text-4xl">💥</span>
@@ -1240,8 +1239,9 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
     const accuracy = totalAnswered > 0 ? Math.round((correctCount / totalAnswered) * 100) : 0;
 
     return (
-      <div className="flex-1 flex items-center justify-center px-4 py-12" style={{ background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%)' }}>
-        <div className="w-full max-w-md">
+      <div className="relative flex-1 flex items-center justify-center px-4 py-12 overflow-hidden">
+        <WriteScholarEditorialBackgroundLayers position="absolute" />
+        <div className="relative w-full max-w-md">
           <div className="bg-white rounded-2xl shadow-sm border border-stone-200/80 overflow-hidden">
             <div className="px-6 py-8 text-center" style={{ background: 'linear-gradient(135deg, #1e293b, #334155)' }}>
               <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-white/15 backdrop-blur-sm mb-3">
@@ -1324,7 +1324,8 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
   };
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%)' }}>
+    <div className="relative min-h-screen flex flex-col overflow-x-hidden">
+      <WriteScholarEditorialBackgroundLayers position="fixed" />
       {!showMinimalUI && <Header onNavigate={onNavigate} user={user} onLogout={onLogout || (() => {})} currentPage="crater-blast" />}
       {showMinimalUI && (gameState === 'menu' || gameState === 'loading' || gameState === 'ready' || gameState === 'gameover') && (
         <div className="sticky top-0 z-10 flex items-center justify-between px-3 py-2 bg-white/95 backdrop-blur border-b border-stone-200">

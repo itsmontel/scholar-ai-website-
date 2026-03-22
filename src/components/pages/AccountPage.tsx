@@ -1,5 +1,6 @@
- import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Header from '../common/Header';
+import { WriteScholarEditorialBackgroundLayers } from '../common/WriteScholarEditorialBackground';
 import { FOCUS_MODE_COMING_SOON, FOCUS_MODE_CHROME_EXTENSION_URL } from '../../constants/focusMode';
 
 interface User {
@@ -404,15 +405,15 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-violet-50/60 via-stone-50 to-white dark:from-stone-950 dark:via-stone-900 dark:to-stone-900">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(251,113,133,0.12),transparent)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(236,72,153,0.08),transparent)] pointer-events-none" aria-hidden />
+    <div className="relative min-h-screen overflow-x-hidden">
+      <WriteScholarEditorialBackgroundLayers position="fixed" />
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="account" />
 
       {/* Main Content */}
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-10 sm:py-14 relative z-10">
         {/* Page Header */}
         <div className="text-center mb-10">
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl text-stone-800 dark:text-stone-100 mb-4" style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 400 }}>
+          <h1 className="font-display text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight text-stone-800 dark:text-stone-100 mb-4">
             Account Settings
           </h1>
           <p className="text-lg text-stone-600 dark:text-stone-400">
@@ -502,7 +503,7 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
                 <div>
                   <div className="font-semibold text-stone-800 dark:text-stone-100">Current Plan</div>
                   <div className="text-stone-600 dark:text-stone-400 flex items-center">
-                    <span className="capitalize">{userStats.subscriptionPlan}</span>
+                    <span className="capitalize">{userStats.subscriptionPlan === 'premium' ? 'Pro' : userStats.subscriptionPlan}</span>
                     <span className={`ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
                       userStats.subscriptionStatus === 'active'
                         ? 'bg-violet-100 dark:bg-violet-900/50 text-violet-800 dark:text-violet-300'
@@ -527,10 +528,8 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
                   <div className="text-stone-600 dark:text-stone-400">
                     {userStats.subscriptionPlan === 'free'
                       ? '3 documents, 2 analyses per month, 2 citation searches'
-                      : userStats.subscriptionPlan === 'pro'
+                      : (userStats.subscriptionPlan === 'pro' || userStats.subscriptionPlan === 'premium')
                       ? 'Unlimited documents, 99 combined/mo (analyses, study packs & citations)'
-                      : userStats.subscriptionPlan === 'premium'
-                      ? 'Unlimited documents, 999 combined/mo (10× Pro) (Premium)'
                       : 'Basic features included'
                     }
                   </div>
@@ -551,25 +550,16 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
                       <div className="text-stone-400 text-xs">Crossword & Crater Blast unlock with Pro</div>
                     </>
                   )}
-                  {userStats.subscriptionPlan === 'pro' && (
+                  {(userStats.subscriptionPlan === 'pro' || userStats.subscriptionPlan === 'premium') && (
                     <>
                       <div>• Unlimited document uploads</div>
                       <div>• 99 combined (analyses, study packs & citations) per month</div>
-                      <div>• 99,999 Paper Summarizer words</div>
+                      <div>• 999,999 Paper Summarizer words per month</div>
+                      <div>• Focus Mode with unlimited blocked sites</div>
+                      <div>• Uploads up to 100MB per file</div>
                       <div>• Long-document summarization</div>
                       <div>• PDF & Word export</div>
-                    </>
-                  )}
-                  {userStats.subscriptionPlan === 'premium' && (
-                    <>
-                      <div>• Everything in Pro — 10× usage</div>
-                      <div>• 999 combined (analyses, study packs & citations) per month</div>
-                      <div>• 999,999 Paper Summarizer words</div>
-                      <div>• Top-tier premium AI model</div>
                       <div>• All quiz types & difficulty levels</div>
-                      <div>• Advanced essay analysis</div>
-                      <div>• Priority support</div>
-                      <div>• Larger document uploads (up to 1GB)</div>
                     </>
                   )}
                 </div>

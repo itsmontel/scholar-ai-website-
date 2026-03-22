@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import jsPDF from 'jspdf';
 import Header from '../common/Header';
+import { WriteScholarEditorialBackgroundLayers } from '../common/WriteScholarEditorialBackground';
 import Footer from '../common/Footer';
 import { AnalysisCardSkeleton } from '../common/LoadingSpinner';
 
@@ -269,7 +270,8 @@ const AnalysisHistoryPage: React.FC<AnalysisHistoryPageProps> = ({ onNavigate, u
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%)' }}>
+      <div className="relative min-h-screen flex items-center justify-center overflow-x-hidden">
+        <WriteScholarEditorialBackgroundLayers position="fixed" />
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading analysis history...</p>
@@ -280,7 +282,8 @@ const AnalysisHistoryPage: React.FC<AnalysisHistoryPageProps> = ({ onNavigate, u
 
   if (!isPaidUser) {
     return (
-      <div className={showHeader ? 'min-h-screen' : ''} style={showHeader ? { background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%)' } : undefined}>
+      <div className={showHeader ? 'relative min-h-screen overflow-x-hidden' : ''}>
+        {showHeader && <WriteScholarEditorialBackgroundLayers position="fixed" />}
         {showHeader && <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="analysis-history" />}
         <div className={showHeader ? 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10' : 'p-6'}>
           <div className="max-w-md mx-auto text-center py-16">
@@ -291,7 +294,7 @@ const AnalysisHistoryPage: React.FC<AnalysisHistoryPageProps> = ({ onNavigate, u
             </div>
             <h1 className="text-2xl font-bold text-gray-900 mb-2">Analysis History is a Pro Feature</h1>
             <p className="text-gray-600 mb-8">
-              Upgrade to Pro or Premium to save and access your analysis history. View past analyses, export to PDF, and never lose your feedback.
+              Upgrade to Pro to save and access your analysis history. View past analyses, export to PDF, and never lose your feedback.
             </p>
             <button
               onClick={() => onNavigate?.('pricing')}
@@ -312,7 +315,8 @@ const AnalysisHistoryPage: React.FC<AnalysisHistoryPageProps> = ({ onNavigate, u
   }
 
   return (
-    <div className={showHeader ? "min-h-screen" : ""} style={showHeader ? { background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%)' } : undefined}>
+    <div className={showHeader ? 'relative min-h-screen overflow-x-hidden' : ''}>
+      {showHeader && <WriteScholarEditorialBackgroundLayers position="fixed" />}
       {showHeader && <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="analysis-history" />}
 
       <div className={showHeader ? "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10" : "p-6"}>

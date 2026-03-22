@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import Header from '../common/Header';
+import { WriteScholarEditorialBackgroundLayers } from '../common/WriteScholarEditorialBackground';
 import FlashcardViewer from '../common/FlashcardViewer';
 import LessonViewer from '../common/LessonViewer';
 import QuizViewer from '../common/QuizViewer';
@@ -163,7 +164,8 @@ const StudyPackViewerPage = ({ onNavigate, user, onLogout, initialData }: StudyP
 
   if (!pack?.data) {
     return (
-      <div className="min-h-screen bg-stone-50 dark:bg-stone-900">
+      <div className="relative min-h-screen overflow-x-hidden">
+        <WriteScholarEditorialBackgroundLayers position="fixed" />
         <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="study-pack-viewer" />
         <div className="max-w-2xl mx-auto px-4 py-20 text-center">
           <ScholarMascot size={100} animated={true} pose="studying" />
@@ -195,7 +197,8 @@ const StudyPackViewerPage = ({ onNavigate, user, onLogout, initialData }: StudyP
   }));
 
   return (
-    <div className="min-h-screen bg-stone-50 dark:bg-stone-900 flex flex-col">
+    <div className="relative min-h-screen flex flex-col overflow-x-hidden">
+      <WriteScholarEditorialBackgroundLayers position="fixed" />
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="study-pack-viewer" />
 
       <main className="flex-1 max-w-6xl mx-auto w-full px-4 py-6">

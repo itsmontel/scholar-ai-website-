@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import Header from '../../common/Header';
+import { WriteScholarEditorialBackgroundLayers } from '../../common/WriteScholarEditorialBackground';
 import Footer from '../../common/Footer';
 import ScholarMascot from '../../common/ScholarMascot';
 import AnalysisAnimation from '../../common/AnalysisAnimation';
@@ -34,8 +35,9 @@ const SummarizerPage = ({ onNavigate, user, onLogout }: SummarizerPageProps) => 
   const [daysUntilReset, setDaysUntilReset] = useState<number | undefined>(undefined);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const isPremiumUser = user && (user.subscription_plan === 'premium' || user.plan === 'premium');
-  const isFreeUser = !user || (user?.subscription_plan !== 'pro' && user?.subscription_plan !== 'premium' && user?.plan !== 'pro' && user?.plan !== 'premium');
+  const userPlanNorm = (user?.subscription_plan || user?.plan || 'free').toLowerCase();
+  const isPaidUser = user && ['pro', 'premium', 'focus'].includes(userPlanNorm);
+  const isFreeUser = !isPaidUser;
   const maxWords = isFreeUser ? 5000 : 15000;
   const userPlan = user?.subscription_plan || user?.plan || 'free';
   const wordCount = inputText.trim().split(/\s+/).filter(Boolean).length;
@@ -216,7 +218,8 @@ const SummarizerPage = ({ onNavigate, user, onLogout }: SummarizerPageProps) => 
 
   if (showFakeAnimation) {
     return (
-      <div className="min-h-screen flex flex-col bg-gradient-to-b from-stone-50 to-white dark:bg-stone-900 dark:from-stone-900 dark:to-stone-800">
+      <div className="relative min-h-screen flex flex-col overflow-x-hidden">
+        <WriteScholarEditorialBackgroundLayers position="fixed" />
         <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="summarizer" />
         <main className="flex-1 flex items-center justify-center">
           <div className="text-center">
@@ -231,7 +234,8 @@ const SummarizerPage = ({ onNavigate, user, onLogout }: SummarizerPageProps) => 
 
   if (showSignupPrompt) {
     return (
-      <div className="min-h-screen flex flex-col bg-gradient-to-b from-stone-50 to-white dark:bg-stone-900 dark:from-stone-900 dark:to-stone-800">
+      <div className="relative min-h-screen flex flex-col overflow-x-hidden">
+        <WriteScholarEditorialBackgroundLayers position="fixed" />
         <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="summarizer" />
         <main className="flex-1 flex items-center justify-center px-4">
           <div className="max-w-md w-full bg-white dark:bg-stone-800 rounded-2xl shadow-xl border border-stone-200 dark:border-stone-600 p-8 text-center">
@@ -268,7 +272,8 @@ const SummarizerPage = ({ onNavigate, user, onLogout }: SummarizerPageProps) => 
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-b from-stone-50 to-white dark:bg-stone-900 dark:from-stone-900 dark:to-stone-800">
+    <div className="relative min-h-screen flex flex-col overflow-x-hidden">
+      <WriteScholarEditorialBackgroundLayers position="fixed" />
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="summarizer" />
       
       <main className="flex-1 w-full min-w-0 overflow-x-hidden">
@@ -531,7 +536,7 @@ const SummarizerPage = ({ onNavigate, user, onLogout }: SummarizerPageProps) => 
                 </div>
                 <div className="flex-1">
                   <p className="text-red-800 dark:text-red-200 text-sm">{error}</p>
-                  {!isPremiumUser && user && (
+                  {isFreeUser && user && (
                     <>
                       <p className="text-red-600 dark:text-red-400 text-xs mt-1">{getResetsInText()}</p>
                       <button
@@ -547,14 +552,14 @@ const SummarizerPage = ({ onNavigate, user, onLogout }: SummarizerPageProps) => 
             )}
 
             {/* Plan Info for non-premium users */}
-            {user && !isPremiumUser && (
+            {user && isFreeUser && (
               <div className="mt-6 mx-3 sm:mx-0">
                 <div className="bg-gradient-to-r from-violet-50 to-red-50 dark:from-violet-900/20 dark:to-red-900/20 border border-violet-200 dark:border-violet-700/50 rounded-2xl p-5 flex items-center justify-between flex-wrap gap-3">
                   <div className="flex items-center gap-3">
                     <span className="text-2xl">📝</span>
                     <div>
                       <p className="text-violet-800 dark:text-violet-200 font-medium text-sm">
-                        {userPlan === 'free' ? `Free plan: 5,000 words/month • Bullet + Medium only • ${getResetsInText(daysUntilReset)}` : userPlan === 'premium' ? 'Premium: 999,999 words/month • All styles & lengths' : 'Pro: 99,999 words/month • All styles & lengths'}
+                        {userPlan === 'free' ? `Free plan: 5,000 words/month • Bullet + Medium only • ${getResetsInText(daysUntilReset)}` : 'Pro: 999,999 words/month • All styles & lengths'}
                       </p>
                       <p className="text-violet-600 dark:text-violet-400 text-xs mt-0.5">Upgrade to Premium for all styles, lengths, and our premium AI model</p>
                     </div>

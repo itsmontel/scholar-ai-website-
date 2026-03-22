@@ -1,4 +1,5 @@
 import Header from '../common/Header';
+import { WriteScholarEditorialBackgroundLayers } from '../common/WriteScholarEditorialBackground';
 import Footer from '../common/Footer';
 
 interface MoreToolsPageProps {
@@ -26,8 +27,9 @@ const moreTools = [
 
 const MoreToolsPage = ({ onNavigate, user, onLogout }: MoreToolsPageProps) => {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-violet-50/60 via-stone-50 to-white dark:bg-stone-900">
-      <div className="h-1 bg-gradient-to-r from-violet-500 via-fuchsia-500 to-red-500" />
+    <div className="relative min-h-screen overflow-x-hidden">
+      <WriteScholarEditorialBackgroundLayers position="fixed" />
+      <div className="h-1 bg-gradient-to-r from-violet-500 via-fuchsia-500 to-red-500 relative z-10" />
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="more-tools" />
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12">

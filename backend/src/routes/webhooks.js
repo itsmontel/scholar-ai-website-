@@ -127,7 +127,7 @@ async function handleCheckoutSessionCompleted(session) {
     if (priceId === process.env.STRIPE_STARTER_MONTHLY_PRICE_ID || priceId === process.env.STRIPE_STARTER_YEARLY_PRICE_ID) {
       plan = 'pro';
     } else if (priceId === process.env.STRIPE_PREMIUM_MONTHLY_PRICE_ID || priceId === process.env.STRIPE_PREMIUM_YEARLY_PRICE_ID) {
-      plan = 'premium';
+      plan = 'pro'; // legacy Premium price → single Pro tier
     } else if (priceId === process.env.STRIPE_FOCUS_MONTHLY_PRICE_ID || priceId === process.env.STRIPE_FOCUS_YEARLY_PRICE_ID || priceId === 'price_focus_monthly' || priceId === 'price_focus_yearly') {
       plan = 'focus';
     }
@@ -204,7 +204,7 @@ async function handleSubscriptionCreated(subscription) {
     if (priceId === process.env.STRIPE_STARTER_MONTHLY_PRICE_ID || priceId === process.env.STRIPE_STARTER_YEARLY_PRICE_ID) {
       plan = 'pro';
     } else if (priceId === process.env.STRIPE_PREMIUM_MONTHLY_PRICE_ID || priceId === process.env.STRIPE_PREMIUM_YEARLY_PRICE_ID) {
-      plan = 'premium';
+      plan = 'pro'; // legacy Premium price → single Pro tier
     } else if (priceId === process.env.STRIPE_FOCUS_MONTHLY_PRICE_ID || priceId === process.env.STRIPE_FOCUS_YEARLY_PRICE_ID || priceId === 'price_focus_monthly' || priceId === 'price_focus_yearly') {
       plan = 'focus';
     }
@@ -243,7 +243,7 @@ async function handleSubscriptionUpdated(subscription) {
     if (priceId === process.env.STRIPE_STARTER_MONTHLY_PRICE_ID || priceId === process.env.STRIPE_STARTER_YEARLY_PRICE_ID) {
       plan = 'pro';
     } else if (priceId === process.env.STRIPE_PREMIUM_MONTHLY_PRICE_ID || priceId === process.env.STRIPE_PREMIUM_YEARLY_PRICE_ID) {
-      plan = 'premium';
+      plan = 'pro';
     } else if (priceId === process.env.STRIPE_FOCUS_MONTHLY_PRICE_ID || priceId === process.env.STRIPE_FOCUS_YEARLY_PRICE_ID || priceId === 'price_focus_monthly' || priceId === 'price_focus_yearly') {
       plan = 'focus';
     }

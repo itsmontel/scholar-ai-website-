@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react';
 import Header from '../common/Header';
+import { WriteScholarEditorialBackgroundLayers } from '../common/WriteScholarEditorialBackground';
 import Footer from '../common/Footer';
 import LoadingSpinner from '../common/LoadingSpinner';
 
@@ -21,18 +22,16 @@ interface UploadedDocument {
   createdAt: string;
 }
 
-// Plan limits: Free 1MB, Pro 25MB, Premium 1GB
+// Plan limits: Free 1MB, Pro (and legacy Premium) 100MB per file
 const getMaxFileSize = (plan: string) => {
   const p = (plan || 'free').toLowerCase();
-  if (p === 'premium') return 1024 * 1024 * 1024; // 1GB
-  if (p === 'pro') return 25 * 1024 * 1024;       // 25MB
-  return 1024 * 1024;                              // 1MB (Free)
+  if (p === 'pro' || p === 'premium' || p === 'focus') return 100 * 1024 * 1024;
+  return 1024 * 1024;
 };
 
 const getMaxFileSizeLabel = (plan: string) => {
   const p = (plan || 'free').toLowerCase();
-  if (p === 'premium') return '1GB';
-  if (p === 'pro') return '25MB';
+  if (p === 'pro' || p === 'premium' || p === 'focus') return '100MB';
   return '1MB';
 };
 
@@ -193,7 +192,8 @@ const UploadPage = ({ onNavigate, user, onLogout }: UploadPageProps) => {
   };
 
   return (
-    <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%)' }}>
+    <div className="relative min-h-screen overflow-x-hidden">
+      <WriteScholarEditorialBackgroundLayers position="fixed" />
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="upload" />
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-10 sm:py-14">

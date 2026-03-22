@@ -41,6 +41,7 @@ module.exports = {
       },
       fontFamily: {
         sans: ['Nunito', 'Inter', 'system-ui', 'sans-serif'],
+        display: ['"EB Garamond"', 'Georgia', 'Times New Roman', 'serif'],
       },
       animation: {
         'fade-in': 'fadeIn 0.6s ease-out',

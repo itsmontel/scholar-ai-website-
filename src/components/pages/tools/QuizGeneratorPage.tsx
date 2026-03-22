@@ -31,6 +31,7 @@ function shuffleQuestionOptions(question: QuizQuestion): QuizQuestion {
   return { ...question, options: relabeled, correctAnswer: newCorrectLetter };
 }
 import Header from '../../common/Header';
+import { WriteScholarEditorialBackgroundLayers } from '../../common/WriteScholarEditorialBackground';
 import Footer from '../../common/Footer';
 import ScholarMascot from '../../common/ScholarMascot';
 import AnalysisAnimation from '../../common/AnalysisAnimation';
@@ -117,10 +118,9 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
   const [hintsUsed, setHintsUsed] = useState(0);
   const crosswordInputRef = useRef<HTMLInputElement | null>(null);
 
-  const isPremiumUser = user && (user.subscription_plan === 'premium' || user.plan === 'premium');
   const userPlan = user?.subscription_plan || user?.plan || 'free';
   const isFreeUser = !user || userPlan === 'free';
-  const isPaidUser = user && (userPlan === 'pro' || userPlan === 'premium');
+  const isPaidUser = user && (userPlan === 'pro' || userPlan === 'premium' || userPlan === 'focus');
   const wordCount = inputText.trim().split(/\s+/).filter(Boolean).length;
 
   // Export upgrade modal state
@@ -1606,8 +1606,8 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
   };
 
   return (
-    <div className="min-h-screen flex flex-col relative bg-gradient-to-b from-amber-50/40 via-stone-50 to-white dark:bg-stone-900 dark:from-stone-900 dark:via-stone-900 dark:to-stone-800">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-15%,rgba(251,191,36,0.15),transparent)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-15%,rgba(245,158,11,0.08),transparent)] pointer-events-none" aria-hidden />
+    <div className="relative min-h-screen flex flex-col overflow-x-hidden">
+      <WriteScholarEditorialBackgroundLayers position="fixed" />
       {!showMinimalUI && <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage={studyToolMode === 'quiz' ? 'quiz-generator' : studyToolMode === 'flashcards' ? 'quiz-generator' : 'crossword-generator'} />}
       
       <main className="flex-1 w-full min-w-0 overflow-x-hidden relative max-w-full">
@@ -1742,9 +1742,9 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
                           <span className="text-xs font-medium text-stone-500 dark:text-stone-400 whitespace-nowrap">Type:</span>
                           <div className="flex gap-1 p-1 bg-stone-100 dark:bg-stone-700 rounded-xl">
                             {typeOptions.map((opt) => {
-                              const locked = user != null && !isPremiumUser && opt.value !== 'mixed';
+                              const locked = user != null && isFreeUser && opt.value !== 'mixed';
                               return (
-                                <button key={opt.value} onClick={() => !locked && setQuizType(opt.value as any)} disabled={locked} title={locked ? 'Premium only' : opt.description}
+                                <button key={opt.value} onClick={() => !locked && setQuizType(opt.value as any)} disabled={locked} title={locked ? 'Pro only' : opt.description}
                                   className={`px-2 sm:px-3 py-1.5 rounded-md text-xs font-medium transition-all whitespace-nowrap ${locked ? 'text-stone-400 dark:text-stone-500 cursor-not-allowed' : quizType === opt.value ? 'bg-white dark:bg-stone-600 text-amber-700 dark:text-amber-300 shadow-sm' : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-600'}`}>
                                   {opt.label}{locked && <span className="ml-1 text-[9px]">🔒</span>}
                                 </button>
@@ -1756,9 +1756,9 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
                           <span className="text-xs font-medium text-stone-500 dark:text-stone-400 whitespace-nowrap">Difficulty:</span>
                           <div className="flex gap-1 p-1 bg-stone-100 dark:bg-stone-700 rounded-xl">
                             {difficultyOptions.map((opt) => {
-                              const locked = user != null && !isPremiumUser && opt.value !== 'medium';
+                              const locked = user != null && isFreeUser && opt.value !== 'medium';
                               return (
-                                <button key={opt.value} onClick={() => !locked && setDifficulty(opt.value as any)} disabled={locked} title={locked ? 'Premium only' : opt.description}
+                                <button key={opt.value} onClick={() => !locked && setDifficulty(opt.value as any)} disabled={locked} title={locked ? 'Pro only' : opt.description}
                                   className={`px-2 sm:px-3 py-1.5 rounded-md text-xs font-medium transition-all whitespace-nowrap ${locked ? 'text-stone-400 dark:text-stone-500 cursor-not-allowed' : difficulty === opt.value ? 'bg-white dark:bg-stone-600 text-amber-700 dark:text-amber-300 shadow-sm' : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-600'}`}>
                                   {opt.label}{locked && <span className="ml-1 text-[9px]">🔒</span>}
                                 </button>
@@ -1938,9 +1938,9 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
                           <span className="text-xs font-medium text-stone-500 dark:text-stone-400 whitespace-nowrap">Type:</span>
                           <div className="flex gap-1 p-1 bg-stone-100 dark:bg-stone-700 rounded-xl">
                             {typeOptions.map((opt) => {
-                              const locked = user != null && !isPremiumUser && opt.value !== 'mixed';
+                              const locked = user != null && isFreeUser && opt.value !== 'mixed';
                               return (
-                                <button key={opt.value} onClick={() => !locked && setQuizType(opt.value as any)} disabled={locked} title={locked ? 'Premium only' : opt.description}
+                                <button key={opt.value} onClick={() => !locked && setQuizType(opt.value as any)} disabled={locked} title={locked ? 'Pro only' : opt.description}
                                   className={`px-2 sm:px-3 py-1.5 rounded-md text-xs font-medium transition-all whitespace-nowrap ${locked ? 'text-stone-400 dark:text-stone-500 cursor-not-allowed' : quizType === opt.value ? 'bg-white dark:bg-stone-600 text-amber-700 dark:text-amber-300 shadow-sm' : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-600'}`}>
                                   {opt.label}{locked && <span className="ml-1 text-[9px]">🔒</span>}
                                 </button>
@@ -1952,9 +1952,9 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
                           <span className="text-xs font-medium text-stone-500 dark:text-stone-400 whitespace-nowrap">Difficulty:</span>
                           <div className="flex gap-1 p-1 bg-stone-100 dark:bg-stone-700 rounded-xl">
                             {difficultyOptions.map((opt) => {
-                              const locked = user != null && !isPremiumUser && opt.value !== 'medium';
+                              const locked = user != null && isFreeUser && opt.value !== 'medium';
                               return (
-                                <button key={opt.value} onClick={() => !locked && setDifficulty(opt.value as any)} disabled={locked} title={locked ? 'Premium only' : opt.description}
+                                <button key={opt.value} onClick={() => !locked && setDifficulty(opt.value as any)} disabled={locked} title={locked ? 'Pro only' : opt.description}
                                   className={`px-2 sm:px-3 py-1.5 rounded-md text-xs font-medium transition-all whitespace-nowrap ${locked ? 'text-stone-400 dark:text-stone-500 cursor-not-allowed' : difficulty === opt.value ? 'bg-white dark:bg-stone-600 text-amber-700 dark:text-amber-300 shadow-sm' : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-600'}`}>
                                   {opt.label}{locked && <span className="ml-1 text-[9px]">🔒</span>}
                                 </button>
@@ -2420,25 +2420,18 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
             )}
 
             {/* Plan Info for free and Pro users */}
-            {user && !isPremiumUser && !quizExhausted && !quiz && !flashcardResult && !crosswordResult && (
+            {user && isFreeUser && !quizExhausted && !quiz && !flashcardResult && !crosswordResult && (
               <div className="mt-6 mx-3 sm:mx-0">
 <div className="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border border-amber-200 dark:border-amber-800 rounded-2xl p-5 flex items-center justify-between flex-wrap gap-3">
                     <div className="flex items-center gap-3">
                     <span className="text-2xl">🧠</span>
                     <div>
-                      {isFreeUser ? (
-                        <>
-                          <p className="text-amber-800 dark:text-amber-200 font-medium text-sm">
-                            Free plan: {quizUsage.generationsRemaining} of {quizUsage.generationLimit} quizzes remaining • Mixed type • Medium difficulty • 10 questions • Max {(quizUsage.maxWordsPerGeneration || 5000).toLocaleString()} words
-                          </p>
-                          <p className="text-amber-600 dark:text-amber-400 text-xs mt-0.5">Upgrade for unlimited quizzes, all options, and up to 15,000 words • {getResetsInText(quizUsage.daysUntilReset)}</p>
-                        </>
-                      ) : (
-                        <>
-                          <p className="text-amber-800 dark:text-amber-200 font-medium text-sm">Pro plan: Mixed type + Medium difficulty only</p>
-                          <p className="text-amber-600 dark:text-amber-400 text-xs mt-0.5">Upgrade to Premium for all quiz types, difficulties, and our premium AI model</p>
-                        </>
-                      )}
+                      <>
+                        <p className="text-amber-800 dark:text-amber-200 font-medium text-sm">
+                          Free plan: {quizUsage.generationsRemaining} of {quizUsage.generationLimit} quizzes remaining • Mixed type • Medium difficulty • 10 questions • Max {(quizUsage.maxWordsPerGeneration || 5000).toLocaleString()} words
+                        </p>
+                        <p className="text-amber-600 dark:text-amber-400 text-xs mt-0.5">Upgrade to Pro for all quiz types, difficulties, and up to 15,000 words • {getResetsInText(quizUsage.daysUntilReset)}</p>
+                      </>
                     </div>
                   </div>
                   <button onClick={() => onNavigate('pricing')} className="px-4 py-1.5 bg-amber-600 text-white text-xs font-semibold rounded-lg hover:bg-amber-500 transition-all">

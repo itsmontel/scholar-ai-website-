@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import DOMPurify from 'dompurify';
 import Header from '../common/Header';
+import { WriteScholarEditorialBackgroundLayers } from '../common/WriteScholarEditorialBackground';
 import Footer from '../common/Footer';
 import LoadingSpinner from '../common/LoadingSpinner';
 import AnalysisAnimation from '../common/AnalysisAnimation';
@@ -1731,7 +1732,8 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%)' }}>
+      <div className="relative min-h-screen flex items-center justify-center overflow-x-hidden">
+        <WriteScholarEditorialBackgroundLayers position="fixed" />
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
           <p className="mt-4 text-stone-600">Loading analysis tools...</p>
@@ -1741,7 +1743,8 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
   }
 
   return (
-    <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%)' }}>
+    <div className="relative min-h-screen overflow-x-hidden">
+      <WriteScholarEditorialBackgroundLayers position="fixed" />
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="analysis" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -1792,7 +1795,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                 <div>
                   <h3 className="text-lg font-bold text-red-800 dark:text-red-200">Monthly limit exceeded</h3>
                   <p className="text-red-700 dark:text-red-300 mt-1">{limitExceededError}</p>
-                  <p className="text-sm text-red-600 dark:text-red-400 mt-2">Upgrade to Pro or Premium for more analyses.</p>
+                  <p className="text-sm text-red-600 dark:text-red-400 mt-2">Upgrade to Pro for more analyses.</p>
                 </div>
               </div>
               <button

@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import Header from '../common/Header';
+import { WriteScholarEditorialBackgroundLayers } from '../common/WriteScholarEditorialBackground';
 import Footer from '../common/Footer';
 import { getPostBySlug, getBlogPostsSortedDesc } from '../../data/blogPosts';
 import BlogPostContent from './BlogPostContent';
@@ -115,7 +116,8 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ onNavigate, user, onLogout 
       return null; // useEffect will redirect to /blog
     }
     return (
-      <div className="min-h-screen bg-[#faf9f7] dark:bg-stone-950">
+      <div className="relative min-h-screen overflow-x-hidden">
+        <WriteScholarEditorialBackgroundLayers position="fixed" />
         <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="blog" />
         <main className="max-w-4xl mx-auto px-4 py-16 text-center">
           <h1 className="text-2xl font-bold text-stone-800 dark:text-stone-100 mb-4">Post not found</h1>
@@ -133,9 +135,8 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ onNavigate, user, onLogout 
   const nextPost = currentIndex >= 0 && currentIndex < sortedPosts.length - 1 ? sortedPosts[currentIndex + 1] : null;
 
   return (
-    <div className="min-h-screen bg-[#faf9f7] dark:bg-stone-950">
-      <div className="fixed inset-0 -z-10 bg-[radial-gradient(ellipse_120%_80%_at_20%_-10%,rgba(251,207,232,0.2),transparent_50%)] dark:bg-[radial-gradient(ellipse_120%_80%_at_20%_-10%,rgba(251,207,232,0.06),transparent_50%)] pointer-events-none" aria-hidden />
-      <div className="fixed inset-0 -z-10 bg-[radial-gradient(ellipse_100%_60%_at_80%_0%,rgba(196,181,253,0.2),transparent_50%)] dark:bg-[radial-gradient(ellipse_100%_60%_at_80%_0%,rgba(196,181,253,0.06),transparent_50%)] pointer-events-none" aria-hidden />
+    <div className="relative min-h-screen overflow-x-hidden">
+      <WriteScholarEditorialBackgroundLayers position="fixed" />
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="blog" />
 
       <main className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12 md:py-16">

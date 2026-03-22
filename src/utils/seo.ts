@@ -36,6 +36,7 @@ const PATH_ALIASES: Record<string, string> = {
   '/tools/lightning-reflex-quiz': '/tools/crater-blast',
   '/analyze': '/tools/analyze',
   '/citations': '/tools/citations',
+  '/study-pack': '/tools/study-pack',
   '/view-more-tools': '/more-tools',
   '/tools/more': '/more-tools',
   '/achievements': '/badges',

@@ -206,16 +206,71 @@ function AnnotationTooltipPortal({
   );
 }
 
+const variantStyles = {
+  before: {
+    outerShadow:
+      'group-hover/preview:shadow-[0_22px_44px_-14px_rgba(124,58,237,0.26)] dark:group-hover/preview:shadow-[0_24px_48px_-12px_rgba(0,0,0,0.72)]',
+    cardRing: 'ring-stone-200 dark:ring-stone-700',
+    cardShadow:
+      'shadow-[0_14px_32px_-12px_rgba(91,33,182,0.16),0_0_0_1px_rgba(139,92,246,0.07)] dark:shadow-[0_18px_40px_-12px_rgba(0,0,0,0.55)]',
+    chromeBar: 'border-violet-200 dark:border-violet-800/60 bg-stone-100 dark:bg-stone-800',
+    docIcon: 'text-violet-600 dark:text-violet-400',
+    scoreBadge: 'bg-gradient-to-br from-violet-600 to-violet-500',
+    paperAccent: 'bg-violet-200 dark:bg-violet-700',
+    legendIcon: 'text-violet-600 dark:text-violet-400',
+    ctaBar: 'text-violet-900 dark:text-violet-100 bg-violet-100 dark:bg-violet-950 border-violet-200 dark:border-violet-800 hover:bg-violet-200 dark:hover:bg-violet-900',
+    ctaIcon: 'text-violet-600 dark:text-violet-400',
+    activeRing: 'ring-violet-500/70',
+  },
+  after: {
+    outerShadow:
+      'group-hover/preview:shadow-[0_22px_44px_-14px_rgba(5,150,105,0.22)] dark:group-hover/preview:shadow-[0_24px_48px_-12px_rgba(0,0,0,0.72)]',
+    cardRing: 'ring-emerald-200/90 dark:ring-emerald-800/60',
+    cardShadow:
+      'shadow-[0_14px_32px_-12px_rgba(5,150,105,0.14),0_0_0_1px_rgba(16,185,129,0.08)] dark:shadow-[0_18px_40px_-12px_rgba(0,0,0,0.55)]',
+    chromeBar: 'border-emerald-200/90 dark:border-emerald-800/60 bg-emerald-50/90 dark:bg-emerald-950/35',
+    docIcon: 'text-emerald-600 dark:text-emerald-400',
+    scoreBadge: 'bg-gradient-to-br from-emerald-600 to-teal-500',
+    paperAccent: 'bg-emerald-300/90 dark:bg-emerald-600',
+    legendIcon: 'text-emerald-600 dark:text-emerald-400',
+    ctaBar: 'text-emerald-950 dark:text-emerald-100 bg-emerald-100 dark:bg-emerald-950 border-emerald-200 dark:border-emerald-800 hover:bg-emerald-200/90 dark:hover:bg-emerald-900',
+    ctaIcon: 'text-emerald-600 dark:text-emerald-400',
+    activeRing: 'ring-emerald-500/70',
+  },
+} as const;
+
 interface HeroEssayPreviewCardProps {
   paper: DemoPaper;
-  rotate?: 'left' | 'right';
+  /** `none` = no tilt (e.g. dashboard inline preview) */
+  rotate?: 'left' | 'right' | 'none';
   onOpenDemo?: () => void;
+  /** Legend chips above or below the paper mock-up */
+  legendPlacement?: 'top' | 'bottom';
+  /** Visual theme: violet “draft” vs emerald “revised” */
+  variant?: 'before' | 'after';
+  /** Tab label in window chrome */
+  chromeTitle?: string;
+  maxExcerptChars?: number;
+  /** Max height of the paper scroll area (taller = more visible text) */
+  paperMaxHeightClass?: string;
 }
 
-export default function HeroEssayPreviewCard({ paper, rotate = 'left', onOpenDemo }: HeroEssayPreviewCardProps) {
+export default function HeroEssayPreviewCard({
+  paper,
+  rotate = 'left',
+  onOpenDemo,
+  legendPlacement = 'bottom',
+  variant = 'before',
+  chromeTitle,
+  maxExcerptChars = 480,
+  paperMaxHeightClass = 'max-h-[200px]',
+}: HeroEssayPreviewCardProps) {
+  const vs = variantStyles[variant];
+  const resolvedChromeTitle = chromeTitle ?? (variant === 'after' ? 'Revised preview' : 'Essay preview');
+
   const { paragraphRanges, annotationSpans } = useMemo(
-    () => buildExcerpt(paper, 480),
-    [paper]
+    () => buildExcerpt(paper, maxExcerptChars),
+    [paper, maxExcerptChars]
   );
 
   const [hoveredId, setHoveredId] = useState<string | null>(null);
@@ -227,9 +282,11 @@ export default function HeroEssayPreviewCard({ paper, rotate = 'left', onOpenDem
   );
 
   const rotation =
-    rotate === 'left'
-      ? '-rotate-[11deg] origin-bottom-right'
-      : 'rotate-[11deg] origin-bottom-left';
+    rotate === 'none'
+      ? ''
+      : rotate === 'left'
+        ? '-rotate-[11deg] origin-bottom-right'
+        : 'rotate-[11deg] origin-bottom-left';
 
   const renderParagraph = (range: { start: number; end: number; text: string }, paraIdx: number) => {
     const isTitle = paraIdx === 0 && range.text === paper.title;
@@ -263,7 +320,7 @@ export default function HeroEssayPreviewCard({ paper, rotate = 'left', onOpenDem
               ${highlightClasses[ann.type]}
               ${hoverRing[ann.type]}
               font-medium cursor-help transition-shadow duration-150
-              ${isActive ? 'ring-2 ring-violet-500/70 ring-offset-1 ring-offset-[#fdfcfa] dark:ring-offset-stone-800' : ''}
+              ${isActive ? `ring-2 ${vs.activeRing} ring-offset-1 ring-offset-[#fdfcfa] dark:ring-offset-stone-800` : ''}
             `}
             onMouseEnter={(e) => {
               setHoveredId(ann.id);
@@ -301,44 +358,67 @@ export default function HeroEssayPreviewCard({ paper, rotate = 'left', onOpenDem
       className={`group/preview pointer-events-auto w-full max-w-[252px] ${rotation} transition-transform duration-500 ease-out hover:rotate-0 hover:scale-[1.02]`}
     >
       <div
-        className="relative rounded-2xl overflow-hidden transition-shadow duration-500
-          group-hover/preview:shadow-[0_22px_44px_-14px_rgba(124,58,237,0.26)]
-          dark:group-hover/preview:shadow-[0_24px_48px_-12px_rgba(0,0,0,0.72)]
+        className={`relative rounded-2xl overflow-hidden transition-shadow duration-500 ${vs.outerShadow}
           bg-white dark:bg-stone-900
-          ring-1 ring-stone-200 dark:ring-stone-700
-          shadow-[0_14px_32px_-12px_rgba(91,33,182,0.16),0_0_0_1px_rgba(139,92,246,0.07)]
-          dark:shadow-[0_18px_40px_-12px_rgba(0,0,0,0.55)]"
+          ring-1 ${vs.cardRing}
+          ${vs.cardShadow}`}
       >
         {/* Window chrome */}
-        <div className="relative flex items-center gap-2 px-2.5 py-2 border-b border-violet-200 dark:border-violet-800/60 bg-stone-100 dark:bg-stone-800">
+        <div className={`relative flex items-center gap-2 px-2.5 py-2 border-b ${vs.chromeBar}`}>
           <div className="flex gap-1 shrink-0" aria-hidden>
             <span className="w-2.5 h-2.5 rounded-full bg-[#ff5f57] shadow-[inset_0_-1px_2px_rgba(0,0,0,0.15)] ring-1 ring-black/5" />
             <span className="w-2.5 h-2.5 rounded-full bg-[#febc2e] shadow-[inset_0_-1px_2px_rgba(0,0,0,0.12)] ring-1 ring-black/5" />
             <span className="w-2.5 h-2.5 rounded-full bg-[#28c840] shadow-[inset_0_-1px_2px_rgba(0,0,0,0.12)] ring-1 ring-black/5" />
           </div>
           <div className="flex-1 min-w-0 flex items-center gap-1.5 rounded-md bg-white dark:bg-stone-950 border border-stone-200 dark:border-stone-600 px-2 py-0.5 shadow-sm">
-            <svg className="w-3 h-3 text-violet-600 dark:text-violet-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
+            <svg className={`w-3 h-3 shrink-0 ${vs.docIcon}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
             <span className="text-[10px] font-medium text-stone-600 dark:text-stone-300 truncate">
-              Essay preview
+              {resolvedChromeTitle}
             </span>
           </div>
-          <span className="text-[9px] font-bold tabular-nums px-2 py-1 rounded-md bg-gradient-to-br from-violet-600 to-violet-500 text-white shadow-sm shrink-0">
+          <span className={`text-[9px] font-bold tabular-nums px-2 py-1 rounded-md ${vs.scoreBadge} text-white shadow-sm shrink-0`}>
             {paper.grade.split(' ')[0]} · {paper.overallScore}/100
           </span>
         </div>
 
+        {legendPlacement === 'top' && (
+          <div className="relative px-2.5 pt-2.5 pb-1 space-y-1.5 border-b border-stone-100 dark:border-stone-800/80">
+            <p className="text-center text-[8px] font-medium text-stone-500 dark:text-stone-400 flex items-center justify-center gap-1">
+              <svg className={`w-2.5 h-2.5 ${vs.legendIcon}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
+              </svg>
+              Hover highlights for annotations
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-1">
+              {[
+                { key: 'strong', label: 'Strong', dot: 'bg-emerald-500', chip: 'border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950 text-emerald-900 dark:text-emerald-200' },
+                { key: 'improve', label: 'Improve', dot: 'bg-amber-500', chip: 'border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950 text-amber-950 dark:text-amber-200' },
+                { key: 'concern', label: 'Concern', dot: 'bg-rose-500', chip: 'border-rose-200 dark:border-rose-800 bg-rose-50 dark:bg-rose-950 text-rose-900 dark:text-rose-200' },
+              ].map((item) => (
+                <span
+                  key={item.key}
+                  className={`inline-flex items-center gap-0.5 rounded-full pl-0.5 pr-1.5 py-0.5 text-[8px] font-bold border ${item.chip}`}
+                >
+                  <span className={`w-1.5 h-1.5 rounded-full ${item.dot} ring-1 ring-black/10 dark:ring-white/15`} />
+                  {item.label}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Paper */}
-        <div className="relative px-2.5 pt-2.5 pb-9">
+        <div className={`relative px-2.5 ${legendPlacement === 'top' ? 'pt-2.5' : 'pt-2.5'} pb-9`}>
           <div
             className="relative rounded-lg border border-stone-200 dark:border-stone-600
               bg-[#fdfcfa] dark:bg-stone-800
               shadow-[inset_0_1px_0_0_rgba(255,255,255,0.95),0_1px_2px_rgba(0,0,0,0.05)]
               dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06),0_2px_6px_rgba(0,0,0,0.28)]"
           >
-            <div className="absolute left-2.5 top-2.5 bottom-2.5 w-px bg-violet-200 dark:bg-violet-700 rounded-full" aria-hidden />
-            <div className="pl-4 pr-2.5 py-2.5 max-h-[200px] overflow-hidden">
+            <div className={`absolute left-2.5 top-2.5 bottom-2.5 w-px rounded-full ${vs.paperAccent}`} aria-hidden />
+            <div className={`pl-4 pr-2.5 py-2.5 overflow-hidden ${paperMaxHeightClass}`}>
               <div className="font-serif text-stone-800 dark:text-stone-200 text-[10px]">
                 {paragraphRanges.map((r, i) => renderParagraph(r, i))}
               </div>
@@ -350,45 +430,41 @@ export default function HeroEssayPreviewCard({ paper, rotate = 'left', onOpenDem
           />
         </div>
 
-        {/* Legend + hover hint */}
-        <div className="relative px-2.5 pb-2 -mt-4 space-y-1.5">
-          <p className="text-center text-[8px] font-medium text-stone-500 dark:text-stone-400 flex items-center justify-center gap-1">
-            <svg className="w-2.5 h-2.5 text-violet-600 dark:text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
-            </svg>
-            Hover highlights for annotations
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-1">
-            {[
-              { key: 'strong', label: 'Strong', dot: 'bg-emerald-500', chip: 'border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950 text-emerald-900 dark:text-emerald-200' },
-              { key: 'improve', label: 'Improve', dot: 'bg-amber-500', chip: 'border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950 text-amber-950 dark:text-amber-200' },
-              { key: 'concern', label: 'Concern', dot: 'bg-rose-500', chip: 'border-rose-200 dark:border-rose-800 bg-rose-50 dark:bg-rose-950 text-rose-900 dark:text-rose-200' },
-            ].map((item) => (
-              <span
-                key={item.key}
-                className={`inline-flex items-center gap-0.5 rounded-full pl-0.5 pr-1.5 py-0.5 text-[8px] font-bold border ${item.chip}`}
-              >
-                <span className={`w-1.5 h-1.5 rounded-full ${item.dot} ring-1 ring-black/10 dark:ring-white/15`} />
-                {item.label}
-              </span>
-            ))}
+        {legendPlacement === 'bottom' && (
+          <div className="relative px-2.5 pb-2 -mt-4 space-y-1.5">
+            <p className="text-center text-[8px] font-medium text-stone-500 dark:text-stone-400 flex items-center justify-center gap-1">
+              <svg className={`w-2.5 h-2.5 ${vs.legendIcon}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
+              </svg>
+              Hover highlights for annotations
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-1">
+              {[
+                { key: 'strong', label: 'Strong', dot: 'bg-emerald-500', chip: 'border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950 text-emerald-900 dark:text-emerald-200' },
+                { key: 'improve', label: 'Improve', dot: 'bg-amber-500', chip: 'border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950 text-amber-950 dark:text-amber-200' },
+                { key: 'concern', label: 'Concern', dot: 'bg-rose-500', chip: 'border-rose-200 dark:border-rose-800 bg-rose-50 dark:bg-rose-950 text-rose-900 dark:text-rose-200' },
+              ].map((item) => (
+                <span
+                  key={item.key}
+                  className={`inline-flex items-center gap-0.5 rounded-full pl-0.5 pr-1.5 py-0.5 text-[8px] font-bold border ${item.chip}`}
+                >
+                  <span className={`w-1.5 h-1.5 rounded-full ${item.dot} ring-1 ring-black/10 dark:ring-white/15`} />
+                  {item.label}
+                </span>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
         {onOpenDemo && (
           <button
             type="button"
             onClick={onOpenDemo}
-            className="relative w-full flex items-center justify-center gap-1.5 py-2 px-3 text-[10px] font-semibold
-              text-violet-900 dark:text-violet-100
-              bg-violet-100 dark:bg-violet-950
-              border-t border-violet-200 dark:border-violet-800
-              hover:bg-violet-200 dark:hover:bg-violet-900
-              transition-colors duration-200 group/btn"
+            className={`relative w-full flex items-center justify-center gap-1.5 py-2 px-3 text-[10px] font-semibold border-t transition-colors duration-200 group/btn ${vs.ctaBar}`}
           >
             <span>Full interactive demo</span>
             <svg
-              className="w-3 h-3 text-violet-600 dark:text-violet-400 transition-transform duration-200 group-hover/btn:translate-x-0.5"
+              className={`w-3 h-3 transition-transform duration-200 group-hover/btn:translate-x-0.5 ${vs.ctaIcon}`}
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"

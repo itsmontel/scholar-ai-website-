@@ -8,8 +8,13 @@ import { HIDE_FRIENDS } from '../../config/featureFlags';
 import ScholarMascot from '../common/ScholarMascot';
 import DualMascot from '../common/DualMascot';
 import InteractiveDocumentAnalysis from '../landing/InteractiveDocumentAnalysis';
+import InteractiveCitationsDemo from '../landing/InteractiveCitationsDemo';
 import HeroEssayPreviewCard from '../landing/HeroEssayPreviewCard';
-import { DEMO_PAPERS } from '../../data/landingPageDemoAnalysis';
+import LandingBeforeAfterSection from '../landing/LandingBeforeAfterSection';
+import { DEMO_HERO_AFTER_PAPER, DEMO_PAPERS } from '../../data/landingPageDemoAnalysis';
+
+/** Hide study packs, Focus Mode, and friends blocks on landing (papers + citations first). */
+const LANDING_HIDE_SECONDARY_SECTIONS = true;
 import ViewportAutoplayVideo from '../common/ViewportAutoplayVideo';
 interface LandingPageProps {
   onNavigate: (page: string, slug?: string) => void;
@@ -41,7 +46,6 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
   const [crosswordWordCount, setCrosswordWordCount] = useState(10);
   const [activeHelpCategory, setActiveHelpCategory] = useState('essays');
   const [activeStudyTab, setActiveStudyTab] = useState('analyse');
-  const [studyCardsCarouselIndex, setStudyCardsCarouselIndex] = useState(0);
 
   const helpCategories = [
     {
@@ -142,11 +146,11 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
   const faqs = [
     {
       question: "Is WriteScholar for college and university students?",
-      answer: "Yes. WriteScholar is for undergrads and postgrads worldwide—whether you're writing essays in the UK, the US, or elsewhere. Set your education level in the analyzer for feedback that fits your course. We support major citation styles (APA, MLA, Chicago, Harvard, and more). High school options are available too."
+      answer: "Yes. WriteScholar is for undergrads and postgrads worldwide, whether you're writing essays in the UK, the US, or elsewhere. Set your education level in the analyzer for feedback that fits your course. We support major citation styles (APA, MLA, Chicago, Harvard, and more). High school options are available too."
     },
     {
       question: "How does the essay analyzer work?",
-      answer: "Paste your essay (200+ words) or upload a PDF/DOCX/TXT file. Our AI analyzes structure, clarity, argument, citations, and academic tone — like a professor would. You get detailed feedback with specific suggestions in under 60 seconds."
+      answer: "Paste your essay (200+ words) or upload a PDF/DOCX/TXT file. Our AI analyzes structure, clarity, argument, citations, and academic tone the way a professor would. You get detailed feedback with specific suggestions in under 60 seconds."
     },
     {
       question: "What kind of feedback will I get on my essay?",
@@ -181,8 +185,8 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
       answer: "Yes. We use enterprise-grade encryption. Your content is never shared with third parties or used to train AI models. You can delete your documents at any time."
     },
     {
-      question: "What's the difference between Free, Pro, and Premium?",
-      answer: "Free: 3 documents, 2 analyses, 2 study packs, 5k words, 2 citations per month, Focus Mode (3 sites). Pro: 99 combined analyses, study packs and citations per month, 99,999 words, all citation styles, PDF/Word export, Focus Mode (20 sites). Premium: 10× usage with 999 combined per month, 999,999 words, larger document uploads (1GB), premium AI, Focus Mode unlimited, priority support."
+      question: "What's the difference between Free and Pro?",
+      answer: "Free: 3 documents, 2 analyses, 2 study packs, 5k words, 2 citations per month, Focus Mode (3 sites). Pro: 99 combined analyses, study packs and citations per month, 999,999 words for the Paper Summarizer, all citation styles, PDF/Word export, Focus Mode with unlimited blocked sites, uploads up to 100MB per file, and full quiz & study tools."
     },
     {
       question: "How do I add friends and share my study materials?",
@@ -370,11 +374,11 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
     title,
     desc,
     onClick,
-    gradient,
     accentClasses,
-    borderColor,
     icon,
     innerContent,
+    gradient: _gradient,
+    borderColor: _borderColor,
   }: {
     title: string;
     desc: string;
@@ -388,17 +392,21 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
     <button
       type="button"
       onClick={onClick}
-      className={`group relative bg-gradient-to-br ${gradient} rounded-3xl p-6 text-left hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 ease-out overflow-hidden border ${borderColor} h-[310px] flex flex-col`}
+      className="group relative rounded-2xl p-5 text-left bg-white dark:bg-stone-900 border border-stone-200/90 dark:border-stone-700 shadow-sm hover:shadow-md hover:border-stone-300 dark:hover:border-stone-600 transition-all duration-200 h-[300px] flex flex-col focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500/40 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-950"
     >
-      <div className={`absolute top-0 right-0 w-32 h-32 rounded-full -translate-y-1/2 translate-x-1/2 ${accentClasses.orb}`} />
-      <h3 className={`text-xl font-bold mb-3 relative z-10 flex-shrink-0 ${accentClasses.title}`}>{title}</h3>
-      <div className="relative z-10 bg-white dark:bg-stone-800 rounded-2xl p-5 shadow-lg mb-4 h-[140px] flex flex-col justify-center overflow-hidden">
-        <div className={`w-8 h-8 rounded-lg flex items-center justify-center mb-3 text-lg flex-shrink-0 ${accentClasses.iconBg}`}>
+      <div className="flex items-start gap-3 mb-3">
+        <div
+          className={`w-10 h-10 rounded-lg flex items-center justify-center text-base shrink-0 border border-stone-200/80 dark:border-stone-600 ${accentClasses.iconBg}`}
+          aria-hidden
+        >
           {icon}
         </div>
+        <h3 className="text-base font-semibold text-stone-900 dark:text-stone-100 leading-snug pt-1 text-left">{title}</h3>
+      </div>
+      <div className="relative z-10 bg-slate-50/90 dark:bg-stone-800/70 rounded-xl p-4 border border-stone-100 dark:border-stone-700/80 mb-3 flex-1 min-h-0 flex flex-col justify-center overflow-hidden">
         {innerContent}
       </div>
-      <p className="text-stone-800 dark:text-stone-200 text-sm relative z-10 font-semibold">{desc}</p>
+      <p className="text-stone-600 dark:text-stone-400 text-sm leading-snug text-left">{desc}</p>
     </button>
   );
 
@@ -406,11 +414,11 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
     title,
     desc,
     onClick,
-    gradient,
     accentClasses,
-    borderColor,
     icon,
     children,
+    gradient: _gradient,
+    borderColor: _borderColor,
   }: {
     title: string;
     desc: string;
@@ -424,24 +432,27 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
     <button
       type="button"
       onClick={onClick}
-      className={`block w-full text-left bg-gradient-to-br ${gradient} rounded-2xl p-4 border ${borderColor} hover:shadow-lg active:scale-[0.98] transition-all`}
+      className="block w-full text-left bg-white dark:bg-stone-900 rounded-2xl p-4 border border-stone-200/90 dark:border-stone-700 shadow-sm hover:shadow-md active:scale-[0.99] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500/40"
     >
-      <div className="flex flex-col items-center gap-2 mb-3 relative">
-        <div className={`absolute top-0 right-0 w-24 h-24 rounded-full -translate-y-1/2 translate-x-1/2 ${accentClasses.orb} opacity-90`} />
-        <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-xl shrink-0 relative z-10 ${accentClasses.iconBg}`}>
+      <div className="flex items-center gap-3 mb-3">
+        <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-lg shrink-0 border border-stone-200/80 dark:border-stone-600 ${accentClasses.iconBg}`}>
           {icon}
         </div>
-        <h3 className={`font-bold text-base text-center relative z-10 ${accentClasses.title}`}>{title}</h3>
+        <h3 className="font-semibold text-base text-stone-900 dark:text-stone-100">{title}</h3>
       </div>
-      <div className="relative z-10 bg-white dark:bg-stone-800 rounded-xl p-3 shadow-sm mb-3 h-[100px] flex items-center justify-center overflow-hidden w-full">
+      <div className="relative z-10 bg-slate-50/90 dark:bg-stone-800/70 rounded-xl p-3 border border-stone-100 dark:border-stone-700/80 mb-3 h-[100px] flex items-center justify-center overflow-hidden w-full">
         {children}
       </div>
-      <p className="text-stone-800 dark:text-stone-200 text-xs leading-snug text-center font-semibold">{desc}</p>
+      <p className="text-stone-600 dark:text-stone-400 text-xs leading-snug text-left">{desc}</p>
     </button>
   );
 
   const scrollToLandingTools = () => {
     document.getElementById('landing-tools')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  const scrollToBeforeAfter = () => {
+    document.getElementById('before-after')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
   const heroFeatureCards = [
@@ -453,7 +464,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
         scrollToLandingTools();
       },
       gradient: 'from-lime-200 to-emerald-200 dark:from-lime-950/60 dark:to-emerald-950/55',
-      accentClasses: { title: 'text-lime-950 dark:text-lime-200', orb: 'bg-lime-600/40', iconBg: 'bg-lime-300 dark:bg-lime-950/70' },
+      accentClasses: { title: 'text-lime-950 dark:text-lime-200', orb: 'bg-lime-600/40', iconBg: 'bg-emerald-50 text-emerald-900 dark:bg-emerald-950/45 dark:text-emerald-100' },
       borderColor: 'border-lime-400/90 dark:border-lime-600/70',
       icon: '📝',
       inner: (
@@ -478,14 +489,14 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
       ),
     },
     {
-      title: 'Citations',
-      desc: 'Find and format academic sources instantly',
+      title: 'Aligned citations',
+      desc: 'Find sources that match your paper and format them',
       onClick: () => {
         setMode('citations');
         scrollToLandingTools();
       },
       gradient: 'from-cyan-200 to-teal-200 dark:from-cyan-950/55 dark:to-teal-950/55',
-      accentClasses: { title: 'text-teal-950 dark:text-teal-200', orb: 'bg-teal-600/40', iconBg: 'bg-teal-300 dark:bg-teal-950/70' },
+      accentClasses: { title: 'text-teal-950 dark:text-teal-200', orb: 'bg-teal-600/40', iconBg: 'bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-100' },
       borderColor: 'border-teal-400/90 dark:border-teal-600/70',
       icon: '🔍',
       inner: (
@@ -514,476 +525,343 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
       ),
     },
     {
-      title: 'Flashcards',
-      desc: 'Generate flashcards from any content',
+      title: 'Professor-style feedback',
+      desc: 'Green, amber & red annotations with concrete revise-to lines',
       onClick: () => {
-        setMode('quiz');
-        setStudyToolMode('flashcards');
+        setMode('analyze');
         scrollToLandingTools();
       },
-      gradient: 'from-pink-200 to-rose-200 dark:from-rose-950/55 dark:to-pink-950/50',
-      accentClasses: { title: 'text-rose-950 dark:text-rose-200', orb: 'bg-rose-600/40', iconBg: 'bg-rose-300 dark:bg-rose-950/70' },
-      borderColor: 'border-rose-400/90 dark:border-rose-600/70',
-      icon: '🃏',
+      gradient: 'from-violet-200 to-fuchsia-200 dark:from-violet-950/55 dark:to-fuchsia-950/50',
+      accentClasses: { title: 'text-violet-950 dark:text-violet-200', orb: 'bg-violet-600/40', iconBg: 'bg-violet-50 text-violet-900 dark:bg-violet-950/50 dark:text-violet-100' },
+      borderColor: 'border-violet-400/90 dark:border-violet-600/70',
+      icon: '🎓',
       inner: (
-        <div className="h-16" style={{ perspective: '120px' }}>
-          <div className="relative h-full animate-flashcard-flip" style={{ transformStyle: 'preserve-3d' }}>
-            <div className="absolute inset-0 bg-gradient-to-br from-rose-800 to-pink-900 rounded-xl p-2.5 flex flex-col justify-center shadow-inner" style={{ backfaceVisibility: 'hidden' }}>
-              <div className="text-white/95 text-[9px]">Term</div>
-              <div className="text-white font-semibold text-xs">Photosynthesis</div>
-            </div>
-            <div className="absolute inset-0 bg-gradient-to-br from-pink-900 to-rose-950 rounded-xl p-2.5 flex flex-col justify-center items-center shadow-inner" style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}>
-              <div className="text-white text-[9px]">Definition</div>
-              <div className="text-white font-medium text-xs text-center">Process plants use...</div>
-            </div>
-          </div>
+        <div className="flex flex-wrap gap-1 justify-center items-center">
+          <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-200/90 dark:bg-emerald-900/60 text-emerald-950 dark:text-emerald-100">Strong</span>
+          <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-200/90 dark:bg-amber-900/60 text-amber-950 dark:text-amber-100">Revise</span>
+          <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-rose-200/90 dark:bg-rose-900/60 text-rose-950 dark:text-rose-100">Concern</span>
         </div>
       ),
       mobileContent: (
-        <div className="relative w-full h-full min-h-[72px]" style={{ perspective: '120px' }}>
-          <div className="absolute inset-0 animate-flashcard-flip" style={{ transformStyle: 'preserve-3d' }}>
-            <div
-              className="absolute inset-0 flex flex-col justify-center items-center bg-gradient-to-br from-rose-800 to-pink-900 rounded-lg p-2 shadow-inner"
-              style={{ backfaceVisibility: 'hidden' }}
-            >
-              <div className="text-white/90 text-[10px]">Term</div>
-              <div className="font-semibold text-white text-sm">Photosynthesis</div>
+        <div className="flex flex-wrap gap-1.5 justify-center w-full">
+          <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-200/90 dark:bg-emerald-900/50 text-emerald-950 dark:text-emerald-100">Strong</span>
+          <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-200/90 dark:bg-amber-900/50 text-amber-950 dark:text-amber-100">Revise</span>
+          <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-rose-200/90 dark:bg-rose-900/50 text-rose-950 dark:text-rose-100">Concern</span>
+        </div>
+      ),
+    },
+    {
+      title: 'Rubric & grade',
+      desc: 'Thesis, evidence, clarity & citations scored like a real course',
+      onClick: scrollToBeforeAfter,
+      gradient: 'from-orange-200 to-amber-200 dark:from-orange-950/50 dark:to-amber-950/50',
+      accentClasses: { title: 'text-orange-950 dark:text-orange-200', orb: 'bg-orange-600/40', iconBg: 'bg-amber-50 text-amber-900 dark:bg-amber-950/45 dark:text-amber-100' },
+      borderColor: 'border-orange-400/90 dark:border-orange-600/70',
+      icon: '📊',
+      inner: (
+        <div className="space-y-1.5 w-full">
+          <div className="flex justify-between text-[9px] font-mono text-orange-950 dark:text-orange-200">
+            <span>Thesis</span>
+            <span className="tabular-nums">15/20</span>
             </div>
-            <div
-              className="absolute inset-0 flex flex-col justify-center items-center bg-gradient-to-br from-pink-900 to-rose-950 rounded-lg p-2 text-center shadow-inner"
-              style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
-            >
-              <div className="text-white text-[10px]">Definition</div>
-              <div className="text-white text-xs">Process plants use...</div>
+          <div className="h-1.5 rounded-full bg-stone-200 dark:bg-stone-600 overflow-hidden">
+            <div className="h-full w-[75%] rounded-full bg-gradient-to-r from-orange-500 to-amber-500" />
+          </div>
+          <p className="text-[9px] text-center text-stone-600 dark:text-stone-400 font-medium">B → A with revision</p>
+        </div>
+      ),
+      mobileContent: (
+        <div className="space-y-2 w-full">
+          <div className="flex justify-between text-[10px] font-mono text-orange-900 dark:text-orange-200">
+            <span>Thesis</span>
+            <span>15/20</span>
             </div>
+          <div className="h-2 rounded-full bg-stone-200 dark:bg-stone-600 overflow-hidden">
+            <div className="h-full w-[75%] rounded-full bg-gradient-to-r from-orange-500 to-amber-500" />
           </div>
         </div>
       ),
     },
     {
-      title: 'Practice Tests',
-      desc: 'Create quizzes from your study material',
+      title: 'Structure & clarity',
+      desc: 'Topic sentences, flow, and where the argument needs tightening',
       onClick: () => {
-        setMode('quiz');
-        setStudyToolMode('quiz');
+        setMode('analyze');
         scrollToLandingTools();
       },
-      gradient: 'from-amber-200 to-orange-200 dark:from-amber-950/55 dark:to-orange-950/50',
-      accentClasses: { title: 'text-orange-950 dark:text-orange-200', orb: 'bg-orange-600/40', iconBg: 'bg-amber-300 dark:bg-amber-950/70' },
-      borderColor: 'border-orange-400/90 dark:border-orange-600/65',
-      icon: '📋',
+      gradient: 'from-sky-200 to-indigo-200 dark:from-sky-950/50 dark:to-indigo-950/50',
+      accentClasses: { title: 'text-sky-950 dark:text-sky-200', orb: 'bg-sky-600/40', iconBg: 'bg-sky-50 text-sky-900 dark:bg-sky-950/45 dark:text-sky-100' },
+      borderColor: 'border-sky-400/90 dark:border-sky-600/70',
+      icon: '🧭',
       inner: (
-        <div className="relative h-14">
-          <div className="absolute inset-0 animate-quiz-show">
-            <div className="text-[10px] text-stone-700 dark:text-stone-300 mb-1 font-semibold">Q: What is 2 + 2?</div>
-            <div className="flex gap-2">
-              <span className="px-2 py-1 bg-amber-300 dark:bg-amber-900/70 text-amber-950 dark:text-amber-100 text-[9px] rounded font-bold">A</span>
-              <span className="px-2 py-1 bg-stone-300 dark:bg-stone-700 text-stone-700 dark:text-stone-300 text-[9px] rounded font-medium">B</span>
-              <span className="px-2 py-1 bg-stone-300 dark:bg-stone-700 text-stone-700 dark:text-stone-300 text-[9px] rounded font-medium">C</span>
-            </div>
-          </div>
-          <div className="absolute inset-0 animate-quiz-hide flex flex-col justify-center">
-            <div className="text-[10px] text-stone-700 dark:text-stone-300 mb-1 font-semibold">Correct!</div>
-            <div className="text-orange-800 dark:text-orange-400 font-bold text-sm">✓ 4</div>
-          </div>
+        <div className="space-y-1 w-full text-left">
+          <div className="h-1.5 bg-stone-300/80 dark:bg-stone-600 rounded w-full" />
+          <div className="h-1.5 bg-sky-500/70 rounded w-[92%]" />
+          <div className="h-1.5 bg-stone-300/80 dark:bg-stone-600 rounded w-full" />
+          <div className="h-1.5 bg-sky-400/60 rounded w-[88%]" />
         </div>
       ),
       mobileContent: (
-        <div className="relative w-full min-h-[72px]">
-          <div className="absolute inset-0 animate-quiz-show">
-            <div className="text-[10px] text-stone-600 dark:text-stone-400 mb-1 font-semibold">Q: What is 2 + 2?</div>
-            <div className="flex gap-2">
-              <span className="px-2 py-1 bg-amber-300 dark:bg-amber-900/50 text-amber-950 dark:text-amber-100 text-[10px] rounded font-bold">A</span>
-              <span className="px-2 py-1 bg-stone-200 dark:bg-stone-700 text-stone-600 dark:text-stone-300 text-[10px] rounded font-medium">B</span>
-              <span className="px-2 py-1 bg-stone-200 dark:bg-stone-700 text-stone-600 dark:text-stone-300 text-[10px] rounded font-medium">C</span>
-            </div>
-          </div>
-          <div className="absolute inset-0 flex flex-col justify-center animate-quiz-hide">
-            <div className="text-[10px] text-stone-600 dark:text-stone-400 mb-1 font-semibold">Correct!</div>
-            <div className="text-orange-700 dark:text-orange-400 font-bold text-sm">✓ 4</div>
-          </div>
-        </div>
-      ),
-    },
-    {
-      title: 'Summarize',
-      desc: 'Turn long papers into concise bullet points',
-      onClick: () => {
-        setMode('summarize');
-        scrollToLandingTools();
-      },
-      gradient: 'from-emerald-200 to-teal-200 dark:from-emerald-950/55 dark:to-teal-950/55',
-      accentClasses: { title: 'text-emerald-950 dark:text-emerald-200', orb: 'bg-emerald-600/40', iconBg: 'bg-emerald-300 dark:bg-emerald-950/70' },
-      borderColor: 'border-emerald-400/90 dark:border-emerald-600/70',
-      icon: '📝',
-      inner: (
-        <div className="space-y-2">
-          <div className="flex gap-1.5 items-center">
-            <div className="w-1.5 h-1.5 rounded-full bg-emerald-700 flex-shrink-0" />
-            <div className="h-2 bg-stone-400/90 dark:bg-stone-600 rounded-full flex-1 overflow-hidden origin-left"><div className="h-full bg-emerald-700 dark:bg-emerald-500 rounded-full animate-summarize-shrink" /></div>
-          </div>
-          <div className="flex gap-1.5 items-center">
-            <div className="w-1.5 h-1.5 rounded-full bg-emerald-700 flex-shrink-0" />
-            <div className="h-2 bg-stone-400/90 dark:bg-stone-600 rounded-full flex-1 overflow-hidden origin-left"><div className="h-full w-full bg-emerald-700 dark:bg-emerald-500 rounded-full animate-summarize-shrink" style={{ animationDelay: '0.3s' }} /></div>
-          </div>
-          <div className="flex gap-1.5 items-center">
-            <div className="w-1.5 h-1.5 rounded-full bg-emerald-700 flex-shrink-0" />
-            <div className="h-2 bg-stone-400/90 dark:bg-stone-600 rounded-full flex-1 overflow-hidden origin-left"><div className="h-full w-full bg-emerald-800 dark:bg-emerald-400 rounded-full animate-summarize-shrink" style={{ animationDelay: '0.6s' }} /></div>
-          </div>
-        </div>
-      ),
-      mobileContent: (
-        <div className="w-full space-y-2">
-          <div className="flex gap-2 items-center">
-            <div className="w-1.5 h-1.5 rounded-full bg-emerald-600 shrink-0" />
-            <div className="h-2 flex-1 bg-stone-200 dark:bg-stone-600 rounded-full overflow-hidden origin-left">
-              <div className="h-full w-full bg-emerald-600 dark:bg-emerald-500 rounded-full animate-summarize-shrink" />
-            </div>
-          </div>
-          <div className="flex gap-2 items-center">
-            <div className="w-1.5 h-1.5 rounded-full bg-emerald-600 shrink-0" />
-            <div className="h-2 flex-1 bg-stone-200 dark:bg-stone-600 rounded-full overflow-hidden origin-left">
-              <div className="h-full w-full bg-emerald-600 dark:bg-emerald-500 rounded-full animate-summarize-shrink" style={{ animationDelay: '0.3s' }} />
-            </div>
-          </div>
-          <div className="flex gap-2 items-center">
-            <div className="w-1.5 h-1.5 rounded-full bg-emerald-600 shrink-0" />
-            <div className="h-2 flex-1 bg-stone-200 dark:bg-stone-600 rounded-full overflow-hidden origin-left">
-              <div className="h-full w-full bg-emerald-700 dark:bg-emerald-400 rounded-full animate-summarize-shrink" style={{ animationDelay: '0.6s' }} />
-            </div>
-          </div>
-        </div>
-      ),
-    },
-    {
-      title: 'Study Tools',
-      desc: 'Quizzes, flashcards & crosswords',
-      onClick: () => {
-        setMode('quiz');
-        setStudyToolMode('quiz');
-        scrollToLandingTools();
-      },
-      gradient: 'from-lime-200 to-green-200 dark:from-lime-950/55 dark:to-green-950/55',
-      accentClasses: { title: 'text-lime-950 dark:text-lime-200', orb: 'bg-lime-600/40', iconBg: 'bg-lime-300 dark:bg-lime-950/70' },
-      borderColor: 'border-lime-400/90 dark:border-lime-600/70',
-      icon: '🎯',
-      inner: (
-        <div className="flex gap-2">
-          <div className="flex-1 text-center py-2 px-2 bg-lime-300 dark:bg-lime-950/70 rounded-lg text-lime-950 dark:text-lime-100 text-xs font-bold animate-tool-show-1 border border-lime-500/70 dark:border-lime-600/60">📝 Quiz</div>
-          <div className="flex-1 text-center py-2 px-2 bg-lime-300 dark:bg-lime-950/70 rounded-lg text-lime-950 dark:text-lime-100 text-xs font-bold animate-tool-show-2 border border-lime-500/70 dark:border-lime-600/60">🃏 Cards</div>
-          <div className="flex-1 text-center py-2 px-2 bg-lime-300 dark:bg-lime-950/70 rounded-lg text-lime-950 dark:text-lime-100 text-xs font-bold animate-tool-show-3 border border-lime-500/70 dark:border-lime-600/60">🧩 Puzzle</div>
-        </div>
-      ),
-      mobileContent: (
-        <div className="w-full flex gap-2">
-          <div className="flex-1 py-2 px-1 bg-lime-300 dark:bg-lime-950/70 rounded-lg text-lime-950 dark:text-lime-100 text-[11px] font-bold text-center animate-tool-show-1 border border-lime-500/70 dark:border-lime-600/60 truncate">
-            📝 Quiz
-          </div>
-          <div className="flex-1 py-2 px-1 bg-lime-300 dark:bg-lime-950/70 rounded-lg text-lime-950 dark:text-lime-100 text-[11px] font-bold text-center animate-tool-show-2 border border-lime-500/70 dark:border-lime-600/60 truncate">
-            🃏 Cards
-          </div>
-          <div className="flex-1 py-2 px-1 bg-lime-300 dark:bg-lime-950/70 rounded-lg text-lime-950 dark:text-lime-100 text-[11px] font-bold text-center animate-tool-show-3 border border-lime-500/70 dark:border-lime-600/60 truncate">
-            🧩 Puzzle
-          </div>
-        </div>
-      ),
-    },
-    {
-      title: 'Crossword',
-      desc: 'Generate crosswords from your notes',
-      onClick: () => {
-        setMode('quiz');
-        setStudyToolMode('crossword');
-        scrollToLandingTools();
-      },
-      gradient: 'from-amber-200 to-yellow-200 dark:from-amber-950/55 dark:to-yellow-950/50',
-      accentClasses: { title: 'text-amber-950 dark:text-amber-200', orb: 'bg-amber-600/40', iconBg: 'bg-amber-300 dark:bg-amber-950/70' },
-      borderColor: 'border-amber-400/90 dark:border-amber-600/70',
-      icon: '🧩',
-      inner: (
-        <div className="grid grid-cols-5 gap-0.5">
-          {[
-            ['C', 'A', 'T', '#', '#'],
-            ['O', '#', '#', '#', '#'],
-            ['D', 'O', 'G', '#', '#'],
-            ['#', '#', '#', '#', '#'],
-            ['#', '#', '#', '#', '#'],
-          ].map((row, ri) =>
-            row.map((cell, ci) => (
-              <div
-                key={`${ri}-${ci}`}
-                className={`aspect-square flex items-center justify-center rounded-sm text-[10px] font-bold transition-all duration-300 ${
-                  cell === '#'
-                    ? 'bg-stone-900 dark:bg-black'
-                    : 'bg-amber-300 dark:bg-amber-950/65 text-amber-950 dark:text-amber-100 border border-amber-500/80 dark:border-amber-500/60 animate-cell-pop'
-                }`}
-                style={cell !== '#' ? { animationDelay: `${(ri * 5 + ci) * 50}ms` } : undefined}
-              >
-                {cell !== '#' ? cell : ''}
-              </div>
-            ))
-          )}
-        </div>
-      ),
-      mobileContent: (
-        <div className="w-full mx-auto grid grid-cols-5 gap-0.5 max-h-[88px]">
-          {[
-            ['C', 'A', 'T', '#', '#'],
-            ['O', '#', '#', '#', '#'],
-            ['D', 'O', 'G', '#', '#'],
-            ['#', '#', '#', '#', '#'],
-            ['#', '#', '#', '#', '#'],
-          ].map((row, ri) =>
-            row.map((cell, ci) => (
-              <div
-                key={`m-${ri}-${ci}`}
-                className={`aspect-square flex items-center justify-center rounded-sm text-[9px] font-bold transition-all duration-300 flex-shrink-0 ${
-                  cell === '#'
-                    ? 'bg-stone-900 dark:bg-black'
-                    : 'bg-amber-300 dark:bg-amber-950/65 text-amber-950 dark:text-amber-100 border border-amber-500/80 dark:border-amber-500/60 animate-cell-pop'
-                }`}
-                style={cell !== '#' ? { animationDelay: `${(ri * 5 + ci) * 50}ms` } : undefined}
-              >
-                {cell !== '#' ? cell : ''}
-              </div>
-            ))
-          )}
+        <div className="space-y-2 w-full">
+          <div className="h-2 bg-stone-300/80 dark:bg-stone-600 rounded w-full" />
+          <div className="h-2 bg-sky-500/70 rounded w-[92%]" />
+          <div className="h-2 bg-stone-300/80 dark:bg-stone-600 rounded w-full" />
         </div>
       ),
     },
   ];
 
-  /** 7 cards × (100/7)% width; 4 slides (indices 0–3) */
-  const heroCarouselMaxIndex = 3;
-  const heroCarouselCardBasis = `${100 / 7}%`;
-  const heroCarouselTranslateStep = 100 / 7;
-
   return (
     <>
-      <Header onNavigate={onNavigate} user={user} sticky={true} currentPage="landing" />
+      <Header onNavigate={onNavigate} user={user} sticky={true} currentPage="landing" opaqueHeader />
       <main className="min-h-screen relative transition-colors font-sans overflow-x-hidden xl:overflow-x-visible" role="main">
-      {/* HERO SECTION - Fun, Gen Z, full of energy */}
-      <section className="relative min-h-[70vh] sm:min-h-[85vh] flex flex-col overflow-hidden xl:overflow-visible">
-        {/* Background: soft cream with a clearer violet wash */}
-        <div className="absolute inset-0 bg-violet-100/75 dark:bg-stone-950" />
-        <div className="absolute inset-0 bg-gradient-to-b from-violet-200/35 via-violet-50/50 to-violet-100/40 dark:from-violet-950/50 dark:via-stone-950/90 dark:to-stone-950 pointer-events-none" />
-        <div className="absolute inset-0 bg-white/40 dark:bg-stone-900/75" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_125%_85%_at_50%_-5%,rgba(167,139,250,0.14),transparent_56%)] dark:bg-[radial-gradient(ellipse_125%_85%_at_50%_-5%,rgba(139,92,246,0.09),transparent_56%)]" />
-        
-        {/* Floating shapes for mobile */}
-        <div className="absolute top-[12%] left-[8%] w-12 h-12 rounded-2xl bg-violet-300/20 rotate-12 lg:hidden animate-float pointer-events-none" />
-        <div className="absolute top-[22%] right-[10%] w-10 h-10 rounded-full bg-violet-300/18 lg:hidden animate-float-delayed pointer-events-none" />
-        <div className="absolute top-[45%] left-[6%] w-8 h-8 rounded-lg bg-sky-300/18 -rotate-12 lg:hidden animate-float pointer-events-none" style={{ animationDelay: '1s' }} />
-        <div className="absolute top-[55%] right-[8%] w-11 h-11 rounded-2xl bg-emerald-300/18 rotate-6 lg:hidden animate-float-delayed pointer-events-none" />
-        <div className="absolute bottom-[35%] left-[10%] w-9 h-9 rounded-full bg-amber-300/18 lg:hidden animate-float pointer-events-none" style={{ animationDelay: '0.5s' }} />
-        <div className="absolute bottom-[25%] right-[12%] w-10 h-10 rounded-lg bg-violet-300/20 -rotate-6 lg:hidden animate-float-delayed pointer-events-none" style={{ animationDelay: '0.8s' }} />
-        
-        {/* Floating tool mockups — hidden xl+ where hero essay previews sit on the sides */}
-        <div className="absolute top-[18%] left-[10%] xl:left-[12%] z-[1] pointer-events-none hidden lg:block xl:hidden animate-float">
-          <div className="bg-white dark:bg-stone-800 rounded-2xl p-3 shadow-xl border border-violet-200/60 dark:border-violet-800/40 rotate-[-6deg] hover:rotate-0 transition-transform">
-            <span className="text-2xl block mb-1">📝</span>
-            <span className="text-xs font-bold text-violet-600 dark:text-violet-400">Quiz</span>
-            <div className="mt-1.5 h-1.5 bg-violet-100 dark:bg-violet-900/50 rounded-full w-12" />
-          </div>
-        </div>
-        <div className="absolute top-[25%] right-[12%] z-[1] pointer-events-none hidden lg:block xl:hidden animate-float-delayed">
-          <div className="bg-white dark:bg-stone-800 rounded-2xl p-3 shadow-xl border border-violet-200/60 dark:border-violet-800/40 rotate-[4deg] hover:rotate-0 transition-transform">
-            <span className="text-2xl block mb-1">🃏</span>
-            <span className="text-xs font-bold text-violet-600 dark:text-violet-400">Cards</span>
-            <div className="mt-1.5 h-1.5 bg-violet-100 dark:bg-violet-900/50 rounded-full w-10" />
-          </div>
-        </div>
-        <div className="absolute top-[42%] left-[10%] xl:left-[12%] z-[1] pointer-events-none hidden lg:block xl:hidden animate-float" style={{ animationDelay: '1s' }}>
-          <div className="bg-white dark:bg-stone-800 rounded-2xl p-3 shadow-xl border border-blue-200/60 dark:border-blue-800/40 rotate-[3deg] hover:rotate-0 transition-transform">
-            <span className="text-2xl block mb-1">🧩</span>
-            <span className="text-xs font-bold text-blue-600 dark:text-blue-400">Puzzle</span>
-            <div className="mt-1.5 grid grid-cols-3 gap-0.5">
-              {['C','A','T'].map((l,i)=>(<div key={i} className="w-4 h-4 rounded bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center text-[8px] font-bold text-blue-700">{l}</div>))}
-            </div>
-          </div>
-        </div>
-        <div className="absolute bottom-[28%] right-[10%] z-[1] pointer-events-none hidden lg:block xl:hidden animate-float-delayed">
-          <div className="bg-white dark:bg-stone-800 rounded-2xl p-3 shadow-xl border border-emerald-200/60 dark:border-emerald-800/40 rotate-[-5deg] hover:rotate-0 transition-transform">
-            <span className="text-2xl block mb-1">✨</span>
-            <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">Summarize</span>
-            <div className="mt-1.5 flex gap-1"><div className="w-2 h-2 rounded-full bg-emerald-400"/><div className="w-3 h-2 rounded-full bg-emerald-300/60"/></div>
-          </div>
-        </div>
-        <div className="absolute top-[35%] left-[5%] hidden xl:block text-4xl opacity-45 animate-float">🔥</div>
-        <div className="absolute top-[40%] right-[6%] hidden xl:block text-3xl opacity-40 animate-float-delayed">⚡</div>
-        <div className="absolute bottom-[35%] left-[6%] hidden xl:block text-3xl opacity-40 animate-float">💡</div>
-        <div className="absolute top-[36%] right-[4%] z-[1] pointer-events-none hidden xl:block text-4xl opacity-45 animate-float-delayed">🎯</div>
+      {/* HERO: formal, conversion-focused */}
+      <section className="relative min-h-[72vh] sm:min-h-[80vh] flex flex-col overflow-hidden border-b border-stone-200/90 dark:border-stone-800 xl:overflow-visible">
+        <div className="absolute inset-0 bg-[#f8fafc] dark:bg-[#0c0a09]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-white via-[#f8fafc] to-[#f1f5f9] dark:from-stone-950 dark:via-stone-950 dark:to-stone-950 pointer-events-none" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_90%_60%_at_50%_-15%,rgba(91,33,182,0.07),transparent_55%)] dark:bg-[radial-gradient(ellipse_90%_55%_at_50%_-10%,rgba(109,40,217,0.12),transparent_58%)] pointer-events-none" />
+        <div
+          className="absolute inset-0 opacity-[0.4] dark:opacity-[0.15] pointer-events-none bg-[length:32px_32px] bg-[linear-gradient(to_right,rgba(148,163,184,0.07)_1px,transparent_1px),linear-gradient(to_bottom,rgba(148,163,184,0.07)_1px,transparent_1px)]"
+          aria-hidden
+        />
 
-        {/* Hero Content — z-10 so text/sections stack above decorative floating mockups (z-1) */}
-        <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8 pt-12 sm:pt-14 lg:pt-12 pb-0">
-          {/* Side mascots — hidden xl+ where essay preview panels sit; ~10% zoom-out matches hero headline */}
-          <div className="hidden lg:block xl:hidden absolute left-0 xl:left-4 top-[25%] -translate-y-1/2 z-10 lg:scale-[0.9] lg:origin-center">
-            <ScholarMascot size={140} animated={true} pose="waving" />
-          </div>
-          <div className="hidden lg:block xl:hidden absolute right-2 xl:right-6 top-[22%] -translate-y-1/2 z-10 opacity-90 lg:scale-[0.9] lg:origin-center">
-            <ScholarMascot size={112} animated={true} pose="studying" />
-          </div>
-
-          <div className="w-full max-w-[1320px] xl:mx-auto xl:grid xl:grid-cols-[minmax(0,252px)_minmax(0,1fr)_minmax(0,252px)] xl:gap-5 xl:items-start xl:justify-center">
+        <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8 pt-14 sm:pt-16 lg:pt-10 pb-0">
+          <div className="w-full max-w-[1240px] xl:mx-auto">
+            <div className="lg:grid lg:grid-cols-[minmax(0,220px)_minmax(0,1fr)_minmax(0,220px)] xl:grid-cols-[minmax(0,248px)_minmax(0,1fr)_minmax(0,248px)] lg:gap-8 xl:gap-10 lg:items-start">
             <aside
-              className="hidden xl:block pointer-events-none xl:pointer-events-auto xl:justify-self-end xl:pt-1 xl:min-w-0 xl:scale-[0.9] xl:origin-top-right"
-              aria-label="Sample essay with professor-style annotations"
-            >
-              <HeroEssayPreviewCard paper={DEMO_PAPERS[0]} rotate="left" onOpenDemo={scrollToLandingTools} />
+                className="hidden lg:flex lg:flex-col gap-0 pointer-events-auto lg:justify-self-end lg:items-end lg:pt-1 xl:pt-2 lg:min-w-0 w-full max-w-[248px]"
+                aria-label="Before essay preview and citation sources demo"
+              >
+                <div className="w-full rounded-2xl border border-amber-200/80 dark:border-amber-900/40 bg-white/85 dark:bg-stone-900/50 p-1 shadow-[0_12px_40px_-12px_rgba(180,83,9,0.12)] dark:shadow-[0_12px_40px_-12px_rgba(0,0,0,0.45)] ring-1 ring-amber-200/50 dark:ring-amber-900/30 transition-all duration-300 hover:shadow-[0_18px_50px_-14px_rgba(180,83,9,0.18)] dark:hover:shadow-[0_18px_50px_-14px_rgba(0,0,0,0.55)] hover:border-amber-300/80 dark:hover:border-amber-700/50">
+                  <p className="text-[10px] font-bold uppercase tracking-wide text-amber-800 dark:text-amber-300 text-center mb-1.5">Before</p>
+                  <HeroEssayPreviewCard
+                    paper={DEMO_PAPERS[1]}
+                    rotate="left"
+                    variant="before"
+                    onOpenDemo={scrollToBeforeAfter}
+                  />
+                </div>
+                <div className="w-[236px] xl:w-[248px] shrink-0 rotate-[11deg] origin-bottom-right drop-shadow-lg mt-20 lg:mt-24 -translate-x-4 lg:-translate-x-7 xl:-translate-x-8">
+                  <p className="text-center mb-2">
+                    <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-sky-800/95 dark:text-sky-300/95">Sources</span>
+                    <span className="block text-[10px] text-stone-500 dark:text-stone-400 mt-0.5">Peer-reviewed picks</span>
+                  </p>
+                  <InteractiveCitationsDemo variant="side-left" />
+                </div>
             </aside>
 
-            <div className="min-w-0 flex flex-col items-center w-full">
-          <div className="max-w-4xl mx-auto text-center w-full lg:scale-[0.9] lg:origin-top">
-            {/* Hero headline */}
-            <h1 className="text-3xl sm:text-5xl lg:text-6xl xl:text-7xl font-extrabold text-[#8447e8] dark:text-violet-400 leading-[1.15] mb-6 sm:mb-6 tracking-tight" style={{ letterSpacing: '-0.03em' }}>
-              <span className="block sm:inline">Check my essay with AI, </span>
-              <span className="block sm:inline sm:ml-1">
-                get{' '}
-                <span className="text-red-600 dark:text-red-500">professor</span>
-                <span className="text-amber-600 dark:text-amber-500">-style</span>{' '}
-                <span className="text-green-600 dark:text-green-500">feedback</span>
-                {' '}in seconds
-              </span>
+              <div className="min-w-0 flex flex-col items-center w-full max-w-2xl lg:max-w-none mx-auto">
+              <div className="w-full max-w-[36.5rem] mx-auto rounded-2xl border border-stone-200/90 dark:border-stone-800/90 bg-white/75 dark:bg-stone-900/50 px-5 py-7 sm:px-9 sm:py-9 shadow-[0_12px_40px_-12px_rgba(15,23,42,0.12)] dark:shadow-[0_12px_40px_-12px_rgba(0,0,0,0.45)] backdrop-blur-[8px] ring-1 ring-white/50 dark:ring-white/5">
+                <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-violet-800/90 dark:text-violet-300/95 mb-3 text-center">
+                  Essay feedback &amp; aligned citations
+                </p>
+                <div
+                  className="mx-auto mb-5 h-0.5 w-16 rounded-full bg-gradient-to-r from-emerald-500 via-amber-400 to-red-500 opacity-90 dark:opacity-85"
+                  aria-hidden
+                />
+                <h1
+                  className="text-[1.65rem] sm:text-4xl lg:text-[2.65rem] xl:text-[2.75rem] font-semibold tracking-tight leading-[1.15] mb-4 text-center px-0.5"
+                  style={{ fontFamily: "'EB Garamond', Georgia, 'Times New Roman', serif" }}
+                >
+                  <span className="text-stone-900 dark:text-stone-50">AI Essay Checker with </span>
+                  <span className="text-emerald-800 dark:text-emerald-400">Professor</span>
+                  <span className="text-stone-900 dark:text-stone-50">-</span>
+                  <span className="text-amber-700 dark:text-amber-400">Level</span>{' '}
+                  <span className="text-red-700 dark:text-red-400">Feedback</span>
+                  <span className="text-stone-900 dark:text-stone-50"> in Seconds</span>
             </h1>
-
-            <p className="text-base sm:text-xl text-stone-600 dark:text-stone-400 mb-10 sm:mb-12 max-w-2xl mx-auto leading-relaxed px-2">
-              Get feedback on your argument, structure, citations and grammar before you submit
-            </p>
+                <p className="text-base sm:text-[1.05rem] text-stone-600 dark:text-stone-400 mb-4 max-w-xl mx-auto text-center leading-relaxed">
+                  <span className="font-semibold text-stone-800 dark:text-stone-200">Better Essays. Higher Grades. Instantly. </span>
+                  See exactly what to fix before you submit.
+                </p>
+                <p className="flex flex-wrap items-center justify-center gap-2 text-sm text-stone-600 dark:text-stone-400 mb-6">
+                  <svg className="w-4 h-4 text-violet-600 dark:text-violet-400 shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
+                    <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z" />
+                  </svg>
+                  <span className="font-medium text-stone-800 dark:text-stone-200">Trusted by 50,000+ students worldwide</span>
+                </p>
+                <div
+                  className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 mb-8 text-[11px] sm:text-xs text-stone-500 dark:text-stone-500"
+                  aria-label="Annotation legend: strong, revise, concern"
+                >
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-stone-200/90 dark:border-stone-700 bg-stone-50/90 dark:bg-stone-800/60 px-2.5 py-1">
+                    <span className="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_0_1px_rgba(16,185,129,0.35)]" aria-hidden />
+                    Strong
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-stone-200/90 dark:border-stone-700 bg-stone-50/90 dark:bg-stone-800/60 px-2.5 py-1">
+                    <span className="h-2 w-2 rounded-full bg-amber-400 shadow-[0_0_0_1px_rgba(251,191,36,0.4)]" aria-hidden />
+                    Revise
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-stone-200/90 dark:border-stone-700 bg-stone-50/90 dark:bg-stone-800/60 px-2.5 py-1">
+                    <span className="h-2 w-2 rounded-full bg-red-500 shadow-[0_0_0_1px_rgba(239,68,68,0.35)]" aria-hidden />
+                    Concern
+                  </span>
           </div>
 
-          <div className="max-w-4xl mx-auto text-center w-full">
-            {/* Primary CTA - mascot peeking behind button with grip hands */}
-            <div className="flex justify-center mb-2 sm:mb-3">
-              <div className="relative inline-flex flex-col items-center">
-                <div className="group relative inline-flex items-center">
-                  {/* Mascot peeking from behind - only eyes and above visible */}
-                  <div className="mascot-sparkle absolute left-1/2 -translate-x-1/2 -top-[42px] z-0 pointer-events-none overflow-hidden w-[80px] transition-transform duration-300 ease-out group-hover:scale-105" style={{ height: '42px' }}>
-                    <ScholarMascot size={80} animated={false} pose="celebrating" peekMode />
-                    {/* Sparkles that appear on hover */}
-                    <svg className="absolute inset-0 w-full h-full" viewBox="0 0 80 42" fill="none">
-                      <path className="sparkle sparkle-1" d="M12 8 L14 12 L18 12 L15 15 L16 19 L12 16 L8 19 L9 15 L6 12 L10 12 Z" fill="#FDE68A" />
-                      <path className="sparkle sparkle-2" d="M68 10 L69.5 13 L73 13 L70.5 15 L71.5 18 L68 16 L64.5 18 L65.5 15 L63 13 L66.5 13 Z" fill="#FDE68A" />
-                      <circle className="sparkle sparkle-3" cx="40" cy="5" r="3" fill="#C4B5FD" />
+                <ul className="flex flex-col sm:flex-row sm:flex-wrap justify-center gap-x-6 gap-y-2.5 mb-9 text-sm text-stone-600 dark:text-stone-400 w-full">
+                  <li className="flex items-center justify-center sm:justify-start gap-2.5">
+                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-emerald-100 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400" aria-hidden>
+                      <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                     </svg>
-                  </div>
-                  {/* Left hand gripping the button edge */}
-                  <svg className="hand-glisten absolute -left-3 top-1/2 -translate-y-1/2 z-20 pointer-events-none w-[28px] h-[44px] transition-transform duration-300 ease-out group-hover:scale-110" viewBox="0 0 28 44">
-                    <defs>
-                      <linearGradient id="handShineL" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stopColor="white" stopOpacity="0" />
-                        <stop offset="50%" stopColor="white" stopOpacity="0.25" />
-                        <stop offset="100%" stopColor="white" stopOpacity="0" />
-                      </linearGradient>
-                    </defs>
-                    {/* Palm on the side */}
-                    <ellipse cx="8" cy="24" rx="8" ry="12" fill="#7C3AED" />
-                    <ellipse cx="9" cy="23" rx="6" ry="9" fill="#8B5CF6" />
-                    {/* Thumb pointing down/back */}
-                    <ellipse cx="4" cy="34" rx="4" ry="6" fill="#8B5CF6" transform="rotate(15 4 34)" />
-                    <ellipse cx="4" cy="33" rx="3" ry="4" fill="#A78BFA" transform="rotate(15 4 33)" />
-                    {/* Fingers curling over the top - knuckles visible */}
-                    <ellipse cx="18" cy="14" rx="6" ry="5" fill="#7C3AED" />
-                    <ellipse cx="18" cy="13" rx="5" ry="4" fill="#8B5CF6" />
-                    {/* Finger tips wrapping over */}
-                    <ellipse cx="22" cy="20" rx="4" ry="5" fill="#8B5CF6" transform="rotate(-20 22 20)" />
-                    <ellipse cx="22" cy="19" rx="3" ry="4" fill="#A78BFA" transform="rotate(-20 22 19)" />
-                    <ellipse cx="20" cy="26" rx="3.5" ry="4.5" fill="#8B5CF6" transform="rotate(-10 20 26)" />
-                    <ellipse cx="20" cy="25" rx="2.5" ry="3.5" fill="#A78BFA" transform="rotate(-10 20 25)" />
-                    <ellipse cx="17" cy="31" rx="3" ry="4" fill="#8B5CF6" transform="rotate(5 17 31)" />
-                    <ellipse cx="17" cy="30" rx="2" ry="3" fill="#A78BFA" transform="rotate(5 17 30)" />
-                    {/* Highlight on palm */}
-                    <ellipse cx="10" cy="21" rx="3" ry="4" fill="#C4B5FD" opacity="0.3" />
-                    {/* Glisten shine overlay */}
-                    <ellipse className="hand-shine" cx="12" cy="20" rx="10" ry="16" fill="url(#handShineL)" />
+                    </span>
+                    <span>APA, MLA, Chicago &amp; more</span>
+                  </li>
+                  <li className="flex items-center justify-center sm:justify-start gap-2.5">
+                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-amber-100 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400" aria-hidden>
+                      <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
-                  {/* Right hand gripping the button edge (mirrored) */}
-                  <svg className="hand-glisten absolute -right-3 top-1/2 z-20 pointer-events-none w-[28px] h-[44px] transition-transform duration-300 ease-out group-hover:scale-110" viewBox="0 0 28 44" style={{ transform: 'translateY(-50%) scaleX(-1)' }}>
-                    <defs>
-                      <linearGradient id="handShineR" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stopColor="white" stopOpacity="0" />
-                        <stop offset="50%" stopColor="white" stopOpacity="0.25" />
-                        <stop offset="100%" stopColor="white" stopOpacity="0" />
-                      </linearGradient>
-                    </defs>
-                    {/* Palm on the side */}
-                    <ellipse cx="8" cy="24" rx="8" ry="12" fill="#7C3AED" />
-                    <ellipse cx="9" cy="23" rx="6" ry="9" fill="#8B5CF6" />
-                    {/* Thumb pointing down/back */}
-                    <ellipse cx="4" cy="34" rx="4" ry="6" fill="#8B5CF6" transform="rotate(15 4 34)" />
-                    <ellipse cx="4" cy="33" rx="3" ry="4" fill="#A78BFA" transform="rotate(15 4 33)" />
-                    {/* Fingers curling over the top - knuckles visible */}
-                    <ellipse cx="18" cy="14" rx="6" ry="5" fill="#7C3AED" />
-                    <ellipse cx="18" cy="13" rx="5" ry="4" fill="#8B5CF6" />
-                    {/* Finger tips wrapping over */}
-                    <ellipse cx="22" cy="20" rx="4" ry="5" fill="#8B5CF6" transform="rotate(-20 22 20)" />
-                    <ellipse cx="22" cy="19" rx="3" ry="4" fill="#A78BFA" transform="rotate(-20 22 19)" />
-                    <ellipse cx="20" cy="26" rx="3.5" ry="4.5" fill="#8B5CF6" transform="rotate(-10 20 26)" />
-                    <ellipse cx="20" cy="25" rx="2.5" ry="3.5" fill="#A78BFA" transform="rotate(-10 20 25)" />
-                    <ellipse cx="17" cy="31" rx="3" ry="4" fill="#8B5CF6" transform="rotate(5 17 31)" />
-                    <ellipse cx="17" cy="30" rx="2" ry="3" fill="#A78BFA" transform="rotate(5 17 30)" />
-                    {/* Highlight on palm */}
-                    <ellipse cx="10" cy="21" rx="3" ry="4" fill="#C4B5FD" opacity="0.3" />
-                    {/* Glisten shine overlay */}
-                    <ellipse className="hand-shine" cx="12" cy="20" rx="10" ry="16" fill="url(#handShineR)" />
+                    </span>
+                    <span>Green, amber &amp; red annotations</span>
+                  </li>
+                  <li className="flex items-center justify-center sm:justify-start gap-2.5">
+                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-red-100 dark:bg-red-950/35 text-red-700 dark:text-red-400" aria-hidden>
+                      <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
+                    </span>
+                    <span>Aligned citations for your bibliography</span>
+                  </li>
+                </ul>
+
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3">
                   <button
+                    type="button"
                     onClick={() => onNavigate('signup')}
-                    className="btn-glisten relative z-10 px-10 py-4 bg-violet-500 text-white font-bold rounded-full hover:bg-violet-600 hover:scale-105 active:scale-95 transition-all duration-300 ease-out shadow-xl shadow-violet-500/25 hover:shadow-2xl hover:shadow-violet-500/40 text-lg"
+                    className="group/btn inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-violet-700 hover:bg-violet-800 dark:bg-violet-600 dark:hover:bg-violet-500 text-white font-semibold rounded-xl shadow-md shadow-violet-900/15 dark:shadow-violet-950/40 ring-1 ring-violet-900/10 dark:ring-white/10 transition-all duration-200 hover:shadow-lg hover:shadow-violet-900/25 hover:-translate-y-0.5 active:translate-y-0 text-base"
                   >
-                    Let&apos;s get started
+                    Check My Essay Free
+                    <svg className="w-4 h-4 group-hover/btn:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
                   </button>
-                </div>
-                <p className="sm:hidden mt-3 w-full text-center text-sm text-stone-500 dark:text-stone-400">
-                  Already have an account?{' '}
                   <button
                     type="button"
                     onClick={() => onNavigate('login')}
-                    className="text-violet-600 dark:text-violet-400 hover:underline font-medium"
+                    className="inline-flex items-center justify-center px-7 py-3.5 border border-stone-300/95 dark:border-stone-600 bg-white/80 dark:bg-stone-900/50 text-stone-800 dark:text-stone-200 font-medium rounded-xl hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors text-base shadow-sm"
                   >
                     Log in
                   </button>
-                </p>
               </div>
-            </div>
-
-            <p className="text-sm text-stone-500 dark:text-stone-400 mb-6 sm:mb-8">
-              Trusted by 50k+ students
+                <p className="mt-3 text-center text-[11px] sm:text-xs text-stone-500 dark:text-stone-400">
+                  Takes 30 seconds • No credit card required
+                </p>
+                <button
+                  type="button"
+                  onClick={scrollToBeforeAfter}
+                  className="mt-4 w-full text-center text-sm font-medium text-violet-800 dark:text-violet-300 hover:underline"
+                >
+                  See a real B → A transformation →
+                </button>
+                <p className="mt-5 text-xs text-stone-500 dark:text-stone-500 text-center leading-relaxed">
+                  Free plan includes 2 essay analyses per month · Encrypted in transit · Cancel anytime
             </p>
           </div>
             </div>
 
             <aside
-              className="hidden xl:block pointer-events-none xl:pointer-events-auto xl:justify-self-start xl:pt-1 xl:min-w-0 xl:scale-[0.9] xl:origin-top-left"
-              aria-label="Sample essay with professor-style annotations"
-            >
-              <HeroEssayPreviewCard paper={DEMO_PAPERS[1]} rotate="right" onOpenDemo={scrollToLandingTools} />
+                className="hidden lg:flex lg:flex-col gap-0 pointer-events-auto lg:justify-self-start lg:items-start lg:pt-1 xl:pt-2 lg:min-w-0 w-full max-w-[248px]"
+                aria-label="After essay preview and citation export demo"
+              >
+                <div className="w-full rounded-2xl border border-emerald-200/70 dark:border-emerald-900/40 bg-white/90 dark:bg-stone-900/50 p-1 shadow-[0_12px_40px_-12px_rgba(5,150,105,0.14)] dark:shadow-[0_12px_40px_-12px_rgba(0,0,0,0.45)] ring-1 ring-emerald-200/40 dark:ring-emerald-900/30 transition-all duration-300 hover:shadow-[0_20px_50px_-16px_rgba(5,150,105,0.18)] dark:hover:shadow-[0_20px_50px_-16px_rgba(0,0,0,0.55)] hover:border-emerald-300/80 dark:hover:border-emerald-700/50">
+                  <p className="text-[10px] font-bold uppercase tracking-wide text-emerald-800 dark:text-emerald-300 text-center mb-1.5">After</p>
+                  <HeroEssayPreviewCard
+                    paper={DEMO_HERO_AFTER_PAPER}
+                    rotate="right"
+                    variant="after"
+                    legendPlacement="top"
+                    maxExcerptChars={720}
+                    onOpenDemo={scrollToBeforeAfter}
+                  />
+                </div>
+                <div className="w-[236px] xl:w-[248px] shrink-0 -rotate-[11deg] origin-bottom-left drop-shadow-lg mt-20 lg:mt-24 translate-x-4 lg:translate-x-7 xl:translate-x-8">
+                  <p className="text-center mb-2">
+                    <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-violet-800/95 dark:text-violet-300/95">Export</span>
+                    <span className="block text-[10px] text-stone-500 dark:text-stone-400 mt-0.5">APA · MLA · Chicago</span>
+                  </p>
+                  <InteractiveCitationsDemo variant="side-right" />
+                </div>
             </aside>
           </div>
 
-            {/* Hero feature cards — scroll on mobile, arrow carousel on desktop */}
-            <div className="w-[calc(100vw-2rem)] sm:w-screen sm:max-w-[100vw] relative left-1/2 -translate-x-1/2 mt-2 sm:mt-4 px-0 sm:pl-20 sm:pr-20 lg:pl-24 lg:pr-24">
-              <button
-                type="button"
-                onClick={() => setStudyCardsCarouselIndex((i) => Math.max(0, i - 1))}
-                disabled={studyCardsCarouselIndex === 0}
-                className="hidden sm:flex absolute left-4 sm:left-6 top-1/2 -translate-y-1/2 z-20 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white dark:bg-stone-800 shadow-lg border border-stone-200 dark:border-stone-600 items-center justify-center text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-700 hover:text-stone-900 dark:hover:text-stone-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-300"
-                aria-label="Previous feature cards"
-              >
-                <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
-              </button>
-              <button
-                type="button"
-                onClick={() => setStudyCardsCarouselIndex((i) => Math.min(heroCarouselMaxIndex, i + 1))}
-                disabled={studyCardsCarouselIndex >= heroCarouselMaxIndex}
-                className="hidden sm:flex absolute right-4 sm:right-6 top-1/2 -translate-y-1/2 z-20 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white dark:bg-stone-800 shadow-lg border border-stone-200 dark:border-stone-600 items-center justify-center text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-700 hover:text-stone-900 dark:hover:text-stone-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-300"
-                aria-label="Next feature cards"
-              >
-                <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
-              </button>
-              <div className="overflow-x-auto sm:overflow-hidden scrollbar-hide pb-4 sm:pb-0 sm:mx-0 sm:px-0 snap-x snap-mandatory sm:snap-none px-2">
-                <div className="flex gap-4 sm:hidden w-max">
+            <div
+              className="lg:hidden w-full mt-8 sm:mt-10 pb-6 sm:pb-8 px-1"
+              aria-label="Before and after essay preview mock-ups"
+            >
+              <p className="text-center text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-500 mb-6">
+                Same topic: professor-style annotations
+              </p>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10 xl:gap-12 items-start justify-items-center max-w-4xl xl:max-w-5xl mx-auto">
+                <div className="w-full max-w-[280px] flex flex-col items-center gap-3">
+                  <div className="text-center">
+                    <p className="text-[11px] font-bold uppercase tracking-wide text-amber-800 dark:text-amber-300">Before</p>
+                    <p className="text-[10px] text-stone-500 dark:text-stone-500 mt-0.5">Draft with mixed feedback</p>
+                  </div>
+                  <div className="rounded-2xl border border-amber-200/80 dark:border-amber-900/40 bg-white/85 dark:bg-stone-900/50 p-1 shadow-[0_12px_40px_-12px_rgba(180,83,9,0.12)] dark:shadow-[0_12px_40px_-12px_rgba(0,0,0,0.45)] ring-1 ring-amber-200/50 dark:ring-amber-900/30 transition-all duration-300 hover:shadow-[0_18px_50px_-14px_rgba(180,83,9,0.18)] dark:hover:shadow-[0_18px_50px_-14px_rgba(0,0,0,0.55)] hover:border-amber-300/80 dark:hover:border-amber-700/50 w-full">
+                    <HeroEssayPreviewCard
+                      paper={DEMO_PAPERS[1]}
+                      rotate="left"
+                      variant="before"
+                      onOpenDemo={scrollToBeforeAfter}
+                    />
+                  </div>
+                  <div className="w-full max-w-[260px] rotate-[8deg] origin-bottom-right drop-shadow-lg pointer-events-auto mt-16 -translate-x-3 self-start">
+                    <p className="text-center mb-1.5">
+                      <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-sky-800/95 dark:text-sky-300/95">Sources</span>
+                      <span className="block text-[9px] text-stone-500 dark:text-stone-400 mt-0.5">Peer-reviewed picks</span>
+                    </p>
+                    <InteractiveCitationsDemo variant="side-left" />
+                  </div>
+                </div>
+                <div className="w-full max-w-[280px] flex flex-col items-center gap-3">
+                  <div className="text-center">
+                    <p className="text-[11px] font-bold uppercase tracking-wide text-emerald-800 dark:text-emerald-300">After</p>
+                    <p className="text-[10px] text-stone-500 dark:text-stone-500 mt-0.5">Revised · 90/100 (A)</p>
+                  </div>
+                  <div className="rounded-2xl border border-emerald-200/70 dark:border-emerald-900/40 bg-white/90 dark:bg-stone-900/50 p-1 shadow-[0_12px_40px_-12px_rgba(5,150,105,0.14)] dark:shadow-[0_12px_40px_-12px_rgba(0,0,0,0.45)] ring-1 ring-emerald-200/40 dark:ring-emerald-900/30 transition-all duration-300 hover:shadow-[0_20px_50px_-16px_rgba(5,150,105,0.18)] dark:hover:shadow-[0_20px_50px_-16px_rgba(0,0,0,0.55)] hover:border-emerald-300/80 dark:hover:border-emerald-700/50 w-full">
+                    <HeroEssayPreviewCard
+                      paper={DEMO_HERO_AFTER_PAPER}
+                      rotate="right"
+                      variant="after"
+                      legendPlacement="top"
+                      maxExcerptChars={720}
+                      onOpenDemo={scrollToBeforeAfter}
+                    />
+                  </div>
+                  <div className="w-full max-w-[260px] -rotate-[8deg] origin-bottom-left drop-shadow-lg pointer-events-auto mt-16 translate-x-3 self-end">
+                    <p className="text-center mb-1.5">
+                      <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-violet-800/95 dark:text-violet-300/95">Export</span>
+                      <span className="block text-[9px] text-stone-500 dark:text-stone-400 mt-0.5">APA · MLA · Chicago</span>
+                    </p>
+                    <InteractiveCitationsDemo variant="side-right" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+            {/* Hero feature cards: five focus areas */}
+            <div className="w-full max-w-6xl mx-auto px-1 sm:px-0 mt-10 sm:mt-12">
+              <div className="flex flex-col items-center gap-3 mb-4">
+                <div className="h-0.5 w-14 rounded-full bg-gradient-to-r from-emerald-500 via-amber-400 to-red-500 opacity-70 dark:opacity-80" aria-hidden />
+                <p className="text-center text-xs font-semibold uppercase tracking-[0.2em] text-stone-500 dark:text-stone-500">
+                  What WriteScholar focuses on
+                </p>
+              </div>
+            </div>
+            <div className="w-full max-w-6xl mx-auto px-2 pb-2">
+              {/* Mobile: horizontal snap carousel (like earlier landing) */}
+              <div className="sm:hidden relative -mx-4">
+                <div
+                  className="flex gap-4 overflow-x-auto scrollbar-hide snap-x snap-mandatory [-webkit-overflow-scrolling:touch] py-1 pl-4 pr-4 pb-2"
+                  aria-label="What WriteScholar focuses on"
+                >
                   {heroFeatureCards.map((card) => (
-                    <div key={card.title} className="flex-shrink-0 w-[min(240px,calc(100vw-2rem))] snap-start">
+                    <div
+                      key={card.title}
+                      className="snap-center shrink-0 w-[min(240px,calc(100vw-3.5rem))] max-w-[240px]"
+                    >
                       <MobileStudyCard
                         title={card.title}
                         desc={card.desc}
@@ -998,12 +876,10 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                     </div>
                   ))}
                 </div>
-                <div
-                  className="hidden sm:flex gap-4 sm:transition-transform sm:duration-500 sm:ease-out w-[140%] pr-8 sm:pr-12"
-                  style={{ transform: `translateX(-${studyCardsCarouselIndex * heroCarouselTranslateStep}%)` }}
-                >
+              </div>
+              <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 justify-items-stretch items-stretch">
                   {heroFeatureCards.map((card) => (
-                    <div key={card.title} className="flex-shrink-0 max-w-none" style={{ flex: `0 0 ${heroCarouselCardBasis}` }}>
+                  <div key={card.title} className="min-w-0 w-full max-w-[min(100%,320px)] mx-auto xl:max-w-none h-full">
                       <StudyCard
                         title={card.title}
                         desc={card.desc}
@@ -1017,59 +893,59 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                     </div>
                   ))}
                 </div>
-              </div>
-              <div className="hidden sm:flex justify-center gap-2 mt-6">
-                {[0, 1, 2, 3].map((i) => (
-                  <button
-                    key={i}
-                    type="button"
-                    onClick={() => setStudyCardsCarouselIndex(i)}
-                    className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${studyCardsCarouselIndex === i ? 'bg-violet-500 w-8' : 'bg-stone-300 dark:bg-stone-600 hover:bg-stone-400'}`}
-                    aria-label={`Feature cards slide ${i + 1}`}
-                  />
-                ))}
-              </div>
+              <p className="text-center text-xs text-stone-500 dark:text-stone-500 mt-5">
+                Quizzes, flashcards, Focus Mode &amp; more live under{' '}
+                <button type="button" onClick={() => onNavigate('more-tools')} className="text-violet-700 dark:text-violet-400 font-semibold hover:underline">
+                  More tools
+                </button>
+              </p>
             </div>
 
-            {/* University marquee — headline + scrolling name chips */}
+            {/* Trust band: testimonial + university marquee */}
             <div
-              className="w-screen max-w-[100vw] relative left-1/2 -translate-x-1/2 mt-14 sm:mt-20 mb-0 overflow-hidden
-                border-y border-violet-200/60 dark:border-violet-800/40
-                bg-gradient-to-b from-violet-50 via-white to-violet-50/90
-                dark:from-stone-900 dark:via-stone-900 dark:to-violet-950/20
-                shadow-[inset_0_1px_0_0_rgba(255,255,255,0.7)] dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)]"
-              aria-label="Universities students use WriteScholar from"
+              className="w-screen max-w-[100vw] relative left-1/2 -translate-x-1/2 mt-12 sm:mt-16 mb-0 overflow-hidden
+                border-y border-stone-200/90 dark:border-stone-800
+                bg-[#fafafa] dark:bg-stone-950
+                shadow-[inset_0_1px_0_0_rgba(255,255,255,0.9)] dark:shadow-none"
+              aria-label="Social proof: student testimonial and universities"
             >
               <div
-                className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_90%_70%_at_50%_-20%,rgba(139,92,246,0.06),transparent_50%)] dark:bg-[radial-gradient(ellipse_90%_70%_at_50%_-20%,rgba(139,92,246,0.1),transparent_50%)]"
+                className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_90%_70%_at_50%_-20%,rgba(91,33,182,0.04),transparent_50%)] dark:bg-[radial-gradient(ellipse_90%_70%_at_50%_-20%,rgba(109,40,217,0.08),transparent_50%)]"
                 aria-hidden
               />
-              <div className="relative z-10 px-4 pt-7 pb-6 sm:pt-8 sm:pb-7">
+              <div className="relative z-10 pt-7 pb-6 sm:pt-8 sm:pb-7">
+                <div className="max-w-6xl mx-auto px-4 sm:px-6">
+                  <figure className="rounded-2xl border border-violet-200/70 dark:border-violet-800/40 bg-white/80 dark:bg-stone-900/50 px-6 py-6 sm:px-10 sm:py-8 text-center max-w-2xl mx-auto ring-1 ring-violet-900/5 dark:ring-violet-400/10 mb-8 sm:mb-10 shadow-sm">
+                    <blockquote>
+                      <p className="text-stone-800 dark:text-stone-100 text-base sm:text-lg leading-relaxed italic">
+                        &ldquo;Went from a B to an A in one submission. The feedback was exactly what my professor wanted.&rdquo;
+                      </p>
+                    </blockquote>
+                  </figure>
                 <div className="mx-auto max-w-xl text-center mb-6 sm:mb-7">
-                  <h3 className="text-lg sm:text-xl md:text-2xl font-extrabold text-stone-900 dark:text-stone-50 tracking-tight leading-tight">
-                    Trusted by students at{' '}
-                    <span className="text-violet-600 dark:text-violet-400">leading universities</span>
-                    <span className="text-stone-800 dark:text-stone-200"> worldwide</span>
+                    <h3 className="text-base sm:text-lg md:text-xl font-semibold text-stone-800 dark:text-stone-100 tracking-tight leading-snug">
+                      Students at leading universities use WriteScholar
                   </h3>
                   <div
-                    className="mt-4 h-[3px] w-16 sm:w-20 mx-auto rounded-full bg-gradient-to-r from-violet-400 via-fuchsia-500 to-violet-500 opacity-90 dark:opacity-100 dark:from-violet-500 dark:via-fuchsia-400 dark:to-violet-400"
+                      className="mt-4 h-0.5 w-12 sm:w-14 mx-auto rounded-full bg-gradient-to-r from-emerald-500 via-amber-400 to-red-500 opacity-60 dark:opacity-70"
                     aria-hidden
                   />
                 </div>
-                <div className="relative overflow-hidden">
+                </div>
+                <div className="relative overflow-hidden px-0">
                   <div
-                    className="pointer-events-none absolute inset-y-0 left-0 z-10 w-14 sm:w-24 bg-gradient-to-r from-violet-50 dark:from-stone-900 via-violet-50 dark:via-stone-900 to-transparent"
+                    className="pointer-events-none absolute inset-y-0 left-0 z-10 w-14 sm:w-24 bg-gradient-to-r from-[#fafafa] dark:from-stone-950 via-[#fafafa] dark:via-stone-950 to-transparent"
                     aria-hidden
                   />
                   <div
-                    className="pointer-events-none absolute inset-y-0 right-0 z-10 w-14 sm:w-24 bg-gradient-to-l from-violet-50 dark:from-stone-900 via-violet-50 dark:via-stone-900 to-transparent"
+                    className="pointer-events-none absolute inset-y-0 right-0 z-10 w-14 sm:w-24 bg-gradient-to-l from-[#fafafa] dark:from-stone-950 via-[#fafafa] dark:via-stone-950 to-transparent"
                     aria-hidden
                   />
                   <div className="flex w-max animate-scroll-slow items-center py-0.5">
                     {universities.map((uni, idx) => (
                       <div key={`hero-first-${idx}`} className="flex-shrink-0 mx-1.5 sm:mx-2.5">
                         <span
-                          className={`inline-flex items-center rounded-xl border border-stone-200/90 dark:border-stone-600 bg-white dark:bg-stone-800 px-3.5 py-2 sm:px-4 sm:py-2.5 text-sm sm:text-base md:text-lg font-bold shadow-md shadow-stone-900/5 dark:shadow-black/30 ring-1 ring-violet-100/80 dark:ring-violet-900/30 ${uni.className} !text-stone-700 dark:!text-stone-200`}
+                          className={`inline-flex items-center rounded-lg border border-stone-200/95 dark:border-stone-700 bg-white dark:bg-stone-900 px-3.5 py-2 sm:px-4 sm:py-2.5 text-sm sm:text-base font-semibold shadow-sm ${uni.className} !text-stone-700 dark:!text-stone-200`}
                         >
                           {uni.name}
                         </span>
@@ -1078,7 +954,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                     {universities.map((uni, idx) => (
                       <div key={`hero-second-${idx}`} className="flex-shrink-0 mx-1.5 sm:mx-2.5">
                         <span
-                          className={`inline-flex items-center rounded-xl border border-stone-200/90 dark:border-stone-600 bg-white dark:bg-stone-800 px-3.5 py-2 sm:px-4 sm:py-2.5 text-sm sm:text-base md:text-lg font-bold shadow-md shadow-stone-900/5 dark:shadow-black/30 ring-1 ring-violet-100/80 dark:ring-violet-900/30 ${uni.className} !text-stone-700 dark:!text-stone-200`}
+                          className={`inline-flex items-center rounded-lg border border-stone-200/95 dark:border-stone-700 bg-white dark:bg-stone-900 px-3.5 py-2 sm:px-4 sm:py-2.5 text-sm sm:text-base font-semibold shadow-sm ${uni.className} !text-stone-700 dark:!text-stone-200`}
                         >
                           {uni.name}
                         </span>
@@ -1087,7 +963,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                     {universities.map((uni, idx) => (
                       <div key={`hero-third-${idx}`} className="flex-shrink-0 mx-1.5 sm:mx-2.5">
                         <span
-                          className={`inline-flex items-center rounded-xl border border-stone-200/90 dark:border-stone-600 bg-white dark:bg-stone-800 px-3.5 py-2 sm:px-4 sm:py-2.5 text-sm sm:text-base md:text-lg font-bold shadow-md shadow-stone-900/5 dark:shadow-black/30 ring-1 ring-violet-100/80 dark:ring-violet-900/30 ${uni.className} !text-stone-700 dark:!text-stone-200`}
+                          className={`inline-flex items-center rounded-lg border border-stone-200/95 dark:border-stone-700 bg-white dark:bg-stone-900 px-3.5 py-2 sm:px-4 sm:py-2.5 text-sm sm:text-base font-semibold shadow-sm ${uni.className} !text-stone-700 dark:!text-stone-200`}
                         >
                           {uni.name}
                         </span>
@@ -1098,38 +974,44 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
               </div>
             </div>
 
-          {/* Analyze Papers — full-bleed vs hero padding so side “margins” match section (not violet hero wash) */}
+          <LandingBeforeAfterSection onOpenDemo={scrollToLandingTools} />
+
+          {/* Analyze Papers: full-bleed vs hero padding so side margins match section (not violet hero wash) */}
           <section
             id="landing-tools"
-            className="relative w-full -mx-4 sm:-mx-6 lg:-mx-8 mt-0 pt-8 sm:pt-10 pb-14 sm:pb-20 overflow-hidden bg-white dark:bg-stone-900 scroll-mt-24 border-t border-stone-200/80 dark:border-stone-700/80"
+            className="relative w-full -mx-4 sm:-mx-6 lg:-mx-8 mt-0 pt-10 sm:pt-14 pb-16 sm:pb-24 overflow-hidden bg-gradient-to-b from-white via-stone-50/80 to-white dark:from-stone-900 dark:via-stone-950 dark:to-stone-900 scroll-mt-24 border-t border-stone-200/80 dark:border-stone-700/80"
           >
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-5%,rgba(120,113,108,0.06),transparent_50%)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-5%,rgba(82,82,82,0.12),transparent_50%)]" />
-            <div className="absolute top-20 left-[5%] hidden xl:block text-4xl opacity-30 animate-float">📝</div>
-            <div className="absolute top-32 right-[8%] hidden xl:block text-3xl opacity-25 animate-float-delayed">✨</div>
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-5%,rgba(91,33,182,0.06),transparent_50%)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-5%,rgba(109,40,217,0.1),transparent_55%)]" />
+            <div className="absolute top-20 left-[5%] hidden xl:block text-4xl opacity-25 animate-float">📝</div>
+            <div className="absolute top-32 right-[8%] hidden xl:block text-3xl opacity-20 animate-float-delayed">✨</div>
             <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-              <div className="text-center mb-10 sm:mb-14">
-                <span className="inline-block px-4 py-1.5 bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-400 rounded-full text-sm font-semibold mb-4">
-                  Feedback that grades like a professor
+              <div className="text-center mb-10 sm:mb-14 max-w-3xl mx-auto">
+                <div className="mx-auto mb-4 h-0.5 w-14 rounded-full bg-gradient-to-r from-violet-500 via-violet-400 to-violet-600 opacity-80" aria-hidden />
+                <p className="text-sm font-semibold text-stone-700 dark:text-stone-300 mb-3 tracking-tight" style={{ fontFamily: "'EB Garamond', Georgia, serif" }}>
+                  See Exactly What Your Professor Sees
+                </p>
+                <span className="inline-block px-4 py-1.5 bg-violet-100/90 dark:bg-violet-950/50 text-violet-800 dark:text-violet-200 rounded-full text-xs font-semibold uppercase tracking-wide border border-violet-200/80 dark:border-violet-800/50 mb-5">
+                  Try it on your draft
                 </span>
-                <h2 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-stone-800 dark:text-stone-100 mb-4 sm:mb-5">
-                  Analyze Papers with Feedback <span className="text-violet-600 dark:text-violet-400">That Thinks Like a Professor</span>
+                <h2 className="text-2xl sm:text-4xl lg:text-[2.35rem] font-semibold text-stone-900 dark:text-stone-100 mb-4 sm:mb-5 leading-tight tracking-tight" style={{ fontFamily: "'EB Garamond', Georgia, serif" }}>
+                  Interactive preview: rubric, annotations, and full report
                 </h2>
-                <p className="text-base sm:text-lg text-stone-600 dark:text-stone-400 max-w-2xl mx-auto">
-                  Upload your essay or research paper. Our AI evaluates structure, clarity, citations, and academic quality, then gives you actionable feedback to improve before you submit.
+                <p className="text-base sm:text-lg text-stone-600 dark:text-stone-400 leading-relaxed">
+                  Upload or paste your essay. Explore highlights in the draft, then switch the analysis panel—rubric scores, comprehensive written feedback, and annotations that mirror how your paper will be read.
                 </p>
               </div>
 
               <InteractiveDocumentAnalysis onNavigate={onNavigate} />
 
-              <div className="text-center mt-10 sm:mt-14">
+              <div className="text-center mt-12 sm:mt-16">
                 <button
                   onClick={() => onNavigate('signup')}
-                  className="inline-flex items-center px-8 py-4 bg-violet-600 hover:bg-violet-500 text-white font-bold rounded-2xl hover:scale-105 active:scale-95 shadow-xl shadow-violet-500/30 transition-all duration-300 text-lg"
+                  className="inline-flex items-center px-8 py-3.5 bg-violet-700 hover:bg-violet-800 dark:bg-violet-600 dark:hover:bg-violet-500 text-white font-semibold rounded-xl shadow-lg shadow-violet-900/20 ring-1 ring-violet-900/10 hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 text-base"
                 >
                   Try your first analysis
                   <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                 </button>
-                <p className="mt-3 text-sm text-stone-500 dark:text-stone-400">No credit card required • Free plan includes 2 analyses per month</p>
+                <p className="mt-4 text-sm text-stone-500 dark:text-stone-400">No credit card required · Free plan includes 2 analyses per month</p>
               </div>
             </div>
           </section>
@@ -1137,8 +1019,8 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
         </div>
       </section>
 
-      {/* H2 #2: Create Study Material - Turn Notes Into Quizzes, Flashcards, Crosswords */}
-      <section className="relative py-12 sm:py-28 overflow-hidden bg-stone-50 dark:bg-stone-900">
+      {/* H2 #2: Create Study Material, hidden (see More tools) */}
+      <section className="hidden relative py-12 sm:py-28 overflow-hidden bg-stone-50 dark:bg-stone-900">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-10%,rgba(245,158,11,0.08),transparent)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-10%,rgba(251,191,36,0.05),transparent)] lg:bg-[radial-gradient(ellipse_70%_40%_at_50%_10%,rgba(120,113,108,0.05),transparent)]" />
         <div className="absolute top-24 left-[5%] hidden xl:block text-5xl opacity-40 animate-float">📚</div>
         <div className="absolute top-40 right-[8%] hidden xl:block text-4xl opacity-35 animate-float-delayed">✏️</div>
@@ -1201,8 +1083,8 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                     <ViewportAutoplayVideo
                       src="/writescholar-notes-study-materials-demo.mp4"
                       className="w-full h-full object-contain group-hover:scale-[1.02] transition-transform duration-700"
-                      title="WriteScholar — Paste notes to generate quizzes, flashcards and crosswords"
-                      aria-label="WriteScholar — Paste notes to generate quizzes, flashcards and crosswords instantly"
+                      title="WriteScholar: paste notes to generate quizzes, flashcards and crosswords"
+                      aria-label="WriteScholar: paste notes to generate quizzes, flashcards and crosswords instantly"
                     />
                   </div>
                 </div>
@@ -1236,7 +1118,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
               <div className="absolute -inset-1 bg-amber-400/25 rounded-3xl blur-xl opacity-0 group-hover:opacity-40 transition-all duration-500 max-lg:opacity-25 max-lg:-inset-1.5"></div>
               <div className="relative bg-white dark:bg-stone-800 rounded-3xl overflow-hidden shadow-xl border-2 border-stone-200/50 dark:border-stone-700 h-full hover:-translate-y-3 hover:scale-[1.02] hover:shadow-2xl hover:border-amber-200/80 dark:hover:border-amber-700/50 transition-all duration-500 max-lg:border-amber-200/50 max-lg:dark:border-amber-900/30 max-lg:shadow-amber-500/10">
                 <div className="relative h-40 sm:h-56 overflow-hidden bg-amber-50 dark:bg-amber-900/20">
-                  <ViewportAutoplayVideo src="/writescholar-quiz-generator-demo.mp4" className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500" title="WriteScholar AI Quiz Generator — Turn notes into practice tests" aria-label="WriteScholar AI Quiz Generator — Turn notes into practice tests instantly" />
+                  <ViewportAutoplayVideo src="/writescholar-quiz-generator-demo.mp4" className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500" title="WriteScholar AI Quiz Generator: turn notes into practice tests" aria-label="WriteScholar AI Quiz Generator: turn notes into practice tests instantly" />
                 </div>
                 <div className="p-6">
                   <div className="flex items-center gap-3">
@@ -1250,7 +1132,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
               <div className="absolute -inset-1 bg-amber-400/25 rounded-3xl blur-xl opacity-0 group-hover:opacity-40 transition-all duration-500 max-lg:opacity-25 max-lg:-inset-1.5"></div>
               <div className="relative bg-white dark:bg-stone-800 rounded-3xl overflow-hidden shadow-xl border-2 border-stone-200/50 dark:border-stone-700 h-full hover:-translate-y-3 hover:scale-[1.02] hover:shadow-2xl hover:border-amber-200/80 dark:hover:border-amber-700/50 transition-all duration-500 max-lg:border-amber-200/50 max-lg:dark:border-amber-900/30 max-lg:shadow-amber-500/10">
                 <div className="relative h-40 sm:h-56 overflow-hidden bg-amber-50 dark:bg-amber-900/20">
-                  <ViewportAutoplayVideo src="/writescholar-flashcards-demo.mp4" className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500" title="WriteScholar Study Pack — AI flashcard generator from notes" aria-label="WriteScholar Study Pack — AI flashcard generator from notes" />
+                  <ViewportAutoplayVideo src="/writescholar-flashcards-demo.mp4" className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500" title="WriteScholar Study Pack: AI flashcard generator from notes" aria-label="WriteScholar Study Pack: AI flashcard generator from notes" />
                 </div>
                 <div className="p-6">
                   <div className="flex items-center gap-3">
@@ -1264,7 +1146,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
               <div className="absolute -inset-1 bg-orange-400/25 rounded-3xl blur-xl opacity-0 group-hover:opacity-40 transition-all duration-500 max-lg:opacity-25 max-lg:-inset-1.5"></div>
               <div className="relative bg-white dark:bg-stone-800 rounded-3xl overflow-hidden shadow-xl border-2 border-stone-200/50 dark:border-stone-700 h-full hover:-translate-y-3 hover:scale-[1.02] hover:shadow-2xl hover:border-amber-200/80 dark:hover:border-amber-700/50 transition-all duration-500 max-lg:border-amber-200/50 max-lg:dark:border-amber-900/30 max-lg:shadow-amber-500/10">
                 <div className="relative h-40 sm:h-56 overflow-hidden bg-orange-50 dark:bg-orange-900/20">
-                  <ViewportAutoplayVideo src="/writescholar-crossword-demo.mp4" className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500" title="WriteScholar Crossword Generator — Create study puzzles from notes" aria-label="WriteScholar Crossword Generator — Create study puzzles from notes" />
+                  <ViewportAutoplayVideo src="/writescholar-crossword-demo.mp4" className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500" title="WriteScholar Crossword Generator: create study puzzles from notes" aria-label="WriteScholar Crossword Generator: create study puzzles from notes" />
                 </div>
                 <div className="p-6">
                   <div className="flex items-center gap-3">
@@ -1280,13 +1162,13 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
               Try Study Tools Free
               <svg className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
             </button>
-            <p className="mt-4 text-stone-500 dark:text-stone-400 text-sm">Free plan includes 2 study packs per month (lesson & flashcards — quiz, crossword & Crater Blast with Pro)</p>
+            <p className="mt-4 text-stone-500 dark:text-stone-400 text-sm">Free plan includes 2 study packs per month (lesson and flashcards; quiz, crossword and Crater Blast with Pro)</p>
           </div>
         </div>
       </section>
 
-      {/* H2 #3: Focus Mode - Earn Your Screen Time - Block Websites */}
-      <section className="relative py-24 sm:py-36 overflow-hidden bg-stone-200 dark:bg-stone-950">
+      {/* H2 #3: Focus Mode, hidden (see More tools) */}
+      <section className="hidden relative py-24 sm:py-36 overflow-hidden bg-stone-200 dark:bg-stone-950">
         {/* Light background with subtle violet accents */}
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_100%_60%_at_50%_-5%,rgba(251,207,232,0.25),transparent_55%)] dark:bg-[radial-gradient(ellipse_100%_60%_at_50%_-5%,rgba(251,207,232,0.08),transparent_55%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_50%_at_85%_85%,rgba(251,113,133,0.12),transparent_45%)] dark:bg-[radial-gradient(ellipse_70%_50%_at_85%_85%,rgba(251,113,133,0.06),transparent_45%)]" />
@@ -1333,8 +1215,8 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   <ViewportAutoplayVideo
                     src="/writescholar-focus-mode-demo.mp4"
                     className="w-full aspect-video object-cover"
-                    title="WriteScholar Focus Mode — Block distractions, solve puzzle or answer quiz to unlock"
-                    aria-label="WriteScholar Focus Mode — Block distractions, solve puzzle or answer quiz to unlock"
+                    title="WriteScholar Focus Mode: block distractions, solve puzzle or answer quiz to unlock"
+                    aria-label="WriteScholar Focus Mode: block distractions, solve puzzle or answer quiz to unlock"
                   />
                   <div className="absolute inset-0 bg-black/35 pointer-events-none" />
                   <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between">
@@ -1368,8 +1250,8 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                     <ViewportAutoplayVideo
                       src="/writescholar-focus-mode-step1-demo.mp4"
                       className="w-full h-full object-cover"
-                      title="WriteScholar Focus Mode Step 1 — Pick sites to block"
-                      aria-label="WriteScholar Focus Mode Step 1 — Pick sites to block"
+                      title="WriteScholar Focus Mode Step 1: pick sites to block"
+                      aria-label="WriteScholar Focus Mode Step 1: pick sites to block"
                     />
                   </div>
                   <div className="p-6 sm:p-8">
@@ -1378,7 +1260,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                       <h4 className="text-xl font-bold text-stone-900 dark:text-white">Pick Sites to Block</h4>
                     </div>
                     <p className="text-stone-600 dark:text-stone-400 leading-relaxed">
-                      YouTube, TikTok, Instagram, Reddit — or add any custom domain. You&apos;re in control.
+                      YouTube, TikTok, Instagram, Reddit, or add any custom domain. You&apos;re in control.
                     </p>
                   </div>
                 </div>
@@ -1397,8 +1279,8 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                     <ViewportAutoplayVideo
                       src="/writescholar-focus-mode-step2-demo.mp4"
                       className="w-full h-full object-cover"
-                      title="WriteScholar Focus Mode Step 2 — Solve puzzle or answer quiz to unlock"
-                      aria-label="WriteScholar Focus Mode Step 2 — Solve puzzle or answer quiz to unlock"
+                      title="WriteScholar Focus Mode Step 2: solve puzzle or answer quiz to unlock"
+                      aria-label="WriteScholar Focus Mode Step 2: solve puzzle or answer quiz to unlock"
                     />
                   </div>
                   <div className="p-6 sm:p-8">
@@ -1426,8 +1308,8 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                     <ViewportAutoplayVideo
                       src="/writescholar-focus-mode-step3-demo.mp4"
                       className="w-full h-full object-cover"
-                      title="WriteScholar Focus Mode Step 3 — Enjoy your earned break"
-                      aria-label="WriteScholar Focus Mode Step 3 — Enjoy your earned break"
+                      title="WriteScholar Focus Mode Step 3: enjoy your earned break"
+                      aria-label="WriteScholar Focus Mode Step 3: enjoy your earned break"
                     />
                   </div>
                   <div className="p-6 sm:p-8">
@@ -1436,7 +1318,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                       <h4 className="text-xl font-bold text-stone-900 dark:text-white">Enjoy Your Break</h4>
                     </div>
                     <p className="text-stone-600 dark:text-stone-400 leading-relaxed">
-                      Site unlocks for 15 min to 24 hours — you choose. Time&apos;s up? Study again to earn more.
+                      Site unlocks for 15 min to 24 hours; you choose. Time&apos;s up? Study again to earn more.
                     </p>
                   </div>
                 </div>
@@ -1461,7 +1343,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                       Why it actually works
                     </h3>
                     <p className="text-stone-600 dark:text-stone-400 leading-relaxed mb-6">
-                      Most blockers just frustrate you. Focus Mode is different — it ties your screen time to learning. 
+                      Most blockers just frustrate you. Focus Mode is different: it ties your screen time to learning. 
                       Every minute on TikTok is <span className="text-stone-900 dark:text-white font-semibold">earned</span> by solving a puzzle or answering questions from your own notes. 
                       Your brain starts associating breaks with achievement, not guilt.
                     </p>
@@ -1539,12 +1421,12 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
         </div>
       </section>
 
-      {/* Study Better Together — from Share Friends page (hidden when HIDE_FRIENDS) */}
-      {!HIDE_FRIENDS && (
+      {/* Study Better Together (from Share Friends page; hidden when HIDE_FRIENDS) */}
+      {!HIDE_FRIENDS && !LANDING_HIDE_SECONDARY_SECTIONS && (
       <section className="relative py-12 sm:py-20 overflow-hidden bg-white dark:bg-stone-900">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_60%_at_50%_50%,rgba(99,102,241,0.07),transparent)] dark:bg-[radial-gradient(ellipse_70%_60%_at_50%_50%,rgba(139,92,246,0.06),transparent)]" />
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Mobile layout — badge, title, video, share instructions */}
+          {/* Mobile layout: badge, title, video, share instructions */}
           <div className="lg:hidden flex flex-col items-center text-center">
             <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300 rounded-full text-sm font-semibold mb-4">
               <span>👫</span>
@@ -1567,8 +1449,8 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
               <ViewportAutoplayVideo
                 src="/writescholar-friends-share-demo.mp4"
                 className="w-full aspect-video object-cover"
-                title="WriteScholar Friends — Share quizzes, flashcards and crosswords"
-                aria-label="WriteScholar Friends — Share quizzes, flashcards and crosswords with friends"
+                title="WriteScholar Friends: share quizzes, flashcards and crosswords"
+                aria-label="WriteScholar Friends: share quizzes, flashcards and crosswords with friends"
               />
             </div>
             <p className="text-xs text-stone-500 dark:text-stone-400 mb-6 px-2 leading-relaxed">
@@ -1593,7 +1475,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
             </div>
           </div>
 
-          {/* Desktop layout — text left, video right */}
+          {/* Desktop layout: text left, video right */}
           <div className="hidden lg:grid lg:grid-cols-2 gap-8 items-center">
             <div className="text-center lg:text-left order-2 lg:order-1 pb-8 lg:pb-0">
               <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300 rounded-full text-sm font-semibold mb-5">
@@ -1607,7 +1489,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                 </span>
               </h2>
               <p className="text-base sm:text-lg text-stone-600 dark:text-stone-300 leading-relaxed mb-4 max-w-lg mx-auto lg:mx-0">
-                Add friends with your unique code and share flashcards, quizzes, crosswords & notes in one tap. It delivers straight to their device — all they have to do is accept.
+                Add friends with your unique code and share flashcards, quizzes, crosswords & notes in one tap. It delivers straight to their device. All they have to do is accept.
               </p>
               <p className="text-sm text-stone-500 dark:text-stone-400 leading-relaxed mb-6 max-w-lg mx-auto lg:mx-0">
                 To share: go to <strong>Saved Materials</strong> in the dashboard or header → tap the <strong>Share</strong> button on any quiz, flashcard, or crossword → select your friend.
@@ -1639,8 +1521,8 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                 <ViewportAutoplayVideo
                   src="/writescholar-friends-share-demo.mp4"
                   className="w-full aspect-video object-cover"
-                  title="WriteScholar Friends — Share quizzes, flashcards and crosswords"
-                  aria-label="WriteScholar Friends — Share quizzes, flashcards and crosswords with friends"
+                  title="WriteScholar Friends: share quizzes, flashcards and crosswords"
+                  aria-label="WriteScholar Friends: share quizzes, flashcards and crosswords with friends"
                 />
               </div>
             </div>
@@ -1649,8 +1531,8 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
       </section>
       )}
 
-      {/* One Code. Endless Friends. — from Share Friends page (hidden when HIDE_FRIENDS) */}
-      {!HIDE_FRIENDS && (
+      {/* One Code. Endless Friends. (from Share Friends page; hidden when HIDE_FRIENDS) */}
+      {!HIDE_FRIENDS && !LANDING_HIDE_SECONDARY_SECTIONS && (
       <section className="relative py-16 sm:py-24 bg-violet-50/40 dark:bg-stone-900 overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_40%_at_50%_50%,rgba(99,102,241,0.08),transparent)] dark:bg-[radial-gradient(ellipse_60%_40%_at_50%_50%,rgba(139,92,246,0.06),transparent)]" />
         <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -1692,7 +1574,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
               </div>
             </div>
           </div>
-          <p className="text-sm text-stone-400 dark:text-stone-500">This is a demo code — sign up to get your own unique code instantly.</p>
+          <p className="text-sm text-stone-400 dark:text-stone-500">This is a demo code. Sign up to get your own unique code instantly.</p>
         </div>
       </section>
       )}
@@ -1735,10 +1617,10 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
             const tabs = [
               { id: 'analyse', label: 'Analyse', icon: '📝', desc: 'Upload your paper and get professor-style feedback on structure, clarity, and how to improve.' },
               { id: 'flashcards', label: 'Flashcards', icon: '🃏', desc: 'Copy and paste your notes or content to generate flip cards for memorization and quick review.' },
-              { id: 'quiz', label: 'Practice Tests', icon: '📋', desc: 'Paste your study material and get instant quizzes — multiple choice, true/false, and more.' },
+              { id: 'quiz', label: 'Practice Tests', icon: '📋', desc: 'Paste your study material and get instant quizzes: multiple choice, true/false, and more.' },
               { id: 'summarise', label: 'Summarise', icon: '📋', desc: 'Upload documents or copy and paste text to get concise bullet points or summaries in seconds.' },
               { id: 'crossword', label: 'Crosswords', icon: '🧩', desc: 'Paste key terms or notes to create an interactive crossword puzzle and test your vocabulary.' },
-              { id: 'games', label: 'Games', icon: '🎮', desc: 'Play Crater Blast — blast the correct falling answer before it lands. Turn your study material into an addictive quiz shooter game.' },
+              { id: 'games', label: 'Games', icon: '🎮', desc: 'Play Crater Blast: blast the correct falling answer before it lands. Turn your study material into an addictive quiz shooter game.' },
               { id: 'focus', label: 'Focus', icon: '🔒', desc: 'Block distracting sites until you finish a study goal. Earn your screen time with our Chrome extension.' },
             ];
             const activeTab = tabs.find(t => t.id === activeStudyTab);
@@ -1778,13 +1660,13 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
             <div className="relative bg-white dark:bg-stone-800 rounded-2xl sm:rounded-3xl overflow-hidden shadow-xl border border-stone-200/60 dark:border-stone-700 group-hover:shadow-2xl group-hover:border-violet-200/60 dark:group-hover:border-violet-800/40 transition-all duration-300">
               <div className="bg-violet-50/40 dark:bg-violet-950/30 flex items-center justify-center min-h-[200px] sm:min-h-[380px]">
                 {[
-                  { id: 'analyse', src: '/writescholar-essay-checker-demo.mp4', title: 'WriteScholar Essay Checker — Professor-style feedback on your writing' },
-                  { id: 'flashcards', src: '/writescholar-flashcards-demo.mp4', title: 'WriteScholar Study Pack — AI flashcard generator from notes' },
-                  { id: 'quiz', src: '/writescholar-quiz-generator-demo.mp4', title: 'WriteScholar AI Quiz Generator — Turn notes into practice tests' },
-                  { id: 'summarise', src: '/writescholar-summarizer-demo.mp4', title: 'WriteScholar AI Summarizer — Condense papers into key points' },
-                  { id: 'crossword', src: '/writescholar-crossword-demo.mp4', title: 'WriteScholar Crossword Generator — Create study puzzles from notes' },
-                  { id: 'games', src: '/writescholar-crater-blast-demo.mp4', title: 'WriteScholar Crater Blast — Quiz game study mode' },
-                  { id: 'focus', src: '/writescholar-focus-mode-demo.mp4', title: 'WriteScholar Focus Mode — Block sites until you study' },
+                  { id: 'analyse', src: '/writescholar-essay-checker-demo.mp4', title: 'WriteScholar: AI Essay Checker with professor-level feedback in seconds' },
+                  { id: 'flashcards', src: '/writescholar-flashcards-demo.mp4', title: 'WriteScholar Study Pack: AI flashcard generator from notes' },
+                  { id: 'quiz', src: '/writescholar-quiz-generator-demo.mp4', title: 'WriteScholar AI Quiz Generator: turn notes into practice tests' },
+                  { id: 'summarise', src: '/writescholar-summarizer-demo.mp4', title: 'WriteScholar AI Summarizer: condense papers into key points' },
+                  { id: 'crossword', src: '/writescholar-crossword-demo.mp4', title: 'WriteScholar Crossword Generator: create study puzzles from notes' },
+                  { id: 'games', src: '/writescholar-crater-blast-demo.mp4', title: 'WriteScholar Crater Blast: quiz game study mode' },
+                  { id: 'focus', src: '/writescholar-focus-mode-demo.mp4', title: 'WriteScholar Focus Mode: block sites until you study' },
                 ].map((vid) => (
                   activeStudyTab === vid.id && (
                     <ViewportAutoplayVideo
@@ -2295,7 +2177,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                 </svg>
               </div>
               <h3 className="font-bold text-stone-800 dark:text-stone-100 text-lg mb-2 relative z-10">Essay Analyzer</h3>
-              <p className="text-stone-600 dark:text-stone-400 text-sm leading-relaxed relative z-10">Professor-style feedback on college papers—structure, clarity, and citations.</p>
+              <p className="text-stone-600 dark:text-stone-400 text-sm leading-relaxed relative z-10">Professor-style feedback on college papers: structure, clarity, and citations.</p>
             </button>
             
             {/* Citation Finder - Teal */}
@@ -2393,11 +2275,11 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
               What WriteScholar Can Help You With
             </h2>
             <p className="mt-4 text-lg text-stone-600 dark:text-stone-400 max-w-2xl mx-auto">
-              Essays, exams, citations, and more — all in one place.
+              Essays, exams, citations, and more, all in one place.
             </p>
           </div>
 
-          {/* Category Tabs — solid accent colors (no gradients) */}
+          {/* Category Tabs: solid accent colors (no gradients) */}
           <div className="flex overflow-x-auto scrollbar-hide gap-2.5 sm:gap-3 mb-8 sm:mb-12 sm:mx-0 sm:px-0 sm:flex-wrap sm:justify-center pb-2 sm:pb-0 snap-x snap-mandatory sm:snap-none px-1">
             {helpCategories.map((category) => {
               const solidBg: Record<string, string> = {
@@ -2740,40 +2622,63 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   </div>
       </section>
 
-      {/* FAQ Section - Purple tint */}
-      <section className="relative py-12 sm:py-24 bg-violet-50/70 dark:bg-stone-900 overflow-hidden">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-violet-200/25 dark:bg-violet-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-        <div className="absolute bottom-0 left-0 w-72 h-72 bg-violet-200/20 dark:bg-violet-600/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
-        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-center gap-4 sm:gap-6 mb-8 sm:mb-12">
-            <div className="text-center lg:text-left flex-1">
-              <h2 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-stone-900 dark:text-stone-100 mb-3 sm:mb-5">
+      {/* FAQ — matches hero editorial theme */}
+      <section className="relative py-16 sm:py-24 overflow-hidden border-t border-stone-200/90 dark:border-stone-800">
+        <div className="absolute inset-0 bg-[#f8fafc] dark:bg-[#0c0a09]" aria-hidden />
+        <div className="absolute inset-0 bg-gradient-to-b from-white via-[#f8fafc] to-[#f1f5f9] dark:from-stone-950 dark:via-stone-950 dark:to-stone-950 pointer-events-none" aria-hidden />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_90%_60%_at_50%_-15%,rgba(91,33,182,0.07),transparent_55%)] dark:bg-[radial-gradient(ellipse_90%_55%_at_50%_-10%,rgba(109,40,217,0.12),transparent_58%)] pointer-events-none" aria-hidden />
+        <div
+          className="absolute inset-0 opacity-[0.4] dark:opacity-[0.15] pointer-events-none bg-[length:32px_32px] bg-[linear-gradient(to_right,rgba(148,163,184,0.07)_1px,transparent_1px),linear-gradient(to_bottom,rgba(148,163,184,0.07)_1px,transparent_1px)]"
+          aria-hidden
+        />
+        <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-8 lg:gap-10 mb-10 sm:mb-14">
+            <div className="text-center lg:text-left flex-1 max-w-2xl mx-auto lg:mx-0">
+              <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-violet-800/90 dark:text-violet-300/95 mb-3">
+                Help
+              </p>
+              <div className="mx-auto lg:mx-0 mb-4 h-0.5 w-16 rounded-full bg-gradient-to-r from-emerald-500 via-amber-400 to-red-500 opacity-90 dark:opacity-85" aria-hidden />
+              <h2
+                className="text-2xl sm:text-3xl lg:text-[2.35rem] font-semibold text-stone-900 dark:text-stone-100 mb-4 tracking-tight leading-tight"
+                style={{ fontFamily: "'EB Garamond', Georgia, serif" }}
+              >
                 Frequently Asked Questions
               </h2>
-              <p className="text-lg text-stone-600 dark:text-stone-400">
-                Everything you need to know—essay feedback, citations, and study tools for college and university coursework
+              <p className="text-base sm:text-lg text-stone-600 dark:text-stone-400 leading-relaxed">
+                Essay feedback, citations, and study tools for college and university coursework.
               </p>
             </div>
-            {/* Mascot - thinking pose */}
-            <div className="hidden lg:flex flex-shrink-0 items-center justify-center">
-              <ScholarMascot size={160} animated={true} pose="thinking" />
+            <div className="hidden lg:flex flex-shrink-0 items-center justify-center pt-1">
+              <ScholarMascot size={140} animated={true} pose="thinking" />
             </div>
           </div>
 
-          <div className="max-w-3xl mx-auto space-y-4">
+          <div className="max-w-3xl mx-auto space-y-3 sm:space-y-4">
             {faqs.map((faq, idx) => (
-              <div key={idx} className="bg-white/70 dark:bg-stone-800/80 rounded-2xl border border-violet-200/60 dark:border-violet-800/40 overflow-hidden hover:border-violet-300 dark:hover:border-violet-600 hover:shadow-lg hover:shadow-violet-500/15 transition-all duration-200 backdrop-blur-sm">
+              <div
+                key={idx}
+                className="rounded-2xl border border-stone-200/90 dark:border-stone-700/90 bg-white/80 dark:bg-stone-900/50 shadow-[0_12px_40px_-12px_rgba(15,23,42,0.1)] dark:shadow-[0_12px_40px_-12px_rgba(0,0,0,0.4)] ring-1 ring-white/50 dark:ring-white/5 overflow-hidden transition-shadow duration-200 hover:shadow-[0_14px_44px_-12px_rgba(91,33,182,0.12)] dark:hover:shadow-[0_16px_48px_-12px_rgba(0,0,0,0.5)]"
+              >
                 <button
+                  type="button"
                   onClick={() => setOpenFAQ(openFAQ === idx ? null : idx)}
-                  className="w-full px-6 py-5 text-left flex items-center justify-between hover:bg-violet-50/50 dark:hover:bg-violet-900/20 transition-all duration-200"
+                  className="w-full px-5 sm:px-6 py-4 sm:py-5 text-left flex items-center justify-between gap-4 hover:bg-stone-50/90 dark:hover:bg-stone-800/50 transition-colors duration-200"
                 >
-                  <span className="font-bold text-stone-800 dark:text-stone-100 text-base sm:text-lg pr-4">{faq.question}</span>
-                  <svg className={`w-5 h-5 text-stone-400 flex-shrink-0 transition-transform ${openFAQ === idx ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <span className="font-semibold text-stone-900 dark:text-stone-100 text-base sm:text-[1.05rem] leading-snug pr-2">{faq.question}</span>
+                  <svg
+                    className={`w-5 h-5 flex-shrink-0 transition-transform duration-200 ${openFAQ === idx ? 'rotate-180 text-violet-600 dark:text-violet-400' : 'text-stone-400 dark:text-stone-500'}`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    aria-hidden
+                  >
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
                 </button>
-                <div className={`overflow-hidden transition-all duration-300 ${openFAQ === idx ? 'max-h-56' : 'max-h-0'}`}>
-                  <div className="px-6 pb-5 text-stone-600 dark:text-stone-400 text-base leading-relaxed">{faq.answer}</div>
+                <div className={`overflow-hidden transition-all duration-300 ease-out ${openFAQ === idx ? 'max-h-[min(28rem,70vh)]' : 'max-h-0'}`}>
+                  <div className="px-5 sm:px-6 pb-5 pt-0 text-stone-600 dark:text-stone-400 text-sm sm:text-base leading-relaxed border-t border-stone-100/90 dark:border-stone-800/80">
+                    <div className="pt-4">{faq.answer}</div>
+                  </div>
                 </div>
               </div>
             ))}
@@ -2781,39 +2686,51 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
         </div>
       </section>
 
-      {/* Final CTA */}
-      <section className="relative py-12 sm:py-24 overflow-hidden bg-stone-200 dark:bg-stone-950">
-        {/* Light background with subtle violet accents */}
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_100%_60%_at_50%_-5%,rgba(251,207,232,0.25),transparent_55%)] dark:bg-[radial-gradient(ellipse_100%_60%_at_50%_-5%,rgba(251,207,232,0.08),transparent_55%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_50%_at_85%_85%,rgba(251,113,133,0.12),transparent_45%)] dark:bg-[radial-gradient(ellipse_70%_50%_at_85%_85%,rgba(251,113,133,0.06),transparent_45%)]" />
-        <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h2 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-stone-900 dark:text-white mb-4 sm:mb-5">
+      {/* Final CTA — matches hero editorial theme */}
+      <section className="relative py-16 sm:py-24 overflow-hidden border-t border-stone-200/90 dark:border-stone-800">
+        <div className="absolute inset-0 bg-[#f8fafc] dark:bg-[#0c0a09]" aria-hidden />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#f1f5f9] via-white to-[#f8fafc] dark:from-stone-950 dark:via-stone-950 dark:to-stone-900 pointer-events-none" aria-hidden />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_20%,rgba(91,33,182,0.06),transparent_50%)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_15%,rgba(109,40,217,0.1),transparent_55%)] pointer-events-none" aria-hidden />
+        <div
+          className="absolute inset-0 opacity-[0.35] dark:opacity-[0.12] pointer-events-none bg-[length:32px_32px] bg-[linear-gradient(to_right,rgba(148,163,184,0.07)_1px,transparent_1px),linear-gradient(to_bottom,rgba(148,163,184,0.07)_1px,transparent_1px)]"
+          aria-hidden
+        />
+        <div className="relative z-10 max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center rounded-2xl border border-stone-200/90 dark:border-stone-800/90 bg-white/75 dark:bg-stone-900/45 px-6 py-10 sm:px-10 sm:py-12 shadow-[0_12px_40px_-12px_rgba(15,23,42,0.12)] dark:shadow-[0_12px_40px_-12px_rgba(0,0,0,0.45)] backdrop-blur-[8px] ring-1 ring-white/50 dark:ring-white/5">
+            <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-violet-800/90 dark:text-violet-300/95 mb-3">
+              Get started
+            </p>
+            <div className="mx-auto mb-5 h-0.5 w-16 rounded-full bg-gradient-to-r from-emerald-500 via-amber-400 to-red-500 opacity-90 dark:opacity-85" aria-hidden />
+            <h2
+              className="text-2xl sm:text-3xl lg:text-[2.5rem] font-semibold text-stone-900 dark:text-stone-50 mb-4 tracking-tight leading-[1.15]"
+              style={{ fontFamily: "'EB Garamond', Georgia, serif" }}
+            >
               Ready to ace your classes?
             </h2>
-            <p className="text-base sm:text-lg text-stone-600 dark:text-stone-300 mb-8 sm:mb-10 max-w-xl mx-auto px-2">
-              Join 50k+ students using WriteScholar for papers and exams. Start free today.
+            <p className="text-base sm:text-lg text-stone-600 dark:text-stone-400 mb-8 max-w-xl mx-auto leading-relaxed">
+              Join 50,000+ students using WriteScholar for papers and exams. Start free today.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-stretch sm:items-center mb-10">
               <button
+                type="button"
                 onClick={() => onNavigate('signup')}
-                className="inline-flex items-center justify-center px-8 py-4 bg-violet-600 hover:bg-violet-500 text-white font-bold rounded-2xl hover:scale-105 active:scale-95 transition-all shadow-xl shadow-violet-500/30 text-lg"
+                className="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-violet-700 hover:bg-violet-800 dark:bg-violet-600 dark:hover:bg-violet-500 text-white font-semibold rounded-xl shadow-md shadow-violet-900/15 dark:shadow-violet-950/40 ring-1 ring-violet-900/10 dark:ring-white/10 transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 text-base"
               >
-                Let's get started
-                <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                Let&apos;s get started
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                 </svg>
               </button>
               <button
+                type="button"
                 onClick={() => onNavigate('pricing')}
-                className="inline-flex items-center justify-center px-8 py-4 bg-white dark:bg-stone-800 border-2 border-stone-300 dark:border-stone-600 text-stone-900 dark:text-white font-bold rounded-2xl hover:bg-stone-100 dark:hover:bg-stone-700 hover:scale-105 active:scale-95 transition-all text-lg"
+                className="inline-flex items-center justify-center px-7 py-3.5 border border-stone-300/95 dark:border-stone-600 bg-white/90 dark:bg-stone-900/50 text-stone-800 dark:text-stone-200 font-medium rounded-xl hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors text-base shadow-sm"
               >
-                View Pricing
+                View pricing
               </button>
             </div>
-            {/* ScholarMascot (celebrating pose) */}
             <div className="flex justify-center items-center">
-              <ScholarMascot size={180} animated={true} pose="celebrating" />
+              <ScholarMascot size={160} animated={true} pose="celebrating" />
             </div>
           </div>
         </div>
@@ -2867,7 +2784,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                 </div>
 
             <h3 className="text-xl font-bold text-stone-800 text-center mb-2">Analysis Complete</h3>
-            <p className="text-stone-500 text-center text-sm mb-6">Your essay has been scanned — here's a quick preview</p>
+            <p className="text-stone-500 text-center text-sm mb-6">Your essay has been scanned. Here&apos;s a quick preview</p>
             
             {/* Results Summary */}
             <div className="space-y-3 mb-5">
@@ -2908,7 +2825,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
               onClick={handleContinueToSignup}
               className="w-full py-3.5 bg-lime-500 hover:bg-lime-600 text-white font-semibold rounded-xl transition-all duration-200 hover:shadow-lg flex items-center justify-center"
                 >
-              View full analysis — it's free
+              View full analysis (it&apos;s free)
               <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>
@@ -2950,7 +2867,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
             
             <div className="bg-green-50 rounded-xl border border-green-100 p-4 mb-5">
               <p className="text-green-800 text-center text-sm leading-relaxed">
-                <span className="font-semibold">We've pulled together strong, relevant citations</span> for your paper — from peer-reviewed journals and academic sources that will strengthen your argument and reference list.
+                <span className="font-semibold">We&apos;ve pulled together strong, relevant citations</span> for your paper from peer-reviewed journals and academic sources that will strengthen your argument and reference list.
               </p>
         </div>
 
@@ -2962,7 +2879,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
               onClick={handleContinueToSignupFromCitations}
               className="w-full py-3.5 bg-lime-500 hover:bg-lime-600 text-white font-semibold rounded-xl transition-all duration-200 hover:shadow-lg flex items-center justify-center"
             >
-              See my citations — it's free
+              See my citations (it&apos;s free)
               <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>
@@ -3048,7 +2965,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
               onClick={handleContinueToSignup}
               className="w-full py-3.5 bg-teal-600 hover:bg-teal-700 text-white font-semibold rounded-xl transition-all duration-200 hover:shadow-lg flex items-center justify-center"
             >
-              Get my summary — it&apos;s free
+              Get my summary (it&apos;s free)
               <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>
@@ -3098,8 +3015,8 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   </svg>
                 </span>
                 <div>
-                  <p className="text-amber-800 font-semibold text-sm">2 free study packs per month (lesson & flashcards — quiz, crossword & Crater Blast with Pro)</p>
-                  <p className="text-amber-600 text-xs mt-0.5">Sign up to unlock Study Tools — upgrade for unlimited</p>
+                  <p className="text-amber-800 font-semibold text-sm">2 free study packs per month (lesson and flashcards; quiz, crossword and Crater Blast with Pro)</p>
+                  <p className="text-amber-600 text-xs mt-0.5">Sign up to unlock Study Tools. Upgrade for unlimited</p>
                 </div>
               </div>
             </div>
@@ -3114,7 +3031,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
               onClick={handleContinueToSignup}
               className="w-full py-3.5 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-xl transition-all duration-200 hover:shadow-lg flex items-center justify-center"
             >
-              Sign up to unlock Study Tools — it&apos;s free
+              Sign up to unlock Study Tools (it&apos;s free)
               <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>

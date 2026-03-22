@@ -1,4 +1,5 @@
 import Header from '../common/Header';
+import { WriteScholarEditorialBackgroundLayers } from '../common/WriteScholarEditorialBackground';
 import Footer from '../common/Footer';
 import ScholarMascot from '../common/ScholarMascot';
 
@@ -18,16 +19,7 @@ const AboutPage = ({ onNavigate, user, onLogout }: AboutPageProps) => {
 
   return (
     <div className="min-h-screen relative transition-colors font-sans overflow-x-hidden">
-      {/* Mesh gradient background - matches Dashboard & Landing */}
-      <div className="fixed inset-0 -z-10 bg-[#faf9f7] dark:bg-stone-950" aria-hidden />
-      <div className="fixed inset-0 -z-10 bg-[radial-gradient(ellipse_120%_80%_at_20%_-10%,rgba(251,207,232,0.4),transparent_50%)] dark:bg-[radial-gradient(ellipse_120%_80%_at_20%_-10%,rgba(251,207,232,0.15),transparent_50%)] pointer-events-none" aria-hidden />
-      <div className="fixed inset-0 -z-10 bg-[radial-gradient(ellipse_100%_60%_at_80%_0%,rgba(196,181,253,0.35),transparent_50%)] dark:bg-[radial-gradient(ellipse_100%_60%_at_80%_0%,rgba(196,181,253,0.12),transparent_50%)] pointer-events-none" aria-hidden />
-      <div className="fixed inset-0 -z-10 bg-[radial-gradient(ellipse_80%_50%_at_50%_100%,rgba(254,215,170,0.3),transparent_50%)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_100%,rgba(254,215,170,0.1),transparent_50%)] pointer-events-none" aria-hidden />
-
-      {/* Floating blobs */}
-      <div className="fixed top-[10%] left-[5%] w-72 h-72 rounded-[40%_60%_70%_30%/40%_50%_60%_50%] bg-gradient-to-br from-fuchsia-300/25 to-fuchsia-400/20 dark:from-fuchsia-500/15 dark:to-fuchsia-600/10 blur-3xl animate-blob-float hidden xl:block pointer-events-none" />
-      <div className="fixed top-[20%] right-[10%] w-64 h-64 rounded-[60%_40%_30%_70%/60%_30%_70%_40%] bg-gradient-to-br from-violet-300/25 to-red-400/20 dark:from-violet-500/15 dark:to-red-600/10 blur-3xl animate-blob-float hidden xl:block pointer-events-none" style={{ animationDelay: '-2s' }} />
-      <div className="fixed bottom-[25%] left-[15%] w-48 h-48 rounded-[30%_70%_70%_30%/30%_30%_70%_70%] bg-gradient-to-br from-amber-300/20 to-orange-400/15 dark:from-amber-500/10 dark:to-orange-600/8 blur-3xl animate-blob-float hidden lg:block pointer-events-none" style={{ animationDelay: '-4s' }} />
+      <WriteScholarEditorialBackgroundLayers position="fixed" />
 
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="about" />
 

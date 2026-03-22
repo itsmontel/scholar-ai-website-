@@ -1,4 +1,5 @@
 import { useState, useEffect, useLayoutEffect, Suspense } from 'react';
+import { WriteScholarEditorialBackgroundLayers } from './common/WriteScholarEditorialBackground';
 import { logger } from '../utils/logger';
 import { HIDE_FRIENDS } from '../config/featureFlags';
 import { persistOnboardingToServer } from '../utils/onboarding';
@@ -63,6 +64,7 @@ const CreateFlashcardsPage = lazyWithRetry(() => import('./pages/tools/CreateFla
 const StudyPackViewerPage = lazyWithRetry(() => import('./pages/StudyPackViewerPage'));
 const AnalyzeEssayPage = lazyWithRetry(() => import('./pages/AnalyzeEssayPage'));
 const CitationsPage = lazyWithRetry(() => import('./pages/CitationsPage'));
+const StudyPackPage = lazyWithRetry(() => import('./pages/StudyPackPage'));
 const UnlockQuizPage = lazyWithRetry(() => import('./pages/UnlockQuizPage'));
 
 // Import common components
@@ -152,6 +154,7 @@ function getPageFromPath(pathname: string): string {
   if (p === '/badges' || p === '/achievements') return 'badges';
   if (p === '/tools/analyze' || p === '/analyze') return 'analyze';
   if (p === '/tools/citations' || p === '/citations') return 'citations';
+  if (p === '/tools/study-pack' || p === '/study-pack') return 'study-pack';
   return 'landing';
 }
 
@@ -268,9 +271,10 @@ const AcademicAIApp = () => {
 
   // SEO: dynamic document title and meta description per page (SPA)
   const pageMeta: Record<string, { title: string; description: string }> = {
-    landing: { title: 'AI Essay Checker | Professor-Style Feedback | WriteScholar', description: 'Professor-style feedback on college papers and essays, plus quizzes and flashcards from your notes and Focus Mode to block distractions. Free to try.' },
-    analyze: { title: 'AI Essay Checker — Professor-Style Feedback & Rubric | WriteScholar', description: 'Paste or upload your paper for professor-style feedback on thesis, evidence, structure, and citations. Choose your education level for rubrics that match your course. Free to try.' },
+    landing: { title: 'AI Essay Checker — Professor-Level Feedback in Seconds | WriteScholar', description: 'Professor-level essay feedback in seconds—structure, argument, citations, and clarity. Plus study packs, quizzes, and Focus Mode. Free to try.' },
+    analyze: { title: 'AI Essay Checker — Professor-Level Feedback in Seconds | WriteScholar', description: 'Paste or upload your paper for professor-level feedback on thesis, evidence, structure, and citations. Choose your education level for rubrics that match your course. Free to try.' },
     citations: { title: 'Citation Finder for College Papers — APA, MLA, Chicago | WriteScholar', description: 'Find peer-reviewed sources for research papers. Search by topic; export APA, MLA, Chicago, or Harvard citations. Built for bibliographies and lit reviews.' },
+    'study-pack': { title: 'AI Study Pack — Lesson, Flashcards, Quiz, Crossword & More | WriteScholar', description: 'Turn notes into a lesson, flashcards, quiz, crossword, and Crater Blast from one paste. Same study pack flow as the dashboard.' },
     features: { title: 'AI Study Tools & Essay Feedback for College Students | WriteScholar', description: 'Essay analysis with rubrics, AI quizzes and flashcards from your notes, summarizer, citation finder, and Focus Mode—one workspace for college coursework.' },
     'focus-mode': { title: 'Focus Mode — Block Sites Until You Study (Chrome) | WriteScholar', description: 'Block TikTok, YouTube, and distracting sites until you answer questions from your own notes. Free: 3 sites; Pro: unlimited.' },
     pricing: { title: 'Pricing — Essay Analysis & Study Tools for Students | WriteScholar', description: 'Plans built for student budgets: free tier to try essay feedback and study packs, then Pro for heavier course loads. Compare to Quizlet Plus or textbook costs.' },
@@ -635,6 +639,7 @@ const AcademicAIApp = () => {
     'study-pack-viewer': '/study-pack-viewer',
     'analyze': '/tools/analyze',
     'citations': '/tools/citations',
+    'study-pack': '/tools/study-pack',
     'more-tools': '/more-tools',
     'badges': '/badges',
     'why-students-choose': '/why-students-choose',
@@ -747,8 +752,9 @@ const AcademicAIApp = () => {
     // No cache + fetch in progress: brief loading (cache usually exists for instant render)
     if (isLoggedIn && !user && protectedRoutes.includes(currentPage)) {
       return (
-        <div className="min-h-screen flex items-center justify-center bg-stone-50">
-          <div className="animate-pulse text-stone-500">Loading...</div>
+        <div className="relative min-h-screen flex items-center justify-center overflow-x-hidden">
+          <WriteScholarEditorialBackgroundLayers position="fixed" />
+          <div className="animate-pulse text-stone-500 relative z-10">Loading...</div>
         </div>
       );
     }
@@ -814,6 +820,9 @@ const AcademicAIApp = () => {
       case 'citations':
         if (needsOnboarding) return renderOnboarding('citations');
         return <CitationsPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
+      case 'study-pack':
+        if (needsOnboarding) return renderOnboarding('dashboard');
+        return <StudyPackPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'analysis':
         return <AnalysisPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'analysis-history':
@@ -968,14 +977,15 @@ const AcademicAIApp = () => {
   };
 
   const pageFallback = (
-    <div className="min-h-screen flex items-center justify-center bg-stone-50 dark:bg-stone-900">
-      <div className="animate-pulse text-stone-500 text-sm">Loading...</div>
+    <div className="relative min-h-screen flex items-center justify-center overflow-x-hidden">
+      <WriteScholarEditorialBackgroundLayers position="fixed" />
+      <div className="animate-pulse text-stone-500 text-sm relative z-10">Loading...</div>
     </div>
   );
 
   return (
     <ErrorBoundary>
-    <div className="min-h-screen bg-stone-50 dark:bg-stone-900 transition-colors">
+    <div className="relative min-h-screen overflow-x-hidden transition-colors">
       <Suspense fallback={pageFallback}>
         <PageErrorBoundary key={currentPage} onGoBack={() => navigateTo('dashboard')}>
           {renderCurrentPage()}
@@ -1000,7 +1010,8 @@ const AcademicAIApp = () => {
 
 // Admin Dashboard Component
 const AdminDashboard = ({ onNavigate, user: _user }: UserProps) => (
-  <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%)' }}>
+  <div className="relative min-h-screen overflow-x-hidden">
+    <WriteScholarEditorialBackgroundLayers position="fixed" />
     {/* Navigation */}
     <nav className="bg-white border-b border-gray-200 px-8 py-4">
       <div className="flex items-center justify-between">
@@ -1089,7 +1100,8 @@ const AdminDashboard = ({ onNavigate, user: _user }: UserProps) => (
 
 // Collaboration Page Component
 const CollaborationPage = ({ onNavigate, user: _user }: UserProps) => (
-  <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%)' }}>
+  <div className="relative min-h-screen overflow-x-hidden">
+    <WriteScholarEditorialBackgroundLayers position="fixed" />
     {/* Navigation */}
     <nav className="bg-white border-b border-gray-200 px-8 py-4">
       <div className="flex items-center justify-between">

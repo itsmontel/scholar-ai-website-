@@ -1,5 +1,6 @@
 import React from 'react';
 import Header from '../common/Header';
+import { WriteScholarEditorialBackgroundLayers } from '../common/WriteScholarEditorialBackground';
 import Footer from '../common/Footer';
 
 interface TermsOfServicePageProps {
@@ -19,7 +20,8 @@ interface TermsOfServicePageProps {
 
 const TermsOfServicePage: React.FC<TermsOfServicePageProps> = ({ onNavigate, user, onLogout }) => {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-violet-50/80 via-stone-50 to-white dark:from-stone-900 dark:to-stone-800">
+    <div className="relative min-h-screen overflow-x-hidden">
+      <WriteScholarEditorialBackgroundLayers position="fixed" />
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="terms" />
       
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
@@ -76,8 +78,7 @@ const TermsOfServicePage: React.FC<TermsOfServicePageProps> = ({ onNavigate, use
                 <p>WriteScholar offers the following plans:</p>
                 <ul className="list-disc list-inside space-y-2 ml-4">
                   <li><strong>Free</strong> — 3 documents per month, 2 AI essay analyses per month, 5,000 words/month for the Paper Summarizer, 2 study pack generations (lesson, flashcards & quiz — crossword & Crater Blast unlock with Pro), 2 citation searches per month</li>
-                  <li><strong>Pro ($19.99/month)</strong> — unlimited documents, 99 combined actions per month (analyses, study packs & citations), 99,999 words/month for the Paper Summarizer; quiz, flashcards, crossword & Crater Blast (mixed type, medium difficulty)</li>
-                  <li><strong>Premium ($39.99/month)</strong> — all Pro features plus 10× usage: 999 combined actions per month (analyses, study packs & citations), 999,999 words/month for the Paper Summarizer; our top-tier premium AI model, advanced essay analysis, priority support, and larger document uploads (up to 1GB)</li>
+                  <li><strong>Pro ($19.99/month)</strong> — unlimited documents, 99 combined actions per month (analyses, study packs & citations), 999,999 words/month for the Paper Summarizer; quiz, flashcards, crossword & Crater Blast with all types and difficulties; Focus Mode with unlimited blocked sites; document uploads up to 100MB per file</li>
                 </ul>
                 <p>
                   Usage limits reset based on your plan: paid subscribers' limits reset at the start of each billing period; free users' limits reset on rolling 30-day periods from signup. Unused allowances do not carry

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import Header from '../common/Header';
+import { WriteScholarEditorialBackgroundLayers } from '../common/WriteScholarEditorialBackground';
 import Footer from '../common/Footer';
 import BadgeCreature from '../common/BadgeCreature';
 import {
@@ -35,10 +36,11 @@ const BadgesPage = ({ onNavigate, user, onLogout }: BadgesPageProps) => {
   const categories: Array<'all' | 'getting-started' | 'streak' | 'mastery' | 'subscription' | 'special'> = ['all', 'getting-started', 'streak', 'mastery', 'subscription', 'special'];
 
   return (
-    <div className="min-h-screen bg-stone-50 dark:bg-stone-900 transition-colors">
+    <div className="relative min-h-screen overflow-x-hidden transition-colors">
+      <WriteScholarEditorialBackgroundLayers position="fixed" />
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="badges" />
 
-      <div className="h-1 bg-gradient-to-r from-amber-400 via-violet-500 to-purple-500" />
+      <div className="h-1 bg-gradient-to-r from-amber-400 via-violet-500 to-purple-500 relative z-10" />
 
       <main className="max-w-5xl mx-auto px-4 sm:px-6 pt-8 pb-16">
         {/* Back button */}

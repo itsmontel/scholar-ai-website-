@@ -9,11 +9,13 @@ interface InteractiveDocumentAnalysisProps {
 }
 
 export default function InteractiveDocumentAnalysis({ onNavigate }: InteractiveDocumentAnalysisProps) {
-  const [selectedDemoId, setSelectedDemoId] = useState<string>(DEMO_PAPERS[0].id);
+  const [selectedDemoId, setSelectedDemoId] = useState<string>(DEMO_PAPERS.find((p) => p.id === 'b')?.id ?? DEMO_PAPERS[0].id);
   const [selectedAnnotation, setSelectedAnnotation] = useState<string | null>(null);
   const [hoveredAnnotation, setHoveredAnnotation] = useState<string | null>(null);
   const [tooltipPos, setTooltipPos] = useState<{ x: number; y: number } | null>(null);
   const [mobileTab, setMobileTab] = useState<'document' | 'feedback' | 'analysis'>('document');
+  /** Rubric + category scores (default) vs full written report; only one at a time */
+  const [analysisPanel, setAnalysisPanel] = useState<'assessment' | 'comprehensive'>('assessment');
 
   const demo = DEMO_PAPERS.find((d) => d.id === selectedDemoId) ?? DEMO_PAPERS[0];
 
@@ -136,7 +138,7 @@ export default function InteractiveDocumentAnalysis({ onNavigate }: InteractiveD
         <div className="flex flex-wrap items-center gap-6">
           <div>
             <h2 className="text-xl font-bold">General Academic Assessment</h2>
-            <p className="text-emerald-100 text-sm mt-0.5">Standard college rubric — thesis, evidence, structure, and clarity</p>
+            <p className="text-emerald-100 text-sm mt-0.5">Standard college rubric: thesis, evidence, structure, and clarity</p>
           </div>
           <div className="flex items-center gap-6 ml-auto">
             <div className="text-right">
@@ -169,12 +171,10 @@ export default function InteractiveDocumentAnalysis({ onNavigate }: InteractiveD
   const renderComprehensiveAnalysis = () => (
     <div className="border-t border-gray-200 dark:border-stone-700 rounded-t-2xl overflow-hidden">
       <div className="bg-gray-900 dark:bg-stone-950 px-4 sm:px-6 py-4 rounded-t-2xl">
-        <h3 className="text-lg font-bold text-white">Comprehensive Academic Analysis</h3>
-        <p className="text-gray-400 text-sm mt-0.5">Full analysis report</p>
+        <h3 className="text-lg font-bold text-white">Full written report</h3>
+        <p className="text-gray-400 text-sm mt-0.5">Narrative feedback, category-by-category, same data as the real export</p>
       </div>
       <div className="p-4 sm:p-6 space-y-8">
-        <h2 className="text-xl font-bold text-gray-900 dark:text-stone-100">Comprehensive Academic Analysis</h2>
-
         <div>
           <p className="text-gray-700 dark:text-stone-300 text-sm leading-relaxed mb-4">
             {demo.comprehensiveAnalysis.overallSummary}
@@ -274,6 +274,7 @@ export default function InteractiveDocumentAnalysis({ onNavigate }: InteractiveD
                 setSelectedAnnotation(null);
                 setHoveredAnnotation(null);
                 setMobileTab('document');
+                setAnalysisPanel('assessment');
               }}
               className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
                 selectedDemoId === d.id
@@ -288,7 +289,7 @@ export default function InteractiveDocumentAnalysis({ onNavigate }: InteractiveD
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="min-w-0 flex-1">
             <h2 className="text-base sm:text-lg lg:text-xl font-bold text-white leading-snug break-words">{demo.title}</h2>
-            <p className="text-gray-400 text-sm mt-1">Comprehensive Review • Sample analysis</p>
+            <p className="text-gray-400 text-sm mt-1">Professor-style review · sample draft (not your work)</p>
           </div>
           <div className="flex items-center gap-3">
           <button className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors flex items-center gap-2 text-sm font-medium text-white">
@@ -307,8 +308,38 @@ export default function InteractiveDocumentAnalysis({ onNavigate }: InteractiveD
         </div>
       </div>
 
-      {/* Grade breakdown — desktop/tablet; on small screens it lives under the Analysis tab */}
-      <div className="hidden lg:block">{renderGradeBreakdown()}</div>
+      {/* Toggle: rubric (default) vs full report (desktop/tablet; mobile uses same under Analysis tab) */}
+      <div className="hidden lg:block border-b border-gray-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-900/80 px-4 sm:px-6 py-4">
+        <p className="text-xs font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400 mb-3">Analysis view</p>
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={() => setAnalysisPanel('assessment')}
+            className={`rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors ring-1 ${
+              analysisPanel === 'assessment'
+                ? 'bg-teal-600 text-white ring-teal-500 shadow-sm'
+                : 'bg-white dark:bg-stone-800 text-stone-700 dark:text-stone-300 ring-stone-200 dark:ring-stone-600 hover:bg-stone-50 dark:hover:bg-stone-700/50'
+            }`}
+          >
+            General academic assessment
+          </button>
+          <button
+            type="button"
+            onClick={() => setAnalysisPanel('comprehensive')}
+            className={`rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors ring-1 ${
+              analysisPanel === 'comprehensive'
+                ? 'bg-violet-700 text-white ring-violet-600 shadow-sm'
+                : 'bg-white dark:bg-stone-800 text-stone-700 dark:text-stone-300 ring-stone-200 dark:ring-stone-600 hover:bg-stone-50 dark:hover:bg-stone-700/50'
+            }`}
+          >
+            Comprehensive written analysis
+          </button>
+        </div>
+        <p className="text-xs text-stone-500 dark:text-stone-400 mt-3 leading-snug max-w-3xl">
+          Start with the rubric for a quick score breakdown. Switch to the comprehensive view for paragraph-level narrative feedback, strengths, and revision notes. That is the same depth you get on a real analysis.
+        </p>
+      </div>
+      <div className="hidden lg:block">{analysisPanel === 'assessment' ? renderGradeBreakdown() : renderComprehensiveAnalysis()}</div>
 
       {/* Hover tooltip for annotations */}
       {hoveredAnnotation && tooltipPos && (() => {
@@ -351,7 +382,7 @@ export default function InteractiveDocumentAnalysis({ onNavigate }: InteractiveD
         );
       })()}
 
-      {/* Legend + hint — on mobile, only when Document tab is active; always on lg+ */}
+      {/* Legend + hint (on mobile, only when Document tab is active; always on lg+) */}
       <div
         className={`bg-gray-50 dark:bg-stone-800/50 px-4 sm:px-6 py-4 border-b border-gray-200 dark:border-stone-700 ${
           mobileTab !== 'document' ? 'hidden lg:block' : ''
@@ -519,17 +550,38 @@ export default function InteractiveDocumentAnalysis({ onNavigate }: InteractiveD
             mobileTab !== 'analysis' ? 'hidden' : ''
           }`}
         >
-          <div className="[&>div]:mx-0 [&>div]:mt-0 [&>div]:mb-0 [&>div]:rounded-none [&>div]:border-0">
-            {renderGradeBreakdown()}
+          <div className="sticky top-0 z-10 border-b border-gray-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-900/95 px-4 py-3 backdrop-blur-sm">
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400 mb-2">Analysis view</p>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setAnalysisPanel('assessment')}
+                className={`flex-1 rounded-lg py-2 px-2 text-xs font-semibold transition-colors ${
+                  analysisPanel === 'assessment'
+                    ? 'bg-teal-600 text-white'
+                    : 'bg-white dark:bg-stone-800 text-stone-700 dark:text-stone-300 ring-1 ring-stone-200 dark:ring-stone-600'
+                }`}
+              >
+                Assessment
+              </button>
+              <button
+                type="button"
+                onClick={() => setAnalysisPanel('comprehensive')}
+                className={`flex-1 rounded-lg py-2 px-2 text-xs font-semibold transition-colors ${
+                  analysisPanel === 'comprehensive'
+                    ? 'bg-violet-700 text-white'
+                    : 'bg-white dark:bg-stone-800 text-stone-700 dark:text-stone-300 ring-1 ring-stone-200 dark:ring-stone-600'
+                }`}
+              >
+                Full report
+              </button>
+            </div>
           </div>
-          <div className="border-t border-gray-200 dark:border-stone-700 [&>div]:border-t-0 [&>div]:rounded-none">
-            {renderComprehensiveAnalysis()}
+          <div className="[&>div]:mx-0 [&>div]:mt-0 [&>div]:mb-0 [&>div]:rounded-none [&>div]:border-0">
+            {analysisPanel === 'assessment' ? renderGradeBreakdown() : renderComprehensiveAnalysis()}
           </div>
         </div>
       </div>
-
-      {/* Comprehensive Academic Analysis — desktop/tablet full-width below split */}
-      <div className="hidden lg:block">{renderComprehensiveAnalysis()}</div>
 
       {/* Footer */}
       <div className="px-4 sm:px-6 py-4 bg-gray-50 dark:bg-stone-800/50 border-t border-gray-200 dark:border-stone-700 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">

@@ -6,7 +6,7 @@ const documentParser = require('../services/documentParser');
 
 const parseUpload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 50 * 1024 * 1024 }, // Match the 50MB limit from regular uploads
+  limits: { fileSize: 110 * 1024 * 1024 }, // allow up to 100MB Pro uploads
   fileFilter: (req, file, cb) => {
     console.log('[multer] File received:', file.originalname, 'mimetype:', file.mimetype);
     if (documentParser.isSupportedFileType(file.mimetype)) {
@@ -61,7 +61,7 @@ router.get('/humanize-usage', authenticateToken, async (req, res) => {
   try {
     const userId = req.user.id;
     const userPlan = getEffectivePlan(req);
-    const planLimits = subscriptionService.PLAN_LIMITS[userPlan] || subscriptionService.PLAN_LIMITS.free;
+    const planLimits = subscriptionService.PLAN_LIMITS[subscriptionService.normalizePlanForLimits(userPlan)] || subscriptionService.PLAN_LIMITS.free;
 
     const { periodStart, periodEnd, daysUntilReset } = await subscriptionService.getUsagePeriod(userId);
 
@@ -138,7 +138,7 @@ router.post('/humanize', authenticateToken, async (req, res) => {
     const { text, mode, intensity } = req.body;
     const userId = req.user.id;
     const userPlan = getEffectivePlan(req);
-    const planLimits = subscriptionService.PLAN_LIMITS[userPlan] || subscriptionService.PLAN_LIMITS.free;
+    const planLimits = subscriptionService.PLAN_LIMITS[subscriptionService.normalizePlanForLimits(userPlan)] || subscriptionService.PLAN_LIMITS.free;
 
     if (!text || text.trim().length === 0) {
       return res.status(400).json({
@@ -245,7 +245,7 @@ router.get('/summarize-usage', authenticateToken, async (req, res) => {
   try {
     const userId = req.user.id;
     const userPlan = getEffectivePlan(req);
-    const planLimits = subscriptionService.PLAN_LIMITS[userPlan] || subscriptionService.PLAN_LIMITS.free;
+    const planLimits = subscriptionService.PLAN_LIMITS[subscriptionService.normalizePlanForLimits(userPlan)] || subscriptionService.PLAN_LIMITS.free;
 
     const { createClient } = require('@supabase/supabase-js');
     const supabase = createClient(
@@ -289,7 +289,7 @@ router.post('/summarize', authenticateToken, async (req, res) => {
     const { text, style, length } = req.body;
     const userId = req.user.id;
     const userPlan = getEffectivePlan(req);
-    const planLimits = subscriptionService.PLAN_LIMITS[userPlan] || subscriptionService.PLAN_LIMITS.free;
+    const planLimits = subscriptionService.PLAN_LIMITS[subscriptionService.normalizePlanForLimits(userPlan)] || subscriptionService.PLAN_LIMITS.free;
 
     // Enforce style/length restrictions for free users only (Pro & Premium get all styles & lengths)
     let effectiveStyle = style || 'bullet';
@@ -409,7 +409,7 @@ router.post('/generate-lesson', authenticateToken, async (req, res) => {
     const { text, style } = req.body;
     const userId = req.user.id;
     const userPlan = req.user.subscription_plan || 'free';
-    const planLimits = subscriptionService.PLAN_LIMITS[userPlan] || subscriptionService.PLAN_LIMITS.free;
+    const planLimits = subscriptionService.PLAN_LIMITS[subscriptionService.normalizePlanForLimits(userPlan)] || subscriptionService.PLAN_LIMITS.free;
 
     if (!text || text.trim().length === 0) {
       return res.status(400).json({
@@ -524,7 +524,7 @@ router.get('/lesson-usage', authenticateToken, async (req, res) => {
   try {
     const userId = req.user.id;
     const userPlan = req.user.subscription_plan || 'free';
-    const planLimits = subscriptionService.PLAN_LIMITS[userPlan] || subscriptionService.PLAN_LIMITS.free;
+    const planLimits = subscriptionService.PLAN_LIMITS[subscriptionService.normalizePlanForLimits(userPlan)] || subscriptionService.PLAN_LIMITS.free;
 
     const { createClient } = require('@supabase/supabase-js');
     const supabase = createClient(
@@ -766,7 +766,7 @@ router.get('/quiz-usage', authenticateToken, async (req, res) => {
   try {
     const userId = req.user.id;
     const userPlan = req.user.subscription_plan || 'free';
-    const planLimits = subscriptionService.PLAN_LIMITS[userPlan] || subscriptionService.PLAN_LIMITS.free;
+    const planLimits = subscriptionService.PLAN_LIMITS[subscriptionService.normalizePlanForLimits(userPlan)] || subscriptionService.PLAN_LIMITS.free;
 
     const { createClient } = require('@supabase/supabase-js');
     const supabase = createClient(
@@ -817,7 +817,7 @@ router.post('/generate-quiz', authenticateToken, async (req, res) => {
     const { text, quizType, difficulty, questionCount } = req.body;
     const userId = req.user.id;
     const userPlan = req.user.subscription_plan || 'free';
-    const planLimits = subscriptionService.PLAN_LIMITS[userPlan] || subscriptionService.PLAN_LIMITS.free;
+    const planLimits = subscriptionService.PLAN_LIMITS[subscriptionService.normalizePlanForLimits(userPlan)] || subscriptionService.PLAN_LIMITS.free;
 
     // Enforce quiz type/difficulty/count restrictions based on plan
     // Free & Pro: mixed type, medium difficulty, 10 questions
@@ -962,7 +962,7 @@ router.post('/generate-flashcards', authenticateToken, async (req, res) => {
     const { text, cardCount } = req.body;
     const userId = req.user.id;
     const userPlan = req.user.subscription_plan || 'free';
-    const planLimits = subscriptionService.PLAN_LIMITS[userPlan] || subscriptionService.PLAN_LIMITS.free;
+    const planLimits = subscriptionService.PLAN_LIMITS[subscriptionService.normalizePlanForLimits(userPlan)] || subscriptionService.PLAN_LIMITS.free;
 
     if (!text || text.trim().length === 0) {
       return res.status(400).json({ success: false, message: 'Text is required' });
@@ -1066,7 +1066,7 @@ router.post('/generate-crossword', authenticateToken, async (req, res) => {
     const { text, wordCount: requestedWordCount } = req.body;
     const userId = req.user.id;
     const userPlan = req.user.subscription_plan || 'free';
-    const planLimits = subscriptionService.PLAN_LIMITS[userPlan] || subscriptionService.PLAN_LIMITS.free;
+    const planLimits = subscriptionService.PLAN_LIMITS[subscriptionService.normalizePlanForLimits(userPlan)] || subscriptionService.PLAN_LIMITS.free;
 
     if (!text || text.trim().length === 0) {
       return res.status(400).json({ success: false, message: 'Text is required' });
@@ -2230,7 +2230,7 @@ router.post('/generate-reflex-questions', authenticateToken, async (req, res) =>
   try {
     const { inputType, content } = req.body;
     const userPlan = req.user.subscription_plan || req.user.plan || 'free';
-    const planLimits = subscriptionService.PLAN_LIMITS[userPlan] || subscriptionService.PLAN_LIMITS.free;
+    const planLimits = subscriptionService.PLAN_LIMITS[subscriptionService.normalizePlanForLimits(userPlan)] || subscriptionService.PLAN_LIMITS.free;
 
     if (!content || content.trim().length === 0) {
       return res.status(400).json({ success: false, message: 'Content is required' });
@@ -2433,8 +2433,10 @@ router.post('/generate-study-pack', authenticateToken, async (req, res) => {
     }
 
     const userId = req.user.id;
-    const userPlan = getEffectivePlan(req);
-    const planLimits = subscriptionService.PLAN_LIMITS[userPlan] || subscriptionService.PLAN_LIMITS.free;
+    const { plan: dbPlan } = await subscriptionService.getUserSubscriptionDetails(userId);
+    const billingPlan = dbPlan === 'starter' ? 'pro' : dbPlan;
+    const normalizedBilling = subscriptionService.normalizePlanForLimits(billingPlan);
+    const planLimits = subscriptionService.PLAN_LIMITS[normalizedBilling] || subscriptionService.PLAN_LIMITS.free;
 
     const maxWords = planLimits.studyPackMaxWordsPerGeneration || planLimits.quizMaxWordsPerGeneration || 5000;
     if (wordCount > maxWords) {
@@ -2453,8 +2455,8 @@ router.post('/generate-study-pack', authenticateToken, async (req, res) => {
     const { periodStart } = await subscriptionService.getUsagePeriod(userId);
 
     let generationsUsed, generationLimit;
-    // Pro/Premium: use combined actions pool; Free: use studyPackGenerationsPerMonth
-    if (userPlan === 'pro' || userPlan === 'premium') {
+    // Pro (paid tier): combined actions pool; Free: study packs only
+    if (normalizedBilling === 'pro') {
       const combinedCheck = await subscriptionService.checkCombinedActionsLimit(userId);
       generationsUsed = combinedCheck.usage;
       generationLimit = combinedCheck.limit;
@@ -2491,7 +2493,7 @@ router.post('/generate-study-pack', authenticateToken, async (req, res) => {
       }
     }
 
-    const pack = await aiAnalysisService.generateStudyPack(text, userPlan);
+    const pack = await aiAnalysisService.generateStudyPack(text, billingPlan);
     pack.originalNotes = text.trim();
 
     supabase.from('quiz_usage').insert({
@@ -2501,7 +2503,7 @@ router.post('/generate-study-pack', authenticateToken, async (req, res) => {
       difficulty: 'mixed'
     }).then(() => {}).catch(err => console.error('Failed to record study pack usage:', err));
 
-    const isPaidUser = userPlan === 'pro' || userPlan === 'premium';
+    const isPaidUser = normalizedBilling === 'pro';
     const expiresAt = isPaidUser ? null : (() => { const d = new Date(); d.setDate(d.getDate() + 30); return d.toISOString(); })();
 
     const packTitle = pack.quiz?.title || pack.flashcards?.title || pack.lesson?.title || 'Study Pack';
@@ -2551,8 +2553,10 @@ router.post('/generate-study-pack', authenticateToken, async (req, res) => {
 router.get('/study-pack-usage', authenticateToken, async (req, res) => {
   try {
     const userId = req.user.id;
-    const userPlan = req.user.subscription_plan || 'free';
-    const planLimits = subscriptionService.PLAN_LIMITS[userPlan] || subscriptionService.PLAN_LIMITS.free;
+    const { plan: dbPlan } = await subscriptionService.getUserSubscriptionDetails(userId);
+    const effectivePlan = dbPlan === 'starter' ? 'pro' : dbPlan;
+    const normalizedPlan = subscriptionService.normalizePlanForLimits(effectivePlan);
+    const planLimits = subscriptionService.PLAN_LIMITS[normalizedPlan] || subscriptionService.PLAN_LIMITS.free;
 
     const { createClient } = require('@supabase/supabase-js');
     const supabase = createClient(
@@ -2561,6 +2565,25 @@ router.get('/study-pack-usage', authenticateToken, async (req, res) => {
     );
 
     const { periodStart, daysUntilReset } = await subscriptionService.getUsagePeriod(userId);
+
+    const maxWords = planLimits.studyPackMaxWordsPerGeneration || planLimits.quizMaxWordsPerGeneration || 5000;
+
+    // Paid (Pro) tier: same combined pool as POST /generate-study-pack (analyses + citations + study packs)
+    if (normalizedPlan === 'pro') {
+      const combined = await subscriptionService.checkCombinedActionsLimit(userId);
+      return res.json({
+        success: true,
+        data: {
+          generationsUsed: combined.usage,
+          generationLimit: combined.limit,
+          generationsRemaining: combined.remaining,
+          maxWordsPerGeneration: maxWords,
+          plan: effectivePlan,
+          daysUntilReset,
+          pool: 'combined',
+        },
+      });
+    }
 
     const { data: usageData, error: usageError } = await supabase
       .from('quiz_usage')
@@ -2571,8 +2594,6 @@ router.get('/study-pack-usage', authenticateToken, async (req, res) => {
 
     const generationsUsed = usageError ? 0 : (usageData || []).length;
     const generationLimit = planLimits.studyPackGenerationsPerMonth || planLimits.quizGenerationsPerMonth;
-    const maxWords = planLimits.studyPackMaxWordsPerGeneration || planLimits.quizMaxWordsPerGeneration || 5000;
-
     res.json({
       success: true,
       data: {
@@ -2580,9 +2601,10 @@ router.get('/study-pack-usage', authenticateToken, async (req, res) => {
         generationLimit,
         generationsRemaining: Math.max(0, generationLimit - generationsUsed),
         maxWordsPerGeneration: maxWords,
-        plan: userPlan,
-        daysUntilReset
-      }
+        plan: effectivePlan,
+        daysUntilReset,
+        pool: 'study_pack',
+      },
     });
   } catch (error) {
     console.error('Study pack usage error:', error);

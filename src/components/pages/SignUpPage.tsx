@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { WriteScholarEditorialBackgroundLayers } from '../common/WriteScholarEditorialBackground';
 
 interface SignUpPageProps {
   onNavigate: (page: string) => void;
@@ -83,7 +84,8 @@ const SignUpPage = ({ onNavigate, onSignUp }: SignUpPageProps) => {
   };
 
   return (
-    <div className="min-h-screen flex bg-gradient-to-b from-violet-50/80 via-stone-50 to-white dark:from-stone-950 dark:via-stone-900 dark:to-stone-900">
+    <div className="relative min-h-screen flex overflow-x-hidden">
+      <WriteScholarEditorialBackgroundLayers position="fixed" />
       {/* Back Button */}
       <button
         onClick={() => onNavigate('landing')}
@@ -110,9 +112,10 @@ const SignUpPage = ({ onNavigate, onSignUp }: SignUpPageProps) => {
 
         {/* Form Container */}
         <div className="flex-1 flex items-center justify-center px-6 pb-12">
-          <div className="w-full max-w-sm">
+          <div className="w-full max-w-sm rounded-2xl border border-stone-200/80 dark:border-stone-700/80 bg-white/80 dark:bg-stone-900/40 backdrop-blur-sm shadow-xl shadow-stone-200/40 dark:shadow-black/20 px-6 py-8 sm:px-8 sm:py-9">
+            <div className="h-0.5 w-16 bg-gradient-to-r from-violet-600 to-red-400/80 rounded-full mb-6" aria-hidden />
             <div className="mb-6">
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-stone-800 dark:text-stone-100 mb-2">Create your account</h1>
+              <h1 className="font-display text-2xl sm:text-3xl font-semibold tracking-tight text-stone-800 dark:text-stone-100 mb-2">Create your account</h1>
               <p className="text-stone-500 dark:text-stone-400">Unlock your full academic toolkit</p>
             </div>
 
@@ -193,7 +196,7 @@ const SignUpPage = ({ onNavigate, onSignUp }: SignUpPageProps) => {
               <button
                 onClick={handleSubmit}
                 disabled={isLoading || success}
-                className="w-full bg-violet-600 hover:bg-violet-500 text-white py-3.5 rounded-2xl font-bold shadow-lg shadow-violet-500/25 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full inline-flex items-center justify-center gap-2 px-4 py-3.5 bg-violet-700 hover:bg-violet-800 dark:bg-violet-600 dark:hover:bg-violet-500 text-white font-semibold rounded-xl shadow-md shadow-violet-900/15 dark:shadow-violet-950/40 ring-1 ring-violet-900/10 dark:ring-white/10 transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:shadow-md"
               >
                 {isLoading ? (
                   <div className="flex items-center justify-center">

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { WriteScholarEditorialBackgroundLayers } from '../common/WriteScholarEditorialBackground';
 
 interface EmailVerificationPageProps {
   onNavigate: (page: string) => void;
@@ -42,7 +43,8 @@ const EmailVerificationPage = ({ onNavigate }: EmailVerificationPageProps) => {
 
   if (verificationStatus === 'loading') {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%)' }}>
+      <div className="relative min-h-screen flex items-center justify-center p-4 overflow-x-hidden">
+        <WriteScholarEditorialBackgroundLayers position="fixed" />
         <div className="max-w-md w-full">
           <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100 text-center">
             <div className="animate-spin mx-auto w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-6">
@@ -60,7 +62,8 @@ const EmailVerificationPage = ({ onNavigate }: EmailVerificationPageProps) => {
 
   if (verificationStatus === 'error') {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%)' }}>
+      <div className="relative min-h-screen flex items-center justify-center p-4 overflow-x-hidden">
+        <WriteScholarEditorialBackgroundLayers position="fixed" />
         <div className="max-w-md w-full">
           <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100 text-center">
             {/* Error Icon */}
@@ -101,7 +104,8 @@ const EmailVerificationPage = ({ onNavigate }: EmailVerificationPageProps) => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%)' }}>
+    <div className="relative min-h-screen flex items-center justify-center p-4 overflow-x-hidden">
+      <WriteScholarEditorialBackgroundLayers position="fixed" />
       <div className="max-w-md w-full">
         <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100 text-center">
           {/* Success Icon */}

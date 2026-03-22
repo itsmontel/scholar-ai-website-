@@ -19,10 +19,11 @@ router.post('/create-checkout-session', authenticateToken, async (req, res) => {
       });
     }
 
-    if (!['pro', 'premium'].includes(planType)) {
+    const normalizedPlan = planType === 'premium' ? 'pro' : planType;
+    if (normalizedPlan !== 'pro') {
       return res.status(400).json({
         success: false,
-        message: 'Invalid plan type. Must be pro or premium.'
+        message: 'Invalid plan type. Must be pro.'
       });
     }
 
@@ -75,7 +76,7 @@ router.post('/create-checkout-session', authenticateToken, async (req, res) => {
     // Pass user email for first-time discount eligibility and custom redirect URLs
     const sessionResult = await subscriptionService.createCheckoutSession(
       customerId,
-      planType,
+      normalizedPlan,
       billingCycle,
       userId,
       effectivePromoCode,
@@ -143,7 +144,7 @@ router.get('/current', authenticateToken, async (req, res) => {
       success: true,
       plan: subscriptionDetails.plan,
       stripeSubscription,
-      planLimits: subscriptionService.PLAN_LIMITS[subscriptionDetails.plan]
+      planLimits: subscriptionService.PLAN_LIMITS[subscriptionService.normalizePlanForLimits(subscriptionDetails.plan)] || subscriptionService.PLAN_LIMITS.free
     });
 
   } catch (error) {
@@ -164,10 +165,11 @@ router.put('/update', authenticateToken, async (req, res) => {
     const { newPlan } = req.body;
     const userId = req.user.id;
 
-    if (!newPlan || !['pro', 'premium'].includes(newPlan)) {
+    const normalizedNew = newPlan === 'premium' ? 'pro' : newPlan;
+    if (!normalizedNew || normalizedNew !== 'pro') {
       return res.status(400).json({
         success: false,
-        message: 'Invalid plan. Must be pro or premium.'
+        message: 'Invalid plan. Must be pro.'
       });
     }
 
@@ -209,7 +211,7 @@ router.put('/update', authenticateToken, async (req, res) => {
     const isMonthly = currentPriceId.includes('monthly') || currentPriceId === process.env.STRIPE_STARTER_MONTHLY_PRICE_ID || currentPriceId === process.env.STRIPE_PREMIUM_MONTHLY_PRICE_ID;
     const billingCycle = isMonthly ? 'monthly' : 'yearly';
 
-    const newPriceId = subscriptionService.getPriceId(newPlan, billingCycle);
+    const newPriceId = subscriptionService.getPriceId(normalizedNew, billingCycle);
     if (!newPriceId) {
       return res.status(400).json({
         success: false,
@@ -234,7 +236,7 @@ router.put('/update', authenticateToken, async (req, res) => {
     // Update user's plan in database (service role required - RLS on users)
     const { error: updateError } = await getSupabase()
       .from('users')
-      .update({ subscription_plan: newPlan })
+      .update({ subscription_plan: normalizedNew })
       .eq('id', userId);
 
     if (updateError) {
@@ -248,8 +250,8 @@ router.put('/update', authenticateToken, async (req, res) => {
     res.json({
       success: true,
       message: 'Subscription updated successfully',
-      newPlan,
-      planLimits: subscriptionService.PLAN_LIMITS[newPlan]
+      newPlan: normalizedNew,
+      planLimits: subscriptionService.PLAN_LIMITS[subscriptionService.normalizePlanForLimits(normalizedNew)] || subscriptionService.PLAN_LIMITS.free
     });
 
   } catch (error) {
@@ -599,7 +601,7 @@ router.get('/usage', authenticateToken, async (req, res) => {
   try {
     const userId = req.user.id;
     const subscriptionDetails = await subscriptionService.getUserSubscriptionDetails(userId);
-    const planLimits = subscriptionService.PLAN_LIMITS[subscriptionDetails.plan];
+    const planLimits = subscriptionService.PLAN_LIMITS[subscriptionService.normalizePlanForLimits(subscriptionDetails.plan)] || subscriptionService.PLAN_LIMITS.free;
 
     const { periodStart, periodEnd, daysUntilReset } = await subscriptionService.getUsagePeriod(userId);
 

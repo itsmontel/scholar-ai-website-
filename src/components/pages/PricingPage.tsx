@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import Header from '../common/Header';
+import { WriteScholarEditorialBackgroundLayers } from '../common/WriteScholarEditorialBackground';
 import Footer from '../common/Footer';
 import ScholarMascot from '../common/ScholarMascot';
 
@@ -66,6 +67,11 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
     checkTrialEligibility();
   }, [user]);
 
+  const isProTier = currentPlan === 'pro' || currentPlan === 'premium';
+  const isCurrentPlanId = (id: string) =>
+    (id === 'free' && currentPlan === 'free') ||
+    (id === 'pro' && isProTier);
+
   const handlePlanAction = async (planId: string) => {
     if (!user) {
       onNavigate('signup');
@@ -111,7 +117,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
             'Content-Type': 'application/json'
           },
             body: JSON.stringify({
-            planType: planId as 'pro' | 'premium',
+            planType: 'pro',
             billingCycle: billingCycle as 'monthly' | 'yearly',
             successUrl: `${window.location.origin}/dashboard?payment=success`,
             cancelUrl: `${window.location.origin}/pricing?payment=cancelled`
@@ -203,10 +209,11 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
       features: [
         'Unlimited documents',
         '99 combined analyses, study packs & citations/mo',
-        '99,999 words Paper Summarizer',
+        '999,999 words Paper Summarizer',
         'All citation styles, PDF/Word export',
-        'Focus Mode (20 sites)',
+        'Focus Mode (unlimited blocked sites)',
         'Quiz, flashcards, crossword & Crater Blast',
+        'Uploads up to 100MB per document',
         'Paper Summarizer (long documents)'
       ],
       limitations: [],
@@ -217,45 +224,21 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
           ? (isTrialEligible ? 'Get $10 Off' : 'Upgrade to Pro') 
           : 'Switch to Pro'),
         buttonAction: () => handlePlanAction('pro')
-    },
-    {
-      id: 'premium',
-      name: 'Premium',
-      description: 'For researchers and institutions',
-      monthlyPrice: 39.99,
-      yearlyPrice: 399.99,
-      features: [
-        'Everything in Pro • 10× usage',
-        '999 combined analyses, study packs & citations/mo',
-        '999,999 words Paper Summarizer',
-        'Premium AI model, advanced essay analysis',
-        'Priority support',
-        'Focus Mode (unlimited sites)',
-        'Larger document uploads (up to 1GB)'
-      ],
-      limitations: [],
-      popular: false,
-      buttonText: !user 
-        ? 'Get $10 Off' 
-        : (currentPlan === 'free' 
-          ? (isTrialEligible ? 'Get $10 Off' : 'Upgrade to Premium') 
-          : 'Switch to Premium'),
-      buttonAction: () => handlePlanAction('premium')
     }
   ];
 
   const faqs = [
     {
       question: "How does the $10 off work?",
-      answer: "First-time subscribers get $10 off their first month on Pro or Premium. Pro starts at $9.99 (then $19.99/mo) and Premium at $29.99 (then $39.99/mo). The discount is applied automatically at checkout. Each email address can only use the offer once."
+      answer: "First-time subscribers get $10 off their first month on Pro. Pro starts at $9.99 (then $19.99/mo). The discount is applied automatically at checkout. Each email address can only use the offer once."
     },
     {
       question: "What's included in the free plan?",
         answer: "The free plan includes 3 documents per month, 2 AI essay analyses, 2 study pack generations (lesson, flashcards & quiz included — crossword & Crater Blast unlock with Pro), 5,000 words for the Paper Summarizer, and 2 citation searches. It's perfect for students just getting started."
     },
     {
-      question: "What's the difference between Pro and Premium?",
-      answer: "Pro: 99 combined actions (analyses, study packs & citations)/mo, 99,999 words for the Paper Summarizer, all citation styles, Focus Mode (20 sites). Premium gives you 10× the usage: 999 combined actions/mo, 999,999 words, plus unlimited Focus Mode, premium AI model, advanced analysis, and priority support."
+      question: "What does Pro include?",
+      answer: "Pro includes 99 combined actions per month (analyses, study packs & citations), 999,999 words for the Paper Summarizer, unlimited Focus Mode blocked sites, uploads up to 100MB per file, all citation styles, and full access to quizzes, flashcards, crossword & Crater Blast."
     },
     {
       question: "Can I change my plan after subscribing?",
@@ -297,7 +280,8 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50/80 via-stone-50 to-white dark:from-stone-950 dark:via-stone-900 dark:to-stone-900">
+    <div className="relative min-h-screen overflow-x-hidden">
+      <WriteScholarEditorialBackgroundLayers position="fixed" />
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="pricing" />
 
       {/* Hero Section - mascot instead of illustration */}
@@ -313,7 +297,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8 lg:gap-12">
             <div className="flex-1 text-center lg:text-left max-w-3xl mx-auto lg:mx-0">
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-stone-800 dark:text-stone-100 mb-4">
+              <h1 className="font-display text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight text-stone-800 dark:text-stone-100 mb-4">
                 Simple, <span className="bg-violet-600 hover:bg-violet-500 bg-clip-text text-transparent">transparent</span> pricing
               </h1>
               <p className="text-lg text-stone-500 dark:text-stone-400 max-w-2xl mx-auto lg:mx-0">
@@ -358,7 +342,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
         </div>
 
         {/* Pricing Cards */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-20">
+        <div className="grid md:grid-cols-2 gap-8 mb-20 max-w-4xl mx-auto">
           {plans.map((plan) => (
             <div
               key={plan.id}
@@ -375,16 +359,8 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
                   </span>
                 </div>
               )}
-              {plan.id === 'premium' && (
-                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                  <span className="bg-amber-600 text-white px-4 py-1 rounded-full text-sm font-bold shadow-lg shadow-amber-500/25">
-                    10× Usage
-                  </span>
-                </div>
-              )}
-
               <div className="text-center mb-8">
-                <h3 className="text-2xl mb-2 text-stone-800 dark:text-stone-100" style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 400 }}>{plan.name}</h3>
+                <h3 className="font-display text-2xl mb-2 text-stone-800 dark:text-stone-100 font-semibold">{plan.name}</h3>
                 <p className="mb-6 text-stone-500 dark:text-stone-400">{plan.description}</p>
                 
                 <div className="mb-4">
@@ -392,15 +368,15 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
                     <>
                       <div className="flex flex-col items-center gap-1">
                         <span className="text-2xl font-semibold text-red-600 dark:text-red-400 line-through decoration-2 decoration-red-500">
-                          ${plan.id === 'pro' ? '19.99' : '39.99'}
+                          $19.99
                         </span>
                         <span className="text-4xl font-bold text-stone-800 dark:text-stone-100">
-                          ${plan.id === 'pro' ? '9.99' : '29.99'}
+                          $9.99
                         </span>
                         <span className="text-stone-500 dark:text-stone-400 text-sm">
                           /month <span className="text-violet-600 dark:text-violet-400 font-semibold">first month only</span>
                         </span>
-                        <span className="text-xs text-stone-500 dark:text-stone-400">Then ${plan.id === 'pro' ? '19.99' : '39.99'}/mo</span>
+                        <span className="text-xs text-stone-500 dark:text-stone-400">Then $19.99/mo</span>
                       </div>
                     </>
                   ) : (
@@ -446,17 +422,17 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
               </div>
 
               <button
-                onClick={plan.id === currentPlan ? undefined : () => plan.buttonAction()}
-                disabled={plan.id === currentPlan || processingPlan !== null}
-                className={`w-full py-3 px-6 rounded-2xl font-bold transition-all duration-150 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 ${
-                    plan.id === currentPlan
+                onClick={isCurrentPlanId(plan.id) ? undefined : () => plan.buttonAction()}
+                disabled={isCurrentPlanId(plan.id) || processingPlan !== null}
+                className={`w-full py-3 px-6 rounded-xl font-semibold transition-all duration-150 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 ${
+                    isCurrentPlanId(plan.id)
                     ? 'bg-stone-100 dark:bg-stone-700 text-stone-500 cursor-not-allowed'
                     : plan.popular
-                    ? 'bg-violet-600 hover:bg-violet-500 text-white shadow-lg shadow-violet-500/25'
+                    ? 'bg-violet-700 hover:bg-violet-800 dark:bg-violet-600 dark:hover:bg-violet-500 text-white shadow-md shadow-violet-900/15 dark:shadow-violet-950/40 ring-1 ring-violet-900/10 dark:ring-white/10'
                     : 'bg-stone-100 dark:bg-stone-700 hover:bg-stone-200 dark:hover:bg-stone-600 text-stone-800 dark:text-stone-100'
                 }`}
               >
-                {plan.id === currentPlan ? (
+                {isCurrentPlanId(plan.id) ? (
                   'Current Plan'
                 ) : processingPlan === plan.id ? (
                   <span className="flex items-center justify-center gap-2">

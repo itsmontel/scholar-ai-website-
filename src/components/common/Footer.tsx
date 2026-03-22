@@ -151,6 +151,12 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
                 </a>
               </li>
               <li>
+                <a href="/tools/study-pack" onClick={(e) => { e.preventDefault(); onNavigate?.('study-pack'); }} className="text-violet-400 hover:text-violet-300 text-sm font-medium transition-colors flex items-center gap-1.5">
+                  Study Pack
+                  <span className="text-xs opacity-75">📦</span>
+                </a>
+              </li>
+              <li>
                 <a href="/tools/summarizer" onClick={(e) => { e.preventDefault(); onNavigate?.('summarizer'); }} className="text-teal-400 hover:text-teal-300 text-sm font-medium transition-colors flex items-center gap-1.5">
                   AI Summarizer
                   <span className="text-xs opacity-75">📝</span>

@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import ScholarMascot from '../common/ScholarMascot';
+import { WriteScholarEditorialBackgroundLayers } from '../common/WriteScholarEditorialBackground';
 
 interface AuthCallbackPageProps {
   onNavigate: (page: string) => void;
@@ -104,7 +105,8 @@ const AuthCallbackPage: React.FC<AuthCallbackPageProps> = ({ onNavigate, onLogin
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%)' }}>
+    <div className="relative min-h-screen flex items-center justify-center p-4 overflow-x-hidden">
+      <WriteScholarEditorialBackgroundLayers position="fixed" />
       <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center">
         <div className="flex items-center gap-2.5 justify-center mb-8">
           <ScholarMascot size={40} animated={false} pose="waving" />

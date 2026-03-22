@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import Header from '../common/Header';
+import { WriteScholarEditorialBackgroundLayers } from '../common/WriteScholarEditorialBackground';
 import Footer from '../common/Footer';
 import NewsletterSubscription from '../common/NewsletterSubscription';
 import { getBlogPostsSortedDesc, BlogPostMeta } from '../../data/blogPosts';
@@ -337,9 +338,8 @@ const BlogPage = ({ onNavigate, user, onLogout }: BlogPageProps) => {
   };
 
   return (
-    <div className="min-h-screen bg-[#faf9f7] dark:bg-stone-950">
-      <div className="fixed inset-0 -z-10 bg-[radial-gradient(ellipse_120%_80%_at_20%_-10%,rgba(251,207,232,0.25),transparent_50%)] dark:bg-[radial-gradient(ellipse_120%_80%_at_20%_-10%,rgba(251,207,232,0.08),transparent_50%)] pointer-events-none" aria-hidden />
-      <div className="fixed inset-0 -z-10 bg-[radial-gradient(ellipse_100%_60%_at_80%_0%,rgba(196,181,253,0.25),transparent_50%)] dark:bg-[radial-gradient(ellipse_100%_60%_at_80%_0%,rgba(196,181,253,0.08),transparent_50%)] pointer-events-none" aria-hidden />
+    <div className="relative min-h-screen overflow-x-hidden">
+      <WriteScholarEditorialBackgroundLayers position="fixed" />
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="blog" />
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 py-10 sm:py-14">

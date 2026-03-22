@@ -39,11 +39,11 @@ const PLAN_LIMITS = {
   pro: {
     documentsPerMonth: -1,
     combinedActionsPerMonth: 99, // analyses + study packs + citations share this pool
-    combinedWordsPerMonth: 99999, // Paper Summarizer word pool
+    combinedWordsPerMonth: 999999, // Paper Summarizer word pool
     analysesPerMonth: 99, // used for combined check
     citationSearchesPerMonth: 99,
-    humanizeWordsPerMonth: 99999,
-    summarizeWordsPerMonth: 99999,
+    humanizeWordsPerMonth: 999999,
+    summarizeWordsPerMonth: 999999,
     studyPackGenerationsPerMonth: 99,
     studyPackMaxWordsPerGeneration: 10000,
     quizWordsPerMonth: 999999,
@@ -54,35 +54,20 @@ const PLAN_LIMITS = {
     lessonGenerationsPerMonth: 99,
     lessonMaxWordsPerGeneration: 10000,
     aiModel: 'gpt-4.1-nano',
-    maxDocumentSize: 25 * 1024 * 1024,
-    maxTotalStorage: 25 * 1024 * 1024,
+    maxDocumentSize: 100 * 1024 * 1024, // 100MB per file
+    maxTotalStorage: 500 * 1024 * 1024, // 500MB library total
     name: 'Pro',
     price: 19.99
   },
-  premium: {
-    documentsPerMonth: -1,
-    combinedActionsPerMonth: 999, // 10x Pro: analyses + study packs + citations
-    combinedWordsPerMonth: 999999, // 10× Pro: Paper Summarizer
-    analysesPerMonth: 999,
-    citationSearchesPerMonth: 999,
-    humanizeWordsPerMonth: 999999,
-    summarizeWordsPerMonth: 999999,
-    studyPackGenerationsPerMonth: 999,
-    studyPackMaxWordsPerGeneration: 20000,
-    quizWordsPerMonth: 999999,
-    quizGenerationsPerMonth: 999,
-    quizMaxWordsPerGeneration: 20000,
-    craterBlastMaxWordsPerGeneration: 10000,
-    lessonWordsPerMonth: 999999,
-    lessonGenerationsPerMonth: 999,
-    lessonMaxWordsPerGeneration: 10000,
-    aiModel: 'gpt-4.1-nano',
-    maxDocumentSize: 1024 * 1024 * 1024,
-    maxTotalStorage: 1024 * 1024 * 1024,
-    name: 'Premium',
-    price: 39.99
-  },
 };
+
+/** Legacy Stripe plan "premium" maps to Pro limits (single paid tier). */
+function normalizePlanForLimits(plan) {
+  const p = (plan || 'free').toLowerCase();
+  // Single paid tier limits: Pro features (99 combined actions/mo, etc.)
+  if (p === 'starter' || p === 'premium' || p === 'focus') return 'pro';
+  return p;
+}
 
 
 // Get user's plan string (free, pro, premium) - for retention policies etc.
@@ -133,7 +118,7 @@ const getUsagePeriod = async (userId) => {
   try {
     const { plan, stripeCustomerId } = await getUserSubscriptionDetails(userId);
 
-    if (plan === 'pro' || plan === 'premium') {
+    if (normalizePlanForLimits(plan) === 'pro') {
       let periodStart = null;
       let periodEnd = null;
 
@@ -257,7 +242,8 @@ const getUsagePeriod = async (userId) => {
 const checkLimit = async (userId, limitType) => {
   try {
     const { plan } = await getUserSubscriptionDetails(userId);
-    const planLimits = PLAN_LIMITS[plan];
+    const effPlan = normalizePlanForLimits(plan);
+    const planLimits = PLAN_LIMITS[effPlan] || PLAN_LIMITS.free;
     
     if (planLimits[limitType] === -1) {
       return { allowed: true, limit: -1, usage: 0, remaining: -1 };
@@ -336,9 +322,10 @@ const getRemainingUsage = async (userId, limitType) => {
 const checkCombinedActionsLimit = async (userId) => {
   try {
     const { plan } = await getUserSubscriptionDetails(userId);
-    const planLimits = PLAN_LIMITS[plan] || PLAN_LIMITS.free;
+    const effPlan = normalizePlanForLimits(plan);
+    const planLimits = PLAN_LIMITS[effPlan] || PLAN_LIMITS.free;
     const limit = planLimits.combinedActionsPerMonth;
-    if (!limit || limit === -1 || (plan !== 'pro' && plan !== 'premium')) {
+    if (!limit || limit === -1 || effPlan !== 'pro') {
       return { allowed: true, limit: -1, usage: 0, remaining: -1 };
     }
     const { periodStart } = await getUsagePeriod(userId);
@@ -360,9 +347,10 @@ const checkCombinedActionsLimit = async (userId) => {
 const checkCombinedWordsLimit = async (userId, additionalWords = 0) => {
   try {
     const { plan } = await getUserSubscriptionDetails(userId);
-    const planLimits = PLAN_LIMITS[plan] || PLAN_LIMITS.free;
+    const effPlan = normalizePlanForLimits(plan);
+    const planLimits = PLAN_LIMITS[effPlan] || PLAN_LIMITS.free;
     const limit = planLimits.combinedWordsPerMonth;
-    if (!limit || limit === -1 || (plan !== 'pro' && plan !== 'premium')) {
+    if (!limit || limit === -1 || effPlan !== 'pro') {
       return { allowed: true, limit: -1, usage: 0, remaining: -1 };
     }
     const { periodStart } = await getUsagePeriod(userId);
@@ -384,14 +372,14 @@ const checkCombinedWordsLimit = async (userId, additionalWords = 0) => {
 
 // Get plan details
 const getPlanDetails = (plan) => {
-  return PLAN_LIMITS[plan] || PLAN_LIMITS.free;
+  return PLAN_LIMITS[normalizePlanForLimits(plan)] || PLAN_LIMITS.free;
 };
 
 // Get plan limits for a user
 const getPlanLimits = async (userId) => {
   try {
     const { plan } = await getUserSubscriptionDetails(userId);
-    return PLAN_LIMITS[plan] || PLAN_LIMITS.free;
+    return PLAN_LIMITS[normalizePlanForLimits(plan)] || PLAN_LIMITS.free;
   } catch (error) {
     console.error('Error getting plan limits:', error);
     return PLAN_LIMITS.free;
@@ -560,15 +548,12 @@ const createCheckoutSession = async (customerId, planType, billingCycle, userId,
 
 // Get price ID based on plan and billing cycle
 const getPriceId = (planType, billingCycle) => {
-  const planKey = planType === 'starter' ? 'pro' : planType;
+  const planKey =
+    planType === 'starter' || planType === 'premium' ? 'pro' : planType;
   const prices = {
-    'pro': {
-      'monthly': process.env.STRIPE_STARTER_MONTHLY_PRICE_ID || 'price_starter_monthly',
-      'yearly': process.env.STRIPE_STARTER_YEARLY_PRICE_ID || 'price_starter_yearly'
-    },
-    'premium': {
-      'monthly': process.env.STRIPE_PREMIUM_MONTHLY_PRICE_ID || 'price_premium_monthly',
-      'yearly': process.env.STRIPE_PREMIUM_YEARLY_PRICE_ID || 'price_premium_yearly'
+    pro: {
+      monthly: process.env.STRIPE_STARTER_MONTHLY_PRICE_ID || 'price_starter_monthly',
+      yearly: process.env.STRIPE_STARTER_YEARLY_PRICE_ID || 'price_starter_yearly'
     }
   };
 
@@ -827,6 +812,7 @@ const cleanupOldCitations = async () => {
 module.exports = {
   supabase,
   PLAN_LIMITS,
+  normalizePlanForLimits,
   getPriceId,
   getUserPlan,
   getUserSubscriptionDetails,

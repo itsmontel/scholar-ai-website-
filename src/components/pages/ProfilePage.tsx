@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import Header from '../common/Header';
+import { WriteScholarEditorialBackgroundLayers } from '../common/WriteScholarEditorialBackground';
 
 interface ProfilePageProps {
   onNavigate: (page: string) => void;
@@ -206,7 +207,8 @@ const ProfilePage = ({ onNavigate, user, onLogout }: ProfilePageProps) => {
   };
 
   return (
-    <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #FAF8F5 0%, #F5F3F0 100%)' }}>
+    <div className="relative min-h-screen overflow-x-hidden">
+      <WriteScholarEditorialBackgroundLayers position="fixed" />
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="profile" />
 
       <div className="max-w-7xl mx-auto px-6 py-12">

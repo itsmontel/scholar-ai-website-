@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import Header from '../../common/Header';
+import { WriteScholarEditorialBackgroundLayers } from '../../common/WriteScholarEditorialBackground';
 import Footer from '../../common/Footer';
 
 interface ConverterPageProps {
@@ -184,7 +185,8 @@ const ConverterPage = ({ onNavigate, user, onLogout }: ConverterPageProps) => {
   const cat = categories[category];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-stone-900 dark:to-stone-800">
+    <div className="relative min-h-screen overflow-x-hidden">
+      <WriteScholarEditorialBackgroundLayers position="fixed" />
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="converter" />
 
       <section className="py-12 sm:py-16">

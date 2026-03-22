@@ -1,4 +1,5 @@
 import Header from '../common/Header';
+import { WriteScholarEditorialBackgroundLayers } from '../common/WriteScholarEditorialBackground';
 import Footer from '../common/Footer';
 
 interface User {
@@ -19,7 +20,8 @@ const ContactPage = ({ onNavigate, user, onLogout }: ContactPageProps) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-violet-50/80 via-stone-50 to-white dark:from-stone-950 dark:via-stone-900 dark:to-stone-900 transition-colors font-sans">
+    <div className="relative min-h-screen overflow-x-hidden transition-colors font-sans">
+      <WriteScholarEditorialBackgroundLayers position="fixed" />
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="contact" />
 
       {/* Main Content */}

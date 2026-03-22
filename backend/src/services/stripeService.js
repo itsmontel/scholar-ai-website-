@@ -234,22 +234,15 @@ class StripeService {
 
   // Get price ID based on plan and billing cycle
   getPriceId(planType, billingCycle) {
+    const key = planType === 'premium' || planType === 'starter' ? 'pro' : planType;
     const prices = {
-      'pro': {
-        'monthly': process.env.STRIPE_STARTER_MONTHLY_PRICE_ID || 'price_starter_monthly',
-        'yearly': process.env.STRIPE_STARTER_YEARLY_PRICE_ID || 'price_starter_yearly'
-      },
-      'starter': { // backward compat
-        'monthly': process.env.STRIPE_STARTER_MONTHLY_PRICE_ID || 'price_starter_monthly',
-        'yearly': process.env.STRIPE_STARTER_YEARLY_PRICE_ID || 'price_starter_yearly'
-      },
-      'premium': {
-        'monthly': process.env.STRIPE_PREMIUM_MONTHLY_PRICE_ID || 'price_premium_monthly',
-        'yearly': process.env.STRIPE_PREMIUM_YEARLY_PRICE_ID || 'price_premium_yearly'
+      pro: {
+        monthly: process.env.STRIPE_STARTER_MONTHLY_PRICE_ID || 'price_starter_monthly',
+        yearly: process.env.STRIPE_STARTER_YEARLY_PRICE_ID || 'price_starter_yearly'
       }
     };
 
-    const priceId = prices[planType]?.[billingCycle];
+    const priceId = prices[key]?.[billingCycle];
     if (!priceId) {
       throw new Error(`Invalid plan type or billing cycle: ${planType}/${billingCycle}`);
     }

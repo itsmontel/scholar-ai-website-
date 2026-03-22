@@ -46,11 +46,10 @@ const UNLOCK_DURATION_OPTIONS = [
   { value: 24 * 60 * 60 * 1000, label: '24 hours' },
 ];
 
-// Free: 3 sites. Pro: 20 sites. Premium: unlimited. (focus: legacy, treat as unlimited)
+// Free: 3 sites. Pro (and legacy premium): unlimited blocked sites.
 function getMaxSites(plan) {
   const p = (plan || 'free').toLowerCase();
-  if (p === 'premium' || p === 'focus') return 99999; // focus = legacy, backward compat
-  if (p === 'pro') return 20;
+  if (p === 'pro' || p === 'premium' || p === 'focus') return 99999;
   return 3;
 }
 

@@ -219,7 +219,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     return;
   }
 
-  planBadge.textContent = isPaid ? (plan === 'premium' ? 'Premium' : 'Pro') : 'Free';
+  planBadge.textContent = isPaid ? 'Pro' : 'Free';
   planBadge.style.display = 'inline-block';
   sitesSection.classList.add('visible');
   actionsRow.style.display = 'flex';
