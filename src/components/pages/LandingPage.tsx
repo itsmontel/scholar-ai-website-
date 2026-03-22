@@ -735,7 +735,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                     <span>APA, MLA, Chicago &amp; more</span>
                   </li>
                   <li className="flex items-center justify-center sm:justify-start gap-2.5">
-                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-amber-100 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400" aria-hidden>
+                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-emerald-100 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400" aria-hidden>
                       <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
@@ -743,7 +743,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                     <span>Green, amber &amp; red annotations</span>
                   </li>
                   <li className="flex items-center justify-center sm:justify-start gap-2.5">
-                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-red-100 dark:bg-red-950/35 text-red-700 dark:text-red-400" aria-hidden>
+                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-emerald-100 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400" aria-hidden>
                       <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
